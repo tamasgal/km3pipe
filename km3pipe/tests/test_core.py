@@ -41,7 +41,7 @@ class TestPipeline(unittest.TestCase):
         pl.drain()
         for module in pl.modules:
             module.finish.assert_called_once_with()
-        assert False
+
 
 class TestModule(unittest.TestCase):
     """Tests for the pipeline module"""
