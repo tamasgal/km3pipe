@@ -61,7 +61,15 @@ class TestModule(unittest.TestCase):
         self.assertEqual('default', module.get('foo'))
 
     def test_default_parameter_value_can_be_overwritten(self):
-        pass
+        class Foo(Module):
+            def __init__(self, **context):
+                super(self.__class__, self).__init__(**context)
+                self.foo = self.get('foo') or 'default_foo'
+        module = Foo()
+        self.assertEqual('default_foo', module.foo)
+        module = Foo(foo='overwritten')
+        self.assertEqual('overwritten', module.foo)
+
 
 
 class TestBlob(unittest.TestCase):
