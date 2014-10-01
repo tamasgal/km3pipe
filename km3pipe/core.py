@@ -25,39 +25,36 @@ log.addHandler(ch)
 class Pipeline(object):
     """The holy pipeline which holds everything together"""
 
-    def __init__(self, blob=None, max_cycles=None):
+    def __init__(self, blob=None):
         self.modules = []
         self.blob = blob or Blob()
-        self.max_cycles = max_cycles or 1
-        self.cycles = 0
 
     def attach(self, module_class, name, **kwargs):
         """Attach a module to the pipeline system"""
-        log.info("> Attaching module '{0}'".format(name))
+        log.info("Attaching module '{0}'".format(name))
         self.modules.append(module_class(name=name, **kwargs))
 
     def drain(self):
         """Activate the pump and let the flow go"""
         try:
             while True:
-                if self.cycles >= self.max_cycles:
-                    raise StopIteration
                 for module in self.modules:
+                    log.info("Processing {0} ".format(module.name))
                     self.blob = module.process(self.blob)
-                self.cycles += 1
         except StopIteration:
-            print("Pipeline empty. Switching off the pump.")
-
+            log.info("Nothing left to pump through.")
         self.finish()
 
     def finish(self):
         for module in self.modules:
+            log.info("Finishing {0}".format(module.name))
             module.finish()
 
 class Module(object):
     """The module which can be attached to the pipeline"""
 
     def __init__(self, name=None, **parameters):
+        log.info("Initialising {0}".format(name))
         self._name = name
         self.parameters = parameters
 
