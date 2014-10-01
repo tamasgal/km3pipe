@@ -29,6 +29,6 @@ class Moo(Module):
 
 
 pipe = Pipeline()
-pipe.attach(Foo, 'foo_module', foo=1)
+pipe.attach(Foo, 'foo_module')
 pipe.attach(Moo, 'moo_module')
 pipe.drain()
