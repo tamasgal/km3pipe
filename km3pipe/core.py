@@ -25,9 +25,11 @@ log.addHandler(ch)
 class Pipeline(object):
     """The holy pipeline which holds everything together"""
 
-    def __init__(self, blob=None):
+    def __init__(self, blob=None, max_cycles=None):
         self.modules = []
         self.blob = blob or Blob()
+        self.max_cycles = max_cycles or 1
+        self.cycles = 0
 
     def attach(self, module_class, name, **kwargs):
         """Attach a module to the pipeline system"""
@@ -38,8 +40,11 @@ class Pipeline(object):
         """Activate the pump and let the flow go"""
         try:
             while True:
+                if self.cycles >= self.max_cycles:
+                    raise StopIteration
                 for module in self.modules:
                     self.blob = module.process(self.blob)
+                self.cycles += 1
         except StopIteration:
             print("Pipeline empty. Switching off the pump.")
 
