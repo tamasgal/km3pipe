@@ -1,6 +1,9 @@
+from __future__ import division, absolute_import, print_function
+
 __author__ = 'tamasgal'
 
 import unittest
+from mock import MagicMock
 
 from km3pipe.core import Pipeline, Module, Blob
 
@@ -8,15 +11,23 @@ from km3pipe.core import Pipeline, Module, Blob
 class TestPipeline(unittest.TestCase):
     """Tests for the main pipeline"""
 
+
     def test_attach(self):
         pl = Pipeline()
-        pl.attach(1)
-        pl.attach(2)
-        self.assertListEqual([1, 2], pl.modules)
+        pl.attach(Module, 'module1')
+        pl.attach(Module, 'module2')
+        self.assertEqual('module1', pl.modules[0].name)
+        self.assertEqual('module2', pl.modules[1].name)
 
-    def test_drain(self):
+    def test_drain_calls_process_method_on_each_attached_module(self):
         pl = Pipeline()
+        pl.attach(Module, 'module1')
+        pl.attach(Module, 'module2')
+        for module in pl.modules:
+            module.process = MagicMock()
         pl.drain()
+        for module in pl.modules:
+            module.process.assert_called_once_with(pl.blob)
 
 
 class TestModule(unittest.TestCase):
@@ -33,8 +44,33 @@ class TestModule(unittest.TestCase):
             module.name = 'narf'
 
 
+    def test_process(self):
+        blob = Blob()
+        module = Module(name='foo')
+        processed_blob = module.process(blob)
+        self.assertIs(blob, processed_blob)
+
+    def test_add_parameter(self):
+        module = Module()
+        module.add('foo', 'default', 'help')
+        self.assertDictEqual({'foo': 'default'}, module.parameters)
+
+    def test_get_parameter(self):
+        module = Module()
+        module.add('foo', 'default', 'help')
+        self.assertEqual('default', module.get('foo'))
+
+    def test_default_parameter_value_can_be_overwritten(self):
+        pass
+
+
 class TestBlob(unittest.TestCase):
     """Tests for the blob holding the data"""
 
     def test_init(self):
         blob = Blob()
+
+    def test_field_can_be_added(self):
+        blob = Blob()
+        blob['foo'] = 1
+        self.assertEqual(1, blob['foo'])
