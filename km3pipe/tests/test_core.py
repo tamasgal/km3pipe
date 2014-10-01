@@ -11,7 +11,6 @@ from km3pipe.core import Pipeline, Module, Blob
 class TestPipeline(unittest.TestCase):
     """Tests for the main pipeline"""
 
-
     def test_attach(self):
         pl = Pipeline()
         pl.attach(Module, 'module1')
@@ -43,7 +42,6 @@ class TestModule(unittest.TestCase):
         with self.assertRaises(AttributeError):
             module.name = 'narf'
 
-
     def test_process(self):
         blob = Blob()
         module = Module(name='foo')
@@ -69,7 +67,6 @@ class TestModule(unittest.TestCase):
         self.assertEqual('default_foo', module.foo)
         module = Foo(foo='overwritten')
         self.assertEqual('overwritten', module.foo)
-
 
 
 class TestBlob(unittest.TestCase):

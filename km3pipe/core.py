@@ -2,6 +2,24 @@ from __future__ import division, absolute_import, print_function
 
 __author__ = 'tamasgal'
 
+import logging
+# create logger
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
+
+# create console handler and set level to debug
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+
+# create formatter
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# add formatter to ch
+ch.setFormatter(formatter)
+
+# add ch to logger
+log.addHandler(ch)
+
 class Pipeline(object):
     """The holy pipeline which holds everything together"""
 
@@ -11,6 +29,7 @@ class Pipeline(object):
 
     def attach(self, module_class, name, **kwargs):
         """Attach a module to the pipeline system"""
+        log.info("Attaching module '{0}'".format(name))
         self.modules.append(module_class(name=name, **kwargs))
 
     def drain(self):
