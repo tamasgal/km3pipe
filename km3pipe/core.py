@@ -48,6 +48,11 @@ class Pipeline(object):
         except StopIteration:
             print("Pipeline empty. Switching off the pump.")
 
+        self.finish()
+
+    def finish(self):
+        for module in self.modules:
+            module.finish()
 
 class Module(object):
     """The module which can be attached to the pipeline"""

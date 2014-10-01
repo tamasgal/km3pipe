@@ -28,6 +28,20 @@ class TestPipeline(unittest.TestCase):
         for module in pl.modules:
             module.process.assert_called_once_with(1)
 
+    def test_finish(self):
+        pl = Pipeline()
+        pl.finish()
+
+    def test_drain_calls_finish_on_each_attached_module(self):
+        pl = Pipeline()
+        pl.attach(Module, 'module1')
+        pl.attach(Module, 'module2')
+        for module in pl.modules:
+            module.finish = MagicMock()
+        pl.drain()
+        for module in pl.modules:
+            module.finish.assert_called_once_with()
+        assert False
 
 class TestModule(unittest.TestCase):
     """Tests for the pipeline module"""
