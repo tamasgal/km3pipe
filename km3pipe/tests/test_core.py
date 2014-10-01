@@ -19,14 +19,14 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual('module2', pl.modules[1].name)
 
     def test_drain_calls_process_method_on_each_attached_module(self):
-        pl = Pipeline()
+        pl = Pipeline(blob=1)
         pl.attach(Module, 'module1')
         pl.attach(Module, 'module2')
         for module in pl.modules:
-            module.process = MagicMock()
+            module.process = MagicMock(return_value=1)
         pl.drain()
         for module in pl.modules:
-            module.process.assert_called_once_with(pl.blob)
+            module.process.assert_called_once_with(1)
 
 
 class TestModule(unittest.TestCase):
@@ -68,6 +68,9 @@ class TestModule(unittest.TestCase):
         module = Foo(foo='overwritten')
         self.assertEqual('overwritten', module.foo)
 
+    def test_finish(self):
+        module = Module()
+        module.finish()
 
 class TestBlob(unittest.TestCase):
     """Tests for the blob holding the data"""
