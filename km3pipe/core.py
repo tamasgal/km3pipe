@@ -32,9 +32,11 @@ log.addHandler(ch)
 class Pipeline(object):
     """The holy pipeline which holds everything together"""
 
-    def __init__(self, blob=None):
+    def __init__(self, blob=None, cycles=None):
         self.modules = []
         self.blob = blob or Blob()
+        self.cycles = cycles
+        self.cycle_count = 0
 
     def attach(self, module_class, name, **kwargs):
         """Attach a module to the pipeline system"""
@@ -48,6 +50,9 @@ class Pipeline(object):
                 for module in self.modules:
                     log.warning("Processing {0} ".format(module.name))
                     self.blob = module.process(self.blob)
+                self.cycle_count += 1
+                if self.cycles and self.cycle_count >= self.cycles:
+                    break
         except StopIteration:
             log.info("Nothing left to pump through.")
         self.finish()

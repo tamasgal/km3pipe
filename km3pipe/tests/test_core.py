@@ -19,7 +19,7 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual('module2', pl.modules[1].name)
 
     def test_drain_calls_process_method_on_each_attached_module(self):
-        pl = Pipeline(blob=1)
+        pl = Pipeline(blob=1, cycles=1)
         pl.attach(Module, 'module1')
         pl.attach(Module, 'module2')
         for module in pl.modules:
@@ -33,7 +33,7 @@ class TestPipeline(unittest.TestCase):
         pl.finish()
 
     def test_drain_calls_finish_on_each_attached_module(self):
-        pl = Pipeline()
+        pl = Pipeline(cycles=4)
         pl.attach(Module, 'module1')
         pl.attach(Module, 'module2')
         for module in pl.modules:
