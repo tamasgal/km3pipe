@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from __future__ import division, absolute_import, print_function
 
 __author__ = 'tamasgal'
@@ -21,6 +22,7 @@ class Pump(Module):
             yield blob
         print("I'm done!")
 
+
 class Foo(Module):
 
     def __init__(self, **context):
@@ -33,15 +35,18 @@ class Foo(Module):
         blob['foo_entry'] = self.foo
         return blob
 
+
 class Moo(Module):
     def process(self, blob):
         blob['moo_entry'] = 42
         return blob
 
+
 class PrintBlob(Module):
     def process(self, blob):
         print(blob)
         return blob
+
 
 pipe = Pipeline()
 pipe.attach(Pump, 'the_pump')
