@@ -13,12 +13,17 @@ class DAQPump(Module):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename')
         self.daq_file = None
+        self.frame_positions = []
 
-    def next_frame(file):
-        print("Preamble:")
-        length, data_type = struct.unpack('<ii', file.read(8))
+        if self.filename:
+            self.open_file()
+            self.determine_frame_positions()
+
+    def next_frame(self):
+        #print("Preamble:")
+        length, data_type = struct.unpack('<ii', self.daq_file.read(8))
         print length, data_type
-        file.read(length-8)
+        self.daq_file.seek(length-8, 1)
         raw_input()
 
     def open_file(self):
@@ -30,6 +35,27 @@ class DAQPump(Module):
         except IOError as e:
             log.error(e)
             raise SystemExit
+
+    def rewind_file(self):
+        self.daq_file.seek(0, 0)
+
+    def determine_frame_positions(self):
+        self.rewind_file()
+        try:
+            while True:
+                pointer_position = self.daq_file.tell()
+                length, data_type = struct.unpack('<ii', self.daq_file.read(8))
+                self.daq_file.seek(length-8, 1)
+                self.frame_positions.append(pointer_position)
+        except struct.error:
+            pass
+        self.rewind_file()
+        print("Found {0} frames.".format(len(self.frame_positions)))
+
+
+    def process(self, blob):
+        #print self.next_frame()
+        return blob
 
     def finish(self):
         self.daq_file.close()
