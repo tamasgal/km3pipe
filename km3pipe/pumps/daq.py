@@ -9,6 +9,8 @@ log = get_logger(__name__)
 
 
 class DAQPump(Module):
+    """A pump for binary DAQ files."""
+
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename')
@@ -27,6 +29,7 @@ class DAQPump(Module):
         raw_input()
 
     def open_file(self):
+        """Open the file with self.filename"""
         try:
             self.daq_file = open(self.filename, 'rb')
         except TypeError:
@@ -37,9 +40,11 @@ class DAQPump(Module):
             raise SystemExit
 
     def rewind_file(self):
+        """Put the file pointer to position 0"""
         self.daq_file.seek(0, 0)
 
     def determine_frame_positions(self):
+        """Record file pointer position of each frame"""
         self.rewind_file()
         try:
             while True:
