@@ -7,7 +7,7 @@ from km3pipe.core import Pipeline, Module
 
 
 class Pump(Module):
-
+    """A pump demonstration with a dummy list as data."""
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.data = [{'nr': 1}, {'nr': 2}]
@@ -17,6 +17,7 @@ class Pump(Module):
         return next(self.blobs)
 
     def blob_generator(self):
+        """Create a blob generator."""
         for blob in self.data:
             print("yielding: " + str(blob))
             yield blob
