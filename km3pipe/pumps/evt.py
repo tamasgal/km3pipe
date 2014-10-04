@@ -14,9 +14,17 @@ class EvtPump(Module):
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename')
-        self.evt_file = None
-        self.open_file()
 
+        self.evt_file = None
+        self.blobs = None
+        self.raw_header = None
+
+        if self.filename:
+            self.open_file()
+            self.prepare_blobs()
+        log.warn("No filename specified. Take care of the file handling!")
+
+    def prepare_blobs(self):
         self.raw_header = self.extract_header()
         self.blobs = self.blob_generator()
 
