@@ -12,9 +12,15 @@ in the pipeline system.
 Instance variables can be initialised within the ``__init__()`` method.
 User defined parameters are accessible via the ``get()`` method, which either
 returns the actual value or ``None`` if not defined.
-This allows an easy way to define default values
+This allows an easy way to define default values as seen in the example below.
 
 .. literalinclude:: ../examples/module_workflow.py
    :pyobject: Foo
-   :emphasize-lines: 8-10
+   :emphasize-lines: 5-6
    :linenos:
+
+To override the default parameters, the desired values can be set when
+attaching the module to the pipeline. Always use the class itself, since
+the ``attach()`` method of the pipeline will care about the initialisation::
+
+    pipe.attach(Foo, 'foo_module', foo='dummyfoo', bar='dummybar')
