@@ -11,6 +11,8 @@ Contents:
 .. toctree::
    :maxdepth: 3
 
+   modules
+   pumps
    examples
    api
 
