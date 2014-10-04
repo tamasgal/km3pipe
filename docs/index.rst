@@ -11,6 +11,7 @@ Contents:
 .. toctree::
    :maxdepth: 3
 
+   examples
    api
 
 .. include:: ../README.md
