@@ -11,6 +11,8 @@ Contents:
 .. toctree::
    :maxdepth: 3
 
+   api
+
 .. include:: ../README.md
 
 Indices and tables
