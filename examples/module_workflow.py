@@ -19,9 +19,7 @@ class Pump(Module):
     def blob_generator(self):
         """Create a blob generator."""
         for blob in self.data:
-            print("yielding: " + str(blob))
             yield blob
-        print("I'm done!")
 
 
 class Foo(Module):
