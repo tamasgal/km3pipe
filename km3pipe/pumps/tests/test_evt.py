@@ -29,10 +29,12 @@ class TestParser(unittest.TestCase):
         self.assertEqual(['1'], raw_header['start_run'])
         self.assertAlmostEqual(-1.4, float(raw_header['spectrum'][0]))
         self.assertAlmostEqual(1, float(raw_header['cut_nu'][2]))
+        self.temp_file.close()
 
-    def test_incomplete_header_raises_valueerror(self):
+    def test_incomplete_header_raises_value_error(self):
         self.temp_file = StringIO(self.corrupt_evt_header)
         self.pump = EvtPump()
         self.pump.evt_file = self.temp_file
         with self.assertRaises(ValueError):
             self.pump.extract_header()
+        self.temp_file.close()
