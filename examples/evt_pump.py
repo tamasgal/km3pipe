@@ -9,7 +9,7 @@ class PrintBlob(Module):
         return blob
 
 pipeline = Pipeline(cycles=1)
-pipeline.attach(EvtPump, 'evtpump', filename='example_numuNC.evt')
+pipeline.attach(EvtPump, 'evtpump', filename='files/example_numuNC.evt')
 pipeline.attach(PrintBlob, 'printer')
 pipeline.drain()
 
