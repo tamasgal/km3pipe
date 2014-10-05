@@ -1,3 +1,5 @@
+from __future__ import division, absolute_import, print_function
+
 import struct
 
 from km3pipe import Pump
@@ -23,7 +25,7 @@ class DAQPump(Pump):
     def next_frame(self):
         #print("Preamble:")
         length, data_type = struct.unpack('<ii', self.blob_file.read(8))
-        print length, data_type
+        print(length, data_type)
         self.blob_file.seek(length-8, 1)
         raw_input()
 
