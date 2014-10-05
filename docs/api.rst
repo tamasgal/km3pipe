@@ -23,3 +23,9 @@ Package `pumps`
 
 .. automodule:: km3pipe.pumps.evt
     :members:
+
+Module `decorators`
+-------------------
+
+.. automodule:: km3pipe.decorators
+    :members:
