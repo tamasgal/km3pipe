@@ -1,20 +1,12 @@
+from __future__ import division, absolute_import, print_function
+
 __author__ = 'tamasgal'
 
-# Use unittest2 on Python < 2.7.
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
-
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
-
+from km3pipe.testing import *
 from km3pipe.pumps import EvtPump
 
 
-class TestParser(unittest.TestCase):
+class TestParser(TestCase):
 
     def setUp(self):
         self.valid_evt_header = "\n".join((

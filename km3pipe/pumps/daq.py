@@ -28,7 +28,7 @@ class DAQPump(Pump):
         raw_input()
 
     def determine_frame_positions(self):
-        """Record file pointer position of each frame"""
+        """Record the file pointer position of each frame"""
         self.rewind_file()
         try:
             while True:

@@ -1,17 +1,10 @@
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
+from __future__ import division, absolute_import, print_function
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
-
+from km3pipe.testing import *
 from km3pipe.decorators import remain_file_pointer
 
 
-class TestRemainFilePointer(unittest.TestCase):
+class TestRemainFilePointer(TestCase):
 
     def test_remains_file_pointer_in_function(self):
         dummy_file = StringIO('abcdefg')

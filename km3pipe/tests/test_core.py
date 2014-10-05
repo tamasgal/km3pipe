@@ -2,17 +2,11 @@ from __future__ import division, absolute_import, print_function
 
 __author__ = 'tamasgal'
 
-# Use unittest2 on Python < 2.7.
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
-from mock import MagicMock
-
+from km3pipe.testing import *
 from km3pipe.core import Pipeline, Module, Blob
 
 
-class TestPipeline(unittest.TestCase):
+class TestPipeline(TestCase):
     """Tests for the main pipeline"""
 
     def test_attach(self):
@@ -47,7 +41,7 @@ class TestPipeline(unittest.TestCase):
             module.finish.assert_called_once_with()
 
 
-class TestModule(unittest.TestCase):
+class TestModule(TestCase):
     """Tests for the pipeline module"""
 
     def test_name_can_be_set_on_init(self):
@@ -90,7 +84,8 @@ class TestModule(unittest.TestCase):
         module = Module()
         module.finish()
 
-class TestBlob(unittest.TestCase):
+
+class TestBlob(TestCase):
     """Tests for the blob holding the data"""
 
     def test_init(self):

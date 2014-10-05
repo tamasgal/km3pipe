@@ -110,5 +110,5 @@ class Pump(Module):
 
 
 class Blob(dict):
-    """A simple dict with a fancy name."""
+    """A simple dict with a fancy name. This should hold the data."""
     pass
