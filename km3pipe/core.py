@@ -41,7 +41,7 @@ class Pipeline(object):
     def finish(self):
         for module in self.modules:
             log.info("Finishing {0}".format(module.name))
-            module.finish()
+            module.pre_finish()
 
 
 class Module(object):
@@ -71,6 +71,42 @@ class Module(object):
 
     def finish(self):
         pass
+
+    def pre_finish(self):
+        self.finish()
+
+
+class Pump(Module):
+    """The pump with basic file or socket handling."""
+
+    def __init__(self, **context):
+        Module.__init__(self, **context)
+        self.blob_file = None
+
+    def open_file(self, filename):
+        """Open the file with filename"""
+        try:
+            self.blob_file = open(filename, 'rb')
+        except TypeError:
+            log.error("Please specify a valid filename.")
+            raise SystemExit
+        except IOError as e:
+            log.error(e)
+            raise SystemExit
+
+    def rewind_file(self):
+        """Put the file pointer to position 0"""
+        self.blob_file.seek(0, 0)
+
+    def close_file(self):
+        """Close file."""
+        if self.blob_file:
+            self.blob_file.close()
+
+    def pre_finish(self):
+        """Clean up open file or socket-handlers."""
+        Module.finish(self)
+        self.close_file()
 
 
 class Blob(dict):

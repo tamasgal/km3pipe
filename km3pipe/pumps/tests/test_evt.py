@@ -28,7 +28,7 @@ class TestParser(unittest.TestCase):
     def test_parse_header(self):
         self.temp_file = StringIO(self.valid_evt_header)
         self.pump = EvtPump()
-        self.pump.evt_file = self.temp_file
+        self.pump.blob_file = self.temp_file
         raw_header = self.pump.extract_header()
         self.assertEqual(['1'], raw_header['start_run'])
         self.assertAlmostEqual(-1.4, float(raw_header['spectrum'][0]))
@@ -38,7 +38,7 @@ class TestParser(unittest.TestCase):
     def test_incomplete_header_raises_value_error(self):
         self.temp_file = StringIO(self.corrupt_evt_header)
         self.pump = EvtPump()
-        self.pump.evt_file = self.temp_file
+        self.pump.blob_file = self.temp_file
         with self.assertRaises(ValueError):
             self.pump.extract_header()
         self.temp_file.close()

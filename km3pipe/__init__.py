@@ -1,1 +1,1 @@
-from km3pipe.core import Module, Pipeline
+from km3pipe.core import Pipeline, Module, Pump
