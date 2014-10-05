@@ -16,7 +16,7 @@ Contents:
    examples
    api
 
-.. include:: ../README.md
+.. include:: ../README.rst
 
 Indices and tables
 ==================

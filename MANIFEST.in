@@ -1,6 +1,9 @@
 include README.md
 include LICENSE
 recursive-include docs *
+recursive-include km3pipe/tests *.py
+recursive-include km3pipe/pumps/tests *.py
+
 recursive-exclude docs *.pyc
 recursive-exclude docs *.pyo
 prune docs/_build
