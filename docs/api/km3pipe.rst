@@ -12,10 +12,26 @@ Subpackages
 Submodules
 ----------
 
+km3pipe.constants module
+------------------------
+
+.. automodule:: km3pipe.constants
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 km3pipe.core module
 -------------------
 
 .. automodule:: km3pipe.core
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+km3pipe.dataclasses module
+--------------------------
+
+.. automodule:: km3pipe.dataclasses
     :members:
     :undoc-members:
     :show-inheritance:
@@ -48,6 +64,14 @@ km3pipe.tools module
 --------------------
 
 .. automodule:: km3pipe.tools
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+km3pipe.units module
+--------------------
+
+.. automodule:: km3pipe.units
     :members:
     :undoc-members:
     :show-inheritance:
