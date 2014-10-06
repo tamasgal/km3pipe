@@ -1,3 +1,12 @@
+# coding=utf-8
+# Filename: core.py
+# pylint: disable=locally-disabled
+"""
+The core of the KM3Pipe framework.
+
+
+
+"""
 from __future__ import division, absolute_import, print_function
 
 __author__ = 'tamasgal'
@@ -65,14 +74,16 @@ class Module(object):
         """Return the value of the requested parameter"""
         return self.parameters.get(name)
 
-    def process(self, blob):
+    def process(self, blob):  # pylint: disable=R0201
         """Knead the blob and return it"""
         return blob
 
     def finish(self):
+        """Clean everything up."""
         pass
 
     def pre_finish(self):
+        """Do the last few things before calling finish()"""
         self.finish()
 
 
@@ -90,8 +101,8 @@ class Pump(Module):
         except TypeError:
             log.error("Please specify a valid filename.")
             raise SystemExit
-        except IOError as e:
-            log.error(e)
+        except IOError as error_message:
+            log.error(error_message)
             raise SystemExit
 
     def rewind_file(self):
