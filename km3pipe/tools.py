@@ -11,6 +11,7 @@ def unpack_nfirst(seq, nfirst):
     (1, 2, 3)
     >>> rest
     (4, 5)
+
     """
     it = iter(seq)
     for x in xrange(nfirst):
@@ -19,7 +20,14 @@ def unpack_nfirst(seq, nfirst):
 
 
 def split(string, callback=None):
-    """Split the string and execute the callback function on each part"""
+    """Split the string and execute the callback function on each part.
+
+    >>> string = "1 2 3 4"
+    >>> parts = split(string, int)
+    >>> parts
+    [1, 2, 3, 4]
+
+    """
     if callback:
         return [callback(i) for i in string.split()]
     else:
