@@ -48,6 +48,7 @@ class Pipeline(object):
         self.finish()
 
     def finish(self):
+        """Call finish() on each attached module"""
         for module in self.modules:
             log.info("Finishing {0}".format(module.name))
             module.pre_finish()
@@ -66,7 +67,7 @@ class Module(object):
         """The name of the module"""
         return self._name
 
-    def add(self, name, value, help_text):
+    def add(self, name, value):
         """Add the parameter with the desired value to the dict"""
         self.parameters[name] = value
 
