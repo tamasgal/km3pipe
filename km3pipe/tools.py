@@ -16,3 +16,11 @@ def unpack_nfirst(seq, nfirst):
     for x in xrange(nfirst):
         yield next(it, None)
     yield tuple(it)
+
+
+def split(string, callback=None):
+    """Split the string and execute the callback function on each part"""
+    if callback:
+        return [callback(i) for i in string.split()]
+    else:
+        return string.split()
