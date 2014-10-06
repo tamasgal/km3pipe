@@ -37,7 +37,7 @@ class Detector(object):
         first_line = self.det_file.readline()
         self.det_id, self.n_doms = split(first_line, int)
 
-    # pylint: disable=C0301
+    # pylint: disable=C0103
     def parse_doms(self):
         """Extract dom information from detector file"""
         self.det_file.seek(0, 0)
