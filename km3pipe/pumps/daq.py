@@ -27,7 +27,6 @@ class DAQPump(Pump):
         length, data_type = struct.unpack('<ii', self.blob_file.read(8))
         print(length, data_type)
         self.blob_file.seek(length-8, 1)
-        raw_input()
 
     def determine_frame_positions(self):
         """Record the file pointer position of each frame"""
@@ -44,13 +43,20 @@ class DAQPump(Pump):
         print("Found {0} frames.".format(len(self.frame_positions)))
 
     def process(self, blob):
-        #print self.next_frame()
+        print(self.next_frame())
         return blob
 
     def finish(self):
         self.blob_file.close()
 
 
+data_types = {
+    101: 'DAQSuperFrame',
+    201: 'DAQSummaryFrame',
+    1001: 'DAQTimeslice',
+    2001: 'DAQSummaryslice',
+    10001: 'DAQEvent',
+}
 
 
 # def foo():
