@@ -5,7 +5,7 @@ __author__ = 'tamasgal'
 from km3pipe import Pump
 from km3pipe.logger import get_logger
 
-log = get_logger(__name__)
+log = get_logger(__name__)  # pylint: disable=C0103
 
 
 class EvtPump(Pump):

@@ -5,7 +5,8 @@ __author__ = 'tamasgal'
 from km3pipe.tools import unpack_nfirst, split
 from km3pipe.logger import get_logger
 
-log = get_logger(__name__)
+log = get_logger(__name__)  # pylint: disable=C0103
+
 
 class Detector(object):
     def __init__(self, filename=None):

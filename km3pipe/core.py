@@ -15,7 +15,7 @@ __author__ = 'tamasgal'
 import logging
 from km3pipe.logger import get_logger
 
-log = get_logger(__name__, logging.INFO)
+log = get_logger(__name__, logging.INFO)  # pylint: disable=C0103
 
 
 class Pipeline(object):
