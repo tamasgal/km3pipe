@@ -1,5 +1,5 @@
-km3pipe
-=======
+API Documentation
+=================
 
 .. toctree::
    :maxdepth: 4
