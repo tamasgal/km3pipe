@@ -8,6 +8,7 @@ Module `core`
 
 .. automodule:: km3pipe.core
     :members:
+    :show-inheritance:
 
 Module `logger`
 ---------------
@@ -20,9 +21,11 @@ Package `pumps`
 
 .. automodule:: km3pipe.pumps.daq
     :members:
+    :show-inheritance:
 
 .. automodule:: km3pipe.pumps.evt
     :members:
+    :show-inheritance:
 
 Module `decorators`
 -------------------
