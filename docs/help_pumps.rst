@@ -1,4 +1,4 @@
-.. _pumps:
+.. _help_pumps:
 
 Pumps
 =====

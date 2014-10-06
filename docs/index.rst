@@ -11,10 +11,10 @@ Contents:
 .. toctree::
    :maxdepth: 3
 
-   modules
-   pumps
+   help_modules
+   help_pumps
    examples
-   api
+   modules
 
 .. include:: ../README.rst
 
