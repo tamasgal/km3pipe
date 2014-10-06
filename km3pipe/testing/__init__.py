@@ -1,3 +1,9 @@
+# coding=utf-8
+# Filename: __init__.py
+"""
+Common unit testing support for km3pipe.
+
+"""
 from __future__ import division, absolute_import, print_function
 
 try:

@@ -1,3 +1,10 @@
+# coding=utf-8
+# Filename: hardware.py
+# pylint: disable=locally-disabled
+"""
+Classes representing KM3NeT hardware.
+
+"""
 from __future__ import division, absolute_import, print_function
 
 __author__ = 'tamasgal'
@@ -9,6 +16,7 @@ log = get_logger(__name__)  # pylint: disable=C0103
 
 
 class Detector(object):
+    """The KM3NeT detector"""
     def __init__(self, filename=None):
         self.det_file = None
         self.det_id = None
@@ -20,6 +28,7 @@ class Detector(object):
             self.open_file(filename)
 
     def open_file(self, filename):
+        """Create the file handler"""
         pass
 
     def parse_header(self):
@@ -28,6 +37,7 @@ class Detector(object):
         first_line = self.det_file.readline()
         self.det_id, self.n_doms = split(first_line, int)
 
+    # pylint: disable=C0103
     def parse_doms(self):
         """Extract dom information from detector file"""
         self.det_file.seek(0, 0)

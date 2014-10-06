@@ -1,3 +1,10 @@
+# coding=utf-8
+# Filename: tools.py
+# pylint: disable=locally-disabled
+"""
+Some frequently used logic.
+
+"""
 from __future__ import division, absolute_import, print_function
 
 __author__ = 'tamasgal'
@@ -13,10 +20,10 @@ def unpack_nfirst(seq, nfirst):
     (4, 5)
 
     """
-    it = iter(seq)
-    for x in xrange(nfirst):
-        yield next(it, None)
-    yield tuple(it)
+    iterator = iter(seq)
+    for item in xrange(nfirst):
+        yield next(iterator, None)
+    yield tuple(iterator)
 
 
 def split(string, callback=None):
@@ -32,3 +39,4 @@ def split(string, callback=None):
         return [callback(i) for i in string.split()]
     else:
         return string.split()
+

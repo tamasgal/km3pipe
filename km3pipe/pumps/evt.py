@@ -1,3 +1,10 @@
+# coding=utf-8
+# Filename: evt.py
+# pylint: disable=locally-disabled
+"""
+Pumps for the EVT simulation dataformat.
+
+"""
 from __future__ import division, absolute_import, print_function
 
 __author__ = 'tamasgal'
@@ -25,6 +32,7 @@ class EvtPump(Pump):
             log.warn("No filename specified. Take care of the file handling!")
 
     def prepare_blobs(self):
+        """Populate the blobs"""
         self.raw_header = self.extract_header()
         self.blobs = self.blob_generator()
 
@@ -65,7 +73,9 @@ class EvtPump(Pump):
                     blob[tag] = value.split()
 
     def process(self, blob):
+        """Pump the next blob to the modules"""
         return next(self.blobs)
 
     def finish(self):
+        """Clean everything up"""
         self.blob_file.close()

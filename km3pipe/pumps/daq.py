@@ -1,3 +1,10 @@
+# coding=utf-8
+# Filename: daq.py
+# pylint: disable=locally-disabled
+"""
+Pumps for the DAQ dataformats.
+
+"""
 from __future__ import division, absolute_import, print_function
 
 import struct
@@ -23,6 +30,7 @@ class DAQPump(Pump):
             log.warn("No filename specified. Take care of the file handling!")
 
     def next_frame(self):
+        """Get the next frame from file"""
         #print("Preamble:")
         length, data_type = struct.unpack('<ii', self.blob_file.read(8))
         print(length, data_type)
@@ -43,14 +51,16 @@ class DAQPump(Pump):
         print("Found {0} frames.".format(len(self.frame_positions)))
 
     def process(self, blob):
+        """Pump the next blob to the modules"""
         print(self.next_frame())
         return blob
 
     def finish(self):
+        """Clean everything up"""
         self.blob_file.close()
 
 
-data_types = {
+DATA_TYPES = {
     101: 'DAQSuperFrame',
     201: 'DAQSummaryFrame',
     1001: 'DAQTimeslice',

@@ -1,3 +1,10 @@
+# coding=utf-8
+# Filename: logger.py
+# pylint: disable=locally-disabled,C0103
+"""
+The logging facility.
+
+"""
 from __future__ import division, absolute_import, print_function
 
 __author__ = 'tamasgal'
@@ -13,6 +20,7 @@ logging.addLevelName(logging.WARNING, "\033[1;33m%s\033[1;0m" %
 logging.addLevelName(logging.ERROR, "\033[1;31m%s\033[1;0m" %
                      logging.getLevelName(logging.ERROR))
 
+# pylint: disable=C0103
 formatter = logging.Formatter('[%(levelname)s] %(name)s: %(message)s')
 
 
@@ -38,9 +46,9 @@ def get_logger(name, log_level=logging.DEBUG):
     log = logging.getLogger(name)
     log.setLevel(log_level)
 
-    ch = logging.StreamHandler()
-    ch.setLevel(log_level)
-    ch.setFormatter(formatter)
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(log_level)
+    console_handler.setFormatter(formatter)
 
-    log.addHandler(ch)
+    log.addHandler(console_handler)
     return log

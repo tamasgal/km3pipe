@@ -4,8 +4,6 @@
 """
 The core of the KM3Pipe framework.
 
-
-
 """
 from __future__ import division, absolute_import, print_function
 
