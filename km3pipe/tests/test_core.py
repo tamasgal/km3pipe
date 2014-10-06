@@ -62,12 +62,12 @@ class TestModule(TestCase):
 
     def test_add_parameter(self):
         module = Module()
-        module.add('foo', 'default', 'help')
+        module.add('foo', 'default')
         self.assertDictEqual({'foo': 'default'}, module.parameters)
 
     def test_get_parameter(self):
         module = Module()
-        module.add('foo', 'default', 'help')
+        module.add('foo', 'default')
         self.assertEqual('default', module.get('foo'))
 
     def test_default_parameter_value_can_be_overwritten(self):
