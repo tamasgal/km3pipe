@@ -31,9 +31,17 @@ example_detx = StringIO("\n".join((
     " 8 1 1 3  0 -1  0 80",
     " 9 1 1 3  0  0 -1 90",)))
 
-class TestHardware(TestCase):
+class TestDetector(TestCase):
 
-    def test_detector_id(self):
-        det = Detector()
-        det.det_file = example_detx
-        self.assertEqual(1, det.id)
+    def setUp(self):
+        self.det = Detector()
+        self.det.det_file = example_detx
+
+    def test_parse_header_extracts_correct_det_id(self):
+        self.det.parse_header()
+        self.assertEqual(1, self.det.det_id)
+
+    def test_parse_header_extracts_correct_det_id(self):
+        self.det.parse_header()
+        self.assertEqual(3, self.det.n_doms)
+
