@@ -44,6 +44,14 @@ km3pipe.logger module
     :undoc-members:
     :show-inheritance:
 
+km3pipe.tools module
+--------------------
+
+.. automodule:: km3pipe.tools
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------
