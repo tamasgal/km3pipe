@@ -19,17 +19,17 @@ from km3pipe.hardware import Detector
 example_detx = StringIO("\n".join((
     "1 3",
     "1 1 1 3",
-    " 1 1 1 1 -1  0  0 10",
-    " 2 1 1 1  0 -1  0 20",
-    " 3 1 1 1  0  0 -1 30",
+    " 1 1.1 1.2 1.3 -1.1  0.2  0.3 10",
+    " 2 1.1 1.2 1.3  0.1 -1.2  0.3 20",
+    " 3 1.1 1.2 1.3  0.1  0.2 -1.3 30",
     "2 1 2 3",
-    " 4 1 1 2 -1  0  0 40",
-    " 5 1 1 2  0 -1  0 50",
-    " 6 1 1 2  0  0 -1 60",
+    " 4 1.1 1.2 2.3 -1.1  0.2  0.3 40",
+    " 5 1.1 1.2 2.3  0.1 -1.2  0.3 50",
+    " 6 1.1 1.2 2.3  0.1  0.2 -1.3 60",
     "3 1 3 3",
-    " 7 1 1 3 -1  0  0 70",
-    " 8 1 1 3  0 -1  0 80",
-    " 9 1 1 3  0  0 -1 90",)))
+    " 7 1.1 1.2 3.3 -1.1  0.2  0.3 70",
+    " 8 1.1 1.2 3.3  0.1 -1.2  0.3 80",
+    " 9 1.1 1.2 3.3  0.1  0.2 -1.3 90",)))
 
 class TestDetector(TestCase):
 
@@ -41,7 +41,18 @@ class TestDetector(TestCase):
         self.det.parse_header()
         self.assertEqual(1, self.det.det_id)
 
-    def test_parse_header_extracts_correct_det_id(self):
+    def test_parse_header_extracts_correct_n_doms(self):
         self.det.parse_header()
         self.assertEqual(3, self.det.n_doms)
+
+    def test_parse_doms_maps_each_dom_correctly(self):
+        self.det.parse_doms()
+        expected = {1: (1, 1, 3), 2: (1, 2, 3), 3: (1, 3, 3)}
+        self.assertDictEqual(expected, self.det.doms)
+
+    def test_parse_doms_fills_pmts_dict(self):
+        self.det.parse_doms()
+        self.assertEqual(9, len(self.det.pmts))
+        self.assertTupleEqual((7, 1.1, 1.2, 3.3, -1.1,  0.2,  0.3, 70),
+                              self.det.pmts[(1, 3, 0)])
 
