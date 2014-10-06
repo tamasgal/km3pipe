@@ -12,6 +12,7 @@ def remain_file_pointer(f):
     def wrapper(*args, **kwargs):
         file_obj = args[-1]
         old_position = file_obj.tell()
-        f(*args, **kwargs)
+        return_value = f(*args, **kwargs)
         file_obj.seek(old_position, 0)
+        return return_value
     return wrapper
