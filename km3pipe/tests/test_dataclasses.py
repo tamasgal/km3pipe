@@ -6,8 +6,11 @@
 """
 from __future__ import division, absolute_import, print_function
 
+import numpy as np
+
 from km3pipe.testing import *
-from km3pipe.dataclasses import Position
+from km3pipe.dataclasses import Position, Direction
+
 
 class TestPosition(TestCase):
 
@@ -35,3 +38,30 @@ class TestPosition(TestCase):
         self.assertEqual(4, pos[1])
         self.assertEqual(3, pos.size)
         self.assertTupleEqual((3,), pos.shape)
+
+
+class TestDirection(TestCase):
+
+    def test_direction(self):
+        dir = Direction((1, 0, 0))
+        self.assertAlmostEqual(1, np.linalg.norm(dir))
+        self.assertEqual(1, dir.x)
+        self.assertEqual(0, dir.y)
+        self.assertEqual(0, dir.z)
+
+    def test_direction_normalises_on_init(self):
+        dir = Direction((1, 2, 3))
+        self.assertAlmostEqual(0.26726124, dir.x)
+        self.assertAlmostEqual(0.53452248, dir.y)
+        self.assertAlmostEqual(0.80178372, dir.z)
+
+    def test_direction_normalises_on_change_attribute(self):
+        dir = Direction((1, 2, 3))
+        self.assertAlmostEqual(1, np.linalg.norm(dir))
+        dir.x = 10
+        self.assertAlmostEqual(1, np.linalg.norm(dir))
+        dir.y = 20
+        self.assertAlmostEqual(1, np.linalg.norm(dir))
+        dir.z = 30
+        self.assertAlmostEqual(1, np.linalg.norm(dir))
+
