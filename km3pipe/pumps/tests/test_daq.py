@@ -80,8 +80,7 @@ class TestDAQPreamble(TestCase):
 
     def test_parse_from_file(self):
         self.setUp()
-        preamble = DAQPreamble()
-        preamble.parse_file(TEST_FILE)
+        preamble = DAQPreamble(from_file=TEST_FILE)
         self.assertEqual(133, preamble.length)
         self.assertEqual(2001, preamble.data_type)
 
@@ -97,7 +96,6 @@ class TestDAQHeader(TestCase):
 
     def test_parse_from_file(self):
         self.setUp()
-        header= DAQHeader()
-        header.parse_file(TEST_FILE)
+        header = DAQHeader(from_file=TEST_FILE)
         self.assertEqual(430, header.run)
         self.assertEqual(1, header.time_slice)

@@ -43,14 +43,14 @@ class DAQPump(Pump):
         """Get the next frame from file"""
         blob_file = self.blob_file
         try:
-            length, data_type = unpack('<ii', blob_file.read(DAQPreamble.size))
+            preamble = DAQPreamble(from_file=blob_file)
         except struct.error:
             raise StopIteration
-        print(length)
+        header = DAQHeader(from_file=blob_file)
+        raw_data = blob_file.read(preamble.length - DAQPreamble.size - DAQHeader.size)
+
         blob = Blob()
-        blob[DATA_TYPES[data_type]] = "narf"
-        raw_header = blob_file.read(DAQHeader.size)
-        raw_data = blob_file.read(length - DAQPreamble.size - DAQHeader.size)
+        blob[DATA_TYPES[preamble.data_type]] = [preamble, header]
         return blob
 
     def determine_frame_positions(self):
@@ -102,11 +102,13 @@ class DAQPreamble(object):
     """Wrapper for the JDAQPreamble binary format."""
     size = 8
 
-    def __init__(self, byte_data=None):
+    def __init__(self, byte_data=None, from_file=None):
         self.length = None
         self.data_type = None
         if byte_data:
             self.parse_byte_data(byte_data)
+        if from_file:
+            self.parse_file(from_file)
 
     def parse_byte_data(self, byte_data):
         """Extract the values from byte string"""
@@ -119,7 +121,6 @@ class DAQPreamble(object):
 
         """
         byte_data = file_obj.read(self.size)
-        print("Byte data: " + str(byte_data))
         self.parse_byte_data(byte_data)
 
 
@@ -127,12 +128,14 @@ class DAQHeader(object):
     """Wrapper for the JDAQHeader binary format."""
     size = 16
 
-    def __init__(self, byte_data=None):
+    def __init__(self, byte_data=None, from_file=None):
         self.run = None
         self.time_slice = None
         self.time_stamp = None
         if byte_data:
             self.parse_byte_data(byte_data)
+        if from_file:
+            self.parse_file(from_file)
 
     def parse_byte_data(self, byte_data):
         """Extract the values from byte string"""
