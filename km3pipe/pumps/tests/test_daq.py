@@ -95,6 +95,7 @@ class TestDAQHeader(TestCase):
         self.assertEqual(1, header.time_slice)
 
     def test_parse_from_file(self):
+        TEST_FILE.seek(8, 0)  # skip preamble
         self.setUp()
         header = DAQHeader(from_file=TEST_FILE)
         self.assertEqual(430, header.run)
