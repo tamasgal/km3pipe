@@ -59,3 +59,9 @@ class TestDAQPump(TestCase):
         blob = pump.next_frame()
         self.assertTrue(blob.has_key('DAQEvent'))
 
+    def test_next_frame_raises_stop_iteration_when_eof_reached(self):
+        pump = self.pump
+        with self.assertRaises(StopIteration):
+            for i in range(6):
+                pump.next_frame()
+

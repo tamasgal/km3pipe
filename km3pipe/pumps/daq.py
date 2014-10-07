@@ -32,9 +32,12 @@ class DAQPump(Pump):
     def next_frame(self):
         """Get the next frame from file"""
         #print("Preamble:")
-        blob = Blob()
-        length, data_type = struct.unpack('<ii', self.blob_file.read(8))
+        try:
+            length, data_type = struct.unpack('<ii', self.blob_file.read(8))
+        except struct.error:
+            raise StopIteration
         print(length)
+        blob = Blob()
         blob[DATA_TYPES[data_type]] = "narf"
         raw_data = self.blob_file.read(length-8)
         return blob
