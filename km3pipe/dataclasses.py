@@ -7,7 +7,7 @@
 """
 from __future__ import division, absolute_import, print_function
 
-__all__ = ('Point', 'Position', 'Direction')
+__all__ = ('Point', 'Position', 'Direction', 'Hit')
 
 import numpy as np
 
@@ -95,3 +95,7 @@ class Direction(Point):
         self._normalise()
 
 
+class Hit(object):
+    def __init__(self, time=None, is_noise=False):
+        self.time = time
+        self.is_noise = is_noise

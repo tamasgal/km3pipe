@@ -2,14 +2,14 @@
 # Filename: daq.py
 # pylint: disable=locally-disabled
 """
-Pumps for the DAQ dataformats.
+Pumps for the DAQ data formats.
 
 """
 from __future__ import division, absolute_import, print_function
 
 import struct
 
-from km3pipe import Pump
+from km3pipe import Pump, Blob
 from km3pipe.logger import get_logger
 
 log = get_logger(__name__)  # pylint: disable=C0103
@@ -32,9 +32,12 @@ class DAQPump(Pump):
     def next_frame(self):
         """Get the next frame from file"""
         #print("Preamble:")
+        blob = Blob()
         length, data_type = struct.unpack('<ii', self.blob_file.read(8))
-        print(length, data_type)
-        self.blob_file.seek(length-8, 1)
+        print(length)
+        blob[DATA_TYPES[data_type]] = "narf"
+        raw_data = self.blob_file.read(length-8)
+        return blob
 
     def determine_frame_positions(self):
         """Record the file pointer position of each frame"""
@@ -42,8 +45,8 @@ class DAQPump(Pump):
         try:
             while True:
                 pointer_position = self.blob_file.tell()
-                length, data_type = struct.unpack('<ii', self.blob_file.read(8))
-                self.blob_file.seek(length-8, 1)
+                length = struct.unpack('<i', self.blob_file.read(4))[0]
+                self.blob_file.seek(length - 4, 1)
                 self.frame_positions.append(pointer_position)
         except struct.error:
             pass
@@ -86,3 +89,6 @@ DATA_TYPES = {
 #     print "Timestamp"
 #     print struct.unpack('<Q', file.read(8))
 
+
+class DAQSummarySlice(object):
+    pass

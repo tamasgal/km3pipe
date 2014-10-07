@@ -9,7 +9,7 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 
 from km3pipe.testing import *
-from km3pipe.dataclasses import Position, Direction
+from km3pipe.dataclasses import Position, Direction, Hit
 
 
 class TestPosition(TestCase):
@@ -65,3 +65,17 @@ class TestDirection(TestCase):
         dir.z = 30
         self.assertAlmostEqual(1, np.linalg.norm(dir))
 
+
+class TestHit(TestCase):
+
+    def test_hit_init(self):
+        hit = Hit(time=1, is_noise=True)
+        self.assertEqual(1, hit.time)
+        self.assertTrue(hit.is_noise)
+
+    def test_hit_set_attributes(self):
+        hit = Hit()
+        hit.time = 10
+        self.assertEqual(10, hit.time)
+        hit.is_noise = True
+        self.assertTrue(hit.is_noise)
