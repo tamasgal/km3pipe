@@ -31,7 +31,15 @@ class Pipeline(object):
         self.modules.append(module_class(name=name, **kwargs))
 
     def drain(self):
-        """Activate the pump and let the flow go"""
+        """Activate the pump and let the flow go.
+
+        This will call the process() method on each attached module until
+        a StopIteration is raised, usually by a pump when it reached the EOF.
+
+        A StopIteration is also raised when self.cycles was set and the
+        number of cycles has reached that limit.
+
+        """
         try:
             while True:
                 self.cycle_count += 1
