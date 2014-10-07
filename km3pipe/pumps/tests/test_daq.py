@@ -7,7 +7,7 @@
 from __future__ import division, absolute_import, print_function
 
 from km3pipe.testing import *
-from km3pipe.pumps.daq import DAQPump
+from km3pipe.pumps.daq import DAQPump, DAQPreamble, DAQHeader
 
 import binascii
 
@@ -38,6 +38,7 @@ TEST_FILE = StringIO(BINARY_DATA)
 class TestDAQPump(TestCase):
 
     def setUp(self):
+        TEST_FILE.seek(0, 0)
         self.pump = DAQPump()
         self.pump.blob_file = TEST_FILE
 
@@ -65,3 +66,38 @@ class TestDAQPump(TestCase):
             for i in range(6):
                 pump.next_frame()
 
+
+class TestDAQPreamble(TestCase):
+
+    def setUp(self):
+        TEST_FILE.seek(0, 0)
+
+    def test_init_with_byte_data(self):
+        byte_data = binascii.unhexlify("85000000D1070000")
+        preamble = DAQPreamble(byte_data=byte_data)
+        self.assertEqual(133, preamble.length)
+        self.assertEqual(2001, preamble.data_type)
+
+    def test_parse_from_file(self):
+        self.setUp()
+        preamble = DAQPreamble()
+        preamble.parse_file(TEST_FILE)
+        self.assertEqual(133, preamble.length)
+        self.assertEqual(2001, preamble.data_type)
+
+
+
+class TestDAQHeader(TestCase):
+
+    def test_init_with_byte_data(self):
+        byte_data = binascii.unhexlify("AE010000010000000000000000000000")
+        header = DAQHeader(byte_data=byte_data)
+        self.assertEqual(430, header.run)
+        self.assertEqual(1, header.time_slice)
+
+    def test_parse_from_file(self):
+        self.setUp()
+        header= DAQHeader()
+        header.parse_file(TEST_FILE)
+        self.assertEqual(430, header.run)
+        self.assertEqual(1, header.time_slice)

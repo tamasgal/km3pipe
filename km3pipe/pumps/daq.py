@@ -8,11 +8,21 @@ Pumps for the DAQ data formats.
 from __future__ import division, absolute_import, print_function
 
 import struct
+from struct import unpack
 
 from km3pipe import Pump, Blob
 from km3pipe.logger import get_logger
 
+
 log = get_logger(__name__)  # pylint: disable=C0103
+
+DATA_TYPES = {
+    101: 'DAQSuperFrame',
+    201: 'DAQSummaryFrame',
+    1001: 'DAQTimeslice',
+    2001: 'DAQSummaryslice',
+    10001: 'DAQEvent',
+}
 
 
 class DAQPump(Pump):
@@ -31,15 +41,16 @@ class DAQPump(Pump):
 
     def next_frame(self):
         """Get the next frame from file"""
-        #print("Preamble:")
+        blob_file = self.blob_file
         try:
-            length, data_type = struct.unpack('<ii', self.blob_file.read(8))
+            length, data_type = unpack('<ii', blob_file.read(DAQPreamble.size))
         except struct.error:
             raise StopIteration
         print(length)
         blob = Blob()
         blob[DATA_TYPES[data_type]] = "narf"
-        raw_data = self.blob_file.read(length-8)
+        raw_header = blob_file.read(DAQHeader.size)
+        raw_data = blob_file.read(length - DAQPreamble.size - DAQHeader.size)
         return blob
 
     def determine_frame_positions(self):
@@ -66,13 +77,7 @@ class DAQPump(Pump):
         self.blob_file.close()
 
 
-DATA_TYPES = {
-    101: 'DAQSuperFrame',
-    201: 'DAQSummaryFrame',
-    1001: 'DAQTimeslice',
-    2001: 'DAQSummaryslice',
-    10001: 'DAQEvent',
-}
+
 
 
 # def foo():
@@ -91,6 +96,60 @@ DATA_TYPES = {
 #     print struct.unpack('<iii', file.read(12))
 #     print "Timestamp"
 #     print struct.unpack('<Q', file.read(8))
+
+
+class DAQPreamble(object):
+    """Wrapper for the JDAQPreamble binary format."""
+    size = 8
+
+    def __init__(self, byte_data=None):
+        self.length = None
+        self.data_type = None
+        if byte_data:
+            self.parse_byte_data(byte_data)
+
+    def parse_byte_data(self, byte_data):
+        """Extract the values from byte string"""
+        self.length, self.data_type = unpack('<ii', byte_data)
+
+    def parse_file(self, file_obj):
+        """Directly read from file handler.
+
+        Note that this will move the file pointer.
+
+        """
+        byte_data = file_obj.read(self.size)
+        print("Byte data: " + str(byte_data))
+        self.parse_byte_data(byte_data)
+
+
+class DAQHeader(object):
+    """Wrapper for the JDAQHeader binary format."""
+    size = 16
+
+    def __init__(self, byte_data=None):
+        self.run = None
+        self.time_slice = None
+        self.time_stamp = None
+        if byte_data:
+            self.parse_byte_data(byte_data)
+
+    def parse_byte_data(self, byte_data):
+        """Extract the values from byte string"""
+        run, time_slice, time_stamp = unpack('<iiQ', byte_data)
+        self.run = run
+        self.time_slice = time_slice
+        self.time_stamp = time_stamp
+
+    def parse_file(self, file_obj):
+        """Directly read from file handler.
+
+        Note that this will move the file pointer.
+
+        """
+        byte_data = file_obj.read(self.size)
+        self.parse_byte_data(byte_data)
+
 
 
 class DAQSummarySlice(object):
