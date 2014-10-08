@@ -151,7 +151,7 @@ class DAQSummarySlice(object):
     Attributes:
       n_summary_frames (int): The number of summary frames.
       summary_frames (dict): The PMT rates for each DOM. The key is the DOM
-        identifier and corresponding value is a sorted list of PMT rates.
+        identifier and the corresponding value is a sorted list of PMT rates.
 
     """
     def __init__(self, preamble, header, byte_data):

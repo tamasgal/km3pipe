@@ -105,6 +105,7 @@ class TestDAQHeader(TestCase):
 class TestDAQSummarySlice(TestCase):
 
     def test_init_with_a_slice(self):
+        TEST_FILE.seek(0, 0)
         byte_data = TEST_FILE.read(133)
         sum_slice = DAQSummarySlice(None, None, byte_data)
         self.assertEqual(3, sum_slice.n_summary_frames)
@@ -113,3 +114,8 @@ class TestDAQSummarySlice(TestCase):
         self.assertEqual(31, len(sum_slice.summary_frames[102]))
         self.assertEqual(31, len(sum_slice.summary_frames[103]))
 
+
+class TestDAQEvent(TestCase):
+
+    def test_init_with_a_frame(self):
+        pass
