@@ -46,11 +46,17 @@ class DAQPump(Pump):
             preamble = DAQPreamble(from_file=blob_file)
         except struct.error:
             raise StopIteration
+        data_type = DATA_TYPES[preamble.data_type]
         header = DAQHeader(from_file=blob_file)
         raw_data = blob_file.read(preamble.length - DAQPreamble.size - DAQHeader.size)
 
         blob = Blob()
-        blob[DATA_TYPES[preamble.data_type]] = [preamble, header]
+        blob[data_type] = None
+
+        if data_type == 'DAQSummaryslice':
+            daq_frame = DAQSummarySlice(preamble, header, raw_data)
+            blob[data_type] = daq_frame
+
         return blob
 
     def determine_frame_positions(self):
@@ -77,27 +83,6 @@ class DAQPump(Pump):
         self.blob_file.close()
 
 
-
-
-
-# def foo():
-#     print "Preamble:"
-#     print struct.unpack('<ii', file.read(8))
-#     print "Header:"
-#     print struct.unpack('<iiq', file.read(16))
-#     print "Subheader:"
-#     print struct.unpack('<i', file.read(4))
-#     print "Summary frames:"
-#     print struct.unpack('i' + 'c'*31, file.read(35))
-#     print struct.unpack('i' + 'c'*31, file.read(35))
-#     print struct.unpack('i' + 'c'*31, file.read(35))
-#
-#     print "Header:"
-#     print struct.unpack('<iii', file.read(12))
-#     print "Timestamp"
-#     print struct.unpack('<Q', file.read(8))
-
-
 class DAQPreamble(object):
     """Wrapper for the JDAQPreamble binary format."""
     size = 8
@@ -112,7 +97,7 @@ class DAQPreamble(object):
 
     def parse_byte_data(self, byte_data):
         """Extract the values from byte string"""
-        self.length, self.data_type = unpack('<ii', byte_data)
+        self.length, self.data_type = unpack('<ii', byte_data[:self.size])
 
     def parse_file(self, file_obj):
         """Directly read from file handler.
@@ -139,7 +124,7 @@ class DAQHeader(object):
 
     def parse_byte_data(self, byte_data):
         """Extract the values from byte string"""
-        run, time_slice, time_stamp = unpack('<iiQ', byte_data)
+        run, time_slice, time_stamp = unpack('<iiQ', byte_data[:self.size])
         self.run = run
         self.time_slice = time_slice
         self.time_stamp = time_stamp
@@ -156,4 +141,31 @@ class DAQHeader(object):
 
 
 class DAQSummarySlice(object):
-    pass
+    """Wrapper for the JDAQSummarySlice binary format.
+
+    Args:
+      preamble (DAQPreamble): The DAQPreamble of this frame.
+      header (DAQHeader): The DAQHeader of this frame.
+      byte_data (bytes or str): The bytes, excluding the preamble and header.
+
+    Attributes:
+      n_summary_frames (int): The number of summary frames.
+      summary_frames (dict): The PMT rates for each DOM. The key is the DOM
+        identifier and corresponding value is a sorted list of PMT rates.
+
+    """
+    def __init__(self, preamble, header, byte_data):
+        self.preamble = preamble
+        self.header = header
+        self.n_summary_frames = unpack('<i', byte_data[:4])[0]
+        self.summary_frames = {}
+
+        self._parse_summary_frames(byte_data[4:])
+
+    def _parse_summary_frames(self, byte_data):
+        """Iterate through the byte data and fill the summary_frames"""
+        for i in range(self.n_summary_frames):
+            dom_id = unpack('<i', byte_data[i*35:i*35+4])[0]
+            pmt_rates = unpack('c'*31, byte_data[i*35+4:i*35+4+31])
+            self.summary_frames[dom_id] = pmt_rates
+
