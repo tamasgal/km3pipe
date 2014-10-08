@@ -195,7 +195,6 @@ class DAQSummaryslice(object):
     def _parse_summary_frames(self, file_obj):
         """Iterate through the byte data and fill the summary_frames"""
         for i in range(self.n_summary_frames):
-            print("frame: {0}".format(i))
             dom_id = unpack('<i', file_obj.read(4))[0]
             pmt_rates = unpack('c'*31, file_obj.read(31))
             self.summary_frames[dom_id] = pmt_rates
