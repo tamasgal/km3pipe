@@ -43,7 +43,7 @@ class Pipeline(object):
         try:
             while True:
                 self.cycle_count += 1
-                log.info("Pumping blob #{0}".format(self.cycle_count))
+                log.debug("Pumping blob #{0}".format(self.cycle_count))
                 for module in self.modules:
                     log.debug("Processing {0} ".format(module.name))
                     self.blob = module.process(self.blob)
