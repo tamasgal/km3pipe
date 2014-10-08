@@ -207,13 +207,34 @@ class DAQEvent(object):
       trigger_counter (int): Incremental identifier of the occurred trigger.
       trigger_mask (int): The trigger type(s) satisfied.
       overlays (int): Number of merged events.
-      n_trig_hits (int): Number of hits satisfying the trigger conditions.
+      n_triggered_hits (int): Number of hits satisfying the trigger conditions.
+      n_snapshot_hits (int): Number of snapshot hits.
+      triggered_hits (list): A list of triggered hits
+        (dom_id, pmt_id, tdc_time, tot)
+      snapshot_hits (list): A list of snapshot hits
+        (dom_id, pmt_id, tdc_time, tot)
 
     """
     def __init__(self, file_obj):
         self.header = DAQHeader(file_obj=file_obj)
-        self.trigger_counter, self.trigger_mask = unpack('<QQ', file_obj.read(16))
-        self.overlays, self.n_trig_hits = unpack('<ii', file_obj.read(8))
+        self.trigger_counter = unpack('<Q', file_obj.read(8))[0]
+        self.trigger_mask = unpack('<Q', file_obj.read(8))[0]
+        self.overlays = unpack('<i', file_obj.read(4))[0]
+
+        self.n_triggered_hits = unpack('<i', file_obj.read(4))[0]
         self.triggered_hits = []
+        self._parse_triggered_hits(file_obj)
+
+        self.n_snapshot_hits = unpack('<i', file_obj.read(4))[0]
         self.snapshot_hits = []
-        #self._parse_triggered_hits(byte_data[24:self.n_trig_hits*18])
+        self._parse_snapshot_hits(file_obj)
+
+    def _parse_triggered_hits(self, file_obj):
+        for i in xrange(self.n_triggered_hits):
+            dom_id, pmt_id, tdc_time, tot = unpack('<ibib', file_obj.read(10))
+            self.triggered_hits.append((dom_id, pmt_id, tdc_time, tot))
+
+    def _parse_snapshot_hits(self, file_obj):
+        for i in xrange(self.n_snapshot_hits):
+            dom_id, pmt_id, tdc_time, tot = unpack('<ibib', file_obj.read(10))
+            self.snapshot_hits.append((dom_id, pmt_id, tdc_time, tot))

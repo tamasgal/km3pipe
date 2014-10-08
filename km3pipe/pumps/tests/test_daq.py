@@ -118,11 +118,29 @@ class TestDAQSummarySlice(TestCase):
 
 class TestDAQEvent(TestCase):
 
-    def test_init_with_a_frame(self):
-        TEST_FILE.seek(133, 0)
+
+    def setUp(self):
+        TEST_FILE.seek(245, 0)
         preamble = DAQPreamble(file_obj=TEST_FILE)
-        event = DAQEvent(TEST_FILE)
-        self.assertEqual(0, event.trigger_counter)
+        self.event = DAQEvent(TEST_FILE)
+
+    def test_init_with_a_frame(self):
+        event = self.event
+        self.assertEqual(1, event.trigger_counter)
         self.assertEqual(2, event.trigger_mask)
         self.assertEqual(0, event.overlays)
-        self.assertEqual(2, event.n_trig_hits)
+        self.assertEqual(2, event.n_triggered_hits)
+
+    def test_triggered_hits(self):
+        event = self.event
+        self.assertEqual(2, len(event.triggered_hits))
+        self.assertTupleEqual((103, 16, 728715, 38), event.triggered_hits[0])
+        self.assertTupleEqual((103, 17, 728720, 18), event.triggered_hits[1])
+
+    def test_snapshot_hits(self):
+        event = self.event
+        self.assertEqual(3, event.n_snapshot_hits)
+        self.assertEqual(3, len(event.snapshot_hits))
+        self.assertTupleEqual((101, 22, 729076, 36), event.snapshot_hits[0])
+        self.assertTupleEqual((103, 16, 728715, 38), event.snapshot_hits[1])
+        self.assertTupleEqual((103, 17, 728720, 18), event.snapshot_hits[2])
