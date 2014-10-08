@@ -94,7 +94,7 @@ class DAQPreamble(object):
     Attributes:
       size (int): The size of the original DAQ byte representation.
       data_type (int): The data type of the following frame. The coding is
-        stored in the ``DATA_TYPES`` dictionary:
+        stored in the ``DATA_TYPES`` dictionary::
 
             101: 'DAQSuperFrame'
             201: 'DAQSummaryFrame'
