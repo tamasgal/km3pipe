@@ -7,7 +7,8 @@
 from __future__ import division, absolute_import, print_function
 
 from km3pipe.testing import *
-from km3pipe.pumps.daq import DAQPump, DAQPreamble, DAQHeader, DAQSummarySlice
+from km3pipe.pumps.daq import (DAQPump, DAQPreamble, DAQHeader,
+                               DAQSummarySlice, DAQEvent)
 
 import binascii
 
@@ -80,7 +81,7 @@ class TestDAQPreamble(TestCase):
 
     def test_parse_from_file(self):
         self.setUp()
-        preamble = DAQPreamble(from_file=TEST_FILE)
+        preamble = DAQPreamble(file_obj=TEST_FILE)
         self.assertEqual(133, preamble.length)
         self.assertEqual(2001, preamble.data_type)
 
@@ -97,7 +98,7 @@ class TestDAQHeader(TestCase):
     def test_parse_from_file(self):
         TEST_FILE.seek(8, 0)  # skip preamble
         self.setUp()
-        header = DAQHeader(from_file=TEST_FILE)
+        header = DAQHeader(file_obj=TEST_FILE)
         self.assertEqual(430, header.run)
         self.assertEqual(1, header.time_slice)
 
@@ -105,9 +106,9 @@ class TestDAQHeader(TestCase):
 class TestDAQSummarySlice(TestCase):
 
     def test_init_with_a_slice(self):
-        TEST_FILE.seek(8+16, 0)
-        byte_data = TEST_FILE.read(133-8-16)
-        sum_slice = DAQSummarySlice(None, None, byte_data)
+        TEST_FILE.seek(0, 0)
+        preamble = DAQPreamble(file_obj=TEST_FILE)
+        sum_slice = DAQSummarySlice(TEST_FILE)
         self.assertEqual(3, sum_slice.n_summary_frames)
         self.assertListEqual([101, 102, 103], sum_slice.summary_frames.keys())
         self.assertEqual(31, len(sum_slice.summary_frames[101]))
@@ -118,4 +119,10 @@ class TestDAQSummarySlice(TestCase):
 class TestDAQEvent(TestCase):
 
     def test_init_with_a_frame(self):
-        pass
+        TEST_FILE.seek(133, 0)
+        preamble = DAQPreamble(file_obj=TEST_FILE)
+        event = DAQEvent(TEST_FILE)
+        self.assertEqual(0, event.trigger_counter)
+        self.assertEqual(2, event.trigger_mask)
+        self.assertEqual(0, event.overlays)
+        self.assertEqual(2, event.n_trig_hits)

@@ -43,19 +43,20 @@ class DAQPump(Pump):
         """Get the next frame from file"""
         blob_file = self.blob_file
         try:
-            preamble = DAQPreamble(from_file=blob_file)
+            preamble = DAQPreamble(file_obj=blob_file)
         except struct.error:
             raise StopIteration
+
         data_type = DATA_TYPES[preamble.data_type]
-        header = DAQHeader(from_file=blob_file)
-        raw_data = blob_file.read(preamble.length - DAQPreamble.size - DAQHeader.size)
 
         blob = Blob()
         blob[data_type] = None
 
         if data_type == 'DAQSummaryslice':
-            daq_frame = DAQSummarySlice(preamble, header, raw_data)
+            daq_frame = DAQSummarySlice(blob_file)
             blob[data_type] = daq_frame
+        else:
+            blob_file.seek(preamble.length - DAQPreamble.size, 1)
 
         return blob
 
@@ -84,59 +85,86 @@ class DAQPump(Pump):
 
 
 class DAQPreamble(object):
-    """Wrapper for the JDAQPreamble binary format."""
+    """Wrapper for the JDAQPreamble binary format.
+
+    Args:
+      file_obj (file): The binary file, where the file pointer is at the
+        beginning of the header.
+
+    Attributes:
+      size (int): The size of the original DAQ byte representation.
+      data_type (int): The data type of the following frame. The coding is
+        stored in the ``DATA_TYPES`` dictionary:
+
+            101: 'DAQSuperFrame'
+            201: 'DAQSummaryFrame'
+            1001: 'DAQTimeslice'
+            2001: 'DAQSummaryslice'
+            10001: 'DAQEvent'
+
+    """
     size = 8
 
-    def __init__(self, byte_data=None, from_file=None):
+    def __init__(self, byte_data=None, file_obj=None):
         self.length = None
         self.data_type = None
         if byte_data:
-            self.parse_byte_data(byte_data)
-        if from_file:
-            self.parse_file(from_file)
+            self._parse_byte_data(byte_data)
+        if file_obj:
+            self._parse_file(file_obj)
 
-    def parse_byte_data(self, byte_data):
-        """Extract the values from byte string"""
+    def _parse_byte_data(self, byte_data):
+        """Extract the values from byte string."""
         self.length, self.data_type = unpack('<ii', byte_data[:self.size])
 
-    def parse_file(self, file_obj):
+    def _parse_file(self, file_obj):
         """Directly read from file handler.
 
         Note that this will move the file pointer.
 
         """
         byte_data = file_obj.read(self.size)
-        self.parse_byte_data(byte_data)
+        self._parse_byte_data(byte_data)
 
 
 class DAQHeader(object):
-    """Wrapper for the JDAQHeader binary format."""
+    """Wrapper for the JDAQHeader binary format.
+
+    Args:
+      file_obj (file): The binary file, where the file pointer is at the
+        beginning of the header.
+
+    Attributes:
+      size (int): The size of the original DAQ byte representation.
+
+    """
     size = 16
 
-    def __init__(self, byte_data=None, from_file=None):
+    def __init__(self, byte_data=None, file_obj=None):
         self.run = None
         self.time_slice = None
         self.time_stamp = None
         if byte_data:
-            self.parse_byte_data(byte_data)
-        if from_file:
-            self.parse_file(from_file)
+            self._parse_byte_data(byte_data)
+        if file_obj:
+            self._parse_file(file_obj)
 
-    def parse_byte_data(self, byte_data):
-        """Extract the values from byte string"""
+    def _parse_byte_data(self, byte_data):
+        """Extract the values from byte string."""
         run, time_slice, time_stamp = unpack('<iiQ', byte_data[:self.size])
         self.run = run
         self.time_slice = time_slice
         self.time_stamp = time_stamp
 
-    def parse_file(self, file_obj):
+    def _parse_file(self, file_obj):
         """Directly read from file handler.
 
-        Note that this will move the file pointer.
+        Note:
+          This will move the file pointer.
 
         """
         byte_data = file_obj.read(self.size)
-        self.parse_byte_data(byte_data)
+        self._parse_byte_data(byte_data)
 
 
 
@@ -144,9 +172,8 @@ class DAQSummarySlice(object):
     """Wrapper for the JDAQSummarySlice binary format.
 
     Args:
-      preamble (DAQPreamble): The DAQPreamble of this frame.
-      header (DAQHeader): The DAQHeader of this frame.
-      byte_data (bytes or str): The bytes, excluding the preamble and header.
+      file_obj (file): The binary file, where the file pointer is at the
+        beginning of the header.
 
     Attributes:
       n_summary_frames (int): The number of summary frames.
@@ -154,18 +181,39 @@ class DAQSummarySlice(object):
         identifier and the corresponding value is a sorted list of PMT rates.
 
     """
-    def __init__(self, preamble, header, byte_data):
-        self.preamble = preamble
-        self.header = header
-        self.n_summary_frames = unpack('<i', byte_data[:4])[0]
+    def __init__(self, file_obj):
+        self.header = DAQHeader(file_obj=file_obj)
+        self.n_summary_frames = unpack('<i', file_obj.read(4))[0]
         self.summary_frames = {}
 
-        self._parse_summary_frames(byte_data[4:])
+        self._parse_summary_frames(file_obj)
 
-    def _parse_summary_frames(self, byte_data):
+    def _parse_summary_frames(self, file_obj):
         """Iterate through the byte data and fill the summary_frames"""
         for i in range(self.n_summary_frames):
-            dom_id = unpack('<i', byte_data[i*35:i*35+4])[0]
-            pmt_rates = unpack('c'*31, byte_data[i*35+4:i*35+4+31])
+            print("frame: {0}".format(i))
+            dom_id = unpack('<i', file_obj.read(4))[0]
+            pmt_rates = unpack('c'*31, file_obj.read(31))
             self.summary_frames[dom_id] = pmt_rates
 
+
+class DAQEvent(object):
+    """Wrapper for the JDAQEvent binary format.
+
+    Args:
+      file_obj (file): The binary file, where the file pointer is at the
+
+    Attributes:
+      trigger_counter (int): Incremental identifier of the occurred trigger.
+      trigger_mask (int): The trigger type(s) satisfied.
+      overlays (int): Number of merged events.
+      n_trig_hits (int): Number of hits satisfying the trigger conditions.
+
+    """
+    def __init__(self, file_obj):
+        self.header = DAQHeader(file_obj=file_obj)
+        self.trigger_counter, self.trigger_mask = unpack('<QQ', file_obj.read(16))
+        self.overlays, self.n_trig_hits = unpack('<ii', file_obj.read(8))
+        self.triggered_hits = []
+        self.snapshot_hits = []
+        #self._parse_triggered_hits(byte_data[24:self.n_trig_hits*18])
