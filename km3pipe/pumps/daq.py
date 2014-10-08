@@ -55,7 +55,12 @@ class DAQPump(Pump):
         if data_type == 'DAQSummaryslice':
             daq_frame = DAQSummarySlice(blob_file)
             blob[data_type] = daq_frame
+        elif data_type == 'DAQEvent':
+            daq_frame = DAQEvent(blob_file)
+            blob[data_type] = daq_frame
         else:
+            log.warning("Skipping DAQ frame with data type code '{0}'."
+                        .format(preamble.data_type))
             blob_file.seek(preamble.length - DAQPreamble.size, 1)
 
         return blob
