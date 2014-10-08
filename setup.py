@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='km3pipe',
-      version='0.0.5',
+      version='0.1.0',
       url='http://github.com/tamasgal/km3pipe/',
       description='An analysis framework for KM3NeT',
       author='Tamas Gal',
