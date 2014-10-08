@@ -32,7 +32,7 @@ sys.path.append('../')
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
+    'sphinxcontrib.napoleon',
     'sphinx.ext.doctest',
     'sphinx.ext.pngmath',
     'sphinx.ext.viewcode',
