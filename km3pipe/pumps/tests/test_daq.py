@@ -8,7 +8,7 @@ from __future__ import division, absolute_import, print_function
 
 from km3pipe.testing import *
 from km3pipe.pumps.daq import (DAQPump, DAQPreamble, DAQHeader,
-                               DAQSummarySlice, DAQEvent)
+                               DAQSummaryslice, DAQEvent)
 
 import binascii
 
@@ -103,12 +103,12 @@ class TestDAQHeader(TestCase):
         self.assertEqual(1, header.time_slice)
 
 
-class TestDAQSummarySlice(TestCase):
+class TestDAQSummaryslice(TestCase):
 
     def test_init_with_a_slice(self):
         TEST_FILE.seek(0, 0)
         preamble = DAQPreamble(file_obj=TEST_FILE)
-        sum_slice = DAQSummarySlice(TEST_FILE)
+        sum_slice = DAQSummaryslice(TEST_FILE)
         self.assertEqual(3, sum_slice.n_summary_frames)
         self.assertListEqual([101, 102, 103], sum_slice.summary_frames.keys())
         self.assertEqual(31, len(sum_slice.summary_frames[101]))

@@ -53,7 +53,7 @@ class DAQPump(Pump):
         blob[data_type] = None
 
         if data_type == 'DAQSummaryslice':
-            daq_frame = DAQSummarySlice(blob_file)
+            daq_frame = DAQSummaryslice(blob_file)
             blob[data_type] = daq_frame
         elif data_type == 'DAQEvent':
             daq_frame = DAQEvent(blob_file)
@@ -173,7 +173,7 @@ class DAQHeader(object):
 
 
 
-class DAQSummarySlice(object):
+class DAQSummaryslice(object):
     """Wrapper for the JDAQSummarySlice binary format.
 
     Args:
