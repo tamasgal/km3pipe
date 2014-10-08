@@ -196,7 +196,7 @@ class DAQSummaryslice(object):
         """Iterate through the byte data and fill the summary_frames"""
         for i in range(self.n_summary_frames):
             dom_id = unpack('<i', file_obj.read(4))[0]
-            pmt_rates = unpack('c'*31, file_obj.read(31))
+            pmt_rates = unpack('b'*31, file_obj.read(31))
             self.summary_frames[dom_id] = pmt_rates
 
 
@@ -241,3 +241,13 @@ class DAQEvent(object):
         for i in xrange(self.n_snapshot_hits):
             dom_id, pmt_id, tdc_time, tot = unpack('<ibib', file_obj.read(10))
             self.snapshot_hits.append((dom_id, pmt_id, tdc_time, tot))
+
+    def __str__(self):
+        #string = "{class}\n{header_line}\n"
+        string = '\n'.join((
+            self.__class__.__name__,
+            "=" * len(self.__class__.__name__),
+            " Number of triggered hits: " + str(self.n_triggered_hits),
+            " Number of snapshot hits:  " + str(self.n_snapshot_hits)
+        ))
+        return string
