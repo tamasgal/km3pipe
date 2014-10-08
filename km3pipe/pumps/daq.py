@@ -81,8 +81,7 @@ class DAQPump(Pump):
 
     def process(self, blob):
         """Pump the next blob to the modules"""
-        print(self.next_frame())
-        return blob
+        return self.next_frame()
 
     def finish(self):
         """Clean everything up"""
