@@ -4,6 +4,7 @@ except ImportError:
     print("Could not import the Python module 'urwid'.")
     raise SystemExit
 
+from pipeinspector.widgets import (BlobWidget, BlobSelector)
 import random
 
 
@@ -83,6 +84,25 @@ class BlobSelector(urwid.WidgetWrap):
         return key
 
 
+class BlobWidget(urwid.Pile):
+    def __init__(self):
+        self.width = 20
+        self.size = (0,)
+        urwid.Pile.__init__(self, [urwid.Text('', wrap='clip'), 
+                                   urwid.Text('', wrap='clip'), 
+                                   urwid.Text('', wrap='clip')])
+    
+    def draw(self):
+        self.widget_list[0].set_text(".OOOOOOOOOOOOOOOOOOOO")
+        self.widget_list[1].set_text("|    '    |    '    |")
+        self.widget_list[2].set_text("0         10        20")
+
+    def render(self, size, focus):
+        self.size = size
+        self.draw()
+        return urwid.Pile.render(self, size, focus)
+
+
 def next_blob():
     pass
 
@@ -98,17 +118,10 @@ browser_header = urwid.AttrMap(urwid.Text('selected:'), 'head')
 browser_listbox = urwid.ListBox(urwid.SimpleListWalker(items))
 browser_view = urwid.Frame(urwid.AttrWrap(browser_listbox, 'body'), header=browser_header)
 
-blobs = []
-for i in range(100):
-    blobs.append((1, BlobSelector(u"\u00A4")))
-blob_columns = urwid.AttrMap(urwid.Columns(blobs[:20]), 'footer')
-blob_scale_labels = urwid.AttrMap(urwid.Text("1   5    10"), 'blob_scale')
-blob_scale = urwid.AttrMap(urwid.Text("|    .    |"), 'blob_scale')
-blobs = urwid.Pile([blob_scale_labels, blob_scale, blob_columns])
-
+blobs = BlobWidget()
 footer = urwid.Columns([urwid.Text('Info\nSecond kube'), blobs])
 
-main_frame = urwid.AttrWrap(urwid.Frame(browser_view, focus_part='footer'), 'default')
+main_frame = urwid.AttrWrap(urwid.Frame(browser_view, focus_part='body'), 'default')
 main_frame.set_header(header)
 main_frame.set_footer(footer)
 
