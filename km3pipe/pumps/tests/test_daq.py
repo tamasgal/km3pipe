@@ -118,7 +118,6 @@ class TestDAQSummaryslice(TestCase):
 
 class TestDAQEvent(TestCase):
 
-
     def setUp(self):
         TEST_FILE.seek(245, 0)
         preamble = DAQPreamble(file_obj=TEST_FILE)
