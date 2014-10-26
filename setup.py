@@ -1,12 +1,12 @@
 from setuptools import setup
 
 setup(name='km3pipe',
-      version='0.1.0',
+      version='0.1.1',
       url='http://github.com/tamasgal/km3pipe/',
       description='An analysis framework for KM3NeT',
       author='Tamas Gal',
       author_email='tgal@km3net.de',
-      packages=['km3pipe', 'km3pipe.testing', 'km3pipe.pumps'],
+      packages=['km3pipe', 'km3pipe.testing', 'km3pipe.pumps', 'pipeinspector'],
       include_package_data=True,
       platforms='any',
       install_requires=[
