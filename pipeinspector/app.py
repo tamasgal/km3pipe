@@ -1,8 +1,4 @@
-try:
-    import urwid
-except ImportError:
-    print("Could not import the Python module 'urwid'.")
-    raise SystemExit
+import urwid
 
 from pipeinspector.widgets import (BlobWidget, BlobSelector)
 import random
@@ -68,39 +64,7 @@ class ItemWidget (urwid.WidgetWrap):
         return key
 
 
-class BlobSelector(urwid.WidgetWrap):
-    def __init__ (self, description):
-        self.content = description
-        self.item = [
-            urwid.AttrWrap(urwid.Text('%s' % description), 'blob', 'focus'),
-        ]
-        w = urwid.Columns(self.item)
-        self.__super.__init__(w)
 
-    def selectable (self):
-        return True
-
-    def keypress(self, size, key):
-        return key
-
-
-class BlobWidget(urwid.Pile):
-    def __init__(self):
-        self.width = 20
-        self.size = (0,)
-        urwid.Pile.__init__(self, [urwid.Text('', wrap='clip'), 
-                                   urwid.Text('', wrap='clip'), 
-                                   urwid.Text('', wrap='clip')])
-    
-    def draw(self):
-        self.widget_list[0].set_text(".OOOOOOOOOOOOOOOOOOOO")
-        self.widget_list[1].set_text("|    '    |    '    |")
-        self.widget_list[2].set_text("0         10        20")
-
-    def render(self, size, focus):
-        self.size = size
-        self.draw()
-        return urwid.Pile.render(self, size, focus)
 
 
 def next_blob():
