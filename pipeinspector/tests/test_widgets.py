@@ -17,6 +17,7 @@ class TestBlobWidget(TestCase):
 
     def test_make_scale_labels(self):
         blobs = BlobWidget()
+        blobs.width = 25
         scale_labels = blobs._make_scale_labels(0)
         self.assertEqual("0         10        20   ", scale_labels)
         scale_labels = blobs._make_scale_labels(1)
@@ -26,6 +27,7 @@ class TestBlobWidget(TestCase):
 
     def test_make_ruler(self):
         blobs = BlobWidget()
+        blobs.width = 25
         ruler = blobs._make_ruler(0)
         self.assertEqual("|    '    |    '    |    ", ruler)
         ruler = blobs._make_ruler(1)

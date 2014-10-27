@@ -19,7 +19,7 @@ class BlobSelector(urwid.WidgetWrap):
         w = urwid.Columns(self.item)
         self.__super.__init__(w)
 
-    def selectable (self):
+    def selectable(self):
         return True
 
     def keypress(self, size, key):
@@ -27,17 +27,31 @@ class BlobSelector(urwid.WidgetWrap):
 
 
 class BlobWidget(urwid.Pile):
+    signals = ['next_blob']
     def __init__(self):
         self.width = 25
         self.size = (0,)
+        self.index = 0
         urwid.Pile.__init__(self, [urwid.Text('', wrap='clip'), 
                                    urwid.Text('', wrap='clip'), 
                                    urwid.Text('', wrap='clip')])
-    
+
+    def previous_blob(self):
+        if self.index <= 0:
+            self.index = 0
+            self.draw()
+            return
+        self.index -= 1
+        self.draw()
+
+    def next_blob(self):
+        self.index += 1
+        self.draw()
+
     def draw(self):
-        self.widget_list[0].set_text(self._make_blob_icons(123))
-        self.widget_list[1].set_text(self._make_ruler(123))
-        self.widget_list[2].set_text(self._make_scale_labels(123))
+        self.widget_list[0].set_text(self._make_blob_icons(self.index))
+        self.widget_list[1].set_text(self._make_ruler(self.index))
+        self.widget_list[2].set_text(self._make_scale_labels(self.index))
 
     def render(self, size, focus):
         self.size = size

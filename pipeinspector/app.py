@@ -1,17 +1,33 @@
 import urwid
 
 from pipeinspector.widgets import (BlobWidget, BlobSelector)
-import random
 
 
 def handle_input(input):
     if input in UI.keys['escape']:
         raise urwid.ExitMainLoop()
-    if input in UI.keys['left'] + UI.keys['right']:
-        main_frame.set_focus('footer')
-        next_blob()
+    if input in UI.keys['left']:
+        blobs.previous_blob()
+    if input in UI.keys['right']:
+        blobs.next_blob()
     if input in UI.keys['down'] + UI.keys['up']:
         main_frame.set_focus('body')
+
+
+def filter_input(keys, raw):
+    if len(keys) == 1:
+        if keys[0] in UI.keys['up']:
+            keys[0] = 'up'
+        elif keys[0] in UI.keys['down']:
+            keys[0] = 'down'
+        elif len(keys[0]) == 4 and keys[0][0] == 'mouse press':
+            if keys[0][1] == 4:
+                keys[0] = 'up'
+            elif keys[0][1] == 5:
+                keys[0] = 'down'
+    return keys
+
+
 
 
 class UI(object):
@@ -66,10 +82,6 @@ class ItemWidget (urwid.WidgetWrap):
 
 
 
-
-def next_blob():
-    pass
-
 header = urwid.AttrWrap(urwid.Text("The header!", align='center'), 'header')
 footer = urwid.AttrWrap(urwid.Text("The footer"), 'footer')
 
@@ -89,5 +101,7 @@ main_frame = urwid.AttrWrap(urwid.Frame(browser_view, focus_part='body'), 'defau
 main_frame.set_header(header)
 main_frame.set_footer(footer)
 
-loop = urwid.MainLoop(main_frame, UI.palette, unhandled_input=handle_input)
+loop = urwid.MainLoop(main_frame, UI.palette,
+                      input_filter=filter_input,
+                      unhandled_input=handle_input)
 loop.run()
