@@ -11,6 +11,7 @@ import pprint
 import math
 import sys
 
+from pipeinspector.settings import UI
 
 class BlobBrowser(urwid.Frame):
     def __init__(self):
@@ -23,6 +24,7 @@ class BlobBrowser(urwid.Frame):
         line_box = urwid.AttrMap(urwid.LineBox(self.frame), 'body')
         urwid.Frame.__init__(self, line_box)
         self.overlay = None
+        self.popup = None
 
     def load(self, blob):
         del self.listbox.body[:]
@@ -38,13 +40,23 @@ class BlobBrowser(urwid.Frame):
             return pprint.pformat(obj)
 
         content = [urwid.Text(line) for line in formatter(data).split('\n')]
-        popup_box = urwid.LineBox(urwid.ListBox(content))
-        self.body = urwid.Overlay(popup_box, self.body,
+        self.popup = urwid.LineBox(urwid.ListBox(content))
+        popup_box = urwid.LineBox(self.popup)
+        self.overlay = urwid.Overlay(popup_box, self.body,
                                   'center',
                                   ('relative', 80),
                                   'middle',
                                   ('relative', 80),)
+        self.body = self.overlay
 
+    def keypress(self, size, key):
+        input = urwid.Frame.keypress(self, size, key)
+        if self.overlay:
+            if input in UI.keys['escape']:
+                self.body = self.overlay.bottom_w
+                self.overlay = None
+        else:
+            return input
 
 
 class ItemWidget (urwid.WidgetWrap):
