@@ -9,6 +9,7 @@ from __future__ import division, absolute_import, print_function
 
 import struct
 from struct import unpack
+import pprint
 
 from km3pipe import Pump, Blob
 from km3pipe.logger import get_logger
@@ -51,13 +52,16 @@ class DAQPump(Pump):
 
         blob = Blob()
         blob[data_type] = None
+        blob['DAQPreamble'] = preamble
 
         if data_type == 'DAQSummaryslice':
             daq_frame = DAQSummaryslice(blob_file)
             blob[data_type] = daq_frame
+            blob['DAQHeader'] = daq_frame.header
         elif data_type == 'DAQEvent':
             daq_frame = DAQEvent(blob_file)
             blob[data_type] = daq_frame
+            blob['DAQHeader'] = daq_frame.header
         else:
             log.warning("Skipping DAQ frame with data type code '{0}'."
                         .format(preamble.data_type))
@@ -138,6 +142,10 @@ class DAQPreamble(object):
         byte_data = file_obj.read(self.size)
         self._parse_byte_data(byte_data)
 
+    def __repr__(self):
+        description = "Length: {0}\nDataType: {1}".format(self.length, self.data_type)
+        return description
+
 
 class DAQHeader(object):
     """Wrapper for the JDAQHeader binary format.
@@ -178,6 +186,10 @@ class DAQHeader(object):
         byte_data = file_obj.read(self.size)
         self._parse_byte_data(byte_data)
 
+    def __repr__(self):
+        description = "Run: {0}\nTime slice: {1}\nTime stamp: {2}"\
+                      .format(self.run, self.time_slice, self.time_stamp)
+        return description
 
 
 class DAQSummaryslice(object):
@@ -250,12 +262,13 @@ class DAQEvent(object):
             dom_id, pmt_id, tdc_time, tot = unpack('<ibib', file_obj.read(10))
             self.snapshot_hits.append((dom_id, pmt_id, tdc_time, tot))
 
-    def __str__(self):
-        #string = "{class}\n{header_line}\n"
+    def __repr__(self):
         string = '\n'.join((
-            self.__class__.__name__,
-            "=" * len(self.__class__.__name__),
             " Number of triggered hits: " + str(self.n_triggered_hits),
-            " Number of snapshot hits:  " + str(self.n_snapshot_hits)
+            " Number of snapshot hits: " + str(self.n_snapshot_hits)
         ))
+        string += "\nTriggered hits:\n"
+        string += pprint.pformat(self.triggered_hits)
+        string += "\nSnapshot hits:\n"
+        string += pprint.pformat(self.snapshot_hits)
         return string
