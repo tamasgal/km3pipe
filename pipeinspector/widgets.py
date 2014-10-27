@@ -7,46 +7,67 @@ GUI elements for the pipeinspector.
 from __future__ import division, absolute_import, print_function
 
 import urwid
+import pprint
 import math
-import random
+import sys
 
 
 class BlobBrowser(urwid.Frame):
     def __init__(self):
         self.items = []
 
-        header = urwid.AttrMap(urwid.Text('selected:'), 'head')
+        self.header = urwid.AttrMap(urwid.Text('Keys:'), 'head')
+
         self.listbox = urwid.ListBox(urwid.SimpleListWalker(self.items))
-        inner_frame = urwid.Frame(self.listbox, header=header)
-        line_box = urwid.AttrMap(urwid.LineBox(inner_frame), 'body')
+        self.frame = urwid.Frame(self.listbox, header=self.header)
+        line_box = urwid.AttrMap(urwid.LineBox(self.frame), 'body')
         urwid.Frame.__init__(self, line_box)
         self.overlay = None
 
-    def load_items(self):
+    def load(self, blob):
         del self.listbox.body[:]
         new_items = []
-        for i in range(random.randint(1, 5)):
-            new_items.append(ItemWidget(i, "Item {0}".format(i)))
+        for key in sorted(blob.keys()):
+            item_widget = ItemWidget(key, blob[key])
+            new_items.append(item_widget)
+            urwid.connect_signal(item_widget, 'key_selected', self.key_selected)
         self.listbox.body.extend(new_items)
+
+    def key_selected(self, data):
+        def formatter(obj):
+            return pprint.pformat(obj)
+
+        content = [urwid.Text(line) for line in formatter(data).split('\n')]
+        popup_box = urwid.LineBox(urwid.ListBox(content))
+        self.body = urwid.Overlay(popup_box, self.body,
+                                  'center',
+                                  ('relative', 80),
+                                  'middle',
+                                  ('relative', 80),)
+
 
 
 class ItemWidget (urwid.WidgetWrap):
-
-    def __init__ (self, id, description):
-        self.id = id
-        self.content = 'item %s: %s...' % (str(id), description[:25])
+    signals = ['key_selected']
+    def __init__ (self, key, data):
+        self.key = key
+        self.data = data
         self.item = [
-            ('fixed', 15, urwid.Padding(urwid.AttrWrap(
-                urwid.Text('item %s' % str(id)), 'body', 'focus'), left=2)),
-            urwid.AttrWrap(urwid.Text('%s' % description), 'body', 'focus'),
+            ('fixed', 35, urwid.Padding(
+                urwid.AttrWrap(urwid.Text(key), 'body', 'focus'), left=2)),
+            urwid.AttrWrap(urwid.Text(str(type(data))), 'body', 'focus'),
+            urwid.AttrWrap(urwid.Text(str(len(data))), 'body', 'focus'),
+            urwid.AttrWrap(urwid.Text(str(sys.getsizeof(data))), 'body', 'focus'),
         ]
         w = urwid.Columns(self.item)
         self.__super.__init__(w)
 
-    def selectable (self):
+    def selectable(self):
         return True
 
     def keypress(self, size, key):
+        if key == 'x':
+            urwid.emit_signal(self, 'key_selected', self.data)
         return key
 
 

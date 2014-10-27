@@ -1,7 +1,7 @@
 import urwid
 
 from pipeinspector.widgets import BlobBrowser, BlobWidget
-
+from km3pipe.pumps import EvtPump
 
 def handle_input(input):
     """Handle any unhandled input."""
@@ -77,12 +77,16 @@ class MainFrame(urwid.Frame):
         urwid.Frame.__init__(self, self.frame)
         self.overlay = None
 
+        self.pump = EvtPump(filename='/Users/tamasgal/Data/KM3NeT/v4/modk40_v4_numuCC_23.evt')
+
         urwid.connect_signal(self.blobs, 'blob_selected', self.blob_selected)
         self.blobs.goto_blob(0)
 
     def blob_selected(self, index):
         self.info_area.set_text("Blob: {0}".format(index))
-        self.blob_browser.load_items()
+
+        blob = self.pump.process(None)
+        self.blob_browser.load(blob)
 
     def keypress(self, size, key):
         input = urwid.Frame.keypress(self, size, key)
