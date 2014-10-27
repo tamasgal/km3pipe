@@ -10,8 +10,15 @@ def handle_input(input):
         blobs.previous_blob()
     if input in UI.keys['right']:
         blobs.next_blob()
+    if input in [key.upper() for key in UI.keys['left']]:
+        blobs.previous_blob(step=10)
+    if input in [key.upper() for key in UI.keys['right']]:
+        blobs.next_blob(step=10)
     if input in UI.keys['down'] + UI.keys['up']:
         main_frame.set_focus('body')
+    if input in UI.keys['home']:
+        blobs.goto_blob(0)
+
 
 
 def filter_input(keys, raw):
@@ -44,6 +51,7 @@ class UI(object):
         ('focus','dark red', '', 'standout'),
         ('head','light red', 'black'),
         ('blob', 'yellow', 'dark cyan'),
+        ('blob_selected', 'dark cyan', 'yellow'),
         ('blob_scale', 'dark cyan', 'black'),
         ] 
 
@@ -55,6 +63,8 @@ class UI(object):
         'right': ('right','l'),
         'up': ('up','k'),
         'down': ('down','j'),
+        'home': ('0', '^'),
+        'end': ('$'),
         'goto':('g','G'),
         'help':('?',),
         }

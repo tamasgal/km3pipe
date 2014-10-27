@@ -36,16 +36,18 @@ class BlobWidget(urwid.Pile):
                                    urwid.Text('', wrap='clip'), 
                                    urwid.Text('', wrap='clip')])
 
-    def previous_blob(self):
-        if self.index <= 0:
-            self.index = 0
-            self.draw()
-            return
-        self.index -= 1
+    def goto_blob(self, position):
+        self.index = position
         self.draw()
 
-    def next_blob(self):
-        self.index += 1
+    def previous_blob(self, step=1):
+        self.index -= step
+        if self.index <= 0:
+            self.index = 0
+        self.draw()
+
+    def next_blob(self, step=1):
+        self.index += step
         self.draw()
 
     def draw(self):
@@ -59,6 +61,10 @@ class BlobWidget(urwid.Pile):
         return urwid.Pile.render(self, size, focus)
 
     def _make_ruler(self, start):
+        if start <= 10:
+            start = 0
+        else:
+            start -= 10
         segment = "|    '    "
         repeat = int(math.ceil(self.width / len(segment)) + 1)
         ruler = segment * repeat
@@ -67,6 +73,10 @@ class BlobWidget(urwid.Pile):
         return ruler[slice_start:slice_end]
 
     def _make_scale_labels(self, start):
+        if start <= 10:
+            start = 0
+        else:
+            start -= 10
         lowest_tick = int(math.floor(start / 10) * 10)
         highest_tick = lowest_tick + self.width
         ticks_labels = ['{0:<10}'.format(i)
@@ -77,10 +87,15 @@ class BlobWidget(urwid.Pile):
         return ticks
 
     def _make_blob_icons(self, start):
-        icon = 'B'
-        if start == 0:
-            return '.' + icon * self.width
+        icon = u'\u00A4'
+        if start < 10:
+            icons = u'.' + icon * (self.width - 1)
         else:
-            return icon * self.width
+            icons = icon * self.width
+        if start > 10:
+            start = 10
+        return [('blob', icons[:start]),
+                ('blob_selected', icons[start]),
+                ('blob', icons[start + 1:])]
 
 
