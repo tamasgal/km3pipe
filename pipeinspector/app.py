@@ -3,11 +3,25 @@
 """
 PipeInspector
 
+Usage:
+    pipeinspector -i <file>
+    pipeinspector (-h | --help)
+    pipeinspector --version
+
+Options:
+    -h --help       Show this screen.
+    -i <file>       Input file.
+
 """
+from __future__ import division, absolute_import, print_function
 import urwid
 
 from pipeinspector.gui import MainFrame
 from pipeinspector.settings import UI
+from km3pipe.pumps import EvtPump
+
+__version__ = "1.0.0"
+
 
 def handle_input(input):
     """Handle any unhandled input."""
@@ -33,7 +47,11 @@ def filter_input(keys, raw):
 
 
 def main():
-    loop = urwid.MainLoop(MainFrame(), UI.palette,
+    from docopt import docopt
+    arguments = docopt(__doc__, version=__version__)
+    input_file = arguments['-i']
+    pump = EvtPump(filename=input_file)
+    loop = urwid.MainLoop(MainFrame(pump), UI.palette,
                       input_filter=filter_input,
                       unhandled_input=handle_input)
     loop.run()

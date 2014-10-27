@@ -4,7 +4,7 @@ import urwid
 
 from pipeinspector.widgets import BlobWidget, BlobBrowser
 from pipeinspector.settings import UI
-from km3pipe.pumps import EvtPump
+
 
 
 
@@ -15,7 +15,7 @@ class MainFrame(urwid.Frame):
     Represents the main GUI
 
     """
-    def __init__(self):
+    def __init__(self, pump):
         self.header = urwid.AttrWrap(urwid.Text("The header!", align='center'),
                                      'header')
 
@@ -31,7 +31,7 @@ class MainFrame(urwid.Frame):
         urwid.Frame.__init__(self, self.frame)
         self.overlay = None
 
-        self.pump = EvtPump(filename='/Users/tamasgal/Data/KM3NeT/v4/modk40_v4_numuCC_23.evt')
+        self.pump = pump
 
         urwid.connect_signal(self.blobs, 'blob_selected', self.blob_selected)
         self.blobs.goto_blob(0)
