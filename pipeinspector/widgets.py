@@ -16,6 +16,7 @@ from pipeinspector.settings import UI
 class BlobBrowser(urwid.Frame):
     def __init__(self):
         self.items = []
+        self.cursor_position = 0
 
         self.header = urwid.AttrMap(urwid.Text('Keys:'), 'head')
 
@@ -34,13 +35,14 @@ class BlobBrowser(urwid.Frame):
             new_items.append(item_widget)
             urwid.connect_signal(item_widget, 'key_selected', self.key_selected)
         self.listbox.body.extend(new_items)
+        self.listbox.set_focus(self.cursor_position)
 
     def key_selected(self, data):
         def formatter(obj):
             return pprint.pformat(obj)
 
         content = [urwid.Text(line) for line in formatter(data).split('\n')]
-        self.popup = urwid.LineBox(urwid.ListBox(content))
+        self.popup = urwid.ListBox(content)
         popup_box = urwid.LineBox(self.popup)
         self.overlay = urwid.Overlay(popup_box, self.body,
                                   'center',
@@ -51,6 +53,7 @@ class BlobBrowser(urwid.Frame):
 
     def keypress(self, size, key):
         input = urwid.Frame.keypress(self, size, key)
+        self.cursor_position = self.listbox.focus_position
         if self.overlay:
             if input in UI.keys['escape']:
                 self.body = self.overlay.bottom_w
