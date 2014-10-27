@@ -14,11 +14,14 @@ Options:
 
 """
 from __future__ import division, absolute_import, print_function
+
+import os
+
 import urwid
 
 from pipeinspector.gui import MainFrame
 from pipeinspector.settings import UI
-from km3pipe.pumps import EvtPump
+from km3pipe.pumps import EvtPump, DAQPump
 
 __version__ = "1.0.0"
 
@@ -43,15 +46,25 @@ def filter_input(keys, raw):
     return keys
 
 
-
+def get_pump(input_file):
+    extension = os.path.splitext(input_file)[1][1:]
+    if extension == 'evt':
+        pump = EvtPump(filename=input_file)
+    elif extension == 'dat':
+        pump = DAQPump(filename=input_file)
+    else:
+        raise SystemExit("No pump found for '{0}' files.".format(extension))
+    return pump
 
 
 def main():
     from docopt import docopt
     arguments = docopt(__doc__, version=__version__)
     input_file = arguments['-i']
-    pump = EvtPump(filename=input_file)
-    loop = urwid.MainLoop(MainFrame(pump), UI.palette,
+    pump = get_pump(input_file)
+    main_frame = MainFrame(pump)
+    #main_frame.header.set_text("Inspecting {0}".format(input_file))
+    loop = urwid.MainLoop(main_frame, UI.palette,
                       input_filter=filter_input,
                       unhandled_input=handle_input)
     loop.run()

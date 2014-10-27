@@ -39,7 +39,7 @@ class DAQPump(Pump):
         else:
             log.warn("No filename specified. Take care of the file handling!")
 
-    def next_frame(self):
+    def next_blob(self):
         """Get the next frame from file"""
         blob_file = self.blob_file
         try:
@@ -65,6 +65,14 @@ class DAQPump(Pump):
 
         return blob
 
+    def seek_to_frame(self, index):
+        pointer_position = self.frame_positions[index]
+        self.blob_file.seek(pointer_position, 0)
+
+    def get_blob(self, index):
+        self.seek_to_frame(index)
+        return self.next_blob()
+
     def determine_frame_positions(self):
         """Record the file pointer position of each frame"""
         self.rewind_file()
@@ -81,7 +89,7 @@ class DAQPump(Pump):
 
     def process(self, blob):
         """Pump the next blob to the modules"""
-        return self.next_frame()
+        return self.next_blob()
 
     def finish(self):
         """Clean everything up"""

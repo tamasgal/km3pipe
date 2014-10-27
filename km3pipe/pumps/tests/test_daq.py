@@ -48,25 +48,43 @@ class TestDAQPump(TestCase):
         pump.determine_frame_positions()
         self.assertListEqual([0, 133, 245, 347, 439], pump.frame_positions)
 
-    def test_next_frame_finds_correct_frame_types(self):
+    def test_next_blob_finds_correct_frame_types(self):
         pump = self.pump
-        blob = pump.next_frame()
+        blob = pump.next_blob()
         self.assertTrue(blob.has_key('DAQSummaryslice'))
-        blob = pump.next_frame()
+        blob = pump.next_blob()
         self.assertTrue(blob.has_key('DAQEvent'))
-        blob = pump.next_frame()
+        blob = pump.next_blob()
         self.assertTrue(blob.has_key('DAQEvent'))
-        blob = pump.next_frame()
+        blob = pump.next_blob()
         self.assertTrue(blob.has_key('DAQEvent'))
-        blob = pump.next_frame()
+        blob = pump.next_blob()
         self.assertTrue(blob.has_key('DAQEvent'))
 
-    def test_next_frame_raises_stop_iteration_when_eof_reached(self):
+    def test_next_blob_raises_stop_iteration_when_eof_reached(self):
         pump = self.pump
         with self.assertRaises(StopIteration):
             for i in range(6):
-                pump.next_frame()
+                pump.next_blob()
 
+    def test_seek_to_frame(self):
+        pump = self.pump
+        pump.determine_frame_positions()
+        pump.seek_to_frame(2)
+        self.assertEqual(245, pump.blob_file.tell())
+
+    def test_next_blob_returns_correct_frame_after_seek_to_frame(self):
+        pump = self.pump
+        pump.determine_frame_positions()
+        pump.seek_to_frame(1)
+        blob = pump.next_blob()
+        self.assertEqual(4, blob['DAQEvent'].n_snapshot_hits)
+
+    def test_get_blob(self):
+        pump = self.pump
+        pump.determine_frame_positions()
+        blob = pump.get_blob(2)
+        self.assertEqual(3, blob['DAQEvent'].n_snapshot_hits)
 
 class TestDAQPreamble(TestCase):
 

@@ -71,7 +71,7 @@ class ItemWidget (urwid.WidgetWrap):
             ('fixed', 35, urwid.Padding(
                 urwid.AttrWrap(urwid.Text(key), 'body', 'focus'), left=2)),
             urwid.AttrWrap(urwid.Text(str(type(data))), 'body', 'focus'),
-            urwid.AttrWrap(urwid.Text(str(len(data))), 'body', 'focus'),
+            #urwid.AttrWrap(urwid.Text(str(len(data))), 'body', 'focus'),
             urwid.AttrWrap(urwid.Text(str(sys.getsizeof(data))), 'body', 'focus'),
         ]
         w = urwid.Columns(self.item)
