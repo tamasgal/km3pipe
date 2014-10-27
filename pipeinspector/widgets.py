@@ -8,19 +8,26 @@ from __future__ import division, absolute_import, print_function
 
 import urwid
 import math
+import random
 
 
-class BlobFrame(urwid.Frame):
+class BlobBrowser(urwid.Frame):
     def __init__(self):
-        items = []
-        for i in range(100):
-            items.append(ItemWidget(i, "Item {0}".format(i)))
-        browser_header = urwid.AttrMap(urwid.Text('selected:'), 'head')
-        browser_listbox = urwid.ListBox(urwid.SimpleListWalker(items))
-        inner_frame = urwid.Frame(browser_listbox, header=browser_header)
+        self.items = []
+
+        header = urwid.AttrMap(urwid.Text('selected:'), 'head')
+        self.listbox = urwid.ListBox(urwid.SimpleListWalker(self.items))
+        inner_frame = urwid.Frame(self.listbox, header=header)
         line_box = urwid.AttrMap(urwid.LineBox(inner_frame), 'body')
         urwid.Frame.__init__(self, line_box)
         self.overlay = None
+
+    def load_items(self):
+        del self.listbox.body[:]
+        new_items = []
+        for i in range(random.randint(1, 5)):
+            new_items.append(ItemWidget(i, "Item {0}".format(i)))
+        self.listbox.body.extend(new_items)
 
 
 class ItemWidget (urwid.WidgetWrap):
