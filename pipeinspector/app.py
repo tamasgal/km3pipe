@@ -1,23 +1,11 @@
 import urwid
 
-from pipeinspector.widgets import (BlobWidget, BlobSelector)
+from pipeinspector.widgets import BlobFrame, BlobWidget
 
 
 def handle_input(input):
     if input in UI.keys['escape']:
-        raise urwid.ExitMainLoop()
-    if input in UI.keys['left']:
-        blobs.previous_blob()
-    if input in UI.keys['right']:
-        blobs.next_blob()
-    if input in [key.upper() for key in UI.keys['left']]:
-        blobs.previous_blob(step=10)
-    if input in [key.upper() for key in UI.keys['right']]:
-        blobs.next_blob(step=10)
-    if input in UI.keys['down'] + UI.keys['up']:
-        main_frame.set_focus('body')
-    if input in UI.keys['home']:
-        blobs.goto_blob(0)
+        raise urwid.ExitMainLoop
 
 
 
@@ -47,71 +35,70 @@ class UI(object):
         ('highlight', fg+',standout', bg),
         ('header', 'white', 'dark cyan'),
         ('footer', 'light gray', 'dark blue'),
-        ('body','dark cyan', '', 'standout'),
-        ('focus','dark red', '', 'standout'),
-        ('head','light red', 'black'),
+        ('body', 'dark cyan', '', 'standout'),
+        ('focus', 'dark red', '', 'standout'),
+        ('head', 'light red', 'black'),
         ('blob', 'yellow', 'dark cyan'),
         ('blob_selected', 'dark cyan', 'yellow'),
         ('blob_scale', 'dark cyan', 'black'),
-        ] 
+        ]
 
     keys = {
-        'select': ('return','enter'),
-        'inspect': ('x','X'),
-        'escape': ('esc','q','Q'),
-        'left': ('left','h'),
-        'right': ('right','l'),
-        'up': ('up','k'),
-        'down': ('down','j'),
+        'select': ('return', 'enter'),
+        'inspect': ('x', 'X'),
+        'escape': ('esc', 'q', 'Q'),
+        'left': ('left', 'h'),
+        'right': ('right', 'l'),
+        'up': ('up', 'k'),
+        'down': ('down', 'j'),
         'home': ('0', '^'),
-        'end': ('$'),
-        'goto':('g','G'),
-        'help':('?',),
+        'end': ('$',),
+        'goto': ('g', 'G'),
+        'help': ('?',),
         }
 
 
-class ItemWidget (urwid.WidgetWrap):
 
-    def __init__ (self, id, description):
-        self.id = id
-        self.content = 'item %s: %s...' % (str(id), description[:25])
-        self.item = [
-            ('fixed', 15, urwid.Padding(urwid.AttrWrap(
-                urwid.Text('item %s' % str(id)), 'body', 'focus'), left=2)),
-            urwid.AttrWrap(urwid.Text('%s' % description), 'body', 'focus'),
-        ]
-        w = urwid.Columns(self.item)
-        self.__super.__init__(w)
 
-    def selectable (self):
-        return True
+
+class MainFrame(urwid.Frame):
+    def __init__(self):
+        self.header = urwid.AttrWrap(urwid.Text("The header!", align='center'), 'header')
+        self.blobs = BlobWidget()
+        self.blob_frame = BlobFrame()
+        self.footer = urwid.Columns([urwid.Text('Info\nSecond kube'), self.blobs])
+
+        self.frame = urwid.AttrWrap(urwid.Frame(self.blob_frame,
+                                                header=self.header,
+                                                footer=self.footer), 'default')
+        urwid.Frame.__init__(self, self.frame)
+        self.overlay = None
 
     def keypress(self, size, key):
-        return key
+        input = urwid.Frame.keypress(self, size, key)
+        if input is None:
+            return
+        if input in UI.keys['left']:
+            self.blobs.previous_blob()
+        elif input in UI.keys['right']:
+            self.blobs.next_blob()
+        elif input in [key.upper() for key in UI.keys['left']]:
+            self.blobs.previous_blob(step=10)
+        elif input in [key.upper() for key in UI.keys['right']]:
+            self.blobs.next_blob(step=10)
+        elif input in UI.keys['home']:
+            self.blobs.goto_blob(0)
+        else:
+            return self.body.keypress(size, input)
 
 
 
 
-header = urwid.AttrWrap(urwid.Text("The header!", align='center'), 'header')
-footer = urwid.AttrWrap(urwid.Text("The footer"), 'footer')
-
-
-items = []
-for i in range(100):
-    items.append(ItemWidget(i, "Item {0}".format(i)))
-
-browser_header = urwid.AttrMap(urwid.Text('selected:'), 'head')
-browser_listbox = urwid.ListBox(urwid.SimpleListWalker(items))
-browser_view = urwid.Frame(urwid.AttrWrap(browser_listbox, 'body'), header=browser_header)
-
-blobs = BlobWidget()
-footer = urwid.Columns([urwid.Text('Info\nSecond kube'), blobs])
-
-main_frame = urwid.AttrWrap(urwid.Frame(browser_view, focus_part='body'), 'default')
-main_frame.set_header(header)
-main_frame.set_footer(footer)
-
-loop = urwid.MainLoop(main_frame, UI.palette,
+def main():
+    loop = urwid.MainLoop(MainFrame(), UI.palette,
                       input_filter=filter_input,
                       unhandled_input=handle_input)
-loop.run()
+    loop.run()
+
+if __name__ == '__main__':
+    main()

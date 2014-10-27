@@ -10,16 +10,33 @@ import urwid
 import math
 
 
-class BlobSelector(urwid.WidgetWrap):
-    def __init__ (self, description):
-        self.content = description
+class BlobFrame(urwid.Frame):
+    def __init__(self):
+        items = []
+        for i in range(100):
+            items.append(ItemWidget(i, "Item {0}".format(i)))
+        browser_header = urwid.AttrMap(urwid.Text('selected:'), 'head')
+        browser_listbox = urwid.ListBox(urwid.SimpleListWalker(items))
+        inner_frame = urwid.Frame(browser_listbox, header=browser_header)
+        line_box = urwid.AttrMap(urwid.LineBox(inner_frame), 'body')
+        urwid.Frame.__init__(self, line_box)
+        self.overlay = None
+
+
+class ItemWidget (urwid.WidgetWrap):
+
+    def __init__ (self, id, description):
+        self.id = id
+        self.content = 'item %s: %s...' % (str(id), description[:25])
         self.item = [
-            urwid.AttrWrap(urwid.Text('%s' % description), 'blob', 'focus'),
+            ('fixed', 15, urwid.Padding(urwid.AttrWrap(
+                urwid.Text('item %s' % str(id)), 'body', 'focus'), left=2)),
+            urwid.AttrWrap(urwid.Text('%s' % description), 'body', 'focus'),
         ]
         w = urwid.Columns(self.item)
         self.__super.__init__(w)
 
-    def selectable(self):
+    def selectable (self):
         return True
 
     def keypress(self, size, key):
@@ -27,9 +44,9 @@ class BlobSelector(urwid.WidgetWrap):
 
 
 class BlobWidget(urwid.Pile):
-    signals = ['next_blob']
+    signals = ['blob_selected']
     def __init__(self):
-        self.width = 25
+        self.width = 50
         self.size = (0,)
         self.index = 0
         urwid.Pile.__init__(self, [urwid.Text('', wrap='clip'), 
@@ -38,16 +55,19 @@ class BlobWidget(urwid.Pile):
 
     def goto_blob(self, position):
         self.index = position
+        self._emit_blob_selected()
         self.draw()
 
     def previous_blob(self, step=1):
         self.index -= step
         if self.index <= 0:
             self.index = 0
+        self._emit_blob_selected()
         self.draw()
 
     def next_blob(self, step=1):
         self.index += step
+        self._emit_blob_selected()
         self.draw()
 
     def draw(self):
@@ -59,6 +79,9 @@ class BlobWidget(urwid.Pile):
         self.size = size
         self.draw()
         return urwid.Pile.render(self, size, focus)
+
+    def _emit_blob_selected(self):
+        urwid.emit_signal(self, 'blob_selected', self.index)
 
     def _make_ruler(self, start):
         if start <= 10:
