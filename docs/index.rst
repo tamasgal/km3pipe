@@ -15,7 +15,7 @@ Contents:
    help_pumps
    examples
    pipeinspector
-      api/modules
+   api/modules
 
 .. include:: ../README.rst
 
