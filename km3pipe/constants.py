@@ -1,5 +1,6 @@
 # coding=utf-8
 # Filename: constants.py
+# pylint: disable=C0103
 """
 The constants used in KM3Pipe.
 

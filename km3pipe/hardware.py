@@ -53,7 +53,8 @@ class Detector(object):
                 for i in range(n_pmts):
                     raw_pmt_info = lines.pop(0)
                     pmt_info = raw_pmt_info.split()
-                    pmt_id, x, y, z, dx, dy, dz, t0, rest = unpack_nfirst(pmt_info, 8)
+                    pmt_id, x, y, z, rest = unpack_nfirst(pmt_info, 4)
+                    dx, dy, dz, t0, rest = unpack_nfirst(rest, 4)
                     if rest:
                         log.warn("Unexpected PMT values: '{0}'".format(rest))
                     pmt_id = int(pmt_id)

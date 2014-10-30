@@ -70,10 +70,12 @@ class DAQPump(Pump):
         return blob
 
     def seek_to_frame(self, index):
+        """Move file pointer to the frame with given index."""
         pointer_position = self.frame_positions[index]
         self.blob_file.seek(pointer_position, 0)
 
     def get_blob(self, index):
+        """Return blob at given index."""
         self.seek_to_frame(index)
         return self.next_blob()
 
@@ -143,7 +145,8 @@ class DAQPreamble(object):
         self._parse_byte_data(byte_data)
 
     def __repr__(self):
-        description = "Length: {0}\nDataType: {1}".format(self.length, self.data_type)
+        description = "Length: {0}\nDataType: {1}"\
+            .format(self.length, self.data_type)
         return description
 
 
