@@ -10,9 +10,9 @@ setup(name='km3pipe',
       include_package_data=True,
       platforms='any',
       install_requires=[
-          'numpy',
-          'urwid',
-          'docopt',
+          #'numpy',
+          #'urwid',
+          #'docopt',
       ],
       entry_points={
           'console_scripts': [
