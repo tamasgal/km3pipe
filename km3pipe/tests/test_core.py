@@ -3,7 +3,7 @@ from __future__ import division, absolute_import, print_function
 __author__ = 'tamasgal'
 
 from km3pipe.testing import *
-from km3pipe.core import Pipeline, Module, Blob
+from km3pipe.core import Pipeline, Module, Pump, Blob
 
 
 class TestPipeline(TestCase):
@@ -83,6 +83,19 @@ class TestModule(TestCase):
     def test_finish(self):
         module = Module()
         module.finish()
+
+
+class TestPump(TestCase):
+    """Tests for the pump"""
+    
+    def test_rewind_file(self):
+        pump = Pump()
+        test_file = StringIO("Some content")
+        pump.blob_file = test_file
+        pump.blob_file.read(1)
+        self.assertEqual(1, pump.blob_file.tell())
+        pump.rewind_file()
+        self.assertEqual(0, pump.blob_file.tell())
 
 
 class TestBlob(TestCase):
