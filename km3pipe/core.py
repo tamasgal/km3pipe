@@ -19,18 +19,17 @@ log = get_logger(__name__, logging.INFO)  # pylint: disable=C0103
 class Pipeline(object):
     """The holy pipeline which holds everything together"""
 
-    def __init__(self, blob=None, cycles=None):
+    def __init__(self, blob=None):
         self.modules = []
         self.blob = blob or Blob()
-        self.cycles = cycles
-        self.cycle_count = 0
+        self._cycle_count = 0
 
     def attach(self, module_class, name, **kwargs):
         """Attach a module to the pipeline system"""
         log.info("Attaching module '{0}'".format(name))
         self.modules.append(module_class(name=name, **kwargs))
 
-    def drain(self):
+    def drain(self, cycles=None):
         """Activate the pump and let the flow go.
 
         This will call the process() method on each attached module until
@@ -40,14 +39,15 @@ class Pipeline(object):
         number of cycles has reached that limit.
 
         """
+        log.info("No cycle count set, the pipeline may be drained forever.")
         try:
             while True:
-                self.cycle_count += 1
-                log.debug("Pumping blob #{0}".format(self.cycle_count))
+                self._cycle_count += 1
+                log.debug("Pumping blob #{0}".format(self._cycle_count))
                 for module in self.modules:
                     log.debug("Processing {0} ".format(module.name))
                     self.blob = module.process(self.blob)
-                if self.cycles and self.cycle_count >= self.cycles:
+                if cycles and self._cycle_count >= cycles:
                     raise StopIteration
         except StopIteration:
             log.info("Nothing left to pump through.")

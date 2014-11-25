@@ -9,35 +9,35 @@ from km3pipe.core import Pipeline, Module, Pump, Blob
 class TestPipeline(TestCase):
     """Tests for the main pipeline"""
 
+    def setUp(self):
+        self.pl = Pipeline()
+
     def test_attach(self):
-        pl = Pipeline()
-        pl.attach(Module, 'module1')
-        pl.attach(Module, 'module2')
-        self.assertEqual('module1', pl.modules[0].name)
-        self.assertEqual('module2', pl.modules[1].name)
+        self.pl.attach(Module, 'module1')
+        self.pl.attach(Module, 'module2')
+        self.assertEqual('module1', self.pl.modules[0].name)
+        self.assertEqual('module2', self.pl.modules[1].name)
 
     def test_drain_calls_process_method_on_each_attached_module(self):
-        pl = Pipeline(blob=1, cycles=1)
+        pl = Pipeline(blob=1)
         pl.attach(Module, 'module1')
         pl.attach(Module, 'module2')
         for module in pl.modules:
             module.process = MagicMock(return_value=1)
-        pl.drain()
+        pl.drain(1)
         for module in pl.modules:
             module.process.assert_called_once_with(1)
 
     def test_finish(self):
-        pl = Pipeline()
-        pl.finish()
+        self.pl.finish()
 
     def test_drain_calls_finish_on_each_attached_module(self):
-        pl = Pipeline(cycles=4)
-        pl.attach(Module, 'module1')
-        pl.attach(Module, 'module2')
-        for module in pl.modules:
+        self.pl.attach(Module, 'module1')
+        self.pl.attach(Module, 'module2')
+        for module in self.pl.modules:
             module.finish = MagicMock()
-        pl.drain()
-        for module in pl.modules:
+        self.pl.drain(4)
+        for module in self.pl.modules:
             module.finish.assert_called_once_with()
 
 
@@ -87,7 +87,7 @@ class TestModule(TestCase):
 
 class TestPump(TestCase):
     """Tests for the pump"""
-    
+
     def test_rewind_file(self):
         pump = Pump()
         test_file = StringIO("Some content")
