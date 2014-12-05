@@ -13,7 +13,7 @@ deal with data I/O and allows easy access to the stored information.
     :align: center
 
 It is currently in early alpha status, but already able to handle the
-DAQ binary data format.
+DAQ binary data, ROOT and Aanet-ROOT format.
 
 If you installed KM3Pipe via `pip`, you'll be able to launch `pipeinspector`
 directly from the terminal::
