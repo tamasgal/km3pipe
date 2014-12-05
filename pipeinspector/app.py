@@ -21,7 +21,7 @@ import urwid
 
 from pipeinspector.gui import MainFrame
 from pipeinspector.settings import UI
-from km3pipe.pumps import EvtPump, DAQPump
+from km3pipe.pumps import EvtPump, DAQPump, AanetPump
 
 __version__ = "1.0.0"
 
@@ -52,6 +52,8 @@ def get_pump(input_file):
         pump = EvtPump(filename=input_file)
     elif extension == 'dat':
         pump = DAQPump(filename=input_file)
+    elif extension == 'root':
+        pump = AanetPump(filename=input_file)
     else:
         raise SystemExit("No pump found for '{0}' files.".format(extension))
     return pump
