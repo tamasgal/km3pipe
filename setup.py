@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='km3pipe',
-      version='0.1.4',
+      version='0.2.0',
       url='http://github.com/tamasgal/km3pipe/',
       description='An analysis framework for KM3NeT',
       author='Tamas Gal',
@@ -10,9 +10,9 @@ setup(name='km3pipe',
       include_package_data=True,
       platforms='any',
       install_requires=[
-          #'numpy',
-          #'urwid',
-          #'docopt',
+          'numpy',
+          'urwid',
+          'docopt',
       ],
       entry_points={
           'console_scripts': [
