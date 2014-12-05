@@ -39,6 +39,11 @@ class BlobBrowser(urwid.Frame):
 
     def key_selected(self, data):
         def formatter(obj):
+            if hasattr(obj, 'size'):
+                output = ""
+                for obj in data:
+                    output += str(obj) + "\n"
+                return output
             return pprint.pformat(obj)
 
         content = [urwid.Text(line) for line in formatter(data).split('\n')]
@@ -92,8 +97,8 @@ class BlobWidget(urwid.Pile):
         self.width = 50
         self.size = (0,)
         self.index = 0
-        urwid.Pile.__init__(self, [urwid.Text('', wrap='clip'), 
-                                   urwid.Text('', wrap='clip'), 
+        urwid.Pile.__init__(self, [urwid.Text('', wrap='clip'),
+                                   urwid.Text('', wrap='clip'),
                                    urwid.Text('', wrap='clip')])
 
     def goto_blob(self, position):
