@@ -12,10 +12,9 @@ from struct import unpack
 import pprint
 
 from km3pipe import Pump, Blob
-from km3pipe.logger import get_logger
+from km3pipe.logger import logging
 
-
-log = get_logger(__name__)  # pylint: disable=C0103
+log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 DATA_TYPES = {
     101: 'DAQSuperFrame',
@@ -91,7 +90,7 @@ class DAQPump(Pump):
         except struct.error:
             pass
         self.rewind_file()
-        print("Found {0} frames.".format(len(self.frame_positions)))
+        log.info("Found {0} frames.".format(len(self.frame_positions)))
 
     def process(self, blob):
         """Pump the next blob to the modules"""

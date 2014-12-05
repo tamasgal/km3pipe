@@ -10,9 +10,9 @@ from __future__ import division, absolute_import, print_function
 __author__ = 'tamasgal'
 
 from km3pipe.tools import unpack_nfirst, split
-from km3pipe.logger import get_logger
+from km3pipe.logger import logging
 
-log = get_logger(__name__)  # pylint: disable=C0103
+log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 class Detector(object):
