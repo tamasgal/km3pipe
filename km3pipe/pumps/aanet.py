@@ -8,10 +8,9 @@ Pump for the Aanet data format.
 from __future__ import division, absolute_import, print_function
 
 from km3pipe import Pump, Blob
-from km3pipe.logger import get_logger
+from km3pipe.logger import logging
 
-
-log = get_logger(__name__)  # pylint: disable=C0103
+log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 class AanetPump(Pump):
@@ -20,3 +19,14 @@ class AanetPump(Pump):
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         import aa
+        from ROOT import TFile, Evt
+        self.filename = self.get('filename')
+        self.rootfile = TFile(self.filename)
+        self.evt = Evt()
+        self.E = self.rootfile.Get('E')
+        self.E.SetBranchAddress('Evt', self.evt)
+
+    def get_blob(self, index):
+        self.E.GetEntry(index)
+        return {'Evt': self.evt,
+                'hits': self.evt.hits,}
