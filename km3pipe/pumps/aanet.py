@@ -21,6 +21,7 @@ class AanetPump(Pump):
         import aa
         from ROOT import TFile, Evt
         self.filename = self.get('filename')
+        self.index = 0
         self.rootfile = TFile(self.filename)
         self.evt = Evt()
         self.E = self.rootfile.Get('E')
@@ -30,3 +31,8 @@ class AanetPump(Pump):
         self.E.GetEntry(index)
         return {'Evt': self.evt,
                 'hits': self.evt.hits,}
+
+    def process(self, blob):
+        self.E.GetEntry(self.index)
+        self.index += 1
+        return {'hits': self.evt.hits, 'a_hit': self.evt.hits[0]}
