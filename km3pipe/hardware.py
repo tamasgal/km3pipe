@@ -34,7 +34,7 @@ class Detector(object):
         file_ext = os.path.splitext(filename)[1][1:]
         if not file_ext == 'detx':
             raise NotImplementedError('Only the detx format is supported.')
-        self.det_file = self.open_file(filename)
+        self.open_file(filename)
         self.parse_header()
         self.parse_doms()
         self.det_file.close()
