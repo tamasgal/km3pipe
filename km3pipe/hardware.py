@@ -73,10 +73,10 @@ class Detector(object):
                     if rest:
                         log.warn("Unexpected PMT values: '{0}'".format(rest))
                     pmt_id = int(pmt_id)
-                    pmt_pos = [float(i) for i in (x, y, z)]
-                    pmt_dir = [float(i) for i in (dx, dy, dz)]
+                    pmt_pos = [float(n) for n in (x, y, z)]
+                    pmt_dir = [float(n) for n in (dx, dy, dz)]
                     t0 = float(t0)
-                    pmt_entry = (pmt_id,) + pmt_pos + pmt_dir + (t0,)
+                    pmt_entry = tuple([pmt_id] + pmt_pos + pmt_dir + [t0])
                     self.pmts[(line_id, floor_id, i)] = pmt_entry
         except IndexError:
             pass
