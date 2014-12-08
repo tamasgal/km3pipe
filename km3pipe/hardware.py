@@ -48,7 +48,10 @@ class Detector(object):
                 line = lines.pop(0)
                 if not line:
                     continue
-                dom_id, line_id, floor_id, n_pmts = split(line, int)
+                try:
+                    dom_id, line_id, floor_id, n_pmts = split(line, int)
+                except ValueError:
+                    continue
                 self.doms[dom_id] = (line_id, floor_id, n_pmts)
                 for i in range(n_pmts):
                     raw_pmt_info = lines.pop(0)
