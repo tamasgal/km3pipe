@@ -9,6 +9,8 @@ from __future__ import division, absolute_import, print_function
 
 __author__ = 'tamasgal'
 
+import os
+
 from km3pipe.tools import unpack_nfirst, split
 from km3pipe.logger import logging
 
@@ -25,11 +27,21 @@ class Detector(object):
         self.pmts = {}
 
         if filename:
-            self.open_file(filename)
+            self.init_from_file(filename)
+
+    def init_from_file(self, filename):
+        """Create detector from file."""
+        file_ext = os.path.splitext(input_file)[1][1:]
+        if not file_ext == 'detx':
+            raise NotImplementedError('Only the detx format is supported.')
+        self.det_file = self.open_file(filename)
+        self.parse_header()
+        self.parse_doms()
+        self.det_file.close()
 
     def open_file(self, filename):
         """Create the file handler"""
-        pass
+        self.det_file = open(filename, 'r')
 
     def parse_header(self):
         """Extract information from the header of the detector file"""
