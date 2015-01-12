@@ -12,11 +12,11 @@ deal with data I/O and allows easy access to the stored information.
     :width: 700
     :align: center
 
-It is currently in early alpha status, but already able to handle the
+It is currently in an early alpha status, but already able to handle the
 DAQ binary data, ROOT and Aanet-ROOT format.
 
 If you installed KM3Pipe via `pip`, you'll be able to launch `pipeinspector`
 directly from the terminal::
 
-    pipeinspector -i /path/to/data/file.dat
+    pipeinspector -i /path/to/data/file.ext
 
