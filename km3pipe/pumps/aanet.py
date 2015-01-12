@@ -21,6 +21,8 @@ class AanetPump(Pump):
         import aa
         from ROOT import TFile, Evt
         self.filename = self.get('filename')
+        if not self.filename:
+            raise ValueError("No filename defined")
         self.index = 0
         self.rootfile = TFile(self.filename)
         self.evt = Evt()
