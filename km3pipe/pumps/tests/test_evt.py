@@ -75,7 +75,16 @@ class TestParser(TestCase):
         self.assertEqual(88, self.pump.event_offsets[0])
         self.temp_file.close()
 
-    def test_get_blob_return(self):
+    def test_rebuild_offsets(self):
+        self.temp_file = StringIO(self.valid_evt_header)
+        self.pump = EvtPump()
+        self.pump.blob_file = self.temp_file
+        self.pump.extract_header()
+        self.pump._rebuild_offsets()
+        self.assertListEqual([88, 233, 700], self.pump.event_offsets)
+
+
+    def test_get_blob_returns_correct_event_information(self):
         self.temp_file = StringIO(self.valid_evt_header)
         self.pump = EvtPump()
         self.pump.blob_file = self.temp_file

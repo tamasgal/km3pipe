@@ -52,6 +52,15 @@ class EvtPump(Pump):
                 return raw_header
         raise ValueError("Incomplete header, no 'end_event' tag found!")
 
+    def _rebuild_offsets(self):
+        self.blob_file.seek(0, 0)
+        self.event_offsets = []
+        for line in self.blob_file:
+            line = line.strip()
+            if line.startswith('end_event:'):
+                self._record_offset()
+        self.event_offsets.pop()  # get rid of the last one
+
     def _record_offset(self):
         """Stores the current file pointer position"""
         offset = self.blob_file.tell()
