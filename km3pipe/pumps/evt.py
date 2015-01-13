@@ -35,6 +35,7 @@ class EvtPump(Pump):
     def prepare_blobs(self):
         """Populate the blobs"""
         self.raw_header = self.extract_header()
+        self._rebuild_offsets()
         self.blobs = self.blob_generator()
 
     def extract_header(self):
@@ -68,6 +69,7 @@ class EvtPump(Pump):
 
     def get_blob(self, index):
         """Return a blob with the event at the given index"""
+        self.blob_file.seek(self.event_offsets[index], 0)
         blob = self._create_blob()
         return blob
 

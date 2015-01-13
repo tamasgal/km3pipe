@@ -96,3 +96,16 @@ class TestParser(TestCase):
         self.assertListEqual([[1.0, 44675.0, 1.0, 1170.59, 5.0, 2.0, 1.0, 1170.59]],
                              blob['hit'])
         self.temp_file.close()
+
+    def test_get_blob_returns_correct_events(self):
+        self.temp_file = StringIO(self.valid_evt_header)
+        self.pump = EvtPump()
+        self.pump.blob_file = self.temp_file
+        self.pump.prepare_blobs()
+        blob = self.pump.get_blob(0)
+        self.assertListEqual(['12', '1'], blob['start_event'])
+        blob = self.pump.get_blob(2)
+        self.assertListEqual(['14', '1'], blob['start_event'])
+        blob = self.pump.get_blob(1)
+        self.assertListEqual(['13', '1'], blob['start_event'])
+        self.temp_file.close()
