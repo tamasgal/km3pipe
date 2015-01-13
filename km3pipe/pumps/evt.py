@@ -57,12 +57,38 @@ class EvtPump(Pump):
         offset = self.blob_file.tell()
         self.event_offsets.append(offset)
 
+    def get_blob(self, index):
+        """Return a blob with the event at the given index"""
+        blob = self._create_blob()
+        return blob
+
+    def _create_blob(self):
+        blob = None
+        for line in self.blob_file:
+            line = line.strip()
+            if line.startswith('end_event:') and blob:
+                blob['raw_header'] = self.raw_header
+                return blob
+            if line.startswith('start_event:'):
+                blob = {}
+                tag, value = line.split(':')
+                blob[tag] = value.split()
+                continue
+            if blob:
+                tag, value = line.split(':')
+                if tag in ('neutrino', 'track_in', 'hit'):
+                    values = [float(x) for x in value.split()]
+                    blob.setdefault(tag, []).append(values)
+                else:
+                    blob[tag] = value.split()
+
     def blob_generator(self):
         """Create a generator object which extracts events from an EVT file."""
         blob = None
         for line in self.blob_file:
             line = line.strip()
             if line.startswith('end_event:') and blob:
+                blob['raw_header'] = self.raw_header
                 yield blob
                 blob = None
                 continue

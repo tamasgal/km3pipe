@@ -14,9 +14,25 @@ class TestParser(TestCase):
             "cut_nu: 0.100E+03 0.100E+09-0.100E+01 0.100E+01",
             "spectrum: -1.40",
             "end_event:",
-            "start_event:",
+            "start_event: 12 1",
             "track_in: 1 -389.951 213.427 516 -0.204562 -0.60399 -0.770293 9.092 0 5 40.998",
             "hit: 1 44675 1 1170.59 5 2 1 1170.59",
+            "end_event:",
+            "start_event: 13 1",
+            "track_in:  1 272.695 -105.613 516 -0.425451 -0.370522 -0.825654 2431.47 0 5 -1380",
+            "track_in:  2 272.348 -106.292 516 -0.425451 -0.370522 -0.825654 24670.7 1.33 5 -1484",
+            "track_in:  3 279.47 -134.999 516 -0.425451 -0.370522 -0.825654 164.586 26.7 5 601.939",
+            "hit: 1 20140 1 1140.06 5 1 1 1140.06",
+            "hit: 2 20159 1 1177.14 5 1 1 1177.14",
+            "hit: 3 20164 1 1178.19 5 1 1 1178.19",
+            "hit: 4 20170 1 1177.23 5 1 1 1177.23",
+            "hit: 5 20171 2 1177.25 5 1 2 1177.25",
+            "end_event:",
+            "start_event: 14 1",
+            "track_in:  1 40.256 -639.888 516 0.185998 0.476123 -0.859483 10016.1 0 5 -1668",
+            "hit: 1 33788 1 2202.81 5 1 1 2202.81",
+            "hit: 2 33801 1 2248.95 5 1 1 2248.95",
+            "hit: 3 33814 1 2249.2 5 1 1 2249.2",
             "end_event:"
         ))
         self.corrupt_evt_header = "foo"
@@ -59,3 +75,19 @@ class TestParser(TestCase):
         self.assertEqual(88, self.pump.event_offsets[0])
         self.temp_file.close()
 
+    def test_get_blob(self):
+        self.pump = EvtPump()
+        self.pump.get_blob(0)
+
+    def test_get_blob_returns_correct_event_and_header(self):
+        self.temp_file = StringIO(self.valid_evt_header)
+        self.pump = EvtPump()
+        self.pump.blob_file = self.temp_file
+        self.pump.prepare_blobs()
+        blob = self.pump.get_blob(0)
+        self.assertTrue(blob.has_key('raw_header'))
+        self.assertEqual(['1'], blob['raw_header']['start_run'])
+        self.assertListEqual(['12', '1'], blob['start_event'])
+        self.assertListEqual([[1.0, 44675.0, 1.0, 1170.59, 5.0, 2.0, 1.0, 1170.59]],
+                             blob['hit'])
+        self.temp_file.close()
