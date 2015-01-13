@@ -39,6 +39,18 @@ class TestParser(TestCase):
             self.pump.extract_header()
         self.temp_file.close()
 
+    def test_record_offset_saves_correct_offset(self):
+        self.temp_file = StringIO('a'*42)
+        self.pump = EvtPump()
+        self.pump.blob_file = self.temp_file
+        offsets = [1, 4, 9, 12, 23]
+        for offset in offsets:
+            self.pump.blob_file.seek(0, 0)
+            self.pump.blob_file.seek(offset, 0)
+            self.pump._record_offset()
+        self.assertListEqual(offsets, self.pump.event_offsets)
+        self.temp_file.close()
+
     def test_event_offset_is_at_first_event_after_parsing_header(self):
         self.temp_file = StringIO(self.valid_evt_header)
         self.pump = EvtPump()
@@ -46,3 +58,4 @@ class TestParser(TestCase):
         raw_header = self.pump.extract_header()
         self.assertEqual(88, self.pump.event_offsets[0])
         self.temp_file.close()
+
