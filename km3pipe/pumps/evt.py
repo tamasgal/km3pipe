@@ -24,6 +24,7 @@ class EvtPump(Pump):
 
         self.blobs = None
         self.raw_header = None
+        self.event_offsets = []
 
         if self.filename:
             self.open_file(self.filename)
@@ -47,8 +48,13 @@ class EvtPump(Pump):
                 continue
             raw_header[tag] = value.split()
             if line.startswith('end_event:'):
+                self._record_offset()
                 return raw_header
         raise ValueError("Incomplete header, no 'end_event' tag found!")
+
+    def _record_offset(self):
+        offset = self.blob_file.tell()
+        self.event_offsets.append(offset)
 
     def blob_generator(self):
         """Create a generator object which extracts events from an EVT file."""
