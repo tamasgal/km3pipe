@@ -24,7 +24,7 @@ class Pipeline(object):
         self.blob = blob or Blob()
         self._cycle_count = 0
 
-    def attach(self, module_class, name, **kwargs):
+    def attach(self, module_class, name='Unnamed', **kwargs):
         """Attach a module to the pipeline system"""
         log.info("Attaching module '{0}'".format(name))
         self.modules.append(module_class(name=name, **kwargs))
