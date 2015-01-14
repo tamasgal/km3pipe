@@ -58,7 +58,7 @@ class EvtPump(Pump):
         blob = self._create_blob()
         return blob
 
-    def process(self, blob):
+    def process(self, blob=None):
         """Pump the next blob to the modules"""
         blob = self.get_blob(self.index)
         self.index += 1
