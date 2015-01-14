@@ -109,3 +109,28 @@ class TestParser(TestCase):
         blob = self.pump.get_blob(1)
         self.assertListEqual(['13', '1'], blob['start_event'])
         self.temp_file.close()
+
+    def test_process_returns_correct_blobs(self):
+        self.temp_file = StringIO(self.valid_evt_header)
+        self.pump = EvtPump()
+        self.pump.blob_file = self.temp_file
+        self.pump.prepare_blobs()
+        blob = self.pump.process()
+        self.assertListEqual(['12', '1'], blob['start_event'])
+        blob = self.pump.process()
+        self.assertListEqual(['13', '1'], blob['start_event'])
+        blob = self.pump.process()
+        self.assertListEqual(['14', '1'], blob['start_event'])
+        self.temp_file.close()
+
+    def test_process_raises_stop_iteration_if_eof_reached(self):
+        self.temp_file = StringIO(self.valid_evt_header)
+        self.pump = EvtPump()
+        self.pump.blob_file = self.temp_file
+        self.pump.prepare_blobs()
+        self.pump.process()
+        self.pump.process()
+        self.pump.process()
+        with self.assertRaises(StopIteration):
+            self.pump.process()
+        self.temp_file.close()

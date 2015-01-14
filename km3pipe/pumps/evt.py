@@ -60,7 +60,10 @@ class EvtPump(Pump):
 
     def process(self, blob=None):
         """Pump the next blob to the modules"""
-        blob = self.get_blob(self.index)
+        try:
+            blob = self.get_blob(self.index)
+        except IndexError:
+            raise StopIteration
         self.index += 1
         return blob
 
