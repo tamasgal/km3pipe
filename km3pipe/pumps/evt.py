@@ -93,7 +93,7 @@ class EvtPump(Pump):
                 continue
             if blob:
                 tag, value = line.split(':')
-                if tag in ('neutrino', 'track_in', 'hit'):
+                if tag in ('neutrino', 'track_in', 'hit', 'hit_raw'):
                     values = [float(x) for x in value.split()]
                     blob.setdefault(tag, []).append(values)
                 else:
