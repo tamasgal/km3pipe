@@ -35,6 +35,7 @@ class StatusBar(Module):
         return blob
 
     def finish(self):
+        """Display some basic statistics like elapsed time"""
         elapsed_time = self.start - datetime.datetime.now()
         print("\n" + '='*42)
         print("Processed {0} blobs in {1} s."
