@@ -40,7 +40,8 @@ class EvtPump(Pump):
     def extract_header(self):
         """Create a dictionary with the EVT header information"""
         raw_header = {}
-        for line in self.blob_file:
+        #for line in self.blob_file:
+        for line in iter(self.blob_file.readline, ''):
             line = line.strip()
             try:
                 tag, value = line.split(':')
@@ -70,7 +71,7 @@ class EvtPump(Pump):
     def _rebuild_offsets(self):
         self.blob_file.seek(0, 0)
         self.event_offsets = []
-        for line in self.blob_file:
+        for line in iter(self.blob_file.readline, ''):
             line = line.strip()
             if line.startswith('end_event:'):
                 self._record_offset()
