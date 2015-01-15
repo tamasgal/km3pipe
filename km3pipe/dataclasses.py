@@ -9,6 +9,8 @@ from __future__ import division, absolute_import, print_function
 
 __all__ = ('Point', 'Position', 'Direction', 'Hit')
 
+from collections import namedtuple
+
 import numpy as np
 
 
@@ -95,7 +97,5 @@ class Direction(Point):
         self._normalise()
 
 
-class Hit(object):
-    def __init__(self, time=None, is_noise=False):
-        self.time = time
-        self.is_noise = is_noise
+Hit = namedtuple('Hit', 'id pmt_id time is_noise')
+Hit.__new__.__defaults__ = (None, None, None, None)

@@ -69,13 +69,26 @@ class TestDirection(TestCase):
 class TestHit(TestCase):
 
     def test_hit_init(self):
-        hit = Hit(time=1, is_noise=True)
-        self.assertEqual(1, hit.time)
+        hit = Hit(1, 2, 3, True)
+        self.assertEqual(1, hit.id)
+        self.assertEqual(2, hit.pmt_id)
+        self.assertEqual(3, hit.time)
         self.assertTrue(hit.is_noise)
 
-    def test_hit_set_attributes(self):
+    def test_hit_default_values(self):
         hit = Hit()
-        hit.time = 10
-        self.assertEqual(10, hit.time)
-        hit.is_noise = True
+        self.assertIsNone(hit.id)
+        self.assertIsNone(hit.pmt_id)
+        self.assertIsNone(hit.time)
+        self.assertIsNone(hit.is_noise)
+
+    def test_hit_default_values_are_set_if_others_are_given(self):
+        hit = Hit(is_noise=True)
         self.assertTrue(hit.is_noise)
+        self.assertIsNone(hit.id)
+        self.assertIsNone(hit.time)
+
+    def test_hit_attributes_are_immutable(self):
+        hit = Hit(1, True)
+        with self.assertRaises(AttributeError):
+            hit.time = 10
