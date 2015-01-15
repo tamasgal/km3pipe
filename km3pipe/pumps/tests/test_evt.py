@@ -6,7 +6,7 @@ from km3pipe.testing import *
 from km3pipe.pumps import EvtPump
 
 
-class TestParser(TestCase):
+class TestEvtParser(TestCase):
 
     def setUp(self):
         self.valid_evt_header = "\n".join((
@@ -134,3 +134,4 @@ class TestParser(TestCase):
         with self.assertRaises(StopIteration):
             self.pump.process()
         self.temp_file.close()
+
