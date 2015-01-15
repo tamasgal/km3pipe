@@ -69,6 +69,7 @@ class EvtPump(Pump):
         return blob
 
     def _rebuild_offsets(self):
+        print("Building event file offsets, this may take a minute.")
         self.blob_file.seek(0, 0)
         self.event_offsets = []
         for line in iter(self.blob_file.readline, ''):
