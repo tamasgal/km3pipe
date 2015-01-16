@@ -96,6 +96,5 @@ class Direction(Point):
         self[2] = value
         self._normalise()
 
-
-Hit = namedtuple('Hit', 'id pmt_id time is_noise')
-Hit.__new__.__defaults__ = (None, None, None, None)
+Hit = namedtuple('Hit', 'id pmt_id pe time type n_photons track_in c_time')
+Hit.__new__.__defaults__ = (None, None, None, None, None, None, None, None)

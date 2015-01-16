@@ -69,22 +69,24 @@ class TestDirection(TestCase):
 class TestHit(TestCase):
 
     def test_hit_init(self):
-        hit = Hit(1, 2, 3, True)
+        hit = Hit(1, 2, 3, 4, 5, 6, 7, 8)
         self.assertEqual(1, hit.id)
         self.assertEqual(2, hit.pmt_id)
-        self.assertEqual(3, hit.time)
-        self.assertTrue(hit.is_noise)
+        self.assertEqual(3, hit.pe)
+        self.assertEqual(4, hit.time)
+        self.assertEqual(5, hit.type)
+        self.assertEqual(6, hit.n_photons)
+        self.assertEqual(7, hit.track_in)
+        self.assertEqual(8, hit.c_time)
 
     def test_hit_default_values(self):
         hit = Hit()
         self.assertIsNone(hit.id)
         self.assertIsNone(hit.pmt_id)
         self.assertIsNone(hit.time)
-        self.assertIsNone(hit.is_noise)
 
     def test_hit_default_values_are_set_if_others_are_given(self):
-        hit = Hit(is_noise=True)
-        self.assertTrue(hit.is_noise)
+        hit = Hit(track_in=1)
         self.assertIsNone(hit.id)
         self.assertIsNone(hit.time)
 
