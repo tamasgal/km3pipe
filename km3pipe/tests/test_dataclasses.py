@@ -9,7 +9,7 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 
 from km3pipe.testing import *
-from km3pipe.dataclasses import Position, Direction, Hit
+from km3pipe.dataclasses import Position, Direction, Hit, RawHit
 
 
 class TestPosition(TestCase):
@@ -94,3 +94,29 @@ class TestHit(TestCase):
         hit = Hit(1, True)
         with self.assertRaises(AttributeError):
             hit.time = 10
+
+
+class TestRawHit(TestCase):
+
+    def test_rawhit_init(self):
+        raw_hit = RawHit(1, 2, 3, 4)
+        self.assertEqual(1, raw_hit.id)
+        self.assertEqual(2, raw_hit.pmt_id)
+        self.assertEqual(3, raw_hit.tot)
+        self.assertEqual(4, raw_hit.time)
+
+    def test_hit_default_values(self):
+        raw_hit = RawHit()
+        self.assertIsNone(raw_hit.id)
+        self.assertIsNone(raw_hit.pmt_id)
+        self.assertIsNone(raw_hit.time)
+
+    def test_hit_default_values_are_set_if_others_are_given(self):
+        raw_hit = RawHit(pmt_id=1)
+        self.assertIsNone(raw_hit.id)
+        self.assertIsNone(raw_hit.time)
+
+    def test_hit_attributes_are_immutable(self):
+        raw_hit = RawHit(1, True)
+        with self.assertRaises(AttributeError):
+            raw_hit.time = 10
