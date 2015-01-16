@@ -24,6 +24,7 @@ class EvtPump(Pump):
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename')
+        self.cache_enabled = self.get('cache_enabled') or False
 
         self.raw_header = None
         self.event_offsets = []
@@ -38,7 +39,8 @@ class EvtPump(Pump):
     def prepare_blobs(self):
         """Populate the blobs"""
         self.raw_header = self.extract_header()
-        self._rebuild_offsets()
+        if self.cache_enabled:
+            self._rebuild_offsets()
 
     def extract_header(self):
         """Create a dictionary with the EVT header information"""
@@ -64,12 +66,19 @@ class EvtPump(Pump):
 
     def process(self, blob=None):
         """Pump the next blob to the modules"""
-        try:
-            blob = self.get_blob(self.index)
-        except IndexError:
-            raise StopIteration
-        self.index += 1
-        return blob
+        if self.cache_enabled:
+            try:
+                blob = self.get_blob(self.index)
+            except IndexError:
+                raise StopIteration
+            self.index += 1
+            return blob
+        else:
+            blob = self._create_blob()
+            if blob:
+                return blob
+            else:
+                raise StopIteration
 
     def _rebuild_offsets(self):
         print("Building event file offsets, this may take a minute.")

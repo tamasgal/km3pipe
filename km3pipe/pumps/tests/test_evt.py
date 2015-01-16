@@ -86,7 +86,7 @@ class TestEvtParser(TestCase):
 
     def test_get_blob_returns_correct_event_information(self):
         self.temp_file = StringIO(self.valid_evt_header)
-        self.pump = EvtPump()
+        self.pump = EvtPump(cache_enabled=True)
         self.pump.blob_file = self.temp_file
         self.pump.prepare_blobs()
         blob = self.pump.get_blob(0)
@@ -99,7 +99,7 @@ class TestEvtParser(TestCase):
 
     def test_get_blob_returns_correct_events(self):
         self.temp_file = StringIO(self.valid_evt_header)
-        self.pump = EvtPump()
+        self.pump = EvtPump(cache_enabled=True)
         self.pump.blob_file = self.temp_file
         self.pump.prepare_blobs()
         blob = self.pump.get_blob(0)
