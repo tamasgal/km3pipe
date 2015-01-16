@@ -83,6 +83,19 @@ class TestEvtParser(TestCase):
         self.pump._rebuild_offsets()
         self.assertListEqual([88, 233, 700], self.pump.event_offsets)
 
+    def test_cache_enabled_triggers_rebuild_offsets(self):
+        self.temp_file = StringIO(self.valid_evt_header)
+        self.pump = EvtPump(cache_enabled=True)
+        self.pump.blob_file = self.temp_file
+        self.pump.prepare_blobs()
+        self.assertEqual(3, len(self.pump.event_offsets))
+
+    def test_cache_disabled_doesnt_trigger_rebuild_offsets(self):
+        self.temp_file = StringIO(self.valid_evt_header)
+        self.pump = EvtPump(cache_enabled=False)
+        self.pump.blob_file = self.temp_file
+        self.pump.prepare_blobs()
+        self.assertEqual(1, len(self.pump.event_offsets))
 
     def test_get_blob_returns_correct_event_information(self):
         self.temp_file = StringIO(self.valid_evt_header)
