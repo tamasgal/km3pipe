@@ -49,7 +49,7 @@ def filter_input(keys, raw):
 def get_pump(input_file):
     extension = os.path.splitext(input_file)[1][1:]
     if extension == 'evt':
-        pump = EvtPump(filename=input_file)
+        pump = EvtPump(filename=input_file, cache_enabled=True)
     elif extension == 'dat':
         pump = DAQPump(filename=input_file)
     elif extension == 'root':
