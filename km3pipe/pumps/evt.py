@@ -9,7 +9,10 @@ from __future__ import division, absolute_import, print_function
 
 __author__ = 'tamasgal'
 
+import sys
+
 from km3pipe import Pump
+from km3pipe.dataclasses import Hit, RawHit
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -76,8 +79,12 @@ class EvtPump(Pump):
             line = line.strip()
             if line.startswith('end_event:'):
                 self._record_offset()
+                if len(self.event_offsets) % 100 == 0:
+                    print('.', end='')
+                    sys.stdout.flush()
         self.event_offsets.pop()  # get rid of the last one
         self.blob_file.seek(self.event_offsets[0], 0)
+        print("\n{0} events indexed.".format(len(self.event_offsets)))
 
     def _record_offset(self):
         """Stores the current file pointer position"""
@@ -101,6 +108,10 @@ class EvtPump(Pump):
                 if tag in ('neutrino', 'track_in', 'hit', 'hit_raw'):
                     values = [float(x) for x in value.split()]
                     blob.setdefault(tag, []).append(values)
+                    if tag == 'hit':
+                        blob.setdefault("EvtHits", []).append(Hit(*values))
+                    if tag == "hit_raw":
+                        blob.setdefault("EvtRawHits", []).append(RawHit(*values))
                 else:
                     blob[tag] = value.split()
 
