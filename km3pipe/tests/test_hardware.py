@@ -56,3 +56,12 @@ class TestDetector(TestCase):
         self.assertTupleEqual((7, 1.1, 1.2, 3.3, -1.1,  0.2,  0.3, 70),
                               self.det.pmts[(1, 3, 0)])
 
+    def test_pmtid2omkey(self):
+        pmtid2omkey = self.det.pmtid2omkey
+        self.assertEqual((1, 13, 12), tuple(pmtid2omkey(168)))
+        self.assertEqual((1, 12, 18), tuple(pmtid2omkey(205)))
+        self.assertEqual((1, 11, 22), tuple(pmtid2omkey(240)))
+        self.assertEqual((4, 11, 2), tuple(pmtid2omkey(1894)))
+        self.assertEqual((9, 18, 0), tuple(pmtid2omkey(4465)))
+        self.assertEqual((95, 7, 16), tuple(pmtid2omkey(52810)))
+        self.assertEqual((95, 4, 13), tuple(pmtid2omkey(52900)))

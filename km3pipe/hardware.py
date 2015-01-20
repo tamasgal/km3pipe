@@ -81,5 +81,12 @@ class Detector(object):
         except IndexError:
             pass
 
+    def pmtid2omkey(self, pmt_id, first_pmt_id=1, oms_per_line=18, pmts_per_om=31):
+        """Convert (consecutive) raw PMT IDs to Multi-OMKeys."""
+        pmts_per_line = oms_per_line * pmts_per_om
+        string = ((pmt_id - first_pmt_id) // pmts_per_line) + 1
+        om = oms_per_line - (pmt_id - first_pmt_id) % pmts_per_line // pmts_per_om
+        pmt = (pmt_id - first_pmt_id) % pmts_per_om
+        return string, om, pmt
 
 
