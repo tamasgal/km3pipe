@@ -65,3 +65,13 @@ class TestDetector(TestCase):
         self.assertEqual((9, 18, 0), tuple(pmtid2omkey(4465)))
         self.assertEqual((95, 7, 16), tuple(pmtid2omkey(52810)))
         self.assertEqual((95, 4, 13), tuple(pmtid2omkey(52900)))
+
+    def test_pmtid2omkey_handles_floats(self):
+        pmtid2omkey = self.det.pmtid2omkey
+        self.assertEqual((1, 13, 12), tuple(pmtid2omkey(168.0)))
+        self.assertEqual((1, 12, 18), tuple(pmtid2omkey(205.0)))
+        self.assertEqual((1, 11, 22), tuple(pmtid2omkey(240.0)))
+        self.assertEqual((4, 11, 2), tuple(pmtid2omkey(1894.0)))
+        self.assertEqual((9, 18, 0), tuple(pmtid2omkey(4465.0)))
+        self.assertEqual((95, 7, 16), tuple(pmtid2omkey(52810.0)))
+        self.assertEqual((95, 4, 13), tuple(pmtid2omkey(52900.0)))
