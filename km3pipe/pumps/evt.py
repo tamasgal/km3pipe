@@ -60,7 +60,7 @@ class EvtPump(Pump):
 
     def get_blob(self, index):
         """Return a blob with the event at the given index"""
-        if index > len(self.event_offsets):
+        if index > len(self.event_offsets) - 1:
             self._cache_offsets(index, verbose=False)
         self.blob_file.seek(self.event_offsets[index], 0)
         blob = self._create_blob()
@@ -71,19 +71,12 @@ class EvtPump(Pump):
 
     def process(self, blob=None):
         """Pump the next blob to the modules"""
-        if self.cache_enabled:
-            try:
-                blob = self.get_blob(self.index)
-            except IndexError:
-                raise StopIteration
-            self.index += 1
-            return blob
-        else:
-            blob = self._create_blob()
-            if blob:
-                return blob
-            else:
-                raise StopIteration
+        try:
+            blob = self.get_blob(self.index)
+        except IndexError:
+            raise StopIteration
+        self.index += 1
+        return blob
 
     def _cache_offsets(self, up_to_index=None, verbose=True):
         if not up_to_index:
