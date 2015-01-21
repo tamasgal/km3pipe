@@ -40,7 +40,7 @@ class EvtPump(Pump):
         """Populate the blobs"""
         self.raw_header = self.extract_header()
         if self.cache_enabled:
-            self._rebuild_offsets()
+            self._cache_offsets()
 
     def extract_header(self):
         """Create a dictionary with the EVT header information"""
@@ -60,9 +60,14 @@ class EvtPump(Pump):
 
     def get_blob(self, index):
         """Return a blob with the event at the given index"""
+        if index > len(self.event_offsets):
+            self._cache_offsets(index, verbose=False)
         self.blob_file.seek(self.event_offsets[index], 0)
         blob = self._create_blob()
-        return blob
+        if blob is None:
+            raise IndexError
+        else:
+            return blob
 
     def process(self, blob=None):
         """Pump the next blob to the modules"""
@@ -80,19 +85,26 @@ class EvtPump(Pump):
             else:
                 raise StopIteration
 
-    def _rebuild_offsets(self):
-        print("Building event file offsets, this may take a minute.")
-        self.blob_file.seek(0, 0)
-        self.event_offsets = []
+    def _cache_offsets(self, up_to_index=None, verbose=True):
+        if not up_to_index:
+            if verbose:
+                print("Caching event file offsets, this may take a minute.")
+            self.blob_file.seek(0, 0)
+            self.event_offsets = []
+        else:
+            self.blob_file.seek(self.event_offsets[-1], 0)
         for line in iter(self.blob_file.readline, ''):
             line = line.strip()
             if line.startswith('end_event:'):
                 self._record_offset()
                 if len(self.event_offsets) % 100 == 0:
-                    print('.', end='')
+                    if verbose:
+                        print('.', end='')
                     sys.stdout.flush()
-        self.event_offsets.pop()  # get rid of the last one
-        self.blob_file.seek(self.event_offsets[0], 0)
+            if up_to_index and len(self.event_offsets) >= up_to_index + 1:
+                return
+        self.event_offsets.pop()  # get rid of the last entry
+        #self.blob_file.seek(self.event_offsets[0], 0)
         print("\n{0} events indexed.".format(len(self.event_offsets)))
 
     def _record_offset(self):
@@ -101,6 +113,7 @@ class EvtPump(Pump):
         self.event_offsets.append(offset)
 
     def _create_blob(self):
+        """Parse the next event from the current file position"""
         blob = None
         for line in self.blob_file:
             line = line.strip()

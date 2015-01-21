@@ -80,7 +80,7 @@ class TestEvtParser(TestCase):
         self.pump = EvtPump()
         self.pump.blob_file = self.temp_file
         self.pump.extract_header()
-        self.pump._rebuild_offsets()
+        self.pump._cache_offsets()
         self.assertListEqual([88, 233, 700], self.pump.event_offsets)
 
     def test_cache_enabled_triggers_rebuild_offsets(self):
@@ -90,12 +90,30 @@ class TestEvtParser(TestCase):
         self.pump.prepare_blobs()
         self.assertEqual(3, len(self.pump.event_offsets))
 
-    def test_cache_disabled_doesnt_trigger_rebuild_offsets(self):
+    def test_cache_disabled_doesnt_trigger_cache_offsets(self):
         self.temp_file = StringIO(self.valid_evt_header)
         self.pump = EvtPump(cache_enabled=False)
         self.pump.blob_file = self.temp_file
         self.pump.prepare_blobs()
         self.assertEqual(1, len(self.pump.event_offsets))
+
+    def test_get_blob_triggers_cache_offsets_if_cache_disabled_and_asking_for_not_indexed_event(self):
+        self.temp_file = StringIO(self.valid_evt_header)
+        self.pump = EvtPump(cache_enabled=False)
+        self.pump.blob_file = self.temp_file
+        self.pump.prepare_blobs()
+        self.assertEqual(1, len(self.pump.event_offsets))
+        blob = self.pump.get_blob(2)
+        self.assertListEqual(['14', '1'], blob['start_event'])
+        self.assertEqual(3, len(self.pump.event_offsets))
+
+    def test_get_blob_raises_index_error_for_wrong_index(self):
+        self.temp_file = StringIO(self.valid_evt_header)
+        self.pump = EvtPump(cache_enabled=False)
+        self.pump.blob_file = self.temp_file
+        self.pump.prepare_blobs()
+        with self.assertRaises(IndexError):
+            self.pump.get_blob(23)
 
     def test_get_blob_returns_correct_event_information(self):
         self.temp_file = StringIO(self.valid_evt_header)
