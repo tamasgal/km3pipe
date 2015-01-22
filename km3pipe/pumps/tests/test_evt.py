@@ -37,70 +37,56 @@ class TestEvtParser(TestCase):
         ))
         self.corrupt_evt_header = "foo"
 
-    def test_parse_header(self):
-        self.temp_file = StringIO(self.valid_evt_header)
         self.pump = EvtPump()
-        self.pump.blob_file = self.temp_file
+        self.pump.blob_file = StringIO(self.valid_evt_header)
+
+    def tearDown(self):
+        self.pump.blob_file.close()
+
+    def test_parse_header(self):
         raw_header = self.pump.extract_header()
         self.assertEqual(['1'], raw_header['start_run'])
         self.assertAlmostEqual(-1.4, float(raw_header['spectrum'][0]))
         self.assertAlmostEqual(1, float(raw_header['cut_nu'][2]))
-        self.temp_file.close()
 
     def test_incomplete_header_raises_value_error(self):
-        self.temp_file = StringIO(self.corrupt_evt_header)
-        self.pump = EvtPump()
-        self.pump.blob_file = self.temp_file
+        temp_file = StringIO(self.corrupt_evt_header)
+        pump = EvtPump()
+        pump.blob_file = temp_file
         with self.assertRaises(ValueError):
-            self.pump.extract_header()
-        self.temp_file.close()
+            pump.extract_header()
+        temp_file.close()
 
     def test_record_offset_saves_correct_offset(self):
-        self.temp_file = StringIO('a'*42)
-        self.pump = EvtPump()
-        self.pump.blob_file = self.temp_file
+        self.pump.blob_file = StringIO('a'*42)
         offsets = [1, 4, 9, 12, 23]
         for offset in offsets:
             self.pump.blob_file.seek(0, 0)
             self.pump.blob_file.seek(offset, 0)
             self.pump._record_offset()
         self.assertListEqual(offsets, self.pump.event_offsets)
-        self.temp_file.close()
 
     def test_event_offset_is_at_first_event_after_parsing_header(self):
-        self.temp_file = StringIO(self.valid_evt_header)
-        self.pump = EvtPump()
-        self.pump.blob_file = self.temp_file
         raw_header = self.pump.extract_header()
         self.assertEqual(88, self.pump.event_offsets[0])
-        self.temp_file.close()
 
     def test_rebuild_offsets(self):
-        self.temp_file = StringIO(self.valid_evt_header)
-        self.pump = EvtPump()
-        self.pump.blob_file = self.temp_file
         self.pump.extract_header()
         self.pump._cache_offsets()
         self.assertListEqual([88, 233, 700], self.pump.event_offsets)
 
     def test_cache_enabled_triggers_rebuild_offsets(self):
-        self.temp_file = StringIO(self.valid_evt_header)
-        self.pump = EvtPump(cache_enabled=True)
-        self.pump.blob_file = self.temp_file
+        self.pump.cache_enabled = True
         self.pump.prepare_blobs()
         self.assertEqual(3, len(self.pump.event_offsets))
 
     def test_cache_disabled_doesnt_trigger_cache_offsets(self):
-        self.temp_file = StringIO(self.valid_evt_header)
-        self.pump = EvtPump(cache_enabled=False)
-        self.pump.blob_file = self.temp_file
+        self.pump.cache_enabled = False
         self.pump.prepare_blobs()
         self.assertEqual(1, len(self.pump.event_offsets))
 
     def test_get_blob_triggers_cache_offsets_if_cache_disabled_and_asking_for_not_indexed_event(self):
-        self.temp_file = StringIO(self.valid_evt_header)
-        self.pump = EvtPump(cache_enabled=False)
-        self.pump.blob_file = self.temp_file
+        self.pump.cache_enabled = False
         self.pump.prepare_blobs()
         self.assertEqual(1, len(self.pump.event_offsets))
         blob = self.pump.get_blob(2)
@@ -108,17 +94,11 @@ class TestEvtParser(TestCase):
         self.assertEqual(3, len(self.pump.event_offsets))
 
     def test_get_blob_raises_index_error_for_wrong_index(self):
-        self.temp_file = StringIO(self.valid_evt_header)
-        self.pump = EvtPump(cache_enabled=False)
-        self.pump.blob_file = self.temp_file
         self.pump.prepare_blobs()
         with self.assertRaises(IndexError):
             self.pump.get_blob(23)
 
     def test_get_blob_returns_correct_event_information(self):
-        self.temp_file = StringIO(self.valid_evt_header)
-        self.pump = EvtPump(cache_enabled=True)
-        self.pump.blob_file = self.temp_file
         self.pump.prepare_blobs()
         blob = self.pump.get_blob(0)
         self.assertTrue(blob.has_key('raw_header'))
@@ -126,12 +106,8 @@ class TestEvtParser(TestCase):
         self.assertListEqual(['12', '1'], blob['start_event'])
         self.assertListEqual([[1.0, 44675.0, 1.0, 1170.59, 5.0, 2.0, 1.0, 1170.59]],
                              blob['hit'])
-        self.temp_file.close()
 
     def test_get_blob_returns_correct_events(self):
-        self.temp_file = StringIO(self.valid_evt_header)
-        self.pump = EvtPump(cache_enabled=True)
-        self.pump.blob_file = self.temp_file
         self.pump.prepare_blobs()
         blob = self.pump.get_blob(0)
         self.assertListEqual(['12', '1'], blob['start_event'])
@@ -139,12 +115,8 @@ class TestEvtParser(TestCase):
         self.assertListEqual(['14', '1'], blob['start_event'])
         blob = self.pump.get_blob(1)
         self.assertListEqual(['13', '1'], blob['start_event'])
-        self.temp_file.close()
 
     def test_process_returns_correct_blobs(self):
-        self.temp_file = StringIO(self.valid_evt_header)
-        self.pump = EvtPump()
-        self.pump.blob_file = self.temp_file
         self.pump.prepare_blobs()
         blob = self.pump.process()
         self.assertListEqual(['12', '1'], blob['start_event'])
@@ -152,17 +124,12 @@ class TestEvtParser(TestCase):
         self.assertListEqual(['13', '1'], blob['start_event'])
         blob = self.pump.process()
         self.assertListEqual(['14', '1'], blob['start_event'])
-        self.temp_file.close()
 
     def test_process_raises_stop_iteration_if_eof_reached(self):
-        self.temp_file = StringIO(self.valid_evt_header)
-        self.pump = EvtPump()
-        self.pump.blob_file = self.temp_file
         self.pump.prepare_blobs()
         self.pump.process()
         self.pump.process()
         self.pump.process()
         with self.assertRaises(StopIteration):
             self.pump.process()
-        self.temp_file.close()
 
