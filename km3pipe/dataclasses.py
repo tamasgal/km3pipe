@@ -96,6 +96,20 @@ class Direction(Point):
         self[2] = value
         self._normalise()
 
+    def __str__(self):
+        return "({0}, {1}, {2})".format(self.x, self.y, self.z)
+
+class PMT(object):
+    def __init__(self, pmt_id, pos, dir, t0):
+        self.pmt_id = pmt_id
+        self.pos = Point(pos)
+        self.dir = Direction(dir)
+        self.t0 = t0
+
+    def __str__(self):
+        return "PMT id:{0} pos: {1} dir: dir{2} t0: {3}"\
+               .format(self.pmt_id, self.pos, self.dir, self.t0)
+
 Hit = namedtuple('Hit', 'id pmt_id pe time type n_photons track_in c_time')
 Hit.__new__.__defaults__ = (None, None, None, None, None, None, None, None)
 

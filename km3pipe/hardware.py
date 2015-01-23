@@ -11,6 +11,7 @@ __author__ = 'tamasgal'
 
 import os
 
+from km3pipe.dataclasses import PMT
 from km3pipe.tools import unpack_nfirst, split
 from km3pipe.logger import logging
 
@@ -25,6 +26,7 @@ class Detector(object):
         self.n_doms = None
         self.doms = {}
         self.pmts = {}
+        self._pmts = {}
 
         if filename:
             self.init_from_file(filename)
@@ -78,8 +80,12 @@ class Detector(object):
                     t0 = float(t0)
                     pmt_entry = tuple([pmt_id] + pmt_pos + pmt_dir + [t0])
                     self.pmts[(line_id, floor_id, i)] = pmt_entry
+                    self._pmts[pmt_id] = PMT(pmt_id, pmt_pos, pmt_dir, t0)
         except IndexError:
             pass
+
+    def pmt_with_id(self, pmt_id):
+        return self._pmts[pmt_id]
 
     def pmtid2omkey(self, pmt_id, first_pmt_id=1, oms_per_line=18, pmts_per_om=31):
         """Convert (consecutive) raw PMT IDs to Multi-OMKeys."""
