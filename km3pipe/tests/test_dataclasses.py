@@ -136,3 +136,12 @@ class TestRawHit(TestCase):
         hit2 = RawHit(time=1, pmt_id=2, tot=20)
         merged_hit = hit1 + hit2
         self.assertEqual(2, merged_hit.pmt_id)
+
+    def test_hit_additions_works_with_multiple_hits(self):
+        hit1 = RawHit(time=2, pmt_id=1, tot=10)
+        hit2 = RawHit(time=1, pmt_id=2, tot=20)
+        hit3 = RawHit(time=1, pmt_id=3, tot=30)
+        merged_hit = hit1 + hit2 + hit3
+        self.assertEqual(2, merged_hit.pmt_id)
+        self.assertEqual(60, merged_hit.tot)
+        self.assertEqual(1, merged_hit.time)
