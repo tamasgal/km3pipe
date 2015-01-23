@@ -99,5 +99,12 @@ class Direction(Point):
 Hit = namedtuple('Hit', 'id pmt_id pe time type n_photons track_in c_time')
 Hit.__new__.__defaults__ = (None, None, None, None, None, None, None, None)
 
+def __add_raw_hit__(self, other):
+    """Add two hits by adding the ToT and preserve time and pmt_id
+    of the earlier one."""
+    first = self if self.time <= other.time else other
+    return RawHit(None, first.pmt_id, self.tot+other.tot, first.time)
+
 RawHit = namedtuple('RawHit', 'id pmt_id tot time')
 RawHit.__new__.__defaults__ = (None, None, None, None)
+RawHit.__add__ = __add_raw_hit__

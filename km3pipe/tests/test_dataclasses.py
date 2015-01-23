@@ -96,6 +96,8 @@ class TestHit(TestCase):
             hit.time = 10
 
 
+
+
 class TestRawHit(TestCase):
 
     def test_rawhit_init(self):
@@ -120,3 +122,17 @@ class TestRawHit(TestCase):
         raw_hit = RawHit(1, True)
         with self.assertRaises(AttributeError):
             raw_hit.time = 10
+
+    def test_hit_addition_remains_time_and_pmt_id_and_adds_tot(self):
+        hit1 = RawHit(time=1, pmt_id=1, tot=10)
+        hit2 = RawHit(time=2, pmt_id=2, tot=20)
+        merged_hit = hit1 + hit2
+        self.assertEqual(1, merged_hit.time)
+        self.assertEqual(1, merged_hit.pmt_id)
+        self.assertEqual(30, merged_hit.tot)
+
+    def test_hit_addition_picks_correct_time_if_second_hit_is_the_earlier_one(self):
+        hit1 = RawHit(time=2, pmt_id=1, tot=10)
+        hit2 = RawHit(time=1, pmt_id=2, tot=20)
+        merged_hit = hit1 + hit2
+        self.assertEqual(2, merged_hit.pmt_id)
