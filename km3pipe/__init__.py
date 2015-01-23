@@ -7,7 +7,7 @@ The extemporary KM3NeT analysis framework.
 from __future__ import division, absolute_import, print_function
 
 from km3pipe.__version__ import version, version_info
-from km3pipe.core import Pipeline, Module, Pump, Blob
+from km3pipe.core import Pipeline, Module, Pump, Blob, Geometry
 
 __author__ = "Tamas Gal"
 __copyright__ = ("Copyright 2015, Tamas Gal and the KM3NeT collaboration "
