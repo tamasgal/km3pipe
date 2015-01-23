@@ -10,14 +10,19 @@ from __future__ import division, absolute_import, print_function
 import datetime
 
 from km3pipe import Module
-from km3pipe.hardware import Detector
 
 
 class HitCounter(Module):
     """Prints the number of hits and raw hits in an Evt file"""
     def process(self, blob):
-        print("Number of hits: {0}".format(len(blob['hit'])))
-        print("Number of raw hits: {0}".format(len(blob['hit_raw'])))
+        try:
+            print("Number of hits: {0}".format(len(blob['hit'])))
+        except KeyError:
+            pass
+        try:
+            print("Number of raw hits: {0}".format(len(blob['hit_raw'])))
+        except KeyError:
+            pass
         return blob
 
 
@@ -43,13 +48,3 @@ class StatusBar(Module):
               .format(self.blob_index, elapsed_time.microseconds / 1e6))
 
 
-class Geometry(Module):
-    """A very simple, preliminary Module which gives access to the geometry"""
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
-        filename = self.get('filename')
-        self.detector = Detector(filename)
-
-    def process(self, blob):
-        blob['Detector'] = self.detector
-        return blob
