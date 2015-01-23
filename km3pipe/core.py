@@ -9,6 +9,7 @@ from __future__ import division, absolute_import, print_function
 
 __author__ = 'tamasgal'
 
+from km3pipe.hardware import Detector
 
 import logging
 from km3pipe.logger import logging
@@ -21,13 +22,19 @@ class Pipeline(object):
 
     def __init__(self, blob=None):
         self.modules = []
+        self.geometry = None
         self.blob = blob or Blob()
         self._cycle_count = 0
 
     def attach(self, module_class, name='Unnamed', **kwargs):
         """Attach a module to the pipeline system"""
+        module = module_class(name=name, **kwargs)
         log.info("Attaching module '{0}'".format(name))
-        self.modules.append(module_class(name=name, **kwargs))
+        try:
+            module.get_detector()
+            self.geometry = module
+        except AttributeError:
+            self.modules.append(module)
 
     def drain(self, cycles=None):
         """Activate the pump and let the flow go.
@@ -40,6 +47,11 @@ class Pipeline(object):
 
         """
         log.info("No cycle count set, the pipeline may be drained forever.")
+        if self.geometry:
+            log.info("Setting up the detector geometry.")
+            for module in self.modules:
+                module.detector = self.geometry.get_detector()
+
         try:
             while True:
                 self._cycle_count += 1
@@ -67,6 +79,7 @@ class Module(object):
         log.debug("Initialising {0}".format(name))
         self._name = name
         self.parameters = parameters
+        self.detector = None
 
     @property
     def name(self):
@@ -130,3 +143,14 @@ class Pump(Module):
 class Blob(dict):
     """A simple dict with a fancy name. This should hold the data."""
     pass
+
+
+class Geometry(Module):
+    """A very simple, preliminary Module which gives access to the geometry"""
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        filename = self.get('filename')
+        self.detector = Detector(filename)
+
+    def get_detector(self):
+        return self.detector
