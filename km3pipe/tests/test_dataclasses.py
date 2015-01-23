@@ -6,6 +6,8 @@
 """
 from __future__ import division, absolute_import, print_function
 
+import operator
+
 import numpy as np
 
 from km3pipe.testing import *
@@ -123,25 +125,39 @@ class TestRawHit(TestCase):
         with self.assertRaises(AttributeError):
             raw_hit.time = 10
 
-    def test_hit_addition_remains_time_and_pmt_id_and_adds_tot(self):
-        hit1 = RawHit(time=1, pmt_id=1, tot=10)
-        hit2 = RawHit(time=2, pmt_id=2, tot=20)
+    def test_hit_addition_remains_time_id_and_pmt_id_and_adds_tot(self):
+        hit1 = RawHit(id=1, time=1, pmt_id=1, tot=10)
+        hit2 = RawHit(id=2, time=2, pmt_id=2, tot=20)
         merged_hit = hit1 + hit2
+        self.assertEqual(1, merged_hit.id)
         self.assertEqual(1, merged_hit.time)
         self.assertEqual(1, merged_hit.pmt_id)
         self.assertEqual(30, merged_hit.tot)
 
     def test_hit_addition_picks_correct_time_if_second_hit_is_the_earlier_one(self):
-        hit1 = RawHit(time=2, pmt_id=1, tot=10)
-        hit2 = RawHit(time=1, pmt_id=2, tot=20)
+        hit1 = RawHit(id=1, time=2, pmt_id=1, tot=10)
+        hit2 = RawHit(id=2, time=1, pmt_id=2, tot=20)
         merged_hit = hit1 + hit2
+        self.assertEqual(2, merged_hit.id)
         self.assertEqual(2, merged_hit.pmt_id)
 
     def test_hit_additions_works_with_multiple_hits(self):
-        hit1 = RawHit(time=2, pmt_id=1, tot=10)
-        hit2 = RawHit(time=1, pmt_id=2, tot=20)
-        hit3 = RawHit(time=1, pmt_id=3, tot=30)
+        hit1 = RawHit(id=1, time=2, pmt_id=1, tot=10)
+        hit2 = RawHit(id=2, time=1, pmt_id=2, tot=20)
+        hit3 = RawHit(id=3, time=1, pmt_id=3, tot=30)
         merged_hit = hit1 + hit2 + hit3
         self.assertEqual(2, merged_hit.pmt_id)
         self.assertEqual(60, merged_hit.tot)
         self.assertEqual(1, merged_hit.time)
+        self.assertEqual(2, merged_hit.id)
+
+    def test_hit_addition_works_with_sum(self):
+        hit1 = RawHit(id=1, time=2, pmt_id=1, tot=10)
+        hit2 = RawHit(id=2, time=1, pmt_id=2, tot=20)
+        hit3 = RawHit(id=3, time=1, pmt_id=3, tot=30)
+        hits = [hit1, hit2, hit3]
+        merged_hit = reduce(operator.add, hits)
+        self.assertEqual(2, merged_hit.id)
+        self.assertEqual(1, merged_hit.time)
+        self.assertEqual(60, merged_hit.tot)
+        self.assertEqual(2, merged_hit.pmt_id)
