@@ -59,6 +59,7 @@ class Pipeline(object):
                 self.blob = self.modules[0].process(self.blob)
                 for module in self.modules[1:]:
                     if self.blob is None:
+                        log.debug("Skipping {0}, due to empty blob.".format(module.name))
                         continue
                     log.debug("Processing {0} ".format(module.name))
                     self.blob = module.process(self.blob)
