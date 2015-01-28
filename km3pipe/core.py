@@ -56,7 +56,10 @@ class Pipeline(object):
             while True:
                 self._cycle_count += 1
                 log.debug("Pumping blob #{0}".format(self._cycle_count))
-                for module in self.modules:
+                self.blob = self.modules[0].process(self.blob)
+                for module in self.modules[1:]:
+                    if self.blob is None:
+                        continue
                     log.debug("Processing {0} ".format(module.name))
                     self.blob = module.process(self.blob)
                 if cycles and self._cycle_count >= cycles:
