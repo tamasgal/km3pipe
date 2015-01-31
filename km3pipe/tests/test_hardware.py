@@ -14,22 +14,22 @@ dom_id line_id floor_id npmts
 from __future__ import division, absolute_import, print_function
 
 from km3pipe.testing import *
-from km3pipe.hardware import Detector
+from km3pipe.hardware import Detector, PMT
 
 example_detx = StringIO("\n".join((
     "1 3",
     "1 1 1 3",
     " 1 1.1 1.2 1.3 -1.1  0.2  0.3 10",
-    " 2 1.1 1.2 1.3  0.1 -1.2  0.3 20",
-    " 3 1.1 1.2 1.3  0.1  0.2 -1.3 30",
+    " 2 1.4 1.5 1.6  0.1 -1.2  0.3 20",
+    " 3 1.7 1.8 1.9  0.1  0.2 -1.3 30",
     "2 1 2 3",
-    " 4 1.1 1.2 2.3 -1.1  0.2  0.3 40",
-    " 5 1.1 1.2 2.3  0.1 -1.2  0.3 50",
-    " 6 1.1 1.2 2.3  0.1  0.2 -1.3 60",
+    " 4 2.1 2.2 2.3 -1.1  0.2  0.3 40",
+    " 5 2.4 2.5 2.6  0.1 -1.2  0.3 50",
+    " 6 2.7 2.8 2.9  0.1  0.2 -1.3 60",
     "3 1 3 3",
-    " 7 1.1 1.2 3.3 -1.1  0.2  0.3 70",
-    " 8 1.1 1.2 3.3  0.1 -1.2  0.3 80",
-    " 9 1.1 1.2 3.3  0.1  0.2 -1.3 90",)))
+    " 7 3.1 3.2 3.3 -1.1  0.2  0.3 70",
+    " 8 3.4 3.5 3.6  0.1 -1.2  0.3 80",
+    " 9 3.7 3.8 3.9  0.1  0.2 -1.3 90",)))
 
 class TestDetector(TestCase):
 
@@ -53,7 +53,7 @@ class TestDetector(TestCase):
     def test_parse_doms_fills_pmts_dict(self):
         self.det.parse_doms()
         self.assertEqual(9, len(self.det.pmts))
-        self.assertTupleEqual((7, 1.1, 1.2, 3.3, -1.1,  0.2,  0.3, 70),
+        self.assertTupleEqual((7, 3.1, 3.2, 3.3, -1.1,  0.2,  0.3, 70),
                               self.det.pmts[(1, 3, 0)])
 
     def test_pmtid2omkey(self):
@@ -75,3 +75,25 @@ class TestDetector(TestCase):
         self.assertEqual((9, 18, 0), tuple(pmtid2omkey(4465.0)))
         self.assertEqual((95, 7, 16), tuple(pmtid2omkey(52810.0)))
         self.assertEqual((95, 4, 13), tuple(pmtid2omkey(52900.0)))
+
+    def test_dom_positions(self):
+        self.det.parse_doms()
+        for i, position in enumerate(self.det.dom_positions):
+            self.assertAlmostEqual(i + 1.1, position.x)
+            self.assertAlmostEqual(i + 1.2, position.y)
+            self.assertAlmostEqual(i + 1.3, position.z)
+
+
+
+class TestPMT(TestCase):
+
+    def test_init(self):
+        pmt = PMT(1, (1, 2, 3), (4, 5, 6), 7)
+        self.assertEqual(1, pmt.pmt_id)
+        self.assertEqual(1, pmt.pos.x)
+        self.assertEqual(2, pmt.pos.y)
+        self.assertEqual(3, pmt.pos.z)
+        self.assertAlmostEqual(0.455842, pmt.dir.x, 6)
+        self.assertAlmostEqual(0.569803, pmt.dir.y, 6)
+        self.assertAlmostEqual(0.683763, pmt.dir.z, 6)
+        self.assertEqual(7, pmt.t0)
