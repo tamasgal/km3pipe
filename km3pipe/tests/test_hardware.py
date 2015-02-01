@@ -84,12 +84,11 @@ class TestDetector(TestCase):
             self.assertAlmostEqual(i + 1.3, position.z)
 
 
-
 class TestPMT(TestCase):
 
     def test_init(self):
         pmt = PMT(1, (1, 2, 3), (4, 5, 6), 7)
-        self.assertEqual(1, pmt.pmt_id)
+        self.assertEqual(1, pmt.id)
         self.assertEqual(1, pmt.pos.x)
         self.assertEqual(2, pmt.pos.y)
         self.assertEqual(3, pmt.pos.z)
