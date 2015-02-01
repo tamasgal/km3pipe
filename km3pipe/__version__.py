@@ -9,7 +9,7 @@ Pep 386 compliant version info.
     (1, 2, 0, 'beta', 2) => "1.2b2"
 
 """
-version_info = (0, 3, 0, 'final', 0)
+version_info = (0, 5, 0, 'final', 0)
 
 def _get_version(version_info):
     """Return a PEP 386-compliant version number."""

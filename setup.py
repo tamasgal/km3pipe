@@ -1,9 +1,9 @@
 from setuptools import setup
 
-import km3pipe
+from km3pipe import version
 
 setup(name='km3pipe',
-      version=km3pipe.version,
+      version=version,
       url='http://github.com/tamasgal/km3pipe/',
       description='An analysis framework for KM3NeT',
       author='Tamas Gal',
