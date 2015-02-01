@@ -89,7 +89,8 @@ class Detector(object):
     @property
     def dom_positions(self):
         """The positions of the DOMs, taken from the PMT with the lowest ID."""
-        return [pmt.pos for pmt in self._pmts.values() if pmt.pmt_id % self.n_pmts_per_dom == 1]
+        return [pmt.pos for pmt in self._pmts.values()
+                if pmt.id % self.n_pmts_per_dom == 1]
 
     def pmt_with_id(self, pmt_id):
         return self._pmts[pmt_id]
@@ -104,12 +105,12 @@ class Detector(object):
 
 
 class PMT(object):
-    def __init__(self, pmt_id, pos, dir, t0):
-        self.pmt_id = pmt_id
+    def __init__(self, id, pos, dir, t0):
+        self.id = id
         self.pos = Point(pos)
         self.dir = Direction(dir)
         self.t0 = t0
 
     def __str__(self):
         return "PMT id:{0} pos: {1} dir: dir{2} t0: {3}"\
-               .format(self.pmt_id, self.pos, self.dir, self.t0)
+               .format(self.id, self.pos, self.dir, self.t0)
