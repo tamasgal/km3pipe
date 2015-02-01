@@ -100,6 +100,17 @@ class Direction(Point):
         return "({0}, {1}, {2})".format(self.x, self.y, self.z)
 
 
+class Track(object):
+    def __init__(self, id, x, y, z, dx, dy, dz, p, t, particle_type, length=None):
+        self.id = id
+        self.pos = Point((x, y, z))
+        self.dir = Direction((dx, dy, dz))
+        self.momentum = p
+        self.time = t
+        self.particle_type = particle_type
+        self.length = length
+
+
 Hit = namedtuple('Hit', 'id pmt_id pe time type n_photons track_in c_time')
 Hit.__new__.__defaults__ = (None, None, None, None, None, None, None, None)
 
