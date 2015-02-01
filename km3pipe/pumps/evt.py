@@ -12,7 +12,7 @@ __author__ = 'tamasgal'
 import sys
 
 from km3pipe import Pump
-from km3pipe.dataclasses import Hit, RawHit
+from km3pipe.dataclasses import Hit, RawHit, Track
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -127,6 +127,8 @@ class EvtPump(Pump):
                         blob.setdefault("EvtHits", []).append(Hit(*values))
                     if tag == "hit_raw":
                         blob.setdefault("EvtRawHits", []).append(RawHit(*values))
+                    if tag == "track_in":
+                        blob.setdefault("TrackIns", []).append(Track(*values))
                 else:
                     blob[tag] = value.split()
 
