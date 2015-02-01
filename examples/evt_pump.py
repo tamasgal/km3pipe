@@ -8,8 +8,8 @@ class PrintBlob(Module):
         print(blob.keys())
         return blob
 
-pipeline = Pipeline(cycles=1)
+pipeline = Pipeline()
 pipeline.attach(EvtPump, 'evtpump', filename='files/example_numuNC.evt')
 pipeline.attach(PrintBlob, 'printer')
-pipeline.drain()
+pipeline.drain(1)
 
