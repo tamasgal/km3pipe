@@ -88,3 +88,17 @@ def geant2pdg(geant_code):
         return conversion_table[geant_code]
     except KeyError:
         return 0
+
+def pdg2name(pdg_id):
+    conversion_table = {
+        12: 'nu_e',
+        -12: 'anu_e',
+        14: 'nu_mu',
+        -14: 'anu_mu',
+        16: 'nu_tau',
+        -16: 'anu_tau',
+    }
+    try:
+        return conversion_table[pdg_id]
+    except KeyError:
+        return "N/A"
