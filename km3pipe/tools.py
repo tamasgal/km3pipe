@@ -64,3 +64,27 @@ def namedtuple_with_defaults(typename, field_names, default_values=[]):
         prototype = T(*default_values)
     T.__new__.__defaults__ = tuple(prototype)
     return T
+
+def geant2pdg(geant_code):
+    """Convert GEANT particle ID to PDG"""
+    conversion_table = {
+        1: 22,   # photon
+        2: -11, # positron
+        3: 11,   # electron
+        5: -13,    # muplus
+        6: 13,   # muminus
+        7: 111, # pi0
+        8: 211, # piplus
+        9: -211, # piminus
+        10: 130, # k0long
+        11: 321, # kplus
+        12: -321, # kminus
+        13: 2112,  # neutron
+        14: 2212, # proton
+        16: 310, # kaon0short
+        17: 221, # eta
+        }
+    try:
+        return conversion_table[geant_code]
+    except KeyError:
+        return 0
