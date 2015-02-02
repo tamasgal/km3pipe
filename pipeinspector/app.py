@@ -4,13 +4,12 @@
 PipeInspector
 
 Usage:
-    pipeinspector -i <file>
+    pipeinspector FILE
     pipeinspector (-h | --help)
     pipeinspector --version
 
 Options:
     -h --help       Show this screen.
-    -i <file>       Input file.
 
 """
 from __future__ import division, absolute_import, print_function
@@ -62,7 +61,7 @@ def get_pump(input_file):
 def main():
     from docopt import docopt
     arguments = docopt(__doc__, version=__version__)
-    input_file = arguments['-i']
+    input_file = arguments['FILE']
     pump = get_pump(input_file)
     main_frame = MainFrame(pump)
     #main_frame.header.set_text("Inspecting {0}".format(input_file))
