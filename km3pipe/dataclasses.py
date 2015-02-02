@@ -13,6 +13,7 @@ from collections import namedtuple
 
 import numpy as np
 
+from km3pipe.tools import pdg2name
 
 class Point(np.ndarray):
     """Represents a point in a 3D space"""
@@ -109,6 +110,30 @@ class Track(object):
         self.time = t
         self.particle_type = particle_type
         self.length = length
+
+
+class Neutrino(object):
+    def __init__(self, id, x, y, z, dx, dy, dz, E, t, Bx, By, ichan, particle_type, channel):
+        self.id = id
+        self.pos = Point((x, y, z))
+        self.dir = Direction((dx, dy, dz))
+        self.E = E
+        self.time = t
+        self.Bx = Bx
+        self.By = By
+        self.ichan = ichan
+        self.particle_type = particle_type
+        self.channel = channel
+
+    def __str__(self):
+        text = "Neutrino: "
+        text += pdg2name(self.particle_type)
+        if self.E >= 1000:
+            text += ", {0} TeV".format(self.E / 1000)
+        else:
+            text += ", {0} GeV".format(self.E)
+        text += ', CC' if int(self.channel) == 2 else ', NC'
+        return text
 
 
 Hit = namedtuple('Hit', 'id pmt_id pe time type n_photons track_in c_time')
