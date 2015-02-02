@@ -18,5 +18,5 @@ DAQ binary data, ROOT and Aanet-ROOT format.
 If you installed KM3Pipe via `pip`, you'll be able to launch `pipeinspector`
 directly from the terminal::
 
-    pipeinspector -i /path/to/data/file.ext
+    pipeinspector /path/to/data/file.ext
 
