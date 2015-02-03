@@ -44,8 +44,13 @@ class EvtPump(Pump):
 
     def extract_header(self):
         """Create a dictionary with the EVT header information"""
-        raw_header = {}
+        raw_header = self.raw_header = {}
         #for line in self.blob_file:
+        first_line = self.blob_file.readline()
+        self.blob_file.seek(0, 0)
+        if not first_line.startswith('start_run'):
+            log.warning("No header found.")
+            return raw_header
         for line in iter(self.blob_file.readline, ''):
             line = line.strip()
             try:
@@ -84,6 +89,8 @@ class EvtPump(Pump):
                 print("Caching event file offsets, this may take a minute.")
             self.blob_file.seek(0, 0)
             self.event_offsets = []
+            if not self.raw_header:
+                self.event_offsets.append(0)
         else:
             self.blob_file.seek(self.event_offsets[-1], 0)
         for line in iter(self.blob_file.readline, ''):

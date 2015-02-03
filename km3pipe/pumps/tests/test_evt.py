@@ -35,6 +35,28 @@ class TestEvtParser(TestCase):
             "hit: 3 33814 1 2249.2 5 1 1 2249.2",
             "end_event:"
         ))
+        self.no_evt_header = "\n".join((
+            "start_event: 12 1",
+            "track_in: 1 -389.951 213.427 516 -0.204562 -0.60399 -0.770293 9.092 0 5 40.998",
+            "hit: 1 44675 1 1170.59 5 2 1 1170.59",
+            "end_event:",
+            "start_event: 13 1",
+            "track_in:  1 272.695 -105.613 516 -0.425451 -0.370522 -0.825654 2431.47 0 5 -1380",
+            "track_in:  2 272.348 -106.292 516 -0.425451 -0.370522 -0.825654 24670.7 1.33 5 -1484",
+            "track_in:  3 279.47 -134.999 516 -0.425451 -0.370522 -0.825654 164.586 26.7 5 601.939",
+            "hit: 1 20140 1 1140.06 5 1 1 1140.06",
+            "hit: 2 20159 1 1177.14 5 1 1 1177.14",
+            "hit: 3 20164 1 1178.19 5 1 1 1178.19",
+            "hit: 4 20170 1 1177.23 5 1 1 1177.23",
+            "hit: 5 20171 2 1177.25 5 1 2 1177.25",
+            "end_event:",
+            "start_event: 14 1",
+            "track_in:  1 40.256 -639.888 516 0.185998 0.476123 -0.859483 10016.1 0 5 -1668",
+            "hit: 1 33788 1 2202.81 5 1 1 2202.81",
+            "hit: 2 33801 1 2248.95 5 1 1 2248.95",
+            "hit: 3 33814 1 2249.2 5 1 1 2249.2",
+            "end_event:"
+        ))
         self.corrupt_evt_header = "foo"
 
         self.pump = EvtPump()
@@ -49,13 +71,13 @@ class TestEvtParser(TestCase):
         self.assertAlmostEqual(-1.4, float(raw_header['spectrum'][0]))
         self.assertAlmostEqual(1, float(raw_header['cut_nu'][2]))
 
-    def test_incomplete_header_raises_value_error(self):
-        temp_file = StringIO(self.corrupt_evt_header)
-        pump = EvtPump()
-        pump.blob_file = temp_file
-        with self.assertRaises(ValueError):
-            pump.extract_header()
-        temp_file.close()
+#    def test_incomplete_header_raises_value_error(self):
+#        temp_file = StringIO(self.corrupt_evt_header)
+#        pump = EvtPump()
+#        pump.blob_file = temp_file
+#        with self.assertRaises(ValueError):
+#            pump.extract_header()
+#        temp_file.close()
 
     def test_record_offset_saves_correct_offset(self):
         self.pump.blob_file = StringIO('a'*42)
@@ -74,6 +96,12 @@ class TestEvtParser(TestCase):
         self.pump.extract_header()
         self.pump._cache_offsets()
         self.assertListEqual([88, 233, 700], self.pump.event_offsets)
+
+    def test_rebuild_offsets_without_header(self):
+        self.pump.blob_file = StringIO(self.no_evt_header)
+        self.pump.extract_header()
+        self.pump._cache_offsets()
+        self.assertListEqual([0, 145, 612], self.pump.event_offsets)
 
     def test_cache_enabled_triggers_rebuild_offsets(self):
         self.pump.cache_enabled = True
