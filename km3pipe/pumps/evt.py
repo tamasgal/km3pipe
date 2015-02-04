@@ -12,7 +12,7 @@ __author__ = 'tamasgal'
 import sys
 
 from km3pipe import Pump
-from km3pipe.dataclasses import Hit, RawHit, Track, Neutrino
+from km3pipe.dataclasses import Hit, RawHit, TrackIn, TrackFit, Neutrino
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -127,7 +127,7 @@ class EvtPump(Pump):
                 continue
             if blob:
                 tag, value = line.split(':')
-                if tag in ('track_in', 'hit', 'hit_raw'):
+                if tag in ('track_in', 'track_fit', 'hit', 'hit_raw'):
                     values = [float(x) for x in value.split()]
                     blob.setdefault(tag, []).append(values)
                     if tag == 'hit':
@@ -135,7 +135,9 @@ class EvtPump(Pump):
                     if tag == "hit_raw":
                         blob.setdefault("EvtRawHits", []).append(RawHit(*values))
                     if tag == "track_in":
-                        blob.setdefault("TrackIns", []).append(Track(*values))
+                        blob.setdefault("TrackIns", []).append(TrackIn(*values))
+                    if tag == "track_fit":
+                        blob.setdefault("TrackFits", []).append(TrackFit(*values))
                 else:
                     if tag == 'neutrino':
                         values = [float(x) for x in value.split()]
