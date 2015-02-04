@@ -102,14 +102,54 @@ class Direction(Point):
 
 
 class Track(object):
-    def __init__(self, id, x, y, z, dx, dy, dz, p, t, particle_type, length=None):
+    def __init__(self, id, x, y, z, dx, dy, dz, E=None, t=0, *args):
         self.id = id
         self.pos = Point((x, y, z))
         self.dir = Direction((dx, dy, dz))
-        self.momentum = p
+        self.E = E
         self.time = t
-        self.particle_type = particle_type
-        self.length = length
+        self.args = args
+
+    def __repr__(self):
+        text = "Track:\n"
+        text += " id: {0}\n".format(self.id)
+        text += " pos: {0}\n".format(self.pos)
+        text += " dir: {0}\n".format(self.dir)
+        text += " energy: {0} GeV\n".format(self.E)
+        text += " time: {0} ns\n".format(self.time)
+        return text
+
+
+class TrackIn(Track):
+    def __init__(self, *context):
+        super(self.__class__, self).__init__(*context)
+        self.particle_type = self.args[0]
+        self.length = self.args[1]
+
+    def __repr__(self):
+        text = super(self.__class__, self).__repr__()
+        text += " type: {0} [PDG]\n".format(self.particle_type)
+        text += " length: {0} [m]\n".format(self.length)
+        return text
+
+
+class TrackFit(Track):
+    def __init__(self, *context):
+        super(self.__class__, self).__init__(*context)
+        self.speed = self.args[0]
+        self.ts = self.args[1]
+        self.te = self.args[2]
+        self.con1 = self.args[3]
+        self.con2 = self.args[4]
+
+    def __repr__(self):
+        text = super(self.__class__, self).__repr__()
+        text += " speed: {0} [m/ns]\n".format(self.speed)
+        text += " ts: {0} [ns]\n".format(self.ts)
+        text += " te: {0} [ns]\n".format(self.te)
+        text += " con1: {0}\n".format(self.con1)
+        text += " con2: {0}\n".format(self.con2)
+        return text
 
 
 class Neutrino(object):
