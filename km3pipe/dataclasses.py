@@ -103,7 +103,7 @@ class Direction(Point):
 
 class Track(object):
     def __init__(self, id, x, y, z, dx, dy, dz, E=None, t=0, *args):
-        self.id = id
+        self.id = int(id)
         self.pos = Point((x, y, z))
         self.dir = Direction((dx, dy, dz))
         self.E = E
