@@ -91,12 +91,29 @@ def geant2pdg(geant_code):
 
 def pdg2name(pdg_id):
     conversion_table = {
-        12: 'nu_e',
+         11: 'e-',
+        -11: 'e+',
+         12: 'nu_e',
         -12: 'anu_e',
-        14: 'nu_mu',
+         13: 'mu-',
+        -13: 'mu+',
+         14: 'nu_mu',
         -14: 'anu_mu',
-        16: 'nu_tau',
+         15: 'tau-',
+        -15: 'tau+',
+         16: 'nu_tau',
         -16: 'anu_tau',
+        111: 'pi0',
+        130: 'K0L',
+        211: 'pi-',
+       -211: 'pi+',
+        310: 'K0S',
+        311: 'K0',
+        321: 'K+',
+       -321: 'K-',
+       2112: 'n',
+       2212: 'p',
+      -2212: 'p-',
     }
     try:
         return conversion_table[pdg_id]
