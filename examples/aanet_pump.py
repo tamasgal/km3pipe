@@ -15,11 +15,7 @@ class PrintBlob(Module):
         return blob
 
 pipeline = Pipeline()
-pipeline.attach(AanetPump, 'aanet_pump',
-                filename='/sps/km3net/users/tgal/data/km3net/mu_oct14/km3net_jul13_90m_muatm10T23.km3_v5r1.JTE.root.aa.root')
-#pipeline.attach(DAQEventPrinter, 'moo')
-#pipeline.attach(DAQSummaryslicePrinter, 'summaryslice_printer')
-#pipeline.attach(MeanRates, 'mean_rates')
+pipeline.attach(AanetPump, 'aanet_pump', filename='foo.aa.root')
 pipeline.attach(PrintBlob, 'print_blob')
 pipeline.drain(1)
 
