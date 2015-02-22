@@ -13,7 +13,7 @@ from collections import namedtuple
 
 import numpy as np
 
-from km3pipe.tools import pdg2name
+from km3pipe.tools import pdg2name, geant2pdg
 
 class Point(np.ndarray):
     """Represents a point in a 3D space"""
@@ -123,12 +123,13 @@ class Track(object):
 class TrackIn(Track):
     def __init__(self, *context):
         super(self.__class__, self).__init__(*context)
-        self.particle_type = self.args[0]
+        self.particle_type = geant2pdg(int(self.args[0]))
         self.length = self.args[1]
 
     def __repr__(self):
         text = super(self.__class__, self).__repr__()
-        text += " type: {0} [PDG]\n".format(self.particle_type)
+        text += " type: {0} '{1}' [PDG]\n".format(self.particle_type,
+                                                  pdg2name(self.particle_type))
         text += " length: {0} [m]\n".format(self.length)
         return text
 
