@@ -103,6 +103,7 @@ def pdg2name(pdg_id):
         -15: 'tau+',
          16: 'nu_tau',
         -16: 'anu_tau',
+         22: 'photon',
         111: 'pi0',
         130: 'K0L',
         211: 'pi-',
