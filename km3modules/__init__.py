@@ -7,7 +7,7 @@ A collection of commonly used modules.
 """
 from __future__ import division, absolute_import, print_function
 
-import datetime
+import timeit
 
 from km3pipe import Module
 
@@ -33,7 +33,7 @@ class StatusBar(Module):
         self.blob_index = 0
 
 
-        self.start = datetime.datetime.now()
+        self.start = timeit.default_timer()
 
     def process(self, blob):
         print("----[Blob {0:>5}]----".format(self.blob_index))
@@ -42,9 +42,9 @@ class StatusBar(Module):
 
     def finish(self):
         """Display some basic statistics like elapsed time"""
-        elapsed_time = self.start - datetime.datetime.now()
+        elapsed_time = timeit.default_timer() - self.start
         print("\n" + '='*42)
         print("Processed {0} blobs in {1} s."
-              .format(self.blob_index, elapsed_time.microseconds / 1e6))
+              .format(self.blob_index, elapsed_time))
 
 
