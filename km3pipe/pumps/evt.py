@@ -25,16 +25,27 @@ class EvtPump(Pump):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename')
         self.cache_enabled = self.get('cache_enabled') or False
+        self.basename = self.get('basename') or None
+        self.index_start = self.get('index_start') or 1
+        self.index_stop = self.get('index_stop') or 1
 
-        self.raw_header = None
-        self.event_offsets = []
-        self.index = 0
+        self._reset()
+        self.file_index = int(self.index_start)
+
+        if self.basename:
+            self.filename = self.basename + str(self.index_start) + '.evt'
 
         if self.filename:
+            print("Opening {0}".format(self.filename))
             self.open_file(self.filename)
             self.prepare_blobs()
         else:
             log.warn("No filename specified. Take care of the file handling!")
+
+    def _reset(self):
+        self.raw_header = None
+        self.event_offsets = []
+        self.index = 0
 
     def prepare_blobs(self):
         """Populate the blobs"""
@@ -79,6 +90,16 @@ class EvtPump(Pump):
         try:
             blob = self.get_blob(self.index)
         except IndexError:
+            if self.basename and self.file_index < self.index_stop:
+                self.file_index += 1
+                self._reset()
+                self.blob_file.close()
+                self.index = 0
+                self.filename = self.basename + str(self.file_index) + '.evt'
+                print("Opening {0}".format(self.filename))
+                self.open_file(self.filename)
+                self.prepare_blobs()
+                return blob
             raise StopIteration
         self.index += 1
         return blob
