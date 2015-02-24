@@ -9,6 +9,9 @@ from __future__ import division, absolute_import, print_function
 
 __author__ = 'tamasgal'
 
+from multiprocessing import Process
+import signal
+
 from km3pipe.hardware import Detector
 
 import logging
@@ -25,6 +28,8 @@ class Pipeline(object):
         self.geometry = None
         self.blob = blob or Blob()
         self._cycle_count = 0
+        self._stop = False
+        self._finished = False
 
     def attach(self, module_class, name='Unnamed', **kwargs):
         """Attach a module to the pipeline system"""
@@ -36,7 +41,7 @@ class Pipeline(object):
         except AttributeError:
             self.modules.append(module)
 
-    def drain(self, cycles=None):
+    def _drain(self, cycles=None):
         """Activate the pump and let the flow go.
 
         This will call the process() method on each attached module until
@@ -53,7 +58,7 @@ class Pipeline(object):
                 module.detector = self.geometry.get_detector()
 
         try:
-            while True:
+            while not self._stop:
                 self._cycle_count += 1
                 log.debug("Pumping blob #{0}".format(self._cycle_count))
                 self.blob = self.modules[0].process(self.blob)
@@ -69,11 +74,28 @@ class Pipeline(object):
             log.info("Nothing left to pump through.")
         self.finish()
 
+    def drain(self, cycles=None):
+        signal.signal(signal.SIGINT, self._handle_ctrl_c)
+        try:
+            self._drain(cycles)
+        except KeyboardInterrupt:
+            pass
+
     def finish(self):
         """Call finish() on each attached module"""
         for module in self.modules:
             log.info("Finishing {0}".format(module.name))
             module.pre_finish()
+        self._finished = True
+
+    def _handle_ctrl_c(self, signal, frame):
+        if self._stop:
+            print("Forced shutdown...")
+            raise SystemExit
+        if not self._stop:
+            print(42*'=' + "\nGot CTRL+C, waing for the current cycle...\n"
+                  "Press CTRL+C again if you're in hurry!\n" + 42*'=')
+            self._stop = True
 
 
 class Module(object):
