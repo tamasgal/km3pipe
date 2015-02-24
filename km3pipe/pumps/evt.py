@@ -166,6 +166,22 @@ class EvtPump(Pump):
                     else:
                         blob[tag] = value.split()
 
+    def __iter__(self):
+        return self
+
+    def next(self):
+        return self.__next__()
+
+    def __next__(self):
+        try:
+            blob = self.get_blob(self.index)
+        except IndexError:
+            self.index = 0
+            raise StopIteration
+        self.index += 1
+        return blob
+
+
     def finish(self):
         """Clean everything up"""
         self.blob_file.close()

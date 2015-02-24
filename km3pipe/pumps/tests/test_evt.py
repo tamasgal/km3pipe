@@ -161,3 +161,10 @@ class TestEvtParser(TestCase):
         with self.assertRaises(StopIteration):
             self.pump.process()
 
+    def test_pump_acts_as_iterator(self):
+        self.pump.prepare_blobs()
+        event_numbers = []
+        for blob in self.pump:
+            event_numbers.append(blob['start_event'][0])
+        self.assertListEqual(['12', '13', '14'], event_numbers)
+
