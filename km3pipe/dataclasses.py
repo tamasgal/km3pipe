@@ -13,7 +13,7 @@ from collections import namedtuple
 
 import numpy as np
 
-from km3pipe.tools import pdg2name, geant2pdg
+from km3pipe.tools import pdg2name, geant2pdg, angle_between
 
 class Point(np.ndarray):
     """Represents a point in a 3D space"""
@@ -96,6 +96,10 @@ class Direction(Point):
     def z(self, value):
         self[2] = value
         self._normalise()
+
+    @property
+    def zenith(self):
+        return angle_between(self, (0, 0, -1))
 
     def __str__(self):
         return "({0}, {1}, {2})".format(self.x, self.y, self.z)
