@@ -53,6 +53,11 @@ class TestTools(TestCase):
         self.assertAlmostEqual(np.pi/2, angle_between(v1, v2))
         self.assertAlmostEqual(np.pi, angle_between(v1, v3))
 
+    def test_angle_between_returns_nan_for_zero_length_vectors(self):
+        v1 = (0, 0, 0)
+        v2 = (1, 0, 0)
+        self.assertTrue(np.isnan(angle_between(v1, v2)))
+
     def test_geant2pdg(self):
         self.assertEqual(22, geant2pdg(1))
         self.assertEqual(-13, geant2pdg(5))
