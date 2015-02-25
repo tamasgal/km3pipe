@@ -158,9 +158,14 @@ class TestNeutrino(TestCase):
 
     def test_neutrino_str(self):
         neutrino = Neutrino(1, 2, 3, 4, 0, 0, 1, 8, 9, 10, 11, 12, 13, 14)
-        repr_str = "Neutrino: mu-, 8 GeV, NC"
+        repr_str = "Neutrino: mu-, 8.0 GeV, NC"
         self.assertEqual(repr_str, str(neutrino))
-
+        neutrino.E = 2000
+        repr_str = "Neutrino: mu-, 2.0 TeV, NC"
+        self.assertEqual(repr_str, str(neutrino))
+        neutrino.E = 3000000
+        repr_str = "Neutrino: mu-, 3.0 PeV, NC"
+        self.assertEqual(repr_str, str(neutrino))
 
 class TestHit(TestCase):
 

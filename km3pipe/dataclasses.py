@@ -177,10 +177,12 @@ class Neutrino(object):
     def __str__(self):
         text = "Neutrino: "
         text += pdg2name(self.particle_type)
-        if self.E >= 1000:
-            text += ", {0} TeV".format(self.E / 1000)
+        if self.E >= 1000000:
+            text += ", {0:.3} PeV".format(self.E / 1000000)
+        elif self.E >= 1000:
+            text += ", {0:.3} TeV".format(self.E / 1000)
         else:
-            text += ", {0} GeV".format(self.E)
+            text += ", {0:.3} GeV".format(float(self.E))
         text += ', CC' if int(self.channel) == 2 else ', NC'
         return text
 
