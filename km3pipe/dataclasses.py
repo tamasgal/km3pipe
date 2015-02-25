@@ -102,7 +102,7 @@ class Direction(Point):
         return angle_between(self, (0, 0, -1))
 
     def __str__(self):
-        return "({0}, {1}, {2})".format(self.x, self.y, self.z)
+        return "({0:.4}, {1:.4}, {2:.4})".format(self.x, self.y, self.z)
 
 
 class Track(object):

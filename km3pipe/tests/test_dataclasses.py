@@ -11,7 +11,8 @@ import operator
 import numpy as np
 
 from km3pipe.testing import *
-from km3pipe.dataclasses import Position, Direction, Hit, RawHit
+from km3pipe.dataclasses import (Position, Direction, Track, TrackIn,
+                                 Hit, RawHit)
 
 
 class TestPosition(TestCase):
@@ -66,6 +67,57 @@ class TestDirection(TestCase):
         self.assertAlmostEqual(1, np.linalg.norm(dir))
         dir.z = 30
         self.assertAlmostEqual(1, np.linalg.norm(dir))
+
+    def test_direction_zenith(self):
+        dir = Direction((0, 0, -1))
+        self.assertAlmostEqual(0, dir.zenith)
+        dir = Direction((0, 0, 1))
+        self.assertAlmostEqual(np.pi, dir.zenith)
+        dir = Direction((0, 1, 0))
+        self.assertAlmostEqual(np.pi/2, dir.zenith)
+
+    def test_direction_str(self):
+        dir = Direction((1, 2, 3))
+        self.assertEqual("(0.2673, 0.5345, 0.8018)", str(dir))
+
+
+class TestTrack(TestCase):
+    def test_track_init(self):
+        track = Track(1, 2, 3, 4, 0, 0, 1, 8, 9, 'a', 'b', 'c')
+        self.assertEqual(1, track.id)
+        self.assertListEqual([2, 3, 4], list(track.pos))
+        self.assertListEqual([0, 0, 1], list(track.dir))
+        self.assertEqual(8, track.E)
+        self.assertEqual(9, track.time)
+        self.assertTupleEqual(('a', 'b', 'c'), track.args)
+
+    def test_track_repr(self):
+        track = Track(1, 2, 3, 4, 0, 0, 1, 8, 9, 'a', 'b', 'c')
+        repr_str = ("Track:\n id: 1\n pos: [2 3 4]\n dir: (0.0, 0.0, 1.0)\n"
+                    " energy: 8 GeV\n time: 9 ns\n")
+        self.assertEqual(repr_str, track.__repr__())
+
+
+class TestTrackIn(TestCase):
+
+    def test_track_init(self):
+        track_in = TrackIn(1, 2, 3, 4, 0, 0, 1, 8, 9, 10, 11)
+        self.assertEqual(1, track_in.id)
+        self.assertListEqual([2, 3, 4], list(track_in.pos))
+        self.assertListEqual([0, 0, 1], list(track_in.dir))
+        self.assertEqual(8, track_in.E)
+        self.assertEqual(9, track_in.time)
+        self.assertEqual(130, track_in.particle_type) # this should be PDG!
+        self.assertEqual(11, track_in.length)
+
+    def test_track_repr(self):
+        track_in = TrackIn(1, 2, 3, 4, 0, 0, 1, 8, 9, 10, 11)
+        repr_str = ("Track:\n id: 1\n pos: [2 3 4]\n dir: (0.0, 0.0, 1.0)\n"
+                    " energy: 8 GeV\n time: 9 ns\n type: 130 'K0L' [PDG]\n"
+                    " length: 11 [m]\n")
+        self.assertEqual(repr_str, track_in.__repr__())
+
+
 
 
 class TestHit(TestCase):
