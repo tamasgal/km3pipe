@@ -1,7 +1,10 @@
 from __future__ import division, absolute_import, print_function
 
+import numpy as np
+
 from km3pipe.testing import *
-from km3pipe.tools import unpack_nfirst, split
+from km3pipe.tools import (unpack_nfirst, split, namedtuple_with_defaults,
+                           angle_between, geant2pdg, pdg2name)
 
 
 class TestTools(TestCase):
@@ -28,3 +31,38 @@ class TestTools(TestCase):
         parts = split(string, float)
         self.assertListEqual([1.0, 2.1, 3.2, 4.3], parts)
 
+    def test_namedtuple_with_defaults_initialises_with_none(self):
+        Node = namedtuple_with_defaults('Node', 'val left right')
+        node = Node()
+        self.assertIsNone(node.val)
+        self.assertIsNone(node.left)
+        self.assertIsNone(node.right)
+
+    def test_namedtuple_with_defaults_initialises_with_given_values(self):
+        Node = namedtuple_with_defaults('Node', 'val left right', [1, 2, 3])
+        node = Node()
+        self.assertEqual(1, node.val)
+        self.assertEqual(2, node.left)
+        self.assertEqual(3, node.right)
+
+    def test_angle_between(self):
+        v1 = (1, 0, 0)
+        v2 = (0, 1, 0)
+        v3 = (-1, 0, 0)
+        self.assertAlmostEqual(0, angle_between(v1, v1))
+        self.assertAlmostEqual(np.pi/2, angle_between(v1, v2))
+        self.assertAlmostEqual(np.pi, angle_between(v1, v3))
+
+    def test_geant2pdg(self):
+        self.assertEqual(22, geant2pdg(1))
+        self.assertEqual(-13, geant2pdg(5))
+
+    def test_geant2pdg_returns_0_for_unknown_particle_id(self):
+        self.assertEqual(0, geant2pdg(-999))
+
+    def test_pdg2name(self):
+        self.assertEqual('mu-', pdg2name(13))
+        self.assertEqual('anu_tau', pdg2name(-16))
+
+    def test_pdg2name_returns_NA_for_unknown_particle(self):
+        self.assertEqual('N/A', pdg2name(0))

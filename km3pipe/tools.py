@@ -9,6 +9,7 @@ from __future__ import division, absolute_import, print_function
 
 __author__ = 'tamasgal'
 
+import collections
 from collections import namedtuple
 
 import numpy as np
