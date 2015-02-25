@@ -106,6 +106,7 @@ class Direction(Point):
 
 
 class Track(object):
+    """Bass class for particle or shower tracks"""
     def __init__(self, id, x, y, z, dx, dy, dz, E=None, t=0, *args):
         self.id = int(id)
         self.pos = Point((x, y, z))
@@ -125,6 +126,7 @@ class Track(object):
 
 
 class TrackIn(Track):
+    """Representation of a track_in entry in an EVT file"""
     def __init__(self, *context):
         super(self.__class__, self).__init__(*context)
         self.particle_type = geant2pdg(int(self.args[0]))
@@ -139,6 +141,7 @@ class TrackIn(Track):
 
 
 class TrackFit(Track):
+    """Representation of a track_fit entry in an EVT file"""
     def __init__(self, *context):
         super(self.__class__, self).__init__(*context)
         self.speed = self.args[0]
@@ -158,6 +161,7 @@ class TrackFit(Track):
 
 
 class Neutrino(object):
+    """Representation of a neutrino entry in an EVT file"""
     def __init__(self, id, x, y, z, dx, dy, dz, E, t, Bx, By, ichan, particle_type, channel):
         self.id = id
         self.pos = Point((x, y, z))
@@ -180,16 +184,16 @@ class Neutrino(object):
         text += ', CC' if int(self.channel) == 2 else ', NC'
         return text
 
-
+# The hit entry in an EVT file
 Hit = namedtuple('Hit', 'id pmt_id pe time type n_photons track_in c_time')
 Hit.__new__.__defaults__ = (None, None, None, None, None, None, None, None)
 
+# The hit_raw entry in an EVT file
 def __add_raw_hit__(self, other):
     """Add two hits by adding the ToT and preserve time and pmt_id
     of the earlier one."""
     first = self if self.time <= other.time else other
     return RawHit(first.id, first.pmt_id, self.tot+other.tot, first.time)
-
 RawHit = namedtuple('RawHit', 'id pmt_id tot time')
 RawHit.__new__.__defaults__ = (None, None, None, None)
 RawHit.__add__ = __add_raw_hit__
