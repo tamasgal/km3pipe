@@ -12,7 +12,7 @@ import numpy as np
 
 from km3pipe.testing import *
 from km3pipe.dataclasses import (Position, Direction, Track, TrackIn,
-                                 Hit, RawHit)
+                                 TrackFit, Neutrino, Hit, RawHit)
 
 
 class TestPosition(TestCase):
@@ -100,7 +100,7 @@ class TestTrack(TestCase):
 
 class TestTrackIn(TestCase):
 
-    def test_track_init(self):
+    def test_trackin_init(self):
         track_in = TrackIn(1, 2, 3, 4, 0, 0, 1, 8, 9, 10, 11)
         self.assertEqual(1, track_in.id)
         self.assertListEqual([2, 3, 4], list(track_in.pos))
@@ -118,6 +118,48 @@ class TestTrackIn(TestCase):
         self.assertEqual(repr_str, track_in.__repr__())
 
 
+class TestTrackFit(TestCase):
+
+    def test_trackfit_init(self):
+        track_fit = TrackFit(1, 2, 3, 4, 0, 0, 1, 8, 9, 10, 11, 12, 13, 14)
+        self.assertEqual(1, track_fit.id)
+        self.assertListEqual([2, 3, 4], list(track_fit.pos))
+        self.assertListEqual([0, 0, 1], list(track_fit.dir))
+        self.assertEqual(8, track_fit.E)
+        self.assertEqual(9, track_fit.time)
+        self.assertEqual(10, track_fit.speed)
+        self.assertEqual(11, track_fit.ts)
+        self.assertEqual(12, track_fit.te)
+        self.assertEqual(13, track_fit.con1)
+        self.assertEqual(14, track_fit.con2)
+
+    def test_trackfit_repr(self):
+        track_fit = TrackFit(1, 2, 3, 4, 0, 0, 1, 8, 9, 10, 11, 12, 13, 14)
+        repr_str = ("Track:\n id: 1\n pos: [2 3 4]\n dir: (0.0, 0.0, 1.0)\n "
+                    "energy: 8 GeV\n time: 9 ns\n speed: 10 [m/ns]\n"
+                    " ts: 11 [ns]\n te: 12 [ns]\n con1: 13\n con2: 14\n")
+        self.assertEqual(repr_str, track_fit.__repr__())
+
+
+class TestNeutrino(TestCase):
+
+    def test_neutrino_init(self):
+        neutrino = Neutrino(1, 2, 3, 4, 0, 0, 1, 8, 9, 10, 11, 12, 13, 14)
+        self.assertEqual(1, neutrino.id)
+        self.assertListEqual([2, 3, 4], list(neutrino.pos))
+        self.assertListEqual([0, 0, 1], list(neutrino.dir))
+        self.assertEqual(8, neutrino.E)
+        self.assertEqual(9, neutrino.time)
+        self.assertEqual(10, neutrino.Bx)
+        self.assertEqual(11, neutrino.By)
+        self.assertEqual(12, neutrino.ichan)
+        self.assertEqual(13, neutrino.particle_type)
+        self.assertEqual(14, neutrino.channel)
+
+    def test_neutrino_str(self):
+        neutrino = Neutrino(1, 2, 3, 4, 0, 0, 1, 8, 9, 10, 11, 12, 13, 14)
+        repr_str = "Neutrino: mu-, 8 GeV, NC"
+        self.assertEqual(repr_str, str(neutrino))
 
 
 class TestHit(TestCase):
