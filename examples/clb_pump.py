@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from km3pipe import Pipeline, Module
 from km3pipe.pumps import CLBPump
-
+from km3modules import StatusBar
 
 class TOTHisto(Module):
     def __init__(self, **context):
@@ -25,6 +25,7 @@ class TOTHisto(Module):
         plt.show()
 
 pipeline = Pipeline()
+pipeline.attach(StatusBar)
 pipeline.attach(CLBPump,
                 filename='/Users/tamasgal/Data/KM3NeT/du1-clb/DOM2_run23.dat')
 pipeline.attach(TOTHisto)

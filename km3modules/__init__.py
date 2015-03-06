@@ -36,7 +36,7 @@ class StatusBar(Module):
         self.start = timeit.default_timer()
 
     def process(self, blob):
-        print("----[Blob {0:>5}]----".format(self.blob_index))
+        print("------------[Blob {0:>7}]-------------".format(self.blob_index))
         self.blob_index += 1
         return blob
 
