@@ -151,6 +151,9 @@ class Pump(Module):
             log.error(error_message)
             raise SystemExit
 
+    def process(self, blob):
+        raise NotImplementedError("The pump has no process() method!")
+
     def rewind_file(self):
         """Put the file pointer to position 0"""
         self.blob_file.seek(0, 0)
