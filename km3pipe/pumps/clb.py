@@ -46,7 +46,7 @@ class CLBPump(Pump):
         except struct.error:
             pass
         self.rewind_file()
-        log.info("Found {0} CLB UDP packets.".format(len(self.packet_positions)))
+        print("Found {0} CLB UDP packets.".format(len(self.packet_positions)))
 
     def seek_to_packet(self, index):
         """Move file pointer to the packet with given index."""
