@@ -11,7 +11,7 @@ import struct
 from struct import unpack
 import binascii
 from collections import namedtuple
-import pprint
+import datetime
 
 from km3pipe import Pump, Blob
 from km3pipe.logger import logging
@@ -97,27 +97,45 @@ class CLBHeader(object):
         self.run_number = None
         self.udp_sequence = None
         self.timestamp = None
+        self.ns_ticks = None
+        self.human_readable_timestamp = None
         self.dom_id = None
-        #self.dom_status = None
+        self.dom_status = None
         self.time_valid = None
         if byte_data:
             self._parse_byte_data(byte_data)
         if file_obj:
             self._parse_file(file_obj)
 
+    def __str__(self):
+        description = ("CLBHeader\n"
+                       "    Data type:    {self.data_type}\n"
+                       "    Run number:   {self.run_number}\n"
+                       "    UDP sequence: {self.udp_sequence}\n"
+                       "    Time stamp:   {self.timestamp}\n"
+                       "                  {self.human_readable_timestamp}\n"
+                       "    Ticks [ns]:   {self.ns_ticks}\n"
+                       "    DOM ID:       {self.dom_id}\n"
+                       "    DOM status:   {self.dom_status}\n"
+                       "".format(self=self))
+        return description
+
     def _parse_byte_data(self, byte_data):
         """Extract the values from byte string."""
         self.data_type = ''.join(unpack('cccc', byte_data[:4]))
         self.run_number = unpack('>i', byte_data[4:8])[0]
         self.udp_sequence = unpack('>i', byte_data[8:12])[0]
-        self.timestamp = unpack('>Q', byte_data[12:20])[0]
+        self.timestamp, self.ns_ticks = unpack('<II', byte_data[12:20])
         self.dom_id = binascii.hexlify(''.join(unpack('cccc', byte_data[20:24])))
 
-        b = unpack('i', byte_data[24:28])[0]
-        first_bit = b >> 7
-        self.time_valid = bool(first_bit)
+        b = unpack('>I', byte_data[24:28])[0]
+        #first_bit = b >> 7
+        #self.time_valid = bool(first_bit)
+        self.dom_status = "{0:032b}".format(b)
 
-        #TODO: read out DOM status (data format not clear!)
+        self.human_readable_timestamp = datetime.datetime.fromtimestamp(
+            int(self.timestamp)).strftime('%Y-%m-%d %H:%M:%S')
+
 
 
     def _parse_file(self, file_obj):

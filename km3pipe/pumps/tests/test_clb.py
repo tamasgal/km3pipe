@@ -192,9 +192,24 @@ class TestCLBHeader(TestCase):
         self.assertEqual('TTDC', header.data_type)
         self.assertEqual(0, header.run_number)
         self.assertEqual(3, header.udp_sequence)
-        self.assertEqual(114632689630240, header.timestamp)
+        self.assertEqual(1114112000, header.timestamp)
         self.assertEqual('30beaf00', header.dom_id)
-        self.assertTrue(header.time_valid)
+        self.assertEqual('10000000000000000000000000000000', header.dom_status)
+
+    def test_str_representation(self):
+        raw_data = "5454444300000000000000030000684200BEBC2030BEAF0080000000"
+        byte_data = binascii.unhexlify(raw_data)
+        header = CLBHeader(byte_data=byte_data)
+        description = "CLBHeader\n" \
+                      "    Data type:    TTDC\n" \
+                      "    Run number:   0\n" \
+                      "    UDP sequence: 3\n" \
+                      "    Time stamp:   1114112000\n" \
+                      "                  2005-04-21 21:33:20\n" \
+                      "    Ticks [ns]:   549240320\n" \
+                      "    DOM ID:       30beaf00\n" \
+                      "    DOM status:   10000000000000000000000000000000\n"
+        self.assertEqual(description, str(header))
 
 
 class TestPMTData(TestCase):

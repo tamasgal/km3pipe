@@ -14,6 +14,7 @@ class TOTHisto(Module):
         self.tots = []
 
     def process(self, blob):
+        print(blob['CLBHeader'])
         for pmt_data in blob['PMTData']:
             self.tots.append(pmt_data.tot)
         return blob
