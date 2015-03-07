@@ -39,6 +39,9 @@ class Pipeline(object):
             module.get_detector()
             self.geometry = module
         except AttributeError:
+            if len(self.modules) < 1 and not isinstance(module, Pump):
+                log.error("The first module to attach to the pipeline should "
+                          "be a Pump!")
             self.modules.append(module)
 
     def _drain(self, cycles=None):
