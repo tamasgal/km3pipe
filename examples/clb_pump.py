@@ -27,6 +27,7 @@ class TOTHisto(Module):
 class PrintCLBHeader(Module):
     def process(self, blob):
         print(blob['CLBHeader'])
+        return blob
 
 pipeline = Pipeline()
 pipeline.attach(CLBPump,
