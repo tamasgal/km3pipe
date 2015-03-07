@@ -192,7 +192,7 @@ class TestCLBHeader(TestCase):
         self.assertEqual('TTDC', header.data_type)
         self.assertEqual(0, header.run_number)
         self.assertEqual(3, header.udp_sequence)
-        self.assertEqual(1114112000, header.timestamp)
+        self.assertEqual(26690, header.timestamp)
         self.assertEqual('30beaf00', header.dom_id)
         self.assertEqual('10000000000000000000000000000000', header.dom_status)
 
@@ -204,9 +204,9 @@ class TestCLBHeader(TestCase):
                       "    Data type:    TTDC\n" \
                       "    Run number:   0\n" \
                       "    UDP sequence: 3\n" \
-                      "    Time stamp:   1114112000\n" \
-                      "                  2005-04-21 21:33:20\n" \
-                      "    Ticks [ns]:   549240320\n" \
+                      "    Time stamp:   26690\n" \
+                      "                  1970-01-01 08:24:50\n" \
+                      "    Ticks [ns]:   12500000\n" \
                       "    DOM ID:       30beaf00\n" \
                       "    DOM status:   10000000000000000000000000000000\n"
         self.assertEqual(description, str(header))

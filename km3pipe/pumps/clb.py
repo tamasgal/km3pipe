@@ -125,7 +125,7 @@ class CLBHeader(object):
         self.data_type = ''.join(unpack('cccc', byte_data[:4]))
         self.run_number = unpack('>i', byte_data[4:8])[0]
         self.udp_sequence = unpack('>i', byte_data[8:12])[0]
-        self.timestamp, self.ns_ticks = unpack('<II', byte_data[12:20])
+        self.timestamp, self.ns_ticks = unpack('>II', byte_data[12:20])
         self.dom_id = binascii.hexlify(''.join(unpack('cccc', byte_data[20:24])))
 
         b = unpack('>I', byte_data[24:28])[0]
