@@ -67,7 +67,8 @@ class Pipeline(object):
                 self.blob = self.modules[0].process(self.blob)
                 for module in self.modules[1:]:
                     if self.blob is None:
-                        log.debug("Skipping {0}, due to empty blob.".format(module.name))
+                        log.debug("Skipping {0}, due to empty blob."
+                                  .format(module.name))
                         continue
                     log.debug("Processing {0} ".format(module.name))
                     self.blob = module.process(self.blob)
@@ -78,6 +79,7 @@ class Pipeline(object):
         self.finish()
 
     def drain(self, cycles=None):
+        """Execute _drain while trapping KeyboardInterrupt"""
         signal.signal(signal.SIGINT, self._handle_ctrl_c)
         try:
             self._drain(cycles)
