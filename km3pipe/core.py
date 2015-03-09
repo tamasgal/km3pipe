@@ -157,6 +157,7 @@ class Pump(Module):
             raise SystemExit
 
     def process(self, blob):
+        """Create a blob"""
         raise NotImplementedError("The pump has no process() method!")
 
     def rewind_file(self):
@@ -188,3 +189,4 @@ class Geometry(Module):
 
     def get_detector(self):
         return self.detector
+
