@@ -130,7 +130,10 @@ class TrackIn(Track):
     def __init__(self, *context):
         super(self.__class__, self).__init__(*context)
         self.particle_type = geant2pdg(int(self.args[0]))
-        self.length = self.args[1]
+        try:
+            self.length = self.args[1]
+        except IndexError:
+            self.length = 0
 
     def __repr__(self):
         text = super(self.__class__, self).__repr__()
@@ -162,7 +165,8 @@ class TrackFit(Track):
 
 class Neutrino(object):
     """Representation of a neutrino entry in an EVT file"""
-    def __init__(self, id, x, y, z, dx, dy, dz, E, t, Bx, By, ichan, particle_type, channel, *args):
+    def __init__(self, id, x, y, z, dx, dy, dz, E, t, Bx, By,
+                 ichan, particle_type, channel, *args):
         self.id = id
         self.pos = Point((x, y, z))
         self.dir = Direction((dx, dy, dz))
