@@ -162,7 +162,7 @@ class TrackFit(Track):
 
 class Neutrino(object):
     """Representation of a neutrino entry in an EVT file"""
-    def __init__(self, id, x, y, z, dx, dy, dz, E, t, Bx, By, ichan, particle_type, channel):
+    def __init__(self, id, x, y, z, dx, dy, dz, E, t, Bx, By, ichan, particle_type, channel, *args):
         self.id = id
         self.pos = Point((x, y, z))
         self.dir = Direction((dx, dy, dz))
