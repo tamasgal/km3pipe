@@ -19,7 +19,7 @@ class AanetPump(Pump):
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         import aa
-        from ROOT import TFile, Evt
+        from ROOT import TFile, Evt, Trk
         self.filename = self.get('filename')
         if not self.filename:
             raise ValueError("No filename defined")
@@ -37,4 +37,6 @@ class AanetPump(Pump):
     def process(self, blob):
         self.E.GetEntry(self.index)
         self.index += 1
-        return {'hits': self.evt.hits, 'a_hit': self.evt.hits[0]}
+        return {'hits': self.evt.hits,
+                'mc_trks': self.evt.mc_trks,
+                'a_hit': self.evt.hits[0]}
