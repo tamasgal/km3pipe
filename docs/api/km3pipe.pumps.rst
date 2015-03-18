@@ -20,6 +20,13 @@ km3pipe.pumps.evt module
     :undoc-members:
     :show-inheritance:
 
+km3pipe.pumps.clb module
+------------------------
+
+.. automodule:: km3pipe.pumps.clb
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 Module contents
 ---------------
