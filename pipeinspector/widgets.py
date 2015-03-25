@@ -39,6 +39,8 @@ class BlobBrowser(urwid.Frame):
 
     def key_selected(self, data):
         def formatter(obj):
+            if hasattr(obj, '__insp__'):
+                return obj.__insp__()
             if hasattr(obj, 'size'):
                 output = ""
                 for obj in data:
