@@ -20,7 +20,7 @@ import urwid
 
 from pipeinspector.gui import MainFrame
 from pipeinspector.settings import UI
-from km3pipe.pumps import EvtPump, DAQPump, AanetPump
+from km3pipe.pumps import EvtPump, DAQPump, AanetPump, CLBPump
 
 __version__ = "1.0.0"
 
