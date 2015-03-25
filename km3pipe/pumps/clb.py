@@ -120,6 +120,9 @@ class CLBHeader(object):
                        "".format(self=self))
         return description
 
+    def __insp__(self):
+        return self.__str__()
+
     def _parse_byte_data(self, byte_data):
         """Extract the values from byte string."""
         self.data_type = ''.join(unpack('cccc', byte_data[:4]))
