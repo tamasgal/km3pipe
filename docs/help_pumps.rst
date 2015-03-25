@@ -21,5 +21,5 @@ each ``process()`` call to the next module in the pipeline.
 
 
 .. literalinclude:: ../examples/module_workflow.py
-   :pyobject: Pump
+   :pyobject: DummyPump
    :linenos:
