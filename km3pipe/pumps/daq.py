@@ -47,7 +47,10 @@ class DAQPump(Pump):
         except struct.error:
             raise StopIteration
 
-        data_type = DATA_TYPES[preamble.data_type]
+        try:
+            data_type = DATA_TYPES[preamble.data_type]
+        except KeyError:
+            data_type = 'Unknown'
 
         blob = Blob()
         blob[data_type] = None
