@@ -52,7 +52,7 @@ def get_pump(input_file):
     elif extension == 'dat':
         pump = DAQPump(filename=input_file)
     elif extension == 'dqd':
-        pump = CLBPump(filename=input_file)
+        pump = CLBPump(filename=input_file, cache_enabled=True)
     elif extension == 'root':
         pump = AanetPump(filename=input_file)
     else:

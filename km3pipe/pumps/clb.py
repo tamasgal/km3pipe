@@ -25,12 +25,14 @@ class CLBPump(Pump):
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename')
+        self.cache_enabled = self.get('cache_enabled') or False
         self.packet_positions = []
         self.index = 0
 
         if self.filename:
             self.open_file(self.filename)
-            self.determine_packet_positions()
+            if self.cache_enabled:
+                self.determine_packet_positions()
         else:
             log.warn("No filename specified. Take care of the file handling!")
 
