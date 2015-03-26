@@ -31,8 +31,10 @@ class Pipeline(object):
         self._stop = False
         self._finished = False
 
-    def attach(self, module_class, name='Unnamed', **kwargs):
+    def attach(self, module_class, name=None, **kwargs):
         """Attach a module to the pipeline system"""
+        if not name:
+            name = module_class.__name__
         module = module_class(name=name, **kwargs)
         log.info("Attaching module '{0}'".format(name))
         try:
