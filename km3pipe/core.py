@@ -84,6 +84,7 @@ class Pipeline(object):
 
     def drain(self, cycles=None):
         """Execute _drain while trapping KeyboardInterrupt"""
+        log.info("Now draining...")
         signal.signal(signal.SIGINT, self._handle_ctrl_c)
         try:
             self._drain(cycles)
