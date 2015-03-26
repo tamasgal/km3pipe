@@ -114,7 +114,7 @@ class CLBHeader(object):
                        "    UDP sequence: {self.udp_sequence}\n"
                        "    Time stamp:   {self.timestamp}\n"
                        "                  {self.human_readable_timestamp}\n"
-                       "    Ticks [ns]:   {self.ns_ticks}\n"
+                       "    Ticks [16ns]: {self.ns_ticks}\n"
                        "    DOM ID:       {self.dom_id}\n"
                        "    DOM status:   {self.dom_status}\n"
                        "".format(self=self))
