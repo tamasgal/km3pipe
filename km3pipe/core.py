@@ -54,7 +54,9 @@ class Pipeline(object):
         number of cycles has reached that limit.
 
         """
-        log.info("No cycle count set, the pipeline may be drained forever.")
+        if not cycles:
+            log.info("No cycle count set, the pipeline may be drained forever.")
+
         if self.geometry:
             log.info("Setting up the detector geometry.")
             for module in self.modules:
