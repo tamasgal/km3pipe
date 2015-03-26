@@ -36,6 +36,7 @@ class CLBPump(Pump):
 
     def determine_packet_positions(self):
         """Record the file pointer position of each frame"""
+        print("Analysing file...")
         self.rewind_file()
         try:
             while True:
