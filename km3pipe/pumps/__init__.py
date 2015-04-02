@@ -10,3 +10,4 @@ from km3pipe.pumps.evt import EvtPump
 from km3pipe.pumps.daq import DAQPump
 from km3pipe.pumps.clb import CLBPump
 from km3pipe.pumps.aanet import AanetPump
+from km3pipe.pumps.jpp import JPPPump
