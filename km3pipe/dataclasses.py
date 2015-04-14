@@ -109,7 +109,9 @@ class Track(object):
     """Bass class for particle or shower tracks"""
     def __init__(self, id, x, y, z, dx, dy, dz, E=None, t=0, *args):
         self.id = int(id)
-        self.pos = Point((x, y, z))
+        # z correctio due to gen/km3 (ZED -> sea level shift)
+        # http://wiki.km3net.physik.uni-erlangen.de/index.php/Simulations
+        self.pos = Point((x, y, z + 405.93))
         self.dir = Direction((dx, dy, dz))
         self.E = E
         self.time = t
@@ -168,7 +170,9 @@ class Neutrino(object):
     def __init__(self, id, x, y, z, dx, dy, dz, E, t, Bx, By,
                  ichan, particle_type, channel, *args):
         self.id = id
-        self.pos = Point((x, y, z))
+        # z correctio due to gen/km3 (ZED -> sea level shift)
+        # http://wiki.km3net.physik.uni-erlangen.de/index.php/Simulations
+        self.pos = Point((x, y, z + 405.93))
         self.dir = Direction((dx, dy, dz))
         self.E = E
         self.time = t
