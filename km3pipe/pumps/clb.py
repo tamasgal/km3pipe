@@ -81,6 +81,24 @@ class CLBPump(Pump):
         blob = self.next_blob()
         return blob
 
+    def __iter__(self):
+        return self
+
+    def next(self):
+        return self.__next__()
+
+    def __next__(self):
+        try:
+            blob = self.get_blob(self.index)
+        except IndexError:
+            self.index = 0
+            raise StopIteration
+        self.index += 1
+        return blob
+
+    def finish(self):
+        """Clean everything up"""
+        self.blob_file.close()
 
 class CLBHeader(object):
     """Wrapper for the CLB Common Header binary format.
