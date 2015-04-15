@@ -88,13 +88,7 @@ class CLBPump(Pump):
         return self.__next__()
 
     def __next__(self):
-        try:
-            blob = self.get_blob(self.index)
-        except IndexError:
-            self.index = 0
-            raise StopIteration
-        self.index += 1
-        return blob
+        return self.next_blob()
 
     def finish(self):
         """Clean everything up"""
