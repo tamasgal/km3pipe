@@ -1,6 +1,6 @@
 # coding=utf-8
 # Filename: evt.py
-# pylint: disable=locally-disabled
+# pylint: disable=locally-disabled,C0103
 """
 Pumps for the EVT simulation dataformat.
 
@@ -33,7 +33,10 @@ class EvtPump(Pump):
         self.index_start = self.get('index_start') or 1
         self.index_stop = self.get('index_stop') or 1
 
-        self._reset()
+        self.raw_header = None
+        self.event_offsets = []
+        self.index = 0
+
         self.file_index = int(self.index_start)
 
         if self.basename:
@@ -47,6 +50,7 @@ class EvtPump(Pump):
             log.warn("No filename specified. Take care of the file handling!")
 
     def _reset(self):
+        """Clear the cache."""
         self.raw_header = None
         self.event_offsets = []
         self.index = 0
@@ -109,6 +113,7 @@ class EvtPump(Pump):
         return blob
 
     def _cache_offsets(self, up_to_index=None, verbose=True):
+        """Cache all event offsets."""
         if not up_to_index:
             if verbose:
                 print("Caching event file offsets, this may take a minute.")
@@ -174,6 +179,7 @@ class EvtPump(Pump):
         return self
 
     def next(self):
+        """Python 2/3 compatibility for iterators"""
         return self.__next__()
 
     def __next__(self):
@@ -298,3 +304,4 @@ def __add_raw_hit__(self, other):
 RawHit = namedtuple('RawHit', 'id pmt_id tot time')
 RawHit.__new__.__defaults__ = (None, None, None, None)
 RawHit.__add__ = __add_raw_hit__
+
