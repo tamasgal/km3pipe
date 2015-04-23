@@ -1,5 +1,6 @@
 # coding=utf-8
 # Filename: test_daq.py
+# pylint: disable=locally-disabled,C0111
 """
 ...
 

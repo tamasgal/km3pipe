@@ -1,3 +1,6 @@
+# coding=utf-8                    
+# Filename: test_hardware.py
+# pylint: disable=locally-disabled,C0111
 """
 Detector description (detx format v5)
 
