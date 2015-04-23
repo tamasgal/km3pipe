@@ -1,6 +1,6 @@
-# coding=utf-8                    
+# coding=utf-8
 # Filename: test_hardware.py
-# pylint: disable=locally-disabled,C0111
+# pylint: disable=C0111,C0103,R0904
 """
 Detector description (detx format v5)
 
@@ -16,10 +16,11 @@ dom_id line_id floor_id npmts
 """
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import *
+from km3pipe.testing import TestCase, StringIO
 from km3pipe.hardware import Detector, PMT
 
-example_detx = StringIO("\n".join((
+
+EXAMPLE_DETX = StringIO("\n".join((
     "1 3",
     "1 1 1 3",
     " 1 1.1 1.2 1.3 -1.1  0.2  0.3 10",
@@ -34,11 +35,12 @@ example_detx = StringIO("\n".join((
     " 8 3.4 3.5 3.6  0.1 -1.2  0.3 80",
     " 9 3.7 3.8 3.9  0.1  0.2 -1.3 90",)))
 
+
 class TestDetector(TestCase):
 
     def setUp(self):
         self.det = Detector()
-        self.det.det_file = example_detx
+        self.det.det_file = EXAMPLE_DETX
 
     def test_parse_header_extracts_correct_det_id(self):
         self.det.parse_header()
@@ -56,7 +58,7 @@ class TestDetector(TestCase):
     def test_parse_doms_fills_pmts_dict(self):
         self.det.parse_doms()
         self.assertEqual(9, len(self.det.pmts))
-        self.assertTupleEqual((7, 3.1, 3.2, 3.3, -1.1,  0.2,  0.3, 70),
+        self.assertTupleEqual((7, 3.1, 3.2, 3.3, -1.1, 0.2, 0.3, 70),
                               self.det.pmts[(1, 3, 0)])
 
     def test_pmtid2omkey(self):
