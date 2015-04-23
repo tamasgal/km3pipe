@@ -1,6 +1,6 @@
 # coding=utf-8
 # Filename: evt.py
-# pylint: disable=locally-disabled,C0103
+# pylint: disable=C0103,R0903
 """
 Pumps for the EVT simulation dataformat.
 
@@ -16,7 +16,7 @@ from collections import namedtuple
 from km3pipe import Pump
 from km3pipe.logger import logging
 
-from km3pipe.dataclasses import Point, Direction, Position
+from km3pipe.dataclasses import Point, Direction
 from km3pipe.tools import pdg2name, geant2pdg, unpack_nfirst
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103

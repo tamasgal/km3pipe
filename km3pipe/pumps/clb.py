@@ -1,6 +1,5 @@
 # coding=utf-8
 # Filename: clb.py
-# pylint: disable=locally-disabled
 """
 Pumps for the CLB data formats.
 
@@ -13,7 +12,7 @@ import binascii
 from collections import namedtuple
 import datetime
 
-from km3pipe import Pump, Blob
+from km3pipe import Pump
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -57,6 +56,7 @@ class CLBPump(Pump):
         self.blob_file.seek(pointer_position, 0)
 
     def next_blob(self):
+        """Generate next blob in file"""
         try:
             length = struct.unpack('<i', self.blob_file.read(4))[0]
         except struct.error:
@@ -85,6 +85,7 @@ class CLBPump(Pump):
         return self
 
     def next(self):
+        """Python 2/3 compatibility for iterators"""
         return self.__next__()
 
     def __next__(self):
@@ -123,6 +124,7 @@ class CLBHeader(object):
             self._parse_file(file_obj)
 
     def __str__(self):
+        # pylint: disable=E1124
         description = ("CLBHeader\n"
                        "    Data type:    {self.data_type}\n"
                        "    Run number:   {self.run_number}\n"
@@ -144,16 +146,14 @@ class CLBHeader(object):
         self.run_number = unpack('>i', byte_data[4:8])[0]
         self.udp_sequence = unpack('>i', byte_data[8:12])[0]
         self.timestamp, self.ns_ticks = unpack('>II', byte_data[12:20])
-        self.dom_id = binascii.hexlify(''.join(unpack('cccc', byte_data[20:24])))
+        self.dom_id = binascii.hexlify(''.join(unpack('cccc',
+                                                      byte_data[20:24])))
 
-        b = unpack('>I', byte_data[24:28])[0]
-        #first_bit = b >> 7
-        #self.time_valid = bool(first_bit)
-        self.dom_status = "{0:032b}".format(b)
+        dom_status_bits = unpack('>I', byte_data[24:28])[0]
+        self.dom_status = "{0:032b}".format(dom_status_bits)
 
         self.human_readable_timestamp = datetime.datetime.fromtimestamp(
             int(self.timestamp)).strftime('%Y-%m-%d %H:%M:%S')
-
 
 
     def _parse_file(self, file_obj):

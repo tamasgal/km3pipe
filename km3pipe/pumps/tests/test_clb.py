@@ -1,13 +1,13 @@
 # coding=utf-8
 # Filename: test_clb.py
-# pylint: disable=locally-disabled,C0111
+# pylint: disable=C0111
 """
 ...
 
 """
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import *
+from km3pipe.testing import TestCase, StringIO
 from km3pipe.pumps.clb import CLBPump, CLBHeader, PMTData
 
 import binascii
