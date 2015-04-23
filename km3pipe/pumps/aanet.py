@@ -18,9 +18,10 @@ class AanetPump(Pump):
 
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
-        
-        import aa # pylint: disable:F0401,W0612
-        from ROOT import TFile, Evt, Trk # pylint: disable:F0401,W0612
+
+        # pylint: disable:F0401,W0612
+        import aa
+        from ROOT import TFile, Evt, Trk
         
         self.filename = self.get('filename')
         if not self.filename:
