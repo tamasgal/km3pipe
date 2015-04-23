@@ -95,7 +95,7 @@ class TestEvtParser(TestCase):
         self.assertListEqual(offsets, self.pump.event_offsets)
 
     def test_event_offset_is_at_first_event_after_parsing_header(self):
-        raw_header = self.pump.extract_header()
+        self.pump.extract_header()
         self.assertEqual(88, self.pump.event_offsets[0])
 
     def test_rebuild_offsets(self):
