@@ -1,7 +1,6 @@
 # coding=utf-8
 # Filename: dataclasses.py
 # pylint: disable=W0232,C0103,C0111
-# pylint: ignored-modules=numpy
 """
 ...
 
