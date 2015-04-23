@@ -93,9 +93,11 @@ class Detector(object):
                 if pmt.id % self.n_pmts_per_dom == 1]
 
     def pmt_with_id(self, pmt_id):
+        """Get PMT with pmt_id"""
         return self._pmts[pmt_id]
 
-    def pmtid2omkey(self, pmt_id, first_pmt_id=1, oms_per_line=18, pmts_per_om=31):
+    def pmtid2omkey(self, pmt_id, 
+                    first_pmt_id=1, oms_per_line=18, pmts_per_om=31):
         """Convert (consecutive) raw PMT IDs to Multi-OMKeys."""
         pmts_per_line = oms_per_line * pmts_per_om
         line = ((pmt_id - first_pmt_id) // pmts_per_line) + 1
@@ -105,6 +107,7 @@ class Detector(object):
 
 
 class PMT(object):
+    """Represents a photomultiplier"""
     def __init__(self, id, pos, dir, t0):
         self.id = id
         self.pos = Point(pos)
@@ -114,3 +117,4 @@ class PMT(object):
     def __str__(self):
         return "PMT id:{0} pos: {1} dir: dir{2} t0: {3}"\
                .format(self.id, self.pos, self.dir, self.t0)
+

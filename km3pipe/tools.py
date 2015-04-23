@@ -1,6 +1,6 @@
 # coding=utf-8
 # Filename: tools.py
-# pylint: disable=locally-disabled
+# pylint: disable=C0103
 """
 Some frequently used logic.
 
@@ -26,7 +26,7 @@ def unpack_nfirst(seq, nfirst):
 
     """
     iterator = iter(seq)
-    for item in xrange(nfirst):
+    for _ in xrange(nfirst):
         yield next(iterator, None)
     yield tuple(iterator)
 
@@ -60,14 +60,14 @@ def namedtuple_with_defaults(typename, field_names, default_values=[]):
     >>> Node(4)
     Node(val=4, left=None, right=7)
     """
-    T = namedtuple(typename, field_names)
-    T.__new__.__defaults__ = (None,) * len(T._fields)
+    the_tuple = namedtuple(typename, field_names)
+    the_tuple.__new__.__defaults__ = (None,) * len(the_tuple._fields)
     if isinstance(default_values, collections.Mapping):
-        prototype = T(**default_values)
+        prototype = the_tuple(**default_values)
     else:
-        prototype = T(*default_values)
-    T.__new__.__defaults__ = tuple(prototype)
-    return T
+        prototype = the_tuple(*default_values)
+    the_tuple.__new__.__defaults__ = tuple(prototype)
+    return the_tuple 
 
 
 def angle_between(v1, v2):
@@ -116,6 +116,8 @@ def geant2pdg(geant_code):
         return 0
 
 def pdg2name(pdg_id):
+    """Convert PDG ID to human readable names"""
+    # pylint: disable=C0330
     conversion_table = {
          11: 'e-',
         -11: 'e+',

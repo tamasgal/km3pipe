@@ -1,9 +1,9 @@
-# coding=utf-8                    
+# coding=utf-8
 # Filename: test_decorators.py
-# pylint: disable=locally-disabled,C0111
+# pylint: disable=C0111,R0904,C0103,R0903,R0201
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import *
+from km3pipe.testing import TestCase, StringIO
 from km3pipe.decorators import remain_file_pointer
 
 

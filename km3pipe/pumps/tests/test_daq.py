@@ -1,13 +1,13 @@
 # coding=utf-8
 # Filename: test_daq.py
-# pylint: disable=locally-disabled,C0111
+# pylint: disable=C0111,R0904,C0103
 """
 ...
 
 """
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import *
+from km3pipe.testing import TestCase, StringIO
 from km3pipe.pumps.daq import (DAQPump, DAQPreamble, DAQHeader,
                                DAQSummaryslice, DAQEvent)
 
@@ -126,7 +126,7 @@ class TestDAQSummaryslice(TestCase):
 
     def test_init_with_a_slice(self):
         TEST_FILE.seek(0, 0)
-        preamble = DAQPreamble(file_obj=TEST_FILE)
+        DAQPreamble(file_obj=TEST_FILE)
         sum_slice = DAQSummaryslice(TEST_FILE)
         self.assertEqual(3, sum_slice.n_summary_frames)
         self.assertListEqual([101, 102, 103], sum_slice.summary_frames.keys())
@@ -139,7 +139,7 @@ class TestDAQEvent(TestCase):
 
     def setUp(self):
         TEST_FILE.seek(245, 0)
-        preamble = DAQPreamble(file_obj=TEST_FILE)
+        DAQPreamble(file_obj=TEST_FILE)
         self.event = DAQEvent(TEST_FILE)
 
     def test_init_with_a_frame(self):
