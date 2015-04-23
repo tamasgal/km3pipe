@@ -1,13 +1,13 @@
-# coding=utf-8                    
+# coding=utf-8
 # Filename: test_evt.py
-# pylint: disable=locally-disabled,C0111
+# pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
 from __future__ import division, absolute_import, print_function
 
 __author__ = 'tamasgal'
 
 import operator
 
-from km3pipe.testing import *
+from km3pipe.testing import TestCase, StringIO
 from km3pipe.pumps import EvtPump
 from km3pipe.pumps.evt import Track, TrackIn, Neutrino, Hit, RawHit, TrackFit
 
@@ -199,7 +199,7 @@ class TestTrackIn(TestCase):
 
     def setUp(self):
         self.track_in = TrackIn((1, 2, 3, 4, 0, 0, 1, 8, 9, 10, 11),
-                           zed_correction=0)
+                                zed_correction=0)
 
     def test_trackin_init(self):
         track_in = self.track_in
