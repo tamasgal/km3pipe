@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 # Filename: __version__.py
+# pylint: disable=C0103
 """
 Pep 386 compliant version info.
 

@@ -1,6 +1,6 @@
 # coding=utf-8
 # Filename: test_clb.py
-# pylint: disable=C0111
+# pylint: disable=C0111,R0904,C0103
 """
 ...
 
@@ -131,7 +131,7 @@ HEX_DATA = ("7A0500005454444300000000000000030000684200BEBC2030BEAF008000000" +
             "21205011D9C5E0B1B012140DD15000122E1A105000122F104060001234ED404" +
             "000124B66406140125ABD610070127CBA40A14012DA81B1D1A012DA82206000" +
             "12F7E5F24")
-            
+
 
 BINARY_DATA = binascii.unhexlify(HEX_DATA)
 TEST_FILE = StringIO(BINARY_DATA)
@@ -178,9 +178,9 @@ class TestCLBPump(TestCase):
 
     def test_next_blob_raises_stop_iteration_on_eof(self):
         self.pump.determine_packet_positions()
-        blob = self.pump.next_blob()
-        blob = self.pump.next_blob()
-        blob = self.pump.next_blob()
+        self.pump.next_blob()
+        self.pump.next_blob()
+        self.pump.next_blob()
         self.assertRaises(StopIteration, self.pump.next_blob)
 
 
