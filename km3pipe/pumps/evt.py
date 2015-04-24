@@ -22,7 +22,7 @@ from km3pipe.tools import pdg2name, geant2pdg, unpack_nfirst
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
-class EvtPump(Pump):
+class EvtPump(Pump): # pylint: disable:R0902
     """Provides a pump for EVT-files"""
 
     def __init__(self, **context):
@@ -156,24 +156,28 @@ class EvtPump(Pump):
                 blob[tag] = value.split()
                 continue
             if blob:
-                tag, value = line.split(':')
-                if tag in ('track_in', 'track_fit', 'hit', 'hit_raw'):
-                    values = [float(x) for x in value.split()]
-                    blob.setdefault(tag, []).append(values)
-                    if tag == 'hit':
-                        blob.setdefault("EvtHits", []).append(Hit(*values))
-                    if tag == "hit_raw":
-                        blob.setdefault("EvtRawHits", []).append(RawHit(*values))
-                    if tag == "track_in":
-                        blob.setdefault("TrackIns", []).append(TrackIn(values))
-                    if tag == "track_fit":
-                        blob.setdefault("TrackFits", []).append(TrackFit(values))
-                else:
-                    if tag == 'neutrino':
-                        values = [float(x) for x in value.split()]
-                        blob['Neutrino'] = Neutrino(values)
-                    else:
-                        blob[tag] = value.split()
+                self._create_blob_entry_for_line(line, blob)
+
+    def _create_blob_entry_for_line(self, line, blob):
+        """Create the actual blob entry from the given line."""
+        tag, value = line.split(':')
+        if tag in ('track_in', 'track_fit', 'hit', 'hit_raw'):
+            values = [float(x) for x in value.split()]
+            blob.setdefault(tag, []).append(values)
+            if tag == 'hit':
+                blob.setdefault("EvtHits", []).append(Hit(*values))
+            if tag == "hit_raw":
+                blob.setdefault("EvtRawHits", []).append(RawHit(*values))
+            if tag == "track_in":
+                blob.setdefault("TrackIns", []).append(TrackIn(values))
+            if tag == "track_fit":
+                blob.setdefault("TrackFits", []).append(TrackFit(values))
+        else:
+            if tag == 'neutrino':
+                values = [float(x) for x in value.split()]
+                blob['Neutrino'] = Neutrino(values)
+            else:
+                blob[tag] = value.split()
 
     def __iter__(self):
         return self
@@ -259,10 +263,8 @@ class TrackFit(Track):
         return text
 
 
-class Neutrino(object):
+class Neutrino(object): # pylint: disable:R0902
     """Representation of a neutrino entry in an EVT file"""
-    #def __init__(self, id, x, y, z, dx, dy, dz, E, t, Bx, By,
-    #             ichan, particle_type, channel, *args):
     def __init__(self, data, zed_correction=405.93):
         id, x, y, z, dx, dy, dz, E, t, Bx, By, \
             ichan, particle_type, channel, args = unpack_nfirst(data, 14)
@@ -291,9 +293,11 @@ class Neutrino(object):
         text += ', CC' if int(self.channel) == 2 else ', NC'
         return text
 
+
 # The hit entry in an EVT file
 Hit = namedtuple('Hit', 'id pmt_id pe time type n_photons track_in c_time')
 Hit.__new__.__defaults__ = (None, None, None, None, None, None, None, None)
+
 
 # The hit_raw entry in an EVT file
 def __add_raw_hit__(self, other):
