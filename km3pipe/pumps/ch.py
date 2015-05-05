@@ -26,9 +26,9 @@ class CHPump(Pump):
         self.port = self.get('port') or 5553
         self.tag = self.get('tag') or 'foo'
 
-        self.client = Client(host, port)
+        self.client = Client(self.host, self.port)
         self.client._connect()
-        self.client.subscribe(tag)
+        self.client.subscribe(self.tag)
 
     def process(self, blob):
         prefix, message = self.client.get_message()
