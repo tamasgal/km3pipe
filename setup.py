@@ -14,6 +14,7 @@ setup(name='km3pipe',
       platforms='any',
       install_requires=[
           'numpy',
+          'controlhost',
           'urwid',
           'docopt',
       ],
