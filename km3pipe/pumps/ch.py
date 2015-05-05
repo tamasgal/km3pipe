@@ -8,6 +8,8 @@ Pump for the jpp file read through aanet interface.
 """
 from __future__ import division, absolute_import, print_function
 
+import socket
+
 from km3pipe import Pump
 from km3pipe.logger import logging
 
@@ -31,8 +33,13 @@ class CHPump(Pump):
         self.client.subscribe(self.tag)
 
     def process(self, blob):
-        prefix, message = self.client.get_message()
-        return {'CHPrefix': prefix, 'CHMessage': message}
+        try:
+            prefix, message = self.client.get_message()
+        except socket.error:
+            log.warn("Stopping cycle due to socket error")
+            raise StopIteration("Stopping cycle due to socket error")
+        else:
+            return {'CHPrefix': prefix, 'CHMessage': message}
 
     def finish(self):
         self.client._disconnect()
