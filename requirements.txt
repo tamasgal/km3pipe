@@ -1,4 +1,5 @@
 docopt
+controlhost
 urwid
 numpy
 
