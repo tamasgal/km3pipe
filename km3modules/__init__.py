@@ -37,7 +37,7 @@ class CHGrabber(Module):
     def process(self, blob):
         """Wait for the next packet and put it in the blob"""
         prefix, data = self.ch_client.get_message()
-        blob[self.key_for_prefix] prefix
+        blob[self.key_for_prefix] = prefix
         blob[self.key_for_data] = data
         return blob
         
