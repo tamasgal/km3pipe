@@ -28,18 +28,21 @@ class CHGrabber(Module):
         self._init_controlhost()
 
     def _init_controlhost(self):
+        """Set up the controlhost connection"""
         from controlhost import Client
         self.ch_client = Client(self.host, self.port)
         self.ch_client._connect()
         self.ch_client.subscribe(self.tag)
 
     def process(self, blob):
+        """Wait for the next packet and put it in the blob"""
         prefix, data = self.ch_client.get_message()
         blob[self.key_for_prefix] prefix
         blob[self.key_for_data] = data
         return blob
         
     def finish(self):
+        """Clean up the JLigier controlhost connection"""
         self.ch_client._disconnect()
 
 
