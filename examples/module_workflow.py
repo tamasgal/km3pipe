@@ -3,10 +3,10 @@ from __future__ import division, absolute_import, print_function
 
 __author__ = 'tamasgal'
 
-from km3pipe.core import Pipeline, Module
+from km3pipe.core import Pipeline, Module, Pump
 
 
-class DummyPump(Module):
+class Pump(Pump):
     """A pump demonstration with a dummy list as data."""
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
