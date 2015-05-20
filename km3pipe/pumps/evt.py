@@ -214,7 +214,7 @@ class EvtPump(Pump): # pylint: disable:R0902
     def _slice_generator(self, index):
         """A simple slice generator for iterations"""
         start, stop, step = index.indices(len(self))
-        for i in xrange(start, stop, step):
+        for i in range(start, stop, step):
             yield self.get_blob(i)
 
     def finish(self):

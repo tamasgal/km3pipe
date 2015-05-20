@@ -26,7 +26,7 @@ def unpack_nfirst(seq, nfirst):
 
     """
     iterator = iter(seq)
-    for _ in xrange(nfirst):
+    for _ in range(nfirst):
         yield next(iterator, None)
     yield tuple(iterator)
 

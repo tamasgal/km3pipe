@@ -8,7 +8,7 @@ from __future__ import division, absolute_import, print_function
 
 import struct
 from struct import unpack
-import binascii
+from binascii import hexlify
 from collections import namedtuple
 import datetime
 
@@ -65,7 +65,7 @@ class CLBPump(Pump):
         blob = {'CLBHeader': header}
         remaining_length = length - header.size
         pmt_data = []
-        for _ in xrange(int(remaining_length/6)):
+        for _ in range(int(remaining_length/6)):
             channel_id, timestamp, tot = struct.unpack('>cic',
                                                        self.blob_file.read(6))
             pmt_data.append(PMTData(ord(channel_id), timestamp, ord(tot)))
@@ -142,12 +142,12 @@ class CLBHeader(object):
 
     def _parse_byte_data(self, byte_data):
         """Extract the values from byte string."""
-        self.data_type = ''.join(unpack('cccc', byte_data[:4]))
+        self.data_type = b''.join(unpack('cccc', byte_data[:4])).decode()
         self.run_number = unpack('>i', byte_data[4:8])[0]
         self.udp_sequence = unpack('>i', byte_data[8:12])[0]
         self.timestamp, self.ns_ticks = unpack('>II', byte_data[12:20])
-        self.dom_id = binascii.hexlify(''.join(unpack('cccc',
-                                                      byte_data[20:24])))
+        self.dom_id = hexlify(b''.join(unpack('cccc',
+                                              byte_data[20:24]))).decode()
 
         dom_status_bits = unpack('>I', byte_data[24:28])[0]
         self.dom_status = "{0:032b}".format(dom_status_bits)
