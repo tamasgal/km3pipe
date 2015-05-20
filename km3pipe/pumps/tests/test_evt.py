@@ -175,6 +175,28 @@ class TestEvtParser(TestCase):
         self.assertListEqual(['12', '13', '14'], event_numbers)
 
 
+    def test_pump_has_len(self):
+        self.pump.prepare_blobs()
+        self.assertEqual(3, len(self.pump))
+
+    def test_pump_get_item_returns_first_for_index_zero(self):
+        self.pump.prepare_blobs()
+        first_blob = self.pump[0]
+        self.assertEqual('12', first_blob['start_event'][0])
+
+    def test_pump_get_item_returns_correct_blob_for_index(self):
+        self.pump.prepare_blobs()
+        blob = self.pump[1]
+        self.assertEqual('13', blob['start_event'][0])
+
+    def test_pump_slice_generator(self):
+        self.pump.prepare_blobs()
+        blobs = self.pump[:]
+        blobs = list(self.pump[1:3])
+        self.assertEqual(2, len(blobs))
+        self.assertEqual(['13', '1'], blobs[0]['start_event'])
+        
+
 class TestTrack(TestCase):
     def setUp(self):
         self.track = Track((1, 2, 3, 4, 0, 0, 1, 8, 9, 'a', 'b', 'c'),

@@ -36,6 +36,7 @@ class EvtPump(Pump): # pylint: disable:R0902
         self.raw_header = None
         self.event_offsets = []
         self.index = 0
+        self.whole_file_cached = False
 
         self.file_index = int(self.index_start)
 
@@ -135,6 +136,8 @@ class EvtPump(Pump): # pylint: disable:R0902
                 return
         self.event_offsets.pop()  # get rid of the last entry
         #self.blob_file.seek(self.event_offsets[0], 0)
+        if not up_to_index:
+            self.whole_file_cached = True
         print("\n{0} events indexed.".format(len(self.event_offsets)))
 
     def _record_offset(self):
@@ -179,6 +182,11 @@ class EvtPump(Pump): # pylint: disable:R0902
             else:
                 blob[tag] = value.split()
 
+    def __len__(self):
+        if not self.whole_file_cached:
+            self._cache_offsets()
+        return len(self.event_offsets)
+
     def __iter__(self):
         return self
 
@@ -195,6 +203,19 @@ class EvtPump(Pump): # pylint: disable:R0902
         self.index += 1
         return blob
 
+    def __getitem__(self,index):
+        if isinstance(index, int):
+            return self.get_blob(index)
+        elif isinstance(index, slice):
+            return self._slice_generator(index)
+        else:
+            raise TypeError("index must be int or slice")
+
+    def _slice_generator(self, index):
+        """A simple slice generator for iterations"""
+        start, stop, step = index.indices(len(self))
+        for i in xrange(start, stop, step):
+            yield self.get_blob(i)
 
     def finish(self):
         """Clean everything up"""
