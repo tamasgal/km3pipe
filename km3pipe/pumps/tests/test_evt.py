@@ -6,6 +6,7 @@ from __future__ import division, absolute_import, print_function
 __author__ = 'tamasgal'
 
 import operator
+from functools import reduce
 
 from km3pipe.testing import TestCase, StringIO
 from km3pipe.pumps import EvtPump
@@ -135,7 +136,7 @@ class TestEvtParser(TestCase):
     def test_get_blob_returns_correct_event_information(self):
         self.pump.prepare_blobs()
         blob = self.pump.get_blob(0)
-        self.assertTrue(blob.has_key('raw_header'))
+        self.assertTrue('raw_header' in blob)
         self.assertEqual(['1'], blob['raw_header']['start_run'])
         self.assertListEqual(['12', '1'], blob['start_event'])
         self.assertListEqual([[1.0, 44675.0, 1.0, 1170.59, 5.0, 2.0, 1.0, 1170.59]],

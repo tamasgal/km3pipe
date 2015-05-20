@@ -259,13 +259,13 @@ class DAQEvent(object):
 
     def _parse_triggered_hits(self, file_obj):
         """Parse and store triggered hits."""
-        for _ in xrange(self.n_triggered_hits):
+        for _ in range(self.n_triggered_hits):
             dom_id, pmt_id, tdc_time, tot = unpack('<ibib', file_obj.read(10))
             self.triggered_hits.append((dom_id, pmt_id, tdc_time, tot))
 
     def _parse_snapshot_hits(self, file_obj):
         """Parse and store snapshot hits."""
-        for _ in xrange(self.n_snapshot_hits):
+        for _ in range(self.n_snapshot_hits):
             dom_id, pmt_id, tdc_time, tot = unpack('<ibib', file_obj.read(10))
             self.snapshot_hits.append((dom_id, pmt_id, tdc_time, tot))
 

@@ -34,7 +34,11 @@ HEX_DATA = ''.join("85000000d1070000ae01000001000000000000000000000003000000" +
                    "000000000000000200000065000000040a1a130022650000000a0e1a" +
                    "1300280200000065000000040a1a130022650000000a0e1a130028")
 BINARY_DATA = binascii.unhexlify(HEX_DATA)
-TEST_FILE = StringIO(BINARY_DATA)
+try:
+    TEST_FILE = StringIO(BINARY_DATA)
+except TypeError:
+    from io import BytesIO
+    TEST_FILE = BytesIO(BINARY_DATA)
 
 
 class TestDAQPump(TestCase):
@@ -52,15 +56,15 @@ class TestDAQPump(TestCase):
     def test_next_blob_finds_correct_frame_types(self):
         pump = self.pump
         blob = pump.next_blob()
-        self.assertTrue(blob.has_key('DAQSummaryslice'))
+        self.assertTrue('DAQSummaryslice' in blob)
         blob = pump.next_blob()
-        self.assertTrue(blob.has_key('DAQEvent'))
+        self.assertTrue('DAQEvent' in blob)
         blob = pump.next_blob()
-        self.assertTrue(blob.has_key('DAQEvent'))
+        self.assertTrue('DAQEvent' in blob)
         blob = pump.next_blob()
-        self.assertTrue(blob.has_key('DAQEvent'))
+        self.assertTrue('DAQEvent' in blob)
         blob = pump.next_blob()
-        self.assertTrue(blob.has_key('DAQEvent'))
+        self.assertTrue('DAQEvent' in blob)
 
     def test_next_blob_raises_stop_iteration_when_eof_reached(self):
         pump = self.pump
@@ -129,7 +133,9 @@ class TestDAQSummaryslice(TestCase):
         DAQPreamble(file_obj=TEST_FILE)
         sum_slice = DAQSummaryslice(TEST_FILE)
         self.assertEqual(3, sum_slice.n_summary_frames)
-        self.assertListEqual([101, 102, 103], sum_slice.summary_frames.keys())
+        print(sum_slice.summary_frames.keys())
+        self.assertListEqual([101, 102, 103],
+                             list(sum_slice.summary_frames.keys()))
         self.assertEqual(31, len(sum_slice.summary_frames[101]))
         self.assertEqual(31, len(sum_slice.summary_frames[102]))
         self.assertEqual(31, len(sum_slice.summary_frames[103]))
