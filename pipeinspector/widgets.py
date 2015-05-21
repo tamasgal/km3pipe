@@ -160,7 +160,7 @@ class BlobWidget(urwid.Pile):
         return ticks
 
     def _make_blob_icons(self, start):
-        icon = u'B'
+        icon = 'B'
         if start < 10:
             icons = u'.' + icon * (self.width - 1)
         else:
