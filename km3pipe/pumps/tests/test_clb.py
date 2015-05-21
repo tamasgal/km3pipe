@@ -133,7 +133,7 @@ HEX_DATA = ("7A0500005454444300000000000000030000684200BEBC2030BEAF008000000" +
             "12F7E5F24")
 
 
-BINARY_DATA = binascii.unhexlify(HEX_DATA)
+BINARY_DATA = binascii.unhexlify(HEX_DATA.encode())
 try:
     TEST_FILE = StringIO(BINARY_DATA)
 except TypeError:
