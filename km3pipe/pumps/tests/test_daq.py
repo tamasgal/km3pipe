@@ -97,7 +97,7 @@ class TestDAQPreamble(TestCase):
         TEST_FILE.seek(0, 0)
 
     def test_init_with_byte_data(self):
-        byte_data = binascii.unhexlify("85000000D1070000")
+        byte_data = binascii.unhexlify("85000000D1070000".encode())
         preamble = DAQPreamble(byte_data=byte_data)
         self.assertEqual(133, preamble.length)
         self.assertEqual(2001, preamble.data_type)

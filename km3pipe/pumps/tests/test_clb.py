@@ -193,7 +193,7 @@ class TestCLBHeader(TestCase):
 
     def test_init_with_byte_data(self):
         raw_data = "5454444300000000000000030000684200BEBC2030BEAF0080000000"
-        byte_data = binascii.unhexlify(raw_data)
+        byte_data = binascii.unhexlify(raw_data.encode())
         header = CLBHeader(byte_data=byte_data)
         self.assertEqual('TTDC', header.data_type)
         self.assertEqual(0, header.run_number)
@@ -205,7 +205,7 @@ class TestCLBHeader(TestCase):
     @skipIf(True, "Weird one hour bias on date?")
     def test_str_representation(self):
         raw_data = "5454444300000000000000030000684200BEBC2030BEAF0080000000"
-        byte_data = binascii.unhexlify(raw_data)
+        byte_data = binascii.unhexlify(raw_data.encode())
         header = CLBHeader(byte_data=byte_data)
         description = "CLBHeader\n" \
                       "    Data type:    TTDC\n" \
