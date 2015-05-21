@@ -11,7 +11,7 @@ from km3pipe.testing import TestCase, StringIO
 from km3pipe.pumps.daq import (DAQPump, DAQPreamble, DAQHeader,
                                DAQSummaryslice, DAQEvent)
 
-import binascii
+from binascii import unhexlify
 
 
 HEX_DATA = ''.join("85000000d1070000ae01000001000000000000000000000003000000" +
@@ -33,7 +33,7 @@ HEX_DATA = ''.join("85000000d1070000ae01000001000000000000000000000003000000" +
                    "01000002000000000000000000800003000000000000000200000000" +
                    "000000000000000200000065000000040a1a130022650000000a0e1a" +
                    "1300280200000065000000040a1a130022650000000a0e1a130028")
-BINARY_DATA = binascii.unhexlify(HEX_DATA.encode())
+BINARY_DATA = unhexlify(HEX_DATA.encode())
 try:
     TEST_FILE = StringIO(BINARY_DATA)
 except TypeError:
@@ -97,7 +97,7 @@ class TestDAQPreamble(TestCase):
         TEST_FILE.seek(0, 0)
 
     def test_init_with_byte_data(self):
-        byte_data = binascii.unhexlify("85000000D1070000".encode())
+        byte_data = unhexlify("85000000D1070000".encode())
         preamble = DAQPreamble(byte_data=byte_data)
         self.assertEqual(133, preamble.length)
         self.assertEqual(2001, preamble.data_type)
@@ -113,7 +113,7 @@ class TestDAQPreamble(TestCase):
 class TestDAQHeader(TestCase):
 
     def test_init_with_byte_data(self):
-        byte_data = binascii.unhexlify("AE010000010000000000000000000000")
+        byte_data = unhexlify("AE010000010000000000000000000000".encode())
         header = DAQHeader(byte_data=byte_data)
         self.assertEqual(430, header.run)
         self.assertEqual(1, header.time_slice)
