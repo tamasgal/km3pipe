@@ -7,9 +7,9 @@ Common unit testing support for km3pipe.
 from __future__ import division, absolute_import, print_function
 
 try:
-    from unittest2 import TestCase, skipIf
+    from unittest2 import TestCase, skip, skipIf
 except ImportError:
-    from unittest import TestCase, skipIf
+    from unittest import TestCase, skip, skipIf
 
 try:
     from cStringIO import StringIO
