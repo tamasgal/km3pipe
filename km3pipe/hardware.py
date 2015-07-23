@@ -106,7 +106,7 @@ class Detector(object):
 
     def pmt_with_id(self, pmt_id):
         """Get PMT with pmt_id"""
-        return self._pmts[pmt_id]
+        return self._pmts_by_id[pmt_id]
 
     def pmtid2omkey(self, pmt_id,
                     first_pmt_id=1, oms_per_line=18, pmts_per_om=31):
