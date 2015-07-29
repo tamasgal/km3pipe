@@ -86,9 +86,18 @@ def angle_between(v1, v2):
     angle = np.arccos(np.dot(v1_u, v2_u))
     return angle
 
+
 def unit_vector(vector):
     """ Returns the unit vector of the vector.  """
     return vector / np.linalg.norm(vector)
+
+
+def circ_permutation(items):
+    """Calculate the circular permutation for a given list of items."""
+    permutations = []
+    for i in range(len(items)):
+        permutations.append(items[i:] + items[:i])
+    return permutations
 
 
 def geant2pdg(geant_code):
