@@ -67,7 +67,7 @@ def namedtuple_with_defaults(typename, field_names, default_values=[]):
     else:
         prototype = the_tuple(*default_values)
     the_tuple.__new__.__defaults__ = tuple(prototype)
-    return the_tuple 
+    return the_tuple
 
 
 def angle_between(v1, v2):
