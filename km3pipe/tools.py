@@ -11,6 +11,7 @@ __author__ = 'tamasgal'
 
 import collections
 from collections import namedtuple
+from itertools import chain
 
 import numpy as np
 
@@ -67,7 +68,7 @@ def namedtuple_with_defaults(typename, field_names, default_values=[]):
     else:
         prototype = the_tuple(*default_values)
     the_tuple.__new__.__defaults__ = tuple(prototype)
-    return the_tuple 
+    return the_tuple
 
 
 def angle_between(v1, v2):
@@ -86,9 +87,18 @@ def angle_between(v1, v2):
     angle = np.arccos(np.dot(v1_u, v2_u))
     return angle
 
+
 def unit_vector(vector):
     """ Returns the unit vector of the vector.  """
     return vector / np.linalg.norm(vector)
+
+
+def circ_permutation(items):
+    """Calculate the circular permutation for a given list of items."""
+    permutations = []
+    for i in range(len(items)):
+        permutations.append(items[i:] + items[:i])
+    return permutations
 
 
 def geant2pdg(geant_code):
@@ -148,3 +158,64 @@ def pdg2name(pdg_id):
         return conversion_table[pdg_id]
     except KeyError:
         return "N/A"
+
+
+class PMTReplugger(object):
+    """Replugs PMTs and modifies the data according to the new setup."""
+
+    def __init__(self, pmt_combs, angles, rates):
+        self._pmt_combs = pmt_combs
+        self._new_combs = []
+        self._angles = angles
+        self._rates = rates
+        self._switch = None
+
+    def angle_for(self, pmt_comb):
+        """Return angle for given PMT combination"""
+        combs = self.current_combs()
+        print(combs)
+        idx = combs.index(pmt_comb)
+        return self._angles[idx]
+
+    def current_combs(self):
+        combs = self._new_combs if self._new_combs else self._pmt_combs
+        return combs
+
+    @property
+    def angles(self):
+        combs = self.current_combs()
+        idxs = []
+        for comb in self._pmt_combs:
+            idxs.append(combs.index(comb))
+        angles = []
+        for idx in idxs:
+            angles.append(self._angles[idx])
+        return angles
+
+    def switch(self, idxs1, idxs2):
+        """Switch PMTs"""
+        flat_combs = np.array(self.flatten(self._pmt_combs))
+        operations = []
+        for old, new in zip(idxs1, idxs2):
+            operations.append((self.indices(old, flat_combs), new))
+        for idxs, new_value in operations:
+            flat_combs[idxs] = new_value
+        it = iter(flat_combs)
+        self._new_combs = []
+        for pmt1, pmt2 in zip(it, it):
+            if pmt1 > pmt2:
+                self._new_combs.append((pmt2, pmt1))
+            else:
+                self._new_combs.append((pmt1, pmt2))
+
+    def reset_switches(self):
+        """Reset all switches"""
+        self._new_combs = None
+
+    def indices(self, item, items):
+        values = np.array(items)
+        indices = np.where(values == item)[0]
+        return indices
+
+    def flatten(self, items):
+        return list(chain.from_iterable(items))
