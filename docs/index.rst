@@ -13,7 +13,7 @@ Contents:
 
    help_modules
    help_pumps
-   data_strctures
+   data_structures
    examples
    pipeinspector
    api/modules
