@@ -1,9 +1,6 @@
 Data Structures
 ===============
 
-Basic Data Structures
----------------------
-
 This section describes the basic data structures which a **pump**
 provides via the **blob** dictionary. The pump is responsible to parse
 the data and create a **blob** (a simple Python dictionary) for each
@@ -13,7 +10,7 @@ the chain recieves the original, unaltered data from the pump and
 further also additional information created by the preceeding modules.
 
 Hits
-~~~~
+----
 
 There are two kind of basic hit types: a **raw hit** representing an
 actual hit measured by the detector hardware, and a **MC hit**, which
@@ -44,3 +41,8 @@ following getters:
 +---------------------+----------+-----------+-----------+----------+
 
 to be continued...
+
+
+Tracks
+------
+...
