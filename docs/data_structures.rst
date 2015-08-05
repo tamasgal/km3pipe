@@ -1,7 +1,7 @@
-KM3Pipe concept
+Data Structures
 ===============
 
-Basic data structures
+Basic Data Structures
 ---------------------
 
 This section describes the basic data structures which a **pump**
@@ -31,10 +31,16 @@ conventions for raw hits and MC hits:
 Both hit types have attributes which can be accessed through the
 following getters:
 
-+---------------+----------+-----------+-----------+----------+
-| information   | getter   | type      | raw hit   | MC hit   |
-+===============+==========+===========+===========+==========+
-| hit time      | .time    | numeric   | X         | X        |
-+---------------+----------+-----------+-----------+----------+
++---------------------+----------+-----------+-----------+----------+
+| information         | getter   | type      | raw hit   | MC hit   |
++=====================+==========+===========+===========+==========+
+| hit id              | .id      | numeric   | X         | X        |
++---------------------+----------+-----------+-----------+----------+
+| hit time            | .time    | numeric   | X         | X        |
++---------------------+----------+-----------+-----------+----------+
+| time over threshold | .tot     | numeric   | X         |          |
++---------------------+----------+-----------+-----------+----------+
+| PMT id              | .pmt_id  | numeric   | X         | X        |
++---------------------+----------+-----------+-----------+----------+
 
 to be continued...
