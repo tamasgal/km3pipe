@@ -11,6 +11,7 @@ Contents:
 .. toctree::
    :maxdepth: 3
 
+   data_structures
    help_modules
    help_pumps
    examples

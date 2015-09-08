@@ -1,6 +1,6 @@
 # coding=utf-8
 # Filename: daq.py
-# pylint: disable=locally-disabled
+# pylint: disable=R0903
 """
 Pumps for the DAQ data formats.
 
@@ -219,7 +219,7 @@ class DAQSummaryslice(object):
 
     def _parse_summary_frames(self, file_obj):
         """Iterate through the byte data and fill the summary_frames"""
-        for i in range(self.n_summary_frames):
+        for _ in range(self.n_summary_frames):
             dom_id = unpack('<i', file_obj.read(4))[0]
             pmt_rates = unpack('b'*31, file_obj.read(31))
             self.summary_frames[dom_id] = pmt_rates
@@ -259,13 +259,13 @@ class DAQEvent(object):
 
     def _parse_triggered_hits(self, file_obj):
         """Parse and store triggered hits."""
-        for i in xrange(self.n_triggered_hits):
+        for _ in range(self.n_triggered_hits):
             dom_id, pmt_id, tdc_time, tot = unpack('<ibib', file_obj.read(10))
             self.triggered_hits.append((dom_id, pmt_id, tdc_time, tot))
 
     def _parse_snapshot_hits(self, file_obj):
         """Parse and store snapshot hits."""
-        for i in xrange(self.n_snapshot_hits):
+        for _ in range(self.n_snapshot_hits):
             dom_id, pmt_id, tdc_time, tot = unpack('<ibib', file_obj.read(10))
             self.snapshot_hits.append((dom_id, pmt_id, tdc_time, tot))
 

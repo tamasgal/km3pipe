@@ -1,10 +1,14 @@
+# coding=utf-8
+# Filename: test_tools.py
+# pylint: disable=locally-disabled,C0111,R0904,C0103
 from __future__ import division, absolute_import, print_function
 
 import numpy as np
+import itertools
 
-from km3pipe.testing import *
+from km3pipe.testing import TestCase
 from km3pipe.tools import (unpack_nfirst, split, namedtuple_with_defaults,
-                           angle_between, geant2pdg, pdg2name)
+                           angle_between, geant2pdg, pdg2name, PMTReplugger)
 
 
 class TestTools(TestCase):
@@ -71,3 +75,38 @@ class TestTools(TestCase):
 
     def test_pdg2name_returns_NA_for_unknown_particle(self):
         self.assertEqual('N/A', pdg2name(0))
+
+
+# [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)]
+PMT_COMBS = list(itertools.combinations(range(4), 2))
+ANGLES = range(len(PMT_COMBS))
+
+class TestPMTReplugger(TestCase):
+
+    def setUp(self):
+        self.replugger = PMTReplugger(PMT_COMBS, ANGLES, [])
+
+    def test_angle_for(self):
+        #self.assertEqual(0, self.replugger.angle_for((0, 1)))
+        #self.assertEqual(1, self.replugger.angle_for((0, 2)))
+        pass
+
+    def test_switch(self):
+        self.replugger.switch([0, 1], [1, 0])
+        self.assertEqual(self.replugger._new_combs,
+                         [(0, 1), (1, 2), (1, 3), (0, 2), (0, 3), (2, 3)])
+
+    def test_switch_three_indicies(self):
+        self.replugger.switch([0, 1, 2], [1, 2, 0])
+        self.assertEqual(self.replugger._new_combs,
+                         [(1, 2), (0, 1), (1, 3), (0, 2), (2, 3), (0, 3)])
+
+    def test_angle_is_correct_if_two_pmts_are_switched(self):
+        self.replugger.switch([0, 1], [1, 0])
+        self.assertEqual(0, self.replugger.angle_for((0, 1)))
+        self.assertEqual(3, self.replugger.angle_for((0, 2)))
+        self.assertEqual(4, self.replugger.angle_for((0, 3)))
+
+    def test_angles_are_ordered_correctly_after_switch(self):
+        self.replugger.switch([0, 1, 2], [1, 2, 0])
+        self.assertListEqual([1, 3, 5, 0, 2, 4], self.replugger.angles)

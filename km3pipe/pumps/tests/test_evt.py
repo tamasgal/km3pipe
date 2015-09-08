@@ -1,9 +1,16 @@
+# coding=utf-8
+# Filename: test_evt.py
+# pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
 from __future__ import division, absolute_import, print_function
 
 __author__ = 'tamasgal'
 
-from km3pipe.testing import *
+import operator
+from functools import reduce
+
+from km3pipe.testing import TestCase, StringIO
 from km3pipe.pumps import EvtPump
+from km3pipe.pumps.evt import Track, TrackIn, Neutrino, Hit, RawHit, TrackFit
 
 
 class TestEvtParser(TestCase):
@@ -89,7 +96,7 @@ class TestEvtParser(TestCase):
         self.assertListEqual(offsets, self.pump.event_offsets)
 
     def test_event_offset_is_at_first_event_after_parsing_header(self):
-        raw_header = self.pump.extract_header()
+        self.pump.extract_header()
         self.assertEqual(88, self.pump.event_offsets[0])
 
     def test_rebuild_offsets(self):
@@ -129,7 +136,7 @@ class TestEvtParser(TestCase):
     def test_get_blob_returns_correct_event_information(self):
         self.pump.prepare_blobs()
         blob = self.pump.get_blob(0)
-        self.assertTrue(blob.has_key('raw_header'))
+        self.assertTrue('raw_header' in blob)
         self.assertEqual(['1'], blob['raw_header']['start_run'])
         self.assertListEqual(['12', '1'], blob['start_event'])
         self.assertListEqual([[1.0, 44675.0, 1.0, 1170.59, 5.0, 2.0, 1.0, 1170.59]],
@@ -167,4 +174,220 @@ class TestEvtParser(TestCase):
         for blob in self.pump:
             event_numbers.append(blob['start_event'][0])
         self.assertListEqual(['12', '13', '14'], event_numbers)
+
+
+    def test_pump_has_len(self):
+        self.pump.prepare_blobs()
+        self.assertEqual(3, len(self.pump))
+
+    def test_pump_get_item_returns_first_for_index_zero(self):
+        self.pump.prepare_blobs()
+        first_blob = self.pump[0]
+        self.assertEqual('12', first_blob['start_event'][0])
+
+    def test_pump_get_item_returns_correct_blob_for_index(self):
+        self.pump.prepare_blobs()
+        blob = self.pump[1]
+        self.assertEqual('13', blob['start_event'][0])
+
+    def test_pump_slice_generator(self):
+        self.pump.prepare_blobs()
+        blobs = self.pump[:]
+        blobs = list(self.pump[1:3])
+        self.assertEqual(2, len(blobs))
+        self.assertEqual(['13', '1'], blobs[0]['start_event'])
+        
+
+class TestTrack(TestCase):
+    def setUp(self):
+        self.track = Track((1, 2, 3, 4, 0, 0, 1, 8, 9, 'a', 'b', 'c'),
+                           zed_correction=0)
+
+    def test_track_init(self):
+        track = self.track
+        self.assertEqual(1, track.id)
+        self.assertListEqual([2, 3, 4], list(track.pos))
+        self.assertListEqual([0, 0, 1], list(track.dir))
+        self.assertEqual(8, track.E)
+        self.assertEqual(9, track.time)
+        self.assertTupleEqual(('a', 'b', 'c'), track.args)
+
+    def test_track_repr(self):
+        repr_str = ("Track:\n id: 1\n pos: [2 3 4]\n dir: (0.0, 0.0, 1.0)\n"
+                    " energy: 8 GeV\n time: 9 ns\n")
+        self.assertEqual(repr_str, self.track.__repr__())
+
+
+class TestTrackIn(TestCase):
+
+    def setUp(self):
+        self.track_in = TrackIn((1, 2, 3, 4, 0, 0, 1, 8, 9, 10, 11),
+                                zed_correction=0)
+
+    def test_trackin_init(self):
+        track_in = self.track_in
+        self.assertEqual(1, track_in.id)
+        self.assertListEqual([2, 3, 4], list(track_in.pos))
+        self.assertListEqual([0, 0, 1], list(track_in.dir))
+        self.assertEqual(8, track_in.E)
+        self.assertEqual(9, track_in.time)
+        self.assertEqual(130, track_in.particle_type) # this should be PDG!
+        self.assertEqual(11, track_in.length)
+
+    def test_track_repr(self):
+        repr_str = ("Track:\n id: 1\n pos: [2 3 4]\n dir: (0.0, 0.0, 1.0)\n"
+                    " energy: 8 GeV\n time: 9 ns\n type: 130 'K0L' [PDG]\n"
+                    " length: 11 [m]\n")
+        self.assertEqual(repr_str, self.track_in.__repr__())
+
+
+class TestTrackFit(TestCase):
+
+    def setUp(self):
+        data = (1, 2, 3, 4, 0, 0, 1, 8, 9, 10, 11, 12, 13, 14)
+        self.track_fit = TrackFit(data, zed_correction=0)
+
+    def test_trackfit_init(self):
+        track_fit = self.track_fit
+        self.assertEqual(1, track_fit.id)
+        self.assertListEqual([2, 3, 4], list(track_fit.pos))
+        self.assertListEqual([0, 0, 1], list(track_fit.dir))
+        self.assertEqual(8, track_fit.E)
+        self.assertEqual(9, track_fit.time)
+        self.assertEqual(10, track_fit.speed)
+        self.assertEqual(11, track_fit.ts)
+        self.assertEqual(12, track_fit.te)
+        self.assertEqual(13, track_fit.con1)
+        self.assertEqual(14, track_fit.con2)
+
+    def test_trackfit_repr(self):
+        repr_str = ("Track:\n id: 1\n pos: [2 3 4]\n dir: (0.0, 0.0, 1.0)\n "
+                    "energy: 8 GeV\n time: 9 ns\n speed: 10 [m/ns]\n"
+                    " ts: 11 [ns]\n te: 12 [ns]\n con1: 13\n con2: 14\n")
+        self.assertEqual(repr_str, self.track_fit.__repr__())
+
+
+class TestNeutrino(TestCase):
+
+    def setUp(self):
+        data = (1, 2, 3, 4, 0, 0, 1, 8, 9, 10, 11, 12, 13, 14)
+        self.neutrino = Neutrino(data, zed_correction=0)
+
+    def test_neutrino_init(self):
+        neutrino = self.neutrino
+        self.assertEqual(1, neutrino.id)
+        self.assertListEqual([2, 3, 4], list(neutrino.pos))
+        self.assertListEqual([0, 0, 1], list(neutrino.dir))
+        self.assertEqual(8, neutrino.E)
+        self.assertEqual(9, neutrino.time)
+        self.assertEqual(10, neutrino.Bx)
+        self.assertEqual(11, neutrino.By)
+        self.assertEqual(12, neutrino.ichan)
+        self.assertEqual(13, neutrino.particle_type)
+        self.assertEqual(14, neutrino.channel)
+
+    def test_neutrino_str(self):
+        neutrino = self.neutrino
+        repr_str = "Neutrino: mu-, 8.0 GeV, NC"
+        self.assertEqual(repr_str, str(neutrino))
+        neutrino.E = 2000
+        repr_str = "Neutrino: mu-, 2.0 TeV, NC"
+        self.assertEqual(repr_str, str(neutrino))
+        neutrino.E = 3000000
+        repr_str = "Neutrino: mu-, 3.0 PeV, NC"
+        self.assertEqual(repr_str, str(neutrino))
+
+class TestHit(TestCase):
+
+    def test_hit_init(self):
+        hit = Hit(1, 2, 3, 4, 5, 6, 7, 8)
+        self.assertEqual(1, hit.id)
+        self.assertEqual(2, hit.pmt_id)
+        self.assertEqual(3, hit.pe)
+        self.assertEqual(4, hit.time)
+        self.assertEqual(5, hit.type)
+        self.assertEqual(6, hit.n_photons)
+        self.assertEqual(7, hit.track_in)
+        self.assertEqual(8, hit.c_time)
+
+    def test_hit_default_values(self):
+        hit = Hit()
+        self.assertIsNone(hit.id)
+        self.assertIsNone(hit.pmt_id)
+        self.assertIsNone(hit.time)
+
+    def test_hit_default_values_are_set_if_others_are_given(self):
+        hit = Hit(track_in=1)
+        self.assertIsNone(hit.id)
+        self.assertIsNone(hit.time)
+
+    def test_hit_attributes_are_immutable(self):
+        hit = Hit(1, True)
+        with self.assertRaises(AttributeError):
+            hit.time = 10
+
+
+
+
+class TestRawHit(TestCase):
+
+    def test_rawhit_init(self):
+        raw_hit = RawHit(1, 2, 3, 4)
+        self.assertEqual(1, raw_hit.id)
+        self.assertEqual(2, raw_hit.pmt_id)
+        self.assertEqual(3, raw_hit.tot)
+        self.assertEqual(4, raw_hit.time)
+
+    def test_hit_default_values(self):
+        raw_hit = RawHit()
+        self.assertIsNone(raw_hit.id)
+        self.assertIsNone(raw_hit.pmt_id)
+        self.assertIsNone(raw_hit.time)
+
+    def test_hit_default_values_are_set_if_others_are_given(self):
+        raw_hit = RawHit(pmt_id=1)
+        self.assertIsNone(raw_hit.id)
+        self.assertIsNone(raw_hit.time)
+
+    def test_hit_attributes_are_immutable(self):
+        raw_hit = RawHit(1, True)
+        with self.assertRaises(AttributeError):
+            raw_hit.time = 10
+
+    def test_hit_addition_remains_time_id_and_pmt_id_and_adds_tot(self):
+        hit1 = RawHit(id=1, time=1, pmt_id=1, tot=10)
+        hit2 = RawHit(id=2, time=2, pmt_id=2, tot=20)
+        merged_hit = hit1 + hit2
+        self.assertEqual(1, merged_hit.id)
+        self.assertEqual(1, merged_hit.time)
+        self.assertEqual(1, merged_hit.pmt_id)
+        self.assertEqual(30, merged_hit.tot)
+
+    def test_hit_addition_picks_correct_time_if_second_hit_is_the_earlier_one(self):
+        hit1 = RawHit(id=1, time=2, pmt_id=1, tot=10)
+        hit2 = RawHit(id=2, time=1, pmt_id=2, tot=20)
+        merged_hit = hit1 + hit2
+        self.assertEqual(2, merged_hit.id)
+        self.assertEqual(2, merged_hit.pmt_id)
+
+    def test_hit_additions_works_with_multiple_hits(self):
+        hit1 = RawHit(id=1, time=2, pmt_id=1, tot=10)
+        hit2 = RawHit(id=2, time=1, pmt_id=2, tot=20)
+        hit3 = RawHit(id=3, time=1, pmt_id=3, tot=30)
+        merged_hit = hit1 + hit2 + hit3
+        self.assertEqual(2, merged_hit.pmt_id)
+        self.assertEqual(60, merged_hit.tot)
+        self.assertEqual(1, merged_hit.time)
+        self.assertEqual(2, merged_hit.id)
+
+    def test_hit_addition_works_with_sum(self):
+        hit1 = RawHit(id=1, time=2, pmt_id=1, tot=10)
+        hit2 = RawHit(id=2, time=1, pmt_id=2, tot=20)
+        hit3 = RawHit(id=3, time=1, pmt_id=3, tot=30)
+        hits = [hit1, hit2, hit3]
+        merged_hit = reduce(operator.add, hits)
+        self.assertEqual(2, merged_hit.id)
+        self.assertEqual(1, merged_hit.time)
+        self.assertEqual(60, merged_hit.tot)
+        self.assertEqual(2, merged_hit.pmt_id)
 

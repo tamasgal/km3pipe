@@ -1,8 +1,11 @@
+# coding=utf-8
+# Filename: test_core.py
+# pylint: disable=C0111,E1003,R0904,C0103,R0201,C0102
 from __future__ import division, absolute_import, print_function
 
 __author__ = 'tamasgal'
 
-from km3pipe.testing import *
+from km3pipe.testing import TestCase, StringIO, MagicMock
 from km3pipe.core import Pipeline, Module, Pump, Blob
 
 
@@ -100,9 +103,6 @@ class TestPump(TestCase):
 
 class TestBlob(TestCase):
     """Tests for the blob holding the data"""
-
-    def test_init(self):
-        blob = Blob()
 
     def test_field_can_be_added(self):
         blob = Blob()

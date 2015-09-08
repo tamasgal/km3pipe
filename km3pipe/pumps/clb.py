@@ -1,6 +1,5 @@
 # coding=utf-8
 # Filename: clb.py
-# pylint: disable=locally-disabled
 """
 Pumps for the CLB data formats.
 
@@ -9,11 +8,11 @@ from __future__ import division, absolute_import, print_function
 
 import struct
 from struct import unpack
-import binascii
+from binascii import hexlify
 from collections import namedtuple
 import datetime
 
-from km3pipe import Pump, Blob
+from km3pipe import Pump
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -57,6 +56,7 @@ class CLBPump(Pump):
         self.blob_file.seek(pointer_position, 0)
 
     def next_blob(self):
+        """Generate next blob in file"""
         try:
             length = struct.unpack('<i', self.blob_file.read(4))[0]
         except struct.error:
@@ -65,7 +65,7 @@ class CLBPump(Pump):
         blob = {'CLBHeader': header}
         remaining_length = length - header.size
         pmt_data = []
-        for _ in xrange(int(remaining_length/6)):
+        for _ in range(int(remaining_length/6)):
             channel_id, timestamp, tot = struct.unpack('>cic',
                                                        self.blob_file.read(6))
             pmt_data.append(PMTData(ord(channel_id), timestamp, ord(tot)))
@@ -81,6 +81,19 @@ class CLBPump(Pump):
         blob = self.next_blob()
         return blob
 
+    def __iter__(self):
+        return self
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        return self.next_blob()
+
+    def finish(self):
+        """Clean everything up"""
+        self.blob_file.close()
 
 class CLBHeader(object):
     """Wrapper for the CLB Common Header binary format.
@@ -111,6 +124,7 @@ class CLBHeader(object):
             self._parse_file(file_obj)
 
     def __str__(self):
+        # pylint: disable=E1124
         description = ("CLBHeader\n"
                        "    Data type:    {self.data_type}\n"
                        "    Run number:   {self.run_number}\n"
@@ -128,20 +142,18 @@ class CLBHeader(object):
 
     def _parse_byte_data(self, byte_data):
         """Extract the values from byte string."""
-        self.data_type = ''.join(unpack('cccc', byte_data[:4]))
+        self.data_type = b''.join(unpack('cccc', byte_data[:4])).decode()
         self.run_number = unpack('>i', byte_data[4:8])[0]
         self.udp_sequence = unpack('>i', byte_data[8:12])[0]
         self.timestamp, self.ns_ticks = unpack('>II', byte_data[12:20])
-        self.dom_id = binascii.hexlify(''.join(unpack('cccc', byte_data[20:24])))
+        self.dom_id = hexlify(b''.join(unpack('cccc',
+                                              byte_data[20:24]))).decode()
 
-        b = unpack('>I', byte_data[24:28])[0]
-        #first_bit = b >> 7
-        #self.time_valid = bool(first_bit)
-        self.dom_status = "{0:032b}".format(b)
+        dom_status_bits = unpack('>I', byte_data[24:28])[0]
+        self.dom_status = "{0:032b}".format(dom_status_bits)
 
         self.human_readable_timestamp = datetime.datetime.fromtimestamp(
             int(self.timestamp)).strftime('%Y-%m-%d %H:%M:%S')
-
 
 
     def _parse_file(self, file_obj):

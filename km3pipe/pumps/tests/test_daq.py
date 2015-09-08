@@ -1,16 +1,17 @@
 # coding=utf-8
 # Filename: test_daq.py
+# pylint: disable=C0111,R0904,C0103
 """
 ...
 
 """
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import *
+from km3pipe.testing import TestCase, StringIO
 from km3pipe.pumps.daq import (DAQPump, DAQPreamble, DAQHeader,
                                DAQSummaryslice, DAQEvent)
 
-import binascii
+from binascii import unhexlify
 
 
 HEX_DATA = ''.join("85000000d1070000ae01000001000000000000000000000003000000" +
@@ -32,8 +33,12 @@ HEX_DATA = ''.join("85000000d1070000ae01000001000000000000000000000003000000" +
                    "01000002000000000000000000800003000000000000000200000000" +
                    "000000000000000200000065000000040a1a130022650000000a0e1a" +
                    "1300280200000065000000040a1a130022650000000a0e1a130028")
-BINARY_DATA = binascii.unhexlify(HEX_DATA)
-TEST_FILE = StringIO(BINARY_DATA)
+BINARY_DATA = unhexlify(HEX_DATA.encode())
+try:
+    TEST_FILE = StringIO(BINARY_DATA)
+except TypeError:
+    from io import BytesIO
+    TEST_FILE = BytesIO(BINARY_DATA)
 
 
 class TestDAQPump(TestCase):
@@ -51,15 +56,15 @@ class TestDAQPump(TestCase):
     def test_next_blob_finds_correct_frame_types(self):
         pump = self.pump
         blob = pump.next_blob()
-        self.assertTrue(blob.has_key('DAQSummaryslice'))
+        self.assertTrue('DAQSummaryslice' in blob)
         blob = pump.next_blob()
-        self.assertTrue(blob.has_key('DAQEvent'))
+        self.assertTrue('DAQEvent' in blob)
         blob = pump.next_blob()
-        self.assertTrue(blob.has_key('DAQEvent'))
+        self.assertTrue('DAQEvent' in blob)
         blob = pump.next_blob()
-        self.assertTrue(blob.has_key('DAQEvent'))
+        self.assertTrue('DAQEvent' in blob)
         blob = pump.next_blob()
-        self.assertTrue(blob.has_key('DAQEvent'))
+        self.assertTrue('DAQEvent' in blob)
 
     def test_next_blob_raises_stop_iteration_when_eof_reached(self):
         pump = self.pump
@@ -92,7 +97,7 @@ class TestDAQPreamble(TestCase):
         TEST_FILE.seek(0, 0)
 
     def test_init_with_byte_data(self):
-        byte_data = binascii.unhexlify("85000000D1070000")
+        byte_data = unhexlify("85000000D1070000".encode())
         preamble = DAQPreamble(byte_data=byte_data)
         self.assertEqual(133, preamble.length)
         self.assertEqual(2001, preamble.data_type)
@@ -108,7 +113,7 @@ class TestDAQPreamble(TestCase):
 class TestDAQHeader(TestCase):
 
     def test_init_with_byte_data(self):
-        byte_data = binascii.unhexlify("AE010000010000000000000000000000")
+        byte_data = unhexlify("AE010000010000000000000000000000".encode())
         header = DAQHeader(byte_data=byte_data)
         self.assertEqual(430, header.run)
         self.assertEqual(1, header.time_slice)
@@ -125,10 +130,12 @@ class TestDAQSummaryslice(TestCase):
 
     def test_init_with_a_slice(self):
         TEST_FILE.seek(0, 0)
-        preamble = DAQPreamble(file_obj=TEST_FILE)
+        DAQPreamble(file_obj=TEST_FILE)
         sum_slice = DAQSummaryslice(TEST_FILE)
         self.assertEqual(3, sum_slice.n_summary_frames)
-        self.assertListEqual([101, 102, 103], sum_slice.summary_frames.keys())
+        print(sum_slice.summary_frames.keys())
+        self.assertListEqual([101, 102, 103],
+                             list(sum_slice.summary_frames.keys()))
         self.assertEqual(31, len(sum_slice.summary_frames[101]))
         self.assertEqual(31, len(sum_slice.summary_frames[102]))
         self.assertEqual(31, len(sum_slice.summary_frames[103]))
@@ -138,7 +145,7 @@ class TestDAQEvent(TestCase):
 
     def setUp(self):
         TEST_FILE.seek(245, 0)
-        preamble = DAQPreamble(file_obj=TEST_FILE)
+        DAQPreamble(file_obj=TEST_FILE)
         self.event = DAQEvent(TEST_FILE)
 
     def test_init_with_a_frame(self):

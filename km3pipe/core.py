@@ -9,7 +9,6 @@ from __future__ import division, absolute_import, print_function
 
 __author__ = 'tamasgal'
 
-from multiprocessing import Process
 import signal
 
 from km3pipe.hardware import Detector
@@ -98,7 +97,8 @@ class Pipeline(object):
             module.pre_finish()
         self._finished = True
 
-    def _handle_ctrl_c(self, signal, frame):
+    def _handle_ctrl_c(self, *args):
+        """Handle the keyboard interrupts."""
         if self._stop:
             print("Forced shutdown...")
             raise SystemExit
@@ -193,5 +193,6 @@ class Geometry(Module):
         self.detector = Detector(filename)
 
     def get_detector(self):
+        """Return the detector"""
         return self.detector
 
