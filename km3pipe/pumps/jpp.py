@@ -18,12 +18,14 @@ class JPPPump(Pump):
 
         import aa
         import ROOT
-
+        if self.get('index'):
+            self.index = self.get('index')
+        else:
+            self.index = 0 
         self.filename = self.get('filename')
         if not self.filename:
             raise ValueError("No filename defined")
 
-        self.index = 0
         self.rootfile = ROOT.EventFile(self.filename)
         self.evt = ROOT.Evt()
 
