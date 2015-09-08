@@ -13,7 +13,6 @@ import socket
 from km3pipe import Pump
 from km3pipe.logger import logging
 
-from controlhost import Client
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -35,6 +34,7 @@ class CHPump(Pump):
 
     def _init_controlhost(self):
         """Set up the controlhost connection"""
+        from controlhost import Client
         self.client = Client(self.host, self.port)
         self.client._connect()
         self.client.subscribe(self.tag)
