@@ -12,6 +12,7 @@ __author__ = 'tamasgal'
 import collections
 from collections import namedtuple
 from itertools import chain
+import time
 
 import numpy as np
 
@@ -219,3 +220,18 @@ class PMTReplugger(object):
 
     def flatten(self, items):
         return list(chain.from_iterable(items))
+
+
+class Timer(object):
+    """A very simple, accurate and easy to use timer context"""
+    def __enter__(self):
+        self.__start = time.time()
+
+    def __exit__(self, type, value, traceback):
+        self.__finish = time.time()
+
+    def get_seconds(self):
+        return self.__finish - self.__start
+
+    def log(self):
+        print("{0}s".format(self.get_seconds()))
