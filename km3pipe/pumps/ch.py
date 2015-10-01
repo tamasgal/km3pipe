@@ -50,7 +50,7 @@ class CHPump(Pump):
             blob[self.key_for_prefix] = prefix
             blob[self.key_for_data] = data
             return blob
-        
+
     def finish(self):
         """Clean up the JLigier controlhost connection"""
-        self.ch_client._disconnect()
+        self.client._disconnect()
