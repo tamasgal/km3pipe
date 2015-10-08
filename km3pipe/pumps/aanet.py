@@ -31,7 +31,7 @@ class AanetPump(Pump):
         self.rootfile = TFile(self.filename)
         self.evt = Evt()
         self.E = self.rootfile.Get(self.treename)
-	self.N = self.E.GetEntries()
+        self.N = self.E.GetEntries()
         self.E.SetBranchAddress('Evt', self.evt)
 
     def get_blob(self, index):
