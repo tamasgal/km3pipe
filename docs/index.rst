@@ -11,9 +11,9 @@ Contents:
 .. toctree::
    :maxdepth: 3
 
+   data_structures
    help_modules
    help_pumps
-   data_strctures
    examples
    pipeinspector
    api/modules

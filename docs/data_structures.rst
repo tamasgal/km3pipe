@@ -1,8 +1,5 @@
-KM3Pipe concept
+Data Structures
 ===============
-
-Basic data structures
----------------------
 
 This section describes the basic data structures which a **pump**
 provides via the **blob** dictionary. The pump is responsible to parse
@@ -13,7 +10,7 @@ the chain recieves the original, unaltered data from the pump and
 further also additional information created by the preceeding modules.
 
 Hits
-~~~~
+----
 
 There are two kind of basic hit types: a **raw hit** representing an
 actual hit measured by the detector hardware, and a **MC hit**, which
@@ -31,10 +28,26 @@ conventions for raw hits and MC hits:
 Both hit types have attributes which can be accessed through the
 following getters:
 
-+---------------+----------+-----------+-----------+----------+
-| information   | getter   | type      | raw hit   | MC hit   |
-+===============+==========+===========+===========+==========+
-| hit time      | .time    | numeric   | X         | X        |
-+---------------+----------+-----------+-----------+----------+
++---------------------+----------+-----------+-----------+----------+
+| information         | getter   | type      | raw hit   | MC hit   |
++=====================+==========+===========+===========+==========+
+| hit id              | .id      | numeric   | X         | X        |
++---------------------+----------+-----------+-----------+----------+
+| hit time            | .time    | numeric   | X         | X        |
++---------------------+----------+-----------+-----------+----------+
+| time over threshold | .tot     | numeric   | X         |          |
++---------------------+----------+-----------+-----------+----------+
+| PMT id              | .pmt_id  | numeric   | X         | X        |
++---------------------+----------+-----------+-----------+----------+
 
 to be continued...
+
+
+Tracks
+------
+
+MC Tracks
+~~~~~~~~~
+
+Track Fits
+~~~~~~~~~~

@@ -24,22 +24,25 @@ class AanetPump(Pump):
         from ROOT import TFile, Evt, Trk
         
         self.filename = self.get('filename')
+        self.treename = self.get('treename') or "E"
         if not self.filename:
             raise ValueError("No filename defined")
         self.index = 0
         self.rootfile = TFile(self.filename)
         self.evt = Evt()
-        self.E = self.rootfile.Get('E')
+        self.E = self.rootfile.Get(self.treename)
+	self.N = self.E.GetEntries()
         self.E.SetBranchAddress('Evt', self.evt)
 
     def get_blob(self, index):
         self.E.GetEntry(index)
         return {'Evt': self.evt,
-                'hits': self.evt.hits,}
+                'hits': self.evt.hits}
 
     def process(self, blob):
         self.E.GetEntry(self.index)
-        self.index += 1
-        return {'hits': self.evt.hits,
-                'mc_trks': self.evt.mc_trks,
-                'a_hit': self.evt.hits[0]}
+        if self.index == self.N:
+            raise StopIteration
+        else:
+	    self.index += 1
+            return {'Evt': self.evt}
