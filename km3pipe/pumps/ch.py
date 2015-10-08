@@ -25,6 +25,7 @@ class CHPump(Pump):
         self.host = self.get('host') or '127.0.0.1'
         self.port = self.get('port') or 5553
         self.tag = self.get('tag') or 'MSG'
+        self.tags = self.get('tags') or []
         self.key_for_data = self.get('key_for_data') or 'CHData'
         self.key_for_prefix = self.get('key_for_prefix') or 'CHPrefix'
 
@@ -37,7 +38,11 @@ class CHPump(Pump):
         from controlhost import Client
         self.client = Client(self.host, self.port)
         self.client._connect()
-        self.client.subscribe(self.tag)
+        if self.tag:
+            self.client.subscribe(self.tag)
+        for tag in self.tags:
+            self.client.subscribe(tag)
+
 
     def process(self, blob):
         """Wait for the next packet and put it in the blob"""
@@ -50,7 +55,7 @@ class CHPump(Pump):
             blob[self.key_for_prefix] = prefix
             blob[self.key_for_data] = data
             return blob
-        
+
     def finish(self):
         """Clean up the JLigier controlhost connection"""
-        self.ch_client._disconnect()
+        self.client._disconnect()
