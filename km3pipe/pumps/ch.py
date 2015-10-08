@@ -12,7 +12,11 @@ import socket
 
 from km3pipe import Pump
 from km3pipe.logger import logging
-
+import threading
+try:
+    from Queue import Queue, Empty
+except ImportError:
+    from queue import Queue, Empty
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -24,37 +28,58 @@ class CHPump(Pump):
 
         self.host = self.get('host') or '127.0.0.1'
         self.port = self.get('port') or 5553
-        self.tag = self.get('tag') or 'MSG'
-        self.tags = self.get('tags') or []
+        self.tags = self.get('tags') or "MSG"
+        self.timeout = self.get('timeout') or 60*60*24
+        self.max_queue = self.get('max_queue') or 50
         self.key_for_data = self.get('key_for_data') or 'CHData'
         self.key_for_prefix = self.get('key_for_prefix') or 'CHPrefix'
 
+        self.queue = Queue()
         self.client = None
+        self.thread = None
+
+        print("Connecting to {0} on port {1}\n"
+              "Subscribed tags: {2}\n"
+              "Connection timout: {3}s\n"
+              "Maximum queue size for incoming data: {4}"
+              .format(self.host, self.port, self.tags, self.timeout,
+                      self.max_queue))
 
         self._init_controlhost()
+        self._start_thread()
+
+    def _start_thread(self):
+        self.thread = threading.Thread(target=self._run, args=())
+        self.thread.daemon = True
+        self.thread.start()
 
     def _init_controlhost(self):
         """Set up the controlhost connection"""
         from controlhost import Client
         self.client = Client(self.host, self.port)
         self.client._connect()
-        if self.tag:
-            self.client.subscribe(self.tag)
-        for tag in self.tags:
-            self.client.subscribe(tag)
+        for tag in self.tags.split(','):
+            self.client.subscribe(tag.strip())
 
+    def _run(self):
+        while True:
+            prefix, data = self.client.get_message()
+            if self.queue.qsize() > self.max_queue:
+                log.warn("Maximum queue size ({0}) reached, dropping data."
+                         .format(self.max_queue))
+            else:
+                self.queue.put((prefix, data))
 
     def process(self, blob):
         """Wait for the next packet and put it in the blob"""
         try:
-            prefix, data = self.client.get_message()
-        except socket.error:
-            log.warn("Stopping cycle due to socket error")
-            raise StopIteration("Stopping cycle due to socket error")
-        else:
-            blob[self.key_for_prefix] = prefix
-            blob[self.key_for_data] = data
-            return blob
+            prefix, data = self.queue.get(timeout=self.timeout)
+        except Empty:
+            log.warn("ControlHost timeout ({0}s) exceeded".format(self.timeout))
+            raise StopIteration("ControlHost timeout exceeded.")
+        blob[self.key_for_prefix] = prefix
+        blob[self.key_for_data] = data
+        return blob
 
     def finish(self):
         """Clean up the JLigier controlhost connection"""
