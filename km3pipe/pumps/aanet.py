@@ -22,7 +22,7 @@ class AanetPump(Pump):
         # pylint: disable:F0401,W0612
         import aa
         from ROOT import TFile, Evt, Trk
-        
+
         self.filename = self.get('filename')
         self.treename = self.get('treename') or "E"
         if not self.filename:
@@ -31,7 +31,7 @@ class AanetPump(Pump):
         self.rootfile = TFile(self.filename)
         self.evt = Evt()
         self.E = self.rootfile.Get(self.treename)
-	self.N = self.E.GetEntries()
+        self.N = self.E.GetEntries()
         self.E.SetBranchAddress('Evt', self.evt)
 
     def get_blob(self, index):
@@ -44,5 +44,5 @@ class AanetPump(Pump):
         if self.index == self.N:
             raise StopIteration
         else:
-	    self.index += 1
+            self.index += 1
             return {'Evt': self.evt}
