@@ -27,11 +27,24 @@ class JPPPump(Pump):
         if self.get('index'):
             self.index = self.get('index')
         else:
-            self.index = 0 
+            self.index = 0
+
+        self.index_start = self.get('index_start') or 1
+        self.index_stop = self.get('index_stop') or 1
+
         self.filename = self.get('filename')
-        if not self.filename:
+        self.basename = self.get('basename')
+        if not self.filename and not self.basename:
             raise ValueError("No filename defined")
-        self.rootfile = ROOT.EventFile(self.filename)
+
+        self.file_index = self.index_start
+
+        if self.basename:
+            self.rootfile = ROOT.EventFile(self.basename + str(self.file_index) + ".JTE.root")
+
+        else:
+                self.rootfile = ROOT.EventFile(self.filename)
+
         self.evt = ROOT.Evt()
 
     def get_blob(self, index):
@@ -46,7 +59,16 @@ class JPPPump(Pump):
             self.index += 1
             return {'Evt': self.evt}
         else:
-            raise StopIteration
+            self.file_index += 1
+            if self.basename and self.file_index <= self.index_stop:
+                import aa
+                import ROOT
+                print("open next file")
+                self.rootfile = ROOT.EventFile(self.basename + str(self.file_index) + ".JTE.root")
+                self.index = 0
+                self.process(blob)
+            else:
+                raise StopIteration
 
 
     def finish(self):
