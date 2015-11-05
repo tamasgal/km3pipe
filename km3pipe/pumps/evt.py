@@ -163,7 +163,11 @@ class EvtPump(Pump): # pylint: disable:R0902
 
     def _create_blob_entry_for_line(self, line, blob):
         """Create the actual blob entry from the given line."""
-        tag, value = line.split(':')
+        try:
+            tag, value = line.split(':')
+        except ValueError:
+            log.warning("Corrupt line in EVT file:\n{0}".format(line))
+            return
         if tag in ('track_in', 'track_fit', 'hit', 'hit_raw'):
             values = [float(x) for x in value.split()]
             blob.setdefault(tag, []).append(values)
