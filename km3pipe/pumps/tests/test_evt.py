@@ -65,6 +65,11 @@ class TestEvtParser(TestCase):
             "end_event:"
         ))
         self.corrupt_evt_header = "foo"
+        self.corrupt_line = "\n".join((
+            "start_event: 1 1",
+            "corrupt line",
+            "end_event:"
+            ))
 
         self.pump = EvtPump()
         self.pump.blob_file = StringIO(self.valid_evt_header)
@@ -196,7 +201,13 @@ class TestEvtParser(TestCase):
         blobs = list(self.pump[1:3])
         self.assertEqual(2, len(blobs))
         self.assertEqual(['13', '1'], blobs[0]['start_event'])
-        
+
+    def test_create_blob_entry_for_line_ignores_corrupt_line(self):
+        self.pump.blob_file = StringIO(self.corrupt_line)
+        self.pump.extract_header()
+        self.pump.prepare_blobs()
+        self.pump.get_blob(0)
+
 
 class TestTrack(TestCase):
     def setUp(self):
