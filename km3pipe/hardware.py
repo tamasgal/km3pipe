@@ -69,7 +69,6 @@ class Detector(object):
                     dom_id, line_id, floor_id, n_pmts = split(line, int)
                 except ValueError:
                     continue
-                self.doms[dom_id] = (line_id, floor_id, n_pmts)
                 self.n_pmts_per_dom = n_pmts
                 for i in range(n_pmts):
                     raw_pmt_info = lines.pop(0)
@@ -82,7 +81,15 @@ class Detector(object):
                     pmt_pos = [float(n) for n in (x, y, z)]
                     pmt_dir = [float(n) for n in (dx, dy, dz)]
                     t0 = float(t0)
-                    #pmt_entry = tuple([pmt_id] + pmt_pos + pmt_dir + [t0])
+                    if floor_id < 0:
+                        _, new_floor_id, _ = self.pmtid2omkey_old(pmt_id)
+                        log.error("Floor ID is negative for PMT {0}.\n"
+                                  "Guessing correct id: {1}"
+                                  .format(pmt_id, new_floor_id))
+                        floor_id = new_floor_id
+                    #TODO: following line is here bc of the bad MC floor IDs
+                    #      put it outside the for loop in future
+                    self.doms[dom_id] = (line_id, floor_id, n_pmts)
                     omkey = (line_id, floor_id, i)
                     pmt = PMT(pmt_id, pmt_pos, pmt_dir, t0, i, omkey)
                     self.pmts.append(pmt)
@@ -105,6 +112,27 @@ class Detector(object):
             self._pmt_angles = [pmt.dir for pmt in pmts]
         return self._pmt_angles
 
+    @property
+    def ascii(self):
+        """The ascii representation of the detector"""
+        header = "{det.det_id} {det.n_doms}".format(det=self)
+        doms = ""
+        for dom_id, (line_id, floor_id, n_pmts) in self.doms.iteritems():
+            doms += "{0} {1} {2} {3}\n".format(dom_id, line_id, floor_id, n_pmts)
+            for i in xrange(n_pmts):
+                pmt = self._pmts_by_omkey[(line_id, floor_id, i)]
+                doms += " {0} {1} {2} {3} {4} {5} {6} {7}\n".format(
+                        pmt.id, pmt.pos.x, pmt.pos.y, pmt.pos.z,
+                        pmt.dir.x, pmt.dir.y, pmt.dir.z,
+                        pmt.t0
+                        )
+        return header + "\n" + doms
+
+    def write(self, filename):
+        with open(filename, 'w') as f:
+            f.write(self.ascii)
+        print("Detector file saved as '{0}'".format(filename))
+
     def pmt_with_id(self, pmt_id):
         """Get PMT with pmt_id"""
         try:
@@ -123,6 +151,7 @@ class Detector(object):
         om = oms_per_line - (pmt_id - first_pmt_id) % pmts_per_line // pmts_per_om
         pmt = (pmt_id - first_pmt_id) % pmts_per_om
         return int(line), int(om), int(pmt)
+
 
 
 class PMT(object):
