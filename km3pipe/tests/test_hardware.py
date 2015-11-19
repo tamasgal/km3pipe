@@ -50,6 +50,36 @@ EXAMPLE_DETX_MIXED_IDS = StringIO("\n".join((
     " 63 3.4 3.5 3.6  0.1 -1.2  0.3 80",
     " 61 3.7 3.8 3.9  0.1  0.2 -1.3 90",)))
 
+EXAMPLE_DETX_WRITE = StringIO("\n".join((
+    "1 3",
+    "1 1 1 3",
+    " 1 1.1 1.2 1.3 1.0 0.0 0.0 10.0",
+    " 2 1.4 1.5 1.6 0.0 1.0 0.0 20.0",
+    " 3 1.7 1.8 1.9 0.0 0.0 1.0 30.0",
+    "2 1 2 3",
+    " 4 2.1 2.2 2.3 0.0 1.0 0.0 40.0",
+    " 5 2.4 2.5 2.6 0.0 0.0 1.0 50.0",
+    " 6 2.7 2.8 2.9 1.0 0.0 0.0 60.0",
+    "3 1 3 3",
+    " 7 3.1 3.2 3.3 0.0 0.0 1.0 70.0",
+    " 8 3.4 3.5 3.6 0.0 1.0 0.0 80.0",
+    " 9 3.7 3.8 3.9 1.0 0.0 0.0 90.0\n",)))
+
+EXAMPLE_MC_DETX_WRITE_MIXED_IDS = StringIO("\n".join((
+    "-1 3",
+    "6 1 1 3",
+    " 31 1.1 1.2 1.3 1.0 0.0 0.0 10.0",
+    " 22 1.4 1.5 1.6 0.0 1.0 0.0 20.0",
+    " 13 1.7 1.8 1.9 0.0 0.0 1.0 30.0",
+    "3 1 2 3",
+    " 34 2.1 2.2 2.3 1.0 0.0 0.0 40.0",
+    " 45 2.4 2.5 2.6 0.0 1.0 0.0 50.0",
+    " 16 2.7 2.8 2.9 0.0 0.0 1.0 60.0",
+    "9 1 3 3",
+    " 17 3.1 3.2 3.3 1.0 0.0 0.0 70.0",
+    " 48 3.4 3.5 3.6 0.0 1.0 0.0 80.0",
+    " 39 3.7 3.8 3.9 0.0 0.0 1.0 90.0\n",)))
+
 class TestDetector(TestCase):
 
     def setUp(self):
@@ -107,6 +137,13 @@ class TestDetector(TestCase):
             self.assertAlmostEqual(i + 1.1, position.x)
             self.assertAlmostEqual(i + 1.2, position.y)
             self.assertAlmostEqual(i + 1.3, position.z)
+
+    @skipIf(True, "DOM ordering is probably not important!")
+    def test_ascii_detector(self):
+        self.det.det_file = EXAMPLE_MC_DETX_WRITE_MIXED_IDS
+        self.det.parse_header()
+        self.det.parse_doms()
+        self.assertEqual(self.det.det_file.getvalue(), self.det.ascii)
 
     def test_pmtid2omkey_old(self):
         pmtid2omkey = self.det.pmtid2omkey_old
