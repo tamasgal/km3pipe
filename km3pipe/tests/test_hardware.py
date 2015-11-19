@@ -35,6 +35,20 @@ EXAMPLE_DETX = StringIO("\n".join((
     " 8 3.4 3.5 3.6  0.1 -1.2  0.3 80",
     " 9 3.7 3.8 3.9  0.1  0.2 -1.3 90",)))
 
+EXAMPLE_DETX_MIXED_IDS = StringIO("\n".join((
+    "1 3",
+    "8 1 1 3",
+    " 83 1.1 1.2 1.3 -1.1  0.2  0.3 10",
+    " 81 1.4 1.5 1.6  0.1 -1.2  0.3 20",
+    " 82 1.7 1.8 1.9  0.1  0.2 -1.3 30",
+    "7 1 2 3",
+    " 71 2.1 2.2 2.3 -1.1  0.2  0.3 40",
+    " 73 2.4 2.5 2.6  0.1 -1.2  0.3 50",
+    " 72 2.7 2.8 2.9  0.1  0.2 -1.3 60",
+    "6 1 3 3",
+    " 62 3.1 3.2 3.3 -1.1  0.2  0.3 70",
+    " 63 3.4 3.5 3.6  0.1 -1.2  0.3 80",
+    " 61 3.7 3.8 3.9  0.1  0.2 -1.3 90",)))
 
 class TestDetector(TestCase):
 
@@ -55,32 +69,18 @@ class TestDetector(TestCase):
         expected = {1: (1, 1, 3), 2: (1, 2, 3), 3: (1, 3, 3)}
         self.assertDictEqual(expected, self.det.doms)
 
+    def test_parse_doms_maps_each_dom_correctly_for_mixed_pmt_ids(self):
+        self.det.det_file = EXAMPLE_DETX_MIXED_IDS
+        self.det.parse_doms()
+        expected = {8: (1, 1, 3), 7: (1, 2, 3), 6: (1, 3, 3)}
+        self.assertDictEqual(expected, self.det.doms)
+
     @skipIf(True, "Weird one hour bias on date?")
     def test_parse_doms_fills_pmts_dict(self):
         self.det.parse_doms()
         self.assertEqual(9, len(self.det.pmts))
         self.assertTupleEqual((7, 3.1, 3.2, 3.3, -1.1, 0.2, 0.3, 70),
                               self.det.pmts[(1, 3, 0)])
-
-    def test_pmtid2omkey(self):
-        pmtid2omkey = self.det.pmtid2omkey
-        self.assertEqual((1, 13, 12), tuple(pmtid2omkey(168)))
-        self.assertEqual((1, 12, 18), tuple(pmtid2omkey(205)))
-        self.assertEqual((1, 11, 22), tuple(pmtid2omkey(240)))
-        self.assertEqual((4, 11, 2), tuple(pmtid2omkey(1894)))
-        self.assertEqual((9, 18, 0), tuple(pmtid2omkey(4465)))
-        self.assertEqual((95, 7, 16), tuple(pmtid2omkey(52810)))
-        self.assertEqual((95, 4, 13), tuple(pmtid2omkey(52900)))
-
-    def test_pmtid2omkey_handles_floats(self):
-        pmtid2omkey = self.det.pmtid2omkey
-        self.assertEqual((1, 13, 12), tuple(pmtid2omkey(168.0)))
-        self.assertEqual((1, 12, 18), tuple(pmtid2omkey(205.0)))
-        self.assertEqual((1, 11, 22), tuple(pmtid2omkey(240.0)))
-        self.assertEqual((4, 11, 2), tuple(pmtid2omkey(1894.0)))
-        self.assertEqual((9, 18, 0), tuple(pmtid2omkey(4465.0)))
-        self.assertEqual((95, 7, 16), tuple(pmtid2omkey(52810.0)))
-        self.assertEqual((95, 4, 13), tuple(pmtid2omkey(52900.0)))
 
     def test_dom_positions(self):
         self.det.parse_doms()
@@ -89,11 +89,54 @@ class TestDetector(TestCase):
             self.assertAlmostEqual(i + 1.2, position.y)
             self.assertAlmostEqual(i + 1.3, position.z)
 
+    def test_omkeys(self):
+        self.det.parse_doms()
+        self.assertEqual((1, 1, 0), self.det.pmt_with_id(1).omkey)
+        self.assertEqual((1, 2, 1), self.det.pmt_with_id(5).omkey)
+
+    def test_pmt_with_id_raises_exception_for_invalid_id(self):
+        self.det.parse_doms()
+        with self.assertRaises(KeyError):
+            self.det.pmt_with_id(100)
+
+    @skipIf(True, "DOM positions ordering unclear")
+    def test_dom_positions_with_mixed_pmt_ids(self):
+        self.det.det_file = EXAMPLE_DETX_MIXED_IDS
+        self.det.parse_doms()
+        for i, position in enumerate(self.det.dom_positions):
+            self.assertAlmostEqual(i + 1.1, position.x)
+            self.assertAlmostEqual(i + 1.2, position.y)
+            self.assertAlmostEqual(i + 1.3, position.z)
+
+    def test_pmtid2omkey_old(self):
+        pmtid2omkey = self.det.pmtid2omkey_old
+        self.assertEqual((1, 13, 12), tuple(pmtid2omkey(168)))
+        self.assertEqual((1, 12, 18), tuple(pmtid2omkey(205)))
+        self.assertEqual((1, 11, 22), tuple(pmtid2omkey(240)))
+        self.assertEqual((4, 11, 2), tuple(pmtid2omkey(1894)))
+        self.assertEqual((9, 18, 0), tuple(pmtid2omkey(4465)))
+        self.assertEqual((95, 7, 16), tuple(pmtid2omkey(52810)))
+        self.assertEqual((95, 4, 13), tuple(pmtid2omkey(52900)))
+
+    def test_pmtid2omkey_old_handles_floats(self):
+        pmtid2omkey = self.det.pmtid2omkey_old
+        self.assertEqual((1, 13, 12), tuple(pmtid2omkey(168.0)))
+        self.assertEqual((1, 12, 18), tuple(pmtid2omkey(205.0)))
+        self.assertEqual((1, 11, 22), tuple(pmtid2omkey(240.0)))
+        self.assertEqual((4, 11, 2), tuple(pmtid2omkey(1894.0)))
+        self.assertEqual((9, 18, 0), tuple(pmtid2omkey(4465.0)))
+        self.assertEqual((95, 7, 16), tuple(pmtid2omkey(52810.0)))
+        self.assertEqual((95, 4, 13), tuple(pmtid2omkey(52900.0)))
+
+
+
+
+
 
 class TestPMT(TestCase):
 
     def test_init(self):
-        pmt = PMT(1, (1, 2, 3), (4, 5, 6), 7, 8)
+        pmt = PMT(1, (1, 2, 3), (4, 5, 6), 7, 8, (9, 10, 11))
         self.assertEqual(1, pmt.id)
         self.assertEqual(1, pmt.pos.x)
         self.assertEqual(2, pmt.pos.y)
@@ -102,4 +145,5 @@ class TestPMT(TestCase):
         self.assertAlmostEqual(0.569803, pmt.dir.y, 6)
         self.assertAlmostEqual(0.683763, pmt.dir.z, 6)
         self.assertEqual(7, pmt.t0)
-        self.assertEqual(8, pmt.channel)
+        self.assertEqual(8, pmt.daq_channel)
+        self.assertEqual((9, 10, 11), pmt.omkey)
