@@ -83,7 +83,8 @@ class Detector(object):
                     pmt_dir = [float(n) for n in (dx, dy, dz)]
                     t0 = float(t0)
                     #pmt_entry = tuple([pmt_id] + pmt_pos + pmt_dir + [t0])
-                    pmt = PMT(pmt_id, pmt_pos, pmt_dir, t0, i)
+                    omkey = (line_id, floor_id, i)
+                    pmt = PMT(pmt_id, pmt_pos, pmt_dir, t0, i, omkey)
                     self.pmts.append(pmt)
                     self._pmts_by_omkey[(line_id, floor_id, i)] = pmt
                     self._pmts_by_id[pmt_id] = pmt
@@ -94,7 +95,7 @@ class Detector(object):
     def dom_positions(self):
         """The positions of the DOMs, taken from the PMT with the lowest ID."""
         return [pmt.pos for pmt in self._pmts_by_id.values()
-                if pmt.id % self.n_pmts_per_dom == 1]
+                if pmt.daq_channel == 0]
 
     @property
     def pmt_angles(self):
@@ -106,9 +107,15 @@ class Detector(object):
 
     def pmt_with_id(self, pmt_id):
         """Get PMT with pmt_id"""
-        return self._pmts_by_id[pmt_id]
+        try:
+            return self._pmts_by_id[pmt_id]
+        except KeyError:
+            raise KeyError("No PMT found for ID: {0}".format(pmt_id))
 
-    def pmtid2omkey(self, pmt_id,
+    def pmtid2omkey(self, pmt_id):
+        return self._pmts_by_id[int(pmt_id)].omkey
+
+    def pmtid2omkey_old(self, pmt_id,
                     first_pmt_id=1, oms_per_line=18, pmts_per_om=31):
         """Convert (consecutive) raw PMT IDs to Multi-OMKeys."""
         pmts_per_line = oms_per_line * pmts_per_om
@@ -120,14 +127,15 @@ class Detector(object):
 
 class PMT(object):
     """Represents a photomultiplier"""
-    def __init__(self, id, pos, dir, t0, channel):
+    def __init__(self, id, pos, dir, t0, daq_channel, omkey):
         self.id = id
         self.pos = Point(pos)
         self.dir = Direction(dir)
         self.t0 = t0
-        self.channel = channel
+        self.daq_channel = daq_channel
+        self.omkey = omkey
 
     def __str__(self):
-        return "PMT id:{0} pos: {1} dir: dir{2} t0: {3} channel: {4}"\
-               .format(self.id, self.pos, self.dir, self.t0)
+        return "PMT id:{0} pos: {1} dir: dir{2} t0: {3} DAQ channel: {4}"\
+               .format(self.id, self.pos, self.dir, self.t0, self.daq_channel)
 
