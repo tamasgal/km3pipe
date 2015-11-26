@@ -26,10 +26,11 @@ class AanetPump(Pump):
         if not self.filename and not self.filenames:
             raise ValueError("No filename(s) defined")
 
-        if "[index]" in self.filename and self.indices:
-            self._parse_filenames()
-        else:
-            self.filenames.append(self.filename)
+        if self.filename:
+            if "[index]" in self.filename and self.indices:
+                self._parse_filenames()
+            else:
+                self.filenames.append(self.filename)
 
         self.blobs = self.blob_generator()
 
