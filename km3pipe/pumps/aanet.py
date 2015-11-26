@@ -48,14 +48,15 @@ class AanetPump(Pump):
 
         for filename in self.filenames:
             print("Reading from file: {0}".format(filename))
-            self.event_file = EventFile(filename)
-            for event in self.event_file:
+            event_file = EventFile(filename)
+            for event in event_file:
                 blob = {'Evt': event,
                         'RawHits': event.hits,
                         'MCHits': event.mc_hits,
                         'RecoTracks': event.trks,
                         'MCTracks': event.mc_trks}
                 yield blob
+            del event_file
 
     def process(self, blob):
         return next(self.blobs)
