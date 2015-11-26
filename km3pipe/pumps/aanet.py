@@ -23,8 +23,8 @@ class AanetPump(Pump):
         self.filenames = self.get('filenames') or []
         self.indices = self.get('indices')
 
-        if not self.filename:
-            raise ValueError("No filename defined")
+        if not self.filename and not self.filenames:
+            raise ValueError("No filename(s) defined")
 
         if "[index]" in self.filename and self.indices:
             self._parse_filenames()
