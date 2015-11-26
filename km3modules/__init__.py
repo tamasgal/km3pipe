@@ -58,3 +58,12 @@ class StatusBar(Module):
               .format(self.blob_index, elapsed_time))
 
 
+class MemoryObserver(Module):
+    """Shows the maximum memory usage"""
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        import resource
+
+    def process(self, blob):
+        memory = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        print("Memory peak usage: {0} kb".format(memory))
