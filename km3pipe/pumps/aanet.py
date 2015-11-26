@@ -20,26 +20,23 @@ class AanetPump(Pump):
         super(self.__class__, self).__init__(**context)
 
         self.filename = self.get('filename')
+        self.filenames = self.get('filenames') or []
         self.indices = self.get('indices')
 
-        if not self.filename:
-            raise ValueError("No filename defined")
-
         if "[index]" in self.filename and self.indices:
-            self._prepare_multi_file_mode()
-        else:
-            self._prepare_single_file_mode()
+            self._parse_filenames()
+            
+        if self.filename:
+            self.filenames.append(self.filename)
+
+        if not self.filenames:
+            raise ValueError("No filename(s) defined")
 
         self.blobs = self.blob_generator()
 
-    def _prepare_multi_file_mode(self):
-        print("Draining multiple files")
-        print("Filename pattern: {0}".format(self.filename))
+    def _parse_filenames(self):
         prefix, suffix = self.filename.split('[index]')
-        self.filenames = [prefix + str(i) + suffix for i in self.indices]
-
-    def _prepare_single_file_mode(self):
-        self.filenames = (self.filename, )
+        self.filenames += [prefix + str(i) + suffix for i in self.indices]
 
     def get_blob(self, index):
         NotImpelementedYet("Aanet currently does not support indexing.")
