@@ -21,28 +21,26 @@ class AanetPump(Pump):
 
         # pylint: disable:F0401,W0612
         import aa
-        from ROOT import TFile, Evt, Trk
+        from ROOT import EventFile
 
         self.filename = self.get('filename')
-        self.treename = self.get('treename') or "E"
         if not self.filename:
             raise ValueError("No filename defined")
-        self.index = 0
-        self.rootfile = TFile(self.filename)
-        self.evt = Evt()
-        self.E = self.rootfile.Get(self.treename)
-        self.N = self.E.GetEntries()
-        self.E.SetBranchAddress('Evt', self.evt)
+        self.event_file = EventFile(self.filename)
+        self.blobs = self.blob_generator()
 
     def get_blob(self, index):
-        self.E.GetEntry(index)
-        return {'Evt': self.evt,
-                'hits': self.evt.hits}
+        NotImpelementedYet("Aanet currently does not support indexing.")
+
+    def blob_generator(self):
+        """Create a blob generator."""
+        for event in self.event_file:
+            blob = {'Evt': event,
+                    'RawHits': event.hits,
+                    'MCHits': event.mc_hits,
+                    'RecoTracks': event.trks,
+                    'MCTracks': event.mc_trks}
+            yield blob
 
     def process(self, blob):
-        self.E.GetEntry(self.index)
-        if self.index == self.N:
-            raise StopIteration
-        else:
-            self.index += 1
-            return {'Evt': self.evt}
+        return next(self.blobs)
