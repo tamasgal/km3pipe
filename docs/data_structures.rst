@@ -12,15 +12,16 @@ further also additional information created by the preceeding modules.
 Hits
 ----
 
-There are two kind of basic hit types: a **raw hit** representing an
-actual hit measured by the detector hardware, and a **MC hit**, which
-was created by a Monte Carlo simulation. Dictonary key naming
-conventions for raw hits and MC hits:
+There are two kinds of basic hit types: a **raw hit** representing either an
+actual hit measured by the detector hardware or a calibrated MC hit which
+does not contain MC information anyomre, and a **MC hit**, which
+was created by a Monte Carlo simulation. The dictonary key naming
+conventions for raw hits and MC hits are the following:
 
 +---------------+------------+------------------------+
 | information   | dict key   | container type         |
 +===============+============+========================+
-| Raw Hits      | RawHits    | list (Python stdlib)   |
+| Raw Hits      | Hits       | list (Python stdlib)   |
 +---------------+------------+------------------------+
 | MC Hits       | MCHits     | list (Python sdtlib)   |
 +---------------+------------+------------------------+
@@ -38,6 +39,8 @@ following getters:
 | time over threshold | .tot     | numeric   | X         |          |
 +---------------------+----------+-----------+-----------+----------+
 | PMT id              | .pmt_id  | numeric   | X         | X        |
++---------------------+----------+-----------+-----------+----------+
+| trigger information | ...      | ...       | X         |          |
 +---------------------+----------+-----------+-----------+----------+
 
 to be continued...

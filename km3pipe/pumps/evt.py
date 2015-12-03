@@ -172,9 +172,13 @@ class EvtPump(Pump): # pylint: disable:R0902
             values = [float(x) for x in value.split()]
             blob.setdefault(tag, []).append(values)
             if tag == 'hit':
-                blob.setdefault("EvtHits", []).append(Hit(*values))
+                hit = Hit(*values)
+                blob.setdefault("EvtHits", []).append(hit)
+                blob.setdefault("MCHits", []).append(hit)
             if tag == "hit_raw":
-                blob.setdefault("EvtRawHits", []).append(RawHit(*values))
+                raw_hit = RawHit(*values)
+                blob.setdefault("EvtRawHits", []).append(raw_hit)
+                blob.setdefault("Hits", []).append(raw_hit)
             if tag == "track_in":
                 blob.setdefault("TrackIns", []).append(TrackIn(values))
             if tag == "track_fit":
