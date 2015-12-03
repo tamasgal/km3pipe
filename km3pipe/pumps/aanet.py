@@ -51,9 +51,9 @@ class AanetPump(Pump):
             self.event_file = EventFile(filename)
             for event in self.event_file:
                 blob = {'Evt': event,
-                        'RawHits': event.hits,
+                        'Hits': event.hits,
                         'MCHits': event.mc_hits,
-                        'RecoTracks': event.trks,
+                        'Tracks': event.trks,
                         'MCTracks': event.mc_trks}
                 yield blob
 
