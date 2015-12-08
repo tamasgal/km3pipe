@@ -100,10 +100,10 @@ class Pipeline(object):
     def _handle_ctrl_c(self, *args):
         """Handle the keyboard interrupts."""
         if self._stop:
-            print("Forced shutdown...")
+            print("\nForced shutdown...")
             raise SystemExit
         if not self._stop:
-            print(42*'=' + "\nGot CTRL+C, waiting for the current cycle...\n"
+            print('\n' + 42*'=' + "\nGot CTRL+C, waiting for current cycle...\n"
                   "Press CTRL+C again if you're in hurry!\n" + 42*'=')
             self._stop = True
 
