@@ -64,6 +64,9 @@ class CHPump(Pump):
     def _run(self):
         while True:
             prefix, data = self.client.get_message()
+            if not data:
+                log.error("No data received, connection died.")
+                break
             if self.queue.qsize() > self.max_queue:
                 log.warn("Maximum queue size ({0}) reached, dropping data."
                          .format(self.max_queue))
