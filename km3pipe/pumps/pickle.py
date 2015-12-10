@@ -27,11 +27,15 @@ class PicklePump(Pump):
 
     def get_blob(self, index):
         hits = self.events[0]
-        raw_hits
+        t0 = min([hit[3] for hit in hits])
+        raw_hits = []
         for hit in hits:
-            pass
-        blob = {}
+            raw_hit = RawHit(hit[0], hit[1], hit[2], hit[3] - t0)
+            print(raw_hit)
+            raw_hits.append(raw_hit)
+        blob = {'EvtRawHits': raw_hits}
         return blob
 
 
 RawHit = namedtuple('RawHit', 'id pmt_id tot time')
+
