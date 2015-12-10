@@ -12,3 +12,4 @@ from km3pipe.pumps.clb import CLBPump
 from km3pipe.pumps.aanet import AanetPump
 from km3pipe.pumps.jpp import JPPPump
 from km3pipe.pumps.ch import CHPump
+from km3pipe.pumps.pickle import PicklePump
