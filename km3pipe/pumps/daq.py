@@ -249,6 +249,9 @@ class DAQEvent(object):
         self.trigger_mask = unpack('<Q', file_obj.read(8))[0]
         self.overlays = unpack('<i', file_obj.read(4))[0]
 
+        # TODO: This is needed but not documented in Wiki!
+        self.what_is_this = unpack('<i', file_obj.read(4))[0]
+
         self.n_triggered_hits = unpack('<i', file_obj.read(4))[0]
         self.triggered_hits = []
         self._parse_triggered_hits(file_obj)
@@ -261,7 +264,9 @@ class DAQEvent(object):
         """Parse and store triggered hits."""
         for _ in range(self.n_triggered_hits):
             dom_id, pmt_id, tdc_time, tot = unpack('<ibib', file_obj.read(10))
-            self.triggered_hits.append((dom_id, pmt_id, tdc_time, tot))
+            trigger_mask = unpack('<Q', file_obj.read(8))
+            self.triggered_hits.append((dom_id, pmt_id, tdc_time, tot,
+                                       trigger_mask))
 
     def _parse_snapshot_hits(self, file_obj):
         """Parse and store snapshot hits."""
