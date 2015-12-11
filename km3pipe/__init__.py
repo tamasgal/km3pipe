@@ -9,7 +9,8 @@ from __future__ import division, absolute_import, print_function
 from km3pipe.__version__ import version, version_info
 
 try:
-    from km3pipe.core import Pipeline, Module, Pump, Blob, Geometry
+    from km3pipe.core import (Pipeline, Module, Pump, Blob,
+                              Geometry, AanetGeometry)
 except ImportError:
     print("Numpy is needed for KM3Pipe")
 
