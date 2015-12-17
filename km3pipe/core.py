@@ -103,8 +103,9 @@ class Pipeline(object):
             print("\nForced shutdown...")
             raise SystemExit
         if not self._stop:
-            print('\n' + 42*'=' + "\nGot CTRL+C, waiting for current cycle...\n"
-                  "Press CTRL+C again if you're in hurry!\n" + 42*'=')
+            hline = 42*'='
+            print('\n' + hline + "\nGot CTRL+C, waiting for current cycle...\n"
+                  "Press CTRL+C again if you're in hurry!\n" + hline)
             self._stop = True
 
 
