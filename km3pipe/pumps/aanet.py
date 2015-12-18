@@ -9,6 +9,7 @@ from __future__ import division, absolute_import, print_function
 
 from km3pipe import Pump
 from km3pipe.logger import logging
+import os.path
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -49,13 +50,17 @@ class AanetPump(Pump):
 
         for filename in self.filenames:
             print("Reading from file: {0}".format(filename))
+            if not os.path.exists(filename):
+                print(filename + " not available: continue without using it")
+                continue
             event_file = EventFile(filename)
             for event in event_file:
                 blob = {'Evt': event,
                         'Hits': event.hits,
                         'MCHits': event.mc_hits,
                         'Tracks': event.trks,
-                        'MCTracks': event.mc_trks}
+                        'MCTracks': event.mc_trks,
+                        'filename': filename}
                 yield blob
             del event_file
 
