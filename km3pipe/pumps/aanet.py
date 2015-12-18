@@ -51,7 +51,7 @@ class AanetPump(Pump):
         for filename in self.filenames:
             print("Reading from file: {0}".format(filename))
             if not os.path.exists(filename):
-                print(filename + " not available: continue without using it")
+                log.warn(filename + " not available: continue without using it")
                 continue
             event_file = EventFile(filename)
             for event in event_file:
