@@ -163,7 +163,7 @@ class DAQHeader(object):
       size (int): The size of the original DAQ byte representation.
 
     """
-    size = 16
+    size = 20
 
     def __init__(self, byte_data=None, file_obj=None):
         self.run = None
@@ -176,10 +176,13 @@ class DAQHeader(object):
 
     def _parse_byte_data(self, byte_data):
         """Extract the values from byte string."""
-        run, time_slice, time_stamp = unpack('<iiQ', byte_data[:self.size])
+        chunks = unpack('<iiiii', byte_data[:self.size])
+        det_id, run, time_slice, time_stamp, ticks = chunks
+        self.det_id = det_id
         self.run = run
         self.time_slice = time_slice
         self.time_stamp = time_stamp
+        self.ticks = ticks
 
     def _parse_file(self, file_obj):
         """Directly read from file handler.
@@ -192,8 +195,9 @@ class DAQHeader(object):
         self._parse_byte_data(byte_data)
 
     def __repr__(self):
-        description = "Run: {0}\nTime slice: {1}\nTime stamp: {2}"\
-                      .format(self.run, self.time_slice, self.time_stamp)
+        description = "Run: {0}\nTime slice: {1}\nTime stamp: {2} ({3})"\
+                      .format(self.run, self.time_slice, self.time_stamp,
+                              self.ticks)
         return description
 
 
@@ -248,9 +252,6 @@ class DAQEvent(object):
         self.trigger_counter = unpack('<Q', file_obj.read(8))[0]
         self.trigger_mask = unpack('<Q', file_obj.read(8))[0]
         self.overlays = unpack('<i', file_obj.read(4))[0]
-
-        # TODO: This is needed but not documented in Wiki!
-        self.what_is_this = unpack('<i', file_obj.read(4))[0]
 
         self.n_triggered_hits = unpack('<i', file_obj.read(4))[0]
         self.triggered_hits = []
