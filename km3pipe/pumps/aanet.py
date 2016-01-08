@@ -9,6 +9,7 @@ from __future__ import division, absolute_import, print_function
 
 from km3pipe import Pump
 from km3pipe.logger import logging
+import os.path
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -23,13 +24,14 @@ class AanetPump(Pump):
         self.filenames = self.get('filenames') or []
         self.indices = self.get('indices')
 
-        if not self.filename:
-            raise ValueError("No filename defined")
+        if not self.filename and not self.filenames:
+            raise ValueError("No filename(s) defined")
 
-        if "[index]" in self.filename and self.indices:
-            self._parse_filenames()
-        else:
-            self.filenames.append(self.filename)
+        if self.filename:
+            if "[index]" in self.filename and self.indices:
+                self._parse_filenames()
+            else:
+                self.filenames.append(self.filename)
 
         self.blobs = self.blob_generator()
 
@@ -48,14 +50,19 @@ class AanetPump(Pump):
 
         for filename in self.filenames:
             print("Reading from file: {0}".format(filename))
-            self.event_file = EventFile(filename)
-            for event in self.event_file:
+            if not os.path.exists(filename):
+                log.warn(filename + " not available: continue without using it")
+                continue
+            event_file = EventFile(filename)
+            for event in event_file:
                 blob = {'Evt': event,
                         'Hits': event.hits,
                         'MCHits': event.mc_hits,
                         'Tracks': event.trks,
-                        'MCTracks': event.mc_trks}
+                        'MCTracks': event.mc_trks,
+                        'filename': filename}
                 yield blob
+            del event_file
 
     def process(self, blob):
         return next(self.blobs)

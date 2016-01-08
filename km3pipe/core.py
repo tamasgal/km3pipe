@@ -197,3 +197,17 @@ class Geometry(Module):
         """Return the detector"""
         return self.detector
 
+
+class AanetGeometry(Module):
+    """AAnet based Geometry using Det()"""
+    def __init__(self, **context):
+        import aa
+        from ROOT import Det
+        super(self.__class__, self).__init__(**context)
+        filename = self.get('filename')
+        self.detector = Det(filename)
+
+    def get_detector(self):
+        """Return the detector"""
+        return self.detector
+
