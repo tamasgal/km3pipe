@@ -12,8 +12,6 @@ except ImportError:
     except ImportError:
         from io import StringIO
 
-from royweb import PacketHandler
-
 from km3pipe import Pipeline, Module
 from km3pipe.pumps import CHPump
 from km3pipe.pumps.daq import DAQPreamble, DAQEvent
