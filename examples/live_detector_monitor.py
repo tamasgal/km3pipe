@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from __future__ import division
-import time
+
 from time import ctime
 from pyslack import SlackClient
 
@@ -30,7 +30,6 @@ class ROySender(Module):
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.packet_handler = PacketHandler('131.188.161.241', 9999)
-        self.filenumber = int(time.time())
 
     def process(self, blob):
         roy = self.packet_handler
