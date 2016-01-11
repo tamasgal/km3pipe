@@ -226,6 +226,7 @@ class DAQSummaryslice(object):
         for _ in range(self.n_summary_frames):
             dom_id = unpack('<i', file_obj.read(4))[0]
             pmt_rates = unpack('b'*31, file_obj.read(31))
+            unknown = file_obj.read(4) # probably dom status?
             self.summary_frames[dom_id] = pmt_rates
 
 
