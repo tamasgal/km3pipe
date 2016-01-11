@@ -2,7 +2,6 @@
 from __future__ import division
 
 from time import ctime
-from pyslack import SlackClient
 
 try:
     from cStringIO import StringIO
