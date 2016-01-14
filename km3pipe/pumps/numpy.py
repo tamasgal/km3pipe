@@ -9,7 +9,7 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 
 from km3pipe.core import Pump
-from km3pipe.logger import logging
+
 
 class NumpyPump(Pump):
     """A pump for Numpy structured arrays.
@@ -20,7 +20,7 @@ class NumpyPump(Pump):
         self.filename = self.get("filename")
         columns = self.get("columns")
 
-        with np.load(filename) as array:
+        with np.load(self.filename) as array:
             self.array = array
         if columns:
             self.columns = columns
