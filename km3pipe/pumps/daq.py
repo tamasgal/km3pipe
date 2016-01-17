@@ -247,7 +247,8 @@ class DAQSummaryslice(object):
     Attributes:
       n_summary_frames (int): The number of summary frames.
       summary_frames (dict): The PMT rates for each DOM. The key is the DOM
-        identifier and the corresponding value is a sorted list of PMT rates.
+        identifier and the corresponding value is a sorted list of PMT rates
+        in [Hz].
 
     """
     def __init__(self, file_obj):
@@ -262,8 +263,18 @@ class DAQSummaryslice(object):
         for _ in range(self.n_summary_frames):
             dom_id = unpack('<i', file_obj.read(4))[0]
             unknown = file_obj.read(4) # probably dom status?
-            pmt_rates = unpack('b'*31, file_obj.read(31))
+            pmt_rates = [self._get_rate(i) for i in unpack('b'*31, file_obj.read(31))]
             self.summary_frames[dom_id] = pmt_rates
+
+    def _get_rate(self, value):
+        """Return the rate in Hz from the short int value"""
+        if value == 0:
+            return 0
+        else:
+            return MINIMAL_RATE_HZ * math.exp(value * self._get_factor())
+
+    def _get_factor(self):
+        return math.log(MAXIMAL_RATE_HZ / MINIMAL_RATE_HZ) / 255
 
 
 class DAQEvent(object):
