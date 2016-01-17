@@ -32,6 +32,7 @@ class DAQPump(Pump):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename')
         self.frame_positions = []
+        self.index = 0
 
         if self.filename:
             self.open_file(self.filename)
@@ -102,6 +103,41 @@ class DAQPump(Pump):
     def finish(self):
         """Clean everything up"""
         self.blob_file.close()
+
+    def __len__(self):
+        if not self.frame_positions:
+            self.determine_frame_positions()
+        return len(self.frame_positions)
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        try:
+            blob = self.get_blob(self.index)
+        except IndexError:
+            self.index = 0
+            raise StopIteration
+        self.index += 1
+        return blob
+
+    def __getitem__(self,index):
+        if isinstance(index, int):
+            return self.get_blob(index)
+        elif isinstance(index, slice):
+            return self._slice_generator(index)
+        else:
+            raise TypeError("index must be int or slice")
+
+    def _slice_generator(self, index):
+        """A simple slice generator for iterations"""
+        start, stop, step = index.indices(len(self))
+        for i in range(start, stop, step):
+            yield self.get_blob(i)
 
 
 class DAQPreamble(object):
