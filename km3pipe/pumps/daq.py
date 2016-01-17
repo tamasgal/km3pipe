@@ -7,6 +7,7 @@ Pumps for the DAQ data formats.
 """
 from __future__ import division, absolute_import, print_function
 
+import math
 import struct
 from struct import unpack
 import pprint
