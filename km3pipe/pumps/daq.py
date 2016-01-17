@@ -23,6 +23,8 @@ DATA_TYPES = {
     2001: 'DAQSummaryslice',
     10001: 'DAQEvent',
 }
+MINIMAL_RATE_HZ = 2.0e3
+MAXIMAL_RATE_HZ = 2.0e6
 
 
 class DAQPump(Pump):
