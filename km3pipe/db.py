@@ -114,3 +114,6 @@ class ParametersContainer(object):
     @property
     def names(self):
         return self._parameters.keys()
+
+    def unit(self, parameter):
+        return self._parameters[parameter]['Unit']
