@@ -40,7 +40,9 @@ BASE_URL='https://km3netdbweb.in2p3.fr'
 
 
 class DBManager(object):
+    """A wrapper for the KM3NeT Web DB"""
     def __init__(self, username=None, password=None):
+        "Create database connection"
         self.cookies = []
         self._parameters = None
         self._opener = None
@@ -50,6 +52,7 @@ class DBManager(object):
         self.login(username, password)
 
     def datalog(self, parameter, run, maxrun=None, detid='D_DU2NAPO'):
+        "Retrieve datalogs for given parameter, run(s) and detector"
         if maxrun is None:
             maxrun = run
         values = { 'parameter_name': parameter.lower(),
@@ -60,9 +63,6 @@ class DBManager(object):
         data = urllib.urlencode(values)
         content = self._get_content('streamds/datalognumbers.txt?' + data)
         try:
-            #dataframe = pd.read_csv(StringIO(content), sep="\t",
-            #                        parse_dates=['UNIXTIME'],
-            #                        date_parser=convert)
             dataframe = pd.read_csv(StringIO(content), sep="\t")
         except ValueError:
             log.warning("Empty dataset")
@@ -74,11 +74,13 @@ class DBManager(object):
 
     @property
     def parameters(self):
+        "Return the parameters container for quick access to their details"
         if self._parameters is None:
             self._load_parameters()
         return self._parameters
 
     def _load_parameters(self):
+        "Retrieve a list of available parameters from the database"
         parameters = self._get_json('allparam/s')
         if parameters['Result'] != 'OK':
             raise ValueError('Error while retrieving the parameter list.')
@@ -88,16 +90,19 @@ class DBManager(object):
         self._parameters = ParametersContainer(data)
 
     def _get_json(self, url):
+        "Get JSON-type content"
         content = self._get_content('jsonds/' + url)
         return json.loads(content)
 
     def _get_content(self, url):
+        "Get HTML content"
         f = self.opener.open(BASE_URL + '/' + url)
         content = f.read()
         return content
 
     @property
     def opener(self):
+        "A reusable connection manager"
         if self._opener is None:
             opener = build_opener()
             for cookie in self.cookies:
@@ -107,6 +112,7 @@ class DBManager(object):
         return self._opener
 
     def login(self, username, password):
+        "Login to the databse and store cookies for upcoming requests."
         cj = cookielib.CookieJar()
         opener = build_opener(HTTPCookieProcessor(cj), HTTPHandler())
         values = { 'usr': username,'pwd': password }
@@ -126,7 +132,10 @@ class ParametersContainer(object):
 
     @property
     def names(self):
+        "A list of parameter names"
         return self._parameters.keys()
 
     def unit(self, parameter):
+        "Get the unit for given parameter"
         return self._parameters[parameter.lower()]['Unit']
+
