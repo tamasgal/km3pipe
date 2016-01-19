@@ -15,6 +15,13 @@ import urllib
 from urllib2 import (Request, build_opener, HTTPCookieProcessor, HTTPHandler)
 import cookielib
 import json
+import sys
+if sys.version_info[0] < 3:
+    from StringIO import StringIO
+else:
+    from io import StringIO
+
+import pandas as pd
 
 from km3pipe.config import Config
 
@@ -49,7 +56,8 @@ class DBManager(object):
                    }
         data = urllib.urlencode(values)
         content = self._get_content('streamds/datalognumbers.txt?' + data)
-        return content
+        dataframe = pd.read_csv(StringIO(content), sep="\t")
+        return dataframe
 
     def _load_parameters(self):
         parameters = self._get_json('allparam/s')
