@@ -48,16 +48,23 @@ class DBManager(object):
             username, password = config.db_credentials
         self.login(username, password)
 
-    def datalog(self, parameter_name, minrun, maxrun, detid):
-        values = { 'parameter_name': parameter_name,
-                   'minrun': minrun,
+    def datalog(self, parameter, run, maxrun=None, detid='D_DU2NAPO'):
+        if maxrun is None:
+            maxrun = run
+        values = { 'parameter_name': parameter.lower(),
+                   'minrun': run,
                    'maxrun': maxrun,
                    'detid': detid,
                    }
         data = urllib.urlencode(values)
         content = self._get_content('streamds/datalognumbers.txt?' + data)
-        dataframe = pd.read_csv(StringIO(content), sep="\t")
-        return dataframe
+        try:
+            dataframe = pd.read_csv(StringIO(content), sep="\t")
+        except ValueError:
+            log.warning("Empty dataset")
+            return None
+        else:
+            return dataframe
 
     @property
     def parameters(self):
@@ -71,7 +78,7 @@ class DBManager(object):
             raise ValueError('Error while retrieving the parameter list.')
         data = {}
         for parameter in parameters['Data']:
-            data[parameter['Name']] = parameter
+            data[parameter['Name'].lower()] = parameter
         self._parameters = ParametersContainer(data)
 
     def _get_json(self, url):
@@ -116,4 +123,4 @@ class ParametersContainer(object):
         return self._parameters.keys()
 
     def unit(self, parameter):
-        return self._parameters[parameter]['Unit']
+        return self._parameters[parameter.lower()]['Unit']
