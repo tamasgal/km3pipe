@@ -1,0 +1,94 @@
+# coding=utf-8
+# Filename: db.py
+# pylint: disable=locally-disabled
+"""
+Database utilities.
+
+"""
+from __future__ import division, absolute_import, print_function
+
+__author__ = 'tamasgal'
+
+import ConfigParser, os
+import ssl
+import urllib
+from urllib2 import (Request, build_opener, HTTPCookieProcessor, HTTPHandler)
+import cookielib
+import json
+
+from km3pipe.config import Config
+
+import logging
+from km3pipe.logger import logging
+
+log = logging.getLogger(__name__)  # pylint: disable=C0103
+
+
+# Ignore invalid certificate error
+ssl._create_default_https_context = ssl._create_unverified_context
+
+LOGIN_URL='https://km3netdbweb.in2p3.fr/home.htm'
+BASE_URL='https://km3netdbweb.in2p3.fr'
+
+
+class DBManager(object):
+    def __init__(self, username=None, password=None):
+        self.cookies = []
+        self.parameters = {}
+        self._opener = None
+        if username is None:
+            config = Config()
+            username, password = config.db_credentials
+        self.login(username, password)
+
+    def datalog(self, parameter_name, minrun, maxrun, detid):
+        values = { 'parameter_name': parameter_name,
+                   'minrun': minrun,
+                   'maxrun': maxrun,
+                   'detid': detid,
+                   }
+        data = urllib.urlencode(values)
+        content = self._get_content('streamds/datalognumbers.txt?' + data)
+        return content
+
+    def _load_parameters(self):
+        parameters = self._get_json('allparam/s')
+        if parameters['Result'] != 'OK':
+            raise ValueError('Error while retrieving the parameter list.')
+        self.parameters = {}
+        print(len(parameters['Data']))
+        for parameter in parameters['Data']:
+            self.parameters[parameter['Name']] = parameter
+        print(len(self.parameters.keys()))
+
+    def _get_json(self, url):
+        content = self._get_content('jsonds/' + url)
+        return json.loads(content)
+
+    def _get_content(self, url):
+        f = self.opener.open(BASE_URL + '/' + url)
+        content = f.read()
+        return content
+
+    @property
+    def opener(self):
+        if self._opener is None:
+            opener = build_opener()
+            for cookie in self.cookies:
+                cookie_str = cookie.name + '=' + cookie.value
+                opener.addheaders.append(('Cookie', cookie_str))
+            self._opener = opener
+        return self._opener
+
+    def login(self, username, password):
+        cj = cookielib.CookieJar()
+        opener = build_opener(HTTPCookieProcessor(cj), HTTPHandler())
+        values = { 'usr': username,'pwd': password }
+        data = urllib.urlencode(values)
+        req = Request(LOGIN_URL, data)
+        f = opener.open(req)
+        html = f.read()
+        if 'Bad username or password' in html:
+            log.error("Bad username or password!")
+        self.cookies = cj
+
