@@ -9,6 +9,7 @@ from __future__ import division, absolute_import, print_function
 
 __author__ = 'tamasgal'
 
+from datetime import datetime
 import ConfigParser, os
 import ssl
 import urllib
@@ -59,11 +60,16 @@ class DBManager(object):
         data = urllib.urlencode(values)
         content = self._get_content('streamds/datalognumbers.txt?' + data)
         try:
+            #dataframe = pd.read_csv(StringIO(content), sep="\t",
+            #                        parse_dates=['UNIXTIME'],
+            #                        date_parser=convert)
             dataframe = pd.read_csv(StringIO(content), sep="\t")
         except ValueError:
             log.warning("Empty dataset")
             return None
         else:
+            convert = lambda x: datetime.fromtimestamp(float(x) / 1e3)
+            dataframe['DATETIME'] = dataframe['UNIXTIME'].apply(convert)
             return dataframe
 
     @property
