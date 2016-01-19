@@ -5,10 +5,13 @@ from __future__ import division, absolute_import, print_function
 
 import numpy as np
 import itertools
+from datetime import datetime
+from time import sleep
 
-from km3pipe.testing import TestCase
+from km3pipe.testing import TestCase, MagicMock
 from km3pipe.tools import (unpack_nfirst, split, namedtuple_with_defaults,
-                           angle_between, geant2pdg, pdg2name, PMTReplugger)
+                           angle_between, geant2pdg, pdg2name, PMTReplugger,
+			   Cuckoo)
 
 
 class TestTools(TestCase):
@@ -110,3 +113,85 @@ class TestPMTReplugger(TestCase):
     def test_angles_are_ordered_correctly_after_switch(self):
         self.replugger.switch([0, 1, 2], [1, 2, 0])
         self.assertListEqual([1, 3, 5, 0, 2, 4], self.replugger.angles)
+
+
+class TestCuckoo(TestCase):
+    def test_init(self):
+        cuckoo = Cuckoo()
+
+    def test_reset_timestamp(self):
+        cuckoo = Cuckoo()
+        cuckoo.reset()
+        now = datetime.now()
+        delta = datetime.now() - cuckoo.timestamp
+        self.assertGreater(delta.total_seconds(), 0)
+
+    def test_set_interval_on_init(self):
+        cuckoo = Cuckoo(1)
+        self.assertEqual(1, cuckoo.interval)
+
+    def test_set_callback(self):
+        callback = 1
+        cuckoo = Cuckoo(callback=callback)
+        self.assertEqual(1, cuckoo.callback)
+
+    def test_msg_calls_callback(self):
+        callback = MagicMock()
+        message = 'a'
+        cuckoo = Cuckoo(callback=callback)
+        cuckoo.msg(message)
+        callback.assert_called_with(message)
+
+    def test_msg_is_not_called_when_interval_not_reached(self):
+        callback = MagicMock()
+        message = 'a'
+        cuckoo = Cuckoo(10, callback)
+        cuckoo.reset()
+        cuckoo.msg(message)
+        self.assertFalse(callback.called)
+
+    def test_msg_is_only_called_when_interval_reached(self):
+        callback = MagicMock()
+        message = 'a'
+        cuckoo = Cuckoo(0.1, callback)
+        cuckoo.reset()
+        cuckoo.msg(message)
+        self.assertFalse(callback.called)
+        sleep(0.11)
+        cuckoo.msg(message)
+        self.assertTrue(callback.called)
+
+    def test_msg_sets_timestamp_on_first_call(self):
+        cuckoo = Cuckoo()
+        cuckoo.msg()
+        assert cuckoo.timestamp
+
+    def test_msg_gets_called_on_the_very_first_time(self):
+        callback = MagicMock()
+        message = 'a'
+        cuckoo = Cuckoo(1, callback)
+        cuckoo.msg(message)
+        self.assertTrue(callback.called)
+
+    def test_msg_resets_timestamp_after_interval_reached(self):
+        callback = MagicMock()
+        message = 'a'
+        cuckoo = Cuckoo(0.1, callback)
+        cuckoo.reset()
+        timestamp1 = cuckoo.timestamp
+        print(cuckoo.timestamp)
+        self.assertFalse(callback.called)
+        sleep(0.11)
+        cuckoo.msg(message)
+        timestamp2 = cuckoo.timestamp
+        print(cuckoo.timestamp)
+        self.assertTrue(callback.called)
+        assert timestamp1 is not timestamp2
+
+    def test_interval_reached(self):
+        cuckoo = Cuckoo(0.1)
+        cuckoo.reset()
+        self.assertFalse(cuckoo._interval_reached())
+        sleep(0.11)
+        self.assertTrue(cuckoo._interval_reached())
+

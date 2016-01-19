@@ -19,4 +19,7 @@ except ImportError:
     except ImportError:
         from io import StringIO
 
-from mock import MagicMock
+try:
+    from mock import MagicMock
+except ImportError:
+    from unittest.mock import MagicMock
