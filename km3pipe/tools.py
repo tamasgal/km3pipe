@@ -12,6 +12,7 @@ __author__ = 'tamasgal'
 import collections
 from collections import namedtuple
 from itertools import chain
+from datetime import datetime
 import time
 
 import numpy as np
@@ -235,3 +236,26 @@ class Timer(object):
 
     def log(self):
         print("{0}s".format(self.get_seconds()))
+
+
+class Cuckoo(object):
+    "A timed callback caller, which only executes once in a given interval."
+    def __init__(self, interval=0, callback=print):
+        "Setup with interval in seconds and a callback function"
+        self.interval = interval
+        self.callback = callback
+        self.timestamp = None
+
+    def msg(self, message=None):
+        "Only execute callback when interval is reached."
+        if self.timestamp is None or self._interval_reached():
+            self.callback(message)
+            self.reset()
+
+    def reset(self):
+        "Reset the timestamp"
+        self.timestamp = datetime.now()
+
+    def _interval_reached(self):
+        "Check if defined interval is reached"
+        return (datetime.now() - self.timestamp).total_seconds() > self.interval
