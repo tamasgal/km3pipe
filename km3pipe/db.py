@@ -41,7 +41,7 @@ BASE_URL='https://km3netdbweb.in2p3.fr'
 class DBManager(object):
     def __init__(self, username=None, password=None):
         self.cookies = []
-        self.parameters = {}
+        self._parameters = None
         self._opener = None
         if username is None:
             config = Config()
@@ -59,15 +59,20 @@ class DBManager(object):
         dataframe = pd.read_csv(StringIO(content), sep="\t")
         return dataframe
 
+    @property
+    def parameters(self):
+        if self._parameters is None:
+            self._load_parameters()
+        return self._parameters
+
     def _load_parameters(self):
         parameters = self._get_json('allparam/s')
         if parameters['Result'] != 'OK':
             raise ValueError('Error while retrieving the parameter list.')
-        self.parameters = {}
-        print(len(parameters['Data']))
+        data = {}
         for parameter in parameters['Data']:
-            self.parameters[parameter['Name']] = parameter
-        print(len(self.parameters.keys()))
+            data[parameter['Name']] = parameter
+        self._parameters = ParametersContainer(data)
 
     def _get_json(self, url):
         content = self._get_content('jsonds/' + url)
@@ -100,3 +105,12 @@ class DBManager(object):
             log.error("Bad username or password!")
         self.cookies = cj
 
+
+class ParametersContainer(object):
+    """Provides easy access to parameters"""
+    def __init__(self, parameters):
+        self._parameters = parameters
+
+    @property
+    def names(self):
+        return self._parameters.keys()
