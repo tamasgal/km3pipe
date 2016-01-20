@@ -11,7 +11,6 @@ import collections
 from collections import namedtuple
 from itertools import chain
 from datetime import datetime
-import time
 
 import numpy as np
 
@@ -236,17 +235,21 @@ class PMTReplugger(object):
 
 class Timer(object):
     """A very simple, accurate and easy to use timer context"""
+    def __init__(self, message='It'):
+        self.message = message
+
     def __enter__(self):
-        self.__start = time.time()
+        self.__start = datetime.now()
 
     def __exit__(self, type, value, traceback):
-        self.__finish = time.time()
+        self.__finish = datetime.now()
+        self.log()
 
     def get_seconds(self):
-        return self.__finish - self.__start
+        return total_seconds(self.__finish - self.__start)
 
     def log(self):
-        print("{0}s".format(self.get_seconds()))
+        print("{0} took {1}s.".format(self.message, self.get_seconds()))
 
 
 class Cuckoo(object):
