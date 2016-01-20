@@ -51,9 +51,10 @@ class DBManager(object):
 
     def datalog(self, parameter, run, maxrun=None, detid='D_DU2NAPO'):
         "Retrieve datalogs for given parameter, run(s) and detector"
+        parameter = parameter.lower()
         if maxrun is None:
             maxrun = run
-        values = {'parameter_name': parameter.lower(),
+        values = {'parameter_name': parameter,
                   'minrun': run,
                   'maxrun': maxrun,
                   'detid': detid,
@@ -66,9 +67,12 @@ class DBManager(object):
             log.warning("Empty dataset")
             return None
         else:
-            def convert(timestamp):
+            def convert_data(timestamp):
                 return datetime.fromtimestamp(float(timestamp) / 1e3)
-            dataframe['DATETIME'] = dataframe['UNIXTIME'].apply(convert)
+            dataframe['DATETIME'] = dataframe['UNIXTIME'].apply(convert_data)
+            convert_unit = self.parameters.get_converter(parameter)
+            dataframe['VALUE'] = dataframe['DATA_VALUE'].apply(convert_unit)
+            dataframe.unit = self.parameters.unit(parameter)
             return dataframe
 
     @property
@@ -128,11 +132,29 @@ class ParametersContainer(object):
     """Provides easy access to parameters"""
     def __init__(self, parameters):
         self._parameters = parameters
+        self._converters = {}
 
     @property
     def names(self):
         "A list of parameter names"
         return self._parameters.keys()
+
+    def get_parameter(self, parameter):
+        "Return a dict of given parameter"
+        return self._parameters[parameter]
+
+    def get_converter(self, parameter):
+        """Generate unit conversion function for given parameter"""
+        if parameter not in self._converters:
+            param = self.get_parameter(parameter)
+
+            def convert(value):
+                scale = float(param['Scale'])
+                easy_scale = float(param['EasyScale'])
+                easy_scale_multiplier = float(param['EasyScaleMultiplier'])
+                return value * scale * easy_scale * easy_scale_multiplier
+
+            return convert
 
     def unit(self, parameter):
         "Get the unit for given parameter"
