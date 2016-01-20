@@ -150,9 +150,9 @@ class ParametersContainer(object):
 
             def convert(value):
                 scale = float(param['Scale'])
-                easy_scale = float(param['EasyScale'])
-                easy_scale_multiplier = float(param['EasyScaleMultiplier'])
-                return value * scale * easy_scale * easy_scale_multiplier
+                # easy_scale = float(param['EasyScale'])
+                # easy_scale_multiplier = float(param['EasyScaleMultiplier'])
+                return value * scale
 
             return convert
 
