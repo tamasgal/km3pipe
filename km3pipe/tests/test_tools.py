@@ -11,7 +11,7 @@ from time import sleep
 from km3pipe.testing import TestCase, MagicMock
 from km3pipe.tools import (unpack_nfirst, split, namedtuple_with_defaults,
                            angle_between, geant2pdg, pdg2name, PMTReplugger,
-			   Cuckoo)
+			   Cuckoo, total_seconds)
 
 
 class TestTools(TestCase):
@@ -79,6 +79,13 @@ class TestTools(TestCase):
     def test_pdg2name_returns_NA_for_unknown_particle(self):
         self.assertEqual('N/A', pdg2name(0))
 
+    def test_total_seconds(self):
+        time1 = datetime.now()
+        sleep(0.1)
+        time2 = datetime.now()
+        td = time2 - time1
+        self.assertAlmostEqual(0.1, total_seconds(td), 1)
+
 
 # [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)]
 PMT_COMBS = list(itertools.combinations(range(4), 2))
@@ -124,7 +131,7 @@ class TestCuckoo(TestCase):
         cuckoo.reset()
         now = datetime.now()
         delta = datetime.now() - cuckoo.timestamp
-        self.assertGreater(delta.total_seconds(), 0)
+        self.assertGreater(total_seconds(delta), 0)
 
     def test_set_interval_on_init(self):
         cuckoo = Cuckoo(1)
