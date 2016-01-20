@@ -8,8 +8,6 @@ Pump for the jpp file read through aanet interface.
 """
 from __future__ import division, absolute_import, print_function
 
-import socket
-
 from km3pipe import Pump
 from km3pipe.logger import logging
 import threading
@@ -78,8 +76,8 @@ class CHPump(Pump):
         try:
             prefix, data = self.queue.get(timeout=self.timeout)
         except Empty:
-            log.warn("ControlHost timeout ({0}s) exceeded".format(self.timeout))
-            raise StopIteration("ControlHost timeout exceeded.")
+            log.warn("ControlHost timeout ({0}s) reached".format(self.timeout))
+            raise StopIteration("ControlHost timeout reached.")
         blob[self.key_for_prefix] = prefix
         blob[self.key_for_data] = data
         return blob

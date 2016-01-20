@@ -7,8 +7,6 @@ Pumps for the EVT simulation dataformat.
 """
 from __future__ import division, absolute_import, print_function
 
-__author__ = 'tamasgal'
-
 import sys
 
 from collections import namedtuple
@@ -21,8 +19,10 @@ from km3pipe.tools import pdg2name, geant2pdg, unpack_nfirst
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
+__author__ = 'tamasgal'
 
-class EvtPump(Pump): # pylint: disable:R0902
+
+class EvtPump(Pump):  # pylint: disable:R0902
     """Provides a pump for EVT-files"""
 
     def __init__(self, **context):
@@ -65,7 +65,6 @@ class EvtPump(Pump): # pylint: disable:R0902
     def extract_header(self):
         """Create a dictionary with the EVT header information"""
         raw_header = self.raw_header = {}
-        #for line in self.blob_file:
         first_line = self.blob_file.readline()
         self.blob_file.seek(0, 0)
         if not first_line.startswith('start_run'):
@@ -135,7 +134,6 @@ class EvtPump(Pump): # pylint: disable:R0902
             if up_to_index and len(self.event_offsets) >= up_to_index + 1:
                 return
         self.event_offsets.pop()  # get rid of the last entry
-        #self.blob_file.seek(self.event_offsets[0], 0)
         if not up_to_index:
             self.whole_file_cached = True
         print("\n{0} events indexed.".format(len(self.event_offsets)))
@@ -211,7 +209,7 @@ class EvtPump(Pump): # pylint: disable:R0902
         self.index += 1
         return blob
 
-    def __getitem__(self,index):
+    def __getitem__(self, index):
         if isinstance(index, int):
             return self.get_blob(index)
         elif isinstance(index, slice):
@@ -292,7 +290,7 @@ class TrackFit(Track):
         return text
 
 
-class Neutrino(object): # pylint: disable:R0902
+class Neutrino(object):  # pylint: disable:R0902
     """Representation of a neutrino entry in an EVT file"""
     def __init__(self, data, zed_correction=405.93):
         id, x, y, z, dx, dy, dz, E, t, Bx, By, \
@@ -337,4 +335,3 @@ def __add_raw_hit__(self, other):
 RawHit = namedtuple('RawHit', 'id pmt_id tot time')
 RawHit.__new__.__defaults__ = (None, None, None, None)
 RawHit.__add__ = __add_raw_hit__
-

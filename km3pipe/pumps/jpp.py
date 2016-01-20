@@ -22,7 +22,7 @@ class JPPPump(Pump):
 
         self.index = self.get('index') or 0
 
-        import aa
+        import aa  # noqa
         import ROOT
         if self.get('index'):
             self.index = self.get('index')
@@ -40,7 +40,8 @@ class JPPPump(Pump):
         self.file_index = self.index_start
 
         if self.basename:
-            self.rootfile = ROOT.EventFile(self.basename + str(self.file_index) + ".JTE.root")
+            filename = self.basename + str(self.file_index) + ".JTE.root"
+            self.rootfile = ROOT.EventFile(filename)
 
         else:
                 self.rootfile = ROOT.EventFile(self.filename)
@@ -61,15 +62,15 @@ class JPPPump(Pump):
         else:
             self.file_index += 1
             if self.basename and self.file_index <= self.index_stop:
-                import aa
+                import aa  # noqa
                 import ROOT
                 print("open next file")
-                self.rootfile = ROOT.EventFile(self.basename + str(self.file_index) + ".JTE.root")
+                filename = self.basename + str(self.file_index) + ".JTE.root"
+                self.rootfile = ROOT.EventFile(filename)
                 self.index = 0
                 self.process(blob)
             else:
                 raise StopIteration
-
 
     def finish(self):
         self.rootfile.Close()

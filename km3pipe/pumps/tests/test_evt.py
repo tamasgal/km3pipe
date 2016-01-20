@@ -3,14 +3,14 @@
 # pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
 from __future__ import division, absolute_import, print_function
 
-__author__ = 'tamasgal'
-
 import operator
 from functools import reduce
 
 from km3pipe.testing import TestCase, StringIO
 from km3pipe.pumps import EvtPump
 from km3pipe.pumps.evt import Track, TrackIn, Neutrino, Hit, RawHit, TrackFit
+
+__author__ = 'tamasgal'
 
 
 class TestEvtParser(TestCase):
@@ -22,13 +22,17 @@ class TestEvtParser(TestCase):
             "spectrum: -1.40",
             "end_event:",
             "start_event: 12 1",
-            "track_in: 1 -389.951 213.427 516 -0.204562 -0.60399 -0.770293 9.092 0 5 40.998",
+            "track_in: 1 -389.951 213.427 516 -0.204562 -0.60399 -0.770293" +
+            " 9.092 0 5 40.998",
             "hit: 1 44675 1 1170.59 5 2 1 1170.59",
             "end_event:",
             "start_event: 13 1",
-            "track_in:  1 272.695 -105.613 516 -0.425451 -0.370522 -0.825654 2431.47 0 5 -1380",
-            "track_in:  2 272.348 -106.292 516 -0.425451 -0.370522 -0.825654 24670.7 1.33 5 -1484",
-            "track_in:  3 279.47 -134.999 516 -0.425451 -0.370522 -0.825654 164.586 26.7 5 601.939",
+            "track_in:  1 272.695 -105.613 516 -0.425451 -0.370522 -0.825654" +
+            " 2431.47 0 5 -1380",
+            "track_in:  2 272.348 -106.292 516 -0.425451 -0.370522 -0.825654" +
+            " 24670.7 1.33 5 -1484",
+            "track_in:  3 279.47 -134.999 516 -0.425451 -0.370522 -0.825654" +
+            " 164.586 26.7 5 601.939",
             "hit: 1 20140 1 1140.06 5 1 1 1140.06",
             "hit: 2 20159 1 1177.14 5 1 1 1177.14",
             "hit: 3 20164 1 1178.19 5 1 1 1178.19",
@@ -36,7 +40,8 @@ class TestEvtParser(TestCase):
             "hit: 5 20171 2 1177.25 5 1 2 1177.25",
             "end_event:",
             "start_event: 14 1",
-            "track_in:  1 40.256 -639.888 516 0.185998 0.476123 -0.859483 10016.1 0 5 -1668",
+            "track_in:  1 40.256 -639.888 516 0.185998 0.476123 -0.859483" +
+            " 10016.1 0 5 -1668",
             "hit: 1 33788 1 2202.81 5 1 1 2202.81",
             "hit: 2 33801 1 2248.95 5 1 1 2248.95",
             "hit: 3 33814 1 2249.2 5 1 1 2249.2",
@@ -44,13 +49,17 @@ class TestEvtParser(TestCase):
         ))
         self.no_evt_header = "\n".join((
             "start_event: 12 1",
-            "track_in: 1 -389.951 213.427 516 -0.204562 -0.60399 -0.770293 9.092 0 5 40.998",
+            "track_in: 1 -389.951 213.427 516 -0.204562 -0.60399 -0.770293" +
+            " 9.092 0 5 40.998",
             "hit: 1 44675 1 1170.59 5 2 1 1170.59",
             "end_event:",
             "start_event: 13 1",
-            "track_in:  1 272.695 -105.613 516 -0.425451 -0.370522 -0.825654 2431.47 0 5 -1380",
-            "track_in:  2 272.348 -106.292 516 -0.425451 -0.370522 -0.825654 24670.7 1.33 5 -1484",
-            "track_in:  3 279.47 -134.999 516 -0.425451 -0.370522 -0.825654 164.586 26.7 5 601.939",
+            "track_in:  1 272.695 -105.613 516 -0.425451 -0.370522 -0.825654" +
+            " 2431.47 0 5 -1380",
+            "track_in:  2 272.348 -106.292 516 -0.425451 -0.370522 -0.825654" +
+            " 24670.7 1.33 5 -1484",
+            "track_in:  3 279.47 -134.999 516 -0.425451 -0.370522 -0.825654" +
+            " 164.586 26.7 5 601.939",
             "hit: 1 20140 1 1140.06 5 1 1 1140.06",
             "hit: 2 20159 1 1177.14 5 1 1 1177.14",
             "hit: 3 20164 1 1178.19 5 1 1 1178.19",
@@ -58,7 +67,8 @@ class TestEvtParser(TestCase):
             "hit: 5 20171 2 1177.25 5 1 2 1177.25",
             "end_event:",
             "start_event: 14 1",
-            "track_in:  1 40.256 -639.888 516 0.185998 0.476123 -0.859483 10016.1 0 5 -1668",
+            "track_in:  1 40.256 -639.888 516 0.185998 0.476123 -0.859483" +
+            " 10016.1 0 5 -1668",
             "hit: 1 33788 1 2202.81 5 1 1 2202.81",
             "hit: 2 33801 1 2248.95 5 1 1 2248.95",
             "hit: 3 33814 1 2249.2 5 1 1 2249.2",
@@ -125,7 +135,8 @@ class TestEvtParser(TestCase):
         self.pump.prepare_blobs()
         self.assertEqual(1, len(self.pump.event_offsets))
 
-    def test_get_blob_triggers_cache_offsets_if_cache_disabled_and_asking_for_not_indexed_event(self):
+    def test_get_blob_triggers_cache_offsets_if_cache_disabled(self):
+        "...and asking for not indexed event"
         self.pump.cache_enabled = False
         self.pump.prepare_blobs()
         self.assertEqual(1, len(self.pump.event_offsets))
@@ -144,7 +155,8 @@ class TestEvtParser(TestCase):
         self.assertTrue('raw_header' in blob)
         self.assertEqual(['1'], blob['raw_header']['start_run'])
         self.assertListEqual(['12', '1'], blob['start_event'])
-        self.assertListEqual([[1.0, 44675.0, 1.0, 1170.59, 5.0, 2.0, 1.0, 1170.59]],
+        self.assertListEqual([[1.0, 44675.0, 1.0, 1170.59,
+                               5.0, 2.0, 1.0, 1170.59]],
                              blob['hit'])
 
     def test_get_blob_returns_correct_events(self):
@@ -179,7 +191,6 @@ class TestEvtParser(TestCase):
         for blob in self.pump:
             event_numbers.append(blob['start_event'][0])
         self.assertListEqual(['12', '13', '14'], event_numbers)
-
 
     def test_pump_has_len(self):
         self.pump.prepare_blobs()
@@ -242,7 +253,7 @@ class TestTrackIn(TestCase):
         self.assertListEqual([0, 0, 1], list(track_in.dir))
         self.assertEqual(8, track_in.E)
         self.assertEqual(9, track_in.time)
-        self.assertEqual(130, track_in.particle_type) # this should be PDG!
+        self.assertEqual(130, track_in.particle_type)  # this should be PDG!
         self.assertEqual(11, track_in.length)
 
     def test_track_repr(self):
@@ -308,6 +319,7 @@ class TestNeutrino(TestCase):
         repr_str = "Neutrino: mu-, 3.0 PeV, NC"
         self.assertEqual(repr_str, str(neutrino))
 
+
 class TestHit(TestCase):
 
     def test_hit_init(self):
@@ -336,8 +348,6 @@ class TestHit(TestCase):
         hit = Hit(1, True)
         with self.assertRaises(AttributeError):
             hit.time = 10
-
-
 
 
 class TestRawHit(TestCase):
@@ -374,7 +384,7 @@ class TestRawHit(TestCase):
         self.assertEqual(1, merged_hit.pmt_id)
         self.assertEqual(30, merged_hit.tot)
 
-    def test_hit_addition_picks_correct_time_if_second_hit_is_the_earlier_one(self):
+    def test_hit_addition_picks_correct_time_if_second_hit_is_earlier(self):
         hit1 = RawHit(id=1, time=2, pmt_id=1, tot=10)
         hit2 = RawHit(id=2, time=1, pmt_id=2, tot=20)
         merged_hit = hit1 + hit2
@@ -401,4 +411,3 @@ class TestRawHit(TestCase):
         self.assertEqual(1, merged_hit.time)
         self.assertEqual(60, merged_hit.tot)
         self.assertEqual(2, merged_hit.pmt_id)
-
