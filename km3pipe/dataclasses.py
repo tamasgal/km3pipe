@@ -7,12 +7,12 @@
 """
 from __future__ import division, absolute_import, print_function
 
-__all__ = ('Point', 'Position', 'Direction')
-
-
 import numpy as np
 
 from km3pipe.tools import angle_between
+
+__all__ = ('Point', 'Position', 'Direction')
+
 
 class Point(np.ndarray):
     """Represents a point in a 3D space"""
@@ -102,5 +102,3 @@ class Direction(Point):
 
     def __str__(self):
         return "({0:.4}, {1:.4}, {2:.4})".format(self.x, self.y, self.z)
-
-

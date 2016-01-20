@@ -11,7 +11,7 @@ from time import sleep
 from km3pipe.testing import TestCase, MagicMock
 from km3pipe.tools import (unpack_nfirst, split, namedtuple_with_defaults,
                            angle_between, geant2pdg, pdg2name, PMTReplugger,
-			   Cuckoo, total_seconds)
+                           Cuckoo, total_seconds)
 
 
 class TestTools(TestCase):
@@ -91,14 +91,15 @@ class TestTools(TestCase):
 PMT_COMBS = list(itertools.combinations(range(4), 2))
 ANGLES = range(len(PMT_COMBS))
 
+
 class TestPMTReplugger(TestCase):
 
     def setUp(self):
         self.replugger = PMTReplugger(PMT_COMBS, ANGLES, [])
 
     def test_angle_for(self):
-        #self.assertEqual(0, self.replugger.angle_for((0, 1)))
-        #self.assertEqual(1, self.replugger.angle_for((0, 2)))
+        # self.assertEqual(0, self.replugger.angle_for((0, 1)))
+        # self.assertEqual(1, self.replugger.angle_for((0, 2)))
         pass
 
     def test_switch(self):
@@ -123,13 +124,9 @@ class TestPMTReplugger(TestCase):
 
 
 class TestCuckoo(TestCase):
-    def test_init(self):
-        cuckoo = Cuckoo()
-
     def test_reset_timestamp(self):
         cuckoo = Cuckoo()
         cuckoo.reset()
-        now = datetime.now()
         delta = datetime.now() - cuckoo.timestamp
         self.assertGreater(total_seconds(delta), 0)
 
@@ -201,4 +198,3 @@ class TestCuckoo(TestCase):
         self.assertFalse(cuckoo._interval_reached())
         sleep(0.11)
         self.assertTrue(cuckoo._interval_reached())
-

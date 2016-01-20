@@ -7,27 +7,26 @@ Database utilities.
 """
 from __future__ import division, absolute_import, print_function
 
-__author__ = 'tamasgal'
-
 from datetime import datetime
-import ConfigParser, os
 import ssl
 import urllib
 from urllib2 import (Request, build_opener, HTTPCookieProcessor, HTTPHandler)
 import cookielib
 import json
 import sys
+
+import pandas as pd
+
+from km3pipe.tools import Timer
+from km3pipe.config import Config
+from km3pipe.logger import logging
+
 if sys.version_info[0] < 3:
     from StringIO import StringIO
 else:
     from io import StringIO
 
-import pandas as pd
-
-from km3pipe.config import Config
-
-import logging
-from km3pipe.logger import logging
+__author__ = 'tamasgal'
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -35,8 +34,8 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 # Ignore invalid certificate error
 ssl._create_default_https_context = ssl._create_unverified_context
 
-LOGIN_URL='https://km3netdbweb.in2p3.fr/home.htm'
-BASE_URL='https://km3netdbweb.in2p3.fr'
+LOGIN_URL = 'https://km3netdbweb.in2p3.fr/home.htm'
+BASE_URL = 'https://km3netdbweb.in2p3.fr'
 
 
 class DBManager(object):
@@ -51,15 +50,21 @@ class DBManager(object):
             username, password = config.db_credentials
         self.login(username, password)
 
-    def datalog(self, parameter, run, maxrun=None, detid='D_DU2NAPO'):
+    def datalog(self, parameter, run, maxrun=None, detid='D_ARCA001'):
         "Retrieve datalogs for given parameter, run(s) and detector"
+        parameter = parameter.lower()
         if maxrun is None:
-            maxrun = run
-        values = { 'parameter_name': parameter.lower(),
-                   'minrun': run,
-                   'maxrun': maxrun,
-                   'detid': detid,
-                   }
+            maxrun is run
+        with Timer('Database lookup'):
+            return self._datalog(parameter, run, maxrun, detid)
+
+    def _datalog(self, parameter, run, maxrun, detid):
+        "Extract data from database"
+        values = {'parameter_name': parameter,
+                  'minrun': run,
+                  'maxrun': maxrun,
+                  'detid': detid,
+                  }
         data = urllib.urlencode(values)
         content = self._get_content('streamds/datalognumbers.txt?' + data)
         try:
@@ -68,8 +73,12 @@ class DBManager(object):
             log.warning("Empty dataset")
             return None
         else:
-            convert = lambda x: datetime.fromtimestamp(float(x) / 1e3)
-            dataframe['DATETIME'] = dataframe['UNIXTIME'].apply(convert)
+            def convert_data(timestamp):
+                return datetime.fromtimestamp(float(timestamp) / 1e3)
+            dataframe['DATETIME'] = dataframe['UNIXTIME'].apply(convert_data)
+            convert_unit = self.parameters.get_converter(parameter)
+            dataframe['VALUE'] = dataframe['DATA_VALUE'].apply(convert_unit)
+            dataframe.unit = self.parameters.unit(parameter)
             return dataframe
 
     @property
@@ -115,7 +124,7 @@ class DBManager(object):
         "Login to the databse and store cookies for upcoming requests."
         cj = cookielib.CookieJar()
         opener = build_opener(HTTPCookieProcessor(cj), HTTPHandler())
-        values = { 'usr': username,'pwd': password }
+        values = {'usr': username, 'pwd': password}
         data = urllib.urlencode(values)
         req = Request(LOGIN_URL, data)
         f = opener.open(req)
@@ -129,13 +138,30 @@ class ParametersContainer(object):
     """Provides easy access to parameters"""
     def __init__(self, parameters):
         self._parameters = parameters
+        self._converters = {}
 
     @property
     def names(self):
         "A list of parameter names"
         return self._parameters.keys()
 
+    def get_parameter(self, parameter):
+        "Return a dict of given parameter"
+        return self._parameters[parameter]
+
+    def get_converter(self, parameter):
+        """Generate unit conversion function for given parameter"""
+        if parameter not in self._converters:
+            param = self.get_parameter(parameter)
+
+            def convert(value):
+                scale = float(param['Scale'])
+                # easy_scale = float(param['EasyScale'])
+                # easy_scale_multiplier = float(param['EasyScaleMultiplier'])
+                return value * scale
+
+            return convert
+
     def unit(self, parameter):
         "Get the unit for given parameter"
         return self._parameters[parameter.lower()]['Unit']
-

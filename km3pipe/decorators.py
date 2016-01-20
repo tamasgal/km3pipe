@@ -24,4 +24,3 @@ def remain_file_pointer(function):
         file_obj.seek(old_position, 0)
         return return_value
     return wrapper
-

@@ -6,10 +6,10 @@ A collection of pumps for different kinds of data formats.
 """
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.pumps.evt import EvtPump
-from km3pipe.pumps.daq import DAQPump
-from km3pipe.pumps.clb import CLBPump
-from km3pipe.pumps.aanet import AanetPump
-from km3pipe.pumps.jpp import JPPPump
-from km3pipe.pumps.ch import CHPump
-from km3pipe.pumps.pickle import PicklePump
+from km3pipe.pumps.evt import EvtPump  # noqa
+from km3pipe.pumps.daq import DAQPump  # noqa
+from km3pipe.pumps.clb import CLBPump  # noqa
+from km3pipe.pumps.aanet import AanetPump  # noqa
+from km3pipe.pumps.jpp import JPPPump  # noqa
+from km3pipe.pumps.ch import CHPump  # noqa
+from km3pipe.pumps.pickle import PicklePump  # noqa

@@ -80,6 +80,7 @@ EXAMPLE_MC_DETX_WRITE_MIXED_IDS = StringIO("\n".join((
     " 48 3.4 3.5 3.6 0.0 1.0 0.0 80.0",
     " 39 3.7 3.8 3.9 0.0 0.0 1.0 90.0\n",)))
 
+
 class TestDetector(TestCase):
 
     def setUp(self):
@@ -164,10 +165,6 @@ class TestDetector(TestCase):
         self.assertEqual((9, 18, 0), tuple(pmtid2omkey(4465.0)))
         self.assertEqual((95, 7, 16), tuple(pmtid2omkey(52810.0)))
         self.assertEqual((95, 4, 13), tuple(pmtid2omkey(52900.0)))
-
-
-
-
 
 
 class TestPMT(TestCase):

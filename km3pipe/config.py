@@ -7,18 +7,17 @@ Tools for global configuration.
 """
 from __future__ import division, absolute_import, print_function
 
-__author__ = 'tamasgal'
-
-import ConfigParser, os
+import os
+import ConfigParser
 import getpass
 
-import logging
 from km3pipe.logger import logging
+
+__author__ = 'tamasgal'
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
-
-CONFIG_PATH='~/.km3net'
+CONFIG_PATH = '~/.km3net'
 
 
 class Config(object):
@@ -40,4 +39,3 @@ class Config(object):
             username = raw_input("Please enter your KM3NeT DB username: ")
             password = getpass.getpass("Password: ")
         return username, password
-

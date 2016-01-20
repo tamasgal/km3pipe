@@ -23,7 +23,7 @@ class PicklePump(Pump):
         super(self.__class__, self).__init__(**context)
 
         self.filename = self.get('filename')
-        self.events = pickle.load(open(self.filename, "rb" ))
+        self.events = pickle.load(open(self.filename, "rb"))
 
     def get_blob(self, index):
         hits = self.events[0]
@@ -38,4 +38,3 @@ class PicklePump(Pump):
 
 
 RawHit = namedtuple('RawHit', 'id pmt_id tot time')
-

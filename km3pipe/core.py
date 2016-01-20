@@ -7,14 +7,12 @@ The core of the KM3Pipe framework.
 """
 from __future__ import division, absolute_import, print_function
 
-__author__ = 'tamasgal'
-
 import signal
 
 from km3pipe.hardware import Detector
-
-import logging
 from km3pipe.logger import logging
+
+__author__ = 'tamasgal'
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -56,7 +54,7 @@ class Pipeline(object):
 
         """
         if not cycles:
-            log.info("No cycle count set, the pipeline may be drained forever.")
+            log.info("No cycle count, the pipeline may be drained forever.")
 
         if self.geometry:
             log.info("Setting up the detector geometry.")
@@ -201,7 +199,7 @@ class Geometry(Module):
 class AanetGeometry(Module):
     """AAnet based Geometry using Det()"""
     def __init__(self, **context):
-        import aa
+        import aa  # noqa
         from ROOT import Det
         super(self.__class__, self).__init__(**context)
         filename = self.get('filename')
@@ -210,4 +208,3 @@ class AanetGeometry(Module):
     def get_detector(self):
         """Return the detector"""
         return self.detector
-

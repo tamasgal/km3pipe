@@ -7,7 +7,7 @@ The constants used in KM3Pipe.
 """
 from __future__ import division, absolute_import, print_function
 
-#TODO: this module should be refactored soon!
+# TODO: this module should be refactored soon!
 
 import math
 

@@ -128,7 +128,7 @@ class DAQPump(Pump):
         self.index += 1
         return blob
 
-    def __getitem__(self,index):
+    def __getitem__(self, index):
         if isinstance(index, int):
             return self.get_blob(index)
         elif isinstance(index, slice):
@@ -265,8 +265,9 @@ class DAQSummaryslice(object):
         """Iterate through the byte data and fill the summary_frames"""
         for _ in range(self.n_summary_frames):
             dom_id = unpack('<i', file_obj.read(4))[0]
-            unknown = file_obj.read(4) # probably dom status?
-            pmt_rates = [self._get_rate(i) for i in unpack('b'*31, file_obj.read(31))]
+            unknown = file_obj.read(4)  # probably dom status? # noqa
+            raw_rates = unpack('b'*31, file_obj.read(31))
+            pmt_rates = [self._get_rate(value) for value in raw_rates]
             self.summary_frames[dom_id] = pmt_rates
 
     def _get_rate(self, value):
