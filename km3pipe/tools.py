@@ -267,4 +267,5 @@ class Cuckoo(object):
 
     def _interval_reached(self):
         "Check if defined interval is reached"
-        return (datetime.now() - self.timestamp).total_seconds() > self.interval
+        return total_seconds(datetime.now() - self.timestamp) > self.interval
+
