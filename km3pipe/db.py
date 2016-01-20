@@ -17,6 +17,7 @@ import sys
 
 import pandas as pd
 
+from km3pipe.tools import Timer
 from km3pipe.config import Config
 from km3pipe.logger import logging
 
@@ -49,11 +50,16 @@ class DBManager(object):
             username, password = config.db_credentials
         self.login(username, password)
 
-    def datalog(self, parameter, run, maxrun=None, detid='D_DU2NAPO'):
+    def datalog(self, parameter, run, maxrun=None, detid='D_ARCA001'):
         "Retrieve datalogs for given parameter, run(s) and detector"
         parameter = parameter.lower()
         if maxrun is None:
-            maxrun = run
+            maxrun is run
+        with Timer('Database lookup'):
+            return self._datalog(parameter, run, maxrun, detid)
+
+    def _datalog(self, parameter, run, maxrun, detid):
+        "Extract data from database"
         values = {'parameter_name': parameter,
                   'minrun': run,
                   'maxrun': maxrun,
