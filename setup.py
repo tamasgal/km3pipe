@@ -17,6 +17,8 @@ setup(name='km3pipe',
           'controlhost',
           'urwid',
           'docopt',
+          'pandas',
+          'tables',
       ],
       entry_points={
           'console_scripts': [
