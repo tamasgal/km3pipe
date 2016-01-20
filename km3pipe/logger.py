@@ -7,10 +7,11 @@ The logging facility.
 """
 from __future__ import division, absolute_import, print_function
 
-__author__ = 'tamasgal'
-
 import logging
 import logging.config
+
+__author__ = 'tamasgal'
+
 try:
     logging.config.fileConfig('logging.conf')
 except Exception:
@@ -27,6 +28,3 @@ logging.addLevelName(logging.ERROR, "\033[1;31m%s\033[1;0m" %
 
 # pylint: disable=C0103
 formatter = logging.Formatter('[%(levelname)s] %(name)s: %(message)s')
-
-
-

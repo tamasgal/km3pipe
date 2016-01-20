@@ -12,6 +12,7 @@ Pep 386 compliant version info.
 """
 version_info = (0, 9, 24, 'final', 0)
 
+
 def _get_version(version_info):
     """Return a PEP 386-compliant version number."""
     assert len(version_info) == 5

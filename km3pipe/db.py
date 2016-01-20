@@ -7,27 +7,25 @@ Database utilities.
 """
 from __future__ import division, absolute_import, print_function
 
-__author__ = 'tamasgal'
-
 from datetime import datetime
-import ConfigParser, os
 import ssl
 import urllib
 from urllib2 import (Request, build_opener, HTTPCookieProcessor, HTTPHandler)
 import cookielib
 import json
 import sys
+
+import pandas as pd
+
+from km3pipe.config import Config
+from km3pipe.logger import logging
+
 if sys.version_info[0] < 3:
     from StringIO import StringIO
 else:
     from io import StringIO
 
-import pandas as pd
-
-from km3pipe.config import Config
-
-import logging
-from km3pipe.logger import logging
+__author__ = 'tamasgal'
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -35,8 +33,8 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 # Ignore invalid certificate error
 ssl._create_default_https_context = ssl._create_unverified_context
 
-LOGIN_URL='https://km3netdbweb.in2p3.fr/home.htm'
-BASE_URL='https://km3netdbweb.in2p3.fr'
+LOGIN_URL = 'https://km3netdbweb.in2p3.fr/home.htm'
+BASE_URL = 'https://km3netdbweb.in2p3.fr'
 
 
 class DBManager(object):
@@ -55,11 +53,11 @@ class DBManager(object):
         "Retrieve datalogs for given parameter, run(s) and detector"
         if maxrun is None:
             maxrun = run
-        values = { 'parameter_name': parameter.lower(),
-                   'minrun': run,
-                   'maxrun': maxrun,
-                   'detid': detid,
-                   }
+        values = {'parameter_name': parameter.lower(),
+                  'minrun': run,
+                  'maxrun': maxrun,
+                  'detid': detid,
+                  }
         data = urllib.urlencode(values)
         content = self._get_content('streamds/datalognumbers.txt?' + data)
         try:
@@ -68,7 +66,8 @@ class DBManager(object):
             log.warning("Empty dataset")
             return None
         else:
-            convert = lambda x: datetime.fromtimestamp(float(x) / 1e3)
+            def convert(timestamp):
+                return datetime.fromtimestamp(float(timestamp) / 1e3)
             dataframe['DATETIME'] = dataframe['UNIXTIME'].apply(convert)
             return dataframe
 
@@ -115,7 +114,7 @@ class DBManager(object):
         "Login to the databse and store cookies for upcoming requests."
         cj = cookielib.CookieJar()
         opener = build_opener(HTTPCookieProcessor(cj), HTTPHandler())
-        values = { 'usr': username,'pwd': password }
+        values = {'usr': username, 'pwd': password}
         data = urllib.urlencode(values)
         req = Request(LOGIN_URL, data)
         f = opener.open(req)
@@ -138,4 +137,3 @@ class ParametersContainer(object):
     def unit(self, parameter):
         "Get the unit for given parameter"
         return self._parameters[parameter.lower()]['Unit']
-

@@ -9,7 +9,7 @@ from __future__ import division, absolute_import, print_function
 try:
     from unittest2 import TestCase, skip, skipIf
 except ImportError:
-    from unittest import TestCase, skip, skipIf
+    from unittest import TestCase, skip, skipIf  # noqa
 
 try:
     from cStringIO import StringIO
@@ -17,9 +17,9 @@ except ImportError:
     try:
         from StringIO import StringIO
     except ImportError:
-        from io import StringIO
+        from io import StringIO  # noqa
 
 try:
     from mock import MagicMock
 except ImportError:
-    from unittest.mock import MagicMock
+    from unittest.mock import MagicMock  # noqa

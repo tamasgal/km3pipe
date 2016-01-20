@@ -95,6 +95,7 @@ class CLBPump(Pump):
         """Clean everything up"""
         self.blob_file.close()
 
+
 class CLBHeader(object):
     """Wrapper for the CLB Common Header binary format.
 
@@ -154,7 +155,6 @@ class CLBHeader(object):
 
         self.human_readable_timestamp = datetime.datetime.fromtimestamp(
             int(self.timestamp)).strftime('%Y-%m-%d %H:%M:%S')
-
 
     def _parse_file(self, file_obj):
         """Directly read from file handler.

@@ -7,8 +7,6 @@ Classes representing KM3NeT hardware.
 """
 from __future__ import division, absolute_import, print_function
 
-__author__ = 'tamasgal'
-
 import os
 
 from km3pipe.tools import unpack_nfirst, split
@@ -16,6 +14,8 @@ from km3pipe.dataclasses import Point, Direction
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
+
+__author__ = 'tamasgal'
 
 
 class Detector(object):
@@ -87,7 +87,7 @@ class Detector(object):
                                   "Guessing correct id: {1}"
                                   .format(pmt_id, new_floor_id))
                         floor_id = new_floor_id
-                    #TODO: following line is here bc of the bad MC floor IDs
+                    # TODO: following line is here bc of the bad MC floor IDs
                     #      put it outside the for loop in future
                     self.doms[dom_id] = (line_id, floor_id, n_pmts)
                     omkey = (line_id, floor_id, i)
@@ -117,10 +117,10 @@ class Detector(object):
         """The ascii representation of the detector"""
         header = "{det.det_id} {det.n_doms}".format(det=self)
         doms = ""
-        for dom_id, (line_id, floor_id, n_pmts) in self.doms.iteritems():
-            doms += "{0} {1} {2} {3}\n".format(dom_id, line_id, floor_id, n_pmts)
+        for dom_id, (line, floor, n_pmts) in self.doms.iteritems():
+            doms += "{0} {1} {2} {3}\n".format(dom_id, line, floor, n_pmts)
             for i in xrange(n_pmts):
-                pmt = self._pmts_by_omkey[(line_id, floor_id, i)]
+                pmt = self._pmts_by_omkey[(line, floor, i)]
                 doms += " {0} {1} {2} {3} {4} {5} {6} {7}\n".format(
                         pmt.id, pmt.pos.x, pmt.pos.y, pmt.pos.z,
                         pmt.dir.x, pmt.dir.y, pmt.dir.z,
@@ -144,14 +144,13 @@ class Detector(object):
         return self._pmts_by_id[int(pmt_id)].omkey
 
     def pmtid2omkey_old(self, pmt_id,
-                    first_pmt_id=1, oms_per_line=18, pmts_per_om=31):
+                        first_pmt_id=1, oms_per_line=18, pmts_per_om=31):
         """Convert (consecutive) raw PMT IDs to Multi-OMKeys."""
-        pmts_per_line = oms_per_line * pmts_per_om
-        line = ((pmt_id - first_pmt_id) // pmts_per_line) + 1
-        om = oms_per_line - (pmt_id - first_pmt_id) % pmts_per_line // pmts_per_om
+        pmts_line = oms_per_line * pmts_per_om
+        line = ((pmt_id - first_pmt_id) // pmts_line) + 1
+        om = oms_per_line - (pmt_id - first_pmt_id) % pmts_line // pmts_per_om
         pmt = (pmt_id - first_pmt_id) % pmts_per_om
         return int(line), int(om), int(pmt)
-
 
 
 class PMT(object):
@@ -167,4 +166,3 @@ class PMT(object):
     def __str__(self):
         return "PMT id:{0} pos: {1} dir: dir{2} t0: {3} DAQ channel: {4}"\
                .format(self.id, self.pos, self.dir, self.t0, self.daq_channel)
-

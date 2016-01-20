@@ -40,18 +40,18 @@ class AanetPump(Pump):
         self.filenames += [prefix + str(i) + suffix for i in self.indices]
 
     def get_blob(self, index):
-        NotImpelementedYet("Aanet currently does not support indexing.")
+        NotImplementedError("Aanet currently does not support indexing.")
 
     def blob_generator(self):
         """Create a blob generator."""
         # pylint: disable:F0401,W0612
-        import aa
-        from ROOT import EventFile 
+        import aa  # noqa
+        from ROOT import EventFile
 
         for filename in self.filenames:
             print("Reading from file: {0}".format(filename))
             if not os.path.exists(filename):
-                log.warn(filename + " not available: continue without using it")
+                log.warn(filename + " not available: continue without it")
                 continue
             event_file = EventFile(filename)
             for event in event_file:
@@ -66,4 +66,3 @@ class AanetPump(Pump):
 
     def process(self, blob):
         return next(self.blobs)
-

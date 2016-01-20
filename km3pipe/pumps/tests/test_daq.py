@@ -8,8 +8,7 @@
 from __future__ import division, absolute_import, print_function
 
 from km3pipe.testing import TestCase, StringIO, skipIf
-from km3pipe.pumps.daq import (DAQPump, DAQPreamble, DAQHeader,
-                               DAQSummaryslice, DAQEvent)
+from km3pipe.pumps.daq import (DAQPreamble, DAQHeader, DAQSummaryslice)
 
 from binascii import unhexlify
 
@@ -43,11 +42,11 @@ except TypeError:
 
 class TestDAQPump(TestCase):
 
-    #@skipIf(True, "Needs to clarify final data format specs.")
-    #def setUp(self):
-    #    TEST_FILE.seek(0, 0)
-    #    self.pump = DAQPump()
-    #    self.pump.blob_file = TEST_FILE
+    # @skipIf(True, "Needs to clarify final data format specs.")
+    # def setUp(self):
+    #     TEST_FILE.seek(0, 0)
+    #     self.pump = DAQPump()
+    #     self.pump.blob_file = TEST_FILE
 
     @skipIf(True, "Needs to clarify final data format specs.")
     def test_determine_frame_positions(self):
@@ -98,10 +97,11 @@ class TestDAQPump(TestCase):
         blob = pump.get_blob(2)
         self.assertEqual(3, blob['DAQEvent'].n_snapshot_hits)
 
+
 class TestDAQPreamble(TestCase):
 
-    #def setUp(self):
-    #    TEST_FILE.seek(0, 0)
+    # def setUp(self):
+    #     TEST_FILE.seek(0, 0)
 
     @skipIf(True, "Needs to clarify final data format specs.")
     def test_init_with_byte_data(self):
@@ -116,7 +116,6 @@ class TestDAQPreamble(TestCase):
         preamble = DAQPreamble(file_obj=TEST_FILE)
         self.assertEqual(133, preamble.length)
         self.assertEqual(2001, preamble.data_type)
-
 
 
 class TestDAQHeader(TestCase):
@@ -155,7 +154,7 @@ class TestDAQSummaryslice(TestCase):
 
 class TestDAQEvent(TestCase):
 
-    #def setUp(self):
+    # def setUp(self):
     #    TEST_FILE.seek(245, 0)
     #    DAQPreamble(file_obj=TEST_FILE)
     #    self.event = DAQEvent(TEST_FILE)
@@ -183,4 +182,3 @@ class TestDAQEvent(TestCase):
         self.assertTupleEqual((101, 22, 729076, 36), event.snapshot_hits[0])
         self.assertTupleEqual((103, 16, 728715, 38), event.snapshot_hits[1])
         self.assertTupleEqual((103, 17, 728720, 18), event.snapshot_hits[2])
-

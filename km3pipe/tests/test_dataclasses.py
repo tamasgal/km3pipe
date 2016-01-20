@@ -77,5 +77,3 @@ class TestDirection(TestCase):
     def test_direction_str(self):
         direction = Direction((1, 2, 3))
         self.assertEqual("(0.2673, 0.5345, 0.8018)", str(direction))
-
-

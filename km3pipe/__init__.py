@@ -6,10 +6,10 @@ The extemporary KM3NeT analysis framework.
 """
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.__version__ import version, version_info
+from km3pipe.__version__ import version, version_info  # noqa
 
 try:
-    from km3pipe.core import (Pipeline, Module, Pump, Blob,
+    from km3pipe.core import (Pipeline, Module, Pump, Blob,  # noqa
                               Geometry, AanetGeometry)
 except ImportError:
     print("Numpy is needed for KM3Pipe")
