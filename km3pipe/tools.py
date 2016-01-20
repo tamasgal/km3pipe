@@ -162,6 +162,15 @@ def pdg2name(pdg_id):
         return "N/A"
 
 
+def total_seconds(td):
+    """Convert the timedelta to seconds. (Python 2.6 backward compatibility)"""
+    try:
+        s = td.total_seconds()
+    except AttributeError:
+        s = (td.microseconds + (td.seconds + td.days*24*3600) * 10**6) / 10**6
+    return s
+
+
 class PMTReplugger(object):
     """Replugs PMTs and modifies the data according to the new setup."""
 
