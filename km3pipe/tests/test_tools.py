@@ -131,7 +131,7 @@ class TestCuckoo(TestCase):
         cuckoo.reset()
         now = datetime.now()
         delta = datetime.now() - cuckoo.timestamp
-        self.assertGreater(delta.total_seconds(), 0)
+        self.assertGreater(total_seconds(delta), 0)
 
     def test_set_interval_on_init(self):
         cuckoo = Cuckoo(1)
