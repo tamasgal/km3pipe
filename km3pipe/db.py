@@ -77,7 +77,7 @@ class DBManager(object):
         try:
             dataframe = pd.read_csv(StringIO(content), sep="\t")
         except ValueError:
-            log.warning("Empty dataset")
+            log.warning("Empty dataset")  # ...probably. Waiting for more info
             return None
         else:
             def convert_data(timestamp):
