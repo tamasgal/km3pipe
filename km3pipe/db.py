@@ -89,7 +89,7 @@ class DBManager(object):
             return dataframe
 
     def run_table(self, detid='D_ARCA001'):
-        url = 'streamds/runs.txt?detid={0}'.format(detid) 
+        url = 'streamds/runs.txt?detid={0}'.format(detid)
         content = self._get_content(url)
         try:
             dataframe = pd.read_csv(StringIO(content), sep="\t")
@@ -97,6 +97,10 @@ class DBManager(object):
             log.warning("Empty dataset")
             return None
         else:
+            def convert_data(timestamp):
+                return datetime.fromtimestamp(float(timestamp) / 1e3)
+            converted = dataframe['UNIXSTARTTIME'].apply(convert_data)
+            dataframe['DATETIME'] = converted
             return dataframe
 
     @property
