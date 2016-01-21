@@ -58,7 +58,7 @@ class DBManager(object):
         "Retrieve datalogs for given parameter, run(s) and detector"
         parameter = parameter.lower()
         if maxrun is None:
-            maxrun is run
+            maxrun = run
         with Timer('Database lookup'):
             return self._datalog(parameter, run, maxrun, detid)
 
@@ -71,11 +71,14 @@ class DBManager(object):
                   }
         data = urllib.urlencode(values)
         content = self._get_content('streamds/datalognumbers.txt?' + data)
+        if content.startswith('ERROR'):
+            log.error(content)
+            return None
         try:
             dataframe = pd.read_csv(StringIO(content), sep="\t")
         except ValueError:
-            log.warning("Empty dataset")
-            return None
+            log.warning("Empty dataset")  # ...probably. Waiting for more info
+            return pd.DataFrame()
         else:
             def convert_data(timestamp):
                 return datetime.fromtimestamp(float(timestamp) / 1e3)
