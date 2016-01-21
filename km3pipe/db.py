@@ -77,8 +77,8 @@ class DBManager(object):
         try:
             dataframe = pd.read_csv(StringIO(content), sep="\t")
         except ValueError:
-            log.warning("Empty dataset")
-            return None
+            log.warning("Empty dataset")  # ...probably. Waiting for more info
+            return pd.DataFrame()
         else:
             def convert_data(timestamp):
                 return datetime.fromtimestamp(float(timestamp) / 1e3)
