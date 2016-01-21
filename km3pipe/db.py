@@ -48,6 +48,7 @@ class DBManager(object):
         "Create database connection"
         self.cookies = []
         self._parameters = None
+        self._detectors = None
         self._opener = None
         if username is None:
             config = Config()
@@ -101,6 +102,22 @@ class DBManager(object):
                 return datetime.fromtimestamp(float(timestamp) / 1e3)
             converted = dataframe['UNIXSTARTTIME'].apply(convert_data)
             dataframe['DATETIME'] = converted
+            return dataframe
+
+    @property
+    def detectors(self):
+        if not self._detectors:
+            self._detectors = self._get_detectors()
+        return self._detectors
+
+    def _get_detectors(self):
+        content = self._get_content('streamds/detectors.txt')
+        try:
+            dataframe = pd.read_csv(StringIO(content), sep="\t")
+        except ValueError:
+            log.warning("Empty dataset")
+            return pd.DataFrame()
+        else:
             return dataframe
 
     @property
