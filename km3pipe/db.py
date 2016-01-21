@@ -32,7 +32,11 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 # Ignore invalid certificate error
-ssl._create_default_https_context = ssl._create_unverified_context
+try:
+    ssl._create_default_https_context = ssl._create_unverified_context
+except AttributeError:
+    log.warn("Your SSL support is outdate. "
+             "Please update your Python installation!")
 
 LOGIN_URL = 'https://km3netdbweb.in2p3.fr/home.htm'
 BASE_URL = 'https://km3netdbweb.in2p3.fr'
@@ -153,9 +157,12 @@ class ParametersContainer(object):
         """Generate unit conversion function for given parameter"""
         if parameter not in self._converters:
             param = self.get_parameter(parameter)
+            try:
+                scale = float(param['Scale'])
+            except KeyError:
+                scale = 1
 
             def convert(value):
-                scale = float(param['Scale'])
                 # easy_scale = float(param['EasyScale'])
                 # easy_scale_multiplier = float(param['EasyScaleMultiplier'])
                 return value * scale
