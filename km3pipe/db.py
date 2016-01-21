@@ -88,6 +88,17 @@ class DBManager(object):
             dataframe.unit = self.parameters.unit(parameter)
             return dataframe
 
+    def run_table(self, detid='D_ARCA001'):
+        url = 'streamds/runs.txt?detid={0}'.format(detid) 
+        content = self._get_content(url)
+        try:
+            dataframe = pd.read_csv(StringIO(content), sep="\t")
+        except ValueError:
+            log.warning("Empty dataset")
+            return None
+        else:
+            return dataframe
+
     @property
     def parameters(self):
         "Return the parameters container for quick access to their details"
