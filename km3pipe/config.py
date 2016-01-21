@@ -27,7 +27,7 @@ class Config(object):
         try:
             self.config.readfp(open(os.path.expanduser(CONFIG_PATH)))
         except IOError:
-            log.error("No configuration found at '{0}'".format(CONFIG_PATH))
+            log.warn("No configuration found at '{0}'".format(CONFIG_PATH))
 
     @property
     def db_credentials(self):
