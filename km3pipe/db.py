@@ -48,6 +48,7 @@ class DBManager(object):
         "Create database connection"
         self.cookies = []
         self._parameters = None
+        self._doms = None
         self._detectors = None
         self._opener = None
         if username is None:
@@ -130,17 +131,29 @@ class DBManager(object):
     def _load_parameters(self):
         "Retrieve a list of available parameters from the database"
         parameters = self._get_json('allparam/s')
-        if parameters['Result'] != 'OK':
-            raise ValueError('Error while retrieving the parameter list.')
         data = {}
-        for parameter in parameters['Data']:
+        for parameter in parameters:
             data[parameter['Name'].lower()] = parameter
         self._parameters = ParametersContainer(data)
+
+    @property
+    def doms(self):
+        if self._doms is None:
+            self._load_doms()
+        return self._doms
+
+    def _load_doms(self):
+        "Retrieve DOM information from the database"
+        doms = self._get_json('domclbupiid/s')
+        self._doms = DOMContainer(doms)
 
     def _get_json(self, url):
         "Get JSON-type content"
         content = self._get_content('jsonds/' + url)
-        return json.loads(content)
+        json_content = json.loads(content)
+        if json_content['Result'] != 'OK':
+            raise ValueError('Error while retrieving the parameter list.')
+        return json_content['Data']
 
     def _get_content(self, url):
         "Get HTML content"
@@ -207,3 +220,9 @@ class ParametersContainer(object):
     def unit(self, parameter):
         "Get the unit for given parameter"
         return self._parameters[parameter.lower()]['Unit']
+
+
+class DOMContainer(object):
+    """Provides easy access to DOM parameters"""
+    def __init__(self, doms):
+        self._doms = doms
