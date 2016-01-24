@@ -132,7 +132,7 @@ class DBManager(object):
         "Retrieve a list of available parameters from the database"
         parameters = self._get_json('allparam/s')
         data = {}
-        for parameter in parameters:
+        for parameter in parameters:  # There is a case-chaos in the DB
             data[parameter['Name'].lower()] = parameter
         self._parameters = ParametersContainer(data)
 
@@ -151,6 +151,8 @@ class DBManager(object):
         "Get JSON-type content"
         content = self._get_content('jsonds/' + url)
         json_content = json.loads(content)
+        if json_content['Comment']:
+            log.warn(json_content['Comment'])
         if json_content['Result'] != 'OK':
             raise ValueError('Error while retrieving the parameter list.')
         return json_content['Data']
@@ -225,4 +227,19 @@ class ParametersContainer(object):
 class DOMContainer(object):
     """Provides easy access to DOM parameters"""
     def __init__(self, doms):
-        self._doms = doms
+        self._json = doms
+        self._ids = []
+
+    def ids(self, det_id):
+        """Return a list of DOM IDs for given detector"""
+        return [dom['DOMId'] for dom in self._json if dom['DetOID'] == det_id]
+
+    def clbupi2domid(self, clb_upi, det_id):
+        """Return DOM ID for given CLB UPI and detector"""
+        lookup = [dom['DOMId'] for dom in self._json if
+                  dom['DetOID'] == det_id and
+                  dom['CLBUPI'] == clb_upi]
+        if len(lookup) > 1:
+            log.warn("Multiple entries found: {0}".format(lookup) + "\n" +
+                     "Return the first one.")
+        return lookup[0]
