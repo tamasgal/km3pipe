@@ -53,7 +53,7 @@ def check_for_update():
         pass
     else:
         version = _get_version(version_info)
-        if latest_version == version:
+        if latest_version != version:
             log.warn("There is an update for km3pipe available.\n" +
                      "    Installed: {0}\n"
                      "    Latest: {1}\n".format(version, latest_version) +
