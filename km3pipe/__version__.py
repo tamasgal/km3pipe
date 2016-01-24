@@ -18,7 +18,7 @@ __author__ = 'tamasgal'
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
-version_info = (0, 9, 31, 'final', 0)
+version_info = (0, 9, 32, 'final', 0)
 
 
 def _get_version(version_info):
