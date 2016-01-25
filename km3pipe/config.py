@@ -8,8 +8,12 @@ Tools for global configuration.
 from __future__ import division, absolute_import, print_function
 
 import os
-import ConfigParser
+from six.moves.configparser import ConfigParser, NoSectionError
 import getpass
+try:
+    input = raw_input
+except NameError:
+    pass
 
 from km3pipe.logger import logging
 
@@ -23,7 +27,7 @@ CONFIG_PATH = '~/.km3net'
 class Config(object):
     def __init__(self):
         """Configuration manager for KM3NeT stuff"""
-        self.config = ConfigParser.ConfigParser()
+        self.config = ConfigParser()
         try:
             self.config.readfp(open(os.path.expanduser(CONFIG_PATH)))
         except IOError:
@@ -35,7 +39,7 @@ class Config(object):
         try:
             username = self.config.get('DB', 'username')
             password = self.config.get('DB', 'password')
-        except ConfigParser.NoSectionError:
-            username = raw_input("Please enter your KM3NeT DB username: ")
+        except NoSectionError:
+            username = input("Please enter your KM3NeT DB username: ")
             password = getpass.getpass("Password: ")
         return username, password
