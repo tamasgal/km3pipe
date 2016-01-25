@@ -11,7 +11,11 @@ Pep 386 compliant version info.
 
 """
 import json
-import urllib
+try:
+    from urllib import urlopen
+except ImportError:
+    from urllib.request import urlopen
+
 from km3pipe.logger import logging
 
 __author__ = 'tamasgal'
@@ -40,7 +44,7 @@ def _get_version(version_info):
 
 
 def _get_latest_version():
-    response = urllib.urlopen('https://pypi.python.org/pypi/km3pipe/json')
+    response = urlopen('https://pypi.python.org/pypi/km3pipe/json')
     content = response.read()
     latest_version = json.loads(content)['info']['version']
     return latest_version
