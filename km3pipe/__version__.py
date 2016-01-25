@@ -11,14 +11,14 @@ Pep 386 compliant version info.
 
 """
 import json
-import urllib2
+import urllib
 from km3pipe.logger import logging
 
 __author__ = 'tamasgal'
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
-version_info = (0, 9, 31, 'final', 0)
+version_info = (0, 9, 33, 'final', 0)
 
 
 def _get_version(version_info):
@@ -40,7 +40,7 @@ def _get_version(version_info):
 
 
 def _get_latest_version():
-    response = urllib2.urlopen('https://pypi.python.org/pypi/km3pipe/json')
+    response = urllib.urlopen('https://pypi.python.org/pypi/km3pipe/json')
     content = response.read()
     latest_version = json.loads(content)['info']['version']
     return latest_version
@@ -49,7 +49,7 @@ def _get_latest_version():
 def check_for_update():
     try:
         latest_version = _get_latest_version()
-    except urllib2.URLError:
+    except IOError:
         pass
     else:
         version = _get_version(version_info)
