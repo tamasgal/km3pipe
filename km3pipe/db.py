@@ -9,11 +9,20 @@ from __future__ import division, absolute_import, print_function
 
 from datetime import datetime
 import ssl
-import urllib
-from urllib2 import (Request, build_opener, HTTPCookieProcessor, HTTPHandler)
-import cookielib
-import json
 import sys
+import json
+if sys.version_info.major > 2:
+    from urllib.parse import urlencode
+    from urllib.request import (Request, build_opener,
+                                HTTPCookieProcessor, HTTPHandler)
+    from io import StringIO
+    from http.cookiejar import CookieJar
+else:
+    from urllib import urlencode
+    from urllib2 import (Request, build_opener,
+                         HTTPCookieProcessor, HTTPHandler)
+    from StringIO import StringIO
+    from cookielib import CookieJar
 
 import pandas as pd
 
@@ -21,10 +30,6 @@ from km3pipe.tools import Timer
 from km3pipe.config import Config
 from km3pipe.logger import logging
 
-if sys.version_info[0] < 3:
-    from StringIO import StringIO
-else:
-    from io import StringIO
 
 __author__ = 'tamasgal'
 
@@ -71,7 +76,7 @@ class DBManager(object):
                   'maxrun': maxrun,
                   'detid': detid,
                   }
-        data = urllib.urlencode(values)
+        data = urlencode(values)
         content = self._get_content('streamds/datalognumbers.txt?' + data)
         if content.startswith('ERROR'):
             log.error(content)
@@ -150,7 +155,7 @@ class DBManager(object):
     def _get_json(self, url):
         "Get JSON-type content"
         content = self._get_content('jsonds/' + url)
-        json_content = json.loads(content)
+        json_content = json.loads(content.decode())
         if json_content['Comment']:
             log.warn(json_content['Comment'])
         if json_content['Result'] != 'OK':
@@ -159,7 +164,8 @@ class DBManager(object):
 
     def _get_content(self, url):
         "Get HTML content"
-        f = self.opener.open(BASE_URL + '/' + url)
+        target_url = BASE_URL + '/' + url
+        f = self.opener.open(target_url)
         content = f.read()
         return content
 
@@ -176,14 +182,14 @@ class DBManager(object):
 
     def login(self, username, password):
         "Login to the databse and store cookies for upcoming requests."
-        cj = cookielib.CookieJar()
+        cj = CookieJar()
         opener = build_opener(HTTPCookieProcessor(cj), HTTPHandler())
         values = {'usr': username, 'pwd': password}
-        data = urllib.urlencode(values)
-        req = Request(LOGIN_URL, data)
+        data = urlencode(values)
+        req = Request(LOGIN_URL, data.encode('utf-8'))
         f = opener.open(req)
         html = f.read()
-        if 'Bad username or password' in html:
+        if 'Bad username or password' in str(html):
             log.error("Bad username or password!")
         self.cookies = cj
 
