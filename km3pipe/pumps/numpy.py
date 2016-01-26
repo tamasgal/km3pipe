@@ -17,14 +17,16 @@ class NumpyStructuredPump(Pump):
 
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
-
-        self.array = self.get("array")
-        columns = self.get("columns")
-
-        if columns:
-            self.columns = columns
+        self.callback = self.get("callback")
+        if callback:
+            self.array = self.callback.get_array()
         else:
+            self.array = self.get("array")
+
+        self.columns = self.get("columns")
+        if not self.columns:
             self.columns = self.array.dtype.names
+        self.index = 0
 
     def get_blob(self, index):
         blob = Blob()
