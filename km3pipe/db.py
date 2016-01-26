@@ -11,6 +11,7 @@ from datetime import datetime
 import ssl
 import sys
 import json
+import re
 
 import pandas as pd
 
@@ -19,13 +20,13 @@ from km3pipe.config import Config
 from km3pipe.logger import logging
 
 if sys.version_info.major > 2:
-    from urllib.parse import urlencode
+    from urllib.parse import urlencode, unquote
     from urllib.request import (Request, build_opener,
                                 HTTPCookieProcessor, HTTPHandler)
     from io import StringIO
     from http.cookiejar import CookieJar
 else:
-    from urllib import urlencode
+    from urllib import urlencode, unquote
     from urllib2 import (Request, build_opener,
                          HTTPCookieProcessor, HTTPHandler)
     from StringIO import StringIO
@@ -167,8 +168,8 @@ class DBManager(object):
 
     def _get_content(self, url):
         "Get HTML content"
-        target_url = BASE_URL + '/' + url
-        f = self.opener.open(target_url)
+        target_url = BASE_URL + '/' + unquote(url)
+        f = self.opener.open(target_url.encode('utf-8'))
         content = f.read()
         return content.decode('utf-8')
 
@@ -209,7 +210,8 @@ class ParametersContainer(object):
         return self._parameters.keys()
 
     def get_parameter(self, parameter):
-        "Return a dict of given parameter"
+        "Return a dict for given parameter"
+        parameter = self._get_parameter_name(parameter)
         return self._parameters[parameter]
 
     def get_converter(self, parameter):
@@ -230,7 +232,22 @@ class ParametersContainer(object):
 
     def unit(self, parameter):
         "Get the unit for given parameter"
-        return self._parameters[parameter.lower()]['Unit']
+        parameter = self._get_parameter_name(parameter).lower()
+        return self._parameters[parameter]['Unit']
+
+    def _get_parameter_name(self, parameter):
+        if parameter in self.names:
+            return parameter
+        log.info("Parameter '{0}' not found, trying to find alternative."
+                 .format(parameter))
+        try:
+            # ahrs_g[0] for example should be looked up as ahrs_g
+            alternative = re.findall(r'(.*)\[[0-9*]\]', parameter)[0]
+            log.info("Found alternative: '{0}'".format(alternative))
+            return alternative
+        except IndexError:
+            raise KeyError("Could not find alternative for '{0}'"
+                           .format(parameter))
 
 
 class DOMContainer(object):
