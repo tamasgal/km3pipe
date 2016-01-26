@@ -41,7 +41,7 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 try:
     ssl._create_default_https_context = ssl._create_unverified_context
 except AttributeError:
-    log.warn("Your SSL support is outdate. "
+    log.warn("Your SSL support is outdated.\n"
              "Please update your Python installation!")
 
 LOGIN_URL = 'https://km3netdbweb.in2p3.fr/home.htm'
