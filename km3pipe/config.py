@@ -21,7 +21,7 @@ __author__ = 'tamasgal'
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
-CONFIG_PATH = '~/.km3net'
+CONFIG_PATH = os.path.expanduser('~/.km3net')
 
 
 class Config(object):
@@ -29,9 +29,23 @@ class Config(object):
         """Configuration manager for KM3NeT stuff"""
         self.config = ConfigParser()
         try:
-            self.config.readfp(open(os.path.expanduser(CONFIG_PATH)))
+            self._read_configuration()
         except IOError:
             log.warn("No configuration found at '{0}'".format(CONFIG_PATH))
+        else:
+            self._check_config_file_permissions()
+
+    def _check_config_file_permissions(self):
+        """Make sure that the configuration file is 0600"""
+        if os.stat(CONFIG_PATH).st_mode & 0777 != 0600:
+            log.critical("Your config file is readable to others!\n" +
+                         "Please execute `chmod 0600 {0}`".format(CONFIG_PATH))
+            return False
+        return True
+
+    def _read_configuration(self):
+        """Parse configuration file"""
+        self.config.readfp(open(CONFIG_PATH))
 
     @property
     def db_credentials(self):
