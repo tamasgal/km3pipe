@@ -7,8 +7,39 @@
 from __future__ import division, absolute_import, print_function
 
 import numpy as np
+import tables
 
-from km3pipe.core import Pump, Blob
+from km3pipe.core import Pump, Blob, Module
+
+
+class HDF5Loader():
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.filename = self.get("filename")
+        self.location = self.get("location")
+        self.title = self.get("title")
+
+        if not self.title:
+            self.title = "data"
+        if self.filename:
+            self.h5file = tables.open_file(self.filename, 'r',
+                                           title=self.title)
+        else:
+            log.warn("No filename specified. Take care of the file handling!")
+        self.array =
+
+    def get_array(self):
+        return self.array
+
+
+class NPYLoader():
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.filename = self.get("filename")
+        self.array = np.load(filename, 'r',)
+
+    def get_array(self):
+        return self.array
 
 
 class NumpyStructuredPump(Pump):
@@ -18,7 +49,7 @@ class NumpyStructuredPump(Pump):
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.callback = self.get("callback")
-        if callback:
+        if self.callback:
             self.array = self.callback.get_array()
         else:
             self.array = self.get("array")
@@ -32,7 +63,8 @@ class NumpyStructuredPump(Pump):
         blob = Blob()
         sample = self.array[index]
         for key in self.columns:
-            blob[key] = sample[key][index]
+            # 0 index due to recarray magick
+            blob[key] = sample[key][0][index]
         return blob
 
     def __len__(self):
@@ -53,7 +85,7 @@ class NumpyStructuredPump(Pump):
     def __iter__(self):
         return self
 
-    def __getitem__(self,index):
+    def __getitem__(self, index):
         if isinstance(index, int):
             return self.get_blob(index)
         elif isinstance(index, slice):

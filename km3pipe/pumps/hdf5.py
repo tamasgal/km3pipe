@@ -36,3 +36,4 @@ class HDF5Pump(Pump):
 
     def finish(self):
         self.h5file.close()
+
