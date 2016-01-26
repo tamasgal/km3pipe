@@ -24,9 +24,10 @@ If you're not using a virtual environment (https://virtualenvwrapper.readthedocs
 To install the latest developer version:
 
 .. code-block:: bash
+
     git clone git@github.com:tamasgal/km3pipe.git
     cd km3pipe
-   pip install -e .
+    pip install -e .
 
 
 .. image:: https://travis-ci.org/tamasgal/km3pipe.svg?branch=develop
