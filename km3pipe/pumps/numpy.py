@@ -32,3 +32,35 @@ class NumpyStructuredPump(Pump):
         for key in self.columns:
             blob[key] = sample[key][index]
         return blob
+
+    def __len__(self):
+        return self.array.shape[0]
+
+    def next(self):
+        return self.__next__()
+
+    def __next__(self):
+        try:
+            blob = self.get_blob(self.index)
+        except IndexError:
+            self.index = 0
+            raise StopIteration
+        self.index += 1
+        return blob
+
+    def __iter__(self):
+        return self
+
+    def __getitem__(self,index):
+        if isinstance(index, int):
+            return self.get_blob(index)
+        elif isinstance(index, slice):
+            return self._slice_generator(index)
+        else:
+            raise TypeError("index must be int or slice")
+
+    def _slice_generator(self, index):
+        """A simple slice generator for iterations"""
+        start, stop, step = index.indices(len(self))
+        for i in range(start, stop, step):
+            yield self.get_blob(i)
