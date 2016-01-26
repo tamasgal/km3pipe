@@ -8,6 +8,7 @@ Tools for global configuration.
 from __future__ import division, absolute_import, print_function
 
 import os
+import stat
 from six.moves.configparser import ConfigParser, NoSectionError
 import getpass
 try:
@@ -37,11 +38,13 @@ class Config(object):
 
     def _check_config_file_permissions(self):
         """Make sure that the configuration file is 0600"""
-        if os.stat(CONFIG_PATH).st_mode & 0777 != 0600:
+        allowed_modes = ['0600', '0o600']
+        if oct(stat.S_IMODE(os.lstat(CONFIG_PATH).st_mode)) in allowed_modes:
+            return True
+        else:
             log.critical("Your config file is readable to others!\n" +
                          "Please execute `chmod 0600 {0}`".format(CONFIG_PATH))
             return False
-        return True
 
     def _read_configuration(self):
         """Parse configuration file"""
