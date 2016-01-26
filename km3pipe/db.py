@@ -25,12 +25,14 @@ if sys.version_info.major > 2:
                                 HTTPCookieProcessor, HTTPHandler)
     from io import StringIO
     from http.cookiejar import CookieJar
+    from http.client import IncompleteRead
 else:
     from urllib import urlencode, unquote
     from urllib2 import (Request, build_opener,
                          HTTPCookieProcessor, HTTPHandler)
     from StringIO import StringIO
     from cookielib import CookieJar
+    from httplib import IncompleteRead
 
 __author__ = 'tamasgal'
 
@@ -88,12 +90,20 @@ class DBManager(object):
             log.warning("Empty dataset")  # ...probably. Waiting for more info
             return pd.DataFrame()
         else:
-            def convert_data(timestamp):
+            def conv_time(timestamp):
                 return datetime.fromtimestamp(float(timestamp) / 1e3)
-            dataframe['DATETIME'] = dataframe['UNIXTIME'].apply(convert_data)
-            convert_unit = self.parameters.get_converter(parameter)
-            dataframe['VALUE'] = dataframe['DATA_VALUE'].apply(convert_unit)
-            dataframe.unit = self.parameters.unit(parameter)
+            try:
+                dataframe['DATETIME'] = dataframe['UNIXTIME'].apply(conv_time)
+            except KeyError:
+                log.warn("Missing 'UNIXTIME': could not add date column.")
+
+            conv_unit = self.parameters.get_converter(parameter)
+            try:
+                dataframe['VALUE'] = dataframe['DATA_VALUE'].apply(conv_unit)
+            except KeyError:
+                log.warn("Missing 'VALUE': no unit conversion.")
+            else:
+                dataframe.unit = self.parameters.unit(parameter)
             return dataframe
 
     def run_table(self, detid='D_ARCA001'):
@@ -170,7 +180,12 @@ class DBManager(object):
         "Get HTML content"
         target_url = BASE_URL + '/' + unquote(url)
         f = self.opener.open(target_url.encode('utf-8'))
-        content = f.read()
+        try:
+            content = f.read()
+        except IncompleteRead as icread:
+            log.critical("Incomplete data received from the DB, the data " +
+                         "could be corrupted.")
+            content = icread.partial
         return content.decode('utf-8')
 
     @property
