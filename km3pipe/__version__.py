@@ -22,7 +22,7 @@ __author__ = 'tamasgal'
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
-version_info = (0, 9, 35, 'final', 0)
+version_info = (0, 9, 36, 'final', 0)
 
 
 def _get_version(version_info):
@@ -46,7 +46,7 @@ def _get_version(version_info):
 def _get_latest_version():
     response = urlopen('https://pypi.python.org/pypi/km3pipe/json')
     content = response.read()
-    latest_version = json.loads(content.decode())['info']['version']
+    latest_version = json.loads(content.decode())['info']['version'].encode()
     return latest_version
 
 
