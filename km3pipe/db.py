@@ -106,8 +106,11 @@ class DBManager(object):
         else:
             def convert_data(timestamp):
                 return datetime.fromtimestamp(float(timestamp) / 1e3)
-            converted = dataframe['UNIXSTARTTIME'].apply(convert_data)
-            dataframe['DATETIME'] = converted
+            try:
+                converted = dataframe['UNIXSTARTTIME'].apply(convert_data)
+                dataframe['DATETIME'] = converted
+            except KeyError:
+                log.warn("Could not add DATETIME column")
             return dataframe
 
     @property
@@ -167,7 +170,7 @@ class DBManager(object):
         target_url = BASE_URL + '/' + url
         f = self.opener.open(target_url)
         content = f.read()
-        return content
+        return content.decode('utf-8')
 
     @property
     def opener(self):
