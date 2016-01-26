@@ -33,6 +33,7 @@ class AanetPump(Pump):
             else:
                 self.filenames.append(self.filename)
 
+        self.header = None
         self.blobs = self.blob_generator()
 
     def _parse_filenames(self):
@@ -54,13 +55,15 @@ class AanetPump(Pump):
                 log.warn(filename + " not available: continue without it")
                 continue
             event_file = EventFile(filename)
+            self.header = event_file.rootfile().Get("Header")
             for event in event_file:
                 blob = {'Evt': event,
                         'Hits': event.hits,
                         'MCHits': event.mc_hits,
                         'Tracks': event.trks,
                         'MCTracks': event.mc_trks,
-                        'filename': filename}
+                        'filename': filename,
+                        'Header': self.header}
                 yield blob
             del event_file
 
