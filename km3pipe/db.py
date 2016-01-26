@@ -11,6 +11,13 @@ from datetime import datetime
 import ssl
 import sys
 import json
+
+import pandas as pd
+
+from km3pipe.tools import Timer
+from km3pipe.config import Config
+from km3pipe.logger import logging
+
 if sys.version_info.major > 2:
     from urllib.parse import urlencode
     from urllib.request import (Request, build_opener,
@@ -23,13 +30,6 @@ else:
                          HTTPCookieProcessor, HTTPHandler)
     from StringIO import StringIO
     from cookielib import CookieJar
-
-import pandas as pd
-
-from km3pipe.tools import Timer
-from km3pipe.config import Config
-from km3pipe.logger import logging
-
 
 __author__ = 'tamasgal'
 
