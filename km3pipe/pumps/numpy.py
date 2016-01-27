@@ -33,9 +33,8 @@ from km3pipe.core import Pump, Blob, Module
 
 
 class NPYLoader():
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
-        self.filename = self.get("filename")
+    def __init__(self, filename):
+        self.filename = filename
         self.array = np.load(filename, 'r',)
 
     def get_array(self):
