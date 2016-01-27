@@ -284,3 +284,12 @@ class DOMContainer(object):
             log.warn("Multiple entries found: {0}".format(lookup) + "\n" +
                      "Return the first one.")
         return lookup[0]
+
+    def clbupi2floor(self, clb_upi, det_id):
+        lookup = [dom['Floor'] for dom in self._json if
+                  dom['CLBUPI'] == clb_upi and
+                  dom['DetOID'] == det_id]
+        if len(lookup) > 1:
+            log.warn("Multiple entries found: {0}".format(lookup) + "\n" +
+                     "Return the first one.")
+        return lookup[0]
