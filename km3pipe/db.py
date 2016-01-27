@@ -183,8 +183,8 @@ class DBManager(object):
         try:
             content = f.read()
         except IncompleteRead as icread:
-            log.critical("Incomplete data received from the DB, the data " +
-                         "could be corrupted.")
+            log.critical("Incomplete data received from the DB, " +
+                         "the data could be corrupted.")
             content = icread.partial
         return content.decode('utf-8')
 
