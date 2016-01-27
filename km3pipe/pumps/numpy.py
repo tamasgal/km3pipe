@@ -57,13 +57,23 @@ class NumpyStructuredPump(Pump):
         if not self.columns:
             self.columns = self.array.dtype.names
         self.index = 0
+        self.n_evts = self.array.shape[0]
+
+    def process(self, blob=None):
+        try:
+            blob = self.get_blob(self.index)
+        except IndexError:
+            raise StopIteration
+        self.index += 1
+        return blob
 
     def get_blob(self, index):
+        if index >= self.n_evts:
+            raise IndexError
         blob = Blob()
-        sample = self.array[index]
         for key in self.columns:
             # 0 index due to recarray magick
-            blob[key] = sample[key][0][index]
+            blob[key] = self.array[key][index]
         return blob
 
     def __len__(self):
