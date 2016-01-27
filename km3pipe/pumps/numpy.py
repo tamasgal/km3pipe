@@ -13,11 +13,17 @@ from km3pipe.core import Pump, Blob, Module
 
 
 class HDF5Loader():
-    def __init__(self, **context):
+    def __init__(self, filename, where='/', tables=None, title='Data'):
         super(self.__class__, self).__init__(**context)
-        self.filename = self.get("filename")
-        self.location = self.get("location")
-        self.title = self.get("title")
+        self.filename = filename
+        self.where = where
+        self.title = title
+        self.h5file = tables.open_file(self.filename, 'r',
+                                       title=self.title)
+        self.tables = tables
+        self.dsets = []
+        for table in tables:
+            self.dsets.append(self.h5file.get_node(where, table))
 
         if not self.title:
             self.title = "data"
