@@ -25,14 +25,13 @@ class HDF5Loader():
         for table in tables:
             self.dsets.append(self.h5file.get_node(where, table))
 
-        if not self.title:
-            self.title = "data"
-        if self.filename:
-            self.h5file = tables.open_file(self.filename, 'r',
-                                           title=self.title)
-        else:
-            log.warn("No filename specified. Take care of the file handling!")
-        #self.array =
+        # TODO
+        # read one name header
+        # view as float/whatever
+        # column_stack
+        # view as 2dim recarray(?)
+        # data.view(dtype=[(n, 'float64') for n in csv_names]).reshape(len(data))
+        # use np_utils
 
     def get_array(self):
         return self.array
