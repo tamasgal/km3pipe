@@ -72,6 +72,8 @@ class CHPump(Pump):
                 log.critical("No data received, connection died.\n" +
                              "Trying to reconnect in 30 seconds.")
                 sleep(30)
+                self._init_controlhost()
+                self._start_thread()
                 continue
             if self.queue.qsize() > self.max_queue:
                 log.warn("Maximum queue size ({0}) reached, dropping data."
