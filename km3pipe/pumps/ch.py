@@ -12,6 +12,7 @@ from km3pipe import Pump
 from km3pipe.logger import logging
 import threading
 import struct
+import socket
 from time import sleep
 try:
     from Queue import Queue, Empty
@@ -72,8 +73,10 @@ class CHPump(Pump):
                 log.critical("No data received, connection died.\n" +
                              "Trying to reconnect in 30 seconds.")
                 sleep(30)
-                self._init_controlhost()
-                self._start_thread()
+                try:
+                    self._init_controlhost()
+                except socket.error:
+                    log.error("Failed to connect to host.")
                 continue
             if self.queue.qsize() > self.max_queue:
                 log.warn("Maximum queue size ({0}) reached, dropping data."
