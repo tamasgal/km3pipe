@@ -11,6 +11,8 @@ from __future__ import division, absolute_import, print_function
 from km3pipe import Pump
 from km3pipe.logger import logging
 import threading
+import struct
+from time import sleep
 try:
     from Queue import Queue, Empty
 except ImportError:
@@ -61,10 +63,16 @@ class CHPump(Pump):
 
     def _run(self):
         while True:
-            prefix, data = self.client.get_message()
+            try:
+                prefix, data = self.client.get_message()
+            except struct.error:
+                log.error("Corrupt data recieved, skipping...")
+                continue
             if not data:
-                log.error("No data received, connection died.")
-                break
+                log.critical("No data received, connection died.\n" +
+                             "Trying to reconnect in 30 seconds.")
+                sleep(30)
+                continue
             if self.queue.qsize() > self.max_queue:
                 log.warn("Maximum queue size ({0}) reached, dropping data."
                          .format(self.max_queue))
