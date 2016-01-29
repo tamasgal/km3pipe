@@ -13,17 +13,17 @@ from km3pipe.core import Pump, Blob, Module
 
 
 class HDF5Loader():
-    def __init__(self, filename, where='/', tables=None, title='Data'):
+    def __init__(self, filename, where='/', keys=None, ftitle='Data'):
         super(self.__class__, self).__init__(**context)
         self.filename = filename
         self.where = where
-        self.title = title
-        self.h5file = tables.open_file(self.filename, 'r',
-                                       title=self.title)
-        self.tables = tables
-        self.dsets = []
-        for table in tables:
-            self.dsets.append(self.h5file.get_node(where, table))
+        self.ftitle = ftitle
+        self.h5file = self._open_h5file(filename)
+
+        self.keys = keys
+        self.dsets = {}
+        for key in self.keys:
+            self.dsets[key] = self._load_array(self.h5file, key, where)
 
         # TODO
         # read one name header
@@ -35,6 +35,20 @@ class HDF5Loader():
 
     def get_array(self):
         return self.array
+
+	def _open_h5file(h5file, fmode='r', ftitle='Data'):
+		"""Open file if name is given, else pass through."""
+		if isinstance(h5file, string_types):
+			return tables.open_file(filename=h5file, mode=fmode, ftitle='Data')
+		return h5file
+
+	def _load_array(h5file, key, tab_where='/', return_rec=True):
+		h5file = self._open_h5file(h5file)
+		rec = h5file.get_node(tab_where + key).read()
+		if return_rec:
+			return rec
+		arr = rec[key]
+		return arr
 
 
 class NPYLoader():
