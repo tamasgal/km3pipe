@@ -14,33 +14,62 @@ from km3pipe.core import Pump, Blob
 
 
 class HDF5Loader():
-    def __init__(self, filename, where='/', keys=None, ftitle='Data'):
-        self.filename = filename
-        self.where = where
-        self.ftitle = ftitle
-        self.h5file = self._open_h5file(filename)
+    """Open an HDF5 File and store it as structured Numpy array.
 
-        self.keys = keys
-        self.dsets = {}
-        for key in self.keys:
-            self.dsets[key] = self._load_array(self.h5file, key, where)
-        self.array = np.column_stack(list(self.dsets.values()))
+    Paramters
+    ---------
+    h5file: str or tables.File instance
+        Name of the HDF5 file to open, or a pytables File instance.
+    keys: list of str, optional (default=None)
+        The names of the tables to fetch (without '/.../' prefix).
+    where: str or dict of strings->strings, optional (default="/")
+        Location of the tables inside the file. If a dictionary is passed,
+        the location of each key is read as where[key].
+
+    Attributes
+    ----------
+    array: numpy structured array
+        The data retrived from the HDF5 file. The keys are stored as
+        columns.
+
+    """
+    def __init__(self, h5file, keys=None, where='/', ftitle='Data'):
+        self._where = where
+        if isinstance(where, string_types):
+            self._mutliple_locations = True
+        self._ftitle = ftitle
+        self._h5file = self._open_h5file(self._h5file)
+
+        self._keys = keys
+        self._dsets = {}
+        for key in self._keys:
+            if self._multiple_locations:
+                where = self._where[key]
+            else:
+                where = self._where
+            self._dsets[key] = self._load_array(self._h5file, key, where)
+        self.array = np.column_stack(list(self._dsets.values()))
         self.array = self.array.view(
-            dtype=[(n, 'float64') for n in keys]
+            dtype=[(k, 'float64') for k in self._keys]
         ).reshape(len(self.array))
 
     def get_array(self):
+        """Return the stored array.
+        """
         return self.array
 
     def _open_h5file(self, h5file, fmode='r', ftitle='Data'):
-        """Open file if name is given, else pass through."""
+        """Open HDF5 file if string is passed, else do nothing.
+        """
         if isinstance(h5file, string_types):
             return tables.open_file(filename=h5file, mode=fmode, ftitle='Data')
         return h5file
 
-    def _load_array(self, h5file, key, tab_where='/', return_rec=False):
+    def _load_array(self, h5file, key, where='/', return_rec=False):
+        """Retrieve a numpy array from an hdf5 file.
+        """
         h5file = self._open_h5file(h5file)
-        rec = h5file.get_node(tab_where + key).read()
+        rec = h5file.get_node(where + key).read()
         if return_rec:
             return rec
         arr = rec[key]
@@ -58,6 +87,13 @@ class NPYLoader():
 
 class NumpyStructuredPump(Pump):
     """NumpyStructuredPump streams events from structured Numpy arrays.
+
+    This pump is different from most file pumps, since it does not open
+    files on its own. It rather streams an array returned from an object
+    via the `callback` parameter.
+
+        pipe.attach(NumpyStructuredPump, callback=NPYLoader('myfile'))
+
     """
 
     def __init__(self, **context):
