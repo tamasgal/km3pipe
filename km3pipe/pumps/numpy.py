@@ -5,16 +5,16 @@
 """Streamer for Numpy arrays.
 """
 from __future__ import division, absolute_import, print_function
+from six import string_types
 
 import numpy as np
 import tables
 
-from km3pipe.core import Pump, Blob, Module
+from km3pipe.core import Pump, Blob
 
 
 class HDF5Loader():
     def __init__(self, filename, where='/', keys=None, ftitle='Data'):
-        super(self.__class__, self).__init__(**context)
         self.filename = filename
         self.where = where
         self.ftitle = ftitle
@@ -26,25 +26,25 @@ class HDF5Loader():
             self.dsets[key] = self._load_array(self.h5file, key, where)
         self.array = np.column_stack(list(self.dsets.values()))
         self.array = self.array.view(
-            dtype=[(n, 'float64') for n in csv_names]
+            dtype=[(n, 'float64') for n in keys]
         ).reshape(len(self.array))
 
     def get_array(self):
         return self.array
 
-	def _open_h5file(h5file, fmode='r', ftitle='Data'):
-		"""Open file if name is given, else pass through."""
-		if isinstance(h5file, string_types):
-			return tables.open_file(filename=h5file, mode=fmode, ftitle='Data')
-		return h5file
+    def _open_h5file(self, h5file, fmode='r', ftitle='Data'):
+        """Open file if name is given, else pass through."""
+        if isinstance(h5file, string_types):
+            return tables.open_file(filename=h5file, mode=fmode, ftitle='Data')
+        return h5file
 
-	def _load_array(h5file, key, tab_where='/', return_rec=False):
-		h5file = self._open_h5file(h5file)
-		rec = h5file.get_node(tab_where + key).read()
-		if return_rec:
-			return rec
-		arr = rec[key]
-		return arr
+    def _load_array(self, h5file, key, tab_where='/', return_rec=False):
+        h5file = self._open_h5file(h5file)
+        rec = h5file.get_node(tab_where + key).read()
+        if return_rec:
+            return rec
+        arr = rec[key]
+        return arr
 
 
 class NPYLoader():
