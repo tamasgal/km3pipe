@@ -23,8 +23,8 @@ class HDF5Loader():
     keys: list of str, optional (default=None)
         The names of the tables to fetch (without '/.../' prefix).
     where: str or dict of strings->strings, optional (default="/")
-        Location of the tables inside the file. If a dictionary is passed,
-        the location of each key is read as where[key].
+        Location of the tables inside the file. If a dictionary is
+        passed, the location of each key is read as where[key].
 
     Attributes
     ----------
@@ -77,9 +77,21 @@ class HDF5Loader():
 
 
 class NPYLoader():
+    """Retrieve an array from a .npy file.
+
+    Parameters
+    ----------
+    filename: str
+        The name of the file to open.
+
+    Attributes
+    ----------
+    array: numpy array
+        The retrieved array.
+    """
     def __init__(self, filename):
-        self.filename = filename
-        self.array = np.load(filename, 'r',)
+        self._filename = filename
+        self.array = np.load(self._filename, 'r',)
 
     def get_array(self):
         return self.array
@@ -92,21 +104,42 @@ class NumpyStructuredPump(Pump):
     files on its own. It rather streams an array returned from an object
     via the `callback` parameter.
 
-        pipe.attach(NumpyStructuredPump, callback=NPYLoader('myfile'))
+    Note: You cannot stream more blobs from this pump than the `n_evts`
+    length of the fetched array.
 
+    Parameters
+    ----------
+    callback: loader instance
+        An instance of a python object with implements the
+        `get_array() -> numpy array` method.
+
+    Attributes
+    ----------
+    index: int
+        Index of the event to blob.
+    n_evts: int
+        Number of events to return.
+
+    Examples
+    --------
+        >>> pipe.Pipeline()
+        >>> pipe.attach(NumpyStructuredPump,
+                        callback=NPYLoader('myfile.npy'))
+        [...]
+        >>> pipe.drain()
     """
 
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
-        self.callback = self.get("callback")
-        if self.callback:
-            self.array = self.callback.get_array()
+        self._callback = self.get("callback")
+        if self._callback:
+            self._array = self._callback.get_array()
         else:
-            self.array = self.get("array")
+            self._array = self.get("array")
 
-        self.columns = self.get("columns")
-        if not self.columns:
-            self.columns = self.array.dtype.names
+        self._columns = self.get("columns")
+        if not self._columns:
+            self._columns = self._array.dtype.names
         self.index = 0
         self.n_evts = self.array.shape[0]
 
@@ -122,13 +155,13 @@ class NumpyStructuredPump(Pump):
         if index >= self.n_evts:
             raise IndexError
         blob = Blob()
-        for key in self.columns:
+        for key in self._columns:
             # 0 index due to recarray magick
-            blob[key] = self.array[key][index]
+            blob[key] = self._array[key][index]
         return blob
 
     def __len__(self):
-        return self.array.shape[0]
+        return self._array.shape[0]
 
     def next(self):
         return self.__next__()
