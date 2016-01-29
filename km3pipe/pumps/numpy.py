@@ -24,14 +24,10 @@ class HDF5Loader():
         self.dsets = {}
         for key in self.keys:
             self.dsets[key] = self._load_array(self.h5file, key, where)
-
-        # TODO
-        # read one name header
-        # view as float/whatever
-        # column_stack
-        # view as 2dim recarray(?)
-        # data.view(dtype=[(n, 'float64') for n in csv_names]).reshape(len(data))
-        # use np_utils
+        self.array = np.column_stack(list(self.dsets.values()))
+        self.array = self.array.view(
+            dtype=[(n, 'float64') for n in csv_names]
+        ).reshape(len(self.array))
 
     def get_array(self):
         return self.array
@@ -42,7 +38,7 @@ class HDF5Loader():
 			return tables.open_file(filename=h5file, mode=fmode, ftitle='Data')
 		return h5file
 
-	def _load_array(h5file, key, tab_where='/', return_rec=True):
+	def _load_array(h5file, key, tab_where='/', return_rec=False):
 		h5file = self._open_h5file(h5file)
 		rec = h5file.get_node(tab_where + key).read()
 		if return_rec:
