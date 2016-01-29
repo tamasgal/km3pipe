@@ -18,17 +18,17 @@ class HDF5Loader():
 
     Paramters
     ---------
-    h5file: str or tables.File instance
+    h5file: str or `tables.File` instance
         Name of the HDF5 file to open, or a pytables File instance.
     keys: list of str, optional (default=None)
         The names of the tables to fetch (without '/.../' prefix).
     where: str or dict of strings->strings, optional (default="/")
         Location of the tables inside the file. If a dictionary is
-        passed, the location of each key is read as where[key].
+        passed, the location of each key is read as `where[key]`.
 
     Attributes
     ----------
-    array: numpy structured array
+    array: `numpy` structured array
         The data retrived from the HDF5 file. The keys are stored as
         columns.
 
@@ -66,7 +66,7 @@ class HDF5Loader():
         return h5file
 
     def _load_array(self, h5file, key, where='/', return_rec=False):
-        """Retrieve a numpy array from an hdf5 file.
+        """Retrieve a `numpy` array from an hdf5 file.
         """
         h5file = self._open_h5file(h5file)
         rec = h5file.get_node(where + key).read()
@@ -86,7 +86,7 @@ class NPYLoader():
 
     Attributes
     ----------
-    array: numpy array
+    array: `numpy` array
         The retrieved array.
     """
     def __init__(self, filename):
@@ -98,7 +98,7 @@ class NPYLoader():
 
 
 class NumpyStructuredPump(Pump):
-    """NumpyStructuredPump streams events from structured Numpy arrays.
+    """NumpyStructuredPump streams events from structured `numpy` arrays.
 
     This pump is different from most file pumps, since it does not open
     files on its own. It rather streams an array returned from an object
