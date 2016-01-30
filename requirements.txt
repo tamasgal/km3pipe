@@ -3,4 +3,5 @@ controlhost
 urwid
 numpy
 ipython
+pandas
 
