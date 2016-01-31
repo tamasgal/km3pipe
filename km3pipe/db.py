@@ -277,19 +277,17 @@ class DOMContainer(object):
 
     def clbupi2domid(self, clb_upi, det_id):
         """Return DOM ID for given CLB UPI and detector"""
-        lookup = [dom['DOMId'] for dom in self._json if
-                  dom['DetOID'] == det_id and
-                  dom['CLBUPI'] == clb_upi]
-        if len(lookup) > 1:
-            log.warn("Multiple entries found: {0}".format(lookup) + "\n" +
-                     "Return the first one.")
-        return lookup[0]
+        return self._json_list_lookup('CLBUPI', clb_upi, 'DOMId', det_id)
 
     def clbupi2floor(self, clb_upi, det_id):
-        lookup = [dom['Floor'] for dom in self._json if
-                  dom['CLBUPI'] == clb_upi and
+        """Return Floor ID for given CLB UPI and detector"""
+        return self._json_list_lookup('CLBUPI', clb_upi, 'Floor', det_id)
+
+    def _json_list_lookup(self, from_key, value, target_key, det_id):
+        lookup = [dom[target_key] for dom in self._json if
+                  dom[from_key] == value and
                   dom['DetOID'] == det_id]
         if len(lookup) > 1:
             log.warn("Multiple entries found: {0}".format(lookup) + "\n" +
-                     "Return the first one.")
+                     "Returning the first one.")
         return lookup[0]
