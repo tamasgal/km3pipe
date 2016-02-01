@@ -19,7 +19,6 @@ setup(name='km3pipe',
           'docopt',
           'pandas',
           'seaborn',
-          'scipy',
       ],
       entry_points={
           'console_scripts': [
