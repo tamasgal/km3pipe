@@ -4,5 +4,3 @@ urwid
 numpy
 ipython
 pandas
-scipy
-seaborn
