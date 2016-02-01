@@ -6,3 +6,4 @@ numpy
 py
 pytest
 urwid
+pandas
