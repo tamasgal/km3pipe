@@ -19,7 +19,7 @@ from km3pipe.tools import Timer
 from km3pipe.config import Config
 from km3pipe.logger import logging
 
-if sys.version_info.major > 2:
+if sys.version_info[0] > 2:
     from urllib.parse import urlencode, unquote
     from urllib.request import (Request, build_opener,
                                 HTTPCookieProcessor, HTTPHandler)
