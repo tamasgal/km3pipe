@@ -7,3 +7,5 @@ py
 pytest
 urwid
 pandas
+seaborn
+scipy
