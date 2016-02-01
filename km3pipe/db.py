@@ -90,20 +90,8 @@ class DBManager(object):
             log.warning("Empty dataset")  # ...probably. Waiting for more info
             return pd.DataFrame()
         else:
-            def conv_time(timestamp):
-                return datetime.fromtimestamp(float(timestamp) / 1e3)
-            try:
-                dataframe['DATETIME'] = dataframe['UNIXTIME'].apply(conv_time)
-            except KeyError:
-                log.warn("Missing 'UNIXTIME': could not add date column.")
-
-            conv_unit = self.parameters.get_converter(parameter)
-            try:
-                dataframe['VALUE'] = dataframe['DATA_VALUE'].apply(conv_unit)
-            except KeyError:
-                log.warn("Missing 'VALUE': no unit conversion.")
-            else:
-                dataframe.unit = self.parameters.unit(parameter)
+            self._add_datetime(dataframe)
+            self._add_converted_units(dataframe, parameter)
             return dataframe
 
     def run_table(self, detid='D_ARCA001'):
@@ -115,14 +103,31 @@ class DBManager(object):
             log.warning("Empty dataset")
             return None
         else:
-            def convert_data(timestamp):
-                return datetime.fromtimestamp(float(timestamp) / 1e3)
-            try:
-                converted = dataframe['UNIXSTARTTIME'].apply(convert_data)
-                dataframe['DATETIME'] = converted
-            except KeyError:
-                log.warn("Could not add DATETIME column")
+            self._add_datetime(dataframe, 'UNIXSTARTTIME')
             return dataframe
+
+    def _add_datetime(self, dataframe, timestamp_key='UNIXTIME'):
+        """Add an additional DATETIME column with standar datetime format.
+
+        This currently manipulates the incoming DataFrame!
+        """
+        def convert_data(timestamp):
+            return datetime.fromtimestamp(float(timestamp) / 1e3)
+        try:
+            converted = dataframe[timestamp_key].apply(convert_data)
+            dataframe['DATETIME'] = converted
+        except KeyError:
+            log.warn("Could not add DATETIME column")
+
+    def _add_converted_units(self, dataframe, parameter, key='VALUE'):
+        """Add an additional DATA_VALUE column with converted VALUEs"""
+        convert_unit = self.parameters.get_converter(parameter)
+        try:
+            dataframe[key] = dataframe['DATA_VALUE'].apply(convert_unit)
+        except KeyError:
+            log.warn("Missing 'VALUE': no unit conversion.")
+        else:
+            dataframe.unit = self.parameters.unit(parameter)
 
     @property
     def detectors(self):
@@ -165,6 +170,36 @@ class DBManager(object):
         "Retrieve DOM information from the database"
         doms = self._get_json('domclbupiid/s')
         self._doms = DOMContainer(doms)
+
+    def ahrs(self, run, maxrun=None, clbupi=None, detid='D_ARCA001'):
+        "Retrieve AHRS values for given run(s) (optionally CLBs) and detector"
+        if maxrun is None:
+            maxrun = run
+        if clbupi is None:
+            log.error("No CLB UPI defined! This may take forever...")
+        with Timer('Database lookup'):
+            return self._ahrs(run, maxrun, clbupi, detid)
+
+    def _ahrs(self, run, maxrun, clbupi, detid):
+        values = {'minrun': run,
+                  'maxrun': maxrun,
+                  'detid': detid,
+                  }
+        if clbupi is not None:
+            values['clbupi'] = clbupi
+        data = urlencode(values)
+        content = self._get_content('streamds/ahrs.txt?' + data)
+        if content.startswith('ERROR'):
+            log.error(content)
+            return None
+        try:
+            dataframe = pd.read_csv(StringIO(content), sep="\t")
+        except ValueError:
+            log.warning("Empty dataset")  # ...probably. Waiting for more info
+            return pd.DataFrame()
+        else:
+            self._add_datetime(dataframe)
+            return dataframe
 
     def _get_json(self, url):
         "Get JSON-type content"
