@@ -18,6 +18,8 @@ setup(name='km3pipe',
           'urwid',
           'docopt',
           'pandas',
+          'seaborn',
+          'scipy',
       ],
       entry_points={
           'console_scripts': [
