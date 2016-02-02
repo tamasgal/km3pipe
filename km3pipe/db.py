@@ -175,8 +175,6 @@ class DBManager(object):
         "Retrieve AHRS values for given run(s) (optionally CLBs) and detector"
         if maxrun is None:
             maxrun = run
-        if clbupi is None:
-            log.error("No CLB UPI defined! This may take forever...")
         with Timer('Database lookup'):
             return self._ahrs(run, maxrun, clbupi, detid)
 

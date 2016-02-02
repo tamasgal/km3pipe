@@ -12,6 +12,22 @@ Subpackages
 Submodules
 ----------
 
+km3pipe.db module
+------------------------
+
+.. automodule:: km3pipe.db
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+km3pipe.config module
+------------------------
+
+.. automodule:: km3pipe.config
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 km3pipe.constants module
 ------------------------
 
@@ -56,6 +72,14 @@ km3pipe.logger module
 ---------------------
 
 .. automodule:: km3pipe.logger
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+km3pipe.style module
+--------------------
+
+.. automodule:: km3pipe.style
     :members:
     :undoc-members:
     :show-inheritance:
