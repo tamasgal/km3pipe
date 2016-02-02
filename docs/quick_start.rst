@@ -25,6 +25,9 @@ To upgrade your existing installation::
 Additional Software Recommendations
 -----------------------------------
 
-I highly recommend using ``IPython`` for prototyping and playing around::
+I highly recommend using ``Ipython`` and ``Jupyter`` for prototyping and
+playing around::
 
-    pip install "ipython[notebook]"
+    pip install ipython
+    pip install jupyter
+
