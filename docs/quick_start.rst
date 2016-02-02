@@ -19,7 +19,7 @@ To install the most recent development version, simply type
 
 To upgrade your existing installation::
 
-    pip install --ugrade km3pipe
+    pip install --upgrade km3pipe
 
 
 Additional Software Recommendations
