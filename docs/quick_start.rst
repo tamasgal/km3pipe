@@ -19,12 +19,15 @@ To install the most recent development version, simply type
 
 To upgrade your existing installation::
 
-    pip install --ugrade km3pipe
+    pip install --upgrade km3pipe
 
 
 Additional Software Recommendations
 -----------------------------------
 
-I highly recommend using ``IPython`` for prototyping and playing around::
+I highly recommend using ``Ipython`` and ``Jupyter`` for prototyping and
+playing around::
 
-    pip install "ipython[notebook]"
+    pip install ipython
+    pip install jupyter
+
