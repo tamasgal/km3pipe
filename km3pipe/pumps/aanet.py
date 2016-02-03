@@ -54,8 +54,14 @@ class AanetPump(Pump):
             if not os.path.exists(filename):
                 log.warn(filename + " not available: continue without it")
                 continue
-            event_file = EventFile(filename)
+
+            try:
+                event_file = EventFile(filename)
+            except Exception:
+                raise SystemExit("Could not open file")
+
             self.header = event_file.rootfile().Get("Header")
+
             for event in event_file:
                 blob = {'Evt': event,
                         'Hits': event.hits,
