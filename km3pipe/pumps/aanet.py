@@ -60,7 +60,10 @@ class AanetPump(Pump):
             except Exception:
                 raise SystemExit("Could not open file")
 
-            self.header = event_file.rootfile().Get("Header")
+            try:
+                self.header = event_file.rootfile().Get("Header")
+            except AttributeError:
+                pass
 
             for event in event_file:
                 blob = {'Evt': event,
