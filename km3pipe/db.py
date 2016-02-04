@@ -316,6 +316,10 @@ class DOMContainer(object):
         """Return Floor ID for given CLB UPI and detector"""
         return self._json_list_lookup('CLBUPI', clb_upi, 'Floor', det_id)
 
+    def domid2floor(self, clb_upi, det_id):
+        """Return Floor ID for given DOM ID and detector"""
+        return self._json_list_lookup('DOMId', clb_upi, 'Floor', det_id)
+
     def _json_list_lookup(self, from_key, value, target_key, det_id):
         lookup = [dom[target_key] for dom in self._json if
                   dom[from_key] == value and
