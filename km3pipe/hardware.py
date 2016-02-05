@@ -21,7 +21,7 @@ __author__ = 'tamasgal'
 class Detector(object):
     """The KM3NeT detector"""
     def __init__(self, filename=None):
-        self.det_file = None
+        self._det_file = None
         self.det_id = None
         self.n_doms = None
         self.n_pmts_per_dom = None
@@ -32,34 +32,34 @@ class Detector(object):
         self._pmt_angles = []
 
         if filename:
-            self.init_from_file(filename)
+            self._init_from_file(filename)
 
-    def init_from_file(self, filename):
+    def _init_from_file(self, filename):
         """Create detector from detx file."""
         file_ext = os.path.splitext(filename)[1][1:]
         if not file_ext == 'detx':
             raise NotImplementedError('Only the detx format is supported.')
-        self.open_file(filename)
-        self.parse_header()
-        self.parse_doms()
-        self.det_file.close()
+        self._open_file(filename)
+        self._parse_header()
+        self._parse_doms()
+        self._det_file.close()
 
-    def open_file(self, filename):
+    def _open_file(self, filename):
         """Create the file handler"""
-        self.det_file = open(filename, 'r')
+        self._det_file = open(filename, 'r')
 
-    def parse_header(self):
+    def _parse_header(self):
         """Extract information from the header of the detector file"""
-        self.det_file.seek(0, 0)
-        first_line = self.det_file.readline()
+        self._det_file.seek(0, 0)
+        first_line = self._det_file.readline()
         self.det_id, self.n_doms = split(first_line, int)
 
     # pylint: disable=C0103
-    def parse_doms(self):
+    def _parse_doms(self):
         """Extract dom information from detector file"""
-        self.det_file.seek(0, 0)
-        self.det_file.readline()
-        lines = self.det_file.readlines()
+        self._det_file.seek(0, 0)
+        self._det_file.readline()
+        lines = self._det_file.readlines()
         try:
             while True:
                 line = lines.pop(0)
@@ -82,7 +82,7 @@ class Detector(object):
                     pmt_dir = [float(n) for n in (dx, dy, dz)]
                     t0 = float(t0)
                     if floor_id < 0:
-                        _, new_floor_id, _ = self.pmtid2omkey_old(pmt_id)
+                        _, new_floor_id, _ = self._pmtid2omkey_old(pmt_id)
                         log.error("Floor ID is negative for PMT {0}.\n"
                                   "Guessing correct id: {1}"
                                   .format(pmt_id, new_floor_id))
@@ -102,7 +102,7 @@ class Detector(object):
     def dom_positions(self):
         """The positions of the DOMs, taken from the PMT with the lowest ID."""
         return [pmt.pos for pmt in self._pmts_by_id.values()
-                if pmt.daq_channel == 0]
+                if pmt.channel_id == 0]
 
     @property
     def pmt_angles(self):
@@ -129,22 +129,29 @@ class Detector(object):
         return header + "\n" + doms
 
     def write(self, filename):
+        """Save detx file."""
         with open(filename, 'w') as f:
             f.write(self.ascii)
         print("Detector file saved as '{0}'".format(filename))
 
     def pmt_with_id(self, pmt_id):
-        """Get PMT with pmt_id"""
+        """Get PMT with global pmt_id"""
         try:
             return self._pmts_by_id[pmt_id]
         except KeyError:
             raise KeyError("No PMT found for ID: {0}".format(pmt_id))
 
+    def get_pmt(self, dom_id, channel_id):
+        """Return PMT with DOM ID and DAQ channel ID"""
+        line, floor, _ = self.doms[dom_id]
+        pmt = self._pmts_by_omkey[(line, floor, channel_id)]
+        return pmt
+
     def pmtid2omkey(self, pmt_id):
         return self._pmts_by_id[int(pmt_id)].omkey
 
-    def pmtid2omkey_old(self, pmt_id,
-                        first_pmt_id=1, oms_per_line=18, pmts_per_om=31):
+    def _pmtid2omkey_old(self, pmt_id,
+                         first_pmt_id=1, oms_per_line=18, pmts_per_om=31):
         """Convert (consecutive) raw PMT IDs to Multi-OMKeys."""
         pmts_line = oms_per_line * pmts_per_om
         line = ((pmt_id - first_pmt_id) // pmts_line) + 1
@@ -155,14 +162,14 @@ class Detector(object):
 
 class PMT(object):
     """Represents a photomultiplier"""
-    def __init__(self, id, pos, dir, t0, daq_channel, omkey):
+    def __init__(self, id, pos, dir, t0, channel_id, omkey):
         self.id = id
         self.pos = Point(pos)
         self.dir = Direction(dir)
         self.t0 = t0
-        self.daq_channel = daq_channel
+        self.channel_id = channel_id
         self.omkey = omkey
 
     def __str__(self):
         return "PMT id:{0} pos: {1} dir: dir{2} t0: {3} DAQ channel: {4}"\
-               .format(self.id, self.pos, self.dir, self.t0, self.daq_channel)
+               .format(self.id, self.pos, self.dir, self.t0, self.channel_id)
