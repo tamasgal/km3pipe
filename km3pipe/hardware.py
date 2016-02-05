@@ -8,11 +8,16 @@ Classes representing KM3NeT hardware.
 from __future__ import division, absolute_import, print_function
 
 import os
+import sys
 
 from km3pipe.tools import unpack_nfirst, split
-from km3pipe.testing import StringIO
 from km3pipe.dataclasses import Point, Direction
 from km3pipe.db import DBManager
+
+if sys.version_info[0] > 2:
+    from io import StringIO
+else:
+    from StringIO import StringIO
 
 from km3pipe.logger import logging
 
