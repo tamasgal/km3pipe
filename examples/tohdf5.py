@@ -40,7 +40,7 @@ class HDF5Sink(Module):
     def finish(self):
         if self.hits:
             df = pd.DataFrame(self.hits)
-            df.to_hdf(self.filename, 'hits')
+            df.to_hdf(self.filename, 'hits', format='table')
             print("Finished {0}".format(self.filename))
         else:
             print("Skipping {0}".format(self.filename))
