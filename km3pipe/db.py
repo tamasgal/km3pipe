@@ -171,6 +171,10 @@ class DBManager(object):
         doms = self._get_json('domclbupiid/s')
         self._doms = DOMContainer(doms)
 
+    def detx(self, det_id):
+        detx = self._get_content('detx/{0}'.format(det_id))
+        return detx
+
     def ahrs(self, run, maxrun=None, clbupi=None, detid='D_ARCA001'):
         "Retrieve AHRS values for given run(s) (optionally CLBs) and detector"
         if maxrun is None:
