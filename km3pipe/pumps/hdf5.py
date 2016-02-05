@@ -24,7 +24,7 @@ class HDF5Pump(Pump):
         self.filename = self.get('filename')
         self._store = pd.HDFStore(self.filename)
         self._hits_by_event = self._store.hits.groupby('event_id')
-        self._n_events = len(self._hits_by_event.groups)
+        self._n_events = len(self._hits_by_event)
         self.index = 0
 
     def process(self, blob):
@@ -38,7 +38,7 @@ class HDF5Pump(Pump):
 
     def get_blob(self, index):
         hits = self._hits_by_event.get_group(index)
-        blob = {'Hits': hits}
+        blob = {'HitTable': hits}
         return blob
 
     def finish(self):
