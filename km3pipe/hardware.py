@@ -10,7 +10,10 @@ from __future__ import division, absolute_import, print_function
 import os
 
 from km3pipe.tools import unpack_nfirst, split
+from km3pipe.testing import StringIO
 from km3pipe.dataclasses import Point, Direction
+from km3pipe.db import DBManager
+
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -20,7 +23,7 @@ __author__ = 'tamasgal'
 
 class Detector(object):
     """The KM3NeT detector"""
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, det_id=None):
         self._det_file = None
         self.det_id = None
         self.n_doms = None
@@ -33,6 +36,16 @@ class Detector(object):
 
         if filename:
             self._init_from_file(filename)
+
+        if det_id is not None:
+            print("Retrieving DETX file from the database...")
+            db = DBManager()
+            detx = db.detx(det_id)
+            self._det_file = StringIO(detx)
+            self._parse_header()
+            self._parse_doms()
+            if self.n_doms < 1:
+                log.error("No data found for detector ID {0}.".format(det_id))
 
     def _init_from_file(self, filename):
         """Create detector from detx file."""
