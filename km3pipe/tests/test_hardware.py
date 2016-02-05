@@ -85,7 +85,7 @@ class TestDetector(TestCase):
 
     def setUp(self):
         self.det = Detector()
-        self.det.det_file = EXAMPLE_DETX
+        self.det._det_file = EXAMPLE_DETX
 
     def test_parse_header_extracts_correct_det_id(self):
         self.det.parse_header()
@@ -101,7 +101,7 @@ class TestDetector(TestCase):
         self.assertDictEqual(expected, self.det.doms)
 
     def test_parse_doms_maps_each_dom_correctly_for_mixed_pmt_ids(self):
-        self.det.det_file = EXAMPLE_DETX_MIXED_IDS
+        self.det._det_file = EXAMPLE_DETX_MIXED_IDS
         self.det.parse_doms()
         expected = {8: (1, 1, 3), 7: (1, 2, 3), 6: (1, 3, 3)}
         self.assertDictEqual(expected, self.det.doms)
@@ -120,10 +120,16 @@ class TestDetector(TestCase):
             self.assertAlmostEqual(i + 1.2, position.y)
             self.assertAlmostEqual(i + 1.3, position.z)
 
-    def test_omkeys(self):
+    def test_pmt_with_id_returns_correct_omkeys(self):
         self.det.parse_doms()
         self.assertEqual((1, 1, 0), self.det.pmt_with_id(1).omkey)
         self.assertEqual((1, 2, 1), self.det.pmt_with_id(5).omkey)
+
+    def test_pmt_with_id_returns_correct_omkeys_with_mixed_pmt_ids(self):
+        self.det._det_file = EXAMPLE_DETX_MIXED_IDS
+        self.det.parse_doms()
+        self.assertEqual((1, 2, 1), self.det.pmt_with_id(73).omkey)
+        self.assertEqual((1, 1, 1), self.det.pmt_with_id(81).omkey)
 
     def test_pmt_with_id_raises_exception_for_invalid_id(self):
         self.det.parse_doms()
@@ -132,7 +138,7 @@ class TestDetector(TestCase):
 
     @skipIf(True, "DOM positions ordering unclear")
     def test_dom_positions_with_mixed_pmt_ids(self):
-        self.det.det_file = EXAMPLE_DETX_MIXED_IDS
+        self.det._det_file = EXAMPLE_DETX_MIXED_IDS
         self.det.parse_doms()
         for i, position in enumerate(self.det.dom_positions):
             self.assertAlmostEqual(i + 1.1, position.x)
@@ -141,13 +147,13 @@ class TestDetector(TestCase):
 
     @skipIf(True, "DOM ordering is probably not important!")
     def test_ascii_detector(self):
-        self.det.det_file = EXAMPLE_MC_DETX_WRITE_MIXED_IDS
+        self.det._det_file = EXAMPLE_MC_DETX_WRITE_MIXED_IDS
         self.det.parse_header()
         self.det.parse_doms()
-        self.assertEqual(self.det.det_file.getvalue(), self.det.ascii)
+        self.assertEqual(self.det._det_file.getvalue(), self.det.ascii)
 
     def test_pmtid2omkey_old(self):
-        pmtid2omkey = self.det.pmtid2omkey_old
+        pmtid2omkey = self.det._pmtid2omkey_old
         self.assertEqual((1, 13, 12), tuple(pmtid2omkey(168)))
         self.assertEqual((1, 12, 18), tuple(pmtid2omkey(205)))
         self.assertEqual((1, 11, 22), tuple(pmtid2omkey(240)))
@@ -157,7 +163,7 @@ class TestDetector(TestCase):
         self.assertEqual((95, 4, 13), tuple(pmtid2omkey(52900)))
 
     def test_pmtid2omkey_old_handles_floats(self):
-        pmtid2omkey = self.det.pmtid2omkey_old
+        pmtid2omkey = self.det._pmtid2omkey_old
         self.assertEqual((1, 13, 12), tuple(pmtid2omkey(168.0)))
         self.assertEqual((1, 12, 18), tuple(pmtid2omkey(205.0)))
         self.assertEqual((1, 11, 22), tuple(pmtid2omkey(240.0)))
@@ -179,5 +185,5 @@ class TestPMT(TestCase):
         self.assertAlmostEqual(0.569803, pmt.dir.y, 6)
         self.assertAlmostEqual(0.683763, pmt.dir.z, 6)
         self.assertEqual(7, pmt.t0)
-        self.assertEqual(8, pmt.daq_channel)
+        self.assertEqual(8, pmt.channel_id)
         self.assertEqual((9, 10, 11), pmt.omkey)
