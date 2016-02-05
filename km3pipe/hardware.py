@@ -48,14 +48,14 @@ class Detector(object):
         """Create the file handler"""
         self._det_file = open(filename, 'r')
 
-    def parse_header(self):
+    def _parse_header(self):
         """Extract information from the header of the detector file"""
         self._det_file.seek(0, 0)
         first_line = self._det_file.readline()
         self.det_id, self.n_doms = split(first_line, int)
 
     # pylint: disable=C0103
-    def parse_doms(self):
+    def _parse_doms(self):
         """Extract dom information from detector file"""
         self._det_file.seek(0, 0)
         self._det_file.readline()
