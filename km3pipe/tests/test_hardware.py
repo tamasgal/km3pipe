@@ -136,6 +136,12 @@ class TestDetector(TestCase):
         with self.assertRaises(KeyError):
             self.det.pmt_with_id(100)
 
+    def test_get_pmt(self):
+        self.det._det_file = EXAMPLE_DETX_MIXED_IDS
+        self.det._parse_doms()
+        pmt = self.det.get_pmt(7, 2)
+        self.assertEqual((1, 2, 2), pmt.omkey)
+
     @skipIf(True, "DOM positions ordering unclear")
     def test_dom_positions_with_mixed_pmt_ids(self):
         self.det._det_file = EXAMPLE_DETX_MIXED_IDS

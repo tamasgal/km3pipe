@@ -141,6 +141,12 @@ class Detector(object):
         except KeyError:
             raise KeyError("No PMT found for ID: {0}".format(pmt_id))
 
+    def get_pmt(self, dom_id, channel_id):
+        """Return PMT with DOM ID and DAQ channel ID"""
+        line, floor, _ = self.doms[dom_id]
+        pmt = self._pmts_by_omkey[(line, floor, channel_id)]
+        return pmt
+
     def pmtid2omkey(self, pmt_id):
         return self._pmts_by_id[int(pmt_id)].omkey
 
