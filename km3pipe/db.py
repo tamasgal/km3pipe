@@ -182,8 +182,15 @@ class DBManager(object):
         doms = self._get_json('domclbupiid/s')
         self._doms = DOMContainer(doms)
 
-    def detx(self, det_id):
-        detx = self._get_content('detx/{0}'.format(det_id))
+    def detx(self, det_id, t0set=None):
+        """Retrieve the detector file for given detector id
+
+        If t0set is given, append the calibration data.
+        """
+        url = 'detx/{0}'.format(det_id)
+        if t0set is not None:
+            url += '?t0set=' + t0set
+        detx = self._get_content(url)
         return detx
 
     def ahrs(self, run, maxrun=None, clbupi=None, detid='D_ARCA001'):
