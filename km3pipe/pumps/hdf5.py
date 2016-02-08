@@ -23,6 +23,7 @@ class HDF5Pump(Pump):
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename')
+        self.create_hit_list = self.get('create_hit_list') or True
         if os.path.isfile(self.filename):
             self._store = pd.HDFStore(self.filename)
             self._hits_by_event = self._store.hits.groupby('event_id')
@@ -44,6 +45,8 @@ class HDF5Pump(Pump):
     def get_blob(self, index):
         hits = self._hits_by_event.get_group(index)
         blob = {'HitTable': hits}
+        if self.create_hit_list:
+            blob['Hits'] = list(hits.itertuples())
         return blob
 
     def finish(self):
