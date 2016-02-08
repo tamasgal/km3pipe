@@ -64,20 +64,20 @@ class DBManager(object):
             username, password = config.db_credentials
         self.login(username, password)
 
-    def datalog(self, parameter, run, maxrun=None, detid='D_ARCA001'):
+    def datalog(self, parameter, run, maxrun=None, det_id='D_ARCA001'):
         "Retrieve datalogs for given parameter, run(s) and detector"
         parameter = parameter.lower()
         if maxrun is None:
             maxrun = run
         with Timer('Database lookup'):
-            return self._datalog(parameter, run, maxrun, detid)
+            return self._datalog(parameter, run, maxrun, det_id)
 
-    def _datalog(self, parameter, run, maxrun, detid):
+    def _datalog(self, parameter, run, maxrun, det_id):
         "Extract data from database"
         values = {'parameter_name': parameter,
                   'minrun': run,
                   'maxrun': maxrun,
-                  'detid': detid,
+                  'detid': det_id,
                   }
         data = urlencode(values)
         content = self._get_content('streamds/datalognumbers.txt?' + data)
@@ -94,8 +94,8 @@ class DBManager(object):
             self._add_converted_units(dataframe, parameter)
             return dataframe
 
-    def run_table(self, detid='D_ARCA001'):
-        url = 'streamds/runs.txt?detid={0}'.format(detid)
+    def run_table(self, det_id='D_ARCA001'):
+        url = 'streamds/runs.txt?detid={0}'.format(det_id)
         content = self._get_content(url)
         try:
             dataframe = pd.read_csv(StringIO(content), sep="\t")
@@ -193,17 +193,17 @@ class DBManager(object):
         detx = self._get_content(url)
         return detx
 
-    def ahrs(self, run, maxrun=None, clbupi=None, detid='D_ARCA001'):
+    def ahrs(self, run, maxrun=None, clbupi=None, det_id='D_ARCA001'):
         "Retrieve AHRS values for given run(s) (optionally CLBs) and detector"
         if maxrun is None:
             maxrun = run
         with Timer('Database lookup'):
-            return self._ahrs(run, maxrun, clbupi, detid)
+            return self._ahrs(run, maxrun, clbupi, det_id)
 
-    def _ahrs(self, run, maxrun, clbupi, detid):
+    def _ahrs(self, run, maxrun, clbupi, det_id):
         values = {'minrun': run,
                   'maxrun': maxrun,
-                  'detid': detid,
+                  'detid': det_id,
                   }
         if clbupi is not None:
             values['clbupi'] = clbupi
