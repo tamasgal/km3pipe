@@ -35,7 +35,7 @@ class HDF5Pump(Pump):
     def process(self, blob):
         try:
             blob = self.get_blob(self.index)
-        except IndexError:
+        except KeyError:
             self.index = 0
             raise StopIteration
         self.index += 1
@@ -63,7 +63,7 @@ class HDF5Pump(Pump):
     def __next__(self):
         try:
             blob = self.get_blob(self.index)
-        except IndexError:
+        except KeyError:
             self.index = 0
             raise StopIteration
         self.index += 1
