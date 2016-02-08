@@ -7,6 +7,7 @@ Pumps for the EVT simulation dataformat.
 """
 from __future__ import division, absolute_import, print_function
 
+import os.path
 import pandas as pd
 
 from km3pipe import Pump
@@ -22,15 +23,20 @@ class HDF5Pump(Pump):
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename')
-        self._store = pd.HDFStore(self.filename)
-        self._hits_by_event = self._store.hits.groupby('event_id')
-        self._n_events = len(self._hits_by_event)
+        self.create_hit_list = self.get('create_hit_list') or True
+        if os.path.isfile(self.filename):
+            self._store = pd.HDFStore(self.filename)
+            self._hits_by_event = self._store.hits.groupby('event_id')
+            self._n_events = len(self._hits_by_event)
+        else:
+            raise IOError("No such file or directory: '{0}'"
+                          .format(self.filename))
         self.index = 0
 
     def process(self, blob):
         try:
             blob = self.get_blob(self.index)
-        except IndexError:
+        except KeyError:
             self.index = 0
             raise StopIteration
         self.index += 1
@@ -39,6 +45,8 @@ class HDF5Pump(Pump):
     def get_blob(self, index):
         hits = self._hits_by_event.get_group(index)
         blob = {'HitTable': hits}
+        if self.create_hit_list:
+            blob['Hits'] = list(hits.itertuples())
         return blob
 
     def finish(self):
@@ -58,7 +66,7 @@ class HDF5Pump(Pump):
     def __next__(self):
         try:
             blob = self.get_blob(self.index)
-        except IndexError:
+        except KeyError:
             self.index = 0
             raise StopIteration
         self.index += 1
