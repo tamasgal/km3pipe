@@ -14,12 +14,13 @@ from km3pipe.tools import unpack_nfirst, split
 from km3pipe.dataclasses import Point, Direction
 from km3pipe.db import DBManager
 
+from km3pipe.logger import logging
+
 if sys.version_info[0] > 2:
     from io import StringIO
 else:
     from StringIO import StringIO
 
-from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -28,7 +29,7 @@ __author__ = 'tamasgal'
 
 class Detector(object):
     """The KM3NeT detector"""
-    def __init__(self, filename=None, det_id=None):
+    def __init__(self, filename=None, det_id=None, t0set=None):
         self._det_file = None
         self.det_id = None
         self.n_doms = None
@@ -45,7 +46,7 @@ class Detector(object):
         if det_id is not None:
             print("Retrieving DETX file from the database...")
             db = DBManager()
-            detx = db.detx(det_id)
+            detx = db.detx(det_id, t0set=t0set)
             self._det_file = StringIO(detx)
             self._parse_header()
             self._parse_doms()
