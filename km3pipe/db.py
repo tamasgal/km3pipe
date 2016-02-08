@@ -145,6 +145,17 @@ class DBManager(object):
         else:
             return dataframe
 
+    def t0sets(self, det_id):
+        content = self._get_content('streamds/t0sets.txt?detid={0}'
+                                    .format(det_id))
+        try:
+            dataframe = pd.read_csv(StringIO(content), sep="\t")
+        except ValueError:
+            log.warning("Empty dataset")
+            return pd.DataFrame()
+        else:
+            return dataframe
+
     @property
     def parameters(self):
         "Return the parameters container for quick access to their details"
