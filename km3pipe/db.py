@@ -91,7 +91,11 @@ class DBManager(object):
             return pd.DataFrame()
         else:
             self._add_datetime(dataframe)
-            self._add_converted_units(dataframe, parameter)
+            try:
+                self._add_converted_units(dataframe, parameter)
+            except KeyError:
+                log.warn("Could not add converted units for {0}"
+                         .format(parameter))
             return dataframe
 
     def run_table(self, det_id='D_ARCA001'):
@@ -305,19 +309,25 @@ class ParametersContainer(object):
         parameter = self._get_parameter_name(parameter).lower()
         return self._parameters[parameter]['Unit']
 
-    def _get_parameter_name(self, parameter):
-        if parameter in self.names:
-            return parameter
+    def _get_parameter_name(self, name):
+        if name in self.names:
+            return name
+
+        aliases = [n for n in self.names if n.endswith(' ' + name)]
+        if len(aliases) == 1:
+            log.info("Alias found for {0}: {1}".format(name, aliases[0]))
+            return aliases[0]
+
         log.info("Parameter '{0}' not found, trying to find alternative."
-                 .format(parameter))
+                 .format(name))
         try:
             # ahrs_g[0] for example should be looked up as ahrs_g
-            alternative = re.findall(r'(.*)\[[0-9*]\]', parameter)[0]
+            alternative = re.findall(r'(.*)\[[0-9*]\]', name)[0]
             log.info("Found alternative: '{0}'".format(alternative))
             return alternative
         except IndexError:
             raise KeyError("Could not find alternative for '{0}'"
-                           .format(parameter))
+                           .format(name))
 
 
 class DOMContainer(object):
