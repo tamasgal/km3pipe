@@ -54,7 +54,7 @@ class DBManager(object):
     """A wrapper for the KM3NeT Web DB"""
     def __init__(self, username=None, password=None):
         "Create database connection"
-        self.cookies = []
+        self._cookies = []
         self._parameters = None
         self._doms = None
         self._detectors = None
@@ -252,7 +252,7 @@ class DBManager(object):
         "A reusable connection manager"
         if self._opener is None:
             opener = build_opener()
-            for cookie in self.cookies:
+            for cookie in self._cookies:
                 cookie_str = cookie.name + '=' + cookie.value
                 opener.addheaders.append(('Cookie', cookie_str))
             self._opener = opener
@@ -269,7 +269,7 @@ class DBManager(object):
         html = f.read()
         if 'Bad username or password' in str(html):
             log.error("Bad username or password!")
-        self.cookies = cj
+        self._cookies = cj
 
 
 class ParametersContainer(object):
