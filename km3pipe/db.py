@@ -13,7 +13,10 @@ import sys
 import json
 import re
 
-import pandas as pd
+try:
+    import pandas as pd
+except ImportError:
+    print("The database utilities needs pandas: pip install pandas")
 
 from km3pipe.tools import Timer
 from km3pipe.config import Config
