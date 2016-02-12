@@ -22,6 +22,7 @@ setup(name='km3pipe',
       ],
       entry_points={
           'console_scripts': [
+              'km3pipe=km3pipe.cmd:main',
               'pipeinspector=pipeinspector.app:main',
           ],
       },
@@ -31,6 +32,6 @@ setup(name='km3pipe',
         'Intended Audience :: Science/Research',
         'Programming Language :: Python',
       ],
-)
+      )
 
 __author__ = 'Tamas Gal'
