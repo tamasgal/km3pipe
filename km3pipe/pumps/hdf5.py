@@ -8,7 +8,11 @@ Pumps for the EVT simulation dataformat.
 from __future__ import division, absolute_import, print_function
 
 import os.path
-import pandas as pd
+try:
+    import pandas as pd
+except ImportError:
+    print("The HDF5 pump needs pandas: pip install pandas")
+
 
 from km3pipe import Pump
 from km3pipe.logger import logging

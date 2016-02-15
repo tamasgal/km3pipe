@@ -188,12 +188,36 @@ class Geometry(Module):
     """A very simple, preliminary Module which gives access to the geometry"""
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
-        filename = self.get('filename')
-        self.detector = Detector(filename)
+        self._should_apply = self.get('apply') or False
+        self.filename = self.get('filename') or None
+        self.det_id = self.get('det_id') or None
+
+        if self.filename or self.det_id:
+            if self.filename is not None:
+                self.detector = Detector(filename=self.filename)
+            if self.det_id:
+                self.detector = Detector(det_id=self.det_id)
+        else:
+            raise ValueError("Define either a filename or a detector ID.")
+
+    def process(self, blob):
+        if self._should_apply:
+            blob['Hits'] = self.apply(blob['Hits'])
+        return blob
 
     def get_detector(self):
         """Return the detector"""
         return self.detector
+
+    def apply(self, hits):
+        for hit in hits:
+            pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
+            hit.pos = pmt.pos
+            hit.dir = pmt.dir
+            hit.t0 = pmt.t0
+            hit.time += pmt.t0
+            hit.a = ord(hit.tot)
+        return hits
 
 
 class AanetGeometry(Module):

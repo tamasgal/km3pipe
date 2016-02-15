@@ -13,7 +13,10 @@ import sys
 import json
 import re
 
-import pandas as pd
+try:
+    import pandas as pd
+except ImportError:
+    print("The database utilities needs pandas: pip install pandas")
 
 from km3pipe.tools import Timer
 from km3pipe.config import Config
@@ -54,7 +57,7 @@ class DBManager(object):
     """A wrapper for the KM3NeT Web DB"""
     def __init__(self, username=None, password=None):
         "Create database connection"
-        self.cookies = []
+        self._cookies = []
         self._parameters = None
         self._doms = None
         self._detectors = None
@@ -237,8 +240,8 @@ class DBManager(object):
 
     def _get_content(self, url):
         "Get HTML content"
-        target_url = BASE_URL + '/' + unquote(url)
-        f = self.opener.open(target_url.encode('utf-8'))
+        target_url = BASE_URL + '/' + unquote(url)  # .encode('utf-8'))
+        f = self.opener.open(target_url)
         try:
             content = f.read()
         except IncompleteRead as icread:
@@ -252,7 +255,7 @@ class DBManager(object):
         "A reusable connection manager"
         if self._opener is None:
             opener = build_opener()
-            for cookie in self.cookies:
+            for cookie in self._cookies:
                 cookie_str = cookie.name + '=' + cookie.value
                 opener.addheaders.append(('Cookie', cookie_str))
             self._opener = opener
@@ -269,7 +272,7 @@ class DBManager(object):
         html = f.read()
         if 'Bad username or password' in str(html):
             log.error("Bad username or password!")
-        self.cookies = cj
+        self._cookies = cj
 
 
 class ParametersContainer(object):

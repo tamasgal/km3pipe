@@ -21,11 +21,26 @@ class HDF5Sink(Module):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
         self.hits = {}
+        self.mc_tracks = {}
         self.index = 0
         print("Processing {0}...".format(self.filename))
 
     def process(self, blob):
-        for hit in blob['Hits']:
+        try:
+            self._add_hits(blob['Hits'])
+        except KeyError:
+            print("No hits found. Skipping...")
+
+        try:
+            self._add_mc_tracks(blob['MCTracks'])
+        except KeyError:
+            print("No MC tracks found. Skipping...")
+
+        self.index += 1
+        return blob
+
+    def _add_hits(self, hits):
+        for hit in hits:
             self.hits.setdefault('event_id', []).append(self.index)
             self.hits.setdefault('id', []).append(hit.id)
             self.hits.setdefault('pmt_id', []).append(hit.pmt_id)
@@ -34,16 +49,30 @@ class HDF5Sink(Module):
             self.hits.setdefault('triggered', []).append(bool(hit.trig))
             self.hits.setdefault('dom_id', []).append(hit.dom_id)
             self.hits.setdefault('channel_id', []).append(ord(hit.channel_id))
-        self.index += 1
-        return blob
+
+    def _add_mc_tracks(self, mc_tracks):
+        for mc_track in mc_tracks:
+            self.mc_tracks.setdefault('event_id', []).append(self.index)
+            self.mc_tracks.setdefault('id', []).append(mc_track.id)
+            self.mc_tracks.setdefault('x', []).append(mc_track.pos.x)
+            self.mc_tracks.setdefault('y', []).append(mc_track.pos.y)
+            self.mc_tracks.setdefault('z', []).append(mc_track.pos.z)
+            self.mc_tracks.setdefault('dx', []).append(mc_track.dir.x)
+            self.mc_tracks.setdefault('dy', []).append(mc_track.dir.y)
+            self.mc_tracks.setdefault('dz', []).append(mc_track.dir.z)
+            self.mc_tracks.setdefault('time', []).append(mc_track.t)
+            self.mc_tracks.setdefault('energy', []).append(mc_track.E)
+            self.mc_tracks.setdefault('type', []).append(mc_track.type)
 
     def finish(self):
         if self.hits:
             df = pd.DataFrame(self.hits)
             df.to_hdf(self.filename, 'hits', format='table')
-            print("Finished {0}".format(self.filename))
-        else:
-            print("Skipping {0}".format(self.filename))
+            print("Finished writing hits in {0}".format(self.filename))
+        if self.mc_tracks:
+            df = pd.DataFrame(self.mc_tracks)
+            df.to_hdf(self.filename, 'mc_tracks', format='table')
+            print("Finished writing MC tracks in {0}".format(self.filename))
 
 
 pipe = Pipeline()
