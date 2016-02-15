@@ -189,11 +189,25 @@ class Geometry(Module):
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         filename = self.get('filename')
+        self._should_apply = self.get('apply') or False
         self.detector = Detector(filename)
+
+    def process(self, blob):
+        if self._should_apply:
+            self.apply(blob['Hits'])
+        return blob
 
     def get_detector(self):
         """Return the detector"""
         return self.detector
+
+    def apply(self, hits):
+        for hit in hits:
+            pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
+            hit.pos = pmt.pos
+            hit.dir = pmt.dir
+            hit.t0 = pmt.t0
+            hit.t += pmt.t0
 
 
 class AanetGeometry(Module):
