@@ -23,14 +23,14 @@ from km3pipe.config import Config
 from km3pipe.logger import logging
 
 if sys.version_info[0] > 2:
-    from urllib.parse import urlencode, quote
+    from urllib.parse import urlencode, unquote
     from urllib.request import (Request, build_opener,
                                 HTTPCookieProcessor, HTTPHandler)
     from io import StringIO
     from http.cookiejar import CookieJar
     from http.client import IncompleteRead
 else:
-    from urllib import urlencode, quote
+    from urllib import urlencode, unquote
     from urllib2 import (Request, build_opener,
                          HTTPCookieProcessor, HTTPHandler)
     from StringIO import StringIO
@@ -240,7 +240,7 @@ class DBManager(object):
 
     def _get_content(self, url):
         "Get HTML content"
-        target_url = BASE_URL + '/' + quote(url)  # .encode('utf-8'))
+        target_url = BASE_URL + '/' + unquote(url)  # .encode('utf-8'))
         f = self.opener.open(target_url)
         try:
             content = f.read()
