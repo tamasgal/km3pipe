@@ -194,7 +194,7 @@ class Geometry(Module):
 
     def process(self, blob):
         if self._should_apply:
-            self.apply(blob['Hits'])
+            blob['Hits'] = self.apply(blob['Hits'])
         return blob
 
     def get_detector(self):
@@ -207,7 +207,9 @@ class Geometry(Module):
             hit.pos = pmt.pos
             hit.dir = pmt.dir
             hit.t0 = pmt.t0
-            hit.t += pmt.t0
+            hit.time += pmt.t0
+            hit.a = ord(hit.tot)
+        return hits
 
 
 class AanetGeometry(Module):
