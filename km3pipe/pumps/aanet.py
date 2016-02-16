@@ -78,3 +78,13 @@ class AanetPump(Pump):
 
     def process(self, blob):
         return next(self.blobs)
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        return next(self.blobs)
