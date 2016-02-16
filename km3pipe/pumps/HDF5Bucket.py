@@ -13,11 +13,11 @@ class HDF5Bucket(Module):
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get("filename")
-        self.prefix = self.get("prefix") or '/'
+        self.prefix = self.get("prefix")
         self.store = defaultdict(list)
 
     def process(self, blob):
-        for key, val in blob.items():
+        for key, val in blob[self.prefix].items():
             self.store[key].append(val)
 
     def finish(self):
