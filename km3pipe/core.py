@@ -152,7 +152,11 @@ class Pump(Module):
     def open_file(self, filename):
         """Open the file with filename"""
         try:
-            self.blob_file = open(filename, 'rb')
+            if filename[-2:] == 'gz':
+                import gzip
+                self.blob_file = gzip.open(filename, 'rb')
+            else:
+                self.blob_file = open(filename, 'rb')
         except TypeError:
             log.error("Please specify a valid filename.")
             raise SystemExit

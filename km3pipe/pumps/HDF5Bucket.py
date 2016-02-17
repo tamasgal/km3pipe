@@ -22,8 +22,9 @@ class HDF5Bucket(Module):
 
     def finish(self):
         h5 = tables.open_file(self.filename, mode='w', ftitle="Data")
-        loc = '/' + self.prefix
+        loc = '/' + self.prefix + '/'
         for key, data in self.store.items():
             arr = np.array(data, dtype=[(key, float), ])
             h5.create_table(loc, key, arr)
+            h5.flush()
         h5.close()
