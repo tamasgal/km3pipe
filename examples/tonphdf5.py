@@ -8,6 +8,7 @@ from km3pipe import Pipeline, Module
 
 import sys
 import pandas as pd
+import h5py
 
 if len(sys.argv) < 3:
     sys.exit('Usage: {0} FILENAME.root OUTPUTFILENAME.h5'.format(sys.argv[0]))
@@ -65,14 +66,17 @@ class HDF5Sink(Module):
             self.mc_tracks.setdefault('type', []).append(mc_track.type)
 
     def finish(self):
+        h5 = h5py.File(self.filename, 'w')
         if self.hits:
             df = pd.DataFrame(self.hits)
-            df.to_hdf(self.filename, 'hits', format='table')
+            rec = df.to_records(index=False)
+            h5.create_dataset('/hits', data=rec)
             print("Finished writing hits in {0}".format(self.filename))
         if self.mc_tracks:
             df = pd.DataFrame(self.mc_tracks)
             df.to_hdf(self.filename, 'mc_tracks', format='table')
             print("Finished writing MC tracks in {0}".format(self.filename))
+        h5.close()
 
 
 pipe = Pipeline()
