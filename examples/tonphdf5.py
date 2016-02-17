@@ -75,7 +75,7 @@ class HDF5Sink(Module):
         if self.mc_tracks:
             df = pd.DataFrame(self.mc_tracks)
             rec = df.to_records(index=False)
-            h5.create_dataset('mc_tracks', data=rec)
+            h5.create_dataset('/mc_tracks', data=rec)
             print("Finished writing MC tracks in {0}".format(self.filename))
         h5.close()
 
