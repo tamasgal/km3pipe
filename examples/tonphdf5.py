@@ -66,18 +66,18 @@ class HDF5Sink(Module):
             self.mc_tracks.setdefault('type', []).append(mc_track.type)
 
     def finish(self):
-        h5 = h5py.File(self.filename, 'w')
+        h5f = h5py.File(self.filename, 'w')
         if self.hits:
             df = pd.DataFrame(self.hits)
             rec = df.to_records(index=False)
-            h5.create_dataset('/hits', data=rec)
+            h5f.create_dataset('/hits', data=rec)
             print("Finished writing hits in {0}".format(self.filename))
         if self.mc_tracks:
             df = pd.DataFrame(self.mc_tracks)
             rec = df.to_records(index=False)
-            h5.create_dataset('/mc_tracks', data=rec)
+            h5f.create_dataset('/mc_tracks', data=rec)
             print("Finished writing MC tracks in {0}".format(self.filename))
-        h5.close()
+        h5f.close()
 
 
 pipe = Pipeline()
