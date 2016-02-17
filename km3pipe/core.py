@@ -8,6 +8,7 @@ The core of the KM3Pipe framework.
 from __future__ import division, absolute_import, print_function
 
 import signal
+import gzip
 
 from km3pipe.hardware import Detector
 from km3pipe.logger import logging
@@ -153,7 +154,6 @@ class Pump(Module):
         """Open the file with filename"""
         try:
             if filename[-2:] == 'gz':
-                import gzip
                 self.blob_file = gzip.open(filename, 'rb')
             else:
                 self.blob_file = open(filename, 'rb')
