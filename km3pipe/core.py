@@ -153,7 +153,7 @@ class Pump(Module):
     def open_file(self, filename):
         """Open the file with filename"""
         try:
-            if filename[-2:] == 'gz':
+            if filename.endswith('.gz'):
                 self.blob_file = gzip.open(filename, 'rb')
             else:
                 self.blob_file = open(filename, 'rb')
