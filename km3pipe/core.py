@@ -8,6 +8,7 @@ The core of the KM3Pipe framework.
 from __future__ import division, absolute_import, print_function
 
 import signal
+import gzip
 
 from km3pipe.hardware import Detector
 from km3pipe.logger import logging
@@ -152,7 +153,10 @@ class Pump(Module):
     def open_file(self, filename):
         """Open the file with filename"""
         try:
-            self.blob_file = open(filename, 'rb')
+            if filename.endswith('.gz'):
+                self.blob_file = gzip.open(filename, 'rb')
+            else:
+                self.blob_file = open(filename, 'rb')
         except TypeError:
             log.error("Please specify a valid filename.")
             raise SystemExit
