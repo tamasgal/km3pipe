@@ -8,10 +8,16 @@ Pumps for the EVT simulation dataformat.
 from __future__ import division, absolute_import, print_function
 
 import os.path
+
 try:
     import pandas as pd
 except ImportError:
     print("The HDF5 pump needs pandas: pip install pandas")
+
+try:
+    import h5py
+except ImportError:
+    print("The HDF5 sink needs h5py: pip install h5py")
 
 
 from km3pipe import Pump, Module
@@ -141,11 +147,15 @@ class HDF5Sink(Module):
             self.mc_tracks.setdefault('type', []).append(mc_track.type)
 
     def finish(self):
+        h5_file = h5py.File(self.filename, 'w')
         if self.hits:
             df = pd.DataFrame(self.hits)
-            df.to_hdf(self.filename, 'hits', format='table')
+            rec = df.to_records(index=False)
+            h5_file.create_dataset('/hits', data=rec)
             print("Finished writing hits in {0}".format(self.filename))
         if self.mc_tracks:
             df = pd.DataFrame(self.mc_tracks)
-            df.to_hdf(self.filename, 'mc_tracks', format='table')
+            rec = df.to_records(index=False)
+            h5_file.create_dataset('/mc_tracks', data=rec)
             print("Finished writing MC tracks in {0}".format(self.filename))
+        h5_file.close()
