@@ -4,7 +4,7 @@
 from collections import defaultdict
 
 import numpy as np
-import tables
+import h5py
 
 from km3pipe.core import Module
 
@@ -21,10 +21,10 @@ class HDF5Bucket(Module):
             self.store[key].append(val)
 
     def finish(self):
-        h5 = tables.open_file(self.filename, mode='w', ftitle="Data")
+        h5 = h5py.File(self.filename, mode='w')
         loc = '/' + self.prefix + '/'
+        h5.create_group(loc)
         for key, data in self.store.items():
             arr = np.array(data, dtype=[(key, float), ])
-            h5.create_table(loc, key, arr)
-            h5.flush()
+            h5.create_dataset(loc, key, arr)
         h5.close()
