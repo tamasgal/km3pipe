@@ -28,7 +28,11 @@ style_definition = {'grid.color': '.85',
                                         u'sans-serif']}
 
 sns.set_style('whitegrid', style_definition)
-sns.set_palette("husl")
+# sns.set_palette("husl")
+
+colors = ["coral", "turquoise blue", "orangey yellow", "avocado",
+          "neon purple", "steel grey", "marine"]
+sns.set_palette(sns.xkcd_palette(colors))
 
 
 def set_context(context):
@@ -39,7 +43,7 @@ def set_context(context):
                          'rc': {}},
             'poster':   {'font_scale': 1.0,
                          'rc': {}},
-            'talk':     {'font_scale': 1.0,
+            'talk':     {'font_scale': 1.5,
                          'rc': {}}
             }
     sns.set_context(context,
