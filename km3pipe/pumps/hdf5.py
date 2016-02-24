@@ -127,7 +127,7 @@ class HDF5Sink(Module):
             self.hits.setdefault('id', []).append(hit.id)
             self.hits.setdefault('pmt_id', []).append(hit.pmt_id)
             self.hits.setdefault('time', []).append(hit.t)
-            self.hits.setdefault('tot', []).append(ord(hit.tot))
+            self.hits.setdefault('tot', []).append(hit.tot)
             self.hits.setdefault('triggered', []).append(bool(hit.trig))
             self.hits.setdefault('dom_id', []).append(hit.dom_id)
             self.hits.setdefault('channel_id', []).append(ord(hit.channel_id))

@@ -220,7 +220,7 @@ class Geometry(Module):
             hit.dir = pmt.dir
             hit.t0 = pmt.t0
             hit.time += pmt.t0
-            hit.a = ord(hit.tot)
+            hit.a = hit.tot
         return hits
 
 
