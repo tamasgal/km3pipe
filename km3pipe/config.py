@@ -9,7 +9,11 @@ from __future__ import division, absolute_import, print_function
 
 import os
 import stat
-from six.moves.configparser import ConfigParser, NoSectionError
+try:
+    from configparser import ConfigParser, NoSectionError
+except ImportError:
+    from six.moves.configparser import ConfigParser, NoSectionError
+
 import getpass
 try:
     input = raw_input
