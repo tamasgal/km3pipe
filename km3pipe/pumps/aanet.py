@@ -23,9 +23,13 @@ class AanetPump(Pump):
         self.filename = self.get('filename')
         self.filenames = self.get('filenames') or []
         self.indices = self.get('indices')
+        self.additional = self.get('additional')
 
         if not self.filename and not self.filenames:
             raise ValueError("No filename(s) defined")
+
+        if self.additional and not self.filename:
+            log.error("additional file only implemeted for single files")
 
         if self.filename:
             if "[index]" in self.filename and self.indices:
@@ -35,6 +39,8 @@ class AanetPump(Pump):
 
         self.header = None
         self.blobs = self.blob_generator()
+        if self.additional:
+            self.previous = None
 
     def _parse_filenames(self):
         prefix, suffix = self.filename.split('[index]')
@@ -77,7 +83,23 @@ class AanetPump(Pump):
             del event_file
 
     def process(self, blob):
-        return next(self.blobs)
+        if self.additional:
+            try:
+                if blob["Evt"].id == self.previous["Evt"].id:
+                    blob[self.additional] = self.previous
+                    return blob
+            except TypeError:
+                pass
+            while True:
+                blob[self.additional] = next(self.blobs)
+                print(blob["Evt"].id, blob[self.additional]["Evt"].id)
+                self.previous = blob[self.additional]
+                if blob["Evt"].id == blob[self.additional]["Evt"].id:
+                    return blob
+                if blob["Evt"].id < blob[self.additional]["Evt"].id:
+                    return None
+        else:
+            return next(self.blobs)
 
     def __iter__(self):
         return self
