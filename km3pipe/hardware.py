@@ -178,6 +178,10 @@ class Detector(object):
         pmt = (pmt_id - first_pmt_id) % pmts_per_om
         return int(line), int(om), int(pmt)
 
+    def domid2floor(self, dom_id):
+        _, floor, _ = self.doms[dom_id]
+        return floor
+
 
 class PMT(object):
     """Represents a photomultiplier"""
