@@ -168,6 +168,7 @@ class HDF5Sink(Module):
         trigger_mask = evt.trigger_mask
         frame_index = evt.frame_index
 
+        self.event_info.setdefault('event_id', []).append(self.index)
         self.event_info.setdefault('time', []).append(timestamp)
         self.event_info.setdefault('det_id', []).append(det_id)
         self.event_info.setdefault('mc_id', []).append(mc_id)
