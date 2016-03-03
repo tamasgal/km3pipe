@@ -125,7 +125,7 @@ class HDF5Sink(Module):
         except KeyError:
             print("No MC tracks found. Skipping...")
 
-        self._add_event_info(self, blob)
+        self._add_event_info(blob)
 
         self.index += 1
         return blob
