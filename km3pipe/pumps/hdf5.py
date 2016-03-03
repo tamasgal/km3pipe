@@ -172,7 +172,7 @@ class HDF5Sink(Module):
 
         self.event_info.setdefault('event_id', []).append(self.index)
         self.event_info.setdefault('timestamp', []).append(timestamp)
-        self.event_info.setdefault('datetime', []).append(time)
+        # self.event_info.setdefault('datetime', []).append(time)
         self.event_info.setdefault('det_id', []).append(det_id)
         self.event_info.setdefault('mc_id', []).append(mc_id)
         self.event_info.setdefault('mc_t', []).append(mc_t)
