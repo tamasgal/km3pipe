@@ -8,6 +8,7 @@ Pumps for the EVT simulation dataformat.
 from __future__ import division, absolute_import, print_function
 
 import os.path
+from datetime import datetime
 
 try:
     import pandas as pd
@@ -159,6 +160,7 @@ class HDF5Sink(Module):
         evt = blob['Evt']
 
         timestamp = evt.t.AsDouble()
+        time = datetime.fromtimestamp(timestamp)
         det_id = evt.det_id
         mc_id = evt.mc_id
         mc_t = evt.mc_t
@@ -169,7 +171,8 @@ class HDF5Sink(Module):
         frame_index = evt.frame_index
 
         self.event_info.setdefault('event_id', []).append(self.index)
-        self.event_info.setdefault('time', []).append(timestamp)
+        self.event_info.setdefault('timestamp', []).append(timestamp)
+        self.event_info.setdefault('datetime', []).append(time)
         self.event_info.setdefault('det_id', []).append(det_id)
         self.event_info.setdefault('mc_id', []).append(mc_id)
         self.event_info.setdefault('mc_t', []).append(mc_t)
