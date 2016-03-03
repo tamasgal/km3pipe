@@ -64,3 +64,13 @@ class Config(object):
             username = input("Please enter your KM3NeT DB username: ")
             password = getpass.getpass("Password: ")
         return username, password
+
+    @property
+    def slack_token(self):
+        """Return slack token for chat bots."""
+        try:
+            token = self.config.get('Slack', 'token')
+        except NoSectionError:
+            log.critical("No Slack token found.")
+        else:
+            return token
