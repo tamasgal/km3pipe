@@ -16,6 +16,7 @@ try:
 except ImportError:
     from urllib.request import urlopen
 
+from km3pipe.config import Config
 from km3pipe.logger import logging
 
 __author__ = 'tamasgal'
@@ -23,6 +24,8 @@ __author__ = 'tamasgal'
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 version_info = (1, 3, 4, 'final', 0)
+
+config = Config()
 
 
 def _get_version(version_info):
@@ -65,4 +68,5 @@ def check_for_update():
 
 
 version = _get_version(version_info)
-check_for_update()
+if config.check_for_updates:
+    check_for_update()
