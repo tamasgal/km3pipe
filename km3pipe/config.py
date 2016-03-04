@@ -10,9 +10,9 @@ from __future__ import division, absolute_import, print_function
 import os
 import stat
 try:
-    from configparser import ConfigParser, NoSectionError
+    from configparser import ConfigParser, Error
 except ImportError:
-    from six.moves.configparser import ConfigParser, NoSectionError
+    from six.moves.configparser import ConfigParser, Error
 
 import getpass
 try:
@@ -60,7 +60,7 @@ class Config(object):
         try:
             username = self.config.get('DB', 'username')
             password = self.config.get('DB', 'password')
-        except NoSectionError:
+        except Error:
             username = input("Please enter your KM3NeT DB username: ")
             password = getpass.getpass("Password: ")
         return username, password
@@ -70,7 +70,14 @@ class Config(object):
         """Return slack token for chat bots."""
         try:
             token = self.config.get('Slack', 'token')
-        except NoSectionError:
+        except Error:
             log.critical("No Slack token found.")
         else:
             return token
+
+    @property
+    def check_for_updates(self):
+        try:
+            return self.config.getboolean('General', 'check_for_updates')
+        except Error:
+            return True
