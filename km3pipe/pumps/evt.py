@@ -47,8 +47,6 @@ class EvtPump(Pump):  # pylint: disable:R0902
             print("Opening {0}".format(self.filename))
             self.open_file(self.filename)
             self.prepare_blobs()
-        else:
-            log.warn("No filename specified. Take care of the file handling!")
 
     def _reset(self):
         """Clear the cache."""

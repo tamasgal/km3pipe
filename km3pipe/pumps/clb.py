@@ -32,8 +32,6 @@ class CLBPump(Pump):
             self.open_file(self.filename)
             if self.cache_enabled:
                 self.determine_packet_positions()
-        else:
-            log.warn("No filename specified. Take care of the file handling!")
 
     def determine_packet_positions(self):
         """Record the file pointer position of each frame"""
