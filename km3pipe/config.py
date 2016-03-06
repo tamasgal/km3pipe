@@ -30,29 +30,30 @@ CONFIG_PATH = os.path.expanduser('~/.km3net')
 
 
 class Config(object):
-    def __init__(self):
+    def __init__(self, config_path=CONFIG_PATH):
         """Configuration manager for KM3NeT stuff"""
         self.config = ConfigParser()
+        self.cfg_path = config_path
         try:
             self._read_configuration()
         except IOError:
-            log.warn("No configuration found at '{0}'".format(CONFIG_PATH))
+            log.warn("No configuration at '{0}'".format(self.cfg_path))
         else:
             self._check_config_file_permissions()
 
     def _check_config_file_permissions(self):
         """Make sure that the configuration file is 0600"""
         allowed_modes = ['0600', '0o600']
-        if oct(stat.S_IMODE(os.lstat(CONFIG_PATH).st_mode)) in allowed_modes:
+        if oct(stat.S_IMODE(os.lstat(self.cfg_path).st_mode)) in allowed_modes:
             return True
         else:
             log.critical("Your config file is readable to others!\n" +
-                         "Please execute `chmod 0600 {0}`".format(CONFIG_PATH))
+                         "Execute `chmod 0600 {0}`".format(self.cfg_path))
             return False
 
     def _read_configuration(self):
         """Parse configuration file"""
-        self.config.readfp(open(CONFIG_PATH))
+        self.config.readfp(open(self.cfg_path))
 
     @property
     def db_credentials(self):
