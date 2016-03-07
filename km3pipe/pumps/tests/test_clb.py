@@ -211,7 +211,7 @@ class TestCLBHeader(TestCase):
                       "    Run number:   0\n" \
                       "    UDP sequence: 3\n" \
                       "    Time stamp:   26690\n" \
-                      "                  1970-01-01 08:24:50\n" \
+                      "                  1970-01-01 07:24:50\n" \
                       "    Ticks [16ns]: 12500000\n" \
                       "    DOM ID:       30beaf00\n" \
                       "    DOM status:   10000000000000000000000000000000\n"
