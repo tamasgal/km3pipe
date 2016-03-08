@@ -174,16 +174,18 @@ class HDF5Sink(Module):
         trigger_mask = evt.trigger_mask
         frame_index = evt.frame_index
 
-        self.event_info.setdefault('event_id', []).append(self.index)
-        self.event_info.setdefault('timestamp', []).append(timestamp)
-        self.event_info.setdefault('det_id', []).append(det_id)
-        self.event_info.setdefault('mc_id', []).append(mc_id)
-        self.event_info.setdefault('mc_t', []).append(mc_t)
-        self.event_info.setdefault('run', []).append(run)
-        self.event_info.setdefault('overlays', []).append(overlays)
-        self.event_info.setdefault('trigger_counter', []).append(trigger_counter)
-        self.event_info.setdefault('trigger_mask', []).append(trigger_mask)
-        self.event_info.setdefault('frame_index', []).append(frame_index)
+        info = self.event_info
+
+        info.setdefault('event_id', []).append(self.index)
+        info.setdefault('timestamp', []).append(timestamp)
+        info.setdefault('det_id', []).append(det_id)
+        info.setdefault('mc_id', []).append(mc_id)
+        info.setdefault('mc_t', []).append(mc_t)
+        info.setdefault('run', []).append(run)
+        info.setdefault('overlays', []).append(overlays)
+        info.setdefault('trigger_counter', []).append(trigger_counter)
+        info.setdefault('trigger_mask', []).append(trigger_mask)
+        info.setdefault('frame_index', []).append(frame_index)
 
     def finish(self):
         h5_file = h5py.File(self.filename, 'w')
