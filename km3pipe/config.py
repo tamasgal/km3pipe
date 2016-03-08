@@ -40,26 +40,23 @@ class Config(object):
             self._init_from_path(config_path)
 
     def _init_from_path(self, path):
+        if not os.path.exists(path):
+            log.warn("No configuration found at '{0}'".format(path))
+            return
         self._check_config_file_permissions(path)
         self._read_from_path(path)
 
     def _read_from_path(self, path):
         """Read configuration from file path"""
-        try:
-            with open(path) as config_file:
-                self._read_from_file(config_file)
-        except IOError:
-            log.warn("No configuration found at '{0}'".format(path))
+        with open(path) as config_file:
+            self._read_from_file(config_file)
 
     def _check_config_file_permissions(self, path):
         """Make sure that the configuration file is 0600"""
         allowed_modes = ['0600', '0o600']
-        if oct(stat.S_IMODE(os.lstat(path).st_mode)) in allowed_modes:
-            return True
-        else:
+        if oct(stat.S_IMODE(os.lstat(path).st_mode)) not in allowed_modes:
             log.critical("Your config file is readable to others!\n" +
                          "Execute `chmod 0600 {0}`".format(path))
-            return False
 
     def _read_from_file(self, file_obj):
         self.config.readfp(file_obj)
