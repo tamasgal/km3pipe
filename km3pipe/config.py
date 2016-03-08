@@ -34,28 +34,35 @@ class Config(object):
     def __init__(self, config_path=CONFIG_PATH):
         """Configuration manager for KM3NeT stuff"""
         self.config = ConfigParser()
-        self.cfg_path = config_path
         self._time_zone = None
-        try:
-            self._read_configuration()
-        except IOError:
-            log.warn("No configuration at '{0}'".format(self.cfg_path))
-        else:
-            self._check_config_file_permissions()
 
-    def _check_config_file_permissions(self):
+        if config_path is not None:
+            self._init_from_path(config_path)
+
+    def _init_from_path(self, path):
+        self._check_config_file_permissions(path)
+        self._read_from_path(path)
+
+    def _read_from_path(self, path):
+        """Read configuration from file path"""
+        try:
+            with open(path) as config_file:
+                self._read_from_file(config_file)
+        except IOError:
+            log.warn("No configuration found at '{0}'".format(path))
+
+    def _check_config_file_permissions(self, path):
         """Make sure that the configuration file is 0600"""
         allowed_modes = ['0600', '0o600']
-        if oct(stat.S_IMODE(os.lstat(self.cfg_path).st_mode)) in allowed_modes:
+        if oct(stat.S_IMODE(os.lstat(path).st_mode)) in allowed_modes:
             return True
         else:
             log.critical("Your config file is readable to others!\n" +
-                         "Execute `chmod 0600 {0}`".format(self.cfg_path))
+                         "Execute `chmod 0600 {0}`".format(path))
             return False
 
-    def _read_configuration(self):
-        """Parse configuration file"""
-        self.config.readfp(open(self.cfg_path))
+    def _read_from_file(self, file_obj):
+        self.config.readfp(file_obj)
 
     @property
     def db_credentials(self):
@@ -74,7 +81,7 @@ class Config(object):
         try:
             token = self.config.get('Slack', 'token')
         except Error:
-            log.critical("No Slack token found.")
+            raise ValueError("No Slack token defined in configuration file.")
         else:
             return token
 
