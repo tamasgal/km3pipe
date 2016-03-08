@@ -6,11 +6,11 @@ Test suite for configuration related functions and classes.
 """
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import TestCase, BytesIO
+from km3pipe.testing import TestCase, StringIO
 from km3pipe.config import Config
 
 
-CONFIGURATION = BytesIO("\n".join((
+CONFIGURATION = StringIO("\n".join((
     "[DB]",
     "username=foo",
     "password=narf",
