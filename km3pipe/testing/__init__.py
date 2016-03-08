@@ -19,6 +19,8 @@ except ImportError:
     except ImportError:
         from io import StringIO  # noqa
 
+from io import BytesIO  # noqa
+
 try:
     from mock import MagicMock
 except ImportError:
