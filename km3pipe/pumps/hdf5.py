@@ -7,6 +7,7 @@ Pumps for the EVT simulation dataformat.
 """
 from __future__ import division, absolute_import, print_function
 
+from collections import defaultdict
 import os.path
 
 try:
@@ -15,9 +16,14 @@ except ImportError:
     print("The HDF5 pump needs pandas: pip install pandas")
 
 try:
+    import numpy as np
+except ImportError:
+    print("The HDF5 Bucket needs numpy: pip install numpy")
+
+try:
     import h5py
 except ImportError:
-    print("The HDF5 sink needs h5py: pip install h5py")
+    print("The HDF5 Sink and Bucket need h5py: pip install h5py")
 
 
 from km3pipe import Pump, Module
@@ -203,3 +209,24 @@ class HDF5Sink(Module):
             print("Finished writing event info in {0}".format(self.filename))
 
         h5_file.close()
+
+
+class HDF5Bucket(Module):
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.filename = self.get("filename")
+        self.prefix = self.get("prefix")
+        self.store = defaultdict(list)
+
+    def process(self, blob):
+        for key, val in blob[self.prefix].items():
+            self.store[key].append(val)
+
+    def finish(self):
+        h5 = h5py.File(self.filename, mode='w')
+        loc = '/' + self.prefix + '/'
+        h5.create_group(loc)
+        for key, data in self.store.items():
+            arr = np.array(data, dtype=[(key, float), ])
+            h5.create_dataset(loc, key, arr)
+        h5.close()
