@@ -9,6 +9,7 @@ from __future__ import division, absolute_import, print_function
 
 import os
 import stat
+import pytz
 try:
     from configparser import ConfigParser, Error
 except ImportError:
@@ -34,6 +35,7 @@ class Config(object):
         """Configuration manager for KM3NeT stuff"""
         self.config = ConfigParser()
         self.cfg_path = config_path
+        self._time_zone = None
         try:
             self._read_configuration()
         except IOError:
@@ -82,3 +84,13 @@ class Config(object):
             return self.config.getboolean('General', 'check_for_updates')
         except Error:
             return True
+
+    @property
+    def time_zone(self):
+        if not self._time_zone:
+            try:
+                time_zone = self.config.get('General', 'time_zone')
+            except Error:
+                time_zone = 'UTC'
+            self._time_zone = pytz.timezone(time_zone)
+        return self._time_zone
