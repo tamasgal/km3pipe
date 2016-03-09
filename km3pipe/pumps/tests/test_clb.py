@@ -7,7 +7,7 @@
 """
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import TestCase, StringIO, skipIf
+from km3pipe.testing import TestCase, StringIO
 from km3pipe.pumps.clb import CLBPump, CLBHeader, PMTData
 
 import binascii
@@ -202,7 +202,6 @@ class TestCLBHeader(TestCase):
         self.assertEqual('30beaf00', header.dom_id)
         self.assertEqual('10000000000000000000000000000000', header.dom_status)
 
-    @skipIf(True, "Weird one hour bias on date?")
     def test_str_representation(self):
         raw_data = "5454444300000000000000030000684200BEBC2030BEAF0080000000"
         byte_data = binascii.unhexlify(raw_data.encode())
@@ -212,7 +211,7 @@ class TestCLBHeader(TestCase):
                       "    Run number:   0\n" \
                       "    UDP sequence: 3\n" \
                       "    Time stamp:   26690\n" \
-                      "                  1970-01-01 08:24:50\n" \
+                      "                  1970-01-01 07:24:50\n" \
                       "    Ticks [16ns]: 12500000\n" \
                       "    DOM ID:       30beaf00\n" \
                       "    DOM status:   10000000000000000000000000000000\n"

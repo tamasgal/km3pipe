@@ -2,15 +2,17 @@
 # Filename: tools.py
 # pylint: disable=C0103
 """
-Some frequently used logic.
+Some unsorted, frequently used logic.
 
 """
 from __future__ import division, absolute_import, print_function
 
+import subprocess
 import collections
 from collections import namedtuple
 from itertools import chain
 from datetime import datetime
+
 
 import numpy as np
 
@@ -273,3 +275,13 @@ class Cuckoo(object):
     def _interval_reached(self):
         "Check if defined interval is reached"
         return total_seconds(datetime.now() - self.timestamp) > self.interval
+
+
+def ifiles(irods_path):
+    """Return a list of filenames for given iRODS path (recursively)"""
+    raw_output = subprocess.check_output("ils -r --bundle {0}"
+                                         "    | grep 'Bundle file:'"
+                                         "    | awk '{{print $3}}'"
+                                         .format(irods_path), shell=True)
+    filenames = raw_output.strip().split("\n")
+    return filenames

@@ -11,6 +11,7 @@ from km3pipe.__version__ import version, version_info  # noqa
 try:
     from km3pipe.core import (Pipeline, Module, Pump, Blob,  # noqa
                               Geometry, AanetGeometry)
+    from km3pipe import pumps
 except ImportError:
     print("Numpy is needed for KM3Pipe")
 

@@ -106,13 +106,6 @@ class TestDetector(TestCase):
         expected = {8: (1, 1, 3), 7: (1, 2, 3), 6: (1, 3, 3)}
         self.assertDictEqual(expected, self.det.doms)
 
-    @skipIf(True, "Weird one hour bias on date?")
-    def test_parse_doms_fills_pmts_dict(self):
-        self.det._parse_doms()
-        self.assertEqual(9, len(self.det.pmts))
-        self.assertTupleEqual((7, 3.1, 3.2, 3.3, -1.1, 0.2, 0.3, 70),
-                              self.det.pmts[(1, 3, 0)])
-
     def test_dom_positions(self):
         self.det._parse_doms()
         for i, position in enumerate(self.det.dom_positions):
@@ -141,22 +134,6 @@ class TestDetector(TestCase):
         self.det._parse_doms()
         pmt = self.det.get_pmt(7, 2)
         self.assertEqual((1, 2, 2), pmt.omkey)
-
-    @skipIf(True, "DOM positions ordering unclear")
-    def test_dom_positions_with_mixed_pmt_ids(self):
-        self.det._det_file = EXAMPLE_DETX_MIXED_IDS
-        self.det._parse_doms()
-        for i, position in enumerate(self.det.dom_positions):
-            self.assertAlmostEqual(i + 1.1, position.x)
-            self.assertAlmostEqual(i + 1.2, position.y)
-            self.assertAlmostEqual(i + 1.3, position.z)
-
-    @skipIf(True, "DOM ordering is probably not important!")
-    def test_ascii_detector(self):
-        self.det._det_file = EXAMPLE_MC_DETX_WRITE_MIXED_IDS
-        self.det._parse_header()
-        self.det._parse_doms()
-        self.assertEqual(self.det._det_file.getvalue(), self.det.ascii)
 
     def test_pmtid2omkey_old(self):
         pmtid2omkey = self.det._pmtid2omkey_old

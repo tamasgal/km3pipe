@@ -7,6 +7,7 @@ Pumps for the EVT simulation dataformat.
 """
 from __future__ import division, absolute_import, print_function
 
+from collections import defaultdict
 import os.path
 
 try:
@@ -15,9 +16,14 @@ except ImportError:
     print("The HDF5 pump needs pandas: pip install pandas")
 
 try:
+    import numpy as np
+except ImportError:
+    print("The HDF5 Bucket needs numpy: pip install numpy")
+
+try:
     import h5py
 except ImportError:
-    print("The HDF5 sink needs h5py: pip install h5py")
+    print("The HDF5 Sink and Bucket need h5py: pip install h5py")
 
 
 from km3pipe import Pump, Module
@@ -103,34 +109,43 @@ class HDF5Sink(Module):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
         self.hits = {}
+        self.mc_hits = {}
         self.mc_tracks = {}
+        self.event_info = {}
         self.index = 0
         print("Processing {0}...".format(self.filename))
 
     def process(self, blob):
         try:
-            self._add_hits(blob['Hits'])
+            self._add_hits(blob['Hits'], self.hits)
         except KeyError:
             print("No hits found. Skipping...")
+
+        try:
+            self._add_hits(blob['MCHits'], self.mc_hits)
+        except KeyError:
+            print("No MC hits found. Skipping...")
 
         try:
             self._add_mc_tracks(blob['MCTracks'])
         except KeyError:
             print("No MC tracks found. Skipping...")
 
+        self._add_event_info(blob)
+
         self.index += 1
         return blob
 
-    def _add_hits(self, hits):
+    def _add_hits(self, hits, target):
         for hit in hits:
-            self.hits.setdefault('event_id', []).append(self.index)
-            self.hits.setdefault('id', []).append(hit.id)
-            self.hits.setdefault('pmt_id', []).append(hit.pmt_id)
-            self.hits.setdefault('time', []).append(hit.t)
-            self.hits.setdefault('tot', []).append(ord(hit.tot))
-            self.hits.setdefault('triggered', []).append(bool(hit.trig))
-            self.hits.setdefault('dom_id', []).append(hit.dom_id)
-            self.hits.setdefault('channel_id', []).append(ord(hit.channel_id))
+            target.setdefault('event_id', []).append(self.index)
+            target.setdefault('id', []).append(hit.id)
+            target.setdefault('pmt_id', []).append(hit.pmt_id)
+            target.setdefault('time', []).append(hit.t)
+            target.setdefault('tot', []).append(hit.tot)
+            target.setdefault('triggered', []).append(bool(hit.trig))
+            target.setdefault('dom_id', []).append(hit.dom_id)
+            target.setdefault('channel_id', []).append(ord(hit.channel_id))
 
     def _add_mc_tracks(self, mc_tracks):
         for mc_track in mc_tracks:
@@ -146,6 +161,32 @@ class HDF5Sink(Module):
             self.mc_tracks.setdefault('energy', []).append(mc_track.E)
             self.mc_tracks.setdefault('type', []).append(mc_track.type)
 
+    def _add_event_info(self, blob):
+        evt = blob['Evt']
+
+        timestamp = evt.t.AsDouble()
+        det_id = evt.det_id
+        mc_id = evt.mc_id
+        mc_t = evt.mc_t
+        run = evt.run_id
+        overlays = evt.overlays
+        trigger_counter = evt.trigger_counter
+        trigger_mask = evt.trigger_mask
+        frame_index = evt.frame_index
+
+        info = self.event_info
+
+        info.setdefault('event_id', []).append(self.index)
+        info.setdefault('timestamp', []).append(timestamp)
+        info.setdefault('det_id', []).append(det_id)
+        info.setdefault('mc_id', []).append(mc_id)
+        info.setdefault('mc_t', []).append(mc_t)
+        info.setdefault('run', []).append(run)
+        info.setdefault('overlays', []).append(overlays)
+        info.setdefault('trigger_counter', []).append(trigger_counter)
+        info.setdefault('trigger_mask', []).append(trigger_mask)
+        info.setdefault('frame_index', []).append(frame_index)
+
     def finish(self):
         h5_file = h5py.File(self.filename, 'w')
         if self.hits:
@@ -153,9 +194,41 @@ class HDF5Sink(Module):
             rec = df.to_records(index=False)
             h5_file.create_dataset('/hits', data=rec)
             print("Finished writing hits in {0}".format(self.filename))
+        if self.mc_hits:
+            df = pd.DataFrame(self.mc_hits)
+            rec = df.to_records(index=False)
+            h5_file.create_dataset('/mc_hits', data=rec)
+            print("Finished writing MC hits in {0}".format(self.filename))
         if self.mc_tracks:
             df = pd.DataFrame(self.mc_tracks)
             rec = df.to_records(index=False)
             h5_file.create_dataset('/mc_tracks', data=rec)
             print("Finished writing MC tracks in {0}".format(self.filename))
+        if self.event_info:
+            df = pd.DataFrame(self.event_info)
+            rec = df.to_records(index=False)
+            h5_file.create_dataset('/event_info', data=rec)
+            print("Finished writing event info in {0}".format(self.filename))
+
         h5_file.close()
+
+
+class HDF5Bucket(Module):
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.filename = self.get("filename")
+        self.prefix = self.get("prefix")
+        self.store = defaultdict(list)
+
+    def process(self, blob):
+        for key, val in blob[self.prefix].items():
+            self.store[key].append(val)
+
+    def finish(self):
+        h5 = h5py.File(self.filename, mode='w')
+        loc = '/' + self.prefix + '/'
+        h5.create_group(loc)
+        for key, data in self.store.items():
+            arr = np.array(data, dtype=[(key, float), ])
+            h5.create_dataset(loc, key, arr)
+        h5.close()

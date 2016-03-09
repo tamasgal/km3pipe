@@ -11,11 +11,15 @@ from struct import unpack
 from binascii import hexlify
 from collections import namedtuple
 import datetime
+import pytz
 
 from km3pipe import Pump
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
+
+
+UTC_TZ = pytz.timezone('UTC')
 
 
 class CLBPump(Pump):
@@ -32,8 +36,6 @@ class CLBPump(Pump):
             self.open_file(self.filename)
             if self.cache_enabled:
                 self.determine_packet_positions()
-        else:
-            log.warn("No filename specified. Take care of the file handling!")
 
     def determine_packet_positions(self):
         """Record the file pointer position of each frame"""
@@ -153,8 +155,9 @@ class CLBHeader(object):
         dom_status_bits = unpack('>I', byte_data[24:28])[0]
         self.dom_status = "{0:032b}".format(dom_status_bits)
 
+        print("Timestamp: {0}".format(self.timestamp))
         self.human_readable_timestamp = datetime.datetime.fromtimestamp(
-            int(self.timestamp)).strftime('%Y-%m-%d %H:%M:%S')
+            int(self.timestamp), UTC_TZ).strftime('%Y-%m-%d %H:%M:%S')
 
     def _parse_file(self, file_obj):
         """Directly read from file handler.

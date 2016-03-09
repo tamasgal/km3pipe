@@ -12,6 +12,7 @@ import ssl
 import sys
 import json
 import re
+import pytz
 
 try:
     import pandas as pd
@@ -40,6 +41,8 @@ else:
 __author__ = 'tamasgal'
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
+
+UTC_TZ = pytz.timezone('UTC')
 
 
 # Ignore invalid certificate error
@@ -119,7 +122,7 @@ class DBManager(object):
         This currently manipulates the incoming DataFrame!
         """
         def convert_data(timestamp):
-            return datetime.fromtimestamp(float(timestamp) / 1e3)
+            return datetime.fromtimestamp(float(timestamp) / 1e3, UTC_TZ)
         try:
             converted = dataframe[timestamp_key].apply(convert_data)
             dataframe['DATETIME'] = converted
