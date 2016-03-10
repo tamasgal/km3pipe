@@ -40,7 +40,12 @@ class AanetPump(Pump):
         self.header = None
         self.blobs = self.blob_generator()
         if self.additional:
-            self.previous = None
+            import ROOT
+            import aa
+            dummy_evt = ROOT.Evt()
+            dummy_evt.frame_index = -1
+            self.previous = {"Evt": dummy_evt}
+
 
     def _parse_filenames(self):
         prefix, suffix = self.filename.split('[index]')
@@ -82,22 +87,24 @@ class AanetPump(Pump):
                 yield blob
             del event_file
 
-    def process(self, blob):
+    def process(self, blob=None):
         if self.additional:
-            try:
-                if blob["Evt"].id == self.previous["Evt"].id:
-                    blob[self.additional] = self.previous
-                    return blob
-            except TypeError:
-                pass
-            while True:
-                blob[self.additional] = next(self.blobs)
-                print(blob["Evt"].id, blob[self.additional]["Evt"].id)
-                self.previous = blob[self.additional]
-                if blob["Evt"].id == blob[self.additional]["Evt"].id:
-                    return blob
-                if blob["Evt"].id < blob[self.additional]["Evt"].id:
-                    return None
+            new_blob = self.previous
+            if new_blob["Evt"].frame_index == blob["Evt"].frame_index:
+                blob[self.additional] = new_blob
+                return blob
+
+            elif new_blob["Evt"].frame_index > blob["Evt"].frame_index:
+                return None
+
+            else:
+                while new_blob["Evt"].frame_index < blob["Evt"].frame_index:
+                    new_blob = next(self.blobs)
+
+                self.previous = new_blob
+
+                return self.process(blob)
+
         else:
             return next(self.blobs)
 
