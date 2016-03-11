@@ -3,19 +3,12 @@ from __future__ import division
 
 from time import ctime
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    try:
-        from StringIO import StringIO
-    except ImportError:
-        from io import StringIO
-
 from royweb import PacketHandler
 
 from km3pipe import Pipeline, Module
 from km3pipe.pumps import CHPump
 from km3pipe.pumps.daq import DAQPreamble, DAQEvent
+from km3pipe.common import StringIO
 
 
 class CHPrinter(Module):
