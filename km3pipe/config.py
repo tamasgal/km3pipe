@@ -9,6 +9,7 @@ from __future__ import division, absolute_import, print_function
 
 import os
 import stat
+import pytz
 try:
     from configparser import ConfigParser, Error
 except ImportError:
@@ -95,6 +96,5 @@ class Config(object):
                 time_zone = self.config.get('General', 'time_zone')
             except Error:
                 time_zone = 'UTC'
-            import pytz  # noqa
             self._time_zone = pytz.timezone(time_zone)
         return self._time_zone

@@ -20,6 +20,7 @@ setup(name='km3pipe',
           'pandas',
           'seaborn',
           'pytz',
+          'six',
       ],
       entry_points={
           'console_scripts': [
