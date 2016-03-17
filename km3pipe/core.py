@@ -38,6 +38,8 @@ class Pipeline(object):
         try:
             module.get_detector()
             self.geometry = module
+            if module._should_apply:
+                self.modules.append(module)
         except AttributeError:
             if len(self.modules) < 1 and not isinstance(module, Pump):
                 log.error("The first module to attach to the pipeline should "
@@ -214,12 +216,14 @@ class Geometry(Module):
         return self.detector
 
     def apply(self, hits):
+        import ROOT
+        import aa
         for hit in hits:
             pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
-            hit.pos = pmt.pos
-            hit.dir = pmt.dir
+            hit.pos = ROOT.Vec(pmt.pos.x, pmt.pos.y, pmt.pos.z)
+            hit.dir = ROOT.Vec(pmt.dir.x, pmt.dir.y, pmt.dir.z)
             hit.t0 = pmt.t0
-            hit.time += pmt.t0
+            hit.t += pmt.t0
             hit.a = hit.tot
         return hits
 
