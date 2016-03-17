@@ -24,7 +24,9 @@ class AanetPump(Pump):
         self.filenames = self.get('filenames') or []
         self.indices = self.get('indices')
         self.additional = self.get('additional')
-        self.id = self.get('id')
+        if self.additional:
+            self.id = self.get('id')
+            self.return_without_match = self.get("return_without_match")
 
         if not self.filename and not self.filenames:
             raise ValueError("No filename(s) defined")
@@ -102,7 +104,7 @@ class AanetPump(Pump):
                 return blob
 
             elif self.event_index(new_blob) > blob["Evt"].frame_index:
-                return None
+                return blob
 
             else:
                 while self.event_index(new_blob) < blob["Evt"].frame_index:
