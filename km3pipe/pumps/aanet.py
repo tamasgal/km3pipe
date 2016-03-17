@@ -104,7 +104,10 @@ class AanetPump(Pump):
                 return blob
 
             elif self.event_index(new_blob) > blob["Evt"].frame_index:
-                return blob
+                if self.return_without_match:
+                    return blob
+                else:
+                    return None
 
             else:
                 while self.event_index(new_blob) < blob["Evt"].frame_index:
