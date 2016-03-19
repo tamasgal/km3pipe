@@ -213,6 +213,101 @@ class HDF5Sink(Module):
         h5_file.close()
 
 
+class HDF5Sink2(Module):
+    def __init__(self, **context):
+        """A Module to convert (KM3NeT) ROOT files to HDF5."""
+        super(self.__class__, self).__init__(**context)
+        self.filename = self.get('filename') or 'dump.h5'
+        self.hits = {}
+        self.mc_hits = {}
+        self.mc_tracks = {}
+        self.event_info = {}
+        self.h5_file = h5py.File(self.filename, 'w')
+        self.index = 1
+        print("Processing {0}...".format(self.filename))
+
+    def process(self, blob):
+        target = '/event/{0}'.format(self.index)
+        self.h5_file.create_group(target)
+
+        self._add_event_info(blob, target=target+'info')
+
+        if 'Hits' in blob:
+            self._add_hits(blob['Hits'], target=target+'hits')
+
+        if 'MCHits' in blob:
+            self._add_hits(blob['MCHits'], target=target+'mc_hits')
+
+        if 'MCTracks' in blob:
+            self._add_tracks(blob['MCTracks'], target=target+'mc_tracks')
+
+        self.index += 1
+        return blob
+
+    def _add_event_info(self, blob, target):
+        evt = blob['Evt']
+
+        timestamp = evt.t.AsDouble()
+        det_id = evt.det_id
+        mc_id = evt.mc_id
+        mc_t = evt.mc_t
+        run = evt.run_id
+        overlays = evt.overlays
+        trigger_counter = evt.trigger_counter
+        trigger_mask = evt.trigger_mask
+        frame_index = evt.frame_index
+
+        info = {}
+
+        info.setdefault('event_id', []).append(self.index)
+        info.setdefault('timestamp', []).append(timestamp)
+        info.setdefault('det_id', []).append(det_id)
+        info.setdefault('mc_id', []).append(mc_id)
+        info.setdefault('mc_t', []).append(mc_t)
+        info.setdefault('run', []).append(run)
+        info.setdefault('overlays', []).append(overlays)
+        info.setdefault('trigger_counter', []).append(trigger_counter)
+        info.setdefault('trigger_mask', []).append(trigger_mask)
+        info.setdefault('frame_index', []).append(frame_index)
+
+        self._dump_dict(info, target)
+
+    def _add_hits(self, hits, target):
+        hits_dict = {}
+        for hit in hits:
+            hits_dict.setdefault('id', []).append(hit.id)
+            hits_dict.setdefault('pmt_id', []).append(hit.pmt_id)
+            hits_dict.setdefault('time', []).append(hit.t)
+            hits_dict.setdefault('tot', []).append(hit.tot)
+            hits_dict.setdefault('triggered', []).append(bool(hit.trig))
+            hits_dict.setdefault('dom_id', []).append(hit.dom_id)
+            hits_dict.setdefault('channel_id', []).append(ord(hit.channel_id))
+        self._dump_dict(hits_dict, target)
+
+    def _add_mc_tracks(self, tracks, target):
+        tracks_dict = {}
+        for track in tracks:
+            tracks_dict.setdefault('id', []).append(track.id)
+            tracks_dict.setdefault('x', []).append(track.pos.x)
+            tracks_dict.setdefault('y', []).append(track.pos.y)
+            tracks_dict.setdefault('z', []).append(track.pos.z)
+            tracks_dict.setdefault('dx', []).append(track.dir.x)
+            tracks_dict.setdefault('dy', []).append(track.dir.y)
+            tracks_dict.setdefault('dz', []).append(track.dir.z)
+            tracks_dict.setdefault('time', []).append(track.t)
+            tracks_dict.setdefault('energy', []).append(track.E)
+            tracks_dict.setdefault('type', []).append(track.type)
+        self._dump_dict(tracks_dict, target)
+
+    def _dump_dict(self, data, target):
+        df = pd.DataFrame(data)
+        rec = df.to_records(index=False)
+        self.h5_file.create_dataset(target, data=rec)
+
+    def finish(self):
+        self.h5_file.close()
+
+
 class HDF5Bucket(Module):
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
