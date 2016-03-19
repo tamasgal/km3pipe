@@ -284,7 +284,7 @@ class HDF5Sink2(Module):
             hits_dict.setdefault('channel_id', []).append(ord(hit.channel_id))
         self._dump_dict(hits_dict, target)
 
-    def _add_mc_tracks(self, tracks, target):
+    def _add_tracks(self, tracks, target):
         tracks_dict = {}
         for track in tracks:
             tracks_dict.setdefault('id', []).append(track.id)
