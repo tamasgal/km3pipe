@@ -301,7 +301,7 @@ class HDF5Sink2(Module):
 
     def _dump_dict(self, data, target):
         if not data:
-            print("Skipping target '{0}' due to empty data.".format(target))
+            return
         df = pd.DataFrame(data)
         rec = df.to_records(index=False)
         self.h5_file.create_dataset(target, data=rec)
