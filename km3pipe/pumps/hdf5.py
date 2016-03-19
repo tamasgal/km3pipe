@@ -227,7 +227,7 @@ class HDF5Sink2(Module):
         print("Processing {0}...".format(self.filename))
 
     def process(self, blob):
-        target = '/event/{0}'.format(self.index)
+        target = '/event/{0}/'.format(self.index)
         self.h5_file.create_group(target)
 
         self._add_event_info(blob, target=target+'info')
@@ -300,6 +300,8 @@ class HDF5Sink2(Module):
         self._dump_dict(tracks_dict, target)
 
     def _dump_dict(self, data, target):
+        if not data:
+            print("Skipping target '{0}' due to empty data.".format(target))
         df = pd.DataFrame(data)
         rec = df.to_records(index=False)
         self.h5_file.create_dataset(target, data=rec)
