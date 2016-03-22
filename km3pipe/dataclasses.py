@@ -102,3 +102,70 @@ class Direction(Point):
 
     def __str__(self):
         return "({0:.4}, {1:.4}, {2:.4})".format(self.x, self.y, self.z)
+
+
+class HitSeries(object):
+    @classmethod
+    def from_hdf5(cls, dictionary):
+        return cls(dictionary, like='dict')
+
+    def __init__(self, data, like):
+        self.data = data
+        self.like = like
+        self._index = 0
+        if like == 'dict':
+            self.hit_constructor = Hit.from_dict
+        else:
+            self.hit_constructor = lambda x: x
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        if self._index >= len(self):
+            self._index = 0
+            raise StopIteration
+        item = self.hit_constructor(self.data[self._index])
+        self._index += 1
+        return item
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, index):
+        if isinstance(index, int):
+            return self.hit_constructor(self.data[index])
+        elif isinstance(index, slice):
+            return self._slice_generator(index)
+        else:
+            raise TypeError("index must be int or slice")
+
+    def _slice_generator(self, index):
+        """A simple slice generator for iterations"""
+        start, stop, step = index.indices(len(self))
+        for i in range(start, stop, step):
+            yield self.hit_constructor(self.data[i])
+
+
+class Hit(object):
+    def __init__(self, time=None, tot=None, channel_id=None, dom_id=None,
+                 data=None):
+        self.time = time
+        self.tot = tot
+        self.channel_id = channel_id
+        self.dom_id = dom_id
+        self.data = data
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(data['time'], data['tot'], data['channel_id'],
+                   data['dom_id'], data)
+
+    @classmethod
+    def from_aanet(cls, data):
+        return cls(data['t'], data['tot'], data['channel_id'],
+                   data['dom_id'], data)

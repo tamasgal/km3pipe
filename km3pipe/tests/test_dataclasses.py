@@ -8,9 +8,10 @@
 from __future__ import division, absolute_import, print_function
 
 import numpy as np
+import pandas as pd
 
 from km3pipe.testing import TestCase
-from km3pipe.dataclasses import Position, Direction
+from km3pipe.dataclasses import Position, Direction, HitSeries
 
 
 class TestPosition(TestCase):
@@ -77,3 +78,43 @@ class TestDirection(TestCase):
     def test_direction_str(self):
         direction = Direction((1, 2, 3))
         self.assertEqual("(0.2673, 0.5345, 0.8018)", str(direction))
+
+
+class TestHitSeries(TestCase):
+    def test_data(self):
+        data = [1, 2, 3]
+        hit_series = HitSeries(data, None)
+        self.assertEqual(data, hit_series.data)
+
+    def test_init_from_hdf5(self):
+        hit1 = {'time': 1, 'tot': 2, 'channel_id': 3}
+        hit2 = {'time': 2, 'tot': 3, 'channel_id': 4}
+        hit3 = {'time': 3, 'tot': 4, 'channel_id': 5}
+        hit_list = [hit1, hit2, hit3]
+
+        hit_series = HitSeries.from_hdf5(hit_list)
+
+        self.assertEqual('dict', hit_series.like)
+        self.assertEqual(3, len(hit_series))
+
+    def test_iterator_protocol_for_lists(self):
+        data = [1, 2, 3]
+        hit_series = HitSeries(data, None)
+        result = [i for i in hit_series]
+        self.assertEqual(data, result)
+
+    def test_attributes(self):
+        hit1 = {'time': 1, 'tot': 2, 'channel_id': 3, 'dom_id': 4}
+        hit2 = {'time': 2, 'tot': 3, 'channel_id': 4, 'dom_id': 5}
+        hit3 = {'time': 3, 'tot': 4, 'channel_id': 5, 'dom_id': 6}
+        hit_list = [hit1, hit2, hit3]
+        hit_series = HitSeries.from_hdf5(hit_list)
+        hit = hit_series[0]
+        self.assertEqual(1, hit.time)
+        self.assertEqual(2, hit.tot)
+        self.assertEqual(3, hit.channel_id)
+        self.assertEqual(4, hit.dom_id)
+        self.assertEqual(id(hit_list), id(hit_series.data))
+
+
+
