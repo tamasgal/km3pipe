@@ -39,35 +39,41 @@ class HDF5Pump(Pump):
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename')
-        self.create_hit_list = self.get('create_hit_list') or True
         if os.path.isfile(self.filename):
-            self._store = pd.HDFStore(self.filename)
-            self._hits_by_event = self._store.hits.groupby('event_id')
-            self._n_events = len(self._hits_by_event)
+            self._h5file = h5py.File(self.filename)
+            try:
+                self._n_events = len(self._h5file['/event'])
+            except KeyError:
+                raise KeyError("No events found.")
         else:
             raise IOError("No such file or directory: '{0}'"
                           .format(self.filename))
-        self.index = 0
+        self.index = None
+        self._reset_index()
 
     def process(self, blob):
         try:
             blob = self.get_blob(self.index)
         except KeyError:
-            self.index = 0
+            self._reset_index()
             raise StopIteration
         self.index += 1
         return blob
 
     def get_blob(self, index):
-        hits = self._hits_by_event.get_group(index)
-        blob = {'HitTable': hits}
-        if self.create_hit_list:
-            blob['Hits'] = list(hits.itertuples())
+        blob = {}
+        n_event = index + 1
+        blob['Hits'] = self._h5file.get('/event/{0}/hits'.format(n_event))
+        blob['EventInfo'] = self._h5file.get('/event/{0}/info'.format(n_event))
         return blob
 
     def finish(self):
         """Clean everything up"""
-        self._store.close()
+        self._h5file.close()
+
+    def _reset_index(self):
+        """Reset index to default value"""
+        self.index = 0
 
     def __len__(self):
         return self._n_events
@@ -80,11 +86,10 @@ class HDF5Pump(Pump):
         return self.__next__()
 
     def __next__(self):
-        try:
-            blob = self.get_blob(self.index)
-        except KeyError:
-            self.index = 0
+        if self.index >= self._n_events:
+            self._reset_index()
             raise StopIteration
+        blob = self.get_blob(self.index)
         self.index += 1
         return blob
 
