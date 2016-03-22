@@ -39,35 +39,41 @@ class HDF5Pump(Pump):
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename')
-        self.create_hit_list = self.get('create_hit_list') or True
         if os.path.isfile(self.filename):
-            self._store = pd.HDFStore(self.filename)
-            self._hits_by_event = self._store.hits.groupby('event_id')
-            self._n_events = len(self._hits_by_event)
+            self._h5file = h5py.File(self.filename)
+            try:
+                self._n_events = len(self._h5file['/event'])
+            except KeyError:
+                raise KeyError("No events found.")
         else:
             raise IOError("No such file or directory: '{0}'"
                           .format(self.filename))
-        self.index = 0
+        self.index = None
+        self._reset_index()
 
     def process(self, blob):
         try:
             blob = self.get_blob(self.index)
         except KeyError:
-            self.index = 0
+            self._reset_index()
             raise StopIteration
         self.index += 1
         return blob
 
     def get_blob(self, index):
-        hits = self._hits_by_event.get_group(index)
-        blob = {'HitTable': hits}
-        if self.create_hit_list:
-            blob['Hits'] = list(hits.itertuples())
+        blob = {}
+        n_event = index + 1
+        blob['Hits'] = self._h5file.get('/event/{0}/hits'.format(n_event))
+        blob['EventInfo'] = self._h5file.get('/event/{0}/info'.format(n_event))
         return blob
 
     def finish(self):
         """Clean everything up"""
-        self._store.close()
+        self._h5file.close()
+
+    def _reset_index(self):
+        """Reset index to default value"""
+        self.index = 0
 
     def __len__(self):
         return self._n_events
@@ -80,11 +86,10 @@ class HDF5Pump(Pump):
         return self.__next__()
 
     def __next__(self):
-        try:
-            blob = self.get_blob(self.index)
-        except KeyError:
-            self.index = 0
+        if self.index >= self._n_events:
+            self._reset_index()
             raise StopIteration
+        blob = self.get_blob(self.index)
         self.index += 1
         return blob
 
@@ -211,6 +216,103 @@ class HDF5Sink(Module):
             print("Finished writing event info in {0}".format(self.filename))
 
         h5_file.close()
+
+
+class HDF5Sink2(Module):
+    def __init__(self, **context):
+        """A Module to convert (KM3NeT) ROOT files to HDF5."""
+        super(self.__class__, self).__init__(**context)
+        self.filename = self.get('filename') or 'dump.h5'
+        self.hits = {}
+        self.mc_hits = {}
+        self.mc_tracks = {}
+        self.event_info = {}
+        self.h5_file = h5py.File(self.filename, 'w')
+        self.index = 1
+        print("Processing {0}...".format(self.filename))
+
+    def process(self, blob):
+        target = '/event/{0}/'.format(self.index)
+        self.h5_file.create_group(target)
+
+        self._add_event_info(blob, target=target+'info')
+
+        if 'Hits' in blob:
+            self._add_hits(blob['Hits'], target=target+'hits')
+
+        if 'MCHits' in blob:
+            self._add_hits(blob['MCHits'], target=target+'mc_hits')
+
+        if 'MCTracks' in blob:
+            self._add_tracks(blob['MCTracks'], target=target+'mc_tracks')
+
+        self.index += 1
+        return blob
+
+    def _add_event_info(self, blob, target):
+        evt = blob['Evt']
+
+        timestamp = evt.t.AsDouble()
+        det_id = evt.det_id
+        mc_id = evt.mc_id
+        mc_t = evt.mc_t
+        run = evt.run_id
+        overlays = evt.overlays
+        trigger_counter = evt.trigger_counter
+        trigger_mask = evt.trigger_mask
+        frame_index = evt.frame_index
+
+        info = {}
+
+        info.setdefault('event_id', []).append(self.index)
+        info.setdefault('timestamp', []).append(timestamp)
+        info.setdefault('det_id', []).append(det_id)
+        info.setdefault('mc_id', []).append(mc_id)
+        info.setdefault('mc_t', []).append(mc_t)
+        info.setdefault('run', []).append(run)
+        info.setdefault('overlays', []).append(overlays)
+        info.setdefault('trigger_counter', []).append(trigger_counter)
+        info.setdefault('trigger_mask', []).append(trigger_mask)
+        info.setdefault('frame_index', []).append(frame_index)
+
+        self._dump_dict(info, target)
+
+    def _add_hits(self, hits, target):
+        hits_dict = {}
+        for hit in hits:
+            hits_dict.setdefault('id', []).append(hit.id)
+            hits_dict.setdefault('pmt_id', []).append(hit.pmt_id)
+            hits_dict.setdefault('time', []).append(hit.t)
+            hits_dict.setdefault('tot', []).append(hit.tot)
+            hits_dict.setdefault('triggered', []).append(bool(hit.trig))
+            hits_dict.setdefault('dom_id', []).append(hit.dom_id)
+            hits_dict.setdefault('channel_id', []).append(ord(hit.channel_id))
+        self._dump_dict(hits_dict, target)
+
+    def _add_tracks(self, tracks, target):
+        tracks_dict = {}
+        for track in tracks:
+            tracks_dict.setdefault('id', []).append(track.id)
+            tracks_dict.setdefault('x', []).append(track.pos.x)
+            tracks_dict.setdefault('y', []).append(track.pos.y)
+            tracks_dict.setdefault('z', []).append(track.pos.z)
+            tracks_dict.setdefault('dx', []).append(track.dir.x)
+            tracks_dict.setdefault('dy', []).append(track.dir.y)
+            tracks_dict.setdefault('dz', []).append(track.dir.z)
+            tracks_dict.setdefault('time', []).append(track.t)
+            tracks_dict.setdefault('energy', []).append(track.E)
+            tracks_dict.setdefault('type', []).append(track.type)
+        self._dump_dict(tracks_dict, target)
+
+    def _dump_dict(self, data, target):
+        if not data:
+            return
+        df = pd.DataFrame(data)
+        rec = df.to_records(index=False)
+        self.h5_file.create_dataset(target, data=rec)
+
+    def finish(self):
+        self.h5_file.close()
 
 
 class HDF5Bucket(Module):
