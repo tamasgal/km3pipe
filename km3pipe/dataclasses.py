@@ -111,7 +111,7 @@ class HitSeries(object):
 
     @classmethod
     def from_aanet(cls, dictionary):
-        return cls(dictionary, Hit.form_aanet)
+        return cls(dictionary, Hit.from_aanet)
 
     @classmethod
     def from_evt(cls, dictionary):
@@ -199,6 +199,11 @@ class HitSeries(object):
 
     def __repr__(self):
         return self.__str__()
+
+    def __insp__(self):
+        if self._hits is None:
+            self._convert_hits()
+        return '\n'.join([str(hit) for hit in self._hits])
 
 
 class Hit(object):
