@@ -27,6 +27,7 @@ except ImportError:
 
 
 from km3pipe import Pump, Module
+from km3pipe.dataclasses import HitSeries
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -63,7 +64,8 @@ class HDF5Pump(Pump):
     def get_blob(self, index):
         blob = {}
         n_event = index + 1
-        blob['Hits'] = self._h5file.get('/event/{0}/hits'.format(n_event))
+        raw_hits = self._h5file.get('/event/{0}/hits'.format(n_event))
+        blob['Hits'] = HitSeries.from_hdf5(raw_hits)
         blob['EventInfo'] = self._h5file.get('/event/{0}/info'.format(n_event))
         return blob
 
