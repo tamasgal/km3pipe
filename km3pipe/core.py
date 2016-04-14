@@ -11,6 +11,7 @@ import signal
 import gzip
 
 from km3pipe.hardware import Detector
+from km3pipe.dataclasses import Position, Direction
 from km3pipe.logger import logging
 
 __author__ = 'tamasgal'
@@ -38,6 +39,8 @@ class Pipeline(object):
         try:
             module.get_detector()
             self.geometry = module
+            if module._should_apply:
+                self.modules.append(module)
         except AttributeError:
             if len(self.modules) < 1 and not isinstance(module, Pump):
                 log.error("The first module to attach to the pipeline should "
@@ -204,9 +207,9 @@ class Geometry(Module):
         else:
             raise ValueError("Define either a filename or a detector ID.")
 
-    def process(self, blob):
+    def process(self, blob, key='Hits'):
         if self._should_apply:
-            blob['Hits'] = self.apply(blob['Hits'])
+            self.apply(blob[key])
         return blob
 
     def get_detector(self):
@@ -214,14 +217,18 @@ class Geometry(Module):
         return self.detector
 
     def apply(self, hits):
+        import ROOT  # noqa
+        import aa  # noqa
         for hit in hits:
-            pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
-            hit.pos = pmt.pos
-            hit.dir = pmt.dir
+            try:
+                pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
+            except KeyError:
+                pmt = self.detector.get_pmt(hit.dom_id, ord(hit.channel_id))
+            hit.pos = Position(pmt.pos)
+            hit.dir = Direction(pmt.dir)
             hit.t0 = pmt.t0
             hit.time += pmt.t0
-            hit.a = hit.tot
-        return hits
+            hit.a = ord(hit.tot)
 
 
 class AanetGeometry(Module):

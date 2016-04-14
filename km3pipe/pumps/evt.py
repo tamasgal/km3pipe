@@ -14,7 +14,7 @@ from collections import namedtuple
 from km3pipe import Pump
 from km3pipe.logger import logging
 
-from km3pipe.dataclasses import Point, Direction
+from km3pipe.dataclasses import Point, Direction, HitSeries
 from km3pipe.tools import pdg2name, geant2pdg, unpack_nfirst
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -148,6 +148,10 @@ class EvtPump(Pump):  # pylint: disable:R0902
             line = line.strip()
             if line.startswith('end_event:') and blob:
                 blob['raw_header'] = self.raw_header
+                try:
+                    blob['Hits'] = HitSeries.from_evt(blob['EvtRawHits'])
+                except KeyError:
+                    pass
                 return blob
             if line.startswith('start_event:'):
                 blob = {}
@@ -168,13 +172,12 @@ class EvtPump(Pump):  # pylint: disable:R0902
             values = [float(x) for x in value.split()]
             blob.setdefault(tag, []).append(values)
             if tag == 'hit':
-                hit = Hit(*values)
+                hit = EvtHit(*values)
                 blob.setdefault("EvtHits", []).append(hit)
                 blob.setdefault("MCHits", []).append(hit)
             if tag == "hit_raw":
-                raw_hit = RawHit(*values)
+                raw_hit = EvtRawHit(*values)
                 blob.setdefault("EvtRawHits", []).append(raw_hit)
-                blob.setdefault("Hits", []).append(raw_hit)
             if tag == "track_in":
                 blob.setdefault("TrackIns", []).append(TrackIn(values))
             if tag == "track_fit":
@@ -320,8 +323,9 @@ class Neutrino(object):  # pylint: disable:R0902
 
 
 # The hit entry in an EVT file
-Hit = namedtuple('Hit', 'id pmt_id pe time type n_photons track_in c_time')
-Hit.__new__.__defaults__ = (None, None, None, None, None, None, None, None)
+EvtHit = namedtuple('EvtHit',
+                    'id pmt_id pe time type n_photons track_in c_time')
+EvtHit.__new__.__defaults__ = (None, None, None, None, None, None, None, None)
 
 
 # The hit_raw entry in an EVT file
@@ -329,7 +333,7 @@ def __add_raw_hit__(self, other):
     """Add two hits by adding the ToT and preserve time and pmt_id
     of the earlier one."""
     first = self if self.time <= other.time else other
-    return RawHit(first.id, first.pmt_id, self.tot+other.tot, first.time)
-RawHit = namedtuple('RawHit', 'id pmt_id tot time')
-RawHit.__new__.__defaults__ = (None, None, None, None)
-RawHit.__add__ = __add_raw_hit__
+    return EvtRawHit(first.id, first.pmt_id, self.tot+other.tot, first.time)
+EvtRawHit = namedtuple('EvtRawHit', 'id pmt_id tot time')
+EvtRawHit.__new__.__defaults__ = (None, None, None, None)
+EvtRawHit.__add__ = __add_raw_hit__
