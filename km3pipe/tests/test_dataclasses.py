@@ -87,9 +87,9 @@ class TestHitSeries(TestCase):
         self.assertEqual(data, hit_series.data)
 
     def test_init_from_hdf5(self):
-        hit1 = {'time': 1, 'tot': 2, 'channel_id': 3}
-        hit2 = {'time': 2, 'tot': 3, 'channel_id': 4}
-        hit3 = {'time': 3, 'tot': 4, 'channel_id': 5}
+        hit1 = {'id': 1, 'time': 1, 'tot': 2, 'channel_id': 3}
+        hit2 = {'id': 2, 'time': 2, 'tot': 3, 'channel_id': 4}
+        hit3 = {'id': 3, 'time': 3, 'tot': 4, 'channel_id': 5}
         hit_list = [hit1, hit2, hit3]
 
         hit_series = HitSeries.from_hdf5(hit_list)
@@ -97,9 +97,9 @@ class TestHitSeries(TestCase):
         self.assertEqual(3, len(hit_series))
 
     def test_attributes(self):
-        hit1 = {'time': 1, 'tot': 2, 'channel_id': 3, 'dom_id': 4}
-        hit2 = {'time': 2, 'tot': 3, 'channel_id': 4, 'dom_id': 5}
-        hit3 = {'time': 3, 'tot': 4, 'channel_id': 5, 'dom_id': 6}
+        hit1 = {'id': 1, 'time': 1, 'tot': 2, 'channel_id': 3, 'dom_id': 4}
+        hit2 = {'id': 2, 'time': 2, 'tot': 3, 'channel_id': 4, 'dom_id': 5}
+        hit3 = {'id': 3, 'time': 3, 'tot': 4, 'channel_id': 5, 'dom_id': 6}
         hit_list = [hit1, hit2, hit3]
         hit_series = HitSeries.from_hdf5(hit_list)
         hit = hit_series[0]
@@ -110,8 +110,8 @@ class TestHitSeries(TestCase):
         self.assertEqual(id(hit_list), id(hit_series.data))
 
     def test_hits_positions(self):
-        hit1 = {'time': 1, 'tot': 2, 'channel_id': 3, 'dom_id': 4}
-        hit2 = {'time': 2, 'tot': 3, 'channel_id': 4, 'dom_id': 5}
+        hit1 = {'id': 1, 'time': 1, 'tot': 2, 'channel_id': 3, 'dom_id': 4}
+        hit2 = {'id': 2, 'time': 2, 'tot': 3, 'channel_id': 4, 'dom_id': 5}
         hit_list = [hit1, hit2]
         hit_series = HitSeries.from_dict(hit_list)
 
@@ -122,8 +122,8 @@ class TestHitSeries(TestCase):
         self.assertTrue(2, len(hit_series.pos))
 
     def test_hits_directions(self):
-        hit1 = {'time': 1, 'tot': 2, 'channel_id': 3, 'dom_id': 4}
-        hit2 = {'time': 2, 'tot': 3, 'channel_id': 4, 'dom_id': 5}
+        hit1 = {'id': 1, 'time': 1, 'tot': 2, 'channel_id': 3, 'dom_id': 4}
+        hit2 = {'id': 2, 'time': 2, 'tot': 3, 'channel_id': 4, 'dom_id': 5}
         hit_list = [hit1, hit2]
         hit_series = HitSeries.from_dict(hit_list)
 
