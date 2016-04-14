@@ -159,6 +159,8 @@ class Hit(object):
         self.channel_id = channel_id
         self.dom_id = dom_id
         self.data = data
+        self.pos = None
+        self.dir = None
 
     @classmethod
     def from_dict(cls, data):
