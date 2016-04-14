@@ -11,7 +11,7 @@ import numpy as np
 
 from km3pipe.tools import angle_between
 
-__all__ = ('Point', 'Position', 'Direction')
+__all__ = ('Point', 'Position', 'Direction', 'HitSeries', 'Hit')
 
 
 class Point(np.ndarray):
