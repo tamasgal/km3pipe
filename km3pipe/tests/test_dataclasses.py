@@ -94,14 +94,7 @@ class TestHitSeries(TestCase):
 
         hit_series = HitSeries.from_hdf5(hit_list)
 
-        self.assertEqual('dict', hit_series.like)
         self.assertEqual(3, len(hit_series))
-
-    def test_iterator_protocol_for_lists(self):
-        data = [1, 2, 3]
-        hit_series = HitSeries(data, None)
-        result = [i for i in hit_series]
-        self.assertEqual(data, result)
 
     def test_attributes(self):
         hit1 = {'time': 1, 'tot': 2, 'channel_id': 3, 'dom_id': 4}

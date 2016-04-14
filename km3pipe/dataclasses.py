@@ -107,23 +107,27 @@ class Direction(Point):
 class HitSeries(object):
     @classmethod
     def from_hdf5(cls, dictionary):
-        return cls(dictionary, like='dict')
+        return cls(dictionary, Hit.from_dict)
+
+    @classmethod
+    def from_aanet(cls, dictionary):
+        return cls(dictionary, Hit.form_aanet)
+
+    @classmethod
+    def from_evt(cls, dictionary):
+        return cls(dictionary, Hit.from_evt)
 
     @classmethod
     def from_dict(cls, dictionary):
-        return cls(dictionary, like='dict')
+        return cls(dictionary, Hit.from_dict)
 
-    def __init__(self, data, like):
+    def __init__(self, data, hit_constructor):
         self.data = data
-        self.like = like
+        self.hit_constructor = hit_constructor
         self._hits = None
         self._pos = None
         self._dir = None
         self._index = 0
-        if like == 'dict':
-            self.hit_constructor = Hit.from_dict
-        else:
-            self.hit_constructor = lambda x: x
 
     @property
     def pos(self):
@@ -200,3 +204,7 @@ class Hit(object):
     def from_aanet(cls, data):
         return cls(data['t'], data['tot'], data['channel_id'],
                    data['dom_id'], data)
+
+    @classmethod
+    def from_evt(cls, data):
+        return cls(data.time, data.tot, data.channel_id, data.dom_id, data)
