@@ -8,7 +8,7 @@ from functools import reduce
 
 from km3pipe.testing import TestCase, StringIO
 from km3pipe.pumps import EvtPump
-from km3pipe.pumps.evt import Track, TrackIn, Neutrino, Hit, RawHit, TrackFit
+from km3pipe.pumps.evt import Track, TrackIn, Neutrino, EvtHit, EvtRawHit, TrackFit
 
 __author__ = 'tamasgal'
 
@@ -320,10 +320,10 @@ class TestNeutrino(TestCase):
         self.assertEqual(repr_str, str(neutrino))
 
 
-class TestHit(TestCase):
+class TestEvtHit(TestCase):
 
     def test_hit_init(self):
-        hit = Hit(1, 2, 3, 4, 5, 6, 7, 8)
+        hit = EvtHit(1, 2, 3, 4, 5, 6, 7, 8)
         self.assertEqual(1, hit.id)
         self.assertEqual(2, hit.pmt_id)
         self.assertEqual(3, hit.pe)
@@ -334,50 +334,50 @@ class TestHit(TestCase):
         self.assertEqual(8, hit.c_time)
 
     def test_hit_default_values(self):
-        hit = Hit()
+        hit = EvtHit()
         self.assertIsNone(hit.id)
         self.assertIsNone(hit.pmt_id)
         self.assertIsNone(hit.time)
 
     def test_hit_default_values_are_set_if_others_are_given(self):
-        hit = Hit(track_in=1)
+        hit = EvtHit(track_in=1)
         self.assertIsNone(hit.id)
         self.assertIsNone(hit.time)
 
     def test_hit_attributes_are_immutable(self):
-        hit = Hit(1, True)
+        hit = EvtHit(1, True)
         with self.assertRaises(AttributeError):
             hit.time = 10
 
 
-class TestRawHit(TestCase):
+class TestEvtRawHit(TestCase):
 
     def test_rawhit_init(self):
-        raw_hit = RawHit(1, 2, 3, 4)
+        raw_hit = EvtRawHit(1, 2, 3, 4)
         self.assertEqual(1, raw_hit.id)
         self.assertEqual(2, raw_hit.pmt_id)
         self.assertEqual(3, raw_hit.tot)
         self.assertEqual(4, raw_hit.time)
 
     def test_hit_default_values(self):
-        raw_hit = RawHit()
+        raw_hit = EvtRawHit()
         self.assertIsNone(raw_hit.id)
         self.assertIsNone(raw_hit.pmt_id)
         self.assertIsNone(raw_hit.time)
 
     def test_hit_default_values_are_set_if_others_are_given(self):
-        raw_hit = RawHit(pmt_id=1)
+        raw_hit = EvtRawHit(pmt_id=1)
         self.assertIsNone(raw_hit.id)
         self.assertIsNone(raw_hit.time)
 
     def test_hit_attributes_are_immutable(self):
-        raw_hit = RawHit(1, True)
+        raw_hit = EvtRawHit(1, True)
         with self.assertRaises(AttributeError):
             raw_hit.time = 10
 
     def test_hit_addition_remains_time_id_and_pmt_id_and_adds_tot(self):
-        hit1 = RawHit(id=1, time=1, pmt_id=1, tot=10)
-        hit2 = RawHit(id=2, time=2, pmt_id=2, tot=20)
+        hit1 = EvtRawHit(id=1, time=1, pmt_id=1, tot=10)
+        hit2 = EvtRawHit(id=2, time=2, pmt_id=2, tot=20)
         merged_hit = hit1 + hit2
         self.assertEqual(1, merged_hit.id)
         self.assertEqual(1, merged_hit.time)
@@ -385,16 +385,16 @@ class TestRawHit(TestCase):
         self.assertEqual(30, merged_hit.tot)
 
     def test_hit_addition_picks_correct_time_if_second_hit_is_earlier(self):
-        hit1 = RawHit(id=1, time=2, pmt_id=1, tot=10)
-        hit2 = RawHit(id=2, time=1, pmt_id=2, tot=20)
+        hit1 = EvtRawHit(id=1, time=2, pmt_id=1, tot=10)
+        hit2 = EvtRawHit(id=2, time=1, pmt_id=2, tot=20)
         merged_hit = hit1 + hit2
         self.assertEqual(2, merged_hit.id)
         self.assertEqual(2, merged_hit.pmt_id)
 
     def test_hit_additions_works_with_multiple_hits(self):
-        hit1 = RawHit(id=1, time=2, pmt_id=1, tot=10)
-        hit2 = RawHit(id=2, time=1, pmt_id=2, tot=20)
-        hit3 = RawHit(id=3, time=1, pmt_id=3, tot=30)
+        hit1 = EvtRawHit(id=1, time=2, pmt_id=1, tot=10)
+        hit2 = EvtRawHit(id=2, time=1, pmt_id=2, tot=20)
+        hit3 = EvtRawHit(id=3, time=1, pmt_id=3, tot=30)
         merged_hit = hit1 + hit2 + hit3
         self.assertEqual(2, merged_hit.pmt_id)
         self.assertEqual(60, merged_hit.tot)
@@ -402,9 +402,9 @@ class TestRawHit(TestCase):
         self.assertEqual(2, merged_hit.id)
 
     def test_hit_addition_works_with_sum(self):
-        hit1 = RawHit(id=1, time=2, pmt_id=1, tot=10)
-        hit2 = RawHit(id=2, time=1, pmt_id=2, tot=20)
-        hit3 = RawHit(id=3, time=1, pmt_id=3, tot=30)
+        hit1 = EvtRawHit(id=1, time=2, pmt_id=1, tot=10)
+        hit2 = EvtRawHit(id=2, time=1, pmt_id=2, tot=20)
+        hit3 = EvtRawHit(id=3, time=1, pmt_id=3, tot=30)
         hits = [hit1, hit2, hit3]
         merged_hit = reduce(operator.add, hits)
         self.assertEqual(2, merged_hit.id)
