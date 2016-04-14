@@ -11,6 +11,7 @@ import signal
 import gzip
 
 from km3pipe.hardware import Detector
+from km3pipe.dataclasses import Position, Direction
 from km3pipe.logger import logging
 
 __author__ = 'tamasgal'
@@ -206,9 +207,9 @@ class Geometry(Module):
         else:
             raise ValueError("Define either a filename or a detector ID.")
 
-    def process(self, blob):
+    def process(self, blob, key='Hits'):
         if self._should_apply:
-            blob['Hits'] = self.apply(blob['Hits'])
+            self.apply(blob[key])
         return blob
 
     def get_detector(self):
@@ -216,22 +217,18 @@ class Geometry(Module):
         return self.detector
 
     def apply(self, hits):
-        import ROOT
-        import aa
+        import ROOT  # noqa
+        import aa  # noqa
         for hit in hits:
             try:
                 pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
             except KeyError:
                 pmt = self.detector.get_pmt(hit.dom_id, ord(hit.channel_id))
-            hit.pos = ROOT.Vec(pmt.pos.x, pmt.pos.y, pmt.pos.z)
-            hit.dir = ROOT.Vec(pmt.dir.x, pmt.dir.y, pmt.dir.z)
+            hit.pos = Position(pmt.pos)
+            hit.dir = Direction(pmt.dir)
             hit.t0 = pmt.t0
-            hit.t += pmt.t0
-            try:
-                hit.a = hit.tot
-            except TypeError:
-                hit.a = ord(hit.tot)
-        return hits
+            hit.time += pmt.t0
+            hit.a = ord(hit.tot)
 
 
 class AanetGeometry(Module):

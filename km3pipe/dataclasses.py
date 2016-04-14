@@ -195,12 +195,14 @@ class Hit(object):
     def __init__(self, id=None, time=None, tot=None, channel_id=None,
                  dom_id=None, data=None):
         self.time = time
+        self.t0 = None
         self.tot = tot
         self.channel_id = channel_id
         self.dom_id = dom_id
         self.data = data
         self.pos = None
         self.dir = None
+        self.a = None  # charge <- historical
 
     @classmethod
     def from_dict(cls, data):
