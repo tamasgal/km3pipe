@@ -217,8 +217,6 @@ class Geometry(Module):
         return self.detector
 
     def apply(self, hits):
-        import ROOT  # noqa
-        import aa  # noqa
         for hit in hits:
             try:
                 pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
