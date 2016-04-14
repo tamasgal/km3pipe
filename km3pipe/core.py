@@ -219,12 +219,18 @@ class Geometry(Module):
         import ROOT
         import aa
         for hit in hits:
-            pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
+            try:
+                pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
+            except KeyError:
+                pmt = self.detector.get_pmt(hit.dom_id, ord(hit.channel_id))
             hit.pos = ROOT.Vec(pmt.pos.x, pmt.pos.y, pmt.pos.z)
             hit.dir = ROOT.Vec(pmt.dir.x, pmt.dir.y, pmt.dir.z)
             hit.t0 = pmt.t0
             hit.t += pmt.t0
-            hit.a = hit.tot
+            try:
+                hit.a = hit.tot
+            except TypeError:
+                hit.a = ord(hit.tot)
         return hits
 
 
