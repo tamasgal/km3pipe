@@ -109,14 +109,37 @@ class HitSeries(object):
     def from_hdf5(cls, dictionary):
         return cls(dictionary, like='dict')
 
+    @classmethod
+    def from_dict(cls, dictionary):
+        return cls(dictionary, like='dict')
+
     def __init__(self, data, like):
         self.data = data
         self.like = like
+        self._hits = None
+        self._pos = None
+        self._dir = None
         self._index = 0
         if like == 'dict':
             self.hit_constructor = Hit.from_dict
         else:
             self.hit_constructor = lambda x: x
+
+    @property
+    def pos(self):
+        if self._pos is None:
+            self._pos = np.array([hit.pos for hit in self._hits])
+        return self._pos
+
+    @property
+    def dir(self):
+        if self._dir is None:
+            self._dir = np.array([hit.dir for hit in self._hits])
+        return self._dir
+
+    def _convert_hits(self):
+        print("Converting hits")
+        self._hits = [self.hit_constructor(hit) for hit in self.data]
 
     def __iter__(self):
         return self
@@ -126,10 +149,13 @@ class HitSeries(object):
         return self.__next__()
 
     def __next__(self):
+        if self._hits is None:
+            self._convert_hits()
+
         if self._index >= len(self):
             self._index = 0
             raise StopIteration
-        item = self.hit_constructor(self.data[self._index])
+        item = self._hits[self._index]
         self._index += 1
         return item
 
@@ -137,8 +163,11 @@ class HitSeries(object):
         return len(self.data)
 
     def __getitem__(self, index):
+        if self._hits is None:
+            self._convert_hits()
+
         if isinstance(index, int):
-            return self.hit_constructor(self.data[index])
+            return self._hits[index]
         elif isinstance(index, slice):
             return self._slice_generator(index)
         else:
@@ -148,7 +177,7 @@ class HitSeries(object):
         """A simple slice generator for iterations"""
         start, stop, step = index.indices(len(self))
         for i in range(start, stop, step):
-            yield self.hit_constructor(self.data[i])
+            yield self._hits[i]
 
 
 class Hit(object):

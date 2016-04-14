@@ -116,5 +116,29 @@ class TestHitSeries(TestCase):
         self.assertEqual(4, hit.dom_id)
         self.assertEqual(id(hit_list), id(hit_series.data))
 
+    def test_hits_positions(self):
+        hit1 = {'time': 1, 'tot': 2, 'channel_id': 3, 'dom_id': 4}
+        hit2 = {'time': 2, 'tot': 3, 'channel_id': 4, 'dom_id': 5}
+        hit_list = [hit1, hit2]
+        hit_series = HitSeries.from_dict(hit_list)
+
+        pos1, pos2 = Position((1, 2, 3)), Position((4, 5, 6))
+        hit_series[0].pos = pos1
+        hit_series[1].pos = pos2
+
+        self.assertTrue(2, len(hit_series.pos))
+
+    def test_hits_directions(self):
+        hit1 = {'time': 1, 'tot': 2, 'channel_id': 3, 'dom_id': 4}
+        hit2 = {'time': 2, 'tot': 3, 'channel_id': 4, 'dom_id': 5}
+        hit_list = [hit1, hit2]
+        hit_series = HitSeries.from_dict(hit_list)
+
+        dir1, dir2 = Direction((1, 2, 3)), Direction((4, 5, 6))
+        hit_series[0].dir = dir1
+        hit_series[1].dir = dir2
+
+        self.assertTrue(2, len(hit_series.dir))
+
 
 
