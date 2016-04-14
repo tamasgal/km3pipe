@@ -221,12 +221,12 @@ class Geometry(Module):
             try:
                 pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
             except KeyError:
-                pmt = self.detector.get_pmt(hit.dom_id, ord(hit.channel_id))
+                pmt = self.detector.pmt_with_id(hit.pmt_id)
             hit.pos = Position(pmt.pos)
             hit.dir = Direction(pmt.dir)
             hit.t0 = pmt.t0
             hit.time += pmt.t0
-            hit.a = ord(hit.tot)
+            hit.a = hit.tot
 
 
 class AanetGeometry(Module):
