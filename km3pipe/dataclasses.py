@@ -121,13 +121,16 @@ class HitSeries(object):
     def from_dict(cls, dictionary):
         return cls(dictionary, Hit.from_dict)
 
-    def __init__(self, data, hit_constructor):
+    def __init__(self, data=None, hit_constructor=None):
         self._data = data
         self.hit_constructor = hit_constructor
         self._hits = None
         self._pos = None
         self._dir = None
         self._index = 0
+
+        if data is None:
+            self._hits = []
 
     def append(self, hit):
         if self._hits is None:
