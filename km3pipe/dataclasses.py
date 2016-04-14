@@ -193,7 +193,7 @@ class HitSeries(object):
 
 class Hit(object):
     def __init__(self, id=None, time=None, tot=None, channel_id=None,
-                 dom_id=None, data=None):
+                 dom_id=None, pmt_id=None, data=None):
         self.time = time
         self.t0 = None
         self.tot = tot
@@ -207,13 +207,13 @@ class Hit(object):
     @classmethod
     def from_dict(cls, data):
         return cls(data['id'], data['time'], data['tot'], data['channel_id'],
-                   data['dom_id'], data)
+                   data['dom_id'], data=data)
 
     @classmethod
     def from_aanet(cls, data):
         return cls(data.id, data.t, data.tot, ord(data.channel_id),
-                   data.dom_id, data)
+                   data.dom_id, data=data)
 
     @classmethod
     def from_evt(cls, data):
-        return cls(data.id, data.time, data.tot, data.pmt_id, data)
+        return cls(data.id, data.time, data.tot, pmt_id=data.pmt_id, data=data)
