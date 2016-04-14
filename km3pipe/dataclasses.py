@@ -121,13 +121,16 @@ class HitSeries(object):
     def from_dict(cls, dictionary):
         return cls(dictionary, Hit.from_dict)
 
-    def __init__(self, data, hit_constructor):
+    def __init__(self, data=None, hit_constructor=None):
         self._data = data
         self.hit_constructor = hit_constructor
         self._hits = None
         self._pos = None
         self._dir = None
         self._index = 0
+
+        if data is None:
+            self._hits = []
 
     def append(self, hit):
         if self._hits is None:
@@ -147,7 +150,6 @@ class HitSeries(object):
         return self._dir
 
     def _convert_hits(self):
-        print("Converting hits")
         self._hits = [self.hit_constructor(hit) for hit in self._data]
 
     def __iter__(self):
@@ -190,15 +192,25 @@ class HitSeries(object):
         for i in range(start, stop, step):
             yield self._hits[i]
 
+    def __str__(self):
+        n_hits = len(self)
+        plural = 's' if n_hits > 1 or n_hits == 0 else ''
+        return("HitSeries with {0} hit{1}.".format(len(self), plural))
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class Hit(object):
     def __init__(self, id=None, time=None, tot=None, channel_id=None,
                  dom_id=None, pmt_id=None, data=None):
+        self.id = id
         self.time = time
         self.t0 = None
         self.tot = tot
         self.channel_id = channel_id
         self.dom_id = dom_id
+        self.pmt_id = pmt_id
         self.data = data
         self.pos = None
         self.dir = None
@@ -217,3 +229,10 @@ class Hit(object):
     @classmethod
     def from_evt(cls, data):
         return cls(data.id, data.time, data.tot, pmt_id=data.pmt_id, data=data)
+
+    def __str__(self):
+        return("Hit(id={0}, time={1}, tot={2})"
+               .format(self.id, self.time, self.tot))
+
+    def __repr__(self):
+        return self.__str__()
