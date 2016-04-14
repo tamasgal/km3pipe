@@ -136,15 +136,21 @@ class HitSeries(object):
         if self._hits is None:
             self._convert_hits()
         self._hits.append(hit)
+        self._pos = None
+        self._dir = None
 
     @property
     def pos(self):
+        if self._hits is None:
+            self._convert_hits()
         if self._pos is None:
             self._pos = np.array([hit.pos for hit in self._hits])
         return self._pos
 
     @property
     def dir(self):
+        if self._hits is None:
+            self._convert_hits()
         if self._dir is None:
             self._dir = np.array([hit.dir for hit in self._hits])
         return self._dir
