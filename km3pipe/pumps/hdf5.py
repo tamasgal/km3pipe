@@ -331,6 +331,5 @@ class HDF5Bucket(Module):
         loc = '/' + self.prefix + '/'
         h5.create_group(loc)
         for key, data in self.store.items():
-            arr = np.array(data, dtype=[(key, float), ])
-            h5.create_dataset(loc, key, arr)
+            h5.create_dataset(loc, key, np.array(data))
         h5.close()
