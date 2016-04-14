@@ -81,7 +81,7 @@ class AanetPump(Pump):
 
             for event in event_file:
                 blob = {'Evt': event,
-                        'Hits': HitSeries.form_aanet(event.hits),
+                        'Hits': HitSeries.from_aanet(event.hits),
                         'MCHits': event.mc_hits,
                         'Tracks': event.trks,
                         'MCTracks': event.mc_trks,

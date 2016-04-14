@@ -111,7 +111,7 @@ class HitSeries(object):
 
     @classmethod
     def from_aanet(cls, dictionary):
-        return cls(dictionary, Hit.form_aanet)
+        return cls(dictionary, Hit.from_aanet)
 
     @classmethod
     def from_evt(cls, dictionary):
