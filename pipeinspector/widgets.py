@@ -74,12 +74,17 @@ class ItemWidget (urwid.WidgetWrap):
     def __init__ (self, key, data):
         self.key = key
         self.data = data
+        try:
+            size_label = str(len(data)) + " items"
+        except TypeError:
+            size_label = str(sys.getsizeof(data)) + " bytes"
+
         self.item = [
             ('fixed', 35, urwid.Padding(
                 urwid.AttrWrap(urwid.Text(key), 'body', 'focus'), left=2)),
-            urwid.AttrWrap(urwid.Text(str(type(data))), 'body', 'focus'),
-            #urwid.AttrWrap(urwid.Text(str(len(data))), 'body', 'focus'),
-            urwid.AttrWrap(urwid.Text(str(sys.getsizeof(data))), 'body', 'focus'),
+            urwid.AttrWrap(urwid.Text(data.__class__.__name__), 'body', 'focus'),
+            urwid.AttrWrap(urwid.Text(size_label), 'body', 'focus'),
+            #urwid.AttrWrap(urwid.Text(str(sys.getsizeof(data))), 'body', 'focus'),
         ]
         w = urwid.Columns(self.item)
         self.__super.__init__(w)
