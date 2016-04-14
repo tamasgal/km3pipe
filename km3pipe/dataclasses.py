@@ -200,6 +200,11 @@ class HitSeries(object):
     def __repr__(self):
         return self.__str__()
 
+    def __insp__(self):
+        if self._hits is None:
+            self._convert_hits()
+        return '\n'.join([str(hit) for hit in self._hits])
+
 
 class Hit(object):
     def __init__(self, id=None, time=None, tot=None, channel_id=None,
