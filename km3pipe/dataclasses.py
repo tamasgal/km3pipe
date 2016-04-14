@@ -122,12 +122,17 @@ class HitSeries(object):
         return cls(dictionary, Hit.from_dict)
 
     def __init__(self, data, hit_constructor):
-        self.data = data
+        self._data = data
         self.hit_constructor = hit_constructor
         self._hits = None
         self._pos = None
         self._dir = None
         self._index = 0
+
+    def append(self, hit):
+        if self._hits is None:
+            self._convert_hits()
+        self._hits.append(hit)
 
     @property
     def pos(self):
@@ -143,7 +148,7 @@ class HitSeries(object):
 
     def _convert_hits(self):
         print("Converting hits")
-        self._hits = [self.hit_constructor(hit) for hit in self.data]
+        self._hits = [self.hit_constructor(hit) for hit in self._data]
 
     def __iter__(self):
         return self
@@ -164,7 +169,9 @@ class HitSeries(object):
         return item
 
     def __len__(self):
-        return len(self.data)
+        if self._hits is None:
+            self._convert_hits()
+        return len(self._hits)
 
     def __getitem__(self, index):
         if self._hits is None:
