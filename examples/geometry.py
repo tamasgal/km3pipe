@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from km3pipe import Pipeline, Geometry, Module
 from km3pipe.pumps import EvtPump
+from km3modules import StatusBar
 import os
 import time
 
@@ -13,6 +14,7 @@ class PrintPositions(Module):
     def process(self, blob):
         print("Hit positions:")
         print(blob['Hits'].pos)
+        time.sleep(0.1)
         return blob
 
     def finish(self):
@@ -21,6 +23,7 @@ class PrintPositions(Module):
 
 pipe = Pipeline()
 pipe.attach(EvtPump, filename=os.path.join(PATH, DATA))
-pipe.attach(Geometry, apply=True, filename=os.path.join(PATH, DETX))
+pipe.attach(StatusBar)
+pipe.attach(Geometry, timeit=True, apply=True, filename=os.path.join(PATH, DETX))
 pipe.attach(PrintPositions, timeit=True)
 pipe.drain(3)
