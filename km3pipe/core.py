@@ -9,6 +9,9 @@ from __future__ import division, absolute_import, print_function
 
 import signal
 import gzip
+from timeit import default_timer as timer
+
+import numpy as np
 
 from km3pipe.hardware import Detector
 from km3pipe.dataclasses import Position, Direction
@@ -20,12 +23,19 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 class Pipeline(object):
-    """The holy pipeline which holds everything together"""
+    """The holy pipeline which holds everything together.
 
-    def __init__(self, blob=None):
+    If initialised with timeit=True, all modules will be monitored, otherwise
+    only the overall statistics and modules with `timeit=True` will be
+    shown.
+    """
+
+    def __init__(self, blob=None, timeit=False):
         self.modules = []
         self.geometry = None
         self.blob = blob or Blob()
+        self.timeit = timeit
+        self._timeit = {'init': timer(), 'cycles': []}
         self._cycle_count = 0
         self._stop = False
         self._finished = False
@@ -67,16 +77,26 @@ class Pipeline(object):
 
         try:
             while not self._stop:
+                cycle_start = timer()
                 self._cycle_count += 1
+
                 log.debug("Pumping blob #{0}".format(self._cycle_count))
-                self.blob = self.modules[0].process(self.blob)
+                pump = self.modules[0]
+                start_time = timer()
+                self.blob = pump.process(self.blob)
+                pump._timeit['process'].append(timer() - start_time)
+
                 for module in self.modules[1:]:
                     if self.blob is None:
                         log.debug("Skipping {0}, due to empty blob."
                                   .format(module.name))
                         continue
                     log.debug("Processing {0} ".format(module.name))
+                    start_time = timer()
                     self.blob = module.process(self.blob)
+                    if self.timeit or module.timeit:
+                        module._timeit['process'].append(timer() - start_time)
+                self._timeit['cycles'].append(timer() - cycle_start)
                 if cycles and self._cycle_count >= cycles:
                     raise StopIteration
         except StopIteration:
@@ -96,7 +116,11 @@ class Pipeline(object):
         """Call finish() on each attached module"""
         for module in self.modules:
             log.info("Finishing {0}".format(module.name))
+            start_time = timer()
             module.pre_finish()
+            module._timeit['finish'] = timer() - start_time
+        self._timeit['finish'] = timer()
+        self._print_timeit_statistics()
         self._finished = True
 
     def _handle_ctrl_c(self, *args):
@@ -110,6 +134,36 @@ class Pipeline(object):
                   "Press CTRL+C again if you're in hurry!\n" + hline)
             self._stop = True
 
+    def _print_timeit_statistics(self):
+        cycles = self._timeit['cycles']
+        n_cycles = len(cycles)
+        if n_cycles < 1:
+            return
+        overall = self._timeit['finish'] - self._timeit['init']
+        if overall > 180:
+            overall /= 60
+            unit = 'min'
+        else:
+            unit = 's'
+        stats_string = "  mean: {0:.3f}s, median: {1:.3f}, " \
+                       "min: {2:.3f}s, max: {3:.3f}s, std: {4:.3f}s"
+        print(42*'-')
+        print("{0} cycles drained in {1:.3f}{2}."
+              .format(n_cycles, overall, unit))
+        print(stats_string.format(*self._calc_stats(cycles)))
+
+        for module in self.modules:
+            if not module.timeit and not self.timeit:
+                continue
+            finish_time = module._timeit['finish']
+            process_times = module._timeit['process']
+            print(module.name + " (finish: {0:.3f}s)".format(finish_time))
+            if len(process_times) > 0:
+                print(stats_string .format(*self._calc_stats(process_times)))
+
+    def _calc_stats(self, values):
+        return [f(values) for f in (np.mean, np.median, min, max, np.std)]
+
 
 class Module(object):
     """The module which can be attached to the pipeline"""
@@ -119,6 +173,8 @@ class Module(object):
         self._name = name
         self.parameters = parameters
         self.detector = None
+        self.timeit = self.get('timeit') or False
+        self._timeit = {'process': [], 'finish': 0}
 
     @property
     def name(self):
