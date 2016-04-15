@@ -10,6 +10,7 @@ from __future__ import division, absolute_import, print_function
 import signal
 import gzip
 import time
+import resource
 from timeit import default_timer as timer
 
 import numpy as np
@@ -175,10 +176,11 @@ class Pipeline(object):
         cycles_cpu = self._timeit['cycles_cpu']
         overall = self._timeit['finish'] - self._timeit['init']
         overall_cpu = self._timeit['finish_cpu'] - self._timeit['init_cpu']
+        mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024 / 1024
 
-        print(80*'-')
-        print("{0} cycles drained in {1} (CPU {2})."
-              .format(n_cycles, timef(overall), timef(overall_cpu)))
+        print(80*'=')
+        print("{0} cycles drained in {1} (CPU {2}). Memory peak: {3:.2f} MB"
+              .format(n_cycles, timef(overall), timef(overall_cpu), mem))
         print(statsf('wall', calc_stats(cycles)))
         print(statsf('CPU ', calc_stats(cycles_cpu)))
 
