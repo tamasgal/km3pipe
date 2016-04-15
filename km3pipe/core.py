@@ -148,31 +148,39 @@ class Pipeline(object):
             self._stop = True
 
     def _print_timeit_statistics(self):
+
+        def calc_stats(values):
+            """Return a tuple of statistical values"""
+            return [f(values) for f in (np.mean, np.median, min, max, np.std)]
+
+        def timef(seconds):
+            """Return a string of formatted time value for given seconds"""
+            time = seconds
+            if time > 180:
+                time /= 60
+                unit = 'min'
+            else:
+                unit = 's'
+            return "{0:.2f}{1}".format(time, unit)
+
+        def statsf(prefix, values):
+            stats = "  mean: {0}  medi: {1}  min: {2}  max: {3}  std: {4}"
+            values = [timef(v) for v in values]
+            return "  " + prefix + stats.format(*values)
+
         cycles = self._timeit['cycles']
-        cycles_cpu = self._timeit['cycles_cpu']
         n_cycles = len(cycles)
         if n_cycles < 1:
             return
+        cycles_cpu = self._timeit['cycles_cpu']
         overall = self._timeit['finish'] - self._timeit['init']
-        if overall > 180:
-            overall /= 60
-            unit = 'min'
-        else:
-            unit = 's'
         overall_cpu = self._timeit['finish_cpu'] - self._timeit['init_cpu']
-        if overall_cpu > 180:
-            overall_cpu /= 60
-            unit_cpu = 'min'
-        else:
-            unit_cpu = 's'
 
-        stats_string = "  {0} mean: {1:.3f}s, median: {2:.3f}, " \
-                       "min: {3:.3f}s, max: {4:.3f}s, std: {5:.3f}s"
-        print(42*'-')
-        print("{0} cycles drained in {1:.3f}{2} (CPU {3:.3f}{4})."
-              .format(n_cycles, overall, unit, overall_cpu, unit_cpu))
-        print(stats_string.format('wall', *self._calc_stats(cycles)))
-        print(stats_string.format('CPU ', *self._calc_stats(cycles_cpu)))
+        print(80*'-')
+        print("{0} cycles drained in {1} (CPU {2})."
+              .format(n_cycles, timef(overall), timef(overall_cpu)))
+        print(statsf('wall', calc_stats(cycles)))
+        print(statsf('CPU ', calc_stats(cycles_cpu)))
 
         for module in self.modules:
             if not module.timeit and not self.timeit:
@@ -181,17 +189,15 @@ class Pipeline(object):
             finish_time_cpu = module._timeit['finish_cpu']
             process_times = module._timeit['process']
             process_times_cpu = module._timeit['process_cpu']
-            print(module.name + " - finish: {0:.3f}s (CPU {1:.3f}s)"
-                  .format(finish_time, finish_time_cpu))
+            print(module.name
+                  + " - process: {0:.3f}s (CPU {1:.3f}s)" \
+                    " - finish: {2:.3f}s (CPU {3:.3f}s)"
+                    .format(sum(process_times), sum(process_times_cpu),
+                          finish_time, finish_time_cpu))
             if len(process_times) > 0:
-                print(stats_string.format('wall',
-                                          *self._calc_stats(process_times)))
+                print(statsf('wall', calc_stats(process_times)))
             if len(process_times_cpu) > 0:
-                print(stats_string.format('CPU ',
-                                          *self._calc_stats(process_times_cpu)))
-
-    def _calc_stats(self, values):
-        return [f(values) for f in (np.mean, np.median, min, max, np.std)]
+                print(statsf('CPU ', calc_stats(process_times_cpu)))
 
 
 class Module(object):
