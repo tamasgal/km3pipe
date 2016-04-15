@@ -19,7 +19,7 @@ class PrintPositions(Module):
         time.sleep(2)
 
 
-pipe = Pipeline(timeit=True)
+pipe = Pipeline()
 pipe.attach(EvtPump, filename=os.path.join(PATH, DATA))
 pipe.attach(Geometry, apply=True, filename=os.path.join(PATH, DETX))
 pipe.attach(PrintPositions, timeit=True)
