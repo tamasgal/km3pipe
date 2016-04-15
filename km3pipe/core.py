@@ -9,6 +9,7 @@ from __future__ import division, absolute_import, print_function
 
 import signal
 import gzip
+import time
 from timeit import default_timer as timer
 
 import numpy as np
@@ -35,7 +36,8 @@ class Pipeline(object):
         self.geometry = None
         self.blob = blob or Blob()
         self.timeit = timeit
-        self._timeit = {'init': timer(), 'cycles': []}
+        self._timeit = {'init': timer(), 'init_cpu': time.clock(),
+                        'cycles': [], 'cycles_cpu': []}
         self._cycle_count = 0
         self._stop = False
         self._finished = False
@@ -78,13 +80,16 @@ class Pipeline(object):
         try:
             while not self._stop:
                 cycle_start = timer()
+                cycle_start_cpu = time.clock()
                 self._cycle_count += 1
 
                 log.debug("Pumping blob #{0}".format(self._cycle_count))
                 pump = self.modules[0]
                 start_time = timer()
+                start_time_cpu = time.clock()
                 self.blob = pump.process(self.blob)
                 pump._timeit['process'].append(timer() - start_time)
+                pump._timeit['process_cpu'].append(time.clock() - start_time_cpu)
 
                 for module in self.modules[1:]:
                     if self.blob is None:
@@ -93,10 +98,15 @@ class Pipeline(object):
                         continue
                     log.debug("Processing {0} ".format(module.name))
                     start_time = timer()
+                    start_time_cpu = time.clock()
                     self.blob = module.process(self.blob)
                     if self.timeit or module.timeit:
-                        module._timeit['process'].append(timer() - start_time)
+                        module._timeit['process'] \
+                            .append(timer() - start_time)
+                        module._timeit['process_cpu'] \
+                            .append(time.clock() - start_time_cpu)
                 self._timeit['cycles'].append(timer() - cycle_start)
+                self._timeit['cycles_cpu'].append(time.clock() - cycle_start_cpu)
                 if cycles and self._cycle_count >= cycles:
                     raise StopIteration
         except StopIteration:
@@ -117,9 +127,12 @@ class Pipeline(object):
         for module in self.modules:
             log.info("Finishing {0}".format(module.name))
             start_time = timer()
+            start_time_cpu = time.clock()
             module.pre_finish()
             module._timeit['finish'] = timer() - start_time
+            module._timeit['finish_cpu'] = time.clock() - start_time_cpu
         self._timeit['finish'] = timer()
+        self._timeit['finish_cpu'] = time.clock()
         self._print_timeit_statistics()
         self._finished = True
 
@@ -136,6 +149,7 @@ class Pipeline(object):
 
     def _print_timeit_statistics(self):
         cycles = self._timeit['cycles']
+        cycles_cpu = self._timeit['cycles_cpu']
         n_cycles = len(cycles)
         if n_cycles < 1:
             return
@@ -145,21 +159,36 @@ class Pipeline(object):
             unit = 'min'
         else:
             unit = 's'
-        stats_string = "  mean: {0:.3f}s, median: {1:.3f}, " \
-                       "min: {2:.3f}s, max: {3:.3f}s, std: {4:.3f}s"
+        overall_cpu = self._timeit['finish_cpu'] - self._timeit['init_cpu']
+        if overall_cpu > 180:
+            overall_cpu /= 60
+            unit_cpu = 'min'
+        else:
+            unit_cpu = 's'
+
+        stats_string = "  {0} mean: {1:.3f}s, median: {2:.3f}, " \
+                       "min: {3:.3f}s, max: {4:.3f}s, std: {5:.3f}s"
         print(42*'-')
-        print("{0} cycles drained in {1:.3f}{2}."
-              .format(n_cycles, overall, unit))
-        print(stats_string.format(*self._calc_stats(cycles)))
+        print("{0} cycles drained in {1:.3f}{2} (CPU {3:.3f}{4})."
+              .format(n_cycles, overall, unit, overall_cpu, unit_cpu))
+        print(stats_string.format('wall', *self._calc_stats(cycles)))
+        print(stats_string.format('CPU ', *self._calc_stats(cycles_cpu)))
 
         for module in self.modules:
             if not module.timeit and not self.timeit:
                 continue
             finish_time = module._timeit['finish']
+            finish_time_cpu = module._timeit['finish_cpu']
             process_times = module._timeit['process']
-            print(module.name + " (finish: {0:.3f}s)".format(finish_time))
+            process_times_cpu = module._timeit['process_cpu']
+            print(module.name + " - finish: {0:.3f}s (CPU {1:.3f}s)"
+                  .format(finish_time, finish_time_cpu))
             if len(process_times) > 0:
-                print(stats_string .format(*self._calc_stats(process_times)))
+                print(stats_string.format('wall',
+                                          *self._calc_stats(process_times)))
+            if len(process_times_cpu) > 0:
+                print(stats_string.format('CPU ',
+                                          *self._calc_stats(process_times_cpu)))
 
     def _calc_stats(self, values):
         return [f(values) for f in (np.mean, np.median, min, max, np.std)]
@@ -174,7 +203,8 @@ class Module(object):
         self.parameters = parameters
         self.detector = None
         self.timeit = self.get('timeit') or False
-        self._timeit = {'process': [], 'finish': 0}
+        self._timeit = {'process': [], 'finish': 0,
+                        'process_cpu': [], 'finish_cpu': 0}
 
     @property
     def name(self):
