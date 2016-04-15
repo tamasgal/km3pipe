@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 from km3pipe import Pipeline, Geometry, Module
 from km3pipe.pumps import EvtPump
+import os
+import time
 
-detx = 'km3net_jul13_90m_r1494_corrected.detx'
+PATH = '/Users/tamasgal/Data/KM3NeT'
+DETX = 'Detector/km3net_jul13_90m_r1494_corrected.detx'
+DATA = 'km3net_jul13_90m_muatm10T23.km3_v5r1.JTE.evt'
 
 
 class PrintPositions(Module):
@@ -11,9 +15,12 @@ class PrintPositions(Module):
         print(blob['Hits'].pos)
         return blob
 
+    def finish(self):
+        time.sleep(2)
 
-pipe = Pipeline()
-pipe.attach(EvtPump, filename='km3net_jul13_90m_muatm10T23.km3_v5r1.JTE.evt')
-pipe.attach(Geometry, apply=True, filename=detx)
-pipe.attach(PrintPositions)
+
+pipe = Pipeline(timeit=True)
+pipe.attach(EvtPump, filename=os.path.join(PATH, DATA))
+pipe.attach(Geometry, apply=True, filename=os.path.join(PATH, DETX))
+pipe.attach(PrintPositions, timeit=True)
 pipe.drain(3)
