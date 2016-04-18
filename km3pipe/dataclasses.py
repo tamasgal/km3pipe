@@ -11,7 +11,7 @@ import numpy as np
 
 from km3pipe.tools import angle_between
 
-__all__ = ('Point', 'Position', 'Direction', 'HitSeries', 'Hit')
+__all__ = ('Point', 'Position', 'Direction', 'HitSeries', 'HitSeriesA', 'Hit')
 
 
 class Point(np.ndarray):
@@ -109,12 +109,6 @@ class HitSeriesA(object):
         self.hit_dtype = np.dtype[
             ('id', float),
             ('dom_id', float),
-            ('pos_x', float),
-            ('pos_y', float),
-            ('pos_z', float),
-            ('dir_x', float),
-            ('dir_y', float),
-            ('dir_z', float),
             ('tot', int),
             ('triggered', bool),
         ]
@@ -123,6 +117,10 @@ class HitSeriesA(object):
                 raise ValueError('Initialize either with data or shape')
             np.rec.array(np.zeros(n_hits), dtype=self.hit_dtype)
         self._data = np.rec.array(data, dtype=self.hit_dtype)
+
+    @classmethod
+    def from_aanet(cls, data):
+        return cls(data=[(h.id, h.dom_id, h.tot, h.trig) for h in data])
 
 
 class HitSeries(object):
