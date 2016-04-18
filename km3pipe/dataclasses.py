@@ -293,3 +293,29 @@ class Hit(object):
 
     def __repr__(self):
         return self.__str__()
+
+
+class HitArray():
+    # prototype blabla
+    def __init__(self, data=None, n_hits=None):
+        self.hit_dtype = np.dtype[
+            ('pos_x', float),
+            ('pos_y', float),
+            ('pos_z', float),
+            ('dir_x', float),
+            ('dir_y', float),
+            ('dir_z', float),
+            ('tot', float),
+            ('index', float),
+        ]
+        if not data:
+            if not n_hits:
+                raise ValueError('Initialize either with data or expected shape')
+            np.rec(np.zeros(n_hits), dtype=self.hit_dtype)
+        self._data = np.rec(data, dtype=self.hit_dtype)
+
+    @property
+    def a(self):
+        # also possible:
+        #   return self.data['tot']
+        return self._data.tot
