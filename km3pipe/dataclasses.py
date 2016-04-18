@@ -116,11 +116,11 @@ class HitSeriesA(object):
             ('pmt_id', int),
             ('t0', int),
             ('pos_x', int),
-            ('pos_x', int),
-            ('pos_x', int),
+            ('pos_y', int),
+            ('pos_z', int),
             ('dir_x', int),
-            ('dir_x', int),
-            ('dir_x', int),
+            ('dir_y', int),
+            ('dir_z', int),
             ])
         self._data = np.rec.array(data, dtype=self.hit_dtype)
 
