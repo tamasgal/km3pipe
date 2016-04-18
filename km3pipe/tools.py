@@ -7,12 +7,13 @@ Some unsorted, frequently used logic.
 """
 from __future__ import division, absolute_import, print_function
 
+import resource
+import sys
 import subprocess
 import collections
 from collections import namedtuple
 from itertools import chain
 from datetime import datetime
-
 
 import numpy as np
 
@@ -285,3 +286,11 @@ def ifiles(irods_path):
                                          .format(irods_path), shell=True)
     filenames = raw_output.strip().split("\n")
     return filenames
+
+
+def peak_memory_usage():
+    mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    factor_mb = 1 / 1024
+    if sys.platform == 'darwin':
+        factor_mb = 1 / (1024 * 1024)
+    return mem * factor_mb

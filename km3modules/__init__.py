@@ -7,9 +7,8 @@ A collection of commonly used modules.
 """
 from __future__ import division, absolute_import, print_function
 
-import resource
-
 from km3pipe import Module
+from km3pipe.tools import peak_memory_usage
 
 
 class HitCounter(Module):
@@ -52,6 +51,5 @@ class MemoryObserver(Module):
         super(self.__class__, self).__init__(**context)
 
     def process(self, blob):
-        memory = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        memory = memory / 1024 / 1024  # convert to MB
+        memory = peak_memory_usage()
         print("Memory peak usage: {0:.3f} MB".format(memory))
