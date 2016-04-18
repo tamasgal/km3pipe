@@ -237,10 +237,10 @@ class Hit(object):
     def from_aanet(cls, data):
         try:
             return cls(data.id, data.t, data.tot, ord(data.channel_id),
-                       data.dom_id, triggered=data.trig, data=data)
+                       data.dom_id, triggered=bool(data.trig), data=data)
         except TypeError:
             return cls(data.id, data.t, data.tot, data.channel_id,
-                       data.dom_id, triggered=data.trig, data=data)
+                       data.dom_id, triggered=bool(data.trig), data=data)
 
     @classmethod
     def from_evt(cls, data):
