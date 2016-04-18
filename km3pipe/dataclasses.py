@@ -106,20 +106,20 @@ class Direction(Point):
 
 class HitSeries(object):
     @classmethod
-    def from_hdf5(cls, dictionary):
-        return cls(dictionary, Hit.from_dict)
+    def from_hdf5(cls, data):
+        return cls(data, Hit.from_dict)
 
     @classmethod
-    def from_aanet(cls, dictionary):
-        return cls(dictionary, Hit.from_aanet)
+    def from_aanet(cls, data):
+        return cls(data, Hit.from_aanet)
 
     @classmethod
-    def from_evt(cls, dictionary):
-        return cls(dictionary, Hit.from_evt)
+    def from_evt(cls, data):
+        return cls(data, Hit.from_evt)
 
     @classmethod
-    def from_dict(cls, dictionary):
-        return cls(dictionary, Hit.from_dict)
+    def from_dict(cls, data):
+        return cls(data, Hit.from_dict)
 
     def __init__(self, data=None, hit_constructor=None):
         self._data = data
