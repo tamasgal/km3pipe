@@ -105,22 +105,31 @@ class Direction(Point):
 
 
 class HitSeriesA(object):
-    def __init__(self, data=None, n_hits=None):
+    def __init__(self, data=None):
         self.hit_dtype = np.dtype([
-            ('id', float),
-            ('dom_id', float),
+            ('id', int),
+            ('dom_id', int),
+            ('time', int),
             ('tot', int),
+            ('channel_id', int),
             ('triggered', bool),
+            ('pmt_id', int),
+            ('t0', int),
+            ('pos_x', int),
+            ('pos_x', int),
+            ('pos_x', int),
+            ('dir_x', int),
+            ('dir_x', int),
+            ('dir_x', int),
             ])
-        if not data:
-            if not n_hits:
-                raise ValueError('Initialize either with data or shape')
-            np.rec.array(np.zeros(n_hits), dtype=self.hit_dtype)
         self._data = np.rec.array(data, dtype=self.hit_dtype)
 
     @classmethod
     def from_aanet(cls, data):
-        return cls(data=[(h.id, h.dom_id, h.tot, h.trig) for h in data])
+        return cls(data=[(h.id, h.dom_id, h.t, h.tot, h.channel_id,
+                          h.trig, h.pmt_id, np.nan,
+                          np.nan, np.nan, np.nan,
+                          np.nan, np.nan, np.nan) for h in data])
 
 
 class HitSeries(object):
