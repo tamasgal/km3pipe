@@ -148,11 +148,11 @@ class HDF5Sink(Module):
             target.setdefault('event_id', []).append(self.index)
             target.setdefault('id', []).append(hit.id)
             target.setdefault('pmt_id', []).append(hit.pmt_id)
-            target.setdefault('time', []).append(hit.t)
+            target.setdefault('time', []).append(hit.time)
             target.setdefault('tot', []).append(hit.tot)
-            target.setdefault('triggered', []).append(bool(hit.trig))
+            target.setdefault('triggered', []).append(hit.trig)
             target.setdefault('dom_id', []).append(hit.dom_id)
-            target.setdefault('channel_id', []).append(ord(hit.channel_id))
+            target.setdefault('channel_id', []).append(hit.channel_id)
 
     def _add_mc_tracks(self, mc_tracks):
         for mc_track in mc_tracks:
@@ -284,11 +284,11 @@ class HDF5Sink2(Module):
         for hit in hits:
             hits_dict.setdefault('id', []).append(hit.id)
             hits_dict.setdefault('pmt_id', []).append(hit.pmt_id)
-            hits_dict.setdefault('time', []).append(hit.t)
+            hits_dict.setdefault('time', []).append(hit.time)
             hits_dict.setdefault('tot', []).append(hit.tot)
-            hits_dict.setdefault('triggered', []).append(bool(hit.trig))
+            hits_dict.setdefault('triggered', []).append(hit.trig)
             hits_dict.setdefault('dom_id', []).append(hit.dom_id)
-            hits_dict.setdefault('channel_id', []).append(ord(hit.channel_id))
+            hits_dict.setdefault('channel_id', []).append(hit.channel_id)
         self._dump_dict(hits_dict, target)
 
     def _add_tracks(self, tracks, target):
