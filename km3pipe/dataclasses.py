@@ -104,6 +104,27 @@ class Direction(Point):
         return "({0:.4}, {1:.4}, {2:.4})".format(self.x, self.y, self.z)
 
 
+class HitSeriesA(object):
+    def __init__(self, data=None, n_hits=None):
+        self.hit_dtype = np.dtype[
+            ('id', float),
+            ('dom_id', float),
+            ('pos_x', float),
+            ('pos_y', float),
+            ('pos_z', float),
+            ('dir_x', float),
+            ('dir_y', float),
+            ('dir_z', float),
+            ('tot', int),
+            ('triggered', bool),
+        ]
+        if not data:
+            if not n_hits:
+                raise ValueError('Initialize either with data or shape')
+            np.rec.array(np.zeros(n_hits), dtype=self.hit_dtype)
+        self._data = np.rec.array(data, dtype=self.hit_dtype)
+
+
 class HitSeries(object):
     @classmethod
     def from_hdf5(cls, data):
