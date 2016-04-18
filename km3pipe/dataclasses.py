@@ -242,7 +242,7 @@ class Hit(object):
         new_hit = Hit(hit.id, hit.time, hit.tot, hit.channel_id, hit.dom_id,
                       hit.pmt_id, hit.triggered, data=None)
         new_hit.pos = Position(hit.pos)
-        new_hit.dir = Direction(hit.pos)
+        new_hit.dir = Direction(hit.dir)
         new_hit.a = hit.a
         return hit
 
