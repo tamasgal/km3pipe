@@ -289,6 +289,7 @@ def ifiles(irods_path):
 
 
 def peak_memory_usage():
+    """Return peak memory usage in MB"""
     mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     factor_mb = 1 / 1024
     if sys.platform == 'darwin':

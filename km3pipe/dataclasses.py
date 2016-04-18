@@ -214,7 +214,7 @@ class HitSeries(object):
 
 class Hit(object):
     def __init__(self, id=None, time=None, tot=None, channel_id=None,
-                 dom_id=None, pmt_id=None, data=None):
+                 dom_id=None, pmt_id=None, triggered=None, data=None):
         self.id = id
         self.time = time
         self.t0 = None
@@ -222,6 +222,7 @@ class Hit(object):
         self.channel_id = channel_id
         self.dom_id = dom_id
         self.pmt_id = pmt_id
+        self.triggered = triggered
         self.data = data
         self.pos = None
         self.dir = None
@@ -234,8 +235,12 @@ class Hit(object):
 
     @classmethod
     def from_aanet(cls, data):
-        return cls(data.id, data.t, data.tot, ord(data.channel_id),
-                   data.dom_id, data=data)
+        try:
+            return cls(data.id, data.t, data.tot, ord(data.channel_id),
+                       data.dom_id, triggered=data.trig, data=data)
+        except TypeError:
+            return cls(data.id, data.t, data.tot, data.channel_id,
+                       data.dom_id, triggered=data.trig, data=data)
 
     @classmethod
     def from_evt(cls, data):
