@@ -10,13 +10,13 @@ from __future__ import division, absolute_import, print_function
 import signal
 import gzip
 import time
-import resource
 from timeit import default_timer as timer
 
 import numpy as np
 
 from km3pipe.hardware import Detector
 from km3pipe.dataclasses import Position, Direction
+from km3pipe.tools import peak_memory_usage
 from km3pipe.logger import logging
 
 __author__ = 'tamasgal'
@@ -86,11 +86,11 @@ class Pipeline(object):
 
                 log.debug("Pumping blob #{0}".format(self._cycle_count))
                 pump = self.modules[0]
-                start_time = timer()
-                start_time_cpu = time.clock()
+                start = timer()
+                start_cpu = time.clock()
                 self.blob = pump.process(self.blob)
-                pump._timeit['process'].append(timer() - start_time)
-                pump._timeit['process_cpu'].append(time.clock() - start_time_cpu)
+                pump._timeit['process'].append(timer() - start)
+                pump._timeit['process_cpu'].append(time.clock() - start_cpu)
 
                 for module in self.modules[1:]:
                     if self.blob is None:
@@ -98,16 +98,17 @@ class Pipeline(object):
                                   .format(module.name))
                         continue
                     log.debug("Processing {0} ".format(module.name))
-                    start_time = timer()
-                    start_time_cpu = time.clock()
+                    start = timer()
+                    start_cpu = time.clock()
                     self.blob = module.process(self.blob)
                     if self.timeit or module.timeit:
                         module._timeit['process'] \
-                            .append(timer() - start_time)
+                            .append(timer() - start)
                         module._timeit['process_cpu'] \
-                            .append(time.clock() - start_time_cpu)
+                            .append(time.clock() - start_cpu)
                 self._timeit['cycles'].append(timer() - cycle_start)
-                self._timeit['cycles_cpu'].append(time.clock() - cycle_start_cpu)
+                self._timeit['cycles_cpu'].append(time.clock() -
+                                                  cycle_start_cpu)
                 if cycles and self._cycle_count >= cycles:
                     raise StopIteration
         except StopIteration:
@@ -176,7 +177,7 @@ class Pipeline(object):
         cycles_cpu = self._timeit['cycles_cpu']
         overall = self._timeit['finish'] - self._timeit['init']
         overall_cpu = self._timeit['finish_cpu'] - self._timeit['init_cpu']
-        mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024 / 1024
+        mem = peak_memory_usage()
 
         print(80*'=')
         print("{0} cycles drained in {1} (CPU {2}). Memory peak: {3:.2f} MB"
@@ -191,10 +192,10 @@ class Pipeline(object):
             finish_time_cpu = module._timeit['finish_cpu']
             process_times = module._timeit['process']
             process_times_cpu = module._timeit['process_cpu']
-            print(module.name
-                  + " - process: {0:.3f}s (CPU {1:.3f}s)" \
-                    " - finish: {2:.3f}s (CPU {3:.3f}s)"
-                    .format(sum(process_times), sum(process_times_cpu),
+            print(module.name +
+                  " - process: {0:.3f}s (CPU {1:.3f}s)"
+                  " - finish: {2:.3f}s (CPU {3:.3f}s)"
+                  .format(sum(process_times), sum(process_times_cpu),
                           finish_time, finish_time_cpu))
             if len(process_times) > 0:
                 print(statsf('wall', calc_stats(process_times)))
