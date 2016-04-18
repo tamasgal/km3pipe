@@ -155,8 +155,17 @@ class HitSeries(object):
             self._dir = np.array([hit.dir for hit in self._hits])
         return self._dir
 
+    @property
+    def triggered(self):
+        """Return a copy of triggered hits."""
+        if self._hits is None:
+            self._convert_hits()
+        triggered_hits = [hit for hit in self._hits if hit.triggered]
+        return HitSeries(triggered_hits, Hit.from_hit)
+
     def _convert_hits(self):
         self._hits = [self.hit_constructor(hit) for hit in self._data]
+        self._data = None  # get rid of reference to allow GC
 
     def __iter__(self):
         return self
@@ -229,6 +238,15 @@ class Hit(object):
         self.a = None  # charge <- historical
 
     @classmethod
+    def from_hit(cls, hit):
+        new_hit = Hit(hit.id, hit.time, hit.tot, hit.channel_id, hit.dom_id,
+                      hit.pmt_id, hit.triggered, data=None)
+        new_hit.pos = Position(hit.pos)
+        new_hit.dir = Direction(hit.pos)
+        new_hit.a = hit.a
+        return hit
+
+    @classmethod
     def from_dict(cls, data):
         return cls(data['id'], data['time'], data['tot'], data['channel_id'],
                    data['dom_id'], data=data)
@@ -247,8 +265,8 @@ class Hit(object):
         return cls(data.id, data.time, data.tot, pmt_id=data.pmt_id, data=data)
 
     def __str__(self):
-        return("Hit(id={0}, time={1}, tot={2})"
-               .format(self.id, self.time, self.tot))
+        return("Hit(id={0}, time={1}, tot={2}, triggered={3})"
+               .format(self.id, self.time, self.tot, self.triggered))
 
     def __repr__(self):
         return self.__str__()

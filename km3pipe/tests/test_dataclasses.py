@@ -8,7 +8,6 @@
 from __future__ import division, absolute_import, print_function
 
 import numpy as np
-import pandas as pd
 
 from km3pipe.testing import TestCase
 from km3pipe.dataclasses import Position, Direction, HitSeries
@@ -102,12 +101,13 @@ class TestHitSeries(TestCase):
         hit3 = {'id': 3, 'time': 3, 'tot': 4, 'channel_id': 5, 'dom_id': 6}
         hit_list = [hit1, hit2, hit3]
         hit_series = HitSeries.from_hdf5(hit_list)
+        self.assertEqual(id(hit_list), id(hit_series._data))
         hit = hit_series[0]
         self.assertEqual(1, hit.time)
         self.assertEqual(2, hit.tot)
         self.assertEqual(3, hit.channel_id)
         self.assertEqual(4, hit.dom_id)
-        self.assertEqual(id(hit_list), id(hit_series._data))
+        self.assertIsNone(hit_series._data)
 
     def test_hits_positions(self):
         hit1 = {'id': 1, 'time': 1, 'tot': 2, 'channel_id': 3, 'dom_id': 4}
@@ -132,6 +132,3 @@ class TestHitSeries(TestCase):
         hit_series[1].dir = dir2
 
         self.assertTrue(2, len(hit_series.dir))
-
-
-
