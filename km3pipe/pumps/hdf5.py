@@ -150,7 +150,7 @@ class HDF5Sink(Module):
             target.setdefault('pmt_id', []).append(hit.pmt_id)
             target.setdefault('time', []).append(hit.time)
             target.setdefault('tot', []).append(hit.tot)
-            target.setdefault('triggered', []).append(hit.trig)
+            target.setdefault('triggered', []).append(hit.triggered)
             target.setdefault('dom_id', []).append(hit.dom_id)
             target.setdefault('channel_id', []).append(hit.channel_id)
 
@@ -286,7 +286,7 @@ class HDF5Sink2(Module):
             hits_dict.setdefault('pmt_id', []).append(hit.pmt_id)
             hits_dict.setdefault('time', []).append(hit.time)
             hits_dict.setdefault('tot', []).append(hit.tot)
-            hits_dict.setdefault('triggered', []).append(hit.trig)
+            hits_dict.setdefault('triggered', []).append(hit.triggered)
             hits_dict.setdefault('dom_id', []).append(hit.dom_id)
             hits_dict.setdefault('channel_id', []).append(hit.channel_id)
         self._dump_dict(hits_dict, target)
