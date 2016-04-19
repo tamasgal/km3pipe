@@ -156,6 +156,11 @@ class CHitSeries(object):
         self._pmt_id = None
         self._channel_id = None
 
+    @classmethod
+    def from_aanet(cls, hits):
+        return cls([CHit(h.id, h.dom_id, h.t, h.tot, ord(h.channel_id),
+                    h.trig, h.pmt_id) for h in hits])
+
     def __iter__(self):
         return self
 
