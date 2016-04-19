@@ -138,23 +138,102 @@ class CHit(ctypes.Structure):
     _fields_ = [
             ('id', ctypes.c_float),
             ('dom_id', ctypes.c_float),
-            ('time', ctypes.c_float),
+            ('t', ctypes.c_float),
             ('tot', ctypes.c_float),
             ('channel_id', ctypes.c_float),
-            ('triggered', ctypes.c_bool),
+            ('trig', ctypes.c_bool),
             ('pmt_id', ctypes.c_float),
             ]
 
 
 class CHitSeries(object):
-    @classmethod
-    def from_aanet(cls, hits):
-        data = [CHit(h.id, h.dom_id, h.t, h.tot, ord(h.channel_id),
-                h.trig, h.pmt_id) for h in hits]
-        return cls(data)
+    def __init__(self, hits):
+        self._hits = hits
+        self._time = None
+        self._triggered = None
+        self._tot = None
+        self._dom_id = None
+        self._pmt_id = None
+        self._channel_id = None
 
-    def __init__(self, data):
-        self._data = data
+    def __iter__(self):
+        return self
+
+    @property
+    def time(self):
+        if self._time is None:
+            self._time = np.array([h.t for h in self._hits])
+        return self._time
+
+    @property
+    def triggered(self):
+        if self._triggered is None:
+            self._triggered = np.array([h.trig for h in self._hits])
+        return self._triggered
+
+    @property
+    def tot(self):
+        if self._tot is None:
+            self._tot = np.array([h.tot for h in self._hits])
+        return self._tot
+
+    @property
+    def dom_id(self):
+        if self._dom_id is None:
+            self._dom_id = np.array([h.dom_id for h in self._hits])
+        return self._dom_id
+
+    @property
+    def pmt_id(self):
+        if self._pmt_id is None:
+            self._pmt_id = np.array([h.pmt_id for h in self._hits])
+        return self._pmt_id
+
+    @property
+    def channel_id(self):
+        if self._channel_id is None:
+            self._channel_id = np.array([h.channel_id for h in self._hits])
+        return self._channel_id
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        if self._index >= len(self):
+            self._index = 0
+            raise StopIteration
+        item = self._hits[self._index]
+        self._index += 1
+        return item
+
+    def __len__(self):
+        return len(self._hits)
+
+    def __getitem__(self, index):
+        if isinstance(index, int):
+            return self._hits[index]
+        elif isinstance(index, slice):
+            return self._slice_generator(index)
+        else:
+            raise TypeError("index must be int or slice")
+
+    def _slice_generator(self, index):
+        """A simple slice generator for iterations"""
+        start, stop, step = index.indices(len(self))
+        for i in range(start, stop, step):
+            yield self._hits[i]
+
+    def __str__(self):
+        n_hits = len(self)
+        plural = 's' if n_hits > 1 or n_hits == 0 else ''
+        return("HitSeries with {0} hit{1}.".format(len(self), plural))
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __insp__(self):
+        return '\n'.join([str(hit) for hit in self._hits])
 
 
 class HitSeries(object):
