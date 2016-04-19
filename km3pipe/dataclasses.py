@@ -7,6 +7,8 @@
 """
 from __future__ import division, absolute_import, print_function
 
+import ctypes
+
 import numpy as np
 
 from km3pipe.tools import angle_between
@@ -114,22 +116,45 @@ class HitSeriesA(object):
             ('channel_id', int),
             ('triggered', bool),
             ('pmt_id', int),
-            ('t0', int),
-            ('pos_x', int),
-            ('pos_y', int),
-            ('pos_z', int),
-            ('dir_x', int),
-            ('dir_y', int),
-            ('dir_z', int),
+            ('t0', float),
+            ('pos_x', float),
+            ('pos_y', float),
+            ('pos_z', float),
+            ('dir_x', float),
+            ('dir_y', float),
+            ('dir_z', float),
             ])
         self._data = np.rec.array(data, dtype=self.hit_dtype)
 
     @classmethod
     def from_aanet(cls, data):
-        return cls(data=[(h.id, h.dom_id, h.t, h.tot, h.channel_id,
+        return cls(data=[(h.id, h.dom_id, h.t, h.tot, ord(h.channel_id),
                           h.trig, h.pmt_id, np.nan,
                           np.nan, np.nan, np.nan,
                           np.nan, np.nan, np.nan) for h in data])
+
+
+class CHit(ctypes.Structure):
+    _fields_ = [
+            ('id', ctypes.c_int),
+            ('dom_id', ctypes.c_int),
+            ('time', ctypes.c_int),
+            ('tot', ctypes.c_int),
+            ('channel_id', ctypes.int),
+            ('triggered', ctypes.c_bool),
+            ('pmt_id', ctypes.int),
+            ]
+
+
+class CHitSeries(object):
+    @classmethod
+    def from_aanet(cls, hits):
+        data = [CHit(h.id, h.dom_id, h.t, h.tot, ord(h.channel_id),
+                h.trig, h.pmt_id) for h in hits]
+        return cls(data)
+
+    def __init__(self, data):
+        self._data = data
 
 
 class HitSeries(object):
