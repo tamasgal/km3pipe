@@ -168,7 +168,7 @@ class CHitSeries(object):
     @property
     def triggered(self):
         if self._triggered is None:
-            self._triggered = np.array([h.trig for h in self._hits])
+            self._triggered = np.array([h for h in self._hits if h.trig])
         return self._triggered
 
     @property
