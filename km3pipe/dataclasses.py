@@ -136,13 +136,13 @@ class HitSeriesA(object):
 
 class CHit(ctypes.Structure):
     _fields_ = [
-            ('id', ctypes.c_int),
-            ('dom_id', ctypes.c_int),
-            ('time', ctypes.c_int),
-            ('tot', ctypes.c_int),
-            ('channel_id', ctypes.c_int),
+            ('id', ctypes.c_float),
+            ('dom_id', ctypes.c_float),
+            ('time', ctypes.c_float),
+            ('tot', ctypes.c_float),
+            ('channel_id', ctypes.c_float),
             ('triggered', ctypes.c_bool),
-            ('pmt_id', ctypes.c_int),
+            ('pmt_id', ctypes.c_float),
             ]
 
 
