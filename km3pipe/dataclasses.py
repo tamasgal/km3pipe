@@ -13,7 +13,8 @@ import numpy as np
 
 from km3pipe.tools import angle_between
 
-__all__ = ('Point', 'Position', 'Direction', 'HitSeries', 'HitSeriesA', 'Hit')
+__all__ = ('Point', 'Position', 'Direction', 'HitSeries', 'HitSeriesA', 'Hit',
+           'CPosition', 'CHitSeries')
 
 
 class Point(np.ndarray):
@@ -134,15 +135,22 @@ class HitSeriesA(object):
                           np.nan, np.nan, np.nan) for h in data])
 
 
+class CPosition(ctypes.Structure):
+    _fields_ = [('x', ctypes.c_float),
+                ('y', ctypes.c_float),
+                ('z', ctypes.c_float)]
+
+
 class CHit(ctypes.Structure):
     _fields_ = [
             ('id', ctypes.c_float),
             ('dom_id', ctypes.c_float),
-            ('t', ctypes.c_float),
+            ('time', ctypes.c_float),
             ('tot', ctypes.c_float),
             ('channel_id', ctypes.c_float),
-            ('trig', ctypes.c_bool),
+            ('triggered', ctypes.c_bool),
             ('pmt_id', ctypes.c_float),
+            ('pos', CPosition),
             ]
 
 
@@ -167,13 +175,13 @@ class CHitSeries(object):
     @property
     def time(self):
         if self._time is None:
-            self._time = np.array([h.t for h in self._hits])
+            self._time = np.array([h.time for h in self._hits])
         return self._time
 
     @property
     def triggered(self):
         if self._triggered is None:
-            self._triggered = np.array([h for h in self._hits if h.trig])
+            self._triggered = np.array([h for h in self._hits if h.triggered])
         return self._triggered
 
     @property
