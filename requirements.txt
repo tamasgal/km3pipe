@@ -4,3 +4,4 @@ urwid
 numpy
 ipython
 pandas
+cython
