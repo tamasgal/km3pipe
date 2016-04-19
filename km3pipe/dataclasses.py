@@ -140,9 +140,9 @@ class CHit(ctypes.Structure):
             ('dom_id', ctypes.c_int),
             ('time', ctypes.c_int),
             ('tot', ctypes.c_int),
-            ('channel_id', ctypes.int),
+            ('channel_id', ctypes.c_int),
             ('triggered', ctypes.c_bool),
-            ('pmt_id', ctypes.int),
+            ('pmt_id', ctypes.c_int),
             ]
 
 
