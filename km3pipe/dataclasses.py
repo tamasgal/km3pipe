@@ -163,6 +163,7 @@ class CHitSeries(object):
         self._dom_id = None
         self._pmt_id = None
         self._channel_id = None
+        self._index = 0
 
     @classmethod
     def from_aanet(cls, hits):
