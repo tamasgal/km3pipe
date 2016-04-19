@@ -13,6 +13,7 @@ setup(name='km3pipe',
       include_package_data=True,
       platforms='any',
       install_requires=[
+          'cython',
           'numpy',
           'controlhost',
           'urwid',
