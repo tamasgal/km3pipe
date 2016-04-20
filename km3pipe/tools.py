@@ -14,6 +14,7 @@ import collections
 from collections import namedtuple
 from itertools import chain
 from datetime import datetime
+from contextlib import contextmanager
 
 import numpy as np
 
@@ -295,3 +296,17 @@ def peak_memory_usage():
     if sys.platform == 'darwin':
         factor_mb = 1 / (1024 * 1024)
     return mem * factor_mb
+
+@contextmanager
+def ignored(*exceptions):
+    """Ignore-context for a given list of exceptions.
+
+    Example:
+        with ignored(AttributeError):
+            foo.a = 1
+
+    """
+    try:
+        yield
+    except exceptions:
+        pass
