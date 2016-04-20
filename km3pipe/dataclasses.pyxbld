@@ -1,0 +1,6 @@
+def make_ext(modname, pyxfilename):
+    print("(Re)compiling {0}...".format(pyxfilename))
+    from distutils.extension import Extension
+    return Extension(name=modname,
+                     sources=[pyxfilename],
+                     extra_compile_args=['-O3', '-march=native', '-w'])
