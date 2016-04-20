@@ -138,7 +138,8 @@ class HitSeriesA(object):
 
 cdef class CyHit:
     cdef:
-        public id, dom_id, time, tot, channel_id, triggered, pmt_id
+        public float id, dom_id, time, tot, channel_id, pmt_id
+        public bint triggered
 #        float *pos, *dir
 
     def __cinit__(self, float id, dom_id, time, tot, channel_id, bint triggered,
