@@ -15,11 +15,11 @@ try:
 except ImportError:
     from six.moves.configparser import ConfigParser, Error
 
+from km3pipe.tools import ignored
+
 import getpass
-try:
+with ignored(NameError):
     input = raw_input
-except NameError:
-    pass
 
 from km3pipe.logger import logging
 
