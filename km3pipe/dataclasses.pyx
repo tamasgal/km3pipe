@@ -142,8 +142,8 @@ cdef class CyHit:
         public bint triggered
 #        float *pos, *dir
 
-    def __cinit__(self, float id, dom_id, time, tot, channel_id, bint triggered,
-                  float pmt_id):
+    def __cinit__(self, float id, float dom_id, float time, float tot,
+                  float channel_id, bint triggered, float pmt_id):
         self.id = id
         self.dom_id = dom_id
         self.time = time
