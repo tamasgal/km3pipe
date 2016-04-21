@@ -17,6 +17,7 @@ from datetime import datetime
 from contextlib import contextmanager
 
 import numpy as np
+import guppy
 
 __author__ = 'tamasgal'
 
@@ -312,6 +313,11 @@ def peak_memory_usage():
     if sys.platform == 'darwin':
         factor_mb = 1 / (1024 * 1024)
     return mem * factor_mb
+
+
+def get_heap():
+    """Return heat size in MB via guppy."""
+    return guppy.hpy().heap()
 
 
 @contextmanager
