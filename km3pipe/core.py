@@ -16,7 +16,7 @@ import numpy as np
 
 from km3pipe.hardware import Detector
 from km3pipe.dataclasses import Position, Direction
-from km3pipe.tools import peak_memory_usage, ignored, get_heap
+from km3pipe.tools import peak_memory_usage, ignored
 from km3pipe.logger import logging
 
 __author__ = 'tamasgal'
@@ -175,14 +175,11 @@ class Pipeline(object):
         cycles_cpu = self._timeit['cycles_cpu']
         overall = self._timeit['finish'] - self._timeit['init']
         overall_cpu = self._timeit['finish_cpu'] - self._timeit['init_cpu']
-        memory_peak = peak_memory_usage()
-        memory_heap = get_heap().size / 1024 / 1024
+        memory = peak_memory_usage()
 
         print(80*'=')
-        print("{0} cycles drained in {1} (CPU {2}). "
-              "Memory peak/heap: {3:.2f}/{3:.2f} MB"
-              .format(n_cycles, timef(overall), timef(overall_cpu),
-                      memory_peak, memory_heap))
+        print("{0} cycles drained in {1} (CPU {2}). Memory peak: {3:.2f} MB"
+              .format(n_cycles, timef(overall), timef(overall_cpu), memory))
         print(statsf('wall', calc_stats(cycles)))
         print(statsf('CPU ', calc_stats(cycles_cpu)))
 
