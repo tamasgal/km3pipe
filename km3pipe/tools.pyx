@@ -14,8 +14,10 @@ import collections
 from collections import namedtuple
 from itertools import chain
 from datetime import datetime
+from contextlib import contextmanager
 
 import numpy as np
+import guppy
 
 __author__ = 'tamasgal'
 
@@ -288,6 +290,22 @@ def ifiles(irods_path):
     return filenames
 
 
+def remain_file_pointer(function):
+    """Remain the file pointer position after calling the decorated function
+
+    This decorator assumes that the last argument is the file handler.
+
+    """
+    def wrapper(*args, **kwargs):
+        """Wrap the function and remain its parameters and return values"""
+        file_obj = args[-1]
+        old_position = file_obj.tell()
+        return_value = function(*args, **kwargs)
+        file_obj.seek(old_position, 0)
+        return return_value
+    return wrapper
+
+
 def peak_memory_usage():
     """Return peak memory usage in MB"""
     mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -295,3 +313,23 @@ def peak_memory_usage():
     if sys.platform == 'darwin':
         factor_mb = 1 / (1024 * 1024)
     return mem * factor_mb
+
+
+def get_heap():
+    """Return heat size in MB via guppy."""
+    return guppy.hpy().heap()
+
+
+@contextmanager
+def ignored(*exceptions):
+    """Ignore-context for a given list of exceptions.
+
+    Example:
+        with ignored(AttributeError):
+            foo.a = 1
+
+    """
+    try:
+        yield
+    except exceptions:
+        pass

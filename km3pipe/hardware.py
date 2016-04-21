@@ -10,7 +10,7 @@ from __future__ import division, absolute_import, print_function
 import os
 import sys
 
-from km3pipe.tools import unpack_nfirst, split
+from km3pipe.tools import unpack_nfirst, split, ignored
 from km3pipe.dataclasses import Point, Direction
 from km3pipe.db import DBManager
 
@@ -79,7 +79,7 @@ class Detector(object):
         self._det_file.seek(0, 0)
         self._det_file.readline()
         lines = self._det_file.readlines()
-        try:
+        with ignored(IndexError):
             while True:
                 line = lines.pop(0)
                 if not line:
@@ -114,8 +114,6 @@ class Detector(object):
                     self.pmts.append(pmt)
                     self._pmts_by_omkey[(line_id, floor_id, i)] = pmt
                     self._pmts_by_id[pmt_id] = pmt
-        except IndexError:
-            pass
 
     @property
     def dom_positions(self):
