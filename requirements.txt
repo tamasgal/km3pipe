@@ -4,3 +4,5 @@ urwid
 numpy
 ipython
 pandas
+guppy
+cython
