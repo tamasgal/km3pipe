@@ -1,5 +1,5 @@
 # coding=utf-8
-# Filename: core.py
+# Filename: core.pyx
 # pylint: disable=locally-disabled
 """
 The core of the KM3Pipe framework.

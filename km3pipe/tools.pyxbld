@@ -1,3 +1,9 @@
+# coding=utf-8
+# Filename: tools.pyxbld
+"""
+Build configuration file for tools.pyx
+
+"""
 def make_ext(modname, pyxfilename):
     print("(Re)compiling {0}...".format(pyxfilename))
     from distutils.extension import Extension

@@ -1,5 +1,10 @@
+# coding=utf-8
+# Filename: dataclasses.pyxbld
+"""
+Build configuration file for dataclasses.pyx
+
+"""
 def make_ext(modname, pyxfilename):
-    print("(Re)compiling {0}...".format(pyxfilename))
     from distutils.extension import Extension
     return Extension(name=modname,
                      sources=[pyxfilename],
