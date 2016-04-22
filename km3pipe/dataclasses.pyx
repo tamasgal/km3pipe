@@ -11,6 +11,10 @@ import ctypes
 from libcpp cimport bool as c_bool
 
 import numpy as np
+cimport numpy as np
+cimport cython
+
+np.import_array()
 
 from km3pipe.tools import angle_between
 
@@ -137,10 +141,10 @@ class HitSeriesA(object):
 
 
 cdef class CyHit:
-    cdef:
-        public float id, dom_id, time, tot, channel_id, pmt_id
-        public bint triggered
-#        float *pos, *dir
+    cdef public float id, dom_id, time, tot, channel_id, pmt_id
+    cdef public bint triggered
+    cdef public np.ndarray pos
+    cdef public np.ndarray dir
 
     def __cinit__(self, float id, float dom_id, float time, float tot,
                   float channel_id, bint triggered, float pmt_id):
