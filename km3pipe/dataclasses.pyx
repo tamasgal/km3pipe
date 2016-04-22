@@ -59,6 +59,16 @@ class Position(Point):
     pass
 
 
+rposition_dt = np.dtype([('x', float), ('y', float), ('z', float)])
+
+def RPosition(pos, as_recarray=True):
+    pos = np.array(pos)
+    if as_recarray:
+        return pos.view(rposition_dt, np.recarray)
+    else:
+        return pos
+
+
 class Direction(Point):
     """Represents a direction in a 3D space
 
