@@ -5,7 +5,6 @@ Build configuration file for tools.pyx
 
 """
 def make_ext(modname, pyxfilename):
-    print("(Re)compiling {0}...".format(pyxfilename))
     from distutils.extension import Extension
     return Extension(name=modname,
                      sources=[pyxfilename],
