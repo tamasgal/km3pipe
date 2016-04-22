@@ -19,7 +19,7 @@ np.import_array()
 from km3pipe.tools import angle_between
 
 __all__ = ('Point', 'Position', 'Direction', 'HitSeries', 'HitSeriesA', 'Hit',
-           'CPosition', 'CHitSeries')
+           'CPosition', 'RPosition', 'CHitSeries')
 
 
 class Point(np.ndarray):
