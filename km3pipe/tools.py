@@ -241,8 +241,9 @@ class PMTReplugger(object):
 
 class Timer(object):
     """A very simple, accurate and easy to use timer context"""
-    def __init__(self, message='It'):
+    def __init__(self, message='It', precision=3):
         self.message = message
+        self.precision = precision
 
     def __enter__(self):
         self.__start = timer()
@@ -262,8 +263,8 @@ class Timer(object):
     def log(self):
         seconds = self.get_seconds()
         seconds_cpu = self.get_seconds_cpu()
-        print("{0} took {1:.3f}s (CPU {2:.3f}s)."
-              .format(self.message, seconds, seconds_cpu))
+        print("{0} took {1:.{3}f}s (CPU {2:.{3}f}s)."
+              .format(self.message, seconds, seconds_cpu, self.precision))
 
 
 class Cuckoo(object):
