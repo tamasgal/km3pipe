@@ -14,6 +14,8 @@ import collections
 from collections import namedtuple
 from itertools import chain
 from datetime import datetime
+import time
+from timeit import default_timer as timer
 from contextlib import contextmanager
 
 import numpy as np
@@ -243,17 +245,25 @@ class Timer(object):
         self.message = message
 
     def __enter__(self):
-        self.__start = datetime.now()
+        self.__start = timer()
+        self.__start_cpu = time.clock()
 
     def __exit__(self, type, value, traceback):
-        self.__finish = datetime.now()
+        self.__finish = timer()
+        self.__finish_cpu = time.clock()
         self.log()
 
     def get_seconds(self):
-        return total_seconds(self.__finish - self.__start)
+        return self.__finish - self.__start
+
+    def get_seconds_cpu(self):
+        return self.__finish_cpu - self.__start_cpu
 
     def log(self):
-        print("{0} took {1}s.".format(self.message, self.get_seconds()))
+        seconds = self.get_seconds()
+        seconds_cpu = self.get_seconds_cpu()
+        print("{0} took {1:.3f}s (CPU {2:.3f}s)."
+              .format(self.message, seconds, seconds_cpu))
 
 
 class Cuckoo(object):
