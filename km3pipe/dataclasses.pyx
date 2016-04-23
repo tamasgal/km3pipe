@@ -59,14 +59,22 @@ class Position(Point):
     pass
 
 
-rposition_dt = np.dtype([('x', float), ('y', float), ('z', float)])
+rpoint_dt = np.dtype([('x', float), ('y', float), ('z', float)])
 
 def RPosition(pos, as_recarray=True):
     pos = np.array(pos)
     if as_recarray:
-        return pos.view(rposition_dt, np.recarray)
+        return pos.view(rpoint_dt, np.recarray)
     else:
         return pos
+
+
+def RDirection(dir, as_recarray=True):
+    dir = np.array(dir)
+    if as_recarray:
+        return dir.view(rpoint_dt, np.recarray)
+    else:
+        return dir
 
 
 class Direction(Point):
