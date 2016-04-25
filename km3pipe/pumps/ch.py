@@ -41,7 +41,7 @@ class CHPump(Pump):
 
         print("Connecting to {0} on port {1}\n"
               "Subscribed tags: {2}\n"
-              "Connection timout: {3}s\n"
+              "Connection timeout: {3}s\n"
               "Maximum queue size for incoming data: {4}"
               .format(self.host, self.port, self.tags, self.timeout,
                       self.max_queue))
