@@ -14,7 +14,7 @@ from timeit import default_timer as timer
 
 import numpy as np
 
-from km3pipe.tools import peak_memory_usage
+from km3pipe.tools import peak_memory_usage, ignored
 from km3pipe.hardware import Detector
 from km3pipe.dataclasses import Position, Direction
 from km3pipe.logger import logging
@@ -119,10 +119,8 @@ class Pipeline(object):
         """Execute _drain while trapping KeyboardInterrupt"""
         log.info("Now draining...")
         signal.signal(signal.SIGINT, self._handle_ctrl_c)
-        try:
+        with ignored(KeyboardInterrupt):
             self._drain(cycles)
-        except KeyboardInterrupt:
-            pass
 
     def finish(self):
         """Call finish() on each attached module"""
