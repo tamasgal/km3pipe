@@ -15,7 +15,7 @@ from km3pipe import Pump
 from km3pipe.logger import logging
 
 from km3pipe.dataclasses import Point, Direction, HitSeries
-from km3pipe.tools import pdg2name, geant2pdg, unpack_nfirst, ignored
+from km3pipe.tools import pdg2name, geant2pdg, unpack_nfirst
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -148,8 +148,10 @@ class EvtPump(Pump):  # pylint: disable:R0902
             line = line.strip()
             if line.startswith('end_event:') and blob:
                 blob['raw_header'] = self.raw_header
-                with ignored(KeyError):
+                try:
                     blob['Hits'] = HitSeries.from_evt(blob['EvtRawHits'])
+                except KeyError:
+                    pass
                 return blob
             if line.startswith('start_event:'):
                 blob = {}

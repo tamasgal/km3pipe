@@ -14,7 +14,6 @@ import datetime
 import pytz
 
 from km3pipe import Pump
-from km3pipe.tools import ignored
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -42,12 +41,14 @@ class CLBPump(Pump):
         """Record the file pointer position of each frame"""
         print("Analysing file...")
         self.rewind_file()
-        with ignored(struct.error):
+        try:
             while True:
                 pointer_position = self.blob_file.tell()
                 length = struct.unpack('<i', self.blob_file.read(4))[0]
                 self.packet_positions.append(pointer_position)
                 self.blob_file.seek(length, 1)
+        except struct.error:
+            pass
         self.rewind_file()
         print("Found {0} CLB UDP packets.".format(len(self.packet_positions)))
 

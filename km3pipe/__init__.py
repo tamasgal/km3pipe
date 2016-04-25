@@ -9,16 +9,16 @@ from __future__ import division, absolute_import, print_function
 
 from km3pipe.__version__ import version, version_info  # noqa
 
-try:
-    import pyximport
-    pyximport.install()
+#try:
+import pyximport
+pyximport.install()
 
-    from km3pipe.core import (Pipeline, Module, Pump, Blob,  # noqa
-                              Geometry, AanetGeometry)
-    from km3pipe import pumps  # noqa
-except ImportError:
-    print("Some modules could not be imported. Ignore this if you're "
-          "installing or upgrading KM3Pipe.")
+from km3pipe.core import (Pipeline, Module, Pump, Blob,  # noqa
+                          Geometry, AanetGeometry)
+#    from km3pipe import pumps  # noqa
+#except ImportError:
+#    print("Some modules could not be imported. Ignore this if you're "
+#          "installing or upgrading KM3Pipe.")
 
 __author__ = "Tamas Gal"
 __copyright__ = ("Copyright 2015, Tamas Gal and the KM3NeT collaboration "

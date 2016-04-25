@@ -9,7 +9,6 @@ from __future__ import division, absolute_import, print_function
 
 from km3pipe import Pump
 from km3pipe.dataclasses import HitSeries
-from km3pipe.tools import ignored
 from km3pipe.logger import logging
 import os.path
 
@@ -75,8 +74,10 @@ class AanetPump(Pump):
             except Exception:
                 raise SystemExit("Could not open file")
 
-            with ignored(AttributeError):
+            try:
                 self.header = event_file.rootfile().Get("Header")
+            except AttributeError:
+                pass
 
             for event in event_file:
                 blob = {'Evt': event,
