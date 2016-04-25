@@ -1,5 +1,5 @@
 # coding=utf-8
-# Filename: core.py
+# Filename: core.pyx
 # pylint: disable=locally-disabled
 """
 The core of the KM3Pipe framework.
@@ -14,9 +14,9 @@ from timeit import default_timer as timer
 
 import numpy as np
 
+from km3pipe.tools import peak_memory_usage, ignored
 from km3pipe.hardware import Detector
 from km3pipe.dataclasses import Position, Direction
-from km3pipe.tools import peak_memory_usage, ignored
 from km3pipe.logger import logging
 
 __author__ = 'tamasgal'

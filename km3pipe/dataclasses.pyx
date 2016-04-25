@@ -8,8 +8,13 @@
 from __future__ import division, absolute_import, print_function
 
 import ctypes
+from libcpp cimport bool as c_bool
 
 import numpy as np
+cimport numpy as np
+cimport cython
+
+np.import_array()
 
 from km3pipe.tools import angle_between
 
@@ -17,7 +22,19 @@ __all__ = ('Point', 'Position', 'Direction', 'HitSeries', 'HitSeriesA', 'Hit',
            'CPosition', 'CHitSeries')
 
 
-class Point(np.ndarray):
+point_dt = np.dtype([('x', float), ('y', float), ('z', float)])
+
+def Point(vector, as_recarray=True):
+    vector = np.array(vector)
+    if as_recarray:
+        return vector.view(point_dt, np.recarray)
+    else:
+        return vector
+
+Position = Direction = Point  # Backwards compatibility
+
+
+class Point_(np.ndarray):
     """Represents a point in a 3D space"""
     def __new__(cls, input_array=(np.nan, np.nan, np.nan)):
         """Add x, y and z to the ndarray"""
@@ -49,12 +66,7 @@ class Point(np.ndarray):
         self[2] = value
 
 
-class Position(Point):
-    """Represents a point in a 3D space"""
-    pass
-
-
-class Direction(Point):
+class Direction_(Point_):
     """Represents a direction in a 3D space
 
     The direction vector always normalises itself when an attribute is changed.
@@ -135,6 +147,23 @@ class HitSeriesA(object):
                           np.nan, np.nan, np.nan) for h in data])
 
 
+cdef class CyHit:
+    cdef public float id, dom_id, time, tot, channel_id, pmt_id
+    cdef public bint triggered
+    cdef public np.ndarray pos
+    cdef public np.ndarray dir
+
+    def __cinit__(self, float id, float dom_id, float time, float tot,
+                  float channel_id, bint triggered, float pmt_id):
+        self.id = id
+        self.dom_id = dom_id
+        self.time = time
+        self.tot = tot
+        self.channel_id = channel_id
+        self.triggered = triggered
+        self.pmt_id = pmt_id
+
+
 class CPosition(ctypes.Structure):
     _fields_ = [('x', ctypes.c_float),
                 ('y', ctypes.c_float),
@@ -168,6 +197,11 @@ class CHitSeries(object):
     @classmethod
     def from_aanet(cls, hits):
         return cls([CHit(h.id, h.dom_id, h.t, h.tot, ord(h.channel_id),
+                    h.trig, h.pmt_id) for h in hits])
+
+    @classmethod
+    def from_aanet_as_cyhit(cls, hits):
+        return cls([CyHit(h.id, h.dom_id, h.t, h.tot, ord(h.channel_id),
                     h.trig, h.pmt_id) for h in hits])
 
     def __iter__(self):
