@@ -222,42 +222,52 @@ class TestEvtParser(TestCase):
 
 class TestTrack(TestCase):
     def setUp(self):
-        self.track = Track((1, 2, 3, 4, 0, 0, 1, 8, 9, 'a', 'b', 'c'),
-                           zed_correction=0)
+        self.track = Track((1., 2., 3., 4., 0., 0., 1., 8., 9., 'a', 'b', 'c'),
+                           zed_correction=0.)
 
     def test_track_init(self):
         track = self.track
-        self.assertEqual(1, track.id)
-        self.assertListEqual([2, 3, 4], list(track.pos))
-        self.assertListEqual([0, 0, 1], list(track.dir))
-        self.assertEqual(8, track.E)
-        self.assertEqual(9, track.time)
+        self.assertAlmostEqual(1, track.id)
+        self.assertAlmostEqual(2, track.pos.x)
+        self.assertAlmostEqual(3, track.pos.y)
+        self.assertAlmostEqual(4, track.pos.z)
+        self.assertAlmostEqual(0, track.dir.x)
+        self.assertAlmostEqual(0, track.dir.y)
+        self.assertAlmostEqual(1, track.dir.z)
+        self.assertAlmostEqual(8, track.E)
+        self.assertAlmostEqual(9, track.time)
         self.assertTupleEqual(('a', 'b', 'c'), track.args)
 
     def test_track_repr(self):
-        repr_str = ("Track:\n id: 1\n pos: [2 3 4]\n dir: (0.0, 0.0, 1.0)\n"
-                    " energy: 8 GeV\n time: 9 ns\n")
+        repr_str = ("Track:\n id: 1\n pos: [(2.0, 3.0, 4.0)]\n"
+                    " dir: [(0.0, 0.0, 1.0)]\n"
+                    " energy: 8.0 GeV\n time: 9.0 ns\n")
         self.assertEqual(repr_str, self.track.__repr__())
 
 
 class TestTrackIn(TestCase):
 
     def setUp(self):
-        self.track_in = TrackIn((1, 2, 3, 4, 0, 0, 1, 8, 9, 10, 11),
+        self.track_in = TrackIn((1, 2., 3., 4., 0., 0., 1., 8, 9, 10, 11),
                                 zed_correction=0)
 
     def test_trackin_init(self):
         track_in = self.track_in
         self.assertEqual(1, track_in.id)
-        self.assertListEqual([2, 3, 4], list(track_in.pos))
-        self.assertListEqual([0, 0, 1], list(track_in.dir))
+        self.assertAlmostEqual(2, track_in.pos.x)
+        self.assertAlmostEqual(3, track_in.pos.y)
+        self.assertAlmostEqual(4, track_in.pos.z)
+        self.assertAlmostEqual(0, track_in.dir.x)
+        self.assertAlmostEqual(0, track_in.dir.y)
+        self.assertAlmostEqual(1, track_in.dir.z)
         self.assertEqual(8, track_in.E)
         self.assertEqual(9, track_in.time)
         self.assertEqual(130, track_in.particle_type)  # this should be PDG!
         self.assertEqual(11, track_in.length)
 
     def test_track_repr(self):
-        repr_str = ("Track:\n id: 1\n pos: [2 3 4]\n dir: (0.0, 0.0, 1.0)\n"
+        repr_str = ("Track:\n id: 1\n pos: [(2.0, 3.0, 4.0)]\n"
+                    " dir: [(0.0, 0.0, 1.0)]\n"
                     " energy: 8 GeV\n time: 9 ns\n type: 130 'K0L' [PDG]\n"
                     " length: 11 [m]\n")
         self.assertEqual(repr_str, self.track_in.__repr__())
@@ -266,14 +276,18 @@ class TestTrackIn(TestCase):
 class TestTrackFit(TestCase):
 
     def setUp(self):
-        data = (1, 2, 3, 4, 0, 0, 1, 8, 9, 10, 11, 12, 13, 14)
+        data = (1, 2., 3., 4., 0., 0., 1., 8, 9, 10, 11, 12, 13, 14)
         self.track_fit = TrackFit(data, zed_correction=0)
 
     def test_trackfit_init(self):
         track_fit = self.track_fit
         self.assertEqual(1, track_fit.id)
-        self.assertListEqual([2, 3, 4], list(track_fit.pos))
-        self.assertListEqual([0, 0, 1], list(track_fit.dir))
+        self.assertAlmostEqual(2, track_fit.pos.x)
+        self.assertAlmostEqual(3, track_fit.pos.y)
+        self.assertAlmostEqual(4, track_fit.pos.z)
+        self.assertAlmostEqual(0, track_fit.dir.x)
+        self.assertAlmostEqual(0, track_fit.dir.y)
+        self.assertAlmostEqual(1, track_fit.dir.z)
         self.assertEqual(8, track_fit.E)
         self.assertEqual(9, track_fit.time)
         self.assertEqual(10, track_fit.speed)
@@ -283,7 +297,8 @@ class TestTrackFit(TestCase):
         self.assertEqual(14, track_fit.con2)
 
     def test_trackfit_repr(self):
-        repr_str = ("Track:\n id: 1\n pos: [2 3 4]\n dir: (0.0, 0.0, 1.0)\n "
+        repr_str = ("Track:\n id: 1\n pos: [(2.0, 3.0, 4.0)]\n"
+                    " dir: [(0.0, 0.0, 1.0)]\n "
                     "energy: 8 GeV\n time: 9 ns\n speed: 10 [m/ns]\n"
                     " ts: 11 [ns]\n te: 12 [ns]\n con1: 13\n con2: 14\n")
         self.assertEqual(repr_str, self.track_fit.__repr__())
@@ -292,14 +307,18 @@ class TestTrackFit(TestCase):
 class TestNeutrino(TestCase):
 
     def setUp(self):
-        data = (1, 2, 3, 4, 0, 0, 1, 8, 9, 10, 11, 12, 13, 14)
+        data = (1, 2., 3., 4., 0., 0., 1., 8, 9, 10, 11, 12, 13, 14)
         self.neutrino = Neutrino(data, zed_correction=0)
 
     def test_neutrino_init(self):
         neutrino = self.neutrino
         self.assertEqual(1, neutrino.id)
-        self.assertListEqual([2, 3, 4], list(neutrino.pos))
-        self.assertListEqual([0, 0, 1], list(neutrino.dir))
+        self.assertAlmostEqual(2, neutrino.pos.x)
+        self.assertAlmostEqual(3, neutrino.pos.y)
+        self.assertAlmostEqual(4, neutrino.pos.z)
+        self.assertAlmostEqual(0, neutrino.dir.x)
+        self.assertAlmostEqual(0, neutrino.dir.y)
+        self.assertAlmostEqual(1, neutrino.dir.z)
         self.assertEqual(8, neutrino.E)
         self.assertEqual(9, neutrino.time)
         self.assertEqual(10, neutrino.Bx)
