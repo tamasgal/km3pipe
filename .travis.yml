@@ -21,4 +21,4 @@ before_install:
 
 install: "pip install -r requirements.txt"
 
-script: py.test km3pipe
+# script: py.test km3pipe
