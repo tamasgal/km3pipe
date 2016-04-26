@@ -15,10 +15,11 @@ before_install:
     - virtualenv --python=python venv
     - source venv/bin/activate
     - python -V
+    - echo $TRAVIS_PYTHON_VERSION
     - pip install -U pip setuptools
     - pip install -U numpy cython
     - pip install -U pytest
 
 install: "pip install -r requirements.txt"
 
-# script: py.test km3pipe
+script: py.test venv/lib/python2.7/site-packages/km3pipe
