@@ -19,6 +19,8 @@ before_install:
     - pip install -U pip setuptools
     - pip install -U numpy cython
     - pip install -U pytest
+    - ls -al
+    - pip install .
 
 install: "pip install -r requirements.txt"
 
