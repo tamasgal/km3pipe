@@ -10,7 +10,7 @@ from __future__ import division, absolute_import, print_function
 import os
 import sys
 
-from km3pipe.tools import unpack_nfirst, split
+from km3pipe.tools import unpack_nfirst, split #, ignored
 from km3pipe.dataclasses import Point, Direction
 from km3pipe.db import DBManager
 

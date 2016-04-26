@@ -1,5 +1,5 @@
 # coding=utf-8
-# Filename: core.py
+# Filename: core.pyx
 # pylint: disable=locally-disabled
 """
 The core of the KM3Pipe framework.
@@ -14,9 +14,9 @@ from timeit import default_timer as timer
 
 import numpy as np
 
+from km3pipe.tools import peak_memory_usage, ignored
 from km3pipe.hardware import Detector
 from km3pipe.dataclasses import Position, Direction
-from km3pipe.tools import peak_memory_usage
 from km3pipe.logger import logging
 
 __author__ = 'tamasgal'
@@ -119,10 +119,8 @@ class Pipeline(object):
         """Execute _drain while trapping KeyboardInterrupt"""
         log.info("Now draining...")
         signal.signal(signal.SIGINT, self._handle_ctrl_c)
-        try:
+        with ignored(KeyboardInterrupt):
             self._drain(cycles)
-        except KeyboardInterrupt:
-            pass
 
     def finish(self):
         """Call finish() on each attached module"""
@@ -177,11 +175,11 @@ class Pipeline(object):
         cycles_cpu = self._timeit['cycles_cpu']
         overall = self._timeit['finish'] - self._timeit['init']
         overall_cpu = self._timeit['finish_cpu'] - self._timeit['init_cpu']
-        mem = peak_memory_usage()
+        memory = peak_memory_usage()
 
         print(80*'=')
         print("{0} cycles drained in {1} (CPU {2}). Memory peak: {3:.2f} MB"
-              .format(n_cycles, timef(overall), timef(overall_cpu), mem))
+              .format(n_cycles, timef(overall), timef(overall_cpu), memory))
         print(statsf('wall', calc_stats(cycles)))
         print(statsf('CPU ', calc_stats(cycles_cpu)))
 

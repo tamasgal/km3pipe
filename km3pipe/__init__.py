@@ -6,17 +6,22 @@ The extemporary KM3NeT analysis framework.
 """
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.__version__ import version, version_info  # noqa
 
 try:
+    __KM3PIPE_SETUP__
+except NameError:
+    __KM3PIPE_SETUP__ = False
+
+from km3pipe.__version__ import version, version_info  # noqa
+
+if not __KM3PIPE_SETUP__:
     from km3pipe.core import (Pipeline, Module, Pump, Blob,  # noqa
                               Geometry, AanetGeometry)
-    from km3pipe import pumps
-except ImportError:
-    print("Numpy is needed for KM3Pipe")
+    from km3pipe import pumps  # noqa
+
 
 __author__ = "Tamas Gal"
-__copyright__ = ("Copyright 2015, Tamas Gal and the KM3NeT collaboration "
+__copyright__ = ("Copyright 2016, Tamas Gal and the KM3NeT collaboration "
                  "(http://km3net.org)")
 __credits__ = []
 __license__ = "MIT"

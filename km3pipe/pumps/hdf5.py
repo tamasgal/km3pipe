@@ -148,11 +148,11 @@ class HDF5Sink(Module):
             target.setdefault('event_id', []).append(self.index)
             target.setdefault('id', []).append(hit.id)
             target.setdefault('pmt_id', []).append(hit.pmt_id)
-            target.setdefault('time', []).append(hit.t)
+            target.setdefault('time', []).append(hit.time)
             target.setdefault('tot', []).append(hit.tot)
-            target.setdefault('triggered', []).append(bool(hit.trig))
+            target.setdefault('triggered', []).append(hit.triggered)
             target.setdefault('dom_id', []).append(hit.dom_id)
-            target.setdefault('channel_id', []).append(ord(hit.channel_id))
+            target.setdefault('channel_id', []).append(hit.channel_id)
 
     def _add_mc_tracks(self, mc_tracks):
         for mc_track in mc_tracks:
@@ -264,46 +264,46 @@ class HDF5Sink2(Module):
         trigger_mask = evt.trigger_mask
         frame_index = evt.frame_index
 
-        info = {}
+        info = defaultdict(list)
 
-        info.setdefault('event_id', []).append(self.index)
-        info.setdefault('timestamp', []).append(timestamp)
-        info.setdefault('det_id', []).append(det_id)
-        info.setdefault('mc_id', []).append(mc_id)
-        info.setdefault('mc_t', []).append(mc_t)
-        info.setdefault('run', []).append(run)
-        info.setdefault('overlays', []).append(overlays)
-        info.setdefault('trigger_counter', []).append(trigger_counter)
-        info.setdefault('trigger_mask', []).append(trigger_mask)
-        info.setdefault('frame_index', []).append(frame_index)
+        info['event_id'].append(self.index)
+        info['timestamp'].append(timestamp)
+        info['det_id'].append(det_id)
+        info['mc_id'].append(mc_id)
+        info['mc_t'].append(mc_t)
+        info['run'].append(run)
+        info['overlays'].append(overlays)
+        info['trigger_counter'].append(trigger_counter)
+        info['trigger_mask'].append(trigger_mask)
+        info['frame_index'].append(frame_index)
 
         self._dump_dict(info, target)
 
     def _add_hits(self, hits, target):
-        hits_dict = {}
+        hits_dict = defaultdict(list)
         for hit in hits:
-            hits_dict.setdefault('id', []).append(hit.id)
-            hits_dict.setdefault('pmt_id', []).append(hit.pmt_id)
-            hits_dict.setdefault('time', []).append(hit.t)
-            hits_dict.setdefault('tot', []).append(hit.tot)
-            hits_dict.setdefault('triggered', []).append(bool(hit.trig))
-            hits_dict.setdefault('dom_id', []).append(hit.dom_id)
-            hits_dict.setdefault('channel_id', []).append(ord(hit.channel_id))
+            hits_dict['id'].append(hit.id)
+            hits_dict['pmt_id'].append(hit.pmt_id)
+            hits_dict['time'].append(hit.time)
+            hits_dict['tot'].append(hit.tot)
+            hits_dict['triggered'].append(hit.triggered)
+            hits_dict['dom_id'].append(hit.dom_id)
+            hits_dict['channel_id'].append(hit.channel_id)
         self._dump_dict(hits_dict, target)
 
     def _add_tracks(self, tracks, target):
-        tracks_dict = {}
+        tracks_dict = defaultdict(list)
         for track in tracks:
-            tracks_dict.setdefault('id', []).append(track.id)
-            tracks_dict.setdefault('x', []).append(track.pos.x)
-            tracks_dict.setdefault('y', []).append(track.pos.y)
-            tracks_dict.setdefault('z', []).append(track.pos.z)
-            tracks_dict.setdefault('dx', []).append(track.dir.x)
-            tracks_dict.setdefault('dy', []).append(track.dir.y)
-            tracks_dict.setdefault('dz', []).append(track.dir.z)
-            tracks_dict.setdefault('time', []).append(track.t)
-            tracks_dict.setdefault('energy', []).append(track.E)
-            tracks_dict.setdefault('type', []).append(track.type)
+            tracks_dict['id'].append(track.id)
+            tracks_dict['x'].append(track.pos.x)
+            tracks_dict['y'].append(track.pos.y)
+            tracks_dict['z'].append(track.pos.z)
+            tracks_dict['dx'].append(track.dir.x)
+            tracks_dict['dy'].append(track.dir.y)
+            tracks_dict['dz'].append(track.dir.z)
+            tracks_dict['time'].append(track.t)
+            tracks_dict['energy'].append(track.E)
+            tracks_dict['type'].append(track.type)
         self._dump_dict(tracks_dict, target)
 
     def _dump_dict(self, data, target):

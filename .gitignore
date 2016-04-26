@@ -1,9 +1,15 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+*.pyxbldc
 
 # C extensions
 *.so
+
+# Temporary Cython *.c files
+km3pipe/core.c
+km3pipe/dataclasses.c
+km3pipe/tools.c
 
 # Distribution / packaging
 .Python

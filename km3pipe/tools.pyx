@@ -1,5 +1,5 @@
 # coding=utf-8
-# Filename: tools.py
+# Filename: tools.pyx
 # pylint: disable=C0103
 """
 Some unsorted, frequently used logic.
@@ -14,6 +14,9 @@ import collections
 from collections import namedtuple
 from itertools import chain
 from datetime import datetime
+import time
+from timeit import default_timer as timer
+from contextlib import contextmanager
 
 import numpy as np
 
@@ -238,21 +241,30 @@ class PMTReplugger(object):
 
 class Timer(object):
     """A very simple, accurate and easy to use timer context"""
-    def __init__(self, message='It'):
+    def __init__(self, message='It', precision=3):
         self.message = message
+        self.precision = precision
 
     def __enter__(self):
-        self.__start = datetime.now()
+        self.__start = timer()
+        self.__start_cpu = time.clock()
 
     def __exit__(self, type, value, traceback):
-        self.__finish = datetime.now()
+        self.__finish = timer()
+        self.__finish_cpu = time.clock()
         self.log()
 
     def get_seconds(self):
-        return total_seconds(self.__finish - self.__start)
+        return self.__finish - self.__start
+
+    def get_seconds_cpu(self):
+        return self.__finish_cpu - self.__start_cpu
 
     def log(self):
-        print("{0} took {1}s.".format(self.message, self.get_seconds()))
+        seconds = self.get_seconds()
+        seconds_cpu = self.get_seconds_cpu()
+        print("{0} took {1:.{3}f}s (CPU {2:.{3}f}s)."
+              .format(self.message, seconds, seconds_cpu, self.precision))
 
 
 class Cuckoo(object):
@@ -288,6 +300,22 @@ def ifiles(irods_path):
     return filenames
 
 
+def remain_file_pointer(function):
+    """Remain the file pointer position after calling the decorated function
+
+    This decorator assumes that the last argument is the file handler.
+
+    """
+    def wrapper(*args, **kwargs):
+        """Wrap the function and remain its parameters and return values"""
+        file_obj = args[-1]
+        old_position = file_obj.tell()
+        return_value = function(*args, **kwargs)
+        file_obj.seek(old_position, 0)
+        return return_value
+    return wrapper
+
+
 def peak_memory_usage():
     """Return peak memory usage in MB"""
     mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -295,3 +323,18 @@ def peak_memory_usage():
     if sys.platform == 'darwin':
         factor_mb = 1 / (1024 * 1024)
     return mem * factor_mb
+
+
+@contextmanager
+def ignored(*exceptions):
+    """Ignore-context for a given list of exceptions.
+
+    Example:
+        with ignored(AttributeError):
+            foo.a = 1
+
+    """
+    try:
+        yield
+    except exceptions:
+        pass

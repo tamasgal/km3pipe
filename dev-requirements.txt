@@ -8,3 +8,4 @@ pytest
 urwid
 pandas
 seaborn
+cython

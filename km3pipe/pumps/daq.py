@@ -13,6 +13,7 @@ from struct import unpack
 import pprint
 
 from km3pipe import Pump, Blob
+from km3pipe.tools import ignored
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -88,14 +89,12 @@ class DAQPump(Pump):
     def determine_frame_positions(self):
         """Record the file pointer position of each frame"""
         self.rewind_file()
-        try:
+        with ignored(struct.error):
             while True:
                 pointer_position = self.blob_file.tell()
                 length = struct.unpack('<i', self.blob_file.read(4))[0]
                 self.blob_file.seek(length - 4, 1)
                 self.frame_positions.append(pointer_position)
-        except struct.error:
-            pass
         self.rewind_file()
         log.info("Found {0} frames.".format(len(self.frame_positions)))
 
