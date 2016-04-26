@@ -148,6 +148,21 @@ class HitSeriesA(object):
 
 
 cdef class CyHit:
+    """Represents a hit on a PMT.
+
+    Parameters
+    ----------
+    id : float
+    dom_id : float
+    time : float
+    tot : float
+    channel_id : float
+    pmt_id : float
+    triggered : bool
+    pos : Position or numpy.ndarray
+    dir : Position or numpy.ndarray
+
+    """
     cdef public float id, dom_id, time, tot, channel_id, pmt_id
     cdef public bint triggered
     cdef public np.ndarray pos
