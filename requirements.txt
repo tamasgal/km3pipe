@@ -5,3 +5,4 @@ numpy
 ipython
 pandas
 cython
+sphinx_rtd_theme
