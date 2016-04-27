@@ -160,7 +160,7 @@ cdef class CyHit:
     pmt_id : float
     triggered : bool
     pos : Position or numpy.ndarray
-    dir : Position or numpy.ndarray
+    dir : Direction or numpy.ndarray
 
     """
     cdef public float id, dom_id, time, tot, channel_id, pmt_id
