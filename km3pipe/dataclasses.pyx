@@ -1,5 +1,6 @@
 # coding=utf-8
 # Filename: dataclasses.py
+# cython: embedsignature=True
 # pylint: disable=W0232,C0103,C0111
 """
 ...
@@ -25,6 +26,7 @@ __all__ = ('Point', 'Position', 'Direction', 'HitSeries', 'HitSeriesA', 'Hit',
 point_dt = np.dtype([('x', float), ('y', float), ('z', float)])
 
 def Point(vector, as_recarray=True):
+    """A point as numpy.recarray with x, y and z attributes."""
     vector = np.array(vector)
     if as_recarray:
         return vector.view(point_dt, np.recarray)
