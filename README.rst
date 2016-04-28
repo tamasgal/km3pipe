@@ -8,7 +8,7 @@ The framework tries to standardise the way the data is processed within our coll
 Although it is mainly designed for the KM3NeT neutrino detectors, it can easily be extended to support any kind of data formats. Feel free to get in touch if you're looking for a small, versatile framework which provides a quite straightforward module system to make code exchange between your project members as easy as possible.
 KM3Pipe already comes with several types of `Pumps` (the modules which act as a data-parser/reader) so it should be easy to find an example to implement your owns. As of version 1.2.3 you find `Pumps` based on popular formats like HDF5 (https://www.hdfgroup.org), ROOT (https://root.cern.ch) but also some very specialised project internal binary data formats, which on the other hand can act templates for your own ones. Just have a look at the `pumps` subpackage and of course the documention if you're interested!
 
-Read the docs at http://km3pipe.readthedocs.org
+Read the docs at http://km3pipe.readthedocs.io
 
 KM3NeT related documentation (internal) at http://wiki.km3net.de/index.php/KM3Pipe
 
@@ -22,7 +22,7 @@ To install the latest stable version:
 
     pip install km3pipe
     
-If you're not using a virtual environment (https://virtualenvwrapper.readthedocs.org), you can install it in your own home directory, however I recommend using virtual environments for any Python related stuff.
+If you're not using a virtual environment (https://virtualenvwrapper.readthedocs.io), you can install it in your own home directory, however I recommend using virtual environments for any Python related stuff.
 
 .. code-block:: bash
 
@@ -46,5 +46,5 @@ The following video shows how to install the latest developer version and run th
     :target: https://travis-ci.org/tamasgal/km3pipe
 
 .. image:: https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat
-    :target: http://km3pipe.readthedocs.org/en/latest/
+    :target: http://km3pipe.readthedocs.io/en/latest/
 
