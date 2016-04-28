@@ -207,3 +207,78 @@ class HDF5Sink(Module):
 
     def finish(self):
         self.h5_file.close()
+
+
+POS_ATOM = tables.FloatAtom(shape=3)
+
+
+class HDF5TableSink(Module):
+    def __init__(self, **context):
+        """A Module to convert (KM3NeT) ROOT files to HDF5."""
+        super(self.__class__, self).__init__(**context)
+        self.filename = self.get('filename') or 'dump.h5'
+        self.hits = {}
+        self.mc_hits = {}
+        self.mc_tracks = {}
+        self.h5_file = h5py.File(self.filename, 'w')
+        self.index = 1
+        self._prepare_hits()
+        self._prepare_hits(group_name='mc_hits')
+        self._prepare_tracks(group_name='mc_tracks')
+        print("Processing {0}...".format(self.filename))
+
+    def _prepare_hits(self, group_name='hits'):
+        hit_group = self.h5_file.create_group('/', group_name)
+        self.h5_file.create_vlarray(hit_group, 'channel_id', atom=tables.IntAtom)
+        self.h5_file.create_vlarray(hit_group, 'dir', atom=POS_ATOM)
+        self.h5_file.create_vlarray(hit_group, 'dom_id', atom=tables.IntAtom)
+        self.h5_file.create_vlarray(hit_group, 'pmt_id', atom=tables.IntAtom)
+        self.h5_file.create_vlarray(hit_group, 'pos', atom=POS_ATOM)
+        self.h5_file.create_vlarray(hit_group, 'time', atom=tables.FloatAtom)
+        self.h5_file.create_vlarray(hit_group, 'tot', atom=tables.FloatAtom)
+        self.h5_file.create_vlarray(hit_group, 'triggered', atom=tables.BoolAtom)
+
+    def _prepare_tracks(self, group_name='tracks'):
+        track_group = self.h5_file.create_group('/', group_name)
+        self.h5_file.create_vlarray(track_group, 'dir', atom=POS_ATOM)
+        self.h5_file.create_vlarray(track_group, 'energy', atom=tables.FloatAtom)
+        self.h5_file.create_vlarray(track_group, 'id', atom=tables.IntAtom)
+        self.h5_file.create_vlarray(track_group, 'pos', atom=POS_ATOM)
+        self.h5_file.create_vlarray(track_group, 'time' atom=tables.FloatAtom)
+        self.h5_file.create_vlarray(track_group, 'type' atom=tables.IntAtom)
+
+    def _dump_hits(self, hits, target):
+        target.channel_id.append(hits.channel_id)
+        target.dir.append(hits.dir)
+        target.dom_id.append(hits.dom_id)
+        target.pmt_id.append(hits.pmt_id)
+        target.pos.append(hits.pos)
+        target.time.append(hits.time)
+        target.tot.append(hits.tot)
+        target.triggered.append(hits.triggered)
+
+    def _dump_tracks(self, tracks, target):
+        target.dir.append(tracks.dir)
+        target.energy.append(tracks.energy)
+        target.id.append(tracks.id)
+        target.pos.append(tracks.pos)
+        target.time.append(tracks.time)
+        target.type.append(tracks.type)
+
+    def process(self, blob):
+        # ignore evt_info so far
+        #self._add_event_info(blob, target=target+'info')
+        if 'Hits' in blob:
+            self._dump_hits(blob['Hits'], target=self.h5_file.root.hits)
+
+        if 'MCHits' in blob:
+            self._dump_hits(blob['MCHits'], target=self.h5_file.root.mc_hits)
+
+        if 'MCTracks' in blob:
+            self._dump_tracks(blob['MCTracks'], target=self.h5_file.root.mc_tracks)
+
+        self.index += 1
+        return blob
+
+    def finish(self):
+        self.h5_file.close()
