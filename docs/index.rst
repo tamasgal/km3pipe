@@ -3,13 +3,13 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to KM3Pipe's documentation!
-===================================
+.. include:: ../README.rst
 
-Contents:
+Contents
+========
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
 
    quick_start
    data_structures
@@ -20,7 +20,6 @@ Contents:
    pipeinspector
    api/modules
 
-.. include:: ../README.rst
 
 Indices and tables
 ==================
