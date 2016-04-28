@@ -217,9 +217,6 @@ class HDF5TableSink(Module):
         """A Module to convert (KM3NeT) ROOT files to HDF5."""
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
-        self.hits = {}
-        self.mc_hits = {}
-        self.mc_tracks = {}
         self.h5_file = h5py.File(self.filename, 'w')
         self.index = 1
         self._prepare_hits()
