@@ -244,7 +244,7 @@ class HDF5Sink(Module):
         self._add_event_info(blob, target=target+'info')
 
         if 'Hits' in blob:
-            self._add_hits(blob['Hits'], target=target+'hits')
+            self._dump_hits(blob['Hits'], target=target+'hits')
 
         if 'MCHits' in blob:
             self._add_hits(blob['MCHits'], target=target+'mc_hits')
@@ -283,17 +283,14 @@ class HDF5Sink(Module):
 
         self._dump_dict(info, target)
 
-    def _add_hits(self, hits, target):
-        hits_dict = defaultdict(list)
+    def _dump_hits(self, hits, target):
         for hit in hits:
-            hits_dict['id'].append(hit.id)
-            hits_dict['pmt_id'].append(hit.pmt_id)
-            hits_dict['time'].append(hit.time)
-            hits_dict['tot'].append(hit.tot)
-            hits_dict['triggered'].append(hit.triggered)
-            hits_dict['dom_id'].append(hit.dom_id)
-            hits_dict['channel_id'].append(hit.channel_id)
-        self._dump_dict(hits_dict, target)
+            self.h5_file.create_dataset('time', data=hit.time)
+            self.h5_file.create_dataset('triggered', data=hit.triggered)
+            self.h5_file.create_dataset('tot', data=hit.tot)
+            self.h5_file.create_dataset('dom_id', data=hit.dom_id)
+            self.h5_file.create_dataset('pmt_id', data=hit.pmt_id)
+            self.h5_file.create_dataset('channel_id', data=hit.channel_id)
 
     def _add_tracks(self, tracks, target):
         tracks_dict = defaultdict(list)
@@ -313,9 +310,9 @@ class HDF5Sink(Module):
     def _dump_dict(self, data, target):
         if not data:
             return
-        df = pd.DataFrame(data)
-        rec = df.to_records(index=False)
-        self.h5_file.create_dataset(target, data=rec)
+        for key, vec in data.items():
+            arr = np.array(vec)
+            self.h5_file.create_dataset(target, data=arr)
 
     def finish(self):
         self.h5_file.close()
