@@ -5,7 +5,7 @@ Converts hits in a Jpp-ROOT file to HDF5.
 """
 from km3pipe import Pipeline
 from km3pipe.pumps.aanet import AanetPump
-from km3pipe.pumps import HDF5Sink
+from km3pipe.pumps import HDF5SinkLegacy
 
 import sys
 
@@ -18,5 +18,5 @@ OUTPUTFILEPATH = sys.argv[2]
 
 pipe = Pipeline()
 pipe.attach(AanetPump, filename=FILEPATH)
-pipe.attach(HDF5Sink, filename=OUTPUTFILEPATH)
+pipe.attach(HDF5SinkLegacy, filename=OUTPUTFILEPATH)
 pipe.drain()

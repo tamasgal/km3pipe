@@ -110,7 +110,7 @@ class HDF5Pump(Pump):
             yield self.get_blob(i)
 
 
-class HDF5Sink(Module):
+class HDF5SinkLegacy(Module):
     def __init__(self, **context):
         """A Module to convert (KM3NeT) ROOT files to HDF5."""
         super(self.__class__, self).__init__(**context)
@@ -220,7 +220,7 @@ class HDF5Sink(Module):
         h5_file.close()
 
 
-class HDF5Sink2(Module):
+class HDF5Sink(Module):
     def __init__(self, **context):
         """A Module to convert (KM3NeT) ROOT files to HDF5."""
         super(self.__class__, self).__init__(**context)
