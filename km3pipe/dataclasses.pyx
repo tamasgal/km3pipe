@@ -1,5 +1,6 @@
 # coding=utf-8
 # Filename: dataclasses.py
+# cython: embedsignature=True
 # pylint: disable=W0232,C0103,C0111
 """
 ...
@@ -25,7 +26,8 @@ __all__ = ('Point', 'Position', 'Direction', 'HitSeries', 'HitSeriesA', 'Hit',
 point_dt = np.dtype([('x', float), ('y', float), ('z', float)])
 
 def Point(vector, as_recarray=True):
-    vector = np.array(vector)
+    """A point as numpy.recarray with optional x, y and z attributes."""
+    vector = np.array(vector, dtype=np.float)
     if as_recarray:
         return vector.view(point_dt, np.recarray)
     else:
@@ -148,13 +150,28 @@ class HitSeriesA(object):
 
 
 cdef class CyHit:
+    """Represents a hit on a PMT.
+
+    Parameters
+    ----------
+    id : float
+    dom_id : float
+    time : float
+    tot : float
+    channel_id : float
+    pmt_id : float
+    triggered : bool
+    pos : Position or numpy.ndarray
+    dir : Direction or numpy.ndarray
+
+    """
     cdef public float id, dom_id, time, tot, channel_id, pmt_id
     cdef public bint triggered
     cdef public np.ndarray pos
     cdef public np.ndarray dir
 
-    def __cinit__(self, float id, float dom_id, float time, float tot,
-                  float channel_id, bint triggered, float pmt_id):
+    def __cinit__(self, int id, int dom_id, int time, int tot,
+                  int channel_id, bint triggered, int pmt_id):
         self.id = id
         self.dom_id = dom_id
         self.time = time

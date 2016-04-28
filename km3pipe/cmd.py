@@ -24,9 +24,9 @@ from km3pipe import version
 def tohdf5(input_file, output_file, separate_events=False):
     """Convert ROOT file to HDF5 file"""
     from km3pipe import Pipeline  # noqa
-    from km3pipe.pumps import AanetPump, HDF5Sink, HDF5Sink2  # noqa
+    from km3pipe.pumps import AanetPump, HDF5Sink, HDF5SinkLegacy  # noqa
 
-    sink = HDF5Sink2 if separate_events else HDF5Sink
+    sink = HDF5Sink if separate_events else HDF5SinkLegacy
 
     pipe = Pipeline()
     pipe.attach(AanetPump, filename=input_file)

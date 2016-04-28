@@ -1,5 +1,6 @@
 # coding=utf-8
 # Filename: tools.pyx
+# cython: embedsignature=True
 # pylint: disable=C0103
 """
 Some unsorted, frequently used logic.
