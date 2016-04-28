@@ -22,6 +22,7 @@ except ImportError:
 
 try:
     import h5py
+    import tables
 except ImportError:
     print("The HDF5 Sink and Bucket need h5py: pip install h5py")
 
