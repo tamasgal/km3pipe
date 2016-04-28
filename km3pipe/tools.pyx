@@ -339,3 +339,19 @@ def ignored(*exceptions):
         yield
     except exceptions:
         pass
+
+
+try:
+    dict.iteritems
+except AttributeError:
+    # for Python 3
+    def itervalues(d):
+        return iter(d.values())
+    def iteritems(d):
+        return iter(d.items())
+else:
+    # for Python 2
+    def itervalues(d):
+        return d.itervalues()
+    def iteritems(d):
+        return d.iteritems()
