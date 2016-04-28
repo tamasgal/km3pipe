@@ -168,8 +168,8 @@ cdef class CyHit:
     cdef public np.ndarray pos
     cdef public np.ndarray dir
 
-    def __cinit__(self, float id, float dom_id, float time, float tot,
-                  float channel_id, bint triggered, float pmt_id):
+    def __cinit__(self, int id, int dom_id, int time, int tot,
+                  int channel_id, bint triggered, int pmt_id):
         self.id = id
         self.dom_id = dom_id
         self.time = time
