@@ -1,9 +1,9 @@
-.. _data_formats:
+.. _file_formats:
 
-Data Formats
+File Formats
 ============
 
-In the following you find a description of the data formats used to store
+In the following you find a description of the file formats used to store
 event and reconstruction information for KM3NeT simulations and real data.
 
 HDF5
