@@ -217,7 +217,7 @@ class HDF5TableSink(Module):
         """A Module to convert (KM3NeT) ROOT files to HDF5."""
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
-        self.h5_file = h5py.File(self.filename, 'w')
+        self.h5_file = tables.File(self.filename, 'w')
         self.index = 1
         self._prepare_hits()
         self._prepare_hits(group_name='mc_hits')
@@ -279,3 +279,77 @@ class HDF5TableSink(Module):
 
     def finish(self):
         self.h5_file.close()
+
+
+class HDF5TablePump(Pump):
+    """Provides a pump for KM3NeT HDF5 files"""
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.filename = self.get('filename')
+        if os.path.isfile(self.filename):
+            self._h5file = tables.File(self.filename)
+        else:
+            raise IOError("No such file or directory: '{0}'"
+                          .format(self.filename))
+        self.index = None
+        self._reset_index()
+
+    def process(self, blob):
+        try:
+            blob = self.get_blob(self.index)
+        except KeyError:
+            self._reset_index()
+            raise StopIteration
+        self.index += 1
+        return blob
+
+    def get_blob(self, index):
+        blob = {}
+        n_event = index + 1
+        # TODO
+        tot = self._h5file.root.hits.tot[index]
+        time = self._h5file.root.hits.time[index]
+        blob['Hits'] = HitSeries.from_hdf5(raw_hits)
+        blob['EventInfo'] = self._h5file.get('/event/{0}/info'.format(n_event))
+        return blob
+
+    def finish(self):
+        """Clean everything up"""
+        self._h5file.close()
+
+    def _reset_index(self):
+        """Reset index to default value"""
+        self.index = 0
+
+    def __len__(self):
+        return self._n_events
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        if self.index >= self._n_events:
+            self._reset_index()
+            raise StopIteration
+        blob = self.get_blob(self.index)
+        self.index += 1
+        return blob
+
+    def __getitem__(self, index):
+        if isinstance(index, int):
+            return self.get_blob(index)
+        elif isinstance(index, slice):
+            return self._slice_generator(index)
+        else:
+            raise TypeError("index must be int or slice")
+
+    def _slice_generator(self, index):
+        """A simple slice generator for iterations"""
+        start, stop, step = index.indices(len(self))
+        for i in range(start, stop, step):
+            yield self.get_blob(i)
+
