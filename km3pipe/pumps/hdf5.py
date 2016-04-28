@@ -315,23 +315,3 @@ class HDF5Sink2(Module):
 
     def finish(self):
         self.h5_file.close()
-
-
-class HDF5Bucket(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
-        self.filename = self.get("filename")
-        self.prefix = self.get("prefix")
-        self.store = defaultdict(list)
-
-    def process(self, blob):
-        for key, val in blob[self.prefix].items():
-            self.store[key].append(val)
-
-    def finish(self):
-        h5 = h5py.File(self.filename, mode='w')
-        loc = '/' + self.prefix + '/'
-        h5.create_group(loc)
-        for key, data in self.store.items():
-            h5.create_dataset(loc, key, np.array(data))
-        h5.close()
