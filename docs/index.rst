@@ -13,6 +13,7 @@ Contents:
 
    quick_start
    data_structures
+   data_formats
    help_modules
    help_pumps
    examples
