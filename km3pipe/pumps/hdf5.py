@@ -43,9 +43,13 @@ class HDF5Pump(Pump):
         if os.path.isfile(self.filename):
             self._h5file = h5py.File(self.filename)
             try:
-                self._n_events = len(self._h5file['/event'])
+                evt_group = self._h5file['/event']
             except KeyError:
                 raise KeyError("No events found.")
+            try:
+                self._n_events = evt_group.attrs['n_events']
+            except KeyError:
+                self._n_events = len(group)
         else:
             raise IOError("No such file or directory: '{0}'"
                           .format(self.filename))
