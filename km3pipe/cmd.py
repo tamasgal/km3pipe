@@ -30,9 +30,7 @@ def tohdf5(input_file, output_file, use_tables=True):
 
     pipe = Pipeline()
     pipe.attach(AanetPump, filename=input_file)
-    pipe.attach(sink,
-                filename=output_file,
-                separate_events=separate_events)
+    pipe.attach(sink, filename=output_file)
     pipe.drain()
 
 
