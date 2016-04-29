@@ -358,6 +358,12 @@ class TrackSeries(object):
         if self._energy is None:
             self._energy = np.array([t.energy for t in self._tracks])
         return self._energy
+    
+    @property
+    def type(self):
+        if self._type is None:
+            self._type = np.array([t.type for t in self._tracks])
+        return self._type
 
     @property
     def pos(self):
