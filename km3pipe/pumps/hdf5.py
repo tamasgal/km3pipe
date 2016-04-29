@@ -116,33 +116,34 @@ class HDF5TablePump(Pump):
         self.index += 1
         return blob
 
-    def _get_hits(self, index, where):
-        _channel_id = where.channel_id[index]
-        _dom_id = where.dom_id[index]
-        _id = where.id[index]
-        _pmt_id = where.pmt_id[index]
-        _time = where.time[index]
-        _tot = where.tot[index]
-        _triggered = where.triggered[index]
+    def _get_hits(self, index, table_name='hits', where='/'):
+        table = self.h5_file.get_node(where, table_name)
+        _channel_id = table.channel_id[index]
+        _dom_id = table.dom_id[index]
+        _id = table.id[index]
+        _pmt_id = table.pmt_id[index]
+        _time = table.time[index]
+        _tot = table.tot[index]
+        _triggered = table.triggered[index]
         return HitSeries.from_arrays(_channel_id, _dom_id, _id, _pmt_id,
                                      _time, _tot, _triggered)
 
-    def _get_tracks(self, index, where):
-        _dir = where.dir[index]
-        _energy = where.energy[index]
-        _id = where.id[index]
-        _pos = where.pos[index]
-        _time = where.time[index]
-        _type = where.type[index]
+    def _get_tracks(self, index, table_name='tracks', where='/'):
+        table = self.h5_file.get_node(where, table_name)
+        _dir = table.dir[index]
+        _energy = table.energy[index]
+        _id = table.id[index]
+        _pos = table.pos[index]
+        _time = table.time[index]
+        _type = table.type[index]
         return TrackSeries.from_arrays(_dir, _energy, _id, _pos,
                                       _time, _type)
 
     def get_blob(self, index):
         blob = {}
-        n_event = index + 1  # noqa
-        blob['Hits'] = self._get_hits(index, self.h5_file.root.hits)
-        blob['MCHits'] = self._get_hits(index, self.h5_file.root.mc_hits)
-        blob['MCTracks'] = self._get_tracks(index, self.h5_file.root.mc_tracks)
+        blob['Hits'] = self._get_hits(index, table_name='hits')
+        blob['MCHits'] = self._get_hits(index, table_name='mc_hits')
+        blob['MCTracks'] = self._get_tracks(index, table_name='mc_tracks')
         return blob
 
     def finish(self):
