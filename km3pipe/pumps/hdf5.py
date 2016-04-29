@@ -245,12 +245,12 @@ class HDF5TableSink(Module):
         h5_file.create_vlarray(track_group, 'type', atom=tables.IntAtom())
 
     def _dump_hits(self, hits, target):
-        target.channel_id.append(hits.channel_id)
-        target.dir.append(hits.dir)
+        # target.channel_id.append(hits.channel_id)
+        # target.dir.append(hits.dir)
         target.dom_id.append(hits.dom_id)
         target.id.append(hits.id)
         target.pmt_id.append(hits.pmt_id)
-        target.pos.append(hits.pos)
+        # target.pos.append(hits.pos)
         target.time.append(hits.time)
         target.tot.append(hits.tot)
         target.triggered.append(hits.triggered)
