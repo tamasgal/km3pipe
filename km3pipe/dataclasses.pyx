@@ -226,7 +226,7 @@ class CHitSeries(object):
     def from_arrays(cls, ids, dom_ids, times, tots, channel_ids,
                     triggereds, pmt_ids):
         args = ids, dom_ids, times, tots, channel_ids, triggereds, pmt_ids
-        hits = cls([CyHit(*hit_args) for hit_args in zip(args)])
+        hits = cls([CyHit(*hit_args) for hit_args in zip(*args)])
         hits._id = ids
         hits._time = times
         hits._id = ids

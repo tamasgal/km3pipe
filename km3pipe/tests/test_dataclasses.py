@@ -10,7 +10,7 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 
 from km3pipe.testing import TestCase
-from km3pipe.dataclasses import Position, Direction_, HitSeries
+from km3pipe.dataclasses import Position, Direction_, HitSeries, CHitSeries
 
 
 class TestPosition(TestCase):
@@ -132,3 +132,20 @@ class TestHitSeries(TestCase):
         hit_series[1].dir = dir2
 
         self.assertTrue(2, len(hit_series.dir))
+
+
+class TestCHitSeries(TestCase):
+
+    def test_from_arrays(self):
+        n = 10
+        ids = np.array(range(n))
+        dom_ids = np.array(range(n))
+        times = np.array(range(n))
+        tots = np.array(range(n))
+        channel_ids = np.array(range(n))
+        triggereds = np.ones(n)
+        pmt_ids = np.array(range(n))
+
+        hits = CHitSeries.from_arrays(ids, dom_ids, times, tots, channel_ids,
+                                      triggereds, pmt_ids)
+        return hits
