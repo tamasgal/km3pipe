@@ -223,24 +223,26 @@ class HDF5TableSink(Module):
 
     def _prepare_hits(self, group_name='hits'):
         hit_group = self.h5_file.create_group('/', group_name)
-        self.h5_file.create_vlarray(hit_group, 'channel_id', atom=tables.IntAtom)
-        self.h5_file.create_vlarray(hit_group, 'dir', atom=POS_ATOM)
-        self.h5_file.create_vlarray(hit_group, 'dom_id', atom=tables.IntAtom)
-        self.h5_file.create_vlarray(hit_group, 'id', atom=tables.IntAtom)
-        self.h5_file.create_vlarray(hit_group, 'pmt_id', atom=tables.IntAtom)
-        self.h5_file.create_vlarray(hit_group, 'pos', atom=POS_ATOM)
-        self.h5_file.create_vlarray(hit_group, 'time', atom=tables.FloatAtom)
-        self.h5_file.create_vlarray(hit_group, 'tot', atom=tables.FloatAtom)
-        self.h5_file.create_vlarray(hit_group, 'triggered', atom=tables.BoolAtom)
+        h5_file = self.h5_file
+        h5_file.create_vlarray(hit_group, 'channel_id', atom=tables.Int8Atom())
+        h5_file.create_vlarray(hit_group, 'dir', atom=POS_ATOM)
+        h5_file.create_vlarray(hit_group, 'dom_id', atom=tables.IntAtom())
+        h5_file.create_vlarray(hit_group, 'id', atom=tables.IntAtom())
+        h5_file.create_vlarray(hit_group, 'pmt_id', atom=tables.IntAtom())
+        h5_file.create_vlarray(hit_group, 'pos', atom=POS_ATOM)
+        h5_file.create_vlarray(hit_group, 'time', atom=tables.IntAtom())
+        h5_file.create_vlarray(hit_group, 'tot', atom=tables.Int8Atom())
+        h5_file.create_vlarray(hit_group, 'triggered', atom=tables.BoolAtom())
 
     def _prepare_tracks(self, group_name='tracks'):
         track_group = self.h5_file.create_group('/', group_name)
-        self.h5_file.create_vlarray(track_group, 'dir', atom=POS_ATOM)
-        self.h5_file.create_vlarray(track_group, 'energy', atom=tables.FloatAtom)
-        self.h5_file.create_vlarray(track_group, 'id', atom=tables.IntAtom)
-        self.h5_file.create_vlarray(track_group, 'pos', atom=POS_ATOM)
-        self.h5_file.create_vlarray(track_group, 'time', atom=tables.FloatAtom)
-        self.h5_file.create_vlarray(track_group, 'type', atom=tables.IntAtom)
+        h5_file = self.h5_file
+        h5_file.create_vlarray(track_group, 'dir', atom=POS_ATOM)
+        h5_file.create_vlarray(track_group, 'energy', atom=tables.FloatAtom())
+        h5_file.create_vlarray(track_group, 'id', atom=tables.IntAtom())
+        h5_file.create_vlarray(track_group, 'pos', atom=POS_ATOM)
+        h5_file.create_vlarray(track_group, 'time', atom=tables.IntAtom())
+        h5_file.create_vlarray(track_group, 'type', atom=tables.IntAtom())
 
     def _dump_hits(self, hits, target):
         target.channel_id.append(hits.channel_id)
