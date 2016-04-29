@@ -137,11 +137,11 @@ class HDF5Sink(Module):
         if 'Hits' in blob:
             self._dump_hits(blob['Hits'], target=target + 'hits')
 
-        #if 'MCHits' in blob:
-        #    self._add_hits(blob['MCHits'], target=target + 'mc_hits')
+        if 'MCHits' in blob:
+            self._add_hits(blob['MCHits'], target=target + 'mc_hits')
 
-        #if 'MCTracks' in blob:
-        #    self._add_tracks(blob['MCTracks'], target=target + 'mc_tracks')
+        if 'MCTracks' in blob:
+            self._add_tracks(blob['MCTracks'], target=target + 'mc_tracks')
 
         self.index += 1
         return blob
@@ -217,8 +217,8 @@ class HDF5TableSink(Module):
         self.h5_file = tables.File(self.filename, 'w')
         self.index = 1
         self._prepare_hits()
-        self._prepare_hits(group_name='mc_hits')
-        self._prepare_tracks(group_name='mc_tracks')
+        #self._prepare_hits(group_name='mc_hits')
+        #self._prepare_tracks(group_name='mc_tracks')
         print("Processing {0}...".format(self.filename))
 
     def _prepare_hits(self, group_name='hits'):
@@ -271,8 +271,8 @@ class HDF5TableSink(Module):
         if 'Hits' in blob:
             self._dump_hits(blob['Hits'], table_name='hits')
 
-        if 'MCHits' in blob:
-            self._dump_hits(blob['MCHits'], table_name='mc_hits')
+        #if 'MCHits' in blob:
+        #    self._dump_hits(blob['MCHits'], table_name='mc_hits')
 
         # if 'MCTracks' in blob:
         #    self._dump_tracks(blob['MCTracks'], target=self.h5_file.root.mc_tracks)
