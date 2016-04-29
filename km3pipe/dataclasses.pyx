@@ -333,7 +333,7 @@ class TrackSeries(object):
         tracks._id = ids
         tracks._time = times
         tracks._energy = energies
-        tracks._types = types
+        tracks._type = types
         tracks._pos = positions
         tracks._pos = directions
         return tracks
