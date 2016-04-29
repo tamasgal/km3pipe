@@ -227,6 +227,7 @@ class CHitSeries(object):
                     triggereds, pmt_ids):
         args = ids, dom_ids, times, tots, channel_ids, triggereds, pmt_ids
         hits = cls([CyHit(*hit_args) for hit_args in zip(args)])
+        hits._id = ids
         hits._time = times
         hits._id = ids
         hits._tots = tots
@@ -238,6 +239,12 @@ class CHitSeries(object):
 
     def __iter__(self):
         return self
+
+    @property
+    def id(self):
+        if self._id is None:
+            self._id = np.array([h.id for h in self._hits])
+        return self._id
 
     @property
     def time(self):
