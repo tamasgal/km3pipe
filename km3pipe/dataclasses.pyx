@@ -165,7 +165,7 @@ cdef class Track:
     dir : Direction or numpy.ndarray
 
     """
-    cdef public int id, time, type
+    cdef public int id, time, energy, type
     cdef public np.ndarray pos
     cdef public np.ndarray dir
 
