@@ -331,8 +331,8 @@ class HDF5TablePump(Pump):
         blob = {}
         n_event = index + 1
         blob['Hits'] = self._get_hits(index, self.h5file.root.hits)
-        blob['MCHits'] = self._get_hits(index, self.h5file.root.mc_hits)
-        blob['MCTracks'] = self._get_tracks(index, self.h5file.root.mc_tracks)
+        #blob['MCHits'] = self._get_hits(index, self.h5file.root.mc_hits)
+        #blob['MCTracks'] = self._get_tracks(index, self.h5file.root.mc_tracks)
         # TODO
         #blob['EventInfo'] = self._h5file.get('/event/{0}/info'.format(n_event))
         return blob
