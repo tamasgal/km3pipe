@@ -213,12 +213,12 @@ class CHitSeries(object):
         self._index = 0
 
     @classmethod
-    def from_aanet(cls, hits):
+    def from_aanet_as_chit(cls, hits):
         return cls([CHit(h.id, h.dom_id, h.t, h.tot, ord(h.channel_id),
                     h.trig, h.pmt_id) for h in hits])
 
     @classmethod
-    def from_aanet_as_cyhit(cls, hits):
+    def from_aanet(cls, hits):
         return cls([CyHit(h.id, h.dom_id, h.t, h.tot, ord(h.channel_id),
                     h.trig, h.pmt_id) for h in hits])
 
