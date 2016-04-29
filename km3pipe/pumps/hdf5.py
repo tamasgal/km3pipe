@@ -244,7 +244,8 @@ class HDF5TableSink(Module):
         h5_file.create_vlarray(track_group, 'time', atom=tables.IntAtom())
         h5_file.create_vlarray(track_group, 'type', atom=tables.IntAtom())
 
-    def _dump_hits(self, hits, target):
+    def _dump_hits(self, hits, table_name='hits', where='/'):
+        target = self.h5_file.get_node(where, table_name)
         # target.channel_id.append(hits.channel_id)
         # target.dir.append(hits.dir)
         target.dom_id.append(hits.dom_id)
@@ -255,7 +256,8 @@ class HDF5TableSink(Module):
         target.tot.append(hits.tot)
         target.triggered.append(hits.triggered)
 
-    def _dump_tracks(self, tracks, target):
+    def _dump_tracks(self, tracks, table_name='tracks', where='/'):
+        target = self.h5_file.get_node(where, table_name)
         target.dir.append(tracks.dir)
         target.energy.append(tracks.energy)
         target.id.append(tracks.id)
@@ -267,10 +269,10 @@ class HDF5TableSink(Module):
         # ignore evt_info so far
         #self._add_event_info(blob, target=target+'info')
         if 'Hits' in blob:
-            self._dump_hits(blob['Hits'], target=self.h5_file.root.hits)
+            self._dump_hits(blob['Hits'], table_name='hits')
 
         if 'MCHits' in blob:
-            self._dump_hits(blob['MCHits'], target=self.h5_file.root.mc_hits)
+            self._dump_hits(blob['MCHits'], table_name='mc_hits')
 
         # if 'MCTracks' in blob:
         #    self._dump_tracks(blob['MCTracks'], target=self.h5_file.root.mc_tracks)
