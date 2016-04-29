@@ -157,13 +157,10 @@ cdef class Track:
 
     Parameters
     ----------
-    id : float
-    dom_id : float
-    time : float
-    tot : float
-    channel_id : float
-    pmt_id : float
-    triggered : bool
+    id : int
+    time : int
+    energy : float
+    type : int
     pos : Position or numpy.ndarray
     dir : Direction or numpy.ndarray
 
@@ -172,9 +169,10 @@ cdef class Track:
     cdef public np.ndarray pos
     cdef public np.ndarray dir
 
-    def __cinit__(self, int id, int time, int type, pos, dir):
+    def __cinit__(self, int id, int time, float energy, int type, pos, dir):
         self.id = id
         self.time = time
+        self.energy = energy
         self.type = type
         self.pos = pos
         self.dir = dir
@@ -310,4 +308,103 @@ class HitSeries(object):
 
 
 class TrackSeries(object):
-    pass
+    def __init__(self, tracks):
+        self._tracks = tracks
+        self._id = None
+        self._time = None
+        self._energy = None
+        self._type = None
+        self._pos = None
+        self._dir = None
+        self._index = 0
+
+    @classmethod
+    def from_aanet(cls, tracks):
+        return cls([Track(h.id, h.t, h.E, h.type,
+                          Position((h.pos.x, h.pos.y, h.pos.z)),
+                          Direction((h.dir.x, h.dir.y, h.dir.z)) for h in hits])
+
+    @classmethod
+    def from_arrays(cls, ids, times, energies, types, positions, directions):
+        args = ids, times, energies, types, positions, directions
+        tracks = cls([Track(*track_args) for track_args in zip(*args)])
+        tracks._id = ids
+        tracks._time = times
+        tracks._energy = energies
+        tracks._types = types
+        tracks._pos = positions
+        tracks._pos = directions
+        return hits
+
+    def __iter__(self):
+        return self
+
+    @property
+    def id(self):
+        if self._id is None:
+            self._id = np.array([t.id for t in self._tracks])
+        return self._id
+
+    @property
+    def time(self):
+        if self._time is None:
+            self._time = np.array([t.time for t in self._tracks])
+        return self._time
+
+    @property
+    def energy(self):
+        if self._energy is None:
+            self._energy = np.array([t.energy for t in self._tracks])
+        return self._energy
+
+    @property
+    def pos(self):
+        if self._pos is None:
+            self._pos = np.array([t.pos for t in self._tracks])
+        return self._pos
+
+    @property
+    def dir(self):
+        if self._dir is None:
+            self._dir = np.array([t.dir for t in self._tracks])
+        return self._dir
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        if self._index >= len(self):
+            self._index = 0
+            raise StopIteration
+        item = self._tracks[self._index]
+        self._index += 1
+        return item
+
+    def __len__(self):
+        return len(self._tracks)
+
+    def __getitem__(self, index):
+        if isinstance(index, int):
+            return self._tracks[index]
+        elif isinstance(index, slice):
+            return self._slice_generator(index)
+        else:
+            raise TypeError("index must be int or slice")
+
+    def _slice_generator(self, index):
+        """A simple slice generator for iterations"""
+        start, stop, step = index.indices(len(self))
+        for i in range(start, stop, step):
+            yield self._tracks[i]
+
+    def __str__(self):
+        n_tracks = len(self)
+        plural = 's' if n_tracks > 1 or n_hits == 0 else ''
+        return("TrackSeries with {0} track{1}.".format(len(self), plural))
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __insp__(self):
+        return '\n'.join([str(tracks) for hit in self._tracks])
