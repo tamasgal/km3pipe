@@ -202,18 +202,17 @@ class HitSeries(object):
                         np.nan, h.pmt_id) for h in hits])
 
     @classmethod
-    def from_arrays(cls, ids, dom_ids, times, tots, channel_ids,
-                    triggereds, pmt_ids):
-        args = ids, dom_ids, times, tots, channel_ids, triggereds, pmt_ids
+    def from_arrays(cls, channel_ids, dom_ids, ids, pmt_ids, times, tots,
+                    triggereds):
+        args = channel_ids, dom_ids, ids, pmt_ids, times, tots, triggereds
         hits = cls([Hit(*hit_args) for hit_args in zip(*args)])
-        hits._id = ids
-        hits._time = times
-        hits._id = ids
-        hits._tots = tots
-        hits._dom_id = dom_ids
         hits._channel_id = channel_ids
-        hits._triggered = triggereds
+        hits._dom_id = dom_ids
+        hits._id = ids
         hits._pmt_id = pmt_ids
+        hits._time = times
+        hits._tots = tots
+        hits._triggered = triggereds
         return hits
 
     def __iter__(self):
@@ -327,15 +326,15 @@ class TrackSeries(object):
                     for t in tracks])
 
     @classmethod
-    def from_arrays(cls, ids, times, energies, types, positions, directions):
-        args = ids, times, energies, types, positions, directions
+    def from_arrays(cls, directions, energies, ids, positions, times, types):
+        args = directions, energies, ids, positions, times, types
         tracks = cls([Track(*track_args) for track_args in zip(*args)])
-        tracks._id = ids
-        tracks._time = times
+        tracks._dir = directions
         tracks._energy = energies
-        tracks._type = types
+        tracks._id = ids
         tracks._pos = positions
-        tracks._pos = directions
+        tracks._time = times
+        tracks._type = types
         return tracks
 
     def __iter__(self):
