@@ -52,12 +52,12 @@ class HDF5TableSink(Module):
     def _prepare_hits(self, group_name='hits', where='/'):
         hit_group = self.h5_file.create_group(where, group_name)
         h5_file = self.h5_file
-        h5_file.create_vlarray(hit_group, 'channel_id', atom=tables.Int8Atom())
-        h5_file.create_vlarray(hit_group, 'dom_id', atom=tables.IntAtom())
-        h5_file.create_vlarray(hit_group, 'id', atom=tables.IntAtom())
-        h5_file.create_vlarray(hit_group, 'pmt_id', atom=tables.IntAtom())
+        h5_file.create_vlarray(hit_group, 'channel_id', atom=tables.UInt8Atom())
+        h5_file.create_vlarray(hit_group, 'dom_id', atom=tables.UIntAtom())
+        h5_file.create_vlarray(hit_group, 'id', atom=tables.UIntAtom())
+        h5_file.create_vlarray(hit_group, 'pmt_id', atom=tables.UIntAtom())
         h5_file.create_vlarray(hit_group, 'time', atom=tables.IntAtom())
-        h5_file.create_vlarray(hit_group, 'tot', atom=tables.Int8Atom())
+        h5_file.create_vlarray(hit_group, 'tot', atom=tables.UInt8Atom())
         h5_file.create_vlarray(hit_group, 'triggered', atom=tables.BoolAtom())
 
     def _prepare_tracks(self, group_name='tracks', where='/'):
@@ -65,14 +65,13 @@ class HDF5TableSink(Module):
         h5_file = self.h5_file
         h5_file.create_vlarray(track_group, 'dir', atom=POS_ATOM)
         h5_file.create_vlarray(track_group, 'energy', atom=tables.FloatAtom())
-        h5_file.create_vlarray(track_group, 'id', atom=tables.IntAtom())
+        h5_file.create_vlarray(track_group, 'id', atom=tables.UIntAtom())
         h5_file.create_vlarray(track_group, 'pos', atom=POS_ATOM)
         h5_file.create_vlarray(track_group, 'time', atom=tables.IntAtom())
         h5_file.create_vlarray(track_group, 'type', atom=tables.IntAtom())
 
     def _write_hits(self, hits, table_name='hits', where='/'):
         target = self.h5_file.get_node(where, table_name)
-        print(hits)
         target.channel_id.append(hits.channel_id)
         target.dom_id.append(hits.dom_id)
         target.id.append(hits.id)
