@@ -38,5 +38,10 @@ def main():
     from docopt import docopt
     arguments = docopt(__doc__, version=version)
 
+    try:
+        n_events = int(arguments['-n'])
+    except TypeError:
+        n_events = None
+
     if arguments['tohdf5']:
-        tohdf5(arguments['-i'], arguments['-o'], int(arguments['-n']))
+        tohdf5(arguments['-i'], arguments['-o'], n_events)
