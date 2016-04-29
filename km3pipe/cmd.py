@@ -5,7 +5,7 @@ KM3Pipe command line utility.
 
 Usage:
     km3pipe test
-    km3pipe tohdf5 -i FILE -o FILE
+    km3pipe tohdf5 [-n EVENTS] -i FILE -o FILE
     km3pipe (-h | --help)
     km3pipe --version
 
@@ -13,6 +13,7 @@ Options:
     -h --help  Show this screen.
     -i FILE    Input file.
     -o FILE    Output file.
+    -n EVENTS  Number of events.
 
 """
 from __future__ import division, absolute_import, print_function
@@ -21,7 +22,7 @@ from km3pipe import version
 from km3modules import StatusBar
 
 
-def tohdf5(input_file, output_file):
+def tohdf5(input_file, output_file, n_events):
     """Convert ROOT file to HDF5 file"""
     from km3pipe import Pipeline  # noqa
     from km3pipe.pumps import AanetPump, HDF5TableSink  # noqa
@@ -30,12 +31,13 @@ def tohdf5(input_file, output_file):
     pipe.attach(AanetPump, filename=input_file)
     pipe.attach(StatusBar, every=1000)
     pipe.attach(HDF5TableSink, filename=output_file)
-    pipe.drain()
+    pipe.drain(n_events)
 
 
 def main():
     from docopt import docopt
     arguments = docopt(__doc__, version=version)
+    print(arguments)
 
     if arguments['tohdf5']:
-        tohdf5(arguments['-i'], arguments['-o'])
+        tohdf5(arguments['-i'], arguments['-o'], arguments['-n'])
