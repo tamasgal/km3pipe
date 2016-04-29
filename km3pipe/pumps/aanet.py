@@ -83,8 +83,8 @@ class AanetPump(Pump):
                 blob = {'Evt': event,
                         'Hits': HitSeries.from_aanet(event.hits),
                         'MCHits': HitSeries.from_aanet(event.mc_hits),
-                        'Tracks': event.trks,
-                        'MCTracks': event.mc_trks,
+                        'Tracks': TrackSeries.from_aanet(event.trks),
+                        'MCTracks': TrackSeries.from_aanet(event.mc_trks),
                         'filename': filename,
                         'Header': self.header}
                 yield blob
