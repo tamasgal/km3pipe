@@ -45,8 +45,8 @@ class HDF5TableSink(Module):
         self.h5_file = tables.File(self.filename, 'w')
         self.index = 1
         self._prepare_hits()
-        #self._prepare_hits(group_name='mc_hits')
-        #self._prepare_tracks(group_name='mc_tracks')
+        self._prepare_hits(group_name='mc_hits')
+        self._prepare_tracks(group_name='mc_tracks')
         print("Processing {0}...".format(self.filename))
 
     def _prepare_hits(self, group_name='hits', where='/'):
