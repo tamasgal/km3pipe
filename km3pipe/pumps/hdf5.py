@@ -35,6 +35,8 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 __author__ = 'tamasgal'
 
+POS_ATOM = tables.FloatAtom(shape=3)
+
 
 class HDF5Pump(Pump):
     """Provides a pump for KM3NeT HDF5 files"""
@@ -208,8 +210,6 @@ class HDF5Sink(Module):
     def finish(self):
         self.h5_file.close()
 
-
-POS_ATOM = tables.FloatAtom(shape=3)
 
 
 class HDF5TableSink(Module):
