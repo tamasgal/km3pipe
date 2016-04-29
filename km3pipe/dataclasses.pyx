@@ -125,12 +125,12 @@ cdef class Hit:
 
     Parameters
     ----------
-    id : float
-    dom_id : float
-    time : float
-    tot : float
-    channel_id : float
-    pmt_id : float
+    id : int
+    dom_id : int
+    time : int
+    tot : int
+    channel_id : int
+    pmt_id : int
     triggered : bool
     pos : Position or numpy.ndarray
     dir : Direction or numpy.ndarray
@@ -150,6 +150,34 @@ cdef class Hit:
         self.channel_id = channel_id
         self.triggered = triggered
         self.pmt_id = pmt_id
+
+
+cdef class Track:
+    """Represents a particle track.
+
+    Parameters
+    ----------
+    id : float
+    dom_id : float
+    time : float
+    tot : float
+    channel_id : float
+    pmt_id : float
+    triggered : bool
+    pos : Position or numpy.ndarray
+    dir : Direction or numpy.ndarray
+
+    """
+    cdef public int id, time, type
+    cdef public np.ndarray pos
+    cdef public np.ndarray dir
+
+    def __cinit__(self, int id, int time, int type, pos, dir):
+        self.id = id
+        self.time = time
+        self.type = type
+        self.pos = pos
+        self.dir = dir
 
 
 class HitSeries(object):
