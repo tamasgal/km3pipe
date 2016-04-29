@@ -11,11 +11,6 @@ from collections import defaultdict
 import os.path
 
 try:
-    import pandas as pd
-except ImportError:
-    print("The HDF5 pump needs pandas: pip install pandas")
-
-try:
     import numpy as np
 except ImportError:
     print("The HDF5 Bucket needs numpy: pip install numpy")
@@ -52,7 +47,7 @@ class HDF5Pump(Pump):
             try:
                 self._n_events = evt_group.attrs['n_events']
             except KeyError:
-                self._n_events = len(group)
+                self._n_events = len(evt_group)
         else:
             raise IOError("No such file or directory: '{0}'"
                           .format(self.filename))
@@ -241,8 +236,8 @@ class HDF5TableSink(Module):
         self.h5_file.create_vlarray(track_group, 'energy', atom=tables.FloatAtom)
         self.h5_file.create_vlarray(track_group, 'id', atom=tables.IntAtom)
         self.h5_file.create_vlarray(track_group, 'pos', atom=POS_ATOM)
-        self.h5_file.create_vlarray(track_group, 'time' atom=tables.FloatAtom)
-        self.h5_file.create_vlarray(track_group, 'type' atom=tables.IntAtom)
+        self.h5_file.create_vlarray(track_group, 'time', atom=tables.FloatAtom)
+        self.h5_file.create_vlarray(track_group, 'type', atom=tables.IntAtom)
 
     def _dump_hits(self, hits, target):
         target.channel_id.append(hits.channel_id)

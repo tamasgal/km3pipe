@@ -21,18 +21,16 @@ from __future__ import division, absolute_import, print_function
 from km3pipe import version
 
 
-def tohdf5(input_file, output_file, separate_events=False):
+def tohdf5(input_file, output_file, use_tables=True):
     """Convert ROOT file to HDF5 file"""
     from km3pipe import Pipeline  # noqa
-    from km3pipe.pumps import AanetPump, HDF5Sink, HDF5SinkLegacy  # noqa
+    from km3pipe.pumps import AanetPump, HDF5Sink, HDF5TableSink  # noqa
 
-    sink = HDF5Sink if separate_events else HDF5SinkLegacy
+    sink = HDF5TableSink if use_tables else HDF5Sink
 
     pipe = Pipeline()
     pipe.attach(AanetPump, filename=input_file)
-    pipe.attach(sink,
-                filename=output_file,
-                separate_events=separate_events)
+    pipe.attach(sink, filename=output_file)
     pipe.drain()
 
 
