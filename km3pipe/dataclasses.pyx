@@ -329,6 +329,9 @@ class CHitSeries(object):
         return '\n'.join([str(hit) for hit in self._hits])
 
 
+class TrackSeries(object):
+    pass
+
 class HitSeries(object):
     @classmethod
     def from_hdf5(cls, data):
