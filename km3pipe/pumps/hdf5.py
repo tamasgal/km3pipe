@@ -26,7 +26,7 @@ except ImportError:
     print("The HDF5 Sink and Bucket need pytables: pip install pytables")
 
 from km3pipe import Pump, Module
-from km3pipe.dataclasses import HitSeries
+from km3pipe.dataclasses import HitSeries, TrackSeries
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -311,7 +311,6 @@ class HDF5TablePump(Pump):
         hits['time'] = where.time[index]
         hits['tot'] = where.tot[index]
         hits['triggered'] = where.triggered[index]
-        # TODO: to hitseries
         return HitSeries.from_dict(hits)
 
     def _get_tracks(self, index, where):
@@ -322,7 +321,6 @@ class HDF5TablePump(Pump):
         tracks['pos'] = where.pos[index]
         tracks['time'] = where.time[index]
         tracks['type'] = where.type[index]
-        # TODO: to hitseries
         return TrackSeries.from_dict(tracks)
 
     def get_blob(self, index):
@@ -374,4 +372,3 @@ class HDF5TablePump(Pump):
         start, stop, step = index.indices(len(self))
         for i in range(start, stop, step):
             yield self.get_blob(i)
-
