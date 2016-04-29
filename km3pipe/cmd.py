@@ -18,6 +18,7 @@ Options:
 from __future__ import division, absolute_import, print_function
 
 from km3pipe import version
+from km3modules import StatusBar
 
 
 def tohdf5(input_file, output_file):
@@ -27,6 +28,7 @@ def tohdf5(input_file, output_file):
 
     pipe = Pipeline()
     pipe.attach(AanetPump, filename=input_file)
+    pipe.attach(StatusBar, every=1000)
     pipe.attach(HDF5TableSink, filename=output_file)
     pipe.drain()
 
