@@ -270,8 +270,8 @@ class HDF5TableSink(Module):
         if 'MCHits' in blob:
             self._dump_hits(blob['MCHits'], target=self.h5_file.root.mc_hits)
 
-        if 'MCTracks' in blob:
-            self._dump_tracks(blob['MCTracks'], target=self.h5_file.root.mc_tracks)
+        # if 'MCTracks' in blob:
+        #    self._dump_tracks(blob['MCTracks'], target=self.h5_file.root.mc_tracks)
 
         self.index += 1
         return blob
