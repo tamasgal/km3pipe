@@ -39,4 +39,4 @@ def main():
     arguments = docopt(__doc__, version=version)
 
     if arguments['tohdf5']:
-        tohdf5(arguments['-i'], arguments['-o'], arguments['-n'])
+        tohdf5(arguments['-i'], arguments['-o'], int(arguments['-n']))
