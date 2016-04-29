@@ -8,23 +8,9 @@ Pumps for the EVT simulation dataformat.
 """
 from __future__ import division, absolute_import, print_function
 
-from collections import defaultdict
 import os.path
 
-try:
-    import numpy as np
-except ImportError:
-    print("The HDF5 Sink needs numpy: pip install numpy")
-
-try:
-    import h5py
-except ImportError:
-    print("The HDF5 Sink and Bucket need h5py: pip install h5py")
-
-try:
-    import tables
-except ImportError:
-    print("The HDF5 Sink and Bucket need pytables: pip install pytables")
+import tables
 
 from km3pipe import Pump, Module
 from km3pipe.dataclasses import HitSeries, TrackSeries
@@ -97,8 +83,8 @@ class HDF5TableSink(Module):
         if 'MCHits' in blob:
             self._write_hits(blob['MCHits'], table_name='mc_hits')
 
-        if 'MCTracks' in blob:
-           self._write_tracks(blob['MCTracks'], table_name='mc_tracks')
+        # if 'MCTracks' in blob:
+        #    self._write_tracks(blob['MCTracks'], table_name='mc_tracks')
 
         self.index += 1
         return blob
@@ -152,7 +138,7 @@ class HDF5TablePump(Pump):
 
     def get_blob(self, index):
         blob = {}
-        n_event = index + 1
+        n_event = index + 1  # noqa
         blob['Hits'] = self._get_hits(index, self.h5file.root.hits)
         blob['MCHits'] = self._get_hits(index, self.h5file.root.mc_hits)
         blob['MCTracks'] = self._get_tracks(index, self.h5file.root.mc_tracks)
