@@ -8,7 +8,7 @@ Pump for the Aanet data format.
 from __future__ import division, absolute_import, print_function
 
 from km3pipe import Pump
-from km3pipe.dataclasses import HitSeries
+from km3pipe.dataclasses import HitSeries, TrackSeries
 from km3pipe.logger import logging
 import os.path
 
