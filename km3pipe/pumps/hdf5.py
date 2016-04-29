@@ -99,7 +99,7 @@ class HDF5TablePump(Pump):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename')
         if os.path.isfile(self.filename):
-            self._h5file = tables.File(self.filename)
+            self.h5_file = tables.File(self.filename)
         else:
             raise IOError("No such file or directory: '{0}'"
                           .format(self.filename))
@@ -139,14 +139,14 @@ class HDF5TablePump(Pump):
     def get_blob(self, index):
         blob = {}
         n_event = index + 1  # noqa
-        blob['Hits'] = self._get_hits(index, self.h5file.root.hits)
-        blob['MCHits'] = self._get_hits(index, self.h5file.root.mc_hits)
-        blob['MCTracks'] = self._get_tracks(index, self.h5file.root.mc_tracks)
+        blob['Hits'] = self._get_hits(index, self.h5_file.root.hits)
+        blob['MCHits'] = self._get_hits(index, self.h5_file.root.mc_hits)
+        blob['MCTracks'] = self._get_tracks(index, self.h5_file.root.mc_tracks)
         return blob
 
     def finish(self):
         """Clean everything up"""
-        self._h5file.close()
+        self.h5_file.close()
 
     def _reset_index(self):
         """Reset index to default value"""
