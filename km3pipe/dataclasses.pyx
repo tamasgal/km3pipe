@@ -170,6 +170,11 @@ class HitSeries(object):
                     h.trig, h.pmt_id) for h in hits])
 
     @classmethod
+    def from_evt(cls, hits):
+        return cls([Hit(h.id, np.nan, h.time, h.tot, np.nan,
+                        np.nan, h.pmt_id) for h in hits])
+
+    @classmethod
     def from_arrays(cls, ids, dom_ids, times, tots, channel_ids,
                     triggereds, pmt_ids):
         args = ids, dom_ids, times, tots, channel_ids, triggereds, pmt_ids
