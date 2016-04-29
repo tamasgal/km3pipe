@@ -137,11 +137,11 @@ class HDF5Sink(Module):
         if 'Hits' in blob:
             self._dump_hits(blob['Hits'], target=target + 'hits')
 
-        if 'MCHits' in blob:
-            self._add_hits(blob['MCHits'], target=target + 'mc_hits')
+        #if 'MCHits' in blob:
+        #    self._add_hits(blob['MCHits'], target=target + 'mc_hits')
 
-        if 'MCTracks' in blob:
-            self._add_tracks(blob['MCTracks'], target=target + 'mc_tracks')
+        #if 'MCTracks' in blob:
+        #    self._add_tracks(blob['MCTracks'], target=target + 'mc_tracks')
 
         self.index += 1
         return blob
