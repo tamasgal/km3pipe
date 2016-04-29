@@ -320,9 +320,10 @@ class TrackSeries(object):
 
     @classmethod
     def from_aanet(cls, tracks):
-        return cls([Track(h.id, h.t, h.E, h.type,
-                          Position((h.pos.x, h.pos.y, h.pos.z)),
-                          Direction((h.dir.x, h.dir.y, h.dir.z))) for h in hits])
+        return cls([Track(t.id, t.t, t.E, t.type,
+                          Position((t.pos.x, t.pos.y, t.pos.z)),
+                          Direction((t.dir.x, t.dir.y, t.dir.z)))
+                    for t in tracks])
 
     @classmethod
     def from_arrays(cls, ids, times, energies, types, positions, directions):
@@ -334,7 +335,7 @@ class TrackSeries(object):
         tracks._types = types
         tracks._pos = positions
         tracks._pos = directions
-        return hits
+        return tracks
 
     def __iter__(self):
         return self
@@ -400,11 +401,11 @@ class TrackSeries(object):
 
     def __str__(self):
         n_tracks = len(self)
-        plural = 's' if n_tracks > 1 or n_hits == 0 else ''
+        plural = 's' if n_tracks > 1 or n_tracks == 0 else ''
         return("TrackSeries with {0} track{1}.".format(len(self), plural))
 
     def __repr__(self):
         return self.__str__()
 
     def __insp__(self):
-        return '\n'.join([str(tracks) for hit in self._tracks])
+        return '\n'.join([str(track) for track in self._tracks])
