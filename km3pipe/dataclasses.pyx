@@ -141,8 +141,15 @@ cdef class Hit:
     cdef public np.ndarray pos
     cdef public np.ndarray dir
 
-    def __cinit__(self, int id, int dom_id, int time, int tot,
-                  int channel_id, bint triggered, int pmt_id):
+    def __cinit__(self, 
+                  int channel_id, 
+                  int dom_id, 
+                  int id, 
+                  int pmt_id,
+                  int time, 
+                  int tot,
+                  bint triggered, 
+                 ):
         self.id = id
         self.dom_id = dom_id
         self.time = time
@@ -150,7 +157,7 @@ cdef class Hit:
         self.channel_id = channel_id
         self.triggered = triggered
         self.pmt_id = pmt_id
-
+        
 
 cdef class Track:
     """Represents a particle track.
@@ -170,14 +177,14 @@ cdef class Track:
     cdef public np.ndarray pos
     cdef public np.ndarray dir
 
-    def __cinit__(self, int id, int time, float energy, int type, pos, dir):
-        self.id = id
-        self.time = time
-        self.energy = energy
-        self.type = type
-        self.pos = pos
+    def __cinit__(self, dir, float energy, int id, pos, int time, int type, ):
         self.dir = dir
-
+        self.energy = energy
+        self.id = id
+        self.pos = pos
+        self.time = time
+        self.type = type
+        
 
 class HitSeries(object):
     def __init__(self, hits):
@@ -320,9 +327,8 @@ class TrackSeries(object):
 
     @classmethod
     def from_aanet(cls, tracks):
-        return cls([Track(t.id, t.t, t.E, t.type,
-                          Position((t.pos.x, t.pos.y, t.pos.z)),
-                          Direction((t.dir.x, t.dir.y, t.dir.z)))
+        return cls([Track(Direction((t.dir.x, t.dir.y, t.dir.z)), t.E, t.id, 
+                          Position((t.pos.x, t.pos.y, t.pos.z)), t.t, t.type,)
                     for t in tracks])
 
     @classmethod

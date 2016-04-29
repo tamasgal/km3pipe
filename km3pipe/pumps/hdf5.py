@@ -9,6 +9,7 @@ Pumps for the EVT simulation dataformat.
 from __future__ import division, absolute_import, print_function
 
 import os.path
+from collections import OrderedDict
 
 import tables
 
@@ -116,25 +117,25 @@ class HDF5TablePump(Pump):
         return blob
 
     def _get_hits(self, index, where):
-        hits = {}
-        hits['channel_id'] = where.channel_id[index]
-        hits['dom_id'] = where.dom_id[index]
-        hits['id'] = where.id[index]
-        hits['pmt_id'] = where.pmt_id[index]
-        hits['time'] = where.time[index]
-        hits['tot'] = where.tot[index]
-        hits['triggered'] = where.triggered[index]
-        return HitSeries.from_dict(hits)
+        _channel_id = where.channel_id[index]
+        _dom_id = where.dom_id[index]
+        _id = where.id[index]
+        _pmt_id = where.pmt_id[index]
+        _time = where.time[index]
+        _tot = where.tot[index]
+        _triggered = where.triggered[index]
+        return HitSeries.from_arrays(_channel_id, _dom_id, _id, _pmt_id,
+                                     _time, _tot, _triggered)
 
     def _get_tracks(self, index, where):
-        tracks = {}
-        tracks['dir'] = where.dir[index]
-        tracks['energy'] = where.energy[index]
-        tracks['id'] = where.id[index]
-        tracks['pos'] = where.pos[index]
-        tracks['time'] = where.time[index]
-        tracks['type'] = where.type[index]
-        return TrackSeries.from_dict(tracks)
+        _dir = where.dir[index]
+        _energy = where.energy[index]
+        _id = where.id[index]
+        _pos = where.pos[index]
+        _time = where.time[index]
+        _type = where.type[index]
+        return TrackSeries.from_arrays(_dir, _energy, _id, _pos,
+                                      _time, _type)
 
     def get_blob(self, index):
         blob = {}
