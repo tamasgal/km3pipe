@@ -9,7 +9,7 @@
 from __future__ import division, absolute_import, print_function
 
 import ctypes
-from libcpp cimport bool as c_bool
+from libcpp cimport bool as c_bool  # noqa
 
 import numpy as np
 cimport numpy as np
@@ -220,6 +220,19 @@ class CHitSeries(object):
     def from_aanet_as_cyhit(cls, hits):
         return cls([CyHit(h.id, h.dom_id, h.t, h.tot, ord(h.channel_id),
                     h.trig, h.pmt_id) for h in hits])
+
+    @classmethod
+    def from_arrays(cls, ids, dom_ids, times, tots, channel_ids,
+                    triggereds, pmt_ids):
+        args = ids, dom_ids, times, tots, channel_ids, triggereds, pmt_ids
+        hits = cls([CyHit(*hit_args) for hit_args in zip(args)])
+        hits._time = times
+        hits._tots = tots
+        hits._dom_id = dom_ids
+        hits._channel_id = channel_ids
+        hits._triggered = triggereds
+        hits._pmt_id = pmt_ids
+        return hits
 
     def __iter__(self):
         return self
