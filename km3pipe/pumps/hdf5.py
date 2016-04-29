@@ -226,6 +226,7 @@ class HDF5TableSink(Module):
         self.h5_file.create_vlarray(hit_group, 'channel_id', atom=tables.IntAtom)
         self.h5_file.create_vlarray(hit_group, 'dir', atom=POS_ATOM)
         self.h5_file.create_vlarray(hit_group, 'dom_id', atom=tables.IntAtom)
+        self.h5_file.create_vlarray(hit_group, 'id', atom=tables.IntAtom)
         self.h5_file.create_vlarray(hit_group, 'pmt_id', atom=tables.IntAtom)
         self.h5_file.create_vlarray(hit_group, 'pos', atom=POS_ATOM)
         self.h5_file.create_vlarray(hit_group, 'time', atom=tables.FloatAtom)
@@ -245,6 +246,7 @@ class HDF5TableSink(Module):
         target.channel_id.append(hits.channel_id)
         target.dir.append(hits.dir)
         target.dom_id.append(hits.dom_id)
+        target.id.append(hits.id)
         target.pmt_id.append(hits.pmt_id)
         target.pos.append(hits.pos)
         target.time.append(hits.time)
@@ -302,12 +304,13 @@ class HDF5TablePump(Pump):
 
     def _get_hits(self, index, where):
         hits = {}
-        hits['tot'] = where.tot[index]
-        hits['time'] = where.time[index]
-        hits['triggered'] = where.triggered[index]
-        hits['pmt_id'] = where.pmt_id[index]
-        hits['dom_id'] = where.dom_id[index]
         hits['channel_id'] = where.channel_id[index]
+        hits['dom_id'] = where.dom_id[index]
+        hits['id'] = where.id[index]
+        hits['pmt_id'] = where.pmt_id[index]
+        hits['time'] = where.time[index]
+        hits['tot'] = where.tot[index]
+        hits['triggered'] = where.triggered[index]
         # TODO: to hitseries
         return HitSeries.from_dict(hits)
 
