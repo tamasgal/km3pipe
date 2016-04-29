@@ -322,7 +322,7 @@ class TrackSeries(object):
     def from_aanet(cls, tracks):
         return cls([Track(h.id, h.t, h.E, h.type,
                           Position((h.pos.x, h.pos.y, h.pos.z)),
-                          Direction((h.dir.x, h.dir.y, h.dir.z)) for h in hits])
+                          Direction((h.dir.x, h.dir.y, h.dir.z))) for h in hits])
 
     @classmethod
     def from_arrays(cls, ids, times, energies, types, positions, directions):
