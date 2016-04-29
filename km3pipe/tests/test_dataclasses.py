@@ -148,4 +148,7 @@ class TestCHitSeries(TestCase):
 
         hits = CHitSeries.from_arrays(ids, dom_ids, times, tots, channel_ids,
                                       triggereds, pmt_ids)
-        return hits
+
+        self.assertAlmostEqual(1, hits[1].id)
+        self.assertAlmostEqual(9, hits[9].pmt_id)
+        self.assertEqual(10, len(hits))
