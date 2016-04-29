@@ -83,8 +83,8 @@ class HDF5TableSink(Module):
         if 'MCHits' in blob:
             self._write_hits(blob['MCHits'], table_name='mc_hits')
 
-        # if 'MCTracks' in blob:
-        #    self._write_tracks(blob['MCTracks'], table_name='mc_tracks')
+        if 'MCTracks' in blob:
+            self._write_tracks(blob['MCTracks'], table_name='mc_tracks')
 
         self.index += 1
         return blob

@@ -8,7 +8,7 @@ Pump for the Aanet data format.
 from __future__ import division, absolute_import, print_function
 
 from km3pipe import Pump
-from km3pipe.dataclasses import HitSeries
+from km3pipe.dataclasses import HitSeries, TrackSeries
 from km3pipe.logger import logging
 import os.path
 
@@ -83,8 +83,8 @@ class AanetPump(Pump):
                 blob = {'Evt': event,
                         'Hits': HitSeries.from_aanet(event.hits),
                         'MCHits': HitSeries.from_aanet(event.mc_hits),
-                        'Tracks': event.trks,
-                        'MCTracks': event.mc_trks,
+                        'Tracks': TrackSeries.from_aanet(event.trks),
+                        'MCTracks': TrackSeries.from_aanet(event.mc_trks),
                         'filename': filename,
                         'Header': self.header}
                 yield blob
