@@ -203,6 +203,7 @@ class CHit(ctypes.Structure):
 class CHitSeries(object):
     def __init__(self, hits):
         self._hits = hits
+        self._id = None
         self._time = None
         self._triggered = None
         self._tot = None
@@ -226,6 +227,7 @@ class CHitSeries(object):
                     triggereds, pmt_ids):
         args = ids, dom_ids, times, tots, channel_ids, triggereds, pmt_ids
         hits = cls([CyHit(*hit_args) for hit_args in zip(args)])
+        hits._id = ids
         hits._time = times
         hits._tots = tots
         hits._dom_id = dom_ids
@@ -236,6 +238,12 @@ class CHitSeries(object):
 
     def __iter__(self):
         return self
+
+    @property
+    def id(self):
+        if self._id is None:
+            self._id = np.array([h.id for h in self._hits])
+        return self._id
 
     @property
     def time(self):
