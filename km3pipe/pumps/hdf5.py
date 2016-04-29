@@ -13,14 +13,17 @@ import os.path
 try:
     import numpy as np
 except ImportError:
-    print("The HDF5 Bucket needs numpy: pip install numpy")
+    print("The HDF5 Sink needs numpy: pip install numpy")
 
 try:
     import h5py
-    import tables
 except ImportError:
     print("The HDF5 Sink and Bucket need h5py: pip install h5py")
 
+try:
+    import tables
+except ImportError:
+    print("The HDF5 Sink and Bucket need pytables: pip install pytables")
 
 from km3pipe import Pump, Module
 from km3pipe.dataclasses import HitSeries
@@ -29,6 +32,8 @@ from km3pipe.logger import logging
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 __author__ = 'tamasgal'
+
+POS_ATOM = tables.FloatAtom(shape=3)
 
 
 class HDF5Pump(Pump):
@@ -127,16 +132,16 @@ class HDF5Sink(Module):
         target = '/event/{0}/'.format(self.index)
         self.h5_file.create_group(target)
 
-        self._add_event_info(blob, target=target+'info')
+        self._add_event_info(blob, target=target + 'info')
 
         if 'Hits' in blob:
-            self._dump_hits(blob['Hits'], target=target+'hits')
+            self._dump_hits(blob['Hits'], target=target + 'hits')
 
         if 'MCHits' in blob:
-            self._add_hits(blob['MCHits'], target=target+'mc_hits')
+            self._add_hits(blob['MCHits'], target=target + 'mc_hits')
 
         if 'MCTracks' in blob:
-            self._add_tracks(blob['MCTracks'], target=target+'mc_tracks')
+            self._add_tracks(blob['MCTracks'], target=target + 'mc_tracks')
 
         self.index += 1
         return blob
@@ -202,9 +207,6 @@ class HDF5Sink(Module):
 
     def finish(self):
         self.h5_file.close()
-
-
-POS_ATOM = tables.FloatAtom(shape=3)
 
 
 class HDF5TableSink(Module):
@@ -298,14 +300,36 @@ class HDF5TablePump(Pump):
         self.index += 1
         return blob
 
+    def _get_hits(self, index, where):
+        hits = {}
+        hits['tot'] = where.tot[index]
+        hits['time'] = where.time[index]
+        hits['triggered'] = where.triggered[index]
+        hits['pmt_id'] = where.pmt_id[index]
+        hits['dom_id'] = where.dom_id[index]
+        hits['channel_id'] = where.channel_id[index]
+        # TODO: to hitseries
+        return HitSeries.from_dict(hits)
+
+    def _get_tracks(self, index, where):
+        tracks = {}
+        tracks['dir'] = where.dir[index]
+        tracks['energy'] = where.energy[index]
+        tracks['id'] = where.id[index]
+        tracks['pos'] = where.pos[index]
+        tracks['time'] = where.time[index]
+        tracks['type'] = where.type[index]
+        # TODO: to hitseries
+        return TrackSeries.from_dict(tracks)
+
     def get_blob(self, index):
         blob = {}
         n_event = index + 1
+        blob['Hits'] = self._get_hits(index, self.h5file.root.hits)
+        blob['MCHits'] = self._get_hits(index, self.h5file.root.mc_hits)
+        blob['MCTracks'] = self._get_tracks(index, self.h5file.root.mc_tracks)
         # TODO
-        tot = self._h5file.root.hits.tot[index]
-        time = self._h5file.root.hits.time[index]
-        blob['Hits'] = HitSeries.from_hdf5(raw_hits)
-        blob['EventInfo'] = self._h5file.get('/event/{0}/info'.format(n_event))
+        #blob['EventInfo'] = self._h5file.get('/event/{0}/info'.format(n_event))
         return blob
 
     def finish(self):
