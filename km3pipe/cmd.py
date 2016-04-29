@@ -37,7 +37,6 @@ def tohdf5(input_file, output_file, n_events):
 def main():
     from docopt import docopt
     arguments = docopt(__doc__, version=version)
-    print(arguments)
 
     if arguments['tohdf5']:
         tohdf5(arguments['-i'], arguments['-o'], arguments['-n'])
