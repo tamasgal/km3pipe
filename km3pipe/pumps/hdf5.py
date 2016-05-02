@@ -89,7 +89,8 @@ class HDF5TableSink(Module):
         self.mc_t.append(evt.mc_t)
 
     def _write_event_info(self, group_name='info', where='/'):
-        mg = self.h5_file.create_group(where, group_name)
+        h5 = self.h5_file
+        mg = h5.create_group(where, group_name)
         # order is the same as in AAnet evt.h
         h5.create_array(mg, 'det_id', np.array(self.det_id, dtype=int))
         h5.create_array(mg, 'mc_id', np.array(self.mc_id, dtype=int))
@@ -144,7 +145,7 @@ class HDF5TableSink(Module):
         return blob
 
     def finish(self):
-        self._get_write_info()
+        self._write_event_info()
         self.h5_file.close()
 
 
