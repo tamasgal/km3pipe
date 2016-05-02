@@ -35,8 +35,19 @@ class HDF5TableSink(Module):
         self._prepare_hits()
         self._prepare_hits(group_name='mc_hits')
         self._prepare_tracks(group_name='mc_tracks')
-        self._prepare_event_info()
+        self._prepare_event_info(group_name='info')
         print("Processing {0}...".format(self.filename))
+
+    def _prepare_event_info(self, group_name='info', where='/'):
+        h5.create_earray(mg, 'det_id', atom=tables.IntAtom())
+        h5.create_earray(mg, 'frame_index', atom=tables.UIntAtom())
+        h5.create_earray(mg, 'mc_id', atom=tables.IntAtom())
+        h5.create_earray(mg, 'mc_t', atom=tables.Float64Atom())
+        h5.create_earray(mg, 'overlays', atom=tables.UInt8Atom())
+        h5.create_earray(mg, 'run_id', atom=tables.UIntAtom())
+        h5.create_earray(mg, 'timestamp', atom=tables.Float64Atom())
+        h5.create_earray(mg, 'trigger_counter', atom=tables.UInt64Atom())
+        h5.create_earray(mg, 'trigger_mask', atom=tables.UInt64Atom())
 
     def _prepare_hits(self, group_name='hits', where='/'):
         hit_group = self.h5_file.create_group(where, group_name)
@@ -59,67 +70,20 @@ class HDF5TableSink(Module):
         h5_file.create_vlarray(track_group, 'time', atom=tables.IntAtom())
         h5_file.create_vlarray(track_group, 'type', atom=tables.IntAtom())
 
-    def _prepare_event_info(self):
-        # Postpone array creation to finish(),
-        # since we don't know n_events from the start
-        self._id = []
-        self._det_id = []
-        self._mc_id = []
-        self._run_id = []
-        self._frame_index = []
-        self._trigger_mask = []
-        self._trigger_counter = []
-        self._overlays = []
-        self._timestamp = []
-        self._mc_t = []
-        # Ignore these AANet-user constructs so far
-        # str comment
-        # int index
-        # int flags
-
-    def _get_event_info(self, evt):
-        self._id.append(evt.id)
-        self._det_id.append(evt.det_id)
-        self._mc_id.append(evt.mc_id)
-        self._run_id.append(evt.run_id)
-        self._frame_index.append(evt.frame_index)
-        self._trigger_mask.append(evt.trigger_mask)
-        self._trigger_counter.append(evt.trigger_counter)
-        self._overlays.append(evt.overlays)
-        self._timestamp.append(evt.timestamp)
-        # is this always available, I wonder?
-        self._mc_t.append(evt.mc_t)
-
-    def _write_event_info(self, group_name='info', where='/'):
-        h5 = self.h5_file
-        mg = h5.create_group(where, group_name)
-        # order is the same as in AAnet evt.h
-        if self._det_id:
-            h5.create_array(mg, 'det_id', obj=np.array(self._det_id, dtype=int))
-        if self._mc_id:
-            h5.create_array(mg, 'mc_id', obj=np.array(self._mc_id, dtype=int))
-        if self._run_id:
-            h5.create_array(mg, 'run_id', obj=np.array(self._run_id, dtype=int))
-        if self._frame_index:
-            h5.create_array(mg, 'frame_index', obj=np.array(self._frame_index, dtype=int))
-        if self._trigger_mask:
-            h5.create_array(mg, 'trigger_mask', obj=np.array(self._trigger_mask, dtype=np.dtype('u8')))
-        if self._trigger_counter:
-            h5.create_array(mg, 'trigger_counter', obj=np.array(self._trigger_counter, dtype=np.dtype('u8')))
-        if self._overlays:
-            h5.create_array(mg, 'overlays', obj=np.array(self._overlays, dtype=np.dtype('u4')))
-        if self._timestamp:
-            h5.create_array(mg, 'timestamp', obj=np.array(self._timestamp, dtype=float))
-        if self._mc_t:
-            h5.create_array(mg, 'mc_t', obj=np.array(self._mc_t, dtype=float))
-        # Ignore these AANet-user constructs so far
-        # str comment
-        # int index
-        # int flags
+    def _write_event_info(self, evt, table_name='info', where='/'):
+        target = self.h5_file.get_node(where, table_name)
+        target.id.append(evt.id)
+        target.det_id.append(evt.det_id)
+        target.run_id.append(evt.run_id)
+        target.frame_index.append(evt.frame_index)
+        target.trigger_mask.append(evt.trigger_mask)
+        target.trigger_counter.append(evt.trigger_counter)
+        target.overlays.append(evt.overlays)
+        target.timestamp.append(evt.timestamp)
+        target.mc_id.append(evt.mc_id)
+        target.mc_t.append(evt.mc_t)
 
     def _write_hits(self, hits, table_name='hits', where='/'):
-        print(table_name)
-        print(hits)
         target = self.h5_file.get_node(where, table_name)
         target.channel_id.append(hits.channel_id)
         target.dom_id.append(hits.dom_id)
@@ -150,13 +114,12 @@ class HDF5TableSink(Module):
             self._write_tracks(blob['MCTracks'], table_name='mc_tracks')
 
         if 'EventInfo' in blob:
-            self._get_event_info(blob['EventInfo'], table_name='info')
+            self._write_event_info(blob['EventInfo'], table_name='info')
 
         self.index += 1
         return blob
 
     def finish(self):
-        self._write_event_info()
         self.h5_file.close()
 
 
