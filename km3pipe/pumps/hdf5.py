@@ -12,6 +12,7 @@ import os.path
 from collections import OrderedDict
 
 import tables
+import numpy as np
 
 from km3pipe import Pump, Module
 from km3pipe.dataclasses import HitSeries, TrackSeries
@@ -34,6 +35,7 @@ class HDF5TableSink(Module):
         self._prepare_hits()
         self._prepare_hits(group_name='mc_hits')
         self._prepare_tracks(group_name='mc_tracks')
+        self._prepare_event_info(group_name='mc_tracks')
         print("Processing {0}...".format(self.filename))
 
     def _prepare_hits(self, group_name='hits', where='/'):
@@ -57,12 +59,51 @@ class HDF5TableSink(Module):
         h5_file.create_vlarray(track_group, 'time', atom=tables.IntAtom())
         h5_file.create_vlarray(track_group, 'type', atom=tables.IntAtom())
 
-    #def _prepare_event_info(self, group_name='meta', where='/'):
-    #    meta_group = self.h5_file.create_group(where, group_name)
-        #h5_file = self.h5_file.
-        #frame_index  =^= evt.id
-        #header??
+    def _prepare_event_info(self):
+        # Postpone array creation to finish(),
+        # since we don't know n_events from the start
+        self.id = []
+        self.det_id = []
+        self.mc_id = []
+        self.run_id = []
+        self.trigger_mask = []
+        self.trigger_counter = []
+        self.overlays = []
+        self.timestamp = []
+        self.mc_t = []
+        # Ignore these AANet-user constructs so far
+        # str comment
+        # int index
+        # int flags
 
+    def _get_event_info(self, evt):
+        self.id.append(evt.id)
+        self.det_id.append(evt.det_id)
+        self.mc_id.append(evt.mc_id)
+        self.run_id.append(evt.run_id)
+        self.trigger_mask.append(evt.trigger_mask)
+        self.trigger_counter.append(evt.trigger_counter)
+        self.overlays.append(evt.overlays)
+        self.timestamp.append(evt.timestamp)
+        # is this always available, I wonder?
+        self.mc_t.append(evt.mc_t)
+
+    def _write_event_info(self, group_name='info', where='/'):
+        mg = self.h5_file.create_group(where, group_name)
+        # order is the same as in AAnet evt.h
+        h5.create_array(mg, 'det_id', np.array(self.det_id, dtype=int))
+        h5.create_array(mg, 'mc_id', np.array(self.mc_id, dtype=int))
+        h5.create_array(mg, 'run_id', np.array(self.run_id, dtype=int))
+        h5.create_array(mg, 'frame_index', np.array(self.frame_index, dtype=int))
+        h5.create_array(mg, 'trigger_mask', np.array(self.trigger_mask, dtype=np.dtype('u8')))
+        h5.create_array(mg, 'trigger_counter', np.array(self.trigger_counter, dtype=np.dtype('u8')))
+        h5.create_array(mg, 'overlays', np.array(self.overlays, dtype=np.dtype('u4')))
+        h5.create_array(mg, 'timestamp', np.array(self.timestamp, dtype=float))
+        h5.create_array(mg, 'mc_t', np.array(self.mc_t, dtype=float))
+        # Ignore these AANet-user constructs so far
+        # str comment
+        # int index
+        # int flags
 
     def _write_hits(self, hits, table_name='hits', where='/'):
         print(table_name)
@@ -85,9 +126,6 @@ class HDF5TableSink(Module):
         target.time.append(tracks.time)
         target.type.append(tracks.type)
 
-    #def _write_event_info(self, tracks, table_name='meta', where='/'):
-    #    target = self.h5_file.get_node(where, table_name)
-
     def process(self, blob):
         # ignore evt_info so far
         if 'Hits' in blob:
@@ -99,10 +137,14 @@ class HDF5TableSink(Module):
         if 'MCTracks' in blob:
             self._write_tracks(blob['MCTracks'], table_name='mc_tracks')
 
+        if 'EventInfo' in blob:
+            self._get_event_info(blob['EventInfo'], table_name='info')
+
         self.index += 1
         return blob
 
     def finish(self):
+        self._get_write_info()
         self.h5_file.close()
 
 
