@@ -57,7 +57,16 @@ class HDF5TableSink(Module):
         h5_file.create_vlarray(track_group, 'time', atom=tables.IntAtom())
         h5_file.create_vlarray(track_group, 'type', atom=tables.IntAtom())
 
+    #def _prepare_event_info(self, group_name='meta', where='/'):
+    #    meta_group = self.h5_file.create_group(where, group_name)
+        #h5_file = self.h5_file.
+        #frame_index  =^= evt.id
+        #header??
+
+
     def _write_hits(self, hits, table_name='hits', where='/'):
+        print(table_name)
+        print(hits)
         target = self.h5_file.get_node(where, table_name)
         target.channel_id.append(hits.channel_id)
         target.dom_id.append(hits.dom_id)
@@ -75,6 +84,9 @@ class HDF5TableSink(Module):
         target.pos.append(tracks.pos)
         target.time.append(tracks.time)
         target.type.append(tracks.type)
+
+    #def _write_event_info(self, tracks, table_name='meta', where='/'):
+    #    target = self.h5_file.get_node(where, table_name)
 
     def process(self, blob):
         # ignore evt_info so far
