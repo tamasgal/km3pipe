@@ -41,16 +41,16 @@ class HDF5TableSink(Module):
     def _prepare_event_info(self, group_name='info', where='/'):
         info_group = self.h5_file.create_group(where, group_name)
         h5_file = self.h5_file
-        h5_file.create_earray(info_group, 'id', atom=tables.IntAtom(), shape=(0, 1))
-        h5_file.create_earray(info_group, 'det_id', atom=tables.IntAtom(), shape=(0, 1))
-        h5_file.create_earray(info_group, 'frame_index', atom=tables.UIntAtom(), shape=(0, 1))
-        h5_file.create_earray(info_group, 'mc_id', atom=tables.IntAtom(), shape=(0, 1))
-        h5_file.create_earray(info_group, 'mc_t', atom=tables.Float64Atom(), shape=(0, 1))
-        h5_file.create_earray(info_group, 'overlays', atom=tables.UInt8Atom(), shape=(0, 1))
-        h5_file.create_earray(info_group, 'run_id', atom=tables.UIntAtom(), shape=(0, 1))
-        h5_file.create_earray(info_group, 'timestamp', atom=tables.Float64Atom(), shape=(0, 1))
-        h5_file.create_earray(info_group, 'trigger_counter', atom=tables.UInt64Atom(), shape=(0, 1))
-        h5_file.create_earray(info_group, 'trigger_mask', atom=tables.UInt64Atom(), shape=(0, 1))
+        h5_file.create_earray(info_group, 'id', atom=tables.IntAtom(), shape=(0, ))
+        h5_file.create_earray(info_group, 'det_id', atom=tables.IntAtom(), shape=(0, ))
+        h5_file.create_earray(info_group, 'frame_index', atom=tables.UIntAtom(), shape=(0, ))
+        h5_file.create_earray(info_group, 'mc_id', atom=tables.IntAtom(), shape=(0, ))
+        h5_file.create_earray(info_group, 'mc_t', atom=tables.Float64Atom(), shape=(0, ))
+        h5_file.create_earray(info_group, 'overlays', atom=tables.UInt8Atom(), shape=(0, ))
+        h5_file.create_earray(info_group, 'run_id', atom=tables.UIntAtom(), shape=(0, ))
+        #h5_file.create_earray(info_group, 'timestamp', atom=tables.Float64Atom(), shape=(0, ))
+        h5_file.create_earray(info_group, 'trigger_counter', atom=tables.UInt64Atom(), shape=(0, ))
+        h5_file.create_earray(info_group, 'trigger_mask', atom=tables.UInt64Atom(), shape=(0, ))
 
     def _prepare_hits(self, group_name='hits', where='/'):
         hit_group = self.h5_file.create_group(where, group_name)
@@ -75,16 +75,16 @@ class HDF5TableSink(Module):
 
     def _write_event_info(self, evt, table_name='info', where='/'):
         target = self.h5_file.get_node(where, table_name)
-        target.id.append(evt.id)
-        target.det_id.append(evt.det_id)
-        target.run_id.append(evt.run_id)
-        target.frame_index.append(evt.frame_index)
-        target.trigger_mask.append(evt.trigger_mask)
-        target.trigger_counter.append(evt.trigger_counter)
-        target.overlays.append(evt.overlays)
-        target.timestamp.append(evt.timestamp)
-        target.mc_id.append(evt.mc_id)
-        target.mc_t.append(evt.mc_t)
+        target.id.append(np.array([evt.id, ]))
+        target.det_id.append(np.array([evt.det_id, ]))
+        target.run_id.append(np.array([evt.run_id, ]))
+        target.frame_index.append(np.array([evt.frame_index, ]))
+        target.trigger_mask.append(np.array([evt.trigger_mask, ]))
+        target.trigger_counter.append(np.array([evt.trigger_counter, ]))
+        target.overlays.append(np.array([evt.overlays, ]))
+        #target.timestamp.append(np.array([evt.timestamp, ]))
+        target.mc_id.append(np.array([evt.mc_id, ]))
+        target.mc_t.append(np.array([evt.mc_t, ]))
 
     def _write_hits(self, hits, table_name='hits', where='/'):
         target = self.h5_file.get_node(where, table_name)
@@ -106,7 +106,6 @@ class HDF5TableSink(Module):
         target.type.append(tracks.type)
 
     def process(self, blob):
-        # ignore evt_info so far
         if 'Hits' in blob:
             self._write_hits(blob['Hits'], table_name='hits')
 
@@ -116,8 +115,8 @@ class HDF5TableSink(Module):
         if 'MCTracks' in blob:
             self._write_tracks(blob['MCTracks'], table_name='mc_tracks')
 
-        if 'EventInfo' in blob:
-            self._write_event_info(blob['EventInfo'], table_name='info')
+        if 'Evt' in blob:
+            self._write_event_info(blob['Evt'], table_name='info')
 
         self.index += 1
         return blob
@@ -181,7 +180,7 @@ class HDF5TablePump(Pump):
         info['trigger_mask'] = table.trigger_mask[index]
         info['trigger_counter'] = table.trigger_counter[index]
         info['overlays'] = table.overlays[index]
-        info['timestamp'] = table.timestamp[index]
+        #info['timestamp'] = table.timestamp[index]
         info['mc_t'] = table.mc_t[index]
         return info
 
