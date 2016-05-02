@@ -193,7 +193,7 @@ class HDF5TablePump(Pump):
         return TrackSeries.from_arrays(_dir, _energy, _id, _pos,
                                       _time, _type)
 
-    def _get_event_info(index, table_name='info', where='/'):
+    def _get_event_info(self, index, table_name='info', where='/'):
         table = self.h5_file.get_node(where, table_name)
         info = {}
         info['id'] = table.id[index]
