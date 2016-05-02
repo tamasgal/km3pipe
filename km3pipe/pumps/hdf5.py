@@ -39,15 +39,17 @@ class HDF5TableSink(Module):
         print("Processing {0}...".format(self.filename))
 
     def _prepare_event_info(self, group_name='info', where='/'):
-        h5.create_earray(mg, 'det_id', atom=tables.IntAtom())
-        h5.create_earray(mg, 'frame_index', atom=tables.UIntAtom())
-        h5.create_earray(mg, 'mc_id', atom=tables.IntAtom())
-        h5.create_earray(mg, 'mc_t', atom=tables.Float64Atom())
-        h5.create_earray(mg, 'overlays', atom=tables.UInt8Atom())
-        h5.create_earray(mg, 'run_id', atom=tables.UIntAtom())
-        h5.create_earray(mg, 'timestamp', atom=tables.Float64Atom())
-        h5.create_earray(mg, 'trigger_counter', atom=tables.UInt64Atom())
-        h5.create_earray(mg, 'trigger_mask', atom=tables.UInt64Atom())
+        info_group = self.h5_file.create_group(where, group_name)
+        h5_file = self.h5_file
+        h5_file.create_earray(info_group, 'det_id', atom=tables.IntAtom())
+        h5_file.create_earray(info_group, 'frame_index', atom=tables.UIntAtom())
+        h5_file.create_earray(info_group, 'mc_id', atom=tables.IntAtom())
+        h5_file.create_earray(info_group, 'mc_t', atom=tables.Float64Atom())
+        h5_file.create_earray(info_group, 'overlays', atom=tables.UInt8Atom())
+        h5_file.create_earray(info_group, 'run_id', atom=tables.UIntAtom())
+        h5_file.create_earray(info_group, 'timestamp', atom=tables.Float64Atom())
+        h5_file.create_earray(info_group, 'trigger_counter', atom=tables.UInt64Atom())
+        h5_file.create_earray(info_group, 'trigger_mask', atom=tables.UInt64Atom())
 
     def _prepare_hits(self, group_name='hits', where='/'):
         hit_group = self.h5_file.create_group(where, group_name)
