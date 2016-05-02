@@ -41,6 +41,7 @@ class HDF5TableSink(Module):
     def _prepare_event_info(self, group_name='info', where='/'):
         info_group = self.h5_file.create_group(where, group_name)
         h5_file = self.h5_file
+        h5_file.create_earray(info_group, 'id', atom=tables.IntAtom(), shape=(0, 1))
         h5_file.create_earray(info_group, 'det_id', atom=tables.IntAtom(), shape=(0, 1))
         h5_file.create_earray(info_group, 'frame_index', atom=tables.UIntAtom(), shape=(0, 1))
         h5_file.create_earray(info_group, 'mc_id', atom=tables.IntAtom(), shape=(0, 1))
