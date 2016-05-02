@@ -62,45 +62,56 @@ class HDF5TableSink(Module):
     def _prepare_event_info(self):
         # Postpone array creation to finish(),
         # since we don't know n_events from the start
-        self.id = []
-        self.det_id = []
-        self.mc_id = []
-        self.run_id = []
-        self.trigger_mask = []
-        self.trigger_counter = []
-        self.overlays = []
-        self.timestamp = []
-        self.mc_t = []
+        self._id = []
+        self._det_id = []
+        self._mc_id = []
+        self._run_id = []
+        self._frame_index = []
+        self._trigger_mask = []
+        self._trigger_counter = []
+        self._overlays = []
+        self._timestamp = []
+        self._mc_t = []
         # Ignore these AANet-user constructs so far
         # str comment
         # int index
         # int flags
 
     def _get_event_info(self, evt):
-        self.id.append(evt.id)
-        self.det_id.append(evt.det_id)
-        self.mc_id.append(evt.mc_id)
-        self.run_id.append(evt.run_id)
-        self.trigger_mask.append(evt.trigger_mask)
-        self.trigger_counter.append(evt.trigger_counter)
-        self.overlays.append(evt.overlays)
-        self.timestamp.append(evt.timestamp)
+        self._id.append(evt.id)
+        self._det_id.append(evt.det_id)
+        self._mc_id.append(evt.mc_id)
+        self._run_id.append(evt.run_id)
+        self._frame_index.append(evt.frame_index)
+        self._trigger_mask.append(evt.trigger_mask)
+        self._trigger_counter.append(evt.trigger_counter)
+        self._overlays.append(evt.overlays)
+        self._timestamp.append(evt.timestamp)
         # is this always available, I wonder?
-        self.mc_t.append(evt.mc_t)
+        self._mc_t.append(evt.mc_t)
 
     def _write_event_info(self, group_name='info', where='/'):
         h5 = self.h5_file
         mg = h5.create_group(where, group_name)
         # order is the same as in AAnet evt.h
-        h5.create_array(mg, 'det_id', np.array(self.det_id, dtype=int))
-        h5.create_array(mg, 'mc_id', np.array(self.mc_id, dtype=int))
-        h5.create_array(mg, 'run_id', np.array(self.run_id, dtype=int))
-        h5.create_array(mg, 'frame_index', np.array(self.frame_index, dtype=int))
-        h5.create_array(mg, 'trigger_mask', np.array(self.trigger_mask, dtype=np.dtype('u8')))
-        h5.create_array(mg, 'trigger_counter', np.array(self.trigger_counter, dtype=np.dtype('u8')))
-        h5.create_array(mg, 'overlays', np.array(self.overlays, dtype=np.dtype('u4')))
-        h5.create_array(mg, 'timestamp', np.array(self.timestamp, dtype=float))
-        h5.create_array(mg, 'mc_t', np.array(self.mc_t, dtype=float))
+        if self._det_id:
+            h5.create_array(mg, 'det_id', obj=np.array(self._det_id, dtype=int))
+        if self._mc_id:
+            h5.create_array(mg, 'mc_id', obj=np.array(self._mc_id, dtype=int))
+        if self._run_id:
+            h5.create_array(mg, 'run_id', obj=np.array(self._run_id, dtype=int))
+        if self._frame_index:
+            h5.create_array(mg, 'frame_index', obj=np.array(self._frame_index, dtype=int))
+        if self._trigger_mask:
+            h5.create_array(mg, 'trigger_mask', obj=np.array(self._trigger_mask, dtype=np.dtype('u8')))
+        if self._trigger_counter:
+            h5.create_array(mg, 'trigger_counter', obj=np.array(self._trigger_counter, dtype=np.dtype('u8')))
+        if self._overlays:
+            h5.create_array(mg, 'overlays', obj=np.array(self._overlays, dtype=np.dtype('u4')))
+        if self._timestamp:
+            h5.create_array(mg, 'timestamp', obj=np.array(self._timestamp, dtype=float))
+        if self._mc_t:
+            h5.create_array(mg, 'mc_t', obj=np.array(self._mc_t, dtype=float))
         # Ignore these AANet-user constructs so far
         # str comment
         # int index
