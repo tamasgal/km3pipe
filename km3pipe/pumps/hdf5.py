@@ -35,7 +35,7 @@ class HDF5TableSink(Module):
         self._prepare_hits()
         self._prepare_hits(group_name='mc_hits')
         self._prepare_tracks(group_name='mc_tracks')
-        self._prepare_event_info(group_name='mc_tracks')
+        self._prepare_event_info()
         print("Processing {0}...".format(self.filename))
 
     def _prepare_hits(self, group_name='hits', where='/'):
