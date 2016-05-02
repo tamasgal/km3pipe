@@ -193,11 +193,26 @@ class HDF5TablePump(Pump):
         return TrackSeries.from_arrays(_dir, _energy, _id, _pos,
                                       _time, _type)
 
+    def _get_event_info(index, table_name='info', where='/'):
+        table = self.h5_file.get_node(where, table_name)
+        info = {}
+        info['id'] = table.id[index]
+        info['det_id'] = table.det_id[index]
+        info['mc_id'] = table.mc_id[index]
+        info['run_id'] = table.run_id[index]
+        info['trigger_mask'] = table.trigger_mask[index]
+        info['trigger_counter'] = table.trigger_counter[index]
+        info['overlays'] = table.overlays[index]
+        info['timestamp'] = table.timestamp[index]
+        info['mc_t'] = table.mc_t[index]
+        return info
+
     def get_blob(self, index):
         blob = {}
         blob['Hits'] = self._get_hits(index, table_name='hits')
         blob['MCHits'] = self._get_hits(index, table_name='mc_hits')
         blob['MCTracks'] = self._get_tracks(index, table_name='mc_tracks')
+        blob['EventInfo'] = self._get_event_info(index, table_name='info')
         return blob
 
     def finish(self):
