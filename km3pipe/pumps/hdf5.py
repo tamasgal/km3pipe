@@ -9,7 +9,6 @@ Pumps for the EVT simulation dataformat.
 from __future__ import division, absolute_import, print_function
 
 import os.path
-from collections import OrderedDict
 
 import tables
 import numpy as np
@@ -168,7 +167,7 @@ class HDF5Pump(Pump):
         _time = table.time[index]
         _type = table.type[index]
         return TrackSeries.from_arrays(_dir, _energy, _id, _pos,
-                                      _time, _type)
+                                       _time, _type)
 
     def _get_event_info(self, index, table_name='info', where='/'):
         table = self.h5_file.get_node(where, table_name)
