@@ -216,7 +216,7 @@ class HitSeries(object):
             np.nan,     # channel_id
             np.nan,     # dom_id
             h.id, 
-            h.pmt_id
+            h.pmt_id,
             h.time, 
             h.tot, 
             np.nan,     # triggered
