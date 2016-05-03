@@ -29,6 +29,8 @@ class HDF5Sink(Module):
         """A Module to convert (KM3NeT) ROOT files to HDF5."""
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
+        self.complevel = self.get('complevel') or 1
+        self.filter = tables.Filters(complevel=self.complevel)
         self.h5_file = tables.File(self.filename, 'w')
         self.index = 1
         self._prepare_hits()
@@ -40,37 +42,37 @@ class HDF5Sink(Module):
     def _prepare_event_info(self, group_name='info', where='/'):
         info_group = self.h5_file.create_group(where, group_name)
         h5_file = self.h5_file
-        h5_file.create_earray(info_group, 'id', atom=tables.IntAtom(), shape=(0, ))
-        h5_file.create_earray(info_group, 'det_id', atom=tables.IntAtom(), shape=(0, ))
-        h5_file.create_earray(info_group, 'frame_index', atom=tables.UIntAtom(), shape=(0, ))
-        h5_file.create_earray(info_group, 'mc_id', atom=tables.IntAtom(), shape=(0, ))
-        h5_file.create_earray(info_group, 'mc_t', atom=tables.Float64Atom(), shape=(0, ))
-        h5_file.create_earray(info_group, 'overlays', atom=tables.UInt8Atom(), shape=(0, ))
-        h5_file.create_earray(info_group, 'run_id', atom=tables.UIntAtom(), shape=(0, ))
-        #h5_file.create_earray(info_group, 'timestamp', atom=tables.Float64Atom(), shape=(0, ))
-        h5_file.create_earray(info_group, 'trigger_counter', atom=tables.UInt64Atom(), shape=(0, ))
-        h5_file.create_earray(info_group, 'trigger_mask', atom=tables.UInt64Atom(), shape=(0, ))
+        h5_file.create_earray(info_group, 'id', atom=tables.IntAtom(), shape=(0, ), filters=self.filter)
+        h5_file.create_earray(info_group, 'det_id', atom=tables.IntAtom(), shape=(0, ), filters=self.filter)
+        h5_file.create_earray(info_group, 'frame_index', atom=tables.UIntAtom(), shape=(0, ), filters=self.filter)
+        h5_file.create_earray(info_group, 'mc_id', atom=tables.IntAtom(), shape=(0, ), filters=self.filter)
+        h5_file.create_earray(info_group, 'mc_t', atom=tables.Float64Atom(), shape=(0, ), filters=self.filter)
+        h5_file.create_earray(info_group, 'overlays', atom=tables.UInt8Atom(), shape=(0, ), filters=self.filter)
+        h5_file.create_earray(info_group, 'run_id', atom=tables.UIntAtom(), shape=(0, ), filters=self.filter)
+        #h5_file.create_earray(info_group, 'timestamp', atom=tables.Float64Atom(), shape=(0, ), filters=self.filter)
+        h5_file.create_earray(info_group, 'trigger_counter', atom=tables.UInt64Atom(), shape=(0, ), filters=self.filter)
+        h5_file.create_earray(info_group, 'trigger_mask', atom=tables.UInt64Atom(), shape=(0, ), filters=self.filter)
 
     def _prepare_hits(self, group_name='hits', where='/'):
         hit_group = self.h5_file.create_group(where, group_name)
         h5_file = self.h5_file
-        h5_file.create_vlarray(hit_group, 'channel_id', atom=tables.UInt8Atom())
-        h5_file.create_vlarray(hit_group, 'dom_id', atom=tables.UIntAtom())
-        h5_file.create_vlarray(hit_group, 'id', atom=tables.UIntAtom())
-        h5_file.create_vlarray(hit_group, 'pmt_id', atom=tables.UIntAtom())
-        h5_file.create_vlarray(hit_group, 'time', atom=tables.IntAtom())
-        h5_file.create_vlarray(hit_group, 'tot', atom=tables.UInt8Atom())
-        h5_file.create_vlarray(hit_group, 'triggered', atom=tables.BoolAtom())
+        h5_file.create_vlarray(hit_group, 'channel_id', atom=tables.UInt8Atom(), filters=self.filter)
+        h5_file.create_vlarray(hit_group, 'dom_id', atom=tables.UIntAtom(), filters=self.filter)
+        h5_file.create_vlarray(hit_group, 'id', atom=tables.UIntAtom(), filters=self.filter)
+        h5_file.create_vlarray(hit_group, 'pmt_id', atom=tables.UIntAtom(), filters=self.filter)
+        h5_file.create_vlarray(hit_group, 'time', atom=tables.IntAtom(), filters=self.filter)
+        h5_file.create_vlarray(hit_group, 'tot', atom=tables.UInt8Atom(), filters=self.filter)
+        h5_file.create_vlarray(hit_group, 'triggered', atom=tables.BoolAtom(), filters=self.filter)
 
     def _prepare_tracks(self, group_name='tracks', where='/'):
         track_group = self.h5_file.create_group(where, group_name)
         h5_file = self.h5_file
-        h5_file.create_vlarray(track_group, 'dir', atom=POS_ATOM)
-        h5_file.create_vlarray(track_group, 'energy', atom=tables.FloatAtom())
-        h5_file.create_vlarray(track_group, 'id', atom=tables.UIntAtom())
-        h5_file.create_vlarray(track_group, 'pos', atom=POS_ATOM)
-        h5_file.create_vlarray(track_group, 'time', atom=tables.IntAtom())
-        h5_file.create_vlarray(track_group, 'type', atom=tables.IntAtom())
+        h5_file.create_vlarray(track_group, 'dir', atom=POS_ATOM, filters=self.filter)
+        h5_file.create_vlarray(track_group, 'energy', atom=tables.FloatAtom(), filters=self.filter)
+        h5_file.create_vlarray(track_group, 'id', atom=tables.UIntAtom(), filters=self.filter)
+        h5_file.create_vlarray(track_group, 'pos', atom=POS_ATOM, filters=self.filter)
+        h5_file.create_vlarray(track_group, 'time', atom=tables.IntAtom(), filters=self.filter)
+        h5_file.create_vlarray(track_group, 'type', atom=tables.IntAtom(), filters=self.filter)
 
     def _write_event_info(self, evt, table_name='info', where='/'):
         target = self.h5_file.get_node(where, table_name)
