@@ -25,7 +25,7 @@ __author__ = 'tamasgal'
 POS_ATOM = tables.FloatAtom(shape=3)
 
 
-class HDF5TableSink(Module):
+class HDF5Sink(Module):
     def __init__(self, **context):
         """A Module to convert (KM3NeT) ROOT files to HDF5."""
         super(self.__class__, self).__init__(**context)
@@ -125,7 +125,7 @@ class HDF5TableSink(Module):
         self.h5_file.close()
 
 
-class HDF5TablePump(Pump):
+class HDF5Pump(Pump):
     """Provides a pump for KM3NeT HDF5 files"""
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
