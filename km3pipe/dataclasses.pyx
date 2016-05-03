@@ -210,12 +210,17 @@ class HitSeries(object):
             h.trig, 
         ) for h in hits])
 
-    # TODO: BROKEN
     @classmethod
     def from_evt(cls, hits):
-        # ORDER IS BROKEN! FIXME! TODO!
-        return cls([Hit(h.id, np.nan, h.time, h.tot, np.nan,
-                        np.nan, h.pmt_id) for h in hits])
+        return cls([Hit(
+            np.nan,     # channel_id
+            np.nan,     # dom_id
+            h.id, 
+            h.pmt_id
+            h.time, 
+            h.tot, 
+            np.nan,     # triggered
+        ) for h in hits])
 
     @classmethod
     def from_arrays(cls, channel_ids, dom_ids, ids, pmt_ids, times, tots,
