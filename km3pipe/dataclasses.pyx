@@ -325,19 +325,25 @@ class HitSeries(object):
 
 class TrackSeries(object):
     def __init__(self, tracks):
-        self._tracks = tracks
-        self._id = None
-        self._time = None
-        self._energy = None
-        self._type = None
-        self._pos = None
         self._dir = None
+        self._energy = None
+        self._id = None
         self._index = 0
+        self._pos = None
+        self._time = None
+        self._tracks = tracks
+        self._type = None
 
     @classmethod
     def from_aanet(cls, tracks):
-        return cls([Track(Direction((t.dir.x, t.dir.y, t.dir.z)), t.E, t.id, 
-                          Position((t.pos.x, t.pos.y, t.pos.z)), t.t, t.type,)
+        return cls([Track(
+            Direction((t.dir.x, t.dir.y, t.dir.z)), 
+            t.id, 
+            t.E, 
+            Position((t.pos.x, t.pos.y, t.pos.z)), 
+            t.t, 
+            t.type,
+        )
                     for t in tracks])
 
     @classmethod
