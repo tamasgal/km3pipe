@@ -125,15 +125,15 @@ cdef class Hit:
 
     Parameters
     ----------
-    id : int
+    channel_id : int
+    dir : Direction or numpy.ndarray
     dom_id : int
+    id : int
+    pmt_id : int
+    pos : Position or numpy.ndarray
     time : int
     tot : int
-    channel_id : int
-    pmt_id : int
     triggered : bool
-    pos : Position or numpy.ndarray
-    dir : Direction or numpy.ndarray
 
     """
     cdef public float id, dom_id, time, tot, channel_id, pmt_id
@@ -150,13 +150,13 @@ cdef class Hit:
                   int tot,
                   bint triggered, 
                  ):
-        self.id = id
+        self.channel_id = channel_id
         self.dom_id = dom_id
+        self.id = id
+        self.pmt_id = pmt_id
         self.time = time
         self.tot = tot
-        self.channel_id = channel_id
         self.triggered = triggered
-        self.pmt_id = pmt_id
         
 
 cdef class Track:
@@ -164,12 +164,12 @@ cdef class Track:
 
     Parameters
     ----------
-    id : int
-    time : int
-    energy : float
-    type : int
-    pos : Position or numpy.ndarray
     dir : Direction or numpy.ndarray
+    energy : float
+    id : int
+    pos : Position or numpy.ndarray
+    time : int
+    type : int
 
     """
     cdef public int id, time, type
@@ -188,23 +188,32 @@ cdef class Track:
 
 class HitSeries(object):
     def __init__(self, hits):
-        self._hits = hits
         self._channel_id = None
         self._dom_id = None
+        self._hits = hits
         self._id = None
+        self._index = 0
         self._pmt_id = None
         self._time = None
         self._tot = None
         self._triggered = None
-        self._index = 0
 
     @classmethod
     def from_aanet(cls, hits):
-        return cls([Hit(h.id, h.dom_id, h.t, h.tot, ord(h.channel_id),
-                    h.trig, h.pmt_id) for h in hits])
+        return cls([Hit(
+            ord(h.channel_id),
+            h.dom_id, 
+            h.id, 
+            h.pmt_id,
+            h.t, 
+            h.tot, 
+            h.trig, 
+        ) for h in hits])
 
+    # TODO: BROKEN
     @classmethod
     def from_evt(cls, hits):
+        # ORDER IS BROKEN! FIXME! TODO!
         return cls([Hit(h.id, np.nan, h.time, h.tot, np.nan,
                         np.nan, h.pmt_id) for h in hits])
 
