@@ -25,12 +25,12 @@ from km3modules import StatusBar
 def tohdf5(input_file, output_file, n_events):
     """Convert ROOT file to HDF5 file"""
     from km3pipe import Pipeline  # noqa
-    from km3pipe.pumps import AanetPump, HDF5TableSink  # noqa
+    from km3pipe.pumps import AanetPump, HDF5Sink  # noqa
 
     pipe = Pipeline()
     pipe.attach(AanetPump, filename=input_file)
     pipe.attach(StatusBar, every=1000)
-    pipe.attach(HDF5TableSink, filename=output_file)
+    pipe.attach(HDF5Sink, filename=output_file)
     pipe.drain(n_events)
 
 
