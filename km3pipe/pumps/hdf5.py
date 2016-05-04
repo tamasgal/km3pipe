@@ -29,7 +29,7 @@ class HDF5Sink(Module):
         """A Module to convert (KM3NeT) ROOT files to HDF5."""
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
-        self.complevel = self.get('complevel') or 1
+        self.complevel = self.get('complevel') or 5
         self.filter = tables.Filters(complevel=self.complevel)
         self.h5_file = tables.File(self.filename, 'w')
         self.index = 1
