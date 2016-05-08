@@ -9,7 +9,7 @@ python:
 before_install:
     - sudo apt-get -qq update
       #    - sudo apt-get install libhdf5
-    - sudo aptitude search hdf5
+    - sudo apt-get install libhdf5-dev
     - uname -a
     - free -m
     - df -h
