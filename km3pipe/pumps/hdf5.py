@@ -135,7 +135,7 @@ class HDF5Sink(Module):
         self.h5file.close()
 
 
-class HDF5PumpOld(Pump):
+class HDF5Pump(Pump):
     """Provides a pump for KM3NeT HDF5 files"""
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
