@@ -35,6 +35,17 @@ class H5Hit(tables.IsDescription):
     triggered = tables.BoolCol()
 
 
+class H5Track(tables.IsDescription):
+        dir = tables.FloatCol(shape=(3,))
+        event_id = tables.UIntCol()
+        energy = tables.FloatCol()
+        event_id = tables.UIntCol()
+        id = tables.UIntCol()
+        pos = tables.FloatCol(shape=(3,))
+        time = tables.IntCol()
+        type = tables.IntCol()
+
+
 class HDF5Sink2(Module):
     def __init__(self, **context):
         """A Module to convert (KM3NeT) ROOT files to HDF5."""
