@@ -54,11 +54,14 @@ class HDF5Sink2(Module):
             hit_row['time'] = hit.time
             hit_row.append()
 
-        self.h5table.flush()
+        if self.index % 1000 == 0:
+            self.h5table.flush()
+
         self.index += 1
         return blob
 
     def finish(self):
+        self.h5table.flush()
         self.h5file.close()
 
 
