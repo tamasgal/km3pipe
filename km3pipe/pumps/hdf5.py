@@ -24,6 +24,17 @@ __author__ = 'tamasgal'
 POS_ATOM = tables.FloatAtom(shape=3)
 
 
+class Hit(tables.IsDescription):
+    channel_id = tables.UInt8Col()
+    dom_id = tables.UIntCol()
+    event_id = tables.UIntCol()
+    id = tables.UIntCol()
+    pmt_id = tables.UIntCol()
+    time = tables.IntCol()
+    tot = tables.UInt8Col()
+    triggered = tables.BoolCol()
+
+
 class HDF5Sink(Module):
     def __init__(self, **context):
         """A Module to convert (KM3NeT) ROOT files to HDF5."""
