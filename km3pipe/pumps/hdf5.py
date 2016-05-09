@@ -41,7 +41,7 @@ class HDF5Sink2(Module):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
         self.index = 1
-        self.h5file = open_file(self.filename, mode="w", title="Test file")
+        self.h5file = tables.open_file(self.filename, mode="w", title="Test file")
         self.h5table = self.h5file.create_table('/', 'hits', Hit, "Hits")
 
     def process(self, blob):
