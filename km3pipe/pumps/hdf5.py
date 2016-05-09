@@ -129,7 +129,12 @@ class HDF5Sink(Module):
         return blob
 
     def finish(self):
+        self.hits.create_index()
+        self.event_info.create_index()
+        self.mc_hits.create_index()
+        self.tracks_hits.create_index()
         self.hits.flush()
+        self.event_info.flush()
         self.mc_hits.flush()
         self.mc_tracks.flush()
         self.h5file.close()
