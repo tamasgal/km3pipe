@@ -35,6 +35,32 @@ class Hit(tables.IsDescription):
     triggered = tables.BoolCol()
 
 
+class HDF5Sink2(Module):
+    def __init__(self, **context):
+        """A Module to convert (KM3NeT) ROOT files to HDF5."""
+        super(self.__class__, self).__init__(**context)
+        self.filename = self.get('filename') or 'dump.h5'
+        self.index = 1
+        self.h5file = open_file(self.filename, mode="w", title="Test file")
+        self.h5table = self.h5file.create_table('/', 'hits', Hit, "Hits")
+
+    def process(self, blob):
+        hits = blob['Hits']
+
+        hit_row = self.h5table.row
+
+        for hit in hits:
+            hit_row['event_id'] = self.index
+            hit_row['time'] = hit.time
+
+        self.h5table.flush()
+        self.index += 1
+        return blob
+
+    def finish(self):
+        self.h5file.close()
+
+
 class HDF5Sink(Module):
     def __init__(self, **context):
         """A Module to convert (KM3NeT) ROOT files to HDF5."""
