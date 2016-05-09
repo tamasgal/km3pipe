@@ -24,7 +24,7 @@ __author__ = 'tamasgal'
 POS_ATOM = tables.FloatAtom(shape=3)
 
 
-class Hit(tables.IsDescription):
+class H5Hit(tables.IsDescription):
     channel_id = tables.UInt8Col()
     dom_id = tables.UIntCol()
     event_id = tables.UIntCol()
