@@ -167,12 +167,21 @@ class HDF5Pump(Pump):
         rows = table.read_where('event_id == %d' % index)
         return HitSeries.from_table(rows)
 
+    def _get_tracks(self, index, table_name='tracks', where='/'):
+        table = self.h5_file.get_node(where, table_name)
+        rows = table.read_where('event_id == %d' % index)
+        return TrackSeries.from_table(rows)
+
+    def _get_event_info(self, index, table_name='event_info', where='/'):
+        table = self.h5_file.get_node(where, table_name)
+        return table[index]
+
     def get_blob(self, index):
         blob = {}
         blob['Hits'] = self._get_hits(index, table_name='hits')
-        #blob['MCHits'] = self._get_hits(index, table_name='mc_hits')
-        #blob['MCTracks'] = self._get_tracks(index, table_name='mc_tracks')
-        #blob['EventInfo'] = self._get_event_info(index, table_name='info')
+        blob['MCHits'] = self._get_hits(index, table_name='mc_hits')
+        blob['MCTracks'] = self._get_tracks(index, table_name='mc_tracks')
+        blob['EventInfo'] = self._get_event_info(index, table_name='event_info')
         return blob
 
     def finish(self):
