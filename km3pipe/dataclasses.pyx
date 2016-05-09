@@ -1,5 +1,6 @@
 # coding=utf-8
 # Filename: dataclasses.py
+# cython: embedsignature=True
 # pylint: disable=W0232,C0103,C0111
 """
 ...
@@ -8,7 +9,7 @@
 from __future__ import division, absolute_import, print_function
 
 import ctypes
-from libcpp cimport bool as c_bool
+from libcpp cimport bool as c_bool  # noqa
 
 import numpy as np
 cimport numpy as np
@@ -18,14 +19,14 @@ np.import_array()
 
 from km3pipe.tools import angle_between
 
-__all__ = ('Point', 'Position', 'Direction', 'HitSeries', 'HitSeriesA', 'Hit',
-           'CPosition', 'CHitSeries')
+__all__ = ('Point', 'Position', 'Direction', 'HitSeries', 'Hit')
 
 
 point_dt = np.dtype([('x', float), ('y', float), ('z', float)])
 
 def Point(vector, as_recarray=True):
-    vector = np.array(vector)
+    """A point as numpy.recarray with optional x, y and z attributes."""
+    vector = np.array(vector, dtype=np.float)
     if as_recarray:
         return vector.view(point_dt, np.recarray)
     else:
@@ -119,48 +120,20 @@ class Direction_(Point_):
         return "({0:.4}, {1:.4}, {2:.4})".format(self.x, self.y, self.z)
 
 
-class HitSeriesA(object):
-    def __init__(self, data=None):
-        self.hit_dtype = np.dtype([
-            ('id', int),
-            ('dom_id', int),
-            ('time', int),
-            ('tot', int),
-            ('channel_id', int),
-            ('triggered', bool),
-            ('pmt_id', int),
-            ('t0', float),
-            ('pos_x', float),
-            ('pos_y', float),
-            ('pos_z', float),
-            ('dir_x', float),
-            ('dir_y', float),
-            ('dir_z', float),
-            ])
-        self._data = np.rec.array(data, dtype=self.hit_dtype)
-
-    @classmethod
-    def from_aanet(cls, data):
-        return cls(data=[(h.id, h.dom_id, h.t, h.tot, ord(h.channel_id),
-                          h.trig, h.pmt_id, np.nan,
-                          np.nan, np.nan, np.nan,
-                          np.nan, np.nan, np.nan) for h in data])
-
-
-cdef class CyHit:
+cdef class Hit:
     """Represents a hit on a PMT.
 
     Parameters
     ----------
-    id : float
-    dom_id : float
-    time : float
-    tot : float
-    channel_id : float
-    pmt_id : float
-    triggered : bool
-    pos : Position or numpy.ndarray
+    channel_id : int
     dir : Direction or numpy.ndarray
+    dom_id : int
+    id : int
+    pmt_id : int
+    pos : Position or numpy.ndarray
+    time : int
+    tot : int
+    triggered : bool
 
     """
     cdef public float id, dom_id, time, tot, channel_id, pmt_id
@@ -168,59 +141,121 @@ cdef class CyHit:
     cdef public np.ndarray pos
     cdef public np.ndarray dir
 
-    def __cinit__(self, float id, float dom_id, float time, float tot,
-                  float channel_id, bint triggered, float pmt_id):
-        self.id = id
+    def __cinit__(self, 
+                  int channel_id, 
+                  int dom_id, 
+                  int id, 
+                  int pmt_id,
+                  int time, 
+                  int tot,
+                  bint triggered, 
+                 ):
+        self.channel_id = channel_id
         self.dom_id = dom_id
+        self.id = id
+        self.pmt_id = pmt_id
         self.time = time
         self.tot = tot
-        self.channel_id = channel_id
         self.triggered = triggered
-        self.pmt_id = pmt_id
+        
 
+cdef class Track:
+    """Represents a particle track.
 
-class CPosition(ctypes.Structure):
-    _fields_ = [('x', ctypes.c_float),
-                ('y', ctypes.c_float),
-                ('z', ctypes.c_float)]
+    Parameters
+    ----------
+    dir : Direction or numpy.ndarray
+    energy : float
+    id : int
+    pos : Position or numpy.ndarray
+    time : int
+    type : int
 
+    """
+    cdef public int id, time, type
+    cdef public float energy
+    cdef public np.ndarray pos
+    cdef public np.ndarray dir
 
-class CHit(ctypes.Structure):
-    _fields_ = [
-            ('id', ctypes.c_float),
-            ('dom_id', ctypes.c_float),
-            ('time', ctypes.c_float),
-            ('tot', ctypes.c_float),
-            ('channel_id', ctypes.c_float),
-            ('triggered', ctypes.c_bool),
-            ('pmt_id', ctypes.c_float),
-            ('pos', CPosition),
-            ]
+    def __cinit__(self, dir, float energy, int id, pos, int time, int type, ):
+        self.dir = dir
+        self.energy = energy
+        self.id = id
+        self.pos = pos
+        self.time = time
+        self.type = type
+        
 
-
-class CHitSeries(object):
+class HitSeries(object):
     def __init__(self, hits):
-        self._hits = hits
-        self._time = None
-        self._triggered = None
-        self._tot = None
-        self._dom_id = None
-        self._pmt_id = None
         self._channel_id = None
+        self._dom_id = None
+        self._hits = hits
+        self._id = None
         self._index = 0
+        self._pmt_id = None
+        self._time = None
+        self._tot = None
+        self._triggered = None
 
     @classmethod
     def from_aanet(cls, hits):
-        return cls([CHit(h.id, h.dom_id, h.t, h.tot, ord(h.channel_id),
-                    h.trig, h.pmt_id) for h in hits])
+        return cls([Hit(
+            ord(h.channel_id),
+            h.dom_id, 
+            h.id, 
+            h.pmt_id,
+            h.t, 
+            h.tot, 
+            h.trig, 
+        ) for h in hits])
 
     @classmethod
-    def from_aanet_as_cyhit(cls, hits):
-        return cls([CyHit(h.id, h.dom_id, h.t, h.tot, ord(h.channel_id),
-                    h.trig, h.pmt_id) for h in hits])
+    def from_evt(cls, hits):
+        return cls([Hit(
+            np.nan,     # channel_id
+            np.nan,     # dom_id
+            h.id, 
+            h.pmt_id,
+            h.time, 
+            h.tot, 
+            np.nan,     # triggered
+        ) for h in hits])
+
+    @classmethod
+    def from_arrays(cls, channel_ids, dom_ids, ids, pmt_ids, times, tots,
+                    triggereds):
+        args = channel_ids, dom_ids, ids, pmt_ids, times, tots, triggereds
+        hits = cls([Hit(*hit_args) for hit_args in zip(*args)])
+        hits._channel_id = channel_ids
+        hits._dom_id = dom_ids
+        hits._id = ids
+        hits._pmt_id = pmt_ids
+        hits._time = times
+        hits._tots = tots
+        hits._triggered = triggereds
+        return hits
+
+    @classmethod
+    def from_table(cls, table):
+        return cls([Hit(
+            row['channel_id'],
+            row['dom_id'],
+            row['id'],
+            row['pmt_id'],
+            row['time'],
+            row['tot'],
+            row['triggered'],
+        ) for row in table])
 
     def __iter__(self):
         return self
+
+    @property
+    def id(self):
+        if self._id is None:
+            self._id = np.array([h.id for h in self._hits])
+        return self._id
 
     @property
     def time(self):
@@ -251,6 +286,12 @@ class CHitSeries(object):
         if self._pmt_id is None:
             self._pmt_id = np.array([h.pmt_id for h in self._hits])
         return self._pmt_id
+
+    @property
+    def id(self):
+        if self._id is None:
+            self._id = np.array([h.id for h in self._hits])
+        return self._id
 
     @property
     def channel_id(self):
@@ -299,98 +340,112 @@ class CHitSeries(object):
         return '\n'.join([str(hit) for hit in self._hits])
 
 
-class HitSeries(object):
-    @classmethod
-    def from_hdf5(cls, data):
-        return cls(data, Hit.from_dict)
-
-    @classmethod
-    def from_aanet(cls, data):
-        return cls(data, Hit.from_aanet)
-
-    @classmethod
-    def from_evt(cls, data):
-        return cls(data, Hit.from_evt)
-
-    @classmethod
-    def from_dict(cls, data):
-        return cls(data, Hit.from_dict)
-
-    def __init__(self, data=None, hit_constructor=None):
-        self._data = data
-        self.hit_constructor = hit_constructor
-        self._hits = None
-        self._pos = None
+class TrackSeries(object):
+    def __init__(self, tracks):
         self._dir = None
+        self._energy = None
+        self._id = None
         self._index = 0
-
-        if data is None:
-            self._hits = []
-
-    def append(self, hit):
-        if self._hits is None:
-            self._convert_hits()
-        self._hits.append(hit)
         self._pos = None
-        self._dir = None
+        self._time = None
+        self._tracks = tracks
+        self._type = None
+
+    @classmethod
+    def from_aanet(cls, tracks):
+        return cls([Track(
+            Direction((t.dir.x, t.dir.y, t.dir.z)), 
+            t.id, 
+            t.E, 
+            Position((t.pos.x, t.pos.y, t.pos.z)), 
+            t.t, 
+            t.type,
+        )
+                    for t in tracks])
+
+    @classmethod
+    def from_arrays(cls, directions, energies, ids, positions, times, types):
+        args = directions, energies, ids, positions, times, types
+        tracks = cls([Track(*track_args) for track_args in zip(*args)])
+        tracks._dir = directions
+        tracks._energy = energies
+        tracks._id = ids
+        tracks._pos = positions
+        tracks._time = times
+        tracks._type = types
+        return tracks
+
+    @classmethod
+    def from_table(cls, table):
+        return cls([Track(
+            row['dir'],
+            row['energy'],
+            row['id'],
+            row['pos'],
+            row['time'],
+            row['type'],
+        ) for row in table])
+
+    def __iter__(self):
+        return self
+
+    def __iter__(self):
+        return self
+
+    @property
+    def id(self):
+        if self._id is None:
+            self._id = np.array([t.id for t in self._tracks])
+        return self._id
+
+    @property
+    def time(self):
+        if self._time is None:
+            self._time = np.array([t.time for t in self._tracks])
+        return self._time
+
+    @property
+    def energy(self):
+        if self._energy is None:
+            self._energy = np.array([t.energy for t in self._tracks])
+        return self._energy
+    
+    @property
+    def type(self):
+        if self._type is None:
+            self._type = np.array([t.type for t in self._tracks])
+        return self._type
 
     @property
     def pos(self):
-        if self._hits is None:
-            self._convert_hits()
         if self._pos is None:
-            self._pos = np.array([hit.pos for hit in self._hits])
+            self._pos = np.array([t.pos for t in self._tracks])
         return self._pos
 
     @property
     def dir(self):
-        if self._hits is None:
-            self._convert_hits()
         if self._dir is None:
-            self._dir = np.array([hit.dir for hit in self._hits])
+            self._dir = np.array([t.dir for t in self._tracks])
         return self._dir
-
-    @property
-    def triggered(self):
-        """Return a copy of triggered hits."""
-        if self._hits is None:
-            self._convert_hits()
-        triggered_hits = [hit for hit in self._hits if hit.triggered]
-        return HitSeries(triggered_hits, Hit.from_hit)
-
-    def _convert_hits(self):
-        self._hits = [self.hit_constructor(hit) for hit in self._data]
-        self._data = None  # get rid of reference to allow GC
-
-    def __iter__(self):
-        return self
 
     def next(self):
         """Python 2/3 compatibility for iterators"""
         return self.__next__()
 
     def __next__(self):
-        if self._hits is None:
-            self._convert_hits()
-
         if self._index >= len(self):
             self._index = 0
             raise StopIteration
-        item = self._hits[self._index]
+        item = self._tracks[self._index]
         self._index += 1
         return item
 
     def __len__(self):
-        if self._hits is None:
-            self._convert_hits()
-        return len(self._hits)
+        return len(self._tracks)
 
     def __getitem__(self, index):
-        if self._hits is None:
-            self._convert_hits()
-
         if isinstance(index, int):
-            return self._hits[index]
+            return self._tracks[index]
         elif isinstance(index, slice):
             return self._slice_generator(index)
         else:
@@ -400,70 +455,15 @@ class HitSeries(object):
         """A simple slice generator for iterations"""
         start, stop, step = index.indices(len(self))
         for i in range(start, stop, step):
-            yield self._hits[i]
+            yield self._tracks[i]
 
     def __str__(self):
-        n_hits = len(self)
-        plural = 's' if n_hits > 1 or n_hits == 0 else ''
-        return("HitSeries with {0} hit{1}.".format(len(self), plural))
+        n_tracks = len(self)
+        plural = 's' if n_tracks > 1 or n_tracks == 0 else ''
+        return("TrackSeries with {0} track{1}.".format(len(self), plural))
 
     def __repr__(self):
         return self.__str__()
 
     def __insp__(self):
-        if self._hits is None:
-            self._convert_hits()
-        return '\n'.join([str(hit) for hit in self._hits])
-
-
-class Hit(object):
-    def __init__(self, id=None, time=None, tot=None, channel_id=None,
-                 dom_id=None, pmt_id=None, triggered=None, data=None):
-        self.id = id
-        self.time = time
-        self.t0 = None
-        self.tot = tot
-        self.channel_id = channel_id
-        self.dom_id = dom_id
-        self.pmt_id = pmt_id
-        self.triggered = triggered
-        self.data = data
-        self.pos = None
-        self.dir = None
-        self.a = None  # charge <- historical
-
-    @classmethod
-    def from_hit(cls, hit):
-        new_hit = Hit(hit.id, hit.time, hit.tot, hit.channel_id, hit.dom_id,
-                      hit.pmt_id, hit.triggered, data=None)
-        if hit.pos is not None:
-            new_hit.pos = Position(hit.pos)
-        if hit.dir is not None:
-            new_hit.dir = Direction(hit.dir)
-        new_hit.a = hit.a
-        return hit
-
-    @classmethod
-    def from_dict(cls, data):
-        return cls(data['id'], data['time'], data['tot'], data['channel_id'],
-                   data['dom_id'], data=data)
-
-    @classmethod
-    def from_aanet(cls, data):
-        try:
-            return cls(data.id, data.t, data.tot, ord(data.channel_id),
-                       data.dom_id, triggered=bool(data.trig), data=data)
-        except TypeError:
-            return cls(data.id, data.t, data.tot, data.channel_id,
-                       data.dom_id, triggered=bool(data.trig), data=data)
-
-    @classmethod
-    def from_evt(cls, data):
-        return cls(data.id, data.time, data.tot, pmt_id=data.pmt_id, data=data)
-
-    def __str__(self):
-        return("Hit(id={0}, time={1}, tot={2}, triggered={3})"
-               .format(self.id, self.time, self.tot, self.triggered))
-
-    def __repr__(self):
-        return self.__str__()
+        return '\n'.join([str(track) for track in self._tracks])

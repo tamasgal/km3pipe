@@ -1,38 +1,143 @@
 # coding=utf-8
 # Filename: hdf5.py
 # pylint: disable=C0103,R0903
+# vim:set ts=4 sts=4 sw=4 et:
 """
 Pumps for the EVT simulation dataformat.
 
 """
 from __future__ import division, absolute_import, print_function
 
-from collections import defaultdict
 import os.path
 
-try:
-    import pandas as pd
-except ImportError:
-    print("The HDF5 pump needs pandas: pip install pandas")
-
-try:
-    import numpy as np
-except ImportError:
-    print("The HDF5 Bucket needs numpy: pip install numpy")
-
-try:
-    import h5py
-except ImportError:
-    print("The HDF5 Sink and Bucket need h5py: pip install h5py")
-
+import tables
+import numpy as np
 
 from km3pipe import Pump, Module
-from km3pipe.dataclasses import HitSeries
+from km3pipe.dataclasses import HitSeries, TrackSeries
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 __author__ = 'tamasgal'
+
+POS_ATOM = tables.FloatAtom(shape=3)
+
+
+class Hit(tables.IsDescription):
+    channel_id = tables.UInt8Col()
+    dom_id = tables.UIntCol()
+    event_id = tables.UIntCol()
+    id = tables.UIntCol()
+    pmt_id = tables.UIntCol()
+    time = tables.IntCol()
+    tot = tables.UInt8Col()
+    triggered = tables.BoolCol()
+
+
+class Track(tables.IsDescription):
+    dir = tables.FloatCol(shape=(3,))
+    energy = tables.FloatCol()
+    event_id = tables.UIntCol()
+    id = tables.UIntCol()
+    pos = tables.FloatCol(shape=(3,))
+    time = tables.IntCol()
+    type = tables.IntCol()
+
+
+class EventInfo(tables.IsDescription):
+    id = tables.IntCol()
+    det_id = tables.IntCol()
+    event_id = tables.UIntCol()
+    frame_index = tables.UIntCol()
+    mc_id = tables.IntCol()
+    mc_t = tables.Float64Col()
+    overlays = tables.UInt8Col()
+    run_id = tables.UIntCol()
+    #timestamp = tables.Float64Col()
+    trigger_counter = tables.UInt64Col()
+    trigger_mask = tables.UInt64Col()
+
+
+class HDF5Sink(Module):
+    def __init__(self, **context):
+        """A Module to convert (KM3NeT) ROOT files to HDF5."""
+        super(self.__class__, self).__init__(**context)
+        self.filename = self.get('filename') or 'dump.h5'
+        self.index = 1
+        self.h5file = tables.open_file(self.filename, mode="w", title="Test file")
+        self.filters = tables.Filters(complevel=5)
+        self.hits = self.h5file.create_table('/', 'hits', Hit, "Hits", filters=self.filters)
+        self.mc_hits = self.h5file.create_table('/', 'mc_hits', Hit, "MC Hits", filters=self.filters)
+        self.mc_tracks = self.h5file.create_table('/', 'mc_tracks', Track, "MC Tracks", filters=self.filters)
+        self.event_info = self.h5file.create_table('/', 'event_info', EventInfo, "Event Info", filters=self.filters)
+
+    def _write_hits(self, hits, hit_row):
+        for hit in hits:
+            hit_row['channel_id'] = hit.channel_id
+            hit_row['dom_id'] = hit.dom_id
+            hit_row['event_id'] = self.index
+            hit_row['id'] = hit.id
+            hit_row['pmt_id'] = hit.pmt_id
+            hit_row['time'] = hit.time
+            hit_row['tot'] = hit.tot
+            hit_row['triggered'] = hit.triggered
+            hit_row.append()
+
+    def _write_tracks(self, tracks, track_row):
+        for track in tracks:
+            track_row['dir'] = track.dir
+            track_row['energy'] = track.energy
+            track_row['event_id'] = self.index
+            track_row['id'] = track.id
+            track_row['pos'] = track.pos
+            track_row['time'] = track.time
+            track_row['type'] = track.type
+            track_row.append()
+
+    def _write_event_info(self, info, info_row):
+        info_row['det_id'] = info.det_id
+        info_row['event_id'] = self.index
+        info_row['frame_index'] = info.frame_index
+        info_row['id'] = info.id
+        info_row['mc_id'] = info.mc_id
+        info_row['mc_t'] = info.mc_t
+        info_row['overlays'] = info.overlays
+        info_row['run_id'] = info.run_id
+        #info_row['timestamp'] = info.timestamp
+        info_row['trigger_counter'] = info.trigger_counter
+        info_row['trigger_mask'] = info.trigger_mask
+        info_row.append()
+
+    def process(self, blob):
+        hits = blob['Hits']
+        self._write_hits(hits, self.hits.row)
+        if 'MCHits' in blob:
+            self._write_hits(blob['MCHits'], self.mc_hits.row)
+        if 'MCTracks' in blob:
+            self._write_tracks(blob['MCTracks'], self.mc_tracks.row)
+        if 'Evt' in blob:
+            self._write_event_info(blob['Evt'], self.event_info.row)
+
+        if not self.index % 1000:
+            self.hits.flush()
+            self.mc_hits.flush()
+            self.mc_tracks.flush()
+            self.event_info.flush()
+
+        self.index += 1
+        return blob
+
+    def finish(self):
+        self.hits.cols.event_id.create_index()
+        self.event_info.cols.event_id.create_index()
+        self.mc_hits.cols.event_id.create_index()
+        self.mc_tracks.cols.event_id.create_index()
+        self.hits.flush()
+        self.event_info.flush()
+        self.mc_hits.flush()
+        self.mc_tracks.flush()
+        self.h5file.close()
 
 
 class HDF5Pump(Pump):
@@ -41,11 +146,7 @@ class HDF5Pump(Pump):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename')
         if os.path.isfile(self.filename):
-            self._h5file = h5py.File(self.filename)
-            try:
-                self._n_events = len(self._h5file['/event'])
-            except KeyError:
-                raise KeyError("No events found.")
+            self.h5_file = tables.File(self.filename)
         else:
             raise IOError("No such file or directory: '{0}'"
                           .format(self.filename))
@@ -61,17 +162,31 @@ class HDF5Pump(Pump):
         self.index += 1
         return blob
 
+    def _get_hits(self, index, table_name='hits', where='/'):
+        table = self.h5_file.get_node(where, table_name)
+        rows = table.read_where('event_id == %d' % index)
+        return HitSeries.from_table(rows)
+
+    def _get_tracks(self, index, table_name='tracks', where='/'):
+        table = self.h5_file.get_node(where, table_name)
+        rows = table.read_where('event_id == %d' % index)
+        return TrackSeries.from_table(rows)
+
+    def _get_event_info(self, index, table_name='event_info', where='/'):
+        table = self.h5_file.get_node(where, table_name)
+        return table[index]
+
     def get_blob(self, index):
         blob = {}
-        n_event = index + 1
-        raw_hits = self._h5file.get('/event/{0}/hits'.format(n_event))
-        blob['Hits'] = HitSeries.from_hdf5(raw_hits)
-        blob['EventInfo'] = self._h5file.get('/event/{0}/info'.format(n_event))
+        blob['Hits'] = self._get_hits(index, table_name='hits')
+        blob['MCHits'] = self._get_hits(index, table_name='mc_hits')
+        blob['MCTracks'] = self._get_tracks(index, table_name='mc_tracks')
+        blob['EventInfo'] = self._get_event_info(index, table_name='event_info')
         return blob
 
     def finish(self):
         """Clean everything up"""
-        self._h5file.close()
+        self.h5_file.close()
 
     def _reset_index(self):
         """Reset index to default value"""
@@ -108,230 +223,3 @@ class HDF5Pump(Pump):
         start, stop, step = index.indices(len(self))
         for i in range(start, stop, step):
             yield self.get_blob(i)
-
-
-class HDF5Sink(Module):
-    def __init__(self, **context):
-        """A Module to convert (KM3NeT) ROOT files to HDF5."""
-        super(self.__class__, self).__init__(**context)
-        self.filename = self.get('filename') or 'dump.h5'
-        self.hits = {}
-        self.mc_hits = {}
-        self.mc_tracks = {}
-        self.event_info = {}
-        self.index = 0
-        print("Processing {0}...".format(self.filename))
-
-    def process(self, blob):
-        try:
-            self._add_hits(blob['Hits'], self.hits)
-        except KeyError:
-            print("No hits found. Skipping...")
-
-        try:
-            self._add_hits(blob['MCHits'], self.mc_hits)
-        except KeyError:
-            print("No MC hits found. Skipping...")
-
-        try:
-            self._add_mc_tracks(blob['MCTracks'])
-        except KeyError:
-            print("No MC tracks found. Skipping...")
-
-        self._add_event_info(blob)
-
-        self.index += 1
-        return blob
-
-    def _add_hits(self, hits, target):
-        for hit in hits:
-            target.setdefault('event_id', []).append(self.index)
-            target.setdefault('id', []).append(hit.id)
-            target.setdefault('pmt_id', []).append(hit.pmt_id)
-            target.setdefault('time', []).append(hit.time)
-            target.setdefault('tot', []).append(hit.tot)
-            target.setdefault('triggered', []).append(hit.triggered)
-            target.setdefault('dom_id', []).append(hit.dom_id)
-            target.setdefault('channel_id', []).append(hit.channel_id)
-
-    def _add_mc_tracks(self, mc_tracks):
-        for mc_track in mc_tracks:
-            self.mc_tracks.setdefault('event_id', []).append(self.index)
-            self.mc_tracks.setdefault('id', []).append(mc_track.id)
-            self.mc_tracks.setdefault('x', []).append(mc_track.pos.x)
-            self.mc_tracks.setdefault('y', []).append(mc_track.pos.y)
-            self.mc_tracks.setdefault('z', []).append(mc_track.pos.z)
-            self.mc_tracks.setdefault('dx', []).append(mc_track.dir.x)
-            self.mc_tracks.setdefault('dy', []).append(mc_track.dir.y)
-            self.mc_tracks.setdefault('dz', []).append(mc_track.dir.z)
-            self.mc_tracks.setdefault('time', []).append(mc_track.t)
-            self.mc_tracks.setdefault('energy', []).append(mc_track.E)
-            self.mc_tracks.setdefault('type', []).append(mc_track.type)
-
-    def _add_event_info(self, blob):
-        evt = blob['Evt']
-
-        timestamp = evt.t.AsDouble()
-        det_id = evt.det_id
-        mc_id = evt.mc_id
-        mc_t = evt.mc_t
-        run = evt.run_id
-        overlays = evt.overlays
-        trigger_counter = evt.trigger_counter
-        trigger_mask = evt.trigger_mask
-        frame_index = evt.frame_index
-
-        info = self.event_info
-
-        info.setdefault('event_id', []).append(self.index)
-        info.setdefault('timestamp', []).append(timestamp)
-        info.setdefault('det_id', []).append(det_id)
-        info.setdefault('mc_id', []).append(mc_id)
-        info.setdefault('mc_t', []).append(mc_t)
-        info.setdefault('run', []).append(run)
-        info.setdefault('overlays', []).append(overlays)
-        info.setdefault('trigger_counter', []).append(trigger_counter)
-        info.setdefault('trigger_mask', []).append(trigger_mask)
-        info.setdefault('frame_index', []).append(frame_index)
-
-    def finish(self):
-        h5_file = h5py.File(self.filename, 'w')
-        if self.hits:
-            df = pd.DataFrame(self.hits)
-            rec = df.to_records(index=False)
-            h5_file.create_dataset('/hits', data=rec)
-            print("Finished writing hits in {0}".format(self.filename))
-        if self.mc_hits:
-            df = pd.DataFrame(self.mc_hits)
-            rec = df.to_records(index=False)
-            h5_file.create_dataset('/mc_hits', data=rec)
-            print("Finished writing MC hits in {0}".format(self.filename))
-        if self.mc_tracks:
-            df = pd.DataFrame(self.mc_tracks)
-            rec = df.to_records(index=False)
-            h5_file.create_dataset('/mc_tracks', data=rec)
-            print("Finished writing MC tracks in {0}".format(self.filename))
-        if self.event_info:
-            df = pd.DataFrame(self.event_info)
-            rec = df.to_records(index=False)
-            h5_file.create_dataset('/event_info', data=rec)
-            print("Finished writing event info in {0}".format(self.filename))
-
-        h5_file.close()
-
-
-class HDF5Sink2(Module):
-    def __init__(self, **context):
-        """A Module to convert (KM3NeT) ROOT files to HDF5."""
-        super(self.__class__, self).__init__(**context)
-        self.filename = self.get('filename') or 'dump.h5'
-        self.hits = {}
-        self.mc_hits = {}
-        self.mc_tracks = {}
-        self.event_info = {}
-        self.h5_file = h5py.File(self.filename, 'w')
-        self.index = 1
-        print("Processing {0}...".format(self.filename))
-
-    def process(self, blob):
-        target = '/event/{0}/'.format(self.index)
-        self.h5_file.create_group(target)
-
-        self._add_event_info(blob, target=target+'info')
-
-        if 'Hits' in blob:
-            self._add_hits(blob['Hits'], target=target+'hits')
-
-        if 'MCHits' in blob:
-            self._add_hits(blob['MCHits'], target=target+'mc_hits')
-
-        if 'MCTracks' in blob:
-            self._add_tracks(blob['MCTracks'], target=target+'mc_tracks')
-
-        self.index += 1
-        return blob
-
-    def _add_event_info(self, blob, target):
-        evt = blob['Evt']
-
-        timestamp = evt.t.AsDouble()
-        det_id = evt.det_id
-        mc_id = evt.mc_id
-        mc_t = evt.mc_t
-        run = evt.run_id
-        overlays = evt.overlays
-        trigger_counter = evt.trigger_counter
-        trigger_mask = evt.trigger_mask
-        frame_index = evt.frame_index
-
-        info = defaultdict(list)
-
-        info['event_id'].append(self.index)
-        info['timestamp'].append(timestamp)
-        info['det_id'].append(det_id)
-        info['mc_id'].append(mc_id)
-        info['mc_t'].append(mc_t)
-        info['run'].append(run)
-        info['overlays'].append(overlays)
-        info['trigger_counter'].append(trigger_counter)
-        info['trigger_mask'].append(trigger_mask)
-        info['frame_index'].append(frame_index)
-
-        self._dump_dict(info, target)
-
-    def _add_hits(self, hits, target):
-        hits_dict = defaultdict(list)
-        for hit in hits:
-            hits_dict['id'].append(hit.id)
-            hits_dict['pmt_id'].append(hit.pmt_id)
-            hits_dict['time'].append(hit.time)
-            hits_dict['tot'].append(hit.tot)
-            hits_dict['triggered'].append(hit.triggered)
-            hits_dict['dom_id'].append(hit.dom_id)
-            hits_dict['channel_id'].append(hit.channel_id)
-        self._dump_dict(hits_dict, target)
-
-    def _add_tracks(self, tracks, target):
-        tracks_dict = defaultdict(list)
-        for track in tracks:
-            tracks_dict['id'].append(track.id)
-            tracks_dict['x'].append(track.pos.x)
-            tracks_dict['y'].append(track.pos.y)
-            tracks_dict['z'].append(track.pos.z)
-            tracks_dict['dx'].append(track.dir.x)
-            tracks_dict['dy'].append(track.dir.y)
-            tracks_dict['dz'].append(track.dir.z)
-            tracks_dict['time'].append(track.t)
-            tracks_dict['energy'].append(track.E)
-            tracks_dict['type'].append(track.type)
-        self._dump_dict(tracks_dict, target)
-
-    def _dump_dict(self, data, target):
-        if not data:
-            return
-        df = pd.DataFrame(data)
-        rec = df.to_records(index=False)
-        self.h5_file.create_dataset(target, data=rec)
-
-    def finish(self):
-        self.h5_file.close()
-
-
-class HDF5Bucket(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
-        self.filename = self.get("filename")
-        self.prefix = self.get("prefix")
-        self.store = defaultdict(list)
-
-    def process(self, blob):
-        for key, val in blob[self.prefix].items():
-            self.store[key].append(val)
-
-    def finish(self):
-        h5 = h5py.File(self.filename, mode='w')
-        loc = '/' + self.prefix + '/'
-        h5.create_group(loc)
-        for key, data in self.store.items():
-            h5.create_dataset(loc, key, np.array(data))
-        h5.close()

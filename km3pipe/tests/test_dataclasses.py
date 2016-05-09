@@ -80,55 +80,20 @@ class TestDirection(TestCase):
 
 
 class TestHitSeries(TestCase):
-    def test_data(self):
-        data = [1, 2, 3]
-        hit_series = HitSeries(data, None)
-        self.assertEqual(data, hit_series._data)
 
-    def test_init_from_hdf5(self):
-        hit1 = {'id': 1, 'time': 1, 'tot': 2, 'channel_id': 3, 'dom_id': 30}
-        hit2 = {'id': 2, 'time': 2, 'tot': 3, 'channel_id': 4, 'dom_id': 40}
-        hit3 = {'id': 3, 'time': 3, 'tot': 4, 'channel_id': 5, 'dom_id': 50}
-        hit_list = [hit1, hit2, hit3]
+    def test_from_arrays(self):
+        n = 10
+        ids = np.array(range(n))
+        dom_ids = np.array(range(n))
+        times = np.array(range(n))
+        tots = np.array(range(n))
+        channel_ids = np.array(range(n))
+        triggereds = np.ones(n)
+        pmt_ids = np.array(range(n))
 
-        hit_series = HitSeries.from_hdf5(hit_list)
+        hits = HitSeries.from_arrays(ids, dom_ids, times, tots, channel_ids,
+                                     triggereds, pmt_ids)
 
-        self.assertEqual(3, len(hit_series))
-
-    def test_attributes(self):
-        hit1 = {'id': 1, 'time': 1, 'tot': 2, 'channel_id': 3, 'dom_id': 4}
-        hit2 = {'id': 2, 'time': 2, 'tot': 3, 'channel_id': 4, 'dom_id': 5}
-        hit3 = {'id': 3, 'time': 3, 'tot': 4, 'channel_id': 5, 'dom_id': 6}
-        hit_list = [hit1, hit2, hit3]
-        hit_series = HitSeries.from_hdf5(hit_list)
-        self.assertEqual(id(hit_list), id(hit_series._data))
-        hit = hit_series[0]
-        self.assertEqual(1, hit.time)
-        self.assertEqual(2, hit.tot)
-        self.assertEqual(3, hit.channel_id)
-        self.assertEqual(4, hit.dom_id)
-        self.assertIsNone(hit_series._data)
-
-    def test_hits_positions(self):
-        hit1 = {'id': 1, 'time': 1, 'tot': 2, 'channel_id': 3, 'dom_id': 4}
-        hit2 = {'id': 2, 'time': 2, 'tot': 3, 'channel_id': 4, 'dom_id': 5}
-        hit_list = [hit1, hit2]
-        hit_series = HitSeries.from_dict(hit_list)
-
-        pos1, pos2 = Position((1., 2, 3)), Position((4., 5, 6))
-        hit_series[0].pos = pos1
-        hit_series[1].pos = pos2
-
-        self.assertTrue(2, len(hit_series.pos))
-
-    def test_hits_directions(self):
-        hit1 = {'id': 1, 'time': 1, 'tot': 2, 'channel_id': 3, 'dom_id': 4}
-        hit2 = {'id': 2, 'time': 2, 'tot': 3, 'channel_id': 4, 'dom_id': 5}
-        hit_list = [hit1, hit2]
-        hit_series = HitSeries.from_dict(hit_list)
-
-        dir1, dir2 = Direction_((1., 2, 3)), Direction_((4., 5, 6))
-        hit_series[0].dir = dir1
-        hit_series[1].dir = dir2
-
-        self.assertTrue(2, len(hit_series.dir))
+        self.assertAlmostEqual(1, hits[1].id)
+        self.assertAlmostEqual(9, hits[9].pmt_id)
+        self.assertEqual(10, len(hits))
