@@ -164,47 +164,15 @@ class HDF5Pump(Pump):
 
     def _get_hits(self, index, table_name='hits', where='/'):
         table = self.h5_file.get_node(where, table_name)
-        _channel_id = table.channel_id[index]
-        _dom_id = table.dom_id[index]
-        _id = table.id[index]
-        _pmt_id = table.pmt_id[index]
-        _time = table.time[index]
-        _tot = table.tot[index]
-        _triggered = table.triggered[index]
-        return HitSeries.from_arrays(_channel_id, _dom_id, _id, _pmt_id,
-                                     _time, _tot, _triggered)
-
-    def _get_tracks(self, index, table_name='tracks', where='/'):
-        table = self.h5_file.get_node(where, table_name)
-        _dir = table.dir[index]
-        _energy = table.energy[index]
-        _id = table.id[index]
-        _pos = table.pos[index]
-        _time = table.time[index]
-        _type = table.type[index]
-        return TrackSeries.from_arrays(_dir, _energy, _id, _pos,
-                                       _time, _type)
-
-    def _get_event_info(self, index, table_name='info', where='/'):
-        table = self.h5_file.get_node(where, table_name)
-        info = {}
-        info['id'] = table.id[index]
-        info['det_id'] = table.det_id[index]
-        info['mc_id'] = table.mc_id[index]
-        info['run_id'] = table.run_id[index]
-        info['trigger_mask'] = table.trigger_mask[index]
-        info['trigger_counter'] = table.trigger_counter[index]
-        info['overlays'] = table.overlays[index]
-        #info['timestamp'] = table.timestamp[index]
-        info['mc_t'] = table.mc_t[index]
-        return info
+        rows = table.read_where('event_id == %d' % index)
+        return HitSeries.from_table(rows)
 
     def get_blob(self, index):
         blob = {}
         blob['Hits'] = self._get_hits(index, table_name='hits')
-        blob['MCHits'] = self._get_hits(index, table_name='mc_hits')
-        blob['MCTracks'] = self._get_tracks(index, table_name='mc_tracks')
-        blob['EventInfo'] = self._get_event_info(index, table_name='info')
+        #blob['MCHits'] = self._get_hits(index, table_name='mc_hits')
+        #blob['MCTracks'] = self._get_tracks(index, table_name='mc_tracks')
+        #blob['EventInfo'] = self._get_event_info(index, table_name='info')
         return blob
 
     def finish(self):

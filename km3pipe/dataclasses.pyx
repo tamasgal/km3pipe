@@ -236,6 +236,18 @@ class HitSeries(object):
         hits._triggered = triggereds
         return hits
 
+    @classmethod
+    def from_table(cls, table):
+        return cls([Hit(
+            row['channel_id'],
+            row['dom_id'],
+            row['id'],
+            row['pmt_id'],
+            row['time'],
+            row['tot'],
+            row['triggered'],
+        ) for row in table])
+
     def __iter__(self):
         return self
 
