@@ -45,17 +45,32 @@ class Track(tables.IsDescription):
     type = tables.IntCol()
 
 
+class EventInfo(tables.IsDescription):
+    id = tables.IntCol()
+    det_id = tables.IntCol()
+    event_id = tables.UIntCol()
+    frame_index = tables.UIntCol()
+    mc_id = tables.IntCol()
+    mc_t = tables.Float64Col()
+    overlays = tables.UInt8Col()
+    run_id = tables.UIntCol()
+    #timestamp = tables.Float64Col()
+    trigger_counter = tables.UInt64Col()
+    trigger_mask = tables.UInt64Col()
+
+
 class HDF5Sink2(Module):
     def __init__(self, **context):
         """A Module to convert (KM3NeT) ROOT files to HDF5."""
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
         self.index = 1
-        self.filters = tables.Filters(complevel=5)
         self.h5file = tables.open_file(self.filename, mode="w", title="Test file")
+        self.filters = tables.Filters(complevel=5)
         self.hits = self.h5file.create_table('/', 'hits', Hit, "Hits", filters=self.filters)
         self.mc_hits = self.h5file.create_table('/', 'mc_hits', Hit, "MC Hits", filters=self.filters)
         self.mc_tracks = self.h5file.create_table('/', 'mc_tracks', Track, "MC Tracks", filters=self.filters)
+        self.event_info = self.h5file.create_table('/', 'event_info', EventInfo, "Event Info", filters=self.filters)
 
     def _write_hits(self, hits, hit_row):
         for hit in hits:
@@ -80,22 +95,35 @@ class HDF5Sink2(Module):
             track_row['type'] = track.type
             track_row.append()
 
+    def _write_eventinfo(self, info, info_row):
+        info_row['det_id'] = info.det_id
+        info_row['event_id'] = self.index
+        info_row['frame_index'] = info.frame_index
+        info_row['id'] = info.id
+        info_row['mc_id'] = info.mc_id
+        info_row['mc_t'] = info.mc_t
+        info_row['overlays'] = info.overlays
+        info_row['run_id'] = info.run_id
+        #info_row['timestamp'] = info.timestamp
+        info_row['trigger_counter'] = info.trigger_counter
+        info_row['trigger_mask'] = info.trigger_mask
+        info_row.append()
+
     def process(self, blob):
         hits = blob['Hits']
         self._write_hits(hits, self.hits.row)
-        try:
-            mc_hits = blob['MCHits']
-            mc_tracks = blob['MCTracks']
-        except KeyError:
-            pass
-        else:
-            self._write_hits(mc_hits, self.mc_hits.row)
-            self._write_tracks(mc_tracks, self.mc_tracks.row)
+        if 'MCHits' in blob:
+            self._write_hits(blob['MCHits'], self.mc_hits.row)
+        if 'MCTracks' in blob:
+            self._write_tracks(blob['MCTracks'], self.mc_tracks.row)
+        if 'Evt' in blob:
+            self._write_event_info(blob['Evt'], self.event_info.row)
 
         if not self.index % 1000:
             self.hits.flush()
             self.mc_hits.flush()
             self.mc_tracks.flush()
+            self.event_info.flush()
 
         self.index += 1
         return blob
