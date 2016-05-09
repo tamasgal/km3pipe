@@ -52,6 +52,7 @@ class HDF5Sink2(Module):
         for hit in hits:
             hit_row['event_id'] = self.index
             hit_row['time'] = hit.time
+            hit_row.append()
 
         self.h5table.flush()
         self.index += 1
