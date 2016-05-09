@@ -375,6 +375,20 @@ class TrackSeries(object):
         tracks._type = types
         return tracks
 
+    @classmethod
+    def from_table(cls, table):
+        return cls([Track(
+            row['dir'],
+            row['energy'],
+            row['id'],
+            row['pos'],
+            row['time'],
+            row['type'],
+        ) for row in table])
+
+    def __iter__(self):
+        return self
+
     def __iter__(self):
         return self
 
