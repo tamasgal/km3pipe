@@ -95,7 +95,7 @@ class HDF5Sink(Module):
             track_row['type'] = track.type
             track_row.append()
 
-    def _write_eventinfo(self, info, info_row):
+    def _write_event_info(self, info, info_row):
         info_row['det_id'] = info.det_id
         info_row['event_id'] = self.index
         info_row['frame_index'] = info.frame_index
