@@ -100,7 +100,9 @@ class HDF5Sink2(Module):
         return blob
 
     def finish(self):
-        self.h5table.flush()
+        self.hits.flush()
+        self.mc_hits.flush()
+        self.mc_tracks.flush()
         self.h5file.close()
 
 
