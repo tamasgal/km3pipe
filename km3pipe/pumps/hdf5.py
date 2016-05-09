@@ -50,8 +50,14 @@ class HDF5Sink2(Module):
         hit_row = self.h5table.row
 
         for hit in hits:
+            hit_row['channel_id'] = hit.channel_id
+            hit_row['dom_id'] = hit.dom_id
             hit_row['event_id'] = self.index
+            hit_row['id'] = hit.id
+            hit_row['pmt_id'] = hit.pmt_id
             hit_row['time'] = hit.time
+            hit_row['tot'] = hit.tot
+            hit_row['triggered'] = hit.triggered
             hit_row.append()
 
         if self.index % 1000 == 0:
