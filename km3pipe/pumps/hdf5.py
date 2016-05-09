@@ -132,7 +132,7 @@ class HDF5Sink(Module):
         self.hits.cols.event_id.create_index()
         self.event_info.cols.event_id.create_index()
         self.mc_hits.cols.event_id.create_index()
-        self.tracks_hits.cols.event_id.create_index()
+        self.mc_tracks.cols.event_id.create_index()
         self.hits.flush()
         self.event_info.flush()
         self.mc_hits.flush()
