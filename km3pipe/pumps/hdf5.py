@@ -37,7 +37,6 @@ class Hit(tables.IsDescription):
 
 class Track(tables.IsDescription):
         dir = tables.FloatCol(shape=(3,))
-        event_id = tables.UIntCol()
         energy = tables.FloatCol()
         event_id = tables.UIntCol()
         id = tables.UIntCol()
@@ -53,13 +52,11 @@ class HDF5Sink2(Module):
         self.filename = self.get('filename') or 'dump.h5'
         self.index = 1
         self.h5file = tables.open_file(self.filename, mode="w", title="Test file")
-        self.h5table = self.h5file.create_table('/', 'hits', Hit, "Hits")
+        self.hits = self.h5file.create_table('/', 'hits', Hit, "Hits")
+        self.mc_hits = self.h5file.create_table('/', 'mc_hits', Hit, "MC Hits")
+        self.mc_tracks = self.h5file.create_table('/', 'mc_tracks', Track, "MC Tracks")
 
-    def process(self, blob):
-        hits = blob['Hits']
-
-        hit_row = self.h5table.row
-
+    def _write_hits(self, hits, hit_row):
         for hit in hits:
             hit_row['channel_id'] = hit.channel_id
             hit_row['dom_id'] = hit.dom_id
@@ -71,8 +68,34 @@ class HDF5Sink2(Module):
             hit_row['triggered'] = hit.triggered
             hit_row.append()
 
-        if self.index % 1000 == 0:
-            self.h5table.flush()
+    def _write_tracks(self, tracks, track_row):
+        for track in tracks:
+            track_row['dir'] = track.dir
+            track_row['energy'] = track.energy
+            track_row['event_id'] = self.index
+            track_row['id'] = track.id
+            track_row['pos'] = track.pos
+            track_row['time'] = track.time
+            track_row['type'] = track.type
+            track_row.append()
+
+    def process(self, blob):
+        hits = blob['Hits']
+        self._write_hits(hits, self.hits.row)
+        try:
+            mc_hits = blob['MCHits']
+            mc_tracks = blob['MCTracks']
+        except KeyError:
+            pass
+        else:
+            self._write_hits(mc_hits, self.mc_hits.row)
+            self._write_tracks(mc_tracks, self.mc_tracks.row)
+
+
+        if not self.index % 1000:
+            self.hits.flush()
+            self.mc_hits.flush()
+            self.mc_tracks.flush()
 
         self.index += 1
         return blob
