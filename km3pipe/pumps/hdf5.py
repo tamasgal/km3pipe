@@ -36,13 +36,13 @@ class Hit(tables.IsDescription):
 
 
 class Track(tables.IsDescription):
-        dir = tables.FloatCol(shape=(3,))
-        energy = tables.FloatCol()
-        event_id = tables.UIntCol()
-        id = tables.UIntCol()
-        pos = tables.FloatCol(shape=(3,))
-        time = tables.IntCol()
-        type = tables.IntCol()
+    dir = tables.FloatCol(shape=(3,))
+    energy = tables.FloatCol()
+    event_id = tables.UIntCol()
+    id = tables.UIntCol()
+    pos = tables.FloatCol(shape=(3,))
+    time = tables.IntCol()
+    type = tables.IntCol()
 
 
 class HDF5Sink2(Module):
@@ -90,7 +90,6 @@ class HDF5Sink2(Module):
         else:
             self._write_hits(mc_hits, self.mc_hits.row)
             self._write_tracks(mc_tracks, self.mc_tracks.row)
-
 
         if not self.index % 1000:
             self.hits.flush()
