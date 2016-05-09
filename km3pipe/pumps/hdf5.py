@@ -59,7 +59,7 @@ class EventInfo(tables.IsDescription):
     trigger_mask = tables.UInt64Col()
 
 
-class HDF5Sink2(Module):
+class HDF5Sink(Module):
     def __init__(self, **context):
         """A Module to convert (KM3NeT) ROOT files to HDF5."""
         super(self.__class__, self).__init__(**context)
@@ -135,109 +135,7 @@ class HDF5Sink2(Module):
         self.h5file.close()
 
 
-class HDF5Sink(Module):
-    def __init__(self, **context):
-        """A Module to convert (KM3NeT) ROOT files to HDF5."""
-        super(self.__class__, self).__init__(**context)
-        self.filename = self.get('filename') or 'dump.h5'
-        self.complevel = self.get('complevel') or 5
-        self.filter = tables.Filters(complevel=self.complevel)
-        self.h5_file = tables.File(self.filename, 'w')
-        self.index = 1
-        self._prepare_hits()
-        self._prepare_hits(group_name='mc_hits')
-        self._prepare_tracks(group_name='mc_tracks')
-        self._prepare_event_info(group_name='info')
-        print("Processing {0}...".format(self.filename))
-
-    def _prepare_event_info(self, group_name='info', where='/'):
-        info_group = self.h5_file.create_group(where, group_name)
-        h5_file = self.h5_file
-        h5_file.create_earray(info_group, 'id', atom=tables.IntAtom(), shape=(0, ), filters=self.filter)
-        h5_file.create_earray(info_group, 'det_id', atom=tables.IntAtom(), shape=(0, ), filters=self.filter)
-        h5_file.create_earray(info_group, 'frame_index', atom=tables.UIntAtom(), shape=(0, ), filters=self.filter)
-        h5_file.create_earray(info_group, 'mc_id', atom=tables.IntAtom(), shape=(0, ), filters=self.filter)
-        h5_file.create_earray(info_group, 'mc_t', atom=tables.Float64Atom(), shape=(0, ), filters=self.filter)
-        h5_file.create_earray(info_group, 'overlays', atom=tables.UInt8Atom(), shape=(0, ), filters=self.filter)
-        h5_file.create_earray(info_group, 'run_id', atom=tables.UIntAtom(), shape=(0, ), filters=self.filter)
-        #h5_file.create_earray(info_group, 'timestamp', atom=tables.Float64Atom(), shape=(0, ), filters=self.filter)
-        h5_file.create_earray(info_group, 'trigger_counter', atom=tables.UInt64Atom(), shape=(0, ), filters=self.filter)
-        h5_file.create_earray(info_group, 'trigger_mask', atom=tables.UInt64Atom(), shape=(0, ), filters=self.filter)
-
-    def _prepare_hits(self, group_name='hits', where='/'):
-        hit_group = self.h5_file.create_group(where, group_name)
-        h5_file = self.h5_file
-        h5_file.create_vlarray(hit_group, 'channel_id', atom=tables.UInt8Atom(), filters=self.filter)
-        h5_file.create_vlarray(hit_group, 'dom_id', atom=tables.UIntAtom(), filters=self.filter)
-        h5_file.create_vlarray(hit_group, 'id', atom=tables.UIntAtom(), filters=self.filter)
-        h5_file.create_vlarray(hit_group, 'pmt_id', atom=tables.UIntAtom(), filters=self.filter)
-        h5_file.create_vlarray(hit_group, 'time', atom=tables.IntAtom(), filters=self.filter)
-        h5_file.create_vlarray(hit_group, 'tot', atom=tables.UInt8Atom(), filters=self.filter)
-        h5_file.create_vlarray(hit_group, 'triggered', atom=tables.BoolAtom(), filters=self.filter)
-
-    def _prepare_tracks(self, group_name='tracks', where='/'):
-        track_group = self.h5_file.create_group(where, group_name)
-        h5_file = self.h5_file
-        h5_file.create_vlarray(track_group, 'dir', atom=POS_ATOM, filters=self.filter)
-        h5_file.create_vlarray(track_group, 'energy', atom=tables.FloatAtom(), filters=self.filter)
-        h5_file.create_vlarray(track_group, 'id', atom=tables.UIntAtom(), filters=self.filter)
-        h5_file.create_vlarray(track_group, 'pos', atom=POS_ATOM, filters=self.filter)
-        h5_file.create_vlarray(track_group, 'time', atom=tables.IntAtom(), filters=self.filter)
-        h5_file.create_vlarray(track_group, 'type', atom=tables.IntAtom(), filters=self.filter)
-
-    def _write_event_info(self, evt, table_name='info', where='/'):
-        target = self.h5_file.get_node(where, table_name)
-        target.id.append(np.array([evt.id, ]))
-        target.det_id.append(np.array([evt.det_id, ]))
-        target.run_id.append(np.array([evt.run_id, ]))
-        target.frame_index.append(np.array([evt.frame_index, ]))
-        target.trigger_mask.append(np.array([evt.trigger_mask, ]))
-        target.trigger_counter.append(np.array([evt.trigger_counter, ]))
-        target.overlays.append(np.array([evt.overlays, ]))
-        #target.timestamp.append(np.array([evt.timestamp, ]))
-        target.mc_id.append(np.array([evt.mc_id, ]))
-        target.mc_t.append(np.array([evt.mc_t, ]))
-
-    def _write_hits(self, hits, table_name='hits', where='/'):
-        target = self.h5_file.get_node(where, table_name)
-        target.channel_id.append(hits.channel_id)
-        target.dom_id.append(hits.dom_id)
-        target.id.append(hits.id)
-        target.pmt_id.append(hits.pmt_id)
-        target.time.append(hits.time)
-        target.tot.append(hits.tot)
-        target.triggered.append(hits.triggered)
-
-    def _write_tracks(self, tracks, table_name='tracks', where='/'):
-        target = self.h5_file.get_node(where, table_name)
-        target.dir.append(tracks.dir)
-        target.energy.append(tracks.energy)
-        target.id.append(tracks.id)
-        target.pos.append(tracks.pos)
-        target.time.append(tracks.time)
-        target.type.append(tracks.type)
-
-    def process(self, blob):
-        if 'Hits' in blob:
-            self._write_hits(blob['Hits'], table_name='hits')
-
-        if 'MCHits' in blob:
-            self._write_hits(blob['MCHits'], table_name='mc_hits')
-
-        if 'MCTracks' in blob:
-            self._write_tracks(blob['MCTracks'], table_name='mc_tracks')
-
-        if 'Evt' in blob:
-            self._write_event_info(blob['Evt'], table_name='info')
-
-        self.index += 1
-        return blob
-
-    def finish(self):
-        self.h5_file.close()
-
-
-class HDF5Pump(Pump):
+class HDF5PumpOld(Pump):
     """Provides a pump for KM3NeT HDF5 files"""
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
