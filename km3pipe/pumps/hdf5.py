@@ -51,10 +51,11 @@ class HDF5Sink2(Module):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
         self.index = 1
+        self.filters = tables.Filters(complevel=5)
         self.h5file = tables.open_file(self.filename, mode="w", title="Test file")
-        self.hits = self.h5file.create_table('/', 'hits', Hit, "Hits")
-        self.mc_hits = self.h5file.create_table('/', 'mc_hits', Hit, "MC Hits")
-        self.mc_tracks = self.h5file.create_table('/', 'mc_tracks', Track, "MC Tracks")
+        self.hits = self.h5file.create_table('/', 'hits', Hit, "Hits", filters=self.filters)
+        self.mc_hits = self.h5file.create_table('/', 'mc_hits', Hit, "MC Hits", filters=self.filters)
+        self.mc_tracks = self.h5file.create_table('/', 'mc_tracks', Track, "MC Tracks", filters=self.filters)
 
     def _write_hits(self, hits, hit_row):
         for hit in hits:
