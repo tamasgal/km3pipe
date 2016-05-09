@@ -236,6 +236,18 @@ class HitSeries(object):
         hits._triggered = triggereds
         return hits
 
+    @classmethod
+    def from_table(cls, table):
+        return cls([Hit(
+            row['channel_id'],
+            row['dom_id'],
+            row['id'],
+            row['pmt_id'],
+            row['time'],
+            row['tot'],
+            row['triggered'],
+        ) for row in table])
+
     def __iter__(self):
         return self
 
@@ -362,6 +374,20 @@ class TrackSeries(object):
         tracks._time = times
         tracks._type = types
         return tracks
+
+    @classmethod
+    def from_table(cls, table):
+        return cls([Track(
+            row['dir'],
+            row['energy'],
+            row['id'],
+            row['pos'],
+            row['time'],
+            row['type'],
+        ) for row in table])
+
+    def __iter__(self):
+        return self
 
     def __iter__(self):
         return self
