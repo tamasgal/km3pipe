@@ -50,7 +50,7 @@ UTC_TZ = pytz.timezone('UTC')
 try:
     ssl._create_default_https_context = ssl._create_unverified_context
 except AttributeError:
-    log.warn("Your SSL support is outdated.\n"
+    log.debug("Your SSL support is outdated.\n"
              "Please update your Python installation!")
 
 LOGIN_URL = 'https://km3netdbweb.in2p3.fr/home.htm'
