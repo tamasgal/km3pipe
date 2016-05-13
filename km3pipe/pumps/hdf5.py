@@ -153,6 +153,14 @@ class HDF5Pump(Pump):
         self.index = None
         self._reset_index()
 
+        try:
+            hits = self.h5_file.get_node('/', 'hits')
+            self.event_ids = np.unique(hits.cols.event_id[:])
+        except tables.NoSuchNodeError:
+            self.event_ids = []
+
+        self._n_events = len(self.event_ids)
+
     def process(self, blob):
         try:
             blob = self.get_blob(self.index)
@@ -162,26 +170,27 @@ class HDF5Pump(Pump):
         self.index += 1
         return blob
 
-    def _get_hits(self, index, table_name='hits', where='/'):
+    def _get_hits(self, event_id, table_name='hits', where='/'):
         table = self.h5_file.get_node(where, table_name)
-        rows = table.read_where('event_id == %d' % index)
+        rows = table.read_where('event_id == %d' % event_id)
         return HitSeries.from_table(rows)
 
-    def _get_tracks(self, index, table_name='tracks', where='/'):
+    def _get_tracks(self, event_id, table_name='tracks', where='/'):
         table = self.h5_file.get_node(where, table_name)
-        rows = table.read_where('event_id == %d' % index)
+        rows = table.read_where('event_id == %d' % event_id)
         return TrackSeries.from_table(rows)
 
-    def _get_event_info(self, index, table_name='event_info', where='/'):
+    def _get_event_info(self, event_id, table_name='event_info', where='/'):
         table = self.h5_file.get_node(where, table_name)
-        return table[index]
+        return table[event_id]
 
     def get_blob(self, index):
+        event_id = self.event_ids[index]
         blob = {}
-        blob['Hits'] = self._get_hits(index, table_name='hits')
-        blob['MCHits'] = self._get_hits(index, table_name='mc_hits')
-        blob['MCTracks'] = self._get_tracks(index, table_name='mc_tracks')
-        blob['EventInfo'] = self._get_event_info(index, table_name='event_info')
+        blob['Hits'] = self._get_hits(event_id, table_name='hits')
+        blob['MCHits'] = self._get_hits(event_id, table_name='mc_hits')
+        blob['MCTracks'] = self._get_tracks(event_id, table_name='mc_tracks')
+        blob['EventInfo'] = self._get_event_info(event_id, table_name='event_info')
         return blob
 
     def finish(self):
