@@ -27,13 +27,14 @@ if sys.version_info[0] > 2:
     from urllib.parse import urlencode, unquote
     from urllib.request import (Request, build_opener,
                                 HTTPCookieProcessor, HTTPHandler)
+    from urllib.error import URLError
     from io import StringIO
     from http.cookiejar import CookieJar
     from http.client import IncompleteRead
 else:
     from urllib import urlencode, unquote
     from urllib2 import (Request, build_opener,
-                         HTTPCookieProcessor, HTTPHandler)
+                         HTTPCookieProcessor, HTTPHandler, URLError)
     from StringIO import StringIO
     from cookielib import CookieJar
     from httplib import IncompleteRead
@@ -68,7 +69,11 @@ class DBManager(object):
         if username is None:
             config = Config()
             username, password = config.db_credentials
-        self.login(username, password)
+        try:
+            self.login(username, password)
+        except URLError as e:
+            log.error("Failed to connect to the database, it seems to be down!")
+            log.error("Error from database server:\n    {0}".format(e))
 
     def datalog(self, parameter, run, maxrun=None, det_id='D_ARCA001'):
         "Retrieve datalogs for given parameter, run(s) and detector"
