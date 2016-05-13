@@ -30,7 +30,7 @@ def Point(vector):  # , as_recarray=True):
 #    if as_recarray:
 #        return vector.view(point_dt, np.recarray)
 #    else:
-        return vector
+    return vector
 
 Position = Direction = Point  # Backwards compatibility
 
