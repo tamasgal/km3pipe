@@ -18,6 +18,7 @@ if not __KM3PIPE_SETUP__:
     from km3pipe.core import (Pipeline, Module, Pump, Blob,  # noqa
                               Geometry, AanetGeometry)
     from km3pipe import pumps  # noqa
+    from km3pipe import utils  # noqa
 
 
 __author__ = "Tamas Gal"

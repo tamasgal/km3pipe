@@ -6,6 +6,7 @@ KM3Pipe command line utility.
 Usage:
     km3pipe test
     km3pipe tohdf5 [-n EVENTS] -i FILE -o FILE
+    km3pipe h5tree [-g GROUP] -i FILE
     km3pipe (-h | --help)
     km3pipe --version
 
@@ -14,6 +15,7 @@ Options:
     -i FILE    Input file.
     -o FILE    Output file.
     -n EVENTS  Number of events.
+    -g GROUP   Group/Node where dataset is located [default: /]
 
 """
 from __future__ import division, absolute_import, print_function
