@@ -22,14 +22,14 @@ from km3pipe.tools import angle_between
 __all__ = ('Point', 'Position', 'Direction', 'HitSeries', 'Hit')
 
 
-point_dt = np.dtype([('x', float), ('y', float), ('z', float)])
+# point_dt = np.dtype([('x', float), ('y', float), ('z', float)])
 
-def Point(vector, as_recarray=True):
+def Point(vector)  # , as_recarray=True):
     """A point as numpy.recarray with optional x, y and z attributes."""
     vector = np.array(vector, dtype=np.float)
-    if as_recarray:
-        return vector.view(point_dt, np.recarray)
-    else:
+#    if as_recarray:
+#        return vector.view(point_dt, np.recarray)
+#    else:
         return vector
 
 Position = Direction = Point  # Backwards compatibility
@@ -141,14 +141,14 @@ cdef class Hit:
     cdef public np.ndarray pos
     cdef public np.ndarray dir
 
-    def __cinit__(self, 
-                  int channel_id, 
-                  int dom_id, 
-                  int id, 
+    def __cinit__(self,
+                  int channel_id,
+                  int dom_id,
+                  int id,
                   int pmt_id,
-                  int time, 
+                  int time,
                   int tot,
-                  bint triggered, 
+                  bint triggered,
                  ):
         self.channel_id = channel_id
         self.dom_id = dom_id
@@ -157,7 +157,7 @@ cdef class Hit:
         self.time = time
         self.tot = tot
         self.triggered = triggered
-        
+
 
 cdef class Track:
     """Represents a particle track.
@@ -184,7 +184,7 @@ cdef class Track:
         self.pos = pos
         self.time = time
         self.type = type
-        
+
 
 class HitSeries(object):
     def __init__(self, hits):
@@ -202,12 +202,12 @@ class HitSeries(object):
     def from_aanet(cls, hits):
         return cls([Hit(
             ord(h.channel_id),
-            h.dom_id, 
-            h.id, 
+            h.dom_id,
+            h.id,
             h.pmt_id,
-            h.t, 
-            h.tot, 
-            h.trig, 
+            h.t,
+            h.tot,
+            h.trig,
         ) for h in hits])
 
     @classmethod
@@ -215,10 +215,10 @@ class HitSeries(object):
         return cls([Hit(
             np.nan,     # channel_id
             np.nan,     # dom_id
-            h.id, 
+            h.id,
             h.pmt_id,
-            h.time, 
-            h.tot, 
+            h.time,
+            h.tot,
             np.nan,     # triggered
         ) for h in hits])
 
@@ -354,11 +354,11 @@ class TrackSeries(object):
     @classmethod
     def from_aanet(cls, tracks):
         return cls([Track(
-            Direction((t.dir.x, t.dir.y, t.dir.z)), 
-            t.id, 
-            t.E, 
-            Position((t.pos.x, t.pos.y, t.pos.z)), 
-            t.t, 
+            Direction((t.dir.x, t.dir.y, t.dir.z)),
+            t.id,
+            t.E,
+            Position((t.pos.x, t.pos.y, t.pos.z)),
+            t.t,
             t.type,
         )
                     for t in tracks])
@@ -409,7 +409,7 @@ class TrackSeries(object):
         if self._energy is None:
             self._energy = np.array([t.energy for t in self._tracks])
         return self._energy
-    
+
     @property
     def type(self):
         if self._type is None:
