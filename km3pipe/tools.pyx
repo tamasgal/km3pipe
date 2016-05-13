@@ -99,7 +99,7 @@ def angle_between(v1, v2):
 
 def unit_vector(vector):
     """ Returns the unit vector of the vector.  """
-    return vector / np.linalg.norm(vector)
+    return np.array(vector) / np.linalg.norm(vector)
 
 
 def circ_permutation(items):
