@@ -190,7 +190,7 @@ class HDF5Pump(Pump):
 
     def _reset_index(self):
         """Reset index to default value"""
-        self.index = 1
+        self.index = 0
 
     def __len__(self):
         return self._n_events
