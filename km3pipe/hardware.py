@@ -10,7 +10,7 @@ from __future__ import division, absolute_import, print_function
 import os
 import sys
 
-from km3pipe.tools import unpack_nfirst, split #, ignored
+from km3pipe.tools import unpack_nfirst, split  # , ignored
 from km3pipe.dataclasses import Point, Direction
 from km3pipe.db import DBManager
 
@@ -36,6 +36,10 @@ class Detector(object):
         self.n_pmts_per_dom = None
         self.doms = {}
         self.pmts = []
+        self.version = None
+        self.valid_from = None
+        self.valid_until = None
+        self.utm_info = None
         self._pmts_by_omkey = {}
         self._pmts_by_id = {}
         self._pmt_angles = []
@@ -71,7 +75,17 @@ class Detector(object):
         """Extract information from the header of the detector file"""
         self._det_file.seek(0, 0)
         first_line = self._det_file.readline()
-        self.det_id, self.n_doms = split(first_line, int)
+        try:
+            self.det_id, self.n_doms = split(first_line, int)
+            self.version = 'v1'
+        except ValueError:
+            det_id, self.version = first_line.split()
+            self.det_id = int(det_id)
+            validity = self._det_file.readline()
+            self.valid_from, self.valid_until = split(validity, float)
+            self.utm_info = self._det_file.readline()
+            n_doms = self._det_file.readline()
+            self.n_doms = int(n_doms)
 
     # pylint: disable=C0103
     def _parse_doms(self):
