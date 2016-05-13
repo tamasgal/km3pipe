@@ -72,8 +72,8 @@ class DBManager(object):
         try:
             self.login(username, password)
         except URLError as e:
-            print("Failed to connect to the database, it seems to be down!")
-            print("Error: {0}".format(e))
+            log.error("Failed to connect to the database, it seems to be down!")
+            log.error("Error from database server:\n    {0}".format(e))
 
     def datalog(self, parameter, run, maxrun=None, det_id='D_ARCA001'):
         "Retrieve datalogs for given parameter, run(s) and detector"
