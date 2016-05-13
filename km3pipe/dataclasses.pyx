@@ -24,7 +24,7 @@ __all__ = ('Point', 'Position', 'Direction', 'HitSeries', 'Hit')
 
 # point_dt = np.dtype([('x', float), ('y', float), ('z', float)])
 
-def Point(vector)  # , as_recarray=True):
+def Point(vector):  # , as_recarray=True):
     """A point as numpy.recarray with optional x, y and z attributes."""
     vector = np.array(vector, dtype=np.float)
 #    if as_recarray:
