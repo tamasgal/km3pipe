@@ -36,12 +36,6 @@ def tohdf5(input_file, output_file, n_events):
     pipe.drain(n_events)
 
 
-def h5tree(h5name, group='/'):
-    with tables.open_file(h5name) as h5:
-        for node in h5.walk_nodes():
-            print(node)
-
-
 def main():
     from docopt import docopt
     arguments = docopt(__doc__, version=version)
@@ -53,6 +47,3 @@ def main():
 
     if arguments['tohdf5']:
         tohdf5(arguments['-i'], arguments['-o'], n_events)
-    if arguments['h5tree']:
-        import tables
-        h5tree(arguments['-i'], group=arguments['-g'])

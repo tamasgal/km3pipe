@@ -69,6 +69,7 @@ setup(name='km3pipe',
           'console_scripts': [
               'km3pipe=km3pipe.cmd:main',
               'pipeinspector=pipeinspector.app:main',
+              'h5tree=km3pipe.utils.h5tree:main',
           ],
       },
       classifiers=[
