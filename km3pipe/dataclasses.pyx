@@ -24,7 +24,7 @@ __all__ = ('Point', 'Position', 'Direction', 'HitSeries', 'Hit')
 
 point_dt = np.dtype([('x', float), ('y', float), ('z', float)])
 
-def Point(vector, as_recarray=True):
+def Point_(vector, as_recarray=True):
     """A point as numpy.recarray with optional x, y and z attributes."""
     vector = np.array(vector, dtype=np.float)
     if as_recarray:
@@ -32,10 +32,8 @@ def Point(vector, as_recarray=True):
     else:
         return vector
 
-Position = Direction = Point  # Backwards compatibility
 
-
-class Point_(np.ndarray):
+class Point(np.ndarray):
     """Represents a point in a 3D space"""
     def __new__(cls, input_array=(np.nan, np.nan, np.nan)):
         """Add x, y and z to the ndarray"""
@@ -67,7 +65,10 @@ class Point_(np.ndarray):
         self[2] = value
 
 
-class Direction_(Point_):
+Position = Direction = Point  # Backwards compatibility
+
+
+class Direction_(Point):
     """Represents a direction in a 3D space
 
     The direction vector always normalises itself when an attribute is changed.
