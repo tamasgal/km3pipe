@@ -6,6 +6,7 @@ KM3Pipe command line utility.
 Usage:
     km3pipe test
     km3pipe tohdf5 [-n EVENTS] -i FILE -o FILE
+    km3pipe h5tree [-g GROUP] -i FILE
     km3pipe (-h | --help)
     km3pipe --version
 
@@ -14,6 +15,7 @@ Options:
     -i FILE    Input file.
     -o FILE    Output file.
     -n EVENTS  Number of events.
+    -g GROUP   Group/Node where dataset is located [default: /]
 
 """
 from __future__ import division, absolute_import, print_function
@@ -34,6 +36,12 @@ def tohdf5(input_file, output_file, n_events):
     pipe.drain(n_events)
 
 
+def h5tree(h5name, group='/'):
+    with tables.open_file(h5name) as h5:
+        for node in h5.walk_nodes():
+            print(node)
+
+
 def main():
     from docopt import docopt
     arguments = docopt(__doc__, version=version)
@@ -45,3 +53,6 @@ def main():
 
     if arguments['tohdf5']:
         tohdf5(arguments['-i'], arguments['-o'], n_events)
+    if arguments['h5tree']:
+        import tables
+        h5tree(arguments['-i'], group=arguments['-g'])
