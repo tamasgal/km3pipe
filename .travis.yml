@@ -10,6 +10,7 @@ before_install:
     - sudo apt-get -qq update
       #    - sudo apt-get install libhdf5
     - sudo apt-get install libhdf5-serial-dev
+    - sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran
     - uname -a
     - free -m
     - df -h
