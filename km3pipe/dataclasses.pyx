@@ -1,4 +1,5 @@
 # coding=utf-8
+# cython: profile=True
 # Filename: dataclasses.py
 # cython: embedsignature=True
 # pylint: disable=W0232,C0103,C0111
