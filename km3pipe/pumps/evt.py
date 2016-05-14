@@ -149,7 +149,8 @@ class EvtPump(Pump):  # pylint: disable:R0902
             if line.startswith('end_event:') and blob:
                 blob['raw_header'] = self.raw_header
                 with ignored(KeyError):
-                    blob['Hits'] = HitSeries.from_evt(blob['EvtRawHits'])
+                    blob['Hits'] = HitSeries.from_evt(blob['EvtRawHits'],
+                                                      self.index)
                 return blob
             if line.startswith('start_event:'):
                 blob = {}

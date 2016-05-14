@@ -188,7 +188,8 @@ cdef class Track:
 
 
 class HitSeries(object):
-    def __init__(self, hits):
+    def __init__(self, hits, event_id=None):
+        self.event_id = event_id
         self._channel_id = None
         self._dom_id = None
         self._hits = hits
@@ -200,7 +201,7 @@ class HitSeries(object):
         self._triggered = None
 
     @classmethod
-    def from_aanet(cls, hits):
+    def from_aanet(cls, hits, event_id=None):
         return cls([Hit(
             ord(h.channel_id),
             h.dom_id,
@@ -209,10 +210,10 @@ class HitSeries(object):
             h.t,
             h.tot,
             h.trig,
-        ) for h in hits])
+        ) for h in hits], event_id)
 
     @classmethod
-    def from_evt(cls, hits):
+    def from_evt(cls, hits, event_id=None):
         return cls([Hit(
             np.nan,     # channel_id
             np.nan,     # dom_id
@@ -221,13 +222,13 @@ class HitSeries(object):
             h.time,
             h.tot,
             np.nan,     # triggered
-        ) for h in hits])
+        ) for h in hits], event_id)
 
     @classmethod
     def from_arrays(cls, channel_ids, dom_ids, ids, pmt_ids, times, tots,
-                    triggereds):
+                    triggereds, event_id=None):
         args = channel_ids, dom_ids, ids, pmt_ids, times, tots, triggereds
-        hits = cls([Hit(*hit_args) for hit_args in zip(*args)])
+        hits = cls([Hit(*hit_args) for hit_args in zip(*args)], event_id)
         hits._channel_id = channel_ids
         hits._dom_id = dom_ids
         hits._id = ids
@@ -238,7 +239,7 @@ class HitSeries(object):
         return hits
 
     @classmethod
-    def from_table(cls, table):
+    def from_table(cls, table, event_id=None):
         return cls([Hit(
             row['channel_id'],
             row['dom_id'],
@@ -247,7 +248,7 @@ class HitSeries(object):
             row['time'],
             row['tot'],
             row['triggered'],
-        ) for row in table])
+        ) for row in table], event_id)
 
     def __iter__(self):
         return self

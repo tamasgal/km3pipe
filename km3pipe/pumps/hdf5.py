@@ -30,6 +30,7 @@ class Hit(tables.IsDescription):
     event_id = tables.UIntCol()
     id = tables.UIntCol()
     pmt_id = tables.UIntCol()
+    run_id = tables.UIntCol()
     time = tables.IntCol()
     tot = tables.UInt8Col()
     triggered = tables.BoolCol()
@@ -76,9 +77,10 @@ class HDF5Sink(Module):
         for hit in hits:
             hit_row['channel_id'] = hit.channel_id
             hit_row['dom_id'] = hit.dom_id
-            hit_row['event_id'] = self.index
+            hit_row['event_id'] = hits.event_id
             hit_row['id'] = hit.id
             hit_row['pmt_id'] = hit.pmt_id
+#            hit_row['run_id'] = hit.pmt_id
             hit_row['time'] = hit.time
             hit_row['tot'] = hit.tot
             hit_row['triggered'] = hit.triggered
@@ -173,7 +175,7 @@ class HDF5Pump(Pump):
     def _get_hits(self, event_id, table_name='hits', where='/'):
         table = self.h5_file.get_node(where, table_name)
         rows = table.read_where('event_id == %d' % event_id)
-        return HitSeries.from_table(rows)
+        return HitSeries.from_table(rows, event_id)
 
     def _get_tracks(self, event_id, table_name='tracks', where='/'):
         table = self.h5_file.get_node(where, table_name)
