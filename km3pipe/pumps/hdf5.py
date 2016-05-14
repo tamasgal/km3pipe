@@ -96,7 +96,7 @@ class HDF5Sink(Module):
         for track in tracks:
             track_row['dir'] = track.dir
             track_row['energy'] = track.energy
-            track_row['event_id'] = self.index
+            track_row['event_id'] = tracks.event_id
             track_row['id'] = track.id
             track_row['pos'] = track.pos
             track_row['time'] = track.time
@@ -186,7 +186,7 @@ class HDF5Pump(Pump):
     def _get_tracks(self, event_id, table_name='tracks', where='/'):
         table = self.h5_file.get_node(where, table_name)
         rows = table.read_where('event_id == %d' % event_id)
-        return TrackSeries.from_table(rows)
+        return TrackSeries.from_table(rows, event_id)
 
     def _get_event_info(self, event_id, table_name='event_info', where='/'):
         table = self.h5_file.get_node(where, table_name)

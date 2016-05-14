@@ -343,7 +343,8 @@ class HitSeries(object):
 
 
 class TrackSeries(object):
-    def __init__(self, tracks):
+    def __init__(self, tracks, event_id=None):
+        self.event_id = event_id
         self._dir = None
         self._energy = None
         self._id = None
@@ -354,7 +355,7 @@ class TrackSeries(object):
         self._type = None
 
     @classmethod
-    def from_aanet(cls, tracks):
+    def from_aanet(cls, tracks, event_id=None):
         return cls([Track(
             Direction((t.dir.x, t.dir.y, t.dir.z)),
             t.id,
@@ -363,12 +364,13 @@ class TrackSeries(object):
             t.t,
             t.type,
         )
-                    for t in tracks])
+                    for t in tracks], event_id)
 
     @classmethod
-    def from_arrays(cls, directions, energies, ids, positions, times, types):
+    def from_arrays(cls, directions, energies, ids, positions, times, types,
+                    event_id=None):
         args = directions, energies, ids, positions, times, types
-        tracks = cls([Track(*track_args) for track_args in zip(*args)])
+        tracks = cls([Track(*track_args) for track_args in zip(*args)], event_id)
         tracks._dir = directions
         tracks._energy = energies
         tracks._id = ids
@@ -378,7 +380,7 @@ class TrackSeries(object):
         return tracks
 
     @classmethod
-    def from_table(cls, table):
+    def from_table(cls, table, event_id=None):
         return cls([Track(
             row['dir'],
             row['energy'],
@@ -386,7 +388,7 @@ class TrackSeries(object):
             row['pos'],
             row['time'],
             row['type'],
-        ) for row in table])
+        ) for row in table], event_id)
 
     def __iter__(self):
         return self
