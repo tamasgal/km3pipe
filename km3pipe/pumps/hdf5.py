@@ -156,10 +156,11 @@ class HDF5Pump(Pump):
         self._reset_index()
 
         try:
-            hits = self.h5_file.get_node('/', 'hits')
-            self.event_ids = np.unique(hits.cols.event_id[:])
+            event_info = self.h5_file.get_node('/', 'event_info')
+            self.event_ids = event_info.cols.event_id[:]
         except tables.NoSuchNodeError:
-            self.event_ids = []
+            log.critical("No /event_info table found.")
+            raise SystemExit
 
         self._n_events = len(self.event_ids)
 
