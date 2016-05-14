@@ -47,7 +47,6 @@ class Track(tables.IsDescription):
 
 
 class EventInfo(tables.IsDescription):
-    id = tables.IntCol()
     det_id = tables.IntCol()
     event_id = tables.UIntCol()
     frame_index = tables.UIntCol()
@@ -97,11 +96,10 @@ class HDF5Sink(Module):
             track_row['type'] = track.type
             track_row.append()
 
-    def _write_event_info(self, info, info_row):
+    def _write_event_info_from_aanet(self, info, info_row):
         info_row['det_id'] = info.det_id
-        info_row['event_id'] = self.index
+        info_row['event_id'] = info.id
         info_row['frame_index'] = info.frame_index
-        info_row['id'] = info.id
         info_row['mc_id'] = info.mc_id
         info_row['mc_t'] = info.mc_t
         info_row['overlays'] = info.overlays
@@ -119,7 +117,7 @@ class HDF5Sink(Module):
         if 'MCTracks' in blob:
             self._write_tracks(blob['MCTracks'], self.mc_tracks.row)
         if 'Evt' in blob:
-            self._write_event_info(blob['Evt'], self.event_info.row)
+            self._write_event_info_from_aanet(blob['Evt'], self.event_info.row)
 
         if not self.index % 1000:
             self.hits.flush()
