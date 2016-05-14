@@ -11,7 +11,6 @@ from __future__ import division, absolute_import, print_function
 import os.path
 
 import tables
-import numpy as np
 
 from km3pipe import Pump, Module
 from km3pipe.dataclasses import HitSeries, TrackSeries
@@ -54,7 +53,7 @@ class EventInfo(tables.IsDescription):
     mc_t = tables.Float64Col()
     overlays = tables.UInt8Col()
     run_id = tables.UIntCol()
-    #timestamp = tables.Float64Col()
+    # timestamp = tables.Float64Col()
     trigger_counter = tables.UInt64Col()
     trigger_mask = tables.UInt64Col()
 
@@ -65,12 +64,20 @@ class HDF5Sink(Module):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
         self.index = 1
-        self.h5file = tables.open_file(self.filename, mode="w", title="Test file")
+        self.h5file = tables.open_file(self.filename, mode="w", title="KM3NeT")
         self.filters = tables.Filters(complevel=5)
-        self.hits = self.h5file.create_table('/', 'hits', Hit, "Hits", filters=self.filters)
-        self.mc_hits = self.h5file.create_table('/', 'mc_hits', Hit, "MC Hits", filters=self.filters)
-        self.mc_tracks = self.h5file.create_table('/', 'mc_tracks', Track, "MC Tracks", filters=self.filters)
-        self.event_info = self.h5file.create_table('/', 'event_info', EventInfo, "Event Info", filters=self.filters)
+        self.hits = self.h5file.create_table('/', 'hits',
+                                             Hit, "Hits",
+                                             filters=self.filters)
+        self.mc_hits = self.h5file.create_table('/', 'mc_hits',
+                                                Hit, "MC Hits",
+                                                filters=self.filters)
+        self.mc_tracks = self.h5file.create_table('/', 'mc_tracks',
+                                                  Track, "MC Tracks",
+                                                  filters=self.filters)
+        self.event_info = self.h5file.create_table('/', 'event_info',
+                                                   EventInfo, "Event Info",
+                                                   filters=self.filters)
 
     def _write_hits(self, hits, hit_row):
         for hit in hits:
@@ -104,7 +111,7 @@ class HDF5Sink(Module):
         info_row['mc_t'] = info.mc_t
         info_row['overlays'] = info.overlays
         info_row['run_id'] = info.run_id
-        #info_row['timestamp'] = info.timestamp
+        # info_row['timestamp'] = info.timestamp
         info_row['trigger_counter'] = info.trigger_counter
         info_row['trigger_mask'] = info.trigger_mask
         info_row.append()
@@ -191,7 +198,8 @@ class HDF5Pump(Pump):
         blob['Hits'] = self._get_hits(event_id, table_name='hits')
         blob['MCHits'] = self._get_hits(event_id, table_name='mc_hits')
         blob['MCTracks'] = self._get_tracks(event_id, table_name='mc_tracks')
-        blob['EventInfo'] = self._get_event_info(event_id, table_name='event_info')
+        blob['EventInfo'] = self._get_event_info(event_id,
+                                                 table_name='event_info')
         return blob
 
     def finish(self):
