@@ -1,4 +1,5 @@
 # coding=utf-8
+# cython: profile=True
 # Filename: core.pyx
 # cython: embedsignature=True
 # pylint: disable=locally-disabled

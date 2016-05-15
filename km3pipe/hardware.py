@@ -155,8 +155,8 @@ class Detector(object):
             for i in xrange(n_pmts):
                 pmt = self._pmts_by_omkey[(line, floor, i)]
                 doms += " {0} {1} {2} {3} {4} {5} {6} {7}\n".format(
-                        pmt.id, pmt.pos.x, pmt.pos.y, pmt.pos.z,
-                        pmt.dir.x, pmt.dir.y, pmt.dir.z,
+                        pmt.id, pmt.pos[0], pmt.pos[1], pmt.pos[2],
+                        pmt.dir[0], pmt.dir[1], pmt.dir[2],
                         pmt.t0
                         )
         return header + "\n" + doms

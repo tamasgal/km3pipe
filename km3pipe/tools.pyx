@@ -1,4 +1,5 @@
 # coding=utf-8
+# cython: profile=True
 # Filename: tools.pyx
 # cython: embedsignature=True
 # pylint: disable=C0103

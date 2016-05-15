@@ -238,12 +238,6 @@ class TestTrack(TestCase):
         self.assertAlmostEqual(9, track.time)
         self.assertTupleEqual(('a', 'b', 'c'), track.args)
 
-    def test_track_repr(self):
-        repr_str = ("Track:\n id: 1\n pos: [(2.0, 3.0, 4.0)]\n"
-                    " dir: [(0.0, 0.0, 1.0)]\n"
-                    " energy: 8.0 GeV\n time: 9.0 ns\n")
-        self.assertEqual(repr_str, self.track.__repr__())
-
 
 class TestTrackIn(TestCase):
 
@@ -264,13 +258,6 @@ class TestTrackIn(TestCase):
         self.assertEqual(9, track_in.time)
         self.assertEqual(130, track_in.particle_type)  # this should be PDG!
         self.assertEqual(11, track_in.length)
-
-    def test_track_repr(self):
-        repr_str = ("Track:\n id: 1\n pos: [(2.0, 3.0, 4.0)]\n"
-                    " dir: [(0.0, 0.0, 1.0)]\n"
-                    " energy: 8 GeV\n time: 9 ns\n type: 130 'K0L' [PDG]\n"
-                    " length: 11 [m]\n")
-        self.assertEqual(repr_str, self.track_in.__repr__())
 
 
 class TestTrackFit(TestCase):
@@ -295,13 +282,6 @@ class TestTrackFit(TestCase):
         self.assertEqual(12, track_fit.te)
         self.assertEqual(13, track_fit.con1)
         self.assertEqual(14, track_fit.con2)
-
-    def test_trackfit_repr(self):
-        repr_str = ("Track:\n id: 1\n pos: [(2.0, 3.0, 4.0)]\n"
-                    " dir: [(0.0, 0.0, 1.0)]\n "
-                    "energy: 8 GeV\n time: 9 ns\n speed: 10 [m/ns]\n"
-                    " ts: 11 [ns]\n te: 12 [ns]\n con1: 13\n con2: 14\n")
-        self.assertEqual(repr_str, self.track_fit.__repr__())
 
 
 class TestNeutrino(TestCase):

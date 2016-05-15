@@ -11,7 +11,6 @@ from __future__ import division, absolute_import, print_function
 import os.path
 
 import tables
-import numpy as np
 
 from km3pipe import Pump, Module
 from km3pipe.dataclasses import HitSeries, TrackSeries
@@ -30,6 +29,7 @@ class Hit(tables.IsDescription):
     event_id = tables.UIntCol()
     id = tables.UIntCol()
     pmt_id = tables.UIntCol()
+    run_id = tables.UIntCol()
     time = tables.IntCol()
     tot = tables.UInt8Col()
     triggered = tables.BoolCol()
@@ -46,7 +46,6 @@ class Track(tables.IsDescription):
 
 
 class EventInfo(tables.IsDescription):
-    id = tables.IntCol()
     det_id = tables.IntCol()
     event_id = tables.UIntCol()
     frame_index = tables.UIntCol()
@@ -54,7 +53,7 @@ class EventInfo(tables.IsDescription):
     mc_t = tables.Float64Col()
     overlays = tables.UInt8Col()
     run_id = tables.UIntCol()
-    #timestamp = tables.Float64Col()
+    # timestamp = tables.Float64Col()
     trigger_counter = tables.UInt64Col()
     trigger_mask = tables.UInt64Col()
 
@@ -65,20 +64,29 @@ class HDF5Sink(Module):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
         self.index = 1
-        self.h5file = tables.open_file(self.filename, mode="w", title="Test file")
+        self.h5file = tables.open_file(self.filename, mode="w", title="KM3NeT")
         self.filters = tables.Filters(complevel=5)
-        self.hits = self.h5file.create_table('/', 'hits', Hit, "Hits", filters=self.filters)
-        self.mc_hits = self.h5file.create_table('/', 'mc_hits', Hit, "MC Hits", filters=self.filters)
-        self.mc_tracks = self.h5file.create_table('/', 'mc_tracks', Track, "MC Tracks", filters=self.filters)
-        self.event_info = self.h5file.create_table('/', 'event_info', EventInfo, "Event Info", filters=self.filters)
+        self.hits = self.h5file.create_table('/', 'hits',
+                                             Hit, "Hits",
+                                             filters=self.filters)
+        self.mc_hits = self.h5file.create_table('/', 'mc_hits',
+                                                Hit, "MC Hits",
+                                                filters=self.filters)
+        self.mc_tracks = self.h5file.create_table('/', 'mc_tracks',
+                                                  Track, "MC Tracks",
+                                                  filters=self.filters)
+        self.event_info = self.h5file.create_table('/', 'event_info',
+                                                   EventInfo, "Event Info",
+                                                   filters=self.filters)
 
     def _write_hits(self, hits, hit_row):
         for hit in hits:
             hit_row['channel_id'] = hit.channel_id
             hit_row['dom_id'] = hit.dom_id
-            hit_row['event_id'] = self.index
+            hit_row['event_id'] = hits.event_id
             hit_row['id'] = hit.id
             hit_row['pmt_id'] = hit.pmt_id
+#            hit_row['run_id'] = hit.pmt_id
             hit_row['time'] = hit.time
             hit_row['tot'] = hit.tot
             hit_row['triggered'] = hit.triggered
@@ -88,23 +96,22 @@ class HDF5Sink(Module):
         for track in tracks:
             track_row['dir'] = track.dir
             track_row['energy'] = track.energy
-            track_row['event_id'] = self.index
+            track_row['event_id'] = tracks.event_id
             track_row['id'] = track.id
             track_row['pos'] = track.pos
             track_row['time'] = track.time
             track_row['type'] = track.type
             track_row.append()
 
-    def _write_event_info(self, info, info_row):
+    def _write_event_info_from_aanet(self, info, info_row):
         info_row['det_id'] = info.det_id
-        info_row['event_id'] = self.index
+        info_row['event_id'] = info.id
         info_row['frame_index'] = info.frame_index
-        info_row['id'] = info.id
         info_row['mc_id'] = info.mc_id
         info_row['mc_t'] = info.mc_t
         info_row['overlays'] = info.overlays
         info_row['run_id'] = info.run_id
-        #info_row['timestamp'] = info.timestamp
+        # info_row['timestamp'] = info.timestamp
         info_row['trigger_counter'] = info.trigger_counter
         info_row['trigger_mask'] = info.trigger_mask
         info_row.append()
@@ -117,7 +124,7 @@ class HDF5Sink(Module):
         if 'MCTracks' in blob:
             self._write_tracks(blob['MCTracks'], self.mc_tracks.row)
         if 'Evt' in blob:
-            self._write_event_info(blob['Evt'], self.event_info.row)
+            self._write_event_info_from_aanet(blob['Evt'], self.event_info.row)
 
         if not self.index % 1000:
             self.hits.flush()
@@ -154,10 +161,11 @@ class HDF5Pump(Pump):
         self._reset_index()
 
         try:
-            hits = self.h5_file.get_node('/', 'hits')
-            self.event_ids = np.unique(hits.cols.event_id[:])
+            event_info = self.h5_file.get_node('/', 'event_info')
+            self.event_ids = event_info.cols.event_id[:]
         except tables.NoSuchNodeError:
-            self.event_ids = []
+            log.critical("No /event_info table found.")
+            raise SystemExit
 
         self._n_events = len(self.event_ids)
 
@@ -173,12 +181,12 @@ class HDF5Pump(Pump):
     def _get_hits(self, event_id, table_name='hits', where='/'):
         table = self.h5_file.get_node(where, table_name)
         rows = table.read_where('event_id == %d' % event_id)
-        return HitSeries.from_table(rows)
+        return HitSeries.from_table(rows, event_id)
 
     def _get_tracks(self, event_id, table_name='tracks', where='/'):
         table = self.h5_file.get_node(where, table_name)
         rows = table.read_where('event_id == %d' % event_id)
-        return TrackSeries.from_table(rows)
+        return TrackSeries.from_table(rows, event_id)
 
     def _get_event_info(self, event_id, table_name='event_info', where='/'):
         table = self.h5_file.get_node(where, table_name)
@@ -190,7 +198,8 @@ class HDF5Pump(Pump):
         blob['Hits'] = self._get_hits(event_id, table_name='hits')
         blob['MCHits'] = self._get_hits(event_id, table_name='mc_hits')
         blob['MCTracks'] = self._get_tracks(event_id, table_name='mc_tracks')
-        blob['EventInfo'] = self._get_event_info(event_id, table_name='event_info')
+        blob['EventInfo'] = self._get_event_info(event_id,
+                                                 table_name='event_info')
         return blob
 
     def finish(self):

@@ -1,4 +1,5 @@
 # coding=utf-8
+# cython: profile=True
 # Filename: dataclasses.py
 # cython: embedsignature=True
 # pylint: disable=W0232,C0103,C0111
@@ -24,7 +25,7 @@ __all__ = ('Point', 'Position', 'Direction', 'HitSeries', 'Hit')
 
 point_dt = np.dtype([('x', float), ('y', float), ('z', float)])
 
-def Point(vector, as_recarray=True):
+def Point_(vector, as_recarray=True):
     """A point as numpy.recarray with optional x, y and z attributes."""
     vector = np.array(vector, dtype=np.float)
     if as_recarray:
@@ -32,10 +33,8 @@ def Point(vector, as_recarray=True):
     else:
         return vector
 
-Position = Direction = Point  # Backwards compatibility
 
-
-class Point_(np.ndarray):
+class Point(np.ndarray):
     """Represents a point in a 3D space"""
     def __new__(cls, input_array=(np.nan, np.nan, np.nan)):
         """Add x, y and z to the ndarray"""
@@ -67,7 +66,10 @@ class Point_(np.ndarray):
         self[2] = value
 
 
-class Direction_(Point_):
+Position = Direction = Point  # Backwards compatibility
+
+
+class Direction_(Point):
     """Represents a direction in a 3D space
 
     The direction vector always normalises itself when an attribute is changed.
@@ -136,19 +138,19 @@ cdef class Hit:
     triggered : bool
 
     """
-    cdef public float id, dom_id, time, tot, channel_id, pmt_id
+    cdef public int id, dom_id, time, tot, channel_id, pmt_id
     cdef public bint triggered
     cdef public np.ndarray pos
     cdef public np.ndarray dir
 
-    def __cinit__(self, 
-                  int channel_id, 
-                  int dom_id, 
-                  int id, 
+    def __cinit__(self,
+                  int channel_id,
+                  int dom_id,
+                  int id,
                   int pmt_id,
-                  int time, 
+                  int time,
                   int tot,
-                  bint triggered, 
+                  bint triggered,
                  ):
         self.channel_id = channel_id
         self.dom_id = dom_id
@@ -157,7 +159,7 @@ cdef class Hit:
         self.time = time
         self.tot = tot
         self.triggered = triggered
-        
+
 
 cdef class Track:
     """Represents a particle track.
@@ -184,10 +186,11 @@ cdef class Track:
         self.pos = pos
         self.time = time
         self.type = type
-        
+
 
 class HitSeries(object):
-    def __init__(self, hits):
+    def __init__(self, hits, event_id=None):
+        self.event_id = event_id
         self._channel_id = None
         self._dom_id = None
         self._hits = hits
@@ -199,34 +202,34 @@ class HitSeries(object):
         self._triggered = None
 
     @classmethod
-    def from_aanet(cls, hits):
+    def from_aanet(cls, hits, event_id=None):
         return cls([Hit(
             ord(h.channel_id),
-            h.dom_id, 
-            h.id, 
+            h.dom_id,
+            h.id,
             h.pmt_id,
-            h.t, 
-            h.tot, 
-            h.trig, 
-        ) for h in hits])
+            h.t,
+            h.tot,
+            h.trig,
+        ) for h in hits], event_id)
 
     @classmethod
-    def from_evt(cls, hits):
+    def from_evt(cls, hits, event_id=None):
         return cls([Hit(
             np.nan,     # channel_id
             np.nan,     # dom_id
-            h.id, 
+            h.id,
             h.pmt_id,
-            h.time, 
-            h.tot, 
+            h.time,
+            h.tot,
             np.nan,     # triggered
-        ) for h in hits])
+        ) for h in hits], event_id)
 
     @classmethod
     def from_arrays(cls, channel_ids, dom_ids, ids, pmt_ids, times, tots,
-                    triggereds):
+                    triggereds, event_id=None):
         args = channel_ids, dom_ids, ids, pmt_ids, times, tots, triggereds
-        hits = cls([Hit(*hit_args) for hit_args in zip(*args)])
+        hits = cls([Hit(*hit_args) for hit_args in zip(*args)], event_id)
         hits._channel_id = channel_ids
         hits._dom_id = dom_ids
         hits._id = ids
@@ -237,7 +240,7 @@ class HitSeries(object):
         return hits
 
     @classmethod
-    def from_table(cls, table):
+    def from_table(cls, table, event_id=None):
         return cls([Hit(
             row['channel_id'],
             row['dom_id'],
@@ -246,7 +249,7 @@ class HitSeries(object):
             row['time'],
             row['tot'],
             row['triggered'],
-        ) for row in table])
+        ) for row in table], event_id)
 
     def __iter__(self):
         return self
@@ -341,7 +344,8 @@ class HitSeries(object):
 
 
 class TrackSeries(object):
-    def __init__(self, tracks):
+    def __init__(self, tracks, event_id=None):
+        self.event_id = event_id
         self._dir = None
         self._energy = None
         self._id = None
@@ -352,21 +356,22 @@ class TrackSeries(object):
         self._type = None
 
     @classmethod
-    def from_aanet(cls, tracks):
+    def from_aanet(cls, tracks, event_id=None):
         return cls([Track(
-            Direction((t.dir.x, t.dir.y, t.dir.z)), 
-            t.id, 
-            t.E, 
-            Position((t.pos.x, t.pos.y, t.pos.z)), 
-            t.t, 
+            Direction((t.dir.x, t.dir.y, t.dir.z)),
+            t.id,
+            t.E,
+            Position((t.pos.x, t.pos.y, t.pos.z)),
+            t.t,
             t.type,
         )
-                    for t in tracks])
+                    for t in tracks], event_id)
 
     @classmethod
-    def from_arrays(cls, directions, energies, ids, positions, times, types):
+    def from_arrays(cls, directions, energies, ids, positions, times, types,
+                    event_id=None):
         args = directions, energies, ids, positions, times, types
-        tracks = cls([Track(*track_args) for track_args in zip(*args)])
+        tracks = cls([Track(*track_args) for track_args in zip(*args)], event_id)
         tracks._dir = directions
         tracks._energy = energies
         tracks._id = ids
@@ -376,7 +381,7 @@ class TrackSeries(object):
         return tracks
 
     @classmethod
-    def from_table(cls, table):
+    def from_table(cls, table, event_id=None):
         return cls([Track(
             row['dir'],
             row['energy'],
@@ -384,7 +389,7 @@ class TrackSeries(object):
             row['pos'],
             row['time'],
             row['type'],
-        ) for row in table])
+        ) for row in table], event_id)
 
     def __iter__(self):
         return self
@@ -409,7 +414,7 @@ class TrackSeries(object):
         if self._energy is None:
             self._energy = np.array([t.energy for t in self._tracks])
         return self._energy
-    
+
     @property
     def type(self):
         if self._type is None:
