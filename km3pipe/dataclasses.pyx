@@ -138,7 +138,7 @@ cdef class Hit:
     triggered : bool
 
     """
-    cdef public float id, dom_id, time, tot, channel_id, pmt_id
+    cdef public int id, dom_id, time, tot, channel_id, pmt_id
     cdef public bint triggered
     cdef public np.ndarray pos
     cdef public np.ndarray dir
