@@ -41,6 +41,7 @@ class Track(tables.IsDescription):
     event_id = tables.UIntCol()
     id = tables.UIntCol()
     pos = tables.FloatCol(shape=(3,))
+    run_id = tables.UIntCol()
     time = tables.IntCol()
     type = tables.IntCol()
 
@@ -86,7 +87,7 @@ class HDF5Sink(Module):
             hit_row['event_id'] = hits.event_id
             hit_row['id'] = hit.id
             hit_row['pmt_id'] = hit.pmt_id
-#            hit_row['run_id'] = hit.pmt_id
+            # hit_row['run_id'] = hit.run_id
             hit_row['time'] = hit.time
             hit_row['tot'] = hit.tot
             hit_row['triggered'] = hit.triggered
@@ -99,6 +100,7 @@ class HDF5Sink(Module):
             track_row['event_id'] = tracks.event_id
             track_row['id'] = track.id
             track_row['pos'] = track.pos
+            # track_row['run_id'] = track.run_id
             track_row['time'] = track.time
             track_row['type'] = track.type
             track_row.append()
@@ -140,6 +142,9 @@ class HDF5Sink(Module):
         self.event_info.cols.event_id.create_index()
         self.mc_hits.cols.event_id.create_index()
         self.mc_tracks.cols.event_id.create_index()
+        #self.event_info.cols.run_id.create_index()
+        #self.mc_hits.cols.run_id.create_index()
+        #self.mc_tracks.cols.run_id.create_index()
         self.hits.flush()
         self.event_info.flush()
         self.mc_hits.flush()

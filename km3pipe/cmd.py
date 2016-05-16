@@ -6,21 +6,24 @@ KM3Pipe command line utility.
 Usage:
     km3pipe test
     km3pipe tohdf5 [-n EVENTS] -i FILE -o FILE
-    km3pipe h5tree [-g GROUP] -i FILE
+    km3pipe runtable [-n RUNS] DET_ID
     km3pipe (-h | --help)
     km3pipe --version
 
 Options:
-    -h --help  Show this screen.
-    -i FILE    Input file.
-    -o FILE    Output file.
-    -n EVENTS  Number of events.
-    -g GROUP   Group/Node where dataset is located [default: /]
+    -h --help       Show this screen.
+    -i FILE         Input file.
+    -o FILE         Output file.
+    -n EVENTS/RUNS  Number of events/runs.
+    DET_ID          Detector ID (eg. D_ARCA001).
 
 """
 from __future__ import division, absolute_import, print_function
 
+import sys
+
 from km3pipe import version
+from km3pipe.db import DBManager
 from km3modules import StatusBar
 
 
@@ -36,14 +39,28 @@ def tohdf5(input_file, output_file, n_events):
     pipe.drain(n_events)
 
 
+def runtable(det_id, n=5, sep='\t'):
+    """Print the run table of the last `n` runs for given detector"""
+    db = DBManager()
+    df = db.run_table(det_id)
+    if n is None:
+        selected_df = df
+    else:
+        selected_df = df.tail(n)
+    selected_df.to_csv(sys.stdout, sep=sep)
+
+
 def main():
     from docopt import docopt
     arguments = docopt(__doc__, version=version)
 
     try:
-        n_events = int(arguments['-n'])
+        n = int(arguments['-n'])
     except TypeError:
-        n_events = None
+        n = None
 
     if arguments['tohdf5']:
-        tohdf5(arguments['-i'], arguments['-o'], n_events)
+        tohdf5(arguments['-i'], arguments['-o'], n)
+
+    if arguments['runtable']:
+        runtable(arguments['DET_ID'], n)

@@ -323,6 +323,17 @@ class Geometry(Module):
             hit.time += pmt.t0
             hit.a = hit.tot
 
+    def apply_to_table(self, table):
+        """Add x, y, z and du, floor columns to hit table"""
+        def get_pmt(hit):
+            return self.detector.get_pmt(hit['dom_id'], hit['channel_id'])
+
+        table['x'] = table.apply(lambda h: get_pmt(h).pos.x, axis=1)
+        table['y'] = table.apply(lambda h: get_pmt(h).pos.y, axis=1)
+        table['z'] = table.apply(lambda h: get_pmt(h).pos.z, axis=1)
+        table['du'] = table.apply(lambda h: get_pmt(h).omkey[0], axis=1)
+        table['floor'] = table.apply(lambda h: get_pmt(h).omkey[1], axis=1)
+
 
 class AanetGeometry(Module):
     """AAnet based Geometry using Det()"""
