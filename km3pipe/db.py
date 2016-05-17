@@ -278,9 +278,12 @@ class DBManager(object):
         req = Request(LOGIN_URL, data.encode('utf-8'))
         f = opener.open(req)
         html = f.read()
-        if 'Bad username or password' in str(html):
-            log.error("Bad username or password!")
+        failed_auth_message = 'Bad username or password'
+        if failed_auth_message in str(html):
+            log.error(failed_auth_message)
+            return False
         self._cookies = cj
+        return True
 
 
 class ParametersContainer(object):

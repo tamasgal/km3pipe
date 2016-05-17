@@ -23,6 +23,19 @@ __author__ = 'tamasgal'
 POS_ATOM = tables.FloatAtom(shape=3)
 
 
+class EventInfo(tables.IsDescription):
+    det_id = tables.IntCol()
+    event_id = tables.UIntCol()
+    frame_index = tables.UIntCol()
+    mc_id = tables.IntCol()
+    mc_t = tables.Float64Col()
+    overlays = tables.UInt8Col()
+    run_id = tables.UIntCol()
+    # timestamp = tables.Float64Col()
+    trigger_counter = tables.UInt64Col()
+    trigger_mask = tables.UInt64Col()
+
+
 class Hit(tables.IsDescription):
     channel_id = tables.UInt8Col()
     dom_id = tables.UIntCol()
@@ -46,17 +59,100 @@ class Track(tables.IsDescription):
     type = tables.IntCol()
 
 
-class EventInfo(tables.IsDescription):
-    det_id = tables.IntCol()
+class RecoTrack(tables.IsDescription):
+    dir = tables.FloatCol(shape=(3,))
+    energy = tables.FloatCol()
     event_id = tables.UIntCol()
-    frame_index = tables.UIntCol()
-    mc_id = tables.IntCol()
-    mc_t = tables.Float64Col()
-    overlays = tables.UInt8Col()
+    pos = tables.FloatCol(shape=(3,))
     run_id = tables.UIntCol()
-    # timestamp = tables.Float64Col()
-    trigger_counter = tables.UInt64Col()
-    trigger_mask = tables.UInt64Col()
+    time = tables.IntCol()
+    quality = tables.FloatCol()         # likelihood
+
+
+class RecoLNSTrack(RecoTrack):
+    beta = tables.FloatCol()
+    n_fits = tables.UIntCol()
+    max_likelihood = tables.FloatCol()
+    n_compatible_solutions = tables.UIntCol()
+    n_hits = tables.UIntCol()
+    # shape might be buggy
+    error_matrix = tables.FloatCol(shape=(15,))
+
+
+class JGandalfTrack(RecoTrack):
+    # shape might be buggy
+    error_matrix = tables.FloatCol(shape=(15,))
+    beta_0 = tables.FloatCol()
+    beta_1 = tables.FloatCol()
+    likelihood = tables.FloatCol()
+    reduced_likelihood = tables.FloatCol()
+    energy_uncorrected = tables.FloatCol()
+    n_hits = tables.UIntCol()
+    energy_old = tables.FloatCol()
+
+
+class QStrategyTrack(RecoTrack):
+    m_estimator = tables.FloatCol()
+    r_final = tables.FloatCol()
+    collected_charge = tables.FloatCol()
+    m_prefit = tables.FloatCol()
+    r_prefit = tables.FloatCol()
+    intertia = tables.FloatCol()
+
+
+class AAShowerFitTrack(RecoTrack):
+    m_estimator = tables.FloatCol()
+    t_vertex = tables.FloatCol()
+    n_hits = tables.UIntCol()
+    beta = tables.FloatCol()
+    # shape = (x, y, z, E, theta, phi) x dito
+    error_matrix = tables.FloatCol(shape=(6, 6))
+
+
+class DusjTrack(RecoTrack):
+    # fix those namings later
+    # some of them will be thrown out anyway
+    gold_parameter = tables.FloatCol()
+    SmallInertia = tables.FloatCol()
+    TimeResidualFWHM = tables.FloatCol()
+    TimeResidualNumberOfHits = tables.FloatCol()
+    YIntersepto1000_o50 = tables.FloatCol()
+    DusjShowerRecoVertexFitLogLikelihood = tables.FloatCol()
+    DusjShowerRecoVertexFitDegreesOfFreedom = tables.FloatCol()
+    DusjShowerRecoVertexFitReducedLogLikelihood = tables.FloatCol()
+    ReconstructedShowerEnergy = tables.FloatCol()
+    DusjShowerRecoFinalFitLogLikelihood = tables.FloatCol()
+    FitHorizontalDistanceToDetectorCenter = tables.FloatCol()
+    FitNumberOfStrings = tables.FloatCol()
+    FitQuadrupoleMoment = tables.FloatCol()
+    FitTimeResidualChiSquare = tables.FloatCol()
+    FitTotalCharge = tables.FloatCol()
+    FitVerticalDistanceToDetectorCenter = tables.FloatCol()
+
+
+class ThomasParameters(tables.IsDescription):
+    # fix those namings later
+    # some of them will be thrown out anyway
+    # Slope parameters (each 11, several fit ranges)
+    slope = tables.FloatCol()
+    chi2 = tables.FloatCol()
+    y_intersept = tables.FloatCol()
+    # difference between current fit and fit to range [0-1000]
+    y_intersept_diff = tables.UIntCol()
+    # Time residual distribution
+    TimeResidualNumberOfHits = tables.UIntCol()
+    TimeResidualMean = tables.FloatCol()
+    TimeResidualMedian = tables.FloatCol()
+    TimeResidualRMS = tables.FloatCol()
+    TimeResidualWidth15_85 = tables.FloatCol()
+    GParameter = tables.FloatCol()
+    GoldParameter = tables.FloatCol()
+    # Tensor of inertia
+    # shapes/dtype???
+    RelativeInertia = tables.FloatCol()
+    MiddleInertia = tables.FloatCol()
+    SmallInertia = tables.FloatCol()
+    BigInertia = tables.FloatCol()
 
 
 class HDF5Sink(Module):
