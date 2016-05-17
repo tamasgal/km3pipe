@@ -174,7 +174,7 @@ class HDF5Sink(Module):
         self.event_info = self.h5file.create_table('/', 'event_info',
                                                    EventInfo, "Event Info",
                                                    filters=self.filters)
-        self.recolns = self.h5file.create_table('/', 'recolns', RecoLNSTrack,
+        self.recolns = self.h5file.create_table('/reco', 'recolns', RecoLNSTrack,
                                                 'Reco LNS', createparents=True,
                                                 filters=self.filters)
 
