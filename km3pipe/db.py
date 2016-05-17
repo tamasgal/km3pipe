@@ -146,7 +146,7 @@ class DBManager(object):
 
     @property
     def detectors(self):
-        if not self._detectors:
+        if self._detectors is None:
             self._detectors = self._get_detectors()
         return self._detectors
 
