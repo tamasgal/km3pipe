@@ -313,7 +313,7 @@ class Geometry(Module):
         return self.detector
 
     def apply(self, hits):
-        """Add x, y, z (and du, floor if DataFrame) columns to hit"""
+        """Add x, y, z, t0 (and du, floor if DataFrame) columns to hit"""
         if isinstance(hits, (HitSeries, list)):
             self._apply_to_hitseries(hits)
         elif isinstance(hits, pd.DataFrame):
@@ -323,7 +323,7 @@ class Geometry(Module):
                             .format(hits.__class__.__name__))
 
     def _apply_to_hitseries(self, hits):
-        """Add x, y and z to hit series"""
+        """Add x, y, z and t0 offset to hit series"""
         for hit in hits:
             try:
                 pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
