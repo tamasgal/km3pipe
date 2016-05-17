@@ -15,10 +15,11 @@ import time
 from timeit import default_timer as timer
 
 import numpy as np
+import pandas as pd
 
 from km3pipe.tools import peak_memory_usage, ignored
 from km3pipe.hardware import Detector
-from km3pipe.dataclasses import Position, Direction
+from km3pipe.dataclasses import Position, Direction, HitSeries
 from km3pipe.logger import logging
 
 __author__ = 'tamasgal'
@@ -312,6 +313,17 @@ class Geometry(Module):
         return self.detector
 
     def apply(self, hits):
+        """Add x, y, z (and du, floor if DataFrame) columns to hit"""
+        if isinstance(hits, (HitSeries, list)):
+            self._apply_to_hitseries(hits)
+        elif isinstance(hits, pd.DataFrame):
+            self._apply_to_table(hits)
+        else:
+            raise TypeError("Don't know how to apply geometry to '{0}'."
+                            .format(hits.__class__.__name__))
+
+    def _apply_to_hitseries(self, hits):
+        """Add x, y and z to hit series"""
         for hit in hits:
             try:
                 pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
@@ -323,7 +335,7 @@ class Geometry(Module):
             hit.time += pmt.t0
             hit.a = hit.tot
 
-    def apply_to_table(self, table):
+    def _apply_to_table(self, table):
         """Add x, y, z and du, floor columns to hit table"""
         def get_pmt(hit):
             return self.detector.get_pmt(hit['dom_id'], hit['channel_id'])
