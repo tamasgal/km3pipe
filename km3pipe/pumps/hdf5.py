@@ -174,6 +174,9 @@ class HDF5Sink(Module):
         self.event_info = self.h5file.create_table('/', 'event_info',
                                                    EventInfo, "Event Info",
                                                    filters=self.filters)
+        self.recolns = self.h5file.create_table('/', 'recolns', RecoLNSTrack,
+                                                'Reco LNS', createparents=True,
+                                                filters=self.filters)
 
     def _write_hits(self, hits, hit_row):
         for hit in hits:
@@ -213,6 +216,16 @@ class HDF5Sink(Module):
         info_row['trigger_mask'] = info.trigger_mask
         info_row.append()
 
+    def _write_recolns(self, track, reco_row):
+        reco_row['beta'] = track.beta
+        reco_row['event_id'] = track.id
+        reco_row['n_fits'] = track.n_fits
+        reco_row['max_likelihood'] = track.max_likelihood
+        reco_row['n_compatible_solutions'] = track.n_compatible_solutions
+        reco_row['n_hits'] = track.n_hits
+        reco_row['error_matrix'] = track.error_matrix
+        reco_row.append()
+
     def process(self, blob):
         hits = blob['Hits']
         self._write_hits(hits, self.hits.row)
@@ -222,12 +235,15 @@ class HDF5Sink(Module):
             self._write_tracks(blob['MCTracks'], self.mc_tracks.row)
         if 'Evt' in blob:
             self._write_event_info_from_aanet(blob['Evt'], self.event_info.row)
+        if 'RecoLNS' in blob:
+            self._write_recolns(blob['RecoLNS'], self.recolns.row)
 
         if not self.index % 1000:
             self.hits.flush()
             self.mc_hits.flush()
             self.mc_tracks.flush()
             self.event_info.flush()
+            self.recolns.flush()
 
         self.index += 1
         return blob
@@ -237,6 +253,7 @@ class HDF5Sink(Module):
         self.event_info.cols.event_id.create_index()
         self.mc_hits.cols.event_id.create_index()
         self.mc_tracks.cols.event_id.create_index()
+        self.recolns.cols.event_id.create_index()
         #self.event_info.cols.run_id.create_index()
         #self.mc_hits.cols.run_id.create_index()
         #self.mc_tracks.cols.run_id.create_index()
@@ -244,6 +261,7 @@ class HDF5Sink(Module):
         self.event_info.flush()
         self.mc_hits.flush()
         self.mc_tracks.flush()
+        self.recolns.flush()
         self.h5file.close()
 
 
