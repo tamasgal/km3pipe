@@ -105,8 +105,8 @@ class AAShowerFitTrack(RecoTrack):
     t_vertex = tables.FloatCol()
     n_hits = tables.UIntCol()
     beta = tables.FloatCol()
-    # shape = (x, y, z, theta, phi) x dito
-    error_matrix = tables.FloatCol(shape=(5, 5))
+    # shape = (x, y, z, E, theta, phi) x dito
+    error_matrix = tables.FloatCol(shape=(6, 6))
 
 
 class DusjTrack(RecoTrack):
