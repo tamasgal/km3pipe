@@ -343,6 +343,7 @@ class Geometry(Module):
         table['x'] = table.apply(lambda h: get_pmt(h).pos.x, axis=1)
         table['y'] = table.apply(lambda h: get_pmt(h).pos.y, axis=1)
         table['z'] = table.apply(lambda h: get_pmt(h).pos.z, axis=1)
+        table['time'] += table.apply(lambda h: get_pmt(h).t0, axis=1)
         table['du'] = table.apply(lambda h: get_pmt(h).omkey[0], axis=1)
         table['floor'] = table.apply(lambda h: get_pmt(h).omkey[1], axis=1)
 
