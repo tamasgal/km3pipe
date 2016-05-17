@@ -216,13 +216,13 @@ class HitSeries(object):
     @classmethod
     def from_evt(cls, hits, event_id=None):
         return cls([Hit(
-            np.nan,     # channel_id
-            np.nan,     # dom_id
+            0,     # channel_id
+            0,     # dom_id
             h.id,
             h.pmt_id,
             h.time,
             h.tot,
-            np.nan,     # triggered
+            0,     # triggered
         ) for h in hits], event_id)
 
     @classmethod
