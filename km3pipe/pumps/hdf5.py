@@ -227,8 +227,9 @@ class HDF5Sink(Module):
         reco_row.append()
 
     def process(self, blob):
-        hits = blob['Hits']
-        self._write_hits(hits, self.hits.row)
+        if 'Hits' in blob:
+            hits = blob['Hits']
+            self._write_hits(hits, self.hits.row)
         if 'MCHits' in blob:
             self._write_hits(blob['MCHits'], self.mc_hits.row)
         if 'MCTracks' in blob:
