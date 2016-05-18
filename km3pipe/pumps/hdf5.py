@@ -100,7 +100,7 @@ class QStrategyTrack(RecoTrack):
     intertia = tables.FloatCol()
 
 
-class AAShowerFitTrack(RecoTrack):
+class AaShowerFitTrack(RecoTrack):
     m_estimator = tables.FloatCol()
     t_vertex = tables.FloatCol()
     n_hits = tables.UIntCol()
@@ -216,14 +216,23 @@ class HDF5Sink(Module):
         info_row['trigger_mask'] = info.trigger_mask
         info_row.append()
 
-    def _write_recolns(self, track, reco_row):
-        reco_row['beta'] = track.beta
-        reco_row['event_id'] = track.id
-        reco_row['n_fits'] = track.n_fits
-        reco_row['max_likelihood'] = track.max_likelihood
-        reco_row['n_compatible_solutions'] = track.n_compatible_solutions
-        reco_row['n_hits'] = track.n_hits
-        reco_row['error_matrix'] = track.error_matrix
+    def _write_reco_info(self, track, reco_row):
+        reco_row['pos'] = track.pos
+        reco_row['dir'] = track.dir
+        reco_row['time'] = track.t
+        reco_row['Energy'] = track.E
+        reco_row['Quality'] = track.lik
+        return reco_row
+
+    def _write_recolns(self, track, reco_row, event_id):
+        reco_row = self._write_reco_info(track, reco_row)
+        reco_row['event_id'] = event_id
+        reco_row['beta'] = track.fitinf[0]
+        reco_row['n_fits'] = track.fitinf[1]
+        reco_row['max_likelihood'] = track.fitinf[2]
+        reco_row['n_compatible_solutions'] = track.fitinf[3]
+        reco_row['n_hits'] = track.fitinf[4]
+        reco_row['error_matrix'] = list(track.error_matrix)
         reco_row.append()
 
     def process(self, blob):
@@ -236,8 +245,11 @@ class HDF5Sink(Module):
             self._write_tracks(blob['MCTracks'], self.mc_tracks.row)
         if 'Evt' in blob:
             self._write_event_info_from_aanet(blob['Evt'], self.event_info.row)
-        if 'RecoLNS' in blob:
-            self._write_recolns(blob['RecoLNS'], self.recolns.row)
+        if 'MiniDST' in blob:
+            mini_dst = blob['MiniDST']
+            if 'RecoLNS' in mini_dst:
+                self._write_recolns(mini_dst['RecoLNS'], self.recolns.row,
+                                   event_id = mini_dst['event_id'])
 
         if not self.index % 1000:
             self.hits.flush()
