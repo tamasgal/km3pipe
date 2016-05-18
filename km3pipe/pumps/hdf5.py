@@ -227,15 +227,14 @@ class HDF5Sink(Module):
     def _write_recolns(self, track, reco_row, event_id):
         reco_row = self._write_reco_info(track, reco_row)
         reco_row['event_id'] = event_id
-        try:
+        # magic number for "fit did not converge"
+        if track.rec_stage > -9999:
             reco_row['beta'] = track.fitinf[0]
             reco_row['n_fits'] = track.fitinf[1]
             reco_row['max_likelihood'] = track.fitinf[2]
             reco_row['n_compatible_solutions'] = track.fitinf[3]
             reco_row['n_hits'] = track.fitinf[4]
             reco_row['error_matrix'] = list(track.error_matrix)
-        except IndexError:
-            print('warning: Event no %d has missing fitinfo fields' % event_id)
         reco_row.append()
 
     def process(self, blob):
