@@ -217,22 +217,25 @@ class HDF5Sink(Module):
         info_row.append()
 
     def _write_reco_info(self, track, reco_row):
-        reco_row['pos'] = track.pos
-        reco_row['dir'] = track.dir
+        reco_row['pos'] = [track.pos.x, track.pos.y, track.pos.z]
+        reco_row['dir'] = [track.dir.x, track.dir.y, track.dir.z]
         reco_row['time'] = track.t
-        reco_row['Energy'] = track.E
-        reco_row['Quality'] = track.lik
+        reco_row['energy'] = track.E
+        reco_row['quality'] = track.lik
         return reco_row
 
     def _write_recolns(self, track, reco_row, event_id):
         reco_row = self._write_reco_info(track, reco_row)
         reco_row['event_id'] = event_id
-        reco_row['beta'] = track.fitinf[0]
-        reco_row['n_fits'] = track.fitinf[1]
-        reco_row['max_likelihood'] = track.fitinf[2]
-        reco_row['n_compatible_solutions'] = track.fitinf[3]
-        reco_row['n_hits'] = track.fitinf[4]
-        reco_row['error_matrix'] = list(track.error_matrix)
+        try:
+            reco_row['beta'] = track.fitinf[0]
+            reco_row['n_fits'] = track.fitinf[1]
+            reco_row['max_likelihood'] = track.fitinf[2]
+            reco_row['n_compatible_solutions'] = track.fitinf[3]
+            reco_row['n_hits'] = track.fitinf[4]
+            reco_row['error_matrix'] = list(track.error_matrix)
+        except IndexError:
+            print('warning: Event no %d has missing fitinfo fields' % event_id)
         reco_row.append()
 
     def process(self, blob):
