@@ -249,7 +249,7 @@ class HDF5Sink(Module):
             mini_dst = blob['MiniDST']
             if 'RecoLNS' in mini_dst:
                 self._write_recolns(mini_dst['RecoLNS'], self.recolns.row,
-                                   event_id = mini_dst['event_id'])
+                                    event_id=mini_dst['event_id'])
 
         if not self.index % 1000:
             self.hits.flush()
