@@ -38,8 +38,6 @@ class JPPPump(Pump):
         while self.reader.has_next():
             self.reader.retrieve_next_event()
             self.index += 1
-            print("Grabbing event with frame index {0}"
-                  .format(self.reader.get_frame_index()))
 
             n = self.reader.get_number_of_snapshot_hits()
             channel_ids = np.zeros(n, dtype='i')
