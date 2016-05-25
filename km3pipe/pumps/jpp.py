@@ -48,7 +48,7 @@ class JPPPump(Pump):
             tots = np.zeros(n, dtype='i')
             triggereds = np.zeros(n, dtype='i')
 
-            self.reader.get_hits(channel_ids, dom_ids, times, tots)
+            self.reader.get_hits(channel_ids, dom_ids, times, tots, triggereds)
 
             hit_series = HitSeries.from_arrays(
                 channel_ids, dom_ids, np.arange(n), np.zeros(n), times, tots,
