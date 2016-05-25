@@ -236,7 +236,7 @@ class HitSeries(object):
         hits._pmt_id = pmt_ids
         hits._time = times
         hits._tots = tots
-        hits._triggered = triggereds
+        hits._triggereds = triggereds
         return hits
 
     @classmethod
