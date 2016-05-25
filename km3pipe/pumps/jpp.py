@@ -46,18 +46,15 @@ class JPPPump(Pump):
             dom_ids = np.zeros(n, dtype='i')
             times = np.zeros(n, dtype='i')
             tots = np.zeros(n, dtype='i')
+            triggereds = np.zeros(n, dtype='i')
 
             self.reader.get_hits(channel_ids, dom_ids, times, tots)
 
             hit_series = HitSeries.from_arrays(
                 channel_ids, dom_ids, np.arange(n), np.zeros(n), times, tots,
-                np.zeros(n), self.index
+                triggereds, self.index
             )
 
             return {'FrameIndex': self.reader.get_frame_index(),
-                    'tots_arr': tots,
-                    'times_arr': times,
-                    'dom_ids_arr': dom_ids,
-                    'channel_ids_arr': channel_ids,
                     'Hits': hit_series}
         raise StopIteration
