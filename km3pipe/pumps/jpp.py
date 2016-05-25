@@ -33,7 +33,7 @@ class JPPPump(Pump):
         self.filename = self.get('filename')
 
         self.reader = jppy.PyJDAQEventReader(self.filename)
-		self.blobs = self.blob_generator()
+        self.blobs = self.blob_generator()
 
     def blob_generator(self):
         while self.reader.has_next():
@@ -57,8 +57,8 @@ class JPPPump(Pump):
             yield {'FrameIndex': self.reader.get_frame_index(),
                    'Hits': hit_series}
 
-	def process(self, blob):
-		return next(self.blobs)
+    def process(self, blob):
+        return next(self.blobs)
 
     def __iter__(self):
         return self
