@@ -24,15 +24,15 @@ class JPPPump(Pump):
         super(self.__class__, self).__init__(**context)
 
         try:
-            import jppp  # noqa
+            import jppy  # noqa
         except ImportError:
-            raise ImportError("\nPlease install the jppp package:\n\n"
-                              "    pip install jppp\n")
+            raise ImportError("\nPlease install the jppy package:\n\n"
+                              "    pip install jppy\n")
 
         self.index = self.get('index') or 0
         self.filename = self.get('filename')
 
-        self.reader = jppp.PyJDAQEventReader(self.filename)
+        self.reader = jppy.PyJDAQEventReader(self.filename)
 
     def process(self, blob):
         while self.reader.has_next():
