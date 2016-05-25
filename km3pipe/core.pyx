@@ -63,6 +63,10 @@ class Pipeline(object):
                           "be a Pump!")
             self.modules.append(module)
 
+    def attach_bundle(self, modules):
+        for mod in modules:
+            self.modules.append(mod)
+
     def _drain(self, cycles=None):
         """Activate the pump and let the flow go.
 
