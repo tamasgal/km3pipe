@@ -33,8 +33,9 @@ class JPPPump(Pump):
         self.filename = self.get('filename')
 
         self.reader = jppy.PyJDAQEventReader(self.filename)
+		self.blobs = self.blob_generator()
 
-    def process(self, blob):
+    def blob_generator(self):
         while self.reader.has_next():
             self.reader.retrieve_next_event()
             self.index += 1
@@ -53,6 +54,18 @@ class JPPPump(Pump):
                 triggereds, self.index
             )
 
-            return {'FrameIndex': self.reader.get_frame_index(),
-                    'Hits': hit_series}
-        raise StopIteration
+            yield {'FrameIndex': self.reader.get_frame_index(),
+                   'Hits': hit_series}
+
+	def process(self, blob):
+		return next(self.blobs)
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        return next(self.blobs)
