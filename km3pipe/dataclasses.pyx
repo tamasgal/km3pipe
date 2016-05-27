@@ -44,6 +44,20 @@ class EventInfo(object):
         self.trigger_counter = trigger_counter
         self.trigger_mask = trigger_mask
 
+    @classmethod
+    def from_table(cls, row):
+        return cls(
+            row['det_id'],
+            row['event_id'],
+            row['frame_index'],
+            row['mc_id'],
+            row['mc_t'],
+            row['overlays'],
+            row['run_id'],
+            row['trigger_counter'],
+            row['trigger_mask'],
+        )
+
     self __str__(self):
         return "Event #{0}:\n" \
                "    detector id: {1}\n" \
