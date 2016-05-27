@@ -23,17 +23,6 @@ from km3pipe.tools import angle_between
 __all__ = ('Point', 'Position', 'Direction', 'HitSeries', 'Hit')
 
 
-point_dt = np.dtype([('x', float), ('y', float), ('z', float)])
-
-def Point_(vector, as_recarray=True):
-    """A point as numpy.recarray with optional x, y and z attributes."""
-    vector = np.array(vector, dtype=np.float)
-    if as_recarray:
-        return vector.view(point_dt, np.recarray)
-    else:
-        return vector
-
-
 class Point(np.ndarray):
     """Represents a point in a 3D space"""
     def __new__(cls, input_array=(np.nan, np.nan, np.nan)):
