@@ -72,6 +72,9 @@ class EventInfo(object):
                        self.mc_id, self.mc_t, self.overlays,
                        self.trigger_counter, self.trigger_mask)
 
+	self __insp__(self):
+		return self.__str__()
+
 
 class Point(np.ndarray):
     """Represents a point in a 3D space"""
