@@ -20,7 +20,43 @@ np.import_array()
 
 from km3pipe.tools import angle_between
 
-__all__ = ('Point', 'Position', 'Direction', 'HitSeries', 'Hit')
+__all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries', 'Hit')
+
+
+class EventInfo(object):
+    self __init__(self,
+                  det_id,
+                  event_id,
+                  frame_index,
+                  mc_id,
+                  mc_time,
+                  overlays,
+                  run_id,
+                  trigger_counter,
+                  trigger_mask)
+        self.det_id = det_id
+        self.event_id = event_id
+        self.frame_index = frame_index
+        self.mc_id = mc_id
+        self.mc_time = mc_time
+        self.overlays = overlays
+        self.run_id = run_id
+        self.trigger_counter = trigger_counter
+        self.trigger_mask = trigger_mask
+
+    self __str__(self):
+        return "Event #{0}:\n" \
+               "    detector id: {1}\n" \
+               "    run ID: {2}\n" \
+               "    frame index: {3}\n" \
+               "    MC id: {4}\n" \
+               "    MC time: {5}\n" \
+               "    overlays: {6}\n" \
+               "    trigger counter: {7}\n" \
+               "    trigger mask: {8}\n" \
+               .format(self.event_id, self.det_id, self.run_id, self.frame_index,
+                       self.mc_id, self.mc_time, self.overlays,
+                       self.trigger_counter, self.trigger_mask)
 
 
 class Point(np.ndarray):
