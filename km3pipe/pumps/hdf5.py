@@ -13,7 +13,7 @@ import os.path
 import tables
 
 from km3pipe import Pump, Module
-from km3pipe.dataclasses import HitSeries, TrackSeries
+from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -23,7 +23,7 @@ __author__ = 'tamasgal'
 POS_ATOM = tables.FloatAtom(shape=3)
 
 
-class EventInfo(tables.IsDescription):
+class EventInfoDesc(tables.IsDescription):
     det_id = tables.IntCol()
     event_id = tables.UIntCol()
     frame_index = tables.UIntCol()
@@ -105,8 +105,7 @@ class AAShowerFitTrack(RecoTrack):
     t_vertex = tables.FloatCol()
     n_hits = tables.UIntCol()
     beta = tables.FloatCol()
-    # shape = (x, y, z, E, theta, phi) x dito
-    error_matrix = tables.FloatCol(shape=(6, 6))
+    error_matrix = tables.FloatCol(shape=(7, 7))
 
 
 class DusjTrack(RecoTrack):
@@ -173,8 +172,11 @@ class HDF5Sink(Module):
                                                   Track, "MC Tracks",
                                                   filters=self.filters)
         self.event_info = self.h5file.create_table('/', 'event_info',
-                                                   EventInfo, "Event Info",
+                                                   EventInfoDesc, "Event Info",
                                                    filters=self.filters)
+        self.recolns = self.h5file.create_table('/reco', 'recolns', RecoLNSTrack,
+                                                'Reco LNS', createparents=True,
+                                                filters=self.filters)
 
     def _write_hits(self, hits, hit_row):
         for hit in hits:
@@ -214,21 +216,35 @@ class HDF5Sink(Module):
         info_row['trigger_mask'] = info.trigger_mask
         info_row.append()
 
+    def _write_recolns(self, track, reco_row):
+        reco_row['beta'] = track.beta
+        reco_row['event_id'] = track.id
+        reco_row['n_fits'] = track.n_fits
+        reco_row['max_likelihood'] = track.max_likelihood
+        reco_row['n_compatible_solutions'] = track.n_compatible_solutions
+        reco_row['n_hits'] = track.n_hits
+        reco_row['error_matrix'] = track.error_matrix
+        reco_row.append()
+
     def process(self, blob):
-        hits = blob['Hits']
-        self._write_hits(hits, self.hits.row)
+        if 'Hits' in blob:
+            hits = blob['Hits']
+            self._write_hits(hits, self.hits.row)
         if 'MCHits' in blob:
             self._write_hits(blob['MCHits'], self.mc_hits.row)
         if 'MCTracks' in blob:
             self._write_tracks(blob['MCTracks'], self.mc_tracks.row)
         if 'Evt' in blob:
             self._write_event_info_from_aanet(blob['Evt'], self.event_info.row)
+        if 'RecoLNS' in blob:
+            self._write_recolns(blob['RecoLNS'], self.recolns.row)
 
         if not self.index % 1000:
             self.hits.flush()
             self.mc_hits.flush()
             self.mc_tracks.flush()
             self.event_info.flush()
+            self.recolns.flush()
 
         self.index += 1
         return blob
@@ -238,6 +254,7 @@ class HDF5Sink(Module):
         self.event_info.cols.event_id.create_index()
         self.mc_hits.cols.event_id.create_index()
         self.mc_tracks.cols.event_id.create_index()
+        self.recolns.cols.event_id.create_index()
         #self.event_info.cols.run_id.create_index()
         #self.mc_hits.cols.run_id.create_index()
         #self.mc_tracks.cols.run_id.create_index()
@@ -245,6 +262,7 @@ class HDF5Sink(Module):
         self.event_info.flush()
         self.mc_hits.flush()
         self.mc_tracks.flush()
+        self.recolns.flush()
         self.h5file.close()
 
 
@@ -291,7 +309,7 @@ class HDF5Pump(Pump):
 
     def _get_event_info(self, event_id, table_name='event_info', where='/'):
         table = self.h5_file.get_node(where, table_name)
-        return table[event_id]
+        return EventInfo.from_table(table[event_id])
 
     def get_blob(self, index):
         event_id = self.event_ids[index]

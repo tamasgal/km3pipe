@@ -20,18 +20,60 @@ np.import_array()
 
 from km3pipe.tools import angle_between
 
-__all__ = ('Point', 'Position', 'Direction', 'HitSeries', 'Hit')
+__all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries', 'Hit')
 
 
-point_dt = np.dtype([('x', float), ('y', float), ('z', float)])
+class EventInfo(object):
+    def __init__(self,
+                 det_id,
+                 event_id,
+                 frame_index,
+                 mc_id,
+                 mc_t,
+                 overlays,
+                 run_id,
+                 trigger_counter,
+                 trigger_mask):
+        self.det_id = det_id
+        self.event_id = event_id
+        self.frame_index = frame_index
+        self.mc_id = mc_id
+        self.mc_t = mc_t
+        self.overlays = overlays
+        self.run_id = run_id
+        self.trigger_counter = trigger_counter
+        self.trigger_mask = trigger_mask
 
-def Point_(vector, as_recarray=True):
-    """A point as numpy.recarray with optional x, y and z attributes."""
-    vector = np.array(vector, dtype=np.float)
-    if as_recarray:
-        return vector.view(point_dt, np.recarray)
-    else:
-        return vector
+    @classmethod
+    def from_table(cls, row):
+        return cls(
+            row['det_id'],
+            row['event_id'],
+            row['frame_index'],
+            row['mc_id'],
+            row['mc_t'],
+            row['overlays'],
+            row['run_id'],
+            row['trigger_counter'],
+            row['trigger_mask'],
+        )
+
+    def __str__(self):
+        return "Event #{0}:\n" \
+               "    detector id:     {1}\n" \
+               "    run ID:          {2}\n" \
+               "    frame index:     {3}\n" \
+               "    MC id:           {4}\n" \
+               "    MC time:         {5}\n" \
+               "    overlays:        {6}\n" \
+               "    trigger counter: {7}\n" \
+               "    trigger mask:    {8}\n" \
+               .format(self.event_id, self.det_id, self.run_id, self.frame_index,
+                       self.mc_id, self.mc_t, self.overlays,
+                       self.trigger_counter, self.trigger_mask)
+
+    def __insp__(self):
+        return self.__str__()
 
 
 class Point(np.ndarray):
@@ -236,7 +278,7 @@ class HitSeries(object):
         hits._pmt_id = pmt_ids
         hits._time = times
         hits._tots = tots
-        hits._triggered = triggereds
+        hits._triggereds = triggereds
         return hits
 
     @classmethod

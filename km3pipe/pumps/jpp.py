@@ -8,7 +8,10 @@ Pump for the jpp file read through aanet interface.
 """
 from __future__ import division, absolute_import, print_function
 
+import numpy as np
+
 from km3pipe import Pump
+from km3pipe.dataclasses import HitSeries
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -20,57 +23,49 @@ class JPPPump(Pump):
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
 
+        try:
+            import jppy  # noqa
+        except ImportError:
+            raise ImportError("\nPlease install the jppy package:\n\n"
+                              "    pip install jppy\n")
+
         self.index = self.get('index') or 0
-
-        import aa  # noqa
-        import ROOT
-        if self.get('index'):
-            self.index = self.get('index')
-        else:
-            self.index = 0
-
-        self.index_start = self.get('index_start') or 1
-        self.index_stop = self.get('index_stop') or 1
-
         self.filename = self.get('filename')
-        self.basename = self.get('basename')
-        if not self.filename and not self.basename:
-            raise ValueError("No filename defined")
 
-        self.file_index = self.index_start
+        self.reader = jppy.PyJDAQEventReader(self.filename)
+        self.blobs = self.blob_generator()
 
-        if self.basename:
-            filename = self.basename + str(self.file_index) + ".JTE.root"
-            self.rootfile = ROOT.EventFile(filename)
+    def blob_generator(self):
+        while self.reader.has_next():
+            self.reader.retrieve_next_event()
+            self.index += 1
 
-        else:
-                self.rootfile = ROOT.EventFile(self.filename)
+            n = self.reader.get_number_of_snapshot_hits()
+            channel_ids = np.zeros(n, dtype='i')
+            dom_ids = np.zeros(n, dtype='i')
+            times = np.zeros(n, dtype='i')
+            tots = np.zeros(n, dtype='i')
+            triggereds = np.zeros(n, dtype='i')
 
-        self.evt = ROOT.Evt()
+            self.reader.get_hits(channel_ids, dom_ids, times, tots, triggereds)
 
-    def get_blob(self, index):
-        """Return the blob"""
-        self.rootfile.set_index(index)
-        self.evt = self.rootfile.evt
-        return {'Evt': self.evt}
+            hit_series = HitSeries.from_arrays(
+                channel_ids, dom_ids, np.arange(n), np.zeros(n), times, tots,
+                triggereds, self.index
+            )
+
+            yield {'FrameIndex': self.reader.get_frame_index(),
+                   'Hits': hit_series}
 
     def process(self, blob):
-        if self.rootfile.set_index(self.index):
-            self.evt = self.rootfile.evt
-            self.index += 1
-            return {'Evt': self.evt}
-        else:
-            self.file_index += 1
-            if self.basename and self.file_index <= self.index_stop:
-                import aa  # noqa
-                import ROOT
-                print("open next file")
-                filename = self.basename + str(self.file_index) + ".JTE.root"
-                self.rootfile = ROOT.EventFile(filename)
-                self.index = 0
-                self.process(blob)
-            else:
-                raise StopIteration
+        return next(self.blobs)
 
-    def finish(self):
-        self.rootfile.Close()
+    def __iter__(self):
+        return self
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        return next(self.blobs)
