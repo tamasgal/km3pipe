@@ -5,6 +5,7 @@ KM3Pipe command line utility.
 
 Usage:
     km3pipe test
+    km3pipe update [BRANCH]
     km3pipe tohdf5 [-n EVENTS] -i FILE -o FILE
     km3pipe hdf2root -i FILE [-o FILE]
     km3pipe runtable [-n RUNS] DET_ID
@@ -17,12 +18,14 @@ Options:
     -o FILE         Output file.
     -n EVENTS/RUNS  Number of events/runs.
     DET_ID          Detector ID (eg. D_ARCA001).
+    BRANCH          Git branch to pull (eg. develop).
 
 """
 
 from __future__ import division, absolute_import, print_function
 
 import sys
+import os
 
 from km3pipe import version
 from km3pipe.db import DBManager
@@ -73,6 +76,13 @@ def hdf2root(infile, outfile):
     h5.close()
 
 
+def update_km3pipe(git_branch):
+    if git_branch == '' or git_branch is None:
+        git_branch = 'master'
+    os.system("pip install -U git+http://git.km3net.de/tgal/km3pipe.git@{0}"
+              .format(git_branch))
+
+
 def main():
     from docopt import docopt
     arguments = docopt(__doc__, version=version)
@@ -81,6 +91,9 @@ def main():
         n = int(arguments['-n'])
     except TypeError:
         n = None
+
+    if arguments['update']:
+        update_km3pipe(arguments['BRANCH'])
 
     if arguments['tohdf5']:
         tohdf5(arguments['-i'], arguments['-o'], n)
