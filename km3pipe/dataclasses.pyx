@@ -33,7 +33,7 @@ class EventInfo(object):
                  overlays,
                  run_id,
                  trigger_counter,
-                 trigger_mask)
+                 trigger_mask):
         self.det_id = det_id
         self.event_id = event_id
         self.frame_index = frame_index
