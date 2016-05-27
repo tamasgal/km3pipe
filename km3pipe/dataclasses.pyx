@@ -24,16 +24,16 @@ __all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries', 'Hit')
 
 
 class EventInfo(object):
-    self __init__(self,
-                  det_id,
-                  event_id,
-                  frame_index,
-                  mc_id,
-                  mc_t,
-                  overlays,
-                  run_id,
-                  trigger_counter,
-                  trigger_mask)
+    def __init__(self,
+                 det_id,
+                 event_id,
+                 frame_index,
+                 mc_id,
+                 mc_t,
+                 overlays,
+                 run_id,
+                 trigger_counter,
+                 trigger_mask)
         self.det_id = det_id
         self.event_id = event_id
         self.frame_index = frame_index
