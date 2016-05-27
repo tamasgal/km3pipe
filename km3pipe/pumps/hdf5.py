@@ -13,7 +13,7 @@ import os.path
 import tables
 
 from km3pipe import Pump, Module
-from km3pipe.dataclasses import HitSeries, TrackSeries
+from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -23,7 +23,7 @@ __author__ = 'tamasgal'
 POS_ATOM = tables.FloatAtom(shape=3)
 
 
-class EventInfo(tables.IsDescription):
+class EventInfoDesc(tables.IsDescription):
     det_id = tables.IntCol()
     event_id = tables.UIntCol()
     frame_index = tables.UIntCol()
@@ -172,7 +172,7 @@ class HDF5Sink(Module):
                                                   Track, "MC Tracks",
                                                   filters=self.filters)
         self.event_info = self.h5file.create_table('/', 'event_info',
-                                                   EventInfo, "Event Info",
+                                                   EventInfoDesc, "Event Info",
                                                    filters=self.filters)
         self.recolns = self.h5file.create_table('/reco', 'recolns', RecoLNSTrack,
                                                 'Reco LNS', createparents=True,
@@ -309,7 +309,7 @@ class HDF5Pump(Pump):
 
     def _get_event_info(self, event_id, table_name='event_info', where='/'):
         table = self.h5_file.get_node(where, table_name)
-        return table[event_id]
+        return EventInfo.from_table(table[event_id])
 
     def get_blob(self, index):
         event_id = self.event_ids[index]
