@@ -58,7 +58,7 @@ class EventInfo(object):
             row['trigger_mask'],
         )
 
-    self __str__(self):
+    def __str__(self):
         return "Event #{0}:\n" \
                "    detector id: {1}\n" \
                "    run ID: {2}\n" \
@@ -72,7 +72,7 @@ class EventInfo(object):
                        self.mc_id, self.mc_t, self.overlays,
                        self.trigger_counter, self.trigger_mask)
 
-	self __insp__(self):
+	def __insp__(self):
 		return self.__str__()
 
 
