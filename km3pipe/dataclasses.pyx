@@ -29,7 +29,7 @@ class EventInfo(object):
                   event_id,
                   frame_index,
                   mc_id,
-                  mc_time,
+                  mc_t,
                   overlays,
                   run_id,
                   trigger_counter,
@@ -38,7 +38,7 @@ class EventInfo(object):
         self.event_id = event_id
         self.frame_index = frame_index
         self.mc_id = mc_id
-        self.mc_time = mc_time
+        self.mc_t = mc_t
         self.overlays = overlays
         self.run_id = run_id
         self.trigger_counter = trigger_counter
@@ -55,7 +55,7 @@ class EventInfo(object):
                "    trigger counter: {7}\n" \
                "    trigger mask: {8}\n" \
                .format(self.event_id, self.det_id, self.run_id, self.frame_index,
-                       self.mc_id, self.mc_time, self.overlays,
+                       self.mc_id, self.mc_t, self.overlays,
                        self.trigger_counter, self.trigger_mask)
 
 
