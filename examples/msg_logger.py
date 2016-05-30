@@ -20,8 +20,13 @@ from __future__ import print_function
 import threading
 from time import sleep
 import os
+import urllib2
+import json
 
 import km3pipe as km3
+
+
+RUN_NUMBER_URL='http://192.168.0.120:1301/mon/controlunit/runnumber'
 
 
 class MessageDumper(km3.Module):
@@ -35,14 +40,13 @@ class MessageDumper(km3.Module):
         if not os.path.exists(self.path):
             os.makedirs(self.path)
 
-        self.db = km3.db.DBManager()
         self.thread = None
         self.lock = threading.Lock()
         self._start_thread()
 
     @property
     def target_file(self):
-        current_run = int(self.db.run_table(det_id=self.det_id).RUN.tail(1))
+        current_run = int(json.load(urllib2.urlopen(RUN_NUMBER_URL))['value'])
         return os.path.join(self.path, 'MSG_dump_{0:08}_{1:08}.log'
                                        .format(int(self.det_id), current_run))
 
