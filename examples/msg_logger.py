@@ -12,7 +12,7 @@ Options:
     -h --help       Show this screen.
     -i SECONDS      Write interval in seconds [Default: 5].
     -p PATH         Target path to store the log files [Default: .].
-    DET_ID          Detector ID (eg. D_ARCA001).
+    DET_ID          Detector ID (eg. 14).
 
 """
 from __future__ import print_function
