@@ -18,7 +18,7 @@ cimport cython
 
 np.import_array()
 
-from km3pipe.tools import angle_between
+from km3pipe.tools import angle_between, geant2pdg
 
 __all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries', 'Hit')
 
@@ -416,7 +416,7 @@ class TrackSeries(object):
                           t.id,
                           Position((t.pos.x, t.pos.y, t.pos.z)),
                           t.t,
-                          t.type)
+                          geant2pdg(t.type))
                     for t in tracks], event_id)
 
     @classmethod
