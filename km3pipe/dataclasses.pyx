@@ -411,14 +411,12 @@ class TrackSeries(object):
 
     @classmethod
     def from_aanet(cls, tracks, event_id=None):
-        return cls([Track(
-            Direction((t.dir.x, t.dir.y, t.dir.z)),
-            t.id,
-            t.E,
-            Position((t.pos.x, t.pos.y, t.pos.z)),
-            t.t,
-            t.type,
-        )
+        return cls([Track(Direction((t.dir.x, t.dir.y, t.dir.z)),
+                          t.E,
+                          t.id,
+                          Position((t.pos.x, t.pos.y, t.pos.z)),
+                          t.t,
+                          t.type)
                     for t in tracks], event_id)
 
     @classmethod
