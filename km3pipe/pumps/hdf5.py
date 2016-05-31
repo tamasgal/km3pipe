@@ -245,8 +245,11 @@ class HDF5Sink(Module):
             self._write_hits(blob['MCHits'], self.mc_hits.row)
         if 'MCTracks' in blob:
             self._write_tracks(blob['MCTracks'], self.mc_tracks.row)
-        if 'Evt' in blob:
+        if 'Evt' in blob and 'EventInfo' not in blob:  # skip in emergency
             self._write_event_info_from_aanet(blob['Evt'], self.event_info.row)
+        if 'EventInfo' in blob:  # TODO: decide how to deal with that class
+            self._write_event_info_from_aanet(blob['EventInfo'],
+                                              self.event_info.row)
         if 'RecoLNS' in blob:
             self._write_recolns(blob['RecoLNS'], self.recolns.row)
 
