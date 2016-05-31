@@ -445,7 +445,7 @@ class TrackSeries(object):
             row['type'],
         ) for row in table], event_id)
 
-    @propety
+    @property
     def highest_energetic_muon(self):
         if self._highest_energetic_muon is None:
             muons = [track for track in self.tracks if abs(track.type) == 13]
