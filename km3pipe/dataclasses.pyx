@@ -203,8 +203,8 @@ cdef class Hit:
         self.triggered = triggered
 
     def __str__(self):
-        return "Hit: channel_id({0}), dom_id({1}), pmt_id({2}), tot({3}), "
-               "time({4}), triggered({5})"
+        return "Hit: channel_id({0}), dom_id({1}), pmt_id({2}), tot({3}), " \
+               "time({4}), triggered({5})" \
                .format(self.channel_id, self.dom_id, self.pmt_id, self.tot,
                        self.time, self.triggered)
 
