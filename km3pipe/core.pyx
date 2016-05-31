@@ -61,6 +61,7 @@ class Pipeline(object):
             if len(self.modules) < 1 and not isinstance(module, Pump):
                 log.error("The first module to attach to the pipeline should "
                           "be a Pump!")
+            module.geometry = self.geometry
             self.modules.append(module)
 
     def attach_bundle(self, modules):
