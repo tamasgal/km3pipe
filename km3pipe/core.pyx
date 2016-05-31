@@ -338,7 +338,7 @@ class Geometry(Module):
             hit.dir = Direction(pmt.dir)
             # hit.t0 = pmt.t0
             hit.time += pmt.t0
-            hit.a = hit.tot
+            # hit.a = hit.tot
 
     def _apply_to_table(self, table):
         """Add x, y, z and du, floor columns to hit table"""
