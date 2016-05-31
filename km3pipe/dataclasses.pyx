@@ -229,6 +229,18 @@ cdef class Track:
         self.time = time
         self.type = type
 
+    def __str__(self):
+        return "Track: pos({0}) dir({1}) t={2} E={3}" \
+               .format(self.pos, self.dir, self.time, self.energy)
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __insp__(self):
+        return self.__str__()
+
+
+
 
 class HitSeries(object):
     def __init__(self, hits, event_id=None):
