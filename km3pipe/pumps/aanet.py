@@ -79,6 +79,10 @@ class AanetPump(Pump):
             except AttributeError:
                 pass
 
+            if event.mc_id <= 0 and event.mc_t < 0:  # apply ZED correction
+                for track in event.mc_trks:
+                    track.pos.z += 405.93
+
             for event in event_file:
                 blob = {'Evt': event,
                         'Hits': HitSeries.from_aanet(event.hits, event.id),
