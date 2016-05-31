@@ -214,9 +214,12 @@ class HDF5Sink(Module):
             track_row['type'] = track.type
             track_row.append()
 
-    def _write_event_info_from_aanet(self, info, info_row):
+    def _write_event_info(self, info, info_row):
         info_row['det_id'] = info.det_id
-        info_row['event_id'] = info.id
+        try:  # dealing with aanet naming conventions
+            info_row['event_id'] = info.id
+        except AttributeError: 
+            info_row['event_id'] = info.event_id
         info_row['frame_index'] = info.frame_index
         info_row['mc_id'] = info.mc_id
         info_row['mc_t'] = info.mc_t
@@ -246,10 +249,9 @@ class HDF5Sink(Module):
         if 'MCTracks' in blob:
             self._write_tracks(blob['MCTracks'], self.mc_tracks.row)
         if 'Evt' in blob and 'EventInfo' not in blob:  # skip in emergency
-            self._write_event_info_from_aanet(blob['Evt'], self.event_info.row)
+            self._write_event_info(blob['Evt'], self.event_info.row)
         if 'EventInfo' in blob:  # TODO: decide how to deal with that class
-            self._write_event_info_from_aanet(blob['EventInfo'],
-                                              self.event_info.row)
+            self._write_event_info(blob['EventInfo'], self.event_info.row)
         if 'RecoLNS' in blob:
             self._write_recolns(blob['RecoLNS'], self.recolns.row)
 
