@@ -12,7 +12,7 @@ Options:
     -h --help       Show this screen.
     -i SECONDS      Write interval in seconds [Default: 5].
     -p PATH         Target path to store the log files [Default: .].
-    DET_ID          Detector ID (eg. 14).
+    DET_ID          Detector ID (eg. D_ARCA001).
 
 """
 from __future__ import print_function
@@ -24,8 +24,13 @@ import urllib2
 import json
 
 import km3pipe as km3
+from km3pipe.logger import logging
 
+from pyslack import SlackClient
 
+__author__ = 'tamasgal'
+
+log = logging.getLogger(__name__)
 RUN_NUMBER_URL='http://192.168.0.120:1301/mon/controlunit/runnumber'
 
 
@@ -36,6 +41,8 @@ class MessageDumper(km3.Module):
         self.path = self.get('path') or '.'
         self.det_id = self.get('det_id')
         self.messages = []
+        self.slack = SlackClient(km3.config.Config().slack_token)
+        self.cuckoo = km3.tools.Cuckoo(interval=5, callback=self.send_message)
 
         if not os.path.exists(self.path):
             os.makedirs(self.path)
@@ -52,9 +59,15 @@ class MessageDumper(km3.Module):
 
     def process(self, blob):
         message = blob['CHData']
+        if 'ERROR' in message:
+            self.cuckoo.msg(message)
+            log.error(message)
         with self.lock:
             self.messages.append(message)
         return blob
+
+    def send_message(self, message):
+        self.slack.chat_post_message("#live-arca-it", message, username="ligier")
 
     def _start_thread(self):
         self.thread = threading.Thread(target=self._run, args=())
