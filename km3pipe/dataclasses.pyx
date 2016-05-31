@@ -409,6 +409,7 @@ class TrackSeries(object):
         self._time = None
         self._tracks = tracks
         self._type = None
+        self._highest_energetic_muon = None
 
     @classmethod
     def from_aanet(cls, tracks, event_id=None):
@@ -443,6 +444,15 @@ class TrackSeries(object):
             row['time'],
             row['type'],
         ) for row in table], event_id)
+
+    @propety
+    def highest_energetic_muon(self):
+        if self._highest_energetic_muon is None:
+            muons = [track for track in self.tracks if abs(track.type) == 13]
+            if len(muons) == 0:
+                raise AttributeError("No muon found")
+            self._highest_energetic_muon = max(muons, key=lambda m: m.energy)
+        return self._highest_energetic_muon
 
     def __iter__(self):
         return self
