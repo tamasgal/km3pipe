@@ -18,7 +18,7 @@ cimport cython
 
 np.import_array()
 
-from km3pipe.tools import angle_between, geant2pdg
+from km3pipe.tools import angle_between, geant2pdg, pdg2name
 
 __all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries', 'Hit')
 
@@ -230,8 +230,9 @@ cdef class Track:
         self.type = type
 
     def __str__(self):
-        return "Track: pos({0}) dir({1}) t={2} E={3}" \
-               .format(self.pos, self.dir, self.time, self.energy)
+        return "Track: pos({0}), dir({1}), t={2}, E={3}, type={4} ({5})" \
+               .format(self.pos, self.dir, self.time, self.energy,
+                       self.type, pdg2name(self.type))
 
     def __repr__(self):
         return self.__str__()
