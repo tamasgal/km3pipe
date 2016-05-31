@@ -336,7 +336,7 @@ class Geometry(Module):
                 pmt = self.detector.pmt_with_id(hit.pmt_id)
             hit.pos = Position(pmt.pos)
             hit.dir = Direction(pmt.dir)
-            hit.t0 = pmt.t0
+            # hit.t0 = pmt.t0
             hit.time += pmt.t0
             hit.a = hit.tot
 
