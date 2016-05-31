@@ -179,10 +179,21 @@ class HDF5Sink(Module):
                                                 filters=self.filters)
 
     def _write_hits(self, hits, hit_row):
+        """Iterate through the hits and write them to the HDF5 table.
+
+        Parameters
+        ----------
+        hits : HitSeries
+        hit_row : HDF5 TableRow
+
+        """
+        event_id = hits.event_id
+        if event_id is None:
+            log.error("Event ID is `None`")
         for hit in hits:
             hit_row['channel_id'] = hit.channel_id
             hit_row['dom_id'] = hit.dom_id
-            hit_row['event_id'] = hits.event_id
+            hit_row['event_id'] = event_id
             hit_row['id'] = hit.id
             hit_row['pmt_id'] = hit.pmt_id
             # hit_row['run_id'] = hit.run_id
