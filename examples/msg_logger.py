@@ -6,13 +6,13 @@
 JLigier MSG log dumper.
 
 Usage:
-    msg_logger.py [-i SECONDS] [-p PATH] DET_ID
+    msg_logger.py [-i SECONDS] [-p PATH] DET_SN
 
 Options:
     -h --help       Show this screen.
     -i SECONDS      Write interval in seconds [Default: 5].
     -p PATH         Target path to store the log files [Default: .].
-    DET_ID          Detector ID (eg. D_ARCA001).
+    DET_SN          Detector serial number (eg. 14).
 
 """
 from __future__ import print_function
@@ -39,7 +39,7 @@ class MessageDumper(km3.Module):
         super(self.__class__, self).__init__(**context)
         self.write_interval = self.get('write_interval') or 1
         self.path = self.get('path') or '.'
-        self.det_id = self.get('det_id')
+        self.det_sn = self.get('det_sn')
         self.messages = []
         self.slack = SlackClient(km3.config.Config().slack_token)
         self.cuckoo = km3.tools.Cuckoo(interval=5, callback=self.send_message)
@@ -55,7 +55,7 @@ class MessageDumper(km3.Module):
     def target_file(self):
         current_run = int(json.load(urllib2.urlopen(RUN_NUMBER_URL))['value'])
         return os.path.join(self.path, 'MSG_dump_{0:08}_{1:08}.log'
-                                       .format(int(self.det_id), current_run))
+                                       .format(int(self.det_sn), current_run))
 
     def process(self, blob):
         message = blob['CHData']
@@ -92,7 +92,7 @@ class MessageDumper(km3.Module):
         self._dump(self.target_file)
 
 
-def main(det_id, target_path, write_interval):
+def main(det_sn, target_path, write_interval):
     pipe = km3.Pipeline()
     pipe.attach(km3.pumps.CHPump, host='localhost',
                 port=5553,
@@ -100,7 +100,7 @@ def main(det_id, target_path, write_interval):
                 timeout=60*60*24*7,
                 max_queue=2000)
     pipe.attach(MessageDumper,
-                write_interval=write_interval, det_id=det_id, path=target_path)
+                write_interval=write_interval, det_sn=det_sn, path=target_path)
     pipe.drain()
 
 
@@ -108,4 +108,4 @@ if __name__ == '__main__':
     from docopt import docopt
     arguments = docopt(__doc__, version=1.0)
 
-    main(arguments['DET_ID'], arguments['-p'], int(arguments['-i']))
+    main(arguments['DET_SN'], arguments['-p'], int(arguments['-i']))
