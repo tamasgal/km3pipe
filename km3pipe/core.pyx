@@ -353,6 +353,12 @@ class Geometry(Module):
         table['du'] = table.apply(lambda h: get_pmt(h).omkey[0], axis=1)
         table['floor'] = table.apply(lambda h: get_pmt(h).omkey[1], axis=1)
 
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return "Geometry: det_id({0})".format(self.det_id)
+
 
 class AanetGeometry(Module):
     """AAnet based Geometry using Det()"""
