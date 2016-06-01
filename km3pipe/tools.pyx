@@ -21,6 +21,8 @@ from timeit import default_timer as timer
 from contextlib import contextmanager
 
 import numpy as np
+import pandas as pd
+import km3pipe as kp
 
 from km3pipe.logger import logging
 
