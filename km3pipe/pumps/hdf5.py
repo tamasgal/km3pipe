@@ -266,6 +266,11 @@ class HDF5Sink(Module):
         return blob
 
     def finish(self):
+        self.hits.flush()
+        self.event_info.flush()
+        self.mc_hits.flush()
+        self.mc_tracks.flush()
+        self.recolns.flush()
         self.hits.cols.event_id.create_index()
         self.event_info.cols.event_id.create_index()
         self.mc_hits.cols.event_id.create_index()
@@ -274,11 +279,6 @@ class HDF5Sink(Module):
         #self.event_info.cols.run_id.create_index()
         #self.mc_hits.cols.run_id.create_index()
         #self.mc_tracks.cols.run_id.create_index()
-        self.hits.flush()
-        self.event_info.flush()
-        self.mc_hits.flush()
-        self.mc_tracks.flush()
-        self.recolns.flush()
         self.h5file.close()
 
 
