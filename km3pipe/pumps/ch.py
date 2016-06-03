@@ -35,6 +35,7 @@ class CHPump(Pump):
         self.key_for_data = self.get('key_for_data') or 'CHData'
         self.key_for_prefix = self.get('key_for_prefix') or 'CHPrefix'
 
+        self.loop_cycle = 0
         self.queue = Queue()
         self.client = None
         self.thread = None
@@ -69,10 +70,13 @@ class CHPump(Pump):
     def _run(self):
         log.debug("Entering the main loop.")
         while True:
+            log.info("----- New loop cycle #{0}".format(self.loop_cycle))
+            log.info("Current queue size: {0}".format(self.queue.qsize()))
+            self.loop_cycle += 1
             try:
                 log.debug("Waiting for data from network...")
                 prefix, data = self.client.get_message()
-                log.debug("{0} bytes received.".format(len(data)))
+                log.debug("{0} bytes received from network.".format(len(data)))
             except struct.error:
                 log.error("Corrupt data recieved, skipping...")
                 continue
