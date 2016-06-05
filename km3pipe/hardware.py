@@ -137,6 +137,11 @@ class Detector(object):
         return [pmt.pos for pmt in self._pmts_by_id.values()
                 if pmt.channel_id == 0]
 
+    def translate_detector(self, vector):
+        vector = np.array(vector, dtype=float)
+        for pmt in self.pmts:
+            pmt.pos = pmt.pos + vector
+
     @property
     def pmt_angles(self):
         """A list of PMT directions sorted by PMT channel"""
