@@ -61,6 +61,7 @@ class Pipeline(object):
             if len(self.modules) < 1 and not isinstance(module, Pump):
                 log.error("The first module to attach to the pipeline should "
                           "be a Pump!")
+            module.geometry = self.geometry
             self.modules.append(module)
 
     def attach_bundle(self, modules):
@@ -336,9 +337,9 @@ class Geometry(Module):
                 pmt = self.detector.pmt_with_id(hit.pmt_id)
             hit.pos = Position(pmt.pos)
             hit.dir = Direction(pmt.dir)
-            hit.t0 = pmt.t0
+            # hit.t0 = pmt.t0
             hit.time += pmt.t0
-            hit.a = hit.tot
+            # hit.a = hit.tot
 
     def _apply_to_table(self, table):
         """Add x, y, z and du, floor columns to hit table"""
@@ -351,6 +352,12 @@ class Geometry(Module):
         table['time'] += table.apply(lambda h: get_pmt(h).t0, axis=1)
         table['du'] = table.apply(lambda h: get_pmt(h).omkey[0], axis=1)
         table['floor'] = table.apply(lambda h: get_pmt(h).omkey[1], axis=1)
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return "Geometry: det_id({0})".format(self.det_id)
 
 
 class AanetGeometry(Module):

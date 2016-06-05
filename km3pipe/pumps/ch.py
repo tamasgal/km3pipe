@@ -35,6 +35,7 @@ class CHPump(Pump):
         self.key_for_data = self.get('key_for_data') or 'CHData'
         self.key_for_prefix = self.get('key_for_prefix') or 'CHPrefix'
 
+        self.loop_cycle = 0
         self.queue = Queue()
         self.client = None
         self.thread = None
@@ -50,22 +51,32 @@ class CHPump(Pump):
         self._start_thread()
 
     def _start_thread(self):
+        log.debug("Starting and demonising thread.")
         self.thread = threading.Thread(target=self._run, args=())
         self.thread.daemon = True
         self.thread.start()
 
     def _init_controlhost(self):
         """Set up the controlhost connection"""
+        log.debug("Connecting to JLigier")
         from controlhost import Client
         self.client = Client(self.host, self.port)
         self.client._connect()
+        log.debug("Subscribing to tags: {0}".format(self.tags))
         for tag in self.tags.split(','):
             self.client.subscribe(tag.strip())
+        log.debug("Controlhost initialisation done.")
 
     def _run(self):
+        log.debug("Entering the main loop.")
         while True:
+            log.info("----- New loop cycle #{0}".format(self.loop_cycle))
+            log.info("Current queue size: {0}".format(self.queue.qsize()))
+            self.loop_cycle += 1
             try:
+                log.debug("Waiting for data from network...")
                 prefix, data = self.client.get_message()
+                log.debug("{0} bytes received from network.".format(len(data)))
             except struct.error:
                 log.error("Corrupt data recieved, skipping...")
                 continue
@@ -74,6 +85,7 @@ class CHPump(Pump):
                              "Trying to reconnect in 30 seconds.")
                 sleep(30)
                 try:
+                    log.debug("Reinitialising new CH connection.")
                     self._init_controlhost()
                 except socket.error:
                     log.error("Failed to connect to host.")
@@ -82,12 +94,16 @@ class CHPump(Pump):
                 log.warn("Maximum queue size ({0}) reached, dropping data."
                          .format(self.max_queue))
             else:
+                log.debug("Filling data into queue.")
                 self.queue.put((prefix, data))
+        log.debug("Quitting the main loop.")
 
     def process(self, blob):
         """Wait for the next packet and put it in the blob"""
         try:
+            log.debug("Waiting for queue items.")
             prefix, data = self.queue.get(timeout=self.timeout)
+            log.debug("Got {0} bytes from queue.".format(len(data)))
         except Empty:
             log.warn("ControlHost timeout ({0}s) reached".format(self.timeout))
             raise StopIteration("ControlHost timeout reached.")
@@ -97,4 +113,5 @@ class CHPump(Pump):
 
     def finish(self):
         """Clean up the JLigier controlhost connection"""
+        log.debug("Disconnecting from JLigier.")
         self.client._disconnect()

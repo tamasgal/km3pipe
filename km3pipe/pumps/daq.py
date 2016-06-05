@@ -55,6 +55,7 @@ class DAQPump(Pump):
         try:
             data_type = DATA_TYPES[preamble.data_type]
         except KeyError:
+            log.error("Unkown datatype: {0}".format(preamble.data_type))
             data_type = 'Unknown'
 
         blob = Blob()
