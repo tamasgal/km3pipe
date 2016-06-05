@@ -7,6 +7,7 @@ Classes representing KM3NeT hardware.
 """
 from __future__ import division, absolute_import, print_function
 
+from collections import OrderedDict
 import os
 import sys
 
@@ -34,14 +35,14 @@ class Detector(object):
         self.det_id = None
         self.n_doms = None
         self.n_pmts_per_dom = None
-        self.doms = {}
+        self.doms = OrderedDict()
         self.pmts = []
         self.version = None
         self.valid_from = None
         self.valid_until = None
         self.utm_info = None
-        self._pmts_by_omkey = {}
-        self._pmts_by_id = {}
+        self._pmts_by_omkey = OrderedDict()
+        self._pmts_by_id = OrderedDict()
         self._pmt_angles = []
 
         if filename:
