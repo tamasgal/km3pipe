@@ -21,6 +21,12 @@ from timeit import default_timer as timer
 from contextlib import contextmanager
 
 import numpy as np
+import pandas as pd
+import km3pipe as kp
+
+from km3pipe.logger import logging
+
+log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 __author__ = 'tamasgal'
 
@@ -340,6 +346,19 @@ def ignored(*exceptions):
         yield
     except exceptions:
         pass
+
+
+def open_hdf5(filename):
+    """Open HDF5 file and retrieve all relevant information."""
+    hits = pd.read_hdf(filename, '/hits')
+    # mc_tracks = pd.read_hdf(filename, '/mc_tracks')  # currently not working
+    mc_tracks = None
+    event_info = pd.read_hdf(filename, '/event_info')
+    det_ids = np.unique(event_info.det_id)
+    if len(det_ids) > 1:
+        log.critical("Multiple detector IDs found in events.")
+    geometry = kp.Geometry(det_id=det_ids[0])
+    return event_info, geometry, hits, mc_tracks
 
 
 try:

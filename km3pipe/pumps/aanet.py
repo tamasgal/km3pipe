@@ -80,6 +80,9 @@ class AanetPump(Pump):
                 pass
 
             for event in event_file:
+                if event.det_id <= 0:  # apply ZED correction
+                    for track in event.mc_trks:
+                        track.pos.z += 405.93
                 blob = {'Evt': event,
                         'Hits': HitSeries.from_aanet(event.hits, event.id),
                         'MCHits': HitSeries.from_aanet(event.mc_hits, event.id),
