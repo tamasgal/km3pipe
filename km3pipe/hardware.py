@@ -11,6 +11,8 @@ from collections import OrderedDict
 import os
 import sys
 
+import numpy as np
+
 from km3pipe.tools import unpack_nfirst, split  # , ignored
 from km3pipe.dataclasses import Point, Direction
 from km3pipe.db import DBManager
