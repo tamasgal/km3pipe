@@ -211,7 +211,7 @@ class Detector(object):
         return len(self.lines)
 
     def __str__(self):
-        return "Detector id: {0} n_doms: {1} n_lines: {2}".format(
+        return "Detector id: '{0}', n_doms: {1}, n_lines: {2}".format(
             self.det_id, self.n_doms, self.n_lines)
 
     def __repr__(self):
@@ -229,5 +229,5 @@ class PMT(object):
         self.omkey = omkey
 
     def __str__(self):
-        return "PMT id:{0} pos: {1} dir: dir{2} t0: {3} DAQ channel: {4}"\
+        return "PMT id:{0}, pos: {1}, dir: dir{2}, t0: {3}, DAQ channel: {4}"\
                .format(self.id, self.pos, self.dir, self.t0, self.channel_id)
