@@ -7,6 +7,9 @@ Usage:
     km3pipe test
     km3pipe update [BRANCH]
     km3pipe tohdf5 [-n EVENTS] -i FILE -o FILE
+    km3pipe aatohdf5 [-n EVENTS] -i FILE -o FILE
+    km3pipe jpptohdf5 [-n EVENTS] -i FILE -o FILE
+    km3pipe evttohdf5 [-n EVENTS] -i FILE -o FILE
     km3pipe hdf2root -i FILE [-o FILE]
     km3pipe runtable [-n RUNS] DET_ID
     km3pipe (-h | --help)
@@ -32,13 +35,36 @@ from km3pipe.db import DBManager
 from km3modules import StatusBar
 
 
-def tohdf5(input_file, output_file, n_events):
-    """Convert ROOT file to HDF5 file"""
+def aatohdf5(input_file, output_file, n_events):
+    """Convert AAnet ROOT file to HDF5 file"""
     from km3pipe import Pipeline  # noqa
     from km3pipe.pumps import AanetPump, HDF5Sink  # noqa
 
     pipe = Pipeline()
     pipe.attach(AanetPump, filename=input_file)
+    pipe.attach(StatusBar, every=1000)
+    pipe.attach(HDF5Sink, filename=output_file)
+    pipe.drain(n_events)
+
+
+def jpptohdf5(input_file, output_file, n_events):
+    """Convert JPP ROOT file to HDF5 file"""
+    from km3pipe import Pipeline  # noqa
+    from km3pipe.pumps import JPPPump, HDF5Sink  # noqa
+
+    pipe = Pipeline()
+    pipe.attach(JPPPump, filename=input_file)
+    pipe.attach(StatusBar, every=1000)
+    pipe.attach(HDF5Sink, filename=output_file)
+    pipe.drain(n_events)
+
+def evttohdf5(input_file, output_file, n_events):
+    """Convert evt file to HDF5 file"""
+    from km3pipe import Pipeline  # noqa
+    from km3pipe.pumps import EvtPump, HDF5Sink  # noqa
+
+    pipe = Pipeline()
+    pipe.attach(EvtPump, filename=input_file)
     pipe.attach(StatusBar, every=1000)
     pipe.attach(HDF5Sink, filename=output_file)
     pipe.drain(n_events)
@@ -96,7 +122,16 @@ def main():
         update_km3pipe(arguments['BRANCH'])
 
     if arguments['tohdf5']:
-        tohdf5(arguments['-i'], arguments['-o'], n)
+        aatohdf5(arguments['-i'], arguments['-o'], n)
+
+    if arguments['aatohdf5']:
+        aatohdf5(arguments['-i'], arguments['-o'], n)
+
+    if arguments['jpptohdf5']:
+        jpptohdf5(arguments['-i'], arguments['-o'], n)
+
+    if arguments['evttohdf5']:
+        evttohdf5(arguments['-i'], arguments['-o'], n)
 
     if arguments['runtable']:
         runtable(arguments['DET_ID'], n)
