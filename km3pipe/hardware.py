@@ -11,6 +11,8 @@ from collections import OrderedDict
 import os
 import sys
 
+import numpy as np
+
 from km3pipe.tools import unpack_nfirst, split  # , ignored
 from km3pipe.dataclasses import Point, Direction
 from km3pipe.db import DBManager
@@ -34,6 +36,7 @@ class Detector(object):
         self._det_file = None
         self.det_id = None
         self.n_doms = None
+        self.lines = set()
         self.n_pmts_per_dom = None
         self.doms = OrderedDict()
         self.pmts = []
@@ -103,6 +106,7 @@ class Detector(object):
                     dom_id, line_id, floor_id, n_pmts = split(line, int)
                 except ValueError:
                     continue
+                self.lines.add(line_id)
                 self.n_pmts_per_dom = n_pmts
                 for i in range(n_pmts):
                     raw_pmt_info = lines.pop(0)
@@ -202,6 +206,17 @@ class Detector(object):
         _, floor, _ = self.doms[dom_id]
         return floor
 
+    @property
+    def n_lines(self):
+        return len(self.lines)
+
+    def __str__(self):
+        return "Detector id: '{0}', n_doms: {1}, n_lines: {2}".format(
+            self.det_id, self.n_doms, self.n_lines)
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class PMT(object):
     """Represents a photomultiplier"""
@@ -214,5 +229,5 @@ class PMT(object):
         self.omkey = omkey
 
     def __str__(self):
-        return "PMT id:{0} pos: {1} dir: dir{2} t0: {3} DAQ channel: {4}"\
+        return "PMT id:{0}, pos: {1}, dir: dir{2}, t0: {3}, DAQ channel: {4}"\
                .format(self.id, self.pos, self.dir, self.t0, self.channel_id)
