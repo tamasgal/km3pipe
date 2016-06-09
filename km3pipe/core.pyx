@@ -95,7 +95,7 @@ class Pipeline(object):
                 log.debug("Pumping blob #{0}".format(self._cycle_count))
                 self.blob = Blob()
 
-                for module in self.modules[1:]:
+                for module in self.modules:
                     if self.blob is None:
                         log.debug("Skipping {0}, due to empty blob."
                                   .format(module.name))
