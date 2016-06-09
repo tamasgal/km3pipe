@@ -250,11 +250,11 @@ class HDF5Sink(Module):
         reco_row['quality'] = track.lik
         return reco_row
 
-    def _write_recolns(self, track, reco_row, event_id):
-        reco_row = self._write_reco_info(track, reco_row)
-        reco_row['event_id'] = event_id
+    def _write_recolns(self, track, reco_row):
         # magic number for "fit did not converge"
         if track.rec_stage > -9999:
+            reco_row = self._write_reco_info(track, reco_row)
+            reco_row['event_id'] = event_id
             reco_row['beta'] = track.fitinf[0]
             reco_row['n_fits'] = track.fitinf[1]
             reco_row['max_likelihood'] = track.fitinf[2]
@@ -342,8 +342,8 @@ class HDF5Sink(Module):
             self._write_event_info(blob['Evt'], self.event_info.row)
         if 'EventInfo' in blob:  # TODO: decide how to deal with that class
             self._write_event_info(blob['EventInfo'], self.event_info.row)
-        if 'RecoLNS' in blob:
-            self._write_recolns(blob['RecoLNS'], self.recolns.row)
+        if 'MiniDST' in blob:
+            self._write_recolns(blob['MiniDST']['RecoLNS'], self.recolns.row)
 
         if not self.index % 1000:
             self.hits.flush()

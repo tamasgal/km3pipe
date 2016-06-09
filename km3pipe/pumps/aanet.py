@@ -135,7 +135,7 @@ class AanetPump(Pump):
         return next(self.blobs)
 
 
-def read_mini_dst(event, event_id):
+def read_mini_dst(aanet_event, event_id):
     pos_to_recname = {
         0: 'RecoLNS',
         1: 'JGandalf',
@@ -143,7 +143,8 @@ def read_mini_dst(event, event_id):
         3: 'QStrategy',
         4: 'Dusj',
     }
-    out = {pos_to_recname[k]: trk for k, trk in enumerate(event.trks)}
-    out['event_id'] = event_id
-    out['ThomasFeatures'] = event.usr
+    # put raw data into map instead of vector
+    minidst_dict = {pos_to_recname[k]: trk for k, trk in enumerate(aanet_event.trks)}
+    minidst_dict['event_id'] = event_id
+    minidst_dict['ThomasFeatures'] = aanet_event.usr
     return out
