@@ -26,10 +26,10 @@ class TestPipeline(TestCase):
         pl.attach(Module, 'module1')
         pl.attach(Module, 'module2')
         for module in pl.modules:
-            module.process = MagicMock(return_value=1)
+            module.process = MagicMock(return_value={})
         pl.drain(1)
         for module in pl.modules:
-            module.process.assert_called_once_with(1)
+            module.process.assert_called_once()
 
     def test_finish(self):
         self.pl.finish()
