@@ -218,7 +218,7 @@ class HDF5Sink(Module):
         info_row['det_id'] = info.det_id
         try:  # dealing with aanet naming conventions
             info_row['event_id'] = info.id
-        except AttributeError: 
+        except AttributeError:
             info_row['event_id'] = info.event_id
         info_row['frame_index'] = info.frame_index
         info_row['mc_id'] = info.mc_id
@@ -284,9 +284,9 @@ class HDF5Sink(Module):
 
 class HDF5Pump(Pump):
     """Provides a pump for KM3NeT HDF5 files"""
-    def __init__(self, **context):
+    def __init__(self, filename, **context):
         super(self.__class__, self).__init__(**context)
-        self.filename = self.get('filename')
+        self.filename = filename
         if os.path.isfile(self.filename):
             self.h5_file = tables.File(self.filename)
         else:
