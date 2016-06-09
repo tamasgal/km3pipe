@@ -295,12 +295,15 @@ class Geometry(Module):
         self.filename = self.get('filename') or None
         self.det_id = self.get('det_id') or None
         self.t0set = self.get('t0set') or None
+        self.calibration = self.get('calibration') or None
 
         if self.filename or self.det_id:
             if self.filename is not None:
                 self.detector = Detector(filename=self.filename)
             if self.det_id:
-                self.detector = Detector(det_id=self.det_id, t0set=self.t0set)
+                self.detector = Detector(det_id=self.det_id,
+                                         t0set=self.t0set,
+                                         calibration=self.calibration)
         else:
             raise ValueError("Define either a filename or a detector ID.")
 
