@@ -93,14 +93,9 @@ class Pipeline(object):
                 self._cycle_count += 1
 
                 log.debug("Pumping blob #{0}".format(self._cycle_count))
-                pump = self.modules[0]
-                start = timer()
-                start_cpu = time.clock()
-                self.blob = pump.process(self.blob)
-                pump._timeit['process'].append(timer() - start)
-                pump._timeit['process_cpu'].append(time.clock() - start_cpu)
+                self.blob = Blob()
 
-                for module in self.modules[1:]:
+                for module in self.modules:
                     if self.blob is None:
                         log.debug("Skipping {0}, due to empty blob."
                                   .format(module.name))
