@@ -13,7 +13,7 @@ import os.path
 import tables
 
 from km3pipe import Pump, Module
-from km3pipe.dataclasses import HitSeries, TrackSeries
+from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -23,7 +23,7 @@ __author__ = 'tamasgal'
 POS_ATOM = tables.FloatAtom(shape=3)
 
 
-class EventInfo(tables.IsDescription):
+class EventInfoDesc(tables.IsDescription):
     det_id = tables.IntCol()
     event_id = tables.UIntCol()
     frame_index = tables.UIntCol()
@@ -172,7 +172,7 @@ class HDF5Sink(Module):
                                                   Track, "MC Tracks",
                                                   filters=self.filters)
         self.event_info = self.h5file.create_table('/', 'event_info',
-                                                   EventInfo, "Event Info",
+                                                   EventInfoDesc, "Event Info",
                                                    filters=self.filters)
         self.recolns = self.h5file.create_table('/reco', 'recolns', RecoLNSTrack,
                                                 'Reco LNS', createparents=True,
@@ -191,10 +191,21 @@ class HDF5Sink(Module):
                                                  filters=self.filters)
 
     def _write_hits(self, hits, hit_row):
+        """Iterate through the hits and write them to the HDF5 table.
+
+        Parameters
+        ----------
+        hits : HitSeries
+        hit_row : HDF5 TableRow
+
+        """
+        event_id = hits.event_id
+        if event_id is None:
+            log.error("Event ID is `None`")
         for hit in hits:
             hit_row['channel_id'] = hit.channel_id
             hit_row['dom_id'] = hit.dom_id
-            hit_row['event_id'] = hits.event_id
+            hit_row['event_id'] = event_id
             hit_row['id'] = hit.id
             hit_row['pmt_id'] = hit.pmt_id
             # hit_row['run_id'] = hit.run_id
@@ -215,9 +226,12 @@ class HDF5Sink(Module):
             track_row['type'] = track.type
             track_row.append()
 
-    def _write_event_info_from_aanet(self, info, info_row):
+    def _write_event_info(self, info, info_row):
         info_row['det_id'] = info.det_id
-        info_row['event_id'] = info.id
+        try:  # dealing with aanet naming conventions
+            info_row['event_id'] = info.id
+        except AttributeError:
+            info_row['event_id'] = info.event_id
         info_row['frame_index'] = info.frame_index
         info_row['mc_id'] = info.mc_id
         info_row['mc_t'] = info.mc_t
@@ -324,22 +338,12 @@ class HDF5Sink(Module):
             self._write_hits(blob['MCHits'], self.mc_hits.row)
         if 'MCTracks' in blob:
             self._write_tracks(blob['MCTracks'], self.mc_tracks.row)
-        if 'Evt' in blob:
-            self._write_event_info_from_aanet(blob['Evt'], self.event_info.row)
-        if 'MiniDST' in blob:
-            mini_dst = blob['MiniDST']
-            if 'RecoLNS' in mini_dst:
-                self._write_recolns(mini_dst['RecoLNS'], self.recolns.row,
-                                    event_id=mini_dst['event_id'])
-            if 'AaShowerFit' in mini_dst:
-                self._write_aashowerfit(mini_dst['AaShowerFit'], self.aashowerfit.row,
-                                    event_id=mini_dst['event_id'])
-            if 'QStrategy' in mini_dst:
-                self._write_qstrategy(mini_dst['QStrategy'], self.qstrategy.row,
-                                    event_id=mini_dst['event_id'])
-            if 'JGandalf' in mini_dst:
-                self._write_jgandalf(mini_dst['JGandalf'], self.jgandalf.row,
-                                    event_id=mini_dst['event_id'])
+        if 'Evt' in blob and 'EventInfo' not in blob:  # skip in emergency
+            self._write_event_info(blob['Evt'], self.event_info.row)
+        if 'EventInfo' in blob:  # TODO: decide how to deal with that class
+            self._write_event_info(blob['EventInfo'], self.event_info.row)
+        if 'RecoLNS' in blob:
+            self._write_recolns(blob['RecoLNS'], self.recolns.row)
 
         if not self.index % 1000:
             self.hits.flush()
@@ -352,6 +356,11 @@ class HDF5Sink(Module):
         return blob
 
     def finish(self):
+        self.hits.flush()
+        self.event_info.flush()
+        self.mc_hits.flush()
+        self.mc_tracks.flush()
+        self.recolns.flush()
         self.hits.cols.event_id.create_index()
         self.event_info.cols.event_id.create_index()
         self.mc_hits.cols.event_id.create_index()
@@ -360,19 +369,14 @@ class HDF5Sink(Module):
         #self.event_info.cols.run_id.create_index()
         #self.mc_hits.cols.run_id.create_index()
         #self.mc_tracks.cols.run_id.create_index()
-        self.hits.flush()
-        self.event_info.flush()
-        self.mc_hits.flush()
-        self.mc_tracks.flush()
-        self.recolns.flush()
         self.h5file.close()
 
 
 class HDF5Pump(Pump):
     """Provides a pump for KM3NeT HDF5 files"""
-    def __init__(self, **context):
+    def __init__(self, filename, **context):
         super(self.__class__, self).__init__(**context)
-        self.filename = self.get('filename')
+        self.filename = filename
         if os.path.isfile(self.filename):
             self.h5_file = tables.File(self.filename)
         else:
@@ -411,7 +415,7 @@ class HDF5Pump(Pump):
 
     def _get_event_info(self, event_id, table_name='event_info', where='/'):
         table = self.h5_file.get_node(where, table_name)
-        return table[event_id]
+        return EventInfo.from_table(table[event_id])
 
     def get_blob(self, index):
         event_id = self.event_ids[index]

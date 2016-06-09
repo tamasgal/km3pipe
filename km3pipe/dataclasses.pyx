@@ -18,20 +18,62 @@ cimport cython
 
 np.import_array()
 
-from km3pipe.tools import angle_between
+from km3pipe.tools import angle_between, geant2pdg, pdg2name
 
-__all__ = ('Point', 'Position', 'Direction', 'HitSeries', 'Hit')
+__all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries', 'Hit')
 
 
-point_dt = np.dtype([('x', float), ('y', float), ('z', float)])
+class EventInfo(object):
+    def __init__(self,
+                 det_id,
+                 event_id,
+                 frame_index,
+                 mc_id,
+                 mc_t,
+                 overlays,
+                 run_id,
+                 trigger_counter,
+                 trigger_mask):
+        self.det_id = det_id
+        self.event_id = event_id
+        self.frame_index = frame_index
+        self.mc_id = mc_id
+        self.mc_t = mc_t
+        self.overlays = overlays
+        self.run_id = run_id
+        self.trigger_counter = trigger_counter
+        self.trigger_mask = trigger_mask
 
-def Point_(vector, as_recarray=True):
-    """A point as numpy.recarray with optional x, y and z attributes."""
-    vector = np.array(vector, dtype=np.float)
-    if as_recarray:
-        return vector.view(point_dt, np.recarray)
-    else:
-        return vector
+    @classmethod
+    def from_table(cls, row):
+        return cls(
+            row['det_id'],
+            row['event_id'],
+            row['frame_index'],
+            row['mc_id'],
+            row['mc_t'],
+            row['overlays'],
+            row['run_id'],
+            row['trigger_counter'],
+            row['trigger_mask'],
+        )
+
+    def __str__(self):
+        return "Event #{0}:\n" \
+               "    detector id:     {1}\n" \
+               "    run ID:          {2}\n" \
+               "    frame index:     {3}\n" \
+               "    MC id:           {4}\n" \
+               "    MC time:         {5}\n" \
+               "    overlays:        {6}\n" \
+               "    trigger counter: {7}\n" \
+               "    trigger mask:    {8}\n" \
+               .format(self.event_id, self.det_id, self.run_id, self.frame_index,
+                       self.mc_id, self.mc_t, self.overlays,
+                       self.trigger_counter, self.trigger_mask)
+
+    def __insp__(self):
+        return self.__str__()
 
 
 class Point(np.ndarray):
@@ -160,6 +202,18 @@ cdef class Hit:
         self.tot = tot
         self.triggered = triggered
 
+    def __str__(self):
+        return "Hit: channel_id({0}), dom_id({1}), pmt_id({2}), tot({3}), " \
+               "time({4}), triggered({5})" \
+               .format(self.channel_id, self.dom_id, self.pmt_id, self.tot,
+                       self.time, self.triggered)
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __insp__(self):
+        return self.__str__()
+
 
 cdef class Track:
     """Represents a particle track.
@@ -186,6 +240,19 @@ cdef class Track:
         self.pos = pos
         self.time = time
         self.type = type
+
+    def __str__(self):
+        return "Track: pos({0}), dir({1}), t={2}, E={3}, type={4} ({5})" \
+               .format(self.pos, self.dir, self.time, self.energy,
+                       self.type, pdg2name(self.type))
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __insp__(self):
+        return self.__str__()
+
+
 
 
 class HitSeries(object):
@@ -216,13 +283,13 @@ class HitSeries(object):
     @classmethod
     def from_evt(cls, hits, event_id=None):
         return cls([Hit(
-            np.nan,     # channel_id
-            np.nan,     # dom_id
+            0,     # channel_id
+            0,     # dom_id
             h.id,
             h.pmt_id,
             h.time,
             h.tot,
-            np.nan,     # triggered
+            0,     # triggered
         ) for h in hits], event_id)
 
     @classmethod
@@ -236,7 +303,7 @@ class HitSeries(object):
         hits._pmt_id = pmt_ids
         hits._time = times
         hits._tots = tots
-        hits._triggered = triggereds
+        hits._triggereds = triggereds
         return hits
 
     @classmethod
@@ -354,17 +421,16 @@ class TrackSeries(object):
         self._time = None
         self._tracks = tracks
         self._type = None
+        self._highest_energetic_muon = None
 
     @classmethod
     def from_aanet(cls, tracks, event_id=None):
-        return cls([Track(
-            Direction((t.dir.x, t.dir.y, t.dir.z)),
-            t.id,
-            t.E,
-            Position((t.pos.x, t.pos.y, t.pos.z)),
-            t.t,
-            t.type,
-        )
+        return cls([Track(Direction((t.dir.x, t.dir.y, t.dir.z)),
+                          t.E,
+                          t.id,
+                          Position((t.pos.x, t.pos.y, t.pos.z)),
+                          t.t,
+                          geant2pdg(t.type))
                     for t in tracks], event_id)
 
     @classmethod
@@ -390,6 +456,15 @@ class TrackSeries(object):
             row['time'],
             row['type'],
         ) for row in table], event_id)
+
+    @property
+    def highest_energetic_muon(self):
+        if self._highest_energetic_muon is None:
+            muons = [track for track in self if abs(track.type) == 13]
+            if len(muons) == 0:
+                raise AttributeError("No muon found")
+            self._highest_energetic_muon = max(muons, key=lambda m: m.energy)
+        return self._highest_energetic_muon
 
     def __iter__(self):
         return self

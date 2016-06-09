@@ -61,7 +61,12 @@ class Pipeline(object):
             if len(self.modules) < 1 and not isinstance(module, Pump):
                 log.error("The first module to attach to the pipeline should "
                           "be a Pump!")
+            module.geometry = self.geometry
             self.modules.append(module)
+
+    def attach_bundle(self, modules):
+        for mod in modules:
+            self.modules.append(mod)
 
     def _drain(self, cycles=None):
         """Activate the pump and let the flow go.
@@ -88,14 +93,9 @@ class Pipeline(object):
                 self._cycle_count += 1
 
                 log.debug("Pumping blob #{0}".format(self._cycle_count))
-                pump = self.modules[0]
-                start = timer()
-                start_cpu = time.clock()
-                self.blob = pump.process(self.blob)
-                pump._timeit['process'].append(timer() - start)
-                pump._timeit['process_cpu'].append(time.clock() - start_cpu)
+                self.blob = Blob()
 
-                for module in self.modules[1:]:
+                for module in self.modules:
                     if self.blob is None:
                         log.debug("Skipping {0}, due to empty blob."
                                   .format(module.name))
@@ -294,12 +294,13 @@ class Geometry(Module):
         self._should_apply = self.get('apply') or False
         self.filename = self.get('filename') or None
         self.det_id = self.get('det_id') or None
+        self.t0set = self.get('t0set') or None
 
         if self.filename or self.det_id:
             if self.filename is not None:
                 self.detector = Detector(filename=self.filename)
             if self.det_id:
-                self.detector = Detector(det_id=self.det_id)
+                self.detector = Detector(det_id=self.det_id, t0set=self.t0set)
         else:
             raise ValueError("Define either a filename or a detector ID.")
 
@@ -313,7 +314,7 @@ class Geometry(Module):
         return self.detector
 
     def apply(self, hits):
-        """Add x, y, z (and du, floor if DataFrame) columns to hit"""
+        """Add x, y, z, t0 (and du, floor if DataFrame) columns to hit"""
         if isinstance(hits, (HitSeries, list)):
             self._apply_to_hitseries(hits)
         elif isinstance(hits, pd.DataFrame):
@@ -323,7 +324,7 @@ class Geometry(Module):
                             .format(hits.__class__.__name__))
 
     def _apply_to_hitseries(self, hits):
-        """Add x, y and z to hit series"""
+        """Add x, y, z and t0 offset to hit series"""
         for hit in hits:
             try:
                 pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
@@ -331,9 +332,9 @@ class Geometry(Module):
                 pmt = self.detector.pmt_with_id(hit.pmt_id)
             hit.pos = Position(pmt.pos)
             hit.dir = Direction(pmt.dir)
-            hit.t0 = pmt.t0
+            # hit.t0 = pmt.t0
             hit.time += pmt.t0
-            hit.a = hit.tot
+            # hit.a = hit.tot
 
     def _apply_to_table(self, table):
         """Add x, y, z and du, floor columns to hit table"""
@@ -343,8 +344,15 @@ class Geometry(Module):
         table['x'] = table.apply(lambda h: get_pmt(h).pos.x, axis=1)
         table['y'] = table.apply(lambda h: get_pmt(h).pos.y, axis=1)
         table['z'] = table.apply(lambda h: get_pmt(h).pos.z, axis=1)
+        table['time'] += table.apply(lambda h: get_pmt(h).t0, axis=1)
         table['du'] = table.apply(lambda h: get_pmt(h).omkey[0], axis=1)
         table['floor'] = table.apply(lambda h: get_pmt(h).omkey[1], axis=1)
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return "Geometry: det_id({0})".format(self.det_id)
 
 
 class AanetGeometry(Module):

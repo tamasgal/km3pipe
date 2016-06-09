@@ -7,8 +7,11 @@ Classes representing KM3NeT hardware.
 """
 from __future__ import division, absolute_import, print_function
 
+from collections import OrderedDict
 import os
 import sys
+
+import numpy as np
 
 from km3pipe.tools import unpack_nfirst, split  # , ignored
 from km3pipe.dataclasses import Point, Direction
@@ -33,15 +36,16 @@ class Detector(object):
         self._det_file = None
         self.det_id = None
         self.n_doms = None
+        self.lines = set()
         self.n_pmts_per_dom = None
-        self.doms = {}
+        self.doms = OrderedDict()
         self.pmts = []
         self.version = None
         self.valid_from = None
         self.valid_until = None
         self.utm_info = None
-        self._pmts_by_omkey = {}
-        self._pmts_by_id = {}
+        self._pmts_by_omkey = OrderedDict()
+        self._pmts_by_id = OrderedDict()
         self._pmt_angles = []
 
         if filename:
@@ -102,6 +106,7 @@ class Detector(object):
                     dom_id, line_id, floor_id, n_pmts = split(line, int)
                 except ValueError:
                     continue
+                self.lines.add(line_id)
                 self.n_pmts_per_dom = n_pmts
                 for i in range(n_pmts):
                     raw_pmt_info = lines.pop(0)
@@ -136,6 +141,11 @@ class Detector(object):
         """The positions of the DOMs, taken from the PMT with the lowest ID."""
         return [pmt.pos for pmt in self._pmts_by_id.values()
                 if pmt.channel_id == 0]
+
+    def translate_detector(self, vector):
+        vector = np.array(vector, dtype=float)
+        for pmt in self.pmts:
+            pmt.pos = pmt.pos + vector
 
     @property
     def pmt_angles(self):
@@ -196,6 +206,17 @@ class Detector(object):
         _, floor, _ = self.doms[dom_id]
         return floor
 
+    @property
+    def n_lines(self):
+        return len(self.lines)
+
+    def __str__(self):
+        return "Detector id: '{0}', n_doms: {1}, n_lines: {2}".format(
+            self.det_id, self.n_doms, self.n_lines)
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class PMT(object):
     """Represents a photomultiplier"""
@@ -208,5 +229,5 @@ class PMT(object):
         self.omkey = omkey
 
     def __str__(self):
-        return "PMT id:{0} pos: {1} dir: dir{2} t0: {3} DAQ channel: {4}"\
+        return "PMT id:{0}, pos: {1}, dir: dir{2}, t0: {3}, DAQ channel: {4}"\
                .format(self.id, self.pos, self.dir, self.t0, self.channel_id)

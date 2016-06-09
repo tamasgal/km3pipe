@@ -12,6 +12,10 @@ from __future__ import division, absolute_import, print_function
 import math
 
 
+# Detector related parameters
+arca_frame_duration = 0.1  # s
+orca_frame_duration = 0.1  # s
+
 c = 2.99792458e8  # m/s
 
 n_water_antares_phase = 1.3499

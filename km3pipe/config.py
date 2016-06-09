@@ -61,6 +61,31 @@ class Config(object):
     def _read_from_file(self, file_obj):
         self.config.readfp(file_obj)
 
+    def create_irods_session(self):
+        try:
+            from irods.session import iRODSSession
+        except ImportError:
+            log.error("Please install the iRODS Python client:\n\n"
+                      "    pip install git+git://github.com/irods/"
+                      "python-irodsclient.git\n")
+            return
+        try:
+            host = self.config.get('iRODS', 'host')
+            port = self.config.get('iRODS', 'port')
+            user = self.config.get('iRODS', 'user')
+            zone = self.config.get('iRODS', 'zone')
+        except Error:
+            log.error("iRODS connection details missing from ~/.km3net")
+            return
+
+        try:
+            password = self.config.get('iRODS', 'password')
+        except Error:
+            password = input("Please enter your iRODS password: ")
+
+        return iRODSSession(host=host, port=port, user=user, password=password,
+                            zone=zone)
+
     @property
     def db_credentials(self):
         """Return username and password for the KM3NeT WebDB."""
