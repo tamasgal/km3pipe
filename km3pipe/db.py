@@ -197,14 +197,17 @@ class DBManager(object):
         doms = self._get_json('domclbupiid/s')
         self._doms = DOMContainer(doms)
 
-    def detx(self, det_id, t0set=None):
+    def detx(self, det_id, t0set=None, calibration=None):
         """Retrieve the detector file for given detector id
 
         If t0set is given, append the calibration data.
         """
-        url = 'detx/{0}'.format(det_id)
+        url = 'detx/{0}?'.format(det_id)  # '?' since it's ignored if no args
         if t0set is not None:
-            url += '?t0set=' + t0set
+            url += '&t0set=' + t0set
+        if calibration is not None:
+            url += '&calibrid=' + calibration
+
         detx = self._get_content(url)
         return detx
 
