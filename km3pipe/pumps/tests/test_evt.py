@@ -81,7 +81,7 @@ class TestEvtParser(TestCase):
             "end_event:"
             ))
 
-        self.pump = EvtPump()
+        self.pump = EvtPump(None)
         self.pump.blob_file = StringIO(self.valid_evt_header)
 
     def tearDown(self):
