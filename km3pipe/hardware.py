@@ -32,7 +32,10 @@ __author__ = 'tamasgal'
 
 class Detector(object):
     """The KM3NeT detector"""
-    def __init__(self, filename=None, det_id=None, t0set=None):
+    def __init__(self, filename=None,
+                 det_id=None,
+                 t0set=None,
+                 calibration=None):
         self._det_file = None
         self.det_id = None
         self.n_doms = None
@@ -54,7 +57,7 @@ class Detector(object):
         if det_id is not None:
             print("Retrieving DETX file from the database...")
             db = DBManager()
-            detx = db.detx(det_id, t0set=t0set)
+            detx = db.detx(det_id, t0set=t0set, calibration=calibration)
             self._det_file = StringIO(detx)
             self._parse_header()
             self._parse_doms()
