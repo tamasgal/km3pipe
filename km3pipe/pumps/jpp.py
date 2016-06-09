@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 class JPPPump(Pump):
     """A pump for JPP ROOT files."""
 
-    def __init__(self, **context):
+    def __init__(self, filename, **context):
         super(self.__class__, self).__init__(**context)
 
         try:
@@ -30,7 +30,8 @@ class JPPPump(Pump):
                               "    pip install jppy\n")
 
         self.index = self.get('index') or 0
-        self.filename = self.get('filename')
+        #self.filename = self.get('filename')
+        self.filename = filename
 
         self.reader = jppy.PyJDAQEventReader(self.filename)
         self.blobs = self.blob_generator()
