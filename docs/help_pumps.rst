@@ -1,5 +1,3 @@
-.. _help_pumps:
-
 Pumps
 =====
 

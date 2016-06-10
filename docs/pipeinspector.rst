@@ -1,5 +1,3 @@
-.. _pipeinspector:
-
 PipeInspector
 =============
 

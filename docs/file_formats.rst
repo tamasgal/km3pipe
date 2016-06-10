@@ -1,5 +1,3 @@
-.. _file_formats:
-
 File Formats
 ============
 
@@ -20,47 +18,20 @@ Three main groups are currently used to organise data in HDF5 files:
 `event`, `reco` and `analysis`, each holding 1D arrays of data.
 A typical file looks like this::
 
-    ├── analysis
-    │   ├── dusj_theta_times_n_hits
-    │   ├── ...
-    │   └── recolns_theta_times_n_hits_minus_reco_plus_seven
-    ├── event
-    │   ├── 1
-    │   │   └── hits
-    │   │       ├── channel_id
-    │   │       ├── ...
-    │   │       ├── time
-    │   │       └── tot
-    │   ├── 10
-    │   ├── 11
-    │   ├── 12
-    │   ├── ...
-    │   ├── 2
-    │   ├── 3
-    │   ├── 4
-    │   ├── 5
-    │   ├── 6
-    │   ├── 7
-    │   ├── 8
-    │   ├── 9
+    ├── hits                    # 2D Table
+    │   ├── tot                 # int
+    │   ├── time                # float
     │   └── ...
-    └── reco
-        ├── aashowerfit
-        │   ├── E
+    ├── mc_tracks
+    │   ├── dir
+    │   └── ...
+    ├── event_info
+    │   ├── det_id
+    │   └── ...
+    └── reco                    # Group
+        ├── aashowerfit         # 2D Table
+        │   ├── E               # float
         │   ├── phi
-        │   ├── ...
-        │   └── theta
-        ├── dusj
-        ├── recolns
-        ├── ...
-        └── royfit
-
-`event/`
-~~~~~~~
-
-`reco/`
-~~~~~~
-
-`analysis/`
-~~~~~~~~~~
+        │   └── ...
+        └── ...
 
