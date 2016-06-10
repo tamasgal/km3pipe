@@ -21,3 +21,8 @@ JGANDALF_DTYPE = TRACK_DTYPE[:]
 JGANDALF_DTYPE.extend([
 
 ])
+
+recname_to_dtype = {
+    'RecoLNS': RECOLNS_DTYPE,
+    'JGandalf': JGANDALF_DTYPE,
+}

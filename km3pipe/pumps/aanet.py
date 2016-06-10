@@ -6,11 +6,11 @@ Pump for the Aanet data format.
 
 """
 from __future__ import division, absolute_import, print_function
+import os.path
 
 from km3pipe import Pump
 from km3pipe.dataclasses import HitSeries, TrackSeries
 from km3pipe.logger import logging
-import os.path
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
