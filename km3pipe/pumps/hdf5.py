@@ -15,6 +15,7 @@ import tables
 from km3pipe import Pump, Module
 from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
 from km3pipe.logger import logging
+from km3pipe.reco_dtypes import recname_to_dtype
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -79,10 +80,7 @@ class HDF5Sink(Module):
         self.event_info = self.h5file.create_table('/', 'event_info',
                                                    EventInfoDesc, "Event Info",
                                                    filters=self.filters)
-        #self.recolns = self.h5file.create_table('/reco', 'recolns', RecoLNSTrack,
-        #                                        'Reco LNS', createparents=True,
-        #                                        filters=self.filters)
-        self._reco_tables_created = set()
+        self._reco_tables = {}
 
     def _write_hits(self, hits, hit_row):
         """Iterate through the hits and write them to the HDF5 table.
@@ -136,6 +134,21 @@ class HDF5Sink(Module):
         info_row['trigger_mask'] = info.trigger_mask
         info_row.append()
 
+    def _write_minidst(minidst):
+        for recname, track in blob['MiniDST']:
+            if recname not in self._reco_tables:
+                recotable = self.h5file.create_table(
+                    '/reco', recname.lower(), np.dtype(recname_to_dtype[recname]),
+                    recname, createparents=True, filters=self.filters
+                )
+                self._reco_tables[recname] = recotable
+            else:
+                recotable = self._reco_tables[recname]
+            # put stuff into table
+            for colname in recotable.colnames:
+                recotable.row[colname].append(track[colname])
+            recotable.append()
+
     def process(self, blob):
         if 'Hits' in blob:
             hits = blob['Hits']
@@ -149,25 +162,15 @@ class HDF5Sink(Module):
         if 'EventInfo' in blob:  # TODO: decide how to deal with that class
             self._write_event_info(blob['EventInfo'], self.event_info.row)
         if 'MiniDST' in blob:
-            for recname, track in blob['MiniDST']:
-
-                if recname not in self._reco_tables_created:
-                    self.h5file.create_table('/reco', recname.lower(),
-
-
-        #    if 'RecoLNS' in blob['MiniDST']:
-        #        self._write_recolns(blob['MiniDST']['RecoLNS'], self.recolns.row)
-        #self.recolns = self.h5file.create_table('/reco', 'recolns', RecoLNSTrack,
-        #                                        'Reco LNS', createparents=True,
-        #                                        filters=self.filters)
+            self._write_minidst(blob['MiniDST'])
 
         if not self.index % 1000:
             self.hits.flush()
             self.mc_hits.flush()
             self.mc_tracks.flush()
             self.event_info.flush()
-            #TODO: flush all reco stuff
-            #self.recolns.flush()
+            for tab in self._reco_tables.values():
+                tab.flush()
 
         self.index += 1
         return blob
@@ -177,17 +180,13 @@ class HDF5Sink(Module):
         self.event_info.flush()
         self.mc_hits.flush()
         self.mc_tracks.flush()
-        #TODO: flush all reco stuff
-        #self.recolns.flush()
+        for tab in self._reco_tables.values():
+            tab.flush()
         self.hits.cols.event_id.create_index()
         self.event_info.cols.event_id.create_index()
         self.mc_hits.cols.event_id.create_index()
         self.mc_tracks.cols.event_id.create_index()
-        #TODO: index all reco stuff
-        #self.recolns.cols.event_id.create_index()
-        #self.event_info.cols.run_id.create_index()
-        #self.mc_hits.cols.run_id.create_index()
-        #self.mc_tracks.cols.run_id.create_index()
+        #TODO: maybe index reco tables? idk
         self.h5file.close()
 
 
