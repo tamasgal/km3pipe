@@ -143,8 +143,46 @@ def read_mini_dst(aanet_event, event_id):
         3: 'QStrategy',
         4: 'Dusj',
     }
-    # put raw data into map instead of vector
-    minidst_dict = {pos_to_recname[k]: trk for k, trk in enumerate(aanet_event.trks)}
-    minidst_dict['event_id'] = event_id
-    minidst_dict['ThomasFeatures'] = aanet_event.usr
+    recname_to_reader = {
+        'RecoLNS': parse_recolns;
+        'JGandalf': parse_jgandalf;
+        'AaShowerFit': parse_aashowerfit;
+        'QStrategy': parse_qstrategy;
+        'Dusj': parse_dusj;
+    }
+    minidist = {}
+    for k, trk in enumerate(aanet_event.trks):
+        recname = pos_to_recname[k]
+        reader = recname_to_reader[recname]
+        minidst[recname] = reader(trk)
+    #minidst_dict = {pos_to_recname[k]: trk for k, trk in enumerate(aanet_event.trks)}
+    minidst['event_id'] = event_id
+    minidst['ThomasFeatures'] = aanet_event.usr
+    return minidst
+
+def parse_track(trk):
+    out = {}
+    out['pos'] = (trk.pos.x, trk.pos.y, trk.pos.z)
+    out['dir'] = (trk.pos.x, trk.pos.y, trk.pos.z)
+    out['time'] = trk.t
+    out['energy'] = trk.E
+    out['quality'] = trk.lik
+    return out
+
+
+def parse_thomasfeatures(aanet_usr):
+    out = {}
+    return out
+
+
+def parse_recolns(aanet_trk):
+    if not aanet_trk.rec_stage > -9999:
+        return {}
+    out = parse_track(aanet_trk)
+    out['beta'] = track.fitinf[0]
+    out['n_fits'] = track.fitinf[1]
+    out['max_likelihood'] = track.fitinf[2]
+    out['n_compatible_solutions'] = track.fitinf[3]
+    out['n_hits'] = track.fitinf[4]
+    out['error_matrix'] = list(track.error_matrix)
     return out

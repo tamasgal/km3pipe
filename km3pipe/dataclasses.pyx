@@ -253,6 +253,7 @@ cdef class Track:
         return self.__str__()
 
 
+cdef class DstTrack(Track):
 
 
 class HitSeries(object):
