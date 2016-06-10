@@ -82,6 +82,7 @@ class HDF5Sink(Module):
         #self.recolns = self.h5file.create_table('/reco', 'recolns', RecoLNSTrack,
         #                                        'Reco LNS', createparents=True,
         #                                        filters=self.filters)
+        self._reco_tables_created = set()
 
     def _write_hits(self, hits, hit_row):
         """Iterate through the hits and write them to the HDF5 table.
@@ -147,9 +148,18 @@ class HDF5Sink(Module):
             self._write_event_info(blob['Evt'], self.event_info.row)
         if 'EventInfo' in blob:  # TODO: decide how to deal with that class
             self._write_event_info(blob['EventInfo'], self.event_info.row)
-        #if 'MiniDST' in blob:
+        if 'MiniDST' in blob:
+            for recname, track in blob['MiniDST']:
+
+                if recname not in self._reco_tables_created:
+                    self.h5file.create_table('/reco', recname.lower(),
+
+
         #    if 'RecoLNS' in blob['MiniDST']:
         #        self._write_recolns(blob['MiniDST']['RecoLNS'], self.recolns.row)
+        #self.recolns = self.h5file.create_table('/reco', 'recolns', RecoLNSTrack,
+        #                                        'Reco LNS', createparents=True,
+        #                                        filters=self.filters)
 
         if not self.index % 1000:
             self.hits.flush()
