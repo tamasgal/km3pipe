@@ -92,14 +92,6 @@ km3pipe.tools module
     :undoc-members:
     :show-inheritance:
 
-km3pipe.units module
---------------------
-
-.. automodule:: km3pipe.units
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 
 Module contents
 ---------------

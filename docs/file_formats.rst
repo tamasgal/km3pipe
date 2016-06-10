@@ -1,5 +1,3 @@
-.. _file_formats:
-
 File Formats
 ============
 
