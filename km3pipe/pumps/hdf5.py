@@ -142,8 +142,6 @@ class HDF5Sink(Module):
 
     def _write_minidst(self, minidst):
         for recname, track in minidst.items():
-            if not track:
-                continue
             if recname == 'event_id':
                 continue
             if recname not in self._reco_tables:
@@ -154,6 +152,12 @@ class HDF5Sink(Module):
                 )
                 self._reco_tables[recname] = reco_table
             reco_table = self._reco_tables[recname]
+            if not track:
+                track = np.zeros(1, recname_to_dtype[recname])
+                for key in track.dtype.names:
+                    reco_table.row[key] = track[key]
+                reco_table.row.append()
+                continue
             self._write_reco(track, reco_table.row)
 
     def process(self, blob):

@@ -156,7 +156,7 @@ def read_mini_dst(aanet_event, event_id):
         reader = recname_to_reader[recname]
         minidst[recname] = reader(trk)
     minidst['event_id'] = event_id
-    minidst['ThomasFeatures'] = parse_thomasfeatures(aanet_event.usr)
+    #minidst['ThomasFeatures'] = parse_thomasfeatures(aanet_event.usr)
     return minidst
 
 
