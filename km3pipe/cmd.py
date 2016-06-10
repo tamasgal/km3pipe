@@ -22,7 +22,7 @@ Options:
     -n EVENTS/RUNS  Number of events/runs.
     -s REGEX        Regular expression to filter the runsetup name/id.
     DET_ID          Detector ID (eg. D_ARCA001).
-    BRANCH          Git branch to pull (eg. develop).
+    GIT_BRANCH      Git branch to pull (eg. develop).
 
 """
 
@@ -125,7 +125,7 @@ def main():
         n = None
 
     if arguments['update']:
-        update_km3pipe(arguments['BRANCH'])
+        update_km3pipe(arguments['GIT_BRANCH'])
 
     if arguments['tohdf5']:
         aatohdf5(arguments['-i'], arguments['-o'], n)
