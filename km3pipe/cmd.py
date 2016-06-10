@@ -5,7 +5,7 @@ KM3Pipe command line utility.
 
 Usage:
     km3pipe test
-    km3pipe update [BRANCH]
+    km3pipe update [GIT_BRANCH]
     km3pipe tohdf5 [-n EVENTS] -i FILE -o FILE
     km3pipe aatohdf5 [-n EVENTS] -i FILE -o FILE
     km3pipe jpptohdf5 [-n EVENTS] -i FILE -o FILE
