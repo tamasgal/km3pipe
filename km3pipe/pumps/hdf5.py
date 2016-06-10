@@ -251,10 +251,10 @@ class HDF5Sink(Module):
         return reco_row
 
     def _write_recolns(self, track, reco_row):
+        reco_row['event_id'] = event_id
         # magic number for "fit did not converge"
         if track.rec_stage > -9999:
             reco_row = self._write_reco_info(track, reco_row)
-            reco_row['event_id'] = event_id
             reco_row['beta'] = track.fitinf[0]
             reco_row['n_fits'] = track.fitinf[1]
             reco_row['max_likelihood'] = track.fitinf[2]
@@ -264,10 +264,10 @@ class HDF5Sink(Module):
         reco_row.append()
 
     def _write_jgandalf(self, track, reco_row, event_id):
-        reco_row = self._write_reco_info(track, reco_row)
         reco_row['event_id'] = event_id
         # magic number for "fit did not converge"
         if track.rec_stage > -9999:
+            reco_row = self._write_reco_info(track, reco_row)
             reco_row['beta_0'] = track.fitinf[0]
             reco_row['beta_1'] = track.fitinf[1]
             reco_row['likelihood'] = track.fitinf[2]
@@ -279,10 +279,10 @@ class HDF5Sink(Module):
         reco_row.append()
 
     def _write_qstrategy(self, track, reco_row, event_id):
-        reco_row = self._write_reco_info(track, reco_row)
         reco_row['event_id'] = event_id
         # magic number for "fit did not converge"
         if track.rec_stage > -9999:
+            reco_row = self._write_reco_info(track, reco_row)
             try:
                 reco_row['m_estimator'] = track.lik         # upstream oddity
                 reco_row['r_final'] = track.fitinf[0]
@@ -295,10 +295,10 @@ class HDF5Sink(Module):
         reco_row.append()
 
     def _write_aashowerfit(self, track, reco_row, event_id):
-        reco_row = self._write_reco_info(track, reco_row)
         reco_row['event_id'] = event_id
         # magic number for "fit did not converge"
         if track.rec_stage > -9999:
+            reco_row = self._write_reco_info(track, reco_row)
             reco_row['m_estimator'] = track.fitinf[0]
             reco_row['t_vertex'] = track.fitinf[1]
             reco_row['n_hits'] = track.fitinf[2]
@@ -307,10 +307,10 @@ class HDF5Sink(Module):
         reco_row.append()
 
     def _write_dusj(self, track, reco_row, event_id):
-        reco_row = self._write_reco_info(track, reco_row)
         reco_row['event_id'] = event_id
         # magic number for "fit did not converge"
         if track.rec_stage > -9999:
+            reco_row = self._write_reco_info(track, reco_row)
             reco_row['gold_parameter'] = track.lik          # upstream oddity
             reco_row['SmallInertia'] = track.fitinf[0]
             reco_row['TimeResidualFWHM'] = track.fitinf[1]
@@ -343,13 +343,15 @@ class HDF5Sink(Module):
         if 'EventInfo' in blob:  # TODO: decide how to deal with that class
             self._write_event_info(blob['EventInfo'], self.event_info.row)
         if 'MiniDST' in blob:
-            self._write_recolns(blob['MiniDST']['RecoLNS'], self.recolns.row)
+            if 'RecoLNS' in blob['MiniDST']:
+                self._write_recolns(blob['MiniDST']['RecoLNS'], self.recolns.row)
 
         if not self.index % 1000:
             self.hits.flush()
             self.mc_hits.flush()
             self.mc_tracks.flush()
             self.event_info.flush()
+            #TODO: flush all reco stuff
             self.recolns.flush()
 
         self.index += 1
@@ -365,6 +367,7 @@ class HDF5Sink(Module):
         self.event_info.cols.event_id.create_index()
         self.mc_hits.cols.event_id.create_index()
         self.mc_tracks.cols.event_id.create_index()
+        #TODO: index all reco stuff
         self.recolns.cols.event_id.create_index()
         #self.event_info.cols.run_id.create_index()
         #self.mc_hits.cols.run_id.create_index()
