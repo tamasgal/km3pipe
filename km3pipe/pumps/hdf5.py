@@ -10,6 +10,7 @@ from __future__ import division, absolute_import, print_function
 
 import os.path
 
+import numpy as np
 import tables
 
 from km3pipe import Pump, Module
@@ -134,11 +135,12 @@ class HDF5Sink(Module):
         info_row['trigger_mask'] = info.trigger_mask
         info_row.append()
 
-    def _write_minidst(minidst):
-        for recname, track in blob['MiniDST']:
+    def _write_minidst(self, minidst):
+        for recname, track in minidst:
             if recname not in self._reco_tables:
                 recotable = self.h5file.create_table(
-                    '/reco', recname.lower(), np.dtype(recname_to_dtype[recname]),
+                    '/reco', recname.lower(),
+                    np.dtype(recname_to_dtype[recname]),
                     recname, createparents=True, filters=self.filters
                 )
                 self._reco_tables[recname] = recotable
@@ -186,7 +188,7 @@ class HDF5Sink(Module):
         self.event_info.cols.event_id.create_index()
         self.mc_hits.cols.event_id.create_index()
         self.mc_tracks.cols.event_id.create_index()
-        #TODO: maybe index reco tables? idk
+        # TODO: maybe index reco tables? idk
         self.h5file.close()
 
 

@@ -144,20 +144,19 @@ def read_mini_dst(aanet_event, event_id):
         4: 'Dusj',
     }
     recname_to_reader = {
-        'RecoLNS': parse_recolns;
-        'JGandalf': parse_jgandalf;
-        'AaShowerFit': parse_aashowerfit;
-        'QStrategy': parse_qstrategy;
-        'Dusj': parse_dusj;
+        'RecoLNS': parse_recolns,
+        'JGandalf': parse_jgandalf,
+        'AaShowerFit': parse_aashowerfit,
+        'QStrategy': parse_qstrategy,
+        'Dusj': parse_dusj,
     }
-    minidist = {}
+    minidst = {}
     for k, trk in enumerate(aanet_event.trks):
         recname = pos_to_recname[k]
         reader = recname_to_reader[recname]
         minidst[recname] = reader(trk)
-    #minidst_dict = {pos_to_recname[k]: trk for k, trk in enumerate(aanet_event.trks)}
     minidst['event_id'] = event_id
-    minidst['ThomasFeatures'] = parse_thomasfeature(aanet_event.usr)
+    minidst['ThomasFeatures'] = parse_thomasfeatures(aanet_event.usr)
     return minidst
 
 
@@ -180,10 +179,38 @@ def parse_recolns(aanet_trk):
     if not aanet_trk.rec_stage > -9999:
         return {}
     out = parse_track(aanet_trk)
-    out['beta'] = track.fitinf[0]
-    out['n_fits'] = track.fitinf[1]
-    out['max_likelihood'] = track.fitinf[2]
-    out['n_compatible_solutions'] = track.fitinf[3]
-    out['n_hits'] = track.fitinf[4]
-    out['error_matrix'] = list(track.error_matrix)
+    out['beta'] = aanet_trk.fitinf[0]
+    out['n_fits'] = aanet_trk.fitinf[1]
+    out['max_likelihood'] = aanet_trk.fitinf[2]
+    out['n_compatible_solutions'] = aanet_trk.fitinf[3]
+    out['n_hits'] = aanet_trk.fitinf[4]
+    out['error_matrix'] = list(aanet_trk.error_matrix)
+    return out
+
+
+def parse_jgandalf(aanet_trk):
+    if not aanet_trk.rec_stage > -9999:
+        return {}
+    out = parse_track(aanet_trk)
+    return out
+
+
+def parse_aashowerfit(aanet_trk):
+    if not aanet_trk.rec_stage > -9999:
+        return {}
+    out = parse_track(aanet_trk)
+    return out
+
+
+def parse_qstrategy(aanet_trk):
+    if not aanet_trk.rec_stage > -9999:
+        return {}
+    out = parse_track(aanet_trk)
+    return out
+
+
+def parse_dusj(aanet_trk):
+    if not aanet_trk.rec_stage > -9999:
+        return {}
+    out = parse_track(aanet_trk)
     return out
