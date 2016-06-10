@@ -12,6 +12,7 @@ Contents
    :maxdepth: 1
 
    quick_start
+   configuration
    data_structures
    file_formats
    help_modules
