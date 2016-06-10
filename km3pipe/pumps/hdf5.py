@@ -59,101 +59,6 @@ class Track(tables.IsDescription):
     type = tables.IntCol()
 
 
-class RecoTrack(tables.IsDescription):
-    dir = tables.FloatCol(shape=(3,))
-    energy = tables.FloatCol()
-    event_id = tables.UIntCol()
-    pos = tables.FloatCol(shape=(3,))
-    run_id = tables.UIntCol()
-    time = tables.IntCol()
-    quality = tables.FloatCol()         # likelihood
-
-
-class RecoLNSTrack(RecoTrack):
-    beta = tables.FloatCol()
-    n_fits = tables.UIntCol()
-    max_likelihood = tables.FloatCol()
-    n_compatible_solutions = tables.UIntCol()
-    n_hits = tables.UIntCol()
-    # shape might be buggy
-    error_matrix = tables.FloatCol(shape=(15,))
-
-
-class JGandalfTrack(RecoTrack):
-    # shape might be buggy
-    error_matrix = tables.FloatCol(shape=(15,))
-    beta_0 = tables.FloatCol()
-    beta_1 = tables.FloatCol()
-    likelihood = tables.FloatCol()
-    reduced_likelihood = tables.FloatCol()
-    energy_uncorrected = tables.FloatCol()
-    n_hits = tables.UIntCol()
-    energy_old = tables.FloatCol()
-
-
-class QStrategyTrack(RecoTrack):
-    m_estimator = tables.FloatCol()
-    r_final = tables.FloatCol()
-    collected_charge = tables.FloatCol()
-    m_prefit = tables.FloatCol()
-    r_prefit = tables.FloatCol()
-    intertia = tables.FloatCol()
-
-
-class AaShowerFitTrack(RecoTrack):
-    m_estimator = tables.FloatCol()
-    t_vertex = tables.FloatCol()
-    n_hits = tables.UIntCol()
-    beta = tables.FloatCol()
-    error_matrix = tables.FloatCol(shape=(7*7, ))
-
-
-class DusjTrack(RecoTrack):
-    # fix those namings later
-    # some of them will be thrown out anyway
-    gold_parameter = tables.FloatCol()
-    SmallInertia = tables.FloatCol()
-    TimeResidualFWHM = tables.FloatCol()
-    TimeResidualNumberOfHits = tables.FloatCol()
-    YIntersepto1000_o50 = tables.FloatCol()
-    DusjShowerRecoVertexFitLogLikelihood = tables.FloatCol()
-    DusjShowerRecoVertexFitDegreesOfFreedom = tables.FloatCol()
-    DusjShowerRecoVertexFitReducedLogLikelihood = tables.FloatCol()
-    ReconstructedShowerEnergy = tables.FloatCol()
-    DusjShowerRecoFinalFitLogLikelihood = tables.FloatCol()
-    FitHorizontalDistanceToDetectorCenter = tables.FloatCol()
-    FitNumberOfStrings = tables.FloatCol()
-    FitQuadrupoleMoment = tables.FloatCol()
-    FitTimeResidualChiSquare = tables.FloatCol()
-    FitTotalCharge = tables.FloatCol()
-    FitVerticalDistanceToDetectorCenter = tables.FloatCol()
-
-
-class ThomasParameters(tables.IsDescription):
-    # fix those namings later
-    # some of them will be thrown out anyway
-    # Slope parameters (each 11, several fit ranges)
-    slope = tables.FloatCol()
-    chi2 = tables.FloatCol()
-    y_intersept = tables.FloatCol()
-    # difference between current fit and fit to range [0-1000]
-    y_intersept_diff = tables.UIntCol()
-    # Time residual distribution
-    TimeResidualNumberOfHits = tables.UIntCol()
-    TimeResidualMean = tables.FloatCol()
-    TimeResidualMedian = tables.FloatCol()
-    TimeResidualRMS = tables.FloatCol()
-    TimeResidualWidth15_85 = tables.FloatCol()
-    GParameter = tables.FloatCol()
-    GoldParameter = tables.FloatCol()
-    # Tensor of inertia
-    # shapes/dtype???
-    RelativeInertia = tables.FloatCol()
-    MiddleInertia = tables.FloatCol()
-    SmallInertia = tables.FloatCol()
-    BigInertia = tables.FloatCol()
-
-
 class HDF5Sink(Module):
     def __init__(self, **context):
         """A Module to convert (KM3NeT) ROOT files to HDF5."""
@@ -174,21 +79,9 @@ class HDF5Sink(Module):
         self.event_info = self.h5file.create_table('/', 'event_info',
                                                    EventInfoDesc, "Event Info",
                                                    filters=self.filters)
-        self.recolns = self.h5file.create_table('/reco', 'recolns', RecoLNSTrack,
-                                                'Reco LNS', createparents=True,
-                                                filters=self.filters)
-        self.aashowerfit = self.h5file.create_table('/reco', 'aashowerfit', AaShowerFitTrack,
-                                                    'AashowerFit', createparents=True,
-                                                    filters=self.filters)
-        self.qstrategy = self.h5file.create_table('/reco', 'q_strategy', QStrategyTrack,
-                                                  'Q Strategy', createparents=True,
-                                                  filters=self.filters)
-        self.dusj = self.h5file.create_table('/reco', 'dusj', DusjTrack,
-                                             'Dusj', createparents=True,
-                                             filters=self.filters)
-        self.jgandalf = self.h5file.create_table('/reco', 'jgandalf', JGandalfTrack,
-                                                 'JGandalf', createparents=True,
-                                                 filters=self.filters)
+        #self.recolns = self.h5file.create_table('/reco', 'recolns', RecoLNSTrack,
+        #                                        'Reco LNS', createparents=True,
+        #                                        filters=self.filters)
 
     def _write_hits(self, hits, hit_row):
         """Iterate through the hits and write them to the HDF5 table.
@@ -242,94 +135,6 @@ class HDF5Sink(Module):
         info_row['trigger_mask'] = info.trigger_mask
         info_row.append()
 
-    def _write_reco_info(self, track, reco_row):
-        reco_row['pos'] = [track.pos.x, track.pos.y, track.pos.z]
-        reco_row['dir'] = [track.dir.x, track.dir.y, track.dir.z]
-        reco_row['time'] = track.t
-        reco_row['energy'] = track.E
-        reco_row['quality'] = track.lik
-        return reco_row
-
-    def _write_recolns(self, track, reco_row):
-        reco_row['event_id'] = event_id
-        # magic number for "fit did not converge"
-        if track.rec_stage > -9999:
-            reco_row = self._write_reco_info(track, reco_row)
-            reco_row['beta'] = track.fitinf[0]
-            reco_row['n_fits'] = track.fitinf[1]
-            reco_row['max_likelihood'] = track.fitinf[2]
-            reco_row['n_compatible_solutions'] = track.fitinf[3]
-            reco_row['n_hits'] = track.fitinf[4]
-            reco_row['error_matrix'] = list(track.error_matrix)
-        reco_row.append()
-
-    def _write_jgandalf(self, track, reco_row, event_id):
-        reco_row['event_id'] = event_id
-        # magic number for "fit did not converge"
-        if track.rec_stage > -9999:
-            reco_row = self._write_reco_info(track, reco_row)
-            reco_row['beta_0'] = track.fitinf[0]
-            reco_row['beta_1'] = track.fitinf[1]
-            reco_row['likelihood'] = track.fitinf[2]
-            reco_row['reduced_likelihood'] = track.fitinf[3]
-            reco_row['energy_uncorrected'] = track.fitinf[4]
-            reco_row['n_hits'] = track.fitinf[6]
-            reco_row['energy_old'] = track.fitinf[7]
-            #reco_row['error_matrix'] = list(track.error_matrix)
-        reco_row.append()
-
-    def _write_qstrategy(self, track, reco_row, event_id):
-        reco_row['event_id'] = event_id
-        # magic number for "fit did not converge"
-        if track.rec_stage > -9999:
-            reco_row = self._write_reco_info(track, reco_row)
-            try:
-                reco_row['m_estimator'] = track.lik         # upstream oddity
-                reco_row['r_final'] = track.fitinf[0]
-                reco_row['collected_charge'] = track.fitinf[1]
-                reco_row['m_prefit'] = track.fitinf[2]
-                reco_row['r_prefit'] = track.fitinf[3]
-                reco_row['inertia'] = track.fitinf[4]
-            except IndexError:
-                pass
-        reco_row.append()
-
-    def _write_aashowerfit(self, track, reco_row, event_id):
-        reco_row['event_id'] = event_id
-        # magic number for "fit did not converge"
-        if track.rec_stage > -9999:
-            reco_row = self._write_reco_info(track, reco_row)
-            reco_row['m_estimator'] = track.fitinf[0]
-            reco_row['t_vertex'] = track.fitinf[1]
-            reco_row['n_hits'] = track.fitinf[2]
-            reco_row['beta'] = track.fitinf[3]
-            reco_row['error_matrix'] = list(track.error_matrix)
-        reco_row.append()
-
-    def _write_dusj(self, track, reco_row, event_id):
-        reco_row['event_id'] = event_id
-        # magic number for "fit did not converge"
-        if track.rec_stage > -9999:
-            reco_row = self._write_reco_info(track, reco_row)
-            reco_row['gold_parameter'] = track.lik          # upstream oddity
-            reco_row['SmallInertia'] = track.fitinf[0]
-            reco_row['TimeResidualFWHM'] = track.fitinf[1]
-            reco_row['TimeResidualNumberOfHits'] = track.fitinf[2]
-            reco_row['YIntersepto1000_o50'] = track.fitinf[3]
-            reco_row['DusjShowerRecoVertexFitLogLikelihood'] = track.fitinf[4]
-            reco_row['DusjShowerRecoVertexFitDegreesOfFreedom'] = track.fitinf[5]
-            reco_row['DusjShowerRecoVertexFitReducedLogLikelihood'] = track.fitinf[6]
-            reco_row['ReconstructedShowerEnergy'] = track.fitinf[7]
-            reco_row['DusjShowerRecoFinalFitLogLikelihood'] = track.fitinf[8]
-            reco_row['FitHorizontalDistanceToDetectorCenter'] = track.fitinf[9]
-            reco_row['FitNumberOfStrings'] = track.fitinf[10]
-            reco_row['FitQuadrupoleMoment'] = track.fitinf[11]
-            reco_row['FitTimeResidualChiSquare'] = track.fitinf[12]
-            reco_row['FitTotalCharge'] = track.fitinf[13]
-            reco_row['FitVerticalDistanceToDetectorCenter'] = track.fitinf[14]
-            reco_row['error_matrix'] = list(track.error_matrix)
-        reco_row.append()
-
     def process(self, blob):
         if 'Hits' in blob:
             hits = blob['Hits']
@@ -342,9 +147,9 @@ class HDF5Sink(Module):
             self._write_event_info(blob['Evt'], self.event_info.row)
         if 'EventInfo' in blob:  # TODO: decide how to deal with that class
             self._write_event_info(blob['EventInfo'], self.event_info.row)
-        if 'MiniDST' in blob:
-            if 'RecoLNS' in blob['MiniDST']:
-                self._write_recolns(blob['MiniDST']['RecoLNS'], self.recolns.row)
+        #if 'MiniDST' in blob:
+        #    if 'RecoLNS' in blob['MiniDST']:
+        #        self._write_recolns(blob['MiniDST']['RecoLNS'], self.recolns.row)
 
         if not self.index % 1000:
             self.hits.flush()
@@ -352,7 +157,7 @@ class HDF5Sink(Module):
             self.mc_tracks.flush()
             self.event_info.flush()
             #TODO: flush all reco stuff
-            self.recolns.flush()
+            #self.recolns.flush()
 
         self.index += 1
         return blob
@@ -362,13 +167,14 @@ class HDF5Sink(Module):
         self.event_info.flush()
         self.mc_hits.flush()
         self.mc_tracks.flush()
-        self.recolns.flush()
+        #TODO: flush all reco stuff
+        #self.recolns.flush()
         self.hits.cols.event_id.create_index()
         self.event_info.cols.event_id.create_index()
         self.mc_hits.cols.event_id.create_index()
         self.mc_tracks.cols.event_id.create_index()
         #TODO: index all reco stuff
-        self.recolns.cols.event_id.create_index()
+        #self.recolns.cols.event_id.create_index()
         #self.event_info.cols.run_id.create_index()
         #self.mc_hits.cols.run_id.create_index()
         #self.mc_tracks.cols.run_id.create_index()
