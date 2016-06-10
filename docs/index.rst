@@ -12,6 +12,8 @@ Contents
    :maxdepth: 1
 
    quick_start
+   configuration
+   cmd
    data_structures
    file_formats
    help_modules

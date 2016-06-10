@@ -52,21 +52,6 @@ km3pipe.pumps.jpp module
     :undoc-members:
     :show-inheritance:
 
-km3pipe.pumps.numpy module
-------------------------
-
-.. automodule:: km3pipe.pumps.numpy
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-km3pipe.pumps.pickle module
-------------------------
-
-.. automodule:: km3pipe.pumps.pickle
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 Module contents
 ---------------

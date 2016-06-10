@@ -5,13 +5,13 @@ KM3Pipe command line utility.
 
 Usage:
     km3pipe test
-    km3pipe update [BRANCH]
+    km3pipe update [GIT_BRANCH]
     km3pipe tohdf5 [-n EVENTS] -i FILE -o FILE
     km3pipe aatohdf5 [-n EVENTS] -i FILE -o FILE
     km3pipe jpptohdf5 [-n EVENTS] -i FILE -o FILE
     km3pipe evttohdf5 [-n EVENTS] -i FILE -o FILE
     km3pipe hdf2root -i FILE [-o FILE]
-    km3pipe runtable [-n RUNS] DET_ID
+    km3pipe runtable [-n RUNS] [-s REGEX] DET_ID
     km3pipe (-h | --help)
     km3pipe --version
 
@@ -20,8 +20,9 @@ Options:
     -i FILE         Input file.
     -o FILE         Output file.
     -n EVENTS/RUNS  Number of events/runs.
+    -s REGEX        Regular expression to filter the runsetup name/id.
     DET_ID          Detector ID (eg. D_ARCA001).
-    BRANCH          Git branch to pull (eg. develop).
+    GIT_BRANCH      Git branch to pull (eg. develop).
 
 """
 
@@ -58,6 +59,7 @@ def jpptohdf5(input_file, output_file, n_events):
     pipe.attach(HDF5Sink, filename=output_file)
     pipe.drain(n_events)
 
+
 def evttohdf5(input_file, output_file, n_events):
     """Convert evt file to HDF5 file"""
     from km3pipe import Pipeline  # noqa
@@ -70,15 +72,19 @@ def evttohdf5(input_file, output_file, n_events):
     pipe.drain(n_events)
 
 
-def runtable(det_id, n=5, sep='\t'):
+def runtable(det_id, n=5, sep='\t', regex=None):
     """Print the run table of the last `n` runs for given detector"""
     db = DBManager()
     df = db.run_table(det_id)
-    if n is None:
-        selected_df = df
-    else:
-        selected_df = df.tail(n)
-    selected_df.to_csv(sys.stdout, sep=sep)
+
+    if regex is not None:
+        df = df[df['RUNSETUPNAME'].str.match(regex) |
+                df['RUNSETUPID'].str.match(regex)]
+
+    if n is not None:
+        df = df.tail(n)
+
+    df.to_csv(sys.stdout, sep=sep)
 
 
 def hdf2root(infile, outfile):
@@ -119,7 +125,7 @@ def main():
         n = None
 
     if arguments['update']:
-        update_km3pipe(arguments['BRANCH'])
+        update_km3pipe(arguments['GIT_BRANCH'])
 
     if arguments['tohdf5']:
         aatohdf5(arguments['-i'], arguments['-o'], n)
@@ -134,7 +140,7 @@ def main():
         evttohdf5(arguments['-i'], arguments['-o'], n)
 
     if arguments['runtable']:
-        runtable(arguments['DET_ID'], n)
+        runtable(arguments['DET_ID'], n, regex=arguments['-s'])
 
     if arguments['hdf2root']:
         infile = arguments['-i']
