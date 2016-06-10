@@ -191,26 +191,30 @@ def parse_recolns(aanet_trk):
 def parse_jgandalf(aanet_trk):
     if not aanet_trk.rec_stage > -9999:
         return {}
-    out = parse_track(aanet_trk)
+    #out = parse_track(aanet_trk)
+    out = {}
     return out
 
 
 def parse_aashowerfit(aanet_trk):
     if not aanet_trk.rec_stage > -9999:
         return {}
-    out = parse_track(aanet_trk)
+    #out = parse_track(aanet_trk)
+    out = {}
     return out
 
 
 def parse_qstrategy(aanet_trk):
     if not aanet_trk.rec_stage > -9999:
         return {}
-    out = parse_track(aanet_trk)
+    #out = parse_track(aanet_trk)
+    out = {}
     return out
 
 
 def parse_dusj(aanet_trk):
     if not aanet_trk.rec_stage > -9999:
         return {}
-    out = parse_track(aanet_trk)
+    #out = parse_track(aanet_trk)
+    out = {}
     return out

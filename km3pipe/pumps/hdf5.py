@@ -135,21 +135,26 @@ class HDF5Sink(Module):
         info_row['trigger_mask'] = info.trigger_mask
         info_row.append()
 
+    def _write_reco(self, track, reco_row):
+        for colname, val in track.items():
+            reco_row[colname] = val
+        reco_row.append()
+
     def _write_minidst(self, minidst):
-        for recname, track in minidst:
+        for recname, track in minidst.items():
+            if not track:
+                continue
+            if recname == 'event_id':
+                continue
             if recname not in self._reco_tables:
-                recotable = self.h5file.create_table(
+                reco_table = self.h5file.create_table(
                     '/reco', recname.lower(),
                     np.dtype(recname_to_dtype[recname]),
                     recname, createparents=True, filters=self.filters
                 )
-                self._reco_tables[recname] = recotable
-            else:
-                recotable = self._reco_tables[recname]
-            # put stuff into table
-            for colname in recotable.colnames:
-                recotable.row[colname].append(track[colname])
-            recotable.append()
+                self._reco_tables[recname] = reco_table
+            reco_table = self._reco_tables[recname]
+            self._write_reco(track, reco_table.row)
 
     def process(self, blob):
         if 'Hits' in blob:
