@@ -1,6 +1,12 @@
 import numpy as np
 
-TRACK_DTYPE = [
+MINIMAL_TRACK_DTYPE = [
+    ('pos', np.float64, (3, )),
+    ('dir', np.float64, (3, )),
+]
+
+
+FULL_TRACK_DTYPE = [
     ('pos', np.float64, (3, )),
     ('dir', np.float64, (3, )),
     ('time', np.float64),
@@ -9,7 +15,7 @@ TRACK_DTYPE = [
 ]
 
 
-RECOLNS_DTYPE = TRACK_DTYPE[:]
+RECOLNS_DTYPE = FULL_TRACK_DTYPE[:]
 RECOLNS_DTYPE.extend([
     ('beta', np.float64),
     ('n_fits', np.uint16),
@@ -19,22 +25,22 @@ RECOLNS_DTYPE.extend([
     ('error_matrix', np.float64, (15, )),
 ])
 
-JGANDALF_DTYPE = TRACK_DTYPE[:]
+JGANDALF_DTYPE = FULL_TRACK_DTYPE[:]
 JGANDALF_DTYPE.extend([
 
 ])
 
-AASHOWERFIT_DTYPE = TRACK_DTYPE[:]
+AASHOWERFIT_DTYPE = FULL_TRACK_DTYPE[:]
 AASHOWERFIT_DTYPE.extend([
 
 ])
 
-QSTRATEGY_DTYPE = TRACK_DTYPE[:]
+QSTRATEGY_DTYPE = FULL_TRACK_DTYPE[:]
 QSTRATEGY_DTYPE.extend([
 
 ])
 
-DUSJ_DTYPE = TRACK_DTYPE[:]
+DUSJ_DTYPE = FULL_TRACK_DTYPE[:]
 DUSJ_DTYPE.extend([
 
 ])

@@ -81,6 +81,8 @@ class HDF5Sink(Module):
         self.event_info = self.h5file.create_table('/', 'event_info',
                                                    EventInfoDesc, "Event Info",
                                                    filters=self.filters)
+        self.reco = self.h5file.create_group(
+            '/', 'reco', createparents=True, filters=self.filters)
         self._reco_tables = {}
 
     def _write_hits(self, hits, hit_row):
@@ -135,18 +137,18 @@ class HDF5Sink(Module):
         info_row['trigger_mask'] = info.trigger_mask
         info_row.append()
 
-    def _write_reco(self, track, reco_row):
+    def _write_reco_track(self, track, reco_row):
         for colname, val in track.items():
             reco_row[colname] = val
         reco_row.append()
 
-    def _write_minidst(self, minidst):
-        for recname, track in minidst.items():
+    def _write_reco(self, reco_dict):
+        for recname, track in reco_dict.items():
             if recname == 'event_id':
                 continue
             if recname not in self._reco_tables:
                 reco_table = self.h5file.create_table(
-                    '/reco', recname.lower(),
+                    self.reco, recname.lower(),
                     np.dtype(recname_to_dtype[recname]),
                     recname, createparents=True, filters=self.filters
                 )
@@ -158,7 +160,7 @@ class HDF5Sink(Module):
                     reco_table.row[key] = track[key]
                 reco_table.row.append()
                 continue
-            self._write_reco(track, reco_table.row)
+            self._write_reco_track(track, reco_table.row)
 
     def process(self, blob):
         if 'Hits' in blob:
@@ -172,8 +174,8 @@ class HDF5Sink(Module):
             self._write_event_info(blob['Evt'], self.event_info.row)
         if 'EventInfo' in blob:  # TODO: decide how to deal with that class
             self._write_event_info(blob['EventInfo'], self.event_info.row)
-        if 'MiniDST' in blob:
-            self._write_minidst(blob['MiniDST'])
+        if 'Reco' in blob:
+            self._write_reco(blob['Reco'])
 
         if not self.index % 1000:
             self.hits.flush()
