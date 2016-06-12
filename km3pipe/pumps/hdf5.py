@@ -199,7 +199,8 @@ class HDF5Sink(Module):
         self.event_info.cols.event_id.create_index()
         self.mc_hits.cols.event_id.create_index()
         self.mc_tracks.cols.event_id.create_index()
-        # TODO: maybe index reco tables? idk
+        for tab in self._reco_tables.values():
+            tab.cols.event_id.create_index()
         self.h5file.close()
 
 
