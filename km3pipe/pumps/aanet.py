@@ -8,6 +8,8 @@ Pump for the Aanet data format.
 from __future__ import division, absolute_import, print_function
 import os.path
 
+import numpy as np
+
 from km3pipe import Pump
 from km3pipe.dataclasses import HitSeries, TrackSeries
 from km3pipe.logger import logging
@@ -162,8 +164,12 @@ def read_mini_dst(aanet_event, event_id):
 
 def parse_track(trk):
     out = {}
-    out['position'] = (trk.pos.x, trk.pos.y, trk.pos.z)
-    out['direction'] = (trk.dir.x, trk.dir.y, trk.dir.z)
+    out['pos_x'] = trk.pos.x
+    out['pos_y'] = trk.pos.y
+    out['pos_z'] = trk.pos.z
+    out['dir_x'] = trk.dir.x
+    out['dir_y'] = trk.dir.y
+    out['dir_z'] = trk.dir.z
     out['time'] = trk.t
     out['energy'] = trk.E
     out['quality'] = trk.lik
@@ -176,41 +182,56 @@ def parse_thomasfeatures(aanet_usr):
 
 
 def parse_recolns(aanet_trk):
-    if not aanet_trk.rec_stage > -9999:
-        return {}
     out = parse_track(aanet_trk)
+    did_converge = aanet_trk.rec_stage > -9999
+    out['did_converge'] = did_converge
+    if not did_converge:
+        for key in ['beta', 'n_fits', 'max_likelihood',
+                    'n_compatible_solutions', 'n_hits']:
+            out[key] = np.nan
+        return out
     out['beta'] = aanet_trk.fitinf[0]
     out['n_fits'] = aanet_trk.fitinf[1]
     out['max_likelihood'] = aanet_trk.fitinf[2]
     out['n_compatible_solutions'] = aanet_trk.fitinf[3]
     out['n_hits'] = aanet_trk.fitinf[4]
-    out['error_matrix'] = list(aanet_trk.error_matrix)
+    # flat is better
+    # nested BS is not a good idea
+    #out['error_matrix'] = list(aanet_trk.error_matrix)
     return out
 
 
 def parse_jgandalf(aanet_trk):
-    if not aanet_trk.rec_stage > -9999:
-        return {}
+    #if not aanet_trk.rec_stage > -9999:
+    #    return out
     out = parse_track(aanet_trk)
+    did_converge = aanet_trk.rec_stage > -9999
+    out['did_converge'] = did_converge
     return out
 
 
 def parse_aashowerfit(aanet_trk):
-    if not aanet_trk.rec_stage > -9999:
-        return {}
+    #if not aanet_trk.rec_stage > -9999:
+    #    return out
     out = parse_track(aanet_trk)
+    did_converge = aanet_trk.rec_stage > -9999
+    out['did_converge'] = did_converge
     return out
 
 
 def parse_qstrategy(aanet_trk):
-    if not aanet_trk.rec_stage > -9999:
-        return {}
+    #if not aanet_trk.rec_stage > -9999:
+    #    return out
     out = parse_track(aanet_trk)
+    did_converge = aanet_trk.rec_stage > -9999
+    out['did_converge'] = did_converge
     return out
 
 
 def parse_dusj(aanet_trk):
-    if not aanet_trk.rec_stage > -9999:
-        return {}
+    #if not aanet_trk.rec_stage > -9999:
+    #    return out
     out = parse_track(aanet_trk)
+    did_converge = aanet_trk.rec_stage > -9999
+    out['did_converge'] = did_converge
     return out

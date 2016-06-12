@@ -81,7 +81,7 @@ class HDF5Sink(Module):
         self.event_info = self.h5file.create_table('/', 'event_info',
                                                    EventInfoDesc, "Event Info",
                                                    filters=self.filters)
-        self.reco = self.h5file.create_group(
+        self.h5file.create_group(
             '/', 'reco', createparents=True, filters=self.filters)
         self._reco_tables = {}
 
@@ -152,12 +152,6 @@ class HDF5Sink(Module):
                 )
                 self._reco_tables[recname] = reco_table
             reco_table = self._reco_tables[recname]
-            if not track:
-                track = np.zeros(1, recname_to_dtype[recname])
-                for key in track.dtype.names:
-                    reco_table.row[key] = track[key]
-                reco_table.row.append()
-                continue
             self._write_reco_track(track, reco_table.row)
 
     def process(self, blob):
@@ -174,7 +168,7 @@ class HDF5Sink(Module):
             self._write_event_info(blob['EventInfo'], self.event_info.row)
         if 'Reco' in blob:
             # this is a group, not a single table
-            self._write_reco(blob['Reco'], self.reco)
+            self._write_reco(blob['Reco'], '/reco')
 
         if not self.index % 1000:
             self.hits.flush()
@@ -250,9 +244,12 @@ class HDF5Pump(Pump):
 
     def _get_reco(self, event_id, group_name='reco', where='/'):
         group = self.h5_file.get_node(where, group_name)
+        out = {}
         for table in group:
-            pass
-
+            tabname = table.title
+            data = table.read_where('event_id == %d' % event_id)
+            out[tabname] = data
+        return out
 
     def get_blob(self, index):
         event_id = self.event_ids[index]
@@ -262,7 +259,7 @@ class HDF5Pump(Pump):
         blob['MCTracks'] = self._get_tracks(event_id, table_name='mc_tracks')
         blob['EventInfo'] = self._get_event_info(event_id,
                                                  table_name='event_info')
-        blob['Reco'] = self.get_reco(event_id, group_name='reco')
+        blob['Reco'] = self._get_reco(event_id, group_name='reco')
         return blob
 
     def finish(self):
