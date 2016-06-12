@@ -142,11 +142,11 @@ class HDF5Sink(Module):
             reco_row[colname] = val
         reco_row.append()
 
-    def _write_reco(self, reco_dict):
+    def _write_reco(self, reco_dict, reco_group):
         for recname, track in reco_dict.items():
             if recname not in self._reco_tables:
                 reco_table = self.h5file.create_table(
-                    self.reco, recname.lower(),
+                    reco_group, recname.lower(),
                     np.dtype(recname_to_dtype[recname]),
                     recname, createparents=True, filters=self.filters
                 )
@@ -174,8 +174,7 @@ class HDF5Sink(Module):
             self._write_event_info(blob['EventInfo'], self.event_info.row)
         if 'Reco' in blob:
             # this is a group, not a single table
-            # thus no `row` passed as arg here
-            self._write_reco(blob['Reco'])
+            self._write_reco(blob['Reco'], self.reco)
 
         if not self.index % 1000:
             self.hits.flush()
@@ -249,6 +248,9 @@ class HDF5Pump(Pump):
         table = self.h5_file.get_node(where, table_name)
         return EventInfo.from_table(table[event_id])
 
+    def _get_reco(self, event_id, group_name='reco', where='/'):
+
+
     def get_blob(self, index):
         event_id = self.event_ids[index]
         blob = {}
@@ -257,6 +259,7 @@ class HDF5Pump(Pump):
         blob['MCTracks'] = self._get_tracks(event_id, table_name='mc_tracks')
         blob['EventInfo'] = self._get_event_info(event_id,
                                                  table_name='event_info')
+        blob['Reco'] = self.get_reco(event_id, group_name='reco')
         return blob
 
     def finish(self):
