@@ -249,6 +249,9 @@ class HDF5Pump(Pump):
         return EventInfo.from_table(table[event_id])
 
     def _get_reco(self, event_id, group_name='reco', where='/'):
+        group = self.h5_file.get_node(where, group_name)
+        for table in group:
+            pass
 
 
     def get_blob(self, index):
