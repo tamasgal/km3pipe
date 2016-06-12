@@ -1,18 +1,18 @@
 import numpy as np
 
 MINIMAL_TRACK_DTYPE = [
+    ('event_id', np.uint64),
     ('pos', np.float64, (3, )),
     ('dir', np.float64, (3, )),
 ]
 
 
-FULL_TRACK_DTYPE = [
-    ('pos', np.float64, (3, )),
-    ('dir', np.float64, (3, )),
+FULL_TRACK_DTYPE = MINIMAL_TRACK_DTYPE[:]
+FULL_TRACK_DTYPE.extend([
     ('time', np.float64),
     ('energy', np.float64),
     ('quality', np.float64),
-]
+])
 
 
 RECOLNS_DTYPE = FULL_TRACK_DTYPE[:]

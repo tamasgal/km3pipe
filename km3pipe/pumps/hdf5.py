@@ -144,8 +144,6 @@ class HDF5Sink(Module):
 
     def _write_reco(self, reco_dict):
         for recname, track in reco_dict.items():
-            if recname == 'event_id':
-                continue
             if recname not in self._reco_tables:
                 reco_table = self.h5file.create_table(
                     self.reco, recname.lower(),
