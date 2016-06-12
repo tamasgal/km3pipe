@@ -175,6 +175,8 @@ class HDF5Sink(Module):
         if 'EventInfo' in blob:  # TODO: decide how to deal with that class
             self._write_event_info(blob['EventInfo'], self.event_info.row)
         if 'Reco' in blob:
+            # this is a group, not a single table
+            # thus no `row` passed as arg here
             self._write_reco(blob['Reco'])
 
         if not self.index % 1000:
