@@ -162,8 +162,8 @@ def read_mini_dst(aanet_event, event_id):
 
 def parse_track(trk):
     out = {}
-    out['pos'] = (trk.pos.x, trk.pos.y, trk.pos.z)
-    out['dir'] = (trk.pos.x, trk.pos.y, trk.pos.z)
+    out['position'] = (trk.pos.x, trk.pos.y, trk.pos.z)
+    out['direction'] = (trk.dir.x, trk.dir.y, trk.dir.z)
     out['time'] = trk.t
     out['energy'] = trk.E
     out['quality'] = trk.lik
