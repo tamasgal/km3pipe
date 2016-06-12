@@ -86,7 +86,7 @@ class AanetPump(Pump):
                 blob = {'Evt': event,
                         'Hits': HitSeries.from_aanet(event.hits, event.id),
                         'MCHits': HitSeries.from_aanet(event.mc_hits, event.id),
-                        'MiniDST': read_mini_dst(event, event.id),
+                        'Reco': read_mini_dst(event, event.id),
                         'MCTracks': TrackSeries.from_aanet(event.mc_trks,
                                                            event.id),
                         'filename': filename,
@@ -155,8 +155,8 @@ def read_mini_dst(aanet_event, event_id):
         recname = pos_to_recname[k]
         reader = recname_to_reader[recname]
         minidst[recname] = reader(trk)
-    minidst['event_id'] = event_id
     #minidst['ThomasFeatures'] = parse_thomasfeatures(aanet_event.usr)
+    minidst['event_id'] = event_id
     return minidst
 
 
