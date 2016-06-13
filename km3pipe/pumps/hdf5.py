@@ -141,10 +141,10 @@ class HDF5Sink(Module):
             reco_row[colname] = val
         reco_row.append()
 
-    self._gen_dtype(self, track):
+    def _gen_dtype(self, track):
         keys = [(k, np.float64) for k in track.keys() if k != 'event_id' if k != 'did_converge']
-        keys.append([('event_id', np.uint32), ('did_converge', np.bool_)])
-        return sorted(keys)
+        keys.extend([('event_id', np.uint32), ('did_converge', np.bool_)])
+        return np.dtype(sorted(keys))
 
     def _write_reco(self, reco_dict, reco_group):
         for recname, track in reco_dict.items():

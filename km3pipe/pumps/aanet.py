@@ -266,7 +266,7 @@ def parse_recolns(aanet_trk):
 
     # flat is better
     # nested BS is not a good idea
-    out['error_matrix'] = list(aanet_trk.error_matrix)
+    #out['error_matrix'] = list(aanet_trk.error_matrix)
     return out
 
 
@@ -303,7 +303,7 @@ def parse_aashowerfit(aanet_trk):
     did_converge = aanet_trk.rec_stage > -9999
     out['did_converge'] = did_converge
 
-    aashow_keys = ['NhitsAA', 'M-estimator', 'beta',
+    aashow_keys = ['NhitsAA', 'M_estimator', 'beta',
                     'NhitsL0', 'NhitsL1']
 
     if not did_converge:
@@ -320,7 +320,7 @@ def parse_aashowerfit(aanet_trk):
         out[key] = aanet_trk.usr[count]
         count += 1
 
-    out['error_matrix'] = list(aanet_trk.error_matrix)
+    #out['error_matrix'] = list(aanet_trk.error_matrix)
 
     return out
 
