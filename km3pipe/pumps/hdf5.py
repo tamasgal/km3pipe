@@ -16,7 +16,6 @@ import tables
 from km3pipe import Pump, Module
 from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
 from km3pipe.logger import logging
-from km3pipe.reco_dtypes import recname_to_dtype
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -142,12 +141,18 @@ class HDF5Sink(Module):
             reco_row[colname] = val
         reco_row.append()
 
+    self._gen_dtype(self, track):
+        keys = [(k, np.float64) for k in track.keys() if k != 'event_id' if k != 'did_converge']
+        keys.append([('event_id', np.uint32), ('did_converge', np.bool_)])
+        return sorted(keys)
+
     def _write_reco(self, reco_dict, reco_group):
         for recname, track in reco_dict.items():
             if recname not in self._reco_tables:
+                dtype = self._gen_dtype(track)
                 reco_table = self.h5file.create_table(
                     reco_group, recname.lower(),
-                    np.dtype(recname_to_dtype[recname]),
+                    dtype,      #np.dtype(recname_to_dtype[recname]),
                     recname, createparents=True, filters=self.filters
                 )
                 self._reco_tables[recname] = reco_table
