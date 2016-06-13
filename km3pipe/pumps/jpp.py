@@ -11,7 +11,7 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 
 from km3pipe import Pump
-from km3pipe.dataclasses import HitSeries
+from km3pipe.dataclasses import EventInfo, HitSeries
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -37,26 +37,31 @@ class JPPPump(Pump):
         self.blobs = self.blob_generator()
 
     def blob_generator(self):
-        while self.reader.has_next():
-            self.reader.retrieve_next_event()
+        while self.reader.has_next:
+            r = self.reader
+            r.retrieve_next_event()
             self.index += 1
 
-            n = self.reader.get_number_of_snapshot_hits()
+            n = r.number_of_snapshot_hits
             channel_ids = np.zeros(n, dtype='i')
             dom_ids = np.zeros(n, dtype='i')
             times = np.zeros(n, dtype='i')
             tots = np.zeros(n, dtype='i')
             triggereds = np.zeros(n, dtype='i')
 
-            self.reader.get_hits(channel_ids, dom_ids, times, tots, triggereds)
+            r.get_hits(channel_ids, dom_ids, times, tots, triggereds)
 
             hit_series = HitSeries.from_arrays(
                 channel_ids, dom_ids, np.arange(n), np.zeros(n), times, tots,
                 triggereds, self.index
             )
 
-            yield {'FrameIndex': self.reader.get_frame_index(),
-                   'Hits': hit_series}
+            event_info = EventInfo(r.det_id, r.event_id, r.frame_index,
+                                   0, 0,  # MC ID and time
+                                   r.overlays, r.run_id,
+                                   r.trigger_counter, r.trigger_mask)
+
+            yield {'EventInfo': event_info, 'Hits': hit_series}
 
     def process(self, blob):
         return next(self.blobs)
