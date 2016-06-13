@@ -40,7 +40,6 @@ class JPPPump(Pump):
         while self.reader.has_next:
             r = self.reader
             r.retrieve_next_event()
-            self.index += 1
 
             n = r.number_of_snapshot_hits
             channel_ids = np.zeros(n, dtype='i')
@@ -56,11 +55,12 @@ class JPPPump(Pump):
                 triggereds, self.index
             )
 
-            event_info = EventInfo(r.det_id, r.event_id, r.frame_index,
+            event_info = EventInfo(r.det_id, self.index, r.frame_index,
                                    0, 0,  # MC ID and time
                                    r.overlays, r.run_id,
                                    r.trigger_counter, r.trigger_mask)
 
+            self.index += 1
             yield {'EventInfo': event_info, 'Hits': hit_series}
 
     def process(self, blob):
