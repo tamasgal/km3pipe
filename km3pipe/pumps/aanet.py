@@ -190,11 +190,11 @@ def parse_recolns(aanet_trk):
                     'n_compatible_solutions', 'n_hits']:
             out[key] = np.nan
         return out
-    out['beta'] = aanet_trk.fitinf[0]
-    out['n_fits'] = aanet_trk.fitinf[1]
-    out['max_likelihood'] = aanet_trk.fitinf[2]
-    out['n_compatible_solutions'] = aanet_trk.fitinf[3]
-    out['n_hits'] = aanet_trk.fitinf[4]
+    out['beta'] = aanet_trk.usr[0]
+    out['n_fits'] = aanet_trk.usr[1]
+    out['max_likelihood'] = aanet_trk.usr[2]
+    out['n_compatible_solutions'] = aanet_trk.usr[3]
+    out['n_hits'] = aanet_trk.usr[4]
     # flat is better
     # nested BS is not a good idea
     #out['error_matrix'] = list(aanet_trk.error_matrix)
