@@ -10,6 +10,7 @@ from __future__ import division, absolute_import, print_function
 
 import os.path
 
+import numpy as np
 import tables
 
 from km3pipe import Pump, Module
@@ -59,101 +60,6 @@ class Track(tables.IsDescription):
     type = tables.IntCol()
 
 
-class RecoTrack(tables.IsDescription):
-    dir = tables.FloatCol(shape=(3,))
-    energy = tables.FloatCol()
-    event_id = tables.UIntCol()
-    pos = tables.FloatCol(shape=(3,))
-    run_id = tables.UIntCol()
-    time = tables.IntCol()
-    quality = tables.FloatCol()         # likelihood
-
-
-class RecoLNSTrack(RecoTrack):
-    beta = tables.FloatCol()
-    n_fits = tables.UIntCol()
-    max_likelihood = tables.FloatCol()
-    n_compatible_solutions = tables.UIntCol()
-    n_hits = tables.UIntCol()
-    # shape might be buggy
-    error_matrix = tables.FloatCol(shape=(15,))
-
-
-class JGandalfTrack(RecoTrack):
-    # shape might be buggy
-    error_matrix = tables.FloatCol(shape=(15,))
-    beta_0 = tables.FloatCol()
-    beta_1 = tables.FloatCol()
-    likelihood = tables.FloatCol()
-    reduced_likelihood = tables.FloatCol()
-    energy_uncorrected = tables.FloatCol()
-    n_hits = tables.UIntCol()
-    energy_old = tables.FloatCol()
-
-
-class QStrategyTrack(RecoTrack):
-    m_estimator = tables.FloatCol()
-    r_final = tables.FloatCol()
-    collected_charge = tables.FloatCol()
-    m_prefit = tables.FloatCol()
-    r_prefit = tables.FloatCol()
-    intertia = tables.FloatCol()
-
-
-class AAShowerFitTrack(RecoTrack):
-    m_estimator = tables.FloatCol()
-    t_vertex = tables.FloatCol()
-    n_hits = tables.UIntCol()
-    beta = tables.FloatCol()
-    error_matrix = tables.FloatCol(shape=(7, 7))
-
-
-class DusjTrack(RecoTrack):
-    # fix those namings later
-    # some of them will be thrown out anyway
-    gold_parameter = tables.FloatCol()
-    SmallInertia = tables.FloatCol()
-    TimeResidualFWHM = tables.FloatCol()
-    TimeResidualNumberOfHits = tables.FloatCol()
-    YIntersepto1000_o50 = tables.FloatCol()
-    DusjShowerRecoVertexFitLogLikelihood = tables.FloatCol()
-    DusjShowerRecoVertexFitDegreesOfFreedom = tables.FloatCol()
-    DusjShowerRecoVertexFitReducedLogLikelihood = tables.FloatCol()
-    ReconstructedShowerEnergy = tables.FloatCol()
-    DusjShowerRecoFinalFitLogLikelihood = tables.FloatCol()
-    FitHorizontalDistanceToDetectorCenter = tables.FloatCol()
-    FitNumberOfStrings = tables.FloatCol()
-    FitQuadrupoleMoment = tables.FloatCol()
-    FitTimeResidualChiSquare = tables.FloatCol()
-    FitTotalCharge = tables.FloatCol()
-    FitVerticalDistanceToDetectorCenter = tables.FloatCol()
-
-
-class ThomasParameters(tables.IsDescription):
-    # fix those namings later
-    # some of them will be thrown out anyway
-    # Slope parameters (each 11, several fit ranges)
-    slope = tables.FloatCol()
-    chi2 = tables.FloatCol()
-    y_intersept = tables.FloatCol()
-    # difference between current fit and fit to range [0-1000]
-    y_intersept_diff = tables.UIntCol()
-    # Time residual distribution
-    TimeResidualNumberOfHits = tables.UIntCol()
-    TimeResidualMean = tables.FloatCol()
-    TimeResidualMedian = tables.FloatCol()
-    TimeResidualRMS = tables.FloatCol()
-    TimeResidualWidth15_85 = tables.FloatCol()
-    GParameter = tables.FloatCol()
-    GoldParameter = tables.FloatCol()
-    # Tensor of inertia
-    # shapes/dtype???
-    RelativeInertia = tables.FloatCol()
-    MiddleInertia = tables.FloatCol()
-    SmallInertia = tables.FloatCol()
-    BigInertia = tables.FloatCol()
-
-
 class HDF5Sink(Module):
     def __init__(self, **context):
         """A Module to convert (KM3NeT) ROOT files to HDF5."""
@@ -174,9 +80,9 @@ class HDF5Sink(Module):
         self.event_info = self.h5file.create_table('/', 'event_info',
                                                    EventInfoDesc, "Event Info",
                                                    filters=self.filters)
-        self.recolns = self.h5file.create_table('/reco', 'recolns', RecoLNSTrack,
-                                                'Reco LNS', createparents=True,
-                                                filters=self.filters)
+        self.h5file.create_group(
+            '/', 'reco', createparents=True, filters=self.filters)
+        self._reco_tables = {}
 
     def _write_hits(self, hits, hit_row):
         """Iterate through the hits and write them to the HDF5 table.
@@ -230,15 +136,28 @@ class HDF5Sink(Module):
         info_row['trigger_mask'] = info.trigger_mask
         info_row.append()
 
-    def _write_recolns(self, track, reco_row):
-        reco_row['beta'] = track.beta
-        reco_row['event_id'] = track.id
-        reco_row['n_fits'] = track.n_fits
-        reco_row['max_likelihood'] = track.max_likelihood
-        reco_row['n_compatible_solutions'] = track.n_compatible_solutions
-        reco_row['n_hits'] = track.n_hits
-        reco_row['error_matrix'] = track.error_matrix
+    def _write_reco_track(self, track, reco_row):
+        for colname, val in track.items():
+            reco_row[colname] = val
         reco_row.append()
+
+    def _gen_dtype(self, track):
+        keys = [(k, np.float64) for k in track.keys() if k != 'event_id' if k != 'did_converge']
+        keys.extend([('event_id', np.uint32), ('did_converge', np.bool_)])
+        return np.dtype(sorted(keys))
+
+    def _write_reco(self, reco_dict, reco_group):
+        for recname, track in reco_dict.items():
+            if recname not in self._reco_tables:
+                dtype = self._gen_dtype(track)
+                reco_table = self.h5file.create_table(
+                    reco_group, recname.lower(),
+                    dtype,      #np.dtype(recname_to_dtype[recname]),
+                    recname, createparents=True, filters=self.filters
+                )
+                self._reco_tables[recname] = reco_table
+            reco_table = self._reco_tables[recname]
+            self._write_reco_track(track, reco_table.row)
 
     def process(self, blob):
         if 'Hits' in blob:
@@ -252,15 +171,17 @@ class HDF5Sink(Module):
             self._write_event_info(blob['Evt'], self.event_info.row)
         if 'EventInfo' in blob:  # TODO: decide how to deal with that class
             self._write_event_info(blob['EventInfo'], self.event_info.row)
-        if 'RecoLNS' in blob:
-            self._write_recolns(blob['RecoLNS'], self.recolns.row)
+        if 'Reco' in blob:
+            # this is a group, not a single table
+            self._write_reco(blob['Reco'], '/reco')
 
         if not self.index % 1000:
             self.hits.flush()
             self.mc_hits.flush()
             self.mc_tracks.flush()
             self.event_info.flush()
-            self.recolns.flush()
+            for tab in self._reco_tables.values():
+                tab.flush()
 
         self.index += 1
         return blob
@@ -270,15 +191,14 @@ class HDF5Sink(Module):
         self.event_info.flush()
         self.mc_hits.flush()
         self.mc_tracks.flush()
-        self.recolns.flush()
+        for tab in self._reco_tables.values():
+            tab.flush()
         self.hits.cols.event_id.create_index()
         self.event_info.cols.event_id.create_index()
         self.mc_hits.cols.event_id.create_index()
         self.mc_tracks.cols.event_id.create_index()
-        self.recolns.cols.event_id.create_index()
-        #self.event_info.cols.run_id.create_index()
-        #self.mc_hits.cols.run_id.create_index()
-        #self.mc_tracks.cols.run_id.create_index()
+        for tab in self._reco_tables.values():
+            tab.cols.event_id.create_index()
         self.h5file.close()
 
 
@@ -327,6 +247,15 @@ class HDF5Pump(Pump):
         table = self.h5_file.get_node(where, table_name)
         return EventInfo.from_table(table[event_id])
 
+    def _get_reco(self, event_id, group_name='reco', where='/'):
+        group = self.h5_file.get_node(where, group_name)
+        out = {}
+        for table in group:
+            tabname = table.title
+            data = table.read_where('event_id == %d' % event_id)
+            out[tabname] = data
+        return out
+
     def get_blob(self, index):
         event_id = self.event_ids[index]
         blob = {}
@@ -335,6 +264,7 @@ class HDF5Pump(Pump):
         blob['MCTracks'] = self._get_tracks(event_id, table_name='mc_tracks')
         blob['EventInfo'] = self._get_event_info(event_id,
                                                  table_name='event_info')
+        blob['Reco'] = self._get_reco(event_id, group_name='reco')
         return blob
 
     def finish(self):

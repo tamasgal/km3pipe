@@ -253,8 +253,6 @@ cdef class Track:
         return self.__str__()
 
 
-
-
 class HitSeries(object):
     def __init__(self, hits, event_id=None):
         self.event_id = event_id
