@@ -12,6 +12,7 @@ Usage:
     km3pipe evttohdf5 [-n EVENTS] -i FILE -o FILE
     km3pipe hdf2root -i FILE [-o FILE]
     km3pipe runtable [-n RUNS] [-s REGEX] DET_ID
+    km3pipe runinfo DET_ID RUN
     km3pipe (-h | --help)
     km3pipe --version
 
@@ -23,6 +24,7 @@ Options:
     -s REGEX        Regular expression to filter the runsetup name/id.
     DET_ID          Detector ID (eg. D_ARCA001).
     GIT_BRANCH      Git branch to pull (eg. develop).
+    RUN             Run number.
 
 """
 
@@ -87,6 +89,38 @@ def runtable(det_id, n=5, sep='\t', regex=None):
     df.to_csv(sys.stdout, sep=sep)
 
 
+def runinfo(run_id, det_id):
+    db = DBManager()
+    df = db.run_table(det_id)
+    row = df[df['RUN'] == int(run_id)]
+    if len(row) == 0:
+        print("No database entry for run {0} found.".format(run_id))
+        return
+    next_row = df[df['RUN'] == (int(run_id) + 1)]
+    if len(next_row) != 0:
+        end_time = next_row['DATETIME'].values[0]
+        duration = (next_row['UNIXSTARTTIME'].values[0] -
+                    row['UNIXSTARTTIME'].values[0]) / 1000 / 60
+    else:
+        end_time = duration = float('NaN')
+    print("Run {0} - detector ID: {1}".format(run_id, det_id))
+    print('-'*42)
+    print("  Start time:         {0}\n"
+          "  End time:           {1}\n"
+          "  Duration [min]:     {2:.2f}\n"
+          "  Start time defined: {3}\n"
+          "  Runsetup ID:        {4}\n"
+          "  Runsetup name:      {5}\n"
+          "  T0 Calibration ID:  {6}\n"
+          .format(row['DATETIME'].values[0],
+                  end_time,
+                  duration,
+                  bool(row['STARTTIME_DEFINED'].values[0]),
+                  row['RUNSETUPID'].values[0],
+                  row['RUNSETUPNAME'].values[0],
+                  row['T0_CALIBSETID'].values[0]))
+
+
 def hdf2root(infile, outfile):
     from rootpy.io import root_open
     from rootpy import asrootpy
@@ -141,6 +175,9 @@ def main():
 
     if arguments['runtable']:
         runtable(arguments['DET_ID'], n, regex=arguments['-s'])
+
+    if arguments['runinfo']:
+        runinfo(arguments['RUN'], arguments['DET_ID'])
 
     if arguments['hdf2root']:
         infile = arguments['-i']

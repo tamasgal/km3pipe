@@ -27,3 +27,8 @@ git push
 git checkout develop
 git push
 git push --tags
+
+git checkout svn
+git merge master
+git svn dcommit
+git checkout develop
