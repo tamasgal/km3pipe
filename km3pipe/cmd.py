@@ -96,14 +96,25 @@ def runinfo(run_id, det_id):
     if len(row) == 0:
         print("No database entry for run {0} found.".format(run_id))
         return
+    next_row = df[df['RUN'] == (int(run_id) + 1)]
+    if len(next_row) != 0:
+        end_time = next_row['DATETIME'].values[0]
+        duration = (next_row['UNIXSTARTTIME'].values[0] -
+                    row['UNIXSTARTTIME'].values[0]) / 1000 / 60
+    else:
+        end_time = duration = float('NaN')
     print("Run {0} - detector ID: {1}".format(run_id, det_id))
     print('-'*42)
     print("  Start time:         {0}\n"
-          "  Start time defined: {1}\n"
-          "  Runsetup ID: {2}\n"
-          "  Runsetup name: {3}\n"
-          "  T0 Calibration ID: {4}\n"
+          "  End time:           {1}\n"
+          "  Duration [min]:     {2:.2f}\n"
+          "  Start time defined: {3}\n"
+          "  Runsetup ID:        {4}\n"
+          "  Runsetup name:      {5}\n"
+          "  T0 Calibration ID:  {6}\n"
           .format(row['DATETIME'].values[0],
+                  end_time,
+                  duration,
                   bool(row['STARTTIME_DEFINED'].values[0]),
                   row['RUNSETUPID'].values[0],
                   row['RUNSETUPNAME'].values[0],
