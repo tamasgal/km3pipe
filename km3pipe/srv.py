@@ -24,6 +24,8 @@ import math
 
 from time import sleep
 
+import pandas as pd
+
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)
@@ -109,7 +111,12 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
             log.warn("Removing ROOT file {0}".format(rootfilepath))
             os.remove(rootfilepath)
 
-        self.message("here is your data")
+        hits = pd.read_hdf(h5filepath, 'hits')
+        snapshot_hits = hits[(hits['event_id'] == event_id)]
+        triggered_hits = hits[(hits['event_id'] == event_id) &
+                              (hits['triggered'] == True)]
+        self.message("Snapshot hits: {0}, Triggered hits: {1}"
+                     .format(len(snapshot_hits), len(triggered_hits)))
 
     def message(self, text):
         """Convert message to json and send it to the clients"""
