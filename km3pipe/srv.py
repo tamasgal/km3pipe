@@ -82,6 +82,7 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
                                   det_dir_name, sub_dir, rootfilename)
 
         h5filepath = os.path.join(data_dir, h5filename)
+        h5filepath_tmp = h5filepath + '.tmp'
         rootfilepath = os.path.join(data_dir, rootfilename)
 
         self.message("Looking for {0}".format(basename))
@@ -89,7 +90,16 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
         print("Detector dir: {0}".format(det_dir))
         print("Data dir: {0}".format(data_dir))
 
+        if os.path.exists(h5filepath_tmp):
+            self.message("File is currently being process. Waiting...")
+
+        while os.path.exists(h5filepath_tmp):
+            sleep(3)
+
         if not os.path.exists(h5filepath):
+            print("Creating {0}".format(h5filepath_tmp))
+            subprocess.call(['mkdir', '-p', data_dir])
+            subprocess.call(['touch', h5filepath_tmp])
             if not os.path.exists(rootfilepath):
                 self.message("No HDF5 file found, downloading ROOT file.")
                 print("Retrieve {0}".format(irods_path))
@@ -101,9 +111,10 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
                     return
             status = subprocess.call(['km3pipe', 'jpptohdf5',
                                       '-i', rootfilepath,
-                                      '-o', h5filepath])
+                                      '-o', h5filepath_tmp])
             if status == 0:
                 self.message("Successfully converted data.")
+                os.rename(h5filepath_tmp, h5filepath)
             else:
                 self.message("There was a problem converting the data.")
 
