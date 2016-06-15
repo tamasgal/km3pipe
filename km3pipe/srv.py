@@ -17,9 +17,16 @@ from tornado.options import define, options
 
 import json
 import os
-import thread
+from thread import start_new_thread
+import re
+import subprocess
+import math
 
 from time import sleep
+
+from km3pipe.logger import logging
+
+log = logging.getLogger(__name__)
 
 VERSION = '0.0.1'
 
@@ -27,11 +34,14 @@ define("ip", default="0.0.0.0", type=str,
        help="The WAN IP of this machine. You can use 127 for local tests.")
 define("port", default="8088", type=int,
        help="The KM3srv server will be available on this port.")
+define("data", default=os.path.expanduser("~/km3net/data"), type=str,
+       help="Path to the data files.")
 
 class EchoWebSocket(tornado.websocket.WebSocketHandler):
     """An echo handler for client/server messaging and debugging"""
     def __init__(self, *args, **kwargs):
         self.clients = kwargs.pop('clients')
+        self.data_path = kwargs.pop('data_path')
         super(EchoWebSocket, self).__init__(*args, **kwargs)
 
     def check_origin(self, origin):
@@ -40,24 +50,70 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
     def open(self):
         welcome = u"WebSocket opened. Welcome to KM3srv {0}!".format(VERSION)
         print(welcome)
-        self.send_json_message(welcome)
+        self.message(welcome)
         self.clients.append(self)
 
     def on_message(self, message):
-        self.send_json_message(u"Client said '{0}'".format(message))
-        thread.start_new_thread(self.background_process, (message, ))
+        # self.message(u"Client said '{0}'".format(message))
+        print("Client said: {0}".format(message))
+        if message.startswith('event'):
+            p = re.compile(ur'event/(\d+)/(\d+)/(\d+)')
+            try:
+                det_id, run_id, event_id = re.search(p, message).groups()
+            except AttributeError:
+                self.message("Syntax error, try event/DET_ID/RUN_ID/EVENT")
+            else:
+                start_new_thread(self.get_event,
+                                 (int(det_id), int(run_id), int(event_id)))
 
-    def background_process(self, foo):
-        self.write_message("Grabbing {0}".format(foo))
-        self.write_message("Sleeping for 7 seconds for {0}...".format(foo))
-        sleep(7)
-        self.write_message("Waking up in 12 seconds for {0}...".format(foo))
-        sleep(12)
-        self.write_message("Done with {0}!".format(foo))
+    def get_event(self, det_id, run_id, event_id):
+        det_dir_name = "KM3NeT_{0:08d}".format(det_id)
+        det_dir = os.path.join(self.data_path, 'sea', det_dir_name)
+        sub_dir = str(int(math.floor(run_id / 1000)))
+        data_dir = os.path.join(det_dir, sub_dir)
 
-    def send_json_message(self, text):
+        basename = "{0}_{1:08d}".format(det_dir_name, run_id, event_id)
+        h5filename = basename + ".h5"
+        rootfilename = basename + ".root"
+
+        irods_path = os.path.join("/in2p3/km3net/data/raw/sea",
+                                  det_dir_name, sub_dir, rootfilename)
+
+        h5filepath = os.path.join(data_dir, h5filename)
+        rootfilepath = os.path.join(data_dir, rootfilename)
+
+        self.message("Looking for {0}".format(basename))
+        print("Request for event {0} in {1}".format(event_id, h5filename))
+        print("Detector dir: {0}".format(det_dir))
+        print("Data dir: {0}".format(data_dir))
+
+        if not os.path.exists(h5filepath):
+            if not os.path.exists(rootfilepath):
+                self.message("No HDF5 file found, downloading ROOT file.")
+                print("Retrieve {0}".format(irods_path))
+                status = subprocess.call(['iget', irods_path, data_dir])
+                if status == 0:
+                    self.message("Successfully downloaded data.")
+                else:
+                    self.message("There was a problem downloading the data.")
+                    return
+            status = subprocess.call(['km3pipe', 'jpptohdf5',
+                                      '-i', rootfilepath,
+                                      '-o', h5filepath])
+            if status == 0:
+                self.message("Successfully converted data.")
+            else:
+                self.message("There was a problem converting the data.")
+
+        if os.path.exists(rootfilepath):
+            log.warn("Removing ROOT file {0}".format(rootfilepath))
+            os.remove(rootfilepath)
+
+        self.message("here is your data")
+
+    def message(self, text):
         """Convert message to json and send it to the clients"""
-        message = json.dumps({'kind': 'message', 'text': text})
+        message = json.dumps({'kind': 'message', 'data': text})
         self.write_message(message)
 
 
@@ -69,19 +125,22 @@ def main():
 
     ip = options.ip
     port = int(options.port)
+    data_path = options.data
+    clients = []
 
     print("Starting KM3srv.")
     print("Running on {0}:{1}".format(ip, port))
+    print("Data path: {0}".format(data_path))
 
     settings = {'debug': True,
                 'static_path': os.path.join(root, 'static'),
                 'template_path': os.path.join(root, 'static/templates'),
                 }
 
-    clients = []
 
     application = tornado.web.Application([
-        (r"/test", EchoWebSocket, {'clients': clients}),
+        (r"/test", EchoWebSocket, {'clients': clients,
+                                   'data_path': data_path}),
     ], **settings)
 
     try:
