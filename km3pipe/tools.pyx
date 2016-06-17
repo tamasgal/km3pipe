@@ -355,11 +355,26 @@ def open_hdf5(filename):
     mc_tracks = None
     event_info = pd.read_hdf(filename, '/event_info')
     det_ids = np.unique(event_info.det_id)
+    reco = read_reco(filename)
     if len(det_ids) > 1:
         log.critical("Multiple detector IDs found in events.")
     geometry = kp.Geometry(det_id=det_ids[0])
     return event_info, geometry, hits, mc_tracks
 
+
+def read_reco(filename):
+    df = []
+    with pd.HDFStore(filename) as h5:
+        reco_group = h5.get_node('/reco')
+        for table in reco_group:
+            tabname = table.name
+            colnames = [tabname + '_' + col for col in table.colnames]
+            df.append(pd.DataFrame(table[:], columns=colnames))
+    df = pd.concat(df)
+    return df
+
+
+### ----------
 
 try:
     dict.iteritems
