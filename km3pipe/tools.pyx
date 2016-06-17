@@ -359,19 +359,20 @@ def open_hdf5(filename):
     if len(det_ids) > 1:
         log.critical("Multiple detector IDs found in events.")
     geometry = kp.Geometry(det_id=det_ids[0])
-    return event_info, geometry, hits, mc_tracks
+    return event_info, geometry, hits, mc_tracks, reco
 
 
 def read_reco(filename):
-    df = []
-    with pd.HDFStore(filename) as h5:
+    dfs = []
+    with pd.HDFStore(filename, 'r') as h5:
         reco_group = h5.get_node('/reco')
         for table in reco_group:
             tabname = table.name
             colnames = [tabname + '_' + col for col in table.colnames]
-            df.append(pd.DataFrame(table[:], columns=colnames))
-    df = pd.concat(df)
-    return df
+            df = pd.DataFrame.from_records(table[:], columns=colnames)
+            dfs.append(df)
+    dfs = pd.concat(dfs)
+    return dfs
 
 
 ### ----------
