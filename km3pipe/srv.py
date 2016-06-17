@@ -18,6 +18,7 @@ from tornado.options import define, options
 import json
 import os
 from thread import start_new_thread
+import threading
 import re
 import subprocess
 import math
@@ -26,6 +27,7 @@ from time import sleep
 
 import pandas as pd
 
+from km3pipe.core import Geometry
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)
@@ -44,16 +46,23 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
     def __init__(self, *args, **kwargs):
         self.clients = kwargs.pop('clients')
         self.data_path = kwargs.pop('data_path')
+        self._status = kwargs.pop('server_status')
+        self._lock = kwargs.pop('lock')
         super(EchoWebSocket, self).__init__(*args, **kwargs)
 
     def check_origin(self, origin):
         return True
 
     def open(self):
+        self.clients.append(self)
         welcome = u"WebSocket opened. Welcome to KM3srv {0}!".format(VERSION)
         print(welcome)
         self.message(welcome)
-        self.clients.append(self)
+        self.message(self.status, 'status')
+
+    def on_close(self):
+        self.clients.remove(self)
+        print("WebSocket closed, client removed.")
 
     def on_message(self, message):
         # self.message(u"Client said '{0}'".format(message))
@@ -97,6 +106,7 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
             sleep(3)
 
         if not os.path.exists(h5filepath):
+            self.status = 'busy'
             print("Creating {0}".format(h5filepath_tmp))
             subprocess.call(['mkdir', '-p', data_dir])
             subprocess.call(['touch', h5filepath_tmp])
@@ -123,16 +133,43 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
             os.remove(rootfilepath)
 
         hits = pd.read_hdf(h5filepath, 'hits')
-        snapshot_hits = hits[(hits['event_id'] == event_id)]
+        snapshot_hits = hits[(hits['event_id'] == event_id)].copy()
         triggered_hits = hits[(hits['event_id'] == event_id) &
                               (hits['triggered'] == True)]
-        self.message("Snapshot hits: {0}, Triggered hits: {1}"
-                     .format(len(snapshot_hits), len(triggered_hits)))
+        self.message("Det ID: {0} Run ID: {1} Event ID: {2} - "
+                     "Snapshot hits: {3}, Triggered hits: {4}"
+                     .format(det_id, run_id, event_id,
+                             len(snapshot_hits), len(triggered_hits)))
+        geometry = Geometry(det_id=det_id)
+        geometry.apply(snapshot_hits)
 
-    def message(self, text):
+        self.message(snapshot_hits.to_dict(), "event")
+        self.status = 'ready'
+
+    @property
+    def status(self):
+        return self._status
+
+    @status.setter
+    def status(self, value):
+        self._status = value
+        self.broadcast(self.status, kind='status')
+
+    def message(self, data, kind="info"):
         """Convert message to json and send it to the clients"""
-        message = json.dumps({'kind': 'message', 'data': text})
+        #message = json.dumps({'kind': kind, 'data': data})
+        message = pd.io.json.dumps({'kind': kind, 'data': data})
+        print("Sent {0} bytes.".format(len(message)))
         self.write_message(message)
+
+    def broadcast(self, text, kind="info"):
+        log.info("Number of connected clients: {0}".format(len(self.clients)))
+        for client in self.clients:
+            message = json.dumps({'kind': kind, 'data': text})
+            try:
+                client.write_message(message)
+            except tornado.websocket.WebSocketClosedError:
+                log.error("Lost connection to client '{0'}".format(client))
 
 
 def main():
@@ -144,6 +181,8 @@ def main():
     ip = options.ip
     port = int(options.port)
     data_path = options.data
+    server_status = 'ready'
+    lock = threading.Lock()
     clients = []
 
     print("Starting KM3srv.")
@@ -158,7 +197,9 @@ def main():
 
     application = tornado.web.Application([
         (r"/test", EchoWebSocket, {'clients': clients,
-                                   'data_path': data_path}),
+                                   'server_status': server_status,
+                                   'data_path': data_path,
+                                   'lock': lock}),
     ], **settings)
 
     try:
