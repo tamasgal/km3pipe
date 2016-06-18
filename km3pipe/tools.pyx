@@ -349,6 +349,10 @@ def ignored(*exceptions):
 
 
 def open_hdf5(filename):
+    return read_hdf5(filename)
+
+
+def read_hdf5(filename):
     """Open HDF5 file and retrieve all relevant information."""
     hits = pd.read_hdf(filename, '/hits')
     # mc_tracks = pd.read_hdf(filename, '/mc_tracks')  # currently not working
@@ -358,7 +362,9 @@ def open_hdf5(filename):
     reco = read_reco(filename)
     if len(det_ids) > 1:
         log.critical("Multiple detector IDs found in events.")
-    geometry = kp.Geometry(det_id=det_ids[0])
+    geometry = None
+    if len(hits) != 0:
+        geometry = kp.Geometry(det_id=det_ids[0])
     return event_info, geometry, hits, mc_tracks, reco
 
 
@@ -372,6 +378,7 @@ def read_reco(filename):
             df = pd.DataFrame.from_records(table[:], columns=colnames)
             dfs.append(df)
     dfs = pd.concat(dfs)
+    dfs.drop_duplicates(inplace=True)
     return dfs
 
 
