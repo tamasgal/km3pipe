@@ -11,6 +11,8 @@ from __future__ import division, absolute_import, print_function
 
 import resource
 import sys
+import os
+import base64
 import subprocess
 import collections
 from collections import namedtuple
@@ -359,6 +361,22 @@ def open_hdf5(filename):
         log.critical("Multiple detector IDs found in events.")
     geometry = kp.Geometry(det_id=det_ids[0])
     return event_info, geometry, hits, mc_tracks
+
+
+def token_urlsafe(nbytes=32):
+    """Return a random URL-safe text string, in Base64 encoding.
+
+    This is taken and slightly modified from the Python 3.6 stdlib.
+
+    The string has *nbytes* random bytes.  If *nbytes* is ``None``
+    or not supplied, a reasonable default is used.
+
+    >>> token_urlsafe(16)  #doctest:+SKIP
+    'Drmhze6EPcv0fN_81Bj-nA'
+
+    """
+    tok = os.urandom(nbytes)
+    return base64.urlsafe_b64encode(tok).rstrip(b'=').decode('ascii')
 
 
 try:
