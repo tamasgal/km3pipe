@@ -201,6 +201,9 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
                      .format(det_id, run_id, event_id,
                              len(snapshot_hits), len(triggered_hits)))
         geometry = Geometry(det_id=det_id)
+        # detx_file = os.path.join(self.data_path, 'detx', det_dir_name + '.detx')
+        # log.warn("Using cached '{0}'".format(detx_file))
+        # geometry = Geometry(filename=detx_file)
         geometry.apply(snapshot_hits)
 
         event = {
@@ -237,6 +240,16 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
                 client.write_message(message)
             except tornado.websocket.WebSocketClosedError:
                 log.error("Lost connection to client '{0'}".format(client))
+
+
+def srv_event(url, token, hits):
+    event = {
+        "hits": {
+            'pos' : [tuple(x) for x in hits[['x', 'y', 'z']].values],
+            'time': list(hits['time']),
+        }
+    }
+    srv_data(url, token, event, 'event')
 
 
 def srv_data(url, token, data, kind):
