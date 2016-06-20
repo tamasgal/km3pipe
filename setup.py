@@ -65,6 +65,7 @@ setup(name='km3pipe',
           'tornado',
           'pytz',
           'six',
+          'websocket-client',
       ],
       entry_points={
           'console_scripts': [

@@ -15,7 +15,6 @@ import tornado.web
 import tornado.websocket
 from tornado.options import define, options
 
-import json
 import os
 from thread import start_new_thread
 import threading
@@ -26,6 +25,7 @@ import math
 from time import sleep
 
 import pandas as pd
+import websocket
 
 from km3pipe.core import Geometry
 from km3pipe.tools import token_urlsafe
@@ -224,11 +224,18 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
     def broadcast(self, text, kind="info"):
         log.info("Number of connected clients: {0}".format(len(self.clients)))
         for client in self.clients.itervalues():
-            message = json.dumps({'kind': kind, 'data': text})
+            message = pd.io.json.dumps({'kind': kind, 'data': text})
             try:
                 client.write_message(message)
             except tornado.websocket.WebSocketClosedError:
                 log.error("Lost connection to client '{0'}".format(client))
+
+
+def srv_data(url, token, data, kind):
+    ws = websocket.create_connection(url)
+    message = {'token': token, 'data': data, 'kind': kind}
+    ws.send(pd.io.json.dumps(message))
+    ws.close()
 
 
 def main():
