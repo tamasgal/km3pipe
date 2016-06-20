@@ -28,6 +28,7 @@ from time import sleep
 import pandas as pd
 
 from km3pipe.core import Geometry
+from km3pipe.tools import token_urlsafe
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)
@@ -41,27 +42,85 @@ define("port", default="8088", type=int,
 define("data", default=os.path.expanduser("~/km3net/data"), type=str,
        help="Path to the data files.")
 
+
+class ClientManager(object):
+    def __init__(self):
+        self._clients = {}
+        start_new_thread(self.heartbeat, ())
+
+    def add(self, client):
+        token = token_urlsafe(3)
+        self._clients[token] = client
+        log.info("New client with token '{0}' registered.".format(token))
+        return token
+
+    def remove(self, token):
+        del self._clients[token]
+        print("Client with token '{0}' removed.".format(token))
+
+    def heartbeat(self, interval=30):
+        while True:
+            log.info("Pinging {0} clients.".format(len(self._clients)))
+            for client in self._clients.itervalues():
+                client.message("Ping.")
+            sleep(interval)
+
+    def message_to(self, token, data, kind):
+        message = pd.io.json.dumps({'kind': kind, 'data': data})
+        print("Sent {0} bytes.".format(len(message)))
+        self.raw_message_to(token, message)
+
+    def raw_message_to(self, token, message):
+        """Convert message to json and send it to the client with given token"""
+        if token not in self._clients:
+            log.critical("Client with token '{0}' not found!".format(token))
+            return
+        self._clients[token].write_message(message)
+        print("Sent {0} bytes.".format(len(message)))
+
+
+class MessageProvider(tornado.websocket.WebSocketHandler):
+    def __init__(self, *args, **kwargs):
+        self.client_manager = kwargs.pop('client_manager')
+        super(MessageProvider, self).__init__(*args, **kwargs)
+
+    def on_message(self, message):
+        log.warning("Client said: {0}".format(message))
+        try:
+            token = pd.io.json.loads(message)['token']
+        except ValueError, KeyError:
+            log.error("Invalid JSON received: {0}".format(message))
+        else:
+            self.client_manager.raw_message_to(token, message)
+
+
 class EchoWebSocket(tornado.websocket.WebSocketHandler):
     """An echo handler for client/server messaging and debugging"""
     def __init__(self, *args, **kwargs):
+        log.warning("EchoWebSocket created!")
+        self.client_manager = kwargs.pop('client_manager')
         self.clients = kwargs.pop('clients')
         self.data_path = kwargs.pop('data_path')
         self._status = kwargs.pop('server_status')
         self._lock = kwargs.pop('lock')
+        self._token = self.client_manager.add(self)
         super(EchoWebSocket, self).__init__(*args, **kwargs)
 
     def check_origin(self, origin):
         return True
 
     def open(self):
-        self.clients.append(self)
         welcome = u"WebSocket opened. Welcome to KM3srv {0}!".format(VERSION)
+        self.clients[self._token] = self
         print(welcome)
+        print(self._token)
+        log.info("Number of clients: {0}".format(len(self.clients)))
         self.message(welcome)
+        self.message(self._token, 'token')
         self.message(self.status, 'status')
 
     def on_close(self):
-        self.clients.remove(self)
+        del self.clients[self._token]
         print("WebSocket closed, client removed.")
 
     def on_message(self, message):
@@ -164,7 +223,7 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
 
     def broadcast(self, text, kind="info"):
         log.info("Number of connected clients: {0}".format(len(self.clients)))
-        for client in self.clients:
+        for client in self.clients.itervalues():
             message = json.dumps({'kind': kind, 'data': text})
             try:
                 client.write_message(message)
@@ -183,7 +242,8 @@ def main():
     data_path = options.data
     server_status = 'ready'
     lock = threading.Lock()
-    clients = []
+    client_manager = ClientManager()
+    clients = {}
 
     print("Starting KM3srv.")
     print("Running on {0}:{1}".format(ip, port))
@@ -197,9 +257,11 @@ def main():
 
     application = tornado.web.Application([
         (r"/test", EchoWebSocket, {'clients': clients,
+                                   'client_manager': client_manager,
                                    'server_status': server_status,
                                    'data_path': data_path,
                                    'lock': lock}),
+        (r"/message", MessageProvider, {'client_manager': client_manager}),
     ], **settings)
 
     try:
