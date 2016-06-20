@@ -25,6 +25,7 @@ import math
 from time import sleep
 
 import pandas as pd
+import numpy as np
 import websocket
 
 from km3pipe.core import Geometry
@@ -202,7 +203,14 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
         geometry = Geometry(det_id=det_id)
         geometry.apply(snapshot_hits)
 
-        self.message(snapshot_hits.to_dict(), "event")
+        event = {
+            "hits": {
+                'pos' : [tuple(x) for x in snapshot_hits[['x', 'y', 'z']].values],
+                'time': list(snapshot_hits['time']),
+            }
+        }
+
+        self.message(event, "event")
         self.status = 'ready'
 
     @property
