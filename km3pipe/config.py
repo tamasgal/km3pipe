@@ -108,6 +108,16 @@ class Config(object):
             return token
 
     @property
+    def rba_url(self):
+        """Return the RainbowAlga URL."""
+        try:
+            url = self.config.get('RainbowAlga', 'url')
+        except Error:
+            return None
+        else:
+            return url
+
+    @property
     def check_for_updates(self):
         try:
             return self.config.getboolean('General', 'check_for_updates')
