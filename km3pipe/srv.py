@@ -94,7 +94,7 @@ class MessageProvider(tornado.websocket.WebSocketHandler):
         log.warning("Client said: {0}".format(message))
         try:
             token = pd.io.json.loads(message)['token']
-        except ValueError, KeyError:
+        except (ValueError, KeyError):
             log.error("Invalid JSON received: {0}".format(message))
         else:
             self.client_manager.raw_message_to(token, message)
