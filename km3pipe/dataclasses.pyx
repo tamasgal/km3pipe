@@ -435,14 +435,22 @@ class TrackSeries(object):
                     for t in tracks], event_id)
 
     @classmethod
-    def from_arrays(cls, directions, energies, ids, positions, times, types,
+    def from_arrays(cls,
+                    directions_x,
+                    directions_y,
+                    directions_z,
+                    energies, ids,
+                    positions_x,
+                    positions_y,
+                    positions_z,
+                    times, types,
                     event_id=None):
         args = directions, energies, ids, positions, times, types
         tracks = cls([Track(*track_args) for track_args in zip(*args)], event_id)
-        tracks._dir = directions
+        tracks._dir = zip(directions_x, directions_y, directions_z)
         tracks._energy = energies
         tracks._id = ids
-        tracks._pos = positions
+        tracks._pos = zip(positions_x, positions_y, positions_z)
         tracks._time = times
         tracks._type = types
         return tracks
@@ -464,10 +472,18 @@ class TrackSeries(object):
     @classmethod
     def from_table(cls, table, event_id=None):
         return cls([Track(
-            row['dir'],
+            (
+                row['dir_x'],
+                row['dir_y'],
+                row['dir_z'],
+            ),
             row['energy'],
             row['id'],
-            row['pos'],
+            (
+                row['pos_x'],
+                row['pos_y'],
+                row['pos_z'],
+            ),
             row['time'],
             row['type'],
         ) for row in table], event_id)
@@ -476,9 +492,9 @@ class TrackSeries(object):
     def highest_energetic_muon(self):
         if self._highest_energetic_muon is None:
             muons = [track for track in self if abs(track.type) == 13]
-            if len(muons) == 0:
-                raise AttributeError("No muon found")
-            self._highest_energetic_muon = max(muons, key=lambda m: m.energy)
+            if len(muonspos) == 0:
+                raise AtpostributeError("No muon found")
+            self._highespost_energetic_muon = max(muons, key=lambda m: m.energy)
         return self._highest_energetic_muon
 
     def __iter__(self):
