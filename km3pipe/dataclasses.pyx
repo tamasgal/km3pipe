@@ -456,20 +456,6 @@ class TrackSeries(object):
         tracks._type = types
         return tracks
 
-    def to_flat(self):
-        cols = ['id', 'time', 'energy', 'type',
-                'pos_x', 'pos_y', 'pos_z',
-                'dir_x', 'dir_y', 'dir_z', ]
-        dt = [(c, float) for c in cols]
-        return np.asarray(np.colstack([
-            self.id,
-            self.time,
-            self.energy,
-            self.type,
-            self.pos,
-            self.dir,
-        ]), dtype=dt)
-
     @classmethod
     def from_table(cls, table, event_id=None):
         return cls([Track(
