@@ -356,7 +356,7 @@ def open_hdf5(filename):
     return read_hdf5(filename)
 
 
-def read_hdf5(filename):
+def read_hdf5(filename, detx=None):
     """Open HDF5 file and retrieve all relevant information."""
     event_info = pd.read_hdf(filename, '/event_info')
     geometry = None
@@ -367,12 +367,15 @@ def read_hdf5(filename):
     except ValueError:
         reco = None
 
-    det_ids = np.unique(event_info.det_id)
-    if len(det_ids) > 1:
-        log.critical("Multiple detector IDs found in events.")
-    det_id = det_ids[0]
-    if det_id > 0:
-        geometry = kp.Geometry(det_id=det_id)
+    if detx is not None:
+        geometry = kp.Geometry(filename=detx)
+    else:
+        det_ids = np.unique(event_info.det_id)
+        if len(det_ids) > 1:
+            log.critical("Multiple detector IDs found in events.")
+        det_id = det_ids[0]
+        if det_id > 0:
+            geometry = kp.Geometry(det_id=det_id)
 
     return event_info, geometry, hits, mc_tracks, reco
 
