@@ -19,7 +19,9 @@ if not __KM3PIPE_SETUP__:
                               Geometry, AanetGeometry)
     from km3pipe import pumps  # noqa
     from km3pipe import utils  # noqa
-    from km3pipe.tools import open_hdf5  # noqa
+    from km3pipe import srv  # noqa
+    from km3pipe.srv import srv_event  # noqa
+    from km3pipe.tools import read_hdf5, open_hdf5, read_reco  # noqa
 
 
 __author__ = "Tamas Gal"

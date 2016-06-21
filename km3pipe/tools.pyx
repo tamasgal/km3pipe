@@ -11,6 +11,8 @@ from __future__ import division, absolute_import, print_function
 
 import resource
 import sys
+import os
+import base64
 import subprocess
 import collections
 from collections import namedtuple
@@ -22,6 +24,8 @@ from contextlib import contextmanager
 
 import numpy as np
 import pandas as pd
+import tables
+
 import km3pipe as kp
 
 from km3pipe.logger import logging
@@ -349,16 +353,70 @@ def ignored(*exceptions):
 
 
 def open_hdf5(filename):
+    return read_hdf5(filename)
+
+
+def read_hdf5(filename):
     """Open HDF5 file and retrieve all relevant information."""
     hits = pd.read_hdf(filename, '/hits')
     # mc_tracks = pd.read_hdf(filename, '/mc_tracks')  # currently not working
-    mc_tracks = None
+    #mc_tracks = None
+    mc_tracks = read_mc_tracks(filename)
     event_info = pd.read_hdf(filename, '/event_info')
     det_ids = np.unique(event_info.det_id)
+    reco = read_reco(filename)
     if len(det_ids) > 1:
         log.critical("Multiple detector IDs found in events.")
-    geometry = kp.Geometry(det_id=det_ids[0])
-    return event_info, geometry, hits, mc_tracks
+    geometry = None
+    if len(hits) != 0:
+        geometry = kp.Geometry(det_id=det_ids[0])
+    return event_info, geometry, hits, mc_tracks, reco
+
+
+def read_mc_tracks(filename):
+    with tables.open_file(filename, 'r') as h5:
+        mc_trks = h5.root.mc_tracks[:]
+    dat = {col: mc_trks[col] for col in mc_trks.dtype.names}
+    for i, c in enumerate(['pos_x', 'pos_y', 'pos_z']):
+        dat[c] = dat['pos'][:, i]
+    for i, c in enumerate(['dir_x', 'dir_y', 'dir_z']):
+        dat[c] = dat['dir'][:, i]
+    del dat['pos']
+    del dat['dir']
+    dat = pd.DataFrame.from_dict(dat)
+    return dat
+
+
+def read_reco(filename):
+    dfs = []
+    with pd.HDFStore(filename, 'r') as h5:
+        reco_group = h5.get_node('/reco')
+        for table in reco_group:
+            tabname = table.name
+            colnames = [tabname + '_' + col for col in table.colnames]
+            df = pd.DataFrame.from_records(table[:], columns=colnames)
+            dfs.append(df)
+    dfs = pd.concat(dfs)
+    dfs.drop_duplicates(inplace=True)
+    return dfs
+
+
+### ----------
+
+def token_urlsafe(nbytes=32):
+    """Return a random URL-safe text string, in Base64 encoding.
+
+    This is taken and slightly modified from the Python 3.6 stdlib.
+
+    The string has *nbytes* random bytes.  If *nbytes* is ``None``
+    or not supplied, a reasonable default is used.
+
+    >>> token_urlsafe(16)  #doctest:+SKIP
+    'Drmhze6EPcv0fN_81Bj-nA'
+
+    """
+    tok = os.urandom(nbytes)
+    return base64.urlsafe_b64encode(tok).rstrip(b'=').decode('ascii')
 
 
 try:
