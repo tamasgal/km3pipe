@@ -65,6 +65,8 @@ setup(name='km3pipe',
           'tornado',
           'pytz',
           'six',
+          'pytest',
+          'mock',
           'websocket-client',
       ],
       entry_points={
