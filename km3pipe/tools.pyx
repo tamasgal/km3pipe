@@ -359,7 +359,7 @@ def open_hdf5(filename):
 def read_hdf5(filename):
     """Open HDF5 file and retrieve all relevant information."""
     hits = pd.read_hdf(filename, '/hits')
-    # mc_tracks = pd.read_hdf(filename, '/mc_tracks')  # currently not working
+    mc_tracks = pd.read_hdf(filename, '/mc_tracks')  # currently not working
     #mc_tracks = None
     #mc_tracks = read_mc_tracks(filename)
     event_info = pd.read_hdf(filename, '/event_info')
