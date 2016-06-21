@@ -133,7 +133,7 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
         # self.message(u"Client said '{0}'".format(message))
         print("Client said: {0}".format(message))
         if message.startswith('event'):
-            p = re.compile(ur'event/(\d+)/(\d+)/(\d+)')
+            p = re.compile(r'event/(\d+)/(\d+)/(\d+)')
             try:
                 det_id, run_id, event_id = re.search(p, message).groups()
             except AttributeError:
