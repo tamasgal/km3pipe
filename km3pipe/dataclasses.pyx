@@ -57,7 +57,7 @@ class EventInfo(object):
         for col in sorted(row.table.colnames):
             try:
                 args.append(row[col])
-            except FooException:
+            except KeyError:
                 args.append(np.nan)
         return cls(*args)
 
@@ -446,11 +446,11 @@ class TrackSeries(object):
         tracks._time = times
         tracks._type = types
         return tracks
-    
+
     def to_flat(self):
-        cols = ['id', 'time', 'energy', 'type', 
+        cols = ['id', 'time', 'energy', 'type',
                 'pos_x', 'pos_y', 'pos_z',
-                'dir_x', 'dir_y', 'dir_z',]
+                'dir_x', 'dir_y', 'dir_z', ]
         dt = [(c, float) for c in cols]
         return np.asarray(np.colstack([
             self.id,
