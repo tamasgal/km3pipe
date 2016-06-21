@@ -33,7 +33,11 @@ class EventInfo(object):
                  overlays,
                  run_id,
                  trigger_counter,
-                 trigger_mask):
+                 trigger_mask,
+                 weight_w1,
+                 weight_w2,
+                 weight_w3,
+                ):
         self.det_id = det_id
         self.event_id = event_id
         self.frame_index = frame_index
@@ -43,20 +47,23 @@ class EventInfo(object):
         self.run_id = run_id
         self.trigger_counter = trigger_counter
         self.trigger_mask = trigger_mask
+        self.weight_w1 = weight_w1
+        self.weight_w2 = weight_w2
+        self.weight_w3 = weight_w3
 
     @classmethod
     def from_table(cls, row):
-        return cls(
-            row['det_id'],
-            row['event_id'],
-            row['frame_index'],
-            row['mc_id'],
-            row['mc_t'],
-            row['overlays'],
-            row['run_id'],
-            row['trigger_counter'],
-            row['trigger_mask'],
-        )
+        args = []
+        for col in sorted(
+                ['det_id', 'event_id', 'frame_index', 'mc_id', 'mc_t',
+                'overlays', 'run_id', 'trigger_counter', 'trigger_mask',
+                'weight_w1', 'weight_w2', 'weight_w3']
+                ):
+            try:
+                args.append(row[col])
+            except KeyError:
+                args.append(np.nan)
+        return cls(*args)
 
     def __str__(self):
         return "Event #{0}:\n" \
@@ -432,39 +439,42 @@ class TrackSeries(object):
                     for t in tracks], event_id)
 
     @classmethod
-    def from_arrays(cls, directions, energies, ids, positions, times, types,
+    def from_arrays(cls,
+                    directions_x,
+                    directions_y,
+                    directions_z,
+                    energies, ids,
+                    positions_x,
+                    positions_y,
+                    positions_z,
+                    times, types,
                     event_id=None):
-        args = directions, energies, ids, positions, times, types
+        args = directions_x, directions_y, directions_z, energies, ids, \
+                positions_x, positions_y, positions_z, times, types
         tracks = cls([Track(*track_args) for track_args in zip(*args)], event_id)
-        tracks._dir = directions
+        tracks._dir = zip(directions_x, directions_y, directions_z)
         tracks._energy = energies
         tracks._id = ids
-        tracks._pos = positions
+        tracks._pos = zip(positions_x, positions_y, positions_z)
         tracks._time = times
         tracks._type = types
         return tracks
-    
-    def to_flat(self):
-        cols = ['id', 'time', 'energy', 'type', 
-                'pos_x', 'pos_y', 'pos_z',
-                'dir_x', 'dir_y', 'dir_z',]
-        dt = [(c, float) for c in cols]
-        return np.asarray(np.colstack([
-            self.id,
-            self.time,
-            self.energy,
-            self.type,
-            self.pos,
-            self.dir,
-        ]), dtype=dt)
 
     @classmethod
     def from_table(cls, table, event_id=None):
         return cls([Track(
-            row['dir'],
+            (
+                row['dir_x'],
+                row['dir_y'],
+                row['dir_z'],
+            ),
             row['energy'],
             row['id'],
-            row['pos'],
+            (
+                row['pos_x'],
+                row['pos_y'],
+                row['pos_z'],
+            ),
             row['time'],
             row['type'],
         ) for row in table], event_id)

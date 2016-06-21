@@ -21,8 +21,6 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 __author__ = 'tamasgal'
 
-POS_ATOM = tables.FloatAtom(shape=3)
-
 
 class EventInfoDesc(tables.IsDescription):
     det_id = tables.IntCol()
@@ -35,6 +33,9 @@ class EventInfoDesc(tables.IsDescription):
     # timestamp = tables.Float64Col()
     trigger_counter = tables.UInt64Col()
     trigger_mask = tables.UInt64Col()
+    weight_w1 = tables.Float64Col()
+    weight_w2 = tables.Float64Col()
+    weight_w3 = tables.Float64Col()
 
 
 class Hit(tables.IsDescription):
@@ -50,11 +51,15 @@ class Hit(tables.IsDescription):
 
 
 class Track(tables.IsDescription):
-    dir = tables.FloatCol(shape=(3,))
+    dir_x = tables.FloatCol()
+    dir_y = tables.FloatCol()
+    dir_z = tables.FloatCol()
     energy = tables.FloatCol()
     event_id = tables.UIntCol()
     id = tables.UIntCol()
-    pos = tables.FloatCol(shape=(3,))
+    pos_x = tables.FloatCol()
+    pos_y = tables.FloatCol()
+    pos_z = tables.FloatCol()
     run_id = tables.UIntCol()
     time = tables.IntCol()
     type = tables.IntCol()
@@ -110,11 +115,15 @@ class HDF5Sink(Module):
 
     def _write_tracks(self, tracks, track_row):
         for track in tracks:
-            track_row['dir'] = track.dir
+            track_row['dir_x'] = track.dir[0]
+            track_row['dir_y'] = track.dir[1]
+            track_row['dir_z'] = track.dir[2]
             track_row['energy'] = track.energy
             track_row['event_id'] = tracks.event_id
             track_row['id'] = track.id
-            track_row['pos'] = track.pos
+            track_row['pos_x'] = track.pos[0]
+            track_row['pos_y'] = track.pos[1]
+            track_row['pos_z'] = track.pos[2]
             # track_row['run_id'] = track.run_id
             track_row['time'] = track.time
             track_row['type'] = track.type
@@ -134,6 +143,9 @@ class HDF5Sink(Module):
         # info_row['timestamp'] = info.timestamp
         info_row['trigger_counter'] = info.trigger_counter
         info_row['trigger_mask'] = info.trigger_mask
+        info_row['weight_w1'] = info.weight_w1
+        info_row['weight_w2'] = info.weight_w2
+        info_row['weight_w3'] = info.weight_w3
         info_row.append()
 
     def _write_reco_track(self, track, reco_row):
@@ -245,6 +257,7 @@ class HDF5Pump(Pump):
 
     def _get_event_info(self, event_id, table_name='event_info', where='/'):
         table = self.h5_file.get_node(where, table_name)
+        print(table)
         return EventInfo.from_table(table[event_id])
 
     def _get_reco(self, event_id, group_name='reco', where='/'):
