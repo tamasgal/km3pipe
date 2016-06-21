@@ -29,6 +29,8 @@ import numpy as np
 import websocket
 
 from km3pipe.core import Geometry
+from km3pipe.config import Config
+from km3pipe.dataclasses import HitSeries
 from km3pipe.tools import token_urlsafe
 from km3pipe.logger import logging
 
@@ -42,6 +44,9 @@ define("port", default="8088", type=int,
        help="The KM3srv server will be available on this port.")
 define("data", default=os.path.expanduser("~/km3net/data"), type=str,
        help="Path to the data files.")
+
+
+RBA_URL = Config().rba_url
 
 
 class ClientManager(object):
@@ -242,17 +247,34 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
                 log.error("Lost connection to client '{0'}".format(client))
 
 
-def srv_event(url, token, hits):
+def srv_event(token, hits, url=RBA_URL):
+    """Serve event to RainbowAlga"""
+
+    if url is None:
+        log.error("Please provide a valid RainbowAlga URL.")
+        return
+
+    ws_url = url + '/message'
+
+    if isinstance(hits, pd.core.frame.DataFrame):
+        pos = [tuple(x) for x in hits[['x', 'y', 'z']].values]
+        time = list(hits['time'])
+    if isinstance(hits, HitSeries):
+        pos = [(h.pos.x, h.pos.y, h.pos.z) for h in hits]
+        time = [h.time for h in hits]
+
     event = {
         "hits": {
-            'pos' : [tuple(x) for x in hits[['x', 'y', 'z']].values],
-            'time': list(hits['time']),
+            'pos' : pos,
+            'time': time,
         }
     }
-    srv_data(url, token, event, 'event')
+
+    srv_data(ws_url, token, event, 'event')
 
 
 def srv_data(url, token, data, kind):
+    """Serve data to RainbowAlga"""
     ws = websocket.create_connection(url)
     message = {'token': token, 'data': data, 'kind': kind}
     ws.send(pd.io.json.dumps(message))
