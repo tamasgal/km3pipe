@@ -358,33 +358,23 @@ def open_hdf5(filename):
 
 def read_hdf5(filename):
     """Open HDF5 file and retrieve all relevant information."""
-    hits = pd.read_hdf(filename, '/hits')
-    mc_tracks = pd.read_hdf(filename, '/mc_tracks')  # currently not working
-    #mc_tracks = None
-    #mc_tracks = read_mc_tracks(filename)
     event_info = pd.read_hdf(filename, '/event_info')
+    geometry = None
+    hits = pd.read_hdf(filename, '/hits')
+    mc_tracks = pd.read_hdf(filename, '/mc_tracks')
+    try:
+        reco = read_reco(filename)
+    except ValueError:
+        reco = None
+
     det_ids = np.unique(event_info.det_id)
-    reco = read_reco(filename)
     if len(det_ids) > 1:
         log.critical("Multiple detector IDs found in events.")
-    geometry = None
-    if len(hits) != 0:
-        geometry = kp.Geometry(det_id=det_ids[0])
-    return event_info, geometry, hits, mc_tracks, reco
+    det_id = det_ids[0]
+    if det_id > 0:
+        geometry = kp.Geometry(det_id=det_id)
 
-# SHOULD BE OBSOLETE NOW
-#def read_mc_tracks(filename):
-#    with tables.open_file(filename, 'r') as h5:
-#        mc_trks = h5.root.mc_tracks[:]
-#    dat = {col: mc_trks[col] for col in mc_trks.dtype.names}
-#    for i, c in enumerate(['pos_x', 'pos_y', 'pos_z']):
-#        dat[c] = dat['pos'][:, i]
-#    for i, c in enumerate(['dir_x', 'dir_y', 'dir_z']):
-#        dat[c] = dat['dir'][:, i]
-#    del dat['pos']
-#    del dat['dir']
-#    dat = pd.DataFrame.from_dict(dat)
-#    return dat
+    return event_info, geometry, hits, mc_tracks, reco
 
 
 def read_reco(filename):
