@@ -16,7 +16,6 @@ import tornado.websocket
 from tornado.options import define, options
 
 import os
-from thread import start_new_thread
 import threading
 import re
 import subprocess
@@ -52,7 +51,7 @@ RBA_URL = Config().rba_url
 class ClientManager(object):
     def __init__(self):
         self._clients = {}
-        start_new_thread(self.heartbeat, ())
+        threading.Thread(target=self.heartbeat).start()
 
     def add(self, client):
         token = token_urlsafe(3)
