@@ -463,18 +463,10 @@ class TrackSeries(object):
     @classmethod
     def from_table(cls, table, event_id=None):
         return cls([Track(
-            (
-                row['dir_x'],
-                row['dir_y'],
-                row['dir_z'],
-            ),
+            np.array((row['dir_x'], row['dir_y'], row['dir_z'])),
             row['energy'],
             row['id'],
-            (
-                row['pos_x'],
-                row['pos_y'],
-                row['pos_z'],
-            ),
+            np.array((row['pos_x'], row['pos_y'], row['pos_z'])),
             row['time'],
             row['type'],
         ) for row in table], event_id)
