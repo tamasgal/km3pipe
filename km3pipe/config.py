@@ -41,7 +41,7 @@ class Config(object):
 
     def _init_from_path(self, path):
         if not os.path.exists(path):
-            log.warn("No configuration found at '{0}'".format(path))
+            log.info("No configuration found at '{0}'".format(path))
             return
         self._check_config_file_permissions(path)
         self._read_from_path(path)
