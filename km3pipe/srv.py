@@ -16,7 +16,6 @@ import tornado.websocket
 from tornado.options import define, options
 
 import os
-from thread import start_new_thread
 import threading
 import re
 import subprocess
@@ -52,7 +51,7 @@ RBA_URL = Config().rba_url
 class ClientManager(object):
     def __init__(self):
         self._clients = {}
-        start_new_thread(self.heartbeat, ())
+        threading.Thread(target=self.heartbeat).start()
 
     def add(self, client):
         token = token_urlsafe(3)
@@ -94,7 +93,7 @@ class MessageProvider(tornado.websocket.WebSocketHandler):
         log.warning("Client said: {0}".format(message))
         try:
             token = pd.io.json.loads(message)['token']
-        except ValueError, KeyError:
+        except (ValueError, KeyError):
             log.error("Invalid JSON received: {0}".format(message))
         else:
             self.client_manager.raw_message_to(token, message)
@@ -133,14 +132,16 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
         # self.message(u"Client said '{0}'".format(message))
         print("Client said: {0}".format(message))
         if message.startswith('event'):
-            p = re.compile(ur'event/(\d+)/(\d+)/(\d+)')
+            p = re.compile(r'event/(\d+)/(\d+)/(\d+)')
             try:
                 det_id, run_id, event_id = re.search(p, message).groups()
             except AttributeError:
                 self.message("Syntax error, try event/DET_ID/RUN_ID/EVENT")
             else:
-                start_new_thread(self.get_event,
-                                 (int(det_id), int(run_id), int(event_id)))
+                threading.Thread(target=self.get_event,
+                                 args=(int(det_id),
+                                       int(run_id),
+                                       int(event_id))).start()
 
     def get_event(self, det_id, run_id, event_id):
         det_dir_name = "KM3NeT_{0:08d}".format(det_id)

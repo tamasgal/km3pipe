@@ -54,7 +54,11 @@ class EventInfo(object):
     @classmethod
     def from_table(cls, row):
         args = []
-        for col in sorted(row.table.colnames):
+        for col in sorted(
+                ['det_id', 'event_id', 'frame_index', 'mc_id', 'mc_t',
+                'overlays', 'run_id', 'trigger_counter', 'trigger_mask',
+                'weight_w1', 'weight_w2', 'weight_w3']
+                ):
             try:
                 args.append(row[col])
             except KeyError:
