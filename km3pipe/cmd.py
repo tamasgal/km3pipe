@@ -161,33 +161,32 @@ def main():
         update_km3pipe(args['GIT_BRANCH'])
 
     if args['tohdf5']:
-        if not args["-o"]:
-            outfile = infile + '.h5'
-        aatohdf5(args['FILE'], outfile, n)
+        infile = args['FILE']
+        outfile = args['-o'] or infile + '.h5'
+        aatohdf5(infile, outfile, n)
 
     if args['aatohdf5']:
-        if not args["-o"]:
-            outfile = infile + '.h5'
-        aatohdf5(args['FILE'], outfile, n)
+        infile = args['FILE']
+        outfile = args['-o'] or infile + '.h5'
+        aatohdf5(infile, outfile, n)
 
     if args['jpptohdf5']:
-        if not args["-o"]:
-            outfile = infile + '.h5'
-        jpptohdf5(args['FILE'], outfile, n)
+        infile = args['FILE']
+        outfile = args['-o'] or infile + '.h5'
+        jpptohdf5(infile, outfile, n)
 
     if args['evttohdf5']:
-        if not args["-o"]:
-            outfile = infile + '.h5'
-        evttohdf5(args['FILE'], outfile, n)
+        infile = args['FILE']
+        outfile = args['-o'] or infile + '.h5'
+        evttohdf5(infile, outfile, n)
 
-    if arguments['runtable']:
-        runtable(arguments['DET_ID'], n, regex=arguments['-s'])
+    if args['runtable']:
+        runtable(args['DET_ID'], n, regex=args['-s'])
 
-    if arguments['runinfo']:
-        runinfo(arguments['RUN'], arguments['DET_ID'])
+    if args['runinfo']:
+        runinfo(args['RUN'], args['DET_ID'])
 
     if args['hdf2root']:
-        infile = args['-i']
-        if not args['-o']:
-            outfile = infile + '.root'
+        infile = args['FILE']
+        outfile = args['-o'] or infile + '.root'
         hdf2root(infile, outfile)
