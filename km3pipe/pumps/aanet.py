@@ -10,7 +10,7 @@ import os.path
 import numpy as np
 
 from km3pipe import Pump
-from km3pipe.dataclasses import HitSeries, TrackSeries
+from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -91,7 +91,22 @@ class AanetPump(Pump):
                         'MCTracks': TrackSeries.from_aanet(event.mc_trks,
                                                            event.id),
                         'filename': filename,
-                        'Header': self.header}
+                        'Header': self.header,
+                        'EventInfo': EventInfo(
+                            0,              # det_id
+                            event.id,       # event_id
+                            0,              # frame_index
+                            0,              # mc_id
+                            0.0,            # mc_t
+                            0,              # overlays
+                            0,              # run_id
+                            0,              # trigger_counter
+                            0,              # trigger_mask
+                            event.w[0],     # weight_w1
+                            event.w[1],     # weight_w2
+                            event.w[2],     # weight_w3
+                        ),
+                       }
                 yield blob
             del event_file
 
@@ -157,7 +172,7 @@ def read_mini_dst(aanet_event, event_id):
         reader = recname_to_reader[recname]
         minidst[recname] = reader(trk)
         minidst[recname]['event_id'] = event_id
-    #minidst['ThomasFeatures'] = parse_thomasfeatures(aanet_event.usr)
+    minidst['ThomasFeatures'] = parse_thomasfeatures(aanet_event.usr)
     return minidst
 
 
@@ -231,16 +246,12 @@ def parse_thomasfeatures(aanet_usr):
 
     out['did_converge'] = did_converge
     if not did_converge:
-        for key in Thomas_keys :
+        for key in Thomas_keys:
             out[key] = np.nan
         return out
 
-#    print("TEST THOMAS")
-
-    count = 0
-    for key in Thomas_keys :
+    for count, key in enumerate(Thomas_keys):
         out[key] = aanet_usr[count]
-        count += 1
     return out
 
 
@@ -257,108 +268,67 @@ def parse_recolns(aanet_trk):
             out[key] = np.nan
         return out
 
-    count = 0
-    for key in recolns_keys :
+    for count, key in enumerate(recolns_keys):
         out[key] = aanet_trk.usr[count]
-        count += 1
-
- #   print("TEST recoLNS")
-
-    # flat is better
-    # nested BS is not a good idea
-    #out['error_matrix'] = list(aanet_trk.error_matrix)
     return out
 
 
 def parse_jgandalf(aanet_trk):
-    #if not aanet_trk.rec_stage > -9999:
-    #    return out
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
     out['did_converge'] = did_converge
 
     jgandalf_keys = ['Energy_f', 'Energy_can', 'Beta0',
-                    'Beta1', 'Lik', 'Lik_reduced', 'NhitsL0', 'NhitsL1']
+                     'Beta1', 'Lik', 'Lik_reduced', 'NhitsL0', 'NhitsL1']
 
     if not did_converge:
-        for key in jgandalf_keys :
+        for key in jgandalf_keys:
             out[key] = np.nan
         return out
 
-  #  print("TEST JGANDALF")
-
-    count = 0
-    for key in jgandalf_keys :
+    for count, key in enumerate(jgandalf_keys):
         out[key] = aanet_trk.usr[count]
-        count += 1
-
     return out
 
 
-
 def parse_aashowerfit(aanet_trk):
-    #if not aanet_trk.rec_stage > -9999:
-    #    return out
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
     out['did_converge'] = did_converge
 
     aashow_keys = ['NhitsAA', 'M_estimator', 'beta',
-                    'NhitsL0', 'NhitsL1']
+                   'NhitsL0', 'NhitsL1']
 
     if not did_converge:
         for key in aashow_keys:
             out[key] = np.nan
         return out
-
-#    out['did_converge'] = did_converge
-
-   # print("TEST aashowfit")
-
-    count = 0
-    for key in aashow_keys :
+    for count, key in enumerate(aashow_keys):
         out[key] = aanet_trk.usr[count]
-        count += 1
-
-    #out['error_matrix'] = list(aanet_trk.error_matrix)
-
     return out
 
 
-
 def parse_qstrategy(aanet_trk):
-    #if not aanet_trk.rec_stage > -9999:
-    #    return out
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
     out['did_converge'] = did_converge
-
     qstrat_keys = ['MFinal', 'Charge', 'MPreFit',
-                    'RPreFit', 'Inertia', 'NhitsL0', 'NhitsL1']
+                   'RPreFit', 'Inertia', 'NhitsL0', 'NhitsL1']
 
     if not did_converge:
         for key in qstrat_keys:
             out[key] = np.nan
         return out
 
-    #print("TEST qstrat")
-
-    count = 0
-    for key in qstrat_keys :
+    for count, key in enumerate(qstrat_keys):
         out[key] = aanet_trk.usr[count]
-        count += 1
-
     return out
 
 
 def parse_dusj(aanet_trk):
-    #if not aanet_trk.rec_stage > -9999:
-    #    return out
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
     out['did_converge'] = did_converge
-
-#    dusj_keys = {'test'}
 
     dusj_keys = ['BigInertia', 'Chi2100_1000', 'Chi2o1000_1000',
                  'Chi2o1000_o10', 'Chi2o1000_o100', 'Chi2o1000_o50',
@@ -391,15 +361,10 @@ def parse_dusj(aanet_trk):
                  'NhitsL1']
 
     if not did_converge:
-        for key in dusj_keys :
+        for key in dusj_keys:
             out[key] = np.nan
         return out
 
-   # print("TEST Dusj!")
-
-    count = 0
-    for key in dusj_keys :
+    for count, key in enumerate(dusj_keys):
         out[key] = aanet_trk.usr[count]
-        count += 1
-
     return out
