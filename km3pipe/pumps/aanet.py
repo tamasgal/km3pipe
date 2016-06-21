@@ -99,6 +99,7 @@ class AanetPump(Pump):
                             0,              # mc_id
                             0.0,            # mc_t
                             0,              # overlays
+                            0,              # run_id
                             0,              # trigger_counter
                             0,              # trigger_mask
                             event.w[0],     # weight_w1
