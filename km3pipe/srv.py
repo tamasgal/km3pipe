@@ -93,7 +93,7 @@ class MessageProvider(tornado.websocket.WebSocketHandler):
         log.warning("Client said: {0}".format(message))
         try:
             token = pd.io.json.loads(message)['token']
-        except ValueError, KeyError:
+        except (ValueError, KeyError):
             log.error("Invalid JSON received: {0}".format(message))
         else:
             self.client_manager.raw_message_to(token, message)
@@ -132,7 +132,7 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
         # self.message(u"Client said '{0}'".format(message))
         print("Client said: {0}".format(message))
         if message.startswith('event'):
-            p = re.compile(ur'event/(\d+)/(\d+)/(\d+)')
+            p = re.compile(r'event/(\d+)/(\d+)/(\d+)')
             try:
                 det_id, run_id, event_id = re.search(p, message).groups()
             except AttributeError:
