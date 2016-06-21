@@ -36,6 +36,12 @@ from km3pipe.db import DBManager
 from km3modules import StatusBar
 
 
+def run_tests():
+    import pytest
+    import km3pipe
+    pytest.main([os.path.dirname(km3pipe.__file__)])
+
+
 def aatohdf5(input_file, output_file, n_events):
     """Convert AAnet ROOT file to HDF5 file"""
     from km3pipe import Pipeline  # noqa
@@ -156,6 +162,9 @@ def main():
     except TypeError:
         n = None
 
+    if args['test']:
+        run_tests()
+        
     if args['update']:
         update_km3pipe(args['GIT_BRANCH'])
 
