@@ -10,7 +10,7 @@ import os.path
 import numpy as np
 
 from km3pipe import Pump
-from km3pipe.dataclasses import HitSeries, TrackSeries
+from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -91,7 +91,21 @@ class AanetPump(Pump):
                         'MCTracks': TrackSeries.from_aanet(event.mc_trks,
                                                            event.id),
                         'filename': filename,
-                        'Header': self.header}
+                        'Header': self.header
+                        'EventInfo': EventInfo(
+                            0,          # det_id
+                            event.id,   # event_id
+                            0,          # frame_index
+                            0,          # mc_id
+                            0.0,        # mc_t
+                            0,          # overlays
+                            0,          # trigger_counter
+                            0,          # trigger_mask
+                            event.w[0], # weight_w1
+                            event.w[1], # weight_w2
+                            event.w[2], # weight_w3
+                        ),
+                       }
                 yield blob
             del event_file
 

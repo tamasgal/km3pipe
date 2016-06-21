@@ -33,7 +33,11 @@ class EventInfo(object):
                  overlays,
                  run_id,
                  trigger_counter,
-                 trigger_mask):
+                 trigger_mask,
+                 weight_w1,
+                 weight_w2,
+                 weight_w3,
+                ):
         self.det_id = det_id
         self.event_id = event_id
         self.frame_index = frame_index
@@ -43,20 +47,19 @@ class EventInfo(object):
         self.run_id = run_id
         self.trigger_counter = trigger_counter
         self.trigger_mask = trigger_mask
+        self.weight_w1 = weight_w1
+        self.weight_w2 = weight_w2
+        self.weight_w3 = weight_w3
 
     @classmethod
     def from_table(cls, row):
-        return cls(
-            row['det_id'],
-            row['event_id'],
-            row['frame_index'],
-            row['mc_id'],
-            row['mc_t'],
-            row['overlays'],
-            row['run_id'],
-            row['trigger_counter'],
-            row['trigger_mask'],
-        )
+        args = []
+        for col in sorted(row.table.colnames):
+            try:
+                args.append(row[col])
+            except FooException:
+                args.append(np.nan)
+        return cls(*args)
 
     def __str__(self):
         return "Event #{0}:\n" \

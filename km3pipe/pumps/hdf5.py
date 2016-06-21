@@ -35,6 +35,9 @@ class EventInfoDesc(tables.IsDescription):
     # timestamp = tables.Float64Col()
     trigger_counter = tables.UInt64Col()
     trigger_mask = tables.UInt64Col()
+    weight_w1 = tables.Float64Col()
+    weight_w2 = tables.Float64Col()
+    weight_w3 = tables.Float64Col()
 
 
 class Hit(tables.IsDescription):
