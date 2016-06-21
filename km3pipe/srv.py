@@ -138,8 +138,10 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
             except AttributeError:
                 self.message("Syntax error, try event/DET_ID/RUN_ID/EVENT")
             else:
-                start_new_thread(self.get_event,
-                                 (int(det_id), int(run_id), int(event_id)))
+                threading.Thread(target=self.get_event,
+                                 args=(int(det_id),
+                                       int(run_id),
+                                       int(event_id))).start()
 
     def get_event(self, det_id, run_id, event_id):
         det_dir_name = "KM3NeT_{0:08d}".format(det_id)
