@@ -6,11 +6,10 @@ KM3Pipe command line utility.
 Usage:
     km3pipe test
     km3pipe update [GIT_BRANCH]
-    km3pipe tohdf5 [-n EVENTS] -i FILE -o FILE
-    km3pipe aatohdf5 [-n EVENTS] -i FILE -o FILE
-    km3pipe jpptohdf5 [-n EVENTS] -i FILE -o FILE
-    km3pipe evttohdf5 [-n EVENTS] -i FILE -o FILE
-    km3pipe hdf2root -i FILE [-o FILE]
+    km3pipe aatohdf5 FILE [-o OUTFILE] [-n EVENTS]
+    km3pipe jpptohdf5 FILE [-o OUTFILE] [-n EVENTS]
+    km3pipe evttohdf5 FILE [-o OUTFILE] [-n EVENTS]
+    km3pipe hdf2root FILE [-o OUTFILE] [-n EVENTS]
     km3pipe runtable [-n RUNS] [-s REGEX] DET_ID
     km3pipe runinfo DET_ID RUN
     km3pipe (-h | --help)
@@ -18,8 +17,7 @@ Usage:
 
 Options:
     -h --help       Show this screen.
-    -i FILE         Input file.
-    -o FILE         Output file.
+    -o OUTFILE         Output file.
     -n EVENTS/RUNS  Number of events/runs.
     -s REGEX        Regular expression to filter the runsetup name/id.
     DET_ID          Detector ID (eg. D_ARCA001).
@@ -36,6 +34,12 @@ import os
 from km3pipe import version
 from km3pipe.db import DBManager
 from km3modules import StatusBar
+
+
+def run_tests():
+    import pytest
+    import km3pipe
+    pytest.main([os.path.dirname(km3pipe.__file__)])
 
 
 def aatohdf5(input_file, output_file, n_events):
@@ -151,36 +155,41 @@ def update_km3pipe(git_branch):
 
 def main():
     from docopt import docopt
-    arguments = docopt(__doc__, version=version)
+    args = docopt(__doc__, version=version)
 
     try:
-        n = int(arguments['-n'])
+        n = int(args['-n'])
     except TypeError:
         n = None
 
-    if arguments['update']:
-        update_km3pipe(arguments['GIT_BRANCH'])
+    if args['test']:
+        run_tests()
+        
+    if args['update']:
+        update_km3pipe(args['GIT_BRANCH'])
 
-    if arguments['tohdf5']:
-        aatohdf5(arguments['-i'], arguments['-o'], n)
+    if args['aatohdf5']:
+        infile = args['FILE']
+        outfile = args['-o'] or infile + '.h5'
+        aatohdf5(infile, outfile, n)
 
-    if arguments['aatohdf5']:
-        aatohdf5(arguments['-i'], arguments['-o'], n)
+    if args['jpptohdf5']:
+        infile = args['FILE']
+        outfile = args['-o'] or infile + '.h5'
+        jpptohdf5(infile, outfile, n)
 
-    if arguments['jpptohdf5']:
-        jpptohdf5(arguments['-i'], arguments['-o'], n)
+    if args['evttohdf5']:
+        infile = args['FILE']
+        outfile = args['-o'] or infile + '.h5'
+        evttohdf5(infile, outfile, n)
 
-    if arguments['evttohdf5']:
-        evttohdf5(arguments['-i'], arguments['-o'], n)
+    if args['runtable']:
+        runtable(args['DET_ID'], n, regex=args['-s'])
 
-    if arguments['runtable']:
-        runtable(arguments['DET_ID'], n, regex=arguments['-s'])
+    if args['runinfo']:
+        runinfo(args['RUN'], args['DET_ID'])
 
-    if arguments['runinfo']:
-        runinfo(arguments['RUN'], arguments['DET_ID'])
-
-    if arguments['hdf2root']:
-        infile = arguments['-i']
-        if not arguments['-o']:
-            outfile = infile + '.root'
+    if args['hdf2root']:
+        infile = args['FILE']
+        outfile = args['-o'] or infile + '.root'
         hdf2root(infile, outfile)
