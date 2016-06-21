@@ -58,7 +58,9 @@ class JPPPump(Pump):
             event_info = EventInfo(r.det_id, self.index, r.frame_index,
                                    0, 0,  # MC ID and time
                                    r.overlays, r.run_id,
-                                   r.trigger_counter, r.trigger_mask)
+                                   r.trigger_counter, r.trigger_mask,
+                                   np.nan, np.nan, np.nan   # w1-w3
+                                  )
 
             self.index += 1
             yield {'EventInfo': event_info, 'Hits': hit_series}
