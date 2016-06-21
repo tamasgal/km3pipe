@@ -6,7 +6,6 @@ KM3Pipe command line utility.
 Usage:
     km3pipe test
     km3pipe update [GIT_BRANCH]
-    km3pipe tohdf5 FILE [-o OUTFILE] [-n EVENTS]
     km3pipe aatohdf5 FILE [-o OUTFILE] [-n EVENTS]
     km3pipe jpptohdf5 FILE [-o OUTFILE] [-n EVENTS]
     km3pipe evttohdf5 FILE [-o OUTFILE] [-n EVENTS]
@@ -159,11 +158,6 @@ def main():
 
     if args['update']:
         update_km3pipe(args['GIT_BRANCH'])
-
-    if args['tohdf5']:
-        infile = args['FILE']
-        outfile = args['-o'] or infile + '.h5'
-        aatohdf5(infile, outfile, n)
 
     if args['aatohdf5']:
         infile = args['FILE']
