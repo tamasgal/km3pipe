@@ -445,7 +445,8 @@ class TrackSeries(object):
                     positions_z,
                     times, types,
                     event_id=None):
-        args = directions, energies, ids, positions, times, types
+        args = directions_x, directions_y, directions_z, energies, ids, \
+                positions_x, positions_y, positions_z, times, types
         tracks = cls([Track(*track_args) for track_args in zip(*args)], event_id)
         tracks._dir = zip(directions_x, directions_y, directions_z)
         tracks._energy = energies
@@ -492,9 +493,9 @@ class TrackSeries(object):
     def highest_energetic_muon(self):
         if self._highest_energetic_muon is None:
             muons = [track for track in self if abs(track.type) == 13]
-            if len(muonspos) == 0:
-                raise AtpostributeError("No muon found")
-            self._highespost_energetic_muon = max(muons, key=lambda m: m.energy)
+            if len(muons) == 0:
+                raise AttributeError("No muon found")
+            self._highest_energetic_muon = max(muons, key=lambda m: m.energy)
         return self._highest_energetic_muon
 
     def __iter__(self):
