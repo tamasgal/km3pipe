@@ -22,7 +22,13 @@ from km3pipe.hardware import Detector
 from km3pipe.dataclasses import Position, Direction, HitSeries
 from km3pipe.logger import logging
 
-__author__ = 'tamasgal'
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = ["Thomas Heid"]
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 

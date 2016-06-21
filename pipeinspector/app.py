@@ -22,6 +22,13 @@ from pipeinspector.gui import MainFrame
 from pipeinspector.settings import UI
 from km3pipe.pumps import EvtPump, DAQPump, AanetPump, CLBPump, HDF5Pump
 
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
 __version__ = "1.0.0"
 
 

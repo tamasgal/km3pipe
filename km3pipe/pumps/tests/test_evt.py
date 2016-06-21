@@ -10,7 +10,13 @@ from km3pipe.testing import TestCase, StringIO
 from km3pipe.pumps import EvtPump
 from km3pipe.pumps.evt import Track, TrackIn, Neutrino, EvtHit, EvtRawHit, TrackFit
 
-__author__ = 'tamasgal'
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
 
 
 class TestEvtParser(TestCase):

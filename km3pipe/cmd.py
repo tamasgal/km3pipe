@@ -35,6 +35,14 @@ from km3pipe import version
 from km3pipe.db import DBManager
 from km3modules import StatusBar
 
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal and Moritz Lotze"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
+
 
 def run_tests():
     import pytest
