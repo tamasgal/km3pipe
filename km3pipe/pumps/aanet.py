@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 __author__ = "Tamas Gal, Thomas Heid and Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
-__credits__ = ["Liam Quin"]
+__credits__ = ["Liam Quin & Javier Barrios Marti"]
 __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
