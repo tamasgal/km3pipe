@@ -13,6 +13,14 @@ from km3pipe.tools import (unpack_nfirst, split, namedtuple_with_defaults,
                            angle_between, geant2pdg, pdg2name, PMTReplugger,
                            Cuckoo, total_seconds, remain_file_pointer)
 
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
+
 
 class TestTools(TestCase):
 

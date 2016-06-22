@@ -20,6 +20,13 @@ np.import_array()
 
 from km3pipe.tools import angle_between, geant2pdg, pdg2name
 
+__author__ = "Tamas Gal and Moritz Lotze"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal and Moritz Lotze"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
 __all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries', 'Hit')
 
 

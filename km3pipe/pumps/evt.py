@@ -19,7 +19,13 @@ from km3pipe.tools import pdg2name, geant2pdg, unpack_nfirst, ignored
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
-__author__ = 'tamasgal'
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
 
 
 class EvtPump(Pump):  # pylint: disable:R0902

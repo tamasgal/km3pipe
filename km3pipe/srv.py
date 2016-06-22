@@ -7,8 +7,6 @@ from __future__ import print_function, absolute_import
 The KM3srv tornado webserver.
 
 """
-__author__ = 'Tamas Gal'
-__email__ = 'tgal@km3net.de'
 
 import tornado.ioloop
 import tornado.web
@@ -32,6 +30,14 @@ from km3pipe.config import Config
 from km3pipe.dataclasses import HitSeries
 from km3pipe.tools import token_urlsafe
 from km3pipe.logger import logging
+
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
 
 log = logging.getLogger(__name__)
 
