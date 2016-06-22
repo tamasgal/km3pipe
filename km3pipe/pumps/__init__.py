@@ -32,7 +32,7 @@ __status__ = "Development"
 log = logging.getLogger(__name__)
 
 
-def GenericPump(filename, use_jppy=False):
+def GenericPump(filename, use_jppy=False, name="GenericPump"):
     """A generic pump which utilises the appropriate pump."""
     extension = os.path.splitext(filename)[1]
 
@@ -48,4 +48,4 @@ def GenericPump(filename, use_jppy=False):
     if extension not in pumps:
         log.critical("No pump found for '{0}'".format(extension))
 
-    return pumps[extension](filename=filename)
+    return pumps[extension](filename=filename, name=name)
