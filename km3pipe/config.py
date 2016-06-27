@@ -41,6 +41,7 @@ class Config(object):
         """Configuration manager for KM3NeT stuff"""
         self.config = ConfigParser()
         self._time_zone = None
+        self._config_path = config_path
 
         if config_path is not None:
             self._init_from_path(config_path)
@@ -66,6 +67,13 @@ class Config(object):
 
     def _read_from_file(self, file_obj):
         self.config.readfp(file_obj)
+
+    def set(self, section, key, value):
+        if section not in self.config.sections():
+            self.config.add_section(section)
+        self.config.set(section, key, value)
+        with open(self._config_path, 'w') as f:
+            self.config.write(f)
 
     def create_irods_session(self):
         try:
@@ -102,6 +110,13 @@ class Config(object):
             username = input("Please enter your KM3NeT DB username: ")
             password = getpass.getpass("Password: ")
         return username, password
+
+    @property
+    def db_session_cookie(self):
+        try:
+            return self.config.get('DB', 'session_cookie')
+        except Error:
+            return None
 
     @property
     def slack_token(self):
