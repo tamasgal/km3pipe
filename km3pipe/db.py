@@ -323,7 +323,6 @@ class DBManager(object):
             log.error(failed_auth_message)
             return False
         self._cookies = cj
-        print(cj)
         return True
 
 
