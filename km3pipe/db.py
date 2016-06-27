@@ -32,14 +32,15 @@ if sys.version_info[0] > 2:
     from urllib.parse import urlencode, unquote
     from urllib.request import (Request, build_opener,
                                 HTTPCookieProcessor, HTTPHandler)
-    from urllib.error import URLError
+    from urllib.error import URLError, HTTPError
     from io import StringIO
     from http.cookiejar import CookieJar
     from http.client import IncompleteRead
 else:
     from urllib import urlencode, unquote
     from urllib2 import (Request, build_opener, urlopen,
-                         HTTPCookieProcessor, HTTPHandler, URLError)
+                         HTTPCookieProcessor, HTTPHandler,
+                         URLError, HTTPError)
     from StringIO import StringIO
     from cookielib import CookieJar
     from httplib import IncompleteRead
@@ -86,10 +87,10 @@ class DBManager(object):
             self.restore_ression(config.db_session_cookie)
         else:
             username, password = config.db_credentials
-            if input("Request permanent session? (Y/n)") in 'yY ':
-                cookie = self.request_sid_cookie(username, password)
-                config.set('DB', 'session_cookie', cookie)
-                self.restore_ression(cookie)
+            print(config.db_session_cookie)
+            if config.db_session_cookie is None and \
+               input("Request permanent session? ([y]/n)") in 'yY ':
+                self.request_permanent_session(username, password)
             else:
                 self.login(username, password)
 
@@ -270,7 +271,11 @@ class DBManager(object):
     def _get_content(self, url):
         "Get HTML content"
         target_url = BASE_URL + '/' + unquote(url)  # .encode('utf-8'))
-        f = self.opener.open(target_url)
+        try:
+            f = self.opener.open(target_url)
+        except HTTPError:
+            log.error("HTTP error, your session may be expired.")
+            return None
         log.debug("Accessing '{0}'".format(target_url))
         try:
             content = f.read()
@@ -303,6 +308,14 @@ class DBManager(object):
         opener = build_opener()
         opener.addheaders.append(('Cookie', cookie))
         self._opener = opener
+
+    def request_permanent_session(self, username=None, password=None):
+        config = Config()
+        if username is None and password is None:
+            username, password = config.db_credentials
+        cookie = self.request_sid_cookie(username, password)
+        config.set('DB', 'session_cookie', cookie)
+        self.restore_ression(cookie)
 
     def login(self, username, password):
         "Login to the databse and store cookies for upcoming requests."
