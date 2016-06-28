@@ -13,6 +13,7 @@ import os.path
 import numpy as np
 import tables
 
+import km3pipe
 from km3pipe import Pump, Module, __version__
 from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
 from km3pipe.logger import logging
@@ -78,9 +79,6 @@ class HDF5Sink(Module):
         self.filename = self.get('filename') or 'dump.h5'
         self.index = 1
         self.h5file = tables.open_file(self.filename, mode="w", title="KM3NeT")
-        self.h5file.root._v_objectid = {'km3pipe': __version__,
-                                        'pytables': tables.__version__,
-                                       }
         self.filters = tables.Filters(complevel=5)
         self.hits = self.h5file.create_table('/', 'hits',
                                              Hit, "Hits",
@@ -220,6 +218,8 @@ class HDF5Sink(Module):
         self.mc_tracks.cols.event_id.create_index()
         for tab in self._reco_tables.values():
             tab.cols.event_id.create_index()
+        self.h5file.root._v_attrs.km3pipe = str(km3pipe.__version__)
+        self.h5file.root._v_attrs.pytables = str(tables.__version__)
         self.h5file.close()
 
 
