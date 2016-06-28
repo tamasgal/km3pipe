@@ -14,7 +14,7 @@ import numpy as np
 import tables
 
 import km3pipe
-from km3pipe import Pump, Module, __version__
+from km3pipe import Pump, Module
 from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
 from km3pipe.logger import logging
 
