@@ -75,6 +75,7 @@ setup(name='km3pipe',
               'km3srv=km3pipe.srv:main',
               'pipeinspector=pipeinspector.app:main',
               'h5tree=km3pipe.utils.h5tree:main',
+              'h5info=km3pipe.utils.h5info:main',
           ],
       },
       classifiers=[
