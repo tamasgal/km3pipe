@@ -24,7 +24,7 @@ __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
 __license__ = "MIT"
-__maintainer__ = "Tamas Gal"
+__maintainer__ = "Tamas Gal, Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
@@ -49,3 +49,70 @@ def GenericPump(filename, use_jppy=False, name="GenericPump"):
         log.critical("No pump found for '{0}'".format(extension))
 
     return pumps[extension](filename=filename, name=name)
+
+
+def df_to_h5(df, filename, tabname, filemode='a', where='/', complevel=5,):
+    """Write pandas dataframes with proper columns.
+
+    The main 2 ways pandas writes dataframes suck bigly.
+    """
+    from tables import Filters, open_file
+    with open_file(filename, filemode) as h5:
+        filt = Filters(complevel=complevel, shuffle=True)
+        h5.create_table(where, tabname, obj=df.to_records(), filters=filt)
+
+
+def load_mva(filenames, label_feat, mc_feats,
+             where='/', tabname='mva', n_events=None, n_events_per_file=None,
+             from_beginning=True,):
+    """
+    A Loader for "stupid" MVA files (all in single table).
+
+    Useful, for example, if you have files output by `rootpy.root2hdf5`.
+
+    Parameters
+    ----------
+    from_beginning: bool, default=True
+        if true, slice file[:n_events]. if false, file[n_events:]
+    n_events / n_events_per_file:
+        if n_events_per_file is set, ignore n_events
+        if both are unset, read all events from each file
+    """
+    import pandas as pd
+    from tables import open_file
+    df = []
+    for fn in filenames:
+        if n_events_per_file:
+            n = n_events_per_file[fn]
+        else:
+            n = n_events
+        with open_file(fn, 'r') as h5:
+            tab = h5.get_node(where, tabname)
+            if not n:
+                buf = tab[:]
+            else:
+                if from_beginning:
+                    buf = tab[:n]
+                else:
+                    buf = tab[n:]
+            buf = pd.DataFrame.from_records(buf)
+            df.append(buf)
+    df = pd.concat(df)
+    feats = df.columns
+    reco_feats = [feat for feat in feats
+                  if feat not in mc_feats and feat != label_feat]
+    X_reco = df[reco_feats]
+    mc_info = df[mc_feats]
+    y = df[label_feat]
+    return X_reco, y, mc_info
+
+
+def guess_mc_feats(df):
+    feats = df.columns
+    mc_feats = []
+    mc_feats.extend([f for f in feats if 'MC' in f])
+    mc_feats.extend([f for f in feats if 'ID' in f])
+    mc_feats.extend([f for f in feats if 'weight' in f.lower()])
+    mc_feats.extend([f for f in feats if 'nevents' in f.lower()])
+    mc_feats.extend([f for f in feats if 'livetime' in f.lower()])
+    return mc_feats

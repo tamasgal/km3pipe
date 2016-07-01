@@ -13,6 +13,7 @@ import os.path
 import numpy as np
 import tables
 
+import km3pipe
 from km3pipe import Pump, Module
 from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
 from km3pipe.logger import logging
@@ -217,6 +218,8 @@ class HDF5Sink(Module):
         self.mc_tracks.cols.event_id.create_index()
         for tab in self._reco_tables.values():
             tab.cols.event_id.create_index()
+        self.h5file.root._v_attrs.km3pipe = str(km3pipe.__version__)
+        self.h5file.root._v_attrs.pytables = str(tables.__version__)
         self.h5file.close()
 
 

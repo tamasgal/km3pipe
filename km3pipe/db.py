@@ -87,7 +87,6 @@ class DBManager(object):
             self.restore_ression(config.db_session_cookie)
         else:
             username, password = config.db_credentials
-            print(config.db_session_cookie)
             if config.db_session_cookie is None and \
                input("Request permanent session? ([y]/n)") in 'yY ':
                 self.request_permanent_session(username, password)
