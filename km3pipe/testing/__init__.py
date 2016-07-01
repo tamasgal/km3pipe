@@ -18,3 +18,11 @@ try:
     from mock import MagicMock
 except ImportError:
     from unittest.mock import MagicMock  # noqa
+
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"

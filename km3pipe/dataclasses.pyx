@@ -20,6 +20,13 @@ np.import_array()
 
 from km3pipe.tools import angle_between, geant2pdg, pdg2name
 
+__author__ = "Tamas Gal and Moritz Lotze"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal and Moritz Lotze"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
 __all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries', 'Hit')
 
 
@@ -54,7 +61,11 @@ class EventInfo(object):
     @classmethod
     def from_table(cls, row):
         args = []
-        for col in sorted(row.table.colnames):
+        for col in sorted(
+                ['det_id', 'event_id', 'frame_index', 'mc_id', 'mc_t',
+                'overlays', 'run_id', 'trigger_counter', 'trigger_mask',
+                'weight_w1', 'weight_w2', 'weight_w3']
+                ):
             try:
                 args.append(row[col])
             except KeyError:
@@ -435,39 +446,34 @@ class TrackSeries(object):
                     for t in tracks], event_id)
 
     @classmethod
-    def from_arrays(cls, directions, energies, ids, positions, times, types,
+    def from_arrays(cls,
+                    directions_x,
+                    directions_y,
+                    directions_z,
+                    energies, ids,
+                    positions_x,
+                    positions_y,
+                    positions_z,
+                    times, types,
                     event_id=None):
-        args = directions, energies, ids, positions, times, types
+        args = directions_x, directions_y, directions_z, energies, ids, \
+                positions_x, positions_y, positions_z, times, types
         tracks = cls([Track(*track_args) for track_args in zip(*args)], event_id)
-        tracks._dir = directions
+        tracks._dir = zip(directions_x, directions_y, directions_z)
         tracks._energy = energies
         tracks._id = ids
-        tracks._pos = positions
+        tracks._pos = zip(positions_x, positions_y, positions_z)
         tracks._time = times
         tracks._type = types
         return tracks
 
-    def to_flat(self):
-        cols = ['id', 'time', 'energy', 'type',
-                'pos_x', 'pos_y', 'pos_z',
-                'dir_x', 'dir_y', 'dir_z', ]
-        dt = [(c, float) for c in cols]
-        return np.asarray(np.colstack([
-            self.id,
-            self.time,
-            self.energy,
-            self.type,
-            self.pos,
-            self.dir,
-        ]), dtype=dt)
-
     @classmethod
     def from_table(cls, table, event_id=None):
         return cls([Track(
-            row['dir'],
+            np.array((row['dir_x'], row['dir_y'], row['dir_z'])),
             row['energy'],
             row['id'],
-            row['pos'],
+            np.array((row['pos_x'], row['pos_y'], row['pos_z'])),
             row['time'],
             row['type'],
         ) for row in table], event_id)

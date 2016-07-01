@@ -19,6 +19,14 @@ from __future__ import division, absolute_import, print_function
 from km3pipe.testing import TestCase, StringIO, skipIf
 from km3pipe.hardware import Detector, PMT
 
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
+
 
 EXAMPLE_DETX = StringIO("\n".join((
     "1 3",

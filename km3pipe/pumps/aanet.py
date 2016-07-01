@@ -15,6 +15,14 @@ from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
+__author__ = "Tamas Gal, Thomas Heid and Moritz Lotze"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = ["Liam Quin & Javier Barrios Marti"]
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal and Moritz Lotze"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
+
 
 class AanetPump(Pump):
     """A pump for binary Aanet files."""
@@ -84,6 +92,12 @@ class AanetPump(Pump):
                 if event.det_id <= 0:  # apply ZED correction
                     for track in event.mc_trks:
                         track.pos.z += 405.93
+
+                if len(event.w) == 3:
+                    w1, w2, w3 = event.w
+                else:
+                    w1 = w2 = w3 = np.nan
+
                 blob = {'Evt': event,
                         'Hits': HitSeries.from_aanet(event.hits, event.id),
                         'MCHits': HitSeries.from_aanet(event.mc_hits, event.id),
@@ -93,18 +107,18 @@ class AanetPump(Pump):
                         'filename': filename,
                         'Header': self.header,
                         'EventInfo': EventInfo(
-                            0,              # det_id
-                            event.id,       # event_id
-                            0,              # frame_index
-                            0,              # mc_id
-                            0.0,            # mc_t
-                            0,              # overlays
-                            0,              # run_id
-                            0,              # trigger_counter
-                            0,              # trigger_mask
-                            event.w[0],     # weight_w1
-                            event.w[1],     # weight_w2
-                            event.w[2],     # weight_w3
+                            event.det_id,
+                            event.id,
+                            event.frame_index,
+                            event.mc_id,
+                            event.mc_t,
+                            event.overlays,
+                            event.run_id,
+                            event.trigger_counter,
+                            event.trigger_mask,
+                            w1,
+                            w2,
+                            w3,
                         ),
                        }
                 yield blob

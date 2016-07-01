@@ -23,7 +23,13 @@ except NameError:
 
 from km3pipe.logger import logging
 
-__author__ = 'tamasgal'
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal and Moritz Lotze"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -35,6 +41,7 @@ class Config(object):
         """Configuration manager for KM3NeT stuff"""
         self.config = ConfigParser()
         self._time_zone = None
+        self._config_path = config_path
 
         if config_path is not None:
             self._init_from_path(config_path)
@@ -60,6 +67,13 @@ class Config(object):
 
     def _read_from_file(self, file_obj):
         self.config.readfp(file_obj)
+
+    def set(self, section, key, value):
+        if section not in self.config.sections():
+            self.config.add_section(section)
+        self.config.set(section, key, value)
+        with open(self._config_path, 'w') as f:
+            self.config.write(f)
 
     def create_irods_session(self):
         try:
@@ -96,6 +110,13 @@ class Config(object):
             username = input("Please enter your KM3NeT DB username: ")
             password = getpass.getpass("Password: ")
         return username, password
+
+    @property
+    def db_session_cookie(self):
+        try:
+            return self.config.get('DB', 'session_cookie')
+        except Error:
+            return None
 
     @property
     def slack_token(self):

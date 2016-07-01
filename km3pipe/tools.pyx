@@ -30,9 +30,15 @@ import km3pipe as kp
 
 from km3pipe.logger import logging
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+__author__ = "Tamas Gal and Moritz Lotze"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal and Moritz Lotze"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
 
-__author__ = 'tamasgal'
+log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 def unpack_nfirst(seq, nfirst):
@@ -356,35 +362,28 @@ def open_hdf5(filename):
     return read_hdf5(filename)
 
 
-def read_hdf5(filename):
+def read_hdf5(filename, detx=None):
     """Open HDF5 file and retrieve all relevant information."""
-    hits = pd.read_hdf(filename, '/hits')
-    # mc_tracks = pd.read_hdf(filename, '/mc_tracks')  # currently not working
-    #mc_tracks = None
-    mc_tracks = read_mc_tracks(filename)
     event_info = pd.read_hdf(filename, '/event_info')
-    det_ids = np.unique(event_info.det_id)
-    reco = read_reco(filename)
-    if len(det_ids) > 1:
-        log.critical("Multiple detector IDs found in events.")
     geometry = None
-    if len(hits) != 0:
-        geometry = kp.Geometry(det_id=det_ids[0])
+    hits = pd.read_hdf(filename, '/hits')
+    mc_tracks = pd.read_hdf(filename, '/mc_tracks')
+    try:
+        reco = read_reco(filename)
+    except ValueError:
+        reco = None
+
+    if detx is not None:
+        geometry = kp.Geometry(filename=detx)
+    else:
+        det_ids = np.unique(event_info.det_id)
+        if len(det_ids) > 1:
+            log.critical("Multiple detector IDs found in events.")
+        det_id = det_ids[0]
+        if det_id > 0:
+            geometry = kp.Geometry(det_id=det_id)
+
     return event_info, geometry, hits, mc_tracks, reco
-
-
-def read_mc_tracks(filename):
-    with tables.open_file(filename, 'r') as h5:
-        mc_trks = h5.root.mc_tracks[:]
-    dat = {col: mc_trks[col] for col in mc_trks.dtype.names}
-    for i, c in enumerate(['pos_x', 'pos_y', 'pos_z']):
-        dat[c] = dat['pos'][:, i]
-    for i, c in enumerate(['dir_x', 'dir_y', 'dir_z']):
-        dat[c] = dat['dir'][:, i]
-    del dat['pos']
-    del dat['dir']
-    dat = pd.DataFrame.from_dict(dat)
-    return dat
 
 
 def read_reco(filename):
@@ -417,6 +416,30 @@ def token_urlsafe(nbytes=32):
     """
     tok = os.urandom(nbytes)
     return base64.urlsafe_b64encode(tok).rstrip(b'=').decode('ascii')
+
+
+def tai_timestamp():
+    """Return current TAI timestamp."""
+    timestamp = time.time()
+    date = datetime.utcfromtimestamp(timestamp)
+    if date.year < 1972:
+        return timestamp
+    offset = 10 + timestamp
+    leap_seconds = [
+        (1972, 1, 1), (1972, 7, 1), (1973, 1, 1),
+        (1974, 1, 1), (1975, 1, 1), (1976, 1, 1),
+        (1977, 1, 1), (1978, 1, 1), (1979, 1, 1),
+        (1980, 1, 1), (1981, 7, 1), (1982, 7, 1),
+        (1983, 7, 1), (1985, 7, 1), (1988, 1, 1),
+        (1990, 1, 1), (1991, 1, 1), (1992, 7, 1),
+        (1993, 7, 1), (1994, 7, 1), (1996, 1, 1),
+        (1997, 7, 1), (1999, 1, 1), (2006, 1, 1),
+        (2009, 1, 1), (2012, 7, 1), (2015, 7, 1),
+    ]
+    for idx, leap_date in enumerate(leap_seconds):
+        if leap_date >= (date.year, date.month, date.day):
+            return idx - 1 + offset
+    return len(leap_seconds) - 1 + offset
 
 
 try:

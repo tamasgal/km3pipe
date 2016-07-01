@@ -13,15 +13,20 @@ import os.path
 import numpy as np
 import tables
 
+import km3pipe
 from km3pipe import Pump, Module
 from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
-__author__ = 'tamasgal'
-
-POS_ATOM = tables.FloatAtom(shape=3)
+__author__ = "Tamas Gal and Moritz Lotze"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal and Moritz Lotze"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
 
 
 class EventInfoDesc(tables.IsDescription):
@@ -53,11 +58,15 @@ class Hit(tables.IsDescription):
 
 
 class Track(tables.IsDescription):
-    dir = tables.FloatCol(shape=(3,))
+    dir_x = tables.FloatCol()
+    dir_y = tables.FloatCol()
+    dir_z = tables.FloatCol()
     energy = tables.FloatCol()
     event_id = tables.UIntCol()
     id = tables.UIntCol()
-    pos = tables.FloatCol(shape=(3,))
+    pos_x = tables.FloatCol()
+    pos_y = tables.FloatCol()
+    pos_z = tables.FloatCol()
     run_id = tables.UIntCol()
     time = tables.IntCol()
     type = tables.IntCol()
@@ -113,11 +122,15 @@ class HDF5Sink(Module):
 
     def _write_tracks(self, tracks, track_row):
         for track in tracks:
-            track_row['dir'] = track.dir
+            track_row['dir_x'] = track.dir[0]
+            track_row['dir_y'] = track.dir[1]
+            track_row['dir_z'] = track.dir[2]
             track_row['energy'] = track.energy
             track_row['event_id'] = tracks.event_id
             track_row['id'] = track.id
-            track_row['pos'] = track.pos
+            track_row['pos_x'] = track.pos[0]
+            track_row['pos_y'] = track.pos[1]
+            track_row['pos_z'] = track.pos[2]
             # track_row['run_id'] = track.run_id
             track_row['time'] = track.time
             track_row['type'] = track.type
@@ -205,6 +218,8 @@ class HDF5Sink(Module):
         self.mc_tracks.cols.event_id.create_index()
         for tab in self._reco_tables.values():
             tab.cols.event_id.create_index()
+        self.h5file.root._v_attrs.km3pipe = str(km3pipe.__version__)
+        self.h5file.root._v_attrs.pytables = str(tables.__version__)
         self.h5file.close()
 
 

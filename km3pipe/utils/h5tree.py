@@ -17,6 +17,14 @@ from __future__ import division, absolute_import, print_function
 
 import tables
 
+__author__ = "Moritz Lotze"
+__copyright__ = "Copyright 2016, Moritz Lotze and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Moritz Lotze"
+__email__ = "mlotze@km3net.de"
+__status__ = "Development"
+
 
 def h5tree(h5name):
     with tables.open_file(h5name) as h5:

@@ -23,23 +23,35 @@ from km3pipe.tools import Timer
 from km3pipe.config import Config
 from km3pipe.logger import logging
 
+try:
+    input = raw_input
+except NameError:
+    pass
+
 if sys.version_info[0] > 2:
     from urllib.parse import urlencode, unquote
     from urllib.request import (Request, build_opener,
                                 HTTPCookieProcessor, HTTPHandler)
-    from urllib.error import URLError
+    from urllib.error import URLError, HTTPError
     from io import StringIO
     from http.cookiejar import CookieJar
     from http.client import IncompleteRead
 else:
     from urllib import urlencode, unquote
-    from urllib2 import (Request, build_opener,
-                         HTTPCookieProcessor, HTTPHandler, URLError)
+    from urllib2 import (Request, build_opener, urlopen,
+                         HTTPCookieProcessor, HTTPHandler,
+                         URLError, HTTPError)
     from StringIO import StringIO
     from cookielib import CookieJar
     from httplib import IncompleteRead
 
-__author__ = 'tamasgal'
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -53,8 +65,8 @@ except AttributeError:
     log.debug("Your SSL support is outdated.\n"
               "Please update your Python installation!")
 
-LOGIN_URL = 'https://km3netdbweb.in2p3.fr/home.htm'
 BASE_URL = 'https://km3netdbweb.in2p3.fr'
+LOGIN_URL = BASE_URL + '/home.htm'
 
 
 class DBManager(object):
@@ -66,14 +78,20 @@ class DBManager(object):
         self._doms = None
         self._detectors = None
         self._opener = None
-        if username is None:
-            config = Config()
-            username, password = config.db_credentials
-        try:
+
+        config = Config()
+
+        if username is not None and password is not None:
             self.login(username, password)
-        except URLError as e:
-            log.error("Failed to connect to the database -> probably down!")
-            log.error("Error from database server:\n    {0}".format(e))
+        elif config.db_session_cookie not in (None, ''):
+            self.restore_ression(config.db_session_cookie)
+        else:
+            username, password = config.db_credentials
+            if config.db_session_cookie is None and \
+               input("Request permanent session? ([y]/n)") in 'yY ':
+                self.request_permanent_session(username, password)
+            else:
+                self.login(username, password)
 
     def datalog(self, parameter, run, maxrun=None, det_id='D_ARCA001'):
         "Retrieve datalogs for given parameter, run(s) and detector"
@@ -252,7 +270,11 @@ class DBManager(object):
     def _get_content(self, url):
         "Get HTML content"
         target_url = BASE_URL + '/' + unquote(url)  # .encode('utf-8'))
-        f = self.opener.open(target_url)
+        try:
+            f = self.opener.open(target_url)
+        except HTTPError:
+            log.error("HTTP error, your session may be expired.")
+            return None
         log.debug("Accessing '{0}'".format(target_url))
         try:
             content = f.read()
@@ -273,6 +295,27 @@ class DBManager(object):
             self._opener = opener
         return self._opener
 
+    def request_sid_cookie(self, username, password):
+        """Request cookie for permanent session token."""
+        target_url = LOGIN_URL + '?usr={0}&pwd={1}&persist=y' \
+                                 .format(username, password)
+        cookie = urlopen(target_url).read()
+        return cookie
+
+    def restore_ression(self, cookie):
+        """Establish databse connection using permanent session cookie"""
+        opener = build_opener()
+        opener.addheaders.append(('Cookie', cookie))
+        self._opener = opener
+
+    def request_permanent_session(self, username=None, password=None):
+        config = Config()
+        if username is None and password is None:
+            username, password = config.db_credentials
+        cookie = self.request_sid_cookie(username, password)
+        config.set('DB', 'session_cookie', cookie)
+        self.restore_ression(cookie)
+
     def login(self, username, password):
         "Login to the databse and store cookies for upcoming requests."
         cj = CookieJar()
@@ -280,7 +323,12 @@ class DBManager(object):
         values = {'usr': username, 'pwd': password}
         data = urlencode(values)
         req = Request(LOGIN_URL, data.encode('utf-8'))
-        f = opener.open(req)
+        try:
+            f = opener.open(req)
+        except URLError as e:
+            log.error("Failed to connect to the database -> probably down!")
+            log.error("Error from database server:\n    {0}".format(e))
+            return False
         html = f.read()
         failed_auth_message = 'Bad username or password'
         if failed_auth_message in str(html):
