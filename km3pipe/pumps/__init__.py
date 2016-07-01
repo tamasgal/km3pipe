@@ -49,3 +49,14 @@ def GenericPump(filename, use_jppy=False, name="GenericPump"):
         log.critical("No pump found for '{0}'".format(extension))
 
     return pumps[extension](filename=filename, name=name)
+
+
+def df_to_h5(df, filename, tabname, filemode='a', where='/', complevel=5,):
+    """Write pandas dataframes with proper columns.
+
+    The main 2 ways pandas writes dataframes suck bigly.
+    """
+    from tables import Filters, open_file
+    with open_file(filename, filemode) as h5:
+        filt = Filters(complevel=complevel, shuffle=True)
+        h5.create_table(where, tabname, obj=df.to_records(), filters=filt)
