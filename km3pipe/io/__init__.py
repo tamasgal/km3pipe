@@ -1,22 +1,22 @@
 # coding=utf-8
 # Filename: __init__.py
 """
-A collection of pumps for different kinds of data formats.
+A collection of io for different kinds of data formats.
 
 """
 from __future__ import division, absolute_import, print_function
 
 import os
 
-from km3pipe.pumps.evt import EvtPump  # noqa
-from km3pipe.pumps.daq import DAQPump  # noqa
-from km3pipe.pumps.clb import CLBPump  # noqa
-from km3pipe.pumps.aanet import AanetPump  # noqa
-from km3pipe.pumps.jpp import JPPPump  # noqa
-from km3pipe.pumps.ch import CHPump  # noqa
-from km3pipe.pumps.hdf5 import HDF5Pump  # noqa
-from km3pipe.pumps.hdf5 import HDF5Sink  # noqa
-from km3pipe.pumps.pickle import PicklePump  # noqa
+from km3pipe.io.evt import EvtPump  # noqa
+from km3pipe.io.daq import DAQPump  # noqa
+from km3pipe.io.clb import CLBPump  # noqa
+from km3pipe.io.aanet import AanetPump  # noqa
+from km3pipe.io.jpp import JPPPump  # noqa
+from km3pipe.io.ch import CHPump  # noqa
+from km3pipe.io.hdf5 import HDF5Pump  # noqa
+from km3pipe.io.hdf5 import HDF5Sink  # noqa
+from km3pipe.io.pickle import PicklePump  # noqa
 
 from km3pipe.logger import logging
 
@@ -36,7 +36,7 @@ def GenericPump(filename, use_jppy=False, name="GenericPump"):
     """A generic pump which utilises the appropriate pump."""
     extension = os.path.splitext(filename)[1]
 
-    pumps = {
+    io = {
             '.evt': EvtPump,
             '.h5': HDF5Pump,
             '.aa.root': AanetPump,
@@ -45,10 +45,10 @@ def GenericPump(filename, use_jppy=False, name="GenericPump"):
             '.dqd': CLBPump,
             }
 
-    if extension not in pumps:
+    if extension not in io:
         log.critical("No pump found for '{0}'".format(extension))
 
-    return pumps[extension](filename=filename, name=name)
+    return io[extension](filename=filename, name=name)
 
 
 def df_to_h5(df, filename, tabname, filemode='a', where='/', complevel=5,):

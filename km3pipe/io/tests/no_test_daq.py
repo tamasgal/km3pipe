@@ -8,7 +8,7 @@
 from __future__ import division, absolute_import, print_function
 
 from km3pipe.testing import TestCase, StringIO, skipIf
-from km3pipe.pumps.daq import (DAQPreamble, DAQHeader, DAQSummaryslice)
+from km3pipe.io.daq import (DAQPreamble, DAQHeader, DAQSummaryslice)
 
 from binascii import unhexlify
 

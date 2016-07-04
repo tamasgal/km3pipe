@@ -53,7 +53,7 @@ def run_tests():
 def aatohdf5(input_file, output_file, n_events):
     """Convert AAnet ROOT file to HDF5 file"""
     from km3pipe import Pipeline  # noqa
-    from km3pipe.pumps import AanetPump, HDF5Sink  # noqa
+    from km3pipe.io import AanetPump, HDF5Sink  # noqa
 
     pipe = Pipeline()
     pipe.attach(AanetPump, filename=input_file)
@@ -65,7 +65,7 @@ def aatohdf5(input_file, output_file, n_events):
 def jpptohdf5(input_file, output_file, n_events):
     """Convert JPP ROOT file to HDF5 file"""
     from km3pipe import Pipeline  # noqa
-    from km3pipe.pumps import JPPPump, HDF5Sink  # noqa
+    from km3pipe.io import JPPPump, HDF5Sink  # noqa
 
     pipe = Pipeline()
     pipe.attach(JPPPump, filename=input_file)
@@ -77,7 +77,7 @@ def jpptohdf5(input_file, output_file, n_events):
 def evttohdf5(input_file, output_file, n_events):
     """Convert evt file to HDF5 file"""
     from km3pipe import Pipeline  # noqa
-    from km3pipe.pumps import EvtPump, HDF5Sink  # noqa
+    from km3pipe.io import EvtPump, HDF5Sink  # noqa
 
     pipe = Pipeline()
     pipe.attach(EvtPump, filename=input_file)
