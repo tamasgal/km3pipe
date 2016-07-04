@@ -79,7 +79,8 @@ class HDF5Sink(Module):
         self.filename = self.get('filename') or 'dump.h5'
         self.index = 1
         self.h5file = tables.open_file(self.filename, mode="w", title="KM3NeT")
-        self.filters = tables.Filters(complevel=5)
+        self.filters = tables.Filters(complevel=5, shuffle=True,
+                                      fletcher32=True)
         self.hits = self.h5file.create_table('/', 'hits',
                                              Hit, "Hits",
                                              filters=self.filters)
