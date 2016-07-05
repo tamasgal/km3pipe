@@ -69,6 +69,9 @@ setup(name='km3pipe',
           'mock',
           'websocket-client',
       ],
+      extra_require = {
+          'scikit-learn': ['sklearn'],
+      },
       entry_points={
           'console_scripts': [
               'km3pipe=km3pipe.cmd:main',
