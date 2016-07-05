@@ -72,9 +72,18 @@ class ClientManager(object):
     def heartbeat(self, interval=30):
         while True:
             log.info("Pinging {0} clients.".format(len(self._clients)))
+            print(self._clients)
             for client in self._clients.itervalues():
+                print(client)
                 client.message("Ping.")
             sleep(interval)
+
+    def broadcast_status(self):
+        # status = {
+        #    n_clients : len(self._clients)
+        # }
+        self.broadcast("Number of connected clients: {0}."
+                       .format(len(self._clients)))
 
     def message_to(self, token, data, kind):
         message = pd.io.json.dumps({'kind': kind, 'data': data})
@@ -86,8 +95,18 @@ class ClientManager(object):
         if token not in self._clients:
             log.critical("Client with token '{0}' not found!".format(token))
             return
-        self._clients[token].write_message(message)
-        print("Sent {0} bytes.".format(len(message)))
+        client = self._clients[token]
+        try:
+            client.write_message(message)
+        except (AttributeError, tornado.websocket.WebSocketClosedError):
+            log.error("Lost connection to client '{0}'".format(client))
+        else:
+            print("Sent {0} bytes.".format(len(message)))
+
+    def broadcast(self, data, kind="info"):
+        log.info("Broatcasting to {0} clients.".format(len(self._clients)))
+        for token in self._clients.iterkeys():
+            self.message_to(token, data, kind)
 
 
 class MessageProvider(tornado.websocket.WebSocketHandler):
@@ -110,7 +129,6 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
     def __init__(self, *args, **kwargs):
         log.warning("EchoWebSocket created!")
         self.client_manager = kwargs.pop('client_manager')
-        self.clients = kwargs.pop('clients')
         self.data_path = kwargs.pop('data_path')
         self._status = kwargs.pop('server_status')
         self._lock = kwargs.pop('lock')
@@ -122,16 +140,13 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
 
     def open(self):
         welcome = u"WebSocket opened. Welcome to KM3srv {0}!".format(VERSION)
-        self.clients[self._token] = self
-        print(welcome)
-        print(self._token)
-        log.info("Number of clients: {0}".format(len(self.clients)))
         self.message(welcome)
         self.message(self._token, 'token')
         self.message(self.status, 'status')
+        self.client_manager.broadcast_status()
 
     def on_close(self):
-        del self.clients[self._token]
+        self.client_manager.remove(self._token)
         print("WebSocket closed, client removed.")
 
     def on_message(self, message):
@@ -235,7 +250,7 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
     @status.setter
     def status(self, value):
         self._status = value
-        self.broadcast(self.status, kind='status')
+        # self.broadcast(self.status, kind='status')
 
     def message(self, data, kind="info"):
         """Convert message to json and send it to the clients"""
@@ -243,15 +258,6 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
         message = pd.io.json.dumps({'kind': kind, 'data': data})
         print("Sent {0} bytes.".format(len(message)))
         self.write_message(message)
-
-    def broadcast(self, text, kind="info"):
-        log.info("Number of connected clients: {0}".format(len(self.clients)))
-        for client in self.clients.itervalues():
-            message = pd.io.json.dumps({'kind': kind, 'data': text})
-            try:
-                client.write_message(message)
-            except tornado.websocket.WebSocketClosedError:
-                log.error("Lost connection to client '{0'}".format(client))
 
 
 def srv_event(token, hits, url=RBA_URL):
@@ -300,7 +306,6 @@ def main():
     server_status = 'ready'
     lock = threading.Lock()
     client_manager = ClientManager()
-    clients = {}
 
     print("Starting KM3srv.")
     print("Running on {0}:{1}".format(ip, port))
@@ -313,8 +318,7 @@ def main():
 
 
     application = tornado.web.Application([
-        (r"/test", EchoWebSocket, {'clients': clients,
-                                   'client_manager': client_manager,
+        (r"/test", EchoWebSocket, {'client_manager': client_manager,
                                    'server_status': server_status,
                                    'data_path': data_path,
                                    'lock': lock}),
