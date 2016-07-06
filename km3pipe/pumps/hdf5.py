@@ -151,6 +151,8 @@ class HDF5Sink(Module):
         # info_row['timestamp'] = info.timestamp
         info_row['trigger_counter'] = info.trigger_counter
         info_row['trigger_mask'] = info.trigger_mask
+        info_row['utc_nanoseconds'] = info.utc_nanoseconds
+        info_row['utc_seconds'] = info.utc_seconds
         info_row['weight_w1'] = info.weight_w1
         info_row['weight_w2'] = info.weight_w2
         info_row['weight_w3'] = info.weight_w3
