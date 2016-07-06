@@ -418,6 +418,30 @@ def token_urlsafe(nbytes=32):
     return base64.urlsafe_b64encode(tok).rstrip(b'=').decode('ascii')
 
 
+def tai_timestamp():
+    """Return current TAI timestamp."""
+    timestamp = time.time()
+    date = datetime.utcfromtimestamp(timestamp)
+    if date.year < 1972:
+        return timestamp
+    offset = 10 + timestamp
+    leap_seconds = [
+        (1972, 1, 1), (1972, 7, 1), (1973, 1, 1),
+        (1974, 1, 1), (1975, 1, 1), (1976, 1, 1),
+        (1977, 1, 1), (1978, 1, 1), (1979, 1, 1),
+        (1980, 1, 1), (1981, 7, 1), (1982, 7, 1),
+        (1983, 7, 1), (1985, 7, 1), (1988, 1, 1),
+        (1990, 1, 1), (1991, 1, 1), (1992, 7, 1),
+        (1993, 7, 1), (1994, 7, 1), (1996, 1, 1),
+        (1997, 7, 1), (1999, 1, 1), (2006, 1, 1),
+        (2009, 1, 1), (2012, 7, 1), (2015, 7, 1),
+    ]
+    for idx, leap_date in enumerate(leap_seconds):
+        if leap_date >= (date.year, date.month, date.day):
+            return idx - 1 + offset
+    return len(leap_seconds) - 1 + offset
+
+
 try:
     dict.iteritems
 except AttributeError:

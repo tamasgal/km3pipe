@@ -302,7 +302,7 @@ class DAQEvent(object):
       n_triggered_hits (int): Number of hits satisfying the trigger conditions.
       n_snapshot_hits (int): Number of snapshot hits.
       triggered_hits (list): A list of triggered hits
-        (dom_id, pmt_id, tdc_time, tot)
+        (dom_id, pmt_id, tdc_time, tot, (trigger_mask,))
       snapshot_hits (list): A list of snapshot hits
         (dom_id, pmt_id, tdc_time, tot)
 

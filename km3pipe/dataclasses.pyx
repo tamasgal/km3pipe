@@ -41,6 +41,8 @@ class EventInfo(object):
                  run_id,
                  trigger_counter,
                  trigger_mask,
+                 utc_nanoseconds,
+                 utc_seconds,
                  weight_w1,
                  weight_w2,
                  weight_w3,
@@ -54,6 +56,8 @@ class EventInfo(object):
         self.run_id = run_id
         self.trigger_counter = trigger_counter
         self.trigger_mask = trigger_mask
+        self.utc_nanoseconds = utc_nanoseconds
+        self.utc_seconds = utc_seconds
         self.weight_w1 = weight_w1
         self.weight_w2 = weight_w2
         self.weight_w3 = weight_w3
@@ -64,6 +68,7 @@ class EventInfo(object):
         for col in sorted(
                 ['det_id', 'event_id', 'frame_index', 'mc_id', 'mc_t',
                 'overlays', 'run_id', 'trigger_counter', 'trigger_mask',
+                'utc_nanoseconds', 'utc_seconds',
                 'weight_w1', 'weight_w2', 'weight_w3']
                 ):
             try:
@@ -77,12 +82,15 @@ class EventInfo(object):
                "    detector id:     {1}\n" \
                "    run ID:          {2}\n" \
                "    frame index:     {3}\n" \
-               "    MC id:           {4}\n" \
-               "    MC time:         {5}\n" \
-               "    overlays:        {6}\n" \
-               "    trigger counter: {7}\n" \
-               "    trigger mask:    {8}\n" \
-               .format(self.event_id, self.det_id, self.run_id, self.frame_index,
+               "    UTC seconds:     {4}\n" \
+               "    UTC nanoseconds: {5}\n" \
+               "    MC id:           {6}\n" \
+               "    MC time:         {7}\n" \
+               "    overlays:        {8}\n" \
+               "    trigger counter: {9}\n" \
+               "    trigger mask:    {10}\n" \
+               .format(self.event_id, self.det_id, self.run_id,
+                       self.frame_index, self.utc_seconds, self.utc_nanoseconds,
                        self.mc_id, self.mc_t, self.overlays,
                        self.trigger_counter, self.trigger_mask)
 
