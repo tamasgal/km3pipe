@@ -119,6 +119,13 @@ class Config(object):
             return None
 
     @property
+    def db_url(self):
+        try:
+            return self.config.get('DB', 'url')
+        except Error:
+            return None
+
+    @property
     def slack_token(self):
         """Return slack token for chat bots."""
         try:
