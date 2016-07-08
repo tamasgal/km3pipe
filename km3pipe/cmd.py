@@ -6,6 +6,7 @@ KM3Pipe command line utility.
 Usage:
     km3pipe test
     km3pipe update [GIT_BRANCH]
+    km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID]
     km3pipe aatohdf5 FILE [-o OUTFILE] [-n EVENTS]
     km3pipe jpptohdf5 FILE [-o OUTFILE] [-n EVENTS]
     km3pipe evttohdf5 FILE [-o OUTFILE] [-n EVENTS]
@@ -17,8 +18,11 @@ Usage:
 
 Options:
     -h --help       Show this screen.
-    -o OUTFILE         Output file.
+    -m              Get the MC detector file (flips the sign of the DET_ID).
+    -c CALIBR_ID    Geometrical calibration ID (eg. A01466417)
+    -t T0_SET       Time calibration ID (eg. A01466431)
     -n EVENTS/RUNS  Number of events/runs.
+    -o OUTFILE      Output file.
     -s REGEX        Regular expression to filter the runsetup name/id.
     DET_ID          Detector ID (eg. D_ARCA001).
     GIT_BRANCH      Git branch to pull (eg. develop).
@@ -30,10 +34,12 @@ from __future__ import division, absolute_import, print_function
 
 import sys
 import os
+from datetime import datetime
 
 from km3pipe import version
 from km3pipe.db import DBManager
 from km3modules import StatusBar
+from km3pipe.hardware import Detector
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -161,6 +167,16 @@ def update_km3pipe(git_branch):
               .format(git_branch))
 
 
+def detx(det_id, calibration, t0set):
+    now = datetime.now()
+    filename = "KM3NeT_{0}{1:08d}_{2}.detx" \
+               .format('-' if det_id < 0 else '', abs(det_id),
+                       now.strftime("%d%m%Y"))
+    det = Detector(det_id=det_id, t0set=t0set, calibration=calibration)
+    if det.n_doms > 0:
+        det.write(filename)
+
+
 def main():
     from docopt import docopt
     args = docopt(__doc__, version=version)
@@ -172,7 +188,7 @@ def main():
 
     if args['test']:
         run_tests()
-        
+
     if args['update']:
         update_km3pipe(args['GIT_BRANCH'])
 
@@ -201,3 +217,9 @@ def main():
         infile = args['FILE']
         outfile = args['-o'] or infile + '.root'
         hdf2root(infile, outfile)
+
+    if args['detx']:
+        t0set = args['-t']
+        calibration = args['-c']
+        det_id = int(('-' if args['-m'] else '') + args['DET_ID'])
+        detx(det_id, calibration, t0set)
