@@ -12,7 +12,11 @@ import struct
 from struct import unpack
 import pprint
 
-from km3pipe import Pump, Blob
+import numpy as np
+
+from km3pipe import Pump, Module, Blob
+from km3pipe.dataclasses import EventInfo, HitSeries
+from km3pipe.common import StringIO
 from km3pipe.tools import ignored
 from km3pipe.logger import logging
 
@@ -149,6 +153,46 @@ class DAQPump(Pump):
         start, stop, step = index.indices(len(self))
         for i in range(start, stop, step):
             yield self.get_blob(i)
+
+
+class DAQProcessor(Module):
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.index = 0
+
+    def process(self, blob):
+        tag = str(blob['CHPrefix'].tag)
+
+        if tag == 'IO_EVT':
+            self.process_event(blob['CHData'], blob)
+
+        return blob
+
+    def process_event(self, data, blob):
+        data_io = StringIO(data)
+        preamble = DAQPreamble(file_obj=data_io)  # noqa
+        event = DAQEvent(file_obj=data_io)
+        header = event.header
+
+        hits = event.snapshot_hits
+        n_hits = event.n_snapshot_hits
+        dom_ids, channel_ids, times, tots = zip(*hits)
+        zeros = np.zeros(n_hits)
+        triggereds = np.zeros(n_hits)
+        hit_series = HitSeries.from_arrays(channel_ids, dom_ids, range(n_hits),
+                                           zeros, times, tots, triggereds,
+                                           self.index)
+        blob['Hits'] = hit_series
+
+        event_info = EventInfo(header.det_id, self.index, header.time_slice,
+                               0, 0,  # MC ID and time
+                               event.overlays, header.run_id,
+                               event.trigger_counter, event.trigger_mask,
+                               header.time_stamp, header.ticks * 16,
+                               0, 0, 0)  # MC weights
+        blob['EventInfo'] = event_info
+
+        self.index += 1
 
 
 class DAQPreamble(object):
