@@ -188,7 +188,7 @@ class DAQProcessor(Module):
                                0, 0,  # MC ID and time
                                event.overlays, header.run,
                                event.trigger_counter, event.trigger_mask,
-                               header.time_stamp, header.ticks * 16,
+                               header.ticks * 16, header.time_stamp,
                                0, 0, 0)  # MC weights
         blob['EventInfo'] = event_info
 
