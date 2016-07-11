@@ -179,9 +179,17 @@ class DAQProcessor(Module):
         dom_ids, channel_ids, times, tots = zip(*hits)
         zeros = np.zeros(n_hits)
         triggereds = np.zeros(n_hits)
+        triggered_map = {}
+        for triggered_hit in event.triggered_hits:
+            dom_id, pmt_id, time, tot, _ = triggered_hit
+            triggered_map[(dom_id, pmt_id, time, tot)] = True
+        for idx, hit in enumerate(hits):
+            triggereds[idx] = hit in triggered_map
+
         hit_series = HitSeries.from_arrays(channel_ids, dom_ids, range(n_hits),
                                            zeros, times, tots, triggereds,
                                            self.index)
+
         blob['Hits'] = hit_series
 
         event_info = EventInfo(header.det_id, self.index, header.time_slice,
@@ -193,6 +201,9 @@ class DAQProcessor(Module):
         blob['EventInfo'] = event_info
 
         self.index += 1
+
+    def process_summary_slice(self, data, blob):
+        pass
 
 
 class DAQPreamble(object):
