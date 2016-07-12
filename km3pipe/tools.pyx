@@ -27,7 +27,7 @@ import pandas as pd
 import tables
 
 import km3pipe as kp
-from km3pipe.core import import Run
+from km3pipe.core import Run
 
 from km3pipe.logger import logging
 
