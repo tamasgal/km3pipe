@@ -79,6 +79,7 @@ setup(name='km3pipe',
               'pipeinspector=pipeinspector.app:main',
               'h5tree=km3pipe.utils.h5tree:main',
               'h5info=km3pipe.utils.h5info:main',
+              'ztplot=km3pipe.utils.ztplot:main',
           ],
       },
       classifiers=[
