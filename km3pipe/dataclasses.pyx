@@ -284,6 +284,7 @@ class HitSeries(object):
         self._id = None
         self._index = 0
         self._pmt_id = None
+        self._pos = None
         self._time = None
         self._tot = None
         self._triggered = None
@@ -388,6 +389,12 @@ class HitSeries(object):
         if self._channel_id is None:
             self._channel_id = np.array([h.channel_id for h in self._hits])
         return self._channel_id
+
+    @property
+    def pos(self):
+        if self._pos is None:
+            self._pos = np.array([h.pos for h in self._hits])
+        return self._pos
 
     def next(self):
         """Python 2/3 compatibility for iterators"""
