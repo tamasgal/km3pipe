@@ -71,6 +71,7 @@ setup(name='km3pipe',
       ],
       extra_require = {
           'scikit-learn': ['sklearn'],
+          'jppy': ['jppy'],
       },
       entry_points={
           'console_scripts': [
