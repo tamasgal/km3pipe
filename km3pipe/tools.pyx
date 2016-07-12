@@ -27,6 +27,7 @@ import pandas as pd
 import tables
 
 import km3pipe as kp
+from km3pipe.core import import Run
 
 from km3pipe.logger import logging
 
@@ -383,7 +384,7 @@ def read_hdf5(filename, detx=None):
         if det_id > 0:
             geometry = kp.Geometry(det_id=det_id)
 
-    return event_info, geometry, hits, mc_tracks, reco
+    return Run(event_info, geometry, hits, mc_tracks, reco)
 
 
 def read_reco(filename):
