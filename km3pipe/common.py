@@ -16,9 +16,9 @@ except ImportError:
         from io import StringIO
 
 try:
-    from Queue import import Queue, Empty
+    from Queue import Queue, Empty
 except ImportError:
-    from queue import import Queue, Empty
+    from queue import Queue, Empty
 
 
 __author__ = "Tamas Gal"
