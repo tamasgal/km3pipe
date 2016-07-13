@@ -15,6 +15,12 @@ except ImportError:
     except ImportError:
         from io import StringIO
 
+try:
+    from Queue import import Queue, Empty
+except ImportError:
+    from queue import import Queue, Empty
+
+
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
