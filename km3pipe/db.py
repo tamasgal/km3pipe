@@ -66,12 +66,11 @@ except AttributeError:
               "Please update your Python installation!")
 
 BASE_URL = 'https://km3netdbweb.in2p3.fr'
-LOGIN_URL = BASE_URL + '/home.htm'
 
 
 class DBManager(object):
     """A wrapper for the KM3NeT Web DB"""
-    def __init__(self, username=None, password=None):
+    def __init__(self, username=None, password=None, url=None):
         "Create database connection"
         self._cookies = []
         self._parameters = None
@@ -80,6 +79,13 @@ class DBManager(object):
         self._opener = None
 
         config = Config()
+
+        if url is not None:
+            self._db_url = url
+        else:
+            self._db_url = config.db_url or BASE_URL
+
+        self._login_url = self._db_url + '/home.htm'
 
         if username is not None and password is not None:
             self.login(username, password)
@@ -269,7 +275,8 @@ class DBManager(object):
 
     def _get_content(self, url):
         "Get HTML content"
-        target_url = BASE_URL + '/' + unquote(url)  # .encode('utf-8'))
+        target_url = self._db_url + '/' + unquote(url)  # .encode('utf-8'))
+        log.debug("Opening '{0}'".format(target_url))
         try:
             f = self.opener.open(target_url)
         except HTTPError:
@@ -282,6 +289,7 @@ class DBManager(object):
             log.critical("Incomplete data received from the DB, " +
                          "the data could be corrupted.")
             content = icread.partial
+        log.debug("Got {0} bytes of data.".format(len(content)))
         return content.decode('utf-8')
 
     @property
@@ -297,8 +305,8 @@ class DBManager(object):
 
     def request_sid_cookie(self, username, password):
         """Request cookie for permanent session token."""
-        target_url = LOGIN_URL + '?usr={0}&pwd={1}&persist=y' \
-                                 .format(username, password)
+        target_url = self._login_url + '?usr={0}&pwd={1}&persist=y' \
+                                      .format(username, password)
         cookie = urlopen(target_url).read()
         return cookie
 
@@ -322,7 +330,7 @@ class DBManager(object):
         opener = build_opener(HTTPCookieProcessor(cj), HTTPHandler())
         values = {'usr': username, 'pwd': password}
         data = urlencode(values)
-        req = Request(LOGIN_URL, data.encode('utf-8'))
+        req = Request(self._login_url, data.encode('utf-8'))
         try:
             f = opener.open(req)
         except URLError as e:

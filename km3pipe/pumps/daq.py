@@ -12,7 +12,11 @@ import struct
 from struct import unpack
 import pprint
 
-from km3pipe import Pump, Blob
+import numpy as np
+
+from km3pipe import Pump, Module, Blob
+from km3pipe.dataclasses import EventInfo, HitSeries
+from km3pipe.common import StringIO
 from km3pipe.tools import ignored
 from km3pipe.logger import logging
 
@@ -149,6 +153,57 @@ class DAQPump(Pump):
         start, stop, step = index.indices(len(self))
         for i in range(start, stop, step):
             yield self.get_blob(i)
+
+
+class DAQProcessor(Module):
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.index = 0
+
+    def process(self, blob):
+        tag = str(blob['CHPrefix'].tag)
+
+        if tag == 'IO_EVT':
+            self.process_event(blob['CHData'], blob)
+
+        return blob
+
+    def process_event(self, data, blob):
+        data_io = StringIO(data)
+        preamble = DAQPreamble(file_obj=data_io)  # noqa
+        event = DAQEvent(file_obj=data_io)
+        header = event.header
+
+        hits = event.snapshot_hits
+        n_hits = event.n_snapshot_hits
+        dom_ids, channel_ids, times, tots = zip(*hits)
+        zeros = np.zeros(n_hits)
+        triggereds = np.zeros(n_hits)
+        triggered_map = {}
+        for triggered_hit in event.triggered_hits:
+            dom_id, pmt_id, time, tot, _ = triggered_hit
+            triggered_map[(dom_id, pmt_id, time, tot)] = True
+        for idx, hit in enumerate(hits):
+            triggereds[idx] = hit in triggered_map
+
+        hit_series = HitSeries.from_arrays(channel_ids, dom_ids, range(n_hits),
+                                           zeros, times, tots, triggereds,
+                                           self.index)
+
+        blob['Hits'] = hit_series
+
+        event_info = EventInfo(header.det_id, self.index, header.time_slice,
+                               0, 0,  # MC ID and time
+                               event.overlays, header.run,
+                               event.trigger_counter, event.trigger_mask,
+                               header.ticks * 16, header.time_stamp,
+                               0, 0, 0)  # MC weights
+        blob['EventInfo'] = event_info
+
+        self.index += 1
+
+    def process_summary_slice(self, data, blob):
+        pass
 
 
 class DAQPreamble(object):
@@ -302,7 +357,7 @@ class DAQEvent(object):
       n_triggered_hits (int): Number of hits satisfying the trigger conditions.
       n_snapshot_hits (int): Number of snapshot hits.
       triggered_hits (list): A list of triggered hits
-        (dom_id, pmt_id, tdc_time, tot)
+        (dom_id, pmt_id, tdc_time, tot, (trigger_mask,))
       snapshot_hits (list): A list of snapshot hits
         (dom_id, pmt_id, tdc_time, tot)
 

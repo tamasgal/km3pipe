@@ -37,9 +37,10 @@ class EventInfoDesc(tables.IsDescription):
     mc_t = tables.Float64Col()
     overlays = tables.UInt8Col()
     run_id = tables.UIntCol()
-    # timestamp = tables.Float64Col()
     trigger_counter = tables.UInt64Col()
     trigger_mask = tables.UInt64Col()
+    utc_nanoseconds = tables.UInt64Col()
+    utc_seconds = tables.UInt64Col()
     weight_w1 = tables.Float64Col()
     weight_w2 = tables.Float64Col()
     weight_w3 = tables.Float64Col()
@@ -150,6 +151,8 @@ class HDF5Sink(Module):
         # info_row['timestamp'] = info.timestamp
         info_row['trigger_counter'] = info.trigger_counter
         info_row['trigger_mask'] = info.trigger_mask
+        info_row['utc_nanoseconds'] = info.utc_nanoseconds
+        info_row['utc_seconds'] = info.utc_seconds
         info_row['weight_w1'] = info.weight_w1
         info_row['weight_w2'] = info.weight_w2
         info_row['weight_w3'] = info.weight_w3
