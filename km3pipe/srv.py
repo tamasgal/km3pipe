@@ -237,6 +237,7 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
             "hits": {
                 'pos' : [tuple(x) for x in snapshot_hits[['x', 'y', 'z']].values],
                 'time': list(snapshot_hits['time']),
+                'tot': list(snapshot_hits['tot']),
             }
         }
 
@@ -272,14 +273,17 @@ def srv_event(token, hits, url=RBA_URL):
     if isinstance(hits, pd.core.frame.DataFrame):
         pos = [tuple(x) for x in hits[['x', 'y', 'z']].values]
         time = list(hits['time'])
+        tot = list(hits['tot'])
     if isinstance(hits, HitSeries):
         pos = [(h.pos.x, h.pos.y, h.pos.z) for h in hits]
         time = [h.time for h in hits]
+        tot = [h.tot for h in hits]
 
     event = {
         "hits": {
             'pos' : pos,
             'time': time,
+            'tot': tot,
         }
     }
 
