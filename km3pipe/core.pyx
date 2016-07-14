@@ -364,6 +364,16 @@ class Geometry(Module):
         return "Geometry: det_id({0})".format(self.det_id)
 
 
+class Run(object):
+    """A simple container for event info, hits, tracks and geometry."""
+    def __init__(self, event_info, geometry, hits, mc_tracks, reco):
+        self.event_info = event_info
+        self.geometry = geometry
+        self.hits = hits
+        self.mc_tracks = mc_tracks
+        self.reco = reco
+
+
 class AanetGeometry(Module):
     """AAnet based Geometry using Det()"""
     def __init__(self, **context):

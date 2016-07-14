@@ -383,7 +383,7 @@ def read_hdf5(filename, detx=None):
         if det_id > 0:
             geometry = kp.Geometry(det_id=det_id)
 
-    return event_info, geometry, hits, mc_tracks, reco
+    return kp.Run(event_info, geometry, hits, mc_tracks, reco)
 
 
 def read_reco(filename):

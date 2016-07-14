@@ -284,9 +284,11 @@ class HitSeries(object):
         self._id = None
         self._index = 0
         self._pmt_id = None
+        self._pos = None
         self._time = None
         self._tot = None
         self._triggered = None
+        self._columns = None
 
     @classmethod
     def from_aanet(cls, hits, event_id=None):
@@ -354,9 +356,16 @@ class HitSeries(object):
         return self._time
 
     @property
+    def triggered_hits(self):
+        if self._triggered_hits is None:
+            self._triggered_hits = np.array([h for h in self._hits 
+                                        if h.triggered])
+        return self._triggered_hits
+
+    @property
     def triggered(self):
         if self._triggered is None:
-            self._triggered = np.array([h for h in self._hits if h.triggered])
+            self._triggered = np.array([h.triggered for h in self._hits])
         return self._triggered
 
     @property
@@ -388,6 +397,25 @@ class HitSeries(object):
         if self._channel_id is None:
             self._channel_id = np.array([h.channel_id for h in self._hits])
         return self._channel_id
+
+    @property
+    def pos(self):
+        if self._pos is None:
+            self._pos = np.array([h.pos for h in self._hits])
+        return self._pos
+
+    def as_columns(self):
+        if self._columns is None:
+            self._columns = {
+                'tot': self.tot,
+                'channel_id': self.channel_id,
+                'pmt_id': self.pmt_id,
+                'dom_id': self.dom_id,
+                'time': self.time,
+                'id': self.id,
+                'triggered': self.triggered,
+            }
+        return self._columns
 
     def next(self):
         """Python 2/3 compatibility for iterators"""
