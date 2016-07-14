@@ -4,8 +4,8 @@
 Create a zt-Plot.
 
 Usage:
-    ztplot [-d DETX_FILE] -e EVENT_ID FILE
-    ztplot [-d DETX_FILE] -f FRAME -c COUNTER FILE
+    ztplot [-d DETX_FILE] [-t] -e EVENT_ID FILE
+    ztplot [-d DETX_FILE] [-t] -f FRAME -c COUNTER FILE
     ztplot (-h | --help)
     ztplot --version
 
@@ -15,6 +15,7 @@ Options:
     -d DETX_FILE  Detector file.
     -e EVENT_ID   Event ID.
     -f FRAME      Frame index.
+    -t            Triggered DUs only.
     -h --help     Show this screen.
 
 """
@@ -56,7 +57,11 @@ def main():
             geo = kp.core.Geometry(det_id=event_info.det_id)
         geo.apply(hits)
         # triggered_dus = set(geo.detector.doms[h.dom_id][0] for h in hits)
-        dus = set(geo.detector.doms[h.dom_id][0] for h in hits)
+        det = geo.detector
+        if arguments['-t']:
+            dus = set(det.doms[h.dom_id][0] for h in hits if h.triggered)
+        else:
+            dus = set(det.doms[h.dom_id][0] for h in hits)
 
         n_plots = len(dus)
         n_cols = int(np.ceil(np.sqrt(n_plots)))
@@ -68,7 +73,7 @@ def main():
 
         for ax, du in zip(axes.flat, dus):
             _hits = [h for h in hits
-                     if geo.detector.doms[h.dom_id][0] == du]
+                     if det.doms[h.dom_id][0] == du]
             du_hits = HitSeries(_hits)
             trig_hits = HitSeries([h for h in _hits if h.triggered])
 
