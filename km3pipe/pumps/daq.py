@@ -413,7 +413,8 @@ class THMCData(object):
         self.data_type = unpack('>I', f.read(4))[0]
         self.run = unpack('>I', f.read(4))[0]
         self.sequence_number = unpack('>I', f.read(4))[0]  # not sure
-        self.utc_seconds, self.utc_nanoseconds = unpack('>II', f.read(8))
+        self.utc_seconds = unpack('>I', f.read(4))[0]
+        self.utc_nanoseconds = unpack('>I', f.read(4))[0] * 16
         self.dom_id = unpack('>I', f.read(4))[0]
         self.dom_status_1 = unpack('>I', f.read(4))[0]  # not sure
         self.dom_status_2 = unpack('>I', f.read(4))[0]  # not sure
@@ -428,10 +429,10 @@ class THMCData(object):
         self.hx, self.hy, self.hz = unpack('>fff', f.read(12))
         self.temp = unpack('>H', f.read(2))[0] / 100.0
         self.humidity = unpack('>H', f.read(2))[0] / 100.0
-        self.det_id = unpack('>I', f.read(4))[0]  # not sure
-        self.n_packets = unpack('>H', f.read(2))[0]  # not sure
-        self.highest_packet_number = unpack('>H', f.read(2))[0]  # not sure
-        self.n_items = unpack('>I', f.read(4))[0]  # not sure
+        # self.det_id = unpack('>I', f.read(4))[0]  # not sure
+        # self.n_packets = unpack('>H', f.read(2))[0]  # not sure
+        # self.highest_packet_number = unpack('>H', f.read(2))[0]  # not sure
+        # self.n_items = unpack('>I', f.read(4))[0]  # not sure
 
     def __str__(self):
         return str(vars(self))
