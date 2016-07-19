@@ -5,5 +5,5 @@ numpy
 ipython
 pandas
 cython
-lebsocket-client
+websocket-client
 sphinx_rtd_theme
