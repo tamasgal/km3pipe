@@ -7,6 +7,7 @@ The logging facility.
 """
 from __future__ import division, absolute_import, print_function
 
+import socket
 import logging
 import logging.config
 
@@ -40,3 +41,17 @@ ch = logging.StreamHandler()
 formatter = logging.Formatter('[%(levelname)s] %(name)s: %(message)s')
 # ch.setFormatter(formatter)
 # logger.addHandler(ch)
+
+
+class LogIO(object):
+    def __init__(self, node, stream,
+                 url='pi2089.physik.uni-erlangen.de',
+                 port=28777):
+        self.node = node
+        self.stream = stream
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.connect((url, port))
+
+    def send(self, message, level='info'):
+        self.sock.send("+log|{0}|{1}|{2}|{3}\r\n"
+                       .format(self.stream, self.node, level, message))
