@@ -479,7 +479,15 @@ class TrackSeries(object):
                           t.id,
                           Position((t.pos.x, t.pos.y, t.pos.z)),
                           t.t,
-                          geant2pdg(t.type))
+                          # TODO:
+                          # This is a nasty bug. It is not completely clear
+                          # if this is supposed to be PDG or Geant convention.
+                          # might be, that for CC neutrino events, 
+                          # the two vector elements might follow _different_ 
+                          # conventions. Yep, 2 conventions for 
+                          # 2 vector elements...
+                          #geant2pdg(t.type))       
+                          t.type)       
                     for t in tracks], event_id)
 
     @classmethod
