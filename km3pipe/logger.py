@@ -49,9 +49,21 @@ class LogIO(object):
                  port=28777):
         self.node = node
         self.stream = stream
+        self.url = url
+        self.port = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect((url, port))
+        self.connect()
 
     def send(self, message, level='info'):
-        self.sock.send("+log|{0}|{1}|{2}|{3}\r\n"
-                       .format(self.stream, self.node, level, message))
+        message_string = "+log|{0}|{1}|{2}|{3}\r\n" \
+                         .format(self.stream, self.node, level, message)
+        try:
+            self.sock.send(message_string)
+        except socket.error:
+            print("Lost connection, reconnecting...")
+            self.connect()
+            self.sock.send(message_string)
+
+    def connect(self):
+        self.sock.connect((self.url, self.port))
+
