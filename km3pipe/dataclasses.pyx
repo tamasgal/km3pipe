@@ -288,6 +288,7 @@ class HitSeries(object):
         self._time = None
         self._tot = None
         self._triggered = None
+        self._triggered_hits = None
         self._columns = None
 
     @classmethod
@@ -324,8 +325,8 @@ class HitSeries(object):
         hits._id = ids
         hits._pmt_id = pmt_ids
         hits._time = times
-        hits._tots = tots
-        hits._triggereds = triggereds
+        hits._tot = tots
+        hits._triggered = triggereds
         return hits
 
     @classmethod
