@@ -44,7 +44,7 @@ formatter = logging.Formatter('[%(levelname)s] %(name)s: %(message)s')
 
 
 class LogIO(object):
-    def __init__(self, node, stream
+    def __init__(self, node, stream,
                  url='pi2089.physik.uni-erlangen.de',
                  port=28777):
         self.node = node
