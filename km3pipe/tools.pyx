@@ -399,7 +399,8 @@ def read_reco(filename):
         for table in reco_group:
             tabname = table.name
             colnames = [tabname + '_' + col for col in table.colnames]
-            df = pd.DataFrame.from_records(table[:], columns=colnames)
+            df = pd.DataFrame.from_records(table[:])
+            df.columns = colnames
             dfs.append(df)
     dfs = pd.concat(dfs)
     dfs.drop_duplicates(inplace=True)
