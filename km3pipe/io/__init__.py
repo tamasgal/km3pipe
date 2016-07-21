@@ -135,7 +135,7 @@ def open_hdf5(filename):
     return read_hdf5(filename)
 
 
-def read_hdf5(filename, detx=None):
+def read_hdf5(filename, detx=None, ignore_geometry=False):
     """Open HDF5 file and retrieve all relevant information."""
     event_info = pd.read_hdf(filename, '/event_info')
     geometry = None
@@ -146,7 +146,7 @@ def read_hdf5(filename, detx=None):
     except ValueError:
         reco = None
 
-    if detx == 'ignore':
+    if ignore_geometry:
         geometry = None
     elif detx is not None:
         geometry = Geometry(filename=detx)
