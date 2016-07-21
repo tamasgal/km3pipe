@@ -7,9 +7,7 @@ Usage:
     km3pipe test
     km3pipe update [GIT_BRANCH]
     km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID]
-    km3pipe aatohdf5 FILE [-o OUTFILE] [-n EVENTS]
-    km3pipe jpptohdf5 FILE [-o OUTFILE] [-n EVENTS]
-    km3pipe evttohdf5 FILE [-o OUTFILE] [-n EVENTS]
+    km3pipe tohdf5 FILE [-o OUTFILE] [-n EVENTS] [-j]
     km3pipe hdf2root FILE [-o OUTFILE] [-n EVENTS]
     km3pipe runtable [-n RUNS] [-s REGEX] DET_ID
     km3pipe runinfo DET_ID RUN
@@ -23,6 +21,7 @@ Options:
     -t T0_SET       Time calibration ID (eg. A01466431)
     -n EVENTS/RUNS  Number of events/runs.
     -o OUTFILE      Output file.
+    -j  --use_jppy  Use jppy (not aanet) for Jpp readout
     -s REGEX        Regular expression to filter the runsetup name/id.
     DET_ID          Detector ID (eg. D_ARCA001).
     GIT_BRANCH      Git branch to pull (eg. develop).
@@ -56,40 +55,37 @@ def run_tests():
     pytest.main([os.path.dirname(km3pipe.__file__)])
 
 
-def aatohdf5(input_file, output_file, n_events):
-    """Convert AAnet ROOT file to HDF5 file"""
+def tohdf5(input_file, output_file, n_events, use_jppy=False):
+    """Convert Any file to HDF5 file"""
     from km3pipe import Pipeline  # noqa
-    from km3pipe.io import AanetPump, HDF5Sink  # noqa
+    from km3pipe.io import GenericPump, HDF5Sink  # noqa
 
     pipe = Pipeline()
-    pipe.attach(AanetPump, filename=input_file)
+    pipe.attach(GenericPump, filename=input_file, use_jppy=use_jppy)
     pipe.attach(StatusBar, every=1000)
     pipe.attach(HDF5Sink, filename=output_file)
     pipe.drain(n_events)
 
 
-def jpptohdf5(input_file, output_file, n_events):
-    """Convert JPP ROOT file to HDF5 file"""
-    from km3pipe import Pipeline  # noqa
-    from km3pipe.io import JPPPump, HDF5Sink  # noqa
+def hdf2root(infile, outfile):
+    from rootpy.io import root_open
+    from rootpy import asrootpy
+    from root_numpy import array2tree
+    from tables import open_file
 
-    pipe = Pipeline()
-    pipe.attach(JPPPump, filename=input_file)
-    pipe.attach(StatusBar, every=1000)
-    pipe.attach(HDF5Sink, filename=output_file)
-    pipe.drain(n_events)
+    h5 = open_file(infile, 'r')
+    rf = root_open(outfile, 'recreate')
 
-
-def evttohdf5(input_file, output_file, n_events):
-    """Convert evt file to HDF5 file"""
-    from km3pipe import Pipeline  # noqa
-    from km3pipe.io import EvtPump, HDF5Sink  # noqa
-
-    pipe = Pipeline()
-    pipe.attach(EvtPump, filename=input_file)
-    pipe.attach(StatusBar, every=1000)
-    pipe.attach(HDF5Sink, filename=output_file)
-    pipe.drain(n_events)
+    # 'walk_nodes' does not allow to check if is a group or leaf
+    #   exception handling is bugged
+    #   introspection/typecheck is buged
+    # => this moronic nested loop instead of simple `walk`
+    for group in h5.walk_groups():
+        for leafname, leaf in group._v_leaves.items():
+            tree = asrootpy(array2tree(leaf[:], name=leaf._v_pathname))
+            tree.write()
+    rf.close()
+    h5.close()
 
 
 def runtable(det_id, n=5, sep='\t', regex=None):
@@ -122,7 +118,7 @@ def runinfo(run_id, det_id):
     else:
         end_time = duration = float('NaN')
     print("Run {0} - detector ID: {1}".format(run_id, det_id))
-    print('-'*42)
+    print('-' * 42)
     print("  Start time:         {0}\n"
           "  End time:           {1}\n"
           "  Duration [min]:     {2:.2f}\n"
@@ -137,27 +133,6 @@ def runinfo(run_id, det_id):
                   row['RUNSETUPID'].values[0],
                   row['RUNSETUPNAME'].values[0],
                   row['T0_CALIBSETID'].values[0]))
-
-
-def hdf2root(infile, outfile):
-    from rootpy.io import root_open
-    from rootpy import asrootpy
-    from root_numpy import array2tree
-    from tables import open_file
-
-    h5 = open_file(infile, 'r')
-    rf = root_open(outfile, 'recreate')
-
-    # 'walk_nodes' does not allow to check if is a group or leaf
-    #   exception handling is bugged
-    #   introspection/typecheck is buged
-    # => this moronic nested loop instead of simple `walk`
-    for group in h5.walk_groups():
-        for leafname, leaf in group._v_leaves.items():
-            tree = asrootpy(array2tree(leaf[:], name=leaf._v_pathname))
-            tree.write()
-    rf.close()
-    h5.close()
 
 
 def update_km3pipe(git_branch):
@@ -192,31 +167,22 @@ def main():
     if args['update']:
         update_km3pipe(args['GIT_BRANCH'])
 
-    if args['aatohdf5']:
+    if args['tohdf5']:
         infile = args['FILE']
         outfile = args['-o'] or infile + '.h5'
-        aatohdf5(infile, outfile, n)
+        use_jppy = args['-j'] or False
+        tohdf5(infile, outfile, n, use_jppy)
 
-    if args['jpptohdf5']:
+    if args['hdf2root']:
         infile = args['FILE']
-        outfile = args['-o'] or infile + '.h5'
-        jpptohdf5(infile, outfile, n)
-
-    if args['evttohdf5']:
-        infile = args['FILE']
-        outfile = args['-o'] or infile + '.h5'
-        evttohdf5(infile, outfile, n)
+        outfile = args['-o'] or infile + '.root'
+        hdf2root(infile, outfile)
 
     if args['runtable']:
         runtable(args['DET_ID'], n, regex=args['-s'])
 
     if args['runinfo']:
         runinfo(args['RUN'], args['DET_ID'])
-
-    if args['hdf2root']:
-        infile = args['FILE']
-        outfile = args['-o'] or infile + '.root'
-        hdf2root(infile, outfile)
 
     if args['detx']:
         t0set = args['-t']
