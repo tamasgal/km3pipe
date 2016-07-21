@@ -8,6 +8,10 @@ from __future__ import division, absolute_import, print_function
 
 import os
 
+import numpy as np
+import pandas as pd
+
+from km3pipe import Geometry, Run
 from km3pipe.io.evt import EvtPump  # noqa
 from km3pipe.io.daq import DAQPump  # noqa
 from km3pipe.io.clb import CLBPump  # noqa
@@ -143,7 +147,7 @@ def read_hdf5(filename, detx=None):
         reco = None
 
     if detx is not None:
-        geometry = kp.Geometry(filename=detx)
+        geometry = Geometry(filename=detx)
     else:
         det_ids = np.unique(event_info.det_id)
         if len(det_ids) > 1:
@@ -151,7 +155,7 @@ def read_hdf5(filename, detx=None):
         det_id = det_ids[0]
         if det_id > 0:
             try:
-                geometry = kp.Geometry(det_id=det_id)
+                geometry = Geometry(det_id=det_id)
             except ValueError:
                 log.warning("Could not retrieve the geometry information.")
         else:
