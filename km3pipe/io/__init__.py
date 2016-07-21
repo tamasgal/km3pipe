@@ -40,6 +40,7 @@ def GenericPump(filename, use_jppy=False, name="GenericPump"):
             '.evt': EvtPump,
             '.h5': HDF5Pump,
             '.aa.root': AanetPump,
+            '.merged_aanet.root': AanetPump,
             '.root': JPPPump if use_jppy else AanetPump,
             '.dat': DAQPump,
             '.dqd': CLBPump,
