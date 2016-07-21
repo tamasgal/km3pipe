@@ -9,7 +9,9 @@ from __future__ import division, absolute_import, print_function
 import os
 
 import numpy as np
+from numpy.lib.recfunctions import stack_arrays
 import pandas as pd
+import tables as tb
 
 from km3pipe import Geometry, Run
 from km3pipe.io.evt import EvtPump  # noqa
@@ -61,9 +63,8 @@ def df_to_h5(df, filename, tabname, filemode='a', where='/', complevel=5,):
 
     The main 2 ways pandas writes dataframes suck bigly.
     """
-    from tables import Filters, open_file
-    with open_file(filename, filemode) as h5:
-        filt = Filters(complevel=complevel, shuffle=True)
+    with tb.open_file(filename, filemode) as h5:
+        filt = tb.Filters(complevel=complevel, shuffle=True)
         h5.create_table(where, tabname, obj=df.to_records(), filters=filt)
 
 
@@ -87,8 +88,6 @@ def load_mva(filenames, label_feat, mc_feats,
         chunked (likely when reading multipple files.
         e.g. [000011112222] -> [022001201112]
     """
-    import pandas as pd
-    from tables import open_file
     if shuffle_rows:
         from sklearn.utils import shuffle
     df = []
@@ -97,7 +96,7 @@ def load_mva(filenames, label_feat, mc_feats,
             n = n_events_per_file[fn]
         else:
             n = n_events
-        with open_file(fn, 'r') as h5:
+        with tb.open_file(fn, 'r') as h5:
             tab = h5.get_node(where, tabname)
             if not n:
                 buf = tab[:]
@@ -137,10 +136,10 @@ def open_hdf5(filename):
 
 def read_hdf5(filename, detx=None, ignore_geometry=False):
     """Open HDF5 file and retrieve all relevant information."""
-    event_info = pd.read_hdf(filename, '/event_info')
+    event_info = read_table(filename, '/event_info')
     geometry = None
-    hits = pd.read_hdf(filename, '/hits')
-    mc_tracks = pd.read_hdf(filename, '/mc_tracks')
+    hits = read_table(filename, '/hits')
+    mc_tracks = read_table(filename, '/mc_tracks')
     try:
         reco = read_reco(filename)
     except ValueError:
@@ -168,16 +167,20 @@ def read_hdf5(filename, detx=None, ignore_geometry=False):
 
 
 def read_reco(filename):
-    df = []
-    with pd.HDFStore(filename, 'r') as h5:
+    tab = []
+    with tb.open_file(filename, 'r') as h5:
         reco_group = h5.get_node('/reco')
         for table in reco_group:
             tabname = table.name
             buf = table[:]
             new_names = [tabname + '_' + col for col in buf.dtype.names]
             buf.dtype.names = new_names
-            buf = pd.DataFrame.from_records(buf)
-            df.append(buf)
-    df = pd.concat(df, axis=1)
-    return df
+            tab.append(buf)
+    tab = stack_arrays(tab)
+    return tab
 
+
+def read_table(filename, tabname):
+    with tb.open_file(filename, 'r') as h5:
+        tab = h5.get_node(tabname)[:]
+    return tab
