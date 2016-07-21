@@ -25,8 +25,8 @@ import numpy as np
 from km3pipe.common import StringIO
 from km3pipe import Pipeline, Module
 from km3pipe.hardware import Detector
-from km3pipe.pumps import CHPump
-from km3pipe.pumps.daq import DAQPreamble, DAQSummaryslice, DAQEvent
+from km3pipe.io import CHPump
+from km3pipe.io.daq import DAQPreamble, DAQSummaryslice, DAQEvent
 from km3pipe.tools import tai_timestamp
 import km3pipe.style
 
