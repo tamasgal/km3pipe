@@ -8,6 +8,10 @@ from __future__ import division, absolute_import, print_function
 
 import os
 
+import numpy as np
+import pandas as pd
+
+from km3pipe import Geometry, Run
 from km3pipe.io.evt import EvtPump  # noqa
 from km3pipe.io.daq import DAQPump  # noqa
 from km3pipe.io.clb import CLBPump  # noqa
@@ -40,6 +44,7 @@ def GenericPump(filename, use_jppy=False, name="GenericPump"):
             '.evt': EvtPump,
             '.h5': HDF5Pump,
             '.aa.root': AanetPump,
+            '.merged_aanet.root': AanetPump,
             '.root': JPPPump if use_jppy else AanetPump,
             '.dat': DAQPump,
             '.dqd': CLBPump,
@@ -143,7 +148,7 @@ def read_hdf5(filename, detx=None, det_id=None, ignore_geometry=False):
 
     if not ignore_geometry:
         if detx is not None:
-            geometry = kp.Geometry(filename=detx)
+            geometry = Geometry(filename=detx)
         if det_id is not None:
             geometry = kp.Geoemtry(det_id=det_id)
 
@@ -154,14 +159,14 @@ def read_hdf5(filename, detx=None, det_id=None, ignore_geometry=False):
             det_id = det_ids[0]
             if det_id > 0:
                 try:
-                    geometry = kp.Geometry(det_id=det_id)
+                    geometry = Geometry(det_id=det_id)
                 except ValueError:
                     log.warning("Could not retrieve the geometry information.")
             else:
                 log.warning("Negative detector ID found ({0}), skipping..."
                             .format(det_id))
 
-    return kp.Run(event_info, geometry, hits, mc_tracks, reco)
+    return Run(event_info, geometry, hits, mc_tracks, reco)
 
 
 def read_reco(filename):

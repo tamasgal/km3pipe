@@ -21,7 +21,7 @@ Options:
     -t T0_SET       Time calibration ID (eg. A01466431)
     -n EVENTS/RUNS  Number of events/runs.
     -o OUTFILE      Output file.
-    -j  --use_jppy  Use jppy (not aanet) for Jpp readout
+    -j --jppy       Use jppy (not aanet) for Jpp readout
     -s REGEX        Regular expression to filter the runsetup name/id.
     DET_ID          Detector ID (eg. D_ARCA001).
     GIT_BRANCH      Git branch to pull (eg. develop).
@@ -170,7 +170,7 @@ def main():
     if args['tohdf5']:
         infile = args['FILE']
         outfile = args['-o'] or infile + '.h5'
-        use_jppy = args['-j'] or False
+        use_jppy = args['--jppy']
         tohdf5(infile, outfile, n, use_jppy)
 
     if args['hdf2root']:
