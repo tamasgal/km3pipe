@@ -288,6 +288,7 @@ class HitSeries(object):
         self._time = None
         self._tot = None
         self._triggered = None
+        self._triggered_hits = None
         self._columns = None
 
     @classmethod
@@ -324,8 +325,8 @@ class HitSeries(object):
         hits._id = ids
         hits._pmt_id = pmt_ids
         hits._time = times
-        hits._tots = tots
-        hits._triggereds = triggereds
+        hits._tot = tots
+        hits._triggered = triggereds
         return hits
 
     @classmethod
@@ -478,7 +479,15 @@ class TrackSeries(object):
                           t.id,
                           Position((t.pos.x, t.pos.y, t.pos.z)),
                           t.t,
-                          geant2pdg(t.type))
+                          # TODO:
+                          # This is a nasty bug. It is not completely clear
+                          # if this is supposed to be PDG or Geant convention.
+                          # might be, that for CC neutrino events, 
+                          # the two vector elements might follow _different_ 
+                          # conventions. Yep, 2 conventions for 
+                          # 2 vector elements...
+                          #geant2pdg(t.type))       
+                          t.type)       
                     for t in tracks], event_id)
 
     @classmethod

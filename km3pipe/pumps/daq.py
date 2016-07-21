@@ -321,6 +321,8 @@ class DAQSummaryslice(object):
         self.header = DAQHeader(file_obj=file_obj)
         self.n_summary_frames = unpack('<i', file_obj.read(4))[0]
         self.summary_frames = {}
+        self.dq_status = {}
+        self.dom_status = {}
 
         self._parse_summary_frames(file_obj)
 
@@ -328,10 +330,13 @@ class DAQSummaryslice(object):
         """Iterate through the byte data and fill the summary_frames"""
         for _ in range(self.n_summary_frames):
             dom_id = unpack('<i', file_obj.read(4))[0]
-            unknown = file_obj.read(4)  # probably dom status? # noqa
+            dq_status = file_obj.read(4)  # probably dom status? # noqa
+            dom_status = unpack('<iiii', file_obj.read(16))
             raw_rates = unpack('b'*31, file_obj.read(31))
             pmt_rates = [self._get_rate(value) for value in raw_rates]
             self.summary_frames[dom_id] = pmt_rates
+            self.dq_status[dom_id] = dq_status
+            self.dom_status[dom_id] = dom_status
 
     def _get_rate(self, value):
         """Return the rate in Hz from the short int value"""
@@ -413,7 +418,8 @@ class THMCData(object):
         self.data_type = unpack('>I', f.read(4))[0]
         self.run = unpack('>I', f.read(4))[0]
         self.sequence_number = unpack('>I', f.read(4))[0]  # not sure
-        self.utc_seconds, self.utc_nanoseconds = unpack('>II', f.read(8))
+        self.utc_seconds = unpack('>I', f.read(4))[0]
+        self.utc_nanoseconds = unpack('>I', f.read(4))[0] * 16
         self.dom_id = unpack('>I', f.read(4))[0]
         self.dom_status_1 = unpack('>I', f.read(4))[0]  # not sure
         self.dom_status_2 = unpack('>I', f.read(4))[0]  # not sure
@@ -428,10 +434,10 @@ class THMCData(object):
         self.hx, self.hy, self.hz = unpack('>fff', f.read(12))
         self.temp = unpack('>H', f.read(2))[0] / 100.0
         self.humidity = unpack('>H', f.read(2))[0] / 100.0
-        self.det_id = unpack('>I', f.read(4))[0]  # not sure
-        self.n_packets = unpack('>H', f.read(2))[0]  # not sure
-        self.highest_packet_number = unpack('>H', f.read(2))[0]  # not sure
-        self.n_items = unpack('>I', f.read(4))[0]  # not sure
+        # self.det_id = unpack('>I', f.read(4))[0]  # not sure
+        # self.n_packets = unpack('>H', f.read(2))[0]  # not sure
+        # self.highest_packet_number = unpack('>H', f.read(2))[0]  # not sure
+        # self.n_items = unpack('>I', f.read(4))[0]  # not sure
 
     def __str__(self):
         return str(vars(self))
