@@ -124,3 +124,53 @@ def guess_mc_feats(df):
     mc_feats.extend([f for f in feats if 'nevents' in f.lower()])
     mc_feats.extend([f for f in feats if 'livetime' in f.lower()])
     return mc_feats
+
+
+def open_hdf5(filename):
+    return read_hdf5(filename)
+
+
+def read_hdf5(filename, detx=None):
+    """Open HDF5 file and retrieve all relevant information."""
+    event_info = pd.read_hdf(filename, '/event_info')
+    geometry = None
+    hits = pd.read_hdf(filename, '/hits')
+    mc_tracks = pd.read_hdf(filename, '/mc_tracks')
+    try:
+        reco = read_reco(filename)
+    except ValueError:
+        reco = None
+
+    if detx is not None:
+        geometry = kp.Geometry(filename=detx)
+    else:
+        det_ids = np.unique(event_info.det_id)
+        if len(det_ids) > 1:
+            log.critical("Multiple detector IDs found in events.")
+        det_id = det_ids[0]
+        if det_id > 0:
+            try:
+                geometry = kp.Geometry(det_id=det_id)
+            except ValueError:
+                log.warning("Could not retrieve the geometry information.")
+        else:
+            log.warning("Negative detector ID found ({0}), skipping..."
+                        .format(det_id))
+
+    return kp.Run(event_info, geometry, hits, mc_tracks, reco)
+
+
+def read_reco(filename):
+    df = []
+    with pd.HDFStore(filename, 'r') as h5:
+        reco_group = h5.get_node('/reco')
+        for table in reco_group:
+            tabname = table.name
+            buf = table[:]
+            new_names = [tabname + '_' + col for col in buf.dtype.names]
+            buf.dtype.names = new_names
+            buf = pd.DataFrame.from_records(buf)
+            df.append(buf)
+    df = pd.concat(df, axis=1)
+    return df
+
