@@ -381,7 +381,13 @@ def read_hdf5(filename, detx=None):
             log.critical("Multiple detector IDs found in events.")
         det_id = det_ids[0]
         if det_id > 0:
-            geometry = kp.Geometry(det_id=det_id)
+            try:
+                geometry = kp.Geometry(det_id=det_id)
+            except ValueError:
+                log.warning("Could not retrieve the geometry information.")
+        else:
+            log.warning("Negative detector ID found ({0}), skipping..."
+                        .format(det_id))
 
     return kp.Run(event_info, geometry, hits, mc_tracks, reco)
 

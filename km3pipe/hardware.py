@@ -61,7 +61,8 @@ class Detector(object):
             self._init_from_file(filename)
 
         if det_id is not None:
-            print("Retrieving DETX file from the database...")
+            print("Retrieving DETX with detector ID {0} from the database..."
+                  .format(det_id))
             db = DBManager()
             detx = db.detx(det_id, t0set=t0set, calibration=calibration)
             self._det_file = StringIO(detx)
