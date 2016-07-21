@@ -51,7 +51,7 @@ class LogIO(object):
         self.stream = stream
         self.url = url
         self.port = port
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock = None
         self.connect()
 
     def send(self, message, level='info'):
@@ -65,5 +65,6 @@ class LogIO(object):
             self.sock.send(message_string)
 
     def connect(self):
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((self.url, self.port))
 
