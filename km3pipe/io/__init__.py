@@ -146,7 +146,9 @@ def read_hdf5(filename, detx=None):
     except ValueError:
         reco = None
 
-    if detx is not None:
+    if detx == 'ignore':
+        geometry = None
+    elif detx is not None:
         geometry = Geometry(filename=detx)
     else:
         det_ids = np.unique(event_info.det_id)
@@ -162,7 +164,7 @@ def read_hdf5(filename, detx=None):
             log.warning("Negative detector ID found ({0}), skipping..."
                         .format(det_id))
 
-    return kp.Run(event_info, geometry, hits, mc_tracks, reco)
+    return Run(event_info, geometry, hits, mc_tracks, reco)
 
 
 def read_reco(filename):
