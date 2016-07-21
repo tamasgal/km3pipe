@@ -130,7 +130,7 @@ def open_hdf5(filename):
     return read_hdf5(filename)
 
 
-def read_hdf5(filename, detx=None):
+def read_hdf5(filename, detx=None, det_id=None, ignore_geometry=False):
     """Open HDF5 file and retrieve all relevant information."""
     event_info = pd.read_hdf(filename, '/event_info')
     geometry = None
@@ -141,21 +141,25 @@ def read_hdf5(filename, detx=None):
     except ValueError:
         reco = None
 
-    if detx is not None:
-        geometry = kp.Geometry(filename=detx)
-    else:
-        det_ids = np.unique(event_info.det_id)
-        if len(det_ids) > 1:
-            log.critical("Multiple detector IDs found in events.")
-        det_id = det_ids[0]
-        if det_id > 0:
-            try:
-                geometry = kp.Geometry(det_id=det_id)
-            except ValueError:
-                log.warning("Could not retrieve the geometry information.")
-        else:
-            log.warning("Negative detector ID found ({0}), skipping..."
-                        .format(det_id))
+    if not ignore_geometry:
+        if detx is not None:
+            geometry = kp.Geometry(filename=detx)
+        if det_id is not None:
+            geometry = kp.Geoemtry(det_id=det_id)
+
+        if detx is None and det_id is None:
+            det_ids = np.unique(event_info.det_id)
+            if len(det_ids) > 1:
+                log.critical("Multiple detector IDs found in events.")
+            det_id = det_ids[0]
+            if det_id > 0:
+                try:
+                    geometry = kp.Geometry(det_id=det_id)
+                except ValueError:
+                    log.warning("Could not retrieve the geometry information.")
+            else:
+                log.warning("Negative detector ID found ({0}), skipping..."
+                            .format(det_id))
 
     return kp.Run(event_info, geometry, hits, mc_tracks, reco)
 
