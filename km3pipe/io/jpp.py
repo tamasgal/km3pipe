@@ -38,7 +38,7 @@ class JPPPump(Pump):
                               "    pip install jppy\n")
 
         self.index = self.get('index') or 0
-        #self.filename = self.get('filename')
+        # self.filename = self.get('filename')
         self.filename = filename
 
         self.reader = jppy.PyJDAQEventReader(self.filename)
@@ -67,8 +67,9 @@ class JPPPump(Pump):
                                    0, 0,  # MC ID and time
                                    r.overlays, r.run_id,
                                    r.trigger_counter, r.trigger_mask,
+                                   r.utc_nanoseconds, r.utc_seconds,
                                    np.nan, np.nan, np.nan   # w1-w3
-                                  )
+                                   )
 
             self.index += 1
             yield {'EventInfo': event_info, 'Hits': hit_series}

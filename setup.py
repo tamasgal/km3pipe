@@ -69,6 +69,10 @@ setup(name='km3pipe',
           'mock',
           'websocket-client',
       ],
+      extra_require = {
+          'scikit-learn': ['sklearn'],
+          'jppy': ['jppy'],
+      },
       entry_points={
           'console_scripts': [
               'km3pipe=km3pipe.cmd:main',
@@ -76,6 +80,7 @@ setup(name='km3pipe',
               'pipeinspector=pipeinspector.app:main',
               'h5tree=km3pipe.utils.h5tree:main',
               'h5info=km3pipe.utils.h5info:main',
+              'ztplot=km3pipe.utils.ztplot:main',
           ],
       },
       classifiers=[

@@ -64,7 +64,7 @@ def df_to_h5(df, filename, tabname, filemode='a', where='/', complevel=5,):
 
 def load_mva(filenames, label_feat, mc_feats,
              where='/', tabname='mva', n_events=None, n_events_per_file=None,
-             from_beginning=True,):
+             from_beginning=True, shuffle_rows=False):
     """
     A Loader for "stupid" MVA files (all in single table).
 
@@ -77,9 +77,15 @@ def load_mva(filenames, label_feat, mc_feats,
     n_events / n_events_per_file:
         if n_events_per_file is set, ignore n_events
         if both are unset, read all events from each file
+    shuffle_rows: bool, default=False
+        Whether to shuffle the sample positions around. useful if your data is
+        chunked (likely when reading multipple files.
+        e.g. [000011112222] -> [022001201112]
     """
     import pandas as pd
     from tables import open_file
+    if shuffle_rows:
+        from sklearn.utils import shuffle
     df = []
     for fn in filenames:
         if n_events_per_file:
@@ -104,6 +110,8 @@ def load_mva(filenames, label_feat, mc_feats,
     X_reco = df[reco_feats]
     mc_info = df[mc_feats]
     y = df[label_feat]
+    if shuffle_rows:
+        X_reco, mc_info, y = shuffle(X_reco, mc_info, y)
     return X_reco, y, mc_info
 
 

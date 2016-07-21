@@ -15,7 +15,7 @@ except NameError:
 from km3pipe.__version__ import version, version_info  # noqa
 
 if not __KM3PIPE_SETUP__:
-    from km3pipe.core import (Pipeline, Module, Pump, Blob,  # noqa
+    from km3pipe.core import (Pipeline, Module, Pump, Blob, Run,  # noqa
                               Geometry, AanetGeometry)
     from km3pipe import io  # noqa
     from km3pipe import utils  # noqa

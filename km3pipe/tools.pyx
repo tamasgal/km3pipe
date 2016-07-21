@@ -381,26 +381,31 @@ def read_hdf5(filename, detx=None):
             log.critical("Multiple detector IDs found in events.")
         det_id = det_ids[0]
         if det_id > 0:
-            geometry = kp.Geometry(det_id=det_id)
+            try:
+                geometry = kp.Geometry(det_id=det_id)
+            except ValueError:
+                log.warning("Could not retrieve the geometry information.")
+        else:
+            log.warning("Negative detector ID found ({0}), skipping..."
+                        .format(det_id))
 
-    return event_info, geometry, hits, mc_tracks, reco
+    return kp.Run(event_info, geometry, hits, mc_tracks, reco)
 
 
 def read_reco(filename):
-    dfs = []
+    df = []
     with pd.HDFStore(filename, 'r') as h5:
         reco_group = h5.get_node('/reco')
         for table in reco_group:
             tabname = table.name
-            colnames = [tabname + '_' + col for col in table.colnames]
-            df = pd.DataFrame.from_records(table[:], columns=colnames)
-            dfs.append(df)
-    dfs = pd.concat(dfs)
-    dfs.drop_duplicates(inplace=True)
-    return dfs
+            buf = table[:]
+            new_names = [tabname + '_' + col for col in buf.dtype.names]
+            buf.dtype.names = new_names
+            buf = pd.DataFrame.from_records(buf)
+            df.append(buf)
+    df = pd.concat(df, axis=1)
+    return df
 
-
-### ----------
 
 def token_urlsafe(nbytes=32):
     """Return a random URL-safe text string, in Base64 encoding.

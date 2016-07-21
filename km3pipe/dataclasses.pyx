@@ -41,6 +41,8 @@ class EventInfo(object):
                  run_id,
                  trigger_counter,
                  trigger_mask,
+                 utc_nanoseconds,
+                 utc_seconds,
                  weight_w1,
                  weight_w2,
                  weight_w3,
@@ -54,6 +56,8 @@ class EventInfo(object):
         self.run_id = run_id
         self.trigger_counter = trigger_counter
         self.trigger_mask = trigger_mask
+        self.utc_nanoseconds = utc_nanoseconds
+        self.utc_seconds = utc_seconds
         self.weight_w1 = weight_w1
         self.weight_w2 = weight_w2
         self.weight_w3 = weight_w3
@@ -64,6 +68,7 @@ class EventInfo(object):
         for col in sorted(
                 ['det_id', 'event_id', 'frame_index', 'mc_id', 'mc_t',
                 'overlays', 'run_id', 'trigger_counter', 'trigger_mask',
+                'utc_nanoseconds', 'utc_seconds',
                 'weight_w1', 'weight_w2', 'weight_w3']
                 ):
             try:
@@ -77,12 +82,15 @@ class EventInfo(object):
                "    detector id:     {1}\n" \
                "    run ID:          {2}\n" \
                "    frame index:     {3}\n" \
-               "    MC id:           {4}\n" \
-               "    MC time:         {5}\n" \
-               "    overlays:        {6}\n" \
-               "    trigger counter: {7}\n" \
-               "    trigger mask:    {8}\n" \
-               .format(self.event_id, self.det_id, self.run_id, self.frame_index,
+               "    UTC seconds:     {4}\n" \
+               "    UTC nanoseconds: {5}\n" \
+               "    MC id:           {6}\n" \
+               "    MC time:         {7}\n" \
+               "    overlays:        {8}\n" \
+               "    trigger counter: {9}\n" \
+               "    trigger mask:    {10}\n" \
+               .format(self.event_id, self.det_id, self.run_id,
+                       self.frame_index, self.utc_seconds, self.utc_nanoseconds,
                        self.mc_id, self.mc_t, self.overlays,
                        self.trigger_counter, self.trigger_mask)
 
@@ -276,9 +284,12 @@ class HitSeries(object):
         self._id = None
         self._index = 0
         self._pmt_id = None
+        self._pos = None
         self._time = None
         self._tot = None
         self._triggered = None
+        self._triggered_hits = None
+        self._columns = None
 
     @classmethod
     def from_aanet(cls, hits, event_id=None):
@@ -314,8 +325,8 @@ class HitSeries(object):
         hits._id = ids
         hits._pmt_id = pmt_ids
         hits._time = times
-        hits._tots = tots
-        hits._triggereds = triggereds
+        hits._tot = tots
+        hits._triggered = triggereds
         return hits
 
     @classmethod
@@ -346,9 +357,16 @@ class HitSeries(object):
         return self._time
 
     @property
+    def triggered_hits(self):
+        if self._triggered_hits is None:
+            self._triggered_hits = np.array([h for h in self._hits 
+                                        if h.triggered])
+        return self._triggered_hits
+
+    @property
     def triggered(self):
         if self._triggered is None:
-            self._triggered = np.array([h for h in self._hits if h.triggered])
+            self._triggered = np.array([h.triggered for h in self._hits])
         return self._triggered
 
     @property
@@ -380,6 +398,25 @@ class HitSeries(object):
         if self._channel_id is None:
             self._channel_id = np.array([h.channel_id for h in self._hits])
         return self._channel_id
+
+    @property
+    def pos(self):
+        if self._pos is None:
+            self._pos = np.array([h.pos for h in self._hits])
+        return self._pos
+
+    def as_columns(self):
+        if self._columns is None:
+            self._columns = {
+                'tot': self.tot,
+                'channel_id': self.channel_id,
+                'pmt_id': self.pmt_id,
+                'dom_id': self.dom_id,
+                'time': self.time,
+                'id': self.id,
+                'triggered': self.triggered,
+            }
+        return self._columns
 
     def next(self):
         """Python 2/3 compatibility for iterators"""
@@ -442,7 +479,15 @@ class TrackSeries(object):
                           t.id,
                           Position((t.pos.x, t.pos.y, t.pos.z)),
                           t.t,
-                          geant2pdg(t.type))
+                          # TODO:
+                          # This is a nasty bug. It is not completely clear
+                          # if this is supposed to be PDG or Geant convention.
+                          # might be, that for CC neutrino events, 
+                          # the two vector elements might follow _different_ 
+                          # conventions. Yep, 2 conventions for 
+                          # 2 vector elements...
+                          #geant2pdg(t.type))       
+                          t.type)       
                     for t in tracks], event_id)
 
     @classmethod

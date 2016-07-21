@@ -116,6 +116,8 @@ class AanetPump(Pump):
                             event.run_id,
                             event.trigger_counter,
                             event.trigger_mask,
+                            event.t.GetNanoSec(),
+                            event.t.GetSec(),
                             w1,
                             w2,
                             w3,

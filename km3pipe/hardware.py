@@ -61,7 +61,8 @@ class Detector(object):
             self._init_from_file(filename)
 
         if det_id is not None:
-            print("Retrieving DETX file from the database...")
+            print("Retrieving DETX with detector ID {0} from the database..."
+                  .format(det_id))
             db = DBManager()
             detx = db.detx(det_id, t0set=t0set, calibration=calibration)
             self._det_file = StringIO(detx)
@@ -167,13 +168,20 @@ class Detector(object):
     @property
     def ascii(self):
         """The ascii representation of the detector"""
-        header = "{det.det_id} {det.n_doms}".format(det=self)
+        if self.version == 'v1':
+            header = "{det.det_id} {det.n_doms}".format(det=self)
+        else:
+            header = "{det.det_id} {det.version}".format(det=self)
+            header += "\n{0} {1}".format(self.valid_from, self.valid_until)
+            header += "\n" + self.utm_info
+            header += str(self.n_doms)
+
         doms = ""
         for dom_id, (line, floor, n_pmts) in self.doms.iteritems():
             doms += "{0} {1} {2} {3}\n".format(dom_id, line, floor, n_pmts)
             for i in xrange(n_pmts):
                 pmt = self._pmts_by_omkey[(line, floor, i)]
-                doms += " {0} {1} {2} {3} {4} {5} {6} {7}\n".format(
+                doms += "{0} {1} {2} {3} {4} {5} {6} {7}\n".format(
                         pmt.id, pmt.pos[0], pmt.pos[1], pmt.pos[2],
                         pmt.dir[0], pmt.dir[1], pmt.dir[2],
                         pmt.t0
