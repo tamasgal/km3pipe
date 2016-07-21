@@ -321,6 +321,8 @@ class DAQSummaryslice(object):
         self.header = DAQHeader(file_obj=file_obj)
         self.n_summary_frames = unpack('<i', file_obj.read(4))[0]
         self.summary_frames = {}
+        self.dq_status = {}
+        self.dom_status = {}
 
         self._parse_summary_frames(file_obj)
 
@@ -328,10 +330,13 @@ class DAQSummaryslice(object):
         """Iterate through the byte data and fill the summary_frames"""
         for _ in range(self.n_summary_frames):
             dom_id = unpack('<i', file_obj.read(4))[0]
-            unknown = file_obj.read(4)  # probably dom status? # noqa
+            dq_status = file_obj.read(4)  # probably dom status? # noqa
+            dom_status = unpack('<iiii', file_obj.read(16))
             raw_rates = unpack('b'*31, file_obj.read(31))
             pmt_rates = [self._get_rate(value) for value in raw_rates]
             self.summary_frames[dom_id] = pmt_rates
+            self.dq_status[dom_id] = dq_status
+            self.dom_status[dom_id] = dom_status
 
     def _get_rate(self, value):
         """Return the rate in Hz from the short int value"""
