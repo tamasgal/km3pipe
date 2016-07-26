@@ -105,10 +105,9 @@ def load_mva(filenames, label_feat, mc_feats,
                     buf = tab[:n]
                 else:
                     buf = tab[n:]
-            buf = pd.DataFrame.from_records(buf)
             df.append(buf)
-    df = pd.concat(df)
-    feats = df.columns
+    df = np.concatenate(df)
+    feats = df.dtype.names
     reco_feats = [feat for feat in feats
                   if feat not in mc_feats and feat != label_feat]
     X_reco = df[reco_feats]
