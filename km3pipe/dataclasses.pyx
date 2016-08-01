@@ -480,6 +480,7 @@ class TrackSeries(object):
         return cls([Track(Direction((t.dir.x, t.dir.y, t.dir.z)),
                           t.E,
                           t.id,
+                          t.len,
                           Position((t.pos.x, t.pos.y, t.pos.z)),
                           t.t,
                           # TODO:
@@ -491,7 +492,7 @@ class TrackSeries(object):
                           # 2 vector elements...
                           #geant2pdg(t.type))       
                           t.type,
-                          t.len)
+                          )
                     for t in tracks], event_id)
 
     @classmethod
@@ -499,18 +500,23 @@ class TrackSeries(object):
                     directions_x,
                     directions_y,
                     directions_z,
-                    energies, ids,
+                    energies, 
+                    ids,
+                    lengths,
                     positions_x,
                     positions_y,
                     positions_z,
-                    times, types,
-                    event_id=None):
+                    times, 
+                    types,
+                    event_id=None,
+                    ):
         args = directions_x, directions_y, directions_z, energies, ids, \
-                positions_x, positions_y, positions_z, times, types
+            lengths, positions_x, positions_y, positions_z, times, types
         tracks = cls([Track(*track_args) for track_args in zip(*args)], event_id)
         tracks._dir = zip(directions_x, directions_y, directions_z)
         tracks._energy = energies
         tracks._id = ids
+        tracks._length = lengths
         tracks._pos = zip(positions_x, positions_y, positions_z)
         tracks._time = times
         tracks._type = types
@@ -522,6 +528,7 @@ class TrackSeries(object):
             np.array((row['dir_x'], row['dir_y'], row['dir_z'])),
             row['energy'],
             row['id'],
+            row['len'],
             np.array((row['pos_x'], row['pos_y'], row['pos_z'])),
             row['time'],
             row['type'],
