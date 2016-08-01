@@ -461,14 +461,6 @@ class HitSeries(object):
     def __insp__(self):
         return '\n'.join([str(hit) for hit in self._hits])
 
-def get_bjorkeny(track):
-    try:
-        bjorkeny = track.usr[1]
-    except IndexError:
-        bjorkeny = 0.
-
-    return bjorkeny
-
 
 class TrackSeries(object):
     def __init__(self, tracks, event_id=None):
@@ -487,7 +479,7 @@ class TrackSeries(object):
 
     @classmethod
     def from_aanet(cls, tracks, event_id=None):
-        return cls([Track(get_bjorkeny(t),
+        return cls([Track(cls.get_bjorkeny(t),
                           Direction((t.dir.x, t.dir.y, t.dir.z)),
                           t.E,
                           t.id,
@@ -508,6 +500,7 @@ class TrackSeries(object):
 
     @classmethod
     def from_arrays(cls,
+                    bjorkeny,
                     directions_x,
                     directions_y,
                     directions_z,
@@ -521,9 +514,10 @@ class TrackSeries(object):
                     types,
                     event_id=None,
                     ):
-        args = directions_x, directions_y, directions_z, energies, ids, \
-            lengths, positions_x, positions_y, positions_z, times, types
+        args = bjorkeny, directions_x, directions_y, directions_z, energies, \
+            ids, lengths, positions_x, positions_y, positions_z, times, types
         tracks = cls([Track(*track_args) for track_args in zip(*args)], event_id)
+        tracks._bjorkeny = bjorkeny
         tracks._dir = zip(directions_x, directions_y, directions_z)
         tracks._energy = energies
         tracks._id = ids
@@ -536,6 +530,7 @@ class TrackSeries(object):
     @classmethod
     def from_table(cls, table, event_id=None):
         return cls([Track(
+            row['bjorkeny'],
             np.array((row['dir_x'], row['dir_y'], row['dir_z'])),
             row['energy'],
             row['id'],
@@ -544,6 +539,14 @@ class TrackSeries(object):
             row['time'],
             row['type'],
         ) for row in table], event_id)
+    
+    @classmethod
+    def get_bjorkeny(cls, track):
+        try:
+            bjorkeny = track.usr[1]
+        except IndexError:
+            bjorkeny = 0.
+        return bjorkeny
 
     @property
     def highest_energetic_muon(self):
