@@ -32,11 +32,9 @@ __all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries', 'Hit')
 
 class EventInfo(object):
     def __init__(self,
-                 bjorkeny,
                  det_id,
                  event_id,
                  frame_index,
-                 length,
                  mc_id,
                  mc_t,
                  overlays,
@@ -49,11 +47,9 @@ class EventInfo(object):
                  weight_w2,
                  weight_w3,
                 ):
-        self.bjorkeny = bjorkeny
         self.det_id = det_id
         self.event_id = event_id
         self.frame_index = frame_index
-        self.length = length
         self.mc_id = mc_id
         self.mc_t = mc_t
         self.overlays = overlays
