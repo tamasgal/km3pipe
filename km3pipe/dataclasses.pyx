@@ -517,7 +517,7 @@ class TrackSeries(object):
         args = bjorkenys, directions_x, directions_y, directions_z, energies, \
             ids, lengths, positions_x, positions_y, positions_z, times, types
         tracks = cls([Track(*track_args) for track_args in zip(*args)], event_id)
-        tracks._bjorkeny = bjorkeny
+        tracks._bjorkeny = bjorkenys
         tracks._dir = zip(directions_x, directions_y, directions_z)
         tracks._energy = energies
         tracks._id = ids
