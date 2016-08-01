@@ -124,6 +124,7 @@ class HDF5Sink(Module):
 
     def _write_tracks(self, tracks, track_row):
         for track in tracks:
+            track_row['bjorkeny'] = track.bjorkeny
             track_row['dir_x'] = track.dir[0]
             track_row['dir_y'] = track.dir[1]
             track_row['dir_z'] = track.dir[2]
