@@ -251,17 +251,18 @@ cdef class Track:
 
     """
     cdef public int id, time, type
-    cdef public float energy
+    cdef public float energy, length
     cdef public np.ndarray pos
     cdef public np.ndarray dir
 
-    def __cinit__(self, dir, float energy, int id, pos, int time, int type, ):
+    def __cinit__(self, dir, float energy, int id, pos, int time, int type, float length=-1234567):
         self.dir = dir
         self.energy = energy
         self.id = id
         self.pos = pos
         self.time = time
         self.type = type
+        self.length = length
 
     def __str__(self):
         return "Track: pos({0}), dir({1}), t={2}, E={3}, type={4} ({5})" \
@@ -471,6 +472,7 @@ class TrackSeries(object):
         self._tracks = tracks
         self._type = None
         self._highest_energetic_muon = None
+        self._length = None
 
     @classmethod
     def from_aanet(cls, tracks, event_id=None):
@@ -487,7 +489,8 @@ class TrackSeries(object):
                           # conventions. Yep, 2 conventions for 
                           # 2 vector elements...
                           #geant2pdg(t.type))       
-                          t.type)       
+                          t.type,
+                          t.len)
                     for t in tracks], event_id)
 
     @classmethod
@@ -555,6 +558,12 @@ class TrackSeries(object):
         if self._energy is None:
             self._energy = np.array([t.energy for t in self._tracks])
         return self._energy
+
+    @property
+    def length(self):
+        if self._length is None:
+            self._length = np.array([t.length for t in self._tracks])
+        return self._length
 
     @property
     def type(self):
