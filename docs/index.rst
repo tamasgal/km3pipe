@@ -17,7 +17,7 @@ Contents
    data_structures
    file_formats
    help_modules
-   help_pumps
+   help_io
    examples
    pipeinspector
    api/modules

@@ -94,7 +94,7 @@ class MessageDumper(km3.Module):
 
 def main(det_sn, target_path, write_interval):
     pipe = km3.Pipeline()
-    pipe.attach(km3.pumps.CHPump, host='localhost',
+    pipe.attach(km3.io.CHPump, host='localhost',
                 port=5553,
                 tags='MSG',
                 timeout=60*60*24*7,

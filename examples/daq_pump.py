@@ -3,7 +3,7 @@ from __future__ import division, absolute_import, print_function
 __author__ = 'tamasgal'
 
 from km3pipe import Pipeline, Module
-from km3pipe.pumps import DAQPump
+from km3pipe.io import DAQPump
 
 
 class DAQEventPrinter(Module):

@@ -4,8 +4,8 @@ Converts hits in a Jpp-ROOT file to HDF5.
 
 """
 from km3pipe import Pipeline
-from km3pipe.pumps.aanet import AanetPump
-from km3pipe.pumps import HDF5SinkLegacy
+from km3pipe.io.aanet import AanetPump
+from km3pipe.io import HDF5SinkLegacy
 
 import sys
 

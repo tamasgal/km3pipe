@@ -5,7 +5,7 @@ __author__ = 'tamasgal'
 import matplotlib.pyplot as plt
 
 from km3pipe import Pipeline, Module
-from km3pipe.pumps import CLBPump
+from km3pipe.io import CLBPump
 from km3modules import StatusBar
 
 class TOTHisto(Module):

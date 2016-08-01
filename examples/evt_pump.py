@@ -1,7 +1,7 @@
 __author__ = 'tamasgal'
 
 from km3pipe import Module, Pipeline
-from km3pipe.pumps import EvtPump
+from km3pipe.io import EvtPump
 
 class PrintBlob(Module):
     def process(self, blob):

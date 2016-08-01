@@ -75,7 +75,7 @@ class CyHitStatistics(kp.Module):
         return blob
 
 pipe = kp.Pipeline(timeit=True)
-pipe.attach(kp.pumps.AanetPump, filename=os.path.join(PATH, DATAFILE))
+pipe.attach(kp.io.AanetPump, filename=os.path.join(PATH, DATAFILE))
 pipe.attach(StatusBar)
 #pipe.attach(HitStatisticsKm3pipe)
 #pipe.attach(HitStatistics2)
