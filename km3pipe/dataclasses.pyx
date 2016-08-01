@@ -32,9 +32,11 @@ __all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries', 'Hit')
 
 class EventInfo(object):
     def __init__(self,
+                 bjorkeny,
                  det_id,
                  event_id,
                  frame_index,
+                 length,
                  mc_id,
                  mc_t,
                  overlays,
@@ -47,9 +49,11 @@ class EventInfo(object):
                  weight_w2,
                  weight_w3,
                 ):
+        self.bjorkeny = bjorkeny
         self.det_id = det_id
         self.event_id = event_id
         self.frame_index = frame_index
+        self.length = length
         self.mc_id = mc_id
         self.mc_t = mc_t
         self.overlays = overlays
@@ -251,12 +255,13 @@ cdef class Track:
 
     """
     cdef public int id, time, type
-    cdef public float energy, length
+    cdef public float energy, length, bjorkeny
     cdef public np.ndarray pos
     cdef public np.ndarray dir
 
-    def __cinit__(self, dir, float energy, int id, float length, pos, 
+    def __cinit__(self, bjorkeny, dir, float energy, int id, float length, pos,
                   int time, int type):
+        self.bjorkeny = bjorkeny
         self.dir = dir
         self.energy = energy
         self.id = id
@@ -460,10 +465,19 @@ class HitSeries(object):
     def __insp__(self):
         return '\n'.join([str(hit) for hit in self._hits])
 
+def get_bjorkeny(track):
+    try:
+        bjorkeny = track.usr[1]
+    except IndexError:
+        bjorkeny = 0.
+
+    return bjorkeny
+
 
 class TrackSeries(object):
     def __init__(self, tracks, event_id=None):
         self.event_id = event_id
+        self._bjorkeny = None
         self._dir = None
         self._energy = None
         self._id = None
@@ -477,7 +491,8 @@ class TrackSeries(object):
 
     @classmethod
     def from_aanet(cls, tracks, event_id=None):
-        return cls([Track(Direction((t.dir.x, t.dir.y, t.dir.z)),
+        return cls([Track(get_bjorkeny(t),
+                          Direction((t.dir.x, t.dir.y, t.dir.z)),
                           t.E,
                           t.id,
                           t.len,
@@ -548,6 +563,12 @@ class TrackSeries(object):
 
     def __iter__(self):
         return self
+
+    @property
+    def bjorkeny(self):
+        if self._bjorkeny is None:
+            self._bjorkeny = np.array([t.bjorkeny for t in self._tracks])
+        return self._bjorkeny
 
     @property
     def id(self):
