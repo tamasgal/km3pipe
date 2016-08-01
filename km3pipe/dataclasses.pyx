@@ -255,14 +255,15 @@ cdef class Track:
     cdef public np.ndarray pos
     cdef public np.ndarray dir
 
-    def __cinit__(self, dir, float energy, int id, pos, int time, int type, float length=-1234567):
+    def __cinit__(self, dir, float energy, int id, float length, pos, 
+                  int time, int type):
         self.dir = dir
         self.energy = energy
         self.id = id
+        self.length = length
         self.pos = pos
         self.time = time
         self.type = type
-        self.length = length
 
     def __str__(self):
         return "Track: pos({0}), dir({1}), t={2}, E={3}, type={4} ({5})" \
