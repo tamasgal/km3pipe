@@ -250,16 +250,18 @@ cdef class Track:
     type : int
 
     """
-    cdef public int id, time, type
+    cdef public int id, time, type, cc, ichan
     cdef public float energy, length, bjorkeny
     cdef public np.ndarray pos
     cdef public np.ndarray dir
 
-    def __cinit__(self, bjorkeny, dir, float energy, int id, float length, pos,
+    def __cinit__(self, float bjorkeny, int cc, dir, float energy, int ichan, int id, float length, pos,
                   int time, int type):
         self.bjorkeny = bjorkeny
+        self.cc = cc
         self.dir = dir
         self.energy = energy
+        self.ichan = ichan
         self.id = id
         self.length = length
         self.pos = pos
@@ -466,8 +468,10 @@ class TrackSeries(object):
     def __init__(self, tracks, event_id=None):
         self.event_id = event_id
         self._bjorkeny = None
+        self._cc = None
         self._dir = None
         self._energy = None
+        self._ichan = None
         self._id = None
         self._index = 0
         self._pos = None
@@ -479,9 +483,11 @@ class TrackSeries(object):
 
     @classmethod
     def from_aanet(cls, tracks, event_id=None):
-        return cls([Track(cls.get_bjorkeny(t),
+        return cls([Track(cls.get_usr_item(t, 1),
+                          cls.get_usr_item(t, 0),
                           Direction((t.dir.x, t.dir.y, t.dir.z)),
                           t.E,
+                          cls.get_usr_item(t, 2),
                           t.id,
                           t.len,
                           Position((t.pos.x, t.pos.y, t.pos.z)),
@@ -541,12 +547,12 @@ class TrackSeries(object):
         ) for row in table], event_id)
     
     @classmethod
-    def get_bjorkeny(cls, track):
+    def get_usr_item(cls, track, index):
         try:
-            bjorkeny = track.usr[1]
+            item = track.usr[index]
         except IndexError:
-            bjorkeny = 0.
-        return bjorkeny
+            item = 0.
+        return item
 
     @property
     def highest_energetic_muon(self):
@@ -568,6 +574,18 @@ class TrackSeries(object):
         if self._bjorkeny is None:
             self._bjorkeny = np.array([t.bjorkeny for t in self._tracks])
         return self._bjorkeny
+
+    @property
+    def cc(self):
+        if self._cc is None:
+            self._cc = np.array([t.cc for t in self._tracks])
+        return self._cc
+
+    @property
+    def ichan(self):
+        if self._ichan is None:
+            self._ichan = np.array([t.ichan for t in self._tracks])
+        return self._ichan
 
     @property
     def id(self):
