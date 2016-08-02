@@ -6,7 +6,7 @@ A collection of io for different kinds of data formats.
 """
 from __future__ import division, absolute_import, print_function
 
-import os
+import os.path
 
 import numpy as np
 from numpy.lib.recfunctions import stack_arrays
@@ -190,3 +190,13 @@ def read_table(filename, tabname):
     with tb.open_file(filename, 'r') as h5:
         tab = h5.get_node(tabname)[:]
     return tab
+
+
+def write_table(filename, where, array):
+    """Write a numpy array into a H5 table."""
+    filt = tb.Filters(complevel=5, shuffle=True, fletcher32=True)
+    loc, tabname = os.path.split(where)
+    print(loc)
+    print(tabname)
+    with tb.open_file(filename, 'a') as h5:
+        h5.create_table(loc, tabname, obj=array, createparents=True, filters=filt)
