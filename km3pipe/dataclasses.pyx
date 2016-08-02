@@ -506,7 +506,7 @@ class TrackSeries(object):
 
     @classmethod
     def from_arrays(cls,
-                    bjorkeny,
+                    bjorkenys,
                     directions_x,
                     directions_y,
                     directions_z,
@@ -520,10 +520,10 @@ class TrackSeries(object):
                     types,
                     event_id=None,
                     ):
-        args = bjorkeny, directions_x, directions_y, directions_z, energies, \
+        args = bjorkenys, directions_x, directions_y, directions_z, energies, \
             ids, lengths, positions_x, positions_y, positions_z, times, types
         tracks = cls([Track(*track_args) for track_args in zip(*args)], event_id)
-        tracks._bjorkeny = bjorkeny
+        tracks._bjorkeny = bjorkenys
         tracks._dir = zip(directions_x, directions_y, directions_z)
         tracks._energy = energies
         tracks._id = ids
@@ -540,7 +540,7 @@ class TrackSeries(object):
             np.array((row['dir_x'], row['dir_y'], row['dir_z'])),
             row['energy'],
             row['id'],
-            row['len'],
+            row['length'],
             np.array((row['pos_x'], row['pos_y'], row['pos_z'])),
             row['time'],
             row['type'],
