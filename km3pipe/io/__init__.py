@@ -196,7 +196,5 @@ def write_table(filename, where, array):
     """Write a numpy array into a H5 table."""
     filt = tb.Filters(complevel=5, shuffle=True, fletcher32=True)
     loc, tabname = os.path.split(where)
-    print(loc)
-    print(tabname)
     with tb.open_file(filename, 'a') as h5:
         h5.create_table(loc, tabname, obj=array, createparents=True, filters=filt)
