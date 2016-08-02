@@ -133,45 +133,50 @@ def open_hdf5(filename):
     return read_hdf5(filename)
 
 
-def read_hdf5(filename, detx=None, det_id=None, ignore_geometry=False):
-    """Open HDF5 file and retrieve all relevant information."""
+def read_hdf5(filename, detx=None, det_id=None, det_from_file=False):
+    """Open HDF5 file and retrieve all relevant information.
+
+    Optionally, a detector geometry can read by passing a detector file,
+    or retrieved from the database by passing a detector ID, or by reading
+    the detector id from the event info in the file.
+    """
     event_info = read_table(filename, '/event_info')
-    geometry = None
     hits = read_table(filename, '/hits')
     mc_tracks = read_table(filename, '/mc_tracks')
-    try:
-        reco = read_reco(filename)
-    except ValueError:
-        reco = None
-
-    if not ignore_geometry:
-        if detx is not None:
-            geometry = Geometry(filename=detx)
-        if det_id is not None:
-            geometry = kp.Geoemtry(det_id=det_id)
-
-        if detx is None and det_id is None:
-            det_ids = np.unique(event_info.det_id)
-            if len(det_ids) > 1:
-                log.critical("Multiple detector IDs found in events.")
-            det_id = det_ids[0]
-            if det_id > 0:
-                try:
-                    geometry = Geometry(det_id=det_id)
-                except ValueError:
-                    log.warning("Could not retrieve the geometry information.")
-            else:
-                log.warning("Negative detector ID found ({0}), skipping..."
-                            .format(det_id))
-
+    reco = read_group(filename, '/reco')
+    geometry = read_geometry(detx, det_id, det_from_file,
+                             det_id_table=event_info['det_id'])
     return Run(event_info, geometry, hits, mc_tracks, reco)
 
 
-def read_reco(filename):
+def read_geometry(detx=None, det_id=None, from_file=False, det_id_table=None):
+    """Retrive geometry from file, the DB."""
+    if not detx or det_id or from_file:
+        return None
+    if detx is not None:
+        return Geometry(filename=detx)
+    if from_file:
+        det_ids = np.unique(det_id_table)
+        if len(det_ids) > 1:
+            log.critical("Multiple detector IDs found in events.")
+        det_id = det_ids[0]
+    if det_id is not None:
+        if det_id < 0:
+            log.warning("Negative detector ID found ({0}), skipping..."
+                        .format(det_id))
+            return None
+        try:
+            return Geometry(det_id=det_id)
+        except ValueError:
+            log.warning("Could not retrieve the geometry information.")
+    return None
+
+
+def read_group(filename, group_path):
     tab = []
     with tb.open_file(filename, 'r') as h5:
-        reco_group = h5.get_node('/reco')
-        for table in reco_group:
+        group = h5.get_node(group_path)
+        for table in group:
             tabname = table.name
             buf = table[:]
             new_names = [tabname + '_' + col for col in buf.dtype.names]
