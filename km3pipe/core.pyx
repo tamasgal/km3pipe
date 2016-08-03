@@ -52,11 +52,14 @@ class Pipeline(object):
         self._stop = False
         self._finished = False
 
-    def attach(self, module_class, name=None, **kwargs):
+    def attach(self, module_factory, name=None, **kwargs):
         """Attach a module to the pipeline system"""
-        if not name:
-            name = module_class.__name__
-        module = module_class(name=name, **kwargs)
+        if name is None:
+            name = module_factory.__name__
+        if isinstance(module, Module):
+            module = module_factory(name=name, **kwargs)
+        else:
+            module = module_factory
         log.info("Attaching module '{0}'".format(name))
         try:
             module.get_detector()
@@ -109,7 +112,7 @@ class Pipeline(object):
                     log.debug("Processing {0} ".format(module.name))
                     start = timer()
                     start_cpu = time.clock()
-                    self.blob = module.process(self.blob)
+                    self.blob = module(self.blob)
                     if self.timeit or module.timeit:
                         module._timeit['process'] \
                             .append(timer() - start)
@@ -134,12 +137,15 @@ class Pipeline(object):
     def finish(self):
         """Call finish() on each attached module"""
         for module in self.modules:
-            log.info("Finishing {0}".format(module.name))
-            start_time = timer()
-            start_time_cpu = time.clock()
-            module.pre_finish()
-            module._timeit['finish'] = timer() - start_time
-            module._timeit['finish_cpu'] = time.clock() - start_time_cpu
+            if isinstance(module, Module):
+                log.info("Finishing {0}".format(module.name))
+                start_time = timer()
+                start_time_cpu = time.clock()
+                module.pre_finish()
+                module._timeit['finish'] = timer() - start_time
+                module._timeit['finish_cpu'] = time.clock() - start_time_cpu
+            else:
+                log.info("Skipping function module {0}".format(module.name))
         self._timeit['finish'] = timer()
         self._timeit['finish_cpu'] = time.clock()
         self._print_timeit_statistics()
@@ -246,6 +252,10 @@ class Module(object):
     def pre_finish(self):
         """Do the last few things before calling finish()"""
         self.finish()
+
+    def __call__(self, *args, **kwargs):
+        """Run process if directly called."""
+        self.process(*args, **kwargs)
 
 
 class Pump(Module):
