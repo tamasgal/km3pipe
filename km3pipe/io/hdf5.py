@@ -59,12 +59,16 @@ class Hit(tables.IsDescription):
 
 
 class Track(tables.IsDescription):
+    bjorkeny = tables.FloatCol()
+    is_cc = tables.BoolCol()
     dir_x = tables.FloatCol()
     dir_y = tables.FloatCol()
     dir_z = tables.FloatCol()
     energy = tables.FloatCol()
     event_id = tables.UIntCol()
+    interaction_channel = tables.UIntCol()
     id = tables.UIntCol()
+    length = tables.FloatCol()
     pos_x = tables.FloatCol()
     pos_y = tables.FloatCol()
     pos_z = tables.FloatCol()
@@ -80,7 +84,8 @@ class HDF5Sink(Module):
         self.filename = self.get('filename') or 'dump.h5'
         self.index = 1
         self.h5file = tables.open_file(self.filename, mode="w", title="KM3NeT")
-        self.filters = tables.Filters(complevel=5)
+        self.filters = tables.Filters(complevel=5, shuffle=True,
+                                      fletcher32=True)
         self.hits = self.h5file.create_table('/', 'hits',
                                              Hit, "Hits",
                                              filters=self.filters)
@@ -123,12 +128,16 @@ class HDF5Sink(Module):
 
     def _write_tracks(self, tracks, track_row):
         for track in tracks:
+            track_row['bjorkeny'] = track.bjorkeny
+            track_row['is_cc'] = track.is_cc
             track_row['dir_x'] = track.dir[0]
             track_row['dir_y'] = track.dir[1]
             track_row['dir_z'] = track.dir[2]
             track_row['energy'] = track.energy
             track_row['event_id'] = tracks.event_id
+            track_row['interaction_channel'] = track.interaction_channel
             track_row['id'] = track.id
+            track_row["length"] = track.length
             track_row['pos_x'] = track.pos[0]
             track_row['pos_y'] = track.pos[1]
             track_row['pos_z'] = track.pos[2]

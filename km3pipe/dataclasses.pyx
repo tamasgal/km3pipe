@@ -30,6 +30,13 @@ __status__ = "Development"
 __all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries', 'Hit')
 
 
+IS_CC = {
+    2: True,
+    1: False,
+    0: True,
+}
+
+
 class EventInfo(object):
     def __init__(self,
                  det_id,
@@ -250,15 +257,30 @@ cdef class Track:
     type : int
 
     """
-    cdef public int id, time, type
-    cdef public float energy
+    cdef public int id, time, type, interaction_channel
+    cdef public float energy, length, bjorkeny
+    cdef public bint is_cc
     cdef public np.ndarray pos
     cdef public np.ndarray dir
 
-    def __cinit__(self, dir, float energy, int id, pos, int time, int type, ):
+    def __cinit__(self, 
+                  float bjorkeny, 
+                  dir, 
+                  float energy, 
+                  int id, 
+                  int interaction_channel, 
+                  bint is_cc, 
+                  float length, pos,
+                  int time, 
+                  int type
+                  ):
+        self.bjorkeny = bjorkeny
+        self.is_cc = is_cc
         self.dir = dir
         self.energy = energy
+        self.interaction_channel = interaction_channel
         self.id = id
+        self.length = length
         self.pos = pos
         self.time = time
         self.type = type
@@ -462,8 +484,11 @@ class HitSeries(object):
 class TrackSeries(object):
     def __init__(self, tracks, event_id=None):
         self.event_id = event_id
+        self._bjorkeny = None
+        self._is_cc = None
         self._dir = None
         self._energy = None
+        self._interaction_channel = None
         self._id = None
         self._index = 0
         self._pos = None
@@ -471,12 +496,17 @@ class TrackSeries(object):
         self._tracks = tracks
         self._type = None
         self._highest_energetic_muon = None
+        self._length = None
 
     @classmethod
     def from_aanet(cls, tracks, event_id=None):
-        return cls([Track(Direction((t.dir.x, t.dir.y, t.dir.z)),
+        return cls([Track(cls.get_usr_item(t, 1),               # bjorkeny
+                          Direction((t.dir.x, t.dir.y, t.dir.z)),
                           t.E,
                           t.id,
+                          cls.get_usr_item(t, 2),               # ichan
+                          IS_CC[cls.get_usr_item(t, 0)],        # is_cc
+                          t.len,
                           Position((t.pos.x, t.pos.y, t.pos.z)),
                           t.t,
                           # TODO:
@@ -487,26 +517,34 @@ class TrackSeries(object):
                           # conventions. Yep, 2 conventions for 
                           # 2 vector elements...
                           #geant2pdg(t.type))       
-                          t.type)       
+                          t.type,
+                          )
                     for t in tracks], event_id)
 
     @classmethod
     def from_arrays(cls,
+                    bjorkenys,
                     directions_x,
                     directions_y,
                     directions_z,
-                    energies, ids,
+                    energies, 
+                    ids,
+                    lengths,
                     positions_x,
                     positions_y,
                     positions_z,
-                    times, types,
-                    event_id=None):
-        args = directions_x, directions_y, directions_z, energies, ids, \
-                positions_x, positions_y, positions_z, times, types
+                    times, 
+                    types,
+                    event_id=None,
+                    ):
+        args = bjorkenys, directions_x, directions_y, directions_z, energies, \
+            ids, lengths, positions_x, positions_y, positions_z, times, types
         tracks = cls([Track(*track_args) for track_args in zip(*args)], event_id)
+        tracks._bjorkeny = bjorkenys
         tracks._dir = zip(directions_x, directions_y, directions_z)
         tracks._energy = energies
         tracks._id = ids
+        tracks._length = lengths
         tracks._pos = zip(positions_x, positions_y, positions_z)
         tracks._time = times
         tracks._type = types
@@ -515,13 +553,23 @@ class TrackSeries(object):
     @classmethod
     def from_table(cls, table, event_id=None):
         return cls([Track(
+            row['bjorkeny'],
             np.array((row['dir_x'], row['dir_y'], row['dir_z'])),
             row['energy'],
             row['id'],
+            row['length'],
             np.array((row['pos_x'], row['pos_y'], row['pos_z'])),
             row['time'],
             row['type'],
         ) for row in table], event_id)
+    
+    @classmethod
+    def get_usr_item(cls, track, index):
+        try:
+            item = track.usr[index]
+        except IndexError:
+            item = 0.
+        return item
 
     @property
     def highest_energetic_muon(self):
@@ -537,6 +585,25 @@ class TrackSeries(object):
 
     def __iter__(self):
         return self
+
+    @property
+    def bjorkeny(self):
+        if self._bjorkeny is None:
+            self._bjorkeny = np.array([t.bjorkeny for t in self._tracks])
+        return self._bjorkeny
+
+    @property
+    def is_cc(self):
+        if self._is_cc is None:
+            self._is_cc = np.array([t.is_cc for t in self._tracks])
+        return self._is_cc
+
+    @property
+    def interaction_channel(self):
+        if self._interaction_channel is None:
+            self._interaction_channel = np.array([t.interaction_channel for 
+                                                  t in self._tracks])
+        return self._interaction_channel
 
     @property
     def id(self):
@@ -555,6 +622,12 @@ class TrackSeries(object):
         if self._energy is None:
             self._energy = np.array([t.energy for t in self._tracks])
         return self._energy
+
+    @property
+    def length(self):
+        if self._length is None:
+            self._length = np.array([t.length for t in self._tracks])
+        return self._length
 
     @property
     def type(self):

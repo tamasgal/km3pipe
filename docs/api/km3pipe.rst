@@ -6,7 +6,7 @@ Subpackages
 
 .. toctree::
 
-    km3pipe.pumps
+    km3pipe.io
     km3pipe.testing
 
 Submodules

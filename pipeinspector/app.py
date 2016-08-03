@@ -20,7 +20,7 @@ import urwid
 
 from pipeinspector.gui import MainFrame
 from pipeinspector.settings import UI
-from km3pipe.pumps import EvtPump, DAQPump, AanetPump, CLBPump, HDF5Pump
+from km3pipe.io import EvtPump, DAQPump, AanetPump, CLBPump, HDF5Pump
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

@@ -8,7 +8,7 @@
 from __future__ import division, absolute_import, print_function
 
 from km3pipe.testing import TestCase, StringIO
-from km3pipe.pumps.clb import CLBPump, CLBHeader, PMTData
+from km3pipe.io.clb import CLBPump, CLBHeader, PMTData
 
 import binascii
 
