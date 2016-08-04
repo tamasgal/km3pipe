@@ -9,6 +9,7 @@ The core of the KM3Pipe framework.
 """
 from __future__ import division, absolute_import, print_function
 
+from collections import deque
 import signal
 import gzip
 import time
@@ -32,6 +33,8 @@ __status__ = "Development"
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
+STAT_LIMIT = 100000
+
 
 class Pipeline(object):
     """The holy pipeline which holds everything together.
@@ -47,7 +50,8 @@ class Pipeline(object):
         self.blob = blob or Blob()
         self.timeit = timeit
         self._timeit = {'init': timer(), 'init_cpu': time.clock(),
-                        'cycles': [], 'cycles_cpu': []}
+                        'cycles': deque(maxlen=STAT_LIMIT),
+                        'cycles_cpu': deque(maxlen=STAT_LIMIT)}
         self._cycle_count = 0
         self._stop = False
         self._finished = False
@@ -164,6 +168,9 @@ class Pipeline(object):
 
     def _print_timeit_statistics(self):
 
+        if self._cycle_count < 1:
+            return
+
         def calc_stats(values):
             """Return a tuple of statistical values"""
             return [f(values) for f in (np.mean, np.median, min, max, np.std)]
@@ -185,8 +192,7 @@ class Pipeline(object):
 
         cycles = self._timeit['cycles']
         n_cycles = len(cycles)
-        if n_cycles < 1:
-            return
+
         cycles_cpu = self._timeit['cycles_cpu']
         overall = self._timeit['finish'] - self._timeit['init']
         overall_cpu = self._timeit['finish_cpu'] - self._timeit['init_cpu']
@@ -194,7 +200,11 @@ class Pipeline(object):
 
         print(80*'=')
         print("{0} cycles drained in {1} (CPU {2}). Memory peak: {3:.2f} MB"
-              .format(n_cycles, timef(overall), timef(overall_cpu), memory))
+              .format(self._cycle_count,
+                      timef(overall), timef(overall_cpu), memory))
+        if self._cycle_count > n_cycles:
+            print("Statistics are based on the last {0} cycles."
+                  .format(n_cycles))
         print(statsf('wall', calc_stats(cycles)))
         print(statsf('CPU ', calc_stats(cycles_cpu)))
 
@@ -225,8 +235,10 @@ class Module(object):
         self.parameters = parameters
         self.detector = None
         self.timeit = self.get('timeit') or False
-        self._timeit = {'process': [], 'finish': 0,
-                        'process_cpu': [], 'finish_cpu': 0}
+        self._timeit = {'process': deque(maxlen=STAT_LIMIT),
+                        'process_cpu': deque(maxlen=STAT_LIMIT),
+                        'finish': 0,
+                        'finish_cpu': 0}
 
     @property
     def name(self):
