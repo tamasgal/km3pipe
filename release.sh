@@ -8,6 +8,7 @@ if [ $# -eq 0 ]
 fi
 
 VERSION=$1
+SVN="http://svn.km3net.de/auxiliaries/KM3Pipe"
 
 git checkout develop
 git pull
@@ -32,3 +33,5 @@ git checkout svn
 git merge master
 git svn dcommit
 git checkout develop
+
+svn copy "${SVN}/git" "${SVN}/tag/v${VERSION}" -m "Release ${VERSION}"
