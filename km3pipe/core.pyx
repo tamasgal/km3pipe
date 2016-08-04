@@ -32,6 +32,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
+log.setLevel(logging.INFO)
 
 STAT_LIMIT = 100000
 
@@ -58,13 +59,20 @@ class Pipeline(object):
 
     def attach(self, module_factory, name=None, **kwargs):
         """Attach a module to the pipeline system"""
+
         if name is None:
             name = module_factory.__name__
-        if isinstance(module, Module):
+
+        log.info("Attaching module '{0}'".format(name))
+
+        if module_factory.__name__ == 'Module':
             module = module_factory(name=name, **kwargs)
         else:
             module = module_factory
-        log.info("Attaching module '{0}'".format(name))
+            module.name = name
+            module.timeit = self.timeit
+
+
         try:
             module.get_detector()
             self.geometry = module
@@ -141,14 +149,14 @@ class Pipeline(object):
     def finish(self):
         """Call finish() on each attached module"""
         for module in self.modules:
-            if isinstance(module, Module):
+            try:
                 log.info("Finishing {0}".format(module.name))
                 start_time = timer()
                 start_time_cpu = time.clock()
                 module.pre_finish()
                 module._timeit['finish'] = timer() - start_time
                 module._timeit['finish_cpu'] = time.clock() - start_time_cpu
-            else:
+            except AttributeError:
                 log.info("Skipping function module {0}".format(module.name))
         self._timeit['finish'] = timer()
         self._timeit['finish_cpu'] = time.clock()
