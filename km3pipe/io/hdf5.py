@@ -29,54 +29,6 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-class EventInfoDesc(tables.IsDescription):
-    det_id = tables.IntCol()
-    event_id = tables.UIntCol()
-    frame_index = tables.UIntCol()
-    mc_id = tables.IntCol()
-    mc_t = tables.Float64Col()
-    overlays = tables.UInt8Col()
-    run_id = tables.UIntCol()
-    trigger_counter = tables.UInt64Col()
-    trigger_mask = tables.UInt64Col()
-    utc_nanoseconds = tables.UInt64Col()
-    utc_seconds = tables.UInt64Col()
-    weight_w1 = tables.Float64Col()
-    weight_w2 = tables.Float64Col()
-    weight_w3 = tables.Float64Col()
-
-
-class Hit(tables.IsDescription):
-    channel_id = tables.UInt8Col()
-    dom_id = tables.UIntCol()
-    event_id = tables.UIntCol()
-    id = tables.UIntCol()
-    pmt_id = tables.UIntCol()
-    run_id = tables.UIntCol()
-    time = tables.IntCol()
-    tot = tables.UInt8Col()
-    triggered = tables.BoolCol()
-
-
-class Track(tables.IsDescription):
-    bjorkeny = tables.FloatCol()
-    is_cc = tables.BoolCol()
-    dir_x = tables.FloatCol()
-    dir_y = tables.FloatCol()
-    dir_z = tables.FloatCol()
-    energy = tables.FloatCol()
-    event_id = tables.UIntCol()
-    interaction_channel = tables.UIntCol()
-    id = tables.UIntCol()
-    length = tables.FloatCol()
-    pos_x = tables.FloatCol()
-    pos_y = tables.FloatCol()
-    pos_z = tables.FloatCol()
-    run_id = tables.UIntCol()
-    time = tables.IntCol()
-    type = tables.IntCol()
-
-
 class HDF5Sink(Module):
     def __init__(self, **context):
         """A Module to convert (KM3NeT) ROOT files to HDF5."""
@@ -87,16 +39,16 @@ class HDF5Sink(Module):
         self.filters = tables.Filters(complevel=5, shuffle=True,
                                       fletcher32=True)
         self.hits = self.h5file.create_table('/', 'hits',
-                                             Hit, "Hits",
+                                             Hit.dtype, "Hits",
                                              filters=self.filters)
         self.mc_hits = self.h5file.create_table('/', 'mc_hits',
-                                                Hit, "MC Hits",
+                                                Hit.dtype, "MC Hits",
                                                 filters=self.filters)
         self.mc_tracks = self.h5file.create_table('/', 'mc_tracks',
-                                                  Track, "MC Tracks",
+                                                  Track.dtype, "MC Tracks",
                                                   filters=self.filters)
         self.event_info = self.h5file.create_table('/', 'event_info',
-                                                   EventInfoDesc, "Event Info",
+                                                   EventInfo.dtype, "Event Info",
                                                    filters=self.filters)
         self.h5file.create_group(
             '/', 'reco', createparents=True, filters=self.filters)
