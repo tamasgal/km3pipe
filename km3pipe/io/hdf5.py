@@ -53,6 +53,19 @@ class HDF5Sink(Module):
         self.h5file.create_group(
             '/', 'reco', createparents=True, filters=self.filters)
         self._reco_tables = {}
+        ## expect a [(blobkey, '/some/h5/path', dtype)] to put arbitraty
+        ## store in {blobkey: <pytables table obj>}
+        #tab_defines = self.get('tables') or []
+        #self._generic_tables = self._init_generic_tables(tab_defines)
+
+    #def _init_generic_tables(self, tablist):
+    #    for key, path, dtype in tablist:
+    #        # append eventid to dtype
+    #        dtype = append_id_to_dtype(dtype)
+    #        loc, tabname = os.path.split(path)
+    #        tab = self.h5file.create_table(loc, tabname, description=dtype,
+    #                title=blobkey, filters=self.filters, createparents=True)
+    #        self._generic_tables[blobkey] = tab
 
     def _write_hits(self, hits, hit_row):
         """Iterate through the hits and write them to the HDF5 table.
@@ -157,6 +170,8 @@ class HDF5Sink(Module):
         if 'Reco' in blob:
             # this is a group, not a single table
             self._write_reco(blob['Reco'], '/reco')
+        #for key, tab in self._generic_tables.items():
+        #    self.tab = write_stuff(blob[key], tab)
 
         if not self.index % 1000:
             self.hits.flush()
@@ -165,6 +180,8 @@ class HDF5Sink(Module):
             self.event_info.flush()
             for tab in self._reco_tables.values():
                 tab.flush()
+            #for tab in self._generic_tables.values():
+            #    tab.flush()
 
         self.index += 1
         return blob
@@ -176,12 +193,16 @@ class HDF5Sink(Module):
         self.mc_tracks.flush()
         for tab in self._reco_tables.values():
             tab.flush()
+        #for tab in self._generic_tables.values():
+        #    tab.flush()
         self.hits.cols.event_id.create_index()
         self.event_info.cols.event_id.create_index()
         self.mc_hits.cols.event_id.create_index()
         self.mc_tracks.cols.event_id.create_index()
         for tab in self._reco_tables.values():
             tab.cols.event_id.create_index()
+        #for tab in self._generic_tables.values():
+        #    tab.cols.event_id.create_index()
         self.h5file.root._v_attrs.km3pipe = str(km3pipe.__version__)
         self.h5file.root._v_attrs.pytables = str(tables.__version__)
         self.h5file.close()
@@ -291,3 +312,9 @@ class HDF5Pump(Pump):
         start, stop, step = index.indices(len(self))
         for i in range(start, stop, step):
             yield self.get_blob(i)
+
+
+def append_id_to_dtype(dtype):
+    dt = dtype.descr
+    dt.append(('event_id', '<u4'))
+    return np.dtype(dt)
