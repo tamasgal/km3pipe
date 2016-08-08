@@ -90,6 +90,27 @@ class EventInfo(object):
             except KeyError:
                 args.append(np.nan)
         return cls(*args)
+    
+    @property
+    def as_columns(self):
+    if self._columns is None:
+        self._columns = {
+                'det_id': self.det_id,
+                'event_id': self.event_id,
+                'frame_index': self.frame_index,
+                'mc_id': self.mc_id,
+                'mc_t': self.mc_t,
+                'overlays': self.overlays,
+                'run_id': self.run_id,
+                'trigger_counter': self.trigger_counter,
+                'trigger_mask': self.trigger_mask,
+                'utc_nanoseconds': self.utc_nanoseconds,
+                'utc_seconds': self.utc_seconds,
+                'weight_w1': self.weight_w1,
+                'weight_w2': self.weight_w2,
+                'weight_w3': self.weight_w3,
+        }
+    return self._columns
 
     def __str__(self):
         return "Event #{0}:\n" \
@@ -438,7 +459,8 @@ class HitSeries(object):
         if self._pos is None:
             self._pos = np.array([h.pos for h in self._hits])
         return self._pos
-
+    
+    @property
     def as_columns(self):
         if self._columns is None:
             self._columns = {
@@ -581,6 +603,25 @@ class TrackSeries(object):
             row['time'],
             row['type'],
         ) for row in table], event_id)
+    
+    @property
+    def as_columns(self):
+    if self._columns is None:
+        self._columns = {
+            'bjorkeny': self.bjorkeny,
+            'dir_x': self.dir[:, 0],
+            'dir_y': self.dir[:, 1],
+            'dir_z': self.dir[:, 2],
+            'energy': self.energy,
+            'id': self.id,
+            'length': self.length,
+            'pos_x': self.pos[:, 0],
+            'pos_y': self.pos[:, 1],
+            'pos_z': self.pos[:, 2],
+            'time': self.time,
+            'type': self.type,
+        }
+    return self._columns
     
     @classmethod
     def get_usr_item(cls, track, index):
