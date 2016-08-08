@@ -39,13 +39,13 @@ class HDF5Sink(Module):
         self.filters = tables.Filters(complevel=5, shuffle=True,
                                       fletcher32=True)
         self.hits = self.h5file.create_table('/', 'hits',
-                                             Hit.dtype, "Hits",
+                                             HitSeries.dtype, "Hits",
                                              filters=self.filters)
         self.mc_hits = self.h5file.create_table('/', 'mc_hits',
-                                                Hit.dtype, "MC Hits",
+                                                HitSeries.dtype, "MC Hits",
                                                 filters=self.filters)
         self.mc_tracks = self.h5file.create_table('/', 'mc_tracks',
-                                                  Track.dtype, "MC Tracks",
+                                                  TrackSeries.dtype, "MC Tracks",
                                                   filters=self.filters)
         self.event_info = self.h5file.create_table('/', 'event_info',
                                                    EventInfo.dtype, "Event Info",
