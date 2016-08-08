@@ -42,15 +42,14 @@ class HDF5Sink(Module):
         # store in {blobkey: <pytables table obj>}
         desc = self.get('tables') or []
         self._descriptions = [
-                ('Hits', '/hits', Hits.dtype),
-                ('MCHits', '/mc_hits', Hits.dtype),
-                ('MCTracks', '/mc_tracks', Tracks.dtype),
+                ('Hits', '/hits', HitSeries.dtype),
+                ('MCHits', '/mc_hits', HitSeries.dtype),
+                ('MCTracks', '/mc_tracks', TrackSeries.dtype),
                 ('EventInfo', '/event_info', EventInfo.dtype),
                 ]
         self._descriptions.extend(desc)
         self._tables = {}
         for key, path, dtype in self._descriptions:
-            dtype = append_id_to_dtype(dtype)
             loc, tabname = os.path.split(path)
             tab = self.h5file.create_table(loc, tabname, description=dtype,
             title=key, filters=self.filters, createparents=True)
@@ -80,7 +79,7 @@ class HDF5Sink(Module):
             self._write_reco_track(track, reco_table.row)
 
     def process(self, blob):
-        for key, tab in self._tables.keys():
+        for key, tab in self._tables.items():
 			if key in blob:
 				tab.append(blob[key].as_table())
         if 'Reco' in blob:
@@ -206,9 +205,3 @@ class HDF5Pump(Pump):
         start, stop, step = index.indices(len(self))
         for i in range(start, stop, step):
             yield self.get_blob(i)
-
-
-def append_id_to_dtype(dtype):
-    dt = dtype.descr
-    dt.append(('event_id', '<u4'))
-    return np.dtype(dt)

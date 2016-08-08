@@ -94,7 +94,7 @@ class EventInfo(object):
     def as_table(self):
         return [(self.det_id, self.event_id, self.frame_index, self.mc_id, 
                 self.mc_t, self.overlays, self.run_id, self.trigger_counter,
-                self.trigger_mast, self.utc_nanoseconds, self.utc_seconds,
+                self.trigger_mask, self.utc_nanoseconds, self.utc_seconds,
                 self.weight_w1, self.weight_w2, self.weight_w3),]
 
     def __str__(self):
