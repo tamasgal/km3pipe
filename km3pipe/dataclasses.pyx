@@ -38,11 +38,11 @@ IS_CC = {
 
 
 class EventInfo(object):
-    dtype = np.dtype([ 
-        ('det_id', '<i4'), ('event_id', '<u4'), ('frame_index', '<u4'), 
-        ('mc_id', '<i4'), ('mc_t', '<f8'), ('overlays', 'u1'), 
-        ('run_id', '<u4'), ('trigger_counter', '<u8'), ('trigger_mask', '<u8'), 
-        ('utc_nanoseconds', '<u8'), ('utc_seconds', '<u8'), 
+    dtype = np.dtype([
+        ('det_id', '<i4'), ('event_id', '<u4'), ('frame_index', '<u4'),
+        ('mc_id', '<i4'), ('mc_t', '<f8'), ('overlays', 'u1'),
+        ('run_id', '<u4'), ('trigger_counter', '<u8'), ('trigger_mask', '<u8'),
+        ('utc_nanoseconds', '<u8'), ('utc_seconds', '<u8'),
         ('weight_w1', '<f8'), ('weight_w2', '<f8'), ('weight_w3', '<f8')
         ])
     def __init__(self,
@@ -90,27 +90,6 @@ class EventInfo(object):
             except KeyError:
                 args.append(np.nan)
         return cls(*args)
-    
-    @property
-    def as_columns(self):
-        if self._columns is None:
-            self._columns = {
-                    'det_id': self.det_id,
-                    'event_id': self.event_id,
-                    'frame_index': self.frame_index,
-                    'mc_id': self.mc_id,
-                    'mc_t': self.mc_t,
-                    'overlays': self.overlays,
-                    'run_id': self.run_id,
-                    'trigger_counter': self.trigger_counter,
-                    'trigger_mask': self.trigger_mask,
-                    'utc_nanoseconds': self.utc_nanoseconds,
-                    'utc_seconds': self.utc_seconds,
-                    'weight_w1': self.weight_w1,
-                    'weight_w2': self.weight_w2,
-                    'weight_w3': self.weight_w3,
-            }
-        return self._columns
 
     def __str__(self):
         return "Event #{0}:\n" \
@@ -291,15 +270,15 @@ cdef class Track:
     cdef public np.ndarray pos
     cdef public np.ndarray dir
 
-    def __cinit__(self, 
-                  float bjorkeny, 
-                  dir, 
-                  float energy, 
-                  int id, 
-                  int interaction_channel, 
-                  bint is_cc, 
+    def __cinit__(self,
+                  float bjorkeny,
+                  dir,
+                  float energy,
+                  int id,
+                  int interaction_channel,
+                  bint is_cc,
                   float length, pos,
-                  int time, 
+                  int time,
                   int type
                   ):
         self.bjorkeny = bjorkeny
@@ -327,8 +306,8 @@ cdef class Track:
 
 class HitSeries(object):
     dtype = np.dtype([
-        ('channel_id', 'u1'), ('dom_id', '<u4'), ('event_id', '<u4'), 
-        ('id', '<u4'), ('pmt_id', '<u4'), ('run_id', '<u4'), ('time', '<i4'), 
+        ('channel_id', 'u1'), ('dom_id', '<u4'), ('event_id', '<u4'),
+        ('id', '<u4'), ('pmt_id', '<u4'), ('run_id', '<u4'), ('time', '<i4'),
         ('tot', 'u1'), ('triggered', '?')
         ])
     def __init__(self, hits, event_id=None):
@@ -414,7 +393,7 @@ class HitSeries(object):
     @property
     def triggered_hits(self):
         if self._triggered_hits is None:
-            self._triggered_hits = np.array([h for h in self._hits 
+            self._triggered_hits = np.array([h for h in self._hits
                                         if h.triggered])
         return self._triggered_hits
 
@@ -459,8 +438,7 @@ class HitSeries(object):
         if self._pos is None:
             self._pos = np.array([h.pos for h in self._hits])
         return self._pos
-    
-    @property
+
     def as_columns(self):
         if self._columns is None:
             self._columns = {
@@ -517,10 +495,10 @@ class HitSeries(object):
 
 class TrackSeries(object):
     dtype = np.dtype([
-        ('bjorkeny', '<f8'), ('dir_x', '<f8'), ('dir_y', '<f8'), 
-        ('dir_z', '<f8'), ('energy', '<f8'), ('event_id', '<u4'), 
-        ('id', '<u4'), ('interaction_channel', '<u4'), ('is_cc', '?'), 
-        ('length', '<f8'), ('pos_x', '<f8'), ('pos_y', '<f8'), 
+        ('bjorkeny', '<f8'), ('dir_x', '<f8'), ('dir_y', '<f8'),
+        ('dir_z', '<f8'), ('energy', '<f8'), ('event_id', '<u4'),
+        ('id', '<u4'), ('interaction_channel', '<u4'), ('is_cc', '?'),
+        ('length', '<f8'), ('pos_x', '<f8'), ('pos_y', '<f8'),
         ('pos_z', '<f8'), ('run_id', '<u4'), ('time', '<i4'), ('type', '<i4')
         ])
     def __init__(self, tracks, event_id=None):
@@ -553,11 +531,11 @@ class TrackSeries(object):
                           # TODO:
                           # This is a nasty bug. It is not completely clear
                           # if this is supposed to be PDG or Geant convention.
-                          # might be, that for CC neutrino events, 
-                          # the two vector elements might follow _different_ 
-                          # conventions. Yep, 2 conventions for 
+                          # might be, that for CC neutrino events,
+                          # the two vector elements might follow _different_
+                          # conventions. Yep, 2 conventions for
                           # 2 vector elements...
-                          #geant2pdg(t.type))       
+                          #geant2pdg(t.type))
                           t.type,
                           )
                     for t in tracks], event_id)
@@ -568,13 +546,13 @@ class TrackSeries(object):
                     directions_x,
                     directions_y,
                     directions_z,
-                    energies, 
+                    energies,
                     ids,
                     lengths,
                     positions_x,
                     positions_y,
                     positions_z,
-                    times, 
+                    times,
                     types,
                     event_id=None,
                     ):
@@ -603,26 +581,7 @@ class TrackSeries(object):
             row['time'],
             row['type'],
         ) for row in table], event_id)
-    
-    @property
-    def as_columns(self):
-        if self._columns is None:
-            self._columns = {
-                'bjorkeny': self.bjorkeny,
-                'dir_x': self.dir[:, 0],
-                'dir_y': self.dir[:, 1],
-                'dir_z': self.dir[:, 2],
-                'energy': self.energy,
-                'id': self.id,
-                'length': self.length,
-                'pos_x': self.pos[:, 0],
-                'pos_y': self.pos[:, 1],
-                'pos_z': self.pos[:, 2],
-                'time': self.time,
-                'type': self.type,
-            }
-        return self._columns
-    
+
     @classmethod
     def get_usr_item(cls, track, index):
         try:
@@ -661,7 +620,7 @@ class TrackSeries(object):
     @property
     def interaction_channel(self):
         if self._interaction_channel is None:
-            self._interaction_channel = np.array([t.interaction_channel for 
+            self._interaction_channel = np.array([t.interaction_channel for
                                                   t in self._tracks])
         return self._interaction_channel
 
