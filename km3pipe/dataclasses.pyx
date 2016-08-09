@@ -90,9 +90,13 @@ class EventInfo(object):
             except KeyError:
                 args.append(np.nan)
         return cls(*args)
-    
+
+    def serialize(to='table'):
+        if to == 'table':
+            return as_table(self)
+
     def as_table(self):
-        return [(self.det_id, self.event_id, self.frame_index, self.mc_id, 
+        return [(self.det_id, self.event_id, self.frame_index, self.mc_id,
                 self.mc_t, self.overlays, self.run_id, self.trigger_counter,
                 self.trigger_mask, self.utc_nanoseconds, self.utc_seconds,
                 self.weight_w1, self.weight_w2, self.weight_w3),]
@@ -383,15 +387,19 @@ class HitSeries(object):
         ) for row in table], event_id)
     dtype = np.dtype([
         ('channel_id', 'u1'), ('dom_id', '<u4'), ('event_id', '<u4'),
-        ('id', '<u4'), ('pmt_id', '<u4'), 
-        #('run_id', '<u4'), 
+        ('id', '<u4'), ('pmt_id', '<u4'),
+        #('run_id', '<u4'),
         ('time', '<i4'),
         ('tot', 'u1'), ('triggered', '?')
         ])
-    
+
+    def serialize(to='table'):
+        if to == 'table':
+            return as_table(self)
+
     def as_table(self):
-        return [(h.channel_id, h.dom_id, self.event_id, h.id, h.pmt_id, 
-            #self.run_id, 
+        return [(h.channel_id, h.dom_id, self.event_id, h.id, h.pmt_id,
+            #self.run_id,
             h.time, h.tot, h.triggered) for h in self._hits]
 
     def __iter__(self):
@@ -518,8 +526,8 @@ class TrackSeries(object):
         ('dir_z', '<f8'), ('energy', '<f8'), ('event_id', '<u4'),
         ('id', '<u4'), ('interaction_channel', '<u4'), ('is_cc', '?'),
         ('length', '<f8'), ('pos_x', '<f8'), ('pos_y', '<f8'),
-        ('pos_z', '<f8'), 
-        #('run_id', '<u4'), 
+        ('pos_z', '<f8'),
+        #('run_id', '<u4'),
         ('time', '<i4'), ('type', '<i4')
         ])
     def __init__(self, tracks, event_id=None):
@@ -602,10 +610,14 @@ class TrackSeries(object):
             row['time'],
             row['type'],
         ) for row in table], event_id)
-    
+
+    def serialize(to='table'):
+        if to == 'table':
+            return as_table(self)
+
     def as_table(self):
-        return [(t.bjorkeny, t.dir[0], t.dir[1], t.dir[2], t.energy, 
-            self.event_id, t.id, t.interaction_channel, t.is_cc, 
+        return [(t.bjorkeny, t.dir[0], t.dir[1], t.dir[2], t.energy,
+            self.event_id, t.id, t.interaction_channel, t.is_cc,
             t.length, t.pos[0], t.pos[1], t.pos[2], t.time, t.type)
             for t in self._tracks]
 
@@ -614,8 +626,8 @@ class TrackSeries(object):
         ('dir_z', '<f8'), ('energy', '<f8'), ('event_id', '<u4'),
         ('id', '<u4'), ('interaction_channel', '<u4'), ('is_cc', '?'),
         ('length', '<f8'), ('pos_x', '<f8'), ('pos_y', '<f8'),
-        ('pos_z', '<f8'), 
-        #('run_id', '<u4'), 
+        ('pos_z', '<f8'),
+        #('run_id', '<u4'),
         ('time', '<i4'), ('type', '<i4')
         ])
 
