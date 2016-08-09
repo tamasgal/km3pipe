@@ -109,8 +109,11 @@ class TestHitSeries(TestCase):
 
 class TestHit(TestCase):
 
+    def setUp(self):
+        self.hit = Hit(1, 2, 3, 4, 5, 6, True)
+
     def test_attributes(self):
-        hit = Hit(1, 2, 3, 4, 5, 6, True)
+        hit = self.hit
         self.assertAlmostEqual(1, hit.channel_id)
         self.assertAlmostEqual(2, hit.dom_id)
         self.assertAlmostEqual(3, hit.id)
@@ -120,7 +123,7 @@ class TestHit(TestCase):
         self.assertTrue(hit.triggered)
 
     def test_string_representation(self):
-        hit = Hit(1, 2, 3, 4, 5, 6, True)
+        hit = self.hit
         representation = "Hit: channel_id(1), dom_id(2), pmt_id(4), tot(6), " \
                          "time(5), triggered(True)"
         self.assertEqual(representation, str(hit))
@@ -128,9 +131,12 @@ class TestHit(TestCase):
 
 class TestTrack(TestCase):
 
-    def test_attributes(self):
-        track = Track(0, np.array((1, 2, 3)), 4, 5, 6, True, 8,
+    def setUp(self):
+        self.track = Track(0, np.array((1, 2, 3)), 4, 5, 6, True, 8,
                       np.array((9, 10, 11)), 12, 13)
+
+    def test_attributes(self):
+        track = self.track
         self.assertAlmostEqual(1, track.dir[0])
         self.assertAlmostEqual(2, track.dir[1])
         self.assertAlmostEqual(3, track.dir[2])
@@ -153,8 +159,7 @@ class TestTrack(TestCase):
         self.assertEqual(representation, str(track))
 
     def test_mutable_dir(self):
-        track = Track(0, np.array((1, 2, 3)), 4, 5, 6, True, 8,
-                      np.array((9, 10, 11)), 12, 13)
+        track = self.track
 
         track.dir = np.array((100, 101, 102))
 
@@ -163,8 +168,7 @@ class TestTrack(TestCase):
         self.assertAlmostEqual(102, track.dir[2])
 
     def test_mutable_pos(self):
-        track = Track(0, np.array((1, 2, 3)), 4, 5, 6, True, 8,
-                      np.array((9, 10, 11)), 12, 13)
+        track = self.track
 
         track.pos = np.array((100, 101, 102))
 
