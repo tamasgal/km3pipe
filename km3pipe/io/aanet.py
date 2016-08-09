@@ -72,7 +72,7 @@ class AanetPump(Pump):
         import aa  # noqa
         from ROOT import EventFile
 
-        for filename in self.filenames:
+        foe filename in self.filenames:
             print("Reading from file: {0}".format(filename))
             if not os.path.exists(filename):
                 log.warn(filename + " not available: continue without it")
@@ -182,14 +182,24 @@ def read_mini_dst(aanet_event, event_id):
         'QStrategy': parse_qstrategy,
         'Dusj': parse_dusj,
     }
+    dt_map = {}
     minidst = {}
     for k, trk in enumerate(aanet_event.trks):
         recname = pos_to_recname[k]
         reader = recname_to_reader[recname]
-        minidst[recname] = reader(trk)
+
+        minidst[recname], dtype = reader(trk)
         minidst[recname]['event_id'] = event_id
-    minidst['ThomasFeatures'] = parse_thomasfeatures(aanet_event.usr)
-    return minidst
+        dtype.append([('event_id', int)])
+        dt_map[recname] = dtype
+        minidst[recname]['event_id'] = event_id
+
+    minidst['ThomasFeatures'], dtype = parse_thomasfeatures(aanet_event.usr)
+    minidst['ThomasFeatures']['event_id'] = event_id
+    dtype.append([('event_id', int)])
+    dt_map['ThomasFeatures'] = dtype
+
+    return minidst, dt_map
 
 
 def parse_track(trk):
@@ -260,7 +270,10 @@ def parse_thomasfeatures(aanet_usr):
                    'BigInertia',
                    'GoldParameter']
 
+    dtype = [(key, float) for key in recolns_keys + list(out.keys())]
+
     out['did_converge'] = did_converge
+    dtype.append(('did_converge', bool))
     if not did_converge:
         for key in Thomas_keys:
             out[key] = np.nan
@@ -268,7 +281,7 @@ def parse_thomasfeatures(aanet_usr):
 
     for count, key in enumerate(Thomas_keys):
         out[key] = aanet_usr[count]
-    return out
+    return out, dtype
 
 
 def parse_recolns(aanet_trk):
@@ -278,6 +291,8 @@ def parse_recolns(aanet_trk):
 
     recolns_keys = ['beta', 'n_fits', 'Lambda',
                     'n_compatible_solutions', 'Nhits', 'NhitsL0', 'NhitsL1']
+    dtype = [(key, float) for key in recolns_keys + list(out.keys())]
+    dtype.append(('did_converge', bool))
 
     if not did_converge:
         for key in recolns_keys:
@@ -286,7 +301,7 @@ def parse_recolns(aanet_trk):
 
     for count, key in enumerate(recolns_keys):
         out[key] = aanet_trk.usr[count]
-    return out
+    return out, dtype
 
 
 def parse_jgandalf(aanet_trk):
@@ -296,6 +311,8 @@ def parse_jgandalf(aanet_trk):
 
     jgandalf_keys = ['Energy_f', 'Energy_can', 'Beta0',
                      'Beta1', 'Lik', 'Lik_reduced', 'NhitsL0', 'NhitsL1']
+    dtype = [(key, float) for key in jgandalf_keys + list(out.keys())]
+    dtype.append(('did_converge', bool))
 
     if not did_converge:
         for key in jgandalf_keys:
@@ -304,16 +321,18 @@ def parse_jgandalf(aanet_trk):
 
     for count, key in enumerate(jgandalf_keys):
         out[key] = aanet_trk.usr[count]
-    return out
+    return out, dtype
 
 
 def parse_aashowerfit(aanet_trk):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
     out['did_converge'] = did_converge
+    dtype.append(('did_converge', bool))
 
     aashow_keys = ['NhitsAA', 'M_estimator', 'beta',
-                   'NhitsL0', 'NhitsL1']
+                          'NhitsL0', 'NhitsL1']
+    dtype = [(key, float) for key in aashow_keys + list(out.keys())]
 
     if not did_converge:
         for key in aashow_keys:
@@ -321,15 +340,17 @@ def parse_aashowerfit(aanet_trk):
         return out
     for count, key in enumerate(aashow_keys):
         out[key] = aanet_trk.usr[count]
-    return out
+    return out, dtype
 
 
 def parse_qstrategy(aanet_trk):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
     out['did_converge'] = did_converge
-    qstrat_keys = ['MFinal', 'Charge', 'MPreFit',
-                   'RPreFit', 'Inertia', 'NhitsL0', 'NhitsL1']
+    qstrat_keys = sorted(['MFinal', 'Charge', 'MPreFit',
+                   'RPreFit', 'Inertia', 'NhitsL0', 'NhitsL1'])
+    dtype = [(key, float) for key in qstrat_keys + list(out.keys())]
+    dtype.append(('did_converge', bool))
 
     if not did_converge:
         for key in qstrat_keys:
@@ -338,7 +359,7 @@ def parse_qstrategy(aanet_trk):
 
     for count, key in enumerate(qstrat_keys):
         out[key] = aanet_trk.usr[count]
-    return out
+    return out, dtype
 
 
 def parse_dusj(aanet_trk):
@@ -375,6 +396,8 @@ def parse_dusj(aanet_trk):
                  'YInterspotDiffo1000_o50',
                  'NhitsL0',
                  'NhitsL1']
+    dtype = [(key, float) for key in dusj_keys + list(out.keys())]
+    dtype.append(('did_converge', bool))
 
     if not did_converge:
         for key in dusj_keys:
@@ -383,4 +406,4 @@ def parse_dusj(aanet_trk):
 
     for count, key in enumerate(dusj_keys):
         out[key] = aanet_trk.usr[count]
-    return out
+    return out, dtype
