@@ -10,7 +10,7 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 
 from km3pipe.testing import TestCase
-from km3pipe.dataclasses import Track, Position, Direction_, HitSeries
+from km3pipe.dataclasses import Hit, Track, Position, Direction_, HitSeries
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -107,6 +107,25 @@ class TestHitSeries(TestCase):
         self.assertEqual(10, len(hits))
 
 
+class TestHit(TestCase):
+
+    def test_attributes(self):
+        hit = Hit(1, 2, 3, 4, 5, 6, True)
+        self.assertAlmostEqual(1, hit.channel_id)
+        self.assertAlmostEqual(2, hit.dom_id)
+        self.assertAlmostEqual(3, hit.id)
+        self.assertAlmostEqual(4, hit.pmt_id)
+        self.assertAlmostEqual(5, hit.time)
+        self.assertAlmostEqual(6, hit.tot)
+        self.assertTrue(hit.triggered)
+
+    def test_string_representation(self):
+        hit = Hit(1, 2, 3, 4, 5, 6, True)
+        representation = "Hit: channel_id(1), dom_id(2), pmt_id(4), tot(6), " \
+                         "time(5), triggered(True)"
+        self.assertEqual(representation, str(hit))
+
+
 class TestTrack(TestCase):
 
     def test_attributes(self):
@@ -132,3 +151,23 @@ class TestTrack(TestCase):
         representation = "Track: pos([ 9 10 11]), dir([1 2 3]), t=12, " \
                          "E=4.0, type=13 (mu-)"
         self.assertEqual(representation, str(track))
+
+    def test_mutable_dir(self):
+        track = Track(0, np.array((1, 2, 3)), 4, 5, 6, True, 8,
+                      np.array((9, 10, 11)), 12, 13)
+
+        track.dir = np.array((100, 101, 102))
+
+        self.assertAlmostEqual(100, track.dir[0])
+        self.assertAlmostEqual(101, track.dir[1])
+        self.assertAlmostEqual(102, track.dir[2])
+
+    def test_mutable_pos(self):
+        track = Track(0, np.array((1, 2, 3)), 4, 5, 6, True, 8,
+                      np.array((9, 10, 11)), 12, 13)
+
+        track.pos = np.array((100, 101, 102))
+
+        self.assertAlmostEqual(100, track.pos[0])
+        self.assertAlmostEqual(101, track.pos[1])
+        self.assertAlmostEqual(102, track.pos[2])
