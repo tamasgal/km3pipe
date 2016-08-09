@@ -430,4 +430,4 @@ def camelise(text, capital_first=True):
             yield str.capitalize
 
     c = camelcase()
-    return "".join(c.next()(x) if x else '_' for x in text.split("_"))
+    return "".join(next(c)(x) if x else '_' for x in text.split("_"))
