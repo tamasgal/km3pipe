@@ -759,7 +759,7 @@ class TrackSeries(object):
 class Reco(object):
     def __init__(self, map, dtype, event_id=None):
         if event_id is not None:
-            dt = self.dtype.descr
+            dt = dtype.descr
             dt.append(('event_id', int))
             dtype = np.dtype(dt)
             map['event_id'] = event_id

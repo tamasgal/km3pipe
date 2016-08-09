@@ -45,7 +45,7 @@ class HDF5Sink(Module):
         if where not in self._tables:
             if dtype is None:
                 dtype = data.dtype
-            loc, tabname = os.split(where)
+            loc, tabname = os.path.split(where)
             self._tables[where] = self.h5file.create_table(
                 loc, tabname, description=dtype, title=title,
                 filters=self.filters, createparents=True)
@@ -62,12 +62,12 @@ class HDF5Sink(Module):
 
             if hasattr(entry, 'dtype'):
                 loc = '/' + decamelise(key)
-                self.write_table(loc, entry, title=key)
+                self._write_table(loc, entry, title=key)
 
             elif isinstance(entry, RecoSeries):
                 for subkey, subentry in entry.items():
                     loc = entry.loc + '/' + decamelise(subkey)
-                    self.write_table(loc, subentry, title=subkey)
+                    self._write_table(loc, subentry, title=subkey)
 
         if not self.index % 1000:
             for tab in self._tables.values():
