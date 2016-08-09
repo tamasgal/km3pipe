@@ -91,7 +91,7 @@ class EventInfo(object):
                 args.append(np.nan)
         return cls(*args)
 
-    def serialize(to='table'):
+    def serialize(self, to='table'):
         if to == 'table':
             return self.as_table()
 
@@ -393,7 +393,7 @@ class HitSeries(object):
         ('tot', 'u1'), ('triggered', '?')
         ])
 
-    def serialize(to='table'):
+    def serialize(self, to='table'):
         if to == 'table':
             return self.as_table()
 
@@ -611,7 +611,7 @@ class TrackSeries(object):
             row['type'],
         ) for row in table], event_id)
 
-    def serialize(to='table'):
+    def serialize(self, to='table'):
         if to == 'table':
             return self.as_table()
 
@@ -768,7 +768,7 @@ class Reco(object):
 
     def serialize(self, to='table'):
         if to == 'table':
-            return [[self.map[key] for key in self.dtype.names],]
+            return [[self.map[key] for key in self.dtype.names], ]
 
 
 class RecoSeries(dict):
