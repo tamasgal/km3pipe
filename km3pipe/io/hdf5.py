@@ -115,21 +115,13 @@ class HDF5Pump(Pump):
         self.index += 1
         return blob
 
-    def _get_hits(self, event_id, table_name='hits', where='/'):
-        table = self.h5_file.get_node(where, table_name)
-        rows = table.read_where('event_id == %d' % event_id)
-        return HitSeries.from_table(rows, event_id)
+    def _get_event(self, event_id, where):
+        if not where.startswith('/'):
+            where = '/' + where
+        table = self.h5_file.get_node(where)
+        return = table.read_where('event_id == %d' % event_id)
 
-    def _get_tracks(self, event_id, table_name='tracks', where='/'):
-        table = self.h5_file.get_node(where, table_name)
-        rows = table.read_where('event_id == %d' % event_id)
-        return TrackSeries.from_table(rows, event_id)
-
-    def _get_event_info(self, event_id, table_name='event_info', where='/'):
-        table = self.h5_file.get_node(where, table_name)
-        return EventInfo.from_table(table[event_id])
-
-    def _get_reco(self, event_id, group_name='reco', where='/'):
+    def _get_group(self, event_id, group_name='reco', where='/'):
         group = self.h5_file.get_node(where, group_name)
         out = {}
         for table in group:
@@ -141,12 +133,24 @@ class HDF5Pump(Pump):
     def get_blob(self, index):
         event_id = self.event_ids[index]
         blob = {}
-        blob['Hits'] = self._get_hits(event_id, table_name='hits')
-        blob['MCHits'] = self._get_hits(event_id, table_name='mc_hits')
-        blob['MCTracks'] = self._get_tracks(event_id, table_name='mc_tracks')
+        blob['Hits'] = HitSeries.from_table(
+            self._get_event(event_id, where='hits'))
+        blob['MCHits'] = HitSeries.from_table(
+            self._get_event(event_id, where='mc_hits'))
+        blob['MCTracks'] = TrackSeries.from_table(
+            self._get_event(event_id, where='mc_tracks'))
+        blob['EventInfo'] = EventInfo.from_table(
+            self._get_event(event_id, where='event_info'))
         blob['EventInfo'] = self._get_event_info(event_id,
-                                                 table_name='event_info')
-        blob['Reco'] = self._get_reco(event_id, group_name='reco')
+                                                 where='event_info')
+        reco = RecoSeries()
+        reco_path = '/reco'
+        reco_group = self.h5_file.get_node(reco_path)
+        for recname in reco_group._v_children.keys():
+            loc = '/'.join(reco_path, recname)
+            reco[recname] = self._get_event(event_id, group_name='reco')
+        blob['Reco'] = reco
+
         return blob
 
     def finish(self):
