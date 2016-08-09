@@ -123,7 +123,6 @@ class TestHitSeries(TestCase):
         self.assertEqual(n_hits, len(hit_series))
 
 
-
 class TestHit(TestCase):
 
     def setUp(self):
