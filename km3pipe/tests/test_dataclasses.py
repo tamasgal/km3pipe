@@ -10,6 +10,7 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 
 from km3pipe.testing import TestCase, FakeAanetHit
+from km3pipe.io.evt import EvtRawHit
 from km3pipe.dataclasses import Hit, Track, Position, Direction_, HitSeries
 
 __author__ = "Tamas Gal"
@@ -120,6 +121,22 @@ class TestHitSeries(TestCase):
         self.assertTrue(hit_series[6].triggered)
         self.assertAlmostEqual(50, hit_series[7].dom_id)
         self.assertAlmostEqual(67, hit_series[9].time)
+        self.assertEqual(n_hits, len(hit_series))
+
+    def test_from_evt(self):
+        n_params = 4
+        n_hits = 10
+        hits = [EvtRawHit(*p) for p in
+                np.arange(n_hits * n_params).reshape(n_hits, n_params)]
+        hit_series = HitSeries.from_evt(hits)
+
+        self.assertAlmostEqual(1, hit_series[0].pmt_id)
+        self.assertAlmostEqual(0, hit_series[1].channel_id)  # always 0 for MC
+        self.assertAlmostEqual(12, hit_series[3].id)
+        self.assertAlmostEqual(22, hit_series[5].tot)
+        self.assertFalse(hit_series[2].triggered)  # always False for MC
+        self.assertAlmostEqual(0, hit_series[7].dom_id)  # always 0 for MC
+        self.assertAlmostEqual(39, hit_series[9].time)
         self.assertEqual(n_hits, len(hit_series))
 
 
