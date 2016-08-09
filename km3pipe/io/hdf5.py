@@ -119,7 +119,7 @@ class HDF5Pump(Pump):
         if not where.startswith('/'):
             where = '/' + where
         table = self.h5_file.get_node(where)
-        return = table.read_where('event_id == %d' % event_id)
+        return table.read_where('event_id == %d' % event_id)
 
     def _get_group(self, event_id, group_name='reco', where='/'):
         group = self.h5_file.get_node(where, group_name)
@@ -148,7 +148,7 @@ class HDF5Pump(Pump):
         reco_group = self.h5_file.get_node(reco_path)
         for recname in reco_group._v_children.keys():
             loc = '/'.join(reco_path, recname)
-            reco[recname] = self._get_event(event_id, group_name='reco')
+            reco[recname] = self._get_event(event_id, where=loc)
         blob['Reco'] = reco
 
         return blob
