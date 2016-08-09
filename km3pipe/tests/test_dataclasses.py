@@ -162,6 +162,29 @@ class TestHitSeries(TestCase):
         self.assertAlmostEqual(39, hit_series[9].time)
         self.assertEqual(n_hits, len(hit_series))
 
+    def test_attributes_via_from_evt(self):
+        n_params = 4
+        n_hits = 10
+        hits = [EvtRawHit(*p) for p in
+                np.arange(n_hits * n_params).reshape(n_hits, n_params)]
+        hit_series = HitSeries.from_evt(hits)
+
+        self.assertTupleEqual((0, 4, 8, 12, 16, 20, 24, 28, 32, 36),
+                              tuple(hit_series.id))
+        self.assertTupleEqual((0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+                              tuple(hit_series.dom_id))
+        self.assertTupleEqual((1, 5, 9, 13, 17, 21, 25, 29, 33, 37),
+                              tuple(hit_series.pmt_id))
+        self.assertTupleEqual((0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+                              tuple(hit_series.channel_id))
+        self.assertTupleEqual((3, 7, 11, 15, 19, 23, 27, 31, 35, 39),
+                              tuple(hit_series.time))
+        self.assertTupleEqual((False, False, False, False, False, False, False,
+                               False, False, False),
+                              tuple(hit_series.triggered))
+        self.assertTupleEqual((2, 6, 10, 14, 18, 22, 26, 30, 34, 38),
+                              tuple(hit_series.tot))
+
 
 class TestHit(TestCase):
 
