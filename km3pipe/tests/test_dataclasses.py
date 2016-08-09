@@ -123,6 +123,29 @@ class TestHitSeries(TestCase):
         self.assertAlmostEqual(67, hit_series[9].time)
         self.assertEqual(n_hits, len(hit_series))
 
+    def test_attributes_via_from_aanet(self):
+        n_params = 7
+        n_hits = 10
+        hits = [FakeAanetHit(*p) for p in
+                np.arange(n_hits * n_params).reshape(n_hits, n_params)]
+        hit_series = HitSeries.from_aanet(hits)
+
+        self.assertTupleEqual((2, 9, 16, 23, 30, 37, 44, 51, 58, 65),
+                              tuple(hit_series.id))
+        self.assertTupleEqual((1, 8, 15, 22, 29, 36, 43, 50, 57, 64),
+                              tuple(hit_series.dom_id))
+        self.assertTupleEqual((3, 10, 17, 24, 31, 38, 45, 52, 59, 66),
+                              tuple(hit_series.pmt_id))
+        self.assertTupleEqual((0, 7, 14, 21, 28, 35, 42, 49, 56, 63),
+                              tuple(hit_series.channel_id))
+        self.assertTupleEqual((4, 11, 18, 25, 32, 39, 46, 53, 60, 67),
+                              tuple(hit_series.time))
+        self.assertTupleEqual((True, True, True, True, True, True, True, True,
+                               True, True),
+                              tuple(hit_series.triggered))
+        self.assertTupleEqual((5, 12, 19, 26, 33, 40, 47, 54, 61, 68),
+                              tuple(hit_series.tot))
+
     def test_from_evt(self):
         n_params = 4
         n_hits = 10
