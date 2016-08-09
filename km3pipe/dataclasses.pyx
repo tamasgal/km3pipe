@@ -277,7 +277,8 @@ cdef class Track:
                   int id,
                   int interaction_channel,
                   bint is_cc,
-                  float length, pos,
+                  float length,
+                  pos,
                   int time,
                   int type
                   ):
