@@ -77,11 +77,7 @@ class HDF5Sink(Module):
             self._write_reco_track(track, reco_table.row)
 
     def process(self, blob):
-<<<<<<< HEAD
         for key, tab in self._tables.items():
-=======
-        for key, tab in self._tables.keys():
->>>>>>> simpler H5 writing
 			if key in blob:
 				tab.append(blob[key].as_table())
         if 'Reco' in blob:
