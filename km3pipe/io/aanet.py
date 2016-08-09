@@ -10,7 +10,8 @@ import os.path
 import numpy as np
 
 from km3pipe import Pump
-from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
+from km3pipe.dataclasses import (HitSeries, TrackSeries, EventInfo, Reco,
+                                RecoSeries)
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -182,24 +183,18 @@ def read_mini_dst(aanet_event, event_id):
         'QStrategy': parse_qstrategy,
         'Dusj': parse_dusj,
     }
-    dt_map = {}
-    minidst = {}
+    minidst = RecoSeries()
     for k, trk in enumerate(aanet_event.trks):
         recname = pos_to_recname[k]
         reader = recname_to_reader[recname]
 
-        minidst[recname], dtype = reader(trk)
-        minidst[recname]['event_id'] = event_id
-        dtype.append([('event_id', int)])
-        dt_map[recname] = dtype
-        minidst[recname]['event_id'] = event_id
+        reco_map, dtype = reader(trk)
+        minidst[recname] = Reco(reco_map, dtype, event_id=event_id)
 
-    minidst['ThomasFeatures'], dtype = parse_thomasfeatures(aanet_event.usr)
-    minidst['ThomasFeatures']['event_id'] = event_id
-    dtype.append([('event_id', int)])
-    dt_map['ThomasFeatures'] = dtype
+    thomas_feat, dtype = parse_thomasfeatures(aanet_event.usr)
+    minidst['ThomasFeatures'] = Reco(thomas_feat, dtype, event_id=event_id)
 
-    return minidst, dt_map
+    return minidst
 
 
 def parse_track(trk):
