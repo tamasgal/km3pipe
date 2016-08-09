@@ -93,7 +93,7 @@ class EventInfo(object):
 
     def serialize(to='table'):
         if to == 'table':
-            return as_table(self)
+            return self.as_table()
 
     def as_table(self):
         return [(self.det_id, self.event_id, self.frame_index, self.mc_id,
@@ -395,7 +395,7 @@ class HitSeries(object):
 
     def serialize(to='table'):
         if to == 'table':
-            return as_table(self)
+            return self.as_table()
 
     def as_table(self):
         return [(h.channel_id, h.dom_id, self.event_id, h.id, h.pmt_id,
@@ -613,7 +613,7 @@ class TrackSeries(object):
 
     def serialize(to='table'):
         if to == 'table':
-            return as_table(self)
+            return self.as_table()
 
     def as_table(self):
         return [(t.bjorkeny, t.dir[0], t.dir[1], t.dir[2], t.energy,
