@@ -15,7 +15,7 @@ import tables
 
 import km3pipe
 from km3pipe import Pump, Module
-from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
+from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo, RecoSeries
 from km3pipe.logger import logging
 from km3pipe.tools import camelise, decamelise
 
@@ -64,7 +64,7 @@ class HDF5Sink(Module):
                 loc = '/' + decamelise(key)
                 self.write_table(loc, entry, title=key)
 
-            elif hasattr(entry, 'dtype_map'):
+            elif isinstance(entry, RecoSeries):
                 for subkey, subentry in entry.items():
                     loc = entry.loc + '/' + decamelise(subkey)
                     self.write_table(loc, subentry, title=subkey)
