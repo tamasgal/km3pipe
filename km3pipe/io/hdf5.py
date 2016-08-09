@@ -17,7 +17,7 @@ import km3pipe
 from km3pipe import Pump, Module
 from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
 from km3pipe.logger import logging
-from km3pipe.tools import camelise
+from km3pipe.tools import camelise, decamelise
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -40,68 +40,34 @@ class HDF5Sink(Module):
         self.filters = tables.Filters(complevel=5, shuffle=True,
                                       fletcher32=True)
         self._tables = {}
-        desc = self.get('tables') or []
-        self._descriptions = [
-                ('Hits', '/hits', HitSeries.dtype),
-                ('MCHits', '/mc_hits', HitSeries.dtype),
-                ('MCTracks', '/mc_tracks', TrackSeries.dtype),
-                ('EventInfo', '/event_info', EventInfo.dtype),
-                ]
-        self._descriptions.extend(desc)
-        for key, path, dtype in self._descriptions:
-            loc, tabname = os.path.split(path)
-            tab = self.h5file.create_table(loc, tabname, description=dtype,
-            title=key, filters=self.filters, createparents=True)
-            self._tables[key] = tab
 
-    def _write_reco_track(self, track, reco_row):
-        for colname, val in track.items():
-            reco_row[colname] = val
-        reco_row.append()
+    def _write_table(self, where, data, title='', dtype=None):
+        if where not in self._tables:
+            if dtype is None:
+                dtype = data.dtype
+            loc, tabname = os.split(where)
+            self._tables[where] = self.h5file.create_table(
+                loc, tabname, description=dtype, title=title,
+                filters=self.filters, createparents=True)
 
-    def _gen_dtype(self, track):
-        keys = [(k, np.float64) for k in track.keys() if k != 'event_id' if k != 'did_converge']
-        keys.extend([('event_id', np.uint32), ('did_converge', np.bool_)])
-        return np.dtype(sorted(keys))
-
-    def _write_reco(self, reco_dict, reco_group):
-        for recname, track in reco_dict.items():
-            if recname not in self._tables:
-                dtype = self._gen_dtype(track)
-                reco_table = self.h5file.create_table(
-                    reco_group, recname.lower(),
-                    dtype,      #np.dtype(recname_to_dtype[recname]),
-                    recname, createparents=True, filters=self.filters
-                )
-                self._tables[recname] = reco_table
-            reco_table = self._tables[recname]
-            self._write_reco_track(track, reco_table.row)
+        tab = self._tables[where]
+        try:
+            data = data.serialize()
+        except AttributeError:
+            pass
+        tab.append(data)
 
     def process(self, blob):
         for key, entry in blob.items():
-            if key == 'Reco':
-                self._write_reco(entry, '/reco')
-            # init h5 tables. maybe do this on 1st iter step only?
-            try:
-                dtype = entry.dtype
-            except AttributeError:
-                continue
-            try:
-                loc = entry.loc
-            except AttributeError:
-                loc = ''
-            tabname + camelise(key)
-            where = loc + '/' + camelise(key)
-            if where not in self._tables.keys():
-                self._tables[where] = self.h5file.create_table(
-                    loc, tabname, description=dtype, title=key,
-                    filters=self.filters, createparents=True)
-            tab = self._tables[where]
-            try:
-                data = entry.as_table()
-            except AttributeError:
-                data = entry
-            tab.append(data)
+
+            if hasattr(entry, 'dtype'):
+                loc = '/' + decamelise(key)
+                self.write_table(loc, entry, title=key)
+
+            elif hasattr(entry, 'dtype_map'):
+                for subkey, subentry in entry.items():
+                    loc = entry.loc + '/' + decamelise(subkey)
+                    self.write_table(loc, subentry, title=subkey)
 
         if not self.index % 1000:
             for tab in self._tables.values():
