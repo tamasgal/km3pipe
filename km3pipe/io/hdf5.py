@@ -17,6 +17,7 @@ import km3pipe
 from km3pipe import Pump, Module
 from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
 from km3pipe.logger import logging
+from km3pipe.tools import camelise
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -38,6 +39,7 @@ class HDF5Sink(Module):
         self.h5file = tables.open_file(self.filename, mode="w", title="KM3NeT")
         self.filters = tables.Filters(complevel=5, shuffle=True,
                                       fletcher32=True)
+        self._tables = {}
         desc = self.get('tables') or []
         self._descriptions = [
                 ('Hits', '/hits', HitSeries.dtype),
@@ -46,7 +48,6 @@ class HDF5Sink(Module):
                 ('EventInfo', '/event_info', EventInfo.dtype),
                 ]
         self._descriptions.extend(desc)
-        self._tables = {}
         for key, path, dtype in self._descriptions:
             loc, tabname = os.path.split(path)
             tab = self.h5file.create_table(loc, tabname, description=dtype,
@@ -77,12 +78,30 @@ class HDF5Sink(Module):
             self._write_reco_track(track, reco_table.row)
 
     def process(self, blob):
-        for key, tab in self._tables.items():
-			if key in blob:
-				tab.append(blob[key].as_table())
-        if 'Reco' in blob:
-            # this is a group, not a single table
-            self._write_reco(blob['Reco'], '/reco')
+        for key, entry in blob.items():
+            if key == 'Reco':
+                self._write_reco(entry, '/reco')
+            # init h5 tables. maybe do this on 1st iter step only?
+            try:
+                dtype = entry.dtype
+            except AttributeError:
+                continue
+            try:
+                loc = entry.loc
+            except AttributeError:
+                loc = ''
+            tabname + camelise(key)
+            where = loc + '/' + camelise(key)
+            if where not in self._tables.keys():
+                self._tables[where] = self.h5file.create_table(
+                    loc, tabname, description=dtype, title=key,
+                    filters=self.filters, createparents=True)
+            tab = self._tables[where]
+            try:
+                data = entry.as_table()
+            except AttributeError:
+                data = entry
+            tab.append(data)
 
         if not self.index % 1000:
             for tab in self._tables.values():
