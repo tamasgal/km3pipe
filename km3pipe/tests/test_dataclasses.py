@@ -10,7 +10,7 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 
 from km3pipe.testing import TestCase
-from km3pipe.dataclasses import Position, Direction_, HitSeries
+from km3pipe.dataclasses import Track, Position, Direction_, HitSeries
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -105,3 +105,30 @@ class TestHitSeries(TestCase):
         self.assertAlmostEqual(1, hits[1].id)
         self.assertAlmostEqual(9, hits[9].pmt_id)
         self.assertEqual(10, len(hits))
+
+
+class TestTrack(TestCase):
+
+    def test_attributes(self):
+        track = Track(0, np.array((1, 2, 3)), 4, 5, 6, True, 8,
+                      np.array((9, 10, 11)), 12, 13)
+        self.assertAlmostEqual(1, track.dir[0])
+        self.assertAlmostEqual(2, track.dir[1])
+        self.assertAlmostEqual(3, track.dir[2])
+        self.assertAlmostEqual(4, track.energy)
+        self.assertAlmostEqual(5, track.id)
+        self.assertAlmostEqual(6, track.interaction_channel)
+        self.assertTrue(track.is_cc)
+        self.assertAlmostEqual(8, track.length)
+        self.assertAlmostEqual(9, track.pos[0])
+        self.assertAlmostEqual(10, track.pos[1])
+        self.assertAlmostEqual(11, track.pos[2])
+        self.assertAlmostEqual(12, track.time)
+        self.assertAlmostEqual(13, track.type)
+
+    def test_string_representation(self):
+        track = Track(0, np.array((1, 2, 3)), 4, 5, 6, True, 8,
+                      np.array((9, 10, 11)), 12, 13)
+        representation = "Track: pos([ 9 10 11]), dir([1 2 3]), t=12, " \
+                         "E=4.0, type=13 (mu-)"
+        self.assertEqual(representation, str(track))
