@@ -9,7 +9,7 @@ from __future__ import division, absolute_import, print_function
 
 import numpy as np
 
-from km3pipe.testing import TestCase
+from km3pipe.testing import TestCase, FakeAanetHit
 from km3pipe.dataclasses import Hit, Track, Position, Direction_, HitSeries
 
 __author__ = "Tamas Gal"
@@ -105,6 +105,23 @@ class TestHitSeries(TestCase):
         self.assertAlmostEqual(1, hits[1].id)
         self.assertAlmostEqual(9, hits[9].pmt_id)
         self.assertEqual(10, len(hits))
+
+    def test_from_aanet(self):
+        n_params = 7
+        n_hits = 10
+        hits = [FakeAanetHit(*p) for p in
+                np.arange(n_hits * n_params).reshape(n_hits, n_params)]
+        hit_series = HitSeries.from_aanet(hits)
+
+        self.assertAlmostEqual(3, hit_series[0].pmt_id)
+        self.assertAlmostEqual(7, hit_series[1].channel_id)
+        self.assertAlmostEqual(23, hit_series[3].id)
+        self.assertAlmostEqual(40, hit_series[5].tot)
+        self.assertTrue(hit_series[6].triggered)
+        self.assertAlmostEqual(50, hit_series[7].dom_id)
+        self.assertAlmostEqual(67, hit_series[9].time)
+        self.assertEqual(n_hits, len(hit_series))
+
 
 
 class TestHit(TestCase):
