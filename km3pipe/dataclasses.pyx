@@ -754,3 +754,23 @@ class TrackSeries(object):
 
     def __insp__(self):
         return '\n'.join([str(track) for track in self._tracks])
+
+
+class Reco(object):
+    def __init__(self, map, dtype, event_id=None):
+        if event_id is not None:
+            dt = self.dtype.descr
+            dt.append(('event_id', int))
+            dtype = np.dtype(dt)
+            map['event_id'] = event_id
+        self.dtype = dtype
+        self.map = map
+
+    def serialize(self, to='table'):
+        if to == 'table':
+            return [[self.map[key] for key in self.dtype.names],]
+
+
+class RecoSeries(dict):
+    def __init__(self, loc='/reco'):
+        self.loc = loc
