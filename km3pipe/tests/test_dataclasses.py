@@ -12,7 +12,7 @@ import numpy as np
 from km3pipe.testing import TestCase, FakeAanetHit
 from km3pipe.io.evt import EvtRawHit
 from km3pipe.dataclasses import (Hit, Track, Position, Direction_, HitSeries,
-                                 EventInfo)
+                                 EventInfo, Serialisable)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -21,6 +21,61 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
+
+
+class TestSerialisableABC(TestCase):
+
+    def test_dtype_can_be_set(self):
+        class TestClass(object):
+            __metaclass__ = Serialisable
+            dtype = [('a', '<i4'), ('b', '>i8')]
+
+        self.assertTupleEqual(('a', 'b'), TestClass.dtype.names)
+
+    def test_dtype_raises_type_error_for_invalid_dtype(self):
+        with self.assertRaises(TypeError):
+            class TestClass(object):
+                __metaclass__ = Serialisable
+                dtype = 1
+
+    def test_arguments_are_set_correctly_as_attributes(self):
+        class TestClass(object):
+            __metaclass__ = Serialisable
+            dtype = [('a', '<i4'), ('b', '>i8')]
+
+        t = TestClass(1, 2)
+        self.assertEqual(1, t.a)
+        self.assertEqual(2, t.b)
+
+    def test_keyword_arguments_are_set_correctly_as_attributes(self):
+        class TestClass(object):
+            __metaclass__ = Serialisable
+            dtype = [('a', '<i4'), ('b', '>i8')]
+
+        t = TestClass(b=1, a=2)
+        self.assertEqual(2, t.a)
+        self.assertEqual(1, t.b)
+
+    def test_mixed_arguments_are_set_correctly_as_attributes(self):
+        class TestClass(object):
+            __metaclass__ = Serialisable
+            dtype = [('a', '<i4'), ('b', '>i8'), ('c', '<i4'), ('d', '<i4')]
+
+        t = TestClass(1, 2, d=3, c=4)
+        self.assertEqual(1, t.a)
+        self.assertEqual(2, t.b)
+        self.assertEqual(4, t.c)
+        self.assertEqual(3, t.d)
+
+    def test_setting_undefined_attribute(self):
+        # TODO: discuss what should happen, currently it passes silently
+
+        class TestClass(object):
+            __metaclass__ = Serialisable
+            dtype = [('a', '<i4')]
+
+        t = TestClass(b=3)
+        self.assertEqual(3, t.b)
 
 
 class TestPosition(TestCase):

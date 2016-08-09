@@ -27,7 +27,8 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
-__all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries', 'Hit')
+__all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries', 'Hit',
+           'Track', 'TrackSeries', 'Serialisable')
 
 
 IS_CC = {
@@ -37,7 +38,44 @@ IS_CC = {
 }
 
 
+class Serialisable(type):
+    """A metaclass for seriasiable classes.
+
+    The classes should define a `dtype` attribute in their body and are not
+    meant to define `__init__` (it will be overwritten).
+
+    Example
+    -------
+
+        class Foo(object):
+            __metaclass__ = Serialisable
+            dtype = [('a', '<i4'), ('b', '>i8')]
+
+    """
+    def __new__(metaclass, class_name, class_parents, class_attr):
+        attr = {}
+        for name, val in class_attr.items():
+            if name == 'dtype':
+                attr['dtype'] = np.dtype(val)
+            else:
+                attr[name] = val
+
+        def __init__(self, *args, **kwargs):
+            """Take care of the attribute settings."""
+            for arg, name in zip(args, self.dtype.names):
+                setattr(self, name, arg)
+            for key, value in kwargs.iteritems():
+                setattr(self, key, value)
+
+        attr['__init__'] = __init__
+
+        return type(class_name, class_parents, attr)
+
+
+
+
 class EventInfo(object):
+    __metaclass__ = Serialisable
     dtype = np.dtype([
         ('det_id', '<i4'), ('event_id', '<u4'), ('frame_index', '<u4'),
         ('mc_id', '<i4'), ('mc_t', '<f8'), ('overlays', 'u1'),
@@ -45,36 +83,6 @@ class EventInfo(object):
         ('utc_nanoseconds', '<u8'), ('utc_seconds', '<u8'),
         ('weight_w1', '<f8'), ('weight_w2', '<f8'), ('weight_w3', '<f8')
         ])
-    def __init__(self,
-                 det_id,
-                 event_id,
-                 frame_index,
-                 mc_id,
-                 mc_t,
-                 overlays,
-                 run_id,
-                 trigger_counter,
-                 trigger_mask,
-                 utc_nanoseconds,
-                 utc_seconds,
-                 weight_w1,
-                 weight_w2,
-                 weight_w3,
-                ):
-        self.det_id = det_id
-        self.event_id = event_id
-        self.frame_index = frame_index
-        self.mc_id = mc_id
-        self.mc_t = mc_t
-        self.overlays = overlays
-        self.run_id = run_id
-        self.trigger_counter = trigger_counter
-        self.trigger_mask = trigger_mask
-        self.utc_nanoseconds = utc_nanoseconds
-        self.utc_seconds = utc_seconds
-        self.weight_w1 = weight_w1
-        self.weight_w2 = weight_w2
-        self.weight_w3 = weight_w3
 
     @classmethod
     def from_table(cls, row):
