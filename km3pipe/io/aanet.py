@@ -73,7 +73,7 @@ class AanetPump(Pump):
         import aa  # noqa
         from ROOT import EventFile
 
-        foe filename in self.filenames:
+        for filename in self.filenames:
             print("Reading from file: {0}".format(filename))
             if not os.path.exists(filename):
                 log.warn(filename + " not available: continue without it")
@@ -265,7 +265,7 @@ def parse_thomasfeatures(aanet_usr):
                    'BigInertia',
                    'GoldParameter']
 
-    dtype = [(key, float) for key in recolns_keys + list(out.keys())]
+    dtype = [(key, float) for key in Thomas_keys + list(out.keys())]
 
     out['did_converge'] = did_converge
     dtype.append(('did_converge', bool))
@@ -323,11 +323,11 @@ def parse_aashowerfit(aanet_trk):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
     out['did_converge'] = did_converge
-    dtype.append(('did_converge', bool))
 
     aashow_keys = ['NhitsAA', 'M_estimator', 'beta',
                           'NhitsL0', 'NhitsL1']
     dtype = [(key, float) for key in aashow_keys + list(out.keys())]
+    dtype.append(('did_converge', bool))
 
     if not did_converge:
         for key in aashow_keys:
@@ -342,6 +342,7 @@ def parse_qstrategy(aanet_trk):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
     out['did_converge'] = did_converge
+
     qstrat_keys = sorted(['MFinal', 'Charge', 'MPreFit',
                    'RPreFit', 'Inertia', 'NhitsL0', 'NhitsL1'])
     dtype = [(key, float) for key in qstrat_keys + list(out.keys())]
