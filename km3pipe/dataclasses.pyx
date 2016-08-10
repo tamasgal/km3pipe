@@ -11,6 +11,7 @@ from __future__ import division, absolute_import, print_function
 
 import ctypes
 from libcpp cimport bool as c_bool  # noqa
+from six import with_metaclass
 
 import numpy as np
 cimport numpy as np
@@ -74,8 +75,7 @@ class Serialisable(type):
 
 
 
-class EventInfo(object):
-    __metaclass__ = Serialisable
+class EventInfo(with_metaclass(Serialisable)):
     dtype = [
         ('det_id', '<i4'), ('event_id', '<u4'), ('frame_index', '<u4'),
         ('mc_id', '<i4'), ('mc_t', '<f8'), ('overlays', 'u1'),

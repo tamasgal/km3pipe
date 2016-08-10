@@ -7,6 +7,8 @@
 """
 from __future__ import division, absolute_import, print_function
 
+from six import with_metaclass
+
 import numpy as np
 
 from km3pipe.testing import TestCase, FakeAanetHit
@@ -26,21 +28,18 @@ __status__ = "Development"
 class TestSerialisableABC(TestCase):
 
     def test_dtype_can_be_set(self):
-        class TestClass(object):
-            __metaclass__ = Serialisable
+        class TestClass(with_metaclass(Serialisable)):
             dtype = [('a', '<i4'), ('b', '>i8')]
 
         self.assertTupleEqual(('a', 'b'), TestClass.dtype.names)
 
     def test_dtype_raises_type_error_for_invalid_dtype(self):
         with self.assertRaises(TypeError):
-            class TestClass(object):
-                __metaclass__ = Serialisable
+            class TestClass(with_metaclass(Serialisable)):
                 dtype = 1
 
     def test_arguments_are_set_correctly_as_attributes(self):
-        class TestClass(object):
-            __metaclass__ = Serialisable
+        class TestClass(with_metaclass(Serialisable)):
             dtype = [('a', '<i4'), ('b', '>i8')]
 
         t = TestClass(1, 2)
@@ -48,8 +47,7 @@ class TestSerialisableABC(TestCase):
         self.assertEqual(2, t.b)
 
     def test_keyword_arguments_are_set_correctly_as_attributes(self):
-        class TestClass(object):
-            __metaclass__ = Serialisable
+        class TestClass(with_metaclass(Serialisable)):
             dtype = [('a', '<i4'), ('b', '>i8')]
 
         t = TestClass(b=1, a=2)
@@ -57,8 +55,7 @@ class TestSerialisableABC(TestCase):
         self.assertEqual(1, t.b)
 
     def test_mixed_arguments_are_set_correctly_as_attributes(self):
-        class TestClass(object):
-            __metaclass__ = Serialisable
+        class TestClass(with_metaclass(Serialisable)):
             dtype = [('a', '<i4'), ('b', '>i8'), ('c', '<i4'), ('d', '<i4')]
 
         t = TestClass(1, 2, d=3, c=4)
@@ -70,8 +67,7 @@ class TestSerialisableABC(TestCase):
     def test_setting_undefined_attribute(self):
         # TODO: discuss what should happen, currently it passes silently
 
-        class TestClass(object):
-            __metaclass__ = Serialisable
+        class TestClass(with_metaclass(Serialisable)):
             dtype = [('a', '<i4')]
 
         t = TestClass(b=3)
