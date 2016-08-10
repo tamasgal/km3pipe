@@ -751,16 +751,22 @@ class TrackSeries(object):
         return '\n'.join([str(track) for track in self._tracks])
 
 
-class Reco(object):
-    def __init__(self, map, dtype, event_id=None, loc='/reco'):
-        if event_id is not None:
+class Reco(dict):
+    """"A dictionary with a dtype."""
+    def __init__(self, map, dtype, loc='/reco'):
+        self.dtype = dtype
+        self.loc = loc
+        self.update(map)
+
+    @classmethod
+    def from_dict(cls, map, dtype, event_id):
+        if 'event_id' not in dtype.names:
             dt = dtype.descr
             dt.append(('event_id', int))
             dtype = np.dtype(dt)
-            map['event_id'] = event_id
-        self.dtype = dtype
-        self.map = map
+        map['event_id'] = event_id
+        return cls(map, dtype)
 
     def serialise(self, to='table'):
         if to == 'table':
-            return [[self.map[key] for key in self.dtype.names], ]
+            return [[self[key] for key in self.dtype.names], ]
