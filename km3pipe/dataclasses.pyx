@@ -40,7 +40,7 @@ IS_CC = {
 
 
 class Serialisable(type):
-    """A metaclass for seriasiable classes.
+    """A metaclass for serialisable classes.
 
     The classes should define a `dtype` attribute in their body and are not
     meant to define `__init__` (it will be overwritten).
