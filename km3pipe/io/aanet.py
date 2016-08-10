@@ -192,10 +192,11 @@ def read_mini_dst(aanet_event, event_id):
         reader = recname_to_reader[recname]
 
         reco_map, dtype = reader(trk)
-        minidst[recname] = Reco(reco_map, dtype, event_id=event_id)
+        minidst[recname] = Reco.from_dict(reco_map, dtype, event_id=event_id)
 
     thomas_map, dtype = parse_thomasfeatures(aanet_event.usr)
-    minidst['ThomasFeatures'] = Reco(thomas_map, dtype, event_id=event_id)
+    minidst['ThomasFeatures'] = Reco.from_dict(thomas_map, dtype,
+                                               event_id=event_id)
 
     return minidst
 

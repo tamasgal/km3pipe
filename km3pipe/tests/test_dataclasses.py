@@ -14,7 +14,7 @@ import numpy as np
 from km3pipe.testing import TestCase, FakeAanetHit
 from km3pipe.io.evt import EvtRawHit
 from km3pipe.dataclasses import (Hit, Track, Position, Direction_, HitSeries,
-                                 EventInfo, Serialisable)
+                                 EventInfo, Serialisable, Reco)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -376,3 +376,30 @@ class TestEventInfo(TestCase):
         self.assertTrue(np.isnan(e.weight_w1))
         self.assertTrue(np.isnan(e.weight_w2))
         self.assertTrue(np.isnan(e.weight_w3))
+
+
+class TestReco(TestCase):
+    def test_reco_event_id_is_appended_to_dtype_if_missing(self):
+        dt = np.dtype([('x', int), ('y', float)])
+        dat = {'x': 4, 'y': 2.0}
+        dt_out = np.dtype([('x', int), ('y', float), ('event_id', int)])
+        r = Reco.from_dict(dat, dtype=dt, event_id=5)
+        self.assertTrue(r.dtype == dt_out)
+        r_manual = Reco.from_dict(dat, dtype=dt_out, event_id=5)
+        self.assertTrue(r_manual.dtype == dt_out)
+
+    def test_reco(self):
+        dt = np.dtype([('x', int), ('y', float), ('did_converge', bool)])
+        dat = {'x': 4, 'y': 2.0, 'did_converge': True}
+        rec = Reco.from_dict(dat, dtype=dt, event_id=42)
+        self.assertTrue(rec['did_converge'])
+        self.assertAlmostEqual(rec['x'], 4)
+
+    def test_reco_serialise(self):
+        dt = np.dtype([('x', int), ('y', float), ('did_converge', bool)])
+        dat = {'x': 4, 'y': 2.0, 'did_converge': True}
+        rec = Reco.from_dict(dat, dtype=dt, event_id=42).serialise()
+        self.assertAlmostEqual(rec[0][-1], 42)
+        self.assertAlmostEqual(rec[0][0], 4)
+        self.assertAlmostEqual(rec[0][1], 2.0)
+        self.assertTrue(rec[0][2])
