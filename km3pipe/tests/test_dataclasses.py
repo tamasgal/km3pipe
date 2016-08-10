@@ -7,11 +7,14 @@
 """
 from __future__ import division, absolute_import, print_function
 
+from six import with_metaclass
+
 import numpy as np
 
 from km3pipe.testing import TestCase, FakeAanetHit
 from km3pipe.io.evt import EvtRawHit
-from km3pipe.dataclasses import Hit, Track, Position, Direction_, HitSeries
+from km3pipe.dataclasses import (Hit, Track, Position, Direction_, HitSeries,
+                                 EventInfo, Serialisable)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -20,6 +23,55 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
+
+
+class TestSerialisableABC(TestCase):
+
+    def test_dtype_can_be_set(self):
+        class TestClass(with_metaclass(Serialisable)):
+            dtype = [('a', '<i4'), ('b', '>i8')]
+
+        self.assertTupleEqual(('a', 'b'), TestClass.dtype.names)
+
+    def test_dtype_raises_type_error_for_invalid_dtype(self):
+        with self.assertRaises(TypeError):
+            class TestClass(with_metaclass(Serialisable)):
+                dtype = 1
+
+    def test_arguments_are_set_correctly_as_attributes(self):
+        class TestClass(with_metaclass(Serialisable)):
+            dtype = [('a', '<i4'), ('b', '>i8')]
+
+        t = TestClass(1, 2)
+        self.assertEqual(1, t.a)
+        self.assertEqual(2, t.b)
+
+    def test_keyword_arguments_are_set_correctly_as_attributes(self):
+        class TestClass(with_metaclass(Serialisable)):
+            dtype = [('a', '<i4'), ('b', '>i8')]
+
+        t = TestClass(b=1, a=2)
+        self.assertEqual(2, t.a)
+        self.assertEqual(1, t.b)
+
+    def test_mixed_arguments_are_set_correctly_as_attributes(self):
+        class TestClass(with_metaclass(Serialisable)):
+            dtype = [('a', '<i4'), ('b', '>i8'), ('c', '<i4'), ('d', '<i4')]
+
+        t = TestClass(1, 2, d=3, c=4)
+        self.assertEqual(1, t.a)
+        self.assertEqual(2, t.b)
+        self.assertEqual(4, t.c)
+        self.assertEqual(3, t.d)
+
+    def test_setting_undefined_attribute(self):
+        # TODO: discuss what should happen, currently it passes silently
+
+        class TestClass(with_metaclass(Serialisable)):
+            dtype = [('a', '<i4')]
+
+        t = TestClass(b=3)
+        self.assertEqual(3, t.b)
 
 
 class TestPosition(TestCase):
@@ -212,7 +264,7 @@ class TestTrack(TestCase):
 
     def setUp(self):
         self.track = Track(0, np.array((1, 2, 3)), 4, 5, 6, True, 8,
-                      np.array((9, 10, 11)), 12, 13)
+                           np.array((9, 10, 11)), 12, 13)
 
     def test_attributes(self):
         track = self.track
@@ -254,3 +306,73 @@ class TestTrack(TestCase):
         self.assertAlmostEqual(100, track.pos[0])
         self.assertAlmostEqual(101, track.pos[1])
         self.assertAlmostEqual(102, track.pos[2])
+
+
+class TestEventInfo(TestCase):
+    def test_event_info(self):
+        e = EventInfo(*range(14))
+        self.assertAlmostEqual(0, e.det_id)
+        self.assertAlmostEqual(1, e.event_id)
+        self.assertAlmostEqual(2, e.frame_index)
+        self.assertAlmostEqual(3, e.mc_id)
+        self.assertAlmostEqual(4, e.mc_t)
+        self.assertAlmostEqual(5, e.overlays)
+        self.assertAlmostEqual(6, e.run_id)
+        self.assertAlmostEqual(7, e.trigger_counter)
+        self.assertAlmostEqual(8, e.trigger_mask)
+        self.assertAlmostEqual(9, e.utc_nanoseconds)
+        self.assertAlmostEqual(10, e.utc_seconds)
+        self.assertAlmostEqual(11, e.weight_w1)
+        self.assertAlmostEqual(12, e.weight_w2)
+        self.assertAlmostEqual(13, e.weight_w3)
+
+    def test_from_table(self):
+        e = EventInfo.from_table({
+            'det_id': 0,
+            'event_id': 1,
+            'frame_index': 2,
+            'mc_id': 3,
+            'mc_t': 4,
+            'overlays': 5,
+            'run_id': 6,
+            'trigger_counter': 7,
+            'trigger_mask': 8,
+            'utc_nanoseconds': 9,
+            'utc_seconds': 10,
+            'weight_w1': 11,
+            'weight_w2': 12,
+            'weight_w3': 13,
+            })
+
+        self.assertAlmostEqual(0, e.det_id)
+        self.assertAlmostEqual(1, e.event_id)
+        self.assertAlmostEqual(2, e.frame_index)
+        self.assertAlmostEqual(3, e.mc_id)
+        self.assertAlmostEqual(4, e.mc_t)
+        self.assertAlmostEqual(5, e.overlays)
+        self.assertAlmostEqual(6, e.run_id)
+        self.assertAlmostEqual(7, e.trigger_counter)
+        self.assertAlmostEqual(8, e.trigger_mask)
+        self.assertAlmostEqual(9, e.utc_nanoseconds)
+        self.assertAlmostEqual(10, e.utc_seconds)
+        self.assertAlmostEqual(11, e.weight_w1)
+        self.assertAlmostEqual(12, e.weight_w2)
+        self.assertAlmostEqual(13, e.weight_w3)
+
+    def test_from_table_puts_nan_for_missing_data(self):
+        e = EventInfo.from_table({})
+
+        self.assertTrue(np.isnan(e.det_id))
+        self.assertTrue(np.isnan(e.event_id))
+        self.assertTrue(np.isnan(e.frame_index))
+        self.assertTrue(np.isnan(e.mc_id))
+        self.assertTrue(np.isnan(e.mc_t))
+        self.assertTrue(np.isnan(e.overlays))
+        self.assertTrue(np.isnan(e.run_id))
+        self.assertTrue(np.isnan(e.trigger_counter))
+        self.assertTrue(np.isnan(e.trigger_mask))
+        self.assertTrue(np.isnan(e.utc_nanoseconds))
+        self.assertTrue(np.isnan(e.utc_seconds))
+        self.assertTrue(np.isnan(e.weight_w1))
+        self.assertTrue(np.isnan(e.weight_w2))
+        self.assertTrue(np.isnan(e.weight_w3))
