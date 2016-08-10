@@ -76,18 +76,18 @@ class Serialisable(type):
 
 class EventInfo(object):
     __metaclass__ = Serialisable
-    dtype = np.dtype([
+    dtype = [
         ('det_id', '<i4'), ('event_id', '<u4'), ('frame_index', '<u4'),
         ('mc_id', '<i4'), ('mc_t', '<f8'), ('overlays', 'u1'),
         ('run_id', '<u4'), ('trigger_counter', '<u8'), ('trigger_mask', '<u8'),
         ('utc_nanoseconds', '<u8'), ('utc_seconds', '<u8'),
         ('weight_w1', '<f8'), ('weight_w2', '<f8'), ('weight_w3', '<f8')
-        ])
+        ]
 
     @classmethod
     def from_table(cls, row):
         args = []
-        for col in sorted(cls.dtype.names):
+        for col in cls.dtype.names:
             try:
                 args.append(row[col])
             except KeyError:
