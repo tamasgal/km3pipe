@@ -73,8 +73,6 @@ class Serialisable(type):
         return type(class_name, class_parents, attr)
 
 
-
-
 class EventInfo(with_metaclass(Serialisable)):
     dtype = [
         ('det_id', '<i4'), ('event_id', '<u4'), ('frame_index', '<u4'),
