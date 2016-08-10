@@ -15,7 +15,7 @@ import tables
 
 import km3pipe
 from km3pipe import Pump, Module
-from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo, RecoSeries
+from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo, Reco
 from km3pipe.logger import logging
 from km3pipe.tools import camelise, decamelise
 
@@ -41,10 +41,9 @@ class HDF5Sink(Module):
                                       fletcher32=True)
         self._tables = {}
 
-    def _write_table(self, where, data, title='', dtype=None):
+    def _write_table(self, where, data, title=''):
         if where not in self._tables:
-            if dtype is None:
-                dtype = data.dtype
+            dtype = data.dtype
             loc, tabname = os.path.split(where)
             self._tables[where] = self.h5file.create_table(
                 loc, tabname, description=dtype, title=title,
@@ -52,7 +51,7 @@ class HDF5Sink(Module):
 
         tab = self._tables[where]
         try:
-            data = data.serialize()
+            data = data.serialise()
         except AttributeError:
             pass
         tab.append(data)
@@ -60,14 +59,13 @@ class HDF5Sink(Module):
     def process(self, blob):
         for key, entry in blob.items():
 
-            if hasattr(entry, 'dtype'):
-                loc = '/' + decamelise(key)
-                self._write_table(loc, entry, title=key)
-
-            elif isinstance(entry, RecoSeries):
-                for subkey, subentry in entry.items():
-                    loc = entry.loc + '/' + decamelise(subkey)
-                    self._write_table(loc, subentry, title=subkey)
+            if hasattr(entry, 'dtype') or hasattr(entry, 'serialise'):
+                try:
+                    loc = entry.loc
+                except AttributeError:
+                    loc = '/'
+                where = loc + decamelise(key)
+                self._write_table(where, entry, title=key)
 
         if not self.index % 1000:
             for tab in self._tables.values():

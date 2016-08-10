@@ -10,8 +10,7 @@ import os.path
 import numpy as np
 
 from km3pipe import Pump
-from km3pipe.dataclasses import (HitSeries, TrackSeries, EventInfo, Reco,
-                                RecoSeries)
+from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo, Reco
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -102,7 +101,6 @@ class AanetPump(Pump):
                 blob = {'Evt': event,
                         'Hits': HitSeries.from_aanet(event.hits, event.id),
                         'MCHits': HitSeries.from_aanet(event.mc_hits, event.id),
-                        'Reco': read_mini_dst(event, event.id),
                         'MCTracks': TrackSeries.from_aanet(event.mc_trks,
                                                            event.id),
                         'filename': filename,
@@ -124,6 +122,9 @@ class AanetPump(Pump):
                             w3,
                         ),
                        }
+                recos = read_mini_dst(event, event.id)
+                for recname, reco in recos.items():
+                    blob[recname] = reco
                 yield blob
             del event_file
 
@@ -183,7 +184,9 @@ def read_mini_dst(aanet_event, event_id):
         'QStrategy': parse_qstrategy,
         'Dusj': parse_dusj,
     }
-    minidst = RecoSeries()
+    minidst = {}
+    if len(aanet_event.trks) == 0:
+        return minidst
     for k, trk in enumerate(aanet_event.trks):
         recname = pos_to_recname[k]
         reader = recname_to_reader[recname]
