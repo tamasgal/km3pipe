@@ -264,7 +264,7 @@ class TestTrack(TestCase):
 
     def setUp(self):
         self.track = Track(0, np.array((1, 2, 3)), 4, 5, 6, True, 8,
-                      np.array((9, 10, 11)), 12, 13)
+                           np.array((9, 10, 11)), 12, 13)
 
     def test_attributes(self):
         track = self.track
@@ -327,7 +327,7 @@ class TestEventInfo(TestCase):
         self.assertAlmostEqual(13, e.weight_w3)
 
     def test_from_table(self):
-        e =  EventInfo.from_table({
+        e = EventInfo.from_table({
             'det_id': 0,
             'event_id': 1,
             'frame_index': 2,
@@ -360,7 +360,7 @@ class TestEventInfo(TestCase):
         self.assertAlmostEqual(13, e.weight_w3)
 
     def test_from_table_puts_nan_for_missing_data(self):
-        e =  EventInfo.from_table({ })
+        e = EventInfo.from_table({})
 
         self.assertTrue(np.isnan(e.det_id))
         self.assertTrue(np.isnan(e.event_id))
