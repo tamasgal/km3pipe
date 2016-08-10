@@ -317,14 +317,14 @@ class TestEventInfo(TestCase):
         self.assertAlmostEqual(3, e.mc_id)
         self.assertAlmostEqual(4, e.mc_t)
         self.assertAlmostEqual(5, e.overlays)
-        self.assertAlmostEqual(6, e.run_id)
-        self.assertAlmostEqual(7, e.trigger_counter)
-        self.assertAlmostEqual(8, e.trigger_mask)
-        self.assertAlmostEqual(9, e.utc_nanoseconds)
-        self.assertAlmostEqual(10, e.utc_seconds)
-        self.assertAlmostEqual(11, e.weight_w1)
-        self.assertAlmostEqual(12, e.weight_w2)
-        self.assertAlmostEqual(13, e.weight_w3)
+        #self.assertAlmostEqual(6, e.run_id)
+        self.assertAlmostEqual(6, e.trigger_counter)
+        self.assertAlmostEqual(7, e.trigger_mask)
+        self.assertAlmostEqual(8, e.utc_nanoseconds)
+        self.assertAlmostEqual(9, e.utc_seconds)
+        self.assertAlmostEqual(10, e.weight_w1)
+        self.assertAlmostEqual(11, e.weight_w2)
+        self.assertAlmostEqual(12, e.weight_w3)
 
     def test_from_table(self):
         e = EventInfo.from_table({
@@ -334,14 +334,14 @@ class TestEventInfo(TestCase):
             'mc_id': 3,
             'mc_t': 4,
             'overlays': 5,
-            'run_id': 6,
-            'trigger_counter': 7,
-            'trigger_mask': 8,
-            'utc_nanoseconds': 9,
-            'utc_seconds': 10,
-            'weight_w1': 11,
-            'weight_w2': 12,
-            'weight_w3': 13,
+            #'run_id': 6,
+            'trigger_counter': 6,
+            'trigger_mask': 7,
+            'utc_nanoseconds': 8,
+            'utc_seconds': 9,
+            'weight_w1': 10,
+            'weight_w2': 11,
+            'weight_w3': 12,
             })
 
         self.assertAlmostEqual(0, e.det_id)
@@ -350,14 +350,14 @@ class TestEventInfo(TestCase):
         self.assertAlmostEqual(3, e.mc_id)
         self.assertAlmostEqual(4, e.mc_t)
         self.assertAlmostEqual(5, e.overlays)
-        self.assertAlmostEqual(6, e.run_id)
-        self.assertAlmostEqual(7, e.trigger_counter)
-        self.assertAlmostEqual(8, e.trigger_mask)
-        self.assertAlmostEqual(9, e.utc_nanoseconds)
-        self.assertAlmostEqual(10, e.utc_seconds)
-        self.assertAlmostEqual(11, e.weight_w1)
-        self.assertAlmostEqual(12, e.weight_w2)
-        self.assertAlmostEqual(13, e.weight_w3)
+        #self.assertAlmostEqual(6, e.run_id)
+        self.assertAlmostEqual(6, e.trigger_counter)
+        self.assertAlmostEqual(7, e.trigger_mask)
+        self.assertAlmostEqual(8, e.utc_nanoseconds)
+        self.assertAlmostEqual(9, e.utc_seconds)
+        self.assertAlmostEqual(10, e.weight_w1)
+        self.assertAlmostEqual(11, e.weight_w2)
+        self.assertAlmostEqual(12, e.weight_w3)
 
     def test_from_table_puts_nan_for_missing_data(self):
         e = EventInfo.from_table({})
@@ -368,7 +368,7 @@ class TestEventInfo(TestCase):
         self.assertTrue(np.isnan(e.mc_id))
         self.assertTrue(np.isnan(e.mc_t))
         self.assertTrue(np.isnan(e.overlays))
-        self.assertTrue(np.isnan(e.run_id))
+        #self.assertTrue(np.isnan(e.run_id))
         self.assertTrue(np.isnan(e.trigger_counter))
         self.assertTrue(np.isnan(e.trigger_mask))
         self.assertTrue(np.isnan(e.utc_nanoseconds))
