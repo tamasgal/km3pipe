@@ -45,11 +45,10 @@ class Serialisable(type):
     The classes should define a `dtype` attribute in their body and are not
     meant to define `__init__` (it will be overwritten).
 
-    Example
-    -------
+    Example using six.with_metaclass for py2/py3 compat
+    ---------------------------------------------------
 
-        class Foo(object):
-            __metaclass__ = Serialisable
+        class Foo(with_metaclass(Serialisable)):
             dtype = [('a', '<i4'), ('b', '>i8')]
 
     """
