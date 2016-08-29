@@ -24,18 +24,79 @@ class TestPipeline(TestCase):
     def test_attach(self):
         self.pl.attach(Module, 'module1')
         self.pl.attach(Module, 'module2')
+        print([m.name for m in self.pl.modules])
         self.assertEqual('module1', self.pl.modules[0].name)
         self.assertEqual('module2', self.pl.modules[1].name)
 
+    def test_attach_function(self):
+        self.pl.attach(lambda x: 1)
+        self.pl.attach(lambda x: 2, "Another Lambda")
+        self.assertEqual('<lambda>', self.pl.modules[0].name)
+        self.assertEqual('Another Lambda', self.pl.modules[1].name)
+
+    def test_drain_calls_each_attached_module(self):
+        pl = Pipeline(blob=1)
+
+        # TODO: there is no working check for func_module yet!
+        # func_module = MagicMock(return_value={})
+        # func_module.__name__ = "MagicMock"
+        func_module_called = True
+        def func_module(blob):
+            global func_module_called
+            func_module_called = True
+            return blob
+
+        pl.attach(Module, 'module1')
+        pl.attach(func_module, 'module2')
+        pl.attach(Module, 'module3')
+
+        for module in pl.modules:
+            print(module)
+            if isinstance(module, Module):
+                print("normal module, mocking")
+                module.process = MagicMock(return_value={})
+
+        pl.drain(1)
+
+        for module in pl.modules:
+            try:
+                # Regular modules
+                module.process.assert_called_once()
+            except AttributeError:
+                # Function module
+                print(func_module_called)
+                self.assertTrue(func_module_called)
+                # func_module.assert_called_once()
+
     def test_drain_calls_process_method_on_each_attached_module(self):
         pl = Pipeline(blob=1)
+
         pl.attach(Module, 'module1')
         pl.attach(Module, 'module2')
+        pl.attach(Module, 'module3')
         for module in pl.modules:
             module.process = MagicMock(return_value={})
         pl.drain(1)
         for module in pl.modules:
             module.process.assert_called_once()
+
+    def test_drain_calls_function_modules(self):
+        pl = Pipeline(blob=1)
+
+        func_module1 = MagicMock()
+        func_module2 = MagicMock()
+        func_module3 = MagicMock()
+
+        func_module1.__name__ = "MagicMock"
+        func_module2.__name__ = "MagicMock"
+        func_module3.__name__ = "MagicMock"
+
+        pl.attach(func_module1, 'module1')
+        pl.attach(func_module2, 'module2')
+        pl.attach(func_module3, 'module3')
+        pl.drain(1)
+        for module in pl.modules:
+            module.assert_called_once()
 
     def test_finish(self):
         self.pl.finish()
@@ -43,11 +104,13 @@ class TestPipeline(TestCase):
     def test_drain_calls_finish_on_each_attached_module(self):
         self.pl.attach(Module, 'module1')
         self.pl.attach(Module, 'module2')
+        self.pl.attach(lambda x: 1, 'func_module')
         for module in self.pl.modules:
             module.finish = MagicMock()
         self.pl.drain(4)
         for module in self.pl.modules:
-            module.finish.assert_called_once_with()
+            if module.name != 'func_module':
+                module.finish.assert_called_once_with()
 
 
 class TestModule(TestCase):

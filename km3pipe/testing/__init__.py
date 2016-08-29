@@ -26,3 +26,14 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
+
+
+class FakeAanetHit(object):
+    def __init__(self, channel_id, dom_id, id, pmt_id, t, tot, trig):
+        self.channel_id = chr(channel_id)
+        self.dom_id = dom_id
+        self.id = id
+        self.pmt_id = pmt_id
+        self.t = t
+        self.tot = tot
+        self.trig = trig

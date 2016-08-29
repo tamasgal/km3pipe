@@ -9,10 +9,13 @@ The core of the KM3Pipe framework.
 """
 from __future__ import division, absolute_import, print_function
 
+from collections import deque, defaultdict
+from functools import partial
 import signal
 import gzip
 import time
 from timeit import default_timer as timer
+import types
 
 import numpy as np
 import pandas as pd
@@ -32,6 +35,8 @@ __status__ = "Development"
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
+STAT_LIMIT = 100000
+
 
 class Pipeline(object):
     """The holy pipeline which holds everything together.
@@ -47,17 +52,35 @@ class Pipeline(object):
         self.blob = blob or Blob()
         self.timeit = timeit
         self._timeit = {'init': timer(), 'init_cpu': time.clock(),
-                        'cycles': [], 'cycles_cpu': []}
+                        'cycles': deque(maxlen=STAT_LIMIT),
+                        'cycles_cpu': deque(maxlen=STAT_LIMIT)}
         self._cycle_count = 0
         self._stop = False
         self._finished = False
 
-    def attach(self, module_class, name=None, **kwargs):
+    def attach(self, module_factory, name=None, **kwargs):
         """Attach a module to the pipeline system"""
-        if not name:
-            name = module_class.__name__
-        module = module_class(name=name, **kwargs)
+
+        if name is None:
+            name = module_factory.__name__
+
         log.info("Attaching module '{0}'".format(name))
+
+        if isinstance(module_factory, types.FunctionType) \
+                and module_factory.__name__ != 'GenericPump':
+            log.debug("Attaching as function module")
+            module = module_factory
+            module.name = name
+            module.timeit = self.timeit
+        else:
+            log.debug("Attaching as regular module")
+            module = module_factory(name=name, **kwargs)
+
+        self._timeit[module] = {'process': deque(maxlen=STAT_LIMIT),
+                                'process_cpu': deque(maxlen=STAT_LIMIT),
+                                'finish': 0,
+                                'finish_cpu': 0}
+
         try:
             module.get_detector()
             self.geometry = module
@@ -84,6 +107,7 @@ class Pipeline(object):
         number of cycles has reached that limit.
 
         """
+        log.info("Now draining...")
         if not cycles:
             log.info("No cycle count, the pipeline may be drained forever.")
 
@@ -109,11 +133,11 @@ class Pipeline(object):
                     log.debug("Processing {0} ".format(module.name))
                     start = timer()
                     start_cpu = time.clock()
-                    self.blob = module.process(self.blob)
+                    self.blob = module(self.blob)
                     if self.timeit or module.timeit:
-                        module._timeit['process'] \
+                        self._timeit[module]['process'] \
                             .append(timer() - start)
-                        module._timeit['process_cpu'] \
+                        self._timeit[module]['process_cpu'] \
                             .append(time.clock() - start_cpu)
                 self._timeit['cycles'].append(timer() - cycle_start)
                 self._timeit['cycles_cpu'].append(time.clock() -
@@ -126,7 +150,7 @@ class Pipeline(object):
 
     def drain(self, cycles=None):
         """Execute _drain while trapping KeyboardInterrupt"""
-        log.info("Now draining...")
+        log.info("Trapping CTRL+C and starting to drain.")
         signal.signal(signal.SIGINT, self._handle_ctrl_c)
         with ignored(KeyboardInterrupt):
             self._drain(cycles)
@@ -134,12 +158,16 @@ class Pipeline(object):
     def finish(self):
         """Call finish() on each attached module"""
         for module in self.modules:
-            log.info("Finishing {0}".format(module.name))
-            start_time = timer()
-            start_time_cpu = time.clock()
-            module.pre_finish()
-            module._timeit['finish'] = timer() - start_time
-            module._timeit['finish_cpu'] = time.clock() - start_time_cpu
+            try:
+                log.info("Finishing {0}".format(module.name))
+                start_time = timer()
+                start_time_cpu = time.clock()
+                module.pre_finish()
+                self._timeit[module]['finish'] = timer() - start_time
+                self._timeit[module]['finish_cpu'] = \
+                        time.clock() - start_time_cpu
+            except AttributeError:
+                log.info("Skipping function module {0}".format(module.name))
         self._timeit['finish'] = timer()
         self._timeit['finish_cpu'] = time.clock()
         self._print_timeit_statistics()
@@ -157,6 +185,9 @@ class Pipeline(object):
             self._stop = True
 
     def _print_timeit_statistics(self):
+
+        if self._cycle_count < 1:
+            return
 
         def calc_stats(values):
             """Return a tuple of statistical values"""
@@ -179,8 +210,7 @@ class Pipeline(object):
 
         cycles = self._timeit['cycles']
         n_cycles = len(cycles)
-        if n_cycles < 1:
-            return
+
         cycles_cpu = self._timeit['cycles_cpu']
         overall = self._timeit['finish'] - self._timeit['init']
         overall_cpu = self._timeit['finish_cpu'] - self._timeit['init_cpu']
@@ -188,17 +218,21 @@ class Pipeline(object):
 
         print(80*'=')
         print("{0} cycles drained in {1} (CPU {2}). Memory peak: {3:.2f} MB"
-              .format(n_cycles, timef(overall), timef(overall_cpu), memory))
+              .format(self._cycle_count,
+                      timef(overall), timef(overall_cpu), memory))
+        if self._cycle_count > n_cycles:
+            print("Statistics are based on the last {0} cycles."
+                  .format(n_cycles))
         print(statsf('wall', calc_stats(cycles)))
         print(statsf('CPU ', calc_stats(cycles_cpu)))
 
         for module in self.modules:
             if not module.timeit and not self.timeit:
                 continue
-            finish_time = module._timeit['finish']
-            finish_time_cpu = module._timeit['finish_cpu']
-            process_times = module._timeit['process']
-            process_times_cpu = module._timeit['process_cpu']
+            finish_time = self._timeit[module]['finish']
+            finish_time_cpu = self._timeit[module]['finish_cpu']
+            process_times = self._timeit[module]['process']
+            process_times_cpu = self._timeit[module]['process_cpu']
             print(module.name +
                   " - process: {0:.3f}s (CPU {1:.3f}s)"
                   " - finish: {2:.3f}s (CPU {3:.3f}s)"
@@ -219,8 +253,10 @@ class Module(object):
         self.parameters = parameters
         self.detector = None
         self.timeit = self.get('timeit') or False
-        self._timeit = {'process': [], 'finish': 0,
-                        'process_cpu': [], 'finish_cpu': 0}
+        self._timeit = {'process': deque(maxlen=STAT_LIMIT),
+                        'process_cpu': deque(maxlen=STAT_LIMIT),
+                        'finish': 0,
+                        'finish_cpu': 0}
 
     @property
     def name(self):
@@ -246,6 +282,11 @@ class Module(object):
     def pre_finish(self):
         """Do the last few things before calling finish()"""
         self.finish()
+
+    def __call__(self, *args, **kwargs):
+        """Run process if directly called."""
+        log.info("Calling process")
+        return self.process(*args, **kwargs)
 
 
 class Pump(Module):

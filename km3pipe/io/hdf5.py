@@ -29,54 +29,6 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-class EventInfoDesc(tables.IsDescription):
-    det_id = tables.IntCol()
-    event_id = tables.UIntCol()
-    frame_index = tables.UIntCol()
-    mc_id = tables.IntCol()
-    mc_t = tables.Float64Col()
-    overlays = tables.UInt8Col()
-    run_id = tables.UIntCol()
-    trigger_counter = tables.UInt64Col()
-    trigger_mask = tables.UInt64Col()
-    utc_nanoseconds = tables.UInt64Col()
-    utc_seconds = tables.UInt64Col()
-    weight_w1 = tables.Float64Col()
-    weight_w2 = tables.Float64Col()
-    weight_w3 = tables.Float64Col()
-
-
-class Hit(tables.IsDescription):
-    channel_id = tables.UInt8Col()
-    dom_id = tables.UIntCol()
-    event_id = tables.UIntCol()
-    id = tables.UIntCol()
-    pmt_id = tables.UIntCol()
-    run_id = tables.UIntCol()
-    time = tables.IntCol()
-    tot = tables.UInt8Col()
-    triggered = tables.BoolCol()
-
-
-class Track(tables.IsDescription):
-    bjorkeny = tables.FloatCol()
-    is_cc = tables.BoolCol()
-    dir_x = tables.FloatCol()
-    dir_y = tables.FloatCol()
-    dir_z = tables.FloatCol()
-    energy = tables.FloatCol()
-    event_id = tables.UIntCol()
-    interaction_channel = tables.UIntCol()
-    id = tables.UIntCol()
-    length = tables.FloatCol()
-    pos_x = tables.FloatCol()
-    pos_y = tables.FloatCol()
-    pos_z = tables.FloatCol()
-    run_id = tables.UIntCol()
-    time = tables.IntCol()
-    type = tables.IntCol()
-
-
 class HDF5Sink(Module):
     def __init__(self, **context):
         """A Module to convert (KM3NeT) ROOT files to HDF5."""
@@ -87,20 +39,33 @@ class HDF5Sink(Module):
         self.filters = tables.Filters(complevel=5, shuffle=True,
                                       fletcher32=True)
         self.hits = self.h5file.create_table('/', 'hits',
-                                             Hit, "Hits",
+                                             HitSeries.dtype, "Hits",
                                              filters=self.filters)
         self.mc_hits = self.h5file.create_table('/', 'mc_hits',
-                                                Hit, "MC Hits",
+                                                HitSeries.dtype, "MC Hits",
                                                 filters=self.filters)
         self.mc_tracks = self.h5file.create_table('/', 'mc_tracks',
-                                                  Track, "MC Tracks",
+                                                  TrackSeries.dtype, "MC Tracks",
                                                   filters=self.filters)
         self.event_info = self.h5file.create_table('/', 'event_info',
-                                                   EventInfoDesc, "Event Info",
+                                                   EventInfo.dtype, "Event Info",
                                                    filters=self.filters)
         self.h5file.create_group(
             '/', 'reco', createparents=True, filters=self.filters)
         self._reco_tables = {}
+        ## expect a [(blobkey, '/some/h5/path', dtype)] to put arbitraty
+        ## store in {blobkey: <pytables table obj>}
+        #tab_defines = self.get('tables') or []
+        #self._generic_tables = self._init_generic_tables(tab_defines)
+
+    #def _init_generic_tables(self, tablist):
+    #    for key, path, dtype in tablist:
+    #        # append eventid to dtype
+    #        dtype = append_id_to_dtype(dtype)
+    #        loc, tabname = os.path.split(path)
+    #        tab = self.h5file.create_table(loc, tabname, description=dtype,
+    #                title=blobkey, filters=self.filters, createparents=True)
+    #        self._generic_tables[blobkey] = tab
 
     def _write_hits(self, hits, hit_row):
         """Iterate through the hits and write them to the HDF5 table.
@@ -205,6 +170,8 @@ class HDF5Sink(Module):
         if 'Reco' in blob:
             # this is a group, not a single table
             self._write_reco(blob['Reco'], '/reco')
+        #for key, tab in self._generic_tables.items():
+        #    self.tab = write_stuff(blob[key], tab)
 
         if not self.index % 1000:
             self.hits.flush()
@@ -213,6 +180,8 @@ class HDF5Sink(Module):
             self.event_info.flush()
             for tab in self._reco_tables.values():
                 tab.flush()
+            #for tab in self._generic_tables.values():
+            #    tab.flush()
 
         self.index += 1
         return blob
@@ -224,12 +193,16 @@ class HDF5Sink(Module):
         self.mc_tracks.flush()
         for tab in self._reco_tables.values():
             tab.flush()
+        #for tab in self._generic_tables.values():
+        #    tab.flush()
         self.hits.cols.event_id.create_index()
         self.event_info.cols.event_id.create_index()
         self.mc_hits.cols.event_id.create_index()
         self.mc_tracks.cols.event_id.create_index()
         for tab in self._reco_tables.values():
             tab.cols.event_id.create_index()
+        #for tab in self._generic_tables.values():
+        #    tab.cols.event_id.create_index()
         self.h5file.root._v_attrs.km3pipe = str(km3pipe.__version__)
         self.h5file.root._v_attrs.pytables = str(tables.__version__)
         self.h5file.close()
@@ -339,3 +312,9 @@ class HDF5Pump(Pump):
         start, stop, step = index.indices(len(self))
         for i in range(start, stop, step):
             yield self.get_blob(i)
+
+
+def append_id_to_dtype(dtype):
+    dt = dtype.descr
+    dt.append(('event_id', '<u4'))
+    return np.dtype(dt)
