@@ -54,11 +54,12 @@ class HDF5Sink(Module):
             data = data.serialise()
         except AttributeError:
             pass
+        if len(data) <= 0:
+            return
         tab.append(data)
 
     def process(self, blob):
         for key, entry in blob.items():
-
             if hasattr(entry, 'dtype') or hasattr(entry, 'serialise'):
                 try:
                     loc = entry.loc
