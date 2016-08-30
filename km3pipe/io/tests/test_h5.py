@@ -22,15 +22,15 @@ class TestMultiTable(TestCase):
         self.tabs = {'foo': self.foo, 'bar': self.bar}
         self.where = '/lala'
         self.h5name = './test.h5'
-        self.h5file = tb.open_file(self.h5name, 'a')
+        self.h5file = tb.open_file(
+            # create the file in memory only
+            self.h5name, 'w', driver="H5FD_CORE", driver_core_backing_store=0)
         for name, tab in self.tabs.items():
             self.h5file.create_table(self.where, name=name, obj=tab,
                                      createparents=True)
-        self.h5file.close()
 
     def tearDown(self):
         self.h5file.close()
-        os.remove(self.h5name)
 
     def test_name_insert(self):
         exp_foo = ('foo_a', 'foo_b', 'foo_c')
@@ -41,7 +41,7 @@ class TestMultiTable(TestCase):
         self.assertEqual(exp_bar, pref_bar.dtype.names)
 
     def test_group_read(self):
-        tabs = _read_group(self.h5name, self.where)
+        tabs = _read_group(self.h5file, self.where)
         exp_cols = (
             'bar_aa', 'bar_bb', 'bar_cc',
             'foo_a', 'foo_b', 'foo_c',

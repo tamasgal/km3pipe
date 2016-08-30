@@ -7,6 +7,7 @@ A collection of io for different kinds of data formats.
 from __future__ import division, absolute_import, print_function
 
 import os.path
+from six import string_types
 
 import numpy as np
 import pandas as pd
@@ -171,15 +172,17 @@ def read_geometry(detx=None, det_id=None, from_file=False, det_id_table=None):
     return None
 
 
-def _read_group(filename, where):
+def _read_group(h5file, where):
+    if isinstance(h5file, string_types):
+        h5file = tb.open_file(h5file, 'r')
     tabs = []
-    with tb.open_file(filename, 'r') as h5:
-        for table in h5.iter_nodes(where, classname='Table'):
-            tabname = table.name
-            tab = table[:]
-            tab = _insert_tabname_into_colnames(tab, tabname)
-            tab = pd.DataFrame.from_records(tab)
-            tabs.append(tab)
+    for table in h5file.iter_nodes(where, classname='Table'):
+        tabname = table.name
+        tab = table[:]
+        tab = _insert_tabname_into_colnames(tab, tabname)
+        tab = pd.DataFrame.from_records(tab)
+        tabs.append(tab)
+    h5file.close()
     tabs = pd.concat(tabs, axis=1)
     return tabs
 
