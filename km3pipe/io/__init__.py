@@ -9,7 +9,6 @@ from __future__ import division, absolute_import, print_function
 import os.path
 
 import numpy as np
-from numpy.lib.recfunctions import stack_arrays
 import pandas as pd
 import tables as tb
 
@@ -143,7 +142,7 @@ def read_hdf5(filename, detx=None, det_id=None, det_from_file=False):
     event_info = read_table(filename, '/event_info')
     hits = read_table(filename, '/hits')
     mc_tracks = read_table(filename, '/mc_tracks')
-    reco = read_group(filename, '/reco')
+    reco = _read_group(filename, '/reco')
     geometry = read_geometry(detx, det_id, det_from_file,
                              det_id_table=event_info['det_id'])
     return Run(event_info, geometry, hits, mc_tracks, reco)
@@ -172,23 +171,31 @@ def read_geometry(detx=None, det_id=None, from_file=False, det_id_table=None):
     return None
 
 
-def read_group(filename, group_path):
-    tab = []
+def _read_group(filename, where):
+    tabs = {}
     with tb.open_file(filename, 'r') as h5:
-        group = h5.get_node(group_path)
-        for table in group:
+        for table in h5.iter_nodes(where, classname='Table'):
             tabname = table.name
-            buf = table[:]
-            new_names = [tabname + '_' + col for col in buf.dtype.names]
-            buf.dtype.names = new_names
-            tab.append(buf)
-    tab = stack_arrays(tab)
-    return tab
+            tabs[tabname] = table[:]
+    tabs = _insert_tabname_into_colnames(tabs, as_df=True)
+    tabs = pd.concat(tabs.values(), axis=1)
+    return tabs
 
 
-def read_table(filename, tabname):
+def _insert_tabname_into_colnames(tab_map, as_df=False):
+    for name, tab in tab_map.items():
+        new_cols = [name + '_' + col for col in tab.dtype.names]
+        tab.dtype.names = new_cols
+        if as_df:
+            tab = pd.DataFrame.from_records(tab)
+        tab_map[name] = tab
+    return tab_map
+
+
+def read_table(filename, where):
     with tb.open_file(filename, 'r') as h5:
-        tab = h5.get_node(tabname)[:]
+        tab = h5.get_node(where)[:]
+    tab = pd.DataFrame.from_records(tab)
     return tab
 
 
