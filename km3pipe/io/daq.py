@@ -12,8 +12,21 @@ import struct
 from struct import unpack
 import pprint
 
-from km3pipe import Pump, Blob
+import numpy as np
+
+from km3pipe import Pump, Module, Blob
+from km3pipe.dataclasses import EventInfo, HitSeries
+from km3pipe.common import StringIO
+from km3pipe.tools import ignored
 from km3pipe.logger import logging
+
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -54,6 +67,7 @@ class DAQPump(Pump):
         try:
             data_type = DATA_TYPES[preamble.data_type]
         except KeyError:
+            log.error("Unkown datatype: {0}".format(preamble.data_type))
             data_type = 'Unknown'
 
         blob = Blob()
@@ -88,14 +102,12 @@ class DAQPump(Pump):
     def determine_frame_positions(self):
         """Record the file pointer position of each frame"""
         self.rewind_file()
-        try:
+        with ignored(struct.error):
             while True:
                 pointer_position = self.blob_file.tell()
                 length = struct.unpack('<i', self.blob_file.read(4))[0]
                 self.blob_file.seek(length - 4, 1)
                 self.frame_positions.append(pointer_position)
-        except struct.error:
-            pass
         self.rewind_file()
         log.info("Found {0} frames.".format(len(self.frame_positions)))
 
@@ -141,6 +153,57 @@ class DAQPump(Pump):
         start, stop, step = index.indices(len(self))
         for i in range(start, stop, step):
             yield self.get_blob(i)
+
+
+class DAQProcessor(Module):
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.index = 0
+
+    def process(self, blob):
+        tag = str(blob['CHPrefix'].tag)
+
+        if tag == 'IO_EVT':
+            self.process_event(blob['CHData'], blob)
+
+        return blob
+
+    def process_event(self, data, blob):
+        data_io = StringIO(data)
+        preamble = DAQPreamble(file_obj=data_io)  # noqa
+        event = DAQEvent(file_obj=data_io)
+        header = event.header
+
+        hits = event.snapshot_hits
+        n_hits = event.n_snapshot_hits
+        dom_ids, channel_ids, times, tots = zip(*hits)
+        zeros = np.zeros(n_hits)
+        triggereds = np.zeros(n_hits)
+        triggered_map = {}
+        for triggered_hit in event.triggered_hits:
+            dom_id, pmt_id, time, tot, _ = triggered_hit
+            triggered_map[(dom_id, pmt_id, time, tot)] = True
+        for idx, hit in enumerate(hits):
+            triggereds[idx] = hit in triggered_map
+
+        hit_series = HitSeries.from_arrays(channel_ids, dom_ids, range(n_hits),
+                                           zeros, times, tots, triggereds,
+                                           self.index)
+
+        blob['Hits'] = hit_series
+
+        event_info = EventInfo(header.det_id, self.index, header.time_slice,
+                               0, 0,  # MC ID and time
+                               event.overlays, header.run,
+                               event.trigger_counter, event.trigger_mask,
+                               header.ticks * 16, header.time_stamp,
+                               0, 0, 0)  # MC weights
+        blob['EventInfo'] = event_info
+
+        self.index += 1
+
+    def process_summary_slice(self, data, blob):
+        pass
 
 
 class DAQPreamble(object):
@@ -258,6 +321,8 @@ class DAQSummaryslice(object):
         self.header = DAQHeader(file_obj=file_obj)
         self.n_summary_frames = unpack('<i', file_obj.read(4))[0]
         self.summary_frames = {}
+        self.dq_status = {}
+        self.dom_status = {}
 
         self._parse_summary_frames(file_obj)
 
@@ -265,10 +330,13 @@ class DAQSummaryslice(object):
         """Iterate through the byte data and fill the summary_frames"""
         for _ in range(self.n_summary_frames):
             dom_id = unpack('<i', file_obj.read(4))[0]
-            unknown = file_obj.read(4)  # probably dom status? # noqa
+            dq_status = file_obj.read(4)  # probably dom status? # noqa
+            dom_status = unpack('<iiii', file_obj.read(16))
             raw_rates = unpack('b'*31, file_obj.read(31))
             pmt_rates = [self._get_rate(value) for value in raw_rates]
             self.summary_frames[dom_id] = pmt_rates
+            self.dq_status[dom_id] = dq_status
+            self.dom_status[dom_id] = dom_status
 
     def _get_rate(self, value):
         """Return the rate in Hz from the short int value"""
@@ -294,7 +362,7 @@ class DAQEvent(object):
       n_triggered_hits (int): Number of hits satisfying the trigger conditions.
       n_snapshot_hits (int): Number of snapshot hits.
       triggered_hits (list): A list of triggered hits
-        (dom_id, pmt_id, tdc_time, tot)
+        (dom_id, pmt_id, tdc_time, tot, (trigger_mask,))
       snapshot_hits (list): A list of snapshot hits
         (dom_id, pmt_id, tdc_time, tot)
 
@@ -341,3 +409,38 @@ class DAQEvent(object):
         string += "\nSnapshot hits:\n"
         string += pprint.pformat(self.snapshot_hits)
         return string
+
+
+class THMCData(object):
+    """Monitoring Channel data."""
+    def __init__(self, file_obj):
+        f = file_obj
+        self.data_type = unpack('>I', f.read(4))[0]
+        self.run = unpack('>I', f.read(4))[0]
+        self.sequence_number = unpack('>I', f.read(4))[0]  # not sure
+        self.utc_seconds = unpack('>I', f.read(4))[0]
+        self.utc_nanoseconds = unpack('>I', f.read(4))[0] * 16
+        self.dom_id = unpack('>I', f.read(4))[0]
+        self.dom_status_1 = unpack('>I', f.read(4))[0]  # not sure
+        self.dom_status_2 = unpack('>I', f.read(4))[0]  # not sure
+        self.dom_status_3 = unpack('>I', f.read(4))[0]  # not sure
+        self.dom_status_4 = unpack('>I', f.read(4))[0]  # not sure
+        self.pmt_rates = [r*10.0 for r in unpack('>' + 31*'I', f.read(31*4))]
+        self.pad = unpack('>I', f.read(4))[0]  # not sure
+        self.valid = unpack('>I', f.read(4))[0]  # not sure
+        self.yaw, self.pitch, self.roll = unpack('>fff', f.read(12))
+        self.ax, self.ay, self.az = unpack('>fff', f.read(12))
+        self.gx, self.gy, self.gz = unpack('>fff', f.read(12))
+        self.hx, self.hy, self.hz = unpack('>fff', f.read(12))
+        self.temp = unpack('>H', f.read(2))[0] / 100.0
+        self.humidity = unpack('>H', f.read(2))[0] / 100.0
+        # self.det_id = unpack('>I', f.read(4))[0]  # not sure
+        # self.n_packets = unpack('>H', f.read(2))[0]  # not sure
+        # self.highest_packet_number = unpack('>H', f.read(2))[0]  # not sure
+        # self.n_items = unpack('>I', f.read(4))[0]  # not sure
+
+    def __str__(self):
+        return str(vars(self))
+
+    def __repr__(self):
+        return self.__str__()

@@ -7,10 +7,13 @@ Classes representing KM3NeT hardware.
 """
 from __future__ import division, absolute_import, print_function
 
+from collections import OrderedDict
 import os
 import sys
 
-from km3pipe.tools import unpack_nfirst, split
+import numpy as np
+
+from km3pipe.tools import unpack_nfirst, split  # , ignored
 from km3pipe.dataclasses import Point, Direction
 from km3pipe.db import DBManager
 
@@ -24,29 +27,44 @@ else:
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
-__author__ = 'tamasgal'
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
 
 
 class Detector(object):
     """The KM3NeT detector"""
-    def __init__(self, filename=None, det_id=None, t0set=None):
+    def __init__(self, filename=None,
+                 det_id=None,
+                 t0set=None,
+                 calibration=None):
         self._det_file = None
         self.det_id = None
         self.n_doms = None
+        self.lines = set()
         self.n_pmts_per_dom = None
-        self.doms = {}
+        self.doms = OrderedDict()
         self.pmts = []
-        self._pmts_by_omkey = {}
-        self._pmts_by_id = {}
+        self.version = None
+        self.valid_from = None
+        self.valid_until = None
+        self.utm_info = None
+        self._pmts_by_omkey = OrderedDict()
+        self._pmts_by_id = OrderedDict()
         self._pmt_angles = []
 
         if filename:
             self._init_from_file(filename)
 
         if det_id is not None:
-            print("Retrieving DETX file from the database...")
+            print("Retrieving DETX with detector ID {0} from the database..."
+                  .format(det_id))
             db = DBManager()
-            detx = db.detx(det_id, t0set=t0set)
+            detx = db.detx(det_id, t0set=t0set, calibration=calibration)
             self._det_file = StringIO(detx)
             self._parse_header()
             self._parse_doms()
@@ -71,7 +89,17 @@ class Detector(object):
         """Extract information from the header of the detector file"""
         self._det_file.seek(0, 0)
         first_line = self._det_file.readline()
-        self.det_id, self.n_doms = split(first_line, int)
+        try:
+            self.det_id, self.n_doms = split(first_line, int)
+            self.version = 'v1'
+        except ValueError:
+            det_id, self.version = first_line.split()
+            self.det_id = int(det_id)
+            validity = self._det_file.readline()
+            self.valid_from, self.valid_until = split(validity, float)
+            self.utm_info = self._det_file.readline()
+            n_doms = self._det_file.readline()
+            self.n_doms = int(n_doms)
 
     # pylint: disable=C0103
     def _parse_doms(self):
@@ -88,6 +116,7 @@ class Detector(object):
                     dom_id, line_id, floor_id, n_pmts = split(line, int)
                 except ValueError:
                     continue
+                self.lines.add(line_id)
                 self.n_pmts_per_dom = n_pmts
                 for i in range(n_pmts):
                     raw_pmt_info = lines.pop(0)
@@ -123,6 +152,11 @@ class Detector(object):
         return [pmt.pos for pmt in self._pmts_by_id.values()
                 if pmt.channel_id == 0]
 
+    def translate_detector(self, vector):
+        vector = np.array(vector, dtype=float)
+        for pmt in self.pmts:
+            pmt.pos = pmt.pos + vector
+
     @property
     def pmt_angles(self):
         """A list of PMT directions sorted by PMT channel"""
@@ -134,15 +168,22 @@ class Detector(object):
     @property
     def ascii(self):
         """The ascii representation of the detector"""
-        header = "{det.det_id} {det.n_doms}".format(det=self)
+        if self.version == 'v1':
+            header = "{det.det_id} {det.n_doms}".format(det=self)
+        else:
+            header = "{det.det_id} {det.version}".format(det=self)
+            header += "\n{0} {1}".format(self.valid_from, self.valid_until)
+            header += "\n" + self.utm_info
+            header += str(self.n_doms)
+
         doms = ""
         for dom_id, (line, floor, n_pmts) in self.doms.iteritems():
             doms += "{0} {1} {2} {3}\n".format(dom_id, line, floor, n_pmts)
             for i in xrange(n_pmts):
                 pmt = self._pmts_by_omkey[(line, floor, i)]
-                doms += " {0} {1} {2} {3} {4} {5} {6} {7}\n".format(
-                        pmt.id, pmt.pos.x, pmt.pos.y, pmt.pos.z,
-                        pmt.dir.x, pmt.dir.y, pmt.dir.z,
+                doms += "{0} {1} {2} {3} {4} {5} {6} {7}\n".format(
+                        pmt.id, pmt.pos[0], pmt.pos[1], pmt.pos[2],
+                        pmt.dir[0], pmt.dir[1], pmt.dir[2],
                         pmt.t0
                         )
         return header + "\n" + doms
@@ -182,6 +223,17 @@ class Detector(object):
         _, floor, _ = self.doms[dom_id]
         return floor
 
+    @property
+    def n_lines(self):
+        return len(self.lines)
+
+    def __str__(self):
+        return "Detector id: '{0}', n_doms: {1}, n_lines: {2}".format(
+            self.det_id, self.n_doms, self.n_lines)
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class PMT(object):
     """Represents a photomultiplier"""
@@ -194,5 +246,5 @@ class PMT(object):
         self.omkey = omkey
 
     def __str__(self):
-        return "PMT id:{0} pos: {1} dir: dir{2} t0: {3} DAQ channel: {4}"\
+        return "PMT id:{0}, pos: {1}, dir: dir{2}, t0: {3}, DAQ channel: {4}"\
                .format(self.id, self.pos, self.dir, self.t0, self.channel_id)

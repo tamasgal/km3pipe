@@ -6,7 +6,7 @@ Subpackages
 
 .. toctree::
 
-    km3pipe.pumps
+    km3pipe.io
     km3pipe.testing
 
 Submodules
@@ -88,14 +88,6 @@ km3pipe.tools module
 --------------------
 
 .. automodule:: km3pipe.tools
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-km3pipe.units module
---------------------
-
-.. automodule:: km3pipe.units
     :members:
     :undoc-members:
     :show-inheritance:

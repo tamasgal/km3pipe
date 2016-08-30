@@ -7,10 +7,17 @@ The logging facility.
 """
 from __future__ import division, absolute_import, print_function
 
+import socket
 import logging
 import logging.config
 
-__author__ = 'tamasgal'
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
 
 try:
     logging.config.fileConfig('logging.conf')
@@ -34,3 +41,30 @@ ch = logging.StreamHandler()
 formatter = logging.Formatter('[%(levelname)s] %(name)s: %(message)s')
 # ch.setFormatter(formatter)
 # logger.addHandler(ch)
+
+
+class LogIO(object):
+    def __init__(self, node, stream,
+                 url='pi2089.physik.uni-erlangen.de',
+                 port=28777):
+        self.node = node
+        self.stream = stream
+        self.url = url
+        self.port = port
+        self.sock = None
+        self.connect()
+
+    def send(self, message, level='info'):
+        message_string = "+log|{0}|{1}|{2}|{3}\r\n" \
+                         .format(self.stream, self.node, level, message)
+        try:
+            self.sock.send(message_string)
+        except socket.error:
+            print("Lost connection, reconnecting...")
+            self.connect()
+            self.sock.send(message_string)
+
+    def connect(self):
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.connect((self.url, self.port))
+

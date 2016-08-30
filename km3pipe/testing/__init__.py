@@ -18,3 +18,22 @@ try:
     from mock import MagicMock
 except ImportError:
     from unittest.mock import MagicMock  # noqa
+
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
+
+
+class FakeAanetHit(object):
+    def __init__(self, channel_id, dom_id, id, pmt_id, t, tot, trig):
+        self.channel_id = chr(channel_id)
+        self.dom_id = dom_id
+        self.id = id
+        self.pmt_id = pmt_id
+        self.t = t
+        self.tot = tot
+        self.trig = trig

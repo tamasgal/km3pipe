@@ -13,6 +13,15 @@ import sys
 
 from pipeinspector.settings import UI
 
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
+
+
 class BlobBrowser(urwid.Frame):
     def __init__(self):
         self.items = []
@@ -74,12 +83,19 @@ class ItemWidget (urwid.WidgetWrap):
     def __init__ (self, key, data):
         self.key = key
         self.data = data
+        try:
+            size_label = str(len(data)) + " items"
+        except TypeError:
+            size_label = str(sys.getsizeof(data)) + " bytes"
+
+        type_label = str(type(data)).split("'")[1]
+
         self.item = [
             ('fixed', 35, urwid.Padding(
                 urwid.AttrWrap(urwid.Text(key), 'body', 'focus'), left=2)),
-            urwid.AttrWrap(urwid.Text(str(type(data))), 'body', 'focus'),
-            #urwid.AttrWrap(urwid.Text(str(len(data))), 'body', 'focus'),
-            urwid.AttrWrap(urwid.Text(str(sys.getsizeof(data))), 'body', 'focus'),
+            urwid.AttrWrap(urwid.Text(type_label), 'body', 'focus'),
+            urwid.AttrWrap(urwid.Text(size_label), 'body', 'focus'),
+            #urwid.AttrWrap(urwid.Text(str(sys.getsizeof(data))), 'body', 'focus'),
         ]
         w = urwid.Columns(self.item)
         self.__super.__init__(w)

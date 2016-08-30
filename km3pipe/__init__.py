@@ -6,21 +6,28 @@ The extemporary KM3NeT analysis framework.
 """
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.__version__ import version, version_info  # noqa
 
 try:
-    from km3pipe.core import (Pipeline, Module, Pump, Blob,  # noqa
-                              Geometry, AanetGeometry)
-    from km3pipe import pumps
-except ImportError:
-    print("Numpy is needed for KM3Pipe")
+    __KM3PIPE_SETUP__
+except NameError:
+    __KM3PIPE_SETUP__ = False
 
-__author__ = "Tamas Gal"
-__copyright__ = ("Copyright 2015, Tamas Gal and the KM3NeT collaboration "
-                 "(http://km3net.org)")
-__credits__ = []
+from km3pipe.__version__ import version, version_info  # noqa
+
+if not __KM3PIPE_SETUP__:
+    from km3pipe.core import (Pipeline, Module, Pump, Blob, Run,  # noqa
+                              Geometry, AanetGeometry)
+    from km3pipe import io  # noqa
+    from km3pipe import utils  # noqa
+    from km3pipe import srv  # noqa
+    from km3pipe.srv import srv_event  # noqa
+    from km3pipe.io import GenericPump, read_hdf5  # noqa
+
+__author__ = "Tamas Gal and Moritz Lotze"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = ["Thomas Heid"]
 __license__ = "MIT"
 __version__ = version
-__maintainer__ = "Tamas Gal"
+__maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"

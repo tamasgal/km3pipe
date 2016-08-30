@@ -23,22 +23,35 @@ from km3pipe.tools import Timer
 from km3pipe.config import Config
 from km3pipe.logger import logging
 
+try:
+    input = raw_input
+except NameError:
+    pass
+
 if sys.version_info[0] > 2:
     from urllib.parse import urlencode, unquote
     from urllib.request import (Request, build_opener,
                                 HTTPCookieProcessor, HTTPHandler)
+    from urllib.error import URLError, HTTPError
     from io import StringIO
     from http.cookiejar import CookieJar
     from http.client import IncompleteRead
 else:
     from urllib import urlencode, unquote
-    from urllib2 import (Request, build_opener,
-                         HTTPCookieProcessor, HTTPHandler)
+    from urllib2 import (Request, build_opener, urlopen,
+                         HTTPCookieProcessor, HTTPHandler,
+                         URLError, HTTPError)
     from StringIO import StringIO
     from cookielib import CookieJar
     from httplib import IncompleteRead
 
-__author__ = 'tamasgal'
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -49,26 +62,42 @@ UTC_TZ = pytz.timezone('UTC')
 try:
     ssl._create_default_https_context = ssl._create_unverified_context
 except AttributeError:
-    log.warn("Your SSL support is outdated.\n"
-             "Please update your Python installation!")
+    log.debug("Your SSL support is outdated.\n"
+              "Please update your Python installation!")
 
-LOGIN_URL = 'https://km3netdbweb.in2p3.fr/home.htm'
 BASE_URL = 'https://km3netdbweb.in2p3.fr'
 
 
 class DBManager(object):
     """A wrapper for the KM3NeT Web DB"""
-    def __init__(self, username=None, password=None):
+    def __init__(self, username=None, password=None, url=None):
         "Create database connection"
         self._cookies = []
         self._parameters = None
         self._doms = None
         self._detectors = None
         self._opener = None
-        if username is None:
-            config = Config()
+
+        config = Config()
+
+        if url is not None:
+            self._db_url = url
+        else:
+            self._db_url = config.db_url or BASE_URL
+
+        self._login_url = self._db_url + '/home.htm'
+
+        if username is not None and password is not None:
+            self.login(username, password)
+        elif config.db_session_cookie not in (None, ''):
+            self.restore_ression(config.db_session_cookie)
+        else:
             username, password = config.db_credentials
-        self.login(username, password)
+            if config.db_session_cookie is None and \
+               input("Request permanent session? ([y]/n)") in 'yY ':
+                self.request_permanent_session(username, password)
+            else:
+                self.login(username, password)
 
     def datalog(self, parameter, run, maxrun=None, det_id='D_ARCA001'):
         "Retrieve datalogs for given parameter, run(s) and detector"
@@ -141,7 +170,7 @@ class DBManager(object):
 
     @property
     def detectors(self):
-        if not self._detectors:
+        if self._detectors is None:
             self._detectors = self._get_detectors()
         return self._detectors
 
@@ -192,14 +221,17 @@ class DBManager(object):
         doms = self._get_json('domclbupiid/s')
         self._doms = DOMContainer(doms)
 
-    def detx(self, det_id, t0set=None):
+    def detx(self, det_id, t0set=None, calibration=None):
         """Retrieve the detector file for given detector id
 
         If t0set is given, append the calibration data.
         """
-        url = 'detx/{0}'.format(det_id)
+        url = 'detx/{0}?'.format(det_id)  # '?' since it's ignored if no args
         if t0set is not None:
-            url += '?t0set=' + t0set
+            url += '&t0set=' + t0set
+        if calibration is not None:
+            url += '&calibrid=' + calibration
+
         detx = self._get_content(url)
         return detx
 
@@ -243,14 +275,21 @@ class DBManager(object):
 
     def _get_content(self, url):
         "Get HTML content"
-        target_url = BASE_URL + '/' + unquote(url)  # .encode('utf-8'))
-        f = self.opener.open(target_url)
+        target_url = self._db_url + '/' + unquote(url)  # .encode('utf-8'))
+        log.debug("Opening '{0}'".format(target_url))
+        try:
+            f = self.opener.open(target_url)
+        except HTTPError:
+            log.error("HTTP error, your session may be expired.")
+            return None
+        log.debug("Accessing '{0}'".format(target_url))
         try:
             content = f.read()
         except IncompleteRead as icread:
             log.critical("Incomplete data received from the DB, " +
                          "the data could be corrupted.")
             content = icread.partial
+        log.debug("Got {0} bytes of data.".format(len(content)))
         return content.decode('utf-8')
 
     @property
@@ -264,18 +303,47 @@ class DBManager(object):
             self._opener = opener
         return self._opener
 
+    def request_sid_cookie(self, username, password):
+        """Request cookie for permanent session token."""
+        target_url = self._login_url + '?usr={0}&pwd={1}&persist=y' \
+                                      .format(username, password)
+        cookie = urlopen(target_url).read()
+        return cookie
+
+    def restore_ression(self, cookie):
+        """Establish databse connection using permanent session cookie"""
+        opener = build_opener()
+        opener.addheaders.append(('Cookie', cookie))
+        self._opener = opener
+
+    def request_permanent_session(self, username=None, password=None):
+        config = Config()
+        if username is None and password is None:
+            username, password = config.db_credentials
+        cookie = self.request_sid_cookie(username, password)
+        config.set('DB', 'session_cookie', cookie)
+        self.restore_ression(cookie)
+
     def login(self, username, password):
         "Login to the databse and store cookies for upcoming requests."
         cj = CookieJar()
         opener = build_opener(HTTPCookieProcessor(cj), HTTPHandler())
         values = {'usr': username, 'pwd': password}
         data = urlencode(values)
-        req = Request(LOGIN_URL, data.encode('utf-8'))
-        f = opener.open(req)
+        req = Request(self._login_url, data.encode('utf-8'))
+        try:
+            f = opener.open(req)
+        except URLError as e:
+            log.error("Failed to connect to the database -> probably down!")
+            log.error("Error from database server:\n    {0}".format(e))
+            return False
         html = f.read()
-        if 'Bad username or password' in str(html):
-            log.error("Bad username or password!")
+        failed_auth_message = 'Bad username or password'
+        if failed_auth_message in str(html):
+            log.error(failed_auth_message)
+            return False
         self._cookies = cj
+        return True
 
 
 class ParametersContainer(object):

@@ -7,20 +7,15 @@ A collection of commonly used modules.
 """
 from __future__ import division, absolute_import, print_function
 
-import timeit
-
 from km3pipe import Module
+from km3pipe.tools import peak_memory_usage
 
 
 class HitCounter(Module):
-    """Prints the number of hits and raw hits in an Evt file"""
+    """Prints the number of hits"""
     def process(self, blob):
         try:
-            print("Number of hits: {0}".format(len(blob['hit'])))
-        except KeyError:
-            pass
-        try:
-            print("Number of raw hits: {0}".format(len(blob['hit_raw'])))
+            print("Number of hits: {0}".format(len(blob['Hit'])))
         except KeyError:
             pass
         return blob
@@ -42,28 +37,21 @@ class StatusBar(Module):
     """Displays the current blob number"""
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
+        self.every = self.get('every') or 1
         self.blob_index = 0
-        self.start = timeit.default_timer()
 
     def process(self, blob):
-        print("------------[Blob {0:>7}]-------------".format(self.blob_index))
+        if self.blob_index % self.every == 0:
+            print('-'*33 + "[Blob {0:>7}]".format(self.blob_index) + '-'*33)
         self.blob_index += 1
         return blob
-
-    def finish(self):
-        """Display some basic statistics like elapsed time"""
-        elapsed_time = timeit.default_timer() - self.start
-        print("\n" + '='*42)
-        print("Processed {0} blobs in {1} s."
-              .format(self.blob_index, elapsed_time))
 
 
 class MemoryObserver(Module):
     """Shows the maximum memory usage"""
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
-        import resource
 
     def process(self, blob):
-        memory = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        print("Memory peak usage: {0} kb".format(memory))
+        memory = peak_memory_usage()
+        print("Memory peak usage: {0:.3f} MB".format(memory))

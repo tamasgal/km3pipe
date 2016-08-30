@@ -4,3 +4,6 @@ urwid
 numpy
 ipython
 pandas
+cython
+websocket-client
+sphinx_rtd_theme

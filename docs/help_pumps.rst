@@ -1,5 +1,3 @@
-.. _help_pumps:
-
 Pumps
 =====
 
@@ -16,7 +14,7 @@ To end the data pumping, the pump has to raise a ``StopIteration`` exception.
 One elegant way to implement this in Python is using a generator.
 
 The following example shows a very basic pump, which simply initialises a
-list of dictionaries and "pumps" one blob after another on
+list of dictionaries and "io" one blob after another on
 each ``process()`` call to the next module in the pipeline.
 
 

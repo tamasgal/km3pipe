@@ -23,7 +23,13 @@ except NameError:
 
 from km3pipe.logger import logging
 
-__author__ = 'tamasgal'
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal and Moritz Lotze"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -35,13 +41,14 @@ class Config(object):
         """Configuration manager for KM3NeT stuff"""
         self.config = ConfigParser()
         self._time_zone = None
+        self._config_path = config_path
 
         if config_path is not None:
             self._init_from_path(config_path)
 
     def _init_from_path(self, path):
         if not os.path.exists(path):
-            log.warn("No configuration found at '{0}'".format(path))
+            log.info("No configuration found at '{0}'".format(path))
             return
         self._check_config_file_permissions(path)
         self._read_from_path(path)
@@ -61,6 +68,38 @@ class Config(object):
     def _read_from_file(self, file_obj):
         self.config.readfp(file_obj)
 
+    def set(self, section, key, value):
+        if section not in self.config.sections():
+            self.config.add_section(section)
+        self.config.set(section, key, value)
+        with open(self._config_path, 'w') as f:
+            self.config.write(f)
+
+    def create_irods_session(self):
+        try:
+            from irods.session import iRODSSession
+        except ImportError:
+            log.error("Please install the iRODS Python client:\n\n"
+                      "    pip install git+git://github.com/irods/"
+                      "python-irodsclient.git\n")
+            return
+        try:
+            host = self.config.get('iRODS', 'host')
+            port = self.config.get('iRODS', 'port')
+            user = self.config.get('iRODS', 'user')
+            zone = self.config.get('iRODS', 'zone')
+        except Error:
+            log.error("iRODS connection details missing from ~/.km3net")
+            return
+
+        try:
+            password = self.config.get('iRODS', 'password')
+        except Error:
+            password = input("Please enter your iRODS password: ")
+
+        return iRODSSession(host=host, port=port, user=user, password=password,
+                            zone=zone)
+
     @property
     def db_credentials(self):
         """Return username and password for the KM3NeT WebDB."""
@@ -73,6 +112,20 @@ class Config(object):
         return username, password
 
     @property
+    def db_session_cookie(self):
+        try:
+            return self.config.get('DB', 'session_cookie')
+        except Error:
+            return None
+
+    @property
+    def db_url(self):
+        try:
+            return self.config.get('DB', 'url')
+        except Error:
+            return None
+
+    @property
     def slack_token(self):
         """Return slack token for chat bots."""
         try:
@@ -81,6 +134,16 @@ class Config(object):
             raise ValueError("No Slack token defined in configuration file.")
         else:
             return token
+
+    @property
+    def rba_url(self):
+        """Return the RainbowAlga URL."""
+        try:
+            url = self.config.get('RainbowAlga', 'url')
+        except Error:
+            return None
+        else:
+            return url
 
     @property
     def check_for_updates(self):

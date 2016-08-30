@@ -2,7 +2,7 @@
 from __future__ import division
 
 from km3pipe import Module, Pipeline
-from km3pipe.pumps.aanet import AanetPump
+from km3pipe.io.aanet import AanetPump
 
 
 class RateEstimator(Module):

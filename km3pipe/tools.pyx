@@ -1,5 +1,7 @@
 # coding=utf-8
-# Filename: tools.py
+# cython: profile=True
+# Filename: tools.pyx
+# cython: embedsignature=True
 # pylint: disable=C0103
 """
 Some unsorted, frequently used logic.
@@ -7,16 +9,37 @@ Some unsorted, frequently used logic.
 """
 from __future__ import division, absolute_import, print_function
 
+import resource
+import sys
+import os
+import base64
 import subprocess
 import collections
 from collections import namedtuple
 from itertools import chain
 from datetime import datetime
-
+import time
+from timeit import default_timer as timer
+from contextlib import contextmanager
+import re
 
 import numpy as np
+import pandas as pd
+import tables
 
-__author__ = 'tamasgal'
+import km3pipe as kp
+
+from km3pipe.logger import logging
+
+__author__ = "Tamas Gal and Moritz Lotze"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal and Moritz Lotze"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
+
+log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 def unpack_nfirst(seq, nfirst):
@@ -94,7 +117,7 @@ def angle_between(v1, v2):
 
 def unit_vector(vector):
     """ Returns the unit vector of the vector.  """
-    return vector / np.linalg.norm(vector)
+    return np.array(vector) / np.linalg.norm(vector)
 
 
 def circ_permutation(items):
@@ -237,21 +260,30 @@ class PMTReplugger(object):
 
 class Timer(object):
     """A very simple, accurate and easy to use timer context"""
-    def __init__(self, message='It'):
+    def __init__(self, message='It', precision=3):
         self.message = message
+        self.precision = precision
 
     def __enter__(self):
-        self.__start = datetime.now()
+        self.__start = timer()
+        self.__start_cpu = time.clock()
 
     def __exit__(self, type, value, traceback):
-        self.__finish = datetime.now()
+        self.__finish = timer()
+        self.__finish_cpu = time.clock()
         self.log()
 
     def get_seconds(self):
-        return total_seconds(self.__finish - self.__start)
+        return self.__finish - self.__start
+
+    def get_seconds_cpu(self):
+        return self.__finish_cpu - self.__start_cpu
 
     def log(self):
-        print("{0} took {1}s.".format(self.message, self.get_seconds()))
+        seconds = self.get_seconds()
+        seconds_cpu = self.get_seconds_cpu()
+        print("{0} took {1:.{3}f}s (CPU {2:.{3}f}s)."
+              .format(self.message, seconds, seconds_cpu, self.precision))
 
 
 class Cuckoo(object):
@@ -285,3 +317,117 @@ def ifiles(irods_path):
                                          .format(irods_path), shell=True)
     filenames = raw_output.strip().split("\n")
     return filenames
+
+
+def remain_file_pointer(function):
+    """Remain the file pointer position after calling the decorated function
+
+    This decorator assumes that the last argument is the file handler.
+
+    """
+    def wrapper(*args, **kwargs):
+        """Wrap the function and remain its parameters and return values"""
+        file_obj = args[-1]
+        old_position = file_obj.tell()
+        return_value = function(*args, **kwargs)
+        file_obj.seek(old_position, 0)
+        return return_value
+    return wrapper
+
+
+def peak_memory_usage():
+    """Return peak memory usage in MB"""
+    mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    factor_mb = 1 / 1024
+    if sys.platform == 'darwin':
+        factor_mb = 1 / (1024 * 1024)
+    return mem * factor_mb
+
+
+@contextmanager
+def ignored(*exceptions):
+    """Ignore-context for a given list of exceptions.
+
+    Example:
+        with ignored(AttributeError):
+            foo.a = 1
+
+    """
+    try:
+        yield
+    except exceptions:
+        pass
+
+
+def token_urlsafe(nbytes=32):
+    """Return a random URL-safe text string, in Base64 encoding.
+
+    This is taken and slightly modified from the Python 3.6 stdlib.
+
+    The string has *nbytes* random bytes.  If *nbytes* is ``None``
+    or not supplied, a reasonable default is used.
+
+    >>> token_urlsafe(16)  #doctest:+SKIP
+    'Drmhze6EPcv0fN_81Bj-nA'
+
+    """
+    tok = os.urandom(nbytes)
+    return base64.urlsafe_b64encode(tok).rstrip(b'=').decode('ascii')
+
+
+def tai_timestamp():
+    """Return current TAI timestamp."""
+    timestamp = time.time()
+    date = datetime.utcfromtimestamp(timestamp)
+    if date.year < 1972:
+        return timestamp
+    offset = 10 + timestamp
+    leap_seconds = [
+        (1972, 1, 1), (1972, 7, 1), (1973, 1, 1),
+        (1974, 1, 1), (1975, 1, 1), (1976, 1, 1),
+        (1977, 1, 1), (1978, 1, 1), (1979, 1, 1),
+        (1980, 1, 1), (1981, 7, 1), (1982, 7, 1),
+        (1983, 7, 1), (1985, 7, 1), (1988, 1, 1),
+        (1990, 1, 1), (1991, 1, 1), (1992, 7, 1),
+        (1993, 7, 1), (1994, 7, 1), (1996, 1, 1),
+        (1997, 7, 1), (1999, 1, 1), (2006, 1, 1),
+        (2009, 1, 1), (2012, 7, 1), (2015, 7, 1),
+    ]
+    for idx, leap_date in enumerate(leap_seconds):
+        if leap_date >= (date.year, date.month, date.day):
+            return idx - 1 + offset
+    return len(leap_seconds) - 1 + offset
+
+
+try:
+    dict.iteritems
+except AttributeError:
+    # for Python 3
+    def itervalues(d):
+        return iter(d.values())
+    def iteritems(d):
+        return iter(d.items())
+else:
+    # for Python 2
+    def itervalues(d):
+        return d.itervalues()
+    def iteritems(d):
+        return d.iteritems()
+
+
+def decamelise(text):
+    """Convert CamelCase to lower_and_underscore."""
+    s = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', text)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s).lower()
+
+
+def camelise(text, capital_first=True):
+    """Convert lower_underscore to CamelCase."""
+    def camelcase():
+        if not capital_first:
+            yield str.lower
+        while True:
+            yield str.capitalize
+
+    c = camelcase()
+    return "".join(next(c)(x) if x else '_' for x in text.split("_"))

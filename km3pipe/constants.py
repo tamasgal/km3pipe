@@ -11,6 +11,18 @@ from __future__ import division, absolute_import, print_function
 
 import math
 
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
+
+
+# Detector related parameters
+arca_frame_duration = 0.1  # s
+orca_frame_duration = 0.1  # s
 
 c = 2.99792458e8  # m/s
 

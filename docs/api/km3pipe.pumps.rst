@@ -1,77 +1,62 @@
-km3pipe.pumps package
+km3pipe.io package
 =====================
 
 Submodules
 ----------
 
-km3pipe.pumps.aanet module
+km3pipe.io.aanet module
 ------------------------
 
-.. automodule:: km3pipe.pumps.aanet
+.. automodule:: km3pipe.io.aanet
     :members:
     :undoc-members:
     :show-inheritance:
 
-km3pipe.pumps.ch module
+km3pipe.io.ch module
 ------------------------
 
-.. automodule:: km3pipe.pumps.ch
+.. automodule:: km3pipe.io.ch
     :members:
     :undoc-members:
     :show-inheritance:
 
-km3pipe.pumps.clb module
+km3pipe.io.clb module
 ------------------------
 
-.. automodule:: km3pipe.pumps.clb
+.. automodule:: km3pipe.io.clb
     :members:
     :undoc-members:
     :show-inheritance:
 
-km3pipe.pumps.daq module
+km3pipe.io.daq module
 ------------------------
 
-.. automodule:: km3pipe.pumps.daq
+.. automodule:: km3pipe.io.daq
     :members:
     :undoc-members:
     :show-inheritance:
 
-km3pipe.pumps.evt module
+km3pipe.io.evt module
 ------------------------
 
-.. automodule:: km3pipe.pumps.evt
+.. automodule:: km3pipe.io.evt
     :members:
     :undoc-members:
     :show-inheritance:
 
-km3pipe.pumps.jpp module
+km3pipe.io.jpp module
 ------------------------
 
-.. automodule:: km3pipe.pumps.jpp
+.. automodule:: km3pipe.io.jpp
     :members:
     :undoc-members:
     :show-inheritance:
 
-km3pipe.pumps.numpy module
-------------------------
-
-.. automodule:: km3pipe.pumps.numpy
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-km3pipe.pumps.pickle module
-------------------------
-
-.. automodule:: km3pipe.pumps.pickle
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 Module contents
 ---------------
 
-.. automodule:: km3pipe.pumps
+.. automodule:: km3pipe.io
     :members:
     :undoc-members:
     :show-inheritance:

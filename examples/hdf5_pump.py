@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from km3pipe import Module, Pipeline
-from km3pipe.pumps import HDF5Pump
+from km3pipe.io import HDF5Pump
 
 
 class Printer(Module):

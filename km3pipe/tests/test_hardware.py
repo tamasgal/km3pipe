@@ -19,6 +19,14 @@ from __future__ import division, absolute_import, print_function
 from km3pipe.testing import TestCase, StringIO, skipIf
 from km3pipe.hardware import Detector, PMT
 
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
+
 
 EXAMPLE_DETX = StringIO("\n".join((
     "1 3",
@@ -159,14 +167,14 @@ class TestDetector(TestCase):
 class TestPMT(TestCase):
 
     def test_init(self):
-        pmt = PMT(1, (1, 2, 3), (4, 5, 6), 7, 8, (9, 10, 11))
-        self.assertEqual(1, pmt.id)
-        self.assertEqual(1, pmt.pos.x)
-        self.assertEqual(2, pmt.pos.y)
-        self.assertEqual(3, pmt.pos.z)
-        self.assertAlmostEqual(0.455842, pmt.dir.x, 6)
-        self.assertAlmostEqual(0.569803, pmt.dir.y, 6)
-        self.assertAlmostEqual(0.683763, pmt.dir.z, 6)
-        self.assertEqual(7, pmt.t0)
-        self.assertEqual(8, pmt.channel_id)
+        pmt = PMT(1, (1., 2, 3), (4., 5, 6), 7, 8, (9, 10, 11))
+        self.assertAlmostEqual(1, pmt.id)
+        self.assertAlmostEqual(1, pmt.pos.x)
+        self.assertAlmostEqual(2, pmt.pos.y)
+        self.assertAlmostEqual(3, pmt.pos.z)
+        self.assertAlmostEqual(4, pmt.dir.x, 6)
+        self.assertAlmostEqual(5, pmt.dir.y, 6)
+        self.assertAlmostEqual(6, pmt.dir.z, 6)
+        self.assertAlmostEqual(7, pmt.t0)
+        self.assertAlmostEqual(8, pmt.channel_id)
         self.assertEqual((9, 10, 11), pmt.omkey)

@@ -14,20 +14,26 @@ from collections import namedtuple
 from km3pipe import Pump
 from km3pipe.logger import logging
 
-from km3pipe.dataclasses import Point, Direction
-from km3pipe.tools import pdg2name, geant2pdg, unpack_nfirst
+from km3pipe.dataclasses import Point, Direction, HitSeries
+from km3pipe.tools import pdg2name, geant2pdg, unpack_nfirst, ignored
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
-__author__ = 'tamasgal'
+__author__ = "Tamas Gal"
+__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__credits__ = []
+__license__ = "MIT"
+__maintainer__ = "Tamas Gal"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
 
 
 class EvtPump(Pump):  # pylint: disable:R0902
     """Provides a pump for EVT-files"""
 
-    def __init__(self, **context):
+    def __init__(self, filename, **context):
         super(self.__class__, self).__init__(**context)
-        self.filename = self.get('filename')
+        self.filename = filename
         self.cache_enabled = self.get('cache_enabled') or False
         self.basename = self.get('basename') or None
         self.index_start = self.get('index_start') or 1
@@ -148,6 +154,9 @@ class EvtPump(Pump):  # pylint: disable:R0902
             line = line.strip()
             if line.startswith('end_event:') and blob:
                 blob['raw_header'] = self.raw_header
+                with ignored(KeyError):
+                    blob['Hits'] = HitSeries.from_evt(blob['EvtRawHits'],
+                                                      self.index)
                 return blob
             if line.startswith('start_event:'):
                 blob = {}
@@ -168,13 +177,12 @@ class EvtPump(Pump):  # pylint: disable:R0902
             values = [float(x) for x in value.split()]
             blob.setdefault(tag, []).append(values)
             if tag == 'hit':
-                hit = Hit(*values)
+                hit = EvtHit(*values)
                 blob.setdefault("EvtHits", []).append(hit)
                 blob.setdefault("MCHits", []).append(hit)
             if tag == "hit_raw":
-                raw_hit = RawHit(*values)
+                raw_hit = EvtRawHit(*values)
                 blob.setdefault("EvtRawHits", []).append(raw_hit)
-                blob.setdefault("Hits", []).append(raw_hit)
             if tag == "track_in":
                 blob.setdefault("TrackIns", []).append(TrackIn(values))
             if tag == "track_fit":
@@ -320,8 +328,9 @@ class Neutrino(object):  # pylint: disable:R0902
 
 
 # The hit entry in an EVT file
-Hit = namedtuple('Hit', 'id pmt_id pe time type n_photons track_in c_time')
-Hit.__new__.__defaults__ = (None, None, None, None, None, None, None, None)
+EvtHit = namedtuple('EvtHit',
+                    'id pmt_id pe time type n_photons track_in c_time')
+EvtHit.__new__.__defaults__ = (None, None, None, None, None, None, None, None)
 
 
 # The hit_raw entry in an EVT file
@@ -329,7 +338,7 @@ def __add_raw_hit__(self, other):
     """Add two hits by adding the ToT and preserve time and pmt_id
     of the earlier one."""
     first = self if self.time <= other.time else other
-    return RawHit(first.id, first.pmt_id, self.tot+other.tot, first.time)
-RawHit = namedtuple('RawHit', 'id pmt_id tot time')
-RawHit.__new__.__defaults__ = (None, None, None, None)
-RawHit.__add__ = __add_raw_hit__
+    return EvtRawHit(first.id, first.pmt_id, self.tot+other.tot, first.time)
+EvtRawHit = namedtuple('EvtRawHit', 'id pmt_id tot time')
+EvtRawHit.__new__.__defaults__ = (None, None, None, None)
+EvtRawHit.__add__ = __add_raw_hit__
