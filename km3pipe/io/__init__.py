@@ -172,24 +172,22 @@ def read_geometry(detx=None, det_id=None, from_file=False, det_id_table=None):
 
 
 def _read_group(filename, where):
-    tabs = {}
+    tabs = []
     with tb.open_file(filename, 'r') as h5:
         for table in h5.iter_nodes(where, classname='Table'):
             tabname = table.name
-            tabs[tabname] = table[:]
-    tabs = _insert_tabname_into_colnames(tabs, as_df=True)
-    tabs = pd.concat(tabs.values(), axis=1)
+            tab = table[:]
+            tab = _insert_tabname_into_colnames(tab, tabname)
+            tab = pd.DataFrame.from_records(tab)
+            tabs.append(tab)
+    tabs = pd.concat(tabs, axis=1)
     return tabs
 
 
-def _insert_tabname_into_colnames(tab_map, as_df=False):
-    for name, tab in tab_map.items():
-        new_cols = [name + '_' + col for col in tab.dtype.names]
-        tab.dtype.names = new_cols
-        if as_df:
-            tab = pd.DataFrame.from_records(tab)
-        tab_map[name] = tab
-    return tab_map
+def _insert_tabname_into_colnames(tab, tabname):
+    new_cols = [tabname + '_' + col for col in tab.dtype.names]
+    tab.dtype.names = new_cols
+    return tab
 
 
 def read_table(filename, where):
