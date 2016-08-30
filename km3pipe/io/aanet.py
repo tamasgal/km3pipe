@@ -287,11 +287,11 @@ def parse_thomasfeatures(aanet_usr):
 def parse_recolns(aanet_trk):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
-    out['did_converge'] = did_converge
 
     recolns_keys = ['beta', 'n_fits', 'Lambda',
                     'n_compatible_solutions', 'Nhits', 'NhitsL0', 'NhitsL1']
     dtype = [(key, float) for key in recolns_keys + list(out.keys())]
+    out['did_converge'] = did_converge
     dtype.append(('did_converge', bool))
     dtype = np.dtype(dtype)
 
@@ -307,11 +307,11 @@ def parse_recolns(aanet_trk):
 def parse_jgandalf(aanet_trk):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
-    out['did_converge'] = did_converge
 
     jgandalf_keys = ['Energy_f', 'Energy_can', 'Beta0',
                      'Beta1', 'Lik', 'Lik_reduced', 'NhitsL0', 'NhitsL1']
     dtype = [(key, float) for key in jgandalf_keys + list(out.keys())]
+    out['did_converge'] = did_converge
     dtype.append(('did_converge', bool))
     dtype = np.dtype(dtype)
 
@@ -327,11 +327,11 @@ def parse_jgandalf(aanet_trk):
 def parse_aashowerfit(aanet_trk):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
-    out['did_converge'] = did_converge
 
     aashow_keys = ['NhitsAA', 'M_estimator', 'beta',
                           'NhitsL0', 'NhitsL1']
     dtype = [(key, float) for key in aashow_keys + list(out.keys())]
+    out['did_converge'] = did_converge
     dtype.append(('did_converge', bool))
     dtype = np.dtype(dtype)
 
@@ -347,11 +347,11 @@ def parse_aashowerfit(aanet_trk):
 def parse_qstrategy(aanet_trk):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
-    out['did_converge'] = did_converge
 
     qstrat_keys = sorted(['MFinal', 'Charge', 'MPreFit',
                    'RPreFit', 'Inertia', 'NhitsL0', 'NhitsL1'])
     dtype = [(key, float) for key in qstrat_keys + list(out.keys())]
+    out['did_converge'] = did_converge
     dtype.append(('did_converge', bool))
     dtype = np.dtype(dtype)
 
@@ -367,7 +367,6 @@ def parse_qstrategy(aanet_trk):
 def parse_dusj(aanet_trk):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
-    out['did_converge'] = did_converge
 
     dusj_keys = ['BigInertia', 'Chi2100_1000', 'Chi2o1000_1000',
                  'Chi2o1000_o10', 'Chi2o1000_o100', 'Chi2o1000_o50',
@@ -399,6 +398,7 @@ def parse_dusj(aanet_trk):
                  'NhitsL0',
                  'NhitsL1']
     dtype = [(key, float) for key in dusj_keys + list(out.keys())]
+    out['did_converge'] = did_converge
     dtype.append(('did_converge', bool))
     dtype = np.dtype(dtype)
 
