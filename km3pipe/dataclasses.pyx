@@ -33,6 +33,7 @@ __all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries', 'Hit',
 
 
 IS_CC = {
+    3: False,
     2: True,
     1: False,
     0: True,
