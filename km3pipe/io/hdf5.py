@@ -15,8 +15,9 @@ import tables
 
 import km3pipe
 from km3pipe import Pump, Module
-from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
+from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo, Reco
 from km3pipe.logger import logging
+from km3pipe.tools import camelise, decamelise
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -38,171 +39,45 @@ class HDF5Sink(Module):
         self.h5file = tables.open_file(self.filename, mode="w", title="KM3NeT")
         self.filters = tables.Filters(complevel=5, shuffle=True,
                                       fletcher32=True)
-        self.hits = self.h5file.create_table('/', 'hits',
-                                             HitSeries.dtype, "Hits",
-                                             filters=self.filters)
-        self.mc_hits = self.h5file.create_table('/', 'mc_hits',
-                                                HitSeries.dtype, "MC Hits",
-                                                filters=self.filters)
-        self.mc_tracks = self.h5file.create_table('/', 'mc_tracks',
-                                                  TrackSeries.dtype, "MC Tracks",
-                                                  filters=self.filters)
-        self.event_info = self.h5file.create_table('/', 'event_info',
-                                                   EventInfo.dtype, "Event Info",
-                                                   filters=self.filters)
-        self.h5file.create_group(
-            '/', 'reco', createparents=True, filters=self.filters)
-        self._reco_tables = {}
-        ## expect a [(blobkey, '/some/h5/path', dtype)] to put arbitraty
-        ## store in {blobkey: <pytables table obj>}
-        #tab_defines = self.get('tables') or []
-        #self._generic_tables = self._init_generic_tables(tab_defines)
+        self._tables = {}
 
-    #def _init_generic_tables(self, tablist):
-    #    for key, path, dtype in tablist:
-    #        # append eventid to dtype
-    #        dtype = append_id_to_dtype(dtype)
-    #        loc, tabname = os.path.split(path)
-    #        tab = self.h5file.create_table(loc, tabname, description=dtype,
-    #                title=blobkey, filters=self.filters, createparents=True)
-    #        self._generic_tables[blobkey] = tab
+    def _write_table(self, where, data, title=''):
+        if where not in self._tables:
+            dtype = data.dtype
+            loc, tabname = os.path.split(where)
+            self._tables[where] = self.h5file.create_table(
+                loc, tabname, description=dtype, title=title,
+                filters=self.filters, createparents=True)
 
-    def _write_hits(self, hits, hit_row):
-        """Iterate through the hits and write them to the HDF5 table.
-
-        Parameters
-        ----------
-        hits : HitSeries
-        hit_row : HDF5 TableRow
-
-        """
-        event_id = hits.event_id
-        if event_id is None:
-            log.error("Event ID is `None`")
-        for hit in hits:
-            hit_row['channel_id'] = hit.channel_id
-            hit_row['dom_id'] = hit.dom_id
-            hit_row['event_id'] = event_id
-            hit_row['id'] = hit.id
-            hit_row['pmt_id'] = hit.pmt_id
-            # hit_row['run_id'] = hit.run_id
-            hit_row['time'] = hit.time
-            hit_row['tot'] = hit.tot
-            hit_row['triggered'] = hit.triggered
-            hit_row.append()
-
-    def _write_tracks(self, tracks, track_row):
-        for track in tracks:
-            track_row['bjorkeny'] = track.bjorkeny
-            track_row['is_cc'] = track.is_cc
-            track_row['dir_x'] = track.dir[0]
-            track_row['dir_y'] = track.dir[1]
-            track_row['dir_z'] = track.dir[2]
-            track_row['energy'] = track.energy
-            track_row['event_id'] = tracks.event_id
-            track_row['interaction_channel'] = track.interaction_channel
-            track_row['id'] = track.id
-            track_row["length"] = track.length
-            track_row['pos_x'] = track.pos[0]
-            track_row['pos_y'] = track.pos[1]
-            track_row['pos_z'] = track.pos[2]
-            # track_row['run_id'] = track.run_id
-            track_row['time'] = track.time
-            track_row['type'] = track.type
-            track_row.append()
-
-    def _write_event_info(self, info, info_row):
-        info_row['det_id'] = info.det_id
-        try:  # dealing with aanet naming conventions
-            info_row['event_id'] = info.id
+        tab = self._tables[where]
+        try:
+            data = data.serialise()
         except AttributeError:
-            info_row['event_id'] = info.event_id
-        info_row['frame_index'] = info.frame_index
-        info_row['mc_id'] = info.mc_id
-        info_row['mc_t'] = info.mc_t
-        info_row['overlays'] = info.overlays
-        info_row['run_id'] = info.run_id
-        # info_row['timestamp'] = info.timestamp
-        info_row['trigger_counter'] = info.trigger_counter
-        info_row['trigger_mask'] = info.trigger_mask
-        info_row['utc_nanoseconds'] = info.utc_nanoseconds
-        info_row['utc_seconds'] = info.utc_seconds
-        info_row['weight_w1'] = info.weight_w1
-        info_row['weight_w2'] = info.weight_w2
-        info_row['weight_w3'] = info.weight_w3
-        info_row.append()
-
-    def _write_reco_track(self, track, reco_row):
-        for colname, val in track.items():
-            reco_row[colname] = val
-        reco_row.append()
-
-    def _gen_dtype(self, track):
-        keys = [(k, np.float64) for k in track.keys() if k != 'event_id' if k != 'did_converge']
-        keys.extend([('event_id', np.uint32), ('did_converge', np.bool_)])
-        return np.dtype(sorted(keys))
-
-    def _write_reco(self, reco_dict, reco_group):
-        for recname, track in reco_dict.items():
-            if recname not in self._reco_tables:
-                dtype = self._gen_dtype(track)
-                reco_table = self.h5file.create_table(
-                    reco_group, recname.lower(),
-                    dtype,      #np.dtype(recname_to_dtype[recname]),
-                    recname, createparents=True, filters=self.filters
-                )
-                self._reco_tables[recname] = reco_table
-            reco_table = self._reco_tables[recname]
-            self._write_reco_track(track, reco_table.row)
+            pass
+        if len(data) <= 0:
+            return
+        tab.append(data)
 
     def process(self, blob):
-        if 'Hits' in blob:
-            hits = blob['Hits']
-            self._write_hits(hits, self.hits.row)
-        if 'MCHits' in blob:
-            self._write_hits(blob['MCHits'], self.mc_hits.row)
-        if 'MCTracks' in blob:
-            self._write_tracks(blob['MCTracks'], self.mc_tracks.row)
-        if 'Evt' in blob and 'EventInfo' not in blob:  # skip in emergency
-            self._write_event_info(blob['Evt'], self.event_info.row)
-        if 'EventInfo' in blob:  # TODO: decide how to deal with that class
-            self._write_event_info(blob['EventInfo'], self.event_info.row)
-        if 'Reco' in blob:
-            # this is a group, not a single table
-            self._write_reco(blob['Reco'], '/reco')
-        #for key, tab in self._generic_tables.items():
-        #    self.tab = write_stuff(blob[key], tab)
+        for key, entry in blob.items():
+            if hasattr(entry, 'dtype') or hasattr(entry, 'serialise'):
+                try:
+                    loc = entry.loc
+                except AttributeError:
+                    loc = '/'
+                where = loc + decamelise(key)
+                self._write_table(where, entry, title=key)
 
         if not self.index % 1000:
-            self.hits.flush()
-            self.mc_hits.flush()
-            self.mc_tracks.flush()
-            self.event_info.flush()
-            for tab in self._reco_tables.values():
+            for tab in self._tables.values():
                 tab.flush()
-            #for tab in self._generic_tables.values():
-            #    tab.flush()
 
         self.index += 1
         return blob
 
     def finish(self):
-        self.hits.flush()
-        self.event_info.flush()
-        self.mc_hits.flush()
-        self.mc_tracks.flush()
-        for tab in self._reco_tables.values():
-            tab.flush()
-        #for tab in self._generic_tables.values():
-        #    tab.flush()
-        self.hits.cols.event_id.create_index()
-        self.event_info.cols.event_id.create_index()
-        self.mc_hits.cols.event_id.create_index()
-        self.mc_tracks.cols.event_id.create_index()
-        for tab in self._reco_tables.values():
+        for tab in self._tables.values():
             tab.cols.event_id.create_index()
-        #for tab in self._generic_tables.values():
-        #    tab.cols.event_id.create_index()
         self.h5file.root._v_attrs.km3pipe = str(km3pipe.__version__)
         self.h5file.root._v_attrs.pytables = str(tables.__version__)
         self.h5file.close()
@@ -239,21 +114,13 @@ class HDF5Pump(Pump):
         self.index += 1
         return blob
 
-    def _get_hits(self, event_id, table_name='hits', where='/'):
-        table = self.h5_file.get_node(where, table_name)
-        rows = table.read_where('event_id == %d' % event_id)
-        return HitSeries.from_table(rows, event_id)
+    def _get_event(self, event_id, where):
+        if not where.startswith('/'):
+            where = '/' + where
+        table = self.h5_file.get_node(where)
+        return table.read_where('event_id == %d' % event_id)
 
-    def _get_tracks(self, event_id, table_name='tracks', where='/'):
-        table = self.h5_file.get_node(where, table_name)
-        rows = table.read_where('event_id == %d' % event_id)
-        return TrackSeries.from_table(rows, event_id)
-
-    def _get_event_info(self, event_id, table_name='event_info', where='/'):
-        table = self.h5_file.get_node(where, table_name)
-        return EventInfo.from_table(table[event_id])
-
-    def _get_reco(self, event_id, group_name='reco', where='/'):
+    def _get_group(self, event_id, group_name='reco', where='/'):
         group = self.h5_file.get_node(where, group_name)
         out = {}
         for table in group:
@@ -265,12 +132,24 @@ class HDF5Pump(Pump):
     def get_blob(self, index):
         event_id = self.event_ids[index]
         blob = {}
-        blob['Hits'] = self._get_hits(event_id, table_name='hits')
-        blob['MCHits'] = self._get_hits(event_id, table_name='mc_hits')
-        blob['MCTracks'] = self._get_tracks(event_id, table_name='mc_tracks')
+        blob['Hits'] = HitSeries.from_table(
+            self._get_event(event_id, where='hits'))
+        blob['MCHits'] = HitSeries.from_table(
+            self._get_event(event_id, where='mc_hits'))
+        blob['MCTracks'] = TrackSeries.from_table(
+            self._get_event(event_id, where='mc_tracks'))
+        blob['EventInfo'] = EventInfo.from_table(
+            self._get_event(event_id, where='event_info'))
         blob['EventInfo'] = self._get_event_info(event_id,
-                                                 table_name='event_info')
-        blob['Reco'] = self._get_reco(event_id, group_name='reco')
+                                                 where='event_info')
+        reco = RecoSeries()
+        reco_path = '/reco'
+        reco_group = self.h5_file.get_node(reco_path)
+        for recname in reco_group._v_children.keys():
+            loc = '/'.join(reco_path, recname)
+            reco[recname] = self._get_event(event_id, where=loc)
+        blob['Reco'] = reco
+
         return blob
 
     def finish(self):
@@ -312,9 +191,3 @@ class HDF5Pump(Pump):
         start, stop, step = index.indices(len(self))
         for i in range(start, stop, step):
             yield self.get_blob(i)
-
-
-def append_id_to_dtype(dtype):
-    dt = dtype.descr
-    dt.append(('event_id', '<u4'))
-    return np.dtype(dt)

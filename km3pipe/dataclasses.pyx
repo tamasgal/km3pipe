@@ -11,6 +11,7 @@ from __future__ import division, absolute_import, print_function
 
 import ctypes
 from libcpp cimport bool as c_bool  # noqa
+from six import with_metaclass
 
 import numpy as np
 cimport numpy as np
@@ -27,69 +28,82 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
-__all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries', 'Hit')
+__all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries', 'Hit',
+           'Track', 'TrackSeries', 'Serialisable')
 
 
 IS_CC = {
+    3: False,
     2: True,
     1: False,
     0: True,
 }
 
 
-class EventInfo(object):
-    dtype = np.dtype([
+class Serialisable(type):
+    """A metaclass for serialisable classes.
+
+    The classes should define a `dtype` attribute in their body and are not
+    meant to define `__init__` (it will be overwritten).
+
+    Example using six.with_metaclass for py2/py3 compat
+    ---------------------------------------------------
+
+        class Foo(with_metaclass(Serialisable)):
+            dtype = [('a', '<i4'), ('b', '>i8')]
+
+    """
+    def __new__(metaclass, class_name, class_parents, class_attr):
+        attr = {}
+        for name, val in class_attr.items():
+            if name == 'dtype':
+                attr['dtype'] = np.dtype(val)
+            else:
+                attr[name] = val
+
+        def __init__(self, *args, **kwargs):
+            """Take care of the attribute settings."""
+            for arg, name in zip(args, self.dtype.names):
+                setattr(self, name, arg)
+            for key, value in kwargs.iteritems():
+                setattr(self, key, value)
+
+        attr['__init__'] = __init__
+
+        return type(class_name, class_parents, attr)
+
+
+class EventInfo(with_metaclass(Serialisable)):
+    dtype = [
         ('det_id', '<i4'), ('event_id', '<u4'), ('frame_index', '<u4'),
         ('mc_id', '<i4'), ('mc_t', '<f8'), ('overlays', 'u1'),
-        ('run_id', '<u4'), ('trigger_counter', '<u8'), ('trigger_mask', '<u8'),
+        #('run_id', '<u4'),
+        ('trigger_counter', '<u8'), ('trigger_mask', '<u8'),
         ('utc_nanoseconds', '<u8'), ('utc_seconds', '<u8'),
         ('weight_w1', '<f8'), ('weight_w2', '<f8'), ('weight_w3', '<f8')
-        ])
-    def __init__(self,
-                 det_id,
-                 event_id,
-                 frame_index,
-                 mc_id,
-                 mc_t,
-                 overlays,
-                 run_id,
-                 trigger_counter,
-                 trigger_mask,
-                 utc_nanoseconds,
-                 utc_seconds,
-                 weight_w1,
-                 weight_w2,
-                 weight_w3,
-                ):
-        self.det_id = det_id
-        self.event_id = event_id
-        self.frame_index = frame_index
-        self.mc_id = mc_id
-        self.mc_t = mc_t
-        self.overlays = overlays
-        self.run_id = run_id
-        self.trigger_counter = trigger_counter
-        self.trigger_mask = trigger_mask
-        self.utc_nanoseconds = utc_nanoseconds
-        self.utc_seconds = utc_seconds
-        self.weight_w1 = weight_w1
-        self.weight_w2 = weight_w2
-        self.weight_w3 = weight_w3
+        ]
 
     @classmethod
     def from_table(cls, row):
         args = []
-        for col in sorted(
-                ['det_id', 'event_id', 'frame_index', 'mc_id', 'mc_t',
-                'overlays', 'run_id', 'trigger_counter', 'trigger_mask',
-                'utc_nanoseconds', 'utc_seconds',
-                'weight_w1', 'weight_w2', 'weight_w3']
-                ):
+        for col in cls.dtype.names:
             try:
                 args.append(row[col])
             except KeyError:
                 args.append(np.nan)
         return cls(*args)
+
+    def serialise(self, to='table'):
+        if to == 'table':
+            return self.as_table()
+
+    def as_table(self):
+        return [(self.det_id, self.event_id, self.frame_index, self.mc_id,
+                 self.mc_t, self.overlays,
+                 #self.run_id,
+                 self.trigger_counter,
+                 self.trigger_mask, self.utc_nanoseconds, self.utc_seconds,
+                 self.weight_w1, self.weight_w2, self.weight_w3),]
 
     def __str__(self):
         return "Event #{0}:\n" \
@@ -103,7 +117,8 @@ class EventInfo(object):
                "    overlays:        {8}\n" \
                "    trigger counter: {9}\n" \
                "    trigger mask:    {10}\n" \
-               .format(self.event_id, self.det_id, self.run_id,
+               .format(self.event_id, self.det_id,
+                       #self.run_id,
                        self.frame_index, self.utc_seconds, self.utc_nanoseconds,
                        self.mc_id, self.mc_t, self.overlays,
                        self.trigger_counter, self.trigger_mask)
@@ -277,7 +292,8 @@ cdef class Track:
                   int id,
                   int interaction_channel,
                   bint is_cc,
-                  float length, pos,
+                  float length,
+                  pos,
                   int time,
                   int type
                   ):
@@ -307,8 +323,9 @@ cdef class Track:
 class HitSeries(object):
     dtype = np.dtype([
         ('channel_id', 'u1'), ('dom_id', '<u4'), ('event_id', '<u4'),
-        ('id', '<u4'), ('pmt_id', '<u4'), ('run_id', '<u4'), ('time', '<i4'),
-        ('tot', 'u1'), ('triggered', '?')
+        ('id', '<u4'), ('pmt_id', '<u4'),
+        #('run_id', '<u4'),
+        ('time', '<i4'), ('tot', 'u1'), ('triggered', '?')
         ])
     def __init__(self, hits, event_id=None):
         self.event_id = event_id
@@ -374,6 +391,22 @@ class HitSeries(object):
             row['tot'],
             row['triggered'],
         ) for row in table], event_id)
+    dtype = np.dtype([
+        ('channel_id', 'u1'), ('dom_id', '<u4'), ('event_id', '<u4'),
+        ('id', '<u4'), ('pmt_id', '<u4'),
+        #('run_id', '<u4'),
+        ('time', '<i4'),
+        ('tot', 'u1'), ('triggered', '?')
+        ])
+
+    def serialise(self, to='table'):
+        if to == 'table':
+            return self.as_table()
+
+    def as_table(self):
+        return [(h.channel_id, h.dom_id, self.event_id, h.id, h.pmt_id,
+            #self.run_id,
+            h.time, h.tot, h.triggered) for h in self._hits]
 
     def __iter__(self):
         return self
@@ -499,7 +532,9 @@ class TrackSeries(object):
         ('dir_z', '<f8'), ('energy', '<f8'), ('event_id', '<u4'),
         ('id', '<u4'), ('interaction_channel', '<u4'), ('is_cc', '?'),
         ('length', '<f8'), ('pos_x', '<f8'), ('pos_y', '<f8'),
-        ('pos_z', '<f8'), ('run_id', '<u4'), ('time', '<i4'), ('type', '<i4')
+        ('pos_z', '<f8'),
+        #('run_id', '<u4'),
+        ('time', '<i4'), ('type', '<i4')
         ])
     def __init__(self, tracks, event_id=None):
         self.event_id = event_id
@@ -581,6 +616,16 @@ class TrackSeries(object):
             row['time'],
             row['type'],
         ) for row in table], event_id)
+
+    def serialise(self, to='table'):
+        if to == 'table':
+            return self.as_table()
+
+    def as_table(self):
+        return [(t.bjorkeny, t.dir[0], t.dir[1], t.dir[2], t.energy,
+            self.event_id, t.id, t.interaction_channel, t.is_cc,
+            t.length, t.pos[0], t.pos[1], t.pos[2], t.time, t.type)
+            for t in self._tracks]
 
     @classmethod
     def get_usr_item(cls, track, index):
@@ -705,3 +750,24 @@ class TrackSeries(object):
 
     def __insp__(self):
         return '\n'.join([str(track) for track in self._tracks])
+
+
+class Reco(dict):
+    """"A dictionary with a dtype."""
+    def __init__(self, map, dtype, loc='/reco'):
+        self.dtype = dtype
+        self.loc = loc
+        self.update(map)
+
+    @classmethod
+    def from_dict(cls, map, dtype, event_id):
+        if 'event_id' not in dtype.names:
+            dt = dtype.descr
+            dt.append(('event_id', int))
+            dtype = np.dtype(dt)
+        map['event_id'] = event_id
+        return cls(map, dtype)
+
+    def serialise(self, to='table'):
+        if to == 'table':
+            return [[self[key] for key in self.dtype.names], ]

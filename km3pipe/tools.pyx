@@ -21,6 +21,7 @@ from datetime import datetime
 import time
 from timeit import default_timer as timer
 from contextlib import contextmanager
+import re
 
 import numpy as np
 import pandas as pd
@@ -412,3 +413,21 @@ else:
         return d.itervalues()
     def iteritems(d):
         return d.iteritems()
+
+
+def decamelise(text):
+    """Convert CamelCase to lower_and_underscore."""
+    s = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', text)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s).lower()
+
+
+def camelise(text, capital_first=True):
+    """Convert lower_underscore to CamelCase."""
+    def camelcase():
+        if not capital_first:
+            yield str.lower
+        while True:
+            yield str.capitalize
+
+    c = camelcase()
+    return "".join(next(c)(x) if x else '_' for x in text.split("_"))

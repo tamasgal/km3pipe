@@ -7,9 +7,9 @@ A collection of io for different kinds of data formats.
 from __future__ import division, absolute_import, print_function
 
 import os.path
+from six import string_types
 
 import numpy as np
-from numpy.lib.recfunctions import stack_arrays
 import pandas as pd
 import tables as tb
 
@@ -143,7 +143,7 @@ def read_hdf5(filename, detx=None, det_id=None, det_from_file=False):
     event_info = read_table(filename, '/event_info')
     hits = read_table(filename, '/hits')
     mc_tracks = read_table(filename, '/mc_tracks')
-    reco = read_group(filename, '/reco')
+    reco = _read_group(filename, '/reco')
     geometry = read_geometry(detx, det_id, det_from_file,
                              det_id_table=event_info['det_id'])
     return Run(event_info, geometry, hits, mc_tracks, reco)
@@ -172,23 +172,31 @@ def read_geometry(detx=None, det_id=None, from_file=False, det_id_table=None):
     return None
 
 
-def read_group(filename, group_path):
-    tab = []
-    with tb.open_file(filename, 'r') as h5:
-        group = h5.get_node(group_path)
-        for table in group:
-            tabname = table.name
-            buf = table[:]
-            new_names = [tabname + '_' + col for col in buf.dtype.names]
-            buf.dtype.names = new_names
-            tab.append(buf)
-    tab = stack_arrays(tab)
+def _read_group(h5file, where):
+    if isinstance(h5file, string_types):
+        h5file = tb.open_file(h5file, 'r')
+    tabs = []
+    for table in h5file.iter_nodes(where, classname='Table'):
+        tabname = table.name
+        tab = table[:]
+        tab = _insert_tabname_into_colnames(tab, tabname)
+        tab = pd.DataFrame.from_records(tab)
+        tabs.append(tab)
+    h5file.close()
+    tabs = pd.concat(tabs, axis=1)
+    return tabs
+
+
+def _insert_tabname_into_colnames(tab, tabname):
+    new_cols = [tabname + '_' + col for col in tab.dtype.names]
+    tab.dtype.names = new_cols
     return tab
 
 
-def read_table(filename, tabname):
+def read_table(filename, where):
     with tb.open_file(filename, 'r') as h5:
-        tab = h5.get_node(tabname)[:]
+        tab = h5.get_node(where)[:]
+    tab = pd.DataFrame.from_records(tab)
     return tab
 
 
@@ -196,7 +204,5 @@ def write_table(filename, where, array):
     """Write a numpy array into a H5 table."""
     filt = tb.Filters(complevel=5, shuffle=True, fletcher32=True)
     loc, tabname = os.path.split(where)
-    print(loc)
-    print(tabname)
     with tb.open_file(filename, 'a') as h5:
         h5.create_table(loc, tabname, obj=array, createparents=True, filters=filt)

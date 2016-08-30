@@ -10,7 +10,7 @@ import os.path
 import numpy as np
 
 from km3pipe import Pump
-from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
+from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo, Reco
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -101,7 +101,6 @@ class AanetPump(Pump):
                 blob = {'Evt': event,
                         'Hits': HitSeries.from_aanet(event.hits, event.id),
                         'MCHits': HitSeries.from_aanet(event.mc_hits, event.id),
-                        'Reco': read_mini_dst(event, event.id),
                         'MCTracks': TrackSeries.from_aanet(event.mc_trks,
                                                            event.id),
                         'filename': filename,
@@ -123,6 +122,9 @@ class AanetPump(Pump):
                             w3,
                         ),
                        }
+                recos = read_mini_dst(event, event.id)
+                for recname, reco in recos.items():
+                    blob[recname] = reco
                 yield blob
             del event_file
 
@@ -183,12 +185,19 @@ def read_mini_dst(aanet_event, event_id):
         'Dusj': parse_dusj,
     }
     minidst = {}
+    if len(aanet_event.trks) == 0:
+        return minidst
     for k, trk in enumerate(aanet_event.trks):
         recname = pos_to_recname[k]
         reader = recname_to_reader[recname]
-        minidst[recname] = reader(trk)
-        minidst[recname]['event_id'] = event_id
-    minidst['ThomasFeatures'] = parse_thomasfeatures(aanet_event.usr)
+
+        reco_map, dtype = reader(trk)
+        minidst[recname] = Reco.from_dict(reco_map, dtype, event_id=event_id)
+
+    thomas_map, dtype = parse_thomasfeatures(aanet_event.usr)
+    minidst['ThomasFeatures'] = Reco.from_dict(thomas_map, dtype,
+                                               event_id=event_id)
+
     return minidst
 
 
@@ -260,91 +269,104 @@ def parse_thomasfeatures(aanet_usr):
                    'BigInertia',
                    'GoldParameter']
 
+    dtype = [(key, float) for key in Thomas_keys + list(out.keys())]
+
     out['did_converge'] = did_converge
+    dtype.append(('did_converge', bool))
+    dtype = np.dtype(dtype)
+
     if not did_converge:
         for key in Thomas_keys:
             out[key] = np.nan
-        return out
-
-    for count, key in enumerate(Thomas_keys):
-        out[key] = aanet_usr[count]
-    return out
+    else:
+        for count, key in enumerate(Thomas_keys):
+            out[key] = aanet_usr[count]
+    return out, dtype
 
 
 def parse_recolns(aanet_trk):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
-    out['did_converge'] = did_converge
 
     recolns_keys = ['beta', 'n_fits', 'Lambda',
                     'n_compatible_solutions', 'Nhits', 'NhitsL0', 'NhitsL1']
+    dtype = [(key, float) for key in recolns_keys + list(out.keys())]
+    out['did_converge'] = did_converge
+    dtype.append(('did_converge', bool))
+    dtype = np.dtype(dtype)
 
     if not did_converge:
         for key in recolns_keys:
             out[key] = np.nan
-        return out
-
-    for count, key in enumerate(recolns_keys):
-        out[key] = aanet_trk.usr[count]
-    return out
+    else:
+        for count, key in enumerate(recolns_keys):
+            out[key] = aanet_trk.usr[count]
+    return out, dtype
 
 
 def parse_jgandalf(aanet_trk):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
-    out['did_converge'] = did_converge
 
     jgandalf_keys = ['Energy_f', 'Energy_can', 'Beta0',
                      'Beta1', 'Lik', 'Lik_reduced', 'NhitsL0', 'NhitsL1']
+    dtype = [(key, float) for key in jgandalf_keys + list(out.keys())]
+    out['did_converge'] = did_converge
+    dtype.append(('did_converge', bool))
+    dtype = np.dtype(dtype)
 
     if not did_converge:
         for key in jgandalf_keys:
             out[key] = np.nan
-        return out
-
-    for count, key in enumerate(jgandalf_keys):
-        out[key] = aanet_trk.usr[count]
-    return out
+    else:
+        for count, key in enumerate(jgandalf_keys):
+            out[key] = aanet_trk.usr[count]
+    return out, dtype
 
 
 def parse_aashowerfit(aanet_trk):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
-    out['did_converge'] = did_converge
 
     aashow_keys = ['NhitsAA', 'M_estimator', 'beta',
-                   'NhitsL0', 'NhitsL1']
+                          'NhitsL0', 'NhitsL1']
+    dtype = [(key, float) for key in aashow_keys + list(out.keys())]
+    out['did_converge'] = did_converge
+    dtype.append(('did_converge', bool))
+    dtype = np.dtype(dtype)
 
     if not did_converge:
         for key in aashow_keys:
             out[key] = np.nan
-        return out
-    for count, key in enumerate(aashow_keys):
-        out[key] = aanet_trk.usr[count]
-    return out
+    else:
+        for count, key in enumerate(aashow_keys):
+            out[key] = aanet_trk.usr[count]
+    return out, dtype
 
 
 def parse_qstrategy(aanet_trk):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
+
+    qstrat_keys = sorted(['MFinal', 'Charge', 'MPreFit',
+                   'RPreFit', 'Inertia', 'NhitsL0', 'NhitsL1'])
+    dtype = [(key, float) for key in qstrat_keys + list(out.keys())]
     out['did_converge'] = did_converge
-    qstrat_keys = ['MFinal', 'Charge', 'MPreFit',
-                   'RPreFit', 'Inertia', 'NhitsL0', 'NhitsL1']
+    dtype.append(('did_converge', bool))
+    dtype = np.dtype(dtype)
 
     if not did_converge:
         for key in qstrat_keys:
             out[key] = np.nan
-        return out
-
-    for count, key in enumerate(qstrat_keys):
-        out[key] = aanet_trk.usr[count]
-    return out
+    else:
+        for count, key in enumerate(qstrat_keys):
+            out[key] = aanet_trk.usr[count]
+    return out, dtype
 
 
 def parse_dusj(aanet_trk):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
-    out['did_converge'] = did_converge
 
     dusj_keys = ['BigInertia', 'Chi2100_1000', 'Chi2o1000_1000',
                  'Chi2o1000_o10', 'Chi2o1000_o100', 'Chi2o1000_o50',
@@ -375,12 +397,15 @@ def parse_dusj(aanet_trk):
                  'YInterspotDiffo1000_o50',
                  'NhitsL0',
                  'NhitsL1']
+    dtype = [(key, float) for key in dusj_keys + list(out.keys())]
+    out['did_converge'] = did_converge
+    dtype.append(('did_converge', bool))
+    dtype = np.dtype(dtype)
 
     if not did_converge:
         for key in dusj_keys:
             out[key] = np.nan
-        return out
-
-    for count, key in enumerate(dusj_keys):
-        out[key] = aanet_trk.usr[count]
-    return out
+    else:
+        for count, key in enumerate(dusj_keys):
+            out[key] = aanet_trk.usr[count]
+    return out, dtype

@@ -11,7 +11,8 @@ from time import sleep
 from km3pipe.testing import TestCase, MagicMock, StringIO
 from km3pipe.tools import (unpack_nfirst, split, namedtuple_with_defaults,
                            angle_between, geant2pdg, pdg2name, PMTReplugger,
-                           Cuckoo, total_seconds, remain_file_pointer)
+                           Cuckoo, total_seconds, remain_file_pointer,
+                           decamelise, camelise)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -269,3 +270,22 @@ class TestRemainFilePointer(TestCase):
         return_value = fileseeker.seek_into_file(fileseeker.dummy_file)
         self.assertEqual(2, fileseeker.dummy_file.tell())
         self.assertEqual(1, return_value)
+
+
+class TestCamelCaseConverter(TestCase):
+    def test_decamelise(self):
+        text = "TestCase"
+        self.assertEqual("test_case", decamelise(text))
+        text = "TestCaseXYZ"
+        self.assertEqual("test_case_xyz", decamelise(text))
+        text = "1TestCase"
+        self.assertEqual("1_test_case", decamelise(text))
+        text = "test_case"
+        self.assertEqual("test_case", decamelise(text))
+
+    def test_camelise(self):
+        text = "camel_case"
+        self.assertEqual("CamelCase", camelise(text))
+        text = "camel_case"
+        self.assertEqual("camelCase", camelise(text, capital_first=False))
+
