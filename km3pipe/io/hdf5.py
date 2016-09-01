@@ -75,12 +75,12 @@ class HDF5Sink(Module):
     def process(self, blob):
         for key, entry in blob.items():
             if hasattr(entry, 'dtype') or hasattr(entry, 'serialise') or \
-                    hasattry(entry, 'to_records'):
+                    hasattr(entry, 'to_records'):
                 try:
-                    loc = entry.loc
+                    h5loc = entry.h5loc
                 except AttributeError:
-                    loc = ''
-                where = loc + '/' + decamelise(key)
+                    h5loc = ''
+                where = h5loc + '/' + decamelise(key)
                 self._write_table(where, entry, title=key)
 
         if not self.index % 1000:

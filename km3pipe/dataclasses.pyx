@@ -754,9 +754,9 @@ class TrackSeries(object):
 
 class Reco(dict):
     """"A dictionary with a dtype."""
-    def __init__(self, map, dtype, loc='/reco'):
+    def __init__(self, map, dtype, h5loc='/reco'):
         self.dtype = dtype
-        self.loc = loc
+        self.h5loc = h5loc
         self.update(map)
 
     @classmethod
