@@ -74,8 +74,8 @@ class HDF5Sink(Module):
                 try:
                     loc = entry.loc
                 except AttributeError:
-                    loc = '/'
-                where = loc + decamelise(key)
+                    loc = ''
+                where = loc + '/' + decamelise(key)
                 self._write_table(where, entry, title=key)
 
         if not self.index % 1000:
