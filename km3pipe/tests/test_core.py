@@ -78,7 +78,7 @@ class TestPipeline(TestCase):
         for module in pl.modules:
             self.assertEqual(n, module.process.call_count)
 
-    def test_conditional_module_only_called_if_key_in_blob(self):
+    def test_conditional_module_not_called_if_key_not_in_blob(self):
         pl = Pipeline(blob=1)
 
         pl.attach(Module, 'module1')
@@ -87,6 +87,23 @@ class TestPipeline(TestCase):
 
         for module in pl.modules:
             module.process = MagicMock(return_value={})
+
+        pl.drain(1)
+
+        self.assertEqual(1, pl.modules[0].process.call_count)
+        self.assertEqual(0, pl.modules[1].process.call_count)
+        self.assertEqual(1, pl.modules[2].process.call_count)
+
+    def test_conditional_module_called_if_key_in_blob(self):
+        pl = Pipeline(blob=1)
+
+        pl.attach(Module, 'module1')
+        pl.attach(Module, 'module2', only_if='foo')
+        pl.attach(Module, 'module3')
+
+        pl.modules[0].process = MagicMock(return_value={'foo': 23})
+        pl.modules[1].process = MagicMock(return_value={})
+        pl.modules[2].process = MagicMock(return_value={})
 
         pl.drain(1)
 
@@ -109,8 +126,9 @@ class TestPipeline(TestCase):
         pl.attach(func_module2, 'module2')
         pl.attach(func_module3, 'module3')
         pl.drain(1)
-        for module in pl.modules:
-            self.assertEqual(1, module.call_count)
+        self.assertEqual(1, pl.modules[0].call_count)
+        self.assertEqual(1, pl.modules[1].call_count)
+        self.assertEqual(1, pl.modules[2].call_count)
 
     def test_finish(self):
         self.pl.finish()

@@ -34,6 +34,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
+log.setLevel(logging.DEBUG)
 
 STAT_LIMIT = 100000
 
@@ -75,6 +76,12 @@ class Pipeline(object):
         else:
             log.debug("Attaching as regular module")
             module = module_factory(name=name, **kwargs)
+
+        # Special parameters
+        if 'only_if' in kwargs:
+            module.only_if = kwargs['only_if']
+        else:
+            module.only_if = None
 
         self._timeit[module] = {'process': deque(maxlen=STAT_LIMIT),
                                 'process_cpu': deque(maxlen=STAT_LIMIT),
@@ -130,6 +137,12 @@ class Pipeline(object):
                         log.debug("Skipping {0}, due to empty blob."
                                   .format(module.name))
                         continue
+                    if module.only_if is not None and \
+                            module.only_if not in self.blob:
+                        log.debug("Skipping {0}, due to missing required key"
+                                  "'{1}'.".format(module.name, module.only_if))
+                        continue
+
                     log.debug("Processing {0} ".format(module.name))
                     start = timer()
                     start_cpu = time.clock()
