@@ -14,7 +14,7 @@ import numpy as np
 from km3pipe.testing import TestCase, FakeAanetHit
 from km3pipe.io.evt import EvtRawHit
 from km3pipe.dataclasses import (Hit, Track, Position, Direction_, HitSeries,
-                                 EventInfo, Serialisable, Reco)
+                                 EventInfo, Serialisable, Reco, TrackSeries)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -308,6 +308,71 @@ class TestTrack(TestCase):
         self.assertAlmostEqual(102, track.pos[2])
 
 
+class TestTrackSeries(TestCase):
+    def test_from_arrays(self):
+        n = 10
+        bjorkenys = np.array(range(n))
+        dir_xs = np.array(range(n))
+        dir_ys = np.array(range(n))
+        dir_zs = np.array(range(n))
+        energys = np.array(range(n))
+        ids = np.array(range(n))
+        interaction_channels = np.array(range(n))
+        is_ccs = np.array([True] * 10)
+        lengths = np.array(range(n))
+        pos_xs = np.array(range(n))
+        pos_ys = np.array(range(n))
+        pos_zs = np.array(range(n))
+        times = np.array(range(n))
+        types = np.array(range(n))
+
+        tracks = TrackSeries.from_arrays(
+            bjorkenys,
+            dir_xs,
+            dir_ys,
+            dir_zs,
+            energys,
+            ids,
+            interaction_channels,
+            is_ccs,
+            lengths,
+            pos_xs,
+            pos_ys,
+            pos_zs,
+            times,
+            types,
+            event_id=0,
+        )
+        print(tracks)
+
+        self.assertAlmostEqual(1, tracks[1].id)
+        self.assertAlmostEqual(9, tracks[9].interaction_channel)
+        self.assertEqual(10, len(tracks))
+
+    def test_array(self):
+        ts = TrackSeries.from_table([{
+            'bjorkeny': 0.0,
+            'dir_x': 1.0,
+            'dir_y': 2.0,
+            'dir_z': 3.0,
+            'energy': 4.0,
+            'id': 5,
+            'interaction_channel': 7,
+            'is_cc': True,
+            'length': 9.0,
+            'pos_x': 10.0,
+            'pos_y': 11.0,
+            'pos_z': 12.0,
+            'time': 13,
+            'type': 14,
+            }], event_id=0)
+        exp = [(0.0, 1.0, 2.0, 3, 4.0, 0, 6, 7, True, 9.0, 10.0, 12.0, 12.0,
+                13, 14),]
+        exp = np.array(exp, dtype=ts.dtype)
+        self.assertEqual(1, len(ts))
+        #self.assertAlmostEqual(exp, ts.serialise())
+
+
 class TestEventInfo(TestCase):
     def test_event_info(self):
         e = EventInfo(*range(14))
@@ -317,7 +382,7 @@ class TestEventInfo(TestCase):
         self.assertAlmostEqual(3, e.mc_id)
         self.assertAlmostEqual(4, e.mc_t)
         self.assertAlmostEqual(5, e.overlays)
-        #self.assertAlmostEqual(6, e.run_id)
+        # self.assertAlmostEqual(6, e.run_id)
         self.assertAlmostEqual(6, e.trigger_counter)
         self.assertAlmostEqual(7, e.trigger_mask)
         self.assertAlmostEqual(8, e.utc_nanoseconds)
@@ -334,7 +399,7 @@ class TestEventInfo(TestCase):
             'mc_id': 3,
             'mc_t': 4,
             'overlays': 5,
-            #'run_id': 6,
+            # 'run_id': 6,
             'trigger_counter': 6,
             'trigger_mask': 7,
             'utc_nanoseconds': 8,
@@ -350,7 +415,7 @@ class TestEventInfo(TestCase):
         self.assertAlmostEqual(3, e.mc_id)
         self.assertAlmostEqual(4, e.mc_t)
         self.assertAlmostEqual(5, e.overlays)
-        #self.assertAlmostEqual(6, e.run_id)
+        # self.assertAlmostEqual(6, e.run_id)
         self.assertAlmostEqual(6, e.trigger_counter)
         self.assertAlmostEqual(7, e.trigger_mask)
         self.assertAlmostEqual(8, e.utc_nanoseconds)
@@ -368,7 +433,7 @@ class TestEventInfo(TestCase):
         self.assertTrue(np.isnan(e.mc_id))
         self.assertTrue(np.isnan(e.mc_t))
         self.assertTrue(np.isnan(e.overlays))
-        #self.assertTrue(np.isnan(e.run_id))
+        # self.assertTrue(np.isnan(e.run_id))
         self.assertTrue(np.isnan(e.trigger_counter))
         self.assertTrue(np.isnan(e.trigger_mask))
         self.assertTrue(np.isnan(e.utc_nanoseconds))
@@ -376,6 +441,26 @@ class TestEventInfo(TestCase):
         self.assertTrue(np.isnan(e.weight_w1))
         self.assertTrue(np.isnan(e.weight_w2))
         self.assertTrue(np.isnan(e.weight_w3))
+
+    def test_array(self):
+        e = EventInfo.from_table({
+            'det_id': 0,
+            'event_id': 1,
+            'frame_index': 2,
+            'mc_id': 3,
+            'mc_t': 4.0,
+            'overlays': 5,
+            # 'run_id': 6,
+            'trigger_counter': 6,
+            'trigger_mask': 7,
+            'utc_nanoseconds': 8,
+            'utc_seconds': 9,
+            'weight_w1': 10.0,
+            'weight_w2': 11.0,
+            'weight_w3': 12.0,
+            })
+        exp = (0, 1, 2, 3, 4.0, 5, 6, 7, 8, 9, 10.0, 11.0, 12.0)
+        self.assertAlmostEqual(e.serialise(), np.array(exp, e.dtype))
 
 
 class TestReco(TestCase):
