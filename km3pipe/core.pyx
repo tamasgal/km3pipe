@@ -251,6 +251,7 @@ class Module(object):
         log.debug("Initialising {0}".format(name))
         self._name = name
         self.parameters = parameters
+        self.only_if = None
         self.detector = None
         self.timeit = self.get('timeit') or False
         self._timeit = {'process': deque(maxlen=STAT_LIMIT),

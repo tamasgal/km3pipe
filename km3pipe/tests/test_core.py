@@ -37,13 +37,10 @@ class TestPipeline(TestCase):
     def test_drain_calls_each_attached_module(self):
         pl = Pipeline(blob=1)
 
-        # TODO: there is no working check for func_module yet!
-        # func_module = MagicMock(return_value={})
-        # func_module.__name__ = "MagicMock"
-        func_module_called = True
+        func_module_spy = MagicMock()
+
         def func_module(blob):
-            global func_module_called
-            func_module_called = True
+            func_module_spy()
             return blob
 
         pl.attach(Module, 'module1')
@@ -56,17 +53,17 @@ class TestPipeline(TestCase):
                 print("normal module, mocking")
                 module.process = MagicMock(return_value={})
 
-        pl.drain(1)
+        n = 3
+
+        pl.drain(n)
 
         for module in pl.modules:
             try:
                 # Regular modules
-                module.process.assert_called_once()
+                self.assertEqual(n, module.process.call_count)
             except AttributeError:
                 # Function module
-                print(func_module_called)
-                self.assertTrue(func_module_called)
-                # func_module.assert_called_once()
+                self.assertEqual(n, func_module_spy.call_count)
 
     def test_drain_calls_process_method_on_each_attached_module(self):
         pl = Pipeline(blob=1)
@@ -76,9 +73,26 @@ class TestPipeline(TestCase):
         pl.attach(Module, 'module3')
         for module in pl.modules:
             module.process = MagicMock(return_value={})
-        pl.drain(1)
+        n = 3
+        pl.drain(n)
         for module in pl.modules:
-            module.process.assert_called_once()
+            self.assertEqual(n, module.process.call_count)
+
+    def test_conditional_module_only_called_if_key_in_blob(self):
+        pl = Pipeline(blob=1)
+
+        pl.attach(Module, 'module1')
+        pl.attach(Module, 'module2', only_if='foo')
+        pl.attach(Module, 'module3')
+
+        for module in pl.modules:
+            module.process = MagicMock(return_value={})
+
+        pl.drain(1)
+
+        self.assertEqual(1, pl.modules[0].process.call_count)
+        self.assertEqual(1, pl.modules[1].process.call_count)
+        self.assertEqual(1, pl.modules[2].process.call_count)
 
     def test_drain_calls_function_modules(self):
         pl = Pipeline(blob=1)
@@ -96,7 +110,7 @@ class TestPipeline(TestCase):
         pl.attach(func_module3, 'module3')
         pl.drain(1)
         for module in pl.modules:
-            module.assert_called_once()
+            self.assertEqual(1, module.call_count)
 
     def test_finish(self):
         self.pl.finish()
@@ -110,7 +124,7 @@ class TestPipeline(TestCase):
         self.pl.drain(4)
         for module in self.pl.modules:
             if module.name != 'func_module':
-                module.finish.assert_called_once_with()
+                self.assertEqual(1, module.finish.call_count)
 
 
 class TestModule(TestCase):
