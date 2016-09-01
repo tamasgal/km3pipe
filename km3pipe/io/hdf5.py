@@ -32,7 +32,17 @@ __status__ = "Development"
 
 class HDF5Sink(Module):
     def __init__(self, **context):
-        """A Module to convert (KM3NeT) ROOT files to HDF5."""
+        """A Module to dump blob data to HDF5.
+
+        Each item in the blob which has a dtype or a `serialise()` method
+        will be dumped in the HDF5 file.
+        The table name is either the key (if the value is a plain value with
+        a dtype) or the `loc` attribute of the object.
+
+        The target table name is a decamelised version of the blob-key,
+        so for example values which are stored in the blob under `FooBar`
+        will be written to `/foo_bar` in the HDF5 file.
+        """
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
         self.index = 1
