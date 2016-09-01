@@ -135,15 +135,6 @@ class HDF5Pump(Pump):
         table = self.h5_file.get_node(where)
         return table.read_where('event_id == %d' % event_id)
 
-    def _get_group(self, event_id, group_name='reco', where='/'):
-        group = self.h5_file.get_node(where, group_name)
-        out = {}
-        for table in group:
-            tabname = table.title
-            data = table.read_where('event_id == %d' % event_id)
-            out[tabname] = data
-        return out
-
     def get_blob(self, index):
         event_id = self.event_ids[index]
         blob = {}
@@ -155,16 +146,11 @@ class HDF5Pump(Pump):
             self._get_event(event_id, where='mc_tracks'))
         blob['EventInfo'] = EventInfo.from_table(
             self._get_event(event_id, where='event_info'))
-        blob['EventInfo'] = self._get_event_info(event_id,
-                                                 where='event_info')
-        reco = RecoSeries()
-        reco_path = '/reco'
-        reco_group = self.h5_file.get_node(reco_path)
-        for recname in reco_group._v_children.keys():
-            loc = '/'.join(reco_path, recname)
-            reco[recname] = self._get_event(event_id, where=loc)
-        blob['Reco'] = reco
 
+        reco_path = '/reco'
+        for tab in self.h5_file.iter_nodes(reco_path, classname='Table'):
+            tabname = tab.name
+            blob[camelise(tabname)] = tab.read_where('event_id == %d' % event_id)
         return blob
 
     def finish(self):
