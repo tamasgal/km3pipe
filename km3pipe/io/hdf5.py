@@ -52,6 +52,16 @@ class HDF5Sink(Module):
         self._tables = {}
 
     def _write_table(self, where, data, title=''):
+        if len(data) <= 0:
+            return
+        try:
+            data = data.to_records()
+        except AttributeError:
+            pass
+        try:
+            data = data.serialise()
+        except AttributeError:
+            pass
         if where not in self._tables:
             dtype = data.dtype
             loc, tabname = os.path.split(where)
@@ -60,17 +70,12 @@ class HDF5Sink(Module):
                 filters=self.filters, createparents=True)
 
         tab = self._tables[where]
-        try:
-            data = data.serialise()
-        except AttributeError:
-            pass
-        if len(data) <= 0:
-            return
         tab.append(data)
 
     def process(self, blob):
         for key, entry in blob.items():
-            if hasattr(entry, 'dtype') or hasattr(entry, 'serialise'):
+            if hasattr(entry, 'dtype') or hasattr(entry, 'serialise') or \
+                    hasattry(entry, 'to_records'):
                 try:
                     loc = entry.loc
                 except AttributeError:
