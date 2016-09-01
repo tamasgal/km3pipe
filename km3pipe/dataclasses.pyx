@@ -271,9 +271,13 @@ cdef class Track:
 
     Parameters
     ----------
+    bjorkeny : float
     dir : Direction or numpy.ndarray
     energy : float
+    lenght : float
     id : int
+    interaction_channel : int
+    is_cc : bool
     pos : Position or numpy.ndarray
     time : int
     type : int
@@ -290,7 +294,7 @@ cdef class Track:
                   dir,
                   float energy,
                   int id,
-                  int interaction_channel,
+                  np.int64_t interaction_channel,
                   bint is_cc,
                   float length,
                   pos,
@@ -611,6 +615,8 @@ class TrackSeries(object):
             np.array((row['dir_x'], row['dir_y'], row['dir_z'])),
             row['energy'],
             row['id'],
+            row['interaction_channel'],
+            row['is_cc'],
             row['length'],
             np.array((row['pos_x'], row['pos_y'], row['pos_z'])),
             row['time'],
