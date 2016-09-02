@@ -762,6 +762,7 @@ class TrackSeries(object):
         return '\n'.join([str(track) for track in self._tracks])
 
 
+
 class Reco(dict):
     """"A dictionary with a dtype."""
     def __init__(self, map, dtype, h5loc='/reco'):
@@ -769,15 +770,9 @@ class Reco(dict):
         self.h5loc = h5loc
         self.update(map)
 
-    @classmethod
-    def from_dict(cls, map, dtype, event_id):
-        if 'event_id' not in dtype.names:
-            dt = dtype.descr
-            dt.append(('event_id', int))
-            dtype = np.dtype(dt)
-        map['event_id'] = event_id
-        return cls(map, dtype)
-
     def serialise(self, to='numpy'):
         if to == 'numpy':
-            return [[self[key] for key in self.dtype.names], ]
+            return np.array(self.__array__(), dtype=self.dtype)
+
+    def __array__(self):
+        return [tuple((self[key] for key in self.dtype.names))]

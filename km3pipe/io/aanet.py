@@ -192,11 +192,10 @@ def read_mini_dst(aanet_event, event_id):
         reader = recname_to_reader[recname]
 
         reco_map, dtype = reader(trk)
-        minidst[recname] = Reco.from_dict(reco_map, dtype, event_id=event_id)
+        minidst[recname] = Reco(reco_map, dtype)
 
     thomas_map, dtype = parse_thomasfeatures(aanet_event.usr)
-    minidst['ThomasFeatures'] = Reco.from_dict(thomas_map, dtype,
-                                               event_id=event_id)
+    minidst['ThomasFeatures'] = Reco(thomas_map, dtype)
 
     return minidst
 
@@ -215,7 +214,7 @@ def parse_track(trk):
     return out
 
 
-def parse_thomasfeatures(aanet_usr):
+def parse_thomasfeatures(aanet_usr, event_id=0):
     out = {}
     did_converge = len(aanet_usr) > 1
 
@@ -273,6 +272,8 @@ def parse_thomasfeatures(aanet_usr):
 
     out['did_converge'] = did_converge
     dtype.append(('did_converge', bool))
+    out['event_id'] = event_id
+    dtype.append(('event_id', '<u4'))
     dtype = np.dtype(dtype)
 
     if not did_converge:
@@ -284,7 +285,7 @@ def parse_thomasfeatures(aanet_usr):
     return out, dtype
 
 
-def parse_recolns(aanet_trk):
+def parse_recolns(aanet_trk, event_id=0):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
 
@@ -293,6 +294,8 @@ def parse_recolns(aanet_trk):
     dtype = [(key, float) for key in recolns_keys + list(out.keys())]
     out['did_converge'] = did_converge
     dtype.append(('did_converge', bool))
+    out['event_id'] = event_id
+    dtype.append(('event_id', '<u4'))
     dtype = np.dtype(dtype)
 
     if not did_converge:
@@ -304,7 +307,7 @@ def parse_recolns(aanet_trk):
     return out, dtype
 
 
-def parse_jgandalf(aanet_trk):
+def parse_jgandalf(aanet_trk, event_id=0):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
 
@@ -313,6 +316,8 @@ def parse_jgandalf(aanet_trk):
     dtype = [(key, float) for key in jgandalf_keys + list(out.keys())]
     out['did_converge'] = did_converge
     dtype.append(('did_converge', bool))
+    out['event_id'] = event_id
+    dtype.append(('event_id', '<u4'))
     dtype = np.dtype(dtype)
 
     if not did_converge:
@@ -324,7 +329,7 @@ def parse_jgandalf(aanet_trk):
     return out, dtype
 
 
-def parse_aashowerfit(aanet_trk):
+def parse_aashowerfit(aanet_trk, event_id=0):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
 
@@ -333,6 +338,8 @@ def parse_aashowerfit(aanet_trk):
     dtype = [(key, float) for key in aashow_keys + list(out.keys())]
     out['did_converge'] = did_converge
     dtype.append(('did_converge', bool))
+    out['event_id'] = event_id
+    dtype.append(('event_id', '<u4'))
     dtype = np.dtype(dtype)
 
     if not did_converge:
@@ -344,7 +351,7 @@ def parse_aashowerfit(aanet_trk):
     return out, dtype
 
 
-def parse_qstrategy(aanet_trk):
+def parse_qstrategy(aanet_trk, event_id=0):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
 
@@ -353,6 +360,8 @@ def parse_qstrategy(aanet_trk):
     dtype = [(key, float) for key in qstrat_keys + list(out.keys())]
     out['did_converge'] = did_converge
     dtype.append(('did_converge', bool))
+    out['event_id'] = event_id
+    dtype.append(('event_id', '<u4'))
     dtype = np.dtype(dtype)
 
     if not did_converge:
@@ -364,7 +373,7 @@ def parse_qstrategy(aanet_trk):
     return out, dtype
 
 
-def parse_dusj(aanet_trk):
+def parse_dusj(aanet_trk, event_id=0):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
 
@@ -400,6 +409,8 @@ def parse_dusj(aanet_trk):
     dtype = [(key, float) for key in dusj_keys + list(out.keys())]
     out['did_converge'] = did_converge
     dtype.append(('did_converge', bool))
+    out['event_id'] = event_id
+    dtype.append(('event_id', '<u4'))
     dtype = np.dtype(dtype)
 
     if not did_converge:
