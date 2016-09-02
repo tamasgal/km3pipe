@@ -367,10 +367,10 @@ class TestTrackSeries(TestCase):
             'type': 14,
             }], event_id=0)
         exp = [(0.0, 1.0, 2.0, 3, 4.0, 0, 6, 7, True, 9.0, 10.0, 12.0, 12.0,
-                13, 14),]
+                13, 14), ]
         exp = np.array(exp, dtype=ts.dtype)
         self.assertEqual(1, len(ts))
-        #self.assertAlmostEqual(exp, ts.serialise())
+        # self.assertAlmostEqual(exp, ts.serialise())
 
 
 class TestEventInfo(TestCase):
@@ -464,27 +464,17 @@ class TestEventInfo(TestCase):
 
 
 class TestReco(TestCase):
-    def test_reco_event_id_is_appended_to_dtype_if_missing(self):
-        dt = np.dtype([('x', int), ('y', float)])
-        dat = {'x': 4, 'y': 2.0}
-        dt_out = np.dtype([('x', int), ('y', float), ('event_id', int)])
-        r = Reco.from_dict(dat, dtype=dt, event_id=5)
-        self.assertTrue(r.dtype == dt_out)
-        r_manual = Reco.from_dict(dat, dtype=dt_out, event_id=5)
-        self.assertTrue(r_manual.dtype == dt_out)
-
     def test_reco(self):
         dt = np.dtype([('x', int), ('y', float), ('did_converge', bool)])
         dat = {'x': 4, 'y': 2.0, 'did_converge': True}
-        rec = Reco.from_dict(dat, dtype=dt, event_id=42)
+        rec = Reco(dat, dtype=dt)
         self.assertTrue(rec['did_converge'])
         self.assertAlmostEqual(rec['x'], 4)
 
     def test_reco_serialise(self):
         dt = np.dtype([('x', int), ('y', float), ('did_converge', bool)])
         dat = {'x': 4, 'y': 2.0, 'did_converge': True}
-        rec = Reco.from_dict(dat, dtype=dt, event_id=42).serialise()
-        self.assertAlmostEqual(rec[0][-1], 42)
+        rec = Reco(dat, dtype=dt).serialise()
         self.assertAlmostEqual(rec[0][0], 4)
         self.assertAlmostEqual(rec[0][1], 2.0)
         self.assertTrue(rec[0][2])
