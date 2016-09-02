@@ -23,6 +23,7 @@ from km3pipe.io.ch import CHPump  # noqa
 from km3pipe.io.hdf5 import HDF5Pump  # noqa
 from km3pipe.io.hdf5 import HDF5Sink  # noqa
 from km3pipe.io.pickle import PicklePump  # noqa
+from km3pipe.tools import insert_prefix_to_dtype
 
 from km3pipe.logger import logging
 
@@ -179,18 +180,13 @@ def _read_group(h5file, where):
     for table in h5file.iter_nodes(where, classname='Table'):
         tabname = table.name
         tab = table[:]
-        tab = _insert_prefix_to_dtype(tab, tabname)
+        tab = insert_prefix_to_dtype(tab, tabname)
         tab = pd.DataFrame.from_records(tab)
         tabs.append(tab)
     h5file.close()
     tabs = pd.concat(tabs, axis=1)
     return tabs
 
-
-def _insert_prefix_to_dtype(arr, prefix):
-    new_cols = [prefix + '_' + col for col in arr.dtype.names]
-    arr.dtype.names = new_cols
-    return arr
 
 
 def read_table(filename, where):

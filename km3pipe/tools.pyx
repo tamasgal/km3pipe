@@ -431,3 +431,9 @@ def camelise(text, capital_first=True):
 
     c = camelcase()
     return "".join(next(c)(x) if x else '_' for x in text.split("_"))
+
+
+def insert_prefix_to_dtype(arr, prefix):
+    new_cols = [prefix + '_' + col for col in arr.dtype.names]
+    arr.dtype.names = new_cols
+    return arr

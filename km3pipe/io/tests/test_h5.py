@@ -5,8 +5,9 @@ import os
 import numpy as np
 import tables as tb
 
-from km3pipe.io import _insert_prefix_to_dtype, _read_group
+from km3pipe.io import _read_group
 from km3pipe.io.hdf5 import H5Chain
+from km3pipe.tools import insert_prefix_to_dtype
 from km3pipe.testing import TestCase
 
 
@@ -36,8 +37,8 @@ class TestMultiTable(TestCase):
     def test_name_insert(self):
         exp_foo = ('foo_a', 'foo_b', 'foo_c')
         exp_bar = ('bar_aa', 'bar_bb', 'bar_cc')
-        pref_foo = _insert_prefix_to_dtype(self.tabs['foo'], 'foo')
-        pref_bar = _insert_prefix_to_dtype(self.tabs['bar'], 'bar')
+        pref_foo = insert_prefix_to_dtype(self.tabs['foo'], 'foo')
+        pref_bar = insert_prefix_to_dtype(self.tabs['bar'], 'bar')
         self.assertEqual(exp_foo, pref_foo.dtype.names)
         self.assertEqual(exp_bar, pref_bar.dtype.names)
 

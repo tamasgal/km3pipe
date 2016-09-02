@@ -17,9 +17,8 @@ import tables as tb
 import km3pipe as kp
 from km3pipe import Pump, Module
 from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
-from km3pipe.io import _insert_prefix_to_dtype
 from km3pipe.logger import logging
-from km3pipe.tools import camelise, decamelise
+from km3pipe.tools import camelise, decamelise, insert_prefix_to_dtype
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
