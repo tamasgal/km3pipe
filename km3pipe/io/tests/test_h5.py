@@ -57,7 +57,6 @@ class TestMultiTable(TestCase):
         self.assertEqual(exp_cols, res_cols)
 
 
-
 class TestH5Chain(TestCase):
     def setUp(self):
         self.foo = np.array([
@@ -77,15 +76,16 @@ class TestH5Chain(TestCase):
         self.h5name = './test.h5'
         self.h5file = tb.open_file(self.h5name, 'a')
         for name, tab in self.tabs.items():
-            self.h5file.create_table(self.where, name=name, obj=tab,
+            self.h5file.create_table(self.where[name], name=name, obj=tab,
                                      createparents=True)
         self.h5file.close()
 
-    # def tearDown(self):
-    #     os.remove(self.h5name)
+    def tearDown(self):
+        os.remove(self.h5name)
 
     def test_single_file(self):
         files = {self.h5name: 1}
         c = H5Chain(files)
         print(c['foo'])
-        self.assertTrue(False)
+        print(c['lala'])
+        self.assertTrue(c['foo'].equals(c.foo))
