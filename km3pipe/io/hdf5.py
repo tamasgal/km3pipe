@@ -199,3 +199,29 @@ class HDF5Pump(Pump):
         start, stop, step = index.indices(len(self))
         for i in range(start, stop, step):
             yield self.get_blob(i)
+
+
+class H5Chain(object):
+    """Read/write Dataframes to multiple H5 files.
+
+    Example
+    -------
+    >>> h5files = ['numu_cc.h5', 'anue_nc.h5']
+    >>> c = H5Chain(h5files)
+
+    # specify how many events per file:
+    >>> n_evts = {'numu_cc.h5': None, 'anue_nc.h5': 100}
+    >>> c = H5Chain(n_evts)
+
+    # specify event ids
+    >>> evt_ids = {'numu_cc.h5': [1, 2, 3], 'anue_nc.h5': None}
+    >>> c = H5Chain(evt_ids)
+
+    # these are pandas Dataframes
+    >>> X = c.reco
+    >>> wgt = c.event_info.weights_w2
+    >>> Y_ene = c.mc_tracks[0].energy
+
+    """
+    def __init__(self):
+        pass
