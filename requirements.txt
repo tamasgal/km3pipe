@@ -7,3 +7,4 @@ pandas
 cython
 websocket-client
 sphinx_rtd_theme
+sphinx-gallery
