@@ -69,8 +69,9 @@ setup(name='km3pipe',
           'mock',
           'websocket-client',
       ],
-      extra_require = {
+      extra_require={
           'scikit-learn': ['sklearn'],
+          'sphinx-gallery': ['sphinx-gallery'],
           'jppy': ['jppy'],
       },
       entry_points={
@@ -84,10 +85,10 @@ setup(name='km3pipe',
           ],
       },
       classifiers=[
-        'Development Status :: 3 - Alpha',
-        'Intended Audience :: Developers',
-        'Intended Audience :: Science/Research',
-        'Programming Language :: Python',
+          'Development Status :: 3 - Alpha',
+          'Intended Audience :: Developers',
+          'Intended Audience :: Science/Research',
+          'Programming Language :: Python',
       ],
       )
 
