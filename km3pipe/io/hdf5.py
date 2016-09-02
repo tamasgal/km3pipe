@@ -51,6 +51,8 @@ class HDF5Sink(Module):
         self._tables = {}
 
     def _write_table(self, where, data, title=''):
+        if len(data) <= 0:
+            return
         try:
             data = data.to_records()
         except AttributeError:
