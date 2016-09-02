@@ -239,16 +239,17 @@ class H5Chain(object):
         self.which = which
         self.store = defaultdict(list)
 
-        for fil, cond in self.which:
+        for fil, cond in self.which.items():
             h5fil = tb.open_file(fil, 'r')
 
             # tables under '/', e.g. mc_tracks
-            for tab in fil.iter_nodes('/', classname='Table'):
+            for tab in h5fil.iter_nodes('/', classname='Table'):
                 arr = self._read_table(tab, cond)
+                arr = pd.DataFrame.from_records(arr)
                 self.store[tab.name].append(arr)
 
             # groups under '/', e.g. '/reco'
-            for gr in fil.iter_nodes('/', classname='Group'):
+            for gr in h5fil.iter_nodes('/', classname='Group'):
                 arr = self._read_group(gr, cond)
                 self.store[gr._v_name].append(arr)
 
@@ -263,13 +264,16 @@ class H5Chain(object):
         except KeyError:
             raise AttributeError("The table {} does not exist".format(name))
 
+    def __getitem__(self, name):
+        return self.store[name]
+
     def _read_group(cls, group, cond):
         # Store through groupname, insert tablename into dtype
         tabs = []
         for tab in group._f_iter_nodes(classname='Table'):
             tabname = tab.name
             arr = cls._read_table(tab, cond)
-            arr = _insert_prefix_to_dtype(arr, tabname)
+            arr = insert_prefix_to_dtype(arr, tabname)
             arr = pd.DataFrame.from_records(arr)
             tabs.append(arr)
         tabs = pd.concat(tabs, axis=1)
@@ -281,4 +285,4 @@ class H5Chain(object):
             arr = table[:]
         else:
             arr = table[:cond]
-        return pd.DataFrame.from_records(arr)
+        return arr
