@@ -236,36 +236,36 @@ class H5Chain(object):
     """
 
     def __init__(self, which):
-        self.which = which
-        self.store = defaultdict(list)
+        self._which = which
+        self._store = defaultdict(list)
 
-        for fil, cond in self.which.items():
+        for fil, cond in self._which.items():
             h5fil = tb.open_file(fil, 'r')
 
             # tables under '/', e.g. mc_tracks
             for tab in h5fil.iter_nodes('/', classname='Table'):
                 arr = self._read_table(tab, cond)
                 arr = pd.DataFrame.from_records(arr)
-                self.store[tab.name].append(arr)
+                self._store[tab.name].append(arr)
 
             # groups under '/', e.g. '/reco'
             for gr in h5fil.iter_nodes('/', classname='Group'):
                 arr = self._read_group(gr, cond)
-                self.store[gr._v_name].append(arr)
+                self._store[gr._v_name].append(arr)
 
             h5fil.close()
 
-        for key, dfs in self.store.items():
-            self.store[key] = pd.concat(dfs)
+        for key, dfs in self._store.items():
+            self._store[key] = pd.concat(dfs)
 
     def __getattr__(self, name):
         try:
-            return self.store[name]
+            return self._store[name]
         except KeyError:
             raise AttributeError("The table {} does not exist".format(name))
 
     def __getitem__(self, name):
-        return self.store[name]
+        return self._store[name]
 
     def _read_group(cls, group, cond):
         # Store through groupname, insert tablename into dtype
@@ -280,9 +280,7 @@ class H5Chain(object):
         return tabs
 
     @classmethod
-    def _read_table(cls, table, cond):
+    def _read_table(cls, table, cond=None):
         if cond is None:
-            arr = table[:]
-        else:
-            arr = table[:cond]
-        return arr
+            return table[:]
+        return table.read(cond)
