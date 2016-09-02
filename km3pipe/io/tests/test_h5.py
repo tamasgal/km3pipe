@@ -108,7 +108,6 @@ class TestH5Chain(TestCase):
         print(c['foo'][::2])
         print(c['lala'])
         self.assertTrue(c['foo'].equals(c.foo))
-        self.assertTrue(False)
 
     # def test_slice(self):
     #     files = {self.h5name: slice(None, None, 2)}
