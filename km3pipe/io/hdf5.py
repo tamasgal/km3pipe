@@ -10,6 +10,7 @@ from __future__ import division, absolute_import, print_function
 
 from collections import defaultdict
 import os.path
+from six import string_types
 
 import pandas as pd
 import tables as tb
@@ -283,4 +284,6 @@ class H5Chain(object):
     def _read_table(cls, table, cond=None):
         if cond is None:
             return table[:]
+        if isinstance(cond, string_types):
+            return table.read_where(cond)
         return table.read(cond)

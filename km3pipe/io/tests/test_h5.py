@@ -109,6 +109,13 @@ class TestH5Chain(TestCase):
         print(c['lala'])
         self.assertTrue(c['foo'].equals(c.foo))
 
+    def test_event_id(self):
+        files = {self.h5name: 'event_id == 1', self.h5name2: 'event_id == 1'}
+        c = H5Chain(files)
+        print(c['foo'][::2])
+        print(c['lala'])
+        self.assertTrue(c['foo'].equals(c.foo))
+
     # def test_slice(self):
     #     files = {self.h5name: slice(None, None, 2)}
     #     c = H5Chain(files)
