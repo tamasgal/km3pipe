@@ -93,11 +93,11 @@ class EventInfo(with_metaclass(Serialisable)):
                 args.append(np.nan)
         return cls(*args)
 
-    def serialise(self, to='table'):
-        if to == 'table':
-            return self.as_table()
+    def serialise(self, to='numpy'):
+        if to == 'numpy':
+            return np.array(self.__array__(), dtype=self.dtype)
 
-    def as_table(self):
+    def __array__(self):
         return [(self.det_id, self.event_id, self.frame_index, self.mc_id,
                  self.mc_t, self.overlays,
                  #self.run_id,
@@ -108,23 +108,26 @@ class EventInfo(with_metaclass(Serialisable)):
     def __str__(self):
         return "Event #{0}:\n" \
                "    detector id:     {1}\n" \
-               "    run ID:          {2}\n" \
-               "    frame index:     {3}\n" \
-               "    UTC seconds:     {4}\n" \
-               "    UTC nanoseconds: {5}\n" \
-               "    MC id:           {6}\n" \
-               "    MC time:         {7}\n" \
-               "    overlays:        {8}\n" \
-               "    trigger counter: {9}\n" \
-               "    trigger mask:    {10}\n" \
+               "    frame index:     {2}\n" \
+               "    UTC seconds:     {3}\n" \
+               "    UTC nanoseconds: {4}\n" \
+               "    MC id:           {5}\n" \
+               "    MC time:         {6}\n" \
+               "    overlays:        {7}\n" \
+               "    trigger counter: {8}\n" \
+               "    trigger mask:    {9}\n" \
                .format(self.event_id, self.det_id,
-                       #self.run_id,
                        self.frame_index, self.utc_seconds, self.utc_nanoseconds,
                        self.mc_id, self.mc_t, self.overlays,
-                       self.trigger_counter, self.trigger_mask)
+                       self.trigger_counter, self.trigger_mask
+                       #self.run_id,
+                       )
 
     def __insp__(self):
         return self.__str__()
+
+    def __len__(self):
+        return 1
 
 
 class Point(np.ndarray):
@@ -274,14 +277,13 @@ cdef class Track:
     bjorkeny : float
     dir : Direction or numpy.ndarray
     energy : float
-    lenght : float
     id : int
     interaction_channel : int
     is_cc : bool
+    length : float
     pos : Position or numpy.ndarray
     time : int
     type : int
-
     """
     cdef public int id, time, type, interaction_channel
     cdef public float energy, length, bjorkeny
@@ -395,22 +397,15 @@ class HitSeries(object):
             row['tot'],
             row['triggered'],
         ) for row in table], event_id)
-    dtype = np.dtype([
-        ('channel_id', 'u1'), ('dom_id', '<u4'), ('event_id', '<u4'),
-        ('id', '<u4'), ('pmt_id', '<u4'),
-        #('run_id', '<u4'),
-        ('time', '<i4'),
-        ('tot', 'u1'), ('triggered', '?')
-        ])
 
-    def serialise(self, to='table'):
-        if to == 'table':
-            return self.as_table()
+    def serialise(self, to='numpy'):
+        if to == 'numpy':
+            return np.array(self.__array__(), dtype=self.dtype)
 
-    def as_table(self):
-        return [(h.channel_id, h.dom_id, self.event_id, h.id, h.pmt_id,
+    def __array__(self):
+        return tuple((h.channel_id, h.dom_id, self.event_id, h.id, h.pmt_id,
             #self.run_id,
-            h.time, h.tot, h.triggered) for h in self._hits]
+            h.time, h.tot, h.triggered) for h in self._hits)
 
     def __iter__(self):
         return self
@@ -543,18 +538,18 @@ class TrackSeries(object):
     def __init__(self, tracks, event_id=None):
         self.event_id = event_id
         self._bjorkeny = None
-        self._is_cc = None
         self._dir = None
         self._energy = None
-        self._interaction_channel = None
+        self._highest_energetic_muon = None
         self._id = None
         self._index = 0
+        self._interaction_channel = None
+        self._is_cc = None
+        self._length = None
         self._pos = None
         self._time = None
         self._tracks = tracks
         self._type = None
-        self._highest_energetic_muon = None
-        self._length = None
 
     @classmethod
     def from_aanet(cls, tracks, event_id=None):
@@ -587,6 +582,8 @@ class TrackSeries(object):
                     directions_z,
                     energies,
                     ids,
+                    interaction_channels,
+                    is_ccs,
                     lengths,
                     positions_x,
                     positions_y,
@@ -595,13 +592,20 @@ class TrackSeries(object):
                     types,
                     event_id=None,
                     ):
-        args = bjorkenys, directions_x, directions_y, directions_z, energies, \
-            ids, lengths, positions_x, positions_y, positions_z, times, types
+        directions = np.column_stack((directions_x, directions_y,
+                                      directions_z))
+        positions = np.column_stack((positions_x, positions_y,
+                                      positions_z))
+        args = bjorkenys, directions, energies, \
+            ids, interaction_channels, is_ccs, lengths, positions, \
+            times, types
         tracks = cls([Track(*track_args) for track_args in zip(*args)], event_id)
         tracks._bjorkeny = bjorkenys
         tracks._dir = zip(directions_x, directions_y, directions_z)
         tracks._energy = energies
         tracks._id = ids
+        tracks._interaction_channel = interaction_channels
+        tracks._is_cc = is_ccs
         tracks._length = lengths
         tracks._pos = zip(positions_x, positions_y, positions_z)
         tracks._time = times
@@ -612,22 +616,22 @@ class TrackSeries(object):
     def from_table(cls, table, event_id=None):
         return cls([Track(
             row['bjorkeny'],
-            np.array((row['dir_x'], row['dir_y'], row['dir_z'])),
+            np.array((row['dir_x'], row['dir_y'], row['dir_z'],)),
             row['energy'],
             row['id'],
             row['interaction_channel'],
             row['is_cc'],
             row['length'],
-            np.array((row['pos_x'], row['pos_y'], row['pos_z'])),
+            np.array((row['pos_x'], row['pos_y'], row['pos_z'],)),
             row['time'],
-            row['type'],
+            row['type']
         ) for row in table], event_id)
 
-    def serialise(self, to='table'):
-        if to == 'table':
-            return self.as_table()
+    def serialise(self, to='numpy'):
+        if to == 'numpy':
+            return np.array(self.__array__(), dtype=self.dtype)
 
-    def as_table(self):
+    def __array__(self):
         return [(t.bjorkeny, t.dir[0], t.dir[1], t.dir[2], t.energy,
             self.event_id, t.id, t.interaction_channel, t.is_cc,
             t.length, t.pos[0], t.pos[1], t.pos[2], t.time, t.type)
@@ -774,6 +778,6 @@ class Reco(dict):
         map['event_id'] = event_id
         return cls(map, dtype)
 
-    def serialise(self, to='table'):
-        if to == 'table':
+    def serialise(self, to='numpy'):
+        if to == 'numpy':
             return [[self[key] for key in self.dtype.names], ]
