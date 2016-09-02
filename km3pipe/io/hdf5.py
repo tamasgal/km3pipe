@@ -8,13 +8,16 @@ Pumps for the EVT simulation dataformat.
 """
 from __future__ import division, absolute_import, print_function
 
+from collections import defaultdict
 import os.path
 
-import tables
+import pandas as pd
+import tables as tb
 
-import km3pipe
+import km3pipe as kp
 from km3pipe import Pump, Module
 from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
+from km3pipe.io import _insert_prefix_to_dtype
 from km3pipe.logger import logging
 from km3pipe.tools import camelise, decamelise
 
@@ -45,9 +48,9 @@ class HDF5Sink(Module):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
         self.index = 1
-        self.h5file = tables.open_file(self.filename, mode="w", title="KM3NeT")
-        self.filters = tables.Filters(complevel=5, shuffle=True,
-                                      fletcher32=True)
+        self.h5file = tb.open_file(self.filename, mode="w", title="KM3NeT")
+        self.filters = tb.Filters(complevel=5, shuffle=True,
+                                  fletcher32=True)
         self._tables = {}
 
     def _write_table(self, where, data, title=''):
@@ -95,8 +98,8 @@ class HDF5Sink(Module):
         for tab in self._tables.values():
             tab.flush()
             tab.cols.event_id.create_index()
-        self.h5file.root._v_attrs.km3pipe = str(km3pipe.__version__)
-        self.h5file.root._v_attrs.pytables = str(tables.__version__)
+        self.h5file.root._v_attrs.km3pipe = str(kp.__version__)
+        self.h5file.root._v_attrs.pytables = str(tb.__version__)
         self.h5file.close()
 
 
@@ -106,7 +109,7 @@ class HDF5Pump(Pump):
         super(self.__class__, self).__init__(**context)
         self.filename = filename
         if os.path.isfile(self.filename):
-            self.h5_file = tables.File(self.filename)
+            self.h5_file = tb.File(self.filename)
         else:
             raise IOError("No such file or directory: '{0}'"
                           .format(self.filename))
@@ -116,7 +119,7 @@ class HDF5Pump(Pump):
         try:
             event_info = self.h5_file.get_node('/', 'event_info')
             self.event_ids = event_info.cols.event_id[:]
-        except tables.NoSuchNodeError:
+        except tb.NoSuchNodeError:
             log.critical("No /event_info table found.")
             raise SystemExit
 
@@ -209,19 +212,74 @@ class H5Chain(object):
     >>> h5files = ['numu_cc.h5', 'anue_nc.h5']
     >>> c = H5Chain(h5files)
 
-    # specify how many events per file:
-    >>> n_evts = {'numu_cc.h5': None, 'anue_nc.h5': 100}
-    >>> c = H5Chain(n_evts)
-
-    # specify event ids
-    >>> evt_ids = {'numu_cc.h5': [1, 2, 3], 'anue_nc.h5': None}
-    >>> c = H5Chain(evt_ids)
+    # specify n_events per file, or their event ids
+    >>> which = {'numu_cc.h5': None, 'anue_nc.h5': 100,
+                  'numu_cc.h5': [1, 2, 3],}
+    >>> c = H5Chain(which)
 
     # these are pandas Dataframes
     >>> X = c.reco
     >>> wgt = c.event_info.weights_w2
     >>> Y_ene = c.mc_tracks[0].energy
 
+    store = defaultdict(list)
+    for file, cond in which:
+        for tab in file.walk_nodes('/', classname='Table'):
+            arr = read_table(tab, cond)
+            arr = pd.DataFrame(arr)
+            store[tab.name].append(arr)
+
+    for key, ds in store.items():
+        store[key] = pd.concat(ds)
+
+    store.key -> store[key]
+
     """
-    def __init__(self):
-        pass
+
+    def __init__(self, which):
+        self.which = which
+        self.store = defaultdict(list)
+
+        for fil, cond in self.which:
+            h5fil = tb.open_file(fil, 'r')
+
+            # tables under '/', e.g. mc_tracks
+            for tab in fil.iter_nodes('/', classname='Table'):
+                arr = self._read_table(tab, cond)
+                self.store[tab.name].append(arr)
+
+            # groups under '/', e.g. '/reco'
+            for gr in fil.iter_nodes('/', classname='Group'):
+                arr = self._read_group(gr, cond)
+                self.store[gr._v_name].append(arr)
+
+            h5fil.close()
+
+        for key, dfs in self.store.items():
+            self.store[key] = pd.concat(dfs)
+
+    def __getattr__(self, name):
+        try:
+            return self.store[name]
+        except KeyError:
+            raise AttributeError("The table {} does not exist".format(name))
+
+    def _read_group(cls, group, cond):
+        # Store through groupname, insert tablename into dtype
+        tabs = []
+        for tab in group._f_iter_nodes(classname='Table'):
+            tabname = tab.name
+            arr = cls._read_table(tab, cond)
+            arr = _insert_prefix_to_dtype(arr, tabname)
+            arr = pd.DataFrame.from_records(arr)
+            tabs.append(arr)
+        tabs = pd.concat(tabs, axis=1)
+        return tabs
+
+    @classmethod
+    def _read_table(cls, table, cond):
+        if cond is None:
+            arr = table[:]
+        else:
+            arr = table[:cond]
+        return pd.DataFrame.from_records(arr)
