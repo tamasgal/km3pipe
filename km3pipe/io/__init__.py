@@ -179,7 +179,7 @@ def _read_group(h5file, where):
     for table in h5file.iter_nodes(where, classname='Table'):
         tabname = table.name
         tab = table[:]
-        tab = _insert_tabname_into_colnames(tab, tabname)
+        tab = _insert_prefix_to_dtype(tab, tabname)
         tab = pd.DataFrame.from_records(tab)
         tabs.append(tab)
     h5file.close()
@@ -187,10 +187,10 @@ def _read_group(h5file, where):
     return tabs
 
 
-def _insert_tabname_into_colnames(tab, tabname):
-    new_cols = [tabname + '_' + col for col in tab.dtype.names]
-    tab.dtype.names = new_cols
-    return tab
+def _insert_prefix_to_dtype(arr, prefix):
+    new_cols = [prefix + '_' + col for col in arr.dtype.names]
+    arr.dtype.names = new_cols
+    return arr
 
 
 def read_table(filename, where):
