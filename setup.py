@@ -28,7 +28,9 @@ builtins.__KM3PIPE_SETUP__ = True
 
 # Needed for line_profiler - disable for production code
 directive_defaults['linetrace'] = True
+directive_defaults['profile'] = True
 directive_defaults['binding'] = True
+CYTHON_TRACE = str(int(directive_defaults['linetrace']))
 
 from km3pipe import version  # noqa
 
@@ -36,18 +38,18 @@ from km3pipe import version  # noqa
 tools = Extension('km3pipe.tools', sources=['km3pipe/tools.pyx'],
                   extra_compile_args=['-O3', '-march=native', '-w'],
                   include_dirs=[numpy.get_include()],
-                  define_macros=[('CYTHON_TRACE', '1')])
+                  define_macros=[('CYTHON_TRACE', CYTHON_TRACE)])
 
 core = Extension('km3pipe.core', sources=['km3pipe/core.pyx'],
                  extra_compile_args=['-O3', '-march=native', '-w'],
                  include_dirs=[numpy.get_include()],
-                 define_macros=[('CYTHON_TRACE', '1')])
+                 define_macros=[('CYTHON_TRACE', CYTHON_TRACE)])
 
 dataclasses = Extension('km3pipe.dataclasses',
                         sources=['km3pipe/dataclasses.pyx'],
                         extra_compile_args=['-O3', '-march=native', '-w'],
                         include_dirs=[numpy.get_include()],
-                        define_macros=[('CYTHON_TRACE', '1')])
+                        define_macros=[('CYTHON_TRACE', CYTHON_TRACE)])
 
 setup(name='km3pipe',
       version=version,
