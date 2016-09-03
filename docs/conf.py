@@ -42,6 +42,7 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.pngmath',
     'sphinx.ext.viewcode',
+    'numpydoc',
     'sphinx_gallery.gen_gallery',
 ]
 
@@ -287,9 +288,9 @@ texinfo_documents = [
 
 # -- Options for Example Gallery ------------------------------------------
 sphinx_gallery_conf = {
-    # 'examples_dirs': '../examples',
-    'examples_dirs': '../tutorials',
+    'examples_dirs': '../examples',
     'gallery_dirs': 'auto_examples',
+    'filename_pattern': '/plot_',
     'reference_url':  {
         # The module you locally document uses a None
         'sphinx_gallery': None,
