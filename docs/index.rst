@@ -17,19 +17,13 @@ Contents
 ========
 
 .. toctree::
-	 :maxdepth: 1 
+  :maxdepth: 2
 
    install
    user_guide
    cmd
    auto_examples/index
-   api/modules
+   api
 
-
-Indices and tables
-==================
 
 * :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
