@@ -6,6 +6,7 @@ KM3Pipe setup script.
 
 """
 from setuptools import setup, Extension
+from Cython.Compiler.Options import directive_defaults
 import sys
 
 if sys.version_info[0] >= 3:
@@ -25,21 +26,28 @@ except ImportError:
 # to avoid loading modules which are not compiled yet. Ugly but robust.
 builtins.__KM3PIPE_SETUP__ = True
 
+# Needed for line_profiler - disable for production code
+directive_defaults['linetrace'] = True
+directive_defaults['binding'] = True
+
 from km3pipe import version  # noqa
 
 
 tools = Extension('km3pipe.tools', sources=['km3pipe/tools.pyx'],
                   extra_compile_args=['-O3', '-march=native', '-w'],
-                  include_dirs=[numpy.get_include()])
+                  include_dirs=[numpy.get_include()],
+                  define_macros=[('CYTHON_TRACE', '1')])
 
 core = Extension('km3pipe.core', sources=['km3pipe/core.pyx'],
                  extra_compile_args=['-O3', '-march=native', '-w'],
-                 include_dirs=[numpy.get_include()])
+                 include_dirs=[numpy.get_include()],
+                 define_macros=[('CYTHON_TRACE', '1')])
 
 dataclasses = Extension('km3pipe.dataclasses',
                         sources=['km3pipe/dataclasses.pyx'],
                         extra_compile_args=['-O3', '-march=native', '-w'],
-                        include_dirs=[numpy.get_include()])
+                        include_dirs=[numpy.get_include()],
+                        define_macros=[('CYTHON_TRACE', '1')])
 
 setup(name='km3pipe',
       version=version,
@@ -69,8 +77,9 @@ setup(name='km3pipe',
           'mock',
           'websocket-client',
       ],
-      extra_require = {
+      extra_require={
           'scikit-learn': ['sklearn'],
+          'documentation': ['sphinx-gallery', 'numpydoc'],
           'jppy': ['jppy'],
       },
       entry_points={
@@ -84,10 +93,10 @@ setup(name='km3pipe',
           ],
       },
       classifiers=[
-        'Development Status :: 3 - Alpha',
-        'Intended Audience :: Developers',
-        'Intended Audience :: Science/Research',
-        'Programming Language :: Python',
+          'Development Status :: 3 - Alpha',
+          'Intended Audience :: Developers',
+          'Intended Audience :: Science/Research',
+          'Programming Language :: Python',
       ],
       )
 

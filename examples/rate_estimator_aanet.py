@@ -1,4 +1,6 @@
-#!/usr/local/bin/python
+"""Open a file with real data and estimate the DOM rates.
+"""
+
 from __future__ import division
 
 from km3pipe import Module, Pipeline
@@ -9,7 +11,6 @@ class RateEstimator(Module):
 
     def process(self, blob):
         hits = blob["Hits"]
-        #hits = [hit for hit in evt.hits if not hit.trig]
         doms = {h.dom_id for h in hits}
         hit_times = [h.t for h in hits]
         event_length = max(hit_times) - min(hit_times)
@@ -30,4 +31,3 @@ pipe = Pipeline()
 pipe.attach(AanetPump, filename='KM3NeT_00000007_00001000.root')
 pipe.attach(RateEstimator)
 pipe.drain(10)
-

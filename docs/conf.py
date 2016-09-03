@@ -37,10 +37,13 @@ sys.path.insert(0, os.path.abspath('.'))
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
     # 'sphinxcontrib.napoleon',
     'sphinx.ext.doctest',
-    'sphinx.ext.pngmath',
+    'sphinx.ext.imgmath',
     'sphinx.ext.viewcode',
+    'numpydoc',
+    'sphinx_gallery.gen_gallery',
 ]
 
 # Napoleon settings
@@ -221,8 +224,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'KM3Pipe.tex', u'KM3Pipe Documentation',
-   u'Tamás Gál', 'manual'),
+    ('index', 'KM3Pipe.tex', u'KM3Pipe Documentation',
+     u'Tamás Gál', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -265,9 +268,9 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'KM3Pipe', u'KM3Pipe Documentation',
-   u'Tamás Gál', 'KM3Pipe', 'An analysis framework for KM3NeT data.',
-   'Miscellaneous'),
+    ('index', 'KM3Pipe', u'KM3Pipe Documentation',
+     u'Tamás Gál', 'KM3Pipe', 'An analysis framework for KM3NeT data.',
+     'Miscellaneous'),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -281,3 +284,21 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 # texinfo_no_detailmenu = False
+
+
+# -- Options for Example Gallery ------------------------------------------
+sphinx_gallery_conf = {
+    'examples_dirs': '../examples/auto',
+    'gallery_dirs': 'auto_examples',
+    'reference_url':  {
+        # The module you locally document uses a None
+        'sphinx_gallery': None,
+
+        # External python modules use their documentation websites
+        'pandas': 'http://pandas.pydata.org',
+        'numpy': 'http://docs.scipy.org/doc/',
+        'matplotlib': 'http://matplotlib.org',
+    }
+}
+
+autosummary_generate = True
