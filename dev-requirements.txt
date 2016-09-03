@@ -2,6 +2,7 @@ docopt
 controlhost
 sphinxcontrib-napoleon
 sphinx-gallery
+numpydoc
 mock
 numpy
 py

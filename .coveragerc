@@ -1,2 +1,12 @@
 [run]
 source = km3pipe
+plugins = Cython.Coverage
+
+[report]
+include =
+    km3pipe/*
+    pipeinspector/*
+    km3modules/*
+omit =
+    */tests/*
+    */*/tests/*
