@@ -17,7 +17,8 @@ Contents
 ========
 
 .. toctree::
-  
+	 :maxdepth: 1 
+
    install
    user_guide
    cmd
