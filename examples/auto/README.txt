@@ -1,2 +1,2 @@
-KM3Pipe Example Gallery
-=======================
+Examples
+========

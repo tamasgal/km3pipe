@@ -1,8 +1,12 @@
-Command Line Interface
-======================
+Command Line Tools
+==================
 
 If you've installed KM3Pipe via `pip`, you have access to some useful
 command line utilities out of the box.
+
+KM3Pipe
+-------
+
 Most of the commands have to be prefixed with `km3pipe` to avoid possible
 nameclashes and also for an improved overview.
 You can for example simply run `km3pipe -h` in your shell to see all available
@@ -70,4 +74,46 @@ An example output is::
     857	3620	1465542060119	Y	A01466427	PHYS.1606v1-TMP.HV-SFP.Power-XTRA.700ns		2016-06-10 07:01:00.119000+00:00
 
 
+PipeInspector
+-------------
 
+PipeInspector is a tool to inspect different kinds of data formats used
+within the KM3NeT collaboration. It utilises the KM3Pipe framework to
+deal with data I/O and allows easy access to the stored information.
+
+.. image:: http://tamasgal.com/km3net/PipeInspector_Screenshot.png
+    :alt: PipeInspector
+    :width: 700
+    :align: center
+
+It is currently in an early alpha status, but already able to handle the
+DAQ binary data, ROOT and Aanet-ROOT format.
+
+If you installed KM3Pipe via `pip`, you'll be able to launch `pipeinspector`
+directly from the terminal::
+
+    pipeinspector /path/to/data/file.ext
+
+
+H5 Utils
+--------
+
+`h5tree`
+^^^^^^^^
+
+Shows the content of a HDF5 file::
+
+    ┌─[moritz@averroes ~/km3net/data ]
+    └─╼ h5tree nueCC.h5
+    / (RootGroup) ''
+    /event_info (Table(121226,), shuffle, zlib(5)) ''
+    /hits (Table(0,), shuffle, zlib(5)) ''
+    /mc_hits (Table(0,), shuffle, zlib(5)) ''
+    /mc_tracks (Table(242452,), shuffle, zlib(5)) ''
+    /reco (Group) ''
+    /reco/aa_shower_fit (Table(121226,), shuffle, zlib(5)) ''
+    /reco/dusj (Table(121226,), shuffle, zlib(5)) ''
+    /reco/j_gandalf (Table(121226,), shuffle, zlib(5)) ''
+    /reco/q_strategy (Table(121226,), shuffle, zlib(5)) ''
+    /reco/reco_lns (Table(121226,), shuffle, zlib(5)) ''
+    /reco/thomas_features (Table(121226,), shuffle, zlib(5)) ''

@@ -9,13 +9,12 @@ Contents
 ========
 
 .. toctree::
-   :maxdepth: 1
-
+  
+   ../README
    quick_start
    cmd
    user_guide
-   auto_examples
-   pipeinspector
+   auto_examples/index
    api/modules
 
 
