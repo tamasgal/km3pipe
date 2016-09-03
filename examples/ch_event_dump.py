@@ -1,6 +1,5 @@
-#!/usr/bin/env python
-import time
-
+"""Read & dump events through the CH Pump.
+"""
 from km3pipe import Pipeline, Module
 from km3pipe.io import CHPump
 
@@ -8,7 +7,7 @@ from km3pipe.io import CHPump
 class CHPrinter(Module):
     def process(self, blob):
         print("New blob:")
-        print blob['CHPrefix']
+        print(blob['CHPrefix'])
         return blob
 
 
@@ -30,13 +29,12 @@ class Dumper(Module):
             f.write(data)
 
 
-
 pipe = Pipeline()
 pipe.attach(CHPump, host='127.0.0.1',
-                    port=5553,
-                    tags='IO_EVT, IO_TSL, IO_SUM, TRG_PARS',
-                    timeout=60*60*24,
-                    max_queue=42)
+            port=5553,
+            tags='IO_EVT, IO_TSL, IO_SUM, TRG_PARS',
+            timeout=60*60*24,
+            max_queue=42)
 pipe.attach(CHPrinter)
 pipe.attach(Dumper)
 pipe.drain()
