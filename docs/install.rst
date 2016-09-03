@@ -68,7 +68,7 @@ Here is an example configuration::
 
 
 Install HowTo
-------------
+-------------
 
 The following video shows how to install the latest developer version and run the test suite.
 
