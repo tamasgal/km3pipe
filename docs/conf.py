@@ -40,7 +40,7 @@ extensions = [
     'sphinx.ext.autosummary',
     # 'sphinxcontrib.napoleon',
     'sphinx.ext.doctest',
-    'sphinx.ext.pngmath',
+    'sphinx.ext.imgmath',
     'sphinx.ext.viewcode',
     'numpydoc',
     'sphinx_gallery.gen_gallery',
