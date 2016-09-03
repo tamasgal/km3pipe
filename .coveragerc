@@ -1,5 +1,6 @@
 [run]
 source = km3pipe
+plugins = Cython.Coverage
 
 [report]
 include =
