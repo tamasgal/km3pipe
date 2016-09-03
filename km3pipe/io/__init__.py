@@ -22,6 +22,7 @@ from km3pipe.io.jpp import JPPPump  # noqa
 from km3pipe.io.ch import CHPump  # noqa
 from km3pipe.io.hdf5 import HDF5Pump  # noqa
 from km3pipe.io.hdf5 import HDF5Sink  # noqa
+from km3pipe.io.hdf5 import H5Chain  # noqa
 from km3pipe.io.pickle import PicklePump  # noqa
 from km3pipe.tools import insert_prefix_to_dtype
 
