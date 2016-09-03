@@ -237,6 +237,8 @@ class H5Chain(object):
     """
 
     def __init__(self, which):
+        if isinstance(which, list):
+            which = {key: None for key in which}
         self._which = which
         self._store = defaultdict(list)
 
