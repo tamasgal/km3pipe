@@ -13,17 +13,12 @@ The framework tries to standardise the way the data is processed within our coll
 Although it is mainly designed for the KM3NeT neutrino detectors, it can easily be extended to support any kind of data formats. Feel free to get in touch if you're looking for a small, versatile framework which provides a quite straightforward module system to make code exchange between your project members as easy as possible.
 KM3Pipe already comes with several types of `Pumps` (the modules which act as a data-parser/reader) so it should be easy to find an example to implement your owns. As of version 1.2.3 you find `Pumps` based on popular formats like HDF5 (https://www.hdfgroup.org), ROOT (https://root.cern.ch) but also some very specialised project internal binary data formats, which on the other hand can act templates for your own ones. Just have a look at the `io` subpackage and of course the documention if you're interested!
 
-Contents
-========
-
 .. toctree::
-  :maxdepth: 2
+   :maxdepth: 1
 
    install
    user_guide
-   cmd
    auto_examples/index
    api
-
 
 * :ref:`genindex`
