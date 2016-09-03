@@ -3,8 +3,7 @@
 # pylint: disable=C0103,R0903
 # vim:set ts=4 sts=4 sw=4 et:
 """
-Pumps for the EVT simulation dataformat.
-
+Read and write KM3NeT-formatted HDF5 files.
 """
 from __future__ import division, absolute_import, print_function
 
@@ -34,16 +33,24 @@ __status__ = "Development"
 
 class HDF5Sink(Module):
     def __init__(self, **context):
-        """A Module to dump blob data to HDF5.
+        """Write KM3NeT-formatted HDF5 files, event-by-event.
 
-        Each item in the blob which has a dtype or a `serialise()` method
-        will be dumped in the HDF5 file.
-        The table name is either the key (if the value is a plain value with
-        a dtype) or the `loc` attribute of the object.
+        The data can be a numpy structured array, a pandas DataFrame,
+        or a km3pipe dataclass object with a `serialise()` method.
 
-        The target table name is a decamelised version of the blob-key,
-        so for example values which are stored in the blob under `FooBar`
+        The name of the corresponding H5 table is the decamelised
+        blob-key, so values which are stored in the blob under `FooBar`
         will be written to `/foo_bar` in the HDF5 file.
+
+        To store at a different location in the file, the data needs a
+        `.loc` attribute:
+
+        >>> my_arr.loc = '/somewhere'
+
+        Parameters
+        ----------
+        filename: str, optional (default: 'dump.h5')
+            Where to store the events.
         """
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
@@ -104,7 +111,13 @@ class HDF5Sink(Module):
 
 
 class HDF5Pump(Pump):
-    """Provides a pump for KM3NeT HDF5 files"""
+    """Read KM3NeT-formatted HDF5 files, event-by-event.
+
+        Parameters
+        ----------
+        filename: str
+        From where to read events.
+        """
     def __init__(self, filename, **context):
         super(self.__class__, self).__init__(**context)
         self.filename = filename
@@ -205,7 +218,17 @@ class HDF5Pump(Pump):
 
 
 class H5Chain(object):
-    """Read/write Dataframes to multiple H5 files.
+    """Read/write multiple HDF5 files as `pandas.DataFrame`.
+
+    The dataframes are accessible as attributes. To read the table `'/reco'`:
+    >>> h5_reco = H5Chain(...).reco
+
+    Parameters
+    ----------
+    which: list(str) or dict(str->cond)
+        The filenames to be read in. When passing a dict, events are
+        selected according to cond, which can be `None` (all events), a
+        slice, or a numexpr-like pytables condition string.
 
     Example
     -------
@@ -214,25 +237,13 @@ class H5Chain(object):
 
     # specify n_events per file, or their event ids
     >>> which = {'numu_cc.h5': None, 'anue_nc.h5': 100,
-                  'numu_cc.h5': [1, 2, 3],}
+                 'numu_cc.h5': [1, 2, 3],}
     >>> c = H5Chain(which)
 
     # these are pandas Dataframes
     >>> X = c.reco
     >>> wgt = c.event_info.weights_w2
-    >>> Y_ene = c.mc_tracks[0].energy
-
-    store = defaultdict(list)
-    for file, cond in which:
-        for tab in file.walk_nodes('/', classname='Table'):
-            arr = read_table(tab, cond)
-            arr = pd.DataFrame(arr)
-            store[tab.name].append(arr)
-
-    for key, ds in store.items():
-        store[key] = pd.concat(ds)
-
-    store.key -> store[key]
+    >>> Y_ene = c.mc_tracks[::2].energy
 
     """
 
