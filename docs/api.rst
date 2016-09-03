@@ -4,18 +4,22 @@ API Reference
 Input / Output
 --------------
 
-HDF5
-^^^^
-
-.. currentmodule:: km3pipe.io.hdf5
+.. currentmodule:: km3pipe.io
 
 .. autosummary::
   :toctree: api
   :template: class.rst
 
+  AanetPump
+  CHPump
+  CLBPump
+  DAQPump
+  EvtPump
+  JPPPump
+  PicklePump
+  H5Chain
   HDF5Pump
   HDF5Sink
-  H5Chain
 
 
 Data Classes
