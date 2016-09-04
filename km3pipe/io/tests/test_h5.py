@@ -109,6 +109,11 @@ class TestH5Chain(TestCase):
         print(c['lala'])
         self.assertTrue(c['foo'].equals(c.foo))
 
+    def test_list(self):
+        files = [self.h5name, self.h5name2]
+        c = H5Chain(files)
+        self.assertTrue(c['foo'].equals(c.foo))
+
     def test_event_id(self):
         files = {self.h5name: 'event_id == 1', self.h5name2: 'event_id == 1'}
         c = H5Chain(files)
