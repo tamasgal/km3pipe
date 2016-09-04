@@ -32,26 +32,26 @@ __status__ = "Development"
 
 
 class HDF5Sink(Module):
+    """Write KM3NeT-formatted HDF5 files, event-by-event.
+
+    The data can be a numpy structured array, a pandas DataFrame,
+    or a km3pipe dataclass object with a `serialise()` method.
+
+    The name of the corresponding H5 table is the decamelised
+    blob-key, so values which are stored in the blob under `FooBar`
+    will be written to `/foo_bar` in the HDF5 file.
+
+    To store at a different location in the file, the data needs a
+    `.loc` attribute:
+
+    >>> my_arr.loc = '/somewhere'
+
+    Parameters
+    ----------
+    filename: str, optional (default: 'dump.h5')
+        Where to store the events.
+    """
     def __init__(self, **context):
-        """Write KM3NeT-formatted HDF5 files, event-by-event.
-
-        The data can be a numpy structured array, a pandas DataFrame,
-        or a km3pipe dataclass object with a `serialise()` method.
-
-        The name of the corresponding H5 table is the decamelised
-        blob-key, so values which are stored in the blob under `FooBar`
-        will be written to `/foo_bar` in the HDF5 file.
-
-        To store at a different location in the file, the data needs a
-        `.loc` attribute:
-
-        >>> my_arr.loc = '/somewhere'
-
-        Parameters
-        ----------
-        filename: str, optional (default: 'dump.h5')
-            Where to store the events.
-        """
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
         self.index = 1
