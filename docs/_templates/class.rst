@@ -1,16 +1,9 @@
-:mod:`{{module}}`.{{objname}}
-{{ underline }}==============
+{% extends "!autosummary/class.rst" %}
 
-.. currentmodule:: {{ module }}
+{% block methods %} {% if methods %}
 
-.. autoclass:: {{ objname }}
+{% endif %} {% endblock %}
 
-   {% block methods %}
-   .. automethod:: __init__
-   {% endblock %}
+{% block attributes %} {% if attributes %}
 
-.. include:: {{module}}.{{objname}}.examples
-
-.. raw:: html
-
-    <div class="clearer"></div>
+{% endif %} {% endblock %}
