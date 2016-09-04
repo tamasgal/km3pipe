@@ -67,8 +67,8 @@ Here is an example configuration::
     token=xoxp-2355837568-2397897846-8945924372-395f023485
 
 
-Install HowTo
--------------
+Video HowTo
+-----------
 
 The following video shows how to install the latest developer version and run the test suite.
 
