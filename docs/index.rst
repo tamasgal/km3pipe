@@ -5,9 +5,13 @@
 
 .. include:: summary.rst
 
+.. toctree::
+   :hidden:
+
+   self
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    install
    user_guide
