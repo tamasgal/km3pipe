@@ -1,6 +1,5 @@
 body {
   margin: 40px auto;
-  max-width: 650px;
 
   line-height: 1.6;
   padding: 0 10px;
@@ -15,10 +14,19 @@ h1, h2, h3 {
 }
 
 a {
-  color: #58a5f2;
+  color: #0076ba;
+  text-decoration: none;
+}
+
+a:visited {
+  color: #0076ba;
   text-decoration: none;
 }
 
 a:hover {
-  color: #8ecffc
+    text-decoration: underline;
+}
+
+a.toc-backref {
+  color: #0076ba;
 }
