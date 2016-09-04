@@ -11,3 +11,4 @@ urwid
 pandas
 seaborn
 cython
+pillow
