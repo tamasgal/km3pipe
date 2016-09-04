@@ -38,25 +38,12 @@ sys.path.insert(0, os.path.abspath('.'))
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
-    # 'sphinxcontrib.napoleon',
     'sphinx.ext.doctest',
     'sphinx.ext.imgmath',
     'sphinx.ext.viewcode',
     'numpydoc',
     'sphinx_gallery.gen_gallery',
 ]
-
-# Napoleon settings
-# napoleon_google_docstring = True
-# napoleon_numpy_docstring = True
-# napoleon_include_private_with_doc = False
-# napoleon_include_special_with_doc = True
-# napoleon_use_admonition_for_examples = False
-# napoleon_use_admonition_for_notes = False
-# napoleon_use_admonition_for_references = False
-# napoleon_use_ivar = False
-# napoleon_use_param = True
-# napoleon_use_rtype = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -134,6 +121,9 @@ html_theme = 'better'
 html_theme_options = {
     'cssfiles': ['_static/paper.css'],
     'textcolor': '#444',
+    'showheader': True,
+    'showrelbartop': False,
+    'showrelbarbottom': False,
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
@@ -141,7 +131,7 @@ html_theme_path = [better_theme_path]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-# html_title = None
+html_title = "KM3Pipe {}".format(km3pipe.__version__)
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 html_short_title = 'Home'
