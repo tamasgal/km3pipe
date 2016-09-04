@@ -74,6 +74,8 @@ class Serialisable(type):
 
 
 class EventInfo(with_metaclass(Serialisable)):
+    """Event Metadata.
+    """
     dtype = [
         ('det_id', '<i4'), ('event_id', '<u4'), ('frame_index', '<u4'),
         ('mc_id', '<i4'), ('mc_t', '<f8'), ('overlays', 'u1'),
@@ -219,7 +221,7 @@ class Direction_(Point):
 
 
 cdef class Hit:
-    """Represents a hit on a PMT.
+    """Hit on a PMT.
 
     Parameters
     ----------
@@ -270,7 +272,7 @@ cdef class Hit:
 
 
 cdef class Track:
-    """Represents a particle track.
+    """Particle track.
 
     Parameters
     ----------
@@ -327,6 +329,8 @@ cdef class Track:
 
 
 class HitSeries(object):
+    """Collection of multiple Hits.
+    """
     dtype = np.dtype([
         ('channel_id', 'u1'), ('dom_id', '<u4'), ('event_id', '<u4'),
         ('id', '<u4'), ('pmt_id', '<u4'),
@@ -526,6 +530,12 @@ class HitSeries(object):
 
 
 class TrackSeries(object):
+    """Collection of multiple Tracks.
+
+    Attributes
+    ----------
+    dtype: datatype of array representation
+    """
     dtype = np.dtype([
         ('bjorkeny', '<f8'), ('dir_x', '<f8'), ('dir_y', '<f8'),
         ('dir_z', '<f8'), ('energy', '<f8'), ('event_id', '<u4'),
@@ -764,7 +774,7 @@ class TrackSeries(object):
 
 
 class Reco(dict):
-    """"A dictionary with a dtype."""
+    """A dictionary with a dtype."""
     def __init__(self, map, dtype, h5loc='/reco'):
         self.dtype = dtype
         self.h5loc = h5loc

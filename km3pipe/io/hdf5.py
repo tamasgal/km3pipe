@@ -220,9 +220,6 @@ class HDF5Pump(Pump):
 class H5Chain(object):
     """Read/write multiple HDF5 files as ``pandas.DataFrame``.
 
-    The dataframes are accessible as attributes. To read the table `'/reco'`:
-    >>> h5_reco = H5Chain(...).reco
-
     Parameters
     ----------
     which: list(str) or dict(str->cond)
@@ -230,27 +227,29 @@ class H5Chain(object):
         selected according to cond, which can be `None` (all events), a
         slice, or a numexpr-like pytables condition string.
 
-    Example
-    -------
-    >>> h5files = ['numu_cc.h5', 'anue_nc.h5']
-    >>> c = H5Chain(h5files)
+    Examples
+    --------
+    >>> filenames = ['numu_cc.h5', 'anue_nc.h5']
+    >>> c = H5Chain(filenames)
 
-    # specify n_events per file, or their event ids
-    >>> which = {'numu_cc.h5': None, 'anue_nc.h5': 100,
+    specify n_events per file, or their event ids
+
+    >>> filenames = {'numu_cc.h5': None, 'anue_nc.h5': 100,
                  'numu_cc.h5': [1, 2, 3],}
-    >>> c = H5Chain(which)
+    >>> c = H5Chain(filenames)
 
-    # these are pandas Dataframes
+    these are pandas Dataframes
+
     >>> X = c.reco
     >>> wgt = c.event_info.weights_w2
     >>> Y_ene = c.mc_tracks[::2].energy
 
     """
 
-    def __init__(self, which):
-        if isinstance(which, list):
-            which = {key: None for key in which}
-        self._which = which
+    def __init__(self, filenames):
+        if isinstance(filenames, list):
+            filenames = {key: None for key in filenames}
+        self._which = filenames
         self._store = defaultdict(list)
 
         for fil, cond in self._which.items():
