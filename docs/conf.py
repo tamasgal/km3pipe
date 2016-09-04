@@ -284,16 +284,12 @@ texinfo_documents = [
 
 # -- Options for Example Gallery ------------------------------------------
 sphinx_gallery_conf = {
-    'examples_dirs': '../examples/auto',
-    'gallery_dirs': 'auto_examples',
+    # path to store the module using example template
+    'mod_example_dir': 'modules/generated',
+    'examples_dirs': ['../examples'],
+    'gallery_dirs': ['auto_examples'],
     'reference_url':  {
-        # The module you locally document uses a None
-        'sphinx_gallery': None,
-
-        # External python modules use their documentation websites
-        'pandas': 'http://pandas.pydata.org',
-        'numpy': 'http://docs.scipy.org/doc/',
-        'matplotlib': 'http://matplotlib.org',
+        'km3pipe': None,
     }
 }
 
