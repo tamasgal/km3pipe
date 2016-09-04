@@ -103,7 +103,7 @@ H5 Utils
 --------
 
 `h5tree`
-^^^^^^^^
+~~~~~~~~
 
 Shows the content of a HDF5 file::
 

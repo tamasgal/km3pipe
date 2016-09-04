@@ -15,24 +15,25 @@ API Reference
   CLBPump
   DAQPump
   EvtPump
-  JPPPump
-  PicklePump
   H5Chain
   HDF5Pump
   HDF5Sink
+  JPPPump
+  PicklePump
 
 
 ``km3pipe.dataclasses``: Internal Data Structures
-------------------------------------------------
+-------------------------------------------------
 
 .. currentmodule:: km3pipe.dataclasses
 
 .. autosummary::
   :toctree: api
+  :template: class.rst
 
-  Hit
-  Track
-  HitSeries
-  TrackSeries
   EventInfo
+  Hit
+  HitSeries
   Reco
+  Track
+  TrackSeries
