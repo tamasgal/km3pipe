@@ -81,7 +81,7 @@ setup(name='km3pipe',
       ],
       extra_require={
           'scikit-learn': ['sklearn'],
-          'documentation': ['sphinx-gallery', 'numpydoc'],
+          'docs': ['sphinx >= 1.4', 'sphinx-gallery', 'numpydoc'],
           'jppy': ['jppy'],
       },
       entry_points={
