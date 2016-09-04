@@ -1,8 +1,8 @@
 API Reference
 =============
 
-Input / Output
---------------
+``km3pipe.io``: File Input / Output
+-----------------------------------
 
 .. currentmodule:: km3pipe.io
 
@@ -22,8 +22,8 @@ Input / Output
   HDF5Sink
 
 
-Data Classes
-------------
+``km3pipe.dataclasses``: Internal Data Structures
+------------------------------------------------
 
 .. currentmodule:: km3pipe.dataclasses
 

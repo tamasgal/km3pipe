@@ -218,7 +218,7 @@ class HDF5Pump(Pump):
 
 
 class H5Chain(object):
-    """Read/write multiple HDF5 files as `pandas.DataFrame`.
+    """Read/write multiple HDF5 files as ``pandas.DataFrame``.
 
     The dataframes are accessible as attributes. To read the table `'/reco'`:
     >>> h5_reco = H5Chain(...).reco
