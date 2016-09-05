@@ -330,7 +330,7 @@ class DBManager(object):
         opener = build_opener(HTTPCookieProcessor(cj), HTTPHandler())
         values = {'usr': username, 'pwd': password}
         data = urlencode(values)
-        req = Request(self._login_url, data.encode('utf-8'))
+        req = self._make_request(self._login_url, data)
         try:
             f = opener.open(req)
         except URLError as e:
@@ -344,6 +344,9 @@ class DBManager(object):
             return False
         self._cookies = cj
         return True
+
+    def _make_request(self, url, data):
+        return Request(url, data.encode('utf-8'))
 
 
 class ParametersContainer(object):

@@ -36,6 +36,21 @@ class TestDBManager(TestCase):
         self.assertEqual(1, DBManager.login.call_count)
         self.assertTupleEqual((user, pwd), DBManager.login.call_args[0])
 
+    def test_login(self):
+        original_login = DBManager.login  # save for later
+        user = 'a'
+        pwd = 'b'
+
+        # mock login to be able to create an instance without an actual login
+        DBManager.login = MagicMock()
+        db = DBManager(username='foo', password='bar')  # make dummy call
+        DBManager.login = original_login  # restore function
+
+        db._make_request = MagicMock()
+        db.login(username='a', password='b')
+        self.assertTupleEqual((db._login_url, "pwd={1}&usr={0}".format(user, pwd)),
+                              tuple(db._make_request.call_args)[0])
+
 
 class TestDOMContainer(TestCase):
     def test_init(self):
