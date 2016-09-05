@@ -298,4 +298,6 @@ class H5Chain(object):
             return table[:]
         if isinstance(cond, string_types):
             return table.read_where(cond)
+        if isinstance(cond, int):
+            return table[:cond]
         return table.read(cond)
