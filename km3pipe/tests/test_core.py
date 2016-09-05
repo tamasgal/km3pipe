@@ -159,6 +159,14 @@ class TestPipeline(TestCase):
             if module.name != 'func_module':
                 self.assertEqual(1, module.finish.call_count)
 
+    def test_ctrl_c_handling(self):
+        pl = Pipeline()
+        self.assertFalse(pl._stop)
+        pl._handle_ctrl_c()  # first KeyboardInterrupt
+        self.assertTrue(pl._stop)
+        with self.assertRaises(SystemExit):
+            pl._handle_ctrl_c()  # second KeyboardInterrupt
+
 
 class TestModule(TestCase):
     """Tests for the pipeline module"""
