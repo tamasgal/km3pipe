@@ -12,3 +12,4 @@ sphinx-gallery
 numpydoc
 pillow
 matplotlib
+seaborn
