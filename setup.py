@@ -6,7 +6,6 @@ KM3Pipe setup script.
 
 """
 from setuptools import setup, Extension
-from Cython.Compiler.Options import directive_defaults
 import sys
 
 if sys.version_info[0] >= 3:
@@ -15,6 +14,7 @@ else:
     import __builtin__ as builtins
 try:
     from Cython.Distutils import build_ext
+    from Cython.Compiler.Options import directive_defaults
     import numpy
 except ImportError:
     raise SystemExit("\nCython and Numpy are required to compile KM3Pipe.\n"
