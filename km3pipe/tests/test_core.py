@@ -78,6 +78,21 @@ class TestPipeline(TestCase):
         for module in pl.modules:
             self.assertEqual(n, module.process.call_count)
 
+    def test_drain_doesnt_call_process_if_blob_is_none(self):
+        pl = Pipeline(blob=1)
+
+        pl.attach(Module, 'module1')
+        pl.attach(Module, 'module2')
+        pl.attach(Module, 'module3')
+        pl.modules[0].process = MagicMock(return_value=None)
+        pl.modules[1].process = MagicMock(return_value={})
+        pl.modules[2].process = MagicMock(return_value={})
+        n = 3
+        pl.drain(n)
+        self.assertEqual(n, pl.modules[0].process.call_count)
+        self.assertEqual(0, pl.modules[1].process.call_count)
+        self.assertEqual(0, pl.modules[2].process.call_count)
+
     def test_conditional_module_not_called_if_key_not_in_blob(self):
         pl = Pipeline(blob=1)
 
