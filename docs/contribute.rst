@@ -57,4 +57,4 @@ Install & run the ``pytest`` suite::
 
 
 Create a Merge Request (aka Pull Request)
-=========================================
+-----------------------------------------
