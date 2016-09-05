@@ -4,7 +4,7 @@
 from __future__ import division, absolute_import, print_function
 
 from km3pipe.testing import TestCase, StringIO, MagicMock
-from km3pipe.core import Pipeline, Module, Pump, Blob
+from km3pipe.core import Pipeline, Module, Pump, Blob, Geometry
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -232,3 +232,11 @@ class TestBlob(TestCase):
         blob = Blob()
         blob['foo'] = 1
         self.assertEqual(1, blob['foo'])
+
+
+class TestGeometry(TestCase):
+    """Tests for the Geometry class"""
+
+    def test_init_requires_filename_or_detector_id(self):
+        with self.assertRaises(ValueError):
+            geo = Geometry()
