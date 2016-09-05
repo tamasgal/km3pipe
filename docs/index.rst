@@ -15,6 +15,7 @@
 
    install
    user_guide
+   contribute
    auto_examples/index
    api
 

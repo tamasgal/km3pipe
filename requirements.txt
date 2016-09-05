@@ -11,3 +11,5 @@ sphinx-better-theme
 sphinx-gallery
 numpydoc
 pillow
+matplotlib
+seaborn

@@ -11,14 +11,16 @@ where there isn't any.
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import km3pipe.style
 
 x = np.linspace(-np.pi, np.pi, 300)
 xx, yy = np.meshgrid(x, x)
 z = np.cos(xx) + np.cos(yy)
 
-fig, axes = plt.subplots(3, 1)
+fig, axes = plt.subplots(2, 2)
 
-for ax, colourmap in zip(axes, ['jet', 'gray', 'cubehelix']):
+for ax, colourmap in zip(axes.flatten(),
+                         ['gray', 'jet', 'cubehelix', 'viridis']):
     ax.set_title(colourmap)
     im = ax.imshow(z, cmap=plt.get_cmap(colourmap))
     divider = make_axes_locatable(ax)
