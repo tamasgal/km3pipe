@@ -28,6 +28,11 @@ class TestPipeline(TestCase):
         self.assertEqual('module1', self.pl.modules[0].name)
         self.assertEqual('module2', self.pl.modules[1].name)
 
+    def test_attach_bundle(self):
+        modules = [Module, Module]
+        self.pl.attach_bundle(modules)
+        self.assertEqual(2, len(self.pl.modules))
+
     def test_attach_function(self):
         self.pl.attach(lambda x: 1)
         self.pl.attach(lambda x: 2, "Another Lambda")
