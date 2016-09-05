@@ -8,8 +8,11 @@ If you have any questions, join us in the `#km3pipe`_ Slack channel.
 
 .. _#km3pipe: https://km3net.slack.com/messages/km3pipe
 
+Add Features & Fix Bugs
+-----------------------
+
 Setup a Virtualenv for your New Version
----------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 TODO.
 
@@ -18,14 +21,14 @@ Enter the virtualenv::
     workon km3pipe
 
 
-Create Your Own Fork of KM3Pipe
--------------------------------
+Make a Fork of KM3Pipe
+~~~~~~~~~~~~~~~~~~~~~~
 
 Go to ``http://git.km3net.de/tgal/km3pipe`` and click on "Fork".
 
 
 Install in Developer Mode
--------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Fetch the develop branch from git repository (replace YOURUSER with you
 git user name)::
@@ -43,10 +46,10 @@ Install in editable mode::
 
 
 When Editing ``.pyx`` files, recompile
---------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Make Sure all Tests pass
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 Install & run the ``pytest`` suite::
 
@@ -57,4 +60,16 @@ Install & run the ``pytest`` suite::
 
 
 Create a Merge Request (aka Pull Request)
------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+How to Write Documentation
+--------------------------
+
+Build docs locally::
+  
+  cd km3pipe/docs
+  make html
+
+How to Add Examples to the Gallery
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
