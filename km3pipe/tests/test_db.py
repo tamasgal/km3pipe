@@ -48,8 +48,10 @@ class TestDBManager(TestCase):
 
         db._make_request = MagicMock()
         db.login(username='a', password='b')
-        self.assertTupleEqual((db._login_url, "pwd={1}&usr={0}".format(user, pwd)),
-                              tuple(db._make_request.call_args)[0])
+        call_args = db._make_request.call_args[0]
+        self.assertEqual(db._login_url, call_args[0])
+        self.assertTrue('pwd={0}'.format(pwd) in call_args[1])
+        self.assertTrue('usr={0}'.format(user) in call_args[1])
 
 
 class TestDOMContainer(TestCase):
