@@ -12,13 +12,17 @@ where there isn't any.
 
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 x = np.linspace(-np.pi, np.pi, 300)
 xx, yy = np.meshgrid(x, x)
 z = np.cos(xx) + np.cos(yy)
 
-plt.figure()
-plt.imshow(z)
-plt.colorbar()
-plt.xlabel('$x$')
-plt.ylabel('$y$')
+fig, axes = plt.subplots(1, 3, figsize=(16, 8))
+
+for ax, colourmap in zip(axes, ['jet', 'gray', 'cubehelix']):
+    ax.set_title(colourmap)
+    im = ax.imshow(z, cmap=plt.get_cmap(colourmap))
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes('right', size='20%', pad=0.05)
+    cbar = plt.colorbar(im, cax=cax)
