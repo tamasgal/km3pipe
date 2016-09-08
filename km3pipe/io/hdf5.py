@@ -16,7 +16,7 @@ import tables as tb
 
 import km3pipe as kp
 from km3pipe import Pump, Module
-from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo, ArrayTaco
+from km3pipe.dataclasses import ArrayTaco, deserialise_map
 from km3pipe.logger import logging
 from km3pipe.tools import camelise, decamelise, insert_prefix_to_dtype
 
@@ -148,33 +148,19 @@ class HDF5Pump(Pump):
         self.index += 1
         return blob
 
-    def _get_event(self, event_id, where):
-        if not where.startswith('/'):
-            where = '/' + where
-        try:
-            table = self.h5_file.get_node(where)
-            return table.read_where('event_id == %d' % event_id)
-        except tb.NodeError:
-            return []
-
     def get_blob(self, index):
         event_id = self.event_ids[index]
         blob = {}
-        hits = self._get_event(event_id, where='hits')
-        blob['Hits'] = HitSeries.from_table(hits, event_id=event_id)
-        mc_hits = self._get_event(event_id, where='mc_hits')
-        blob['MCHits'] = HitSeries.from_table(mc_hits, event_id=event_id)
-        mc_tracks = self._get_event(event_id, where='mc_tracks')
-        blob['MCTracks'] = TrackSeries.from_table(mc_tracks,
-                                                      event_id=event_id)
-        blob['EventInfo'] = EventInfo.from_table(
-            self._get_event(event_id, where='event_info')[0])
-
-        reco_path = '/reco'
-        for tab in self.h5_file.iter_nodes(reco_path, classname='Table'):
-            tabname = tab.name
+        for tab in self.h5_file.walk_nodes(classname="Table"):
+            tabname = camelise(tab.name)
+            try:
+                dc = deserialise_map[tabname]
+                loc = ''
+            except KeyError:
+                dc = ArrayTaco
+                loc, _ = os.path.split(tab._v_pathname)
             arr = tab.read_where('event_id == %d' % event_id)
-            blob[camelise(tabname)] = ArrayTaco(arr, h5loc=reco_path)
+            blob[tabname] = dc.deserialise(arr, h5loc=loc)
         return blob
 
     def finish(self):
