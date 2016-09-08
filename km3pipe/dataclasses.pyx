@@ -795,3 +795,6 @@ class ArrayTaco(object):
 
     def serialise(self, to='numpy'):
         return self.array
+
+    def __len__(self):
+        return len(self.array)
