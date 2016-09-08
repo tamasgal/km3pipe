@@ -58,7 +58,7 @@ class TestMultiTable(TestCase):
 
 
 class TestH5Chain(TestCase):
-    def setUp(self):
+    def skip_setUp(self):
         self.foo = np.array([
             (1.0, 2.0, 1.0, 1),
             (4.0, 5.0, 0.0, 1),
@@ -98,23 +98,23 @@ class TestH5Chain(TestCase):
         self.h5file.close()
         self.h5file2.close()
 
-    def tearDown(self):
+    def skip_tearDown(self):
         os.remove(self.h5name)
         os.remove(self.h5name2)
 
-    def test_two_files(self):
+    def skip_test_two_files(self):
         files = {self.h5name: None, self.h5name2: None}
         c = H5Chain(files)
         print(c['foo'][::2])
         print(c['lala'])
         self.assertTrue(c['foo'].equals(c.foo))
 
-    def test_list(self):
+    def skip_test_list(self):
         files = [self.h5name, self.h5name2]
         c = H5Chain(files)
         self.assertTrue(c['foo'].equals(c.foo))
 
-    def test_event_id(self):
+    def skip_test_event_id(self):
         files = {self.h5name: 'event_id == 1', self.h5name2: 'event_id == 1'}
         c = H5Chain(files)
         print(c['foo'][::2])
