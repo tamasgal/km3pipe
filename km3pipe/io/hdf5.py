@@ -90,8 +90,8 @@ class HDF5Sink(Module):
                 try:
                     h5loc = entry.h5loc
                 except AttributeError:
-                    h5loc = ''
-                where = h5loc + '/' + decamelise(key)
+                    h5loc = '/'
+                where = os.path.join(h5loc, decamelise(key))
                 entry = self._to_array(entry)
                 self._write_array(where, entry, title=key)
 
@@ -152,7 +152,8 @@ class HDF5Pump(Pump):
         event_id = self.event_ids[index]
         blob = {}
         for tab in self.h5_file.walk_nodes(classname="Table"):
-            tabname = camelise(tab.name)
+            loc, tabname = os.path.split(tab._v_pathname)
+            tabname = camelise(tabname)
             try:
                 dc = deserialise_map[tabname]
                 loc = ''

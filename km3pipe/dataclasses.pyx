@@ -97,7 +97,7 @@ class EventInfo(with_metaclass(Serialisable)):
         return cls(*args)
 
     @classmethod
-    def deserialise(cls, data, event_id=None, fmt='numpy', h5loc=''):
+    def deserialise(cls, data, event_id=None, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
             return cls.from_table(data[0])
 
@@ -409,7 +409,7 @@ class HitSeries(object):
         ) for row in table], event_id)
 
     @classmethod
-    def deserialise(cls, data, event_id=None, fmt='numpy', h5loc=''):
+    def deserialise(cls, data, event_id=None, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
             return cls.from_table(data, event_id)
 
@@ -649,7 +649,7 @@ class TrackSeries(object):
         ) for row in table], event_id)
 
     @classmethod
-    def deserialise(cls, data, event_id=None, fmt='numpy', h5loc=''):
+    def deserialise(cls, data, event_id=None, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
             return cls.from_table(data, event_id)
 
