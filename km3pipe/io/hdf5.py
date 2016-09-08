@@ -246,7 +246,9 @@ class H5Chain(object):
 
     """
 
-    def __init__(self, filenames):
+    def __init__(self, filenames, table_filter=None):
+        if table_filter is None:
+            table_filter = {}
         if isinstance(filenames, list):
             filenames = {key: None for key in filenames}
         self._which = filenames
@@ -257,7 +259,11 @@ class H5Chain(object):
 
             # tables under '/', e.g. mc_tracks
             for tab in h5fil.iter_nodes('/', classname='Table'):
-                arr = self._read_table(tab, cond)
+                if tab.name in table_filter.keys():
+                    tab_cond = table_filter[tab.name]
+                    arr = self._read_table(tab, tab_cond)
+                else:
+                    arr = self._read_table(tab, cond)
                 arr = pd.DataFrame.from_records(arr)
                 self._store[tab.name].append(arr)
 
@@ -271,11 +277,8 @@ class H5Chain(object):
         for key, dfs in self._store.items():
             self._store[key] = pd.concat(dfs)
 
-    def __getattr__(self, name):
-        try:
-            return self._store[name]
-        except KeyError:
-            raise AttributeError("The table {} does not exist".format(name))
+        for key, val in self._store.items():
+            setattr(self, key, val)
 
     def __getitem__(self, name):
         return self._store[name]
@@ -300,4 +303,6 @@ class H5Chain(object):
             return table.read_where(cond)
         if isinstance(cond, int):
             return table[:cond]
+        if isinstance(cond, slice):
+            return table[cond]
         return table.read(cond)
