@@ -161,14 +161,11 @@ class HDF5Pump(Pump):
         event_id = self.event_ids[index]
         blob = {}
         hits = self._get_event(event_id, where='hits')
-        if len(hits) > 0:
-            blob['Hits'] = HitSeries.from_table(hits, event_id=event_id)
+        blob['Hits'] = HitSeries.from_table(hits, event_id=event_id)
         mc_hits = self._get_event(event_id, where='mc_hits')
-        if len(mc_hits) > 0:
-            blob['MCHits'] = HitSeries.from_table(mc_hits, event_id=event_id)
+        blob['MCHits'] = HitSeries.from_table(mc_hits, event_id=event_id)
         mc_tracks = self._get_event(event_id, where='mc_tracks')
-        if len(mc_tracks) > 0:
-            blob['MCTracks'] = TrackSeries.from_table(mc_tracks,
+        blob['MCTracks'] = TrackSeries.from_table(mc_tracks,
                                                       event_id=event_id)
         blob['EventInfo'] = EventInfo.from_table(
             self._get_event(event_id, where='event_info')[0])
