@@ -154,7 +154,7 @@ class HDF5Pump(Pump):
         try:
             table = self.h5_file.get_node(where)
             return table.read_where('event_id == %d' % event_id)
-        except tables.NodeError:
+        except tb.NodeError:
             return []
 
     def get_blob(self, index):
