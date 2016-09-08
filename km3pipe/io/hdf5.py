@@ -151,8 +151,11 @@ class HDF5Pump(Pump):
     def _get_event(self, event_id, where):
         if not where.startswith('/'):
             where = '/' + where
-        table = self.h5_file.get_node(where)
-        return table.read_where('event_id == %d' % event_id)
+        try:
+            table = self.h5_file.get_node(where)
+            return table.read_where('event_id == %d' % event_id)
+        except tables.NodeError:
+            return []
 
     def get_blob(self, index):
         event_id = self.event_ids[index]
