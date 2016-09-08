@@ -16,7 +16,7 @@ import tables as tb
 
 import km3pipe as kp
 from km3pipe import Pump, Module
-from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
+from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo, ArrayTaco
 from km3pipe.logger import logging
 from km3pipe.tools import camelise, decamelise, insert_prefix_to_dtype
 
@@ -42,9 +42,9 @@ class HDF5Sink(Module):
     will be written to `/foo_bar` in the HDF5 file.
 
     To store at a different location in the file, the data needs a
-    `.loc` attribute:
+    `.h5loc` attribute:
 
-    >>> my_arr.loc = '/somewhere'
+    >>> my_arr.h5loc = '/somewhere'
 
     Parameters
     ----------
@@ -60,7 +60,7 @@ class HDF5Sink(Module):
                                   fletcher32=True)
         self._tables = {}
 
-    def _write_table(self, where, data, title=''):
+    def _to_array(self, data):
         if len(data) <= 0:
             return
         try:
@@ -71,7 +71,7 @@ class HDF5Sink(Module):
             data = data.serialise()
         except AttributeError:
             pass
-        self._write_array(where, data, title)
+        return data
 
     def _write_array(self, where, arr, title=''):
         if where not in self._tables:
@@ -92,7 +92,8 @@ class HDF5Sink(Module):
                 except AttributeError:
                     h5loc = ''
                 where = h5loc + '/' + decamelise(key)
-                self._write_table(where, entry, title=key)
+                entry = self._to_array(entry)
+                self._write_array(where, entry, title=key)
 
         if not self.index % 1000:
             for tab in self._tables.values():
@@ -103,8 +104,8 @@ class HDF5Sink(Module):
 
     def finish(self):
         for tab in self._tables.values():
-            tab.flush()
             tab.cols.event_id.create_index()
+            tab.flush()
         self.h5file.root._v_attrs.km3pipe = str(kp.__version__)
         self.h5file.root._v_attrs.pytables = str(tb.__version__)
         self.h5file.close()
@@ -172,8 +173,8 @@ class HDF5Pump(Pump):
         reco_path = '/reco'
         for tab in self.h5_file.iter_nodes(reco_path, classname='Table'):
             tabname = tab.name
-            blob[camelise(tabname)] = tab.read_where(
-                'event_id == %d' % event_id)
+            arr = tab.read_where('event_id == %d' % event_id)
+            blob[camelise(tabname)] = ArrayTaco(arr, h5loc=reco_path)
         return blob
 
     def finish(self):

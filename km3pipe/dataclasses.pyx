@@ -786,3 +786,15 @@ class Reco(dict):
 
     def __array__(self):
         return [tuple((self[key] for key in self.dtype.names))]
+
+
+class ArrayTaco(object):
+    def __init__(self, arr, h5loc='/'):
+        self.array = arr
+        self.h5loc = h5loc
+
+    def serialise(self, to='numpy'):
+        return self.array
+
+    def __len__(self):
+        return len(self.array)

@@ -128,3 +128,14 @@ class TestH5Chain(TestCase):
     #     files = {self.h5name: slice(1, 3, 2)}
     #     c = H5Chain(files)
     #     self.assertTrue(c['foo'].equals(c.foo))
+
+
+class TestH5Pump(TestCase):
+    pass
+
+class TestH5Sink(TestCase):
+    def test_to_array(self):
+        # check if is converted to array:
+        # hitseries
+        # reco
+        pass
