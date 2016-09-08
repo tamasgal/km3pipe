@@ -34,7 +34,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
-log.setLevel(logging.DEBUG)
+# log.setLevel(logging.DEBUG)
 
 STAT_LIMIT = 100000
 

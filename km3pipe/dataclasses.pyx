@@ -407,7 +407,7 @@ class HitSeries(object):
             return np.array(self.__array__(), dtype=self.dtype)
 
     def __array__(self):
-        return tuple((h.channel_id, h.dom_id, self.event_id, h.id, h.pmt_id,
+        return list((h.channel_id, h.dom_id, self.event_id, h.id, h.pmt_id,
             #self.run_id,
             h.time, h.tot, h.triggered) for h in self._hits)
 
