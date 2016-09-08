@@ -64,11 +64,11 @@ class HDF5Sink(Module):
         if len(data) <= 0:
             return
         try:
-            data = data.to_records()
+            return data.to_records()
         except AttributeError:
             pass
         try:
-            data = data.serialise()
+            return data.serialise()
         except AttributeError:
             pass
         return data
@@ -93,6 +93,8 @@ class HDF5Sink(Module):
                     h5loc = '/'
                 where = os.path.join(h5loc, decamelise(key))
                 entry = self._to_array(entry)
+                if entry is None:
+                    continue
                 self._write_array(where, entry, title=key)
 
         if not self.index % 1000:
@@ -156,10 +158,8 @@ class HDF5Pump(Pump):
             tabname = camelise(tabname)
             try:
                 dc = deserialise_map[tabname]
-                loc = ''
             except KeyError:
                 dc = ArrayTaco
-                loc, _ = os.path.split(tab._v_pathname)
             arr = tab.read_where('event_id == %d' % event_id)
             blob[tabname] = dc.deserialise(arr, h5loc=loc)
         return blob
