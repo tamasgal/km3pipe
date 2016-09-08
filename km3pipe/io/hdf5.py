@@ -16,7 +16,7 @@ import tables as tb
 
 import km3pipe as kp
 from km3pipe import Pump, Module
-from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
+from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo, ArrayTaco
 from km3pipe.logger import logging
 from km3pipe.tools import camelise, decamelise, insert_prefix_to_dtype
 
@@ -42,9 +42,9 @@ class HDF5Sink(Module):
     will be written to `/foo_bar` in the HDF5 file.
 
     To store at a different location in the file, the data needs a
-    `.loc` attribute:
+    `.h5loc` attribute:
 
-    >>> my_arr.loc = '/somewhere'
+    >>> my_arr.h5loc = '/somewhere'
 
     Parameters
     ----------
@@ -172,8 +172,8 @@ class HDF5Pump(Pump):
         reco_path = '/reco'
         for tab in self.h5_file.iter_nodes(reco_path, classname='Table'):
             tabname = tab.name
-            blob[camelise(tabname)] = tab.read_where(
-                'event_id == %d' % event_id)
+            arr = tab.read_where('event_id == %d' % event_id)
+            blob[camelise(tabname)] = ArrayTaco(arr, h5loc=reco_path)
         return blob
 
     def finish(self):
