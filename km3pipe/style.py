@@ -19,7 +19,13 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
+mpl.rcParams['axes.edgecolor'] = 'black'
+mpl.rcParams['axes.grid'] = True
 mpl.rcParams['grid.linewidth'] = 1.0
+mpl.rcParams['figure.subplot.wspace'] = 0.3
+mpl.rcParams['figure.subplot.hspace'] = 0.3
+mpl.rcParams['xtick.labelsize'] = 'small'
+mpl.rcParams['ytick.labelsize'] = 'small'
 
 style_definition = {'grid.color': '.85',
                     'grid.linestyle': u'--',
