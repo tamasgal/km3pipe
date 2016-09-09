@@ -84,7 +84,7 @@ class HDF5Sink(Module):
         tab.append(arr)
 
     def process(self, blob):
-        for key, entry in blob.items():
+        for key, entry in sorted(blob.items()):
             if hasattr(entry, 'dtype') or hasattr(entry, 'serialise') or \
                     hasattr(entry, 'to_records'):
                 try:
@@ -242,7 +242,7 @@ class H5Chain(object):
         self._which = filenames
         self._store = defaultdict(list)
 
-        for fil, cond in self._which.items():
+        for fil, cond in sorted(self._which.items()):
             h5fil = tb.open_file(fil, 'r')
 
             # tables under '/', e.g. mc_tracks
@@ -262,10 +262,10 @@ class H5Chain(object):
 
             h5fil.close()
 
-        for key, dfs in self._store.items():
+        for key, dfs in sorted(self._store.items()):
             self._store[key] = pd.concat(dfs)
 
-        for key, val in self._store.items():
+        for key, val in sorted(self._store.items()):
             setattr(self, key, val)
 
     def __getitem__(self, name):
