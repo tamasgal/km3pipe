@@ -40,6 +40,7 @@ IS_CC = {
 }
 
 
+
 class Serialisable(type):
     """A metaclass for serialisable classes.
 
@@ -94,6 +95,11 @@ class EventInfo(with_metaclass(Serialisable)):
             except KeyError:
                 args.append(np.nan)
         return cls(*args)
+
+    @classmethod
+    def deserialise(cls, data, event_id=None, fmt='numpy', h5loc='/'):
+        if fmt == 'numpy':
+            return cls.from_table(data[0])
 
     def serialise(self, to='numpy'):
         if to == 'numpy':
@@ -402,6 +408,11 @@ class HitSeries(object):
             row['triggered'],
         ) for row in table], event_id)
 
+    @classmethod
+    def deserialise(cls, data, event_id=None, fmt='numpy', h5loc='/'):
+        if fmt == 'numpy':
+            return cls.from_table(data, event_id)
+
     def serialise(self, to='numpy'):
         if to == 'numpy':
             return np.array(self.__array__(), dtype=self.dtype)
@@ -637,6 +648,11 @@ class TrackSeries(object):
             row['type']
         ) for row in table], event_id)
 
+    @classmethod
+    def deserialise(cls, data, event_id=None, fmt='numpy', h5loc='/'):
+        if fmt == 'numpy':
+            return cls.from_table(data, event_id)
+
     def serialise(self, to='numpy'):
         if to == 'numpy':
             return np.array(self.__array__(), dtype=self.dtype)
@@ -793,8 +809,22 @@ class ArrayTaco(object):
         self.array = arr
         self.h5loc = h5loc
 
+    @classmethod
+    def deserialise(cls, data, h5loc='/', event_id=None, fmt='numpy'):
+        if fmt == 'numpy':
+            return cls(data, h5loc)
+
     def serialise(self, to='numpy'):
         return self.array
 
     def __len__(self):
         return len(self.array)
+
+
+deserialise_map = {
+    'MCHits': HitSeries,
+    'Hits': HitSeries,
+    'MCTracks': TrackSeries,
+    'EventInfo': EventInfo,
+}
+

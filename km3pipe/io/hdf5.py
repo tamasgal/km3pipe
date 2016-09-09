@@ -16,7 +16,7 @@ import tables as tb
 
 import km3pipe as kp
 from km3pipe import Pump, Module
-from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo, ArrayTaco
+from km3pipe.dataclasses import ArrayTaco, deserialise_map
 from km3pipe.logger import logging
 from km3pipe.tools import camelise, decamelise, insert_prefix_to_dtype
 
@@ -64,11 +64,11 @@ class HDF5Sink(Module):
         if len(data) <= 0:
             return
         try:
-            data = data.to_records()
+            return data.to_records()
         except AttributeError:
             pass
         try:
-            data = data.serialise()
+            return data.serialise()
         except AttributeError:
             pass
         return data
@@ -90,9 +90,11 @@ class HDF5Sink(Module):
                 try:
                     h5loc = entry.h5loc
                 except AttributeError:
-                    h5loc = ''
-                where = h5loc + '/' + decamelise(key)
+                    h5loc = '/'
+                where = os.path.join(h5loc, decamelise(key))
                 entry = self._to_array(entry)
+                if entry is None:
+                    continue
                 self._write_array(where, entry, title=key)
 
         if not self.index % 1000:
@@ -148,38 +150,18 @@ class HDF5Pump(Pump):
         self.index += 1
         return blob
 
-    def _get_event(self, event_id, where):
-        if not where.startswith('/'):
-            where = '/' + where
-        try:
-            table = self.h5_file.get_node(where)
-            return table.read_where('event_id == %d' % event_id)
-        except tb.NodeError:
-            return []
-
     def get_blob(self, index):
         event_id = self.event_ids[index]
         blob = {}
-
-        hits = self._get_event(event_id, where='hits')
-        if len(hits) > 0:
-            blob['Hits'] = HitSeries.from_table(hits, event_id=event_id)
-        mc_hits = self._get_event(event_id, where='mc_hits')
-        if len(mc_hits) > 0:
-            blob['MCHits'] = HitSeries.from_table(mc_hits, event_id=event_id)
-        mc_tracks = self._get_event(event_id, where='mc_tracks')
-        if len(mc_tracks) > 0:
-            blob['MCTracks'] = TrackSeries.from_table(mc_tracks,
-                                                      event_id=event_id)
-
-        blob['EventInfo'] = EventInfo.from_table(
-            self._get_event(event_id, where='event_info')[0])
-
-        reco_path = '/reco'
-        for tab in self.h5_file.iter_nodes(reco_path, classname='Table'):
-            tabname = tab.name
+        for tab in self.h5_file.walk_nodes(classname="Table"):
+            loc, tabname = os.path.split(tab._v_pathname)
+            tabname = camelise(tabname)
+            try:
+                dc = deserialise_map[tabname]
+            except KeyError:
+                dc = ArrayTaco
             arr = tab.read_where('event_id == %d' % event_id)
-            blob[camelise(tabname)] = ArrayTaco(arr, h5loc=reco_path)
+            blob[tabname] = dc.deserialise(arr, h5loc=loc)
         return blob
 
     def finish(self):
