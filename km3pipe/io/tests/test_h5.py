@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import os
-
 import numpy as np
 import tables as tb
 
@@ -58,7 +56,7 @@ class TestMultiTable(TestCase):
 
 
 class TestH5Chain(TestCase):
-    def skip_setUp(self):
+    def setUp(self):
         self.foo = np.array([
             (1.0, 2.0, 1.0, 1),
             (4.0, 5.0, 0.0, 1),
@@ -88,50 +86,41 @@ class TestH5Chain(TestCase):
         self.where = {'foo': '/', 'bar': '/lala', 'yay': '/lala'}
         self.h5name = './test.h5'
         self.h5name2 = './test2.h5'
-        self.h5file = tb.open_file(self.h5name, 'a')
-        self.h5file2 = tb.open_file(self.h5name2, 'a')
+        self.h5file = tb.open_file(self.h5name, 'a', driver="H5FD_CORE",
+                                   driver_core_backing_store=0)
+        self.h5file2 = tb.open_file(self.h5name2, 'a', driver="H5FD_CORE",
+                                    driver_core_backing_store=0)
         for name, tab in self.tabs.items():
             self.h5file.create_table(self.where[name], name=name, obj=tab,
                                      createparents=True)
             self.h5file2.create_table(self.where[name], name=name, obj=tab,
                                       createparents=True)
+
+    def tearDown(self):
         self.h5file.close()
         self.h5file2.close()
 
-    def skip_tearDown(self):
-        os.remove(self.h5name)
-        os.remove(self.h5name2)
+    def test_raises_error_if_file_is_opened(self):
+        with self.assertRaises(ValueError):
+            H5Chain([self.h5name, self.h5name2])
 
-    def skip_test_two_files(self):
-        files = {self.h5name: None, self.h5name2: None}
-        c = H5Chain(files)
-        print(c['foo'][::2])
-        print(c['lala'])
-        self.assertTrue(c['foo'].equals(c.foo))
-
-    def skip_test_list(self):
-        files = [self.h5name, self.h5name2]
-        c = H5Chain(files)
-        self.assertTrue(c['foo'].equals(c.foo))
-
-    def skip_test_event_id(self):
-        files = {self.h5name: 'event_id == 1', self.h5name2: 'event_id == 1'}
-        c = H5Chain(files)
-        print(c['foo'][::2])
-        print(c['lala'])
-        self.assertTrue(c['foo'].equals(c.foo))
-
-    # def test_slice(self):
-    #     files = {self.h5name: slice(None, None, 2)}
-    #     c = H5Chain(files)
-    #     self.assertTrue(c['foo'].equals(c.foo))
-    #     files = {self.h5name: slice(1, 3, 2)}
-    #     c = H5Chain(files)
-    #     self.assertTrue(c['foo'].equals(c.foo))
+    def test_noargs(self):
+        c = H5Chain([self.h5file, self.h5file2])
+        run = c()
+        self.assertAlmostEqual(run['foo'].shape, (16, 4))
+        self.assertAlmostEqual(run['lala'].shape, (8, 8))
+        self.assertAlmostEqual(tuple(run['foo'].columns),
+                               tuple(['a', 'b', 'c', 'event_id']))
+        self.assertAlmostEqual(
+            tuple(run['lala'].columns),
+            tuple(['bar_aa', 'bar_bb', 'bar_cc', 'bar_event_id',
+                   'yay_aaa', 'yay_bbb', 'yay_ccc', 'yay_event_id'])
+        )
 
 
 class TestH5Pump(TestCase):
     pass
+
 
 class TestH5Sink(TestCase):
     def test_to_array(self):
