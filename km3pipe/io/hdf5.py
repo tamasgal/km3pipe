@@ -148,7 +148,7 @@ class HDF5Pump(Pump):
 
     def _check_version(self):
         try:
-            version = self.h5_file.root._v_attrs.format_version
+            version = str(self.h5_file.root._v_attrs.format_version)
         except AttributeError:
             log.error("Could not determine HDF5 format version, you may "
                       "encounter unexpected errors! Good luck...")
