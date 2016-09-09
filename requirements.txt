@@ -6,6 +6,8 @@ ipython
 pandas
 cython
 websocket-client
+tables
+tornado
 sphinx>=1.4
 sphinx-better-theme
 sphinx-gallery
