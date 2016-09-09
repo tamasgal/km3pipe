@@ -18,7 +18,7 @@ import km3pipe as kp
 from km3pipe import Pump, Module
 from km3pipe.dataclasses import ArrayTaco, deserialise_map
 from km3pipe.logger import logging
-from km3pipe.tools import camelise, decamelise, insert_prefix_to_dtype
+from km3pipe.tools import camelise, decamelise, insert_prefix_to_dtype, split
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -29,6 +29,9 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
+
+FORMAT_VERSION = '1.0'
+MINIMUM_FORMAT_VERSION = '1.0'
 
 
 class HDF5Sink(Module):
@@ -110,6 +113,7 @@ class HDF5Sink(Module):
             tab.flush()
         self.h5file.root._v_attrs.km3pipe = str(kp.__version__)
         self.h5file.root._v_attrs.pytables = str(tb.__version__)
+        self.h5file.root._v_attrs.format_version = str(FORMAT_VERSION)
         self.h5file.close()
 
 
@@ -126,6 +130,8 @@ class HDF5Pump(Pump):
         self.filename = filename
         if os.path.isfile(self.filename):
             self.h5_file = tb.File(self.filename)
+            if not self.get("no_version_check"):
+                self._check_version()
         else:
             raise IOError("No such file or directory: '{0}'"
                           .format(self.filename))
@@ -140,6 +146,21 @@ class HDF5Pump(Pump):
             raise SystemExit
 
         self._n_events = len(self.event_ids)
+
+    def _check_version(self):
+        try:
+            version = str(self.h5_file.root._v_attrs.format_version)
+        except AttributeError:
+            log.error("Could not determine HDF5 format version, you may "
+                      "encounter unexpected errors! Good luck...")
+            return
+
+        if split(version, int, '.') < split(MINIMUM_FORMAT_VERSION, int, '.'):
+            raise SystemExit("HDF5 format version {0} or newer required!\n"
+                             "'{1}' has HDF5 format version {2}."
+                             .format(MINIMUM_FORMAT_VERSION,
+                                     self.filename,
+                                     version))
 
     def process(self, blob):
         try:
