@@ -130,7 +130,7 @@ class HDF5Pump(Pump):
         self.filename = filename
         if os.path.isfile(self.filename):
             self.h5_file = tb.File(self.filename)
-            if not self.get("no_version_check"):
+            if not self.get("skip_version_check"):
                 self._check_version()
         else:
             raise IOError("No such file or directory: '{0}'"
