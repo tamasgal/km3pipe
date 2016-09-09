@@ -161,7 +161,7 @@ class HDF5Pump(Pump):
             except KeyError:
                 dc = ArrayTaco
             arr = tab.read_where('event_id == %d' % event_id)
-            blob[tabname] = dc.deserialise(arr, h5loc=loc)
+            blob[tabname] = dc.deserialise(arr, h5loc=loc, event_id=event_id)
         return blob
 
     def finish(self):
