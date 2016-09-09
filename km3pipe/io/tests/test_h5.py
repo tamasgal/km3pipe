@@ -100,12 +100,8 @@ class TestH5Chain(TestCase):
         self.h5file.close()
         self.h5file2.close()
 
-    def test_raises_error_if_file_is_opened(self):
-        with self.assertRaises(ValueError):
-            H5Chain([self.h5name, self.h5name2])
-
     def test_noargs(self):
-        c = H5Chain([self.h5file, self.h5file2])
+        c = H5Chain({self.h5name: self.h5file, self.h5name2: self.h5file2})
         run = c()
         self.assertAlmostEqual(run['foo'].shape, (16, 4))
         self.assertAlmostEqual(run['lala'].shape, (8, 8))
@@ -116,6 +112,18 @@ class TestH5Chain(TestCase):
             tuple(['bar_aa', 'bar_bb', 'bar_cc', 'bar_event_id',
                    'yay_aaa', 'yay_bbb', 'yay_ccc', 'yay_event_id'])
         )
+
+    def skip_n_events(self):
+        c = H5Chain({self.h5name: self.h5file, self.h5name2: self.h5file2})
+        run = c(2)
+        print(run['foo'])
+        print(run['lala'])
+        print(run['foo'].shape)
+        print(run['lala'].shape)
+        self.assertAlmostEqual(run['foo'].shape[0], 16)
+        self.assertAlmostEqual(run['foo'].shape[1], 2)
+        self.assertAlmostEqual(run['lala'].shape[0], 8)
+        self.assertAlmostEqual(run['lala'].shape[1], 2)
 
 
 class TestH5Pump(TestCase):
