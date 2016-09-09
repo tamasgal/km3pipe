@@ -30,8 +30,8 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-FORMAT_VERSION = 1.0
-MINIMUM_FORMAT_VERSION = 1.0
+FORMAT_VERSION = '1.0'
+MINIMUM_FORMAT_VERSION = '1.0'
 
 
 class HDF5Sink(Module):
