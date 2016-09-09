@@ -156,10 +156,10 @@ class HDF5Pump(Pump):
 
         if split(version, int, '.') < split(MINIMUM_FORMAT_VERSION, int, '.'):
             raise SystemExit("HDF5 format version {0} or newer required!\n"
-                             "'{1}' has format version {2}."
+                             "'{1}' has HDF5 format version {2}."
                              .format(MINIMUM_FORMAT_VERSION,
-                                     version,
-                                     self.filename))
+                                     self.filename,
+                                     version))
 
     def process(self, blob):
         try:
