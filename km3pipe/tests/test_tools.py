@@ -38,6 +38,11 @@ class TestTools(TestCase):
         parts = split(string)
         self.assertListEqual(['1', '2', '3', '4'], parts)
 
+    def test_split_splits_strings_with_separator(self):
+        string = "1,2,3,4"
+        parts = split(string, sep=',')
+        self.assertListEqual(['1', '2', '3', '4'], parts)
+
     def test_split_callback_converts_correctly(self):
         string = "1 2 3 4"
         parts = split(string, int)
