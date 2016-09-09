@@ -59,6 +59,7 @@ coverage.xml
 docs/_build/
 docs/auto_examples/
 docs/modules/
+docs/api
 
 # VI swap files
 *.swp

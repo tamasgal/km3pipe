@@ -3,9 +3,10 @@
 # pylint: disable=C0111,E1003,R0904,C0103,R0201,C0102
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import TestCase
+from km3pipe.testing import TestCase, MagicMock
 
-from km3pipe.db import DOMContainer
+from km3pipe.db import DBManager, DOMContainer
+from km3pipe.logger import logging
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -15,16 +16,41 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-
 DET_ID = 'det_id1'
 JSON_DOMS = [{'DOMId': 1, 'Floor': 10, 'CLBUPI': '100', 'DetOID': DET_ID},
              {'DOMId': 2, 'Floor': 20, 'CLBUPI': '200', 'DetOID': DET_ID},
              {'DOMId': 3, 'Floor': 30, 'CLBUPI': '300', 'DetOID': DET_ID},
              {'DOMId': 4, 'Floor': 40, 'CLBUPI': '400', 'DetOID': 'det_id2'}]
 
+log = logging.getLogger('db')
+
 
 class TestDBManager(TestCase):
-    pass
+
+    def test_login_called_on_init_when_credentials_are_provided(self):
+        user = 'user'
+        pwd = 'god'
+
+        DBManager.login = MagicMock()
+        db = DBManager(username=user, password=pwd)
+        self.assertEqual(1, DBManager.login.call_count)
+        self.assertTupleEqual((user, pwd), DBManager.login.call_args[0])
+
+    def test_login(self):
+        original_login = DBManager.login  # save for later
+        user = 'a'
+        pwd = 'b'
+
+        # mock login to be able to create an instance without an actual login
+        DBManager.login = MagicMock()
+        db = DBManager(username='foo', password='bar')  # make dummy call
+        DBManager.login = original_login  # restore function
+
+        db._make_request = MagicMock()
+        db.login(username='a', password='b')
+        call_args = db._make_request.call_args[0]
+        self.assertEqual(db._login_url, call_args[0])
+        self.assertDictEqual({'usr': 'a', 'pwd': 'b'}, call_args[1])
 
 
 class TestDOMContainer(TestCase):

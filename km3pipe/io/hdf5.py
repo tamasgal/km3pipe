@@ -3,8 +3,7 @@
 # pylint: disable=C0103,R0903
 # vim:set ts=4 sts=4 sw=4 et:
 """
-Pumps for the EVT simulation dataformat.
-
+Read and write KM3NeT-formatted HDF5 files.
 """
 from __future__ import division, absolute_import, print_function
 
@@ -17,7 +16,7 @@ import tables as tb
 
 import km3pipe as kp
 from km3pipe import Pump, Module
-from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo
+from km3pipe.dataclasses import ArrayTaco, deserialise_map
 from km3pipe.logger import logging
 from km3pipe.tools import camelise, decamelise, insert_prefix_to_dtype
 
@@ -33,18 +32,26 @@ __status__ = "Development"
 
 
 class HDF5Sink(Module):
+    """Write KM3NeT-formatted HDF5 files, event-by-event.
+
+    The data can be a numpy structured array, a pandas DataFrame,
+    or a km3pipe dataclass object with a `serialise()` method.
+
+    The name of the corresponding H5 table is the decamelised
+    blob-key, so values which are stored in the blob under `FooBar`
+    will be written to `/foo_bar` in the HDF5 file.
+
+    To store at a different location in the file, the data needs a
+    `.h5loc` attribute:
+
+    >>> my_arr.h5loc = '/somewhere'
+
+    Parameters
+    ----------
+    filename: str, optional (default: 'dump.h5')
+        Where to store the events.
+    """
     def __init__(self, **context):
-        """A Module to dump blob data to HDF5.
-
-        Each item in the blob which has a dtype or a `serialise()` method
-        will be dumped in the HDF5 file.
-        The table name is either the key (if the value is a plain value with
-        a dtype) or the `loc` attribute of the object.
-
-        The target table name is a decamelised version of the blob-key,
-        so for example values which are stored in the blob under `FooBar`
-        will be written to `/foo_bar` in the HDF5 file.
-        """
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
         self.index = 1
@@ -53,18 +60,18 @@ class HDF5Sink(Module):
                                   fletcher32=True)
         self._tables = {}
 
-    def _write_table(self, where, data, title=''):
+    def _to_array(self, data):
         if len(data) <= 0:
             return
         try:
-            data = data.to_records()
+            return data.to_records()
         except AttributeError:
             pass
         try:
-            data = data.serialise()
+            return data.serialise()
         except AttributeError:
             pass
-        self._write_array(where, data, title)
+        return data
 
     def _write_array(self, where, arr, title=''):
         if where not in self._tables:
@@ -77,15 +84,18 @@ class HDF5Sink(Module):
         tab.append(arr)
 
     def process(self, blob):
-        for key, entry in blob.items():
+        for key, entry in sorted(blob.items()):
             if hasattr(entry, 'dtype') or hasattr(entry, 'serialise') or \
                     hasattr(entry, 'to_records'):
                 try:
                     h5loc = entry.h5loc
                 except AttributeError:
-                    h5loc = ''
-                where = h5loc + '/' + decamelise(key)
-                self._write_table(where, entry, title=key)
+                    h5loc = '/'
+                where = os.path.join(h5loc, decamelise(key))
+                entry = self._to_array(entry)
+                if entry is None:
+                    continue
+                self._write_array(where, entry, title=key)
 
         if not self.index % 1000:
             for tab in self._tables.values():
@@ -96,15 +106,21 @@ class HDF5Sink(Module):
 
     def finish(self):
         for tab in self._tables.values():
-            tab.flush()
             tab.cols.event_id.create_index()
+            tab.flush()
         self.h5file.root._v_attrs.km3pipe = str(kp.__version__)
         self.h5file.root._v_attrs.pytables = str(tb.__version__)
         self.h5file.close()
 
 
 class HDF5Pump(Pump):
-    """Provides a pump for KM3NeT HDF5 files"""
+    """Read KM3NeT-formatted HDF5 files, event-by-event.
+
+        Parameters
+        ----------
+        filename: str
+        From where to read events.
+        """
     def __init__(self, filename, **context):
         super(self.__class__, self).__init__(**context)
         self.filename = filename
@@ -134,33 +150,18 @@ class HDF5Pump(Pump):
         self.index += 1
         return blob
 
-    def _get_event(self, event_id, where):
-        if not where.startswith('/'):
-            where = '/' + where
-        table = self.h5_file.get_node(where)
-        return table.read_where('event_id == %d' % event_id)
-
     def get_blob(self, index):
         event_id = self.event_ids[index]
         blob = {}
-        hits = self._get_event(event_id, where='hits')
-        if len(hits) > 0:
-            blob['Hits'] = HitSeries.from_table(hits, event_id=event_id)
-        mc_hits = self._get_event(event_id, where='mc_hits')
-        if len(mc_hits) > 0:
-            blob['MCHits'] = HitSeries.from_table(mc_hits, event_id=event_id)
-        mc_tracks = self._get_event(event_id, where='mc_tracks')
-        if len(mc_tracks) > 0:
-            blob['MCTracks'] = TrackSeries.from_table(mc_tracks,
-                                                      event_id=event_id)
-        blob['EventInfo'] = EventInfo.from_table(
-            self._get_event(event_id, where='event_info')[0])
-
-        reco_path = '/reco'
-        for tab in self.h5_file.iter_nodes(reco_path, classname='Table'):
-            tabname = tab.name
-            blob[camelise(tabname)] = tab.read_where(
-                'event_id == %d' % event_id)
+        for tab in self.h5_file.walk_nodes(classname="Table"):
+            loc, tabname = os.path.split(tab._v_pathname)
+            tabname = camelise(tabname)
+            try:
+                dc = deserialise_map[tabname]
+            except KeyError:
+                dc = ArrayTaco
+            arr = tab.read_where('event_id == %d' % event_id)
+            blob[tabname] = dc.deserialise(arr, h5loc=loc, event_id=event_id)
         return blob
 
     def finish(self):
@@ -205,47 +206,52 @@ class HDF5Pump(Pump):
 
 
 class H5Chain(object):
-    """Read/write Dataframes to multiple H5 files.
+    """Read/write multiple HDF5 files as ``pandas.DataFrame``.
 
-    Example
-    -------
-    >>> h5files = ['numu_cc.h5', 'anue_nc.h5']
-    >>> c = H5Chain(h5files)
+    Parameters
+    ----------
+    which: list(str) or dict(str->cond)
+        The filenames to be read in. When passing a dict, events are
+        selected according to cond, which can be `None` (all events), a
+        slice, or a numexpr-like pytables condition string.
 
-    # specify n_events per file, or their event ids
-    >>> which = {'numu_cc.h5': None, 'anue_nc.h5': 100,
-                  'numu_cc.h5': [1, 2, 3],}
-    >>> c = H5Chain(which)
+    Examples
+    --------
+    >>> filenames = ['numu_cc.h5', 'anue_nc.h5']
+    >>> c = H5Chain(filenames)
 
-    # these are pandas Dataframes
+    specify n_events per file, or their event ids
+
+    >>> filenames = {'numu_cc.h5': None, 'anue_nc.h5': 100,
+                 'numu_cc.h5': [1, 2, 3],}
+    >>> c = H5Chain(filenames)
+
+    these are pandas Dataframes
+
     >>> X = c.reco
     >>> wgt = c.event_info.weights_w2
-    >>> Y_ene = c.mc_tracks[0].energy
-
-    store = defaultdict(list)
-    for file, cond in which:
-        for tab in file.walk_nodes('/', classname='Table'):
-            arr = read_table(tab, cond)
-            arr = pd.DataFrame(arr)
-            store[tab.name].append(arr)
-
-    for key, ds in store.items():
-        store[key] = pd.concat(ds)
-
-    store.key -> store[key]
+    >>> Y_ene = c.mc_tracks[::2].energy
 
     """
 
-    def __init__(self, which):
-        self._which = which
+    def __init__(self, filenames, table_filter=None):
+        if table_filter is None:
+            table_filter = {}
+        if isinstance(filenames, list):
+            filenames = {key: None for key in filenames}
+        self._which = filenames
         self._store = defaultdict(list)
 
-        for fil, cond in self._which.items():
+        for fil, cond in sorted(self._which.items()):
             h5fil = tb.open_file(fil, 'r')
 
             # tables under '/', e.g. mc_tracks
             for tab in h5fil.iter_nodes('/', classname='Table'):
-                arr = self._read_table(tab, cond)
+                if tab.name in table_filter.keys():
+                    tab_cond = table_filter[tab.name]
+                    arr = self._read_table(tab, tab_cond)
+                else:
+                    arr = self._read_table(tab, cond)
                 arr = pd.DataFrame.from_records(arr)
                 self._store[tab.name].append(arr)
 
@@ -256,14 +262,11 @@ class H5Chain(object):
 
             h5fil.close()
 
-        for key, dfs in self._store.items():
+        for key, dfs in sorted(self._store.items()):
             self._store[key] = pd.concat(dfs)
 
-    def __getattr__(self, name):
-        try:
-            return self._store[name]
-        except KeyError:
-            raise AttributeError("The table {} does not exist".format(name))
+        for key, val in sorted(self._store.items()):
+            setattr(self, key, val)
 
     def __getitem__(self, name):
         return self._store[name]
@@ -286,4 +289,8 @@ class H5Chain(object):
             return table[:]
         if isinstance(cond, string_types):
             return table.read_where(cond)
+        if isinstance(cond, int):
+            return table[:cond]
+        if isinstance(cond, slice):
+            return table[cond]
         return table.read(cond)

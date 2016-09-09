@@ -5,8 +5,12 @@ plugins = Cython.Coverage
 [report]
 include =
     km3pipe/*
-    pipeinspector/*
-    km3modules/*
 omit =
     */tests/*
     */*/tests/*
+exclude_lines =
+    pragma: no cover
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if __name__ == .__main__.:

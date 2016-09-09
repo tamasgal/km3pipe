@@ -40,6 +40,7 @@ IS_CC = {
 }
 
 
+
 class Serialisable(type):
     """A metaclass for serialisable classes.
 
@@ -74,6 +75,8 @@ class Serialisable(type):
 
 
 class EventInfo(with_metaclass(Serialisable)):
+    """Event Metadata.
+    """
     dtype = [
         ('det_id', '<i4'), ('event_id', '<u4'), ('frame_index', '<u4'),
         ('mc_id', '<i4'), ('mc_t', '<f8'), ('overlays', 'u1'),
@@ -92,6 +95,11 @@ class EventInfo(with_metaclass(Serialisable)):
             except KeyError:
                 args.append(np.nan)
         return cls(*args)
+
+    @classmethod
+    def deserialise(cls, data, event_id=None, fmt='numpy', h5loc='/'):
+        if fmt == 'numpy':
+            return cls.from_table(data[0])
 
     def serialise(self, to='numpy'):
         if to == 'numpy':
@@ -219,7 +227,7 @@ class Direction_(Point):
 
 
 cdef class Hit:
-    """Represents a hit on a PMT.
+    """Hit on a PMT.
 
     Parameters
     ----------
@@ -270,7 +278,7 @@ cdef class Hit:
 
 
 cdef class Track:
-    """Represents a particle track.
+    """Particle track.
 
     Parameters
     ----------
@@ -327,6 +335,8 @@ cdef class Track:
 
 
 class HitSeries(object):
+    """Collection of multiple Hits.
+    """
     dtype = np.dtype([
         ('channel_id', 'u1'), ('dom_id', '<u4'), ('event_id', '<u4'),
         ('id', '<u4'), ('pmt_id', '<u4'),
@@ -398,12 +408,17 @@ class HitSeries(object):
             row['triggered'],
         ) for row in table], event_id)
 
+    @classmethod
+    def deserialise(cls, data, event_id=None, fmt='numpy', h5loc='/'):
+        if fmt == 'numpy':
+            return cls.from_table(data, event_id)
+
     def serialise(self, to='numpy'):
         if to == 'numpy':
             return np.array(self.__array__(), dtype=self.dtype)
 
     def __array__(self):
-        return tuple((h.channel_id, h.dom_id, self.event_id, h.id, h.pmt_id,
+        return list((h.channel_id, h.dom_id, self.event_id, h.id, h.pmt_id,
             #self.run_id,
             h.time, h.tot, h.triggered) for h in self._hits)
 
@@ -526,6 +541,12 @@ class HitSeries(object):
 
 
 class TrackSeries(object):
+    """Collection of multiple Tracks.
+
+    Attributes
+    ----------
+    dtype: datatype of array representation
+    """
     dtype = np.dtype([
         ('bjorkeny', '<f8'), ('dir_x', '<f8'), ('dir_y', '<f8'),
         ('dir_z', '<f8'), ('energy', '<f8'), ('event_id', '<u4'),
@@ -626,6 +647,11 @@ class TrackSeries(object):
             row['time'],
             row['type']
         ) for row in table], event_id)
+
+    @classmethod
+    def deserialise(cls, data, event_id=None, fmt='numpy', h5loc='/'):
+        if fmt == 'numpy':
+            return cls.from_table(data, event_id)
 
     def serialise(self, to='numpy'):
         if to == 'numpy':
@@ -764,7 +790,7 @@ class TrackSeries(object):
 
 
 class Reco(dict):
-    """"A dictionary with a dtype."""
+    """A dictionary with a dtype."""
     def __init__(self, map, dtype, h5loc='/reco'):
         self.dtype = dtype
         self.h5loc = h5loc
@@ -776,3 +802,33 @@ class Reco(dict):
 
     def __array__(self):
         return [tuple((self[key] for key in self.dtype.names))]
+
+
+class ArrayTaco(object):
+    def __init__(self, arr, h5loc='/'):
+        self.array = arr
+        self.h5loc = h5loc
+
+    @classmethod
+    def deserialise(cls, data, h5loc='/', event_id=None, fmt='numpy'):
+        if fmt == 'numpy':
+            return cls(data, h5loc)
+
+    def serialise(self, to='numpy'):
+        return self.array
+
+    @property
+    def dtype(self):
+        return self.array.dtype
+
+    def __len__(self):
+        return len(self.array)
+
+
+deserialise_map = {
+    'MCHits': HitSeries,
+    'Hits': HitSeries,
+    'MCTracks': TrackSeries,
+    'EventInfo': EventInfo,
+}
+
