@@ -277,6 +277,58 @@ cdef class Hit:
         return self.__str__()
 
 
+
+cdef class MCHit:
+    """Monte Carlo Hit on a PMT.
+
+    Parameters
+    ----------
+    channel_id : int
+    dir : Direction or numpy.ndarray
+    dom_id : int
+    id : int
+    pmt_id : int
+    pos : Position or numpy.ndarray
+    time : int
+    tot : int
+    triggered : bool
+
+    """
+    cdef public int id, dom_id, time, tot, channel_id, pmt_id
+    cdef public bint triggered
+    cdef public np.ndarray pos
+    cdef public np.ndarray dir
+
+    def __cinit__(self,
+                  int channel_id,
+                  int dom_id,
+                  int id,
+                  int pmt_id,
+                  int time,
+                  int tot,
+                  bint triggered,
+                 ):
+        self.channel_id = channel_id
+        self.dom_id = dom_id
+        self.id = id
+        self.pmt_id = pmt_id
+        self.time = time
+        self.tot = tot
+        self.triggered = triggered
+
+    def __str__(self):
+        return "Hit: channel_id({0}), dom_id({1}), pmt_id({2}), tot({3}), " \
+               "time({4}), triggered({5})" \
+               .format(self.channel_id, self.dom_id, self.pmt_id, self.tot,
+                       self.time, self.triggered)
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __insp__(self):
+        return self.__str__()
+
+
 cdef class Track:
     """Particle track.
 
