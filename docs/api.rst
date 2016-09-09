@@ -34,6 +34,89 @@ API Reference
   EventInfo
   Hit
   HitSeries
-  Reco
   Track
   TrackSeries
+  Reco
+  ArrayTaco
+
+
+``km3pipe.core``
+----------------
+
+.. currentmodule:: km3pipe.core
+
+.. autosummary::
+  :toctree: api
+  :template: class.rst
+
+  Pipeline
+  Module
+  Pump
+  Blob
+  Geometry
+  AanetGeometry
+  Run
+
+
+``km3pipe.hardware``
+--------------------
+
+.. currentmodule:: km3pipe.hardware
+
+.. autosummary::
+  :toctree: api
+  :template: class.rst
+
+  Detector
+  PMT
+
+
+``km3pipe.logger``
+------------------
+
+.. currentmodule:: km3pipe.logger
+
+.. autosummary::
+  :toctree: api
+  :template: class.rst
+
+  LogIO
+
+
+``km3pipe.srv``
+---------------
+
+.. currentmodule:: km3pipe.srv
+
+.. autosummary::
+  :toctree: api
+  :template: class.rst
+
+  ClientManager
+
+
+``km3pipe.tools``
+-----------------
+
+.. currentmodule:: km3pipe.tools
+
+.. autosummary::
+  :toctree: api
+
+  pdg2name
+  geant2pdf
+  decamelise
+  camelise
+
+
+``km3pipe.db``: Database Tools
+------------------------------
+
+.. currentmodule:: km3pipe.db
+
+.. autosummary::
+  :toctree: api
+  :template: class.rst
+
+  DBManater
+
