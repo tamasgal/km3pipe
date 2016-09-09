@@ -259,7 +259,7 @@ class H5Chain(object):
         if table_filter is None:
             table_filter = {}
         if isinstance(filenames, list):
-            filenames = {key: None for key in filenames}
+            filenames = {key: None for key in filenames}        # NOQA
         self._which = filenames
         self._store = defaultdict(list)
 
