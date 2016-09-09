@@ -9,7 +9,6 @@ from __future__ import division, absolute_import, print_function
 
 from collections import defaultdict
 import os.path
-from six import string_types
 
 import pandas as pd
 import tables as tb
@@ -264,15 +263,17 @@ class H5Chain(object):
     >>> Y_ene = coll['mc_tracks']['energy']
     """
 
-    def __init__(self, h5files):
-        self.h5files = []
-        for h5 in h5files:
-            if isinstance(h5, string_types):
-                h5 = tb.open_file(h5, 'r')
-            self.h5files.append(h5)
+    def __init__(self, filenames):
+        self.h5files = {}
+        if isinstance(filenames, dict):
+            self.h5files.update(filenames)
+            return
+        for fn in filenames:
+            h5 = tb.open_file(fn, 'r')
+            self.h5files[fn] = h5
 
     def _finish(self):
-        for h5 in self.h5files:
+        for h5 in self.h5files.values():
             h5.close()
 
     def __exit__(self):
@@ -286,13 +287,9 @@ class H5Chain(object):
         Parameters
         ----------
         n_evts: int or dict(str->int) (default=None)
-            NOT IMPLEMENTED YET
-
             Number of events to read. If None, read every event from all.
             If int, read that many from all.  In case of dict: If a
             filename is in the dict, read that many events from the file.
-            If a filename is in `self.h5files` but not in the dict,
-            read all events from it.
 
         keys: list(str) (default=None)
             Names of the tables/groups to read. If None, read all.
@@ -300,13 +297,17 @@ class H5Chain(object):
             e.g. '/mc_tracks' (Table) or '/reco' (Group).
         """
         store = defaultdict(list)
-        for h5 in self.h5files:
+        for fname, h5 in self.h5files.items():
+            n = n_evts
+            if isinstance(n_evts, dict):
+                n = n_evts[fname]
+
             # tables under '/', e.g. mc_tracks
             for tab in h5.iter_nodes('/', classname='Table'):
                 tabname = tab.name
                 if keys is not None and tabname not in keys:
                     continue
-                arr = self._read_table(tab)
+                arr = self._read_table(tab, n)
                 arr = pd.DataFrame.from_records(arr)
                 store[tabname].append(arr)
 
@@ -316,7 +317,7 @@ class H5Chain(object):
                 groupname = gr._v_name
                 if keys is not None and groupname not in keys:
                     continue
-                arr = self._read_group(gr)
+                arr = self._read_group(gr, n)
                 store[groupname].append(arr)
 
         for key, dfs in sorted(store.items()):
@@ -324,12 +325,12 @@ class H5Chain(object):
         return store
 
     @classmethod
-    def _read_group(cls, group, cond=None):
+    def _read_group(cls, group, n=None, cond=None):
         # Store through groupname, insert tablename into dtype
         df = []
         for tab in group._f_iter_nodes(classname='Table'):
             tabname = tab.name
-            arr = cls._read_table(tab, cond)
+            arr = cls._read_table(tab, n)
             arr = insert_prefix_to_dtype(arr, tabname)
             arr = pd.DataFrame.from_records(arr)
             df.append(arr)
@@ -337,13 +338,7 @@ class H5Chain(object):
         return df
 
     @classmethod
-    def _read_table(cls, table, cond=None):
-        if cond is None:
-            return table[:]
-        if isinstance(cond, string_types):
-            return table.read_where(cond)
-        if isinstance(cond, int):
-            return table[:cond]
-        if isinstance(cond, slice):
-            return table[cond]
-        return table.read(cond)
+    def _read_table(cls, table, n=None, cond=None):
+        if isinstance(n, int):
+            return table[:n]
+        return table[:]
