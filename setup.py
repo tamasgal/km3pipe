@@ -27,9 +27,9 @@ except ImportError:
 builtins.__KM3PIPE_SETUP__ = True
 
 # Needed for line_profiler - disable for production code
-directive_defaults['linetrace'] = False
-directive_defaults['profile'] = False
-directive_defaults['binding'] = False
+directive_defaults['linetrace'] = True
+directive_defaults['profile'] = True
+directive_defaults['binding'] = True
 CYTHON_TRACE = str(int(directive_defaults['linetrace']))
 
 from km3pipe import version  # noqa
