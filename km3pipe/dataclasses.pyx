@@ -395,21 +395,9 @@ class HitSeries(object):
         #('run_id', '<u4'),
         ('time', '<i4'), ('tot', 'u1'), ('triggered', '?')
         ])
-    def __init__(self, arr, event_id=None):
-        self.event_id = event_id
-        self._channel_id = None
-        self._dom_id = None
+    def __init__(self, arr):
         self._arr = arr
         self._hits = None
-        self._id = None
-        self._index = 0
-        self._pmt_id = None
-        self._pos = None
-        self._time = None
-        self._tot = None
-        self._triggered = None
-        self._triggered_hits = None
-        self._columns = None
 
     # TODO
     @classmethod
@@ -417,6 +405,7 @@ class HitSeries(object):
         return cls(np.array([(
             ord(h.channel_id),
             h.dom_id,
+            event_id,
             h.id,
             h.pmt_id,
             h.t,
@@ -429,37 +418,48 @@ class HitSeries(object):
         return cls(np.array([(
             0,     # channel_id
             0,     # dom_id
+            event_id,
             h.id,
             h.pmt_id,
             h.time,
             h.tot,
             0,     # triggered
-        ) for h in hits], dtype=cls.dtype), event_id)
-
-    def from_empty(map, dt):
-    len = next(iter(map.values())).shape[0]
-    buf = np.empty(len, dt)
-    for key, val in map.items():
-        buf[key] = val
-    return buf
-
-    #@classmethod
-    #def from_arrays(cls, channel_ids, dom_ids, ids, pmt_ids, times, tots,
-    #                triggereds, event_id=None):
-    #    args = channel_ids, dom_ids, ids, pmt_ids, times, tots, triggereds
-    #    hits = cls([Hit(*hit_args) for hit_args in zip(*args)], event_id)
-    #    hits._channel_id = channel_ids
-    #    hits._dom_id = dom_ids
-    #    hits._id = ids
-    #    hits._pmt_id = pmt_ids
-    #    hits._time = times
-    #    hits._tot = tots
-    #    hits._triggered = triggereds
-    #    return hits
+        ) for h in hits], dtype=cls.dtype))
 
     @classmethod
+    def from_arrays(cls, channel_ids, dom_ids, ids, pmt_ids, times, tots,
+                    triggereds, event_id):
+        len = channel_ids.shape[0]
+        hits = np.empty(len, cls.dtype)
+        hits['channel_id'] = channel_ids
+        hits['dom_id'] = dom_ids
+        hits['id'] = ids
+        hits['event_id'] = np.full(len, event_id)
+        hits['pmt_id'] = pmt_ids
+        hits['time'] = times
+        hits['tot'] = tots
+        hits['triggered'] = triggereds
+        return cls(hits)
+
+    @classmethod
+    def from_dict(cls, map, event_id=None):
+        if event_id is None:
+            event_id = map['event_id']
+        return cls.from_arrays(
+            map['channel_id'],
+            map['dom_id'],
+            map['id'],
+            map['pmt_id'],
+            map['time'],
+            map['tot'],
+            map['triggered'],
+            event_id,
+        )
+
     def from_table(cls, table, event_id=None):
-        return cls([Hit(
+        if event_id is None:
+            event_id = table[0]['event_id']
+        return cls(np.array([(
             row['channel_id'],
             row['dom_id'],
             row['id'],
@@ -467,7 +467,7 @@ class HitSeries(object):
             row['time'],
             row['tot'],
             row['triggered'],
-        ) for row in table], event_id)
+        ) for row in table], dtype=cls.dtype), event_id)
 
     @classmethod
     def deserialise(cls, data, event_id=None, fmt='numpy', h5loc='/'):
@@ -490,6 +490,7 @@ class HitSeries(object):
 
     @property
     def time(self):
+        return self._arr['time']
 
     @property
     def triggered_hits(self):
