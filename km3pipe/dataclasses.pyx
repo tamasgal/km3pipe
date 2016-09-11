@@ -395,11 +395,11 @@ class HitSeries(object):
         #('run_id', '<u4'),
         ('time', '<i4'), ('tot', 'u1'), ('triggered', '?')
         ])
-    def __init__(self, hits, event_id=None):
+    def __init__(self, arr, event_id=None):
         self.event_id = event_id
         self._channel_id = None
         self._dom_id = None
-        self._hits = hits
+        self._arr = arr
         self._id = None
         self._index = 0
         self._pmt_id = None
@@ -410,29 +410,30 @@ class HitSeries(object):
         self._triggered_hits = None
         self._columns = None
 
-    @classmethod
-    def from_aanet(cls, hits, event_id=None):
-        return cls([Hit(
-            ord(h.channel_id),
-            h.dom_id,
-            h.id,
-            h.pmt_id,
-            h.t,
-            h.tot,
-            h.trig,
-        ) for h in hits], event_id)
+    # TODO
+    #@classmethod
+    #def from_aanet(cls, hits, event_id=None):
+    #    return cls([Hit(
+    #        ord(h.channel_id),
+    #        h.dom_id,
+    #        h.id,
+    #        h.pmt_id,
+    #        h.t,
+    #        h.tot,
+    #        h.trig,
+    #    ) for h in hits], event_id)
 
-    @classmethod
-    def from_evt(cls, hits, event_id=None):
-        return cls([Hit(
-            0,     # channel_id
-            0,     # dom_id
-            h.id,
-            h.pmt_id,
-            h.time,
-            h.tot,
-            0,     # triggered
-        ) for h in hits], event_id)
+    #@classmethod
+    #def from_evt(cls, hits, event_id=None):
+    #    return cls([Hit(
+    #        0,     # channel_id
+    #        0,     # dom_id
+    #        h.id,
+    #        h.pmt_id,
+    #        h.time,
+    #        h.tot,
+    #        0,     # triggered
+    #    ) for h in hits], event_id)
 
     @classmethod
     def from_arrays(cls, channel_ids, dom_ids, ids, pmt_ids, times, tots,
@@ -470,86 +471,49 @@ class HitSeries(object):
             return np.array(self.__array__(), dtype=self.dtype)
 
     def __array__(self):
-        return list((h.channel_id, h.dom_id, self.event_id, h.id, h.pmt_id,
-            #self.run_id,
-            h.time, h.tot, h.triggered) for h in self._hits)
+        return self._arr
 
     def __iter__(self):
         return self
 
     @property
     def id(self):
-        if self._id is None:
-            self._id = np.array([h.id for h in self._hits])
-        return self._id
+        return self._arr['id']
 
     @property
     def time(self):
-        if self._time is None:
-            self._time = np.array([h.time for h in self._hits])
-        return self._time
 
     @property
     def triggered_hits(self):
-        if self._triggered_hits is None:
-            self._triggered_hits = np.array([h for h in self._hits
-                                        if h.triggered])
-        return self._triggered_hits
+        return self._arr['triggered_hits']
 
     @property
     def triggered(self):
-        if self._triggered is None:
-            self._triggered = np.array([h.triggered for h in self._hits])
         return self._triggered
 
     @property
     def tot(self):
-        if self._tot is None:
-            self._tot = np.array([h.tot for h in self._hits])
-        return self._tot
+        return self._arr['tot']
 
     @property
     def dom_id(self):
-        if self._dom_id is None:
-            self._dom_id = np.array([h.dom_id for h in self._hits])
-        return self._dom_id
+        return self._arr['dom_id']
 
     @property
     def pmt_id(self):
-        if self._pmt_id is None:
-            self._pmt_id = np.array([h.pmt_id for h in self._hits])
-        return self._pmt_id
+        return self._arr['pmt_id']
 
     @property
     def id(self):
-        if self._id is None:
-            self._id = np.array([h.id for h in self._hits])
-        return self._id
+        return self._arr['id']
 
     @property
     def channel_id(self):
-        if self._channel_id is None:
-            self._channel_id = np.array([h.channel_id for h in self._hits])
-        return self._channel_id
+        return self._arr['channel_id']
 
     @property
     def pos(self):
-        if self._pos is None:
-            self._pos = np.array([h.pos for h in self._hits])
-        return self._pos
-
-    def as_columns(self):
-        if self._columns is None:
-            self._columns = {
-                'tot': self.tot,
-                'channel_id': self.channel_id,
-                'pmt_id': self.pmt_id,
-                'dom_id': self.dom_id,
-                'time': self.time,
-                'id': self.id,
-                'triggered': self.triggered,
-            }
-        return self._columns
+        return self._arr['pos']
 
     def next(self):
         """Python 2/3 compatibility for iterators"""
@@ -559,16 +523,16 @@ class HitSeries(object):
         if self._index >= len(self):
             self._index = 0
             raise StopIteration
-        item = self._hits[self._index]
+        hits = Hit(self._arr[self._index])
         self._index += 1
-        return item
+        return hits
 
     def __len__(self):
-        return len(self._hits)
+        return self._arr.shape[0]
 
     def __getitem__(self, index):
         if isinstance(index, int):
-            return self._hits[index]
+            return Hit(self._arr[index])
         elif isinstance(index, slice):
             return self._slice_generator(index)
         else:
@@ -578,7 +542,7 @@ class HitSeries(object):
         """A simple slice generator for iterations"""
         start, stop, step = index.indices(len(self))
         for i in range(start, stop, step):
-            yield self._hits[i]
+            yield Hit(self._arr[i])
 
     def __str__(self):
         n_hits = len(self)
