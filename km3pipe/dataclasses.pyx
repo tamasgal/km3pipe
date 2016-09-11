@@ -400,6 +400,7 @@ class HitSeries(object):
         self._channel_id = None
         self._dom_id = None
         self._arr = arr
+        self._hits = None
         self._id = None
         self._index = 0
         self._pmt_id = None
@@ -411,43 +412,50 @@ class HitSeries(object):
         self._columns = None
 
     # TODO
-    #@classmethod
-    #def from_aanet(cls, hits, event_id=None):
-    #    return cls([Hit(
-    #        ord(h.channel_id),
-    #        h.dom_id,
-    #        h.id,
-    #        h.pmt_id,
-    #        h.t,
-    #        h.tot,
-    #        h.trig,
-    #    ) for h in hits], event_id)
-
-    #@classmethod
-    #def from_evt(cls, hits, event_id=None):
-    #    return cls([Hit(
-    #        0,     # channel_id
-    #        0,     # dom_id
-    #        h.id,
-    #        h.pmt_id,
-    #        h.time,
-    #        h.tot,
-    #        0,     # triggered
-    #    ) for h in hits], event_id)
-
     @classmethod
-    def from_arrays(cls, channel_ids, dom_ids, ids, pmt_ids, times, tots,
-                    triggereds, event_id=None):
-        args = channel_ids, dom_ids, ids, pmt_ids, times, tots, triggereds
-        hits = cls([Hit(*hit_args) for hit_args in zip(*args)], event_id)
-        hits._channel_id = channel_ids
-        hits._dom_id = dom_ids
-        hits._id = ids
-        hits._pmt_id = pmt_ids
-        hits._time = times
-        hits._tot = tots
-        hits._triggered = triggereds
-        return hits
+    def from_aanet(cls, hits, event_id=None):
+        return cls(np.array([(
+            ord(h.channel_id),
+            h.dom_id,
+            h.id,
+            h.pmt_id,
+            h.t,
+            h.tot,
+            h.trig,
+        ) for h in hits], dtype=cls.dtype), event_id)
+
+    #@classmethod
+    def from_evt(cls, hits, event_id=None):
+        return cls(np.array([(
+            0,     # channel_id
+            0,     # dom_id
+            h.id,
+            h.pmt_id,
+            h.time,
+            h.tot,
+            0,     # triggered
+        ) for h in hits], dtype=cls.dtype), event_id)
+
+    def from_empty(map, dt):
+    len = next(iter(map.values())).shape[0]
+    buf = np.empty(len, dt)
+    for key, val in map.items():
+        buf[key] = val
+    return buf
+
+    #@classmethod
+    #def from_arrays(cls, channel_ids, dom_ids, ids, pmt_ids, times, tots,
+    #                triggereds, event_id=None):
+    #    args = channel_ids, dom_ids, ids, pmt_ids, times, tots, triggereds
+    #    hits = cls([Hit(*hit_args) for hit_args in zip(*args)], event_id)
+    #    hits._channel_id = channel_ids
+    #    hits._dom_id = dom_ids
+    #    hits._id = ids
+    #    hits._pmt_id = pmt_ids
+    #    hits._time = times
+    #    hits._tot = tots
+    #    hits._triggered = triggereds
+    #    return hits
 
     @classmethod
     def from_table(cls, table, event_id=None):
