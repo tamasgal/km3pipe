@@ -399,7 +399,6 @@ class HitSeries(object):
         self._arr = arr
         self._hits = None
 
-    # TODO
     @classmethod
     def from_aanet(cls, hits, event_id=None):
         return cls(np.array([(
@@ -413,7 +412,7 @@ class HitSeries(object):
             h.trig,
         ) for h in hits], dtype=cls.dtype), event_id)
 
-    #@classmethod
+    @classmethod
     def from_evt(cls, hits, event_id=None):
         return cls(np.array([(
             0,     # channel_id
