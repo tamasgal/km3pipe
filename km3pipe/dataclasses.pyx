@@ -435,7 +435,7 @@ class HitSeries(object):
         hits['channel_id'] = channel_ids
         hits['dom_id'] = dom_ids
         hits['id'] = ids
-        hits['event_id'] = np.full(len, event_id)
+        hits['event_id'] = np.full(len, event_id, dtype='<u4')
         hits['pmt_id'] = pmt_ids
         hits['time'] = times
         hits['tot'] = tots
