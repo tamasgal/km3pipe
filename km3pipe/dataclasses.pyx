@@ -404,7 +404,8 @@ class HitSeries(object):
     @classmethod
     def from_aanet(cls, hits, event_id):
         return cls(np.array([(
-            ord(h.channel_id),
+            #ord(h.channel_id),
+            h.channel_id,
             h.dom_id,
             event_id,
             h.id,
@@ -473,7 +474,8 @@ class HitSeries(object):
     @classmethod
     def deserialise(cls, data, event_id=None, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
-            return cls.from_table(data, event_id)
+            #return cls.from_table(data, event_id)
+            return cls(data)
 
     def serialise(self, to='numpy'):
         if to == 'numpy':
@@ -856,5 +858,6 @@ deserialise_map = {
     'Hits': HitSeries,
     'MCTracks': TrackSeries,
     'EventInfo': EventInfo,
+    'Tracks': TrackSeries,
 }
 
