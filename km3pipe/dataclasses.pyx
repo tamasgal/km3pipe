@@ -398,6 +398,7 @@ class HitSeries(object):
         ])
     def __init__(self, arr):
         self._arr = arr
+        self._index = 0
         self._hits = None
 
     @classmethod
