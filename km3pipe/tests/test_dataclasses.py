@@ -153,7 +153,7 @@ class TestHitSeries(TestCase):
         pmt_ids = np.array(range(n))
 
         hits = HitSeries.from_arrays(ids, dom_ids, times, tots, channel_ids,
-                                     triggereds, pmt_ids)
+                                     triggereds, pmt_ids, 0)
 
         self.assertAlmostEqual(1, hits[1].id)
         self.assertAlmostEqual(9, hits[9].pmt_id)
@@ -164,8 +164,9 @@ class TestHitSeries(TestCase):
         n_hits = 10
         hits = [FakeAanetHit(*p) for p in
                 np.arange(n_hits * n_params).reshape(n_hits, n_params)]
-        hit_series = HitSeries.from_aanet(hits)
+        hit_series = HitSeries.from_aanet(hits, 0)
 
+        self.assertAlmostEqual(3, hit_series.pmt_id[0])
         self.assertAlmostEqual(3, hit_series[0].pmt_id)
         self.assertAlmostEqual(7, hit_series[1].channel_id)
         self.assertAlmostEqual(23, hit_series[3].id)
@@ -180,7 +181,7 @@ class TestHitSeries(TestCase):
         n_hits = 10
         hits = [FakeAanetHit(*p) for p in
                 np.arange(n_hits * n_params).reshape(n_hits, n_params)]
-        hit_series = HitSeries.from_aanet(hits)
+        hit_series = HitSeries.from_aanet(hits, 0)
 
         self.assertTupleEqual((2, 9, 16, 23, 30, 37, 44, 51, 58, 65),
                               tuple(hit_series.id))
@@ -203,7 +204,7 @@ class TestHitSeries(TestCase):
         n_hits = 10
         hits = [EvtRawHit(*p) for p in
                 np.arange(n_hits * n_params).reshape(n_hits, n_params)]
-        hit_series = HitSeries.from_evt(hits)
+        hit_series = HitSeries.from_evt(hits, 0)
 
         self.assertAlmostEqual(1, hit_series[0].pmt_id)
         self.assertAlmostEqual(0, hit_series[1].channel_id)  # always 0 for MC
@@ -219,7 +220,7 @@ class TestHitSeries(TestCase):
         n_hits = 10
         hits = [EvtRawHit(*p) for p in
                 np.arange(n_hits * n_params).reshape(n_hits, n_params)]
-        hit_series = HitSeries.from_evt(hits)
+        hit_series = HitSeries.from_evt(hits, 0)
 
         self.assertTupleEqual((0, 4, 8, 12, 16, 20, 24, 28, 32, 36),
                               tuple(hit_series.id))

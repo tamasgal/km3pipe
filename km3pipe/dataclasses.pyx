@@ -255,6 +255,7 @@ cdef class Hit:
                   int time,
                   int tot,
                   bint triggered,
+                  int event_id=0        # ignore this!
                  ):
         self.channel_id = channel_id
         self.dom_id = dom_id
@@ -400,7 +401,7 @@ class HitSeries(object):
         self._hits = None
 
     @classmethod
-    def from_aanet(cls, hits, event_id=None):
+    def from_aanet(cls, hits, event_id):
         return cls(np.array([(
             ord(h.channel_id),
             h.dom_id,
@@ -410,10 +411,10 @@ class HitSeries(object):
             h.t,
             h.tot,
             h.trig,
-        ) for h in hits], dtype=cls.dtype), event_id)
+        ) for h in hits], dtype=cls.dtype))
 
     @classmethod
-    def from_evt(cls, hits, event_id=None):
+    def from_evt(cls, hits, event_id):
         return cls(np.array([(
             0,     # channel_id
             0,     # dom_id
@@ -493,11 +494,11 @@ class HitSeries(object):
 
     @property
     def triggered_hits(self):
-        return self._arr['triggered_hits']
+        return self._arr[self._arr['triggered'] == True]
 
     @property
     def triggered(self):
-        return self._triggered
+        return self._arr['triggered']
 
     @property
     def tot(self):
@@ -531,7 +532,7 @@ class HitSeries(object):
         if self._index >= len(self):
             self._index = 0
             raise StopIteration
-        hits = Hit(self._arr[self._index])
+        hits = Hit(*self._arr[self._index])
         self._index += 1
         return hits
 
@@ -540,7 +541,7 @@ class HitSeries(object):
 
     def __getitem__(self, index):
         if isinstance(index, int):
-            return Hit(self._arr[index])
+            return Hit(*self._arr[index])
         elif isinstance(index, slice):
             return self._slice_generator(index)
         else:
@@ -550,7 +551,7 @@ class HitSeries(object):
         """A simple slice generator for iterations"""
         start, stop, step = index.indices(len(self))
         for i in range(start, stop, step):
-            yield Hit(self._arr[i])
+            yield Hit(*self._arr[i])
 
     def __str__(self):
         n_hits = len(self)
