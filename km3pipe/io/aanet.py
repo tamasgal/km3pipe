@@ -103,6 +103,7 @@ class AanetPump(Pump):
                         'MCHits': HitSeries.from_aanet(event.mc_hits, event.id),
                         'MCTracks': TrackSeries.from_aanet(event.mc_trks,
                                                            event.id),
+                        'Tracks': TrackSeries.from_aanet(event.trks, event.id),
                         'filename': filename,
                         'Header': self.header,
                         'EventInfo': EventInfo(
@@ -121,10 +122,13 @@ class AanetPump(Pump):
                             w2,
                             w3,
                         ),
-                       }
-                recos = read_mini_dst(event, event.id)
-                for recname, reco in recos.items():
-                    blob[recname] = reco
+                        }
+                try:
+                    recos = read_mini_dst(event, event.id)
+                    for recname, reco in recos.items():
+                        blob[recname] = reco
+                except IndexError:
+                    pass
                 yield blob
             del event_file
 
