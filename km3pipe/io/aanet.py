@@ -34,6 +34,7 @@ class AanetPump(Pump):
         self.filenames = self.get('filenames') or []
         self.indices = self.get('indices')
         self.additional = self.get('additional')
+        format = self.get('format')
         if self.additional:
             self.id = self.get('id')
             self.return_without_match = self.get("return_without_match")
@@ -49,6 +50,10 @@ class AanetPump(Pump):
                 self._parse_filenames()
             else:
                 self.filenames.append(self.filename)
+
+        self.format = None
+        if format and format in ('minidst', 'jevt_jgandalf', 'generic_track'):
+            self.format = format
 
         self.header = None
         self.blobs = self.blob_generator()
@@ -103,7 +108,6 @@ class AanetPump(Pump):
                         'MCHits': HitSeries.from_aanet(event.mc_hits, event.id),
                         'MCTracks': TrackSeries.from_aanet(event.mc_trks,
                                                            event.id),
-                        'Tracks': TrackSeries.from_aanet(event.trks, event.id),
                         'filename': filename,
                         'Header': self.header,
                         'EventInfo': EventInfo(
@@ -123,12 +127,18 @@ class AanetPump(Pump):
                             w3,
                         ),
                         }
-                try:
+                if self.format == 'minidst':
                     recos = read_mini_dst(event, event.id)
                     for recname, reco in recos.items():
                         blob[recname] = reco
-                except IndexError:
-                    pass
+                if self.format == 'jevt_jgandalf':
+                    track, dtype = parse_jevt_jgandalf(event, event.id)
+                    if track:
+                        blob['JEvtJGandalf'] = Reco(track, dtype)
+                if self.format == 'generic_track':
+                    track, dtype = parse_generic_event(event, event.id)
+                    if track:
+                        blob['Track'] = Reco(track, dtype)
                 yield blob
             del event_file
 
@@ -171,6 +181,66 @@ class AanetPump(Pump):
 
     def __next__(self):
         return next(self.blobs)
+
+
+def parse_jevt_jgandalf(aanet_event, event_id):
+    map = {}
+    try:
+        track = evt.tracks[0]
+    except IndexError:
+        return map, None
+    map['id'] = track.id
+    map['pos_x'] = track.pos[0]
+    map['pos_y'] = track.pos[1]
+    map['pos_z'] = track.pos[2]
+    map['dir_x'] = track.dir[0]
+    map['dir_y'] = track.dir[1]
+    map['dir_z'] = track.dir[2]
+    map['time'] = track.t
+    map['type'] = track.type
+    map['rec_type'] = track.rec_type
+    map['rec_stage'] = track.rec_stage
+    map['beta0'] = track.fitinf[0]
+    map['beta1'] = track.fitinf[1]
+    map['lik'] = track.fitinf[2]
+    map['lik_red'] = track.fitinf[3]
+    map['energy'] = track.fitinf[4]
+    dt = [(key, float) for key in sorted(map.keys())]
+    map['event_id'] = event_id
+    dt.append(('event_id', '<u4))
+    dt = np.dtype(dt)
+    return map, dt
+
+def parse_generic_event(aanet_event, event_id):
+    map = {}
+    try:
+        track = evt.tracks[0]
+    except IndexError:
+        return map, None
+    map['id'] = track.id
+    map['pos_x'] = track.pos[0]
+    map['pos_y'] = track.pos[1]
+    map['pos_z'] = track.pos[2]
+    map['dir_x'] = track.dir[0]
+    map['dir_y'] = track.dir[1]
+    map['dir_z'] = track.dir[2]
+    map['energy'] = track.E
+    map['time'] = track.t
+    map['lik'] = track.lik
+    map['type'] = track.type
+    map['rec_type'] = track.rec_type
+    map['rec_stage'] = track.rec_stage
+    for k, entry in enumerate(track.fitinf):
+        map['fitinf_{}'.format(k)] = entry
+    for k, entry in enumerate(track.error_matrix):
+        map['error_matrix_{}'.format(k)] = entry
+    map['event_id'] = event_id
+    dt.append(('event_id', '<u4))
+    dt = np.dtype(dt)
+    return map, dt
+
+
+def parse_generic_track(aanet_track):
 
 
 def read_mini_dst(aanet_event, event_id):
