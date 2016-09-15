@@ -62,7 +62,7 @@ def tohdf5(input_file, output_file, n_events, use_jppy=False, aa_fmt=None):
     from km3pipe.io import GenericPump, HDF5Sink  # noqa
 
     pipe = Pipeline()
-    pipe.attach(GenericPump, filename=input_file, use_jppy=use_jppy, aa_fmt=None)
+    pipe.attach(GenericPump, filename=input_file, use_jppy=use_jppy, aa_fmt=aa_fmt)
     pipe.attach(StatusBar, every=1000)
     pipe.attach(HDF5Sink, filename=output_file)
     pipe.drain(n_events)
