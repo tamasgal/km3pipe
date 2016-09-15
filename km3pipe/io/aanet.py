@@ -187,16 +187,16 @@ class AanetPump(Pump):
 def parse_jevt_jgandalf(aanet_event, event_id):
     map = {}
     try:
-        track = aanet_event.tracks[0]
+        track = aanet_event.trks[0]
     except IndexError:
         return map, None
     map['id'] = track.id
-    map['pos_x'] = track.pos[0]
-    map['pos_y'] = track.pos[1]
-    map['pos_z'] = track.pos[2]
-    map['dir_x'] = track.dir[0]
-    map['dir_y'] = track.dir[1]
-    map['dir_z'] = track.dir[2]
+    map['pos_x'] = track.pos.x
+    map['pos_y'] = track.pos.y
+    map['pos_z'] = track.pos.z
+    map['dir_x'] = track.dir.x
+    map['dir_y'] = track.dir.y
+    map['dir_z'] = track.dir.z
     map['time'] = track.t
     map['type'] = track.type
     map['rec_type'] = track.rec_type
@@ -216,7 +216,7 @@ def parse_jevt_jgandalf(aanet_event, event_id):
 def parse_generic_event(aanet_event, event_id):
     map = {}
     try:
-        track = aanet_event.tracks[0]
+        track = aanet_event.trks[0]
     except IndexError:
         return map, None
     map['id'] = track.id
