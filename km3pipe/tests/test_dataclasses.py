@@ -144,16 +144,23 @@ class TestHitSeries(TestCase):
 
     def test_from_arrays(self):
         n = 10
-        ids = np.array(range(n))
-        dom_ids = np.array(range(n))
-        times = np.array(range(n))
-        tots = np.array(range(n))
-        channel_ids = np.array(range(n))
+        ids = np.arange(n)
+        dom_ids = np.arange(n)
+        times = np.arange(n)
+        tots = np.arange(n)
+        channel_ids = np.arange(n)
         triggereds = np.ones(n)
-        pmt_ids = np.array(range(n))
+        pmt_ids = np.arange(n)
 
-        hits = HitSeries.from_arrays(ids, dom_ids, times, tots, channel_ids,
-                                     triggereds, pmt_ids, 0)
+        hits = HitSeries.from_arrays(
+            channel_ids, dom_ids,
+            ids,
+            pmt_ids,
+            times,
+            tots,
+            triggereds,
+            0,      # event_id
+        )
 
         self.assertAlmostEqual(1, hits[1].id)
         self.assertAlmostEqual(9, hits[9].pmt_id)
@@ -344,7 +351,6 @@ class TestTrackSeries(TestCase):
             types,
             event_id=0,
         )
-        print(tracks)
 
         self.assertAlmostEqual(1, tracks[1].id)
         self.assertAlmostEqual(9, tracks[9].interaction_channel)
@@ -378,24 +384,23 @@ class TestEventInfo(TestCase):
     def test_event_info(self):
         e = EventInfo(*range(14))
         self.assertAlmostEqual(0, e.det_id)
-        self.assertAlmostEqual(1, e.event_id)
-        self.assertAlmostEqual(2, e.frame_index)
-        self.assertAlmostEqual(3, e.mc_id)
-        self.assertAlmostEqual(4, e.mc_t)
-        self.assertAlmostEqual(5, e.overlays)
+        self.assertAlmostEqual(1, e.frame_index)
+        self.assertAlmostEqual(2, e.mc_id)
+        self.assertAlmostEqual(3, e.mc_t)
+        self.assertAlmostEqual(4, e.overlays)
         # self.assertAlmostEqual(6, e.run_id)
-        self.assertAlmostEqual(6, e.trigger_counter)
-        self.assertAlmostEqual(7, e.trigger_mask)
-        self.assertAlmostEqual(8, e.utc_nanoseconds)
-        self.assertAlmostEqual(9, e.utc_seconds)
-        self.assertAlmostEqual(10, e.weight_w1)
-        self.assertAlmostEqual(11, e.weight_w2)
-        self.assertAlmostEqual(12, e.weight_w3)
+        self.assertAlmostEqual(5, e.trigger_counter)
+        self.assertAlmostEqual(6, e.trigger_mask)
+        self.assertAlmostEqual(7, e.utc_nanoseconds)
+        self.assertAlmostEqual(8, e.utc_seconds)
+        self.assertAlmostEqual(9, e.weight_w1)
+        self.assertAlmostEqual(10, e.weight_w2)
+        self.assertAlmostEqual(11, e.weight_w3)
+        self.assertAlmostEqual(12, e.event_id)
 
     def test_from_table(self):
         e = EventInfo.from_table({
             'det_id': 0,
-            'event_id': 1,
             'frame_index': 2,
             'mc_id': 3,
             'mc_t': 4,
@@ -408,10 +413,10 @@ class TestEventInfo(TestCase):
             'weight_w1': 10,
             'weight_w2': 11,
             'weight_w3': 12,
+            'event_id': 1,
             })
 
         self.assertAlmostEqual(0, e.det_id)
-        self.assertAlmostEqual(1, e.event_id)
         self.assertAlmostEqual(2, e.frame_index)
         self.assertAlmostEqual(3, e.mc_id)
         self.assertAlmostEqual(4, e.mc_t)
@@ -424,6 +429,7 @@ class TestEventInfo(TestCase):
         self.assertAlmostEqual(10, e.weight_w1)
         self.assertAlmostEqual(11, e.weight_w2)
         self.assertAlmostEqual(12, e.weight_w3)
+        self.assertAlmostEqual(1, e.event_id)
 
     def test_from_table_puts_nan_for_missing_data(self):
         e = EventInfo.from_table({})
@@ -446,7 +452,6 @@ class TestEventInfo(TestCase):
     def test_array(self):
         e = EventInfo.from_table({
             'det_id': 0,
-            'event_id': 1,
             'frame_index': 2,
             'mc_id': 3,
             'mc_t': 4.0,
@@ -459,8 +464,9 @@ class TestEventInfo(TestCase):
             'weight_w1': 10.0,
             'weight_w2': 11.0,
             'weight_w3': 12.0,
+            'event_id': 1,
             })
-        exp = (0, 1, 2, 3, 4.0, 5, 6, 7, 8, 9, 10.0, 11.0, 12.0)
+        exp = (0, 2, 3, 4.0, 5, 6, 7, 8, 9, 10.0, 11.0, 12.0, 1)
         self.assertAlmostEqual(e.serialise(), np.array(exp, e.dtype))
 
 

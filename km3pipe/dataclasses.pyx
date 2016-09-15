@@ -78,12 +78,13 @@ class EventInfo(with_metaclass(Serialisable)):
     """Event Metadata.
     """
     dtype = [
-        ('det_id', '<i4'), ('event_id', '<u4'), ('frame_index', '<u4'),
+        ('det_id', '<i4'), ('frame_index', '<u4'),
         ('mc_id', '<i4'), ('mc_t', '<f8'), ('overlays', 'u1'),
         #('run_id', '<u4'),
         ('trigger_counter', '<u8'), ('trigger_mask', '<u8'),
         ('utc_nanoseconds', '<u8'), ('utc_seconds', '<u8'),
-        ('weight_w1', '<f8'), ('weight_w2', '<f8'), ('weight_w3', '<f8')
+        ('weight_w1', '<f8'), ('weight_w2', '<f8'), ('weight_w3', '<f8'),
+        ('event_id', '<u4'),
         ]
 
     @classmethod
@@ -106,12 +107,14 @@ class EventInfo(with_metaclass(Serialisable)):
             return np.array(self.__array__(), dtype=self.dtype)
 
     def __array__(self):
-        return [(self.det_id, self.event_id, self.frame_index, self.mc_id,
-                 self.mc_t, self.overlays,
-                 #self.run_id,
-                 self.trigger_counter,
-                 self.trigger_mask, self.utc_nanoseconds, self.utc_seconds,
-                 self.weight_w1, self.weight_w2, self.weight_w3),]
+        return [(
+            self.det_id, self.frame_index, self.mc_id, self.mc_t,
+            self.overlays,
+            #self.run_id,
+            self.trigger_counter, self.trigger_mask, self.utc_nanoseconds,
+            self.utc_seconds, self.weight_w1, self.weight_w2, self.weight_w3,
+            self.event_id,
+        ),]
 
     def __str__(self):
         return "Event #{0}:\n" \
@@ -391,10 +394,11 @@ class HitSeries(object):
     """Collection of multiple Hits.
     """
     dtype = np.dtype([
-        ('channel_id', 'u1'), ('dom_id', '<u4'), ('event_id', '<u4'),
+        ('channel_id', 'u1'), ('dom_id', '<u4'),
         ('id', '<u4'), ('pmt_id', '<u4'),
         #('run_id', '<u4'),
-        ('time', '<i4'), ('tot', 'u1'), ('triggered', '?')
+        ('time', '<i4'), ('tot', 'u1'), ('triggered', '?'),
+        ('event_id', '<u4'),
         ])
     def __init__(self, arr):
         self._arr = arr
@@ -404,15 +408,14 @@ class HitSeries(object):
     @classmethod
     def from_aanet(cls, hits, event_id):
         return cls(np.array([(
-            #ord(h.channel_id),
-            h.channel_id,
+            h.channel_id,       # ord(h.channel_id),
             h.dom_id,
-            event_id,
             h.id,
             h.pmt_id,
             h.t,
             h.tot,
             h.trig,
+            event_id,
         ) for h in hits], dtype=cls.dtype))
 
     @classmethod
@@ -420,12 +423,12 @@ class HitSeries(object):
         return cls(np.array([(
             0,     # channel_id
             0,     # dom_id
-            event_id,
             h.id,
             h.pmt_id,
             h.time,
             h.tot,
             0,     # triggered
+            event_id,
         ) for h in hits], dtype=cls.dtype))
 
     @classmethod
@@ -436,11 +439,11 @@ class HitSeries(object):
         hits['channel_id'] = channel_ids
         hits['dom_id'] = dom_ids
         hits['id'] = ids
-        hits['event_id'] = np.full(len, event_id, dtype='<u4')
         hits['pmt_id'] = pmt_ids
         hits['time'] = times
         hits['tot'] = tots
         hits['triggered'] = triggereds
+        hits['event_id'] = np.full(len, event_id, dtype='<u4')
         return cls(hits)
 
     @classmethod
@@ -577,15 +580,15 @@ class TrackSeries(object):
     """
     dtype = np.dtype([
         ('bjorkeny', '<f8'), ('dir_x', '<f8'), ('dir_y', '<f8'),
-        ('dir_z', '<f8'), ('energy', '<f8'), ('event_id', '<u4'),
+        ('dir_z', '<f8'), ('energy', '<f8'),
         ('id', '<u4'), ('interaction_channel', '<u4'), ('is_cc', '?'),
         ('length', '<f8'), ('pos_x', '<f8'), ('pos_y', '<f8'),
         ('pos_z', '<f8'),
         #('run_id', '<u4'),
-        ('time', '<i4'), ('type', '<i4')
+        ('time', '<i4'), ('type', '<i4'),
+        ('event_id', '<u4'),
         ])
     def __init__(self, tracks, event_id=None):
-        self.event_id = event_id
         self._bjorkeny = None
         self._dir = None
         self._energy = None
@@ -599,6 +602,7 @@ class TrackSeries(object):
         self._time = None
         self._tracks = tracks
         self._type = None
+        self.event_id = event_id
 
     @classmethod
     def from_aanet(cls, tracks, event_id=None):
@@ -686,10 +690,12 @@ class TrackSeries(object):
             return np.array(self.__array__(), dtype=self.dtype)
 
     def __array__(self):
-        return [(t.bjorkeny, t.dir[0], t.dir[1], t.dir[2], t.energy,
-            self.event_id, t.id, t.interaction_channel, t.is_cc,
-            t.length, t.pos[0], t.pos[1], t.pos[2], t.time, t.type)
-            for t in self._tracks]
+        return [(
+            t.bjorkeny, t.dir[0], t.dir[1], t.dir[2], t.energy,
+            t.id, t.interaction_channel, t.is_cc,
+            t.length, t.pos[0], t.pos[1], t.pos[2], t.time, t.type,
+            self.event_id,
+        ) for t in self._tracks]
 
     @classmethod
     def get_usr_item(cls, track, index):
