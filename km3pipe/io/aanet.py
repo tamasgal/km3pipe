@@ -34,7 +34,7 @@ class AanetPump(Pump):
         self.filenames = self.get('filenames') or []
         self.indices = self.get('indices')
         self.additional = self.get('additional')
-        format = self.get('format')
+        format = self.get('aa_fmt')
         if self.additional:
             self.id = self.get('id')
             self.return_without_match = self.get("return_without_match")
