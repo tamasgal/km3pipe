@@ -413,7 +413,8 @@ class HitSeries(object):
     @classmethod
     def from_aanet(cls, hits, event_id=None):
         return cls([Hit(
-            ord(h.channel_id),
+            #ord(h.channel_id),
+            h.channel_id,
             h.dom_id,
             h.id,
             h.pmt_id,

@@ -105,7 +105,8 @@ class AanetPump(Pump):
 
                 blob = {'Evt': event,
                         'Hits': HitSeries.from_aanet(event.hits, event.id),
-                        'MCHits': HitSeries.from_aanet(event.mc_hits, event.id),
+                        'MCHits': HitSeries.from_aanet(event.mc_hits,
+                                                       event.id),
                         'MCTracks': TrackSeries.from_aanet(event.mc_trks,
                                                            event.id),
                         'filename': filename,
@@ -186,7 +187,7 @@ class AanetPump(Pump):
 def parse_jevt_jgandalf(aanet_event, event_id):
     map = {}
     try:
-        track = evt.tracks[0]
+        track = aanet_event.tracks[0]
     except IndexError:
         return map, None
     map['id'] = track.id
@@ -207,14 +208,15 @@ def parse_jevt_jgandalf(aanet_event, event_id):
     map['energy'] = track.fitinf[4]
     dt = [(key, float) for key in sorted(map.keys())]
     map['event_id'] = event_id
-    dt.append(('event_id', '<u4))
+    dt.append(('event_id', '<u4'))
     dt = np.dtype(dt)
     return map, dt
+
 
 def parse_generic_event(aanet_event, event_id):
     map = {}
     try:
-        track = evt.tracks[0]
+        track = aanet_event.tracks[0]
     except IndexError:
         return map, None
     map['id'] = track.id
@@ -234,13 +236,15 @@ def parse_generic_event(aanet_event, event_id):
         map['fitinf_{}'.format(k)] = entry
     for k, entry in enumerate(track.error_matrix):
         map['error_matrix_{}'.format(k)] = entry
+    dt = [(key, float) for key in sorted(map.keys())]
     map['event_id'] = event_id
-    dt.append(('event_id', '<u4))
+    dt.append(('event_id', '<u4'))
     dt = np.dtype(dt)
     return map, dt
 
 
 def parse_generic_track(aanet_track):
+    pass
 
 
 def read_mini_dst(aanet_event, event_id):
@@ -408,7 +412,7 @@ def parse_aashowerfit(aanet_trk, event_id=0):
     did_converge = aanet_trk.rec_stage > -9999
 
     aashow_keys = ['NhitsAA', 'M_estimator', 'beta',
-                          'NhitsL0', 'NhitsL1']
+                   'NhitsL0', 'NhitsL1']
     dtype = [(key, float) for key in aashow_keys + list(out.keys())]
     out['did_converge'] = did_converge
     dtype.append(('did_converge', bool))
@@ -430,7 +434,7 @@ def parse_qstrategy(aanet_trk, event_id=0):
     did_converge = aanet_trk.rec_stage > -9999
 
     qstrat_keys = sorted(['MFinal', 'Charge', 'MPreFit',
-                   'RPreFit', 'Inertia', 'NhitsL0', 'NhitsL1'])
+                          'RPreFit', 'Inertia', 'NhitsL0', 'NhitsL1'])
     dtype = [(key, float) for key in qstrat_keys + list(out.keys())]
     out['did_converge'] = did_converge
     dtype.append(('did_converge', bool))
