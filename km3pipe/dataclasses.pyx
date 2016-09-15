@@ -78,12 +78,13 @@ class EventInfo(with_metaclass(Serialisable)):
     """Event Metadata.
     """
     dtype = [
-        ('det_id', '<i4'), ('event_id', '<u4'), ('frame_index', '<u4'),
+        ('det_id', '<i4'), ('frame_index', '<u4'),
         ('mc_id', '<i4'), ('mc_t', '<f8'), ('overlays', 'u1'),
         #('run_id', '<u4'),
         ('trigger_counter', '<u8'), ('trigger_mask', '<u8'),
         ('utc_nanoseconds', '<u8'), ('utc_seconds', '<u8'),
-        ('weight_w1', '<f8'), ('weight_w2', '<f8'), ('weight_w3', '<f8')
+        ('weight_w1', '<f8'), ('weight_w2', '<f8'), ('weight_w3', '<f8'),
+        ('event_id', '<u4'),
         ]
 
     @classmethod
@@ -106,12 +107,14 @@ class EventInfo(with_metaclass(Serialisable)):
             return np.array(self.__array__(), dtype=self.dtype)
 
     def __array__(self):
-        return [(self.det_id, self.event_id, self.frame_index, self.mc_id,
-                 self.mc_t, self.overlays,
-                 #self.run_id,
-                 self.trigger_counter,
-                 self.trigger_mask, self.utc_nanoseconds, self.utc_seconds,
-                 self.weight_w1, self.weight_w2, self.weight_w3),]
+        return [(
+            self.det_id, self.frame_index, self.mc_id, self.mc_t,
+            self.overlays,
+            #self.run_id,
+            self.trigger_counter, self.trigger_mask, self.utc_nanoseconds,
+            self.utc_seconds, self.weight_w1, self.weight_w2, self.weight_w3,
+            self.event_id,
+        ),]
 
     def __str__(self):
         return "Event #{0}:\n" \
@@ -255,6 +258,59 @@ cdef class Hit:
                   int time,
                   int tot,
                   bint triggered,
+                  int event_id=0        # ignore this!
+                 ):
+        self.channel_id = channel_id
+        self.dom_id = dom_id
+        self.id = id
+        self.pmt_id = pmt_id
+        self.time = time
+        self.tot = tot
+        self.triggered = triggered
+
+    def __str__(self):
+        return "Hit: channel_id({0}), dom_id({1}), pmt_id({2}), tot({3}), " \
+               "time({4}), triggered({5})" \
+               .format(self.channel_id, self.dom_id, self.pmt_id, self.tot,
+                       self.time, self.triggered)
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __insp__(self):
+        return self.__str__()
+
+
+
+cdef class MCHit:
+    """Monte Carlo Hit on a PMT.
+
+    Parameters
+    ----------
+    channel_id : int
+    dir : Direction or numpy.ndarray
+    dom_id : int
+    id : int
+    pmt_id : int
+    pos : Position or numpy.ndarray
+    time : int
+    tot : int
+    triggered : bool
+
+    """
+    cdef public int id, dom_id, time, tot, channel_id, pmt_id
+    cdef public bint triggered
+    cdef public np.ndarray pos
+    cdef public np.ndarray dir
+
+    def __cinit__(self,
+                  int channel_id,
+                  int dom_id,
+                  int id,
+                  int pmt_id,
+                  int time,
+                  int tot,
+                  bint triggered,
                  ):
         self.channel_id = channel_id
         self.dom_id = dom_id
@@ -338,41 +394,33 @@ class HitSeries(object):
     """Collection of multiple Hits.
     """
     dtype = np.dtype([
-        ('channel_id', 'u1'), ('dom_id', '<u4'), ('event_id', '<u4'),
+        ('channel_id', 'u1'), ('dom_id', '<u4'),
         ('id', '<u4'), ('pmt_id', '<u4'),
         #('run_id', '<u4'),
-        ('time', '<i4'), ('tot', 'u1'), ('triggered', '?')
+        ('time', '<i4'), ('tot', 'u1'), ('triggered', '?'),
+        ('event_id', '<u4'),
         ])
-    def __init__(self, hits, event_id=None):
-        self.event_id = event_id
-        self._channel_id = None
-        self._dom_id = None
-        self._hits = hits
-        self._id = None
+    def __init__(self, arr):
+        self._arr = arr
         self._index = 0
-        self._pmt_id = None
-        self._pos = None
-        self._time = None
-        self._tot = None
-        self._triggered = None
-        self._triggered_hits = None
-        self._columns = None
+        self._hits = None
 
     @classmethod
-    def from_aanet(cls, hits, event_id=None):
-        return cls([Hit(
-            ord(h.channel_id),
+    def from_aanet(cls, hits, event_id):
+        return cls(np.array([(
+            h.channel_id,       # ord(h.channel_id),
             h.dom_id,
             h.id,
             h.pmt_id,
             h.t,
             h.tot,
             h.trig,
-        ) for h in hits], event_id)
+            event_id,
+        ) for h in hits], dtype=cls.dtype))
 
     @classmethod
-    def from_evt(cls, hits, event_id=None):
-        return cls([Hit(
+    def from_evt(cls, hits, event_id):
+        return cls(np.array([(
             0,     # channel_id
             0,     # dom_id
             h.id,
@@ -380,25 +428,43 @@ class HitSeries(object):
             h.time,
             h.tot,
             0,     # triggered
-        ) for h in hits], event_id)
+            event_id,
+        ) for h in hits], dtype=cls.dtype))
 
     @classmethod
     def from_arrays(cls, channel_ids, dom_ids, ids, pmt_ids, times, tots,
-                    triggereds, event_id=None):
-        args = channel_ids, dom_ids, ids, pmt_ids, times, tots, triggereds
-        hits = cls([Hit(*hit_args) for hit_args in zip(*args)], event_id)
-        hits._channel_id = channel_ids
-        hits._dom_id = dom_ids
-        hits._id = ids
-        hits._pmt_id = pmt_ids
-        hits._time = times
-        hits._tot = tots
-        hits._triggered = triggereds
-        return hits
+                    triggereds, event_id):
+        len = channel_ids.shape[0]
+        hits = np.empty(len, cls.dtype)
+        hits['channel_id'] = channel_ids
+        hits['dom_id'] = dom_ids
+        hits['id'] = ids
+        hits['pmt_id'] = pmt_ids
+        hits['time'] = times
+        hits['tot'] = tots
+        hits['triggered'] = triggereds
+        hits['event_id'] = np.full(len, event_id, dtype='<u4')
+        return cls(hits)
 
     @classmethod
+    def from_dict(cls, map, event_id=None):
+        if event_id is None:
+            event_id = map['event_id']
+        return cls.from_arrays(
+            map['channel_id'],
+            map['dom_id'],
+            map['id'],
+            map['pmt_id'],
+            map['time'],
+            map['tot'],
+            map['triggered'],
+            event_id,
+        )
+
     def from_table(cls, table, event_id=None):
-        return cls([Hit(
+        if event_id is None:
+            event_id = table[0]['event_id']
+        return cls(np.array([(
             row['channel_id'],
             row['dom_id'],
             row['id'],
@@ -406,98 +472,63 @@ class HitSeries(object):
             row['time'],
             row['tot'],
             row['triggered'],
-        ) for row in table], event_id)
+        ) for row in table], dtype=cls.dtype), event_id)
 
     @classmethod
     def deserialise(cls, data, event_id=None, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
-            return cls.from_table(data, event_id)
+            #return cls.from_table(data, event_id)
+            return cls(data)
 
     def serialise(self, to='numpy'):
         if to == 'numpy':
             return np.array(self.__array__(), dtype=self.dtype)
 
     def __array__(self):
-        return list((h.channel_id, h.dom_id, self.event_id, h.id, h.pmt_id,
-            #self.run_id,
-            h.time, h.tot, h.triggered) for h in self._hits)
+        return self._arr
 
     def __iter__(self):
         return self
 
     @property
     def id(self):
-        if self._id is None:
-            self._id = np.array([h.id for h in self._hits])
-        return self._id
+        return self._arr['id']
 
     @property
     def time(self):
-        if self._time is None:
-            self._time = np.array([h.time for h in self._hits])
-        return self._time
+        return self._arr['time']
 
     @property
     def triggered_hits(self):
-        if self._triggered_hits is None:
-            self._triggered_hits = np.array([h for h in self._hits
-                                        if h.triggered])
-        return self._triggered_hits
+        return self._arr[self._arr['triggered'] == True]
 
     @property
     def triggered(self):
-        if self._triggered is None:
-            self._triggered = np.array([h.triggered for h in self._hits])
-        return self._triggered
+        return self._arr['triggered']
 
     @property
     def tot(self):
-        if self._tot is None:
-            self._tot = np.array([h.tot for h in self._hits])
-        return self._tot
+        return self._arr['tot']
 
     @property
     def dom_id(self):
-        if self._dom_id is None:
-            self._dom_id = np.array([h.dom_id for h in self._hits])
-        return self._dom_id
+        return self._arr['dom_id']
 
     @property
     def pmt_id(self):
-        if self._pmt_id is None:
-            self._pmt_id = np.array([h.pmt_id for h in self._hits])
-        return self._pmt_id
+        return self._arr['pmt_id']
 
     @property
     def id(self):
-        if self._id is None:
-            self._id = np.array([h.id for h in self._hits])
-        return self._id
+        return self._arr['id']
 
     @property
     def channel_id(self):
-        if self._channel_id is None:
-            self._channel_id = np.array([h.channel_id for h in self._hits])
-        return self._channel_id
+        return self._arr['channel_id']
 
     @property
     def pos(self):
-        if self._pos is None:
-            self._pos = np.array([h.pos for h in self._hits])
-        return self._pos
-
-    def as_columns(self):
-        if self._columns is None:
-            self._columns = {
-                'tot': self.tot,
-                'channel_id': self.channel_id,
-                'pmt_id': self.pmt_id,
-                'dom_id': self.dom_id,
-                'time': self.time,
-                'id': self.id,
-                'triggered': self.triggered,
-            }
-        return self._columns
+        return self._arr['pos']
 
     def next(self):
         """Python 2/3 compatibility for iterators"""
@@ -507,16 +538,16 @@ class HitSeries(object):
         if self._index >= len(self):
             self._index = 0
             raise StopIteration
-        item = self._hits[self._index]
+        hits = Hit(*self._arr[self._index])
         self._index += 1
-        return item
+        return hits
 
     def __len__(self):
-        return len(self._hits)
+        return self._arr.shape[0]
 
     def __getitem__(self, index):
         if isinstance(index, int):
-            return self._hits[index]
+            return Hit(*self._arr[index])
         elif isinstance(index, slice):
             return self._slice_generator(index)
         else:
@@ -526,7 +557,7 @@ class HitSeries(object):
         """A simple slice generator for iterations"""
         start, stop, step = index.indices(len(self))
         for i in range(start, stop, step):
-            yield self._hits[i]
+            yield Hit(*self._arr[i])
 
     def __str__(self):
         n_hits = len(self)
@@ -549,15 +580,15 @@ class TrackSeries(object):
     """
     dtype = np.dtype([
         ('bjorkeny', '<f8'), ('dir_x', '<f8'), ('dir_y', '<f8'),
-        ('dir_z', '<f8'), ('energy', '<f8'), ('event_id', '<u4'),
+        ('dir_z', '<f8'), ('energy', '<f8'),
         ('id', '<u4'), ('interaction_channel', '<u4'), ('is_cc', '?'),
         ('length', '<f8'), ('pos_x', '<f8'), ('pos_y', '<f8'),
         ('pos_z', '<f8'),
         #('run_id', '<u4'),
-        ('time', '<i4'), ('type', '<i4')
+        ('time', '<i4'), ('type', '<i4'),
+        ('event_id', '<u4'),
         ])
     def __init__(self, tracks, event_id=None):
-        self.event_id = event_id
         self._bjorkeny = None
         self._dir = None
         self._energy = None
@@ -571,6 +602,7 @@ class TrackSeries(object):
         self._time = None
         self._tracks = tracks
         self._type = None
+        self.event_id = event_id
 
     @classmethod
     def from_aanet(cls, tracks, event_id=None):
@@ -658,10 +690,12 @@ class TrackSeries(object):
             return np.array(self.__array__(), dtype=self.dtype)
 
     def __array__(self):
-        return [(t.bjorkeny, t.dir[0], t.dir[1], t.dir[2], t.energy,
-            self.event_id, t.id, t.interaction_channel, t.is_cc,
-            t.length, t.pos[0], t.pos[1], t.pos[2], t.time, t.type)
-            for t in self._tracks]
+        return [(
+            t.bjorkeny, t.dir[0], t.dir[1], t.dir[2], t.energy,
+            t.id, t.interaction_channel, t.is_cc,
+            t.length, t.pos[0], t.pos[1], t.pos[2], t.time, t.type,
+            self.event_id,
+        ) for t in self._tracks]
 
     @classmethod
     def get_usr_item(cls, track, index):
@@ -830,5 +864,6 @@ deserialise_map = {
     'Hits': HitSeries,
     'MCTracks': TrackSeries,
     'EventInfo': EventInfo,
+    'Tracks': TrackSeries,
 }
 

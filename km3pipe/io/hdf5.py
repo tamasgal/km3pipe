@@ -9,7 +9,6 @@ from __future__ import division, absolute_import, print_function
 
 from collections import defaultdict
 import os.path
-from six import string_types
 
 import pandas as pd
 import tables as tb
@@ -130,7 +129,7 @@ class HDF5Pump(Pump):
         self.filename = filename
         if os.path.isfile(self.filename):
             self.h5_file = tb.File(self.filename)
-            if not self.get("no_version_check"):
+            if not self.get("skip_version_check"):
                 self._check_version()
         else:
             raise IOError("No such file or directory: '{0}'"
@@ -229,89 +228,117 @@ class HDF5Pump(Pump):
 class H5Chain(object):
     """Read/write multiple HDF5 files as ``pandas.DataFrame``.
 
+    It is impliend that all files share the same group/tables
+    structure and naming.
+
+    This class mitigates 3 issues:
+    * read different amounts of events from each file
+        * (100 from A, 20 from B)
+    * don't slice all tables equally, e.g.:
+        * read every row from jgandalf
+        * read every 2nd row from mc_tracks
+    * merge all tables below a group into a single table
+        * /reco/jgandalf
+        * /reco/dusj
+
     Parameters
     ----------
-    which: list(str) or dict(str->cond)
-        The filenames to be read in. When passing a dict, events are
-        selected according to cond, which can be `None` (all events), a
-        slice, or a numexpr-like pytables condition string.
+    filenames: list(str)
 
     Examples
     --------
     >>> filenames = ['numu_cc.h5', 'anue_nc.h5']
+    >>> n_evts = {'numu_cc.h5': None, 'anue_nc.h5': 100, }
+    # either tables keys below '/', or group names
+    >>> keys = ['hits', 'reco']
+    >>> step = {'mc_tracks': 2}
+
     >>> c = H5Chain(filenames)
+    >>> coll = c(n_evts, keys, step)
+    {'mc_tracks': pd.Dataframe, 'hits' pd.DataFrame, 'reco': dataframe}
 
-    specify n_events per file, or their event ids
-
-    >>> filenames = {'numu_cc.h5': None, 'anue_nc.h5': 100,
-                 'numu_cc.h5': [1, 2, 3],}
-    >>> c = H5Chain(filenames)
-
-    these are pandas Dataframes
-
-    >>> X = c.reco
-    >>> wgt = c.event_info.weights_w2
-    >>> Y_ene = c.mc_tracks[::2].energy
-
+    # these are pandas Dataframes
+    >>> X = coll['reco']
+    >>> wgt = coll['event_info']['weights_w2']
+    >>> Y_ene = coll['mc_tracks']['energy']
     """
 
-    def __init__(self, filenames, table_filter=None):
-        if table_filter is None:
-            table_filter = {}
-        if isinstance(filenames, list):
-            filenames = {key: None for key in filenames}
-        self._which = filenames
-        self._store = defaultdict(list)
+    def __init__(self, filenames):
+        self.h5files = {}
+        if isinstance(filenames, dict):
+            self.h5files.update(filenames)
+            return
+        for fn in filenames:
+            h5 = tb.open_file(fn, 'r')
+            self.h5files[fn] = h5
 
-        for fil, cond in sorted(self._which.items()):
-            h5fil = tb.open_file(fil, 'r')
+    def _finish(self):
+        for h5 in self.h5files.values():
+            h5.close()
+
+    def __exit__(self):
+        self._finish()
+
+    def __enter__(self):
+        return self
+
+    def __call__(self, n_evts=None, keys=None, ):
+        """
+        Parameters
+        ----------
+        n_evts: int or dict(str->int) (default=None)
+            Number of events to read. If None, read every event from all.
+            If int, read that many from all.  In case of dict: If a
+            filename is in the dict, read that many events from the file.
+
+        keys: list(str) (default=None)
+            Names of the tables/groups to read. If None, read all.
+            Refers only to nodes sitting below '/',
+            e.g. '/mc_tracks' (Table) or '/reco' (Group).
+        """
+        store = defaultdict(list)
+        for fname, h5 in self.h5files.items():
+            n = n_evts
+            if isinstance(n_evts, dict):
+                n = n_evts[fname]
 
             # tables under '/', e.g. mc_tracks
-            for tab in h5fil.iter_nodes('/', classname='Table'):
-                if tab.name in table_filter.keys():
-                    tab_cond = table_filter[tab.name]
-                    arr = self._read_table(tab, tab_cond)
-                else:
-                    arr = self._read_table(tab, cond)
+            for tab in h5.iter_nodes('/', classname='Table'):
+                tabname = tab.name
+                if keys is not None and tabname not in keys:
+                    continue
+                arr = self._read_table(tab, n)
                 arr = pd.DataFrame.from_records(arr)
-                self._store[tab.name].append(arr)
+                store[tabname].append(arr)
 
             # groups under '/', e.g. '/reco'
-            for gr in h5fil.iter_nodes('/', classname='Group'):
-                arr = self._read_group(gr, cond)
-                self._store[gr._v_name].append(arr)
+            # tables sitting below will be merged
+            for gr in h5.iter_nodes('/', classname='Group'):
+                groupname = gr._v_name
+                if keys is not None and groupname not in keys:
+                    continue
+                arr = self._read_group(gr, n)
+                store[groupname].append(arr)
 
-            h5fil.close()
-
-        for key, dfs in sorted(self._store.items()):
-            self._store[key] = pd.concat(dfs)
-
-        for key, val in sorted(self._store.items()):
-            setattr(self, key, val)
-
-    def __getitem__(self, name):
-        return self._store[name]
-
-    def _read_group(cls, group, cond):
-        # Store through groupname, insert tablename into dtype
-        tabs = []
-        for tab in group._f_iter_nodes(classname='Table'):
-            tabname = tab.name
-            arr = cls._read_table(tab, cond)
-            arr = insert_prefix_to_dtype(arr, tabname)
-            arr = pd.DataFrame.from_records(arr)
-            tabs.append(arr)
-        tabs = pd.concat(tabs, axis=1)
-        return tabs
+        for key, dfs in sorted(store.items()):
+            store[key] = pd.concat(dfs)
+        return store
 
     @classmethod
-    def _read_table(cls, table, cond=None):
-        if cond is None:
-            return table[:]
-        if isinstance(cond, string_types):
-            return table.read_where(cond)
-        if isinstance(cond, int):
-            return table[:cond]
-        if isinstance(cond, slice):
-            return table[cond]
-        return table.read(cond)
+    def _read_group(cls, group, n=None, cond=None):
+        # Store through groupname, insert tablename into dtype
+        df = []
+        for tab in group._f_iter_nodes(classname='Table'):
+            tabname = tab.name
+            arr = cls._read_table(tab, n)
+            arr = insert_prefix_to_dtype(arr, tabname)
+            arr = pd.DataFrame.from_records(arr)
+            df.append(arr)
+        df = pd.concat(df, axis=1)
+        return df
+
+    @classmethod
+    def _read_table(cls, table, n=None, cond=None):
+        if isinstance(n, int):
+            return table[:n]
+        return table[:]

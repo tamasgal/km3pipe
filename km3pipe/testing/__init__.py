@@ -32,7 +32,8 @@ __status__ = "Development"
 
 class FakeAanetHit(object):
     def __init__(self, channel_id, dom_id, id, pmt_id, t, tot, trig):
-        self.channel_id = chr(channel_id)
+        # self.channel_id = chr(channel_id)
+        self.channel_id = channel_id
         self.dom_id = dom_id
         self.id = id
         self.pmt_id = pmt_id
