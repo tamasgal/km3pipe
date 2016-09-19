@@ -56,13 +56,13 @@ def run_tests():
     pytest.main([os.path.dirname(km3pipe.__file__)])
 
 
-def tohdf5(input_file, output_file, n_events, use_jppy=False, aa_fmt=None):
+def tohdf5(input_file, output_file, n_events, **kwargs):
     """Convert Any file to HDF5 file"""
     from km3pipe import Pipeline  # noqa
     from km3pipe.io import GenericPump, HDF5Sink  # noqa
 
     pipe = Pipeline()
-    pipe.attach(GenericPump, filename=input_file, use_jppy=use_jppy, aa_fmt=aa_fmt)
+    pipe.attach(GenericPump, filename=input_file, **kwargs)
     pipe.attach(StatusBar, every=1000)
     pipe.attach(HDF5Sink, filename=output_file)
     pipe.drain(n_events)
@@ -171,9 +171,9 @@ def main():
     if args['tohdf5']:
         infile = args['FILE']
         outfile = args['-o'] or infile + '.h5'
-        use_jppy = args['--jppy']
-        aa_fmt = args['--aa-format']
-        tohdf5(infile, outfile, n, use_jppy, aa_fmt)
+        use_jppy_pump = args['--jppy']
+        aa_format = args['--aa-format']
+        tohdf5(infile, outfile, n, use_jppy=use_jppy_pump, aa_fmt=aa_format)
 
     if args['hdf2root']:
         infile = args['FILE']
