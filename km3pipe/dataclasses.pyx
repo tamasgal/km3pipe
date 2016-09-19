@@ -612,7 +612,7 @@ class TrackSeries(object):
                           t.id,
                           cls.get_usr_item(t, 2),               # ichan
                           IS_CC[cls.get_usr_item(t, 0)],        # is_cc
-                          t.len,
+                          cls.get_len(t),
                           Position((t.pos.x, t.pos.y, t.pos.z)),
                           t.t,
                           # TODO:
@@ -696,6 +696,13 @@ class TrackSeries(object):
             t.length, t.pos[0], t.pos[1], t.pos[2], t.time, t.type,
             self.event_id,
         ) for t in self._tracks]
+
+    @classmethod
+    def get_len(cls, track):
+        try:
+            return track.len
+        except AttributeError:
+            return 0
 
     @classmethod
     def get_usr_item(cls, track, index):
