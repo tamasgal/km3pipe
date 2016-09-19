@@ -51,12 +51,15 @@ class AanetPump(Pump):
             else:
                 self.filenames.append(self.filename)
 
+        import ROOT # noqa
+        self.aalib = self.get('aa_lib')
+        if self.aalib:
+            ROOT.gSystem.Load(self.aalib) # noqa
+        else:
+            import aa  # noqa
+
         self.header = None
         self.blobs = self.blob_generator()
-
-        import ROOT # noqa
-        #import aa  # noqa
-        ROOT.gSystem.Load("/sps/km3net/users/lquinn/sandbox/aa-recoLNSlowE/bin/reco_v0r9_standalone.so") # noqa
 
         if self.additional:
             dummy_evt = ROOT.Evt()
