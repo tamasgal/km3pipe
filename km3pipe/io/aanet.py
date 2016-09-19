@@ -34,7 +34,7 @@ class AanetPump(Pump):
         self.filenames = self.get('filenames') or []
         self.indices = self.get('indices')
         self.additional = self.get('additional')
-        format = self.get('aa_fmt')
+        self.format = self.get('aa_fmt')
         if self.additional:
             self.id = self.get('id')
             self.return_without_match = self.get("return_without_match")
@@ -51,17 +51,12 @@ class AanetPump(Pump):
             else:
                 self.filenames.append(self.filename)
 
-        self.format = None
-        if format and format in ('minidst', 'jevt_jgandalf', 'generic_track'):
-            self.format = format
-
         self.header = None
         self.blobs = self.blob_generator()
 
         import ROOT # noqa
         #import aa  # noqa
         ROOT.gSystem.Load("/sps/km3net/users/lquinn/sandbox/aa-recoLNSlowE/bin/reco_v0r9_standalone.so") # noqa
-
 
         if self.additional:
             dummy_evt = ROOT.Evt()
@@ -248,7 +243,7 @@ def parse_ancient_recolns(aanet_event, event_id):
     out['sin_theta'] = sin_theta
     out['beta'] = np.sqrt(sin_theta * sin_theta * sigma2_phi + sigma2_theta)
 
-    dt = [(key, float) for key in sorted(map.keys())]
+    dt = [(key, float) for key in sorted(out.keys())]
     out['event_id'] = event_id
     dt.append(('event_id', '<u4'))
     dt = np.dtype(dt)
