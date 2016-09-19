@@ -57,9 +57,13 @@ class AanetPump(Pump):
 
         self.header = None
         self.blobs = self.blob_generator()
+
+        import ROOT # noqa
+        #import aa  # noqa
+        ROOT.gSystem.Load("/sps/km3net/users/lquinn/sandbox/aa-recoLNSlowE/bin/reco_v0r9_standalone.so") # noqa
+
+
         if self.additional:
-            import ROOT
-            import aa  # noqa
             dummy_evt = ROOT.Evt()
             dummy_evt.frame_index = -1
             self.previous = {"Evt": dummy_evt}
@@ -74,7 +78,6 @@ class AanetPump(Pump):
     def blob_generator(self):
         """Create a blob generator."""
         # pylint: disable:F0401,W0612
-        import aa  # noqa
         from ROOT import EventFile
 
         for filename in self.filenames:
@@ -90,44 +93,70 @@ class AanetPump(Pump):
 
             try:
                 self.header = event_file.rootfile().Get("Header")
-            except AttributeError:
+            except (AttributeError, TypeError):
                 pass
 
-            for event in event_file:
-                if event.det_id <= 0:  # apply ZED correction
-                    for track in event.mc_trks:
-                        track.pos.z += 405.93
+            # for event in event_file:
+            while event_file.next():
+                event = event_file.evt
+                try:
+                    if event.det_id <= 0:  # apply ZED correction
+                        for track in event.mc_trks:
+                            track.pos.z += 405.93
+                except AttributeError:
+                    pass
 
                 if len(event.w) == 3:
                     w1, w2, w3 = event.w
                 else:
                     w1 = w2 = w3 = np.nan
 
-                blob = {'Evt': event,
-                        'Hits': HitSeries.from_aanet(event.hits, event.id),
-                        'MCHits': HitSeries.from_aanet(event.mc_hits,
-                                                       event.id),
-                        'MCTracks': TrackSeries.from_aanet(event.mc_trks,
-                                                           event.id),
-                        'filename': filename,
-                        'Header': self.header,
-                        'EventInfo': EventInfo(
-                            event.det_id,
-                            event.id,
-                            event.frame_index,
-                            event.mc_id,
-                            event.mc_t,
-                            event.overlays,
-                            event.run_id,
-                            event.trigger_counter,
-                            event.trigger_mask,
-                            event.t.GetNanoSec(),
-                            event.t.GetSec(),
-                            w1,
-                            w2,
-                            w3,
-                        ),
-                        }
+                blob = {}
+                blob['Evt'] = event
+                try:
+                    blob['Hits'] = HitSeries.from_aanet(event.hits, event.id)
+                    blob['MCHits'] = HitSeries.from_aanet(event.mc_hits,
+                                                          event.id)
+                except AttributeError:
+                    pass
+                blob['MCTracks'] = TrackSeries.from_aanet(event.mc_trks,
+                                                          event.id)
+                blob['filename'] = filename
+                blob['Header'] = self.header
+                try:
+                    blob['EventInfo'] = EventInfo(
+                        event.det_id,
+                        event.id,
+                        event.frame_index,
+                        event.mc_id,
+                        event.mc_t,
+                        event.overlays,
+                        event.run_id,
+                        event.trigger_counter,
+                        event.trigger_mask,
+                        event.t.GetNanoSec(),
+                        event.t.GetSec(),
+                        w1,
+                        w2,
+                        w3,
+                    )
+                except AttributeError:
+                    blob['EventInfo'] = EventInfo(
+                        0,
+                        event.id,
+                        event.frame_index,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        w1,
+                        w2,
+                        w3,
+                    )
                 if self.format == 'minidst':
                     recos = read_mini_dst(event, event.id)
                     for recname, reco in recos.items():
@@ -140,6 +169,10 @@ class AanetPump(Pump):
                     track, dtype = parse_generic_event(event, event.id)
                     if track:
                         blob['Track'] = Reco(track, dtype)
+                if self.format == 'ancient_recolns':
+                    track, dtype = parse_ancient_recolns(event, event.id)
+                    if track:
+                        blob['AncientRecoLNS'] = Reco(track, dtype)
                 yield blob
             del event_file
 
@@ -182,6 +215,44 @@ class AanetPump(Pump):
 
     def __next__(self):
         return next(self.blobs)
+
+
+def parse_ancient_recolns(aanet_event, event_id):
+    # the final recontructed track is in f.evt.trks, at the index 5
+    # trks[0] ==> prefit track
+    # trks[1] ==> m-estimator track
+    # trks[2] ==> "original" pdf track
+    # trks[3] ==> full pdf track, final reconstructed direction
+    # trks[4] ==> + vertex fit and muon length fit
+    # trks[5] ==> + bjorken-y fit and neutrino energy fit
+    out = {}
+    out['lambda'] = aanet_event.trks[3].lik
+    out['n_hits_used'] = aanet_event.trks[3].fitinf[0]
+    out['energy_muon'] = aanet_event.trks[4].E
+    out['energy_neutrino'] = aanet_event.trks[5].E
+    out['bjorken_y'] = aanet_event.trks[5].By_rec
+    out['pos_x'] = aanet_event.trks[5].pos.x
+    out['pos_y'] = aanet_event.trks[5].pos.y
+    out['pos_z'] = aanet_event.trks[5].pos.z
+    out['dir_x'] = aanet_event.trks[5].dir.x
+    out['dir_y'] = aanet_event.trks[5].dir.y
+    out['dir_z'] = aanet_event.trks[5].dir.z
+
+    sigma2_theta = aanet_event.trks[3].error_matrix[18] \
+        if aanet_event.trks[3].error_matrix[18] > 0 else 0
+    out['sigma2_theta'] = sigma2_theta
+    sigma2_phi = aanet_event.trks[3].error_matrix[24] \
+        if aanet_event.trks[3].error_matrix[24] > 0 else 0
+    out['sigma2_phi'] = sigma2_phi
+    sin_theta = np.sin(np.arccos(aanet_event.trks[3].dir.z))
+    out['sin_theta'] = sin_theta
+    out['beta'] = np.sqrt(sin_theta * sin_theta * sigma2_phi + sigma2_theta)
+
+    dt = [(key, float) for key in sorted(map.keys())]
+    out['event_id'] = event_id
+    dt.append(('event_id', '<u4'))
+    dt = np.dtype(dt)
+    return out, dt
 
 
 def parse_jevt_jgandalf(aanet_event, event_id):
