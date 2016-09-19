@@ -290,10 +290,6 @@ def parse_generic_event(aanet_event, event_id):
     return map, dt
 
 
-def parse_generic_track(aanet_track):
-    pass
-
-
 def read_mini_dst(aanet_event, event_id):
     pos_to_recname = {
         0: 'RecoLNS',
