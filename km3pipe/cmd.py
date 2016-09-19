@@ -7,7 +7,7 @@ Usage:
     km3pipe test
     km3pipe update [GIT_BRANCH]
     km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID]
-    km3pipe tohdf5 FILE [-o OUTFILE] [-n EVENTS] [-j] [--aa-format=<fmt>]
+    km3pipe tohdf5 FILE [-o OUTFILE] [-n EVENTS] [-j] [--aa-format=<fmt>] [--aa-lib=<lib.so>]
     km3pipe hdf2root FILE [-o OUTFILE] [-n EVENTS]
     km3pipe runtable [-n RUNS] [-s REGEX] DET_ID
     km3pipe runinfo DET_ID RUN
@@ -16,7 +16,7 @@ Usage:
 
 Options:
     -h --help           Show this screen.
-    -m                  Get the MC detector file (flips the sign of the DET_ID).
+    -m                  Get the MC detector file (flips the sign of DET_ID).
     -c CALIBR_ID        Geometrical calibration ID (eg. A01466417)
     -t T0_SET           Time calibration ID (eg. A01466431)
     -n EVENTS/RUNS      Number of events/runs.
@@ -24,6 +24,9 @@ Options:
     -j --jppy           tohdf5: Use jppy (not aanet) for Jpp readout
     --aa-format=<fmt>   tohdf5: Which aanet subformat ('minidst',
                         'jevt_jgandalf', 'generic_track') [default: None]
+    --aa-lib-<lib.so>   tohdf5: path to aanet binary (for old versions which
+                        must be loaded via `ROOT.gSystem.Load()` instead
+                        of `import aa`)
     -s REGEX            Regular expression to filter the runsetup name/id.
     DET_ID              Detector ID (eg. D_ARCA001).
     GIT_BRANCH          Git branch to pull (eg. develop).
@@ -173,7 +176,9 @@ def main():
         outfile = args['-o'] or infile + '.h5'
         use_jppy_pump = args['--jppy']
         aa_format = args['--aa-format']
-        tohdf5(infile, outfile, n, use_jppy=use_jppy_pump, aa_fmt=aa_format)
+        aa_lib = args['--aa-lib']
+        tohdf5(infile, outfile, n, use_jppy=use_jppy_pump, aa_fmt=aa_format,
+               aa_lib=aa_lib)
 
     if args['hdf2root']:
         infile = args['FILE']
