@@ -40,15 +40,13 @@ __status__ = "Development"
 log = logging.getLogger(__name__)
 
 
-def GenericPump(filename, use_jppy=False, name="GenericPump"):
+def GenericPump(filename, use_jppy=False, name="GenericPump", **kwargs):
     """A generic pump which utilises the appropriate pump."""
     extension = os.path.splitext(filename)[1]
 
     io = {
         '.evt': EvtPump,
         '.h5': HDF5Pump,
-        '.aa.root': AanetPump,
-        '.merged_aanet.root': AanetPump,
         '.root': JPPPump if use_jppy else AanetPump,
         '.dat': DAQPump,
         '.dqd': CLBPump,
@@ -57,7 +55,7 @@ def GenericPump(filename, use_jppy=False, name="GenericPump"):
     if extension not in io:
         log.critical("No pump found for '{0}'".format(extension))
 
-    return io[extension](filename=filename, name=name)
+    return io[extension](filename=filename, name=name, **kwargs)
 
 
 def df_to_h5(df, filename, tabname, filemode='a', where='/', complevel=5,):
