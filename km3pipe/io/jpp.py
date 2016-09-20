@@ -11,7 +11,8 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 
 from km3pipe import Pump, Blob
-from km3pipe.dataclasses import EventInfo, HitSeries, L0HitSeries
+from km3pipe.dataclasses import (EventInfo, TimesliceInfo,
+                                 HitSeries, L0HitSeries)
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -39,6 +40,7 @@ class JPPPump(Pump):
 
         self.event_index = self.get('index') or 0
         self.timeslice_index = 0
+        self.timeslice_frame_index = 0
         # self.filename = self.get('filename')
         self.filename = filename
 
@@ -50,10 +52,12 @@ class JPPPump(Pump):
         while self.event_reader.has_next:
             yield self.extract_event()
         while self.timeslice_reader.has_next:
+            self.timeslice_frame_index = 0
             self.timeslice_reader.retrieve_next_timeslice()
             while self.timeslice_reader.has_next_superframe:
                 yield self.extract_frame()
                 self.timeslice_reader.retrieve_next_superframe()
+                self.timeslice_frame_index += 1
             self.timeslice_index += 1
         raise StopIteration
 
@@ -105,8 +109,15 @@ class JPPPump(Pump):
         hit_series = L0HitSeries.from_arrays(
             channel_ids, dom_ids, times, tots, self.timeslice_index
         )
+        timeslice_info = TimesliceInfo(
+                dom_ids[0],
+                self.timeslice_frame_index,
+                n,
+                self.timeslice_index,
+                )
 
         blob['L0Hits'] = hit_series
+        blob['TimesliceInfo'] = timeslice_info
         return blob
 
     def process(self, blob):
