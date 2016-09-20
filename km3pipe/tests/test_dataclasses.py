@@ -13,8 +13,10 @@ import numpy as np
 
 from km3pipe.testing import TestCase, FakeAanetHit
 from km3pipe.io.evt import EvtRawHit
-from km3pipe.dataclasses import (Hit, Track, Position, Direction_, HitSeries,
-                                 EventInfo, SummarysliceInfo, Serialisable,
+from km3pipe.dataclasses import (Hit, Track, Position, Direction_,
+                                 HitSeries, L0HitSeries,
+                                 EventInfo, SummarysliceInfo, TimesliceInfo,
+                                 Serialisable,
                                  Reco, TrackSeries, SummaryframeSeries)
 
 __author__ = "Tamas Gal"
@@ -139,6 +141,28 @@ class TestDirection(TestCase):
     def test_direction_str(self):
         direction = Direction_((1, 2, 3))
         self.assertEqual("(0.2673, 0.5345, 0.8018)", str(direction))
+
+
+class TestL0HitSeries(TestCase):
+
+    def test_from_arrays(self):
+        n = 10
+        dom_ids = np.arange(n)
+        times = np.arange(n)
+        tots = np.arange(n)
+        channel_ids = np.arange(n)
+
+        hits = L0HitSeries.from_arrays(
+            channel_ids,
+            dom_ids,
+            times,
+            tots,
+            23,      # frame_id
+        )
+
+        self.assertAlmostEqual(1, hits[1].channel_id)
+        self.assertAlmostEqual(9, hits[9].tot)
+        self.assertEqual(10, len(hits))
 
 
 class TestHitSeries(TestCase):
@@ -402,8 +426,17 @@ class TestSummaryframeSeries(TestCase):
         self.assertEqual(10, len(frames))
 
 
+class TestTimesliceInfo(TestCase):
+    def test_timeslice_info(self):
+        s = TimesliceInfo(*range(4))
+        self.assertAlmostEqual(0, s.dom_id)
+        self.assertAlmostEqual(1, s.frame_id)
+        self.assertAlmostEqual(2, s.n_hits)
+        self.assertAlmostEqual(3, s.slice_id)
+
+
 class TestSummarysliceInfo(TestCase):
-    def test_event_info(self):
+    def test_summaryslice_info(self):
         s = SummarysliceInfo(*range(4))
         self.assertAlmostEqual(0, s.det_id)
         self.assertAlmostEqual(1, s.frame_index)

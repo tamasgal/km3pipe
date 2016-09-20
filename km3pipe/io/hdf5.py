@@ -7,7 +7,7 @@ Read and write KM3NeT-formatted HDF5 files.
 """
 from __future__ import division, absolute_import, print_function
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 import os.path
 
 import pandas as pd
@@ -60,7 +60,7 @@ class HDF5Sink(Module):
         self.h5file = tb.open_file(self.filename, mode="w", title="KM3NeT")
         self.filters = tb.Filters(complevel=5, shuffle=True,
                                   fletcher32=True)
-        self._tables = {}
+        self._tables = OrderedDict()
 
     def _to_array(self, data):
         if len(data) <= 0:
@@ -107,8 +107,16 @@ class HDF5Sink(Module):
         return blob
 
     def finish(self):
-        for tab in self._tables.values():
-            tab.cols.event_id.create_index()
+        for tab in self._tables.itervalues():
+            if 'frame_id' in tab.colnames:
+                print("Creating index for '{0}' using 'frame_id'..."
+                      .format(tab.name))
+                tab.cols.frame_id.create_index()
+            elif 'event_id' in tab.colnames:
+                print("Creating index for '{0}' using 'event_id'..."
+                      .format(tab.name))
+                tab.cols.event_id.create_index()
+
             tab.flush()
         self.h5file.root._v_attrs.km3pipe = str(kp.__version__)
         self.h5file.root._v_attrs.pytables = str(tb.__version__)
@@ -272,12 +280,12 @@ class H5Chain(object):
             h5 = tb.open_file(fn, 'r')
             self.h5files[fn] = h5
 
-    def _finish(self):
+    def close(self):
         for h5 in self.h5files.values():
             h5.close()
 
-    def __exit__(self):
-        self._finish()
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
 
     def __enter__(self):
         return self
