@@ -58,7 +58,7 @@ def unpack_nfirst(seq, nfirst):
     yield tuple(iterator)
 
 
-def split(string, callback=None):
+def split(string, callback=None, sep=' '):
     """Split the string and execute the callback function on each part.
 
     >>> string = "1 2 3 4"
@@ -67,10 +67,10 @@ def split(string, callback=None):
     [1, 2, 3, 4]
 
     """
-    if callback:
-        return [callback(i) for i in string.split()]
+    if callback is not None:
+        return [callback(i) for i in string.split(sep)]
     else:
-        return string.split()
+        return string.split(sep)
 
 
 def namedtuple_with_defaults(typename, field_names, default_values=[]):

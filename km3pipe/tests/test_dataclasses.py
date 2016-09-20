@@ -13,8 +13,11 @@ import numpy as np
 
 from km3pipe.testing import TestCase, FakeAanetHit
 from km3pipe.io.evt import EvtRawHit
-from km3pipe.dataclasses import (Hit, Track, Position, Direction_, HitSeries,
-                                 EventInfo, Serialisable, Reco, TrackSeries)
+from km3pipe.dataclasses import (Hit, Track, Position, Direction_,
+                                 HitSeries, L0HitSeries,
+                                 EventInfo, SummarysliceInfo, TimesliceInfo,
+                                 Serialisable,
+                                 Reco, TrackSeries, SummaryframeSeries)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -140,20 +143,49 @@ class TestDirection(TestCase):
         self.assertEqual("(0.2673, 0.5345, 0.8018)", str(direction))
 
 
+class TestL0HitSeries(TestCase):
+
+    def test_from_arrays(self):
+        n = 10
+        dom_ids = np.arange(n)
+        times = np.arange(n)
+        tots = np.arange(n)
+        channel_ids = np.arange(n)
+
+        hits = L0HitSeries.from_arrays(
+            channel_ids,
+            dom_ids,
+            times,
+            tots,
+            23,      # frame_id
+        )
+
+        self.assertAlmostEqual(1, hits[1].channel_id)
+        self.assertAlmostEqual(9, hits[9].tot)
+        self.assertEqual(10, len(hits))
+
+
 class TestHitSeries(TestCase):
 
     def test_from_arrays(self):
         n = 10
-        ids = np.array(range(n))
-        dom_ids = np.array(range(n))
-        times = np.array(range(n))
-        tots = np.array(range(n))
-        channel_ids = np.array(range(n))
+        ids = np.arange(n)
+        dom_ids = np.arange(n)
+        times = np.arange(n)
+        tots = np.arange(n)
+        channel_ids = np.arange(n)
         triggereds = np.ones(n)
-        pmt_ids = np.array(range(n))
+        pmt_ids = np.arange(n)
 
-        hits = HitSeries.from_arrays(ids, dom_ids, times, tots, channel_ids,
-                                     triggereds, pmt_ids)
+        hits = HitSeries.from_arrays(
+            channel_ids, dom_ids,
+            ids,
+            pmt_ids,
+            times,
+            tots,
+            triggereds,
+            0,      # event_id
+        )
 
         self.assertAlmostEqual(1, hits[1].id)
         self.assertAlmostEqual(9, hits[9].pmt_id)
@@ -164,8 +196,9 @@ class TestHitSeries(TestCase):
         n_hits = 10
         hits = [FakeAanetHit(*p) for p in
                 np.arange(n_hits * n_params).reshape(n_hits, n_params)]
-        hit_series = HitSeries.from_aanet(hits)
+        hit_series = HitSeries.from_aanet(hits, 0)
 
+        self.assertAlmostEqual(3, hit_series.pmt_id[0])
         self.assertAlmostEqual(3, hit_series[0].pmt_id)
         self.assertAlmostEqual(7, hit_series[1].channel_id)
         self.assertAlmostEqual(23, hit_series[3].id)
@@ -180,7 +213,7 @@ class TestHitSeries(TestCase):
         n_hits = 10
         hits = [FakeAanetHit(*p) for p in
                 np.arange(n_hits * n_params).reshape(n_hits, n_params)]
-        hit_series = HitSeries.from_aanet(hits)
+        hit_series = HitSeries.from_aanet(hits, 0)
 
         self.assertTupleEqual((2, 9, 16, 23, 30, 37, 44, 51, 58, 65),
                               tuple(hit_series.id))
@@ -203,7 +236,7 @@ class TestHitSeries(TestCase):
         n_hits = 10
         hits = [EvtRawHit(*p) for p in
                 np.arange(n_hits * n_params).reshape(n_hits, n_params)]
-        hit_series = HitSeries.from_evt(hits)
+        hit_series = HitSeries.from_evt(hits, 0)
 
         self.assertAlmostEqual(1, hit_series[0].pmt_id)
         self.assertAlmostEqual(0, hit_series[1].channel_id)  # always 0 for MC
@@ -219,7 +252,7 @@ class TestHitSeries(TestCase):
         n_hits = 10
         hits = [EvtRawHit(*p) for p in
                 np.arange(n_hits * n_params).reshape(n_hits, n_params)]
-        hit_series = HitSeries.from_evt(hits)
+        hit_series = HitSeries.from_evt(hits, 0)
 
         self.assertTupleEqual((0, 4, 8, 12, 16, 20, 24, 28, 32, 36),
                               tuple(hit_series.id))
@@ -343,7 +376,6 @@ class TestTrackSeries(TestCase):
             types,
             event_id=0,
         )
-        print(tracks)
 
         self.assertAlmostEqual(1, tracks[1].id)
         self.assertAlmostEqual(9, tracks[9].interaction_channel)
@@ -373,28 +405,66 @@ class TestTrackSeries(TestCase):
         # self.assertAlmostEqual(exp, ts.serialise())
 
 
+class TestSummaryframeSeries(TestCase):
+
+    def test_from_arrays(self):
+        n = 10
+        dom_ids = np.arange(n)
+        max_sequence_numbers = np.arange(n)
+        n_received_packets = np.arange(n)
+        frames = SummaryframeSeries.from_arrays(
+            dom_ids,
+            max_sequence_numbers,
+            n_received_packets,
+            23,      # slice_id
+        )
+
+        self.assertAlmostEqual(1, frames[1][0])  # dom_id
+        self.assertAlmostEqual(9, frames[9][2])  # n_received_packets
+        self.assertTupleEqual(tuple(range(n)),
+                              tuple(frames.n_received_packets))
+        self.assertEqual(10, len(frames))
+
+
+class TestTimesliceInfo(TestCase):
+    def test_timeslice_info(self):
+        s = TimesliceInfo(*range(4))
+        self.assertAlmostEqual(0, s.dom_id)
+        self.assertAlmostEqual(1, s.frame_id)
+        self.assertAlmostEqual(2, s.n_hits)
+        self.assertAlmostEqual(3, s.slice_id)
+
+
+class TestSummarysliceInfo(TestCase):
+    def test_summaryslice_info(self):
+        s = SummarysliceInfo(*range(4))
+        self.assertAlmostEqual(0, s.det_id)
+        self.assertAlmostEqual(1, s.frame_index)
+        self.assertAlmostEqual(2, s.run_id)
+        self.assertAlmostEqual(3, s.slice_id)
+
+
 class TestEventInfo(TestCase):
     def test_event_info(self):
         e = EventInfo(*range(14))
         self.assertAlmostEqual(0, e.det_id)
-        self.assertAlmostEqual(1, e.event_id)
-        self.assertAlmostEqual(2, e.frame_index)
-        self.assertAlmostEqual(3, e.mc_id)
-        self.assertAlmostEqual(4, e.mc_t)
-        self.assertAlmostEqual(5, e.overlays)
+        self.assertAlmostEqual(1, e.frame_index)
+        self.assertAlmostEqual(2, e.mc_id)
+        self.assertAlmostEqual(3, e.mc_t)
+        self.assertAlmostEqual(4, e.overlays)
         # self.assertAlmostEqual(6, e.run_id)
-        self.assertAlmostEqual(6, e.trigger_counter)
-        self.assertAlmostEqual(7, e.trigger_mask)
-        self.assertAlmostEqual(8, e.utc_nanoseconds)
-        self.assertAlmostEqual(9, e.utc_seconds)
-        self.assertAlmostEqual(10, e.weight_w1)
-        self.assertAlmostEqual(11, e.weight_w2)
-        self.assertAlmostEqual(12, e.weight_w3)
+        self.assertAlmostEqual(5, e.trigger_counter)
+        self.assertAlmostEqual(6, e.trigger_mask)
+        self.assertAlmostEqual(7, e.utc_nanoseconds)
+        self.assertAlmostEqual(8, e.utc_seconds)
+        self.assertAlmostEqual(9, e.weight_w1)
+        self.assertAlmostEqual(10, e.weight_w2)
+        self.assertAlmostEqual(11, e.weight_w3)
+        self.assertAlmostEqual(12, e.event_id)
 
     def test_from_table(self):
         e = EventInfo.from_table({
             'det_id': 0,
-            'event_id': 1,
             'frame_index': 2,
             'mc_id': 3,
             'mc_t': 4,
@@ -407,10 +477,10 @@ class TestEventInfo(TestCase):
             'weight_w1': 10,
             'weight_w2': 11,
             'weight_w3': 12,
+            'event_id': 1,
             })
 
         self.assertAlmostEqual(0, e.det_id)
-        self.assertAlmostEqual(1, e.event_id)
         self.assertAlmostEqual(2, e.frame_index)
         self.assertAlmostEqual(3, e.mc_id)
         self.assertAlmostEqual(4, e.mc_t)
@@ -423,6 +493,7 @@ class TestEventInfo(TestCase):
         self.assertAlmostEqual(10, e.weight_w1)
         self.assertAlmostEqual(11, e.weight_w2)
         self.assertAlmostEqual(12, e.weight_w3)
+        self.assertAlmostEqual(1, e.event_id)
 
     def test_from_table_puts_nan_for_missing_data(self):
         e = EventInfo.from_table({})
@@ -445,7 +516,6 @@ class TestEventInfo(TestCase):
     def test_array(self):
         e = EventInfo.from_table({
             'det_id': 0,
-            'event_id': 1,
             'frame_index': 2,
             'mc_id': 3,
             'mc_t': 4.0,
@@ -458,8 +528,9 @@ class TestEventInfo(TestCase):
             'weight_w1': 10.0,
             'weight_w2': 11.0,
             'weight_w3': 12.0,
+            'event_id': 1,
             })
-        exp = (0, 1, 2, 3, 4.0, 5, 6, 7, 8, 9, 10.0, 11.0, 12.0)
+        exp = (0, 2, 3, 4.0, 5, 6, 7, 8, 9, 10.0, 11.0, 12.0, 1)
         self.assertAlmostEqual(e.serialise(), np.array(exp, e.dtype))
 
 

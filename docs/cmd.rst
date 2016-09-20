@@ -17,23 +17,27 @@ commands::
     Usage:
         km3pipe test
         km3pipe update [GIT_BRANCH]
-        km3pipe tohdf5 [-n EVENTS] -i FILE -o FILE
-        km3pipe aatohdf5 [-n EVENTS] -i FILE -o FILE
-        km3pipe jpptohdf5 [-n EVENTS] -i FILE -o FILE
-        km3pipe evttohdf5 [-n EVENTS] -i FILE -o FILE
-        km3pipe hdf2root -i FILE [-o FILE]
+        km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID]
+        km3pipe tohdf5 FILE [-o OUTFILE] [-n EVENTS] [-j]
+        km3pipe hdf2root FILE [-o OUTFILE] [-n EVENTS]
         km3pipe runtable [-n RUNS] [-s REGEX] DET_ID
+        km3pipe runinfo DET_ID RUN
         km3pipe (-h | --help)
         km3pipe --version
 
     Options:
         -h --help       Show this screen.
-        -i FILE         Input file.
-        -o FILE         Output file.
+        -m              Get the MC detector file (flips the sign of the DET_ID).
+        -c CALIBR_ID    Geometrical calibration ID (eg. A01466417)
+        -t T0_SET       Time calibration ID (eg. A01466431)
         -n EVENTS/RUNS  Number of events/runs.
+        -o OUTFILE      Output file.
+        -j --jppy       Use jppy (not aanet) for Jpp readout
         -s REGEX        Regular expression to filter the runsetup name/id.
         DET_ID          Detector ID (eg. D_ARCA001).
-        GIT_BRANCH          Git branch to pull (eg. develop).
+        GIT_BRANCH      Git branch to pull (eg. develop).
+        RUN             Run number.
+
 
 `update`
 ~~~~~~~~
@@ -99,7 +103,7 @@ H5 Utils
 --------
 
 `h5tree`
-^^^^^^^^
+~~~~~~~~
 
 Shows the content of a HDF5 file::
 

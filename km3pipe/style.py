@@ -8,6 +8,7 @@ The KM3Pipe style definitions.
 from __future__ import division, absolute_import, print_function
 
 import seaborn as sns
+import matplotlib as mpl
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -18,6 +19,14 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
+mpl.rcParams['axes.edgecolor'] = 'black'
+mpl.rcParams['axes.grid'] = True
+mpl.rcParams['grid.linewidth'] = 1.0
+mpl.rcParams['figure.subplot.wspace'] = 0.3
+mpl.rcParams['figure.subplot.hspace'] = 0.3
+mpl.rcParams['xtick.labelsize'] = 'small'
+mpl.rcParams['ytick.labelsize'] = 'small'
+
 style_definition = {'grid.color': '.85',
                     'grid.linestyle': u'--',
                     'text.color': '.15',
@@ -25,6 +34,7 @@ style_definition = {'grid.color': '.85',
                     'xtick.direction': u'in',
                     'xtick.major.size': 5.0,
                     'xtick.minor.size': 2.0,
+                    'patch.edgecolor': 'none',
                     'ytick.color': '.15',
                     'ytick.direction': u'in',
                     'ytick.major.size': 5.0,

@@ -34,7 +34,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
-log.setLevel(logging.DEBUG)
+# log.setLevel(logging.DEBUG)
 
 STAT_LIMIT = 100000
 
@@ -236,8 +236,10 @@ class Pipeline(object):
         if self._cycle_count > n_cycles:
             print("Statistics are based on the last {0} cycles."
                   .format(n_cycles))
-        print(statsf('wall', calc_stats(cycles)))
-        print(statsf('CPU ', calc_stats(cycles_cpu)))
+        if cycles:
+            print(statsf('wall', calc_stats(cycles)))
+        if cycles_cpu:
+            print(statsf('CPU ', calc_stats(cycles_cpu)))
 
         for module in self.modules:
             if not module.timeit and not self.timeit:

@@ -16,7 +16,7 @@ import sys
 import os
 from datetime import date
 
-import sphinx_rtd_theme
+from better import better_theme_path
 
 sys.path.append('../')
 
@@ -38,25 +38,12 @@ sys.path.insert(0, os.path.abspath('.'))
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
-    # 'sphinxcontrib.napoleon',
     'sphinx.ext.doctest',
     'sphinx.ext.imgmath',
     'sphinx.ext.viewcode',
     'numpydoc',
     'sphinx_gallery.gen_gallery',
 ]
-
-# Napoleon settings
-# napoleon_google_docstring = True
-# napoleon_numpy_docstring = True
-# napoleon_include_private_with_doc = False
-# napoleon_include_special_with_doc = True
-# napoleon_use_admonition_for_examples = False
-# napoleon_use_admonition_for_notes = False
-# napoleon_use_admonition_for_references = False
-# napoleon_use_ivar = False
-# napoleon_use_param = True
-# napoleon_use_rtype = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -95,7 +82,7 @@ release = km3pipe.__version__
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build']
+exclude_patterns = ['_build', '_templates']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -126,22 +113,28 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'better'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-# html_theme_options = {}
+html_theme_options = {
+    'cssfiles': ['_static/paper.css'],
+    'textcolor': '#444',
+    'showheader': True,
+    'showrelbartop': False,
+    'showrelbarbottom': False,
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_theme_path = [better_theme_path]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-# html_title = None
+html_title = "KM3Pipe {}".format(km3pipe.__version__)
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
-# html_short_title = None
+html_short_title = 'Home'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
@@ -171,7 +164,10 @@ html_static_path = ['_static']
 # html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-# html_sidebars = {}
+html_sidebars = {
+    '**': ['globaltoc.html', 'searchbox.html'],
+}
+
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
@@ -288,16 +284,12 @@ texinfo_documents = [
 
 # -- Options for Example Gallery ------------------------------------------
 sphinx_gallery_conf = {
-    'examples_dirs': '../examples/auto',
-    'gallery_dirs': 'auto_examples',
+    # path to store the module using example template
+    'mod_example_dir': 'modules/generated',
+    'examples_dirs': ['../examples'],
+    'gallery_dirs': ['auto_examples'],
     'reference_url':  {
-        # The module you locally document uses a None
-        'sphinx_gallery': None,
-
-        # External python modules use their documentation websites
-        'pandas': 'http://pandas.pydata.org',
-        'numpy': 'http://docs.scipy.org/doc/',
-        'matplotlib': 'http://matplotlib.org',
+        'km3pipe': None,
     }
 }
 

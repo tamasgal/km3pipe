@@ -326,11 +326,9 @@ class DBManager(object):
 
     def login(self, username, password):
         "Login to the databse and store cookies for upcoming requests."
-        cj = CookieJar()
-        opener = build_opener(HTTPCookieProcessor(cj), HTTPHandler())
+        opener = self._build_opener()
         values = {'usr': username, 'pwd': password}
-        data = urlencode(values)
-        req = Request(self._login_url, data.encode('utf-8'))
+        req = self._make_request(self._login_url, values)
         try:
             f = opener.open(req)
         except URLError as e:
@@ -342,8 +340,17 @@ class DBManager(object):
         if failed_auth_message in str(html):
             log.error(failed_auth_message)
             return False
-        self._cookies = cj
         return True
+
+    def _build_opener(self):
+        cj = CookieJar()
+        self._cookies = cj
+        opener = build_opener(HTTPCookieProcessor(cj), HTTPHandler())
+        return opener
+
+    def _make_request(self, url, values):
+        data = urlencode(values)
+        return Request(url, data.encode('utf-8'))
 
 
 class ParametersContainer(object):

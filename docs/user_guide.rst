@@ -3,6 +3,7 @@ User Guide
 
 .. toctree:: 
 
-    data_structures
-    file_formats
     pipeline
+    cmd
+    file_formats
+    data_structures

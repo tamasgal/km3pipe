@@ -6,9 +6,9 @@ Requirements
 
 To install km3pipe, you need:
 
-- Python installation ``>= 2.7`` or ``>= 3.4``.
+- Python >= 2.7 or >= 3.4
 
-- ``pip`` (get it via ``easy_install pip``), to install additional dependencies (numpy, cython, etc.)
+- pip (via ``easy_install pip``)
 
 - C compiler, e.g. ``gcc``.
 
@@ -67,8 +67,8 @@ Here is an example configuration::
     token=xoxp-2355837568-2397897846-8945924372-395f023485
 
 
-Install HowTo
--------------
+Video HowTo
+-----------
 
 The following video shows how to install the latest developer version and run the test suite.
 

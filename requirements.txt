@@ -6,6 +6,12 @@ ipython
 pandas
 cython
 websocket-client
-sphinx_rtd_theme
+tables
+tornado
+sphinx>=1.4
+sphinx-better-theme
 sphinx-gallery
 numpydoc
+pillow
+matplotlib
+seaborn

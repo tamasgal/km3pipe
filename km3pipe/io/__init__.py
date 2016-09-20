@@ -22,6 +22,7 @@ from km3pipe.io.jpp import JPPPump  # noqa
 from km3pipe.io.ch import CHPump  # noqa
 from km3pipe.io.hdf5 import HDF5Pump  # noqa
 from km3pipe.io.hdf5 import HDF5Sink  # noqa
+from km3pipe.io.hdf5 import H5Chain  # noqa
 from km3pipe.io.pickle import PicklePump  # noqa
 from km3pipe.tools import insert_prefix_to_dtype
 
@@ -39,24 +40,22 @@ __status__ = "Development"
 log = logging.getLogger(__name__)
 
 
-def GenericPump(filename, use_jppy=False, name="GenericPump"):
+def GenericPump(filename, use_jppy=False, name="GenericPump", **kwargs):
     """A generic pump which utilises the appropriate pump."""
     extension = os.path.splitext(filename)[1]
 
     io = {
-            '.evt': EvtPump,
-            '.h5': HDF5Pump,
-            '.aa.root': AanetPump,
-            '.merged_aanet.root': AanetPump,
-            '.root': JPPPump if use_jppy else AanetPump,
-            '.dat': DAQPump,
-            '.dqd': CLBPump,
-            }
+        '.evt': EvtPump,
+        '.h5': HDF5Pump,
+        '.root': JPPPump if use_jppy else AanetPump,
+        '.dat': DAQPump,
+        '.dqd': CLBPump,
+    }
 
     if extension not in io:
         log.critical("No pump found for '{0}'".format(extension))
 
-    return io[extension](filename=filename, name=name)
+    return io[extension](filename=filename, name=name, **kwargs)
 
 
 def df_to_h5(df, filename, tabname, filemode='a', where='/', complevel=5,):
@@ -188,7 +187,6 @@ def _read_group(h5file, where):
     return tabs
 
 
-
 def read_table(filename, where):
     with tb.open_file(filename, 'r') as h5:
         tab = h5.get_node(where)[:]
@@ -201,4 +199,5 @@ def write_table(filename, where, array):
     filt = tb.Filters(complevel=5, shuffle=True, fletcher32=True)
     loc, tabname = os.path.split(where)
     with tb.open_file(filename, 'a') as h5:
-        h5.create_table(loc, tabname, obj=array, createparents=True, filters=filt)
+        h5.create_table(loc, tabname, obj=array, createparents=True,
+                        filters=filt)

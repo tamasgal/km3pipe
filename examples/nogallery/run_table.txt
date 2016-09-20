@@ -1,0 +1,35 @@
+#!/usr/bin/env python2.7
+# coding=utf-8
+# Filename: run_table.py
+"""
+Run table dumper.
+
+Usage:
+  run_table.py -d DET_ID
+  run_table.py -h | --help
+  run_table.py --version
+
+Options:
+  -d		Detector ID (e.g. D_ARCA001).
+  -h --help     Show this screen.
+  --version     Show version.
+
+"""
+import sys
+from docopt import docopt
+
+from km3pipe.db import DBManager
+
+__author__ = 'Tamas Gal'
+__email__ = "tgal@km3net.de"
+
+
+def dump_run_table(det_id):
+    db = DBManager()
+    df = db.run_table(det_id)
+    df.to_csv(sys.stdout, sep='\t')
+
+
+if __name__ == '__main__':
+    arguments = docopt(__doc__, version='0.0.1')
+    dump_run_table(arguments['-d'])

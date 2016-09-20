@@ -10,8 +10,9 @@ from __future__ import division, absolute_import, print_function
 
 import numpy as np
 
-from km3pipe import Pump
-from km3pipe.dataclasses import EventInfo, HitSeries
+from km3pipe import Pump, Blob
+from km3pipe.dataclasses import (EventInfo, TimesliceInfo,
+                                 HitSeries, L0HitSeries)
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -37,42 +38,87 @@ class JPPPump(Pump):
             raise ImportError("\nPlease install the jppy package:\n\n"
                               "    pip install jppy\n")
 
-        self.index = self.get('index') or 0
+        self.event_index = self.get('index') or 0
+        self.timeslice_index = 0
+        self.timeslice_frame_index = 0
         # self.filename = self.get('filename')
         self.filename = filename
 
-        self.reader = jppy.PyJDAQEventReader(self.filename)
+        self.event_reader = jppy.PyJDAQEventReader(self.filename)
+        self.timeslice_reader = jppy.PyJDAQTimesliceReader(self.filename)
         self.blobs = self.blob_generator()
 
     def blob_generator(self):
-        while self.reader.has_next:
-            r = self.reader
-            r.retrieve_next_event()
+        while self.event_reader.has_next:
+            yield self.extract_event()
+        while self.timeslice_reader.has_next:
+            self.timeslice_frame_index = 0
+            self.timeslice_reader.retrieve_next_timeslice()
+            while self.timeslice_reader.has_next_superframe:
+                yield self.extract_frame()
+                self.timeslice_reader.retrieve_next_superframe()
+                self.timeslice_frame_index += 1
+            self.timeslice_index += 1
+        raise StopIteration
 
-            n = r.number_of_snapshot_hits
-            channel_ids = np.zeros(n, dtype='i')
-            dom_ids = np.zeros(n, dtype='i')
-            times = np.zeros(n, dtype='i')
-            tots = np.zeros(n, dtype='i')
-            triggereds = np.zeros(n, dtype='i')
+    def extract_event(self):
+        blob = Blob()
+        r = self.event_reader
+        r.retrieve_next_event()  # do it at the beginning!
 
-            r.get_hits(channel_ids, dom_ids, times, tots, triggereds)
+        n = r.number_of_snapshot_hits
+        channel_ids = np.zeros(n, dtype='i')
+        dom_ids = np.zeros(n, dtype='i')
+        times = np.zeros(n, dtype='i')
+        tots = np.zeros(n, dtype='i')
+        triggereds = np.zeros(n, dtype='i')
 
-            hit_series = HitSeries.from_arrays(
-                channel_ids, dom_ids, np.arange(n), np.zeros(n), times, tots,
-                triggereds, self.index
+        r.get_hits(channel_ids, dom_ids, times, tots, triggereds)
+
+        hit_series = HitSeries.from_arrays(
+            channel_ids, dom_ids, np.arange(n), np.zeros(n), times,
+            tots, triggereds, self.event_index
+        )
+
+        event_info = EventInfo(
+            r.det_id, r.frame_index,
+            0, 0,  # MC ID and time
+            r.overlays,
+            # r.run_id,
+            r.trigger_counter, r.trigger_mask,
+            r.utc_nanoseconds, r.utc_seconds,
+            np.nan, np.nan, np.nan,   # w1-w3
+            self.event_index,
             )
 
-            event_info = EventInfo(r.det_id, self.index, r.frame_index,
-                                   0, 0,  # MC ID and time
-                                   r.overlays, r.run_id,
-                                   r.trigger_counter, r.trigger_mask,
-                                   r.utc_nanoseconds, r.utc_seconds,
-                                   np.nan, np.nan, np.nan   # w1-w3
-                                   )
+        self.event_index += 1
+        blob['EventInfo'] = event_info
+        blob['Hits'] = hit_series
+        return blob
 
-            self.index += 1
-            yield {'EventInfo': event_info, 'Hits': hit_series}
+    def extract_frame(self):
+        blob = Blob()
+        r = self.timeslice_reader
+        n = r.number_of_hits
+        channel_ids = np.zeros(n, dtype='i')
+        dom_ids = np.zeros(n, dtype='i')
+        times = np.zeros(n, dtype='i')
+        tots = np.zeros(n, dtype='i')
+        triggereds = np.zeros(n, dtype='i')
+        r.get_hits(channel_ids, dom_ids, times, tots)
+        hit_series = L0HitSeries.from_arrays(
+            channel_ids, dom_ids, times, tots, self.timeslice_index
+        )
+        timeslice_info = TimesliceInfo(
+                dom_ids[0],
+                self.timeslice_frame_index,
+                n,
+                self.timeslice_index,
+                )
+
+        blob['L0Hits'] = hit_series
+        blob['TimesliceInfo'] = timeslice_info
+        return blob
 
     def process(self, blob):
         return next(self.blobs)

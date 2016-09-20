@@ -4,7 +4,7 @@
 from __future__ import division, absolute_import, print_function
 
 from km3pipe.testing import TestCase, StringIO, MagicMock
-from km3pipe.core import Pipeline, Module, Pump, Blob
+from km3pipe.core import Pipeline, Module, Pump, Blob, Geometry
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -27,6 +27,11 @@ class TestPipeline(TestCase):
         print([m.name for m in self.pl.modules])
         self.assertEqual('module1', self.pl.modules[0].name)
         self.assertEqual('module2', self.pl.modules[1].name)
+
+    def test_attach_bundle(self):
+        modules = [Module, Module]
+        self.pl.attach_bundle(modules)
+        self.assertEqual(2, len(self.pl.modules))
 
     def test_attach_function(self):
         self.pl.attach(lambda x: 1)
@@ -77,6 +82,21 @@ class TestPipeline(TestCase):
         pl.drain(n)
         for module in pl.modules:
             self.assertEqual(n, module.process.call_count)
+
+    def test_drain_doesnt_call_process_if_blob_is_none(self):
+        pl = Pipeline(blob=1)
+
+        pl.attach(Module, 'module1')
+        pl.attach(Module, 'module2')
+        pl.attach(Module, 'module3')
+        pl.modules[0].process = MagicMock(return_value=None)
+        pl.modules[1].process = MagicMock(return_value={})
+        pl.modules[2].process = MagicMock(return_value={})
+        n = 3
+        pl.drain(n)
+        self.assertEqual(n, pl.modules[0].process.call_count)
+        self.assertEqual(0, pl.modules[1].process.call_count)
+        self.assertEqual(0, pl.modules[2].process.call_count)
 
     def test_conditional_module_not_called_if_key_not_in_blob(self):
         pl = Pipeline(blob=1)
@@ -144,6 +164,14 @@ class TestPipeline(TestCase):
             if module.name != 'func_module':
                 self.assertEqual(1, module.finish.call_count)
 
+    def test_ctrl_c_handling(self):
+        pl = Pipeline()
+        self.assertFalse(pl._stop)
+        pl._handle_ctrl_c()  # first KeyboardInterrupt
+        self.assertTrue(pl._stop)
+        with self.assertRaises(SystemExit):
+            pl._handle_ctrl_c()  # second KeyboardInterrupt
+
 
 class TestModule(TestCase):
     """Tests for the pipeline module"""
@@ -209,3 +237,11 @@ class TestBlob(TestCase):
         blob = Blob()
         blob['foo'] = 1
         self.assertEqual(1, blob['foo'])
+
+
+class TestGeometry(TestCase):
+    """Tests for the Geometry class"""
+
+    def test_init_requires_filename_or_detector_id(self):
+        with self.assertRaises(ValueError):
+            geo = Geometry()

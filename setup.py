@@ -6,7 +6,6 @@ KM3Pipe setup script.
 
 """
 from setuptools import setup, Extension
-from Cython.Compiler.Options import directive_defaults
 import sys
 
 if sys.version_info[0] >= 3:
@@ -15,6 +14,7 @@ else:
     import __builtin__ as builtins
 try:
     from Cython.Distutils import build_ext
+    from Cython.Compiler.Options import directive_defaults
     import numpy
 except ImportError:
     raise SystemExit("\nCython and Numpy are required to compile KM3Pipe.\n"
@@ -28,7 +28,9 @@ builtins.__KM3PIPE_SETUP__ = True
 
 # Needed for line_profiler - disable for production code
 directive_defaults['linetrace'] = True
+directive_defaults['profile'] = True
 directive_defaults['binding'] = True
+CYTHON_TRACE = str(int(directive_defaults['linetrace']))
 
 from km3pipe import version  # noqa
 
@@ -36,18 +38,18 @@ from km3pipe import version  # noqa
 tools = Extension('km3pipe.tools', sources=['km3pipe/tools.pyx'],
                   extra_compile_args=['-O3', '-march=native', '-w'],
                   include_dirs=[numpy.get_include()],
-                  define_macros=[('CYTHON_TRACE', '1')])
+                  define_macros=[('CYTHON_TRACE', CYTHON_TRACE)])
 
 core = Extension('km3pipe.core', sources=['km3pipe/core.pyx'],
                  extra_compile_args=['-O3', '-march=native', '-w'],
                  include_dirs=[numpy.get_include()],
-                 define_macros=[('CYTHON_TRACE', '1')])
+                 define_macros=[('CYTHON_TRACE', CYTHON_TRACE)])
 
 dataclasses = Extension('km3pipe.dataclasses',
                         sources=['km3pipe/dataclasses.pyx'],
                         extra_compile_args=['-O3', '-march=native', '-w'],
                         include_dirs=[numpy.get_include()],
-                        define_macros=[('CYTHON_TRACE', '1')])
+                        define_macros=[('CYTHON_TRACE', CYTHON_TRACE)])
 
 setup(name='km3pipe',
       version=version,
@@ -79,7 +81,7 @@ setup(name='km3pipe',
       ],
       extra_require={
           'scikit-learn': ['sklearn'],
-          'documentation': ['sphinx-gallery', 'numpydoc'],
+          'docs': ['sphinx >= 1.4', 'sphinx-gallery', 'numpydoc'],
           'jppy': ['jppy'],
       },
       entry_points={
