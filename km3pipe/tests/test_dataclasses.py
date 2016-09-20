@@ -15,7 +15,7 @@ from km3pipe.testing import TestCase, FakeAanetHit
 from km3pipe.io.evt import EvtRawHit
 from km3pipe.dataclasses import (Hit, Track, Position, Direction_, HitSeries,
                                  EventInfo, SummarysliceInfo, Serialisable,
-                                 Reco, TrackSeries)
+                                 Reco, TrackSeries, SummaryframeSeries)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -379,6 +379,27 @@ class TestTrackSeries(TestCase):
         exp = np.array(exp, dtype=ts.dtype)
         self.assertEqual(1, len(ts))
         # self.assertAlmostEqual(exp, ts.serialise())
+
+
+class TestSummaryframeSeries(TestCase):
+
+    def test_from_arrays(self):
+        n = 10
+        dom_ids = np.arange(n)
+        max_sequence_numbers = np.arange(n)
+        n_received_packets = np.arange(n)
+        frames = SummaryframeSeries.from_arrays(
+            dom_ids,
+            max_sequence_numbers,
+            n_received_packets,
+            23,      # slice_id
+        )
+
+        self.assertAlmostEqual(1, frames[1][0])  # dom_id
+        self.assertAlmostEqual(9, frames[9][2])  # n_received_packets
+        self.assertTupleEqual(tuple(range(n)),
+                              tuple(frames.n_received_packets))
+        self.assertEqual(10, len(frames))
 
 
 class TestSummarysliceInfo(TestCase):

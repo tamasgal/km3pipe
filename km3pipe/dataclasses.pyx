@@ -909,15 +909,15 @@ class SummaryframeSeries(object):
         self._frames = None
 
     @classmethod
-    def from_arrays(cls, dom_ids, max_sequence_numbers, n_recieved_packets,
+    def from_arrays(cls, dom_ids, max_sequence_numbers, n_received_packets,
                     slice_id):
         length = dom_ids.shape[0]
-        hits = np.empty(length, cls.dtype)
-        hits['dom_id'] = dom_ids
-        hits['max_sequence_number'] = max_sequence_numbers
-        hits['n_recieved_packets'] = n_recieved_packets
-        hits['slice_id'] = np.full(length, slice_id, dtype='<u4')
-        return cls(hits)
+        frames = np.empty(length, cls.dtype)
+        frames['dom_id'] = dom_ids
+        frames['max_sequence_number'] = max_sequence_numbers
+        frames['n_received_packets'] = n_received_packets
+        frames['slice_id'] = np.full(length, slice_id, dtype='<u4')
+        return cls(frames)
 
     def from_table(cls, table, slice_id=None):
         if slice_id is None:
@@ -937,6 +937,18 @@ class SummaryframeSeries(object):
     def serialise(self, to='numpy'):
         if to == 'numpy':
             return np.array(self.__array__(), dtype=self.dtype)
+
+    @property
+    def n_received_packets(self):
+        return self._arr['n_received_packets']
+
+    @property
+    def dom_ids(self):
+        return self._arr['dom_ids']
+
+    @property
+    def max_sequence_numbers(self):
+        return self._arr['max_sequence_numbers']
 
     def __array__(self):
         return self._arr
