@@ -126,7 +126,8 @@ class TimesliceInfo(with_metaclass(Serialisable)):
     """JDAQTimeslice metadata.
     """
     dtype = [
-        ('dom_id', '<u4'), ('frame_id', '<u4'), ('slice_id', '<u4'),
+        ('dom_id', '<u4'), ('frame_id', '<u4'), ('n_hits', '<u4'),
+        ('slice_id', '<u4'),
         ]
 
     @classmethod
@@ -150,15 +151,16 @@ class TimesliceInfo(with_metaclass(Serialisable)):
 
     def __array__(self):
         return [(
-            self.frame_id, self.slice_id,
+            self.dom_id, self.frame_id, self.n_hits, self.slice_id,
         ),]
 
     def __str__(self):
         return "Summaryslice frame #{0}:\n" \
                "    slice id: {1}\n" \
                "    frame id: {2}\n" \
-               "    DOM id: {3}\n" \
-               .format(self.slice_id, self.frame_id, self.dom_id)
+               "    DOM id:   {3}\n" \
+               "    n_hits:   {4}\n" \
+               .format(self.slice_id, self.frame_id, self.dom_id, self.n_hits)
 
     def __insp__(self):
         return self.__str__()
