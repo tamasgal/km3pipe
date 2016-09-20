@@ -107,8 +107,16 @@ class HDF5Sink(Module):
         return blob
 
     def finish(self):
-        for tab in self._tables.values():
-            tab.cols.event_id.create_index()
+        for tab in self._tables.itervalues():
+            if 'frame_id' in tab.colnames:
+                print("Creating index for '{0}' using 'frame_id'..."
+                      .format(tab.name))
+                tab.cols.frame_id.create_index()
+            elif 'event_id' in tab.colnames:
+                print("Creating index for '{0}' using 'event_id'..."
+                      .format(tab.name))
+                tab.cols.event_id.create_index()
+
             tab.flush()
         self.h5file.root._v_attrs.km3pipe = str(kp.__version__)
         self.h5file.root._v_attrs.pytables = str(tb.__version__)
