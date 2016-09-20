@@ -272,12 +272,12 @@ class H5Chain(object):
             h5 = tb.open_file(fn, 'r')
             self.h5files[fn] = h5
 
-    def _finish(self):
+    def close(self):
         for h5 in self.h5files.values():
             h5.close()
 
-    def __exit__(self):
-        self._finish()
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
 
     def __enter__(self):
         return self
