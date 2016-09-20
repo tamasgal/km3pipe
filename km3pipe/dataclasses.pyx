@@ -1011,6 +1011,7 @@ class ArrayTaco(object):
 deserialise_map = {
     'MCHits': HitSeries,
     'Hits': HitSeries,
+    'L0Hits': HitSeries,
     'MCTracks': TrackSeries,
     'EventInfo': EventInfo,
     'SummarysliceInfo': SummarysliceInfo,

@@ -37,7 +37,7 @@ class JPPPump(Pump):
             raise ImportError("\nPlease install the jppy package:\n\n"
                               "    pip install jppy\n")
 
-        self.index = self.get('index') or 0
+        self.event_index = self.get('index') or 0
         # self.filename = self.get('filename')
         self.filename = filename
 
@@ -46,9 +46,9 @@ class JPPPump(Pump):
         self.blobs = self.blob_generator()
 
     def blob_generator(self):
-        blob = Blob()
-        if self.event_reader.has_next:
-            while self.event_reader.has_next:
+        while self.event_reader.has_next or self.timeslice_reader.has_next:
+            blob = Blob()
+            if self.event_reader.has_next:
                 r = self.event_reader
                 r.retrieve_next_event()
 
@@ -63,10 +63,11 @@ class JPPPump(Pump):
 
                 hit_series = HitSeries.from_arrays(
                     channel_ids, dom_ids, np.arange(n), np.zeros(n), times,
-                    tots, triggereds, self.index
+                    tots, triggereds, self.event_index
                 )
 
-                event_info = EventInfo(r.det_id, self.index, r.frame_index,
+                event_info = EventInfo(r.det_id, self.event_index,
+                                       r.frame_index,
                                        0, 0,  # MC ID and time
                                        r.overlays, r.run_id,
                                        r.trigger_counter, r.trigger_mask,
@@ -74,10 +75,32 @@ class JPPPump(Pump):
                                        np.nan, np.nan, np.nan   # w1-w3
                                        )
 
-                self.index += 1
+                self.event_index += 1
                 blob['EventInfo'] = event_info
                 blob['Hits'] = hit_series
-        yield blob
+
+            if self.timeslice_reader.has_next:
+                r = self.timeslice_reader
+                r.retrieve_next_timeslice()
+                n = r.number_of_hits
+                channel_ids = np.zeros(n, dtype='i')
+                dom_ids = np.zeros(n, dtype='i')
+                times = np.zeros(n, dtype='i')
+                tots = np.zeros(n, dtype='i')
+                triggereds = np.zeros(n, dtype='i')
+                r.get_hits(channel_ids, dom_ids, times, tots)
+                hit_series = HitSeries.from_arrays(
+                    channel_ids, dom_ids, np.arange(n), np.zeros(n), times,
+                    tots, triggereds, 0
+                )
+
+                blob['L0Hits'] = hit_series
+
+            if blob:
+                yield blob
+            else:
+                raise StopIteration
+
 
     def process(self, blob):
         return next(self.blobs)
