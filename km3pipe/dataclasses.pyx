@@ -919,6 +919,7 @@ deserialise_map = {
     'Hits': HitSeries,
     'MCTracks': TrackSeries,
     'EventInfo': EventInfo,
+    'SummarysliceInfo': SummarysliceInfo,
     'Tracks': TrackSeries,
 }
 
