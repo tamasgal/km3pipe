@@ -38,6 +38,7 @@ class JPPPump(Pump):
                               "    pip install jppy\n")
 
         self.event_index = self.get('index') or 0
+        self.timeslice_index = 0
         # self.filename = self.get('filename')
         self.filename = filename
 
@@ -93,9 +94,10 @@ class JPPPump(Pump):
                 r.get_hits(channel_ids, dom_ids, times, tots)
                 hit_series = HitSeries.from_arrays(
                     channel_ids, dom_ids, np.arange(n), np.zeros(n), times,
-                    tots, triggereds, 0
+                    tots, triggereds, self.timeslice_index
                 )
 
+                self.timeslice_index += 1
                 blob['L0Hits'] = hit_series
 
             if blob:
