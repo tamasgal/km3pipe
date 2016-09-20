@@ -74,6 +74,54 @@ class Serialisable(type):
         return type(class_name, class_parents, attr)
 
 
+class SummarysliceInfo(with_metaclass(Serialisable)):
+    """JDAQSummaryslice Metadata.
+    """
+    dtype = [
+        ('det_id', '<i4'), ('frame_index', '<u4'), ('run_id', '<i4'),
+        ('slice_id', '<u4'),
+        ]
+
+    @classmethod
+    def from_table(cls, row):
+        args = []
+        for col in cls.dtype.names:
+            try:
+                args.append(row[col])
+            except KeyError:
+                args.append(np.nan)
+        return cls(*args)
+
+    @classmethod
+    def deserialise(cls, data, event_id=None, fmt='numpy', h5loc='/'):
+        if fmt == 'numpy':
+            return cls.from_table(data[0])
+
+    def serialise(self, to='numpy'):
+        if to == 'numpy':
+            return np.array(self.__array__(), dtype=self.dtype)
+
+    def __array__(self):
+        return [(
+            self.det_id, self.frame_index, self.run_id, self.slice_id,
+        ),]
+
+    def __str__(self):
+        return "Summaryslice #{0}:\n" \
+               "    detector id:     {1}\n" \
+               "    frame index:     {2}\n" \
+               "    run id:          {3}\n" \
+               .format(self.slice_id,
+                       self.det_id, self.frame_index, self.run_id,
+                       )
+
+    def __insp__(self):
+        return self.__str__()
+
+    def __len__(self):
+        return 1
+
+
 class EventInfo(with_metaclass(Serialisable)):
     """Event Metadata.
     """
