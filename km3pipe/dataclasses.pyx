@@ -74,6 +74,54 @@ class Serialisable(type):
         return type(class_name, class_parents, attr)
 
 
+class SummarysliceInfo(with_metaclass(Serialisable)):
+    """JDAQSummaryslice Metadata.
+    """
+    dtype = [
+        ('det_id', '<i4'), ('frame_index', '<u4'), ('run_id', '<i4'),
+        ('slice_id', '<u4'),
+        ]
+
+    @classmethod
+    def from_table(cls, row):
+        args = []
+        for col in cls.dtype.names:
+            try:
+                args.append(row[col])
+            except KeyError:
+                args.append(np.nan)
+        return cls(*args)
+
+    @classmethod
+    def deserialise(cls, data, event_id=None, fmt='numpy', h5loc='/'):
+        if fmt == 'numpy':
+            return cls.from_table(data[0])
+
+    def serialise(self, to='numpy'):
+        if to == 'numpy':
+            return np.array(self.__array__(), dtype=self.dtype)
+
+    def __array__(self):
+        return [(
+            self.det_id, self.frame_index, self.run_id, self.slice_id,
+        ),]
+
+    def __str__(self):
+        return "Summaryslice #{0}:\n" \
+               "    detector id:     {1}\n" \
+               "    frame index:     {2}\n" \
+               "    run id:          {3}\n" \
+               .format(self.slice_id,
+                       self.det_id, self.frame_index, self.run_id,
+                       )
+
+    def __insp__(self):
+        return self.__str__()
+
+    def __len__(self):
+        return 1
+
+
 class EventInfo(with_metaclass(Serialisable)):
     """Event Metadata.
     """
@@ -845,6 +893,100 @@ class Reco(dict):
         return [tuple((self[key] for key in self.dtype.names))]
 
 
+class SummaryframeSeries(object):
+    """Collection of summary frames.
+    """
+    dtype = np.dtype([
+        ('dom_id', '<u4'),
+        ('max_sequence_number', '<u4'),
+        ('n_received_packets', '<u4'),
+        ('slice_id', '<u4'),
+        ])
+
+    def __init__(self, arr):
+        self._arr = arr
+        self._index = 0
+        self._frames = None
+
+    @classmethod
+    def from_arrays(cls, dom_ids, max_sequence_numbers, n_received_packets,
+                    slice_id):
+        length = dom_ids.shape[0]
+        frames = np.empty(length, cls.dtype)
+        frames['dom_id'] = dom_ids
+        frames['max_sequence_number'] = max_sequence_numbers
+        frames['n_received_packets'] = n_received_packets
+        frames['slice_id'] = np.full(length, slice_id, dtype='<u4')
+        return cls(frames)
+
+    def from_table(cls, table, slice_id=None):
+        if slice_id is None:
+            slice_id = table[0]['slice_id']
+        return cls(np.array([(
+            row['dom_id'],
+            row['max_sequence_number'],
+            row['n_received_packets'],
+        ) for row in table], dtype=cls.dtype), slice_id)
+
+    @classmethod
+    def deserialise(cls, data, slice_id=None, fmt='numpy', h5loc='/'):
+        if fmt == 'numpy':
+            #return cls.from_table(data, event_id)
+            return cls(data)
+
+    def serialise(self, to='numpy'):
+        if to == 'numpy':
+            return np.array(self.__array__(), dtype=self.dtype)
+
+    @property
+    def n_received_packets(self):
+        return self._arr['n_received_packets']
+
+    @property
+    def dom_ids(self):
+        return self._arr['dom_ids']
+
+    @property
+    def max_sequence_numbers(self):
+        return self._arr['max_sequence_numbers']
+
+    def __array__(self):
+        return self._arr
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        if self._index >= len(self):
+            self._index = 0
+            raise StopIteration
+        data = self._arr[self._index]
+        self._index += 1
+        return data
+
+    def __len__(self):
+        return self._arr.shape[0]
+
+    def __getitem__(self, index):
+        if isinstance(index, int):
+            return self._arr[index]
+        elif isinstance(index, slice):
+            return self._slice_generator(index)
+        else:
+            raise TypeError("index must be int or slice")
+
+    def _slice_generator(self, index):
+        """A simple slice generator for iterations"""
+        start, stop, step = index.indices(len(self))
+        for i in range(start, stop, step):
+            yield self._arr[i]
+
+
+
 class ArrayTaco(object):
     def __init__(self, arr, h5loc='/'):
         self.array = arr
@@ -871,6 +1013,7 @@ deserialise_map = {
     'Hits': HitSeries,
     'MCTracks': TrackSeries,
     'EventInfo': EventInfo,
+    'SummarysliceInfo': SummarysliceInfo,
     'Tracks': TrackSeries,
 }
 
