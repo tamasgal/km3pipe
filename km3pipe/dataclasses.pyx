@@ -93,7 +93,7 @@ class SummarysliceInfo(with_metaclass(Serialisable)):
         return cls(*args)
 
     @classmethod
-    def deserialise(cls, data, event_id=None, fmt='numpy', h5loc='/'):
+    def deserialise(cls, data, event_id, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
             return cls.from_table(data[0])
 
@@ -146,7 +146,7 @@ class EventInfo(with_metaclass(Serialisable)):
         return cls(*args)
 
     @classmethod
-    def deserialise(cls, data, event_id=None, fmt='numpy', h5loc='/'):
+    def deserialise(cls, data, event_id, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
             return cls.from_table(data[0])
 
@@ -495,7 +495,7 @@ class HitSeries(object):
         return cls(hits)
 
     @classmethod
-    def from_dict(cls, map, event_id=None):
+    def from_dict(cls, map, event_id):
         if event_id is None:
             event_id = map['event_id']
         return cls.from_arrays(
@@ -509,7 +509,7 @@ class HitSeries(object):
             event_id,
         )
 
-    def from_table(cls, table, event_id=None):
+    def from_table(cls, table, event_id):
         if event_id is None:
             event_id = table[0]['event_id']
         return cls(np.array([(
@@ -523,7 +523,7 @@ class HitSeries(object):
         ) for row in table], dtype=cls.dtype), event_id)
 
     @classmethod
-    def deserialise(cls, data, event_id=None, fmt='numpy', h5loc='/'):
+    def deserialise(cls, data, event_id, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
             #return cls.from_table(data, event_id)
             return cls(data)
@@ -636,7 +636,7 @@ class TrackSeries(object):
         ('time', '<i4'), ('type', '<i4'),
         ('event_id', '<u4'),
         ])
-    def __init__(self, tracks, event_id=None):
+    def __init__(self, tracks, event_id):
         self._bjorkeny = None
         self._dir = None
         self._energy = None
@@ -653,7 +653,7 @@ class TrackSeries(object):
         self.event_id = event_id
 
     @classmethod
-    def from_aanet(cls, tracks, event_id=None):
+    def from_aanet(cls, tracks, event_id):
         return cls([Track(cls.get_usr_item(t, 1),               # bjorkeny
                           Direction((t.dir.x, t.dir.y, t.dir.z)),
                           t.E,
@@ -691,7 +691,7 @@ class TrackSeries(object):
                     positions_z,
                     times,
                     types,
-                    event_id=None,
+                    event_id,
                     ):
         directions = np.column_stack((directions_x, directions_y,
                                       directions_z))
@@ -714,7 +714,7 @@ class TrackSeries(object):
         return tracks
 
     @classmethod
-    def from_table(cls, table, event_id=None):
+    def from_table(cls, table, event_id):
         return cls([Track(
             row['bjorkeny'],
             np.array((row['dir_x'], row['dir_y'], row['dir_z'],)),
@@ -729,7 +729,7 @@ class TrackSeries(object):
         ) for row in table], event_id)
 
     @classmethod
-    def deserialise(cls, data, event_id=None, fmt='numpy', h5loc='/'):
+    def deserialise(cls, data, event_id, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
             return cls.from_table(data, event_id)
 
@@ -919,7 +919,7 @@ class SummaryframeSeries(object):
         frames['slice_id'] = np.full(length, slice_id, dtype='<u4')
         return cls(frames)
 
-    def from_table(cls, table, slice_id=None):
+    def from_table(cls, table, slice_id):
         if slice_id is None:
             slice_id = table[0]['slice_id']
         return cls(np.array([(
@@ -929,7 +929,7 @@ class SummaryframeSeries(object):
         ) for row in table], dtype=cls.dtype), slice_id)
 
     @classmethod
-    def deserialise(cls, data, slice_id=None, fmt='numpy', h5loc='/'):
+    def deserialise(cls, data, slice_id, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
             #return cls.from_table(data, event_id)
             return cls(data)
@@ -993,7 +993,7 @@ class ArrayTaco(object):
         self.h5loc = h5loc
 
     @classmethod
-    def deserialise(cls, data, h5loc='/', event_id=None, fmt='numpy'):
+    def deserialise(cls, data, event_id, h5loc='/', fmt='numpy'):
         if fmt == 'numpy':
             return cls(data, h5loc)
 
