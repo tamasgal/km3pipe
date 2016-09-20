@@ -66,14 +66,16 @@ class JPPPump(Pump):
                     tots, triggereds, self.event_index
                 )
 
-                event_info = EventInfo(r.det_id, self.event_index,
-                                       r.frame_index,
-                                       0, 0,  # MC ID and time
-                                       r.overlays, r.run_id,
-                                       r.trigger_counter, r.trigger_mask,
-                                       r.utc_nanoseconds, r.utc_seconds,
-                                       np.nan, np.nan, np.nan   # w1-w3
-                                       )
+                event_info = EventInfo(
+                    r.det_id, r.frame_index,
+                    0, 0,  # MC ID and time
+                    r.overlays,
+                    # r.run_id,
+                    r.trigger_counter, r.trigger_mask,
+                    r.utc_nanoseconds, r.utc_seconds,
+                    np.nan, np.nan, np.nan,   # w1-w3
+                    self.event_index,
+                    )
 
                 self.event_index += 1
                 blob['EventInfo'] = event_info
