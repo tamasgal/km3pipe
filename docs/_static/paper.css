@@ -6,11 +6,11 @@ body {
   font-size: 18px;
 
   color: #444;
-  background-color: #F5F5F5;
+  background-color: #fff;
 }
 
 h1, h2, h3 { 
-  line - height : 1.2;
+  line-height : 1.2;
 }
 
 a {

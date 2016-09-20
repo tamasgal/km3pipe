@@ -7,7 +7,7 @@ Usage:
     km3pipe test
     km3pipe update [GIT_BRANCH]
     km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID]
-    km3pipe tohdf5 FILE [-o OUTFILE] [-n EVENTS] [-j]
+    km3pipe tohdf5 FILE [-o OUTFILE] [-n EVENTS] [-j] [--aa-format=<fmt>] [--aa-lib=<lib.so>]
     km3pipe hdf2root FILE [-o OUTFILE] [-n EVENTS]
     km3pipe runtable [-n RUNS] [-s REGEX] DET_ID
     km3pipe runinfo DET_ID RUN
@@ -15,18 +15,22 @@ Usage:
     km3pipe --version
 
 Options:
-    -h --help       Show this screen.
-    -m              Get the MC detector file (flips the sign of the DET_ID).
-    -c CALIBR_ID    Geometrical calibration ID (eg. A01466417)
-    -t T0_SET       Time calibration ID (eg. A01466431)
-    -n EVENTS/RUNS  Number of events/runs.
-    -o OUTFILE      Output file.
-    -j --jppy       Use jppy (not aanet) for Jpp readout
-    -s REGEX        Regular expression to filter the runsetup name/id.
-    DET_ID          Detector ID (eg. D_ARCA001).
-    GIT_BRANCH      Git branch to pull (eg. develop).
-    RUN             Run number.
-
+    -h --help           Show this screen.
+    -m                  Get the MC detector file (flips the sign of DET_ID).
+    -c CALIBR_ID        Geometrical calibration ID (eg. A01466417)
+    -t T0_SET           Time calibration ID (eg. A01466431)
+    -n EVENTS/RUNS      Number of events/runs.
+    -o OUTFILE          Output file.
+    -j --jppy           tohdf5: Use jppy (not aanet) for Jpp readout
+    --aa-format=<fmt>   tohdf5: Which aanet subformat ('minidst',
+                        'jevt_jgandalf', 'generic_track') [default: None]
+    --aa-lib-<lib.so>   tohdf5: path to aanet binary (for old versions which
+                        must be loaded via `ROOT.gSystem.Load()` instead
+                        of `import aa`)
+    -s REGEX            Regular expression to filter the runsetup name/id.
+    DET_ID              Detector ID (eg. D_ARCA001).
+    GIT_BRANCH          Git branch to pull (eg. develop).
+    RUN                 Run number.
 """
 
 from __future__ import division, absolute_import, print_function
@@ -55,13 +59,13 @@ def run_tests():
     pytest.main([os.path.dirname(km3pipe.__file__)])
 
 
-def tohdf5(input_file, output_file, n_events, use_jppy=False):
+def tohdf5(input_file, output_file, n_events, **kwargs):
     """Convert Any file to HDF5 file"""
     from km3pipe import Pipeline  # noqa
     from km3pipe.io import GenericPump, HDF5Sink  # noqa
 
     pipe = Pipeline()
-    pipe.attach(GenericPump, filename=input_file, use_jppy=use_jppy)
+    pipe.attach(GenericPump, filename=input_file, **kwargs)
     pipe.attach(StatusBar, every=1000)
     pipe.attach(HDF5Sink, filename=output_file)
     pipe.drain(n_events)
@@ -170,8 +174,11 @@ def main():
     if args['tohdf5']:
         infile = args['FILE']
         outfile = args['-o'] or infile + '.h5'
-        use_jppy = args['--jppy']
-        tohdf5(infile, outfile, n, use_jppy)
+        use_jppy_pump = args['--jppy']
+        aa_format = args['--aa-format']
+        aa_lib = args['--aa-lib']
+        tohdf5(infile, outfile, n, use_jppy=use_jppy_pump, aa_fmt=aa_format,
+               aa_lib=aa_lib)
 
     if args['hdf2root']:
         infile = args['FILE']
