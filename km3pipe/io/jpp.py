@@ -10,7 +10,7 @@ from __future__ import division, absolute_import, print_function
 
 import numpy as np
 
-from km3pipe import Pump
+from km3pipe import Pump, Blob
 from km3pipe.dataclasses import EventInfo, HitSeries
 from km3pipe.logger import logging
 
@@ -41,38 +41,43 @@ class JPPPump(Pump):
         # self.filename = self.get('filename')
         self.filename = filename
 
-        self.reader = jppy.PyJDAQEventReader(self.filename)
+        self.event_reader = jppy.PyJDAQEventReader(self.filename)
+        self.timeslice_reader = jppy.PyJDAQTimesliceReader(self.filename)
         self.blobs = self.blob_generator()
 
     def blob_generator(self):
-        while self.reader.has_next:
-            r = self.reader
-            r.retrieve_next_event()
+        blob = Blob()
+        if self.event_reader.has_next:
+            while self.event_reader.has_next:
+                r = self.event_reader
+                r.retrieve_next_event()
 
-            n = r.number_of_snapshot_hits
-            channel_ids = np.zeros(n, dtype='i')
-            dom_ids = np.zeros(n, dtype='i')
-            times = np.zeros(n, dtype='i')
-            tots = np.zeros(n, dtype='i')
-            triggereds = np.zeros(n, dtype='i')
+                n = r.number_of_snapshot_hits
+                channel_ids = np.zeros(n, dtype='i')
+                dom_ids = np.zeros(n, dtype='i')
+                times = np.zeros(n, dtype='i')
+                tots = np.zeros(n, dtype='i')
+                triggereds = np.zeros(n, dtype='i')
 
-            r.get_hits(channel_ids, dom_ids, times, tots, triggereds)
+                r.get_hits(channel_ids, dom_ids, times, tots, triggereds)
 
-            hit_series = HitSeries.from_arrays(
-                channel_ids, dom_ids, np.arange(n), np.zeros(n), times, tots,
-                triggereds, self.index
-            )
+                hit_series = HitSeries.from_arrays(
+                    channel_ids, dom_ids, np.arange(n), np.zeros(n), times,
+                    tots, triggereds, self.index
+                )
 
-            event_info = EventInfo(r.det_id, self.index, r.frame_index,
-                                   0, 0,  # MC ID and time
-                                   r.overlays, r.run_id,
-                                   r.trigger_counter, r.trigger_mask,
-                                   r.utc_nanoseconds, r.utc_seconds,
-                                   np.nan, np.nan, np.nan   # w1-w3
-                                   )
+                event_info = EventInfo(r.det_id, self.index, r.frame_index,
+                                       0, 0,  # MC ID and time
+                                       r.overlays, r.run_id,
+                                       r.trigger_counter, r.trigger_mask,
+                                       r.utc_nanoseconds, r.utc_seconds,
+                                       np.nan, np.nan, np.nan   # w1-w3
+                                       )
 
-            self.index += 1
-            yield {'EventInfo': event_info, 'Hits': hit_series}
+                self.index += 1
+                blob['EventInfo'] = event_info
+                blob['Hits'] = hit_series
+        yield blob
 
     def process(self, blob):
         return next(self.blobs)
