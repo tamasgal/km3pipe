@@ -7,7 +7,7 @@ Read and write KM3NeT-formatted HDF5 files.
 """
 from __future__ import division, absolute_import, print_function
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 import os.path
 
 import pandas as pd
@@ -60,7 +60,7 @@ class HDF5Sink(Module):
         self.h5file = tb.open_file(self.filename, mode="w", title="KM3NeT")
         self.filters = tb.Filters(complevel=5, shuffle=True,
                                   fletcher32=True)
-        self._tables = {}
+        self._tables = OrderedDict()
 
     def _to_array(self, data):
         if len(data) <= 0:
