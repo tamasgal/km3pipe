@@ -126,7 +126,7 @@ class TimesliceInfo(with_metaclass(Serialisable)):
     """JDAQTimeslice metadata.
     """
     dtype = [
-        ('dom_id', '<4'), ('frame_id', '<u4'), ('slice_id', '<u4'),
+        ('dom_id', '<u4'), ('frame_id', '<u4'), ('slice_id', '<u4'),
         ]
 
     @classmethod
@@ -150,7 +150,7 @@ class TimesliceInfo(with_metaclass(Serialisable)):
 
     def __array__(self):
         return [(
-            self.dom_id, self.frame_id, self.slice_id,
+            self.frame_id, self.slice_id,
         ),]
 
     def __str__(self):

@@ -428,9 +428,10 @@ class TestSummaryframeSeries(TestCase):
 
 class TestTimesliceInfo(TestCase):
     def test_timeslice_info(self):
-        s = TimesliceInfo(*range(2))
-        self.assertAlmostEqual(1, s.slice_id)
-        self.assertAlmostEqual(0, s.frame_id)
+        s = TimesliceInfo(*range(3))
+        self.assertAlmostEqual(0, s.dom_id)
+        self.assertAlmostEqual(2, s.slice_id)
+        self.assertAlmostEqual(1, s.frame_id)
 
 
 class TestSummarysliceInfo(TestCase):
