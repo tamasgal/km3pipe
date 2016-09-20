@@ -893,6 +893,88 @@ class Reco(dict):
         return [tuple((self[key] for key in self.dtype.names))]
 
 
+class SummaryframeSeries(object):
+    """Collection of summary frames.
+    """
+    dtype = np.dtype([
+        ('dom_id', '<u4'),
+        ('max_sequence_number', '<u4'),
+        ('n_received_packets', '<u4'),
+        ('slice_id', '<u4'),
+        ])
+
+    def __init__(self, arr):
+        self._arr = arr
+        self._index = 0
+        self._frames = None
+
+    @classmethod
+    def from_arrays(cls, dom_ids, max_sequence_numbers, n_recieved_packets,
+                    slice_id):
+        length = dom_ids.shape[0]
+        hits = np.empty(length, cls.dtype)
+        hits['dom_id'] = dom_ids
+        hits['max_sequence_number'] = max_sequence_numbers
+        hits['n_recieved_packets'] = n_recieved_packets
+        hits['slice_id'] = np.full(length, slice_id, dtype='<u4')
+        return cls(hits)
+
+    def from_table(cls, table, slice_id=None):
+        if slice_id is None:
+            slice_id = table[0]['slice_id']
+        return cls(np.array([(
+            row['dom_id'],
+            row['max_sequence_number'],
+            row['n_received_packets'],
+        ) for row in table], dtype=cls.dtype), slice_id)
+
+    @classmethod
+    def deserialise(cls, data, slice_id=None, fmt='numpy', h5loc='/'):
+        if fmt == 'numpy':
+            #return cls.from_table(data, event_id)
+            return cls(data)
+
+    def serialise(self, to='numpy'):
+        if to == 'numpy':
+            return np.array(self.__array__(), dtype=self.dtype)
+
+    def __array__(self):
+        return self._arr
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        if self._index >= len(self):
+            self._index = 0
+            raise StopIteration
+        data = self._arr[self._index]
+        self._index += 1
+        return data
+
+    def __len__(self):
+        return self._arr.shape[0]
+
+    def __getitem__(self, index):
+        if isinstance(index, int):
+            return self._arr[index]
+        elif isinstance(index, slice):
+            return self._slice_generator(index)
+        else:
+            raise TypeError("index must be int or slice")
+
+    def _slice_generator(self, index):
+        """A simple slice generator for iterations"""
+        start, stop, step = index.indices(len(self))
+        for i in range(start, stop, step):
+            yield self._arr[i]
+
+
+
 class ArrayTaco(object):
     def __init__(self, arr, h5loc='/'):
         self.array = arr
