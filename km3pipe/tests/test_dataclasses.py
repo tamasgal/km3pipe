@@ -14,7 +14,8 @@ import numpy as np
 from km3pipe.testing import TestCase, FakeAanetHit
 from km3pipe.io.evt import EvtRawHit
 from km3pipe.dataclasses import (Hit, Track, Position, Direction_, HitSeries,
-                                 EventInfo, SummarysliceInfo, Serialisable,
+                                 EventInfo, SummarysliceInfo, TimesliceInfo,
+                                 Serialisable,
                                  Reco, TrackSeries, SummaryframeSeries)
 
 __author__ = "Tamas Gal"
@@ -402,8 +403,15 @@ class TestSummaryframeSeries(TestCase):
         self.assertEqual(10, len(frames))
 
 
+class TestTimesliceInfo(TestCase):
+    def test_timeslice_info(self):
+        s = TimesliceInfo(*range(2))
+        self.assertAlmostEqual(1, s.slice_id)
+        self.assertAlmostEqual(0, s.frame_id)
+
+
 class TestSummarysliceInfo(TestCase):
-    def test_event_info(self):
+    def test_summaryslice_info(self):
         s = SummarysliceInfo(*range(4))
         self.assertAlmostEqual(0, s.det_id)
         self.assertAlmostEqual(1, s.frame_index)

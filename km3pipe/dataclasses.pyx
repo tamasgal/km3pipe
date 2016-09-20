@@ -122,6 +122,50 @@ class SummarysliceInfo(with_metaclass(Serialisable)):
         return 1
 
 
+class TimesliceInfo(with_metaclass(Serialisable)):
+    """JDAQTimeslice metadata.
+    """
+    dtype = [
+        ('frame_id', '<u4'), ('slice_id', '<u4'),
+        ]
+
+    @classmethod
+    def from_table(cls, row):
+        args = []
+        for col in cls.dtype.names:
+            try:
+                args.append(row[col])
+            except KeyError:
+                args.append(np.nan)
+        return cls(*args)
+
+    @classmethod
+    def deserialise(cls, data, frame_id, fmt='numpy', h5loc='/'):
+        if fmt == 'numpy':
+            return cls.from_table(data[0])
+
+    def serialise(self, to='numpy'):
+        if to == 'numpy':
+            return np.array(self.__array__(), dtype=self.dtype)
+
+    def __array__(self):
+        return [(
+            self.frame_id, self.slice_id,
+        ),]
+
+    def __str__(self):
+        return "Summaryslice frame #{0}:\n" \
+               "    slice id: {1}\n" \
+               "    frame id: {2}\n" \
+               .format(self.slice_id, self.frame_id)
+
+    def __insp__(self):
+        return self.__str__()
+
+    def __len__(self):
+        return 1
+
+
 class EventInfo(with_metaclass(Serialisable)):
     """Event Metadata.
     """
