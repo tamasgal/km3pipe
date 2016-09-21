@@ -183,10 +183,10 @@ class EventInfo(object):
         ])
 
     def __init__(self, arr, h5loc='/'):
-        self._arr = np.array(arr, dtype=self.dtype)
-        print(self._arr)
+        self._arr = np.array(arr, dtype=self.dtype).reshape(1)
         self.h5loc = h5loc
-
+        for col in self.dtype.names:
+            setattr(self, col, self._arr[col])
     @classmethod
     def from_row(cls, row):
         args = tuple((row[col] for col in cls.dtype.names))
@@ -203,9 +203,6 @@ class EventInfo(object):
 
     def __array__(self):
         return self._arr
-
-    def __getattr__(self, attr):
-        return self._arr[attr]
 
     def __str__(self):
         return "Event #{0}:\n" \
