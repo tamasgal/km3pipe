@@ -112,6 +112,10 @@ class HDF5Sink(Module):
                 print("Creating index for '{0}' using 'frame_id'..."
                       .format(tab.name))
                 tab.cols.frame_id.create_index()
+            if 'dom_id' in tab.colnames:
+                print("Creating index for '{0}' using 'dom_id'..."
+                      .format(tab.name))
+                tab.cols.dom_id.create_index()
             elif 'event_id' in tab.colnames:
                 print("Creating index for '{0}' using 'event_id'..."
                       .format(tab.name))

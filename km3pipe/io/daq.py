@@ -192,12 +192,12 @@ class DAQProcessor(Module):
 
         blob['Hits'] = hit_series
 
-        event_info = EventInfo(header.det_id, self.index, header.time_slice,
+        event_info = EventInfo((header.det_id, self.index, header.time_slice,
                                0, 0,  # MC ID and time
                                event.overlays, header.run,
                                event.trigger_counter, event.trigger_mask,
                                header.ticks * 16, header.time_stamp,
-                               0, 0, 0)  # MC weights
+                               0, 0, 0))  # MC weights
         blob['EventInfo'] = event_info
 
         self.index += 1
