@@ -51,7 +51,7 @@ class Serialisable(type):
     ---------------------------------------------------
 
         class Foo(with_metaclass(Serialisable)):
-            dtype = [('a', '<i4'), ('b', '>i8')]
+            dtype = np.dtype([('a', '<i4'), ('b', '>i8')])
 
     """
     def __new__(metaclass, class_name, class_parents, class_attr):
@@ -77,10 +77,10 @@ class Serialisable(type):
 class SummarysliceInfo(with_metaclass(Serialisable)):
     """JDAQSummaryslice Metadata.
     """
-    dtype = [
+    dtype = np.dtype([
         ('det_id', '<i4'), ('frame_index', '<u4'), ('run_id', '<i4'),
         ('slice_id', '<u4'),
-        ]
+        ])
 
     @classmethod
     def from_table(cls, row):
@@ -125,10 +125,10 @@ class SummarysliceInfo(with_metaclass(Serialisable)):
 class TimesliceInfo(with_metaclass(Serialisable)):
     """JDAQTimeslice metadata.
     """
-    dtype = [
+    dtype = np.dtype([
         ('dom_id', '<u4'), ('frame_id', '<u4'), ('n_hits', '<u4'),
         ('slice_id', '<u4'),
-        ]
+        ])
 
     @classmethod
     def from_table(cls, row):
@@ -169,47 +169,43 @@ class TimesliceInfo(with_metaclass(Serialisable)):
         return 1
 
 
-class EventInfo(with_metaclass(Serialisable)):
+class EventInfo(object):
     """Event Metadata.
     """
-    dtype = [
+    dtype = np.dtype([
         ('det_id', '<i4'), ('frame_index', '<u4'),
-        ('mc_id', '<i4'), ('mc_t', '<f8'), ('overlays', 'u1'),
+        ('mc_id', '<i4'), ('mc_t', '<f8'), ('overlays', '<u4'),
         #('run_id', '<u4'),
         ('trigger_counter', '<u8'), ('trigger_mask', '<u8'),
         ('utc_nanoseconds', '<u8'), ('utc_seconds', '<u8'),
         ('weight_w1', '<f8'), ('weight_w2', '<f8'), ('weight_w3', '<f8'),
         ('event_id', '<u4'),
-        ]
+        ])
+
+    def __init__(self, arr, h5loc='/'):
+        self._arr = np.array(arr, dtype=self.dtype)
+        print(self._arr)
+        self.h5loc = h5loc
 
     @classmethod
-    def from_table(cls, row):
-        args = []
-        for col in cls.dtype.names:
-            try:
-                args.append(row[col])
-            except KeyError:
-                args.append(np.nan)
-        return cls(*args)
+    def from_row(cls, row):
+        args = tuple((row[col] for col in cls.dtype.names))
+        return cls(np.array(args, dtype=cls.dtype))
 
     @classmethod
-    def deserialise(cls, data, event_id, fmt='numpy', h5loc='/'):
+    def deserialise(cls, data, event_id, h5loc='/', fmt='numpy'):
         if fmt == 'numpy':
-            return cls.from_table(data[0])
+            return cls.from_row(data)
 
     def serialise(self, to='numpy'):
         if to == 'numpy':
             return np.array(self.__array__(), dtype=self.dtype)
 
     def __array__(self):
-        return [(
-            self.det_id, self.frame_index, self.mc_id, self.mc_t,
-            self.overlays,
-            #self.run_id,
-            self.trigger_counter, self.trigger_mask, self.utc_nanoseconds,
-            self.utc_seconds, self.weight_w1, self.weight_w2, self.weight_w3,
-            self.event_id,
-        ),]
+        return self._arr
+
+    def __getattr__(self, attr):
+        return self._arr[attr]
 
     def __str__(self):
         return "Event #{0}:\n" \
@@ -1087,7 +1083,7 @@ class TrackSeries(object):
 class Reco(dict):
     """A dictionary with a dtype."""
     def __init__(self, map, dtype, h5loc='/reco'):
-        self.dtype = dtype
+        self.dtype = np.dtype(dtype)
         self.h5loc = h5loc
         self.update(map)
 
