@@ -45,7 +45,7 @@ def get_hist(rfile, histname, get_overflow=False):
     """Read a 1D Histogram."""
     rfile = open_rfile(rfile)
     hist = rfile[histname]
-    xlims = np.array(hist.xedges())
+    xlims = np.array(list(hist.xedges()))
     bin_values = rnp.hist2array(hist, include_overflow=get_overflow)
     #bin_errors = list(hist.xerror())
     rfile.close()
@@ -56,8 +56,8 @@ def get_hist2d(rfile, histname, get_overflow=False):
     """Read a 2D Histogram."""
     rfile = open_rfile(rfile)
     hist = rfile[histname]
-    xlims = np.array(hist.xedges())
-    ylims = np.array(hist.yedges())
+    xlims = np.array(list(hist.xedges()))
+    ylims = np.array(list(hist.yedges()))
     bin_values = rnp.hist2array(hist, include_overflow=get_overflow)
     #bin_errors = list(hist.xerror())
     rfile.close()
@@ -68,9 +68,9 @@ def get_hist3d(rfile, histname, get_overflow=False):
     """Read a 3D Histogram."""
     rfile = open_rfile(rfile)
     hist = rfile[histname]
-    xlims = np.array(hist.xedges())
-    ylims = np.array(hist.xedges())
-    zlims = np.array(hist.zedges())
+    xlims = np.array(list(hist.xedges()))
+    ylims = np.array(list(hist.xedges()))
+    zlims = np.array(list(hist.zedges()))
     bin_values = rnp.hist2array(hist, include_overflow=get_overflow)
     #bin_errors = list(hist.xerror())
     rfile.close()
