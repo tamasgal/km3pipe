@@ -44,5 +44,6 @@ e = math.e
 dt_window_l = -15  # ns
 dt_window_h = +25  # ns
 
-orca_coords = (42 + (48/60), 6 + (2/60))  # (n, e) / degree
+orca_longitude = 42 + (48/60)  # degree
+orca_latitude = 6 + (2/60)  # degree
 orca_height = -2450  # m
