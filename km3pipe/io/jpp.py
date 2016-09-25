@@ -11,7 +11,7 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 
 from km3pipe import Pump, Blob
-from km3pipe.dataclasses import (EventInfo, TimesliceInfo,
+from km3pipe.dataclasses import (EventInfo, TimesliceInfo, SummaryframeInfo,
                                  HitSeries, L0HitSeries)
 from km3pipe.logger import logging
 
@@ -41,24 +41,38 @@ class JPPPump(Pump):
         self.event_index = self.get('index') or 0
         self.timeslice_index = 0
         self.timeslice_frame_index = 0
+        self.summaryslice_index = 0
+        self.summaryslice_frame_index = 0
         # self.filename = self.get('filename')
         self.filename = filename
 
         self.event_reader = jppy.PyJDAQEventReader(self.filename)
         self.timeslice_reader = jppy.PyJDAQTimesliceReader(self.filename)
+        self.summaryslice_reader = jppy.PyJDAQSummarysliceReader(self.filename)
         self.blobs = self.blob_generator()
 
     def blob_generator(self):
         while self.event_reader.has_next:
             yield self.extract_event()
+
+        while self.summaryslice_reader.has_next:
+            self.summaryslice_frame_index = 0
+            self.summaryslice_reader.retrieve_next_summaryslice()
+            while self.summaryslice_reader.has_next_frame:
+                yield self.extract_summaryslice_frame()
+                self.summaryslice_reader.retrieve_next_frame()
+                self.summaryslice_frame_index += 1
+            self.summaryslice_index += 1
+
         while self.timeslice_reader.has_next:
             self.timeslice_frame_index = 0
             self.timeslice_reader.retrieve_next_timeslice()
             while self.timeslice_reader.has_next_superframe:
-                yield self.extract_frame()
+                yield self.extract_timeslice_frame()
                 self.timeslice_reader.retrieve_next_superframe()
                 self.timeslice_frame_index += 1
             self.timeslice_index += 1
+
         raise StopIteration
 
     def extract_event(self):
@@ -80,7 +94,7 @@ class JPPPump(Pump):
             tots, triggereds, self.event_index
         )
 
-        event_info = EventInfo(
+        event_info = EventInfo((
             r.det_id, r.frame_index,
             0, 0,  # MC ID and time
             r.overlays,
@@ -89,14 +103,14 @@ class JPPPump(Pump):
             r.utc_nanoseconds, r.utc_seconds,
             np.nan, np.nan, np.nan,   # w1-w3
             self.event_index,
-            )
+            ))
 
         self.event_index += 1
         blob['EventInfo'] = event_info
         blob['Hits'] = hit_series
         return blob
 
-    def extract_frame(self):
+    def extract_timeslice_frame(self):
         blob = Blob()
         r = self.timeslice_reader
         n = r.number_of_hits
@@ -104,7 +118,6 @@ class JPPPump(Pump):
         dom_ids = np.zeros(n, dtype='i')
         times = np.zeros(n, dtype='i')
         tots = np.zeros(n, dtype='i')
-        triggereds = np.zeros(n, dtype='i')
         r.get_hits(channel_ids, dom_ids, times, tots)
         hit_series = L0HitSeries.from_arrays(
             channel_ids, dom_ids, times, tots, self.timeslice_index
@@ -119,6 +132,29 @@ class JPPPump(Pump):
         blob['L0Hits'] = hit_series
         blob['TimesliceInfo'] = timeslice_info
         return blob
+
+    def extract_summaryslice_frame(self):
+        blob = Blob()
+        r = self.summaryslice_reader
+        summaryframe_info = SummaryframeInfo(
+                r.dom_id,
+                r.fifo_status,
+                self.summaryslice_frame_index,
+                r.frame_index,
+                r.has_udp_trailer,
+                r.high_rate_veto,
+                r.max_sequence_number,
+                r.number_of_received_packets,
+                self.summaryslice_index,
+                r.utc_nanoseconds,
+                r.utc_seconds,
+                r.white_rabbit_status,
+                )
+
+        blob['SummaryframeInfo'] = summaryframe_info
+        return blob
+
+
 
     def process(self, blob):
         return next(self.blobs)

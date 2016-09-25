@@ -29,7 +29,7 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 __all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries', 'Hit',
-           'Track', 'TrackSeries', 'Serialisable')
+           'Track', 'TrackSeries', 'Serialisable', 'SummaryframeInfo')
 
 
 IS_CC = {
@@ -51,7 +51,7 @@ class Serialisable(type):
     ---------------------------------------------------
 
         class Foo(with_metaclass(Serialisable)):
-            dtype = [('a', '<i4'), ('b', '>i8')]
+            dtype = np.dtype([('a', '<i4'), ('b', '>i8')])
 
     """
     def __new__(metaclass, class_name, class_parents, class_attr):
@@ -77,10 +77,10 @@ class Serialisable(type):
 class SummarysliceInfo(with_metaclass(Serialisable)):
     """JDAQSummaryslice Metadata.
     """
-    dtype = [
+    dtype = np.dtype([
         ('det_id', '<i4'), ('frame_index', '<u4'), ('run_id', '<i4'),
         ('slice_id', '<u4'),
-        ]
+        ])
 
     @classmethod
     def from_table(cls, row):
@@ -125,10 +125,10 @@ class SummarysliceInfo(with_metaclass(Serialisable)):
 class TimesliceInfo(with_metaclass(Serialisable)):
     """JDAQTimeslice metadata.
     """
-    dtype = [
+    dtype = np.dtype([
         ('dom_id', '<u4'), ('frame_id', '<u4'), ('n_hits', '<u4'),
         ('slice_id', '<u4'),
-        ]
+        ])
 
     @classmethod
     def from_table(cls, row):
@@ -155,7 +155,7 @@ class TimesliceInfo(with_metaclass(Serialisable)):
         ),]
 
     def __str__(self):
-        return "Summaryslice frame #{0}:\n" \
+        return "Timeslice frame #{0}:\n" \
                "    slice id: {1}\n" \
                "    frame id: {2}\n" \
                "    DOM id:   {3}\n" \
@@ -169,18 +169,23 @@ class TimesliceInfo(with_metaclass(Serialisable)):
         return 1
 
 
-class EventInfo(with_metaclass(Serialisable)):
-    """Event Metadata.
+class SummaryframeInfo(with_metaclass(Serialisable)):
+    """JDAQSummaryslice frame metadata.
     """
-    dtype = [
-        ('det_id', '<i4'), ('frame_index', '<u4'),
-        ('mc_id', '<i4'), ('mc_t', '<f8'), ('overlays', 'u1'),
-        #('run_id', '<u4'),
-        ('trigger_counter', '<u8'), ('trigger_mask', '<u8'),
-        ('utc_nanoseconds', '<u8'), ('utc_seconds', '<u8'),
-        ('weight_w1', '<f8'), ('weight_w2', '<f8'), ('weight_w3', '<f8'),
-        ('event_id', '<u4'),
-        ]
+    dtype = np.dtype([
+        ('dom_id', '<u4'),
+    ('fifo_status', '<u4'),
+        ('frame_id', '<u4'),
+        ('frame_index', '<u4'),
+        ('has_udp_trailer', '<u4'),
+        ('high_rate_veto', '<u4'),
+        ('max_sequence_number', '<u4'),
+        ('n_packets', '<u4'),
+        ('slice_id', '<u4'),
+        ('utc_nanoseconds', '<u4'),
+        ('utc_seconds', '<u4'),
+        ('white_rabbit_status', '<u4'),
+        ])
 
     @classmethod
     def from_table(cls, row):
@@ -193,7 +198,7 @@ class EventInfo(with_metaclass(Serialisable)):
         return cls(*args)
 
     @classmethod
-    def deserialise(cls, data, event_id, fmt='numpy', h5loc='/'):
+    def deserialise(cls, data, frame_id, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
             return cls.from_table(data[0])
 
@@ -203,13 +208,61 @@ class EventInfo(with_metaclass(Serialisable)):
 
     def __array__(self):
         return [(
-            self.det_id, self.frame_index, self.mc_id, self.mc_t,
-            self.overlays,
-            #self.run_id,
-            self.trigger_counter, self.trigger_mask, self.utc_nanoseconds,
-            self.utc_seconds, self.weight_w1, self.weight_w2, self.weight_w3,
-            self.event_id,
+            self.dom_id, self.fifo_status, self.frame_id, self.frame_index,
+            self.has_udp_trailer, self.high_rate_veto,
+            self.max_sequence_number, self.n_packets, self.slice_id,
+            self.utc_nanoseconds, self.utc_seconds, self.white_rabbit_status
         ),]
+
+    def __str__(self):
+        return "Summaryslice frame #{0}:\n" \
+               "    slice id:    {1}\n" \
+               "    DOM id:      {2}\n" \
+               "    UDP packets: {3}/{4}\n" \
+               .format(self, self.frame_id, self.slice_id, self.dom_id,
+                       self.number_of_packets, self.max_sequence_number)
+
+    def __insp__(self):
+        return self.__str__()
+
+    def __len__(self):
+        return 1
+
+
+class EventInfo(object):
+    """Event Metadata.
+    """
+    dtype = np.dtype([
+        ('det_id', '<i4'), ('frame_index', '<u4'),
+        ('mc_id', '<i4'), ('mc_t', '<f8'), ('overlays', '<u4'),
+        #('run_id', '<u4'),
+        ('trigger_counter', '<u8'), ('trigger_mask', '<u8'),
+        ('utc_nanoseconds', '<u8'), ('utc_seconds', '<u8'),
+        ('weight_w1', '<f8'), ('weight_w2', '<f8'), ('weight_w3', '<f8'),
+        ('event_id', '<u4'),
+        ])
+
+    def __init__(self, arr, h5loc='/'):
+        self._arr = np.array(arr, dtype=self.dtype).reshape(1)
+        self.h5loc = h5loc
+        for col in self.dtype.names:
+            setattr(self, col, self._arr[col])
+    @classmethod
+    def from_row(cls, row):
+        args = tuple((row[col] for col in cls.dtype.names))
+        return cls(np.array(args, dtype=cls.dtype))
+
+    @classmethod
+    def deserialise(cls, data, event_id, h5loc='/', fmt='numpy'):
+        if fmt == 'numpy':
+            return cls.from_row(data)
+
+    def serialise(self, to='numpy'):
+        if to == 'numpy':
+            return np.array(self.__array__(), dtype=self.dtype)
+
+    def __array__(self):
+        return self._arr
 
     def __str__(self):
         return "Event #{0}:\n" \
@@ -1087,7 +1140,7 @@ class TrackSeries(object):
 class Reco(dict):
     """A dictionary with a dtype."""
     def __init__(self, map, dtype, h5loc='/reco'):
-        self.dtype = dtype
+        self.dtype = np.dtype(dtype)
         self.h5loc = h5loc
         self.update(map)
 
@@ -1221,6 +1274,7 @@ deserialise_map = {
     'MCTracks': TrackSeries,
     'EventInfo': EventInfo,
     'SummarysliceInfo': SummarysliceInfo,
+    'SummaryframeInfo': SummaryframeInfo,
     'Tracks': TrackSeries,
 }
 

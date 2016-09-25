@@ -446,7 +446,7 @@ class TestSummarysliceInfo(TestCase):
 
 class TestEventInfo(TestCase):
     def test_event_info(self):
-        e = EventInfo(*range(14))
+        e = EventInfo(tuple(range(13)))
         self.assertAlmostEqual(0, e.det_id)
         self.assertAlmostEqual(1, e.frame_index)
         self.assertAlmostEqual(2, e.mc_id)
@@ -463,7 +463,7 @@ class TestEventInfo(TestCase):
         self.assertAlmostEqual(12, e.event_id)
 
     def test_from_table(self):
-        e = EventInfo.from_table({
+        e = EventInfo.from_row({
             'det_id': 0,
             'frame_index': 2,
             'mc_id': 3,
@@ -495,26 +495,8 @@ class TestEventInfo(TestCase):
         self.assertAlmostEqual(12, e.weight_w3)
         self.assertAlmostEqual(1, e.event_id)
 
-    def test_from_table_puts_nan_for_missing_data(self):
-        e = EventInfo.from_table({})
-
-        self.assertTrue(np.isnan(e.det_id))
-        self.assertTrue(np.isnan(e.event_id))
-        self.assertTrue(np.isnan(e.frame_index))
-        self.assertTrue(np.isnan(e.mc_id))
-        self.assertTrue(np.isnan(e.mc_t))
-        self.assertTrue(np.isnan(e.overlays))
-        # self.assertTrue(np.isnan(e.run_id))
-        self.assertTrue(np.isnan(e.trigger_counter))
-        self.assertTrue(np.isnan(e.trigger_mask))
-        self.assertTrue(np.isnan(e.utc_nanoseconds))
-        self.assertTrue(np.isnan(e.utc_seconds))
-        self.assertTrue(np.isnan(e.weight_w1))
-        self.assertTrue(np.isnan(e.weight_w2))
-        self.assertTrue(np.isnan(e.weight_w3))
-
     def test_array(self):
-        e = EventInfo.from_table({
+        e = EventInfo.from_row({
             'det_id': 0,
             'frame_index': 2,
             'mc_id': 3,
