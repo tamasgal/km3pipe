@@ -12,3 +12,4 @@ pandas
 seaborn
 cython
 pillow
+matplotlib>=1.5

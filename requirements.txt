@@ -13,5 +13,5 @@ sphinx-better-theme
 sphinx-gallery
 numpydoc
 pillow
-matplotlib
+matplotlib>=1.5
 seaborn
