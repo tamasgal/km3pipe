@@ -28,4 +28,13 @@ evt = gc_evt.transform_to(orca_frame)
 
 plt.subplot(111, projection='mollweide')
 plt.plot(evt.az.deg, evt.alt.deg, 'x', markersize=5)
-print(evt)
+
+evt_icrs = evt.icrs
+
+ra = evt_icrs.ra.wrap_at(180 * degree).radian
+dec = evt_icrs.dec.radian
+
+fig = plt.figure(figsize=(8, 8))
+fig.add_subplot(111, projection='aitoff')
+plt.plot(ra, dec, 'o', markersize=10, alpha=0.3, color='k')
+plt.savefig('foo.pdf')
