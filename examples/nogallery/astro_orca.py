@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+"""
+Orca Astro Test.
+
+You are in a rubber boat floating atop ORCA. If a neutrino is coming at you
+from the galactic center, should you protect yourself with a helmet, a vest
+or with leaden boots?
+"""
+
+from astropy.coordinates import (Angle, Latitude, Longitude, Galactic, # noqa
+                                 EarthLocation, AltAz, SkyCoord)  # noqa
+from astropy.units import degree, minute, meter     # noqa
+from astropy.time import Time
+import matplotlib.pyplot as plt
+
+from km3pipe.constants import orca_longitude, orca_latitude, orca_height
+
+
+orca_loc = EarthLocation.from_geodetic(
+    Longitude(orca_longitude * degree),
+    Latitude(orca_latitude * degree),
+    height=orca_height
+)
+orca_frame = AltAz(obstime=Time.now(), location=orca_loc)
+
+gc_evt = SkyCoord(180 * degree, 0 * degree, frame='galactic')
+evt = gc_evt.transform_to(orca_frame)
+
+plt.subplot(111, projection='mollweide')
+plt.plot(evt.az.deg, evt.alt.deg, 'x', markersize=5)
+
+evt_icrs = evt.icrs
+
+ra = evt_icrs.ra.wrap_at(180 * degree).radian
+dec = evt_icrs.dec.radian
+
+fig = plt.figure(figsize=(8, 8))
+fig.add_subplot(111, projection='aitoff')
+plt.plot(ra, dec, 'o', markersize=10, alpha=0.3, color='k')
+plt.savefig('foo.pdf')
