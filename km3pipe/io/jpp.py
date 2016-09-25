@@ -140,7 +140,7 @@ class JPPPump(Pump):
                 r.has_udp_trailer,
                 r.high_rate_veto,
                 r.max_sequence_number,
-                r.n_packets,
+                r.number_of_received_packets,
                 self.timeslice_index,
                 r.utc_nanoseconds,
                 r.utc_seconds,
