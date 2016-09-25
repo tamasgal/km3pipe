@@ -208,7 +208,10 @@ class SummaryframeInfo(with_metaclass(Serialisable)):
 
     def __array__(self):
         return [(
-            self.dom_id, self.frame_id, self.n_hits, self.slice_id,
+            self.dom_id, self.fifo_status, self.frame_id, self.frame_index,
+            self.has_udp_trailer, self.high_rate_veto,
+            self.max_sequence_number, self.n_packets, self.slice_id,
+            self.utc_nanoseconds, self.utc_seconds, self.white_rabbit_status
         ),]
 
     def __str__(self):
