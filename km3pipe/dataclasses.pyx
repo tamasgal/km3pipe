@@ -173,7 +173,6 @@ class SummaryframeInfo(with_metaclass(Serialisable)):
     """JDAQSummaryslice frame metadata.
     """
     dtype = np.dtype([
-	('det_id', '<u4'),
 	('dom_id', '<u4'),
 	('fifo_status', '<u4'),
 	('frame_id', '<u4'),
@@ -182,7 +181,6 @@ class SummaryframeInfo(with_metaclass(Serialisable)):
 	('high_rate_veto', '<u4'),
 	('max_sequence_number', '<u4'),
 	('n_packets', '<u4'),
-	('run_number', '<u4'),
         ('slice_id', '<u4'),
 	('utc_nanoseconds', '<u4'),
 	('utc_seconds', '<u4'),
@@ -1273,6 +1271,7 @@ deserialise_map = {
     'MCTracks': TrackSeries,
     'EventInfo': EventInfo,
     'SummarysliceInfo': SummarysliceInfo,
+    'SummaryframeInfo': SummaryframeInfo,
     'Tracks': TrackSeries,
 }
 
