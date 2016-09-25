@@ -59,7 +59,7 @@ class HDF5Sink(Module):
         self.index = 1
         self.h5file = tb.open_file(self.filename, mode="w", title="KM3NeT")
         self.filters = tb.Filters(complevel=5, shuffle=True,
-                                  fletcher32=True)
+                                  fletcher32=True, complib='blosc')
         self._tables = OrderedDict()
 
     def _to_array(self, data):
