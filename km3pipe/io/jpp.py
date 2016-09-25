@@ -54,6 +54,13 @@ class JPPPump(Pump):
     def blob_generator(self):
         while self.event_reader.has_next:
             yield self.extract_event()
+        while self.summaryslice_reader.has_next:
+            self.summaryslice_frame_index = 0
+            self.summaryslice_reader.retrieve_next_summaryslice()
+            while self.summaryslice_reader.has_next_frame():
+                yield self.extract_summaryslice_frame()
+                self.summaryslice_reader.retrieve_next_frame()
+                self.summaryslice_frame_index += 1
         while self.timeslice_reader.has_next:
             self.timeslice_frame_index = 0
             self.timeslice_reader.retrieve_next_timeslice()
@@ -62,13 +69,6 @@ class JPPPump(Pump):
                 self.timeslice_reader.retrieve_next_superframe()
                 self.timeslice_frame_index += 1
             self.timeslice_index += 1
-        while self.summaryslice_reader.has_next:
-            self.summaryslice_frame_index = 0
-            self.summaryslice_reader.retrieve_next_summaryslice()
-            while self.summaryslice_reader.has_next_frame():
-                yield self.extract_summaryslice_frame()
-                self.summaryslice_reader.retrieve_next_frame()
-                self.summaryslice_frame_index += 1
         raise StopIteration
 
     def extract_event(self):
