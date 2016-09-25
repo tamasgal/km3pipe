@@ -104,7 +104,6 @@ class JPPPump(Pump):
         dom_ids = np.zeros(n, dtype='i')
         times = np.zeros(n, dtype='i')
         tots = np.zeros(n, dtype='i')
-        triggereds = np.zeros(n, dtype='i')
         r.get_hits(channel_ids, dom_ids, times, tots)
         hit_series = L0HitSeries.from_arrays(
             channel_ids, dom_ids, times, tots, self.timeslice_index
