@@ -57,7 +57,7 @@ class JPPPump(Pump):
         while self.summaryslice_reader.has_next:
             self.summaryslice_frame_index = 0
             self.summaryslice_reader.retrieve_next_summaryslice()
-            while self.summaryslice_reader.has_next_frame():
+            while self.summaryslice_reader.has_next_frame:
                 yield self.extract_summaryslice_frame()
                 self.summaryslice_reader.retrieve_next_frame()
                 self.summaryslice_frame_index += 1
