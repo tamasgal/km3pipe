@@ -173,18 +173,18 @@ class SummaryframeInfo(with_metaclass(Serialisable)):
     """JDAQSummaryslice frame metadata.
     """
     dtype = np.dtype([
-	('dom_id', '<u4'),
-	('fifo_status', '<u4'),
-	('frame_id', '<u4'),
-	('frame_index', '<u4'),
-	('has_udp_trailer', '<u4'),
-	('high_rate_veto', '<u4'),
-	('max_sequence_number', '<u4'),
-	('n_packets', '<u4'),
+        ('dom_id', '<u4'),
+    ('fifo_status', '<u4'),
+        ('frame_id', '<u4'),
+        ('frame_index', '<u4'),
+        ('has_udp_trailer', '<u4'),
+        ('high_rate_veto', '<u4'),
+        ('max_sequence_number', '<u4'),
+        ('n_packets', '<u4'),
         ('slice_id', '<u4'),
-	('utc_nanoseconds', '<u4'),
-	('utc_seconds', '<u4'),
-	('white_rabbit_status', '<u4'),
+        ('utc_nanoseconds', '<u4'),
+        ('utc_seconds', '<u4'),
+        ('white_rabbit_status', '<u4'),
         ])
 
     @classmethod
@@ -220,7 +220,7 @@ class SummaryframeInfo(with_metaclass(Serialisable)):
                "    DOM id:      {2}\n" \
                "    UDP packets: {3}/{4}\n" \
                .format(self, self.frame_id, self.slice_id, self.dom_id,
-		       self.number_of_packets, self.max_sequence_number)
+                       self.number_of_packets, self.max_sequence_number)
 
     def __insp__(self):
         return self.__str__()
