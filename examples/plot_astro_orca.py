@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """
+================
 Orca Astro Test.
+================
 
 This example needs Astropy: `pip install astropy`.
 
@@ -15,8 +17,8 @@ from astropy.time import Time
 import matplotlib.pyplot as plt
 import numpy as np
 
+import km3pipe.style
 from km3pipe.constants import orca_longitude, orca_latitude, orca_height
-plt.style.use('foursigma')
 
 # load orca coordinates
 orca_loc = EarthLocation.from_geodetic(
