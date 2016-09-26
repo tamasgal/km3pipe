@@ -59,7 +59,7 @@ class HDF5Sink(Module):
         self.index = 1
         self.h5file = tb.open_file(self.filename, mode="w", title="KM3NeT")
         self.filters = tb.Filters(complevel=5, shuffle=True,
-                                  fletcher32=True)
+                                  fletcher32=True, complib='blosc')
         self._tables = OrderedDict()
 
     def _to_array(self, data):
@@ -112,6 +112,10 @@ class HDF5Sink(Module):
                 print("Creating index for '{0}' using 'frame_id'..."
                       .format(tab.name))
                 tab.cols.frame_id.create_index()
+            if 'slice_id' in tab.colnames:
+                print("Creating index for '{0}' using 'slice_id'..."
+                      .format(tab.name))
+                tab.cols.slice_id.create_index()
             if 'dom_id' in tab.colnames:
                 print("Creating index for '{0}' using 'dom_id'..."
                       .format(tab.name))
