@@ -2,10 +2,9 @@
 """
 Orca Astro Test.
 
-First, generate an event coming from the Galactic center right now!
-From which direction does it enter the detector?
+This example needs Astropy: `pip install astropy`.
 
-Then, the reverse: take some events in the detector and transform them
+Take some events in the detector and transform them
 to galactic coordinates.
 """
 
