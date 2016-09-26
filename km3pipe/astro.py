@@ -8,11 +8,9 @@ Astro utils.
 from __future__ import division, absolute_import, print_function
 
 
-from astropy import units as u
-from astropy.units import degree, minute
-from astropy.coordinates import (Angle, Latitude, Longitude, Galactic,
+from astropy.units import degree
+from astropy.coordinates import (Latitude, Longitude,
                                  EarthLocation, AltAz, SkyCoord)
-from astropy.time import Time
 
 from km3pipe.constants import orca_longitude, orca_latitude, orca_height
 
@@ -33,6 +31,14 @@ orca_loc = EarthLocation.from_geodetic(
 
 
 def to_frame(times, zeniths, azimuths, frame='galactic'):
+    """Tranform from the Detector frame to anything else.
+
+    Parameters:
+    -----------
+    frame: str [default: 'galactic']
+        The reference frame to transform to (needs to be known to astropy)
+
+    """
     zeniths *= degree
     azimuths *= degree
     orca_frame = AltAz(location=orca_loc, obstime=times)
