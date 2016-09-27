@@ -16,3 +16,4 @@ pillow
 matplotlib>=1.5
 seaborn
 astropy
+rootpy
