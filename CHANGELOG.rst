@@ -1,6 +1,7 @@
 Unreleased changes
 ------------------
 - Improved documentation
+- Fixed event_id indexing for the /hits table in HDF5
 
 4.7.0 / 2016-09-25
 ~~~~~~~~~~~~~~~~~~
