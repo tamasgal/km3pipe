@@ -1,11 +1,14 @@
 Unreleased changes
 ------------------
-- Improved documentation
-- Fixed event_id indexing for the /hits table in HDF5
+* Improved documentation
+* Fixed event_id indexing for the /hits table in HDF5
+* root sub-package added (via rootpy)
 
 4.7.0 / 2016-09-25
 ~~~~~~~~~~~~~~~~~~
 * Adds summary slice readout support via jppy
+* Introducing astro package
+* Use BLOSC compression library for HDF5
 
 4.6.0
 ~~~~~
