@@ -20,7 +20,7 @@ Options:
     -l --with-l0hits        Include L0-hits [default: False]
     -n EVENTS/RUNS          Number of events/runs.
     -o OUTFILE              Output file.
-    -s --with-summarslices  Include summary slices [default: False]
+    -s --with-summaryslices  Include summary slices [default: False]
 """
 
 from __future__ import division, absolute_import, print_function
@@ -67,7 +67,7 @@ def main():
     use_jppy_pump = args['--jppy']
     aa_format = args['--aa-format']
     aa_lib = args['--aa-lib']
-    with_summaryslices = args['--with-summarslices']
+    with_summaryslices = args['--with-summaryslices']
     with_l0hits = args['--with-l0hits']
     tohdf5(infile, outfile, n, use_jppy=use_jppy_pump, aa_fmt=aa_format,
            aa_lib=aa_lib, with_summaryslices=with_summaryslices,
