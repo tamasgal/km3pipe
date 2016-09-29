@@ -56,21 +56,19 @@ def tohdf5(input_file, output_file, n_events, **kwargs):
 def main():
     from docopt import docopt
     args = docopt(__doc__, version=version)
-    print(args)
 
     try:
         n = int(args['-n'])
     except TypeError:
         n = None
 
-    if args['tohdf5']:
-        infile = args['FILE']
-        outfile = args['-o'] or infile + '.h5'
-        use_jppy_pump = args['--jppy']
-        aa_format = args['--aa-format']
-        aa_lib = args['--aa-lib']
-        with_summaryslices = args['-s']
-        with_l0hits = args['-l']
-        tohdf5(infile, outfile, n, use_jppy=use_jppy_pump, aa_fmt=aa_format,
-               aa_lib=aa_lib, with_summaryslices=with_summaryslices,
-               with_l0hits=with_l0hits)
+    infile = args['FILE']
+    outfile = args['-o'] or infile + '.h5'
+    use_jppy_pump = args['--jppy']
+    aa_format = args['--aa-format']
+    aa_lib = args['--aa-lib']
+    with_summaryslices = args['-s']
+    with_l0hits = args['-l']
+    tohdf5(infile, outfile, n, use_jppy=use_jppy_pump, aa_fmt=aa_format,
+           aa_lib=aa_lib, with_summaryslices=with_summaryslices,
+           with_l0hits=with_l0hits)
