@@ -26,7 +26,10 @@ hits[hits['du'] == DU].plot('time', 'z', style='.', ax=ax)
 triggered_hits = hits[(hits['du'] == DU) & (hits['triggered'] == True)]
 triggered_hits.plot('time', 'z', style='.', ax=ax)
 
-ax.legend_.remove()
+try:
+    ax.legend_.remove()
+except AttributeError:
+    pass
 ax.set_title("zt-plot of event {0} on DU{1}".format(EVENT_ID, DU))
 ax.set_xlabel("time [ns]")
 ax.set_ylabel("z [m]")
