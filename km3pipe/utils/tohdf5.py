@@ -10,16 +10,16 @@ Usage:
     tohdf5 --version
 
 Options:
-    --aa-format=<fmt>       tohdf5: Which aanet subformat ('minidst',
-                            'jevt_jgandalf', 'generic_track') [default: None]
-    --aa-lib-<lib.so>       tohdf5: path to aanet binary (for old versions which
-                            must be loaded via `ROOT.gSystem.Load()` instead
-                            of `import aa`)
-    -h --help               Show this screen.
-    -j --jppy               tohdf5: Use jppy (not aanet) for Jpp readout
-    -l --with-l0hits        Include L0-hits [default: False]
-    -n EVENTS/RUNS          Number of events/runs.
-    -o OUTFILE              Output file.
+    --aa-format=<fmt>        tohdf5: Which aanet subformat ('minidst',
+                             'jevt_jgandalf', 'generic_track') [default: None]
+    --aa-lib-<lib.so>        tohdf5: path to aanet binary (for old versions which
+                             must be loaded via `ROOT.gSystem.Load()` instead
+                             of `import aa`)
+    -h --help                Show this screen.
+    -j --jppy                tohdf5: Use jppy (not aanet) for Jpp readout
+    -l --with-l0hits         Include L0-hits [default: False]
+    -n EVENTS/RUNS           Number of events/runs.
+    -o OUTFILE               Output file.
     -s --with-summaryslices  Include summary slices [default: False]
 """
 
