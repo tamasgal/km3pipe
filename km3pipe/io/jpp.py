@@ -156,7 +156,6 @@ class JPPPump(Pump):
         blob['SummaryframeInfo'] = summaryframe_info
         return blob
 
-
     def process(self, blob):
         return next(self.blobs)
 
