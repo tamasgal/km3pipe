@@ -67,8 +67,8 @@ def main():
     use_jppy_pump = args['--jppy']
     aa_format = args['--aa-format']
     aa_lib = args['--aa-lib']
-    with_summaryslices = args['-s']
-    with_l0hits = args['-l']
+    with_summaryslices = args['--with-summarslices']
+    with_l0hits = args['--with-l0hits']
     tohdf5(infile, outfile, n, use_jppy=use_jppy_pump, aa_fmt=aa_format,
            aa_lib=aa_lib, with_summaryslices=with_summaryslices,
            with_l0hits=with_l0hits)
