@@ -3,6 +3,9 @@ Unreleased changes
 * Improved documentation
 * Fixed event_id indexing for the /hits table in HDF5
 * root sub-package added (via rootpy)
+* Added arguments to allow optional parsing of L0 data and summaryslices
+  when using the JPPPump
+* New command line utility to convert to HDF5: `tohdf5`
 
 4.7.0 / 2016-09-25
 ~~~~~~~~~~~~~~~~~~
