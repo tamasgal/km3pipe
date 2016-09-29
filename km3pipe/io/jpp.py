@@ -157,7 +157,6 @@ class JPPPump(Pump):
         return blob
 
 
-
     def process(self, blob):
         return next(self.blobs)
 
