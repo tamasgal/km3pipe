@@ -1,5 +1,10 @@
 Unreleased changes
 ------------------
+
+
+
+4.7.1 / 2016-09-29
+~~~~~~~~~~~~~~~~~~
 * Improved documentation
 * Fixed event_id indexing for the /hits table in HDF5
 * root sub-package added (via rootpy)
