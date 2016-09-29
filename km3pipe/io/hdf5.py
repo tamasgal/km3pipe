@@ -87,8 +87,8 @@ class HDF5Sink(Module):
 
     def process(self, blob):
         for key, entry in sorted(blob.items()):
-            if hasattr(entry, 'dtype') or hasattr(entry, 'serialise') or \
-                    hasattr(entry, 'to_records'):
+            serialisable_attributes = ('dtype', 'serialise', 'to_records')
+            if any(hasattr(entry, a) for a in serialisable_attributes):
                 try:
                     h5loc = entry.h5loc
                 except AttributeError:
