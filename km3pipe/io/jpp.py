@@ -70,9 +70,14 @@ class JPPPump(Pump):
             self.timeslice_frame_index = 0
             self.timeslice_reader.retrieve_next_timeslice()
             while self.timeslice_reader.has_next_superframe:
-                yield self.extract_timeslice_frame()
-                self.timeslice_reader.retrieve_next_superframe()
-                self.timeslice_frame_index += 1
+                try:
+                    yield self.extract_timeslice_frame()
+                except IndexError:
+                    log.warning("Skipping broken frame.")
+                else:
+                    self.timeslice_frame_index += 1
+                finally:
+                    self.timeslice_reader.retrieve_next_superframe()
             self.timeslice_index += 1
 
         raise StopIteration
