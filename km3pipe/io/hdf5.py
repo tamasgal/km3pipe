@@ -59,7 +59,7 @@ class HDF5Sink(Module):
         self.index = 1
         self.h5file = tb.open_file(self.filename, mode="w", title="KM3NeT")
         self.filters = tb.Filters(complevel=5, shuffle=True,
-                                  fletcher32=True)
+                                  fletcher32=True, complib='blosc')
         self._tables = OrderedDict()
 
     def _to_array(self, data):
@@ -87,8 +87,8 @@ class HDF5Sink(Module):
 
     def process(self, blob):
         for key, entry in sorted(blob.items()):
-            if hasattr(entry, 'dtype') or hasattr(entry, 'serialise') or \
-                    hasattr(entry, 'to_records'):
+            serialisable_attributes = ('dtype', 'serialise', 'to_records')
+            if any(hasattr(entry, a) for a in serialisable_attributes):
                 try:
                     h5loc = entry.h5loc
                 except AttributeError:
@@ -112,11 +112,15 @@ class HDF5Sink(Module):
                 print("Creating index for '{0}' using 'frame_id'..."
                       .format(tab.name))
                 tab.cols.frame_id.create_index()
+            if 'slice_id' in tab.colnames:
+                print("Creating index for '{0}' using 'slice_id'..."
+                      .format(tab.name))
+                tab.cols.slice_id.create_index()
             if 'dom_id' in tab.colnames:
                 print("Creating index for '{0}' using 'dom_id'..."
                       .format(tab.name))
                 tab.cols.dom_id.create_index()
-            elif 'event_id' in tab.colnames:
+            if 'event_id' in tab.colnames:
                 print("Creating index for '{0}' using 'event_id'..."
                       .format(tab.name))
                 tab.cols.event_id.create_index()

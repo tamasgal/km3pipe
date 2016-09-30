@@ -118,5 +118,16 @@ API Reference
   :toctree: api
   :template: class.rst
 
-  DBManater
+  DBManager
+
+
+``km3pipe.astro``: Astro Tools
+------------------------------
+
+.. currentmodule:: km3pipe.astro
+
+.. autosummary::
+  :toctree: api
+
+  to_frame
 

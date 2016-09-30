@@ -14,6 +14,7 @@
    :maxdepth: 2
 
    install
+   changelog
    user_guide
    contribute
    auto_examples/index
