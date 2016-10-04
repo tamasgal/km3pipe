@@ -77,16 +77,21 @@ class HDF5Sink(Module):
 
     def _write_array(self, where, arr, title=''):
         level = len(where.split('/'))
+
         if where not in self._tables:
             dtype = arr.dtype
             loc, tabname = os.path.split(where)
             tab = self.h5file.create_table(
                 loc, tabname, description=dtype, title=title,
                 filters=self.filters, createparents=True)
-        tab.append(arr)
-        if(level < 4):
-            self._tables[where] = tab
+            if(level < 4):
+                self._tables[where] = tab
         else:
+            tab = self._tables[where]
+
+        tab.append(arr)
+
+        if(level < 4):
             tab.flush()
 
     def process(self, blob):
