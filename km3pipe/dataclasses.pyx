@@ -775,7 +775,7 @@ class L0HitSeries(object):
 
     @property
     def h5loc(self):
-        return "/slice_{0}".format(self.slice_id)
+        return "/timeslices/slice_{0}".format(self.slice_id)
 
     @property
     def tabname(self):
