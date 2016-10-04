@@ -93,7 +93,12 @@ class HDF5Sink(Module):
                     h5loc = entry.h5loc
                 except AttributeError:
                     h5loc = '/'
-                where = os.path.join(h5loc, decamelise(key))
+                try:
+                    tabname = entry.tabname
+                except AttributeError:
+                    tabname = decamelise(key)
+
+                where = os.path.join(h5loc, tabname)
                 entry = self._to_array(entry)
                 if entry is None:
                     continue

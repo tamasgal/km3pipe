@@ -775,7 +775,11 @@ class L0HitSeries(object):
 
     @property
     def h5loc(self):
-        return "/slice_{0}/frame_{1}".format(self.slice_id, self.frame_id)
+        return "/slice_{0}".format(self.slice_id)
+
+    @property
+    def tabname(self):
+        return "frame_{0}".format(self.frame_id)
 
     @classmethod
     def from_arrays(cls, channel_ids, dom_ids, times, tots, slice_id, frame_id):
