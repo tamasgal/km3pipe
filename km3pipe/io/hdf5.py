@@ -76,14 +76,23 @@ class HDF5Sink(Module):
         return data
 
     def _write_array(self, where, arr, title=''):
+        level = len(where.split('/'))
+
         if where not in self._tables:
             dtype = arr.dtype
             loc, tabname = os.path.split(where)
-            self._tables[where] = self.h5file.create_table(
+            tab = self.h5file.create_table(
                 loc, tabname, description=dtype, title=title,
                 filters=self.filters, createparents=True)
-        tab = self._tables[where]
+            if(level < 4):
+                self._tables[where] = tab
+        else:
+            tab = self._tables[where]
+
         tab.append(arr)
+
+        if(level < 4):
+            tab.flush()
 
     def process(self, blob):
         for key, entry in sorted(blob.items()):
@@ -93,7 +102,12 @@ class HDF5Sink(Module):
                     h5loc = entry.h5loc
                 except AttributeError:
                     h5loc = '/'
-                where = os.path.join(h5loc, decamelise(key))
+                try:
+                    tabname = entry.tabname
+                except AttributeError:
+                    tabname = decamelise(key)
+
+                where = os.path.join(h5loc, tabname)
                 entry = self._to_array(entry)
                 if entry is None:
                     continue
@@ -107,6 +121,9 @@ class HDF5Sink(Module):
         return blob
 
     def finish(self):
+        self.h5file.root._v_attrs.km3pipe = str(kp.__version__)
+        self.h5file.root._v_attrs.pytables = str(tb.__version__)
+        self.h5file.root._v_attrs.format_version = str(FORMAT_VERSION)
         for tab in self._tables.itervalues():
             if 'frame_id' in tab.colnames:
                 print("Creating index for '{0}' using 'frame_id'..."
@@ -126,9 +143,6 @@ class HDF5Sink(Module):
                 tab.cols.event_id.create_index()
 
             tab.flush()
-        self.h5file.root._v_attrs.km3pipe = str(kp.__version__)
-        self.h5file.root._v_attrs.pytables = str(tb.__version__)
-        self.h5file.root._v_attrs.format_version = str(FORMAT_VERSION)
         self.h5file.close()
 
 
