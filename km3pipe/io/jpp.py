@@ -129,6 +129,8 @@ class JPPPump(Pump):
         hit_series = L0HitSeries.from_arrays(
             channel_ids, dom_ids, times, tots, self.timeslice_index
         )
+        hit_series.slice_id = self.timeslice_index
+        hit_series.frame_id = self.timeslice_frame_index
         timeslice_info = TimesliceInfo(
                 dom_ids[0],
                 self.timeslice_frame_index,
