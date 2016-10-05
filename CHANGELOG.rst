@@ -2,6 +2,8 @@ Unreleased changes
 ------------------
 * Group frames in summary slices under /timeslices/slice_id/frame_id
   when using `tohdf5 -j -s FILE.root`
+* `hdf2root` is now it's own command
+* `tohdf5` and `hdf2root` no longer `km3pipe` CLI subcommands
 
 
 4.7.1 / 2016-09-29
