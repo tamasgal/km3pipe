@@ -1,18 +1,18 @@
-`tohdf`
-~~~~~~~
+``tohdf``
+~~~~~~~~~
 .. program-output:: tohdf5 --help
 
-`hdf2root`
-~~~~~~~~~~
+``hdf2root``
+~~~~~~~~~~~~
 .. program-output:: hdf2root --help
 
-`h5info`
-~~~~~~~~
+``h5info``
+~~~~~~~~~~
 
 .. program-output:: h5info --help
 
-`h5tree`
-~~~~~~~~
+``h5tree``
+~~~~~~~~~~
 
 .. program-output:: h5tree --help
 
