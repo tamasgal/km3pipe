@@ -5,7 +5,7 @@ Notebooks
 ---------
 
 .. toctree::
-    notebooks/h5_ant.ipynb
+    notebooks/h5_ant.ipynb.rst
 
 Gallery
 -------
