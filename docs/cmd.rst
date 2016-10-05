@@ -121,3 +121,11 @@ Shows the content of a HDF5 file::
     /reco/q_strategy (Table(121226,), shuffle, zlib(5)) ''
     /reco/reco_lns (Table(121226,), shuffle, zlib(5)) ''
     /reco/thomas_features (Table(121226,), shuffle, zlib(5)) ''
+
+`tohdf`
+~~~~~~~
+.. program-output:: tohdf5 --help
+
+`hdf2root`
+~~~~~~~~~~
+.. program-output:: hdf2root --help
