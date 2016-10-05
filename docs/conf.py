@@ -15,6 +15,7 @@
 import sys
 import os
 from datetime import date
+from glob import glob
 
 from better import better_theme_path
 
@@ -298,4 +299,4 @@ sphinx_gallery_conf = {
     }
 }
 
-autosummary_generate = True
+autosummary_generate = ["api.rst"]
