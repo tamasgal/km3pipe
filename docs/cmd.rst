@@ -12,7 +12,8 @@ nameclashes and also for an improved overview.
 You can for example simply run ``km3pipe -h`` in your shell to see all available
 commands:
 
-.. program-output:: km3pipe --help
+.. command-output:: km3pipe --help
+   :shell:
 
 ``update``
 ~~~~~~~~~~
