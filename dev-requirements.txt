@@ -15,4 +15,3 @@ pillow
 matplotlib>=1.5
 astropy
 sphinxcontrib-programoutput
-nbsphinx
