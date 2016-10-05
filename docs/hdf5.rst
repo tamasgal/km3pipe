@@ -9,7 +9,7 @@ Data Hierarchy
 --------------
 
 Three main groups are currently used to organise data in HDF5 files:
-`event`, `reco` and `analysis`, each holding 1D arrays of data.
+``event``, ``reco`` and ``analysis``, each holding 1D arrays of data.
 A typical file looks like this::
 
     ├── hits                    # 2D Table
@@ -32,4 +32,4 @@ A typical file looks like this::
 Command Line Utils
 ------------------
 
-.. include:: h5-cli.rst
+See the :ref:`h5cli` on how to convert & inspect HDF5 files from the shell.
