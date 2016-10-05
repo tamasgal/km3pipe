@@ -61,7 +61,7 @@ PipeInspector is a tool to inspect different kinds of data formats used
 within the KM3NeT collaboration. It utilises the KM3Pipe framework to
 deal with data I/O and allows easy access to the stored information.
 
-.. image:: http://tamasgal.com/km3net/PipeInspector_Screenshot.png
+.. image:: _static/PipeInspector_Screenshot.png
     :alt: PipeInspector
     :width: 700
     :align: center
