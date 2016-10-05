@@ -7,8 +7,6 @@ Usage:
     km3pipe test
     km3pipe update [GIT_BRANCH]
     km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID]
-    km3pipe tohdf5 FILE [-o OUTFILE] [-n EVENTS] [-j] [--aa-format=<fmt>] [--aa-lib=<lib.so>]
-    km3pipe hdf2root FILE [-o OUTFILE] [-n EVENTS]
     km3pipe runtable [-n RUNS] [-s REGEX] DET_ID
     km3pipe runinfo DET_ID RUN
     km3pipe (-h | --help)
@@ -20,14 +18,6 @@ Options:
     -c CALIBR_ID        Geometrical calibration ID (eg. A01466417)
     -t T0_SET           Time calibration ID (eg. A01466431)
     -n EVENTS/RUNS      Number of events/runs.
-    -o OUTFILE          Output file.
-    -j --jppy           tohdf5: Use jppy (not aanet) for Jpp readout
-    --aa-format=<fmt>   tohdf5: Which aanet subformat ('minidst',
-                        'ancient_recolns', 'jevt_jgandalf', 'generic_track')
-                        [default: None]
-    --aa-lib-<lib.so>   tohdf5: path to aanet binary (for old versions which
-                        must be loaded via `ROOT.gSystem.Load()` instead
-                        of `import aa`)
     -s REGEX            Regular expression to filter the runsetup name/id.
     DET_ID              Detector ID (eg. D_ARCA001).
     GIT_BRANCH          Git branch to pull (eg. develop).
@@ -58,39 +48,6 @@ def run_tests():
     import pytest
     import km3pipe
     pytest.main([os.path.dirname(km3pipe.__file__)])
-
-
-def tohdf5(input_file, output_file, n_events, **kwargs):
-    """Convert Any file to HDF5 file"""
-    from km3pipe import Pipeline  # noqa
-    from km3pipe.io import GenericPump, HDF5Sink  # noqa
-
-    pipe = Pipeline()
-    pipe.attach(GenericPump, filename=input_file, **kwargs)
-    pipe.attach(StatusBar, every=1000)
-    pipe.attach(HDF5Sink, filename=output_file)
-    pipe.drain(n_events)
-
-
-def hdf2root(infile, outfile):
-    from rootpy.io import root_open
-    from rootpy import asrootpy
-    from root_numpy import array2tree
-    from tables import open_file
-
-    h5 = open_file(infile, 'r')
-    rf = root_open(outfile, 'recreate')
-
-    # 'walk_nodes' does not allow to check if is a group or leaf
-    #   exception handling is bugged
-    #   introspection/typecheck is buged
-    # => this moronic nested loop instead of simple `walk`
-    for group in h5.walk_groups():
-        for leafname, leaf in group._v_leaves.items():
-            tree = asrootpy(array2tree(leaf[:], name=leaf._v_pathname))
-            tree.write()
-    rf.close()
-    h5.close()
 
 
 def runtable(det_id, n=5, sep='\t', regex=None):
