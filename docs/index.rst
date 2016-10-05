@@ -14,10 +14,10 @@
    :maxdepth: 2
 
    install
-   changelog
    user_guide
+   examples
    contribute
-   auto_examples/index
+   changelog
    api
 
 * :ref:`genindex`
