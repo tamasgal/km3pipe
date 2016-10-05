@@ -30,3 +30,7 @@ a:hover {
 a.toc-backref {
   color: #0076ba;
 }
+
+.section img {
+    width: 100%;
+    }
