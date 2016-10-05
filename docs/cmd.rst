@@ -129,3 +129,5 @@ Shows the content of a HDF5 file::
 `hdf2root`
 ~~~~~~~~~~
 .. program-output:: hdf2root --help
+
+.. include:: h5-cli.rst

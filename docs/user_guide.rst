@@ -5,5 +5,5 @@ User Guide
 
     pipeline
     cmd
-    file_formats
+    hdf5
     data_structures

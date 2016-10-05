@@ -44,6 +44,7 @@ extensions = [
     'numpydoc',
     'sphinx_gallery.gen_gallery',
     'nbsphinx',
+    'sphinxcontrib.programoutput',
 ]
 
 exclude_patterns = ['_build', '**.ipynb_checkpoints']
