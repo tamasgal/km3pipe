@@ -764,52 +764,57 @@ class L0HitSeries(object):
     """
     dtype = np.dtype([
         ('channel_id', 'u1'), ('dom_id', '<u4'),
-        ('frame_id', '<u4'),
         ('time', '<i4'), ('tot', 'u1'),
         ])
-    def __init__(self, arr):
+    def __init__(self, arr, slice_id, frame_id):
         self._arr = arr
         self._index = 0
         self._hits = None
+        self.slice_id = slice_id
+        self.frame_id = frame_id
+
+    @property
+    def h5loc(self):
+        return "/timeslices/slice_{0}".format(self.slice_id)
+
+    @property
+    def tabname(self):
+        return "frame_{0}".format(self.frame_id)
 
     @classmethod
-    def from_arrays(cls, channel_ids, dom_ids, times, tots, frame_id):
+    def from_arrays(cls, channel_ids, dom_ids, times, tots, slice_id, frame_id):
         len = channel_ids.shape[0]
         hits = np.empty(len, cls.dtype)
         hits['channel_id'] = channel_ids
         hits['dom_id'] = dom_ids
         hits['time'] = times
         hits['tot'] = tots
-        hits['frame_id'] = np.full(len, frame_id, dtype='<u4')
-        return cls(hits)
+        return cls(hits, slice_id, frame_id)
 
     @classmethod
-    def from_dict(cls, map, frame_id):
-        if frame_id is None:
-            frame_id = map['frame_id']
+    def from_dict(cls, map, slice_id, frame_id):
         return cls.from_arrays(
             map['channel_id'],
             map['dom_id'],
             map['time'],
             map['tot'],
+            slice_id,
             frame_id,
         )
 
-    def from_table(cls, table, frame_id):
-        if frame_id is None:
-            frame_id = table[0]['frame_id']
+    def from_table(cls, table, slice_id, frame_id):
         return cls(np.array([(
             row['channel_id'],
             row['dom_id'],
             row['time'],
             row['tot'],
-        ) for row in table], dtype=cls.dtype), frame_id)
+        ) for row in table], dtype=cls.dtype), slice_id, frame_id)
 
     @classmethod
-    def deserialise(cls, data, frame_id, fmt='numpy', h5loc='/'):
+    def deserialise(cls, data, slice_id, frame_id, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
-            #return cls.from_table(data, frame_id)
-            return cls(data)
+            # return cls.from_table(data, frame_id)
+            return cls(data, slice_id, frame_id)
 
     def serialise(self, to='numpy'):
         if to == 'numpy':

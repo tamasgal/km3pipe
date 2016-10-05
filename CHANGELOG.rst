@@ -1,10 +1,23 @@
 Unreleased changes
 ------------------
-- Improved documentation
+* Group frames in summary slices under /timeslices/slice_id/frame_id
+  when using `tohdf5 -j -s FILE.root`
+
+
+4.7.1 / 2016-09-29
+~~~~~~~~~~~~~~~~~~
+* Improved documentation
+* Fixed event_id indexing for the /hits table in HDF5
+* root sub-package added (via rootpy)
+* Added arguments to allow optional parsing of L0 data and summaryslices
+  when using the JPPPump
+* New command line utility to convert to HDF5: `tohdf5`
 
 4.7.0 / 2016-09-25
 ~~~~~~~~~~~~~~~~~~
 * Adds summary slice readout support via jppy
+* Introducing astro package
+* Use BLOSC compression library for HDF5
 
 4.6.0
 ~~~~~

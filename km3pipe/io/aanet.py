@@ -124,16 +124,19 @@ class AanetPump(Pump):
                 blob['Header'] = self.header
                 try:
                     blob['EventInfo'] = EventInfo((
-                        event.det_id, event.id, event.frame_index,
+                        event.det_id, event.frame_index,
                         event.mc_id, event.mc_t, event.overlays,
                         #event.run_id,
                         event.trigger_counter, event.trigger_mask,
-                        event.t.GetNanoSec(), event.t.GetSec(), w1, w2, w3,)
-                    )
+                        event.t.GetNanoSec(), event.t.GetSec(),
+                        w1, w2, w3,
+                        event.id))
                 except AttributeError:
-                    blob['EventInfo'] = EventInfo((0, event.id,
-                                                  event.frame_index, 0, 0, 0,
-                                                  0, 0, 0, 0, 0, w1, w2, w3,))
+                    blob['EventInfo'] = EventInfo((0, event.frame_index,
+                                                   0, 0, 0,
+                                                   0, 0, 0, 0,
+                                                   w1, w2, w3,
+                                                   event.id))
                 if self.format == 'minidst':
                     recos = read_mini_dst(event, event.id)
                     for recname, reco in recos.items():

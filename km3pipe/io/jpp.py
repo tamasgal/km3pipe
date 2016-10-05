@@ -39,6 +39,8 @@ class JPPPump(Pump):
                               "    pip install jppy\n")
 
         self.event_index = self.get('index') or 0
+        self.with_summaryslices = self.get('with_summaryslices') or False
+        self.with_l0hits = self.get('with_l0hits') or False
         self.timeslice_index = 0
         self.timeslice_frame_index = 0
         self.summaryslice_index = 0
@@ -55,7 +57,7 @@ class JPPPump(Pump):
         while self.event_reader.has_next:
             yield self.extract_event()
 
-        while self.summaryslice_reader.has_next:
+        while self.with_summaryslices and self.summaryslice_reader.has_next:
             self.summaryslice_frame_index = 0
             self.summaryslice_reader.retrieve_next_summaryslice()
             while self.summaryslice_reader.has_next_frame:
@@ -64,13 +66,18 @@ class JPPPump(Pump):
                 self.summaryslice_frame_index += 1
             self.summaryslice_index += 1
 
-        while self.timeslice_reader.has_next:
+        while self.with_l0hits and self.timeslice_reader.has_next:
             self.timeslice_frame_index = 0
             self.timeslice_reader.retrieve_next_timeslice()
             while self.timeslice_reader.has_next_superframe:
-                yield self.extract_timeslice_frame()
-                self.timeslice_reader.retrieve_next_superframe()
-                self.timeslice_frame_index += 1
+                try:
+                    yield self.extract_timeslice_frame()
+                except IndexError:
+                    log.warning("Skipping broken frame.")
+                else:
+                    self.timeslice_frame_index += 1
+                finally:
+                    self.timeslice_reader.retrieve_next_superframe()
             self.timeslice_index += 1
 
         raise StopIteration
@@ -120,7 +127,8 @@ class JPPPump(Pump):
         tots = np.zeros(n, dtype='i')
         r.get_hits(channel_ids, dom_ids, times, tots)
         hit_series = L0HitSeries.from_arrays(
-            channel_ids, dom_ids, times, tots, self.timeslice_index
+            channel_ids, dom_ids, times, tots,
+            self.timeslice_index, self.timeslice_frame_index
         )
         timeslice_info = TimesliceInfo(
                 dom_ids[0],
@@ -153,8 +161,6 @@ class JPPPump(Pump):
 
         blob['SummaryframeInfo'] = summaryframe_info
         return blob
-
-
 
     def process(self, blob):
         return next(self.blobs)

@@ -90,6 +90,7 @@ setup(name='km3pipe',
           'console_scripts': [
               'km3pipe=km3pipe.cmd:main',
               'km3srv=km3pipe.srv:main',
+              'tohdf5=km3pipe.utils.tohdf5:main',
               'pipeinspector=pipeinspector.app:main',
               'h5tree=km3pipe.utils.h5tree:main',
               'rtree=km3pipe.utils.rtree:main',
