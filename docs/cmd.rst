@@ -81,21 +81,25 @@ HDF5 CLI Utils
 
 ``tohdf``
 ~~~~~~~~~
-.. program-output:: tohdf5 --help
+.. command-output:: tohdf5 --help
+   :shell:
 
 ``hdf2root``
 ~~~~~~~~~~~~
-.. program-output:: hdf2root --help
+.. command-output:: hdf2root --help
+   :shell:
 
 ``h5info``
 ~~~~~~~~~~
 
-.. program-output:: h5info --help
+.. command-output:: h5info --help
+   :shell:
 
 ``h5tree``
 ~~~~~~~~~~
 
-.. program-output:: h5tree --help
+.. command-output:: h5tree --help
+   :shell:
 
 Example::
 
