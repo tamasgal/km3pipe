@@ -4,6 +4,7 @@ Unreleased changes
   when using ``tohdf5 -j -s FILE.root``
 * ``hdf2root`` is now it's own command
 * ``tohdf5`` and ``hdf2root`` no longer ``km3pipe`` CLI subcommands
+* Use zlib instead of blosc for compatibility reasons
 
 
 4.7.1 / 2016-09-29
