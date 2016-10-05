@@ -65,10 +65,3 @@ Here is an example configuration::
 
     [Slack]
     token=xoxp-2355837568-2397897846-8945924372-395f023485
-
-
-.. image:: https://travis-ci.org/tamasgal/km3pipe.svg?branch=develop
-    :target: https://travis-ci.org/tamasgal/km3pipe
-
-.. image:: https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat
-    :target: http://km3pipe.readthedocs.io/en/latest/
