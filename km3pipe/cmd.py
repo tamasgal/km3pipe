@@ -129,20 +129,6 @@ def main():
     if args['update']:
         update_km3pipe(args['GIT_BRANCH'])
 
-    if args['tohdf5']:
-        infile = args['FILE']
-        outfile = args['-o'] or infile + '.h5'
-        use_jppy_pump = args['--jppy']
-        aa_format = args['--aa-format']
-        aa_lib = args['--aa-lib']
-        tohdf5(infile, outfile, n, use_jppy=use_jppy_pump, aa_fmt=aa_format,
-               aa_lib=aa_lib)
-
-    if args['hdf2root']:
-        infile = args['FILE']
-        outfile = args['-o'] or infile + '.root'
-        hdf2root(infile, outfile)
-
     if args['runtable']:
         runtable(args['DET_ID'], n, regex=args['-s'])
 
