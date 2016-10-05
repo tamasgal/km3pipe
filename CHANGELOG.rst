@@ -2,6 +2,7 @@ Unreleased changes
 ------------------
 * Group frames in summary slices under /timeslices/slice_id/frame_id
   when using `tohdf5 -j -s FILE.root`
+* Use zlib instead of blosc for compatibility reasons
 
 
 4.7.1 / 2016-09-29
