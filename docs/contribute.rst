@@ -8,8 +8,8 @@ If you have any questions, join us in the `#km3pipe`_ Slack channel.
 
 .. _#km3pipe: https://km3net.slack.com/messages/km3pipe
 
-Add Features & Fix Bugs
------------------------
+Install in Developer Mode
+-------------------------
 
 Setup a Virtualenv for your New Version
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
