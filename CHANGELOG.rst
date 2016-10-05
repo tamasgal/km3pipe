@@ -5,6 +5,7 @@ Unreleased changes
 * ``hdf2root`` is now it's own command
 * ``tohdf5`` and ``hdf2root`` no longer ``km3pipe`` CLI subcommands
 * Use zlib instead of blosc for compatibility reasons
+* add CLI option to make DB connection non-permanent
 
 
 4.7.1 / 2016-09-29
