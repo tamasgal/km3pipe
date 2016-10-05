@@ -23,7 +23,8 @@ Options:
     -o OUTFILE          Output file.
     -j --jppy           tohdf5: Use jppy (not aanet) for Jpp readout
     --aa-format=<fmt>   tohdf5: Which aanet subformat ('minidst',
-                        'jevt_jgandalf', 'generic_track') [default: None]
+                        'ancient_recolns', 'jevt_jgandalf', 'generic_track')
+                        [default: None]
     --aa-lib-<lib.so>   tohdf5: path to aanet binary (for old versions which
                         must be loaded via `ROOT.gSystem.Load()` instead
                         of `import aa`)
