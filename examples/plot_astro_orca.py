@@ -40,4 +40,4 @@ orca_event = SkyCoord(alt=alt, az=az, frame=orca_frame)
 orca_event_origin = orca_event.galactic
 ax.plot(orca_event_origin.l, orca_event_origin.b, 'o',
         markersize=10, alpha=0.3, color='k')
-plt.savefig('foo.pdf')
+plt.show()

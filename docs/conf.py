@@ -15,6 +15,7 @@
 import sys
 import os
 from datetime import date
+from glob import glob
 
 from better import better_theme_path
 
@@ -43,7 +44,10 @@ extensions = [
     'sphinx.ext.viewcode',
     'numpydoc',
     'sphinx_gallery.gen_gallery',
+    'sphinxcontrib.programoutput',
 ]
+
+exclude_patterns = ['_build', '**.ipynb_checkpoints']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -265,7 +269,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     ('index', 'KM3Pipe', u'KM3Pipe Documentation',
-     u'Tamás Gál and Moritz Lotze', 'KM3Pipe', 'An analysis framework for KM3NeT data.',
+     u'Tamás Gál and Moritz Lotze', 'KM3Pipe',
+     'An analysis framework for KM3NeT data.',
      'Miscellaneous'),
 ]
 
@@ -293,4 +298,4 @@ sphinx_gallery_conf = {
     }
 }
 
-autosummary_generate = True
+autosummary_generate = ["api.rst"]

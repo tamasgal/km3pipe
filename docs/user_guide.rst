@@ -4,6 +4,5 @@ User Guide
 .. toctree:: 
 
     pipeline
+    hdf5
     cmd
-    file_formats
-    data_structures
