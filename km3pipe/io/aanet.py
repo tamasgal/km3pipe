@@ -95,9 +95,9 @@ class AanetPump(Pump):
                 log.warn(filename + ": can't read header.")
                 pass
 
-            # for event in event_file:
-            while event_file.next():
-                event = event_file.evt
+            # while event_file.next():
+                # event = event_file.evt
+            for event in event_file:
                 try:
                     if event.det_id <= 0:  # apply ZED correction
                         for track in event.mc_trks:
