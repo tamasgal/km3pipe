@@ -4,24 +4,29 @@
 Convert ROOT and EVT files to HDF5.
 
 Usage:
-    tohdf5 [-o OUTFILE] [-n EVENTS] [--aa-format=<fmt>] [--aa-lib=<lib.so>] FILE...
-    tohdf5 [-o OUTFILE] [-n EVENTS] [-j] [-s] [-l] FILE...
+    tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [--aa-format=<fmt>] [--aa-lib=<lib.so>] FILE...
+    tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [-j] [-s] [-l] FILE...
     tohdf5 (-h | --help)
     tohdf5 --version
 
 Options:
-    --aa-format=<fmt>        tohdf5: Which aanet subformat ('minidst',
-                             'ancient_recolns', 'jevt_jgandalf',
-                             'generic_track') [default: None]
-    --aa-lib-<lib.so>        tohdf5: path to aanet binary (for old versions which
-                             must be loaded via `ROOT.gSystem.Load()` instead
-                             of `import aa`)
-    -h --help                Show this screen.
-    -j --jppy                tohdf5: Use jppy (not aanet) for Jpp readout
-    -l --with-l0hits         Include L0-hits [default: False]
-    -n EVENTS/RUNS           Number of events/runs.
-    -o OUTFILE               Output file.
-    -s --with-summaryslices  Include summary slices [default: False]
+    --aa-format=<fmt>          tohdf5: Which aanet subformat ('minidst',
+                               'ancient_recolns', 'jevt_jgandalf',
+                               'generic_track') [default: None]
+    --aa-lib-<lib.so>          tohdf5: path to aanet binary (for old versions which
+                               must be loaded via `ROOT.gSystem.Load()` instead
+                               of `import aa`)
+    -h --help                  Show this screen.
+    -j --jppy                  tohdf5: Use jppy (not aanet) for Jpp readout
+    -l --with-l0hits           Include L0-hits [default: False]
+    -n EVENTS/RUNS             Number of events/runs.
+    -o OUTFILE                 Output file.
+    -s --with-summaryslices    Include summary slices [default: False]
+    -e --expected-rows NROWS   Approximate number of events.  Providing a
+                               rough estimate for this (100, 10000000, ...)
+                               will greatly improve reading/writing speed and
+                               memory usage. Strongly recommended if the
+                               table/array size is >= 100 MB.
 """
 
 from __future__ import division, absolute_import, print_function
@@ -51,7 +56,7 @@ def tohdf5(input_files, output_file, n_events, **kwargs):
     pipe = Pipeline()
     pipe.attach(GenericPump, filenames=input_files, **kwargs)
     pipe.attach(StatusBar, every=1000)
-    pipe.attach(HDF5Sink, filename=output_file)
+    pipe.attach(HDF5Sink, filename=output_file, **kwargs)
     pipe.drain(n_events)
 
 
@@ -76,6 +81,7 @@ def main():
         suffix = '.combined.h5'
     outfile = args['-o'] or infiles[0] + suffix
 
+    n_rows_expected = args['--expected-rows']
     use_jppy_pump = args['--jppy']
     aa_format = args['--aa-format']
     aa_lib = args['--aa-lib']
@@ -83,4 +89,4 @@ def main():
     with_l0hits = args['--with-l0hits']
     tohdf5(infiles, outfile, n, use_jppy=use_jppy_pump, aa_fmt=aa_format,
            aa_lib=aa_lib, with_summaryslices=with_summaryslices,
-           with_l0hits=with_l0hits)
+           with_l0hits=with_l0hits, n_rows_expected=n_rows_expected)
