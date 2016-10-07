@@ -4,8 +4,8 @@
 Convert ROOT and EVT files to HDF5.
 
 Usage:
-    tohdf5 FILE [-o OUTFILE] [-n EVENTS] [--aa-format=<fmt>] [--aa-lib=<lib.so>]
-    tohdf5 FILE [-o OUTFILE] [-n EVENTS] [-j] [-s] [-l]
+    tohdf5 [-o OUTFILE] [-n EVENTS] [--aa-format=<fmt>] [--aa-lib=<lib.so>] FILE...
+    tohdf5 [-o OUTFILE] [-n EVENTS] [-j] [-s] [-l] FILE...
     tohdf5 (-h | --help)
     tohdf5 --version
 
@@ -26,12 +26,13 @@ Options:
 
 from __future__ import division, absolute_import, print_function
 
-import sys
-import os
 from datetime import datetime
+import os
+from six import string_types
+import sys
 
-from km3pipe import version
 from km3modules import StatusBar
+from km3pipe import version
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -42,13 +43,13 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-def tohdf5(input_file, output_file, n_events, **kwargs):
+def tohdf5(input_files, output_file, n_events, **kwargs):
     """Convert Any file to HDF5 file"""
     from km3pipe import Pipeline  # noqa
     from km3pipe.io import GenericPump, HDF5Sink  # noqa
 
     pipe = Pipeline()
-    pipe.attach(GenericPump, filename=input_file, **kwargs)
+    pipe.attach(GenericPump, filenames=input_files, **kwargs)
     pipe.attach(StatusBar, every=1000)
     pipe.attach(HDF5Sink, filename=output_file)
     pipe.drain(n_events)
@@ -63,13 +64,17 @@ def main():
     except TypeError:
         n = None
 
-    infile = args['FILE']
-    outfile = args['-o'] or infile + '.h5'
+    infiles = args['FILE']
+    if isinstance(infiles, string_types):
+        ofname = infiles + '.h5'
+    else:
+        ofname = infiles[0] + '.combined.h5'
+    outfile = args['-o'] or ofname
     use_jppy_pump = args['--jppy']
     aa_format = args['--aa-format']
     aa_lib = args['--aa-lib']
     with_summaryslices = args['--with-summaryslices']
     with_l0hits = args['--with-l0hits']
-    tohdf5(infile, outfile, n, use_jppy=use_jppy_pump, aa_fmt=aa_format,
+    tohdf5(infiles, outfile, n, use_jppy=use_jppy_pump, aa_fmt=aa_format,
            aa_lib=aa_lib, with_summaryslices=with_summaryslices,
            with_l0hits=with_l0hits)
