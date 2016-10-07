@@ -12,7 +12,8 @@ nameclashes and also for an improved overview.
 You can for example simply run ``km3pipe -h`` in your shell to see all available
 commands:
 
-.. program-output:: km3pipe --help
+.. command-output:: km3pipe --help
+   :shell:
 
 ``update``
 ~~~~~~~~~~
@@ -60,7 +61,7 @@ PipeInspector is a tool to inspect different kinds of data formats used
 within the KM3NeT collaboration. It utilises the KM3Pipe framework to
 deal with data I/O and allows easy access to the stored information.
 
-.. image:: http://tamasgal.com/km3net/PipeInspector_Screenshot.png
+.. image:: _static/PipeInspector_Screenshot.png
     :alt: PipeInspector
     :width: 700
     :align: center
@@ -81,21 +82,25 @@ HDF5 CLI Utils
 
 ``tohdf``
 ~~~~~~~~~
-.. program-output:: tohdf5 --help
+.. command-output:: tohdf5 --help
+   :shell:
 
 ``hdf2root``
 ~~~~~~~~~~~~
-.. program-output:: hdf2root --help
+.. command-output:: hdf2root --help
+   :shell:
 
 ``h5info``
 ~~~~~~~~~~
 
-.. program-output:: h5info --help
+.. command-output:: h5info --help
+   :shell:
 
 ``h5tree``
 ~~~~~~~~~~
 
-.. program-output:: h5tree --help
+.. command-output:: h5tree --help
+   :shell:
 
 Example::
 

@@ -7,8 +7,8 @@ Usage:
     km3pipe test
     km3pipe update [GIT_BRANCH]
     km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID]
-    km3pipe runtable [-n RUNS] [-s REGEX] DET_ID
-    km3pipe runinfo DET_ID RUN
+    km3pipe runtable [-n RUNS] [-s REGEX] [--temporary] DET_ID
+    km3pipe runinfo [--temporary] DET_ID RUN
     km3pipe (-h | --help)
     km3pipe --version
 
@@ -19,6 +19,7 @@ Options:
     -t T0_SET           Time calibration ID (eg. A01466431)
     -n EVENTS/RUNS      Number of events/runs.
     -s REGEX            Regular expression to filter the runsetup name/id.
+    --temporary         Do not request a permanent session, but a temporary one. [default=False]
     DET_ID              Detector ID (eg. D_ARCA001).
     GIT_BRANCH          Git branch to pull (eg. develop).
     RUN                 Run number.
@@ -50,9 +51,9 @@ def run_tests():
     pytest.main([os.path.dirname(km3pipe.__file__)])
 
 
-def runtable(det_id, n=5, sep='\t', regex=None):
+def runtable(det_id, n=5, sep='\t', regex=None, temporary=False):
     """Print the run table of the last `n` runs for given detector"""
-    db = DBManager()
+    db = DBManager(temporary=temporary)
     df = db.run_table(det_id)
 
     if regex is not None:
@@ -65,8 +66,8 @@ def runtable(det_id, n=5, sep='\t', regex=None):
     df.to_csv(sys.stdout, sep=sep)
 
 
-def runinfo(run_id, det_id):
-    db = DBManager()
+def runinfo(run_id, det_id, temporary=False):
+    db = DBManager(temporary=temporary)
     df = db.run_table(det_id)
     row = df[df['RUN'] == int(run_id)]
     if len(row) == 0:
@@ -130,10 +131,10 @@ def main():
         update_km3pipe(args['GIT_BRANCH'])
 
     if args['runtable']:
-        runtable(args['DET_ID'], n, regex=args['-s'])
+        runtable(args['DET_ID'], n, regex=args['-s'], temporary=args["--temporary"])
 
     if args['runinfo']:
-        runinfo(args['RUN'], args['DET_ID'])
+        runinfo(args['RUN'], args['DET_ID'], temporary=args["--temporary"])
 
     if args['detx']:
         t0set = args['-t']
