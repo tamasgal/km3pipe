@@ -64,12 +64,18 @@ def main():
     except TypeError:
         n = None
 
+    # FILE... (ellipsis) always returns a list in docopt.
+    # so the bug checking-string-length should not happen here
     infiles = args['FILE']
-    if isinstance(infiles, string_types):
-        ofname = infiles + '.h5'
+    if len(infiles) == 1:
+        suffix = '.h5'
     else:
-        ofname = infiles[0] + '.combined.h5'
-    outfile = args['-o'] or ofname
+        # if the user is too lazy specifying an outfile name
+        # when converting *multiple files into one* (yeah, I know),
+        # at least be clear that it's a combined file
+        suffix = '.combined.h5'
+    outfile = args['-o'] or infiles[0] + suffix
+
     use_jppy_pump = args['--jppy']
     aa_format = args['--aa-format']
     aa_lib = args['--aa-lib']

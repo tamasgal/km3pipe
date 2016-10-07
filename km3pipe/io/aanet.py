@@ -32,8 +32,6 @@ class AanetPump(Pump):
 
         self.filename = self.get('filename')
         self.filenames = self.get('filenames') or []
-        print(self.filename)
-        print(self.filenames)
         self.indices = self.get('indices')
         self.additional = self.get('additional')
         self.format = self.get('aa_fmt')
