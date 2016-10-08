@@ -62,7 +62,10 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
     if isinstance(filenames, string_types):
         return io[extension](filename=filenames, name=name, **kwargs)
     else:
+        if len(filenames) == 1:
+            return io[extension](filename=filenames[0], name=name, **kwargs)
         return io[extension](filenames=filenames, name=name, **kwargs)
+
 
 def df_to_h5(df, filename, tabname, filemode='a', where='/', complevel=5,):
     """Write pandas dataframes with proper columns.
