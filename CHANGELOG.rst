@@ -6,6 +6,7 @@ Unreleased changes
 * ``tohdf5`` and ``hdf2root`` no longer ``km3pipe`` CLI subcommands
 * Use zlib instead of blosc for compatibility reasons
 * add CLI option to make DB connection non-permanent
+* ``tohdf5`` / ``GenericPump`` now supports multiple input files
 
 
 4.7.1 / 2016-09-29

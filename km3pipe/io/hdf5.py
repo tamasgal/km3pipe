@@ -56,6 +56,13 @@ class HDF5Sink(Module):
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
+
+        # magic 10000: this is the default of the "expectedrows" arg
+        # from the tables.File.create_table() function
+        # at least according to the docs
+        # might be able to set to `None`, I don't know...
+        self.n_rows_expected = self.get('n_rows_expected') or 10000
+
         self.index = 1
         self.h5file = tb.open_file(self.filename, mode="w", title="KM3NeT")
         self.filters = tb.Filters(complevel=5, shuffle=True,
@@ -83,7 +90,9 @@ class HDF5Sink(Module):
             loc, tabname = os.path.split(where)
             tab = self.h5file.create_table(
                 loc, tabname, description=dtype, title=title,
-                filters=self.filters, createparents=True)
+                filters=self.filters, createparents=True,
+                expectedrows=self.n_rows_expected,
+            )
             if(level < 4):
                 self._tables[where] = tab
         else:
