@@ -780,7 +780,7 @@ class L0HitSeries(object):
 
     @property
     def tabname(self):
-        return "{0}".format(self.slice_id)
+        return "slice_{0}".format(self.slice_id)
 
     @classmethod
     def from_arrays(cls, channel_ids, dom_ids, times, tots, slice_id, frame_id):
