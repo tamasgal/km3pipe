@@ -133,24 +133,16 @@ class HDF5Sink(Module):
         self.h5file.root._v_attrs.km3pipe = str(kp.__version__)
         self.h5file.root._v_attrs.pytables = str(tb.__version__)
         self.h5file.root._v_attrs.format_version = str(FORMAT_VERSION)
+        print("Creating index tables. This may take a few minutes...")
         for tab in self._tables.itervalues():
             if 'frame_id' in tab.colnames:
-                print("Creating index for '{0}' using 'frame_id'..."
-                      .format(tab.name))
                 tab.cols.frame_id.create_index()
             if 'slice_id' in tab.colnames:
-                print("Creating index for '{0}' using 'slice_id'..."
-                      .format(tab.name))
                 tab.cols.slice_id.create_index()
             if 'dom_id' in tab.colnames:
-                print("Creating index for '{0}' using 'dom_id'..."
-                      .format(tab.name))
                 tab.cols.dom_id.create_index()
             if 'event_id' in tab.colnames:
-                print("Creating index for '{0}' using 'event_id'..."
-                      .format(tab.name))
                 tab.cols.event_id.create_index()
-
             tab.flush()
         self.h5file.close()
 
