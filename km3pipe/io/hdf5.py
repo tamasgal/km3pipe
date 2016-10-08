@@ -163,9 +163,9 @@ class HDF5Pump(Pump):
         filename: str
         From where to read events.
         """
-    def __init__(self, filename, **context):
+    def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
-        self.filename = filename
+        self.filename = self.get('filename')
         if os.path.isfile(self.filename):
             self.h5_file = tb.File(self.filename)
             if not self.get("skip_version_check"):

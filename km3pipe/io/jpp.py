@@ -29,7 +29,7 @@ __status__ = "Development"
 class JPPPump(Pump):
     """A pump for JPP ROOT files."""
 
-    def __init__(self, filename, **context):
+    def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
 
         try:
@@ -45,8 +45,7 @@ class JPPPump(Pump):
         self.timeslice_frame_index = 0
         self.summaryslice_index = 0
         self.summaryslice_frame_index = 0
-        # self.filename = self.get('filename')
-        self.filename = filename
+        self.filename = self.get('filename')
 
         self.event_reader = jppy.PyJDAQEventReader(self.filename)
         self.timeslice_reader = jppy.PyJDAQTimesliceReader(self.filename)
