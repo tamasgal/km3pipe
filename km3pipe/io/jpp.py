@@ -11,8 +11,8 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 
 from km3pipe import Pump, Blob
-from km3pipe.dataclasses import (EventInfo, TimesliceInfo, SummaryframeInfo,
-                                 HitSeries, L0HitSeries)
+from km3pipe.dataclasses import (EventInfo, TimesliceFrameInfo,
+                                 SummaryframeInfo, HitSeries, L0HitSeries)
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -129,15 +129,23 @@ class JPPPump(Pump):
             channel_ids, dom_ids, times, tots,
             self.timeslice_index, self.timeslice_frame_index
         )
-        timeslice_info = TimesliceInfo(
-                dom_ids[0],
-                self.timeslice_frame_index,
-                n,
-                self.timeslice_index,
+        timesliceframe_info = TimesliceFrameInfo(
+                r.dom_id,
+                r.fifo_status,
+                self.summaryslice_frame_index,
+                r.frame_index,
+                r.has_udp_trailer,
+                r.high_rate_veto,
+                r.max_sequence_number,
+                r.number_of_received_packets,
+                self.summaryslice_index,
+                r.utc_nanoseconds,
+                r.utc_seconds,
+                r.white_rabbit_status,
                 )
 
         blob['L0Hits'] = hit_series
-        blob['TimesliceInfo'] = timeslice_info
+        blob['TimesliceFrameInfo'] = timesliceframe_info
         return blob
 
     def extract_summaryslice_frame(self):
