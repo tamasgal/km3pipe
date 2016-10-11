@@ -1,5 +1,9 @@
 Unreleased changes
 ------------------
+
+
+4.8.0 / 2016-10-11
+------------------
 * Group frames in summary slices under /timeslices/slice_id/frame_id
   when using ``tohdf5 -j -s FILE.root``
 * ``hdf2root`` is now it's own command
