@@ -115,8 +115,10 @@ pygments_style = 'sphinx'
 
 html_theme = 'alabaster'
 html_theme_options = {
-    'font_family': "'Lato', 'Open Sans', sans",
-    'code_font_family': "'Inconsolata', 'Consolas', monospace",
+    'font_family': "'Open Sans', sans",
+    'head_font_family': "'Lato', sans",
+    'code_font_family': "'Roboto Mono', 'Inconsolata', 'Consolas', monospace",
+    'code_font_size': '0.8em',
 }
 
 
