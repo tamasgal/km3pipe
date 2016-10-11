@@ -29,7 +29,7 @@ __status__ = "Development"
 class JPPPump(Pump):
     """A pump for JPP ROOT files."""
 
-    def __init__(self, filename, **context):
+    def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
 
         try:
@@ -45,8 +45,7 @@ class JPPPump(Pump):
         self.timeslice_frame_index = 0
         self.summaryslice_index = 0
         self.summaryslice_frame_index = 0
-        # self.filename = self.get('filename')
-        self.filename = filename
+        self.filename = self.get('filename')
 
         self.event_reader = jppy.PyJDAQEventReader(self.filename)
         self.timeslice_reader = jppy.PyJDAQTimesliceReader(self.filename)
@@ -54,9 +53,6 @@ class JPPPump(Pump):
         self.blobs = self.blob_generator()
 
     def blob_generator(self):
-        while self.event_reader.has_next:
-            yield self.extract_event()
-
         while self.with_summaryslices and self.summaryslice_reader.has_next:
             self.summaryslice_frame_index = 0
             self.summaryslice_reader.retrieve_next_summaryslice()
@@ -79,6 +75,9 @@ class JPPPump(Pump):
                 finally:
                     self.timeslice_reader.retrieve_next_superframe()
             self.timeslice_index += 1
+
+        while self.event_reader.has_next:
+            yield self.extract_event()
 
         raise StopIteration
 

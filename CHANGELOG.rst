@@ -1,7 +1,12 @@
 Unreleased changes
 ------------------
 * Group frames in summary slices under /timeslices/slice_id/frame_id
-  when using `tohdf5 -j -s FILE.root`
+  when using ``tohdf5 -j -s FILE.root``
+* ``hdf2root`` is now it's own command
+* ``tohdf5`` and ``hdf2root`` no longer ``km3pipe`` CLI subcommands
+* Use zlib instead of blosc for compatibility reasons
+* add CLI option to make DB connection non-permanent
+* ``tohdf5`` / ``GenericPump`` now supports multiple input files for aanet files
 
 
 4.7.1 / 2016-09-29
@@ -11,7 +16,7 @@ Unreleased changes
 * root sub-package added (via rootpy)
 * Added arguments to allow optional parsing of L0 data and summaryslices
   when using the JPPPump
-* New command line utility to convert to HDF5: `tohdf5`
+* New command line utility to convert to HDF5: ``tohdf5``
 
 4.7.0 / 2016-09-25
 ~~~~~~~~~~~~~~~~~~
@@ -29,7 +34,7 @@ Unreleased changes
 
 4.5.0
 ~~~~~
-* Full L0 readout support via `JPPPump`
+* Full L0 readout support via ``JPPPump``
 
 4.4.1
 ~~~~~

@@ -65,19 +65,3 @@ Here is an example configuration::
 
     [Slack]
     token=xoxp-2355837568-2397897846-8945924372-395f023485
-
-
-Video HowTo
------------
-
-The following video shows how to install the latest developer version and run the test suite.
-
-.. raw:: html
-
-    <script type="text/javascript" src="https://asciinema.org/a/43603.js" id="asciicast-43603" async></script>
-
-.. image:: https://travis-ci.org/tamasgal/km3pipe.svg?branch=develop
-    :target: https://travis-ci.org/tamasgal/km3pipe
-
-.. image:: https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat
-    :target: http://km3pipe.readthedocs.io/en/latest/

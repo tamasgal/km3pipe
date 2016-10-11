@@ -155,11 +155,11 @@ class TimesliceInfo(with_metaclass(Serialisable)):
         ),]
 
     def __str__(self):
-        return "Timeslice frame #{0}:\n" \
-               "    slice id: {1}\n" \
-               "    frame id: {2}\n" \
-               "    DOM id:   {3}\n" \
-               "    n_hits:   {4}\n" \
+        return "Timeslice frame:\n" \
+               "    slice id: {0}\n" \
+               "    frame id: {1}\n" \
+               "    DOM id:   {2}\n" \
+               "    n_hits:   {3}\n" \
                .format(self.slice_id, self.frame_id, self.dom_id, self.n_hits)
 
     def __insp__(self):

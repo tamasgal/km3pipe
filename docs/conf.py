@@ -15,8 +15,7 @@
 import sys
 import os
 from datetime import date
-
-from better import better_theme_path
+from glob import glob
 
 sys.path.append('../')
 
@@ -43,7 +42,10 @@ extensions = [
     'sphinx.ext.viewcode',
     'numpydoc',
     'sphinx_gallery.gen_gallery',
+    'sphinxcontrib.programoutput',
 ]
+
+exclude_patterns = ['_build', '**.ipynb_checkpoints']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -111,23 +113,12 @@ pygments_style = 'sphinx'
 
 # -- Options for HTML output ----------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-html_theme = 'better'
-
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
+html_theme = 'alabaster'
 html_theme_options = {
-    'cssfiles': ['_static/paper.css'],
-    'textcolor': '#444',
-    'showheader': True,
-    'showrelbartop': False,
-    'showrelbarbottom': False,
+    'font_family': "'Lato', 'Open Sans', sans",
+    'code_font_family': "'Inconsolata', 'Consolas', monospace",
 }
 
-# Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = [better_theme_path]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -265,7 +256,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     ('index', 'KM3Pipe', u'KM3Pipe Documentation',
-     u'Tamás Gál and Moritz Lotze', 'KM3Pipe', 'An analysis framework for KM3NeT data.',
+     u'Tamás Gál and Moritz Lotze', 'KM3Pipe',
+     'An analysis framework for KM3NeT data.',
      'Miscellaneous'),
 ]
 
@@ -293,4 +285,4 @@ sphinx_gallery_conf = {
     }
 }
 
-autosummary_generate = True
+autosummary_generate = ["api.rst"]

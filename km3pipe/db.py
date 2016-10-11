@@ -70,13 +70,14 @@ BASE_URL = 'https://km3netdbweb.in2p3.fr'
 
 class DBManager(object):
     """A wrapper for the KM3NeT Web DB"""
-    def __init__(self, username=None, password=None, url=None):
+    def __init__(self, username=None, password=None, url=None, temporary=False):
         "Create database connection"
         self._cookies = []
         self._parameters = None
         self._doms = None
         self._detectors = None
         self._opener = None
+        self._temporary = temporary
 
         config = Config()
 
@@ -94,6 +95,7 @@ class DBManager(object):
         else:
             username, password = config.db_credentials
             if config.db_session_cookie is None and \
+                    not self._temporary and \
                input("Request permanent session? ([y]/n)") in 'yY ':
                 self.request_permanent_session(username, password)
             else:

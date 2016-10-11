@@ -95,66 +95,74 @@ class AanetPump(Pump):
                 log.warn(filename + ": can't read header.")
                 pass
 
-            # for event in event_file:
-            while event_file.next():
-                event = event_file.evt
-                try:
-                    if event.det_id <= 0:  # apply ZED correction
-                        for track in event.mc_trks:
-                            track.pos.z += 405.93
-                except AttributeError:
-                    pass
-
-                if len(event.w) == 3:
-                    w1, w2, w3 = event.w
-                else:
-                    w1 = w2 = w3 = np.nan
-
-                blob = {}
-                blob['Evt'] = event
-                try:
-                    blob['Hits'] = HitSeries.from_aanet(event.hits, event.id)
-                    blob['MCHits'] = HitSeries.from_aanet(event.mc_hits,
-                                                          event.id)
-                except AttributeError:
-                    pass
-                blob['MCTracks'] = TrackSeries.from_aanet(event.mc_trks,
-                                                          event.id)
-                blob['filename'] = filename
-                blob['Header'] = self.header
-                try:
-                    blob['EventInfo'] = EventInfo((
-                        event.det_id, event.frame_index,
-                        event.mc_id, event.mc_t, event.overlays,
-                        #event.run_id,
-                        event.trigger_counter, event.trigger_mask,
-                        event.t.GetNanoSec(), event.t.GetSec(),
-                        w1, w2, w3,
-                        event.id))
-                except AttributeError:
-                    blob['EventInfo'] = EventInfo((0, event.frame_index,
-                                                   0, 0, 0,
-                                                   0, 0, 0, 0,
-                                                   w1, w2, w3,
-                                                   event.id))
-                if self.format == 'minidst':
-                    recos = read_mini_dst(event, event.id)
-                    for recname, reco in recos.items():
-                        blob[recname] = reco
-                if self.format == 'jevt_jgandalf':
-                    track, dtype = parse_jevt_jgandalf(event, event.id)
-                    if track:
-                        blob['JEvtJGandalf'] = Reco(track, dtype)
-                if self.format == 'generic_track':
-                    track, dtype = parse_generic_event(event, event.id)
-                    if track:
-                        blob['Track'] = Reco(track, dtype)
-                if self.format == 'ancient_recolns':
-                    track, dtype = parse_ancient_recolns(event, event.id)
-                    if track:
-                        blob['AncientRecoLNS'] = Reco(track, dtype)
-                yield blob
+            if self.format == 'ancient_recolns':
+                while event_file.next():
+                    event = event_file.evt
+                    blob = self._read_event(event, filename)
+                    yield blob
+            else:
+                for event in event_file:
+                    blob = self._read_event(event, filename)
+                    yield blob
             del event_file
+
+    def _read_event(self, event, filename):
+        try:
+            if event.det_id <= 0:  # apply ZED correction
+                for track in event.mc_trks:
+                    track.pos.z += 405.93
+        except AttributeError:
+            pass
+
+        if len(event.w) == 3:
+            w1, w2, w3 = event.w
+        else:
+            w1 = w2 = w3 = np.nan
+
+        blob = {}
+        blob['Evt'] = event
+        try:
+            blob['Hits'] = HitSeries.from_aanet(event.hits, event.id)
+            blob['MCHits'] = HitSeries.from_aanet(event.mc_hits,
+                                                  event.id)
+        except AttributeError:
+            pass
+        blob['MCTracks'] = TrackSeries.from_aanet(event.mc_trks,
+                                                  event.id)
+        blob['filename'] = filename
+        blob['Header'] = self.header
+        try:
+            blob['EventInfo'] = EventInfo((
+                event.det_id, event.frame_index,
+                event.mc_id, event.mc_t, event.overlays,
+                # event.run_id,
+                event.trigger_counter, event.trigger_mask,
+                event.t.GetNanoSec(), event.t.GetSec(),
+                w1, w2, w3,
+                event.id))
+        except AttributeError:
+            blob['EventInfo'] = EventInfo((0, event.frame_index,
+                                           0, 0, 0,
+                                           0, 0, 0, 0,
+                                           w1, w2, w3,
+                                           event.id))
+        if self.format == 'minidst':
+            recos = read_mini_dst(event, event.id)
+            for recname, reco in recos.items():
+                blob[recname] = reco
+        if self.format == 'jevt_jgandalf':
+            track, dtype = parse_jevt_jgandalf(event, event.id)
+            if track:
+                blob['JEvtJGandalf'] = Reco(track, dtype)
+        if self.format == 'generic_track':
+            track, dtype = parse_generic_event(event, event.id)
+            if track:
+                blob['Track'] = Reco(track, dtype)
+        if self.format == 'ancient_recolns':
+            track, dtype = parse_ancient_recolns(event, event.id)
+            if track:
+                blob['AncientRecoLNS'] = Reco(track, dtype)
+        return blob
 
     def event_index(self, blob):
         if self.id:
