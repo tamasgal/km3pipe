@@ -222,7 +222,7 @@ class TimesliceFrameInfo(with_metaclass(Serialisable)):
                "    UDP packets: {3}/{4}\n" \
                "    n_hits:   {5}\n" \
                .format(self.slice_id, self.frame_id, self.dom_id,
-                       self.number_of_received_packets,
+                       self.n_packets,
                        self.max_sequence_number, self.n_hits)
 
     def __insp__(self):
