@@ -15,7 +15,6 @@
 import sys
 import os
 from datetime import date
-from glob import glob
 
 sys.path.append('../')
 
@@ -117,8 +116,7 @@ html_theme = 'alabaster'
 html_theme_options = {
     'font_family': "'Open Sans', sans",
     'head_font_family': "'Lato', sans",
-    'code_font_family': "'Roboto Mono', 'Inconsolata', 'Consolas', monospace",
-    'code_font_size': '0.8em',
+    'code_font_family': "'Roboto Mono', monospace",
 }
 
 
