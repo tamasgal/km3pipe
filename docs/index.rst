@@ -15,19 +15,19 @@ KM3Pipe
 .. include:: summary.rst
 
 .. toctree::
-   :hidden:
+    :hidden:
+    :titlesonly:
 
-   self
+    self
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 3
 
-   install
-   user_guide
-   examples
-   contribute
-   changelog
-   api
+    install
+    user_guide
+    examples
+    contribute
+    changelog
+    api
 
 * :ref:`genindex`
-

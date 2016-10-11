@@ -288,7 +288,7 @@ class H5Chain(object):
     >>> coll = c(n_evts, keys, step)
     {'mc_tracks': pd.Dataframe, 'hits' pd.DataFrame, 'reco': dataframe}
 
-    # these are pandas Dataframes
+    >>> # these are pandas Dataframes
     >>> X = coll['reco']
     >>> wgt = coll['event_info']['weights_w2']
     >>> Y_ene = coll['mc_tracks']['energy']
