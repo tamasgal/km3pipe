@@ -283,7 +283,7 @@ class SummaryframeInfo(with_metaclass(Serialisable)):
                "    DOM id:      {2}\n" \
                "    UDP packets: {3}/{4}\n" \
                .format(self, self.frame_id, self.slice_id, self.dom_id,
-                       self.number_of_received_packets,
+                       self.n_packets,
                        self.max_sequence_number)
 
     def __insp__(self):
