@@ -43,4 +43,4 @@ def to_frame(times, zeniths, azimuths, frame='galactic'):
     azimuths *= degree
     orca_frame = AltAz(location=orca_loc, obstime=times)
     coords = SkyCoord(zeniths, azimuths, frame=orca_frame)
-    return coords
+    return coords.transform_to(frame)

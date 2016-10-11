@@ -1,6 +1,3 @@
-KM3Pipe
-=======
-
 KM3Pipe is a framework for KM3NeT related stuff including MC, data files, live access to detectors and databases, parsers for different file formats and an easy to use framework for batch processing.
 
 The framework tries to standardise the way the data is processed within our collaboration by providing a `Pipeline`-class, which can be used to put together different built-in or user made `Pumps` and `Modules`. `Pumps` act as data readers/parsers (from files, memory or even socket connections) and `Modules` take care of data processing and output. Such a `Pipeline` setup can then be used to iteratively process data in a file. In our case for example we store several thousands of neutrino interaction events in a bunch of files and KM3Pipe is used to put together an analysis chain which processes each event one-by-one.

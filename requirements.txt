@@ -9,10 +9,10 @@ websocket-client
 tables
 tornado
 sphinx>=1.4
-sphinx-better-theme
 sphinx-gallery
 numpydoc
 pillow
 matplotlib>=1.5
 seaborn
 astropy
+sphinxcontrib-programoutput

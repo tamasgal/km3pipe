@@ -29,7 +29,7 @@ __status__ = "Development"
 class JPPPump(Pump):
     """A pump for JPP ROOT files."""
 
-    def __init__(self, filename, **context):
+    def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
 
         try:
@@ -45,8 +45,7 @@ class JPPPump(Pump):
         self.timeslice_frame_index = 0
         self.summaryslice_index = 0
         self.summaryslice_frame_index = 0
-        # self.filename = self.get('filename')
-        self.filename = filename
+        self.filename = self.get('filename')
 
         self.event_reader = jppy.PyJDAQEventReader(self.filename)
         self.timeslice_reader = jppy.PyJDAQTimesliceReader(self.filename)
@@ -54,9 +53,6 @@ class JPPPump(Pump):
         self.blobs = self.blob_generator()
 
     def blob_generator(self):
-        while self.event_reader.has_next:
-            yield self.extract_event()
-
         while self.with_summaryslices and self.summaryslice_reader.has_next:
             self.summaryslice_frame_index = 0
             self.summaryslice_reader.retrieve_next_summaryslice()
@@ -70,10 +66,18 @@ class JPPPump(Pump):
             self.timeslice_frame_index = 0
             self.timeslice_reader.retrieve_next_timeslice()
             while self.timeslice_reader.has_next_superframe:
-                yield self.extract_timeslice_frame()
-                self.timeslice_reader.retrieve_next_superframe()
-                self.timeslice_frame_index += 1
+                try:
+                    yield self.extract_timeslice_frame()
+                except IndexError:
+                    log.warning("Skipping broken frame.")
+                else:
+                    self.timeslice_frame_index += 1
+                finally:
+                    self.timeslice_reader.retrieve_next_superframe()
             self.timeslice_index += 1
+
+        while self.event_reader.has_next:
+            yield self.extract_event()
 
         raise StopIteration
 
@@ -122,7 +126,8 @@ class JPPPump(Pump):
         tots = np.zeros(n, dtype='i')
         r.get_hits(channel_ids, dom_ids, times, tots)
         hit_series = L0HitSeries.from_arrays(
-            channel_ids, dom_ids, times, tots, self.timeslice_index
+            channel_ids, dom_ids, times, tots,
+            self.timeslice_index, self.timeslice_frame_index
         )
         timeslice_info = TimesliceInfo(
                 dom_ids[0],
