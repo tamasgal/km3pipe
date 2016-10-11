@@ -222,8 +222,8 @@ class TimesliceFrameInfo(with_metaclass(Serialisable)):
                "    UDP packets: {3}/{4}\n" \
                "    n_hits:   {5}\n" \
                .format(self.slice_id, self.frame_id, self.dom_id,
-                       self.number_of_packets, self.max_sequence_number,
-                       self.n_hits)
+                       self.number_of_received_packets,
+                       self.max_sequence_number, self.n_hits)
 
     def __insp__(self):
         return self.__str__()
@@ -283,7 +283,8 @@ class SummaryframeInfo(with_metaclass(Serialisable)):
                "    DOM id:      {2}\n" \
                "    UDP packets: {3}/{4}\n" \
                .format(self, self.frame_id, self.slice_id, self.dom_id,
-                       self.number_of_packets, self.max_sequence_number)
+                       self.number_of_received_packets,
+                       self.max_sequence_number)
 
     def __insp__(self):
         return self.__str__()
