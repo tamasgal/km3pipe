@@ -11,8 +11,8 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 
 from km3pipe import Pump, Blob
-from km3pipe.dataclasses import (EventInfo, TimesliceInfo, SummaryframeInfo,
-                                 HitSeries, L0HitSeries)
+from km3pipe.dataclasses import (EventInfo, TimesliceFrameInfo,
+                                 SummaryframeInfo, HitSeries, L0HitSeries)
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -53,15 +53,6 @@ class JPPPump(Pump):
         self.blobs = self.blob_generator()
 
     def blob_generator(self):
-        while self.with_summaryslices and self.summaryslice_reader.has_next:
-            self.summaryslice_frame_index = 0
-            self.summaryslice_reader.retrieve_next_summaryslice()
-            while self.summaryslice_reader.has_next_frame:
-                yield self.extract_summaryslice_frame()
-                self.summaryslice_reader.retrieve_next_frame()
-                self.summaryslice_frame_index += 1
-            self.summaryslice_index += 1
-
         while self.with_l0hits and self.timeslice_reader.has_next:
             self.timeslice_frame_index = 0
             self.timeslice_reader.retrieve_next_timeslice()
@@ -75,6 +66,15 @@ class JPPPump(Pump):
                 finally:
                     self.timeslice_reader.retrieve_next_superframe()
             self.timeslice_index += 1
+
+        while self.with_summaryslices and self.summaryslice_reader.has_next:
+            self.summaryslice_frame_index = 0
+            self.summaryslice_reader.retrieve_next_summaryslice()
+            while self.summaryslice_reader.has_next_frame:
+                yield self.extract_summaryslice_frame()
+                self.summaryslice_reader.retrieve_next_frame()
+                self.summaryslice_frame_index += 1
+            self.summaryslice_index += 1
 
         while self.event_reader.has_next:
             yield self.extract_event()
@@ -129,15 +129,23 @@ class JPPPump(Pump):
             channel_ids, dom_ids, times, tots,
             self.timeslice_index, self.timeslice_frame_index
         )
-        timeslice_info = TimesliceInfo(
-                dom_ids[0],
+        timesliceframe_info = TimesliceFrameInfo(
+                r.dom_id,
+                r.fifo_status,
                 self.timeslice_frame_index,
-                n,
+                r.frame_index,
+                r.has_udp_trailer,
+                r.high_rate_veto,
+                r.max_sequence_number,
+                r.number_of_received_packets,
                 self.timeslice_index,
+                r.utc_nanoseconds,
+                r.utc_seconds,
+                r.white_rabbit_status,
                 )
 
         blob['L0Hits'] = hit_series
-        blob['TimesliceInfo'] = timeslice_info
+        blob['TimesliceFrameInfo'] = timesliceframe_info
         return blob
 
     def extract_summaryslice_frame(self):

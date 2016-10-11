@@ -169,12 +169,74 @@ class TimesliceInfo(with_metaclass(Serialisable)):
         return 1
 
 
+class TimesliceFrameInfo(with_metaclass(Serialisable)):
+    """JDAQTimeslice frame metadata.
+    """
+    dtype = np.dtype([
+        ('dom_id', '<u4'),
+        ('fifo_status', '<u4'),
+        ('frame_id', '<u4'),
+        ('frame_index', '<u4'),
+        ('has_udp_trailer', '<u4'),
+        ('high_rate_veto', '<u4'),
+        ('max_sequence_number', '<u4'),
+        ('n_packets', '<u4'),
+        ('slice_id', '<u4'),
+        ('utc_nanoseconds', '<u4'),
+        ('utc_seconds', '<u4'),
+        ('white_rabbit_status', '<u4'),
+        ])
+
+    @classmethod
+    def from_table(cls, row):
+        args = []
+        for col in cls.dtype.names:
+            try:
+                args.append(row[col])
+            except KeyError:
+                args.append(np.nan)
+        return cls(*args)
+
+    @classmethod
+    def deserialise(cls, data, frame_id, fmt='numpy', h5loc='/'):
+        if fmt == 'numpy':
+            return cls.from_table(data[0])
+
+    def serialise(self, to='numpy'):
+        if to == 'numpy':
+            return np.array(self.__array__(), dtype=self.dtype)
+
+    def __array__(self):
+        return [(
+            self.dom_id, self.fifo_status, self.frame_id, self.frame_index,
+            self.has_udp_trailer, self.high_rate_veto,
+            self.max_sequence_number, self.n_packets, self.slice_id,
+            self.utc_nanoseconds, self.utc_seconds, self.white_rabbit_status
+        ),]
+
+    def __str__(self):
+        return "Timeslice frame:\n" \
+               "    slice id: {0}\n" \
+               "    frame id: {1}\n" \
+               "    DOM id:   {2}\n" \
+               "    UDP packets: {3}/{4}\n" \
+               .format(self.slice_id, self.frame_id, self.dom_id,
+                       self.n_packets,
+                       self.max_sequence_number)
+
+    def __insp__(self):
+        return self.__str__()
+
+    def __len__(self):
+        return 1
+
+
 class SummaryframeInfo(with_metaclass(Serialisable)):
     """JDAQSummaryslice frame metadata.
     """
     dtype = np.dtype([
         ('dom_id', '<u4'),
-    ('fifo_status', '<u4'),
+        ('fifo_status', '<u4'),
         ('frame_id', '<u4'),
         ('frame_index', '<u4'),
         ('has_udp_trailer', '<u4'),
@@ -220,7 +282,8 @@ class SummaryframeInfo(with_metaclass(Serialisable)):
                "    DOM id:      {2}\n" \
                "    UDP packets: {3}/{4}\n" \
                .format(self, self.frame_id, self.slice_id, self.dom_id,
-                       self.number_of_packets, self.max_sequence_number)
+                       self.n_packets,
+                       self.max_sequence_number)
 
     def __insp__(self):
         return self.__str__()
