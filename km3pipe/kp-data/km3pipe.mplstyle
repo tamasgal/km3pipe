@@ -19,7 +19,7 @@ axes.axisbelow: true
 axes.grid: true
 axes.edgecolor: .9
 axes.linewidth: 1
-axes.titlesize: large
+axes.titlesize: medium
 
 patch.edgecolor: ffffff
 patch.linewidth: 0.5
@@ -41,7 +41,7 @@ ytick.color: .15
 
 font.size:12.0
 font.family: sans-serif
-font.sans-serif: Helvetica Neue, Helvetica, Liberation Sans, Bitstream Vera Sans, sans-serif
+#font.sans-serif: Helvetica Neue, Helvetica, Liberation Sans, Bitstream Vera Sans, sans-serif
 
 savefig.edgecolor: ffffff
 savefig.facecolor: ffffff
