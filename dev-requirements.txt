@@ -12,6 +12,6 @@ pandas
 seaborn
 cython
 pillow
-matplotlib>=1.5
+matplotlib>=2.0.0b4
 astropy
 sphinxcontrib-programoutput
