@@ -6,7 +6,6 @@ A collection of commonly used modules.
 
 """
 from __future__ import division, absolute_import, print_function
-from pprint import pprint
 
 from km3pipe import Module
 from km3pipe.tools import peak_memory_usage
@@ -27,12 +26,13 @@ class Dump(Module):
         self.keys = self.get('keys') or None
 
     def process(self, blob):
+        print('\n----------------------------------------\n')
         if self.keys is None:
             self.keys = sorted(blob.keys())
         for key in self.keys:
-            #pprint(blob[key])
             print(key, end=': ')
             print(blob[key])
+            print('')
         return blob
 
 
