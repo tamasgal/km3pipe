@@ -27,11 +27,12 @@ class Dump(Module):
         self.keys = self.get('keys') or None
 
     def process(self, blob):
-        if self.keys:
-            for key in self.keys:
-                pprint(blob[key])
-        else:
-            pprint(blob)
+        if self.keys is None:
+            self.keys = sorted(blob.keys())
+        for key in self.keys:
+            #pprint(blob[key])
+            print(key, end=': ')
+            print(blob[key])
         return blob
 
 

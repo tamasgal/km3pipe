@@ -337,13 +337,16 @@ class EventInfo(object):
                "    MC time:         {6}\n" \
                "    overlays:        {7}\n" \
                "    trigger counter: {8}\n" \
-               "    trigger mask:    {9}\n" \
+               "    trigger mask:    {9}" \
                .format(self.event_id, self.det_id,
                        self.frame_index, self.utc_seconds, self.utc_nanoseconds,
                        self.mc_id, self.mc_t, self.overlays,
                        self.trigger_counter, self.trigger_mask
                        #self.run_id,
                        )
+
+    def __repr__(self):
+        return self.__str__()
 
     def __insp__(self):
         return self.__str__()
@@ -1334,6 +1337,11 @@ class ArrayTaco(object):
     def __len__(self):
         return len(self.array)
 
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return "Array with dtype %s" % str(self.dtype)
 
 deserialise_map = {
     'MCHits': HitSeries,
@@ -1345,4 +1353,3 @@ deserialise_map = {
     'SummaryframeInfo': SummaryframeInfo,
     'Tracks': TrackSeries,
 }
-
