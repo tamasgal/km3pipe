@@ -27,7 +27,11 @@ class Dump(Module):
         self.keys = self.get('keys') or None
 
     def process(self, blob):
-        pprint(blob)
+        if self.keys:
+            for key in self.keys:
+                pprint(blob[key])
+        else:
+            pprint(blob)
         return blob
 
 
@@ -41,14 +45,11 @@ class Delete(Module):
     """
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
-        self.todelete = self.get('keys') or set()
+        self.keys = self.get('keys') or set()
 
     def process(self, blob):
         for key in self.keys:
-            try:
-                del blob[key]
-            except KeyError:
-                pass
+            blob.pop(key, None)
         return blob
 
 
