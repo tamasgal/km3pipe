@@ -12,7 +12,7 @@ sphinx>=1.4
 sphinx-gallery
 numpydoc
 pillow
-matplotlib>=1.5
+matplotlib>=2.0.0b4
 seaborn
 astropy
 sphinxcontrib-programoutput

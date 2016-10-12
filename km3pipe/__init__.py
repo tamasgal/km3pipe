@@ -15,6 +15,7 @@ except NameError:
 from km3pipe.__version__ import version, version_info  # noqa
 
 if not __KM3PIPE_SETUP__:
+    import km3pipe
     from km3pipe.core import (Pipeline, Module, Pump, Blob, Run,  # noqa
                               Geometry, AanetGeometry)
     from km3pipe import io  # noqa
@@ -22,6 +23,10 @@ if not __KM3PIPE_SETUP__:
     from km3pipe import srv  # noqa
     from km3pipe.srv import srv_event  # noqa
     from km3pipe.io import GenericPump, read_hdf5  # noqa
+
+    import os
+
+    mplstyle = os.path.dirname(km3pipe.__file__) + '/kp-data/km3pipe.mplstyle'
 
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
