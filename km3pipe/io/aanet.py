@@ -256,27 +256,30 @@ def parse_ancient_recolns(aanet_event, event_id):
 
 
 def parse_jevt_jgandalf(aanet_event, event_id):
-    map = {}
     try:
-        track = aanet_event.trks[0]
+        track = aanet_event.trks[0]     # this might throw IndexError
+        map = {}
+        map['id'] = track.id
+        map['pos_x'] = track.pos.x
+        map['pos_y'] = track.pos.y
+        map['pos_z'] = track.pos.z
+        map['dir_x'] = track.dir.x
+        map['dir_y'] = track.dir.y
+        map['dir_z'] = track.dir.z
+        map['time'] = track.t
+        map['type'] = track.type
+        map['rec_type'] = track.rec_type
+        map['rec_stage'] = track.rec_stage
+        map['beta0'] = track.fitinf[0]
+        map['beta1'] = track.fitinf[1]
+        map['lik'] = track.fitinf[2]
+        map['lik_red'] = track.fitinf[3]
+        map['energy'] = track.fitinf[4]
     except IndexError:
-        return map, None
-    map['id'] = track.id
-    map['pos_x'] = track.pos.x
-    map['pos_y'] = track.pos.y
-    map['pos_z'] = track.pos.z
-    map['dir_x'] = track.dir.x
-    map['dir_y'] = track.dir.y
-    map['dir_z'] = track.dir.z
-    map['time'] = track.t
-    map['type'] = track.type
-    map['rec_type'] = track.rec_type
-    map['rec_stage'] = track.rec_stage
-    map['beta0'] = track.fitinf[0]
-    map['beta1'] = track.fitinf[1]
-    map['lik'] = track.fitinf[2]
-    map['lik_red'] = track.fitinf[3]
-    map['energy'] = track.fitinf[4]
+        keys = {'id', 'pos_x', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z',
+                'time', 'type', 'rec_type', 'rec_stage', 'beta0', 'beta1',
+                'lik', 'lik_red', 'energy', }
+        map = {key: 0 for key in keys}
     dt = [(key, float) for key in sorted(map.keys())]
     map['event_id'] = event_id
     dt.append(('event_id', '<u4'))
@@ -289,6 +292,7 @@ def parse_generic_event(aanet_event, event_id):
     try:
         track = aanet_event.trks[0]
     except IndexError:
+        #TODO: don't return empty map
         return map, None
     map['id'] = track.id
     map['pos_x'] = track.pos[0]
