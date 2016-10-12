@@ -26,5 +26,5 @@ for ax, colourmap in zip(axes.flatten(),
     ax.set_title(colourmap)
     im = ax.imshow(z, cmap=plt.get_cmap(colourmap))
     divider = make_axes_locatable(ax)
-    cax = divider.append_axes('right', size='20%', pad=0.05)
+    cax = divider.append_axes('right', size='7%', pad=0.05)
     cbar = plt.colorbar(im, cax=cax)
