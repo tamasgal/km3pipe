@@ -17,8 +17,10 @@ from astropy.time import Time
 import matplotlib.pyplot as plt
 import numpy as np
 
-import km3pipe.style
+import km3pipe as kp
 from km3pipe.constants import orca_longitude, orca_latitude, orca_height
+
+plt.style.use(kp.mplstyle)
 
 # load orca coordinates
 orca_loc = EarthLocation.from_geodetic(
