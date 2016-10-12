@@ -6,9 +6,50 @@ A collection of commonly used modules.
 
 """
 from __future__ import division, absolute_import, print_function
+from pprint import pprint
 
 from km3pipe import Module
 from km3pipe.tools import peak_memory_usage
+
+
+class Dump(Module):
+    """Print the content of the blob.
+
+    If no argument is specified, dump everything.
+
+    Parameters
+    ----------
+    keys: collection(string), optional
+        Keys to print.
+    """
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.keys = self.get('keys') or None
+
+    def process(self, blob):
+        pprint(blob)
+        return blob
+
+
+class Delete(Module):
+    """Remove specific keys from the blob.
+
+    Parameters
+    ----------
+    keys: collection(string), optional
+        Keys to remove.
+    """
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.todelete = self.get('keys') or set()
+
+    def process(self, blob):
+        for key in self.keys:
+            try:
+                del blob[key]
+            except KeyError:
+                pass
+        return blob
 
 
 class HitCounter(Module):
