@@ -43,7 +43,7 @@ ytick.labelsize: 7
 
 font.size:12.0
 font.family: sans-serif
-#font.sans-serif: Helvetica Neue, Helvetica, Liberation Sans, Bitstream Vera Sans, sans-serif
+font.sans-serif: Helvetica Neue, Helvetica, Liberation Sans, Bitstream Vera Sans, sans-serif
 
 savefig.edgecolor: ffffff
 savefig.facecolor: ffffff
@@ -52,5 +52,5 @@ savefig.facecolor: ffffff
 #figure.subplot.right: 0.95
 #figure.subplot.bottom: 0.07
 figure.facecolor: ffffff
-figure.subplot.wspace: 0.3
+figure.subplot.wspace: 0.4
 figure.subplot.hspace: 0.3
