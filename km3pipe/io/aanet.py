@@ -164,16 +164,19 @@ class AanetPump(Pump):
                 blob[recname] = reco
         if self.format == 'jevt_jgandalf':
             track, dtype = parse_jevt_jgandalf(event, event.id)
-            if track:
-                blob['JEvtJGandalf'] = Reco(track, dtype)
+            if not track:
+                track = None
+            blob['JEvtJGandalf'] = Reco(track, dtype)
         if self.format == 'generic_track':
             track, dtype = parse_generic_event(event, event.id)
-            if track:
-                blob['Track'] = Reco(track, dtype)
+            if not track:
+                track = None
+            blob['Track'] = Reco(track, dtype)
         if self.format == 'ancient_recolns':
             track, dtype = parse_ancient_recolns(event, event.id)
-            if track:
-                blob['AncientRecoLNS'] = Reco(track, dtype)
+            if not track:
+                track = None
+            blob['AncientRecoLNS'] = Reco(track, dtype)
         return blob
 
     def event_index(self, blob):
