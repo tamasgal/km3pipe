@@ -11,9 +11,8 @@ where there isn't any.
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-import km3pipe as kp
+import km3pipe.style
 
-plt.style.use(kp.mplstyle)
 
 x = np.linspace(-np.pi, np.pi, 300)
 xx, yy = np.meshgrid(x, x)
