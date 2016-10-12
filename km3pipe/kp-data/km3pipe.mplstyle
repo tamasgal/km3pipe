@@ -38,8 +38,8 @@ xtick.direction: out
 ytick.direction: out
 xtick.color: .15
 ytick.color: .15
-xtick.labelsize: small
-ytick.labelsize: small
+xtick.labelsize: 7
+ytick.labelsize: 7
 
 font.size:12.0
 font.family: sans-serif
