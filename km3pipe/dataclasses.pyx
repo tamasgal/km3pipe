@@ -1206,12 +1206,8 @@ class TrackSeries(object):
 
 
 class Reco(dict):
-    """A dictionary with a dtype.
-    """
+    """A dictionary with a dtype."""
     def __init__(self, map, dtype, h5loc='/reco'):
-        if map is None:
-            zero = np.zeros(1, dtype=dtype)
-            map = {key: zero[key][0] for key in dtype.names}
         self.dtype = np.dtype(dtype)
         self.h5loc = h5loc
         self.update(map)
