@@ -9,7 +9,8 @@ This example shows how to create a zt-plot of a given DU and event ID.
 import pandas as pd
 import matplotlib.pyplot as plt
 import km3pipe as kp
-import km3pipe.style
+
+plt.style.use(kp.mplstyle)
 
 DU = 26
 EVENT_ID = 23
