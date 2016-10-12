@@ -1,5 +1,9 @@
 Unreleased changes
 ------------------
+* Forcing matplotlib 2.0.0b4 as dependency. Don't blame us!
+* New unified style for all plots, using `import km3pipe.style`
+* aanet / jgandalf: write zeroed row if no track in event
+* fix string handling in H5 attributes
 
 
 4.8.0 / 2016-10-11
@@ -11,7 +15,6 @@ Unreleased changes
 * Use zlib instead of blosc for compatibility reasons
 * add CLI option to make DB connection non-permanent
 * ``tohdf5`` / ``GenericPump`` now supports multiple input files for aanet files
-
 
 4.7.1 / 2016-09-29
 ~~~~~~~~~~~~~~~~~~
