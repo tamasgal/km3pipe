@@ -34,8 +34,8 @@ xtick.major.size: 5.0
 xtick.minor.size: 2.0
 ytick.major.size: 5.0
 ytick.minor.size: 2.0
-xtick.direction: in
-ytick.direction: in
+xtick.direction: out
+ytick.direction: out
 xtick.color: .15
 ytick.color: .15
 
