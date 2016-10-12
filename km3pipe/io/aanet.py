@@ -25,7 +25,19 @@ __status__ = "Development"
 
 
 class AanetPump(Pump):
-    """A pump for binary Aanet files."""
+    """A pump for binary Aanet files.
+
+    Parameters
+    ----------
+    filename: str, optional
+        Name of the file to open. If this parameter is not given, ``filenames``
+        needs to be specified instead.
+    filenames: list(str), optional
+        List of files to open.
+    aa_fmt: string, optional
+        Subformat of aanet in the file. Possible values:
+        ``'minidst', 'jevt_jgandalf', 'generic_track', 'ancient_recolns'``
+    """
 
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
