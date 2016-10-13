@@ -250,7 +250,8 @@ class TestGeometry(TestCase):
         class FakeDetector(object):
             def pmt_with_id(self, i):
                 pmt = MagicMock(dir=np.array((i*10+i, i*10+i+1, i*10+i+2)),
-                                pos=np.array((i*100+i, i*100+i+1, i*100+i+2)))
+                                pos=np.array((i*100+i, i*100+i+1, i*100+i+2)),
+                                t0=1000*i)
                 return pmt
 
         geo = Geometry(detector=FakeDetector())
@@ -274,6 +275,10 @@ class TestGeometry(TestCase):
             0,      # event_id
         )
 
+        self.assertEqual(0, hits[0].time)
+        self.assertEqual(4, hits[4].time)
+        self.assertTrue(np.isnan(hits[2].pos[1]))
+
         geo._apply_to_hitseries(hits)
 
         self.assertAlmostEqual(303, hits[3].pos[0])
@@ -283,6 +288,9 @@ class TestGeometry(TestCase):
         self.assertAlmostEqual(2, hits[0].dir[2])
         self.assertAlmostEqual(12, hits[1].dir[1])
         self.assertAlmostEqual(22, hits[2].dir[0])
+
+        self.assertEqual(1001, hits[1].time)
+        self.assertEqual(4004, hits[4].time)
 
         for idx, hit in enumerate(hits):
             h = hit
