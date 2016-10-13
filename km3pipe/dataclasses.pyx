@@ -659,7 +659,7 @@ class HitSeries(object):
     @classmethod
     def from_aanet(cls, hits, event_id):
         return cls(np.array([(
-            h.channel_id,       # ord(h.channel_id),
+            ord(h.channel_id),
             h.dom_id,
             h.id,
             h.pmt_id,
