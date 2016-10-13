@@ -242,6 +242,13 @@ class TestBlob(TestCase):
 class TestGeometry(TestCase):
     """Tests for the Geometry class"""
 
-    def test_init_requires_filename_or_detector_id(self):
-        with self.assertRaises(ValueError):
-            geo = Geometry()
+    def test_apply_to_hitseries(self):
+        def fake_pmt(x):
+            pmt = MagicMock()
+            pmt.pos = x
+            return pmt
+
+        detector = MagicMock()
+        detector.pmt_with_id = fake_pmt
+
+
