@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* New plot style handling
 
 
 4.8.3 / 2016-10-13
