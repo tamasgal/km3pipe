@@ -2,6 +2,10 @@ Unreleased changes
 ------------------
 
 
+4.8.3 / 2016-10-13
+------------------
+* Fixes t0 application in HitSeries
+
 4.8.2 / 2016-10-13
 ------------------
 * Fixes geometry application in HitSeries
