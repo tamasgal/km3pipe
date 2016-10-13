@@ -390,13 +390,13 @@ class Geometry(Module):
 
     def _apply_to_hitseries(self, hits):
         """Add x, y, z and t0 offset to hit series"""
-        for hit in hits:
+        for idx, hit in enumerate(hits):
             try:
                 pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
-            except KeyError:
+            except (KeyError, AttributeError):
                 pmt = self.detector.pmt_with_id(hit.pmt_id)
-            hit.pos = Position(pmt.pos)
-            hit.dir = Direction(pmt.dir)
+            hits._pos[idx] = pmt.pos
+            hits._dir[idx] = pmt.dir
             # hit.t0 = pmt.t0
             hit.time += pmt.t0
             # hit.a = hit.tot
