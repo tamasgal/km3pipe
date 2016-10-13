@@ -71,6 +71,8 @@ class HDF5Sink(Module):
         self._tables = OrderedDict()
 
     def _to_array(self, data):
+        if np.isscalar(data):
+            return np.asarray(data).reshape((1,))
         if len(data) <= 0:
             return
         try:
@@ -121,6 +123,10 @@ class HDF5Sink(Module):
                 entry = self._to_array(entry)
                 if entry is None:
                     continue
+                if entry.dtype.names is None:
+                    dt = np.dtype((entry.dtype, [(key, entry.dtype)]))
+                    entry = entry.view(dt)
+                    h5loc = '/misc'
                 self._write_array(where, entry, title=key)
 
         if not self.index % 1000:
