@@ -10,6 +10,10 @@ fi
 VERSION=$1
 SVN="http://svn.km3net.de/auxiliaries/KM3Pipe"
 
+git checkout develop
+git pull
+git push
+
 git checkout master
 git pull
 
