@@ -10,6 +10,7 @@ from __future__ import division, absolute_import, print_function
 from collections import defaultdict, OrderedDict
 import os.path
 
+import numpy as np
 import pandas as pd
 import tables as tb
 
@@ -29,8 +30,8 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-FORMAT_VERSION = '1.0'
-MINIMUM_FORMAT_VERSION = '1.0'
+FORMAT_VERSION = np.string_('1.0')
+MINIMUM_FORMAT_VERSION = np.string_('1.0')
 
 
 class HDF5Sink(Module):
@@ -130,9 +131,9 @@ class HDF5Sink(Module):
         return blob
 
     def finish(self):
-        self.h5file.root._v_attrs.km3pipe = str(kp.__version__)
-        self.h5file.root._v_attrs.pytables = str(tb.__version__)
-        self.h5file.root._v_attrs.format_version = str(FORMAT_VERSION)
+        self.h5file.root._v_attrs.km3pipe = np.string_(kp.__version__)
+        self.h5file.root._v_attrs.pytables = np.string_(tb.__version__)
+        self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
         print("Creating index tables. This may take a few minutes...")
         for tab in self._tables.itervalues():
             if 'frame_id' in tab.colnames:
@@ -179,13 +180,12 @@ class HDF5Pump(Pump):
 
     def _check_version(self):
         try:
-            version = str(self.h5_file.root._v_attrs.format_version)
+            version = np.string_(self.h5_file.root._v_attrs.format_version)
         except AttributeError:
             log.error("Could not determine HDF5 format version, you may "
                       "encounter unexpected errors! Good luck...")
             return
-
-        if split(version, int, '.') < split(MINIMUM_FORMAT_VERSION, int, '.'):
+        if split(version, int, np.string_('.')) < split(MINIMUM_FORMAT_VERSION, int, np.string_('.')):
             raise SystemExit("HDF5 format version {0} or newer required!\n"
                              "'{1}' has HDF5 format version {2}."
                              .format(MINIMUM_FORMAT_VERSION,

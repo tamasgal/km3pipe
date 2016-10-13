@@ -5,6 +5,9 @@ from __future__ import division, absolute_import, print_function
 
 from km3pipe.testing import TestCase, StringIO, MagicMock
 from km3pipe.core import Pipeline, Module, Pump, Blob, Geometry
+from km3pipe.dataclasses import HitSeries
+
+import numpy as np
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -242,6 +245,48 @@ class TestBlob(TestCase):
 class TestGeometry(TestCase):
     """Tests for the Geometry class"""
 
-    def test_init_requires_filename_or_detector_id(self):
-        with self.assertRaises(ValueError):
-            geo = Geometry()
+    def test_apply_to_hitseries(self):
+
+        class FakeDetector(object):
+            def pmt_with_id(self, i):
+                pmt = MagicMock(dir=np.array((i*10+i, i*10+i+1, i*10+i+2)),
+                                pos=np.array((i*100+i, i*100+i+1, i*100+i+2)))
+                return pmt
+
+        geo = Geometry(detector=FakeDetector())
+
+        n = 5
+        ids = np.arange(n)
+        dom_ids = np.arange(n)
+        times = np.arange(n)
+        tots = np.arange(n)
+        channel_ids = np.arange(n)
+        triggereds = np.ones(n)
+        pmt_ids = np.arange(n)
+
+        hits = HitSeries.from_arrays(
+            channel_ids, dom_ids,
+            ids,
+            pmt_ids,
+            times,
+            tots,
+            triggereds,
+            0,      # event_id
+        )
+
+        geo._apply_to_hitseries(hits)
+
+        self.assertAlmostEqual(303, hits[3].pos[0])
+        self.assertAlmostEqual(304, hits[3].pos[1])
+        self.assertAlmostEqual(305, hits[3].pos[2])
+        self.assertAlmostEqual(406, hits[4].pos[2])
+        self.assertAlmostEqual(2, hits[0].dir[2])
+        self.assertAlmostEqual(12, hits[1].dir[1])
+        self.assertAlmostEqual(22, hits[2].dir[0])
+
+        for idx, hit in enumerate(hits):
+            h = hit
+            if idx == 3:
+                break
+
+        self.assertAlmostEqual(303, h.pos[0])

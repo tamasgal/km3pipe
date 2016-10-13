@@ -337,13 +337,16 @@ class EventInfo(object):
                "    MC time:         {6}\n" \
                "    overlays:        {7}\n" \
                "    trigger counter: {8}\n" \
-               "    trigger mask:    {9}\n" \
+               "    trigger mask:    {9}" \
                .format(self.event_id, self.det_id,
                        self.frame_index, self.utc_seconds, self.utc_nanoseconds,
                        self.mc_id, self.mc_t, self.overlays,
                        self.trigger_counter, self.trigger_mask
                        #self.run_id,
                        )
+
+    def __repr__(self):
+        return self.__str__()
 
     def __insp__(self):
         return self.__str__()
@@ -655,6 +658,8 @@ class HitSeries(object):
         self._arr = arr
         self._index = 0
         self._hits = None
+        self._pos = np.full((len(arr), 3), np.nan)
+        self._dir = np.full((len(arr), 3), np.nan)
 
     @classmethod
     def from_aanet(cls, hits, event_id):
@@ -779,7 +784,11 @@ class HitSeries(object):
 
     @property
     def pos(self):
-        return self._arr['pos']
+        return self._pos
+
+    @property
+    def dir(self):
+        return self._dir
 
     def next(self):
         """Python 2/3 compatibility for iterators"""
@@ -789,16 +798,19 @@ class HitSeries(object):
         if self._index >= len(self):
             self._index = 0
             raise StopIteration
-        hits = Hit(*self._arr[self._index])
+        hit = self[self._index]
         self._index += 1
-        return hits
+        return hit
 
     def __len__(self):
         return self._arr.shape[0]
 
     def __getitem__(self, index):
         if isinstance(index, int):
-            return Hit(*self._arr[index])
+            hit = Hit(*self._arr[index])
+            hit.pos = self._pos[index]
+            hit.dir = self._dir[index]
+            return hit
         elif isinstance(index, slice):
             return self._slice_generator(index)
         else:
@@ -1334,6 +1346,11 @@ class ArrayTaco(object):
     def __len__(self):
         return len(self.array)
 
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return "Array with dtype %s" % str(self.dtype)
 
 deserialise_map = {
     'MCHits': HitSeries,
@@ -1345,4 +1362,3 @@ deserialise_map = {
     'SummaryframeInfo': SummaryframeInfo,
     'Tracks': TrackSeries,
 }
-
