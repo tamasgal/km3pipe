@@ -177,9 +177,9 @@ class Detector(object):
             header += str(self.n_doms)
 
         doms = ""
-        for dom_id, (line, floor, n_pmts) in self.doms.items():
+        for dom_id, (line, floor, n_pmts) in self.doms.iteritems():
             doms += "{0} {1} {2} {3}\n".format(dom_id, line, floor, n_pmts)
-            for i in range(n_pmts):
+            for i in xrange(n_pmts):
                 pmt = self._pmts_by_omkey[(line, floor, i)]
                 doms += "{0} {1} {2} {3} {4} {5} {6} {7}\n".format(
                         pmt.id, pmt.pos[0], pmt.pos[1], pmt.pos[2],
