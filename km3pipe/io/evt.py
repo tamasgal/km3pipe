@@ -31,9 +31,9 @@ __status__ = "Development"
 class EvtPump(Pump):  # pylint: disable:R0902
     """Provides a pump for EVT-files"""
 
-    def __init__(self, filename, **context):
+    def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
-        self.filename = filename
+        self.filename = self.get('filename')
         self.cache_enabled = self.get('cache_enabled') or False
         self.basename = self.get('basename') or None
         self.index_start = self.get('index_start') or 1

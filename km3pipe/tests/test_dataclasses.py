@@ -157,12 +157,15 @@ class TestL0HitSeries(TestCase):
             dom_ids,
             times,
             tots,
+            42,      # slice_id
             23,      # frame_id
         )
 
         self.assertAlmostEqual(1, hits[1].channel_id)
         self.assertAlmostEqual(9, hits[9].tot)
         self.assertEqual(10, len(hits))
+        self.assertEqual(42, hits.slice_id)
+        self.assertEqual(23, hits.frame_id)
 
 
 class TestHitSeries(TestCase):

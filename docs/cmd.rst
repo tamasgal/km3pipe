@@ -1,71 +1,47 @@
 Command Line Tools
 ==================
 
-If you've installed KM3Pipe via `pip`, you have access to some useful
+If you've installed KM3Pipe via ``pip``, you have access to some useful
 command line utilities out of the box.
 
 KM3Pipe
 -------
 
-Most of the commands have to be prefixed with `km3pipe` to avoid possible
+Most of the commands have to be prefixed with ``km3pipe`` to avoid possible
 nameclashes and also for an improved overview.
-You can for example simply run `km3pipe -h` in your shell to see all available
-commands::
+You can for example simply run ``km3pipe -h`` in your shell to see all available
+commands:
 
-    KM3Pipe command line utility.
+.. command-output:: km3pipe --help
+   :shell:
 
-    Usage:
-        km3pipe test
-        km3pipe update [GIT_BRANCH]
-        km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID]
-        km3pipe tohdf5 FILE [-o OUTFILE] [-n EVENTS] [-j]
-        km3pipe hdf2root FILE [-o OUTFILE] [-n EVENTS]
-        km3pipe runtable [-n RUNS] [-s REGEX] DET_ID
-        km3pipe runinfo DET_ID RUN
-        km3pipe (-h | --help)
-        km3pipe --version
+``update``
+~~~~~~~~~~
 
-    Options:
-        -h --help       Show this screen.
-        -m              Get the MC detector file (flips the sign of the DET_ID).
-        -c CALIBR_ID    Geometrical calibration ID (eg. A01466417)
-        -t T0_SET       Time calibration ID (eg. A01466431)
-        -n EVENTS/RUNS  Number of events/runs.
-        -o OUTFILE      Output file.
-        -j --jppy       Use jppy (not aanet) for Jpp readout
-        -s REGEX        Regular expression to filter the runsetup name/id.
-        DET_ID          Detector ID (eg. D_ARCA001).
-        GIT_BRANCH      Git branch to pull (eg. develop).
-        RUN             Run number.
-
-
-`update`
-~~~~~~~~
-
-The command `km3pipe update [GIT_BRANCH]` should be used to (once installed)
+The command ``km3pipe update [GIT_BRANCH]`` should be used to (once installed)
 get latest version of KM3Pipe. If no git branch is specified, it will pull
 the master branch, which always holds the stable releases.
 
 If you want to try the newest features, pull the develop branch via
-`km3pipe update develop`. This is 99.9% stable, since we always do our
-experiments in `feature/x` branches. However, we might break it sometimes.
+``km3pipe update develop``. This is 99.9% stable, since we always do our
+experiments in ``feature/x`` branches. However, we might break it sometimes.
 Have a look at our git repository to see what we're working on if you're
 interested.
 
-`runtable`
-~~~~~~~~~~
+``runtable``
+~~~~~~~~~~~~
 
 To get a list of runs taken with one of the KM3NeT detectors, you can use
-the `runtable` command.
+the ``runtable`` command.
 
 The following command pulls the last 10 runs which matches the regular
-expression `PHYS`. In other words, you'll get a list of physics runs::
+expression ``PHYS``. In other words, you'll get a list of physics runs::
 
     km3pipe runtable -n 10 -s PHYS 14
 
 An example output is::
 
-            RUN	UNIXSTARTTIME	STARTTIME_DEFINED	RUNSETUPID	RUNSETUPNAME	T0_CALIBSETID	DATETIME
+    RUN	UNIXSTARTTIME	STARTTIME_DEFINED	RUNSETUPID	RUNSETUPNAME	T0_CALIBSETID	DATETIME
     848	3611	1465506000553	Y	A01466427	PHYS.1606v1-TMP.HV-SFP.Power-XTRA.700ns		2016-06-09 21:00:00.553000+00:00
     849	3612	1465506060554	Y	A01466427	PHYS.1606v1-TMP.HV-SFP.Power-XTRA.700ns		2016-06-09 21:01:00.554000+00:00
     850	3613	1465509600606	Y	A01466427	PHYS.1606v1-TMP.HV-SFP.Power-XTRA.700ns		2016-06-09 22:00:00.606000+00:00
@@ -85,7 +61,7 @@ PipeInspector is a tool to inspect different kinds of data formats used
 within the KM3NeT collaboration. It utilises the KM3Pipe framework to
 deal with data I/O and allows easy access to the stored information.
 
-.. image:: http://tamasgal.com/km3net/PipeInspector_Screenshot.png
+.. image:: _static/PipeInspector_Screenshot.png
     :alt: PipeInspector
     :width: 700
     :align: center
@@ -99,13 +75,41 @@ directly from the terminal::
     pipeinspector /path/to/data/file.ext
 
 
-H5 Utils
---------
+.. _h5cli:
 
-`h5tree`
-~~~~~~~~
+HDF5 CLI Utils
+--------------
 
-Shows the content of a HDF5 file::
+``tohdf``
+~~~~~~~~~
+
+Convert an aanet/root/evt/jpp file to hdf5.
+
+Example::
+
+  tohdf5 --aa-fmt=jevt_jgandalf some_jgandalf_file.aa.root
+
+.. command-output:: tohdf5 --help
+   :shell:
+
+``hdf2root``
+~~~~~~~~~~~~
+
+Convert a HDF5 file to a plain ROOT file (requires ``rootpy`` + ``root_numpy``).
+
+Example::
+
+  hdf52root FOO.h5
+
+.. command-output:: hdf2root --help
+   :shell:
+
+``h5tree``
+~~~~~~~~~~
+
+Inspect the contents of a HDF5 file, walking through all the subgroups.
+
+Example output::
 
     ┌─[moritz@averroes ~/km3net/data ]
     └─╼ h5tree nueCC.h5
@@ -121,3 +125,21 @@ Shows the content of a HDF5 file::
     /reco/q_strategy (Table(121226,), shuffle, zlib(5)) ''
     /reco/reco_lns (Table(121226,), shuffle, zlib(5)) ''
     /reco/thomas_features (Table(121226,), shuffle, zlib(5)) ''
+
+
+.. command-output:: h5tree --help
+   :shell:
+
+``h5info``
+~~~~~~~~~~
+
+Show some H5 metadata (KM3 H5 version, km3pipe version, etc).
+
+Example::
+  $ h5info km3net_jul13_90m_muatm50T655.km3_v5r1.JTE_r2356.root.0-299.h5
+  km3pipe: 4.2.1
+  pytables: 3.2.3.1
+
+.. command-output:: h5info --help
+   :shell:
+

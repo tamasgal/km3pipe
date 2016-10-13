@@ -3,21 +3,31 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+KM3Pipe
+=======
+
+.. image:: https://travis-ci.org/tamasgal/km3pipe.svg?branch=develop
+    :target: https://travis-ci.org/tamasgal/km3pipe
+
+.. image:: https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat
+    :target: http://km3pipe.readthedocs.io/en/latest/
+
 .. include:: summary.rst
 
 .. toctree::
-   :hidden:
+    :hidden:
+    :titlesonly:
 
-   self
+    self
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 3
 
-   install
-   changelog
-   user_guide
-   contribute
-   auto_examples/index
-   api
+    install
+    user_guide
+    examples
+    contribute
+    changelog
+    api
 
 * :ref:`genindex`

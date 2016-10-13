@@ -10,6 +10,7 @@ from __future__ import division, absolute_import, print_function
 from collections import defaultdict, OrderedDict
 import os.path
 
+import numpy as np
 import pandas as pd
 import tables as tb
 
@@ -29,8 +30,8 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-FORMAT_VERSION = '1.0'
-MINIMUM_FORMAT_VERSION = '1.0'
+FORMAT_VERSION = np.string_('1.0')
+MINIMUM_FORMAT_VERSION = np.string_('1.0')
 
 
 class HDF5Sink(Module):
@@ -56,10 +57,17 @@ class HDF5Sink(Module):
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
+
+        # magic 10000: this is the default of the "expectedrows" arg
+        # from the tables.File.create_table() function
+        # at least according to the docs
+        # might be able to set to `None`, I don't know...
+        self.n_rows_expected = self.get('n_rows_expected') or 10000
+
         self.index = 1
         self.h5file = tb.open_file(self.filename, mode="w", title="KM3NeT")
         self.filters = tb.Filters(complevel=5, shuffle=True,
-                                  fletcher32=True, complib='blosc')
+                                  fletcher32=True, complib='zlib')
         self._tables = OrderedDict()
 
     def _to_array(self, data):
@@ -76,14 +84,25 @@ class HDF5Sink(Module):
         return data
 
     def _write_array(self, where, arr, title=''):
+        level = len(where.split('/'))
+
         if where not in self._tables:
             dtype = arr.dtype
             loc, tabname = os.path.split(where)
-            self._tables[where] = self.h5file.create_table(
+            tab = self.h5file.create_table(
                 loc, tabname, description=dtype, title=title,
-                filters=self.filters, createparents=True)
-        tab = self._tables[where]
+                filters=self.filters, createparents=True,
+                expectedrows=self.n_rows_expected,
+            )
+            if(level < 4):
+                self._tables[where] = tab
+        else:
+            tab = self._tables[where]
+
         tab.append(arr)
+
+        if(level < 4):
+            tab.flush()
 
     def process(self, blob):
         for key, entry in sorted(blob.items()):
@@ -93,7 +112,12 @@ class HDF5Sink(Module):
                     h5loc = entry.h5loc
                 except AttributeError:
                     h5loc = '/'
-                where = os.path.join(h5loc, decamelise(key))
+                try:
+                    tabname = entry.tabname
+                except AttributeError:
+                    tabname = decamelise(key)
+
+                where = os.path.join(h5loc, tabname)
                 entry = self._to_array(entry)
                 if entry is None:
                     continue
@@ -107,28 +131,20 @@ class HDF5Sink(Module):
         return blob
 
     def finish(self):
+        self.h5file.root._v_attrs.km3pipe = np.string_(kp.__version__)
+        self.h5file.root._v_attrs.pytables = np.string_(tb.__version__)
+        self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
+        print("Creating index tables. This may take a few minutes...")
         for tab in self._tables.itervalues():
             if 'frame_id' in tab.colnames:
-                print("Creating index for '{0}' using 'frame_id'..."
-                      .format(tab.name))
                 tab.cols.frame_id.create_index()
             if 'slice_id' in tab.colnames:
-                print("Creating index for '{0}' using 'slice_id'..."
-                      .format(tab.name))
                 tab.cols.slice_id.create_index()
             if 'dom_id' in tab.colnames:
-                print("Creating index for '{0}' using 'dom_id'..."
-                      .format(tab.name))
                 tab.cols.dom_id.create_index()
             if 'event_id' in tab.colnames:
-                print("Creating index for '{0}' using 'event_id'..."
-                      .format(tab.name))
                 tab.cols.event_id.create_index()
-
             tab.flush()
-        self.h5file.root._v_attrs.km3pipe = str(kp.__version__)
-        self.h5file.root._v_attrs.pytables = str(tb.__version__)
-        self.h5file.root._v_attrs.format_version = str(FORMAT_VERSION)
         self.h5file.close()
 
 
@@ -140,9 +156,9 @@ class HDF5Pump(Pump):
         filename: str
         From where to read events.
         """
-    def __init__(self, filename, **context):
+    def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
-        self.filename = filename
+        self.filename = self.get('filename')
         if os.path.isfile(self.filename):
             self.h5_file = tb.File(self.filename)
             if not self.get("skip_version_check"):
@@ -164,13 +180,12 @@ class HDF5Pump(Pump):
 
     def _check_version(self):
         try:
-            version = str(self.h5_file.root._v_attrs.format_version)
+            version = np.string_(self.h5_file.root._v_attrs.format_version)
         except AttributeError:
             log.error("Could not determine HDF5 format version, you may "
                       "encounter unexpected errors! Good luck...")
             return
-
-        if split(version, int, '.') < split(MINIMUM_FORMAT_VERSION, int, '.'):
+        if split(version, int, np.string_('.')) < split(MINIMUM_FORMAT_VERSION, int, np.string_('.')):
             raise SystemExit("HDF5 format version {0} or newer required!\n"
                              "'{1}' has HDF5 format version {2}."
                              .format(MINIMUM_FORMAT_VERSION,
@@ -273,7 +288,7 @@ class H5Chain(object):
     >>> coll = c(n_evts, keys, step)
     {'mc_tracks': pd.Dataframe, 'hits' pd.DataFrame, 'reco': dataframe}
 
-    # these are pandas Dataframes
+    >>> # these are pandas Dataframes
     >>> X = coll['reco']
     >>> wgt = coll['event_info']['weights_w2']
     >>> Y_ene = coll['mc_tracks']['energy']

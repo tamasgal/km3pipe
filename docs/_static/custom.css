@@ -1,0 +1,34 @@
+@import 'https://fonts.googleapis.com/css?family=Lato:400,700,900|Open+Sans|Roboto+Mono';
+
+pre, code {
+  font-family: "Roboto Mono", monospace;
+  font-size: 14px;
+}
+pre {
+  line-height: 1.4em;
+  overflow-x: auto;
+}
+
+code, tt {
+  padding: 1px 3px;
+  font-family: "Roboto Mono", monospace;
+  font-size: 0.85em;
+  white-space: pre-wrap;
+}
+
+pre {
+  margin: 0 0 1.75em 0;
+  width: 100%;
+  padding: 10px;
+  font-family: "Roboto Mono", monospace;
+  font-size: 0.9em;
+  white-space: pre;
+  overflow: auto;
+}
+
+pre code, pre tt {
+  font-size: inherit;
+  white-space: pre-wrap;
+  border: none;
+  padding: 0;
+}

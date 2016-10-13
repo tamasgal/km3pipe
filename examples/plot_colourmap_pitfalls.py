@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import km3pipe.style
 
+
 x = np.linspace(-np.pi, np.pi, 300)
 xx, yy = np.meshgrid(x, x)
 z = np.cos(xx) + np.cos(yy)
@@ -24,5 +25,5 @@ for ax, colourmap in zip(axes.flatten(),
     ax.set_title(colourmap)
     im = ax.imshow(z, cmap=plt.get_cmap(colourmap))
     divider = make_axes_locatable(ax)
-    cax = divider.append_axes('right', size='20%', pad=0.05)
+    cax = divider.append_axes('right', size='7%', pad=0.05)
     cbar = plt.colorbar(im, cax=cax)

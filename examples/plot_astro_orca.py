@@ -17,8 +17,9 @@ from astropy.time import Time
 import matplotlib.pyplot as plt
 import numpy as np
 
-import km3pipe.style
 from km3pipe.constants import orca_longitude, orca_latitude, orca_height
+import km3pipe.style
+
 
 # load orca coordinates
 orca_loc = EarthLocation.from_geodetic(
@@ -40,4 +41,4 @@ orca_event = SkyCoord(alt=alt, az=az, frame=orca_frame)
 orca_event_origin = orca_event.galactic
 ax.plot(orca_event_origin.l, orca_event_origin.b, 'o',
         markersize=10, alpha=0.3, color='k')
-plt.savefig('foo.pdf')
+plt.show()

@@ -155,12 +155,74 @@ class TimesliceInfo(with_metaclass(Serialisable)):
         ),]
 
     def __str__(self):
-        return "Timeslice frame #{0}:\n" \
-               "    slice id: {1}\n" \
-               "    frame id: {2}\n" \
-               "    DOM id:   {3}\n" \
-               "    n_hits:   {4}\n" \
+        return "Timeslice frame:\n" \
+               "    slice id: {0}\n" \
+               "    frame id: {1}\n" \
+               "    DOM id:   {2}\n" \
+               "    n_hits:   {3}\n" \
                .format(self.slice_id, self.frame_id, self.dom_id, self.n_hits)
+
+    def __insp__(self):
+        return self.__str__()
+
+    def __len__(self):
+        return 1
+
+
+class TimesliceFrameInfo(with_metaclass(Serialisable)):
+    """JDAQTimeslice frame metadata.
+    """
+    dtype = np.dtype([
+        ('dom_id', '<u4'),
+        ('fifo_status', '<u4'),
+        ('frame_id', '<u4'),
+        ('frame_index', '<u4'),
+        ('has_udp_trailer', '<u4'),
+        ('high_rate_veto', '<u4'),
+        ('max_sequence_number', '<u4'),
+        ('n_packets', '<u4'),
+        ('slice_id', '<u4'),
+        ('utc_nanoseconds', '<u4'),
+        ('utc_seconds', '<u4'),
+        ('white_rabbit_status', '<u4'),
+        ])
+
+    @classmethod
+    def from_table(cls, row):
+        args = []
+        for col in cls.dtype.names:
+            try:
+                args.append(row[col])
+            except KeyError:
+                args.append(np.nan)
+        return cls(*args)
+
+    @classmethod
+    def deserialise(cls, data, frame_id, fmt='numpy', h5loc='/'):
+        if fmt == 'numpy':
+            return cls.from_table(data[0])
+
+    def serialise(self, to='numpy'):
+        if to == 'numpy':
+            return np.array(self.__array__(), dtype=self.dtype)
+
+    def __array__(self):
+        return [(
+            self.dom_id, self.fifo_status, self.frame_id, self.frame_index,
+            self.has_udp_trailer, self.high_rate_veto,
+            self.max_sequence_number, self.n_packets, self.slice_id,
+            self.utc_nanoseconds, self.utc_seconds, self.white_rabbit_status
+        ),]
+
+    def __str__(self):
+        return "Timeslice frame:\n" \
+               "    slice id: {0}\n" \
+               "    frame id: {1}\n" \
+               "    DOM id:   {2}\n" \
+               "    UDP packets: {3}/{4}\n" \
+               .format(self.slice_id, self.frame_id, self.dom_id,
+                       self.n_packets,
+                       self.max_sequence_number)
 
     def __insp__(self):
         return self.__str__()
@@ -174,7 +236,7 @@ class SummaryframeInfo(with_metaclass(Serialisable)):
     """
     dtype = np.dtype([
         ('dom_id', '<u4'),
-    ('fifo_status', '<u4'),
+        ('fifo_status', '<u4'),
         ('frame_id', '<u4'),
         ('frame_index', '<u4'),
         ('has_udp_trailer', '<u4'),
@@ -220,7 +282,8 @@ class SummaryframeInfo(with_metaclass(Serialisable)):
                "    DOM id:      {2}\n" \
                "    UDP packets: {3}/{4}\n" \
                .format(self, self.frame_id, self.slice_id, self.dom_id,
-                       self.number_of_packets, self.max_sequence_number)
+                       self.n_packets,
+                       self.max_sequence_number)
 
     def __insp__(self):
         return self.__str__()
@@ -274,13 +337,16 @@ class EventInfo(object):
                "    MC time:         {6}\n" \
                "    overlays:        {7}\n" \
                "    trigger counter: {8}\n" \
-               "    trigger mask:    {9}\n" \
+               "    trigger mask:    {9}" \
                .format(self.event_id, self.det_id,
                        self.frame_index, self.utc_seconds, self.utc_nanoseconds,
                        self.mc_id, self.mc_t, self.overlays,
                        self.trigger_counter, self.trigger_mask
                        #self.run_id,
                        )
+
+    def __repr__(self):
+        return self.__str__()
 
     def __insp__(self):
         return self.__str__()
@@ -592,6 +658,8 @@ class HitSeries(object):
         self._arr = arr
         self._index = 0
         self._hits = None
+        self._pos = np.full((len(arr), 3), np.nan)
+        self._dir = np.full((len(arr), 3), np.nan)
 
     @classmethod
     def from_aanet(cls, hits, event_id):
@@ -716,7 +784,11 @@ class HitSeries(object):
 
     @property
     def pos(self):
-        return self._arr['pos']
+        return self._pos
+
+    @property
+    def dir(self):
+        return self._dir
 
     def next(self):
         """Python 2/3 compatibility for iterators"""
@@ -726,16 +798,19 @@ class HitSeries(object):
         if self._index >= len(self):
             self._index = 0
             raise StopIteration
-        hits = Hit(*self._arr[self._index])
+        hit = self[self._index]
         self._index += 1
-        return hits
+        return hit
 
     def __len__(self):
         return self._arr.shape[0]
 
     def __getitem__(self, index):
         if isinstance(index, int):
-            return Hit(*self._arr[index])
+            hit = Hit(*self._arr[index])
+            hit.pos = self._pos[index]
+            hit.dir = self._dir[index]
+            return hit
         elif isinstance(index, slice):
             return self._slice_generator(index)
         else:
@@ -764,52 +839,57 @@ class L0HitSeries(object):
     """
     dtype = np.dtype([
         ('channel_id', 'u1'), ('dom_id', '<u4'),
-        ('frame_id', '<u4'),
         ('time', '<i4'), ('tot', 'u1'),
         ])
-    def __init__(self, arr):
+    def __init__(self, arr, slice_id, frame_id):
         self._arr = arr
         self._index = 0
         self._hits = None
+        self.slice_id = slice_id
+        self.frame_id = frame_id
+
+    @property
+    def h5loc(self):
+        return "/timeslices/slice_{0}".format(self.slice_id)
+
+    @property
+    def tabname(self):
+        return "frame_{0}".format(self.frame_id)
 
     @classmethod
-    def from_arrays(cls, channel_ids, dom_ids, times, tots, frame_id):
+    def from_arrays(cls, channel_ids, dom_ids, times, tots, slice_id, frame_id):
         len = channel_ids.shape[0]
         hits = np.empty(len, cls.dtype)
         hits['channel_id'] = channel_ids
         hits['dom_id'] = dom_ids
         hits['time'] = times
         hits['tot'] = tots
-        hits['frame_id'] = np.full(len, frame_id, dtype='<u4')
-        return cls(hits)
+        return cls(hits, slice_id, frame_id)
 
     @classmethod
-    def from_dict(cls, map, frame_id):
-        if frame_id is None:
-            frame_id = map['frame_id']
+    def from_dict(cls, map, slice_id, frame_id):
         return cls.from_arrays(
             map['channel_id'],
             map['dom_id'],
             map['time'],
             map['tot'],
+            slice_id,
             frame_id,
         )
 
-    def from_table(cls, table, frame_id):
-        if frame_id is None:
-            frame_id = table[0]['frame_id']
+    def from_table(cls, table, slice_id, frame_id):
         return cls(np.array([(
             row['channel_id'],
             row['dom_id'],
             row['time'],
             row['tot'],
-        ) for row in table], dtype=cls.dtype), frame_id)
+        ) for row in table], dtype=cls.dtype), slice_id, frame_id)
 
     @classmethod
-    def deserialise(cls, data, frame_id, fmt='numpy', h5loc='/'):
+    def deserialise(cls, data, slice_id, frame_id, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
-            #return cls.from_table(data, frame_id)
-            return cls(data)
+            # return cls.from_table(data, frame_id)
+            return cls(data, slice_id, frame_id)
 
     def serialise(self, to='numpy'):
         if to == 'numpy':
@@ -1266,6 +1346,11 @@ class ArrayTaco(object):
     def __len__(self):
         return len(self.array)
 
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return "Array with dtype %s" % str(self.dtype)
 
 deserialise_map = {
     'MCHits': HitSeries,
@@ -1277,4 +1362,3 @@ deserialise_map = {
     'SummaryframeInfo': SummaryframeInfo,
     'Tracks': TrackSeries,
 }
-

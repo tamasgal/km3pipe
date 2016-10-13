@@ -25,7 +25,19 @@ __status__ = "Development"
 
 
 class AanetPump(Pump):
-    """A pump for binary Aanet files."""
+    """A pump for binary Aanet files.
+
+    Parameters
+    ----------
+    filename: str, optional
+        Name of the file to open. If this parameter is not given, ``filenames``
+        needs to be specified instead.
+    filenames: list(str), optional
+        List of files to open.
+    aa_fmt: string, optional
+        Subformat of aanet in the file. Possible values:
+        ``'minidst', 'jevt_jgandalf', 'generic_track', 'ancient_recolns'``
+    """
 
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
@@ -95,63 +107,74 @@ class AanetPump(Pump):
                 log.warn(filename + ": can't read header.")
                 pass
 
-            # for event in event_file:
-            while event_file.next():
-                event = event_file.evt
-                try:
-                    if event.det_id <= 0:  # apply ZED correction
-                        for track in event.mc_trks:
-                            track.pos.z += 405.93
-                except AttributeError:
-                    pass
-
-                if len(event.w) == 3:
-                    w1, w2, w3 = event.w
-                else:
-                    w1 = w2 = w3 = np.nan
-
-                blob = {}
-                blob['Evt'] = event
-                try:
-                    blob['Hits'] = HitSeries.from_aanet(event.hits, event.id)
-                    blob['MCHits'] = HitSeries.from_aanet(event.mc_hits,
-                                                          event.id)
-                except AttributeError:
-                    pass
-                blob['MCTracks'] = TrackSeries.from_aanet(event.mc_trks,
-                                                          event.id)
-                blob['filename'] = filename
-                blob['Header'] = self.header
-                try:
-                    blob['EventInfo'] = EventInfo((
-                        event.det_id, event.id, event.frame_index,
-                        event.mc_id, event.mc_t, event.overlays,
-                        #event.run_id,
-                        event.trigger_counter, event.trigger_mask,
-                        event.t.GetNanoSec(), event.t.GetSec(), w1, w2, w3,)
-                    )
-                except AttributeError:
-                    blob['EventInfo'] = EventInfo((0, event.id,
-                                                  event.frame_index, 0, 0, 0,
-                                                  0, 0, 0, 0, 0, w1, w2, w3,))
-                if self.format == 'minidst':
-                    recos = read_mini_dst(event, event.id)
-                    for recname, reco in recos.items():
-                        blob[recname] = reco
-                if self.format == 'jevt_jgandalf':
-                    track, dtype = parse_jevt_jgandalf(event, event.id)
-                    if track:
-                        blob['JEvtJGandalf'] = Reco(track, dtype)
-                if self.format == 'generic_track':
-                    track, dtype = parse_generic_event(event, event.id)
-                    if track:
-                        blob['Track'] = Reco(track, dtype)
-                if self.format == 'ancient_recolns':
-                    track, dtype = parse_ancient_recolns(event, event.id)
-                    if track:
-                        blob['AncientRecoLNS'] = Reco(track, dtype)
-                yield blob
+            if self.format == 'ancient_recolns':
+                while event_file.next():
+                    event = event_file.evt
+                    blob = self._read_event(event, filename)
+                    yield blob
+            else:
+                for event in event_file:
+                    blob = self._read_event(event, filename)
+                    yield blob
             del event_file
+
+    def _read_event(self, event, filename):
+        try:
+            if event.det_id <= 0:  # apply ZED correction
+                for track in event.mc_trks:
+                    track.pos.z += 405.93
+        except AttributeError:
+            pass
+
+        if len(event.w) == 3:
+            w1, w2, w3 = event.w
+        else:
+            w1 = w2 = w3 = np.nan
+
+        blob = {}
+        blob['Evt'] = event
+        try:
+            blob['Hits'] = HitSeries.from_aanet(event.hits, event.id)
+            blob['MCHits'] = HitSeries.from_aanet(event.mc_hits,
+                                                  event.id)
+        except AttributeError:
+            pass
+        blob['MCTracks'] = TrackSeries.from_aanet(event.mc_trks,
+                                                  event.id)
+        blob['filename'] = filename
+        blob['Header'] = self.header
+        try:
+            blob['EventInfo'] = EventInfo((
+                event.det_id, event.frame_index,
+                event.mc_id, event.mc_t, event.overlays,
+                # event.run_id,
+                event.trigger_counter, event.trigger_mask,
+                event.t.GetNanoSec(), event.t.GetSec(),
+                w1, w2, w3,
+                event.id))
+        except AttributeError:
+            blob['EventInfo'] = EventInfo((0, event.frame_index,
+                                           0, 0, 0,
+                                           0, 0, 0, 0,
+                                           w1, w2, w3,
+                                           event.id))
+        if self.format == 'minidst':
+            recos = read_mini_dst(event, event.id)
+            for recname, reco in recos.items():
+                blob[recname] = reco
+        if self.format == 'jevt_jgandalf':
+            track, dtype = parse_jevt_jgandalf(event, event.id)
+            if track:
+                blob['JEvtJGandalf'] = Reco(track, dtype)
+        if self.format == 'generic_track':
+            track, dtype = parse_generic_event(event, event.id)
+            if track:
+                blob['Track'] = Reco(track, dtype)
+        if self.format == 'ancient_recolns':
+            track, dtype = parse_ancient_recolns(event, event.id)
+            if track:
+                blob['AncientRecoLNS'] = Reco(track, dtype)
+        return blob
 
     def event_index(self, blob):
         if self.id:
@@ -233,27 +256,30 @@ def parse_ancient_recolns(aanet_event, event_id):
 
 
 def parse_jevt_jgandalf(aanet_event, event_id):
-    map = {}
     try:
-        track = aanet_event.trks[0]
+        track = aanet_event.trks[0]     # this might throw IndexError
+        map = {}
+        map['id'] = track.id
+        map['pos_x'] = track.pos.x
+        map['pos_y'] = track.pos.y
+        map['pos_z'] = track.pos.z
+        map['dir_x'] = track.dir.x
+        map['dir_y'] = track.dir.y
+        map['dir_z'] = track.dir.z
+        map['time'] = track.t
+        map['type'] = track.type
+        map['rec_type'] = track.rec_type
+        map['rec_stage'] = track.rec_stage
+        map['beta0'] = track.fitinf[0]
+        map['beta1'] = track.fitinf[1]
+        map['lik'] = track.fitinf[2]
+        map['lik_red'] = track.fitinf[3]
+        map['energy'] = track.fitinf[4]
     except IndexError:
-        return map, None
-    map['id'] = track.id
-    map['pos_x'] = track.pos.x
-    map['pos_y'] = track.pos.y
-    map['pos_z'] = track.pos.z
-    map['dir_x'] = track.dir.x
-    map['dir_y'] = track.dir.y
-    map['dir_z'] = track.dir.z
-    map['time'] = track.t
-    map['type'] = track.type
-    map['rec_type'] = track.rec_type
-    map['rec_stage'] = track.rec_stage
-    map['beta0'] = track.fitinf[0]
-    map['beta1'] = track.fitinf[1]
-    map['lik'] = track.fitinf[2]
-    map['lik_red'] = track.fitinf[3]
-    map['energy'] = track.fitinf[4]
+        keys = {'id', 'pos_x', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z',
+                'time', 'type', 'rec_type', 'rec_stage', 'beta0', 'beta1',
+                'lik', 'lik_red', 'energy', }
+        map = {key: 0 for key in keys}
     dt = [(key, float) for key in sorted(map.keys())]
     map['event_id'] = event_id
     dt.append(('event_id', '<u4'))
@@ -266,6 +292,7 @@ def parse_generic_event(aanet_event, event_id):
     try:
         track = aanet_event.trks[0]
     except IndexError:
+        #TODO: don't return empty map
         return map, None
     map['id'] = track.id
     map['pos_x'] = track.pos[0]
