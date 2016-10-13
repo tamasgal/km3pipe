@@ -389,13 +389,16 @@ class Geometry(Module):
             raise TypeError("Don't know how to apply geometry to '{0}'."
                             .format(hits.__class__.__name__))
 
-    def _apply_to_hitseries(self, hits):
+    def _apply_to_hitseries(self, hits, detector=None):
         """Add x, y, z and t0 offset to hit series"""
+        if detector is None:
+            detector = self.detector
+
         for hit in hits:
             try:
-                pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
+                pmt = detector.get_pmt(hit.dom_id, hit.channel_id)
             except KeyError:
-                pmt = self.detector.pmt_with_id(hit.pmt_id)
+                pmt = detector.pmt_with_id(hit.pmt_id)
             hit.pos = Position(pmt.pos)
             hit.dir = Direction(pmt.dir)
             # hit.t0 = pmt.t0
