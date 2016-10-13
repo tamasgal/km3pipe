@@ -398,7 +398,7 @@ class Geometry(Module):
             hits._pos[idx] = pmt.pos
             hits._dir[idx] = pmt.dir
             # hit.t0 = pmt.t0
-            hit.time += pmt.t0
+            hits._arr['time'][idx] += pmt.t0
             # hit.a = hit.tot
 
     def _apply_to_table(self, table):
