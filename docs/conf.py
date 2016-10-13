@@ -44,7 +44,6 @@ extensions = [
     'sphinxcontrib.programoutput',
 ]
 
-exclude_patterns = ['_build', '**.ipynb_checkpoints']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -83,7 +82,7 @@ release = km3pipe.__version__
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build', '_templates']
+exclude_patterns = ['_build', '_templates', '**.ipynb_checkpoints']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.

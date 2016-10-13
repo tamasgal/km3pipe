@@ -82,27 +82,34 @@ HDF5 CLI Utils
 
 ``tohdf``
 ~~~~~~~~~
+
+Convert an aanet/root/evt/jpp file to hdf5.
+
+Example::
+
+  tohdf5 --aa-fmt=jevt_jgandalf some_jgandalf_file.aa.root
+
 .. command-output:: tohdf5 --help
    :shell:
 
 ``hdf2root``
 ~~~~~~~~~~~~
+
+Convert a HDF5 file to a plain ROOT file (requires ``rootpy`` + ``root_numpy``).
+
+Example::
+
+  hdf52root FOO.h5
+
 .. command-output:: hdf2root --help
-   :shell:
-
-``h5info``
-~~~~~~~~~~
-
-.. command-output:: h5info --help
    :shell:
 
 ``h5tree``
 ~~~~~~~~~~
 
-.. command-output:: h5tree --help
-   :shell:
+Inspect the contents of a HDF5 file, walking through all the subgroups.
 
-Example::
+Example output::
 
     ┌─[moritz@averroes ~/km3net/data ]
     └─╼ h5tree nueCC.h5
@@ -118,4 +125,21 @@ Example::
     /reco/q_strategy (Table(121226,), shuffle, zlib(5)) ''
     /reco/reco_lns (Table(121226,), shuffle, zlib(5)) ''
     /reco/thomas_features (Table(121226,), shuffle, zlib(5)) ''
+
+
+.. command-output:: h5tree --help
+   :shell:
+
+``h5info``
+~~~~~~~~~~
+
+Show some H5 metadata (KM3 H5 version, km3pipe version, etc).
+
+Example::
+  $ h5info km3net_jul13_90m_muatm50T655.km3_v5r1.JTE_r2356.root.0-299.h5
+  km3pipe: 4.2.1
+  pytables: 3.2.3.1
+
+.. command-output:: h5info --help
+   :shell:
 
