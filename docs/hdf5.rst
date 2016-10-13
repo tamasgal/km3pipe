@@ -29,7 +29,7 @@ A typical file looks like this::
         │   └── ...
         └── ...
 
-Command Line Utils
-------------------
+Conversion Utils
+----------------
 
 See the :ref:`h5cli` on how to convert & inspect HDF5 files from the shell.

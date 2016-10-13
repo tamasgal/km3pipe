@@ -359,6 +359,7 @@ class Geometry(Module):
         self.det_id = self.get('det_id') or None
         self.t0set = self.get('t0set') or None
         self.calibration = self.get('calibration') or None
+        self.detector = self.get('detector') or None
 
         if self.filename or self.det_id:
             if self.filename is not None:
@@ -367,8 +368,6 @@ class Geometry(Module):
                 self.detector = Detector(det_id=self.det_id,
                                          t0set=self.t0set,
                                          calibration=self.calibration)
-        else:
-            raise ValueError("Define either a filename or a detector ID.")
 
     def process(self, blob, key='Hits'):
         if self._should_apply:
