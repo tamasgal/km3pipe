@@ -1,6 +1,12 @@
 Unreleased changes
 ------------------
 
+4.9.0 / 2016-10-14
+------------------
+* New plot style handling and new styles: talk, poster, notebook
+  (load them using `km3pipe.style.use(...)`)
+  Just like in previous versions: `import km3pipe.style` will load
+  the default style.
 
 4.8.3 / 2016-10-13
 ------------------

@@ -7,7 +7,10 @@ The KM3Pipe style definitions.
 """
 from __future__ import division, absolute_import, print_function
 
+import os
+
 import matplotlib.pyplot as plt
+import matplotlib.style
 import km3pipe as kp
 
 __author__ = "Tamas Gal"
@@ -19,4 +22,22 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-plt.style.use(kp.mplstyle)
+style_dir = os.path.dirname(kp.__file__) + '/kp-data/stylelib'
+
+
+def get_style_path(style='km3pipe'):
+    if style in ('default', 'km3pipe'):
+        style = ''
+    else:
+        style = '-' + style
+    return style_dir + '/km3pipe' + style + '.mplstyle'
+
+
+def use(style):
+    if style not in matplotlib.style.available:
+        style = get_style_path(style)
+    plt.style.use(style)
+
+
+# Automatically load default style on import.
+use('default')
