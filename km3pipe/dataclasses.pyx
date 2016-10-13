@@ -658,6 +658,8 @@ class HitSeries(object):
         self._arr = arr
         self._index = 0
         self._hits = None
+        self._pos = np.full((len(arr), 3), np.nan)
+        self._dir = np.full((len(arr), 3), np.nan)
 
     @classmethod
     def from_aanet(cls, hits, event_id):
@@ -782,7 +784,11 @@ class HitSeries(object):
 
     @property
     def pos(self):
-        return self._arr['pos']
+        return self._pos
+
+    @property
+    def dir(self):
+        return self._dir
 
     def next(self):
         """Python 2/3 compatibility for iterators"""
@@ -792,16 +798,19 @@ class HitSeries(object):
         if self._index >= len(self):
             self._index = 0
             raise StopIteration
-        hits = Hit(*self._arr[self._index])
+        hit = self[self._index]
         self._index += 1
-        return hits
+        return hit
 
     def __len__(self):
         return self._arr.shape[0]
 
     def __getitem__(self, index):
         if isinstance(index, int):
-            return Hit(*self._arr[index])
+            hit = Hit(*self._arr[index])
+            hit.pos = self._pos[index]
+            hit.dir = self._dir[index]
+            return hit
         elif isinstance(index, slice):
             return self._slice_generator(index)
         else:
