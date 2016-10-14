@@ -54,6 +54,25 @@ class Delete(Module):
         return blob
 
 
+class Keep(Module):
+    """Keep only specified keys in the blob.
+
+    Parameters
+    ----------
+    keys: collection(string), optional
+        Keys to keep. Everything else is removed.
+    """
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.keys = self.get('keys') or set()
+
+    def process(self, blob):
+        for key in blob.keys():
+            if key not in self.keys:
+                blob.pop(key, None)
+        return blob
+
+
 class HitCounter(Module):
     """Prints the number of hits"""
     def process(self, blob):
