@@ -22,7 +22,6 @@ __status__ = "Development"
 
 
 style_dir = os.path.dirname(kp.__file__) + '/kp-data/stylelib'
-matplotlib.use('PDF')
 
 
 def get_style_path(style='km3pipe'):
