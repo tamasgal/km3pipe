@@ -663,16 +663,30 @@ class HitSeries(object):
 
     @classmethod
     def from_aanet(cls, hits, event_id):
-        return cls(np.array([(
-            h.channel_id,       # ord(h.channel_id),
-            h.dom_id,
-            h.id,
-            h.pmt_id,
-            h.t,
-            h.tot,
-            h.trig,
-            event_id,
-        ) for h in hits], dtype=cls.dtype))
+        try:
+            return cls(np.array([(
+                h.channel_id,
+                h.dom_id,
+                h.id,
+                h.pmt_id,
+                h.t,
+                h.tot,
+                h.trig,
+                event_id,
+            ) for h in hits], dtype=cls.dtype))
+        except ValueError:
+            # Older aanet format.
+            return cls(np.array([(
+                ord(h.channel_id),
+                h.dom_id,
+                h.id,
+                h.pmt_id,
+                h.t,
+                h.tot,
+                h.trig,
+                event_id,
+            ) for h in hits], dtype=cls.dtype))
+
 
     @classmethod
     def from_evt(cls, hits, event_id):
