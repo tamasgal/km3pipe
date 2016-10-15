@@ -10,6 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import km3pipe as kp
 import km3pipe.style
+km3pie.style.use('default')
 
 
 DU = 26

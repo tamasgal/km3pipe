@@ -19,6 +19,7 @@ import numpy as np
 
 from km3pipe.constants import orca_longitude, orca_latitude, orca_height
 import km3pipe.style
+km3pipe.style.use('default')
 
 
 # load orca coordinates
