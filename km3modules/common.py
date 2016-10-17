@@ -26,9 +26,8 @@ class Dump(Module):
         self.keys = self.get('keys') or None
 
     def process(self, blob):
-        if self.keys is None:
-            self.keys = sorted(blob.keys())
-        for key in self.keys:
+        keys = sorted(blob.keys()) if self.keys is None else self.keys
+        for key in keys:
             print(key, end=': ')
             print(blob[key])
             print('')
