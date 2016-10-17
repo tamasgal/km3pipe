@@ -1,5 +1,8 @@
 Unreleased changes
 ------------------
+* Major dataclass refactor:
+  * hits now always have pos_x, .., dir_y, .., t0
+  * completely flat hit datastructure
 
 4.9.0 / 2016-10-14
 ------------------
