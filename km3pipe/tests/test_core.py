@@ -296,13 +296,13 @@ class TestGeometry(TestCase):
 
         geo._apply_to_hitseries(hits)
 
-        self.assertAlmostEqual(303, hits[3].pos_x)
-        self.assertAlmostEqual(304, hits[3].pos_y)
-        self.assertAlmostEqual(305, hits[3].pos_z)
-        self.assertAlmostEqual(406, hits[4].pos_z)
+        self.assertAlmostEqual(305, hits[3].pos_x)
+        self.assertAlmostEqual(3.0, hits[3].pos_y)
+        self.assertAlmostEqual(3.0, hits[3].pos_z)
+        self.assertAlmostEqual(4.0, hits[4].pos_z)
         self.assertAlmostEqual(2, hits[0].dir_z)
         self.assertAlmostEqual(12, hits[1].dir_y)
-        self.assertAlmostEqual(22, hits[2].dir_0)
+        self.assertAlmostEqual(22, hits[2].dir_x)
 
         self.assertEqual(1001, hits[1].time)
         self.assertEqual(4004, hits[4].time)
@@ -312,4 +312,4 @@ class TestGeometry(TestCase):
             if idx == 3:
                 break
 
-        self.assertAlmostEqual(303, h.pos[0])
+        self.assertAlmostEqual(305.0, h.pos_x)

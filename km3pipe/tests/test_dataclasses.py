@@ -227,7 +227,7 @@ class TestHitSeries(TestCase):
             dom_ids,
             ids,
             pmt_ids,
-            nans, nans, nans, nans,
+            nans, nans, nans, 0,
             times,
             tots,
             triggereds,
@@ -330,7 +330,7 @@ class TestHit(TestCase):
 
     def setUp(self):
         self.hit = Hit(1, nan, nan, nan, 2, 3, 4,
-                       nan, nan, nan, nan, 5, 6, True)
+                       nan, nan, nan, 0, 5, 6, True)
 
     def test_attributes(self):
         hit = self.hit
@@ -344,7 +344,7 @@ class TestHit(TestCase):
         self.assertTrue(np.isnan(hit.pos_x))
         self.assertTrue(np.isnan(hit.pos_y))
         self.assertTrue(np.isnan(hit.pos_z))
-        self.assertTrue(np.isnan(hit.t0))
+        self.assertAlmostEqual(0, hit.t0)
         self.assertAlmostEqual(5, hit.time)
         self.assertAlmostEqual(6, hit.tot)
         self.assertTrue(hit.triggered)

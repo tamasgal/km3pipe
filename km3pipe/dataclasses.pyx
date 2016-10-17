@@ -688,7 +688,7 @@ class HitSeries(object):
         ('pos_y', '<f8'),
         ('pos_z', '<f8'),
         #('run_id', '<u4'),
-        ('t0', '<f8'),
+        ('t0', '<i4'),
         ('time', '<i4'),
         ('tot', 'u1'),
         ('triggered', '?'),
