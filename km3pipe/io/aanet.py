@@ -249,11 +249,11 @@ def parse_ancient_recolns(aanet_event, event_id):
         out['sin_theta'] = sin_theta
         out['beta'] = np.sqrt(sin_theta * sin_theta * sigma2_phi + sigma2_theta)
     except IndexError:
-        keys = {'lambda', 'n_hits_used', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z',
-                'energy_muon', 'energy_neutrino', 'bjorken_y', 'beta',
-                'sigma2_theta', 'sigma2_phi', 'sin_theta', }    #noqa
+        keys = {'lambda', 'n_hits_used', 'pos_x', 'pos_y', 'pos_z',
+                'dir_x', 'dir_y', 'dir_z', 'energy_muon', 'energy_neutrino',
+                'bjorken_y', 'beta', 'sigma2_theta', 'sigma2_phi',
+                'sin_theta', }    #noqa
         out = {key: 0 for key in keys}
-
     dt = [(key, float) for key in sorted(out.keys())]
     out['event_id'] = event_id
     dt.append(('event_id', '<u4'))
