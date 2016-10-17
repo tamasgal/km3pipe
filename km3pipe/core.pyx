@@ -67,15 +67,18 @@ class Pipeline(object):
 
         log.info("Attaching module '{0}'".format(name))
 
-        if isinstance(module_factory, types.FunctionType) \
-                and module_factory.__name__ != 'GenericPump':
+        if issubclass(module_factor, Module) or \
+                module_factory.__name__ == 'GenericPump':
+            log.debug("Attaching as regular module")
+            module = module_factory(name=name, **kwargs)
+        elif isinstance(module_factory, types.FunctionType):
             log.debug("Attaching as function module")
             module = module_factory
             module.name = name
             module.timeit = self.timeit
         else:
-            log.debug("Attaching as regular module")
-            module = module_factory(name=name, **kwargs)
+            log.critical("Don't know how to attach module '{0}'!".format(name))
+            return
 
         # Special parameters
         if 'only_if' in kwargs:
