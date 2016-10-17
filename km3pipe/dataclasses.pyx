@@ -801,6 +801,18 @@ class HitSeries(object):
         return self._pos
 
     @property
+    def pos_x(self):
+        return self.pos[:, 0]
+
+    @property
+    def pos_y(self):
+        return self.pos[:, 1]
+
+    @property
+    def pos_z(self):
+        return self.pos[:, 2]
+
+    @property
     def dir(self):
         return self._dir
 

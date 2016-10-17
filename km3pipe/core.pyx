@@ -11,6 +11,7 @@ from __future__ import division, absolute_import, print_function
 
 from collections import deque, defaultdict
 from functools import partial
+import inspect
 import signal
 import gzip
 import time
@@ -61,21 +62,26 @@ class Pipeline(object):
 
     def attach(self, module_factory, name=None, **kwargs):
         """Attach a module to the pipeline system"""
+        fac = module_factory
 
         if name is None:
-            name = module_factory.__name__
+            name = fac.__name__
 
         log.info("Attaching module '{0}'".format(name))
 
-        if isinstance(module_factory, types.FunctionType) \
-                and module_factory.__name__ != 'GenericPump':
-            log.debug("Attaching as function module")
-            module = module_factory
+        if (inspect.isclass(fac) and issubclass(fac, Module)) or \
+                name == 'GenericPump':
+            log.debug("Attaching as regular module")
+            module = fac(name=name, **kwargs)
+        else:
+            if isinstance(fac, types.FunctionType):
+                log.debug("Attaching as function module")
+            else:
+                log.critical("Don't know how to attach module '{0}'!\n"
+                             "But I'll do my best".format(name))
+            module = fac
             module.name = name
             module.timeit = self.timeit
-        else:
-            log.debug("Attaching as regular module")
-            module = module_factory(name=name, **kwargs)
 
         # Special parameters
         if 'only_if' in kwargs:
