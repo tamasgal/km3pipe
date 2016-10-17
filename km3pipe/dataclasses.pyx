@@ -470,6 +470,7 @@ cdef class Hit:
     triggered : bool
 
     """
+    #TODO
     cdef public int id, dom_id, time, tot, channel_id, pmt_id
     cdef public bint triggered
     cdef public np.ndarray pos
@@ -681,18 +682,23 @@ class HitSeries(object):
         self._arr = arr
         self._index = 0
         self._hits = None
-        self._pos = np.full((len(arr), 3), np.nan)
-        self._dir = np.full((len(arr), 3), np.nan)
 
     @classmethod
     def from_aanet(cls, hits, event_id):
         try:
             return cls(np.array([(
                 h.channel_id,
+                h.dir[0],
+                h.dir[1],
+                h.dir[2],
                 h.dom_id,
                 h.id,
                 h.pmt_id,
+                h.pos[0],
+                h.pos[1],
+                h.pos[2],
                 h.t,
+                0,      # t0
                 h.tot,
                 h.trig,
                 event_id,
@@ -702,9 +708,16 @@ class HitSeries(object):
             return cls(np.array([(
                 ord(h.channel_id),
                 h.dom_id,
+                h.dir[0],
+                h.dir[1],
+                h.dir[2],
                 h.id,
                 h.pmt_id,
+                h.pos[0],
+                h.pos[1],
+                h.pos[2],
                 h.t,
+                0,      # t0
                 h.tot,
                 h.trig,
                 event_id,
@@ -716,9 +729,16 @@ class HitSeries(object):
         return cls(np.array([(
             0,     # channel_id
             0,     # dom_id
+            h.dir.x,
+            h.dir.y,
+            h.dir.z,
             h.id,
             h.pmt_id,
+            h.pos.x,
+            h.pos.y,
+            h.pos.z,
             h.time,
+            0,      # t0
             h.tot,
             0,     # triggered
             event_id,
@@ -727,6 +747,7 @@ class HitSeries(object):
     @classmethod
     def from_arrays(cls, channel_ids, dom_ids, ids, pmt_ids, times, tots,
                     triggereds, event_id):
+        #TODO
         len = channel_ids.shape[0]
         hits = np.empty(len, cls.dtype)
         hits['channel_id'] = channel_ids
@@ -741,6 +762,7 @@ class HitSeries(object):
 
     @classmethod
     def from_dict(cls, map, event_id):
+        #TODO
         if event_id is None:
             event_id = map['event_id']
         return cls.from_arrays(
@@ -755,6 +777,7 @@ class HitSeries(object):
         )
 
     def from_table(cls, table, event_id):
+        #TODO
         if event_id is None:
             event_id = table[0]['event_id']
         return cls(np.array([(
@@ -777,13 +800,10 @@ class HitSeries(object):
         if to == 'numpy':
             return np.array(self.__array__(), dtype=self.dtype)
 
-    def __array__(self, applied=False):
+    def __array__(self):
         if applied:
             return self._applied_array()
         return self._arr
-
-    def _applied_array(self):
-        return
 
     def __iter__(self):
         return self
@@ -824,7 +844,6 @@ class HitSeries(object):
     def channel_id(self):
         return self._arr['channel_id']
 
-
     @property
     def pos_x(self):
         return self._arr['pos_x']
@@ -849,6 +868,10 @@ class HitSeries(object):
     def dir_z(self):
         return self._arr['dir_z']
 
+    @property
+    def t0(self):
+        return self._arr['t0']
+
     def next(self):
         """Python 2/3 compatibility for iterators"""
         return self.__next__()
@@ -866,6 +889,7 @@ class HitSeries(object):
 
     def __getitem__(self, index):
         if isinstance(index, int):
+            #TODO
             hit = Hit(*self._arr[index])
             hit.pos = self._pos[index]
             hit.dir = self._dir[index]
