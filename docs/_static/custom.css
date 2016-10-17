@@ -32,3 +32,36 @@ pre code, pre tt {
   border: none;
   padding: 0;
 }
+
+/* better styling for tables, i.e. pd.DataFrame */
+
+table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  table-layout: fixed;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+thead {
+  vertical-align: bottom;
+  border-bottom: 1px solid;
+  text-align: right;
+}
+
+/* alabaster has some weird div.body table defines,
+ * and I can't override them by `td, th` or 
+ * `.dataframe td`. WTF.
+ */
+div.body td, div.body th {
+  text-align: right;
+  vertical-align: right;
+  padding: 0.5em 0.5em;
+  line-height: 1.0;
+  white-space: nowrap;
+  max-width: 100px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  border: none;
+}
