@@ -6,3 +6,4 @@ User Guide
     pipeline
     hdf5
     cmd
+    db

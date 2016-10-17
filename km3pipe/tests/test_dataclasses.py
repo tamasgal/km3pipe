@@ -10,6 +10,7 @@ from __future__ import division, absolute_import, print_function
 from six import with_metaclass
 
 import numpy as np
+from numpy import nan
 
 from km3pipe.testing import TestCase, FakeAanetHit
 from km3pipe.io.evt import EvtRawHit
@@ -174,6 +175,13 @@ class TestHitSeries(TestCase):
         n = 10
         ids = np.arange(n)
         dom_ids = np.arange(n)
+        dir_xs = np.arange(n)
+        dir_ys = np.arange(n)
+        dir_zs = np.arange(n)
+        pos_xs = np.arange(n)
+        pos_ys = np.arange(n)
+        pos_zs = np.arange(n)
+        t0s = np.arange(n)
         times = np.arange(n)
         tots = np.arange(n)
         channel_ids = np.arange(n)
@@ -181,9 +189,45 @@ class TestHitSeries(TestCase):
         pmt_ids = np.arange(n)
 
         hits = HitSeries.from_arrays(
-            channel_ids, dom_ids,
+            channel_ids,
+            dir_xs,
+            dir_ys,
+            dir_zs,
+            dom_ids,
+            ids,
+            pos_xs,
+            pos_ys,
+            pos_zs,
+            pmt_ids,
+            t0s,
+            times,
+            tots,
+            triggereds,
+            0,      # event_id
+        )
+
+        self.assertAlmostEqual(1, hits[1].id)
+        self.assertAlmostEqual(9, hits[9].pmt_id)
+        self.assertEqual(10, len(hits))
+
+    def test_uncalib_hits_dont_have_pmt_info(self):
+        n = 10
+        nans = np.full(n, np.nan, dtype='<f8')
+        ids = np.arange(n)
+        dom_ids = np.arange(n)
+        times = np.arange(n)
+        tots = np.arange(n)
+        channel_ids = np.arange(n)
+        triggereds = np.ones(n)
+        pmt_ids = np.arange(n)
+
+        hits = HitSeries.from_arrays(
+            channel_ids,
+            nans, nans, nans,
+            dom_ids,
             ids,
             pmt_ids,
+            nans, nans, nans, 0,
             times,
             tots,
             triggereds,
@@ -195,43 +239,49 @@ class TestHitSeries(TestCase):
         self.assertEqual(10, len(hits))
 
     def test_from_aanet(self):
-        n_params = 7
+        n_params = 14
         n_hits = 10
         hits = [FakeAanetHit(*p) for p in
                 np.arange(n_hits * n_params).reshape(n_hits, n_params)]
         hit_series = HitSeries.from_aanet(hits, 0)
 
-        self.assertAlmostEqual(3, hit_series.pmt_id[0])
-        self.assertAlmostEqual(3, hit_series[0].pmt_id)
-        self.assertAlmostEqual(7, hit_series[1].channel_id)
-        self.assertAlmostEqual(23, hit_series[3].id)
-        self.assertAlmostEqual(40, hit_series[5].tot)
-        self.assertTrue(hit_series[6].triggered)
-        self.assertAlmostEqual(50, hit_series[7].dom_id)
-        self.assertAlmostEqual(67, hit_series[9].time)
+        self.assertAlmostEqual(6, hit_series.pmt_id[0])
+        self.assertAlmostEqual(6, hit_series[0].pmt_id)
+        self.assertAlmostEqual(14, hit_series[1].channel_id)
+        self.assertAlmostEqual(47, hit_series[3].id)
+        self.assertAlmostEqual(82, hit_series[5].tot)
+        self.assertTrue(hit_series[9].triggered)
+        self.assertAlmostEqual(102, hit_series[7].dom_id)
+        self.assertAlmostEqual(137, hit_series[9].time)
         self.assertEqual(n_hits, len(hit_series))
 
     def test_attributes_via_from_aanet(self):
-        n_params = 7
+        n_params = 14
         n_hits = 10
         hits = [FakeAanetHit(*p) for p in
                 np.arange(n_hits * n_params).reshape(n_hits, n_params)]
         hit_series = HitSeries.from_aanet(hits, 0)
 
-        self.assertTupleEqual((2, 9, 16, 23, 30, 37, 44, 51, 58, 65),
+        self.assertTupleEqual((5, 19, 33, 47, 61, 75, 89, 103, 117, 131),
                               tuple(hit_series.id))
-        self.assertTupleEqual((1, 8, 15, 22, 29, 36, 43, 50, 57, 64),
+        self.assertTupleEqual(
+            (4, 18, 32, 46, 60, 74, 88, 102, 116, 130),
                               tuple(hit_series.dom_id))
-        self.assertTupleEqual((3, 10, 17, 24, 31, 38, 45, 52, 59, 66),
+        self.assertTupleEqual(
+            (6, 20, 34, 48, 62, 76, 90, 104, 118, 132),
                               tuple(hit_series.pmt_id))
-        self.assertTupleEqual((0, 7, 14, 21, 28, 35, 42, 49, 56, 63),
+        self.assertTupleEqual(
+            (0, 14, 28, 42, 56, 70, 84, 98, 112, 126),
                               tuple(hit_series.channel_id))
-        self.assertTupleEqual((4, 11, 18, 25, 32, 39, 46, 53, 60, 67),
+        self.assertTupleEqual(
+            (11, 25, 39, 53, 67, 81, 95, 109, 123, 137),
                               tuple(hit_series.time))
-        self.assertTupleEqual((True, True, True, True, True, True, True, True,
+        self.assertTupleEqual(
+            (True, True, True, True, True, True, True, True,
                                True, True),
                               tuple(hit_series.triggered))
-        self.assertTupleEqual((5, 12, 19, 26, 33, 40, 47, 54, 61, 68),
+        self.assertTupleEqual(
+            (12, 26, 40, 54, 68, 82, 96, 110, 124, 138),
                               tuple(hit_series.tot))
 
     def test_from_evt(self):
@@ -239,6 +289,8 @@ class TestHitSeries(TestCase):
         n_hits = 10
         hits = [EvtRawHit(*p) for p in
                 np.arange(n_hits * n_params).reshape(n_hits, n_params)]
+        print(len(hits))
+        print(len(hits[0]))
         hit_series = HitSeries.from_evt(hits, 0)
 
         self.assertAlmostEqual(1, hit_series[0].pmt_id)
@@ -277,14 +329,22 @@ class TestHitSeries(TestCase):
 class TestHit(TestCase):
 
     def setUp(self):
-        self.hit = Hit(1, 2, 3, 4, 5, 6, True)
+        self.hit = Hit(1, nan, nan, nan, 2, 3, 4,
+                       nan, nan, nan, 0, 5, 6, True)
 
     def test_attributes(self):
         hit = self.hit
         self.assertAlmostEqual(1, hit.channel_id)
+        self.assertTrue(np.isnan(hit.dir_x))
+        self.assertTrue(np.isnan(hit.dir_y))
+        self.assertTrue(np.isnan(hit.dir_z))
         self.assertAlmostEqual(2, hit.dom_id)
         self.assertAlmostEqual(3, hit.id)
         self.assertAlmostEqual(4, hit.pmt_id)
+        self.assertTrue(np.isnan(hit.pos_x))
+        self.assertTrue(np.isnan(hit.pos_y))
+        self.assertTrue(np.isnan(hit.pos_z))
+        self.assertAlmostEqual(0, hit.t0)
         self.assertAlmostEqual(5, hit.time)
         self.assertAlmostEqual(6, hit.tot)
         self.assertTrue(hit.triggered)

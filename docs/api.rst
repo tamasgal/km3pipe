@@ -1,7 +1,7 @@
 API Reference
 =============
 
-``km3pipe.io``: File Input / Output
+``km3pipe.io``: Data Input / Output
 -----------------------------------
 
 .. automodule:: km3pipe.io

@@ -7,8 +7,30 @@ A collection of commonly used modules.
 """
 from __future__ import division, absolute_import, print_function
 
+import numpy as np
+
 from km3pipe import Module
 from km3pipe.tools import peak_memory_usage
+from km3pipe.dataclasses import ArrayTaco, Reco     # noqa
+
+
+class Wrap(Module):
+    """Wrap a key-val dictionary as a Serialisable.
+    """
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.keys = self.get('keys') or None
+
+    def process(self, blob):
+        keys = sorted(blob.keys()) if self.keys is None else self.keys
+        for key in keys:
+            dat = blob[key]
+            if dat is None:
+                continue
+            dt = np.dtype([(f, float) for f in sorted(dat.keys())])
+            arr = Reco(dat, dt)
+            blob[key] = arr
+        return blob
 
 
 class Dump(Module):
@@ -26,9 +48,8 @@ class Dump(Module):
         self.keys = self.get('keys') or None
 
     def process(self, blob):
-        if self.keys is None:
-            self.keys = sorted(blob.keys())
-        for key in self.keys:
+        keys = sorted(blob.keys()) if self.keys is None else self.keys
+        for key in keys:
             print(key, end=': ')
             print(blob[key])
             print('')
@@ -51,6 +72,25 @@ class Delete(Module):
     def process(self, blob):
         for key in self.keys:
             blob.pop(key, None)
+        return blob
+
+
+class Keep(Module):
+    """Keep only specified keys in the blob.
+
+    Parameters
+    ----------
+    keys: collection(string), optional
+        Keys to keep. Everything else is removed.
+    """
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.keys = self.get('keys') or set()
+
+    def process(self, blob):
+        for key in blob.keys():
+            if key not in self.keys:
+                blob.pop(key, None)
         return blob
 
 

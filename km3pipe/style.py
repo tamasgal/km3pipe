@@ -10,7 +10,6 @@ from __future__ import division, absolute_import, print_function
 import os
 
 import matplotlib.pyplot as plt
-import matplotlib.style
 import km3pipe as kp
 
 __author__ = "Tamas Gal"
@@ -34,8 +33,9 @@ def get_style_path(style='km3pipe'):
 
 
 def use(style):
-    if style not in matplotlib.style.available:
+    if style in ('default', 'km3pipe', 'talk', 'notepad', 'poster'):
         style = get_style_path(style)
+        plt.style.use(get_style_path('default'))
     plt.style.use(style)
 
 

@@ -186,9 +186,11 @@ class DAQProcessor(Module):
         for idx, hit in enumerate(hits):
             triggereds[idx] = hit in triggered_map
 
-        hit_series = HitSeries.from_arrays(channel_ids, dom_ids, range(n_hits),
-                                           zeros, times, tots, triggereds,
-                                           self.index)
+        nans = np.full(n_hits, np.nan, dtype='<f8')
+        hit_series = HitSeries.from_arrays(channel_ids, nans, nans, nans,
+                                           dom_ids, range(n_hits),
+                                           zeros, nans, nans, nans, nans,
+                                           times, tots, triggereds, self.index)
 
         blob['Hits'] = hit_series
 

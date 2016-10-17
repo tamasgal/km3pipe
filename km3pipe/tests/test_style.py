@@ -6,9 +6,6 @@ from __future__ import division, absolute_import, print_function
 from km3pipe.testing import TestCase
 from km3pipe.style import get_style_path
 
-import matplotlib.pyplot as plt
-import os
-
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
