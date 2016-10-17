@@ -460,36 +460,53 @@ cdef class Hit:
     Parameters
     ----------
     channel_id : int
-    dir : Direction or numpy.ndarray
+    dir_x : float
+    dir_y : float
+    dir_z : float
     dom_id : int
     id : int
     pmt_id : int
-    pos : Position or numpy.ndarray
+    pos_x : float
+    pos_y : float
+    pos_z : float
+    t0 : int
     time : int
     tot : int
     triggered : bool
 
     """
-    #TODO
     cdef public int id, dom_id, time, tot, channel_id, pmt_id
     cdef public bint triggered
-    cdef public np.ndarray pos
-    cdef public np.ndarray dir
+    cdef public float pos_x, pos_y, pos_z, dir_x, dir_y, dir_z, t0
 
     def __cinit__(self,
                   int channel_id,
+                  float dir_x,
+                  float dir_y,
+                  float dir_z,
                   int dom_id,
                   int id,
                   int pmt_id,
+                  float pos_x,
+                  float pos_y,
+                  float pos_z,
+                  int t0,
                   int time,
                   int tot,
                   bint triggered,
                   int event_id=0        # ignore this!
                  ):
         self.channel_id = channel_id
+        self.dir_x = dir_x
+        self.dir_y = dir_y
+        self.dir_z = dir_z
         self.dom_id = dom_id
         self.id = id
         self.pmt_id = pmt_id
+        self.pos_x = pos_x
+        self.pos_y = pos_y
+        self.pos_z = pos_z
+        self.t0 = t0
         self.time = time
         self.tot = tot
         self.triggered = triggered
@@ -671,13 +688,13 @@ class HitSeries(object):
         ('pos_y', '<f8'),
         ('pos_z', '<f8'),
         #('run_id', '<u4'),
+        ('t0', '<f8'),
         ('time', '<i4'),
         ('tot', 'u1'),
         ('triggered', '?'),
-        ('t0', '<f8'),
         ('event_id', '<u4'),
     ])
-    applied_dtype = np.dtype([
+
     def __init__(self, arr):
         self._arr = arr
         self._index = 0
@@ -697,8 +714,8 @@ class HitSeries(object):
                 h.pos[0],
                 h.pos[1],
                 h.pos[2],
-                h.t,
                 0,      # t0
+                h.t,
                 h.tot,
                 h.trig,
                 event_id,
@@ -716,8 +733,8 @@ class HitSeries(object):
                 h.pos[0],
                 h.pos[1],
                 h.pos[2],
-                h.t,
                 0,      # t0
+                h.t,
                 h.tot,
                 h.trig,
                 event_id,
@@ -728,32 +745,39 @@ class HitSeries(object):
     def from_evt(cls, hits, event_id):
         return cls(np.array([(
             0,     # channel_id
+            np.nan,
+            np.nan,
+            np.nan,
             0,     # dom_id
-            h.dir.x,
-            h.dir.y,
-            h.dir.z,
             h.id,
             h.pmt_id,
-            h.pos.x,
-            h.pos.y,
-            h.pos.z,
-            h.time,
+            np.nan,
+            np.nan,
+            np.nan,
             0,      # t0
+            h.time,
             h.tot,
             0,     # triggered
             event_id,
         ) for h in hits], dtype=cls.dtype))
 
     @classmethod
-    def from_arrays(cls, channel_ids, dom_ids, ids, pmt_ids, times, tots,
+    def from_arrays(cls, channel_ids, dir_xs, dir_ys, dir_zs, dom_ids, ids,
+                    pmt_ids, pos_xs, pos_ys, pos_zs, t0s, times, tots,
                     triggereds, event_id):
-        #TODO
         len = channel_ids.shape[0]
         hits = np.empty(len, cls.dtype)
         hits['channel_id'] = channel_ids
+        hits['dir_x'] = dir_xs
+        hits['dir_y'] = dir_ys
+        hits['dir_z'] = dir_zs
         hits['dom_id'] = dom_ids
         hits['id'] = ids
         hits['pmt_id'] = pmt_ids
+        hits['pos_x'] = pos_xs
+        hits['pos_y'] = pos_ys
+        hits['pos_z'] = pos_zs
+        hits['t0'] = t0s
         hits['time'] = times
         hits['tot'] = tots
         hits['triggered'] = triggereds
@@ -762,14 +786,20 @@ class HitSeries(object):
 
     @classmethod
     def from_dict(cls, map, event_id):
-        #TODO
         if event_id is None:
             event_id = map['event_id']
         return cls.from_arrays(
             map['channel_id'],
+            map['dir_x'],
+            map['dir_y'],
+            map['dir_z'],
             map['dom_id'],
             map['id'],
             map['pmt_id'],
+            map['pos_x'],
+            map['pos_y'],
+            map['pos_z'],
+            map['t0'],
             map['time'],
             map['tot'],
             map['triggered'],
@@ -777,14 +807,20 @@ class HitSeries(object):
         )
 
     def from_table(cls, table, event_id):
-        #TODO
         if event_id is None:
             event_id = table[0]['event_id']
         return cls(np.array([(
             row['channel_id'],
+            row['dir_x'],
+            row['dir_y'],
+            row['dir_z'],
             row['dom_id'],
             row['id'],
             row['pmt_id'],
+            row['pos_x'],
+            row['pos_y'],
+            row['pos_z'],
+            row['t0'],
             row['time'],
             row['tot'],
             row['triggered'],
@@ -793,7 +829,6 @@ class HitSeries(object):
     @classmethod
     def deserialise(cls, data, event_id, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
-            #return cls.from_table(data, event_id)
             return cls(data)
 
     def serialise(self, to='numpy'):
@@ -801,8 +836,6 @@ class HitSeries(object):
             return np.array(self.__array__(), dtype=self.dtype)
 
     def __array__(self):
-        if applied:
-            return self._applied_array()
         return self._arr
 
     def __iter__(self):
@@ -889,10 +922,7 @@ class HitSeries(object):
 
     def __getitem__(self, index):
         if isinstance(index, int):
-            #TODO
             hit = Hit(*self._arr[index])
-            hit.pos = self._pos[index]
-            hit.dir = self._dir[index]
             return hit
         elif isinstance(index, slice):
             return self._slice_generator(index)
@@ -1095,7 +1125,6 @@ class TrackSeries(object):
                           cls.get_len(t),
                           Position((t.pos.x, t.pos.y, t.pos.z)),
                           t.t,
-                          # TODO:
                           # This is a nasty bug. It is not completely clear
                           # if this is supposed to be PDG or Geant convention.
                           # might be, that for CC neutrino events,
