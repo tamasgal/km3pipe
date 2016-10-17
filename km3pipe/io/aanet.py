@@ -225,28 +225,34 @@ def parse_ancient_recolns(aanet_event, event_id):
     # trks[3] ==> full pdf track, final reconstructed direction
     # trks[4] ==> + vertex fit and muon length fit
     # trks[5] ==> + bjorken-y fit and neutrino energy fit
-    out = {}
-    out['lambda'] = aanet_event.trks[3].lik
-    out['n_hits_used'] = aanet_event.trks[3].fitinf[0]
-    out['energy_muon'] = aanet_event.trks[4].E
-    out['energy_neutrino'] = aanet_event.trks[5].E
-    out['bjorken_y'] = aanet_event.trks[5].By_rec
-    out['pos_x'] = aanet_event.trks[5].pos.x
-    out['pos_y'] = aanet_event.trks[5].pos.y
-    out['pos_z'] = aanet_event.trks[5].pos.z
-    out['dir_x'] = aanet_event.trks[5].dir.x
-    out['dir_y'] = aanet_event.trks[5].dir.y
-    out['dir_z'] = aanet_event.trks[5].dir.z
+    try:
+        out = {}
+        out['lambda'] = aanet_event.trks[3].lik
+        out['n_hits_used'] = aanet_event.trks[3].fitinf[0]
+        out['energy_muon'] = aanet_event.trks[4].E
+        out['energy_neutrino'] = aanet_event.trks[5].E
+        out['bjorken_y'] = aanet_event.trks[5].By_rec
+        out['pos_x'] = aanet_event.trks[5].pos.x
+        out['pos_y'] = aanet_event.trks[5].pos.y
+        out['pos_z'] = aanet_event.trks[5].pos.z
+        out['dir_x'] = aanet_event.trks[5].dir.x
+        out['dir_y'] = aanet_event.trks[5].dir.y
+        out['dir_z'] = aanet_event.trks[5].dir.z
 
-    sigma2_theta = aanet_event.trks[3].error_matrix[18] \
-        if aanet_event.trks[3].error_matrix[18] > 0 else 0
-    out['sigma2_theta'] = sigma2_theta
-    sigma2_phi = aanet_event.trks[3].error_matrix[24] \
-        if aanet_event.trks[3].error_matrix[24] > 0 else 0
-    out['sigma2_phi'] = sigma2_phi
-    sin_theta = np.sin(np.arccos(aanet_event.trks[3].dir.z))
-    out['sin_theta'] = sin_theta
-    out['beta'] = np.sqrt(sin_theta * sin_theta * sigma2_phi + sigma2_theta)
+        sigma2_theta = aanet_event.trks[3].error_matrix[18] \
+            if aanet_event.trks[3].error_matrix[18] > 0 else 0
+        out['sigma2_theta'] = sigma2_theta
+        sigma2_phi = aanet_event.trks[3].error_matrix[24] \
+            if aanet_event.trks[3].error_matrix[24] > 0 else 0
+        out['sigma2_phi'] = sigma2_phi
+        sin_theta = np.sin(np.arccos(aanet_event.trks[3].dir.z))
+        out['sin_theta'] = sin_theta
+        out['beta'] = np.sqrt(sin_theta * sin_theta * sigma2_phi + sigma2_theta)
+    except IndexError:
+        keys = {'lambda', 'n_hits_used', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z',
+                'energy_muon', 'energy_neutrino', 'bjorken_y', 'beta',
+                'sigma2_theta', 'sigma2_phi', 'sin_theta', }    #noqa
+        out = {key: 0 for key in keys}
 
     dt = [(key, float) for key in sorted(out.keys())]
     out['event_id'] = event_id
