@@ -648,12 +648,24 @@ class HitSeries(object):
     """Collection of multiple Hits.
     """
     dtype = np.dtype([
-        ('channel_id', 'u1'), ('dom_id', '<u4'),
-        ('id', '<u4'), ('pmt_id', '<u4'),
+        ('channel_id', 'u1'),
+        ('dir_x', '<f8'),
+        ('dir_y', '<f8'),
+        ('dir_z', '<f8'),
+        ('dom_id', '<u4'),
+        ('id', '<u4'),
+        ('pmt_id', '<u4'),
+        ('pos_x', '<f8'),
+        ('pos_y', '<f8'),
+        ('pos_z', '<f8'),
         #('run_id', '<u4'),
-        ('time', '<i4'), ('tot', 'u1'), ('triggered', '?'),
+        ('time', '<i4'),
+        ('tot', 'u1'),
+        ('triggered', '?'),
+        ('t0', '<f8'),
         ('event_id', '<u4'),
-        ])
+    ])
+    applied_dtype = np.dtype([
     def __init__(self, arr):
         self._arr = arr
         self._index = 0
@@ -754,8 +766,13 @@ class HitSeries(object):
         if to == 'numpy':
             return np.array(self.__array__(), dtype=self.dtype)
 
-    def __array__(self):
+    def __array__(self, applied=False):
+        if applied:
+            return self._applied_array()
         return self._arr
+
+    def _applied_array(self):
+        return
 
     def __iter__(self):
         return self
@@ -796,25 +813,30 @@ class HitSeries(object):
     def channel_id(self):
         return self._arr['channel_id']
 
-    @property
-    def pos(self):
-        return self._pos
 
     @property
     def pos_x(self):
-        return self.pos[:, 0]
+        return self._arr['pos_x']
 
     @property
     def pos_y(self):
-        return self.pos[:, 1]
+        return self._arr['pos_x']
 
     @property
     def pos_z(self):
-        return self.pos[:, 2]
+        return self._arr['pos_x']
 
     @property
-    def dir(self):
-        return self._dir
+    def dir_x(self):
+        return self._arr['dir_x']
+
+    @property
+    def dir_y(self):
+        return self._arr['dir_y']
+
+    @property
+    def dir_z(self):
+        return self._arr['dir_z']
 
     def next(self):
         """Python 2/3 compatibility for iterators"""
