@@ -12,7 +12,8 @@ from six import with_metaclass
 import numpy as np
 from numpy import nan
 
-from km3pipe.testing import TestCase, FakeAanetHit
+from km3pipe.testing import TestCase
+from km3pipe.testing.mocks import FakeAanetHit
 from km3pipe.io.evt import EvtRawHit
 from km3pipe.dataclasses import (Hit, Track, Position, Direction_,
                                  HitSeries, L0HitSeries,
