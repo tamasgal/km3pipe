@@ -78,9 +78,11 @@ class SummarysliceInfo(with_metaclass(Serialisable)):
     """JDAQSummaryslice Metadata.
     """
     dtype = np.dtype([
-        ('det_id', '<i4'), ('frame_index', '<u4'), ('run_id', '<i4'),
+        ('det_id', '<i4'),
+        ('frame_index', '<u4'),
+        ('run_id', '<i4'),
         ('slice_id', '<u4'),
-        ])
+    ])
 
     @classmethod
     def from_table(cls, row):
@@ -126,9 +128,11 @@ class TimesliceInfo(with_metaclass(Serialisable)):
     """JDAQTimeslice metadata.
     """
     dtype = np.dtype([
-        ('dom_id', '<u4'), ('frame_id', '<u4'), ('n_hits', '<u4'),
+        ('dom_id', '<u4'),
+        ('frame_id', '<u4'),
+        ('n_hits', '<u4'),
         ('slice_id', '<u4'),
-        ])
+    ])
 
     @classmethod
     def from_table(cls, row):
@@ -185,7 +189,7 @@ class TimesliceFrameInfo(with_metaclass(Serialisable)):
         ('utc_nanoseconds', '<u4'),
         ('utc_seconds', '<u4'),
         ('white_rabbit_status', '<u4'),
-        ])
+    ])
 
     @classmethod
     def from_table(cls, row):
@@ -247,7 +251,7 @@ class SummaryframeInfo(with_metaclass(Serialisable)):
         ('utc_nanoseconds', '<u4'),
         ('utc_seconds', '<u4'),
         ('white_rabbit_status', '<u4'),
-        ])
+    ])
 
     @classmethod
     def from_table(cls, row):
@@ -296,14 +300,21 @@ class EventInfo(object):
     """Event Metadata.
     """
     dtype = np.dtype([
-        ('det_id', '<i4'), ('frame_index', '<u4'),
-        ('mc_id', '<i4'), ('mc_t', '<f8'), ('overlays', '<u4'),
+        ('det_id', '<i4'),
+        ('frame_index', '<u4'),
+        ('mc_id', '<i4'),
+        ('mc_t', '<f8'),
+        ('overlays', '<u4'),
         #('run_id', '<u4'),
-        ('trigger_counter', '<u8'), ('trigger_mask', '<u8'),
-        ('utc_nanoseconds', '<u8'), ('utc_seconds', '<u8'),
-        ('weight_w1', '<f8'), ('weight_w2', '<f8'), ('weight_w3', '<f8'),
+        ('trigger_counter', '<u8'),
+        ('trigger_mask', '<u8'),
+        ('utc_nanoseconds', '<u8'),
+        ('utc_seconds', '<u8'),
+        ('weight_w1', '<f8'),
+        ('weight_w2', '<f8'),
+        ('weight_w3', '<f8'),
         ('event_id', '<u4'),
-        ])
+    ])
 
     def __init__(self, arr, h5loc='/'):
         self._arr = np.array(arr, dtype=self.dtype).reshape(1)
@@ -886,9 +897,11 @@ class L0HitSeries(object):
     """Collection of multiple L0Hits.
     """
     dtype = np.dtype([
-        ('channel_id', 'u1'), ('dom_id', '<u4'),
-        ('time', '<i4'), ('tot', 'u1'),
-        ])
+        ('channel_id', 'u1'),
+        ('dom_id', '<u4'),
+        ('time', '<i4'),
+        ('tot', 'u1'),
+    ])
     def __init__(self, arr, slice_id, frame_id):
         self._arr = arr
         self._index = 0
@@ -1014,15 +1027,23 @@ class TrackSeries(object):
     dtype: datatype of array representation
     """
     dtype = np.dtype([
-        ('bjorkeny', '<f8'), ('dir_x', '<f8'), ('dir_y', '<f8'),
-        ('dir_z', '<f8'), ('energy', '<f8'),
-        ('id', '<u4'), ('interaction_channel', '<u4'), ('is_cc', '?'),
-        ('length', '<f8'), ('pos_x', '<f8'), ('pos_y', '<f8'),
+        ('bjorkeny', '<f8'),
+        ('dir_x', '<f8'),
+        ('dir_y', '<f8'),
+        ('dir_z', '<f8'),
+        ('energy', '<f8'),
+        ('id', '<u4'),
+        ('interaction_channel', '<u4'),
+        ('is_cc', '?'),
+        ('length', '<f8'),
+        ('pos_x', '<f8'),
+        ('pos_y', '<f8'),
         ('pos_z', '<f8'),
         #('run_id', '<u4'),
-        ('time', '<i4'), ('type', '<i4'),
+        ('time', '<i4'),
+        ('type', '<i4'),
         ('event_id', '<u4'),
-        ])
+    ])
     def __init__(self, tracks, event_id):
         self._bjorkeny = None
         self._dir = None
