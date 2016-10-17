@@ -73,7 +73,7 @@ class Pipeline(object):
                 name == 'GenericPump':
             log.debug("Attaching as regular module")
             module = fac(name=name, **kwargs)
-        else isinstance(fac, types.FunctionType):
+        else:
             if isinstance(fac, types.FunctionType):
                 log.debug("Attaching as function module")
             else:
