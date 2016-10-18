@@ -53,7 +53,7 @@ thead {
 /* alabaster has some weird div.body table defines,
  * and I can't override them by `td, th` or 
  * `.dataframe td`. WTF.
- */
+ *
 div.body td, div.body th {
   text-align: right;
   vertical-align: right;
@@ -65,3 +65,4 @@ div.body td, div.body th {
   overflow: hidden;
   border: none;
 }
+ */
