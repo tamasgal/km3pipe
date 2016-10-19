@@ -178,7 +178,7 @@ class DAQProcessor(Module):
         n_hits = event.n_snapshot_hits
         dom_ids, channel_ids, times, tots = zip(*hits)
         zeros = np.zeros(n_hits)
-        nans = np.full(zeros, np.nan)
+        nans = np.full_like(zeros, np.nan)
         triggereds = np.zeros(n_hits)
         triggered_map = {}
         for triggered_hit in event.triggered_hits:
