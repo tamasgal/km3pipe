@@ -178,6 +178,7 @@ class DAQProcessor(Module):
         n_hits = event.n_snapshot_hits
         dom_ids, channel_ids, times, tots = zip(*hits)
         zeros = np.zeros(n_hits)
+        nans = np.full(zeros, np.nan)
         triggereds = np.zeros(n_hits)
         triggered_map = {}
         for triggered_hit in event.triggered_hits:
@@ -186,11 +187,22 @@ class DAQProcessor(Module):
         for idx, hit in enumerate(hits):
             triggereds[idx] = hit in triggered_map
 
-        nans = np.full(n_hits, np.nan, dtype='<f8')
-        hit_series = HitSeries.from_arrays(channel_ids, nans, nans, nans,
-                                           dom_ids, range(n_hits),
-                                           zeros, nans, nans, nans, nans,
-                                           times, tots, triggereds, self.index)
+        hit_series = HitSeries.from_arrays(
+            channel_ids,
+            nans,  # dir_x
+            nans,  # dir_y
+            nans,  # dir_z
+            dom_ids,
+            range(n_hits),  # id
+            zeros, # pmt_id
+            nans,  # pos_x
+            nans,  # pos_y
+            nans,  # pos_z
+            zeros,  # t0
+            times,
+            tots,
+            triggereds,
+            self.index)
 
         blob['Hits'] = hit_series
 
