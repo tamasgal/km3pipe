@@ -194,7 +194,7 @@ class DAQProcessor(Module):
             nans,  # dir_z
             dom_ids,
             range(n_hits),  # id
-            zeros, # pmt_id
+            zeros,  # pmt_id
             nans,  # pos_x
             nans,  # pos_y
             nans,  # pos_z
@@ -206,12 +206,17 @@ class DAQProcessor(Module):
 
         blob['Hits'] = hit_series
 
-        event_info = EventInfo((header.det_id, self.index, header.time_slice,
-                               0, 0,  # MC ID and time
-                               event.overlays, header.run,
-                               event.trigger_counter, event.trigger_mask,
-                               header.ticks * 16, header.time_stamp,
-                               0, 0, 0))  # MC weights
+        event_info = EventInfo((
+            header.det_id,
+            self.index,
+            # header.time_slice,
+            0, 0,  # MC ID and time
+            event.overlays,
+            #header.run,
+            event.trigger_counter, event.trigger_mask,
+            header.ticks * 16, header.time_stamp,
+            0, 0, 0,  # MC weights
+            0))
         blob['EventInfo'] = event_info
 
         self.index += 1
