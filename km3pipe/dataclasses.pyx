@@ -765,8 +765,12 @@ class HitSeries(object):
     def from_arrays(cls, channel_ids, dir_xs, dir_ys, dir_zs, dom_ids, ids,
                     pmt_ids, pos_xs, pos_ys, pos_zs, t0s, times, tots,
                     triggereds, event_id):
-        len = channel_ids.shape[0]
-        hits = np.empty(len, cls.dtype)
+        # do we need shape[0] or does len() work too?
+        try:
+            length = channel_ids.shape[0]
+        except AttributeError:
+            length = len(channel_ids)
+        hits = np.empty(length, cls.dtype)
         hits['channel_id'] = channel_ids
         hits['dir_x'] = dir_xs
         hits['dir_y'] = dir_ys
@@ -781,7 +785,7 @@ class HitSeries(object):
         hits['time'] = times
         hits['tot'] = tots
         hits['triggered'] = triggereds
-        hits['event_id'] = np.full(len, event_id, dtype='<u4')
+        hits['event_id'] = np.full(length, event_id, dtype='<u4')
         return cls(hits)
 
     @classmethod
