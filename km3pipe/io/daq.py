@@ -162,9 +162,12 @@ class DAQProcessor(Module):
 
     def process(self, blob):
         tag = str(blob['CHPrefix'].tag)
+        data = blob['CHData']
 
         if tag == 'IO_EVT':
-            self.process_event(blob['CHData'], blob)
+            self.process_event(data, blob)
+        if tag == 'IO_SUM':
+            self.process_summaryslice(data, blob)
 
         return blob
 
@@ -221,8 +224,11 @@ class DAQProcessor(Module):
 
         self.index += 1
 
-    def process_summary_slice(self, data, blob):
-        pass
+    def process_summaryslice(self, data, blob):
+        data_io = StringIO(data)
+        preamble = DAQPreamble(file_obj=data_io)
+        summaryslice = DAQSummaryslice(file_obj=data_io)
+        blob["RawSummaryslice"] = summaryslice
 
 
 class DAQPreamble(object):
