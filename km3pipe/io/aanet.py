@@ -90,11 +90,15 @@ class AanetPump(Pump):
         # pylint: disable:F0401,W0612
         from ROOT import EventFile
 
+        found_any_files = False
         for filename in self.filenames:
             print("Reading from file: {0}".format(filename))
             if not os.path.exists(filename):
                 log.warn(filename + " not available: continue without it")
                 continue
+
+            if not found_any_files:
+                found_any_files = True
 
             try:
                 event_file = EventFile(filename)
@@ -117,6 +121,14 @@ class AanetPump(Pump):
                     blob = self._read_event(event, filename)
                     yield blob
             del event_file
+
+        if not found_any_files:
+            msg = "None of the input files available. Exiting."
+            try:
+                raise FileNotFoundError(msg)
+            except NameError:
+                # python2
+                raise IOError(msg)
 
     def _read_event(self, event, filename):
         try:
