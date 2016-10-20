@@ -1469,7 +1469,8 @@ class ArrayTaco(object):
     def from_dict(cls, map, dtype=None, **kwargs):
         if dtype is None:
             dtype = [(key, float) for key in sorted(map.keys())]
-        return cls([tuple((map[key] for key in dtype.names))], **kwargs)
+        return cls(np.array([tuple((map[key] for key in dtype.names))],
+                            dtype=dtype), **kwargs)
 
     @property
     def dtype(self):
