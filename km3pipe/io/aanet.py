@@ -177,15 +177,18 @@ class AanetPump(Pump):
         if self.format == 'jevt_jgandalf':
             track, dtype = parse_jevt_jgandalf(event, event.id)
             if track:
-                blob['JEvtJGandalf'] = ArrayTaco.from_dict(track, dtype)
+                blob['JEvtJGandalf'] = ArrayTaco.from_dict(track, dtype,
+                                                           h5loc='/reco')
         if self.format == 'generic_track':
             track, dtype = parse_generic_event(event, event.id)
             if track:
-                blob['Track'] = ArrayTaco.from_dict(track, dtype)
+                blob['Track'] = ArrayTaco.from_dict(track, dtype,
+                                                    h5loc='/reco')
         if self.format == 'ancient_recolns':
             track, dtype = parse_ancient_recolns(event, event.id)
             if track:
-                blob['AncientRecoLNS'] = ArrayTaco.from_dict(track, dtype)
+                blob['AncientRecoLNS'] = ArrayTaco.from_dict(track, dtype,
+                                                             h5loc='/reco')
         return blob
 
     def event_index(self, blob):
@@ -359,10 +362,12 @@ def read_mini_dst(aanet_event, event_id):
         reader = recname_to_reader[recname]
 
         reco_map, dtype = reader(trk)
-        minidst[recname] = ArrayTaco.from_dict(reco_map, dtype)
+        minidst[recname] = ArrayTaco.from_dict(reco_map, dtype,
+                                               h5loc='/reco')
 
     thomas_map, dtype = parse_thomasfeatures(aanet_event.usr)
-    minidst['ThomasFeatures'] = ArrayTaco.from_dict(thomas_map, dtype)
+    minidst['ThomasFeatures'] = ArrayTaco.from_dict(thomas_map, dtype,
+                                                    h5loc='/reco')
 
     return minidst
 
