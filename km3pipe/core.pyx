@@ -401,12 +401,12 @@ class Geometry(Module):
                 pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
             except (KeyError, AttributeError):
                 pmt = self.detector.pmt_with_id(hit.pmt_id)
-            hits.pos_x[idx] = pmt.pos.x
-            hits.pos_y[idx] = pmt.pos.y
-            hits.pos_z[idx] = pmt.pos.z
-            hits.dir_x[idx] = pmt.dir.x
-            hits.dir_y[idx] = pmt.dir.y
-            hits.dir_z[idx] = pmt.dir.z
+            hits.pos_x[idx] = pmt.pos[0]
+            hits.pos_y[idx] = pmt.pos[1]
+            hits.pos_z[idx] = pmt.pos[2]
+            hits.dir_x[idx] = pmt.dir[0]
+            hits.dir_y[idx] = pmt.dir[1]
+            hits.dir_z[idx] = pmt.dir[2]
             # hit.t0 = pmt.t0
             hits._arr['time'][idx] += pmt.t0
             # hit.a = hit.tot
