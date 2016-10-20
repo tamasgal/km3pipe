@@ -132,7 +132,7 @@ API Reference
   :toctree: api
 
   pdg2name
-  geant2pdf
+  geant2pdg
   decamelise
   camelise
 
