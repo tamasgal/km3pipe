@@ -2,13 +2,14 @@ Unreleased changes
 ------------------
 
 5.1.2 / 2016-10-20
-------------------
+~~~~~~~~~~~~~~~~~~
 * Unify Reco + Wrapper dataclass. Reco(map, dtype) -> ArrayTaco.from_dict()
 * add ``to='pandas'`` option to ``Dataclass.serialise()``
 * Tweak internal array/dataframe handling
 
 5.1.0 / 2016-10-20
-~~~~~~~~~~~~~~~~~~
+------------------
+* ...
 
 5.0.0 / 2016-10-18
 ------------------
