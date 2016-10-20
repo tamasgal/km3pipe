@@ -16,6 +16,7 @@ from six import with_metaclass
 import numpy as np
 cimport numpy as np
 cimport cython
+import pandas as pd
 
 np.import_array()
 
@@ -102,6 +103,8 @@ class SummarysliceInfo(with_metaclass(Serialisable)):
     def serialise(self, to='numpy'):
         if to == 'numpy':
             return np.array(self.__array__(), dtype=self.dtype)
+        if to == 'pandas':
+            return pd.DataFrame.from_records(self.serialise(to='numpy'))
 
     def __array__(self):
         return [(
@@ -152,6 +155,8 @@ class TimesliceInfo(with_metaclass(Serialisable)):
     def serialise(self, to='numpy'):
         if to == 'numpy':
             return np.array(self.__array__(), dtype=self.dtype)
+        if to == 'pandas':
+            return pd.DataFrame.from_records(self.serialise(to='numpy'))
 
     def __array__(self):
         return [(
@@ -209,6 +214,8 @@ class TimesliceFrameInfo(with_metaclass(Serialisable)):
     def serialise(self, to='numpy'):
         if to == 'numpy':
             return np.array(self.__array__(), dtype=self.dtype)
+        if to == 'pandas':
+            return pd.DataFrame.from_records(self.serialise(to='numpy'))
 
     def __array__(self):
         return [(
@@ -271,6 +278,8 @@ class SummaryframeInfo(with_metaclass(Serialisable)):
     def serialise(self, to='numpy'):
         if to == 'numpy':
             return np.array(self.__array__(), dtype=self.dtype)
+        if to == 'pandas':
+            return pd.DataFrame.from_records(self.serialise(to='numpy'))
 
     def __array__(self):
         return [(
@@ -334,6 +343,8 @@ class EventInfo(object):
     def serialise(self, to='numpy'):
         if to == 'numpy':
             return np.array(self.__array__(), dtype=self.dtype)
+        if to == 'pandas':
+            return pd.DataFrame.from_records(self.serialise(to='numpy'))
 
     def __array__(self):
         return self._arr
@@ -838,6 +849,8 @@ class HitSeries(object):
     def serialise(self, to='numpy'):
         if to == 'numpy':
             return np.array(self.__array__(), dtype=self.dtype)
+        if to == 'pandas':
+            return pd.DataFrame.from_records(self.serialise(to='numpy'))
 
     def __array__(self):
         return self._arr
@@ -1013,6 +1026,8 @@ class L0HitSeries(object):
     def serialise(self, to='numpy'):
         if to == 'numpy':
             return np.array(self.__array__(), dtype=self.dtype)
+        if to == 'pandas':
+            return pd.DataFrame.from_records(self.serialise(to='numpy'))
 
     def __array__(self):
         return self._arr
@@ -1201,6 +1216,8 @@ class TrackSeries(object):
     def serialise(self, to='numpy'):
         if to == 'numpy':
             return np.array(self.__array__(), dtype=self.dtype)
+        if to == 'pandas':
+            return pd.DataFrame.from_records(self.serialise(to='numpy'))
 
     def __array__(self):
         return [(
@@ -1387,6 +1404,8 @@ class SummaryframeSeries(object):
     def serialise(self, to='numpy'):
         if to == 'numpy':
             return np.array(self.__array__(), dtype=self.dtype)
+        if to == 'pandas':
+            return pd.DataFrame.from_records(self.serialise(to='numpy'))
 
     @property
     def n_received_packets(self):
@@ -1448,7 +1467,10 @@ class ArrayTaco(object):
             return cls(data, h5loc)
 
     def serialise(self, to='numpy'):
-        return self.array
+        if to == 'numpy':
+            return self.array
+        if to == 'pandas':
+            return pd.DataFrame.from_records(self.serialise(to='numpy'))
 
     @classmethod
     def from_dict(cls, map, dtype=None, **kwargs):

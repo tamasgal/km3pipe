@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* add ``to='pandas'`` option to ``Dataclass.serialise()``
 
 5.1.0 / 2016-10-20
 ------------------
