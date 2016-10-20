@@ -65,3 +65,7 @@ div.body td, div.body th {
   border: none;
 }
  */
+
+div.sphinxsidebar ul li {
+  line-height: 1.8;
+}
