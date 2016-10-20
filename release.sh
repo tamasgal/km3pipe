@@ -27,8 +27,8 @@ git add km3pipe/__version__.py
 
 git commit -m "Bumps version number"
 
-vim km3pipe/CHANGELOG.rst
-git add km3pipe/CHANGELOG.rst
+vim CHANGELOG.rst
+git add CHANGELOG.rst
 git commit -m "Bumps changelog"
 
 git flow release finish "${VERSION}"
