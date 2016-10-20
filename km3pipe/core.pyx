@@ -46,6 +46,11 @@ class Pipeline(object):
     If initialised with timeit=True, all modules will be monitored, otherwise
     only the overall statistics and modules with `timeit=True` will be
     shown.
+
+    Parameters
+    ----------
+    timeit: bool, optional [default=False]
+        Display time profiling statistics for the pipeline?
     """
 
     def __init__(self, blob=None, timeit=False):
@@ -357,7 +362,21 @@ class Blob(dict):
 
 
 class Geometry(Module):
-    """A very simple, preliminary Module which gives access to the geometry"""
+    """A very simple, preliminary Module which gives access to the geometry.
+
+    Parameters
+    ----------
+    should_apply: bool, optional [default=False]
+        Apply the geometry to the hits (add position/direction/t0)?
+    filename: str, optional [default=None]
+        DetX file with detector description.
+    det_id: int, optional
+        .detx ID of detector (when retrieving from database).
+    t0set: optional
+        t0set (when retrieving from database).
+    calibration: optional
+        calibration (when retrieving from database).
+    """
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self._should_apply = self.get('apply') or False
@@ -434,7 +453,21 @@ class Geometry(Module):
 
 
 class Run(object):
-    """A simple container for event info, hits, tracks and geometry."""
+    """A simple container for event info, hits, tracks and geometry.
+
+    Attributes
+    ----------
+    event_info:
+
+    geometry:
+
+    hits:
+
+    mc_tracks:
+
+    reco:
+        Concatenation of all tables below ``/reco``.
+    """
     def __init__(self, event_info, geometry, hits, mc_tracks, reco):
         self.event_info = event_info
         self.geometry = geometry

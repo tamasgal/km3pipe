@@ -55,6 +55,8 @@ RBA_URL = Config().rba_url
 
 
 class ClientManager(object):
+    """Manage km3srv clients.
+    """
     def __init__(self):
         self._clients = {}
         threading.Thread(target=self.heartbeat).start()

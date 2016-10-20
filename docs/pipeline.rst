@@ -48,29 +48,33 @@ the ``attach()`` method of the pipeline will care about the initialisation::
     pipe.attach(Foo, 'foo_module', foo='dummyfoo', bar='dummybar')
 
 
-Pumps
------
+Pumps / Sinks
+-------------
 
-The pump is a special type of ``Module`` and is usually the first one to be
-attached to a pipeline. It is responsible for data generation by reading data
-files or streams from socket connections.
+The pump and sink are special types of ``Module`` and are usually the
+first and last ones to be attached to a pipeline. They are responsible
+for reading and writing data to/from files, or streams from socket
+connections.
 
-``Pump`` inherits from the ``Module`` class. The ``__init__()`` method should
-be used to set up the file or socket handler and the ``finish()`` has to
-close them. The actual data is passed via the ``process()`` method. A
-data chunk is internally called ``Blob`` and usually represents an event.
+``Pump`` and ``Sink`` inherits from the ``Module`` class. The
+``__init__()`` method should be used to set up the file or socket
+handler and the ``finish()`` has to close them. The actual data is
+passed via the ``process()`` method. A data chunk is internally called
+``Blob`` and usually represents an event.
 
-To end the data pumping, the pump has to raise a ``StopIteration`` exception.
-One elegant way to implement this in Python is using a generator.
+To end the data pumping, the pump has to raise a ``StopIteration``
+exception. One elegant way to implement this in Python is using a
+generator.
 
-The following example shows a very basic pump, which simply initialises a
-list of dictionaries and "io" one blob after another on
-each ``process()`` call to the next module in the pipeline.
+The following example shows a very basic pump, which simply initialises
+a list of dictionaries and "io" one blob after another on each
+``process()`` call to the next module in the pipeline.
 
 
 .. literalinclude:: ../examples/module_workflow.py
    :pyobject: DummyPump
    :linenos:
+
 
 Data Structures
 ---------------
@@ -85,6 +89,8 @@ further also additional information created by the preceeding modules.
 
 Hits
 ~~~~
+
+TODO: Since about 4.x, km3pipe has new dataclasses for MC and L0 hits.
 
 There are two kinds of basic hit types: a **raw hit** representing either an
 actual hit measured by the detector hardware or a calibrated MC hit which
