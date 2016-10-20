@@ -19,7 +19,8 @@ from km3pipe.dataclasses import (Hit, Track, Position, Direction_,
                                  HitSeries, L0HitSeries,
                                  EventInfo, SummarysliceInfo, TimesliceInfo,
                                  Serialisable,
-                                 Reco, TrackSeries, SummaryframeSeries)
+                                 Reco, TrackSeries, SummaryframeSeries,
+                                 ArrayTaco)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -580,18 +581,23 @@ class TestEventInfo(TestCase):
         self.assertAlmostEqual(e.serialise(), np.array(exp, e.dtype))
 
 
-class TestReco(TestCase):
-    def test_reco(self):
-        dt = np.dtype([('x', int), ('y', float), ('did_converge', bool)])
+class TestWrapper(TestCase):
+    def test_wrapper(self):
+        dt = np.dtype(sorted([('x', int), ('y', float), ('did_converge', bool)]))
         dat = {'x': 4, 'y': 2.0, 'did_converge': True}
-        rec = Reco(dat, dtype=dt)
+        rec = ArrayTaco.from_dict(dat, dtype=dt)
+        print(rec)
+        print(rec.dtype)
+        self.assertAlmostEqual(rec.dtype, dt)
         self.assertTrue(rec['did_converge'])
         self.assertAlmostEqual(rec['x'], 4)
 
     def test_reco_serialise(self):
-        dt = np.dtype([('x', int), ('y', float), ('did_converge', bool)])
+        dt = np.dtype(sorted([('x', int), ('y', float), ('did_converge', bool)]))
         dat = {'x': 4, 'y': 2.0, 'did_converge': True}
-        rec = Reco(dat, dtype=dt).serialise()
-        self.assertAlmostEqual(rec[0][0], 4)
-        self.assertAlmostEqual(rec[0][1], 2.0)
-        self.assertTrue(rec[0][2])
+        rec = ArrayTaco.from_dict(dat, dtype=dt).serialise()
+        print(rec)
+        print(rec.dtype)
+        self.assertTrue(rec[0][0])
+        self.assertAlmostEqual(rec[0][1], 4)
+        self.assertAlmostEqual(rec[0][2], 2.0)
