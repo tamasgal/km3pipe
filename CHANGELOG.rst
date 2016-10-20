@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* Unify Reco + Wrapper dataclass. Reco(map, dtype) -> ArrayTaco.from_dict()
 
 5.0.0 / 2016-10-18
 ------------------
