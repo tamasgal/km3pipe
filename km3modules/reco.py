@@ -1,6 +1,7 @@
 import km3pipe as kp
 import numpy as np
-import pandas as pd
+import pandas as pd     # noqa
+from km3pipe.dataclasses import ArrayTaco
 
 
 class PrimFitter(kp.Module):
@@ -8,7 +9,7 @@ class PrimFitter(kp.Module):
         out = {}
 
         # has detector applied already
-        hits = pd.DataFrame.from_records(blob['Hits'].__array__())
+        hits = blob['Hits'].serialise(to='pandas')
         dus = np.unique(hits['dom_id'])
         n_dus = len(dus)
 
@@ -16,16 +17,30 @@ class PrimFitter(kp.Module):
             return
 
         fh = hits.drop_duplicates(subset='dom_id')
-        print(fh.columns)
 
-        data = fh['pos_x', 'pos_y', 'pos_z']
-        center = data.mean(axis=0)
+        pos = fh[['pos_x', 'pos_y', 'pos_z']]
+        center = pos.mean(axis=0)
 
-        _, _, v = np.linalg.svd(data - center)
-        reco_dir = v[0]
+        _, _, v = np.linalg.svd(pos - center)
+
+        reco_dir = np.array(v[0])
         reco_pos = center
-        out['direction'] = reco_dir
-        out['position'] = reco_pos
+        out = {
+            'pos_x': reco_pos['pos_x'],
+            'pos_y': reco_pos['pos_y'],
+            'pos_z': reco_pos['pos_z'],
+            'dir_x': reco_dir[0],
+            'dir_y': reco_dir[1],
+            'dir_z': reco_dir[2],
+        }
+        dt = np.dtype([
+            ('pos_x', float),
+            ('pos_y', float),
+            ('pos_z', float),
+            ('dir_x', float),
+            ('dir_y', float),
+            ('dir_z', float),
+        ])
 
         # muon = blob['MCTracks'].highest_energetic_muon
         # blob['Muon'] = muon
@@ -35,5 +50,5 @@ class PrimFitter(kp.Module):
         # angular_diff = 180 * (angle_between(muon.dir, reco_muon.dir) / np.pi)
         # print("Angular difference: {0}".format(angular_diff))
 
-        blob['PrimFitter'] = out
+        blob['PrimFitter'] = ArrayTaco.from_dict(out, dtype=dt, h5loc='/reco')
         return blob
