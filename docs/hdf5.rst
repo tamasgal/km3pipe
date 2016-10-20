@@ -29,7 +29,26 @@ A typical file looks like this::
         │   └── ...
         └── ...
 
+
+Reading/Writing
+---------------
+
+Table Workflow
+~~~~~~~~~~~~~~
+
+Pipeline Workflow
+~~~~~~~~~~~~~~~~~
+
+
 Conversion Utils
 ----------------
 
 See the :ref:`h5cli` on how to convert & inspect HDF5 files from the shell.
+
+Basically, the converters are just command line wrappers around the 
+following workflow::
+
+    pipe = Pipeline()
+    pipe.attach(SomePump, filename=foo)
+    pipe.attach(SomeSink, filename=bar)
+    pipe.drain()
