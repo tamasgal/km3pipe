@@ -8,7 +8,7 @@ To install km3pipe, you need:
 
 - Python >= 2.7 or >= 3.4
 
-- pip (via ``easy_install pip``)
+- pip (via ``$ easy_install pip``)
 
 - C compiler, e.g. ``gcc``.
 
@@ -24,11 +24,11 @@ Install
 
 To install the latest stable version:::
 
-    pip install km3pipe
+    $ pip install km3pipe
 
 To get the development version, use:::
 
-    pip install git+http://git.km3net.de/tgal/km3pipe.git@develop
+    $ pip install git+http://git.km3net.de/tgal/km3pipe.git@develop
 
 
 Updating
@@ -37,15 +37,15 @@ Updating
 KM3Pipe comes with a command line utility called `km3pipe`, which can
 be used to update KM3Pipe itself::
 
-    km3pipe update
+    $ km3pipe update
 
 To get the latest developer version::
 
-    km3pipe update develop
+    $ km3pipe update develop
 
 Or you can of course use `pip`::
 
-    pip install --upgrade km3pipe
+    $ pip install --upgrade km3pipe
 
 
 Configuration

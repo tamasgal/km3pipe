@@ -24,9 +24,9 @@ geometry.apply(hits)
 
 fig, ax = plt.subplots()
 
-hits[hits['du'] == DU].plot('time', 'z', style='.', ax=ax)
+hits[hits['du'] == DU].plot('time', 'pos_z', style='.', ax=ax)
 triggered_hits = hits[(hits['du'] == DU) & (hits['triggered'] == True)]
-triggered_hits.plot('time', 'z', style='.', ax=ax)
+triggered_hits.plot('time', 'pos_z', style='.', ax=ax)
 
 try:
     ax.legend_.remove()

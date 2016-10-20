@@ -37,7 +37,19 @@ __status__ = "Development"
 
 
 class Detector(object):
-    """The KM3NeT detector"""
+    """A KM3NeT detector.
+
+    Parameters
+    ----------
+    filename: str, optional
+        Name of .detx file with detector definition.
+    det_id: int, optional
+        .detx ID of detector (when retrieving from database).
+    t0set: optional
+        t0set (when retrieving from database).
+    calibration: optional
+        calibration (when retrieving from database).
+    """
     def __init__(self, filename=None,
                  det_id=None,
                  t0set=None,
@@ -236,7 +248,17 @@ class Detector(object):
 
 
 class PMT(object):
-    """Represents a photomultiplier"""
+    """Represents a photomultiplier.
+
+    Parameters
+    ----------
+    id: int
+    pos: 3-float-tuple (x, y, z)
+    dir: 3-float-tuple (x, y, z)
+    t0: int
+    channel_id: int
+    omkey: int
+    """
     def __init__(self, id, pos, dir, t0, channel_id, omkey):
         self.id = id
         self.pos = Point(pos)
