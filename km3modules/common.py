@@ -11,7 +11,7 @@ import numpy as np
 
 from km3pipe import Module
 from km3pipe.tools import peak_memory_usage
-from km3pipe.dataclasses import ArrayTaco, Reco     # noqa
+from km3pipe.dataclasses import ArrayTaco     # noqa
 
 
 class Wrap(Module):
@@ -28,7 +28,7 @@ class Wrap(Module):
             if dat is None:
                 continue
             dt = np.dtype([(f, float) for f in sorted(dat.keys())])
-            arr = Reco(dat, dt)
+            arr = ArrayTaco.from_dict(dat, dt)
             blob[key] = arr
         return blob
 
