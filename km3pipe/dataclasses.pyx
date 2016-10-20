@@ -887,11 +887,11 @@ class HitSeries(object):
 
     @property
     def pos_y(self):
-        return self._arr['pos_x']
+        return self._arr['pos_y']
 
     @property
     def pos_z(self):
-        return self._arr['pos_x']
+        return self._arr['pos_z']
 
     @property
     def dir_x(self):
