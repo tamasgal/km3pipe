@@ -74,7 +74,12 @@ def df_to_h5(df, filename, tabname, filemode='a', where='/', complevel=5,):
     """
     with tb.open_file(filename, filemode) as h5:
         filt = tb.Filters(complevel=complevel, shuffle=True)
-        h5.create_table(where, tabname, obj=df.to_records(), filters=filt)
+        h5.create_table(where, tabname, obj=df.to_records(index=False),
+                        filters=filt)
+
+
+def map2df(map):
+    return pd.DataFrame.from_records(map, index=np.ones(1, dtype=int))
 
 
 def load_mva(filenames, label_feat, mc_feats,
