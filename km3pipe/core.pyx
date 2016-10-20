@@ -401,12 +401,12 @@ class Geometry(Module):
                 pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
             except (KeyError, AttributeError):
                 pmt = self.detector.pmt_with_id(hit.pmt_id)
-            hits.pos_x[idx] = pmt.pos[0]
-            hits.pos_y[idx] = pmt.pos[1]
-            hits.pos_z[idx] = pmt.pos[2]
-            hits.dir_x[idx] = pmt.dir[0]
-            hits.dir_y[idx] = pmt.dir[1]
-            hits.dir_z[idx] = pmt.dir[2]
+            hits.pos_x[idx] = pmt.pos.x
+            hits.pos_y[idx] = pmt.pos.y
+            hits.pos_z[idx] = pmt.pos.z
+            hits.dir_x[idx] = pmt.dir.x
+            hits.dir_y[idx] = pmt.dir.y
+            hits.dir_z[idx] = pmt.dir.z
             # hit.t0 = pmt.t0
             hits._arr['time'][idx] += pmt.t0
             # hit.a = hit.tot
@@ -416,9 +416,12 @@ class Geometry(Module):
         def get_pmt(hit):
             return self.detector.get_pmt(hit['dom_id'], hit['channel_id'])
 
-        table['x'] = table.apply(lambda h: get_pmt(h).pos.x, axis=1)
-        table['y'] = table.apply(lambda h: get_pmt(h).pos.y, axis=1)
-        table['z'] = table.apply(lambda h: get_pmt(h).pos.z, axis=1)
+        table['pos_x'] = table.apply(lambda h: get_pmt(h).pos.x, axis=1)
+        table['pos_y'] = table.apply(lambda h: get_pmt(h).pos.y, axis=1)
+        table['pos_z'] = table.apply(lambda h: get_pmt(h).pos.z, axis=1)
+        table['dir_x'] = table.apply(lambda h: get_pmt(h).dir.x, axis=1)
+        table['dir_y'] = table.apply(lambda h: get_pmt(h).dir.y, axis=1)
+        table['dir_z'] = table.apply(lambda h: get_pmt(h).dir.z, axis=1)
         table['time'] += table.apply(lambda h: get_pmt(h).t0, axis=1)
         table['du'] = table.apply(lambda h: get_pmt(h).omkey[0], axis=1)
         table['floor'] = table.apply(lambda h: get_pmt(h).omkey[1], axis=1)

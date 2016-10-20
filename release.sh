@@ -24,7 +24,12 @@ git flow release start "${VERSION}"
 
 vim km3pipe/__version__.py
 git add km3pipe/__version__.py
+
 git commit -m "Bumps version number"
+
+vim CHANGELOG.rst
+git add CHANGELOG.rst
+git commit -m "Bumps changelog"
 
 git flow release finish "${VERSION}"
 

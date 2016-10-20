@@ -1,5 +1,9 @@
 Unreleased changes
 ------------------
+* add ``to='pandas'`` option to ``Dataclass.serialise()``
+
+5.1.0 / 2016-10-20
+------------------
 * Unify Reco + Wrapper dataclass. Reco(map, dtype) -> ArrayTaco.from_dict()
 
 5.0.0 / 2016-10-18
