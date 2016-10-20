@@ -10,7 +10,7 @@ import os.path
 import numpy as np
 
 from km3pipe import Pump
-from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo, Reco
+from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo, ArrayTaco
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -90,11 +90,15 @@ class AanetPump(Pump):
         # pylint: disable:F0401,W0612
         from ROOT import EventFile
 
+        found_any_files = False
         for filename in self.filenames:
             print("Reading from file: {0}".format(filename))
             if not os.path.exists(filename):
                 log.warn(filename + " not available: continue without it")
                 continue
+
+            if not found_any_files:
+                found_any_files = True
 
             try:
                 event_file = EventFile(filename)
@@ -117,6 +121,14 @@ class AanetPump(Pump):
                     blob = self._read_event(event, filename)
                     yield blob
             del event_file
+
+        if not found_any_files:
+            msg = "None of the input files available. Exiting."
+            try:
+                raise FileNotFoundError(msg)
+            except NameError:
+                # python2
+                raise IOError(msg)
 
     def _read_event(self, event, filename):
         try:
@@ -165,15 +177,18 @@ class AanetPump(Pump):
         if self.format == 'jevt_jgandalf':
             track, dtype = parse_jevt_jgandalf(event, event.id)
             if track:
-                blob['JEvtJGandalf'] = Reco(track, dtype)
+                blob['JEvtJGandalf'] = ArrayTaco.from_dict(track, dtype,
+                                                           h5loc='/reco')
         if self.format == 'generic_track':
             track, dtype = parse_generic_event(event, event.id)
             if track:
-                blob['Track'] = Reco(track, dtype)
+                blob['Track'] = ArrayTaco.from_dict(track, dtype,
+                                                    h5loc='/reco')
         if self.format == 'ancient_recolns':
             track, dtype = parse_ancient_recolns(event, event.id)
             if track:
-                blob['AncientRecoLNS'] = Reco(track, dtype)
+                blob['AncientRecoLNS'] = ArrayTaco.from_dict(track, dtype,
+                                                             h5loc='/reco')
         return blob
 
     def event_index(self, blob):
@@ -227,7 +242,7 @@ def parse_ancient_recolns(aanet_event, event_id):
     # trks[5] ==> + bjorken-y fit and neutrino energy fit
     try:
         out = {}
-        out['lambda'] = aanet_event.trks[3].lik
+        out['quality'] = aanet_event.trks[3].lik
         out['n_hits_used'] = aanet_event.trks[3].fitinf[0]
         out['energy_muon'] = aanet_event.trks[4].E
         out['energy_neutrino'] = aanet_event.trks[5].E
@@ -249,7 +264,7 @@ def parse_ancient_recolns(aanet_event, event_id):
         out['sin_theta'] = sin_theta
         out['beta'] = np.sqrt(sin_theta * sin_theta * sigma2_phi + sigma2_theta)
     except IndexError:
-        keys = {'lambda', 'n_hits_used', 'pos_x', 'pos_y', 'pos_z',
+        keys = {'quality', 'n_hits_used', 'pos_x', 'pos_y', 'pos_z',
                 'dir_x', 'dir_y', 'dir_z', 'energy_muon', 'energy_neutrino',
                 'bjorken_y', 'beta', 'sigma2_theta', 'sigma2_phi',
                 'sin_theta', }    #noqa
@@ -347,10 +362,12 @@ def read_mini_dst(aanet_event, event_id):
         reader = recname_to_reader[recname]
 
         reco_map, dtype = reader(trk)
-        minidst[recname] = Reco(reco_map, dtype)
+        minidst[recname] = ArrayTaco.from_dict(reco_map, dtype,
+                                               h5loc='/reco')
 
     thomas_map, dtype = parse_thomasfeatures(aanet_event.usr)
-    minidst['ThomasFeatures'] = Reco(thomas_map, dtype)
+    minidst['ThomasFeatures'] = ArrayTaco.from_dict(thomas_map, dtype,
+                                                    h5loc='/reco')
 
     return minidst
 

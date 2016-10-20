@@ -765,8 +765,12 @@ class HitSeries(object):
     def from_arrays(cls, channel_ids, dir_xs, dir_ys, dir_zs, dom_ids, ids,
                     pmt_ids, pos_xs, pos_ys, pos_zs, t0s, times, tots,
                     triggereds, event_id):
-        len = channel_ids.shape[0]
-        hits = np.empty(len, cls.dtype)
+        # do we need shape[0] or does len() work too?
+        try:
+            length = channel_ids.shape[0]
+        except AttributeError:
+            length = len(channel_ids)
+        hits = np.empty(length, cls.dtype)
         hits['channel_id'] = channel_ids
         hits['dir_x'] = dir_xs
         hits['dir_y'] = dir_ys
@@ -781,7 +785,7 @@ class HitSeries(object):
         hits['time'] = times
         hits['tot'] = tots
         hits['triggered'] = triggereds
-        hits['event_id'] = np.full(len, event_id, dtype='<u4')
+        hits['event_id'] = np.full(length, event_id, dtype='<u4')
         return cls(hits)
 
     @classmethod
@@ -1339,21 +1343,6 @@ class TrackSeries(object):
 
 
 
-class Reco(dict):
-    """A dictionary with a dtype."""
-    def __init__(self, map, dtype, h5loc='/reco'):
-        self.dtype = np.dtype(dtype)
-        self.h5loc = h5loc
-        self.update(map)
-
-    def serialise(self, to='numpy'):
-        if to == 'numpy':
-            return np.array(self.__array__(), dtype=self.dtype)
-
-    def __array__(self):
-        return [tuple((self[key] for key in self.dtype.names))]
-
-
 class SummaryframeSeries(object):
     """Collection of summary frames.
     """
@@ -1461,12 +1450,22 @@ class ArrayTaco(object):
     def serialise(self, to='numpy'):
         return self.array
 
+    @classmethod
+    def from_dict(cls, map, dtype=None, **kwargs):
+        if dtype is None:
+            dtype = [(key, float) for key in sorted(map.keys())]
+        return cls(np.array([tuple((map[key] for key in dtype.names))],
+                            dtype=dtype), **kwargs)
+
     @property
     def dtype(self):
         return self.array.dtype
 
     def __len__(self):
         return len(self.array)
+
+    def __getitem__(self, item):
+        return self.array[item]
 
     def __repr__(self):
         return self.__str__()

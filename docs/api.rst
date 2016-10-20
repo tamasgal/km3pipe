@@ -45,7 +45,6 @@ API Reference
   HitSeries
   Track
   TrackSeries
-  Reco
   ArrayTaco
 
 

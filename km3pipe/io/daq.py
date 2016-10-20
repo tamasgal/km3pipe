@@ -162,9 +162,12 @@ class DAQProcessor(Module):
 
     def process(self, blob):
         tag = str(blob['CHPrefix'].tag)
+        data = blob['CHData']
 
         if tag == 'IO_EVT':
-            self.process_event(blob['CHData'], blob)
+            self.process_event(data, blob)
+        if tag == 'IO_SUM':
+            self.process_summaryslice(data, blob)
 
         return blob
 
@@ -178,6 +181,7 @@ class DAQProcessor(Module):
         n_hits = event.n_snapshot_hits
         dom_ids, channel_ids, times, tots = zip(*hits)
         zeros = np.zeros(n_hits)
+        nans = np.full_like(zeros, np.nan)
         triggereds = np.zeros(n_hits)
         triggered_map = {}
         for triggered_hit in event.triggered_hits:
@@ -186,26 +190,45 @@ class DAQProcessor(Module):
         for idx, hit in enumerate(hits):
             triggereds[idx] = hit in triggered_map
 
-        nans = np.full(n_hits, np.nan, dtype='<f8')
-        hit_series = HitSeries.from_arrays(channel_ids, nans, nans, nans,
-                                           dom_ids, range(n_hits),
-                                           zeros, nans, nans, nans, nans,
-                                           times, tots, triggereds, self.index)
+        hit_series = HitSeries.from_arrays(
+            channel_ids,
+            nans,  # dir_x
+            nans,  # dir_y
+            nans,  # dir_z
+            dom_ids,
+            range(n_hits),  # id
+            zeros,  # pmt_id
+            nans,  # pos_x
+            nans,  # pos_y
+            nans,  # pos_z
+            zeros,  # t0
+            times,
+            tots,
+            triggereds,
+            self.index)
 
         blob['Hits'] = hit_series
 
-        event_info = EventInfo((header.det_id, self.index, header.time_slice,
-                               0, 0,  # MC ID and time
-                               event.overlays, header.run,
-                               event.trigger_counter, event.trigger_mask,
-                               header.ticks * 16, header.time_stamp,
-                               0, 0, 0))  # MC weights
+        event_info = EventInfo((
+            header.det_id,
+            self.index,
+            # header.time_slice,
+            0, 0,  # MC ID and time
+            event.overlays,
+            #header.run,
+            event.trigger_counter, event.trigger_mask,
+            header.ticks * 16, header.time_stamp,
+            0, 0, 0,  # MC weights
+            0))
         blob['EventInfo'] = event_info
 
         self.index += 1
 
-    def process_summary_slice(self, data, blob):
-        pass
+    def process_summaryslice(self, data, blob):
+        data_io = StringIO(data)
+        preamble = DAQPreamble(file_obj=data_io)
+        summaryslice = DAQSummaryslice(file_obj=data_io)
+        blob["RawSummaryslice"] = summaryslice
 
 
 class DAQPreamble(object):
