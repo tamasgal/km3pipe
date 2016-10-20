@@ -46,4 +46,4 @@ git merge master
 git svn dcommit
 git checkout develop
 
-svn copy "${SVN}/git" "${SVN}/tag/v${VERSION}" -m "Release ${VERSION}"
+svn copy "${SVN}/git" "${SVN}/tag/v${VERSION}" -m "KM3Pipe Release ${VERSION}"
