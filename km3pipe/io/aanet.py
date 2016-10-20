@@ -10,7 +10,7 @@ import os.path
 import numpy as np
 
 from km3pipe import Pump
-from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo, Reco, ArrayTaco
+from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo, ArrayTaco
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103

@@ -18,8 +18,7 @@ from km3pipe.io.evt import EvtRawHit
 from km3pipe.dataclasses import (Hit, Track, Position, Direction_,
                                  HitSeries, L0HitSeries,
                                  EventInfo, SummarysliceInfo, TimesliceInfo,
-                                 Serialisable,
-                                 Reco, TrackSeries, SummaryframeSeries,
+                                 Serialisable, TrackSeries, SummaryframeSeries,
                                  ArrayTaco)
 
 __author__ = "Tamas Gal"
@@ -592,7 +591,7 @@ class TestWrapper(TestCase):
         self.assertTrue(rec['did_converge'])
         self.assertAlmostEqual(rec['x'], 4)
 
-    def test_reco_serialise(self):
+    def test_wrapper_serialise(self):
         dt = np.dtype(sorted([('x', int), ('y', float), ('did_converge', bool)]))
         dat = {'x': 4, 'y': 2.0, 'did_converge': True}
         rec = ArrayTaco.from_dict(dat, dtype=dt).serialise()

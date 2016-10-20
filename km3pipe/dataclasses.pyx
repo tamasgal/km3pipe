@@ -1343,21 +1343,6 @@ class TrackSeries(object):
 
 
 
-class Reco(dict):
-    """A dictionary with a dtype."""
-    def __init__(self, map, dtype, h5loc='/reco'):
-        self.dtype = np.dtype(dtype)
-        self.h5loc = h5loc
-        self.update(map)
-
-    def serialise(self, to='numpy'):
-        if to == 'numpy':
-            return np.array(self.__array__(), dtype=self.dtype)
-
-    def __array__(self):
-        return [tuple((self[key] for key in self.dtype.names))]
-
-
 class SummaryframeSeries(object):
     """Collection of summary frames.
     """
