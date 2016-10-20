@@ -1478,6 +1478,9 @@ class ArrayTaco(object):
     def __len__(self):
         return len(self.array)
 
+    def __getitem__(self, item):
+        return self.array[item]
+
     def __repr__(self):
         return self.__str__()
 
