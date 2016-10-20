@@ -10,7 +10,7 @@ import os.path
 import numpy as np
 
 from km3pipe import Pump
-from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo, Reco
+from km3pipe.dataclasses import HitSeries, TrackSeries, EventInfo, Reco, ArrayTaco
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -165,15 +165,15 @@ class AanetPump(Pump):
         if self.format == 'jevt_jgandalf':
             track, dtype = parse_jevt_jgandalf(event, event.id)
             if track:
-                blob['JEvtJGandalf'] = Reco(track, dtype)
+                blob['JEvtJGandalf'] = ArrayTaco.from_dict(track, dtype)
         if self.format == 'generic_track':
             track, dtype = parse_generic_event(event, event.id)
             if track:
-                blob['Track'] = Reco(track, dtype)
+                blob['Track'] = ArrayTaco.from_dict(track, dtype)
         if self.format == 'ancient_recolns':
             track, dtype = parse_ancient_recolns(event, event.id)
             if track:
-                blob['AncientRecoLNS'] = Reco(track, dtype)
+                blob['AncientRecoLNS'] = ArrayTaco.from_dict(track, dtype)
         return blob
 
     def event_index(self, blob):
@@ -347,10 +347,10 @@ def read_mini_dst(aanet_event, event_id):
         reader = recname_to_reader[recname]
 
         reco_map, dtype = reader(trk)
-        minidst[recname] = Reco(reco_map, dtype)
+        minidst[recname] = ArrayTaco.from_dict(reco_map, dtype)
 
     thomas_map, dtype = parse_thomasfeatures(aanet_event.usr)
-    minidst['ThomasFeatures'] = Reco(thomas_map, dtype)
+    minidst['ThomasFeatures'] = ArrayTaco.from_dict(thomas_map, dtype)
 
     return minidst
 

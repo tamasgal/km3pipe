@@ -1465,6 +1465,12 @@ class ArrayTaco(object):
     def serialise(self, to='numpy'):
         return self.array
 
+    @classmethod
+    def from_dict(cls, map, dtype=None, **kwargs):
+        if dtype is None:
+            dtype = [(key, float) for key in sorted(map.keys())]
+        return cls([tuple((map[key] for key in dtype.names))], **kwargs)
+
     @property
     def dtype(self):
         return self.array.dtype
