@@ -48,6 +48,7 @@ git push --tags
 git checkout svn
 git merge master
 git svn dcommit
-git checkout develop
 
 svn copy "${SVN}/git" "${SVN}/tag/v${VERSION}" -m "KM3Pipe Release ${VERSION}"
+
+git checkout develop
