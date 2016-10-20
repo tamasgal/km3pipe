@@ -12,18 +12,22 @@ API Reference
 
 .. autosummary::
   :toctree: api
-  :template: class.rst
 
   AanetPump
   CHPump
   CLBPump
   DAQPump
   EvtPump
+  GenericPump
   H5Chain
   HDF5Pump
   HDF5Sink
   JPPPump
   PicklePump
+  df_to_h5
+  read_hdf5
+  read_table
+  write_table
 
 
 ``km3pipe.dataclasses``: Internal Data Structures
@@ -38,7 +42,6 @@ API Reference
 
 .. autosummary::
   :toctree: api
-  :template: class.rst
 
   EventInfo
   Hit
@@ -59,7 +62,6 @@ API Reference
 
 .. autosummary::
   :toctree: api
-  :template: class.rst
 
   Pipeline
   Module
@@ -81,7 +83,6 @@ API Reference
 
 .. autosummary::
   :toctree: api
-  :template: class.rst
 
   Detector
   PMT
@@ -98,7 +99,6 @@ API Reference
 
 .. autosummary::
   :toctree: api
-  :template: class.rst
 
   LogIO
 
@@ -114,7 +114,6 @@ API Reference
 
 .. autosummary::
   :toctree: api
-  :template: class.rst
 
   ClientManager
 
@@ -148,7 +147,6 @@ API Reference
 
 .. autosummary::
   :toctree: api
-  :template: class.rst
 
   DBManager
 
