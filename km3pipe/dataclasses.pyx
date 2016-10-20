@@ -1457,6 +1457,17 @@ class SummaryframeSeries(object):
 
 
 class ArrayTaco(object):
+    """Wrapper around Numpy arrays.
+
+    Parameters
+    ----------
+    arr: np.array
+        (Structured) numpy array to store.
+
+    h5loc: str, optional [default='/']
+        HDF5 Group to store table. (The table name is the blob key).
+    """
+
     def __init__(self, arr, h5loc='/'):
         self.array = arr
         self.h5loc = h5loc
