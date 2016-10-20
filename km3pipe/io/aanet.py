@@ -242,7 +242,7 @@ def parse_ancient_recolns(aanet_event, event_id):
     # trks[5] ==> + bjorken-y fit and neutrino energy fit
     try:
         out = {}
-        out['lambda'] = aanet_event.trks[3].lik
+        out['quality'] = aanet_event.trks[3].lik
         out['n_hits_used'] = aanet_event.trks[3].fitinf[0]
         out['energy_muon'] = aanet_event.trks[4].E
         out['energy_neutrino'] = aanet_event.trks[5].E
@@ -264,7 +264,7 @@ def parse_ancient_recolns(aanet_event, event_id):
         out['sin_theta'] = sin_theta
         out['beta'] = np.sqrt(sin_theta * sin_theta * sigma2_phi + sigma2_theta)
     except IndexError:
-        keys = {'lambda', 'n_hits_used', 'pos_x', 'pos_y', 'pos_z',
+        keys = {'quality', 'n_hits_used', 'pos_x', 'pos_y', 'pos_z',
                 'dir_x', 'dir_y', 'dir_z', 'energy_muon', 'energy_neutrino',
                 'bjorken_y', 'beta', 'sigma2_theta', 'sigma2_phi',
                 'sin_theta', }    #noqa
