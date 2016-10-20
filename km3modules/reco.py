@@ -33,14 +33,6 @@ class PrimFitter(kp.Module):
             'dir_y': reco_dir[1],
             'dir_z': reco_dir[2],
         }
-        dt = np.dtype([
-            ('pos_x', float),
-            ('pos_y', float),
-            ('pos_z', float),
-            ('dir_x', float),
-            ('dir_y', float),
-            ('dir_z', float),
-        ])
 
         # muon = blob['MCTracks'].highest_energetic_muon
         # blob['Muon'] = muon
@@ -50,5 +42,5 @@ class PrimFitter(kp.Module):
         # angular_diff = 180 * (angle_between(muon.dir, reco_muon.dir) / np.pi)
         # print("Angular difference: {0}".format(angular_diff))
 
-        blob['PrimFitter'] = ArrayTaco.from_dict(out, dtype=dt, h5loc='/reco')
+        blob['PrimFitter'] = ArrayTaco.from_dict(out, h5loc='/reco')
         return blob
