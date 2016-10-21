@@ -98,14 +98,14 @@ def runinfo(run_id, det_id, temporary=False):
                   row['T0_CALIBSETID'].values[0]))
 
 
-def update_km3pipe(git_branch):
+def update_km3pipe(git_branch=''):
     if git_branch == '' or git_branch is None:
         git_branch = 'master'
     os.system("pip install -U git+http://git.km3net.de/tgal/km3pipe.git@{0}"
               .format(git_branch))
 
 
-def detx(det_id, calibration, t0set):
+def detx(det_id, calibration='', t0set=''):
     now = datetime.now()
     filename = "KM3NeT_{0}{1:08d}_{2}.detx" \
                .format('-' if det_id < 0 else '', abs(det_id),
