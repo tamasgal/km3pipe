@@ -29,7 +29,7 @@ class TestDetx(TestCase):
 
     @patch('km3pipe.cmd.Detector', new_callable=PropertyMock)
     def test_detx_called_with_correct_args(self, mock_detector):
-        mock_detector.n_doms = 0
+        mock_detector.n_doms.return_value = 0
         detx(1, 2, 3)
         mock_detector.assert_called_with(t0set=3, det_id=1, calibration=2)
 
