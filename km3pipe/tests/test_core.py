@@ -261,6 +261,13 @@ class TestGeometry(TestCase):
         geo = Geometry(det_id=1, calibration=2, t0set=3)
         mock_detector.assert_called_with(t0set=3, calibration=2, det_id=1)
 
+    def test_apply_to_list(self):
+        geo = Geometry()
+        hits = [1, 2, 3]
+        geo._apply_to_hitseries = MagicMock()
+        geo.apply(hits)
+        geo._apply_to_hitseries.assert_called_with(hits)
+
     def test_apply_to_hitseries(self):
 
         class FakeDetector(object):
