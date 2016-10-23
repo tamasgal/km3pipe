@@ -151,11 +151,11 @@ class AanetPump(Pump):
             event_id += self.id_offset
         try:
             blob['Hits'] = HitSeries.from_aanet(event.hits, event_id)
-            blob['MCHits'] = HitSeries.from_aanet(event.mc_hits,
+            blob['McHits'] = HitSeries.from_aanet(event.mc_hits,
                                                   event_id)
         except AttributeError:
             pass
-        blob['MCTracks'] = TrackSeries.from_aanet(event.mc_trks,
+        blob['McTracks'] = TrackSeries.from_aanet(event.mc_trks,
                                                   event_id)
         blob['filename'] = filename
         blob['Header'] = self.header

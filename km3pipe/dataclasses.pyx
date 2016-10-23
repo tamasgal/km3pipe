@@ -1507,10 +1507,10 @@ class ArrayTaco(object):
         return "Array with dtype %s" % str(self.dtype)
 
 deserialise_map = {
-    'MCHits': HitSeries,
+    'McHits': HitSeries,
     'Hits': HitSeries,
     'L0Hits': L0HitSeries,
-    'MCTracks': TrackSeries,
+    'McTracks': TrackSeries,
     'EventInfo': EventInfo,
     'SummarysliceInfo': SummarysliceInfo,
     'SummaryframeInfo': SummaryframeInfo,
