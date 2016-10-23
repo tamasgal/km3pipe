@@ -27,8 +27,6 @@ Options:
                                will greatly improve reading/writing speed and
                                memory usage. Strongly recommended if the
                                table/array size is >= 100 MB. [default: 10000]
-    --id-offset NUM            Correct the event id by NUM, like:
-                               event_id = event_id + NUM [default: 0]
 """
 
 from __future__ import division, absolute_import, print_function
@@ -83,8 +81,6 @@ def main():
         suffix = '.combined.h5'
     outfile = args['-o'] or infiles[0] + suffix
 
-    id_offset = int(args['--id-offset'])
-
     n_rows_expected = int(args['--expected-rows'])
     use_jppy_pump = args['--jppy']
     aa_format = args['--aa-format']
@@ -93,5 +89,4 @@ def main():
     with_l0hits = args['--with-l0hits']
     tohdf5(infiles, outfile, n, use_jppy=use_jppy_pump, aa_fmt=aa_format,
            aa_lib=aa_lib, with_summaryslices=with_summaryslices,
-           with_l0hits=with_l0hits, n_rows_expected=n_rows_expected,
-           id_offset=id_offset)
+           with_l0hits=with_l0hits, n_rows_expected=n_rows_expected)
