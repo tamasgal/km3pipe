@@ -208,6 +208,9 @@ class HDF5Pump(Pump):
         return blob
 
     def get_blob(self, index):
+        if self.index >= self._n_events:
+            self._reset_index()
+            raise StopIteration
         event_id = self.event_ids[index]
         blob = {}
         for tab in self.h5_file.walk_nodes(classname="Table"):
