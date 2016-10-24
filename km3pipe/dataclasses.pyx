@@ -716,15 +716,15 @@ class HitSeries(object):
         try:
             return cls(np.array([(
                 h.channel_id,
-                h.dir.x,
-                h.dir.y,
-                h.dir.z,
+                np.nan, #h.dir.x,
+                np.nan, #h.dir.y,
+                np.nan, #h.dir.z,
                 h.dom_id,
                 h.id,
                 h.pmt_id,
-                h.pos.x,
-                h.pos.y,
-                h.pos.z,
+                np.nan, #h.pos.x,
+                np.nan, #h.pos.y,
+                np.nan, #h.pos.z,
                 0,      # t0
                 h.t,
                 h.tot,
@@ -736,14 +736,14 @@ class HitSeries(object):
             return cls(np.array([(
                 ord(h.channel_id),
                 h.dom_id,
-                h.dir.x,
-                h.dir.y,
-                h.dir.z,
+                np.nan, #h.dir.x,
+                np.nan, #h.dir.y,
+                np.nan, #h.dir.z,
                 h.id,
                 h.pmt_id,
-                h.pos.x,
-                h.pos.y,
-                h.pos.z,
+                np.nan, #h.pos.x,
+                np.nan, #h.pos.y,
+                np.nan, #h.pos.z,
                 0,      # t0
                 h.t,
                 h.tot,
@@ -1507,10 +1507,10 @@ class ArrayTaco(object):
         return "Array with dtype %s" % str(self.dtype)
 
 deserialise_map = {
-    'MCHits': HitSeries,
+    'McHits': HitSeries,
     'Hits': HitSeries,
     'L0Hits': L0HitSeries,
-    'MCTracks': TrackSeries,
+    'McTracks': TrackSeries,
     'EventInfo': EventInfo,
     'SummarysliceInfo': SummarysliceInfo,
     'SummaryframeInfo': SummaryframeInfo,

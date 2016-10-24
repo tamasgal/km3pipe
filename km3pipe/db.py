@@ -30,7 +30,7 @@ except NameError:
 
 if sys.version_info[0] > 2:
     from urllib.parse import urlencode, unquote
-    from urllib.request import (Request, build_opener,
+    from urllib.request import (Request, build_opener, urlopen,
                                 HTTPCookieProcessor, HTTPHandler)
     from urllib.error import URLError, HTTPError
     from io import StringIO
@@ -268,7 +268,10 @@ class DBManager(object):
     def _get_json(self, url):
         "Get JSON-type content"
         content = self._get_content('jsonds/' + url)
-        json_content = json.loads(content.decode())
+        try:
+            json_content = json.loads(content.decode())
+        except AttributeError:
+            json_content = json.loads(content)
         if json_content['Comment']:
             log.warn(json_content['Comment'])
         if json_content['Result'] != 'OK':

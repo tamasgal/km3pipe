@@ -3,7 +3,7 @@
 # pylint: disable=C0111,E1003,R0904,C0103,R0201,C0102
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import TestCase, StringIO, MagicMock
+from km3pipe.testing import TestCase, StringIO, MagicMock, patch
 from km3pipe.core import Pipeline, Module, Pump, Blob, Geometry
 from km3pipe.dataclasses import HitSeries
 
@@ -244,6 +244,29 @@ class TestBlob(TestCase):
 
 class TestGeometry(TestCase):
     """Tests for the Geometry class"""
+
+    def test_init_with_wrong_file_extension(self):
+        with self.assertRaises(NotImplementedError):
+            geo = Geometry(filename='foo')
+
+    @patch('km3pipe.core.Detector')
+    def test_init_with_filename(self, mock_detector):
+        geo = Geometry(filename='foo.detx')
+        mock_detector.assert_called_with(filename='foo.detx')
+
+    @patch('km3pipe.core.Detector')
+    def test_init_with_det_id(self, mock_detector):
+        geo = Geometry(det_id=1)
+        mock_detector.assert_called_with(t0set=None, calibration=None, det_id=1)
+        geo = Geometry(det_id=1, calibration=2, t0set=3)
+        mock_detector.assert_called_with(t0set=3, calibration=2, det_id=1)
+
+    def test_apply_to_list(self):
+        geo = Geometry()
+        hits = [1, 2, 3]
+        geo._apply_to_hitseries = MagicMock()
+        geo.apply(hits)
+        geo._apply_to_hitseries.assert_called_with(hits)
 
     def test_apply_to_hitseries(self):
 

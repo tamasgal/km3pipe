@@ -3,8 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-KM3Pipe
-=======
+.. include:: version.txt
 
 .. image:: https://travis-ci.org/tamasgal/km3pipe.svg?branch=develop
     :target: https://travis-ci.org/tamasgal/km3pipe
@@ -21,7 +20,7 @@ KM3Pipe
     self
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 2
 
     install
     user_guide

@@ -17,9 +17,11 @@ except ImportError:
 try:
     from mock import MagicMock
     from mock import Mock
+    from mock import patch
 except ImportError:
     from unittest.mock import MagicMock  # noqa
     from unittest.mock import Mock  # noqa
+    from unittest.mock import patch  # noqa
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

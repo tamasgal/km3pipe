@@ -27,6 +27,10 @@ git add km3pipe/__version__.py
 
 git commit -m "Bumps version number"
 
+echo "KM3Pipe $(km3pipe --version)\n=============" > docs/version.txt
+git add docs/version.txt
+git commit -m "update version tag in docs"
+
 vim CHANGELOG.rst
 git add CHANGELOG.rst
 git commit -m "Bumps changelog"
@@ -44,6 +48,7 @@ git push --tags
 git checkout svn
 git merge master
 git svn dcommit
-git checkout develop
 
 svn copy "${SVN}/git" "${SVN}/tag/v${VERSION}" -m "KM3Pipe Release ${VERSION}"
+
+git checkout develop

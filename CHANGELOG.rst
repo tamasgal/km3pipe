@@ -2,10 +2,14 @@ Unreleased changes
 ------------------
 
 5.1.2 / 2016-10-20
-------------------
+~~~~~~~~~~~~~~~~~~
 * Unify Reco + Wrapper dataclass. Reco(map, dtype) -> ArrayTaco.from_dict()
 * add ``to='pandas'`` option to ``Dataclass.serialise()``
 * Tweak internal array/dataframe handling
+
+5.1.0 / 2016-10-20
+------------------
+* ...
 
 5.0.0 / 2016-10-18
 ------------------
@@ -21,15 +25,15 @@ Unreleased changes
   the default style.
 
 4.8.3 / 2016-10-13
-------------------
+~~~~~~~~~~~~~~~~~~
 * Fixes t0 application in HitSeries
 
 4.8.2 / 2016-10-13
-------------------
+~~~~~~~~~~~~~~~~~~
 * Fixes geometry application in HitSeries
 
 4.8.1 / 2016-10-12
-------------------
+~~~~~~~~~~~~~~~~~~
 * Forcing matplotlib 2.0.0b4 as dependency. Don't blame us!
 * New unified style for all plots, using `import km3pipe.style`
 * aanet / jgandalf: write zeroed row if no track in event
@@ -55,13 +59,13 @@ Unreleased changes
 * New command line utility to convert to HDF5: ``tohdf5``
 
 4.7.0 / 2016-09-25
-~~~~~~~~~~~~~~~~~~
+------------------
 * Adds summary slice readout support via jppy
 * Introducing astro package
 * Use BLOSC compression library for HDF5
 
 4.6.0
-~~~~~
+-----
 * ...
 
 4.5.1
@@ -69,7 +73,7 @@ Unreleased changes
 * Bugfixes
 
 4.5.0
-~~~~~
+-----
 * Full L0 readout support via ``JPPPump``
 
 4.4.1
@@ -77,12 +81,12 @@ Unreleased changes
 * Bugfixes
 
 4.4.0
-~~~~~
+-----
 * JEvt/JGandalf support
 * Minor HDF5 Improvements
 
 4.3.0
-~~~~~
+-----
 * Introduces HDF5 format versioning
 
 4.2.2
@@ -94,7 +98,7 @@ Unreleased changes
 * Bugfixes
 
 4.2.0
-~~~~~
+-----
 * ...
 
 4.1.2
@@ -106,5 +110,5 @@ Unreleased changes
 * Bugfixes
 
 4.1.0 / 2016-08-04
-~~~~~~~~~~~~~~~~~~
+------------------
 * Ability to use simple functions as modules

@@ -47,6 +47,7 @@ class AanetPump(Pump):
         self.indices = self.get('indices')
         self.additional = self.get('additional')
         self.format = self.get('aa_fmt')
+        self.id_offset = self.get('id_offset') or 0
         if self.additional:
             self.id = self.get('id')
             self.return_without_match = self.get("return_without_match")
@@ -145,14 +146,17 @@ class AanetPump(Pump):
 
         blob = {}
         blob['Evt'] = event
+        event_id = event.id
+        if self.id_offset:
+            event_id += self.id_offset
         try:
-            blob['Hits'] = HitSeries.from_aanet(event.hits, event.id)
-            blob['MCHits'] = HitSeries.from_aanet(event.mc_hits,
-                                                  event.id)
+            blob['Hits'] = HitSeries.from_aanet(event.hits, event_id)
+            blob['McHits'] = HitSeries.from_aanet(event.mc_hits,
+                                                  event_id)
         except AttributeError:
             pass
-        blob['MCTracks'] = TrackSeries.from_aanet(event.mc_trks,
-                                                  event.id)
+        blob['McTracks'] = TrackSeries.from_aanet(event.mc_trks,
+                                                  event_id)
         blob['filename'] = filename
         blob['Header'] = self.header
         try:
@@ -163,29 +167,29 @@ class AanetPump(Pump):
                 event.trigger_counter, event.trigger_mask,
                 event.t.GetNanoSec(), event.t.GetSec(),
                 w1, w2, w3,
-                event.id))
+                event_id))
         except AttributeError:
             blob['EventInfo'] = EventInfo((0, event.frame_index,
                                            0, 0, 0,
                                            0, 0, 0, 0,
                                            w1, w2, w3,
-                                           event.id))
+                                           event_id))
         if self.format == 'minidst':
-            recos = read_mini_dst(event, event.id)
+            recos = read_mini_dst(event, event_id)
             for recname, reco in recos.items():
                 blob[recname] = reco
         if self.format == 'jevt_jgandalf':
-            track, dtype = parse_jevt_jgandalf(event, event.id)
+            track, dtype = parse_jevt_jgandalf(event, event_id)
             if track:
                 blob['JEvtJGandalf'] = ArrayTaco.from_dict(track, dtype,
                                                            h5loc='/reco')
         if self.format == 'generic_track':
-            track, dtype = parse_generic_event(event, event.id)
+            track, dtype = parse_generic_event(event, event_id)
             if track:
                 blob['Track'] = ArrayTaco.from_dict(track, dtype,
                                                     h5loc='/reco')
         if self.format == 'ancient_recolns':
-            track, dtype = parse_ancient_recolns(event, event.id)
+            track, dtype = parse_ancient_recolns(event, event_id)
             if track:
                 blob['AncientRecoLNS'] = ArrayTaco.from_dict(track, dtype,
                                                              h5loc='/reco')
