@@ -60,7 +60,6 @@ docs/_build/
 docs/auto_examples/
 docs/modules/
 docs/api
-docs/version.txt
 
 # VI swap files
 *.swp

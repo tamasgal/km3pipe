@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 
+5.1.4 / 2016-10-24
+~~~~~~~~~~~~~~~~~~
+* DB/Dataclass bugfixes
+
 5.1.2 / 2016-10-20
 ~~~~~~~~~~~~~~~~~~
 * Unify Reco + Wrapper dataclass. Reco(map, dtype) -> ArrayTaco.from_dict()
