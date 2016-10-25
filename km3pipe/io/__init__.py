@@ -99,10 +99,17 @@ def read_hdf5(filename, detx=None, det_id=None, det_from_file=False):
     the detector id from the event info in the file.
     """
     h5 = pd.HDFStore(filename)
-    event_info = h5.get('/event_info')
-    hits = h5.get('/hits')
-    mc_tracks = h5.get('/mc_tracks')
-    reco = read_group(h5.root.reco)
-    geometry = read_geometry(detx, det_id, det_from_file,
-                             det_id_table=event_info['det_id'])
-    return Run(event_info, geometry, hits, mc_tracks, reco)
+    run = kp.Run(h5.get('event_info'))
+    optional_keys = {'hits', 'mc_hits', 'mc_tracks'}       # noqa
+    for k in optional_keys:
+        try:
+            run[k] = h5.get(k)
+        except KeyError:
+            continue
+    try:
+        run.reco = read_group(h5.root.reco)
+    except (KeyError, ValueError):
+        pass
+
+    run.geometry = read_geometry(detx, det_id, det_from_file,
+                                 det_id_table=event_info['det_id'])

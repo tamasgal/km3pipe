@@ -473,12 +473,10 @@ class Run(object):
     reco:
         Concatenation of all tables below ``/reco``.
     """
-    def __init__(self, event_info, geometry, hits, mc_tracks, reco):
+    def __init__(self, event_info, **tables):
         self.event_info = event_info
-        self.geometry = geometry
-        self.hits = hits
-        self.mc_tracks = mc_tracks
-        self.reco = reco
+        for key, val in self.tables:
+            setattr(self, key, val)
 
 
 class AanetGeometry(Module):
