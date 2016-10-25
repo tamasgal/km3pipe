@@ -29,7 +29,8 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
-__all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries', 'Hit',
+__all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries',
+           'TimesliceHitSeries', 'Hit',
            'Track', 'TrackSeries', 'Serialisable', 'SummaryframeInfo')
 
 
@@ -535,15 +536,13 @@ cdef class Hit:
         return self.__str__()
 
 
-cdef class L0Hit:
-    """L0Hit on a PMT.
+cdef class TimesliceHit:
+    """Timeslice hit on a PMT.
 
     Parameters
     ----------
     channel_id : int
-    dir : Direction or numpy.ndarray
     dom_id : int
-    pos : Position or numpy.ndarray
     time : int
     tot : int
 
@@ -565,7 +564,7 @@ cdef class L0Hit:
         self.tot = tot
 
     def __str__(self):
-        return "L0Hit: channel_id({0}), dom_id({1}), tot({2}), " \
+        return "TimesliceHit: channel_id({0}), dom_id({1}), tot({2}), " \
                "time({3})" \
                .format(self.channel_id, self.dom_id, self.tot, self.time)
 
@@ -964,8 +963,8 @@ class HitSeries(object):
         return '\n'.join([str(hit) for hit in self._hits])
 
 
-class L0HitSeries(object):
-    """Collection of multiple L0Hits.
+class TimesliceHitSeries(object):
+    """Collection of multiple timeslice hits.
     """
     dtype = np.dtype([
         ('channel_id', 'u1'),
@@ -1059,7 +1058,7 @@ class L0HitSeries(object):
         if self._index >= len(self):
             self._index = 0
             raise StopIteration
-        hits = L0Hit(*self._arr[self._index])
+        hits = TimesliceHit(*self._arr[self._index])
         self._index += 1
         return hits
 
@@ -1068,7 +1067,7 @@ class L0HitSeries(object):
 
     def __getitem__(self, index):
         if isinstance(index, int):
-            return L0Hit(*self._arr[index])
+            return TimesliceHit(*self._arr[index])
         elif isinstance(index, slice):
             return self._slice_generator(index)
         else:
@@ -1078,12 +1077,12 @@ class L0HitSeries(object):
         """A simple slice generator for iterations"""
         start, stop, step = index.indices(len(self))
         for i in range(start, stop, step):
-            yield L0Hit(*self._arr[i])
+            yield TimesliceHit(*self._arr[i])
 
     def __str__(self):
         n_hits = len(self)
         plural = 's' if n_hits > 1 or n_hits == 0 else ''
-        return("L0HitSeries with {0} hit{1}.".format(len(self), plural))
+        return("TimesliceHitSeries with {0} hit{1}.".format(len(self), plural))
 
     def __repr__(self):
         return self.__str__()
@@ -1509,7 +1508,7 @@ class ArrayTaco(object):
 deserialise_map = {
     'McHits': HitSeries,
     'Hits': HitSeries,
-    'L0Hits': L0HitSeries,
+    'TimesliceHits': TimesliceHitSeries,
     'McTracks': TrackSeries,
     'EventInfo': EventInfo,
     'SummarysliceInfo': SummarysliceInfo,

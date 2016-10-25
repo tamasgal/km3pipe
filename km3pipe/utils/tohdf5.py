@@ -18,7 +18,7 @@ Options:
                                of `import aa`)
     -h --help                  Show this screen.
     -j --jppy                  tohdf5: Use jppy (not aanet) for Jpp readout
-    -l --with-l0hits           Include L0-hits [default: False]
+    -l --with-timeslice-hits   Include timeslice-hits [default: False]
     -n EVENTS/RUNS             Number of events/runs.
     -o OUTFILE                 Output file.
     -s --with-summaryslices    Include summary slices [default: False]
@@ -86,7 +86,13 @@ def main():
     aa_format = args['--aa-format']
     aa_lib = args['--aa-lib']
     with_summaryslices = args['--with-summaryslices']
-    with_l0hits = args['--with-l0hits']
-    tohdf5(infiles, outfile, n, use_jppy=use_jppy_pump, aa_fmt=aa_format,
-           aa_lib=aa_lib, with_summaryslices=with_summaryslices,
-           with_l0hits=with_l0hits, n_rows_expected=n_rows_expected)
+    with_timeslice_hits = args['--with-timeslice-hits']
+    tohdf5(infiles,
+           outfile,
+           n,
+           use_jppy=use_jppy_pump,
+           aa_fmt=aa_format,
+           aa_lib=aa_lib,
+           with_summaryslices=with_summaryslices,
+           with_timeslice_hits=with_timeslice_hits,
+           n_rows_expected=n_rows_expected)

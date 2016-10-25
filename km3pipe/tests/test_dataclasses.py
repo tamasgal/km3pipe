@@ -16,7 +16,7 @@ from km3pipe.testing import TestCase
 from km3pipe.testing.mocks import FakeAanetHit
 from km3pipe.io.evt import EvtRawHit
 from km3pipe.dataclasses import (Hit, Track, Position, Direction_,
-                                 HitSeries, L0HitSeries,
+                                 HitSeries, TimesliceHitSeries,
                                  EventInfo, SummarysliceInfo, TimesliceInfo,
                                  Serialisable, TrackSeries, SummaryframeSeries,
                                  ArrayTaco)
@@ -145,7 +145,7 @@ class TestDirection(TestCase):
         self.assertEqual("(0.2673, 0.5345, 0.8018)", str(direction))
 
 
-class TestL0HitSeries(TestCase):
+class TestTimesliceHitSeries(TestCase):
 
     def test_from_arrays(self):
         n = 10
@@ -154,7 +154,7 @@ class TestL0HitSeries(TestCase):
         tots = np.arange(n)
         channel_ids = np.arange(n)
 
-        hits = L0HitSeries.from_arrays(
+        hits = TimesliceHitSeries.from_arrays(
             channel_ids,
             dom_ids,
             times,
