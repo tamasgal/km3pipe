@@ -459,23 +459,9 @@ class Geometry(Module):
 
 class Run(object):
     """A simple container for event info, hits, tracks and geometry.
-
-    Attributes
-    ----------
-    event_info:
-
-    geometry:
-
-    hits:
-
-    mc_tracks:
-
-    reco:
-        Concatenation of all tables below ``/reco``.
     """
-    def __init__(self, event_info, **tables):
-        self.event_info = event_info
-        for key, val in self.tables.items():
+    def __init__(self, **tables):
+        for key, val in tables.items():
             setattr(self, key, val)
 
 
