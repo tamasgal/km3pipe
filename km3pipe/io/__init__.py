@@ -22,8 +22,8 @@ from km3pipe.io.hdf5 import HDF5Pump  # noqa
 from km3pipe.io.hdf5 import HDF5Sink  # noqa
 from km3pipe.io.pickle import PicklePump  # noqa
 from km3pipe.tools import insert_prefix_to_dtype
-from km3pipe.io.pandas import (H5Chain, df_to_h5, map2df, load_mva, open_hdf5,
-                               read_hdf5, read_group, read_table, write_table,)
+from km3pipe.io.pandas import (H5Chain, df_to_h5, map2df,
+                               read_hdf5, read_group, write_table,)
 
 
 from km3pipe.logger import logging
