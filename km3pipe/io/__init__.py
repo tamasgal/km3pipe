@@ -67,14 +67,17 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
         return io[extension](filenames=filenames, name=name, **kwargs)
 
 
-def df_to_h5(df, filename, tabname, filemode='a', where='/', complevel=5,):
+def df_to_h5(df, filename, where, filemode='a', complevel=5,):
     """Write pandas dataframes with proper columns.
 
     The main 2 ways pandas writes dataframes suck bigly.
     """
+    loc, tabname = os.path.split(where)
+    if loc == '':
+        loc = '/'
     with tb.open_file(filename, filemode) as h5:
-        filt = tb.Filters(complevel=complevel, shuffle=True)
-        h5.create_table(where, tabname, obj=df.to_records(index=False),
+        filt = tb.Filters(complevel=complevel, shuffle=True, fletcher32=True)
+        h5.create_table(loc, tabname, obj=df.to_records(index=False),
                         filters=filt)
 
 
