@@ -82,8 +82,16 @@ class TestH5Chain(TestCase):
             (42.0, 52.0, 62.0, 4),
         ], dtype=[('aaa', '<f8'), ('bbb', '<f8'),
                   ('ccc', '<f8'), ('event_id', int)])
-        self.tabs = {'foo': self.foo, 'bar': self.bar, 'yay': self.yay}
-        self.where = {'foo': '/', 'bar': '/lala', 'yay': '/lala'}
+        self.info = np.array([
+            (0,  0),
+            (0,  1),
+            (0,  2),
+            (0,  3),
+        ], dtype=[('aaa', int), ('event_id', int)])
+        self.tabs = {'foo': self.foo, 'bar': self.bar, 'yay': self.yay,
+                     'event_info': self.info}
+        self.where = {'foo': '/', 'bar': '/lala', 'yay': '/lala',
+                      'event_info': '/'}
         self.h5name = './test.h5'
         self.h5name2 = './test2.h5'
         self.h5file = tb.open_file(self.h5name, 'a', driver="H5FD_CORE",
@@ -103,8 +111,11 @@ class TestH5Chain(TestCase):
     def test_noargs(self):
         c = H5Chain({self.h5name: self.h5file, self.h5name2: self.h5file2})
         run = c()
-        self.assertAlmostEqual(run['foo'].shape, (16, 4))
-        self.assertAlmostEqual(run['lala'].shape, (8, 8))
+        print(run['foo'])
+        self.assertAlmostEqual(run['foo'].shape[0], 12)
+        self.assertAlmostEqual(run['foo'].shape[1], 4)
+        self.assertAlmostEqual(run['lala'].shape[0], 6)
+        self.assertAlmostEqual(run['lala'].shape[1], 8)
         self.assertAlmostEqual(tuple(run['foo'].columns),
                                tuple(['a', 'b', 'c', 'event_id']))
         self.assertAlmostEqual(

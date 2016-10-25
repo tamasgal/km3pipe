@@ -94,14 +94,14 @@ class H5Chain(object):
             n = n_evts
             if isinstance(n_evts, dict):
                 n = n_evts[fname]
-            max_id = np.unique(h5.root.event_info.read(stop=n))[-1]
-
+            max_id = np.unique(h5.root.event_info.read(field='event_id', stop=n))[-1]
+            print(max_id)
             # tables under '/', e.g. mc_tracks
             for tab in h5.iter_nodes('/', classname='Table'):
                 tabname = tab.name
                 if keys is not None and tabname not in keys:
                     continue
-                arr = self._read_table(tab, max_id)
+                arr = _read_table(tab, max_id)
                 arr = pd.DataFrame.from_records(arr)
                 store[tabname].append(arr)
 
@@ -115,9 +115,8 @@ class H5Chain(object):
                 store[groupname].append(arr)
 
         for key, dfs in sorted(store.items()):
-            store[key] = pd.concat(dfs)
+            store[key] = pd.concat(dfs, axis=0)
         return store
-
 
 
 def map2df(map):
