@@ -475,7 +475,7 @@ class Run(object):
     """
     def __init__(self, event_info, **tables):
         self.event_info = event_info
-        for key, val in self.tables:
+        for key, val in self.tables.items():
             setattr(self, key, val)
 
 
