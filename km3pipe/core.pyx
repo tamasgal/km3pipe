@@ -284,6 +284,11 @@ class Module(object):
                         'process_cpu': deque(maxlen=STAT_LIMIT),
                         'finish': 0,
                         'finish_cpu': 0}
+        self.configure()
+
+    def configure(self):
+        """Configure module, like instance variables etc."""
+        pass
 
     @property
     def name(self):

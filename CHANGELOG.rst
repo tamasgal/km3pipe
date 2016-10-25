@@ -1,6 +1,12 @@
 Unreleased changes
 ------------------
 
+
+5.2.0 / 2016-10-25
+------------------
+* Introduce ``configure`` method in ``Module``, so you no longer need to
+  override ``__init__`` and call ``super``. You can, though ;)
+
 5.1.5 / 2016-10-24
 ~~~~~~~~~~~~~~~~~~
 * DB/Dataclass bugfixes

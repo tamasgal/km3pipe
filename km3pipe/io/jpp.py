@@ -12,7 +12,8 @@ import numpy as np
 
 from km3pipe import Pump, Blob
 from km3pipe.dataclasses import (EventInfo, TimesliceFrameInfo,
-                                 SummaryframeInfo, HitSeries, L0HitSeries)
+                                 SummaryframeInfo, HitSeries,
+                                 TimesliceHitSeries)
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -40,7 +41,7 @@ class JPPPump(Pump):
 
         self.event_index = self.get('index') or 0
         self.with_summaryslices = self.get('with_summaryslices') or False
-        self.with_l0hits = self.get('with_l0hits') or False
+        self.with_timeslice_hits = self.get('with_timeslice_hits') or False
         self.timeslice_index = 0
         self.timeslice_frame_index = 0
         self.summaryslice_index = 0
@@ -53,7 +54,7 @@ class JPPPump(Pump):
         self.blobs = self.blob_generator()
 
     def blob_generator(self):
-        while self.with_l0hits and self.timeslice_reader.has_next:
+        while self.with_timeslice_hits and self.timeslice_reader.has_next:
             self.timeslice_frame_index = 0
             self.timeslice_reader.retrieve_next_timeslice()
             while self.timeslice_reader.has_next_superframe:
@@ -126,7 +127,7 @@ class JPPPump(Pump):
         times = np.zeros(n, dtype='i')
         tots = np.zeros(n, dtype='i')
         r.get_hits(channel_ids, dom_ids, times, tots)
-        hit_series = L0HitSeries.from_arrays(
+        hit_series = TimesliceHitSeries.from_arrays(
             channel_ids, dom_ids, times, tots,
             self.timeslice_index, self.timeslice_frame_index
         )
@@ -145,7 +146,7 @@ class JPPPump(Pump):
                 r.white_rabbit_status,
                 )
 
-        blob['L0Hits'] = hit_series
+        blob['TimesliceHits'] = hit_series
         blob['TimesliceFrameInfo'] = timesliceframe_info
         return blob
 
