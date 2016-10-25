@@ -7,7 +7,7 @@ Pandas Helpers.
 """
 from __future__ import division, absolute_import, print_function
 
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 import os.path
 from six import string_types
 
@@ -15,11 +15,8 @@ import numpy as np
 import pandas as pd
 import tables as tb
 
-import km3pipe as kp
-from km3pipe import Pump, Module, Run
-from km3pipe.dataclasses import ArrayTaco, deserialise_map
 from km3pipe.logger import logging
-from km3pipe.tools import camelise, decamelise, insert_prefix_to_dtype, split
+from km3pipe.tools import insert_prefix_to_dtype
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -38,19 +35,9 @@ class H5Chain(object):
     It is impliend that all files share the same group/tables
     structure and naming.
 
-    This class mitigates 3 issues:
-    * read different amounts of events from each file
-        * (100 from A, 20 from B)
-    * don't slice all tables equally, e.g.:
-        * read every row from jgandalf
-        * read every 2nd row from mc_tracks
-    * merge all tables below a group into a single table
-        * /reco/jgandalf
-        * /reco/dusj
-
     Parameters
     ----------
-    filenames: list(str)
+    filenames: list(str), or dict(fname -> h5file)
 
     Examples
     --------
@@ -69,7 +56,6 @@ class H5Chain(object):
     >>> wgt = coll['event_info']['weights_w2']
     >>> Y_ene = coll['mc_tracks']['energy']
     """
-
     def __init__(self, filenames):
         self.h5files = {}
         if isinstance(filenames, dict):
@@ -89,7 +75,7 @@ class H5Chain(object):
     def __enter__(self):
         return self
 
-    def __call__(self, n_evts=None, keys=None, ):
+    def __call__(self, n_evts=None, keys=None):
         """
         Parameters
         ----------
@@ -108,13 +94,14 @@ class H5Chain(object):
             n = n_evts
             if isinstance(n_evts, dict):
                 n = n_evts[fname]
+            max_id = np.unique(h5.root.event_info.read(stop=n))[-1]
 
             # tables under '/', e.g. mc_tracks
             for tab in h5.iter_nodes('/', classname='Table'):
                 tabname = tab.name
                 if keys is not None and tabname not in keys:
                     continue
-                arr = tab.read(stop=n)
+                arr = self._read_table(tab, max_id)
                 arr = pd.DataFrame.from_records(arr)
                 store[tabname].append(arr)
 
@@ -124,7 +111,7 @@ class H5Chain(object):
                 groupname = gr._v_name
                 if keys is not None and groupname not in keys:
                     continue
-                arr = read_group(gr, stop=n)
+                arr = read_group(gr, max_id)
                 store[groupname].append(arr)
 
         for key, dfs in sorted(store.items()):
@@ -132,16 +119,25 @@ class H5Chain(object):
         return store
 
 
+
 def map2df(map):
     return pd.DataFrame.from_records(map, index=np.ones(1, dtype=int))
 
 
-def read_group(group, **kwargs):
+def _read_table(tab, max_id=None):
+    # takewhile(lambda x: x['event_id'] != max_id, tab.iterrows())
+    return tab.read_where('event_id <= %d' % max_id)
+
+
+def read_group(group, max_id=None, **kwargs):
     # Store through groupname, insert tablename into dtype
     df = []
     for tab in group._f_iter_nodes(classname='Table'):
         tabname = tab.name
-        arr = tab.read(**kwargs)
+        if max_id is None:
+            arr = tab.read(**kwargs)
+        else:
+            arr = _read_table(tab, max_id)
         arr = insert_prefix_to_dtype(arr, tabname)
         arr = pd.DataFrame.from_records(arr)
         df.append(arr)
