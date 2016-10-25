@@ -10,8 +10,9 @@ import os.path
 from six import string_types
 
 import numpy as np
+import pandas as pd
 
-from km3pipe import Geometry
+from km3pipe import Geometry, Run
 from km3pipe.io.evt import EvtPump  # noqa
 from km3pipe.io.daq import DAQPump  # noqa
 from km3pipe.io.clb import CLBPump  # noqa
@@ -23,7 +24,7 @@ from km3pipe.io.hdf5 import HDF5Sink  # noqa
 from km3pipe.io.pickle import PicklePump  # noqa
 from km3pipe.tools import insert_prefix_to_dtype
 from km3pipe.io.pandas import (H5Chain, df_to_h5, map2df,
-                               read_hdf5, read_group, write_table,)
+                               read_group, write_table,)
 
 
 from km3pipe.logger import logging
@@ -88,3 +89,20 @@ def read_geometry(detx=None, det_id=None, from_file=False, det_id_table=None):
         except ValueError:
             log.warning("Could not retrieve the geometry information.")
     return None
+
+
+def read_hdf5(filename, detx=None, det_id=None, det_from_file=False):
+    """Open HDF5 file and retrieve all relevant information.
+
+    Optionally, a detector geometry can read by passing a detector file,
+    or retrieved from the database by passing a detector ID, or by reading
+    the detector id from the event info in the file.
+    """
+    h5 = pd.HDFStore(filename)
+    event_info = h5.get('/event_info')
+    hits = h5.get('/hits')
+    mc_tracks = h5.get('/mc_tracks')
+    reco = read_group(h5.root.reco)
+    geometry = read_geometry(detx, det_id, det_from_file,
+                             det_id_table=event_info['det_id'])
+    return Run(event_info, geometry, hits, mc_tracks, reco)

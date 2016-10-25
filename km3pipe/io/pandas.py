@@ -20,7 +20,6 @@ from km3pipe import Pump, Module, Run
 from km3pipe.dataclasses import ArrayTaco, deserialise_map
 from km3pipe.logger import logging
 from km3pipe.tools import camelise, decamelise, insert_prefix_to_dtype, split
-from km3pipe.io import read_geometry
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -135,23 +134,6 @@ class H5Chain(object):
 
 def map2df(map):
     return pd.DataFrame.from_records(map, index=np.ones(1, dtype=int))
-
-
-def read_hdf5(filename, detx=None, det_id=None, det_from_file=False):
-    """Open HDF5 file and retrieve all relevant information.
-
-    Optionally, a detector geometry can read by passing a detector file,
-    or retrieved from the database by passing a detector ID, or by reading
-    the detector id from the event info in the file.
-    """
-    h5 = pd.HDFStore(filename)
-    event_info = h5.get('/event_info')
-    hits = h5.get('/hits')
-    mc_tracks = h5.get('/mc_tracks')
-    reco = read_group(h5.root.reco)
-    geometry = read_geometry(detx, det_id, det_from_file,
-                             det_id_table=event_info['det_id'])
-    return Run(event_info, geometry, hits, mc_tracks, reco)
 
 
 def read_group(group, **kwargs):
