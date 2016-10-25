@@ -27,7 +27,7 @@ git add km3pipe/__version__.py
 
 git commit -m "Bumps version number"
 
-echo "KM3Pipe $(km3pipe --version)\n=============" > docs/version.txt
+echo "KM3Pipe ${VERSION}\n=============" > docs/version.txt
 git add docs/version.txt
 git commit -m "update version tag in docs"
 
