@@ -734,10 +734,10 @@ class HitSeries(object):
             # Older aanet format.
             return cls(np.array([(
                 ord(h.channel_id),
-                h.dom_id,
                 np.nan, #h.dir.x,
                 np.nan, #h.dir.y,
                 np.nan, #h.dir.z,
+                h.dom_id,
                 h.id,
                 h.pmt_id,
                 np.nan, #h.pos.x,
