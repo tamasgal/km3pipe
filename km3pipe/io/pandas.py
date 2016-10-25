@@ -113,7 +113,7 @@ class H5Chain(object):
                 tabname = tab.name
                 if keys is not None and tabname not in keys:
                     continue
-                arr = self._read_table(tab, n)
+                arr = tab.read(stop=n)
                 arr = pd.DataFrame.from_records(arr)
                 store[tabname].append(arr)
 
@@ -123,31 +123,13 @@ class H5Chain(object):
                 groupname = gr._v_name
                 if keys is not None and groupname not in keys:
                     continue
-                arr = self._read_group(gr, n)
+                arr = read_group(gr)
                 store[groupname].append(arr)
 
         for key, dfs in sorted(store.items()):
             store[key] = pd.concat(dfs)
         return store
 
-    @classmethod
-    def _read_group(cls, group, n=None, cond=None):
-        # Store through groupname, insert tablename into dtype
-        df = []
-        for tab in group._f_iter_nodes(classname='Table'):
-            tabname = tab.name
-            arr = cls._read_table(tab, n)
-            arr = insert_prefix_to_dtype(arr, tabname)
-            arr = pd.DataFrame.from_records(arr)
-            df.append(arr)
-        df = pd.concat(df, axis=1)
-        return df
-
-    @classmethod
-    def _read_table(cls, table, n=None, cond=None):
-        if isinstance(n, int):
-            return table[:n]
-        return table[:]
 
 def df_to_h5(df, filename, where, filemode='a', complevel=5,):
     """Write pandas dataframes with proper columns.
@@ -232,33 +214,23 @@ def read_hdf5(filename, detx=None, det_id=None, det_from_file=False):
     event_info = read_table(filename, '/event_info')
     hits = read_table(filename, '/hits')
     mc_tracks = read_table(filename, '/mc_tracks')
-    reco = read_group(filename, '/reco')
+    # reco = read_group(filename, '/reco')  # TODO
     geometry = read_geometry(detx, det_id, det_from_file,
                              det_id_table=event_info['det_id'])
     return Run(event_info, geometry, hits, mc_tracks, reco)
 
 
-def read_group(h5file, where):
-    if isinstance(h5file, string_types):
-        h5file = tb.open_file(h5file, 'r')
-    tabs = []
-    for table in h5file.iter_nodes(where, classname='Table'):
-        tabname = table.name
-        tab = table[:]
-        tab = insert_prefix_to_dtype(tab, tabname)
-        tab = pd.DataFrame.from_records(tab)
-        tabs.append(tab)
-    h5file.close()
-    tabs = pd.concat(tabs, axis=1)
-    return tabs
-
-
-def read_table(filename, where):
-    with tb.open_file(filename, 'r') as h5:
-        tab = h5.get_node(where)[:]
-    tab = pd.DataFrame.from_records(tab)
-    return tab
-
+def read_group(cls, group, **kwargs):
+    # Store through groupname, insert tablename into dtype
+    df = []
+    for tab in group._f_iter_nodes(classname='Table'):
+        tabname = tab.name
+        arr = tab.read(**kwargs)
+        arr = insert_prefix_to_dtype(arr, tabname)
+        arr = pd.DataFrame.from_records(arr)
+        df.append(arr)
+    df = pd.concat(df, axis=1)
+    return df
 
 def write_table(filename, where, array):
     """Write a numpy array into a H5 table."""
