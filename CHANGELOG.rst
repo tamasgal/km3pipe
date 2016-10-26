@@ -1,5 +1,10 @@
 Unreleased changes
 ------------------
+
+
+5.2.1 / 2016-10-26
+~~~~~~~~~~~~~~~~~~
+* Fixes Cython dependency
 * ``kp.io.pandas.H5Chain`` now returns N _events_, not _rows_
 
 5.2.0 / 2016-10-25
