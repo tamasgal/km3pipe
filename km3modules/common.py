@@ -129,6 +129,9 @@ class StatusBar(Module):
         self.blob_index += 1
         return blob
 
+    def finish(self):
+        print('=' * 74)
+
 
 class MemoryObserver(Module):
     """Shows the maximum memory usage"""
