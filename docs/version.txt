@@ -1,1 +1,1 @@
-KM3Pipe 5.2.1\n=
+KM3Pipe 5.2.2\n=
