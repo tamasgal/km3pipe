@@ -19,7 +19,7 @@ try:
 except ImportError:
     raise SystemExit("\nCython and Numpy are required to compile KM3Pipe.\n"
                      "You can install it easily via pip:\n\n"
-                     "    > pip install cython numpy")
+                     "    > pip install cython==0.24.1 numpy")
 
 
 # This hack is "stolen" from numpy and allows to detect the setup procedure
@@ -64,7 +64,7 @@ setup(name='km3pipe',
       include_package_data=True,
       platforms='any',
       install_requires=[
-          'cython',
+          'cython==0.24.1',
           'numpy',
           'controlhost',
           'urwid',

@@ -4,7 +4,7 @@ urwid
 numpy
 ipython
 pandas
-cython
+cython==0.24.1
 websocket-client
 tables
 tornado
