@@ -14,12 +14,13 @@ else:
     import __builtin__ as builtins
 try:
     from Cython.Distutils import build_ext
-    from Cython.Compiler.Options import directive_defaults
+    from Cython.Build import cythonize
+    # from Cython.Compiler.Options import directive_defaults
     import numpy
 except ImportError:
     raise SystemExit("\nCython and Numpy are required to compile KM3Pipe.\n"
                      "You can install it easily via pip:\n\n"
-                     "    > pip install cython==0.24.1 numpy")
+                     "    > pip install cython numpy")
 
 
 # This hack is "stolen" from numpy and allows to detect the setup procedure
@@ -27,10 +28,12 @@ except ImportError:
 builtins.__KM3PIPE_SETUP__ = True
 
 # Needed for line_profiler - disable for production code
-directive_defaults['linetrace'] = True
-directive_defaults['profile'] = True
-directive_defaults['binding'] = True
-CYTHON_TRACE = str(int(directive_defaults['linetrace']))
+directives = {
+    'linetrace': True,
+    'profile': True,
+    'binding': True,
+}
+CYTHON_TRACE = '1'
 
 from km3pipe import version  # noqa
 
@@ -59,12 +62,13 @@ setup(name='km3pipe',
       author_email='tgal@km3net.de',
       packages=['km3pipe', 'km3pipe.testing', 'km3pipe.io', 'km3pipe.utils',
                 'km3modules', 'pipeinspector'],
-      ext_modules=[tools, core, dataclasses],
+      ext_modules=cythonize([tools, core, dataclasses],
+                            compiler_directives=directives),
       cmdclass={'build_ext': build_ext},
       include_package_data=True,
       platforms='any',
       install_requires=[
-          'cython==0.24.1',
+          'cython',
           'numpy',
           'controlhost',
           'urwid',
