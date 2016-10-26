@@ -1,6 +1,6 @@
 Unreleased changes
 ------------------
-
+* ``kp.io.pandas.H5Chain`` now returns N _events_, not _rows_
 
 5.2.0 / 2016-10-25
 ------------------

@@ -22,6 +22,7 @@ import time
 from timeit import default_timer as timer
 from contextlib import contextmanager
 import re
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -437,3 +438,73 @@ def insert_prefix_to_dtype(arr, prefix):
     new_cols = [prefix + '_' + col for col in arr.dtype.names]
     arr.dtype.names = new_cols
     return arr
+
+
+class deprecated(object):
+    """Decorator to mark a function or class as deprecated.
+
+    >>> @deprecated('some warning')
+    ... def some_function(): pass
+    """
+
+    # Adapted from http://wiki.python.org/moin/PythonDecoratorLibrary,
+    # but with many changes.
+    # and stolen again from sklearn.utils
+
+    def __init__(self, extra=''):
+        """
+        Parameters
+        ----------
+        extra: string
+          to be added to the deprecation messages
+        """
+        self.extra = extra
+
+    def __call__(self, obj):
+        if isinstance(obj, type):
+            return self._decorate_class(obj)
+        else:
+            return self._decorate_fun(obj)
+
+    def _decorate_class(self, cls):
+        msg = "Class %s is deprecated" % cls.__name__
+        if self.extra:
+            msg += "; %s" % self.extra
+
+        init = cls.__init__
+
+        def wrapped(*args, **kwargs):
+            warnings.warn(msg, category=DeprecationWarning)
+            return init(*args, **kwargs)
+        cls.__init__ = wrapped
+
+        wrapped.__name__ = '__init__'
+        wrapped.__doc__ = self._update_doc(init.__doc__)
+        wrapped.deprecated_original = init
+
+        return cls
+
+    def _decorate_fun(self, fun):
+        """Decorate function fun"""
+
+        msg = "Function %s is deprecated" % fun.__name__
+        if self.extra:
+            msg += "; %s" % self.extra
+
+        def wrapped(*args, **kwargs):
+            warnings.warn(msg, category=DeprecationWarning)
+            return fun(*args, **kwargs)
+
+        wrapped.__name__ = fun.__name__
+        wrapped.__dict__ = fun.__dict__
+        wrapped.__doc__ = self._update_doc(fun.__doc__)
+
+        return wrapped
+
+    def _update_doc(self, olddoc):
+        newdoc = "DEPRECATED"
+        if self.extra:
+            newdoc = "%s: %s" % (newdoc, self.extra)
+        if olddoc:
+            newdoc = "%s\n\n%s" % (newdoc, olddoc)
+        return newdoc
