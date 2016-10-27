@@ -152,6 +152,10 @@ def read_group(group, max_id=None, **kwargs):
 
 def df_to_h5(df, filename, where):
     """Write pandas dataframes with proper columns.
+
+    Example:
+        >>> df = pd.DataFrame(...)
+        >>> df_to_h5(df, 'foo.h5', '/some/loc/my_df')
     """
     write_table(df.to_records(index=False), filename, where)
 
