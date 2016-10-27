@@ -75,7 +75,7 @@ class H5Chain(object):
     def __enter__(self):
         return self
 
-    def __call__(self, n_evts=None, keys=None):
+    def __call__(self, n_evts=None, keys=None, ignore_events=False):
         """
         Parameters
         ----------
@@ -94,14 +94,18 @@ class H5Chain(object):
             n = n_evts
             if isinstance(n_evts, dict):
                 n = n_evts[fname]
-            max_id = np.unique(h5.root.event_info.read(field='event_id', stop=n))[-1]
-            print(max_id)
+            if ignore_events:
+                max_id = n
+            else:
+                max_id = np.unique(
+                    h5.root.event_info.read(field='event_id', stop=n)
+                )[-1]
             # tables under '/', e.g. mc_tracks
             for tab in h5.iter_nodes('/', classname='Table'):
                 tabname = tab.name
                 if keys is not None and tabname not in keys:
                     continue
-                arr = _read_table(tab, max_id)
+                arr = _read_table(tab, max_id, ignore_events)
                 arr = pd.DataFrame.from_records(arr)
                 store[tabname].append(arr)
 
@@ -123,9 +127,11 @@ def map2df(map):
     return pd.DataFrame.from_records(map, index=np.ones(1, dtype=int))
 
 
-def _read_table(tab, max_id=None):
-    # takewhile(lambda x: x['event_id'] != max_id, tab.iterrows())
-    return tab.read_where('event_id <= %d' % max_id)
+def _read_table(tab, max_id=None, ignore_events=False):
+    if ignore_events:
+        return tab[:max_id]
+    else:
+        return tab.read_where('event_id <= %d' % max_id)
 
 
 def read_group(group, max_id=None, **kwargs):
