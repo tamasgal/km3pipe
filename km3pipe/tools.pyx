@@ -120,6 +120,13 @@ def unit_vector(vector):
     """ Returns the unit vector of the vector.  """
     return np.array(vector) / np.linalg.norm(vector)
 
+def com(points, masses=None):
+    """Calculate center of mass for given points.
+    If masses is not set, assume equal masses."""
+    if masses is None:
+        return np.average(points, axis=0)
+    else:
+        return np.average(points, axis=0, weights=masses)
 
 def circ_permutation(items):
     """Calculate the circular permutation for a given list of items."""

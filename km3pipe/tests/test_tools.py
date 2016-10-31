@@ -10,9 +10,9 @@ from time import sleep
 
 from km3pipe.testing import TestCase, MagicMock, StringIO
 from km3pipe.tools import (unpack_nfirst, split, namedtuple_with_defaults,
-                           angle_between, geant2pdg, pdg2name, PMTReplugger,
-                           Cuckoo, total_seconds, remain_file_pointer,
-                           decamelise, camelise)
+                           angle_between, com, geant2pdg, pdg2name,
+                           PMTReplugger, Cuckoo, total_seconds,
+                           remain_file_pointer, decamelise, camelise)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -78,6 +78,16 @@ class TestTools(TestCase):
         v1 = (0, 0, 0)
         v2 = (1, 0, 0)
         self.assertTrue(np.isnan(angle_between(v1, v2)))
+
+    def test_com(self):
+        center_of_mass = com(((1, 2, 3), (4, 5, 6), (7, 8, 9), (10, 11, 12)))
+        self.assertEqual((5.5, 6.5, 7.5), tuple(center_of_mass))
+        center_of_mass = com(((1, 2, 3), (4, 5, 6), (7, 8, 9)),
+                             masses=(1, 0, 0))
+        self.assertEqual((1, 2, 3), tuple(center_of_mass))
+        center_of_mass = com(((1, 1, 1), (0, 0, 0)))
+        self.assertEqual((0.5, 0.5, 0.5), tuple(center_of_mass))
+
 
     def test_geant2pdg(self):
         self.assertEqual(22, geant2pdg(1))
