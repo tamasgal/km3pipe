@@ -13,7 +13,7 @@ import sys
 
 import numpy as np
 
-from km3pipe.tools import unpack_nfirst, split  # , ignored
+from km3pipe.tools import unpack_nfirst, split, com  # , ignored
 from km3pipe.dataclasses import Point, Direction
 from km3pipe.db import DBManager
 
@@ -66,7 +66,7 @@ class Detector(object):
         self.valid_until = None
         self.utm_info = None
         self._dom_ids = []
-        self._dom_positions = []
+        self._dom_positions = OrderedDict()
         self._pmts_by_omkey = OrderedDict()
         self._pmts_by_id = OrderedDict()
         self._pmts_by_dom_id = defaultdict(list)
@@ -170,10 +170,11 @@ class Detector(object):
 
     @property
     def dom_positions(self):
-        """The positions of the DOMs, taken from the PMT with the lowest ID."""
+        """The positions of the DOMs, calculated as COM from PMTs."""
         if not self._dom_positions:
-            self._dom_positions = [pmt.pos for pmt in self._pmts_by_id.values()
-                                   if pmt.channel_id == 0]
+            for dom_id in self.dom_ids:
+                pmt_positions = [p.pos for p in self._pmts_by_dom_id[dom_id]]
+                self._dom_positions[dom_id] = com(pmt_positions)
         return self._dom_positions
 
     def translate_detector(self, vector):
