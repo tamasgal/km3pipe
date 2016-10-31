@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* Cache DOM positions in Detector
 
 
 5.2.2 / 2016-10-26
