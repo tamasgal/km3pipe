@@ -14,4 +14,3 @@ cython==0.24.1
 pillow
 matplotlib>=2.0.0b4
 astropy
-sphinxcontrib-programoutput
