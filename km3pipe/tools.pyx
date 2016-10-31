@@ -122,8 +122,7 @@ def unit_vector(vector):
 
 def pld3(p1, p2, d2):
     """Calculate the point-line-distance for given point and line."""
-    norm = np.linalg.norm
-    return norm(np.cross(d2, p2 - p1)) / norm(d2)
+    return np.linalg.norm(np.cross(d2, p2 - p1)) / np.linalg.norm(d2)
 
 def com(points, masses=None):
     """Calculate center of mass for given points.
