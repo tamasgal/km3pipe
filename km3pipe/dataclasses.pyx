@@ -867,7 +867,7 @@ class HitSeries(object):
 
     @property
     def triggered_hits(self):
-        return self._arr[self._arr['triggered'] == True]
+        return HitSeries(self._arr[self._arr['triggered'] == True])
 
     @property
     def triggered(self):
