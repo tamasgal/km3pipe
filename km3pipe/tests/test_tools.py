@@ -96,6 +96,14 @@ class TestTools(TestCase):
         p2 = np.array((4, 5, 6))
         d2 = np.array((7, 8, 9))
         self.assertAlmostEqual(0.5275893, pld3(p1, p2, d2))
+        p1 = np.array((0, 0, 2))
+        p2 = np.array((-100, 0, -100))
+        d2 = np.array((1, 0, 1))
+        self.assertAlmostEqual(1.4142136, pld3(p1, p2, d2))
+        p1 = np.array([183., -311., 351.96083871])
+        p2 = np.array([40.256, -639.888, 921.93])
+        d2 = np.array([0.185998, 0.476123, -0.859483])
+        self.assertAlmostEqual(21.25456308, pld3(p1, p2, d2))
 
     def test_com(self):
         center_of_mass = com(((1, 2, 3), (4, 5, 6), (7, 8, 9), (10, 11, 12)))
