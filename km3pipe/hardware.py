@@ -7,7 +7,7 @@ Classes representing KM3NeT hardware.
 """
 from __future__ import division, absolute_import, print_function
 
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 import os
 import sys
 
@@ -65,8 +65,11 @@ class Detector(object):
         self.valid_from = None
         self.valid_until = None
         self.utm_info = None
+        self._dom_ids = []
+        self._dom_positions = []
         self._pmts_by_omkey = OrderedDict()
         self._pmts_by_id = OrderedDict()
+        self._pmts_by_dom_id = defaultdict(list)
         self._pmt_angles = []
 
         if filename:
@@ -155,14 +158,23 @@ class Detector(object):
                     self.pmts.append(pmt)
                     self._pmts_by_omkey[(line_id, floor_id, i)] = pmt
                     self._pmts_by_id[pmt_id] = pmt
+                    self._pmts_by_dom_id[dom_id].append(pmt)
         except IndexError:
             pass
 
     @property
+    def dom_ids(self):
+        if not self._dom_ids:
+            self._dom_ids = self.doms.keys()
+        return self._dom_ids
+
+    @property
     def dom_positions(self):
         """The positions of the DOMs, taken from the PMT with the lowest ID."""
-        return [pmt.pos for pmt in self._pmts_by_id.values()
-                if pmt.channel_id == 0]
+        if not self._dom_positions:
+            self._dom_positions = [pmt.pos for pmt in self._pmts_by_id.values()
+                                   if pmt.channel_id == 0]
+        return self._dom_positions
 
     def translate_detector(self, vector):
         vector = np.array(vector, dtype=float)
