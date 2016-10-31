@@ -1,6 +1,7 @@
 Unreleased changes
 ------------------
 * Cache DOM positions in Detector
+* pld3 function in tools, to calculate point-line-distance in 3d
 
 
 5.2.2 / 2016-10-26
