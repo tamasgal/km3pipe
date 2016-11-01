@@ -355,9 +355,12 @@ class Pump(Module):
         if self.blob_file:
             self.blob_file.close()
 
+    def finish(self):
+        pass
+
     def pre_finish(self):
         """Clean up open file or socket-handlers."""
-        Module.finish(self)
+        self.finish()
         self.close_file()
 
 
