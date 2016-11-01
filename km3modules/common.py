@@ -125,12 +125,12 @@ class StatusBar(Module):
 
     def process(self, blob):
         if self.blob_index % self.every == 0:
-            print('-'*33 + "[Blob {0:>7}]".format(self.blob_index) + '-'*33)
+            print('-'*23 + "[Blob {0:>7}]".format(self.blob_index) + '-'*23)
         self.blob_index += 1
         return blob
 
     def finish(self):
-        print('=' * 74)
+        print('=' * 60)
 
 
 class MemoryObserver(Module):
