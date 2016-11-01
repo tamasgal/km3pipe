@@ -10,6 +10,7 @@ tables
 tornado
 sphinx>=1.4
 sphinx-gallery
+nbsphinx
 numpydoc
 pillow
 matplotlib>=2.0.0b4
