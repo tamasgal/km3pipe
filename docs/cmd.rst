@@ -89,8 +89,34 @@ Example::
 
   tohdf5 --aa-fmt=jevt_jgandalf some_jgandalf_file.aa.root
 
-.. command-output:: tohdf5 --help
-   :shell:
+  $ tohdf5 --help
+  Convert ROOT and EVT files to HDF5.
+
+  Usage:
+      tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [--aa-format=<fmt>] [--aa-lib=<lib.so>] FILE...
+      tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [-j] [-s] [-l] FILE...
+      tohdf5 (-h | --help)
+      tohdf5 --version
+  
+  Options:
+      --aa-format=<fmt>          tohdf5: Which aanet subformat ('minidst',
+                                 'ancient_recolns', 'jevt_jgandalf',
+                                 'generic_track') [default: None]
+      --aa-lib-<lib.so>          tohdf5: path to aanet binary (for old versions which
+                                 must be loaded via `ROOT.gSystem.Load()` instead
+                                 of `import aa`)
+      -h --help                  Show this screen.
+      -j --jppy                  tohdf5: Use jppy (not aanet) for Jpp readout
+      -l --with-timeslice-hits   Include timeslice-hits [default: False]
+      -n EVENTS/RUNS             Number of events/runs.
+      -o OUTFILE                 Output file.
+      -s --with-summaryslices    Include summary slices [default: False]
+      -e --expected-rows NROWS   Approximate number of events.  Providing a
+                                 rough estimate for this (100, 10000000, ...)
+                                 will greatly improve reading/writing speed and
+                                 memory usage. Strongly recommended if the
+                                 table/array size is >= 100 MB. [default: 10000]
+
 
 ``hdf2root``
 ~~~~~~~~~~~~
@@ -101,8 +127,18 @@ Example::
 
   hdf52root FOO.h5
 
-.. command-output:: hdf2root --help
-   :shell:
+  $ hdf2root --help
+  Convert HDF5 to vanilla ROOT.
+
+  Usage:
+       hdf2root FILE [-o OUTFILE]
+       hdf2root (-h | --help)
+       hdf2root --version
+  
+  Options:
+      -h --help           Show this screen.
+      -o OUTFILE          Output file.
+
 
 ``h5tree``
 ~~~~~~~~~~
@@ -126,9 +162,18 @@ Example output::
     /reco/reco_lns (Table(121226,), shuffle, zlib(5)) ''
     /reco/thomas_features (Table(121226,), shuffle, zlib(5)) ''
 
+    $ h5tree --help
+    Print the HDF5 file structure.
 
-.. command-output:: h5tree --help
-   :shell:
+    Usage:
+        h5tree FILE
+        h5tree (-h | --help)
+        h5tree --version
+    
+    Options:
+        FILE       Input file.
+        -h --help  Show this screen.
+
 
 ``h5info``
 ~~~~~~~~~~
@@ -140,6 +185,17 @@ Example::
   km3pipe: 4.2.1
   pytables: 3.2.3.1
 
-.. command-output:: h5info --help
-   :shell:
+  $ h5info --help
+
+  Show the km3pipe etc. version used to write a H5 file.
+
+  Usage:
+      h5info FILE [-r]
+      h5info (-h | --help)
+      h5info --version
+  
+  Options:
+      FILE        Input file.
+      -r --raw    Dump raw metadata.
+      -h --help   Show this screen.
 

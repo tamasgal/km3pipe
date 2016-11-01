@@ -41,7 +41,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'numpydoc',
     'sphinx_gallery.gen_gallery',
-    'sphinxcontrib.programoutput',
+    'nbsphinx',
 ]
 
 

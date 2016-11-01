@@ -240,7 +240,7 @@ class Pipeline(object):
         overall_cpu = self._timeit['finish_cpu'] - self._timeit['init_cpu']
         memory = peak_memory_usage()
 
-        print(80*'=')
+        print(60*'=')
         print("{0} cycles drained in {1} (CPU {2}). Memory peak: {3:.2f} MB"
               .format(self._cycle_count,
                       timef(overall), timef(overall_cpu), memory))
@@ -355,9 +355,12 @@ class Pump(Module):
         if self.blob_file:
             self.blob_file.close()
 
+    def finish(self):
+        pass
+
     def pre_finish(self):
         """Clean up open file or socket-handlers."""
-        Module.finish(self)
+        self.finish()
         self.close_file()
 
 
