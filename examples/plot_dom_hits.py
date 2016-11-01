@@ -49,7 +49,7 @@ class DOMHits(kp.Module):
 
         triggered_hits = hits.triggered_hits
         dom_hits = Counter(triggered_hits.dom_id)
-        for dom_id, n_hits in dom_hits.iteritems():
+        for dom_id, n_hits in dom_hits.items():
             distance = pld3(geo.detector.dom_positions[dom_id],
                             muon.pos,
                             muon.dir)
