@@ -6,6 +6,9 @@ ToT histogram.
 Create a simple histogram of the PMT signals (ToTs) in all events.
 """
 
+# Author: Tamas Gal <tgal@km3net.de>
+# License: BSD-3
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import km3pipe.style

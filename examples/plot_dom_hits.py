@@ -6,6 +6,9 @@ DOM hits.
 Estimate track/DOM distances using the number of hits per DOM.
 """
 
+# Author: Tamas Gal <tgal@km3net.de>
+# License: BSD-3
+
 from collections import defaultdict, Counter
 
 import km3pipe as kp

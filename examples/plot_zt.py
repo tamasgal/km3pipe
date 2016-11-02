@@ -6,6 +6,9 @@ zt-plots.
 This example shows how to create a zt-plot of a given DU and event ID.
 """
 
+# Author: Tamas Gal <tgal@km3net.de>
+# License: BSD-3
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import km3pipe as kp
