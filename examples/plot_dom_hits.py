@@ -26,13 +26,12 @@ filename = "data/km3net_jul13_90m_muatm50T655.km3_v5r1.JTE_r2356.root.0-499.h5"
 geo = kp.Geometry(filename="data/km3net_jul13_90m_r1494_corrected.detx")
 
 
-class MuonFilter(kp.Module):
-    """Write all muons from MCTracks to Muons."""
-    def process(self, blob):
-        tracks = blob['McTracks']
-        muons = [t for t in blob['McTracks'] if t.type == 5]
-        blob["Muons"] = kp.dataclasses.TrackSeries(muons, tracks.event_id)
-        return blob
+def filter_muons(blob):
+    """Write all muons from McTracks to Muons."""
+    tracks = blob['McTracks']
+    muons = [t for t in blob['McTracks'] if t.type == 5]
+    blob["Muons"] = kp.dataclasses.TrackSeries(muons, tracks.event_id)
+    return blob
 
 
 class DOMHits(kp.Module):
@@ -71,6 +70,6 @@ class DOMHits(kp.Module):
 pipe = kp.Pipeline()
 pipe.attach(kp.io.HDF5Pump, filename=filename)
 pipe.attach(StatusBar, every=100)
-pipe.attach(MuonFilter)
+pipe.attach(filter_muons)
 pipe.attach(DOMHits)
 pipe.drain()
