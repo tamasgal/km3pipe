@@ -3,7 +3,7 @@
 ToT histogram.
 ==================
 
-This example shows how to create a simple histogram of the PMT signals.
+Create a simple histogram of the PMT signals (ToTs) in all events.
 """
 
 import pandas as pd

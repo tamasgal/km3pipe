@@ -3,8 +3,7 @@
 DOM hits.
 ==================
 
-This example shows how to create DOM hits statistics to estimate track
-distances.
+Estimate track/DOM distances using the number of hits per DOM.
 """
 
 from collections import defaultdict, Counter
