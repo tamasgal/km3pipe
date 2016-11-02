@@ -10,23 +10,25 @@ Histograms, PDF fits, Kernel Density.
 # Author: Moritz Lotze <mlotze@km3net.de>
 # License: BSD-3
 
-from astropy.stats import knuth_bin_width
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import statsmodels.api as sm
+
+from astropy.stats import knuth_bin_width
 from scipy.stats import norm
-from scipy.stats import norm
-import seaborn as sb
 from sklearn.mixture import GaussianMixture
 from sklearn.grid_search import GridSearchCV
 from sklearn.neighbors import KernelDensity
-import statsmodels.api as sm
+
+import km3pipe.style
+km3pipe.style.use('default')
 
 ##############################################################################
 # First generate some pseudodata: A bimodal gaussian, + noise.
 
 N = 100
 bmg = np.concatenate((np.random.normal(15, 1, 0.3 * N),
-                    np.random.normal(20, 1, 0.7 * N)))
+                      np.random.normal(20, 1, 0.7 * N)))
 noise_bmg = 0.5
 data = np.random.normal(bmg, noise_bmg)[:, np.newaxis]
 
