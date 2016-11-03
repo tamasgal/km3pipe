@@ -2,6 +2,12 @@ Unreleased changes
 ------------------
 
 
+5.3.0 / 2016-11-03
+------------------
+* Detector.dom_positions now returns an OrderedDict instead of a list
+* Cache DOM positions in Detector
+* pld3 function in tools, to calculate point-line-distance in 3d
+
 5.2.2 / 2016-10-26
 ~~~~~~~~~~~~~~~~~~
 * Fixes Cython dependency

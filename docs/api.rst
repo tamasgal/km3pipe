@@ -26,7 +26,6 @@ API Reference
   PicklePump
   df_to_h5
   read_hdf5
-  read_table
   write_table
 
 

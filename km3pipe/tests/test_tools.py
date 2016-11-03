@@ -10,9 +10,9 @@ from time import sleep
 
 from km3pipe.testing import TestCase, MagicMock, StringIO
 from km3pipe.tools import (unpack_nfirst, split, namedtuple_with_defaults,
-                           angle_between, geant2pdg, pdg2name, PMTReplugger,
-                           Cuckoo, total_seconds, remain_file_pointer,
-                           decamelise, camelise)
+                           angle_between, pld3, com, geant2pdg, pdg2name,
+                           PMTReplugger, Cuckoo, total_seconds,
+                           remain_file_pointer, decamelise, camelise)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -78,6 +78,42 @@ class TestTools(TestCase):
         v1 = (0, 0, 0)
         v2 = (1, 0, 0)
         self.assertTrue(np.isnan(angle_between(v1, v2)))
+
+    def test_pld3(self):
+        p1 = np.array((0, 0, 0))
+        p2 = np.array((0, 0, 1))
+        d2 = np.array((0, 1, 0))
+        self.assertAlmostEqual(1, pld3(p1, p2, d2))
+        p1 = np.array((0, 0, 0))
+        p2 = np.array((0, 0, 2))
+        d2 = np.array((0, 1, 0))
+        self.assertAlmostEqual(2, pld3(p1, p2, d2))
+        p1 = np.array((0, 0, 0))
+        p2 = np.array((0, 0, 0))
+        d2 = np.array((0, 1, 0))
+        self.assertAlmostEqual(0, pld3(p1, p2, d2))
+        p1 = np.array((1, 2, 3))
+        p2 = np.array((4, 5, 6))
+        d2 = np.array((7, 8, 9))
+        self.assertAlmostEqual(0.5275893, pld3(p1, p2, d2))
+        p1 = np.array((0, 0, 2))
+        p2 = np.array((-100, 0, -100))
+        d2 = np.array((1, 0, 1))
+        self.assertAlmostEqual(1.4142136, pld3(p1, p2, d2))
+        p1 = np.array([183., -311., 351.96083871])
+        p2 = np.array([40.256, -639.888, 921.93])
+        d2 = np.array([0.185998, 0.476123, -0.859483])
+        self.assertAlmostEqual(21.25456308, pld3(p1, p2, d2))
+
+    def test_com(self):
+        center_of_mass = com(((1, 2, 3), (4, 5, 6), (7, 8, 9), (10, 11, 12)))
+        self.assertEqual((5.5, 6.5, 7.5), tuple(center_of_mass))
+        center_of_mass = com(((1, 2, 3), (4, 5, 6), (7, 8, 9)),
+                             masses=(1, 0, 0))
+        self.assertEqual((1, 2, 3), tuple(center_of_mass))
+        center_of_mass = com(((1, 1, 1), (0, 0, 0)))
+        self.assertEqual((0.5, 0.5, 0.5), tuple(center_of_mass))
+
 
     def test_geant2pdg(self):
         self.assertEqual(22, geant2pdg(1))

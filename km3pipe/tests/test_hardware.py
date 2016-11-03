@@ -108,6 +108,10 @@ class TestDetector(TestCase):
         expected = {1: (1, 1, 3), 2: (1, 2, 3), 3: (1, 3, 3)}
         self.assertDictEqual(expected, self.det.doms)
 
+    def test_dom_ids(self):
+        self.det._parse_doms()
+        self.assertEqual((1, 2, 3), tuple(self.det.dom_ids))
+
     def test_parse_doms_maps_each_dom_correctly_for_mixed_pmt_ids(self):
         self.det._det_file = EXAMPLE_DETX_MIXED_IDS
         self.det._parse_doms()
@@ -116,10 +120,12 @@ class TestDetector(TestCase):
 
     def test_dom_positions(self):
         self.det._parse_doms()
-        for i, position in enumerate(self.det.dom_positions):
-            self.assertAlmostEqual(i + 1.1, position.x)
-            self.assertAlmostEqual(i + 1.2, position.y)
-            self.assertAlmostEqual(i + 1.3, position.z)
+        self.assertAlmostEqual(1.4, self.det.dom_positions[1][0])
+        self.assertAlmostEqual(1.5, self.det.dom_positions[1][1])
+        self.assertAlmostEqual(1.6, self.det.dom_positions[1][2])
+        self.assertAlmostEqual(2.4, self.det.dom_positions[2][0])
+        self.assertAlmostEqual(2.5, self.det.dom_positions[2][1])
+        self.assertAlmostEqual(2.6, self.det.dom_positions[2][2])
 
     def test_pmt_with_id_returns_correct_omkeys(self):
         self.det._parse_doms()
