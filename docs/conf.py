@@ -282,6 +282,8 @@ sphinx_gallery_conf = {
     'gallery_dirs': ['auto_examples'],
     'reference_url':  {
         'km3pipe': None,
+        'matplotlib': 'http://matplotlib.org',
+        'numpy': 'http://docs.scipy.org/doc/numpy-1.9.1',
     }
 }
 
