@@ -67,3 +67,5 @@ docs/api
 # PyCharm files
 .idea
 
+# jupyter files
+.ipynb_checkpoints/

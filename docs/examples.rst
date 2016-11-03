@@ -5,10 +5,11 @@ Notebooks
 ---------
 
 .. toctree::
-    :maxdepth: 1
-    :glob:
+  :maxdepth: 1
+  :glob:
 
-    notebooks/*
+  notebooks/*
+
 
 Gallery
 -------
