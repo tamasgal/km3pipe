@@ -1,7 +1,7 @@
 Unreleased changes
 ------------------
 
-5.3.1 / 2016-11-03
+5.3.2 / 2016-11-03
 ~~~~~~~~~~~~~~~~~~
 * add preliminary bootstrap script
 
