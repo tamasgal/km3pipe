@@ -870,8 +870,17 @@ class HitSeries(object):
         return HitSeries(self._arr[self._arr['triggered'] == True])
 
     @property
-    def first_hits(self):
+    def time_sorted(self):
+        """Sort hits by (calibrated) time."""
         h = self.serialise(to='pandas')
+        h['calib_time'] = h['time'] - h['t0']
+        h.sort_values('calib_time', inplace=True)
+        h.drop('calib_time', axis=1, inplace=True)
+        return HitSeries(h.to_records(index=False))
+
+    @property
+    def first_hits(self):
+        h = self.time_sorted.serialise(to='pandas')
         fh = h.drop_duplicates(subset='dom_id')
         return HitSeries(fh.to_records(index=False))
 

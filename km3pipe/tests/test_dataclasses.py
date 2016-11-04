@@ -332,9 +332,6 @@ class TestHitSeries(TestCase):
         n_unique = len(np.unique(self.hits.dom_id))
         self.assertEqual(n_fh, n_unique)
 
-    def test_first_hits_are_actually_first_in_time(self):
-        pass
-
 class TestHit(TestCase):
 
     def setUp(self):
