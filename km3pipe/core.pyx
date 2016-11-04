@@ -434,7 +434,7 @@ class Geometry(Module):
             hits.dir_x[idx] = pmt.dir[0]
             hits.dir_y[idx] = pmt.dir[1]
             hits.dir_z[idx] = pmt.dir[2]
-            hit.t0 = pmt.t0
+            hits._arr['t0'][idx] = pmt.t0
             hits._arr['time'][idx] += pmt.t0
             # hit.a = hit.tot
 
