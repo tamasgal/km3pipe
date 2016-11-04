@@ -434,7 +434,7 @@ class Geometry(Module):
             hits.dir_x[idx] = pmt.dir[0]
             hits.dir_y[idx] = pmt.dir[1]
             hits.dir_z[idx] = pmt.dir[2]
-            # hit.t0 = pmt.t0
+            hit.t0 = pmt.t0
             hits._arr['time'][idx] += pmt.t0
             # hit.a = hit.tot
 
@@ -450,6 +450,7 @@ class Geometry(Module):
         table['dir_y'] = table.apply(lambda h: get_pmt(h).dir.y, axis=1)
         table['dir_z'] = table.apply(lambda h: get_pmt(h).dir.z, axis=1)
         table['time'] += table.apply(lambda h: get_pmt(h).t0, axis=1)
+        table['t0'] = table.apply(lambda h: get_pmt(h).t0, axis=1)
         table['du'] = table.apply(lambda h: get_pmt(h).omkey[0], axis=1)
         table['floor'] = table.apply(lambda h: get_pmt(h).omkey[1], axis=1)
 
