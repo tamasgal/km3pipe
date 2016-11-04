@@ -16,7 +16,8 @@ class PrimFitter(kp.Module):
         if n_dus < 8:
             return
 
-        fh = hits.drop_duplicates(subset='dom_id')
+        #fh = hits.drop_duplicates(subset='dom_id')
+        fh = hits.first_hits
 
         pos = fh[['pos_x', 'pos_y', 'pos_z']]
         center = pos.mean(axis=0)
