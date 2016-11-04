@@ -874,7 +874,7 @@ class HitSeries(object):
         h = self.serialise(to='pandas')
         h.sort_values('time', inplace=True)
         h = h.drop_duplicates(subset='dom_id')
-        return HitSeries(fh.to_records(index=False))
+        return HitSeries(h.to_records(index=False))
 
     @property
     def triggered(self):
