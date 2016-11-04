@@ -171,8 +171,7 @@ class TestTimesliceHitSeries(TestCase):
 
 
 class TestHitSeries(TestCase):
-
-    def test_from_arrays(self):
+    def setUp(self):
         n = 10
         ids = np.arange(n)
         dom_ids = np.arange(n)
@@ -189,7 +188,7 @@ class TestHitSeries(TestCase):
         triggereds = np.ones(n)
         pmt_ids = np.arange(n)
 
-        hits = HitSeries.from_arrays(
+        self.hits = HitSeries.from_arrays(
             channel_ids,
             dir_xs,
             dir_ys,
@@ -207,6 +206,8 @@ class TestHitSeries(TestCase):
             0,      # event_id
         )
 
+    def test_from_arrays(self):
+        hits = self.hits
         self.assertAlmostEqual(1, hits[1].id)
         self.assertAlmostEqual(9, hits[9].pmt_id)
         self.assertEqual(10, len(hits))
@@ -326,6 +327,13 @@ class TestHitSeries(TestCase):
         self.assertTupleEqual((2, 6, 10, 14, 18, 22, 26, 30, 34, 38),
                               tuple(hit_series.tot))
 
+    def test_first_hits_unique(self):
+        n_fh = len(self.hits.first_hits)
+        n_unique = len(np.unique(self.hits.dom_id))
+        self.assertEqual(n_fh, n_unique)
+
+    def test_first_hits_are_actually_first_in_time(self):
+        pass
 
 class TestHit(TestCase):
 
