@@ -870,6 +870,13 @@ class HitSeries(object):
         return HitSeries(self._arr[self._arr['triggered'] == True])
 
     @property
+    def first_hits(self):
+        h = self.serialise(to='pandas')
+        h.sort_values('time', inplace=True)
+        h = h.drop_duplicates(subset='dom_id')
+        return HitSeries(h.to_records(index=False))
+
+    @property
     def triggered(self):
         return self._arr['triggered']
 

@@ -7,8 +7,8 @@ if [ $# -eq 0 ]
     exit 1
 fi
 
-VERSION=$1
-SVN="http://svn.km3net.de/auxiliaries/KM3Pipe"
+export VERSION=$1
+export SVN="http://svn.km3net.de/auxiliaries/KM3Pipe"
 
 git checkout develop
 git pull
