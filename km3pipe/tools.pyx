@@ -99,6 +99,19 @@ def namedtuple_with_defaults(typename, field_names, default_values=[]):
     return the_tuple
 
 
+def zenith(v):
+    """Return the zenith angle in radians"""
+    return angle_between((0, 0, -1), v)
+
+
+def azimuth(v):
+    """Return the azimuth angle in radians"""
+    phi = np.arctan2(v[1], v[0])
+    if phi < 0:
+        phi += 2 * np.pi
+    return phi
+
+
 def angle_between(v1, v2):
     """Returns the angle in radians between vectors 'v1' and 'v2'::
 

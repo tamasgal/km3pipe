@@ -11,7 +11,8 @@ from time import sleep
 from km3pipe.testing import TestCase, MagicMock, StringIO
 from km3pipe.tools import (unpack_nfirst, split, namedtuple_with_defaults,
                            angle_between, pld3, com, geant2pdg, pdg2name,
-                           PMTReplugger, Cuckoo, total_seconds,
+                           PMTReplugger, Cuckoo, total_seconds, zenith,
+                           azimuth,
                            remain_file_pointer, decamelise, camelise)
 
 __author__ = "Tamas Gal"
@@ -65,6 +66,22 @@ class TestTools(TestCase):
         self.assertEqual(1, node.val)
         self.assertEqual(2, node.left)
         self.assertEqual(3, node.right)
+
+    def test_zenith(self):
+        self.assertAlmostEqual(np.pi, zenith((0, 0, 1)))
+        self.assertAlmostEqual(0, zenith((0, 0, -1)))
+        self.assertAlmostEqual(np.pi / 2, zenith((0, 1, 0)))
+        self.assertAlmostEqual(np.pi / 2, zenith((0, -1, 0)))
+        self.assertAlmostEqual(np.pi / 4 * 3, zenith((0, 1, 1)))
+        self.assertAlmostEqual(np.pi / 4 * 3, zenith((0, -1, 1)))
+
+    def test_azimuth(self):
+        self.assertAlmostEqual(0, azimuth((1, 0, 0)))
+        self.assertAlmostEqual(np.pi, azimuth((-1, 0, 0)))
+        self.assertAlmostEqual(np.pi / 2, azimuth((0, 1, 0)))
+        self.assertAlmostEqual(np.pi / 2 * 3, azimuth((0, -1, 0)))
+        self.assertAlmostEqual(np.pi / 2 * 3, azimuth((0, -1, 0)))
+        self.assertAlmostEqual(0, azimuth((0, 0, 0)))
 
     def test_angle_between(self):
         v1 = (1, 0, 0)
