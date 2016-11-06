@@ -1,8 +1,11 @@
 API Reference
 =============
 
+KM3Pipe: Main Framework
+-----------------------
+
 ``km3pipe.io``: Data Input / Output
------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: km3pipe.io
   :no-members:
@@ -30,7 +33,7 @@ API Reference
 
 
 ``km3pipe.dataclasses``: Internal Data Structures
--------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: km3pipe.dataclasses
   :no-members:
@@ -51,7 +54,7 @@ API Reference
 
 
 ``km3pipe.core``
-----------------
+~~~~~~~~~~~~~~~~
 
 .. automodule:: km3pipe.core
   :no-members:
@@ -72,7 +75,7 @@ API Reference
 
 
 ``km3pipe.hardware``
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: km3pipe.hardware
   :no-members:
@@ -88,7 +91,7 @@ API Reference
 
 
 ``km3pipe.logger``
-------------------
+~~~~~~~~~~~~~~~~~~
 
 .. automodule:: km3pipe.logger
   :no-members:
@@ -103,7 +106,7 @@ API Reference
 
 
 ``km3pipe.srv``
----------------
+~~~~~~~~~~~~~~~
 
 .. automodule:: km3pipe.srv
   :no-members:
@@ -118,7 +121,7 @@ API Reference
 
 
 ``km3pipe.tools``
------------------
+~~~~~~~~~~~~~~~~~
 
 .. automodule:: km3pipe.tools
   :no-members:
@@ -136,7 +139,7 @@ API Reference
 
 
 ``km3pipe.db``: Database Tools
-------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: km3pipe.db
   :no-members:
@@ -151,7 +154,7 @@ API Reference
 
 
 ``km3pipe.astro``: Astro Tools
-------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: km3pipe.astro
   :no-members:
@@ -164,3 +167,56 @@ API Reference
 
   to_frame
 
+
+``km3modules``: Modules to attach to the Pipeline
+-------------------------------------------------
+
+``km3modules``: Useful helper modules
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: km3modules
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3modules
+
+.. autosummary::
+  :toctree: api
+
+  Wrap
+  Dump
+  Delete
+  Keep
+  HitCounter
+  BlobIndexer
+  StatusBar
+  MemoryObserver
+
+``km3modules.hits``: Hit Processing Modules
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: km3modules.hits
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3modules.hits
+
+.. autosummary::
+  :toctree: api
+
+  HitStatistics
+  NDoms
+  HitSelector
+  FirstHits
+  TrimmedHits
+
+``km3modules.reco``: Simple Reconstructions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: km3modules.reco
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3modules.reco
+
+.. autosummary::
+  :toctree: api
+  
+  PrimFitter
