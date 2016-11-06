@@ -5,19 +5,34 @@ from km3pipe.dataclasses import ArrayTaco
 
 
 class PrimFitter(kp.Module):
+    """Primitive Linefit using Singular Value Decomposition.
+
+    Parameters
+    ----------
+    hit_sel: str, default='Hits'
+        Blob key of the hits to run the fit on.
+        This assumes the key exists. Ensure this via::
+
+            >>> pipe.attach(Module, only_if='MyBlobKey')
+    """
+    def __init__(self, **kwargs):
+        super(self.__class__, self).__init__(**kwargs)
+        self.hit_sel = self.get('hit_sel') or 'Hits'
+
     def process(self, blob):
         out = {}
 
         # has detector applied already
-        hits = blob['Hits'].serialise(to='pandas')
+        hits = blob[self.hit_sel].serialise(to='pandas')
         dus = np.unique(hits['dom_id'])
         n_dus = len(dus)
 
         if n_dus < 8:
             return
 
-        #fh = hits.drop_duplicates(subset='dom_id')
-        fh = hits.first_hits
+        # moved to HitSelector module
+        # fh = hits.drop_duplicates(subset='dom_id')
+        # fh = hits.first_hits
 
         pos = fh[['pos_x', 'pos_y', 'pos_z']]
         center = pos.mean(axis=0)
@@ -34,14 +49,6 @@ class PrimFitter(kp.Module):
             'dir_y': reco_dir[1],
             'dir_z': reco_dir[2],
         }
-
-        # muon = blob['MCTracks'].highest_energetic_muon
-        # blob['Muon'] = muon
-        # print("Incoming muon:      {0}".format(muon))
-        # reco_muon = kp.dataclasses.Track(reco_dir, 0, 0, reco_pos, 0, 0)
-        # print("Reconstructed muon: {0}".format(reco_muon))
-        # angular_diff = 180 * (angle_between(muon.dir, reco_muon.dir) / np.pi)
-        # print("Angular difference: {0}".format(angular_diff))
 
         blob['PrimFitter'] = ArrayTaco.from_dict(out, h5loc='/reco')
         return blob
