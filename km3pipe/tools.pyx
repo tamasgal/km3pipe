@@ -25,6 +25,7 @@ import re
 import warnings
 
 import numpy as np
+import scipy.linalg
 import pandas as pd
 import tables
 
@@ -106,9 +107,11 @@ def zenith(v):
 
 def azimuth(v):
     """Return the azimuth angle in radians"""
-    phi = np.arctan2(v[1], v[0])
-    if phi < 0:
-        phi += 2 * np.pi
+    v = np.atleast_2d(v)
+    phi = np.arctan2(v[:, 1], v[:, 0])
+    phi[phi < 0] += 2 * np.pi
+    if len(phi) == 1:
+        return phi[0]
     return phi
 
 
@@ -125,17 +128,27 @@ def angle_between(v1, v2):
     """
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
-    angle = np.arccos(np.dot(v1_u, v2_u))
+    # Don't use `np.dot`, does not work with all shapes
+    angle = np.arccos(np.inner(v1_u, v2_u))
     return angle
 
 
-def unit_vector(vector):
-    """ Returns the unit vector of the vector.  """
-    return np.array(vector) / np.linalg.norm(vector)
+def unit_vector(vector, **kwargs):
+    """Returns the unit vector of the vector."""
+    # This also works for a dataframe with columns ['x', 'y', 'z']
+    # However, the division operation is picky about the shapes
+    # So, remember input vector shape, cast all up to 2d,
+    # do the (ugly) conversion, then return unit in same shape as input
+    # of course, the numpy-ized version of the input...
+    vector = np.array(vector)
+    out_shape = vector.shape
+    vector = np.atleast_2d(vector)
+    unit = vector / scipy.linalg.norm(vector, axis=1, **kwargs)[:, None]
+    return unit.reshape(out_shape)
 
 def pld3(p1, p2, d2):
     """Calculate the point-line-distance for given point and line."""
-    return np.linalg.norm(np.cross(d2, p2 - p1)) / np.linalg.norm(d2)
+    return scipy.linalg.norm(np.cross(d2, p2 - p1)) / scipy.linalg.norm(d2)
 
 def com(points, masses=None):
     """Calculate center of mass for given points.

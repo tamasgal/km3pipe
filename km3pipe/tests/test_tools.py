@@ -25,6 +25,19 @@ __status__ = "Development"
 
 
 class TestTools(TestCase):
+    def setUp(self):
+        self.vecs = np.array([[0., 1., 5.],
+                              [1., 1., 4.],
+                              [2., 1., 3.],
+                              [3., 1., 2.],
+                              [4., 1., 1.]])
+        self.v = (1, 2, 3)
+        self.unit_v = np.array([ 0.26726124,  0.53452248,  0.80178373])
+        self.unit_vecs = np.array([[ 0.        ,  0.19611614,  0.98058068],
+                                  [ 0.23570226,  0.23570226,  0.94280904],
+                                  [ 0.53452248,  0.26726124,  0.80178373],
+                                  [ 0.80178373,  0.26726124,  0.53452248],
+                                  [ 0.94280904,  0.23570226,  0.23570226]])
 
     def test_unpack_nfirst(self):
         a_tuple = (1, 2, 3, 4, 5)
@@ -67,6 +80,7 @@ class TestTools(TestCase):
         self.assertEqual(2, node.left)
         self.assertEqual(3, node.right)
 
+
     def test_zenith(self):
         self.assertAlmostEqual(np.pi, zenith((0, 0, 1)))
         self.assertAlmostEqual(0, zenith((0, 0, -1)))
@@ -74,6 +88,10 @@ class TestTools(TestCase):
         self.assertAlmostEqual(np.pi / 2, zenith((0, -1, 0)))
         self.assertAlmostEqual(np.pi / 4 * 3, zenith((0, 1, 1)))
         self.assertAlmostEqual(np.pi / 4 * 3, zenith((0, -1, 1)))
+        self.assertAlmostEqual(zenith(self.v), 2.5010703409103687)
+        self.assertTrue(np.allclose(zenith(self.vecs),
+                                    np.array([2.94419709, 2.80175574, 2.50107034,
+                                              2.13473897, 1.80873745])))
 
     def test_azimuth(self):
         self.assertAlmostEqual(0, azimuth((1, 0, 0)))
@@ -82,6 +100,10 @@ class TestTools(TestCase):
         self.assertAlmostEqual(np.pi / 2 * 3, azimuth((0, -1, 0)))
         self.assertAlmostEqual(np.pi / 2 * 3, azimuth((0, -1, 0)))
         self.assertAlmostEqual(0, azimuth((0, 0, 0)))
+        self.assertAlmostEqual(azimuth(self.v), 1.10714872)
+        self.assertTrue(np.allclose(azimuth(self.vecs),
+                                    np.array([1.57079633, 0.78539816, 0.46364761,
+                                              0.32175055, 0.24497866])))
 
     def test_angle_between(self):
         v1 = (1, 0, 0)
@@ -90,6 +112,20 @@ class TestTools(TestCase):
         self.assertAlmostEqual(0, angle_between(v1, v1))
         self.assertAlmostEqual(np.pi/2, angle_between(v1, v2))
         self.assertAlmostEqual(np.pi, angle_between(v1, v3))
+        self.assertAlmostEqual(angle_between(self.v, v1), 1.3002465638163236)
+        self.assertAlmostEqual(angle_between(self.v, v2), 1.0068536854342678)
+        self.assertAlmostEqual(angle_between(self.v, v3), 1.8413460897734695)
+        self.assertTrue(np.allclose(angle_between(self.vecs, v1),
+                                    np.array([1.57079633, 1.3328552 , 1.00685369,
+                                              0.64052231, 0.33983691])))
+        self.assertTrue(np.allclose(angle_between(self.vecs, v2),
+                                    np.array([1.37340077, 1.3328552 , 1.30024656,
+                                              1.30024656, 1.3328552 ])))
+        self.assertTrue(np.allclose(angle_between(self.vecs, v3),
+                                    np.array([1.57079633, 1.80873745,
+                                              2.13473897, 2.50107034,
+                                              2.80175574])))
+
 
     def test_angle_between_returns_nan_for_zero_length_vectors(self):
         v1 = (0, 0, 0)
