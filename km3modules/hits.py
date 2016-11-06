@@ -3,16 +3,15 @@
 This module defines 2 base classes: HitStatistics (e.g. to count n_doms)
 and HitSelector (e.g. FirstHits).
 """
-
-import km3pipe as kp
 import numpy as np
 import pandas as pd     # noqa
 from scipy.stats import trimboth
 
 from km3pipe.dataclasses import HitSeries
+from km3pipe import Module
 
 
-class HitStatistics(kp.Module):
+class HitStatistics(Module):
     """Compute stuff on hits.
 
     Parameters
@@ -59,7 +58,7 @@ class NDoms(HitStatistics):
         return len(dus)
 
 
-class HitSelector(kp.Module):
+class HitSelector(Module):
     """Select hits according to a criterion.
 
     Defaults to ``return hits``.

@@ -2,13 +2,13 @@
 
 This module defines a base class, ``Reconstruction``.
 """
-import km3pipe as kp
 import numpy as np
 import pandas as pd     # noqa
+
 from km3pipe.dataclasses import ArrayTaco
+from km3pipe import Module
 
-
-class Reconstruction(kp.Module):
+class Reconstruction(Module):
     """Reconstruction base class.
 
     Parameters
