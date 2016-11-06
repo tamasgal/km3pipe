@@ -4,37 +4,57 @@ import pandas as pd     # noqa
 from km3pipe.dataclasses import ArrayTaco
 
 
-class PrimFitter(kp.Module):
+class Reconstruction(kp.Module):
+    """Reconstruction base class.
+
+    Parameters
+    ----------
+    hit_sel: str, default='Hits'
+        Blob key of the hits to run the fit on.
+    key_out: str, default='PrimFit'
+        Key to write into.
+    """
+
+    def __init__(self, **kwargs):
+        super(self.__class__, self).__init__(**kwargs)
+        self.hit_sel = self.get('hit_sel') or 'Hits'
+        self.key_out = self.get('key_out') or 'PrimFit'
+
+    def process(self, blob):
+        hits = blob[self.hit_sel].serialise(to='pandas')
+        reco = self.fit(hits)
+        if reco is not None:
+            blob[self.key_out] = ArrayTaco.from_dict(reco, h5loc='/reco')
+        return blob
+
+    def fit(self, hits):
+        return
+
+
+class PrimFitter(Reconstruction):
     """Primitive Linefit using Singular Value Decomposition.
 
     Parameters
     ----------
     hit_sel: str, default='Hits'
         Blob key of the hits to run the fit on.
-        This assumes the key exists. Ensure this via::
-
-            >>> pipe.attach(Module, only_if='MyBlobKey')
+    key_out: str, default='PrimFit'
+        Key to write into.
     """
     def __init__(self, **kwargs):
         super(self.__class__, self).__init__(**kwargs)
         self.hit_sel = self.get('hit_sel') or 'Hits'
+        self.key_out = self.get('key_out') or 'PrimFit'
 
-    def process(self, blob):
+    def fit(self, hits):
         out = {}
-
-        # has detector applied already
-        hits = blob[self.hit_sel].serialise(to='pandas')
         dus = np.unique(hits['dom_id'])
         n_dus = len(dus)
 
         if n_dus < 8:
             return
 
-        # moved to HitSelector module
-        # fh = hits.drop_duplicates(subset='dom_id')
-        # fh = hits.first_hits
-
-        pos = fh[['pos_x', 'pos_y', 'pos_z']]
+        pos = hits[['pos_x', 'pos_y', 'pos_z']]
         center = pos.mean(axis=0)
 
         _, _, v = np.linalg.svd(pos - center)
@@ -49,6 +69,4 @@ class PrimFitter(kp.Module):
             'dir_y': reco_dir[1],
             'dir_z': reco_dir[2],
         }
-
-        blob['PrimFitter'] = ArrayTaco.from_dict(out, h5loc='/reco')
-        return blob
+        return out
