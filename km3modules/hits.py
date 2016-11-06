@@ -12,7 +12,7 @@ from scipy.stats import trimboth
 from km3pipe.dataclasses import HitSeries
 
 
-class HitStatistics(kp.Module)
+class HitStatistics(kp.Module):
     """Compute stuff on hits.
 
     Parameters
@@ -57,6 +57,7 @@ class NDoms(HitStatistics):
     def compute(self, pd_hits):
         dus = np.unique(pd_hits['dom_id'])
         return len(dus)
+
 
 class HitSelector(kp.Module):
     """Select hits according to a criterion.
@@ -146,7 +147,7 @@ class TrimmedHits(HitSelector):
             n = len(pd_hits)
             idx = trimboth(range(n), self.trim)
             return pd_hits.iloc[idx]
-        if self.which in {'time', 'pos_z'}:
+        if self.which in {'time', 'pos_z'}:     # noqa
             lo = df.quantile(self.trim)[self.which]
             hi = df.quantile(1 - self.trim)[self.which]
             return pd_hits.query(
