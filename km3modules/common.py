@@ -42,17 +42,21 @@ class Dump(Module):
     ----------
     keys: collection(string), optional
         Keys to print.
+    all: bool, default=False
+        Print blob values too, not just the keys?
     """
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.keys = self.get('keys') or None
+        self.all = self.get('all') or False
 
     def process(self, blob):
         keys = sorted(blob.keys()) if self.keys is None else self.keys
         for key in keys:
             print(key, end=': ')
-            print(blob[key])
-            print('')
+            if self.all:
+                print(blob[key])
+                print('')
         print('----------------------------------------\n')
         return blob
 
