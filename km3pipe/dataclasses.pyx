@@ -523,6 +523,14 @@ cdef class Hit:
         self.tot = tot
         self.triggered = triggered
 
+    @property
+    def dir(self):
+        return np.array((self.dir_x, self.dir_y, self.dir_z))
+
+    @property
+    def pos(self):
+        return np.array((self.pos_x, self.pos_y, self.pos_z))
+
     def __str__(self):
         return "Hit: channel_id({0}), dom_id({1}), pmt_id({2}), tot({3}), " \
                "time({4}), triggered({5})" \
