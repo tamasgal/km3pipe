@@ -1,3 +1,7 @@
+"""Simple reconstruction algorithms.
+
+This module defines a base class, ``Reconstruction``.
+"""
 import km3pipe as kp
 import numpy as np
 import pandas as pd     # noqa
