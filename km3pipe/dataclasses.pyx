@@ -1526,6 +1526,23 @@ class ArrayTaco(object):
     def __str__(self):
         return "Array with dtype %s" % str(self.dtype)
 
+
+class KM3DataFrame(pd.DataFrame):
+    """Pandas Dataframe + metadata."""
+
+    # do not rename this!
+    # http://pandas.pydata.org/pandas-docs/stable/internals.html#define-original-properties
+    # this is preserved over df manipulations
+    _metadata = ['h5loc']
+
+    # default value
+    h5loc = '/'
+
+    @property
+    def _constructor(self):
+        return KM3DataFrame
+
+
 deserialise_map = {
     'McHits': HitSeries,
     'Hits': HitSeries,
