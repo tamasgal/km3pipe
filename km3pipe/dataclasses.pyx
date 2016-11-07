@@ -1528,7 +1528,22 @@ class ArrayTaco(object):
 
 
 class KM3DataFrame(pd.DataFrame):
-    """Pandas Dataframe + metadata."""
+    """Pandas Dataframe + metadata.
+
+    This class adds the following to ``pd.DataFrame``:
+
+    Attributes
+    ----------
+    h5loc: str, default='/'
+        HDF5 group where to write into.
+
+    Methods
+    -------
+    deserialise(data, h5loc='/', fmt='pandas')
+        Factory to init from data.
+    serialise(to='numpy')
+        Convert for storage.
+    """
 
     # do not rename this!
     # http://pandas.pydata.org/pandas-docs/stable/internals.html#define-original-properties

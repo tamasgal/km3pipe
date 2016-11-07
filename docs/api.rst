@@ -168,11 +168,11 @@ KM3Pipe: Main Framework
   to_frame
 
 
-``km3modules``: Modules to attach to the Pipeline
--------------------------------------------------
+KM3Modules: Pipeline Segments
+-----------------------------
 
-``km3modules``: Useful helper modules
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``km3modules``: Useful helpers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. automodule:: km3modules
   :no-members:
   :no-inherited-members:
@@ -191,8 +191,8 @@ KM3Pipe: Main Framework
   StatusBar
   MemoryObserver
 
-``km3modules.hits``: Hit Processing Modules
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``km3modules.hits``: Hit Processing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. automodule:: km3modules.hits
   :no-members:
   :no-inherited-members:

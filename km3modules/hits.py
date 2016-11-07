@@ -1,7 +1,6 @@
 """Hit processing classes.
 
-This module defines 2 base classes: HitStatistics (e.g. to count n_doms)
-and HitSelector (e.g. FirstHits).
+This module defines 2 base classes: ``HitStatistics`` and ``HitSelector``.
 """
 import numpy as np
 import pandas as pd     # noqa
