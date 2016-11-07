@@ -146,9 +146,11 @@ def unit_vector(vector, **kwargs):
     unit = vector / scipy.linalg.norm(vector, axis=1, **kwargs)[:, None]
     return unit.reshape(out_shape)
 
+
 def pld3(p1, p2, d2):
     """Calculate the point-line-distance for given point and line."""
     return scipy.linalg.norm(np.cross(d2, p2 - p1)) / scipy.linalg.norm(d2)
+
 
 def com(points, masses=None):
     """Calculate center of mass for given points.
@@ -157,6 +159,7 @@ def com(points, masses=None):
         return np.average(points, axis=0)
     else:
         return np.average(points, axis=0, weights=masses)
+
 
 def circ_permutation(items):
     """Calculate the circular permutation for a given list of items."""
@@ -195,30 +198,30 @@ def pdg2name(pdg_id):
     """Convert PDG ID to human readable names"""
     # pylint: disable=C0330
     conversion_table = {
-      11:    'e-',
-      -11:   'e+',
-      12:    'nu_e',
-      -12:   'anu_e',
-      13:    'mu-',
-      -13:   'mu+',
-      14:    'nu_mu',
-      -14:   'anu_mu',
-      15:    'tau-',
-      -15:   'tau+',
-      16:    'nu_tau',
-      -16:   'anu_tau',
-      22:    'photon',
-      111:   'pi0',
-      130:   'K0L',
-      211:   'pi-',
-      -211:  'pi+',
-      310:   'K0S',
-      311:   'K0',
-      321:   'K+',
-      -321:  'K-',
-      2112:  'n',
-      2212:  'p',
-      -2212: 'p-',
+        11: 'e-',
+        -11: 'e+',
+        12: 'nu_e',
+        -12: 'anu_e',
+        13: 'mu-',
+        -13: 'mu+',
+        14: 'nu_mu',
+        -14: 'anu_mu',
+        15: 'tau-',
+        -15: 'tau+',
+        16: 'nu_tau',
+        -16: 'anu_tau',
+        22: 'photon',
+        111: 'pi0',
+        130: 'K0L',
+        211: 'pi-',
+        -211: 'pi+',
+        310: 'K0S',
+        311: 'K0',
+        321: 'K+',
+        -321: 'K-',
+        2112: 'n',
+        2212: 'p',
+        -2212: 'p-',
     }
     try:
         return conversion_table[pdg_id]
@@ -441,14 +444,17 @@ try:
     dict.iteritems
 except AttributeError:
     # for Python 3
+
     def itervalues(d):
         return iter(d.values())
+
     def iteritems(d):
         return iter(d.items())
 else:
     # for Python 2
     def itervalues(d):
         return d.itervalues()
+
     def iteritems(d):
         return d.iteritems()
 
@@ -545,3 +551,27 @@ class deprecated(object):
         if olddoc:
             newdoc = "%s\n\n%s" % (newdoc, olddoc)
         return newdoc
+
+
+def add_empty_flow_bins(bins):
+    """Add empty over- and underflow bins.
+    """
+    bins = list(bins)
+    bins.insert(0, 0)
+    bins.append(0)
+    return np.array(bins)
+
+
+def flat_weights(x, bins):
+    """Get weights to produce a flat histogram.
+    """
+    bin_width = np.abs(bins[1] - bins[0])
+    hist, _ = np.histogram(x, bins=bins)
+    hist = hist.astype(float)
+    hist = add_empty_flow_bins(hist)
+    hist *= bin_width
+    which = np.digitize(x, bins=bins, right=True)
+    pop = hist[which]
+    wgt = 1 / pop
+    wgt *= len(wgt) / np.sum(wgt)
+    return wgt
