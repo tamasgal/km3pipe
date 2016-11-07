@@ -6,7 +6,9 @@ import numpy as np
 import pandas as pd     # noqa
 
 from km3pipe.dataclasses import ArrayTaco
+from km3pipe.tools import azimuth, zenith
 from km3pipe import Module
+
 
 class Reconstruction(Module):
     """Reconstruction base class.
@@ -72,5 +74,7 @@ class PrimFitter(Reconstruction):
             'dir_x': reco_dir[0],
             'dir_y': reco_dir[1],
             'dir_z': reco_dir[2],
+            'phi': azimuth(reco_dir),
+            'theta': zenith(reco_dir),
         }
         return out
