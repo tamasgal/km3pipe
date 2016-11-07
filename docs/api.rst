@@ -51,6 +51,7 @@ KM3Pipe: Main Framework
   Track
   TrackSeries
   ArrayTaco
+  KM3DataFrame
 
 
 ``km3pipe.core``
