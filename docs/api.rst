@@ -222,3 +222,22 @@ KM3Modules: Pipeline Segments
   
   Reconstruction
   PrimFitter
+
+``km3modules.feature_extraction``: Feature Extraction
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: km3modules.feature_extraction
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3modules.feature_extraction
+
+.. autosummary::
+  :toctree: api
+  
+  Trawler
+  TrawlerMod
+  TrackMuxer
+  bimod
+  uniform_chi2
+  idr
+  tensor_of_intertia

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # vim:set ts=4 sts=4 sw=4 et:
-"""Bruteforce Feature Extractor.
+"""Feature Extractors.
+
+TODO Clean this up & move funcs to main tools lib.
 """
 from __future__ import division, absolute_import, print_function
 
@@ -19,6 +21,7 @@ from km3pipe.dataclasses import ArrayTaco
 
 
 def bimod(skew, kurt, n, is_fisher=True):
+    """Test a distribution for bimodality."""
     if not is_fisher:
         kurt = kurt - 3
     return np.divide(
@@ -28,6 +31,7 @@ def bimod(skew, kurt, n, is_fisher=True):
 
 
 def uniform_chi2(x):
+    """Test a distribution for uniformity."""
     chi2, _ = chisquare(x, f_exp=None)
     return chi2
 
@@ -38,6 +42,10 @@ def idr(x, perc=10):
 
 
 def tensor_of_inertia(self, pos_x, pos_y, pos_z, weight=1):
+    """Tensor of Intertia.
+
+    Adapted from Thomas Heid' EventID (ROOT implementation).
+    """
     toi = np.zeros((3, 3), dtype=float)
     toi[0][0] += np.square(pos_y) * np.square(pos_z)
     toi[0][1] += (-1) * pos_x * pos_y
@@ -53,6 +61,12 @@ def tensor_of_inertia(self, pos_x, pos_y, pos_z, weight=1):
 
 
 class TrackMuxer(Module):
+    """Compare outputs of different fits.
+
+    Like, angular difference between 2 fit directions.
+
+    TODO, WORK IN PROGRESS
+    """
     __name__ = 'TrackMuxer'
 
     def __init__(self, **kwargs):
@@ -99,6 +113,12 @@ class TrackMuxer(Module):
 
 
 class TrawlerMod(Module):
+    """Compute summary statistics on hits.
+
+    Wrapper Module.
+
+    TODO Merge this.
+    """
     __name__ = 'Trawler'
 
     def __init__(self, **kwargs):
