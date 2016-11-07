@@ -1539,9 +1539,13 @@ class KM3DataFrame(pd.DataFrame):
     h5loc = '/'
 
     @classmethod
-    def deserialise(cls, data, event_id, h5loc='/', fmt='pandas'):
-        if fmt == 'numpy':
-            df = cls.from_records(data)
+    def deserialise(cls, data, event_id=None, h5loc='/', fmt='pandas'):
+        if fmt in {'numpy', 'pandas'}:
+            df = cls(data)
+            df.h5loc = h5loc
+            return df
+        if fmt == 'dict':
+            df = cls(data, index=[0])
             df.h5loc = h5loc
             return df
 

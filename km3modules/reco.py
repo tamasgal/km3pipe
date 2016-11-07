@@ -5,7 +5,7 @@ This module defines a base class, ``Reconstruction``.
 import numpy as np
 import pandas as pd     # noqa
 
-from km3pipe.dataclasses import ArrayTaco
+from km3pipe.dataclasses import ArrayTaco, KM3DataFrame     # noqa
 from km3pipe.tools import azimuth, zenith
 from km3pipe import Module
 
@@ -30,7 +30,8 @@ class Reconstruction(Module):
         hits = blob[self.hit_sel].serialise(to='pandas')
         reco = self.fit(hits)
         if reco is not None:
-            blob[self.key_out] = ArrayTaco.from_dict(reco, h5loc='/reco')
+            blob[self.key_out] = KM3DataFrame.deserialise(
+                reco, h5loc='/reco', fmt='dict')
         return blob
 
     def fit(self, hits):
