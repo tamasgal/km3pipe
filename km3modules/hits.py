@@ -88,7 +88,7 @@ class HitSelector(Module):
         """
         hits = hits.serialise(to='pandas')
         hits = self.select_hits(hits)
-        return HitSeries.from_table(hits)
+        return HitSeries.from_table(hits, event_id=None)
 
     def select_hits(self, pd_hits):
         """Defaults to nothing: ``return hits``."""

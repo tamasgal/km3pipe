@@ -828,6 +828,7 @@ class HitSeries(object):
             event_id,
         )
 
+    @classmethod
     def from_table(cls, table, event_id):
         if event_id is None:
             event_id = table[0]['event_id']
