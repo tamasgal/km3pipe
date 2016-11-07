@@ -20,7 +20,7 @@ class Reconstruction(Module):
     """
 
     def __init__(self, **kwargs):
-        super(self.__class__, self).__init__(**kwargs)
+        super(Reconstruction, self).__init__(**kwargs)
         self.hit_sel = self.get('hit_sel') or 'Hits'
         self.key_out = self.get('key_out') or 'PrimFit'
 
@@ -46,7 +46,7 @@ class PrimFitter(Reconstruction):
         Key to write into.
     """
     def __init__(self, **kwargs):
-        super(self.__class__, self).__init__(**kwargs)
+        super(PrimFitter, self).__init__(**kwargs)
         self.hit_sel = self.get('hit_sel') or 'Hits'
         self.key_out = self.get('key_out') or 'PrimFit'
 

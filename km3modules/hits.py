@@ -22,7 +22,7 @@ class HitStatistics(Module):
         Key to write into.
     """
     def __init__(self, **kwargs):
-        super(self.__class__, self).__init__(**kwargs)
+        super(HitStatistics, self).__init__(**kwargs)
         self.key_in = self.get('key_in') or 'Hits'
         self.key_out = self.get('key_out') or 'SelectedHits'
 
@@ -49,7 +49,7 @@ class NDoms(HitStatistics):
         Key to write into.
     """
     def __init__(self, **kwargs):
-        super(self.__class__, self).__init__(**kwargs)
+        super(NDoms, self).__init__(**kwargs)
         self.key_in = self.get('key_in') or 'Hits'
         self.key_out = self.get('key_out') or 'n_doms'
 
@@ -71,7 +71,7 @@ class HitSelector(Module):
         Key to write into.
     """
     def __init__(self, **kwargs):
-        super(self.__class__, self).__init__(**kwargs)
+        super(HitSelector, self).__init__(**kwargs)
         self.key_in = self.get('key_in') or 'Hits'
         self.key_out = self.get('key_out') or 'SelectedHits'
 
@@ -107,7 +107,7 @@ class FirstHits(HitSelector):
 
     """
     def __init__(self, **kwargs):
-        super(self.__class__, self).__init__(**kwargs)
+        super(FirstHits, self).__init__(**kwargs)
         self.key_in = self.get('key_in') or 'Hits'
         self.key_out = self.get('key_out') or 'FirstHits'
 
@@ -135,7 +135,7 @@ class TrimmedHits(HitSelector):
         Key to write into.
     """
     def __init__(self, **kwargs):
-        super(self.__class__, self).__init__(**kwargs)
+        super(TrimmedHits, self).__init__(**kwargs)
         self.which = self.get('which') or 'time'
         self.trim = self.get('trim') or 0.1
         self.key_in = self.get('key_in') or 'Hits'
