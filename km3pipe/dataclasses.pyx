@@ -1538,6 +1538,19 @@ class KM3DataFrame(pd.DataFrame):
     # default value
     h5loc = '/'
 
+    @classmethod
+    def deserialise(cls, data, event_id, h5loc='/', fmt='pandas'):
+        if fmt == 'numpy':
+            df = cls.from_records(data)
+            df.h5loc = h5loc
+            return df
+
+    def serialise(self, to='numpy'):
+        if to == 'numpy':
+            return self.to_records(index=False)
+        if to == 'pandas':
+            return self
+
     @property
     def _constructor(self):
         return KM3DataFrame

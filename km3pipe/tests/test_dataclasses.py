@@ -614,6 +614,7 @@ class TestKM3DataFrame(TestCase):
     def test_h5loc_is_preserved_along_trafo(self):
         arr = np.random.normal(size=24).reshape(-1, 3)
         df = KM3DataFrame(arr)
+        self.assertTrue(hasattr(df, 'h5loc'))
         self.assertEqual('/', df.h5loc)
         df.h5loc = '/reco'
         self.assertEqual('/reco', df.h5loc)
