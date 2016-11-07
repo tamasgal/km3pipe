@@ -42,7 +42,6 @@ IS_CC = {
 }
 
 
-
 class Serialisable(type):
     """A metaclass for serialisable classes.
 
@@ -110,7 +109,7 @@ class SummarysliceInfo(with_metaclass(Serialisable)):
     def __array__(self):
         return [(
             self.det_id, self.frame_index, self.run_id, self.slice_id,
-        ),]
+        ), ]
 
     def __str__(self):
         return "Summaryslice #{0}:\n" \
@@ -162,7 +161,7 @@ class TimesliceInfo(with_metaclass(Serialisable)):
     def __array__(self):
         return [(
             self.dom_id, self.frame_id, self.n_hits, self.slice_id,
-        ),]
+        ), ]
 
     def __str__(self):
         return "Timeslice frame:\n" \
@@ -224,7 +223,7 @@ class TimesliceFrameInfo(with_metaclass(Serialisable)):
             self.has_udp_trailer, self.high_rate_veto,
             self.max_sequence_number, self.n_packets, self.slice_id,
             self.utc_nanoseconds, self.utc_seconds, self.white_rabbit_status
-        ),]
+        ), ]
 
     def __str__(self):
         return "Timeslice frame:\n" \
@@ -288,7 +287,7 @@ class SummaryframeInfo(with_metaclass(Serialisable)):
             self.has_udp_trailer, self.high_rate_veto,
             self.max_sequence_number, self.n_packets, self.slice_id,
             self.utc_nanoseconds, self.utc_seconds, self.white_rabbit_status
-        ),]
+        ), ]
 
     def __str__(self):
         return "Summaryslice frame #{0}:\n" \
@@ -315,7 +314,7 @@ class EventInfo(object):
         ('mc_id', '<i4'),
         ('mc_t', '<f8'),
         ('overlays', '<u4'),
-        #('run_id', '<u4'),
+        # ('run_id', '<u4'),
         ('trigger_counter', '<u8'),
         ('trigger_mask', '<u8'),
         ('utc_nanoseconds', '<u8'),
@@ -331,6 +330,7 @@ class EventInfo(object):
         self.h5loc = h5loc
         for col in self.dtype.names:
             setattr(self, col, self._arr[col])
+
     @classmethod
     def from_row(cls, row):
         args = tuple((row[col] for col in cls.dtype.names))
@@ -362,10 +362,10 @@ class EventInfo(object):
                "    trigger counter: {8}\n" \
                "    trigger mask:    {9}" \
                .format(self.event_id, self.det_id,
-                       self.frame_index, self.utc_seconds, self.utc_nanoseconds,
-                       self.mc_id, self.mc_t, self.overlays,
-                       self.trigger_counter, self.trigger_mask
-                       #self.run_id,
+                       self.frame_index, self.utc_seconds,
+                       self.utc_nanoseconds, self.mc_id, self.mc_t,
+                       self.overlays, self.trigger_counter, self.trigger_mask,
+                       # self.run_id,
                        )
 
     def __repr__(self):
@@ -507,7 +507,7 @@ cdef class Hit:
                   int tot,
                   bint triggered,
                   int event_id=0        # ignore this!
-                 ):
+                  ):
         self.channel_id = channel_id
         self.dir_x = dir_x
         self.dir_y = dir_y
@@ -565,7 +565,7 @@ cdef class TimesliceHit:
                   int time,
                   int tot,
                   int frame_id=0        # ignore this!
-                 ):
+                  ):
         self.channel_id = channel_id
         self.dom_id = dom_id
         self.time = time
@@ -612,7 +612,7 @@ cdef class MCHit:
                   int time,
                   int tot,
                   bint triggered,
-                 ):
+                  ):
         self.channel_id = channel_id
         self.dom_id = dom_id
         self.id = id
@@ -705,7 +705,7 @@ class HitSeries(object):
         ('pos_x', '<f8'),
         ('pos_y', '<f8'),
         ('pos_z', '<f8'),
-        #('run_id', '<u4'),
+        # ('run_id', '<u4'),
         ('t0', '<i4'),
         ('time', '<i4'),
         ('tot', 'u1'),
@@ -723,16 +723,16 @@ class HitSeries(object):
         try:
             return cls(np.array([(
                 h.channel_id,
-                np.nan, #h.dir.x,
-                np.nan, #h.dir.y,
-                np.nan, #h.dir.z,
+                np.nan,     # h.dir.x,
+                np.nan,     # h.dir.y,
+                np.nan,     # h.dir.z,
                 h.dom_id,
                 h.id,
                 h.pmt_id,
-                np.nan, #h.pos.x,
-                np.nan, #h.pos.y,
-                np.nan, #h.pos.z,
-                0,      # t0
+                np.nan,     # h.pos.x,
+                np.nan,     # h.pos.y,
+                np.nan,     # h.pos.z,
+                0,          # t0
                 h.t,
                 h.tot,
                 h.trig,
@@ -742,22 +742,21 @@ class HitSeries(object):
             # Older aanet format.
             return cls(np.array([(
                 ord(h.channel_id),
-                np.nan, #h.dir.x,
-                np.nan, #h.dir.y,
-                np.nan, #h.dir.z,
+                np.nan,     # h.dir.x,
+                np.nan,     # h.dir.y,
+                np.nan,     # h.dir.z,
                 h.dom_id,
                 h.id,
                 h.pmt_id,
-                np.nan, #h.pos.x,
-                np.nan, #h.pos.y,
-                np.nan, #h.pos.z,
-                0,      # t0
+                np.nan,     # h.pos.x,
+                np.nan,     # h.pos.y,
+                np.nan,     # h.pos.z,
+                0,          # t0
                 h.t,
                 h.tot,
                 h.trig,
                 event_id,
             ) for h in hits], dtype=cls.dtype))
-
 
     @classmethod
     def from_evt(cls, hits, event_id):
@@ -879,7 +878,7 @@ class HitSeries(object):
 
     @property
     def triggered_hits(self):
-        return HitSeries(self._arr[self._arr['triggered'] == True])
+        return HitSeries(self._arr[self._arr['triggered'] is True])
 
     @property
     def first_hits(self):
@@ -991,6 +990,7 @@ class TimesliceHitSeries(object):
         ('time', '<i4'),
         ('tot', 'u1'),
     ])
+
     def __init__(self, arr, slice_id, frame_id):
         self._arr = arr
         self._index = 0
@@ -1007,7 +1007,8 @@ class TimesliceHitSeries(object):
         return "frame_{0}".format(self.frame_id)
 
     @classmethod
-    def from_arrays(cls, channel_ids, dom_ids, times, tots, slice_id, frame_id):
+    def from_arrays(cls, channel_ids, dom_ids, times, tots, slice_id,
+                    frame_id):
         len = channel_ids.shape[0]
         hits = np.empty(len, cls.dtype)
         hits['channel_id'] = channel_ids
@@ -1130,11 +1131,12 @@ class TrackSeries(object):
         ('pos_x', '<f8'),
         ('pos_y', '<f8'),
         ('pos_z', '<f8'),
-        #('run_id', '<u4'),
+        # ('run_id', '<u4'),
         ('time', '<i4'),
         ('type', '<i4'),
         ('event_id', '<u4'),
     ])
+
     def __init__(self, tracks, event_id):
         self._bjorkeny = None
         self._dir = None
@@ -1168,7 +1170,8 @@ class TrackSeries(object):
                           # the two vector elements might follow _different_
                           # conventions. Yep, 2 conventions for
                           # 2 vector elements...
-                          #geant2pdg(t.type))
+                          #
+                          # geant2pdg(t.type))
                           t.type,
                           )
                     for t in tracks], event_id)
@@ -1194,11 +1197,12 @@ class TrackSeries(object):
         directions = np.column_stack((directions_x, directions_y,
                                       directions_z))
         positions = np.column_stack((positions_x, positions_y,
-                                      positions_z))
+                                     positions_z))
         args = bjorkenys, directions, energies, \
             ids, interaction_channels, is_ccs, lengths, positions, \
             times, types
-        tracks = cls([Track(*track_args) for track_args in zip(*args)], event_id)
+        tracks = cls([Track(*track_args) for track_args in zip(*args)],
+                     event_id)
         tracks._bjorkeny = bjorkenys
         tracks._dir = zip(directions_x, directions_y, directions_z)
         tracks._energy = energies
@@ -1377,7 +1381,6 @@ class TrackSeries(object):
         return '\n'.join([str(track) for track in self._tracks])
 
 
-
 class SummaryframeSeries(object):
     """Collection of summary frames.
     """
@@ -1416,7 +1419,7 @@ class SummaryframeSeries(object):
     @classmethod
     def deserialise(cls, data, slice_id, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
-            #return cls.from_table(data, event_id)
+            # return cls.from_table(data, event_id)
             return cls(data)
 
     def serialise(self, to='numpy'):
@@ -1471,7 +1474,6 @@ class SummaryframeSeries(object):
         start, stop, step = index.indices(len(self))
         for i in range(start, stop, step):
             yield self._arr[i]
-
 
 
 class ArrayTaco(object):
