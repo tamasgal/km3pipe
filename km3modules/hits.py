@@ -67,13 +67,13 @@ class HitSelector(Module):
     ----------
     key_in: str, default='Hits'
         Key of the hits to select.
-    key_out: str, default='SelectedHits'
+    key_out: str, default='Hits'
         Key to write into.
     """
     def __init__(self, **kwargs):
         super(HitSelector, self).__init__(**kwargs)
         self.key_in = self.get('key_in') or 'Hits'
-        self.key_out = self.get('key_out') or 'SelectedHits'
+        self.key_out = self.get('key_out') or 'Hits'
 
     def process(self, blob):
         """Read Hits, call ``process_hits``, store result.
@@ -88,7 +88,7 @@ class HitSelector(Module):
         """
         hits = hits.serialise(to='pandas')
         hits = self.select_hits(hits)
-        return HitSeries.from_table(hits, event_id=None)
+        return HitSeries.deserialise(hits, fmt='pandas')
 
     def select_hits(self, pd_hits):
         """Defaults to nothing: ``return hits``."""
@@ -147,8 +147,8 @@ class TrimmedHits(HitSelector):
             idx = trimboth(range(n), self.trim)
             return pd_hits.iloc[idx]
         if self.which in {'time', 'pos_z'}:     # noqa
-            lo = df.quantile(self.trim)[self.which]
-            hi = df.quantile(1 - self.trim)[self.which]
+            lo = pd_hits.quantile(self.trim)[self.which]
+            hi = pd_hits.quantile(1 - self.trim)[self.which]
             return pd_hits.query(
                 '{l} < {w} and {w} <= {h}'.format(l=lo, h=hi, w=self.which))
         # if not matching anything above
