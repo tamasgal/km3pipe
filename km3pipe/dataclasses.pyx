@@ -850,9 +850,12 @@ class HitSeries(object):
         ) for row in table], dtype=cls.dtype), event_id)
 
     @classmethod
-    def deserialise(cls, data, event_id, fmt='numpy', h5loc='/'):
+    def deserialise(cls, data, event_id=None, fmt='numpy', h5loc='/'):
+        # what is event_id doing here?
         if fmt == 'numpy':
             return cls(data)
+        if fmt == 'pandas':
+            return cls(data.to_records(index=False))
 
     def serialise(self, to='numpy'):
         if to == 'numpy':
