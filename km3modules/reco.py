@@ -1,25 +1,67 @@
-import km3pipe as kp
+"""Simple reconstruction algorithms.
+
+This module defines a base class, ``Reconstruction``.
+"""
 import numpy as np
 import pandas as pd     # noqa
-from km3pipe.dataclasses import ArrayTaco
+
+from km3pipe.dataclasses import ArrayTaco, KM3DataFrame     # noqa
+from km3pipe.tools import azimuth, zenith
+from km3pipe import Module
 
 
-class PrimFitter(kp.Module):
+class Reconstruction(Module):
+    """Reconstruction base class.
+
+    Parameters
+    ----------
+    hit_sel: str, default='Hits'
+        Blob key of the hits to run the fit on.
+    key_out: str, default='PrimFit'
+        Key to write into.
+    """
+
+    def __init__(self, **kwargs):
+        super(Reconstruction, self).__init__(**kwargs)
+        self.hit_sel = self.get('hit_sel') or 'Hits'
+        self.key_out = self.get('key_out') or 'PrimFit'
+
     def process(self, blob):
-        out = {}
+        hits = blob[self.hit_sel].serialise(to='pandas')
+        reco = self.fit(hits)
+        if reco is not None:
+            blob[self.key_out] = KM3DataFrame.deserialise(
+                reco, h5loc='/reco', fmt='dict')
+        return blob
 
-        # has detector applied already
-        hits = blob['Hits'].serialise(to='pandas')
+    def fit(self, hits):
+        return
+
+
+class PrimFitter(Reconstruction):
+    """Primitive Linefit using Singular Value Decomposition.
+
+    Parameters
+    ----------
+    hit_sel: str, default='Hits'
+        Blob key of the hits to run the fit on.
+    key_out: str, default='PrimFit'
+        Key to write into.
+    """
+    def __init__(self, **kwargs):
+        super(PrimFitter, self).__init__(**kwargs)
+        self.hit_sel = self.get('hit_sel') or 'Hits'
+        self.key_out = self.get('key_out') or 'PrimFit'
+
+    def fit(self, hits):
+        out = {}
         dus = np.unique(hits['dom_id'])
         n_dus = len(dus)
 
         if n_dus < 8:
             return
 
-        #fh = hits.drop_duplicates(subset='dom_id')
-        fh = hits.first_hits
-
-        pos = fh[['pos_x', 'pos_y', 'pos_z']]
+        pos = hits[['pos_x', 'pos_y', 'pos_z']]
         center = pos.mean(axis=0)
 
         _, _, v = np.linalg.svd(pos - center)
@@ -33,15 +75,7 @@ class PrimFitter(kp.Module):
             'dir_x': reco_dir[0],
             'dir_y': reco_dir[1],
             'dir_z': reco_dir[2],
+            'phi': azimuth(reco_dir),
+            'theta': zenith(reco_dir),
         }
-
-        # muon = blob['MCTracks'].highest_energetic_muon
-        # blob['Muon'] = muon
-        # print("Incoming muon:      {0}".format(muon))
-        # reco_muon = kp.dataclasses.Track(reco_dir, 0, 0, reco_pos, 0, 0)
-        # print("Reconstructed muon: {0}".format(reco_muon))
-        # angular_diff = 180 * (angle_between(muon.dir, reco_muon.dir) / np.pi)
-        # print("Angular difference: {0}".format(angular_diff))
-
-        blob['PrimFitter'] = ArrayTaco.from_dict(out, h5loc='/reco')
-        return blob
+        return out

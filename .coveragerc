@@ -5,6 +5,7 @@ plugins = Cython.Coverage
 [report]
 include =
     km3pipe/*
+    km3modules/*
 omit =
     */tests/*
     */*/tests/*

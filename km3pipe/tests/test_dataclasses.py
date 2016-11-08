@@ -19,7 +19,7 @@ from km3pipe.dataclasses import (Hit, Track, Position, Direction_,
                                  HitSeries, TimesliceHitSeries,
                                  EventInfo, SummarysliceInfo, TimesliceInfo,
                                  Serialisable, TrackSeries, SummaryframeSeries,
-                                 ArrayTaco)
+                                 ArrayTaco, KM3DataFrame)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -268,23 +268,23 @@ class TestHitSeries(TestCase):
                               tuple(hit_series.id))
         self.assertTupleEqual(
             (4, 18, 32, 46, 60, 74, 88, 102, 116, 130),
-                              tuple(hit_series.dom_id))
+            tuple(hit_series.dom_id))
         self.assertTupleEqual(
             (6, 20, 34, 48, 62, 76, 90, 104, 118, 132),
-                              tuple(hit_series.pmt_id))
+            tuple(hit_series.pmt_id))
         self.assertTupleEqual(
             (0, 14, 28, 42, 56, 70, 84, 98, 112, 126),
-                              tuple(hit_series.channel_id))
+            tuple(hit_series.channel_id))
         self.assertTupleEqual(
             (11, 25, 39, 53, 67, 81, 95, 109, 123, 137),
-                              tuple(hit_series.time))
+            tuple(hit_series.time))
         self.assertTupleEqual(
             (True, True, True, True, True, True, True, True,
-                               True, True),
-                              tuple(hit_series.triggered))
+             True, True),
+            tuple(hit_series.triggered))
         self.assertTupleEqual(
             (12, 26, 40, 54, 68, 82, 96, 110, 124, 138),
-                              tuple(hit_series.tot))
+            tuple(hit_series.tot))
 
     def test_from_evt(self):
         n_params = 4
@@ -331,6 +331,7 @@ class TestHitSeries(TestCase):
         n_fh = len(self.hits.first_hits)
         n_unique = len(np.unique(self.hits.dom_id))
         self.assertEqual(n_fh, n_unique)
+
 
 class TestHit(TestCase):
 
@@ -587,7 +588,8 @@ class TestEventInfo(TestCase):
 
 class TestWrapper(TestCase):
     def test_wrapper(self):
-        dt = np.dtype(sorted([('x', int), ('y', float), ('did_converge', bool)]))
+        dt = np.dtype(sorted([('x', int), ('y', float),
+                              ('did_converge', bool)]))
         dat = {'x': 4, 'y': 2.0, 'did_converge': True}
         rec = ArrayTaco.from_dict(dat, dtype=dt)
         print(rec)
@@ -597,7 +599,8 @@ class TestWrapper(TestCase):
         self.assertAlmostEqual(rec['x'], 4)
 
     def test_wrapper_serialise(self):
-        dt = np.dtype(sorted([('x', int), ('y', float), ('did_converge', bool)]))
+        dt = np.dtype(sorted([('x', int), ('y', float),
+                              ('did_converge', bool)]))
         dat = {'x': 4, 'y': 2.0, 'did_converge': True}
         rec = ArrayTaco.from_dict(dat, dtype=dt).serialise()
         print(rec)
@@ -605,3 +608,14 @@ class TestWrapper(TestCase):
         self.assertTrue(rec[0][0])
         self.assertAlmostEqual(rec[0][1], 4)
         self.assertAlmostEqual(rec[0][2], 2.0)
+
+
+class TestKM3DataFrame(TestCase):
+    def test_h5loc_is_preserved_along_trafo(self):
+        arr = np.random.normal(size=24).reshape(-1, 3)
+        df = KM3DataFrame(arr)
+        self.assertTrue(hasattr(df, 'h5loc'))
+        self.assertEqual('/', df.h5loc)
+        df.h5loc = '/reco'
+        self.assertEqual('/reco', df.h5loc)
+        self.assertEqual('/reco', df[[0, 1]].h5loc)

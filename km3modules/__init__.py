@@ -5,5 +5,5 @@
 A collection of commonly used modules.
 
 """
-from km3modules.common import (Dump, Delete, HitCounter, BlobIndexer,
+from km3modules.common import (Dump, Delete, HitCounter, BlobIndexer, Keep,
                                StatusBar, MemoryObserver, Wrap)
