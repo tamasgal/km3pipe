@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 
+5.4 / 2016-11-08
+~~~~~~~~~~~~~~~~
+* Add a bunch of useful km3modules
+
 5.3.3 / 2016-11-04
 ~~~~~~~~~~~~~~~~~~
 * Fix time calib application
