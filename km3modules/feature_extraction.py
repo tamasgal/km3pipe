@@ -139,6 +139,10 @@ class Trawler():
     """
     def __call__(self, hits):
         out = {}
+
+        # time has arbitrary offset, so center it.
+        hits['time'] -= np.median(hits['time'])
+
         n_hits = len(hits)
         out['n_hits'] = n_hits
         r2 = np.sqrt(
