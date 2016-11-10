@@ -7,8 +7,8 @@ Astro utils.
 """
 from __future__ import division, absolute_import, print_function
 
-
-from astropy.units import degree
+import numpy as np
+from astropy.units import degree, rad
 from astropy.coordinates import (Latitude, Longitude,
                                  EarthLocation, AltAz, SkyCoord)
 
@@ -30,7 +30,7 @@ orca_loc = EarthLocation.from_geodetic(
 )
 
 
-def to_frame(times, zeniths, azimuths, frame='galactic'):
+def to_frame(time, zenith, azimuth, frame='galactic', unit=rad):
     """Tranform from the Detector frame to anything else.
 
     Parameters:
@@ -39,8 +39,8 @@ def to_frame(times, zeniths, azimuths, frame='galactic'):
         The reference frame to transform to (needs to be known to astropy)
 
     """
-    zeniths *= degree
-    azimuths *= degree
-    orca_frame = AltAz(location=orca_loc, obstime=times)
-    coords = SkyCoord(zeniths, azimuths, frame=orca_frame)
+    altitude = (0.5*np.pi - zenith) * unit
+    azimuth *= unit
+    orca_frame = AltAz(location=orca_loc, obstime=time)
+    coords = SkyCoord(altitude, azimuth, frame=orca_frame)
     return coords.transform_to(frame)
