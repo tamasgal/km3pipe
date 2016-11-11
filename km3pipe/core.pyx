@@ -303,6 +303,14 @@ class Module(object):
         """Return the value of the requested parameter"""
         return self.parameters.get(name)
 
+    def require(self, name):
+        """Return the value of the requested parameter or raise an error."""
+        value = self.get(name)
+        if value is None:
+            raise TypeError("{0} requires the parameter '{1}'."
+                            .format(self.__class__, name))
+        return value
+
     def process(self, blob):  # pylint: disable=R0201
         """Knead the blob and return it"""
         return blob
