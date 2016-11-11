@@ -164,7 +164,7 @@ class HDF5Pump(Pump):
         """
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
-        self.filename = self.get('filename')
+        self.filename = self.require('filename')
         if os.path.isfile(self.filename):
             self.h5_file = tb.File(self.filename)
             if not self.get("skip_version_check"):
