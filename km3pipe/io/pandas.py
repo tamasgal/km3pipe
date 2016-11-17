@@ -119,7 +119,7 @@ class H5Chain(object):
                 store[groupname].append(arr)
 
         for key, dfs in sorted(store.items()):
-            store[key] = pd.concat(dfs, axis=0)
+            store[key] = pd.concat(dfs, axis=0, ignore_index=True)
         return store
 
 
@@ -174,3 +174,11 @@ def write_table(array, h5file, where):
                         filters=filt)
     if own_h5:
         h5file.close()
+
+
+def first_mc_tracks(mc_tracks, mupage=False):
+    mc_tracks = pd.DataFrame(mc_tracks)
+    if mupage:
+        mc_tracks = mc_tracks[mc_tracks.type != 0]
+        mc_tracks = mc_tracks[mc_tracks.id == 1]
+    return mc_tracks.drop_duplicates(subset='event_id')

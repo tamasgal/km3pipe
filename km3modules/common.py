@@ -9,7 +9,7 @@ from __future__ import division, absolute_import, print_function
 
 import numpy as np
 
-from km3pipe import Module
+from km3pipe import Module, SkipEvent
 from km3pipe.tools import peak_memory_usage
 from km3pipe.dataclasses import ArrayTaco     # noqa
 
@@ -145,3 +145,21 @@ class MemoryObserver(Module):
     def process(self, blob):
         memory = peak_memory_usage()
         print("Memory peak usage: {0:.3f} MB".format(memory))
+
+
+class Cut(Module):
+    """Drop an event from the pipe if certain criteria are met.
+
+    This is handled by the ``km3pipe.core.SkipException``.
+    """
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.key = self.get('key')
+        self.cond = self.get('condition')
+
+    def process(self, blob):
+        df = blob[self.key].serialise(fmt='pandas')
+        ok = df.eval(self.cond).all()
+        if not ok:
+            raise SkipEvent
+        return blob
