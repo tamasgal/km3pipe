@@ -83,6 +83,8 @@ setup(name='km3pipe',
           'mock',
           'websocket-client',
           'astropy',
+          'statsmodels',
+          'scipy=>0.18',
       ],
       extra_require={
           'scikit-learn': ['sklearn'],
