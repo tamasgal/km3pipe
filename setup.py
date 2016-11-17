@@ -84,7 +84,7 @@ setup(name='km3pipe',
           'websocket-client',
           'astropy',
           'statsmodels',
-          'scipy=>0.18',
+          'scipy>=0.18',
       ],
       extra_require={
           'scikit-learn': ['sklearn'],
