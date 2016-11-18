@@ -158,7 +158,7 @@ class Cut(Module):
         self.cond = self.get('condition')
 
     def process(self, blob):
-        df = blob[self.key].serialise(fmt='pandas')
+        df = blob[self.key].serialise(to='pandas')
         ok = df.eval(self.cond).all()
         if not ok:
             raise SkipEvent
