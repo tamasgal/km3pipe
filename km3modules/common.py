@@ -55,7 +55,7 @@ class Dump(Module):
         for key in keys:
             print(key, end=': ')
             if self.all:
-                print(blob[key])
+                print(blob[key].__repr__())
                 print('')
         print('----------------------------------------\n')
         return blob
@@ -158,12 +158,11 @@ class Cut(Module):
         self.cond = self.get('condition')
 
     def process(self, blob):
-        h5loc = blob[self.key].h5loc
-        df = blob[self.key].serialise(to='pandas')
+        df = blob[self.key]
         ok = df.eval(self.cond).all()
         if not ok:
             raise SkipEvent
-        df[self.key] = df.deserialise()
+        df[self.key] = df
         return blob
 
 
@@ -174,7 +173,7 @@ class GetAngle(Module):
         self.key = self.get('key')
 
     def process(self, blob):
-        df = blob[self.key].serialise(to='pandas')
+        df = blob[self.key].conv_to(to='pandas')
         df['zenith'] = zenith(df['dir_x'], df['dir_y'], df['dir_z'])
         df['azimuth'] = azimuth(df['dir_x'], df['dir_y'], df['dir_z'])
         return blob
