@@ -36,27 +36,25 @@ class Wrap(Module):
 class Dump(Module):
     """Print the content of the blob.
 
-    If no argument is specified, dump everything.
-
     Parameters
     ----------
-    keys: collection(string), optional
-        Keys to print.
-    all: bool, default=False
+    keys: collection(string), optional [default=None]
+        Keys to print. If None, print all keys.
+    full: bool, default=False
         Print blob values too, not just the keys?
     """
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.keys = self.get('keys') or None
-        self.all = self.get('all') or False
+        self.full = self.get('full') or False
 
     def process(self, blob):
         keys = sorted(blob.keys()) if self.keys is None else self.keys
         for key in keys:
-            print(key, end=': ')
-            if self.all:
+            print(key + ':')
+            if self.full:
                 print(blob[key].__repr__())
-                print('')
+            print('')
         print('----------------------------------------\n')
         return blob
 
