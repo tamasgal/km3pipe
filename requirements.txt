@@ -1,7 +1,7 @@
 docopt
 controlhost
 urwid
-numpy
+numpy==1.11.2
 ipython
 pandas
 cython
@@ -12,7 +12,7 @@ sphinx>=1.4
 sphinx-gallery
 numpydoc
 pillow
-matplotlib>=2.0.0b4
+matplotlib==2.0.0b4
 seaborn
 astropy
 scikit-learn
