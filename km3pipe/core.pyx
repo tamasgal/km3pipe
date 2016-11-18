@@ -255,29 +255,19 @@ class Pipeline(object):
         for module in self.modules:
             if not module.timeit and not self.timeit:
                 continue
-            try:
-                finish_time = self._timeit[module]['finish']
-                finish_time_cpu = self._timeit[module]['finish_cpu']
-                process_times = self._timeit[module]['process']
-                process_times_cpu = self._timeit[module]['process_cpu']
-                print(module.name +
-                    " - process: {0:.3f}s (CPU {1:.3f}s)"
-                    " - finish: {2:.3f}s (CPU {3:.3f}s)"
-                    .format(sum(process_times), sum(process_times_cpu),
-                            finish_time, finish_time_cpu))
-                if len(process_times) > 0:
-                    print(statsf('wall', calc_stats(process_times)))
-                if len(process_times_cpu) > 0:
-                    print(statsf('CPU ', calc_stats(process_times_cpu)))
-            except SkipEvent:
-                log.debug("Event is removed. Skipping further steps...")
-                continue
-
-
-class SkipEvent(Exception):
-    """Raise this if an event shall not be passed further down the pipe.
-    """
-    pass
+            finish_time = self._timeit[module]['finish']
+            finish_time_cpu = self._timeit[module]['finish_cpu']
+            process_times = self._timeit[module]['process']
+            process_times_cpu = self._timeit[module]['process_cpu']
+            print(module.name +
+                " - process: {0:.3f}s (CPU {1:.3f}s)"
+                " - finish: {2:.3f}s (CPU {3:.3f}s)"
+                .format(sum(process_times), sum(process_times_cpu),
+                        finish_time, finish_time_cpu))
+            if len(process_times) > 0:
+                print(statsf('wall', calc_stats(process_times)))
+            if len(process_times_cpu) > 0:
+                print(statsf('CPU ', calc_stats(process_times_cpu)))
 
 
 class Module(object):

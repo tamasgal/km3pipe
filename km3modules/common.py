@@ -162,7 +162,7 @@ class Cut(Module):
         ok = df.eval(self.cond).all()
         if not ok:
             return
-        df[self.key] = df
+        blob[self.key] = df
         return blob
 
 
