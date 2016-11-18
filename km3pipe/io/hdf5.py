@@ -220,7 +220,7 @@ class HDF5Pump(Pump):
             except KeyError:
                 dc = KM3Array
             arr = tab.read_where('event_id == %d' % event_id)
-            blob[tabname] = dc.deserialise(arr, h5loc=loc, event_id=event_id)
+            blob[tabname] = dc.deserialise(arr, event_id=event_id)
         return blob
 
     def finish(self):
