@@ -9,7 +9,7 @@ from __future__ import division, absolute_import, print_function
 
 import numpy as np
 
-from km3pipe import Module, SkipEvent
+from km3pipe import Module
 from km3pipe.tools import peak_memory_usage, zenith, azimuth
 from km3pipe.dataclasses import KM3DataFrame, KM3Array     # noqa
 
@@ -158,10 +158,10 @@ class Cut(Module):
         self.cond = self.get('condition')
 
     def process(self, blob):
-        df = blob[self.key]
+        df = blob[self.key].conv_to(to='pandas')
         ok = df.eval(self.cond).all()
         if not ok:
-            raise SkipEvent
+            return
         df[self.key] = df
         return blob
 
@@ -174,6 +174,7 @@ class GetAngle(Module):
 
     def process(self, blob):
         df = blob[self.key].conv_to(to='pandas')
-        df['zenith'] = zenith(df['dir_x'], df['dir_y'], df['dir_z'])
-        df['azimuth'] = azimuth(df['dir_x'], df['dir_y'], df['dir_z'])
+        df['zenith'] = zenith(df[['dir_x', 'dir_y', 'dir_z']])
+        df['azimuth'] = azimuth(df[['dir_x', 'dir_y', 'dir_z']])
+        blob[self.key] = df
         return blob
