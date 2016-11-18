@@ -158,7 +158,7 @@ class Cut(Module):
         self.cond = self.get('condition')
 
     def process(self, blob):
-        h5loc = blob[selk.key].h5loc
+        h5loc = blob[self.key].h5loc
         df = blob[self.key].serialise(to='pandas')
         ok = df.eval(self.cond).all()
         if not ok:
