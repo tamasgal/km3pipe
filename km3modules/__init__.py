@@ -6,6 +6,6 @@ A collection of commonly used modules.
 
 """
 from km3modules.common import (Dump, Delete, HitCounter, BlobIndexer, Keep,
-                               StatusBar, MemoryObserver, Wrap)
+                               StatusBar, MemoryObserver, Wrap, Cut)
 from km3modules.reco import SvdFit as PrimFit
 from km3modules.reco import SvdFit
