@@ -50,7 +50,7 @@ KM3Pipe: Main Framework
   HitSeries
   Track
   TrackSeries
-  ArrayTaco
+  KM3Array
   KM3DataFrame
 
 

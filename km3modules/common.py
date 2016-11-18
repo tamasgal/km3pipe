@@ -10,8 +10,8 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 
 from km3pipe import Module, SkipEvent
-from km3pipe.tools import peak_memory_usage
-from km3pipe.dataclasses import ArrayTaco     # noqa
+from km3pipe.tools import peak_memory_usage, zenith, azimuth
+from km3pipe.dataclasses import KM3DataFrame, KM3Array     # noqa
 
 
 class Wrap(Module):
@@ -28,7 +28,7 @@ class Wrap(Module):
             if dat is None:
                 continue
             dt = np.dtype([(f, float) for f in sorted(dat.keys())])
-            arr = ArrayTaco.from_dict(dat, dt)
+            arr = KM3Array.from_dict(dat, dt)
             blob[key] = arr
         return blob
 
@@ -158,8 +158,23 @@ class Cut(Module):
         self.cond = self.get('condition')
 
     def process(self, blob):
+        h5loc = blob[selk.key].h5loc
         df = blob[self.key].serialise(to='pandas')
         ok = df.eval(self.cond).all()
         if not ok:
             raise SkipEvent
+        df[self.key] = df.deserialise()
+        return blob
+
+
+class GetAngle(Module):
+    """Convert pos(x, y, z) to zenith, azimuth."""
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.key = self.get('key')
+
+    def process(self, blob):
+        df = blob[self.key].serialise(to='pandas')
+        df['zenith'] = zenith(df['dir_x'], df['dir_y'], df['dir_z'])
+        df['azimuth'] = azimuth(df['dir_x'], df['dir_y'], df['dir_z'])
         return blob

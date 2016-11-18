@@ -20,7 +20,7 @@ from rootpy.tree import Tree, TreeModel, FloatCol, IntCol
 
 import km3pipe as kp
 from km3pipe import Pump, Module
-from km3pipe.dataclasses import ArrayTaco, deserialise_map
+from km3pipe.dataclasses import KM3Array, deserialise_map
 from km3pipe.logger import logging
 from km3pipe.tools import camelise, decamelise, insert_prefix_to_dtype, split
 

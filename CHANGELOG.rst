@@ -1,6 +1,11 @@
 Unreleased changes
 ------------------
 
+5.5 / 2016-11-18
+~~~~~~~~~~~~~~~~
+* New ``KM3DataFrame + KM3Array`` dataclasses, np/pandas subclasses + metadata
+* replaced ``ArrayTaco`` with ``KM3Array``
+
 5.4 / 2016-11-08
 ~~~~~~~~~~~~~~~~
 * Add a bunch of useful km3modules

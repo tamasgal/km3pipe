@@ -15,7 +15,7 @@ import tables as tb
 
 import km3pipe as kp
 from km3pipe import Pump, Module
-from km3pipe.dataclasses import ArrayTaco, deserialise_map
+from km3pipe.dataclasses import KM3Array, deserialise_map
 from km3pipe.logger import logging
 from km3pipe.tools import camelise, decamelise, split
 
@@ -218,7 +218,7 @@ class HDF5Pump(Pump):
             try:
                 dc = deserialise_map[tabname]
             except KeyError:
-                dc = ArrayTaco
+                dc = KM3Array
             arr = tab.read_where('event_id == %d' % event_id)
             blob[tabname] = dc.deserialise(arr, h5loc=loc, event_id=event_id)
         return blob

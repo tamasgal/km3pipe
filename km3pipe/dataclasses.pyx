@@ -1539,32 +1539,55 @@ class SummaryframeSeries(object):
             yield self._arr[i]
 
 
-class ArrayTaco(object):
-    """Wrapper around Numpy arrays.
+class KM3Array(np.ndarray):
+    """Numpy NDarray + metadata.
 
-    Parameters
+    This class adds the following to ``np.ndarray``:
+
+    Attributes
     ----------
-    arr: np.array
-        (Structured) numpy array to store.
+    h5loc: str, default='/'
+        HDF5 group where to write into.
 
-    h5loc: str, optional [default='/']
-        HDF5 Group to store table. (The table name is the blob key).
+    Methods
+    -------
+    deserialise(data, h5loc='/', fmt='pandas')
+        Factory to init from data.
+    serialise(to='numpy')
+        Convert for storage.
     """
+
+    def __new__(cls, arr, h5loc='/'):
+        obj = np.asarray(arr).view(cls)
+        obj.h5loc = h5loc
+        return obj
 
     def __init__(self, arr, h5loc='/'):
         self.array = arr
         self.h5loc = h5loc
 
+    def __array_finalize__(self, obj):
+        if obj is None:
+            return
+        self.h5loc = getattr(obj, 'h5loc', None)
+
     @classmethod
-    def deserialise(cls, data, event_id, h5loc='/', fmt='numpy'):
+    def deserialise(cls, *args, **kwargs):
+        return cls.conv_from(*args, **kwargs)
+
+    def serialise(self, *args, **kwargs):
+        return self.conv_to(*args, **kwargs)
+
+    @classmethod
+    def conv_from(cls, data, event_id, h5loc='/', fmt='numpy'):
         if fmt == 'numpy':
             return cls(data, h5loc)
 
-    def serialise(self, to='numpy'):
+    def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return self.array
+            return self
         if to == 'pandas':
-            return pd.DataFrame.from_records(self.serialise(to='numpy'))
+            return KM3DataFrame.conv_from(self, fmt='numpy')
 
     @classmethod
     def from_dict(cls, map, dtype=None, **kwargs):
@@ -1572,22 +1595,6 @@ class ArrayTaco(object):
             dtype = np.dtype([(key, float) for key in sorted(map.keys())])
         return cls(np.array([tuple((map[key] for key in dtype.names))],
                             dtype=dtype), **kwargs)
-
-    @property
-    def dtype(self):
-        return self.array.dtype
-
-    def __len__(self):
-        return len(self.array)
-
-    def __getitem__(self, item):
-        return self.array[item]
-
-    def __repr__(self):
-        return self.__str__()
-
-    def __str__(self):
-        return "Array with dtype %s" % str(self.dtype)
 
 
 class KM3DataFrame(pd.DataFrame):
@@ -1624,7 +1631,7 @@ class KM3DataFrame(pd.DataFrame):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_to(cls, data, event_id=None, h5loc='/', fmt='pandas'):
+    def conv_from(cls, data, event_id=None, h5loc='/', fmt='pandas'):
         if fmt in {'numpy', 'pandas'}:
             df = cls(data)
             df.h5loc = h5loc

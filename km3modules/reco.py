@@ -16,7 +16,7 @@ from scipy.stats import (
 from statsmodels.robust.scale import mad
 
 from km3pipe import Module
-from km3pipe.dataclasses import ArrayTaco, KM3DataFrame     # noqa
+from km3pipe.dataclasses import KM3Array, KM3DataFrame     # noqa
 from km3pipe.tools import azimuth, zenith, dist, unit_vector
 from km3pipe import Module
 
