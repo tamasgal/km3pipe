@@ -1,5 +1,8 @@
 Unreleased changes
 ------------------
+* Cuckoo now can be called directly
+* CHPump uses Cuckoo for log.warn to avoid spamming in case of
+  high network traffic
 
 5.5 / 2016-11-18
 ~~~~~~~~~~~~~~~~
