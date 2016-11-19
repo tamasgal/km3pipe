@@ -9,6 +9,7 @@ Pump for the jpp file read through aanet interface.
 from __future__ import division, absolute_import, print_function
 
 from km3pipe import Pump
+from km3pipe.tools import Cuckoo
 from km3pipe.logger import logging
 import threading
 import struct
@@ -42,6 +43,7 @@ class CHPump(Pump):
         self.max_queue = self.get('max_queue') or 50
         self.key_for_data = self.get('key_for_data') or 'CHData'
         self.key_for_prefix = self.get('key_for_prefix') or 'CHPrefix'
+        self.cuckoo_warn = Cuckoo(60*5, log.warn)
 
         self.loop_cycle = 0
         self.queue = Queue()
@@ -78,8 +80,9 @@ class CHPump(Pump):
     def _run(self):
         log.debug("Entering the main loop.")
         while True:
+            current_qsize = self.queue.qsize()
             log.info("----- New loop cycle #{0}".format(self.loop_cycle))
-            log.info("Current queue size: {0}".format(self.queue.qsize()))
+            log.info("Current queue size: {0}".format(current_qsize))
             self.loop_cycle += 1
             try:
                 log.debug("Waiting for data from network...")
@@ -98,9 +101,9 @@ class CHPump(Pump):
                 except socket.error:
                     log.error("Failed to connect to host.")
                 continue
-            if self.queue.qsize() > self.max_queue:
-                log.warn("Maximum queue size ({0}) reached, dropping data."
-                         .format(self.max_queue))
+            if current_qsize > self.max_queue:
+                self.cuckoo_warn.msg("Maximum queue size ({0}) reached, "
+                                     "dropping data.".format(self.max_queue))
             else:
                 log.debug("Filling data into queue.")
                 self.queue.put((prefix, data))
