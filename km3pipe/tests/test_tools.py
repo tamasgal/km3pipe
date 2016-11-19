@@ -249,6 +249,13 @@ class TestCuckoo(TestCase):
         cuckoo.msg(message)
         callback.assert_called_with(message)
 
+    def test_direct_call_calls_callback(self):
+        callback = MagicMock()
+        message = 'a'
+        cuckoo = Cuckoo(callback=callback)
+        cuckoo(message)
+        callback.assert_called_with(message)
+
     def test_msg_is_not_called_when_interval_not_reached(self):
         callback = MagicMock()
         message = 'a'

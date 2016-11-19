@@ -357,6 +357,10 @@ class Cuckoo(object):
         "Check if defined interval is reached"
         return total_seconds(datetime.now() - self.timestamp) > self.interval
 
+    def __call__(self, message):
+        "Run the msg function when called directly."
+        self.msg(message)
+
 
 def ifiles(irods_path):
     """Return a list of filenames for given iRODS path (recursively)"""

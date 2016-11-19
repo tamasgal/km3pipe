@@ -102,8 +102,8 @@ class CHPump(Pump):
                     log.error("Failed to connect to host.")
                 continue
             if current_qsize > self.max_queue:
-                self.cuckoo_warn.msg("Maximum queue size ({0}) reached, "
-                                     "dropping data.".format(self.max_queue))
+                self.cuckoo_warn("Maximum queue size ({0}) reached, "
+                                 "dropping data.".format(self.max_queue))
             else:
                 log.debug("Filling data into queue.")
                 self.queue.put((prefix, data))
