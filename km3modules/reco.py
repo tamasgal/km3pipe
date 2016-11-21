@@ -18,7 +18,6 @@ from statsmodels.robust.scale import mad
 from km3pipe import Module
 from km3pipe.dataclasses import KM3Array, KM3DataFrame     # noqa
 from km3pipe.tools import azimuth, zenith, dist, unit_vector
-from km3pipe import Module
 
 
 def bimod(skew, kurt, n, is_fisher=True):
@@ -194,9 +193,6 @@ class Trawler(Reconstruction):
     def fit(self, hits):
         out = {}
 
-        # time has arbitrary offset, so center it.
-        hits['time'] -= np.median(hits['time'])
-
         n_hits = len(hits)
         out['n_hits'] = n_hits
         r2 = np.sqrt(
@@ -225,7 +221,7 @@ class Trawler(Reconstruction):
         # first pulses / truncated: variance etc
 
         # time windows (n_win = 3)
-        for deno in ('tot_sum', 'n_hits', 'time_iqr', 'time_idr', 'time_var'):
+        for deno in ('tot_sum', 'n_hits', 'tot_max'):
             for meas in ('var', 'cog', 'idr', 'iqr'):
                 for nume in ('r2', 'r3', 'z'):
                     feat = nume + '_' + meas + '_over_' + deno
