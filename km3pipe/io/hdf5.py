@@ -43,11 +43,6 @@ class HDF5Sink(Module):
     blob-key, so values which are stored in the blob under `FooBar`
     will be written to `/foo_bar` in the HDF5 file.
 
-    To store at a different location in the file, the data needs a
-    `.h5loc` attribute:
-
-    >>> my_arr.h5loc = '/somewhere'
-
     Parameters
     ----------
     filename: str, optional (default: 'dump.h5')
@@ -156,9 +151,9 @@ class HDF5Sink(Module):
 class HDF5Pump(Pump):
     """Read KM3NeT-formatted HDF5 files, event-by-event.
 
-        Parameters
-        ----------
-        filename: str
+    Parameters
+    ----------
+    filename: str
         From where to read events.
         """
     def __init__(self, **context):
@@ -190,7 +185,8 @@ class HDF5Pump(Pump):
             log.error("Could not determine HDF5 format version, you may "
                       "encounter unexpected errors! Good luck...")
             return
-        if split(version, int, np.string_('.')) < split(MINIMUM_FORMAT_VERSION, int, np.string_('.')):
+        if split(version, int, np.string_('.')) < \
+                split(MINIMUM_FORMAT_VERSION, int, np.string_('.')):
             raise SystemExit("HDF5 format version {0} or newer required!\n"
                              "'{1}' has HDF5 format version {2}."
                              .format(MINIMUM_FORMAT_VERSION,
@@ -221,6 +217,114 @@ class HDF5Pump(Pump):
                 dc = KM3Array
             arr = tab.read_where('event_id == %d' % event_id)
             blob[tabname] = dc.deserialise(arr, event_id=event_id)
+        return blob
+
+    def finish(self):
+        """Clean everything up"""
+        self.h5_file.close()
+
+    def _reset_index(self):
+        """Reset index to default value"""
+        self.index = 0
+
+    def __len__(self):
+        return self._n_events
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        if self.index >= self._n_events:
+            self._reset_index()
+            raise StopIteration
+        blob = self.get_blob(self.index)
+        self.index += 1
+        return blob
+
+    def __getitem__(self, index):
+        if isinstance(index, int):
+            return self.get_blob(index)
+        elif isinstance(index, slice):
+            return self._slice_generator(index)
+        else:
+            raise TypeError("index must be int or slice")
+
+    def _slice_generator(self, index):
+        """A simple slice generator for iterations"""
+        start, stop, step = index.indices(len(self))
+        for i in range(start, stop, step):
+            yield self.get_blob(i)
+
+
+class H5Mono(Pump):
+    """Read HDF5 files with one big table.
+
+    Each event corresponds to a single row. Optionally, a table can have
+    an index column which will be used as event id.
+
+    A good example are the files produced by ``rootpy.root2hdf5``.
+
+    Parameters
+    ----------
+    filename: str
+        From where to read events.
+    table: str, optional [default=None]
+        Name of the table to read. If None, take the first table
+        encountered in the file.
+    id_col: str, optional [default=None]
+        Column to use as event id. If None, simply enumerate
+        the events instead.
+    h5loc: str, optional [default='/']
+        Path where to store when serializing to KM3HDF5.
+    """
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.filename = self.require('filename')
+        if os.path.isfile(self.filename):
+            self.h5_file = tb.open_file(self.filename, 'r')
+        else:
+            raise IOError("No such file or directory: '{0}'"
+                          .format(self.filename))
+        self.tabname = self.get('table')
+        self.blobkey = camelise(self.tabname)
+        self.h5loc = self.get('h5loc') or '/'
+        self.index = None
+        self._reset_index()
+
+        self.table = self.h5file.get_node(self.tabname)
+        self.id_col = self.get('id_col') or None
+        if self.id_col is None:
+            self._n_events = self.table.shape[0]
+        else:
+            self.ids = np.unique(self.table.read(self.id_col))
+            self._n_events = len(self.ids)
+
+    def get_blob(self, index):
+        if self.index >= self._n_events:
+            self._reset_index()
+            raise StopIteration
+        blob = {}
+        if self.id_col is None:
+            arr = self.table[index]
+            event_id = index
+        else:
+            event_id = self.event_ids[index]
+            arr = self.table.read_where('%s == %d' % (self.id_col, event_id))
+        blob[self.blobkey] = KM3Array.deserialise(arr, event_id=event_id,
+                                                  h5loc=self.h5loc)
+        return blob
+
+    def process(self, blob):
+        try:
+            blob = self.get_blob(self.index)
+        except KeyError:
+            self._reset_index()
+            raise StopIteration
+        self.index += 1
         return blob
 
     def finish(self):
