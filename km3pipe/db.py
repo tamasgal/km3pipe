@@ -438,6 +438,14 @@ class DOMContainer(object):
         """Return Floor ID for given DOM ID and detector"""
         return self._json_list_lookup('DOMId', dom_id, 'Floor', det_id)
 
+    def via_omkey(self, omkey, det_id):
+        """Return CLB UPI for given OMkey (DU, floor)"""
+        du, floor = omkey
+        return DOM.from_json([d for d in self.doms
+                              if d["DU"] == du and
+                              d["Floor"] == floor and
+                              d["DetOID"] == det_id][0])
+
     def _json_list_lookup(self, from_key, value, target_key, det_id):
         lookup = [dom[target_key] for dom in self._json if
                   dom[from_key] == value and
@@ -446,3 +454,22 @@ class DOMContainer(object):
             log.warn("Multiple entries found: {0}".format(lookup) + "\n" +
                      "Returning the first one.")
         return lookup[0]
+
+
+class DOM(object):
+    """Represents a DOM"""
+    def __init__(self, clb_upi, dom_id, dom_upi, du, det_oid, floor):
+        self.clb_upi = clb_upi
+        self.dom_id = dom_id
+        self.dom_upi = dom_upi
+        self.du = du
+        self.det_oid = det_oid
+        self.floor = floor
+
+    @classmethod
+    def from_json(cls, json):
+        return cls(json["CLBUPI"], json["DOMId"], json["DOMUPI"],
+                   json["DU"], json["DetOID"], json["Floor"])
+
+    def __str__(self):
+        return "DU{0}-DOM{1}".format(self.du, self.dom)
