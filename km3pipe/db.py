@@ -439,12 +439,32 @@ class DOMContainer(object):
         return self._json_list_lookup('DOMId', dom_id, 'Floor', det_id)
 
     def via_omkey(self, omkey, det_id):
-        """Return CLB UPI for given OMkey (DU, floor)"""
+        """Return DOM for given OMkey (DU, floor)"""
         du, floor = omkey
-        return DOM.from_json([d for d in self._json
-                              if d["DU"] == du and
-                              d["Floor"] == floor and
-                              d["DetOID"] == det_id][0])
+        try:
+            return DOM.from_json([d for d in self._json
+                                  if d["DU"] == du and
+                                  d["Floor"] == floor and
+                                  d["DetOID"] == det_id][0])
+        except IndexError:
+            log.critical("No DOM found for OMKey '{0}' and DetOID '{1}'."
+                         .format(omkey, det_id))
+
+    def via_dom_id(self, dom_id):
+        """Return DOM for given dom_id"""
+        try:
+            return DOM.from_json([d for d in self._json
+                                  if d["DOMId"] == dom_id][0])
+        except IndexError:
+            log.critical("No DOM found for DOM ID '{0}'".format(dom_id))
+
+    def via_clb_upi(self, clb_upi):
+        """return DOM for given CLB UPI"""
+        try:
+            return DOM.from_json([d for d in self._json
+                                  if d["CLBUPI"] == clb_upi][0])
+        except IndexError:
+            log.critical("No DOM found for CLB UPI '{0}'".format(clb_upi))
 
     def _json_list_lookup(self, from_key, value, target_key, det_id):
         lookup = [dom[target_key] for dom in self._json if
