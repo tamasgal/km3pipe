@@ -265,3 +265,21 @@ class HDF5Pump(Pump):
             yield self.get_blob(i)
 
 
+
+class H5RootPump(Pump):
+    """Read HDF5 files produced by ``rootpy.root2hdf5``.
+
+    Parameters
+    ----------
+    filename: str
+    From where to read events.
+    """
+
+    def process(self, blob):
+        try:
+            blob = self.get_blob(self.index)
+        except KeyError:
+            self._reset_index()
+            raise StopIteration
+        self.index += 1
+        return blob
