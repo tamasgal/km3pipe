@@ -441,7 +441,7 @@ class DOMContainer(object):
     def via_omkey(self, omkey, det_id):
         """Return CLB UPI for given OMkey (DU, floor)"""
         du, floor = omkey
-        return DOM.from_json([d for d in self.doms
+        return DOM.from_json([d for d in self._json
                               if d["DU"] == du and
                               d["Floor"] == floor and
                               d["DetOID"] == det_id][0])
@@ -472,4 +472,4 @@ class DOM(object):
                    json["DU"], json["DetOID"], json["Floor"])
 
     def __str__(self):
-        return "DU{0}-DOM{1}".format(self.du, self.dom)
+        return "DU{0}-DOM{1}".format(self.du, self.floor)
