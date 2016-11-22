@@ -417,7 +417,7 @@ class ParametersContainer(object):
 
 
 class DOMContainer(object):
-    """Provides easy access to DOM parameters"""
+    """Provides easy access to DOM parameters stored in the DB."""
     def __init__(self, doms):
         self._json = doms
         self._ids = []
