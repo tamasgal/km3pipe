@@ -500,4 +500,4 @@ class DOM(object):
                 "   CLB UPI: {3}\n"
                 "   DET OID: {4}\n"
                 .format(self.__str__(), self.dom_id, self.dom_upi,
-                        self.clb_upi, self.det_id))
+                        self.clb_upi, self.det_oid))
