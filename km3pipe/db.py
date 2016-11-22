@@ -495,4 +495,9 @@ class DOM(object):
         return "DU{0}-DOM{1}".format(self.du, self.floor)
 
     def __repr__(self):
-        return self.__str__()
+        return ("{0} - DOM ID: {1}\n"
+                "   DOM UPI: {2}\n"
+                "   CLB UPI: {3}\n"
+                "   DET OID: {4}\n"
+                .format(self.__str__(), self.dom_id, self.dom_upi,
+                        self.clb_upi, self.det_id))
