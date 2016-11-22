@@ -7,18 +7,17 @@ Read and write KM3NeT-formatted HDF5 files.
 """
 from __future__ import division, absolute_import, print_function
 
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict
 import os.path
 
 import numpy as np
-import pandas as pd
 import tables as tb
 
 import km3pipe as kp
 from km3pipe import Pump, Module
-from km3pipe.dataclasses import ArrayTaco, deserialise_map
+from km3pipe.dataclasses import KM3Array, deserialise_map
 from km3pipe.logger import logging
-from km3pipe.tools import camelise, decamelise, insert_prefix_to_dtype, split
+from km3pipe.tools import camelise, decamelise, split
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -164,9 +163,9 @@ class HDF5Pump(Pump):
         """
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
-        self.filename = self.get('filename')
+        self.filename = self.require('filename')
         if os.path.isfile(self.filename):
-            self.h5_file = tb.File(self.filename)
+            self.h5_file = tb.open_file(self.filename, 'r')
             if not self.get("skip_version_check"):
                 self._check_version()
         else:
@@ -219,9 +218,9 @@ class HDF5Pump(Pump):
             try:
                 dc = deserialise_map[tabname]
             except KeyError:
-                dc = ArrayTaco
+                dc = KM3Array
             arr = tab.read_where('event_id == %d' % event_id)
-            blob[tabname] = dc.deserialise(arr, h5loc=loc, event_id=event_id)
+            blob[tabname] = dc.deserialise(arr, event_id=event_id)
         return blob
 
     def finish(self):
@@ -263,7 +262,6 @@ class HDF5Pump(Pump):
         start, stop, step = index.indices(len(self))
         for i in range(start, stop, step):
             yield self.get_blob(i)
-
 
 
 class H5RootPump(Pump):

@@ -1,5 +1,13 @@
 Unreleased changes
 ------------------
+* Cuckoo now can be called directly
+* CHPump uses Cuckoo for log.warn to avoid spamming in case of
+  high network traffic
+
+5.5 / 2016-11-18
+~~~~~~~~~~~~~~~~
+* New ``KM3DataFrame + KM3Array`` dataclasses, np/pandas subclasses + metadata
+* replaced ``ArrayTaco`` with ``KM3Array``
 
 5.4 / 2016-11-08
 ~~~~~~~~~~~~~~~~

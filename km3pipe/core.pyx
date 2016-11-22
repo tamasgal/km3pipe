@@ -260,10 +260,10 @@ class Pipeline(object):
             process_times = self._timeit[module]['process']
             process_times_cpu = self._timeit[module]['process_cpu']
             print(module.name +
-                  " - process: {0:.3f}s (CPU {1:.3f}s)"
-                  " - finish: {2:.3f}s (CPU {3:.3f}s)"
-                  .format(sum(process_times), sum(process_times_cpu),
-                          finish_time, finish_time_cpu))
+                " - process: {0:.3f}s (CPU {1:.3f}s)"
+                " - finish: {2:.3f}s (CPU {3:.3f}s)"
+                .format(sum(process_times), sum(process_times_cpu),
+                        finish_time, finish_time_cpu))
             if len(process_times) > 0:
                 print(statsf('wall', calc_stats(process_times)))
             if len(process_times_cpu) > 0:
@@ -302,6 +302,14 @@ class Module(object):
     def get(self, name):
         """Return the value of the requested parameter"""
         return self.parameters.get(name)
+
+    def require(self, name):
+        """Return the value of the requested parameter or raise an error."""
+        value = self.get(name)
+        if value is None:
+            raise TypeError("{0} requires the parameter '{1}'."
+                            .format(self.__class__, name))
+        return value
 
     def process(self, blob):  # pylint: disable=R0201
         """Knead the blob and return it"""

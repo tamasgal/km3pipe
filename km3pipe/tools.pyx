@@ -152,6 +152,14 @@ def pld3(p1, p2, d2):
     return scipy.linalg.norm(np.cross(d2, p2 - p1)) / scipy.linalg.norm(d2)
 
 
+def lpnorm(x, p=2):
+    return np.power(np.sum(np.power(x, p)), 1/p)
+
+
+def dist(x1, x2):
+    return lpnorm(x2 - x1, p=2)
+
+
 def com(points, masses=None):
     """Calculate center of mass for given points.
     If masses is not set, assume equal masses."""
@@ -348,6 +356,10 @@ class Cuckoo(object):
     def _interval_reached(self):
         "Check if defined interval is reached"
         return total_seconds(datetime.now() - self.timestamp) > self.interval
+
+    def __call__(self, message):
+        "Run the msg function when called directly."
+        self.msg(message)
 
 
 def ifiles(irods_path):
