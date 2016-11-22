@@ -190,7 +190,8 @@ class HDF5Pump(Pump):
             log.error("Could not determine HDF5 format version, you may "
                       "encounter unexpected errors! Good luck...")
             return
-        if split(version, int, np.string_('.')) < split(MINIMUM_FORMAT_VERSION, int, np.string_('.')):
+        if split(version, int, np.string_('.')) < \
+                split(MINIMUM_FORMAT_VERSION, int, np.string_('.')):
             raise SystemExit("HDF5 format version {0} or newer required!\n"
                              "'{1}' has HDF5 format version {2}."
                              .format(MINIMUM_FORMAT_VERSION,
@@ -272,7 +273,6 @@ class H5RootPump(Pump):
     filename: str
     From where to read events.
     """
-
     def process(self, blob):
         try:
             blob = self.get_blob(self.index)
