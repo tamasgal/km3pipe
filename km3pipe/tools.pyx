@@ -26,10 +26,7 @@ import warnings
 
 import numpy as np
 import scipy.linalg
-import pandas as pd
-import tables
 
-import km3pipe as kp
 
 from km3pipe.logger import logging
 
@@ -113,6 +110,13 @@ def azimuth(v):
     if len(phi) == 1:
         return phi[0]
     return phi
+
+
+def cartesian(phi, theta, radius=1):
+    x = radius * np.sin(theta) * np.cos(phi)
+    y = radius * np.sin(theta) * np.sin(phi)
+    z = radius * np.cos(theta)
+    return np.column_stack((x, y, z))
 
 
 def angle_between(v1, v2):

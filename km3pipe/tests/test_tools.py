@@ -5,7 +5,7 @@ from __future__ import division, absolute_import, print_function
 
 import numpy as np
 import itertools
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import sleep
 
 from km3pipe.testing import TestCase, MagicMock, StringIO
@@ -183,11 +183,11 @@ class TestTools(TestCase):
         self.assertEqual('N/A', pdg2name(0))
 
     def test_total_seconds(self):
+        seconds = 3
         time1 = datetime.now()
-        sleep(0.1)
-        time2 = datetime.now()
+        time2 = time1 + timedelta(seconds=seconds)
         td = time2 - time1
-        self.assertAlmostEqual(0.1, total_seconds(td), 1)
+        self.assertAlmostEqual(seconds, total_seconds(td))
 
 
 # [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)]
