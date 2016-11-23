@@ -112,10 +112,10 @@ def azimuth(v):
     return phi
 
 
-def cartesian(phi, theta):
-    x = np.sin(theta) * np.cos(phi)
-    y = np.sin(theta) * np.sin(phi)
-    z = np.cos(theta)
+def cartesian(phi, theta, radius=1):
+    x = radius * np.sin(theta) * np.cos(phi)
+    y = radius * np.sin(theta) * np.sin(phi)
+    z = radius * np.cos(theta)
     return np.column_stack((x, y, z))
 
 
