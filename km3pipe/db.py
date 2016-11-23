@@ -329,7 +329,7 @@ class DBManager(object):
               "~/.km3net and will be used from now on to authenticate with "
               "the KM3NeT Oracle DB:\n\n"
               "    {0}\n\n".format(cookie))
-        config.set('DB', 'session_cookie', str(cookie))
+        config.set('DB', 'session_cookie', str(cookie, 'utf-8'))
         self.restore_ression(cookie)
 
     def login(self, username, password):
