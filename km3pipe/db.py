@@ -325,11 +325,15 @@ class DBManager(object):
         if username is None and password is None:
             username, password = config.db_credentials
         cookie = self.request_sid_cookie(username, password)
+        try:
+            cookie_str = str(cookie, 'utf-8')  # Python 3
+        except TypeError:
+            cookie_str = str(cookie)  # Python 2
         print("The following permanent session cookie has been stored in "
               "~/.km3net and will be used from now on to authenticate with "
               "the KM3NeT Oracle DB:\n\n"
-              "    {0}\n\n".format(str(cookie, 'utf-8')))
-        config.set('DB', 'session_cookie', str(cookie, 'utf-8'))
+              "    {0}\n\n".format(cookie_str))
+        config.set('DB', 'session_cookie', cookie_str)
         self.restore_ression(cookie)
 
     def login(self, username, password):
