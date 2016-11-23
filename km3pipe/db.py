@@ -329,10 +329,7 @@ class DBManager(object):
             cookie_str = str(cookie, 'utf-8')  # Python 3
         except TypeError:
             cookie_str = str(cookie)  # Python 2
-        print("The following permanent session cookie has been stored in "
-              "~/.km3net and will be used from now on to authenticate with "
-              "the KM3NeT Oracle DB:\n\n"
-              "    {0}\n\n".format(cookie_str))
+        log.debug("Session cookie: {0}".format(cookie_str))
         config.set('DB', 'session_cookie', cookie_str)
         self.restore_ression(cookie)
 
