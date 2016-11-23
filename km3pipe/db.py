@@ -328,7 +328,7 @@ class DBManager(object):
         print("The following permanent session cookie has been stored in "
               "~/.km3net and will be used from now on to authenticate with "
               "the KM3NeT Oracle DB:\n\n"
-              "    {0}\n\n".format(cookie))
+              "    {0}\n\n".format(str(cookie, 'utf-8')))
         config.set('DB', 'session_cookie', str(cookie, 'utf-8'))
         self.restore_ression(cookie)
 
