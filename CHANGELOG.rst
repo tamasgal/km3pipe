@@ -3,6 +3,8 @@ Unreleased changes
 * Cuckoo now can be called directly
 * CHPump uses Cuckoo for log.warn to avoid spamming in case of
   high network traffic
+* DOM class to represent DOMs retrieved by the DBManager
+* ``H5Mono`` pump to read HDF5 with flat table structure
 
 5.5 / 2016-11-18
 ~~~~~~~~~~~~~~~~

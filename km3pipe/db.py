@@ -417,7 +417,7 @@ class ParametersContainer(object):
 
 
 class DOMContainer(object):
-    """Provides easy access to DOM parameters"""
+    """Provides easy access to DOM parameters stored in the DB."""
     def __init__(self, doms):
         self._json = doms
         self._ids = []
@@ -438,6 +438,34 @@ class DOMContainer(object):
         """Return Floor ID for given DOM ID and detector"""
         return self._json_list_lookup('DOMId', dom_id, 'Floor', det_id)
 
+    def via_omkey(self, omkey, det_id):
+        """Return DOM for given OMkey (DU, floor)"""
+        du, floor = omkey
+        try:
+            return DOM.from_json([d for d in self._json
+                                  if d["DU"] == du and
+                                  d["Floor"] == floor and
+                                  d["DetOID"] == det_id][0])
+        except IndexError:
+            log.critical("No DOM found for OMKey '{0}' and DetOID '{1}'."
+                         .format(omkey, det_id))
+
+    def via_dom_id(self, dom_id):
+        """Return DOM for given dom_id"""
+        try:
+            return DOM.from_json([d for d in self._json
+                                  if d["DOMId"] == dom_id][0])
+        except IndexError:
+            log.critical("No DOM found for DOM ID '{0}'".format(dom_id))
+
+    def via_clb_upi(self, clb_upi):
+        """return DOM for given CLB UPI"""
+        try:
+            return DOM.from_json([d for d in self._json
+                                  if d["CLBUPI"] == clb_upi][0])
+        except IndexError:
+            log.critical("No DOM found for CLB UPI '{0}'".format(clb_upi))
+
     def _json_list_lookup(self, from_key, value, target_key, det_id):
         lookup = [dom[target_key] for dom in self._json if
                   dom[from_key] == value and
@@ -446,3 +474,30 @@ class DOMContainer(object):
             log.warn("Multiple entries found: {0}".format(lookup) + "\n" +
                      "Returning the first one.")
         return lookup[0]
+
+
+class DOM(object):
+    """Represents a DOM"""
+    def __init__(self, clb_upi, dom_id, dom_upi, du, det_oid, floor):
+        self.clb_upi = clb_upi
+        self.dom_id = dom_id
+        self.dom_upi = dom_upi
+        self.du = du
+        self.det_oid = det_oid
+        self.floor = floor
+
+    @classmethod
+    def from_json(cls, json):
+        return cls(json["CLBUPI"], json["DOMId"], json["DOMUPI"],
+                   json["DU"], json["DetOID"], json["Floor"])
+
+    def __str__(self):
+        return "DU{0}-DOM{1}".format(self.du, self.floor)
+
+    def __repr__(self):
+        return ("{0} - DOM ID: {1}\n"
+                "   DOM UPI: {2}\n"
+                "   CLB UPI: {3}\n"
+                "   DET OID: {4}\n"
+                .format(self.__str__(), self.dom_id, self.dom_upi,
+                        self.clb_upi, self.det_oid))
