@@ -1,15 +1,18 @@
 Unreleased changes
 ------------------
+
+5.5.1 / 2016-11-24
+~~~~~~~~~~~~~~~~~~
 * Cuckoo now can be called directly
 * CHPump uses Cuckoo for log.warn to avoid spamming in case of
   high network traffic
 * DOM class to represent DOMs retrieved by the DBManager
-* ``H5Mono`` pump to read HDF5 with flat table structure
 
 5.5 / 2016-11-18
 ~~~~~~~~~~~~~~~~
 * New ``KM3DataFrame + KM3Array`` dataclasses, np/pandas subclasses + metadata
 * replaced ``ArrayTaco`` with ``KM3Array``
+* ``H5Mono`` pump to read HDF5 with flat table structure
 
 5.4 / 2016-11-08
 ~~~~~~~~~~~~~~~~
