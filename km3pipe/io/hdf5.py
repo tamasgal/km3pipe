@@ -282,26 +282,29 @@ class H5Mono(Pump):
         Path where to store when serializing to KM3HDF5.
     """
     def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+        super(H5Mono, self).__init__(**context)
         self.filename = self.require('filename')
         if os.path.isfile(self.filename):
             self.h5_file = tb.open_file(self.filename, 'r')
         else:
             raise IOError("No such file or directory: '{0}'"
                           .format(self.filename))
-        self.tabname = self.get('table')
-        self.blobkey = camelise(self.tabname)
+        self.tabname = self.get('table') or None
+        if self.tabname is None:
+            self.table = self.h5_file.list_nodes('/', classname='Table')[0]
+            self.tabname = self.table.name
+        self.blobkey = self.tabname
         self.h5loc = self.get('h5loc') or '/'
         self.index = None
         self._reset_index()
 
-        self.table = self.h5file.get_node(self.tabname)
+        self.table = self.h5_file.get_node(os.path.join('/', self.tabname))
         self.id_col = self.get('id_col') or None
         if self.id_col is None:
             self._n_events = self.table.shape[0]
         else:
-            self.ids = np.unique(self.table.read(self.id_col))
-            self._n_events = len(self.ids)
+            self.event_ids = np.unique(self.table.read(field=self.id_col))
+            self._n_events = len(self.event_ids)
 
     def get_blob(self, index):
         if self.index >= self._n_events:

@@ -1277,6 +1277,12 @@ class TrackSeries(object):
         tracks._type = types
         return tracks
 
+
+    @classmethod
+    def from_km3df(cls, km3df):
+        return cls.from_table(km3df.conv_to(to='numpy'),
+                              event_id=int(km3df['event_id']))
+
     @classmethod
     def from_table(cls, table, event_id):
         return cls([Track(

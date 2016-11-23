@@ -127,6 +127,10 @@ class SvdFit(Reconstruction):
 
         reco_dir = np.array(v[0])
         reco_pos = center
+        len = dist(pos.iloc[-1], pos.iloc[0])
+        dur = hits.time.iloc[-1] - hits.time.iloc[0]
+        velo = len/dur
+
         out = {
             'pos_x': reco_pos['pos_x'],
             'pos_y': reco_pos['pos_y'],
@@ -136,14 +140,13 @@ class SvdFit(Reconstruction):
             'dir_z': reco_dir[2],
             'phi': azimuth(reco_dir),
             'theta': zenith(reco_dir),
+            'speed': velo,
         }
         return out
 
 
 class LineFit(Reconstruction):
     """Fit a linear track, with direction and velocity.
-
-    Inspired by ``icecube.linefit``.
 
     Parameters
     ----------
@@ -167,9 +170,6 @@ class LineFit(Reconstruction):
         pos = hits[['pos_x', 'pos_y', 'pos_z']]
 
         reco_dir = unit_vector(pos.iloc[-1] - pos.iloc[0])
-        len = dist(pos.iloc[-1], pos.iloc[0])
-        dur = hits.time.iloc[-1] - hits.time.iloc[0]
-        velo = len/dur
 
         out = {
             'dir_x': reco_dir[0],
