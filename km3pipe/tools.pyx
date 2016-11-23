@@ -26,10 +26,7 @@ import warnings
 
 import numpy as np
 import scipy.linalg
-import pandas as pd
-import tables
 
-import km3pipe as kp
 
 from km3pipe.logger import logging
 
@@ -115,6 +112,13 @@ def azimuth(v):
     return phi
 
 
+def cartesian(phi, theta, radius=1):
+    x = radius * np.sin(theta) * np.cos(phi)
+    y = radius * np.sin(theta) * np.sin(phi)
+    z = radius * np.cos(theta)
+    return np.column_stack((x, y, z))
+
+
 def angle_between(v1, v2):
     """Returns the angle in radians between vectors 'v1' and 'v2'::
 
@@ -150,6 +154,14 @@ def unit_vector(vector, **kwargs):
 def pld3(p1, p2, d2):
     """Calculate the point-line-distance for given point and line."""
     return scipy.linalg.norm(np.cross(d2, p2 - p1)) / scipy.linalg.norm(d2)
+
+
+def lpnorm(x, p=2):
+    return np.power(np.sum(np.power(x, p)), 1/p)
+
+
+def dist(x1, x2):
+    return lpnorm(x2 - x1, p=2)
 
 
 def com(points, masses=None):
@@ -348,6 +360,10 @@ class Cuckoo(object):
     def _interval_reached(self):
         "Check if defined interval is reached"
         return total_seconds(datetime.now() - self.timestamp) > self.interval
+
+    def __call__(self, message):
+        "Run the msg function when called directly."
+        self.msg(message)
 
 
 def ifiles(irods_path):

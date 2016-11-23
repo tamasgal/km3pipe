@@ -10,8 +10,8 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 
 from km3pipe import Module
-from km3pipe.tools import peak_memory_usage
-from km3pipe.dataclasses import ArrayTaco     # noqa
+from km3pipe.tools import peak_memory_usage, zenith, azimuth
+from km3pipe.dataclasses import KM3DataFrame, KM3Array     # noqa
 
 
 class Wrap(Module):
@@ -28,7 +28,7 @@ class Wrap(Module):
             if dat is None:
                 continue
             dt = np.dtype([(f, float) for f in sorted(dat.keys())])
-            arr = ArrayTaco.from_dict(dat, dt)
+            arr = KM3Array.from_dict(dat, dt)
             blob[key] = arr
         return blob
 
@@ -36,27 +36,25 @@ class Wrap(Module):
 class Dump(Module):
     """Print the content of the blob.
 
-    If no argument is specified, dump everything.
-
     Parameters
     ----------
-    keys: collection(string), optional
-        Keys to print.
-    all: bool, default=False
+    keys: collection(string), optional [default=None]
+        Keys to print. If None, print all keys.
+    full: bool, default=False
         Print blob values too, not just the keys?
     """
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.keys = self.get('keys') or None
-        self.all = self.get('all') or False
+        self.full = self.get('full') or False
 
     def process(self, blob):
         keys = sorted(blob.keys()) if self.keys is None else self.keys
         for key in keys:
-            print(key, end=': ')
-            if self.all:
-                print(blob[key])
-                print('')
+            print(key + ':')
+            if self.full:
+                print(blob[key].__repr__())
+            print('')
         print('----------------------------------------\n')
         return blob
 
@@ -145,3 +143,36 @@ class MemoryObserver(Module):
     def process(self, blob):
         memory = peak_memory_usage()
         print("Memory peak usage: {0:.3f} MB".format(memory))
+
+
+class Cut(Module):
+    """Drop an event from the pipe if certain criteria are met.
+
+    This is handled by the ``km3pipe.core.SkipException``.
+    """
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.key = self.get('key')
+        self.cond = self.get('condition')
+
+    def process(self, blob):
+        df = blob[self.key].conv_to(to='pandas')
+        ok = df.eval(self.cond).all()
+        if not ok:
+            return
+        blob[self.key] = df
+        return blob
+
+
+class GetAngle(Module):
+    """Convert pos(x, y, z) to zenith, azimuth."""
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.key = self.get('key')
+
+    def process(self, blob):
+        df = blob[self.key].conv_to(to='pandas')
+        df['zenith'] = zenith(df[['dir_x', 'dir_y', 'dir_z']])
+        df['azimuth'] = azimuth(df[['dir_x', 'dir_y', 'dir_z']])
+        blob[self.key] = df
+        return blob

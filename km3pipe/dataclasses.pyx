@@ -56,7 +56,7 @@ class Serialisable(type):
 
     """
     def __new__(metaclass, class_name, class_parents, class_attr):
-        attr = {}
+        attr = {'h5loc': '/'}
         for name, val in class_attr.items():
             if name == 'dtype':
                 attr['dtype'] = np.dtype(val)
@@ -78,6 +78,7 @@ class Serialisable(type):
 class SummarysliceInfo(with_metaclass(Serialisable)):
     """JDAQSummaryslice Metadata.
     """
+    h5loc = '/'
     dtype = np.dtype([
         ('det_id', '<i4'),
         ('frame_index', '<u4'),
@@ -96,15 +97,23 @@ class SummarysliceInfo(with_metaclass(Serialisable)):
         return cls(*args)
 
     @classmethod
-    def deserialise(cls, data, event_id, fmt='numpy', h5loc='/'):
+    def deserialise(cls, *args, **kwargs):
+        return cls.conv_from(*args, **kwargs)
+
+    def serialise(self, *args, **kwargs):
+        return self.conv_to(*args, **kwargs)
+
+    @classmethod
+    def conv_from(cls, data, event_id, fmt='numpy'):
         if fmt == 'numpy':
             return cls.from_table(data[0])
 
-    def serialise(self, to='numpy'):
+    def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return np.array(self.__array__(), dtype=self.dtype)
+            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
+                            h5loc=self.h5loc)
         if to == 'pandas':
-            return pd.DataFrame.from_records(self.serialise(to='numpy'))
+            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
     def __array__(self):
         return [(
@@ -130,6 +139,7 @@ class SummarysliceInfo(with_metaclass(Serialisable)):
 class TimesliceInfo(with_metaclass(Serialisable)):
     """JDAQTimeslice metadata.
     """
+    h5loc = '/'
     dtype = np.dtype([
         ('dom_id', '<u4'),
         ('frame_id', '<u4'),
@@ -148,15 +158,23 @@ class TimesliceInfo(with_metaclass(Serialisable)):
         return cls(*args)
 
     @classmethod
-    def deserialise(cls, data, frame_id, fmt='numpy', h5loc='/'):
+    def deserialise(cls, *args, **kwargs):
+        return cls.conv_from(*args, **kwargs)
+
+    def serialise(self, *args, **kwargs):
+        return self.conv_to(*args, **kwargs)
+
+    @classmethod
+    def conv_from(cls, data, frame_id, fmt='numpy'):
         if fmt == 'numpy':
             return cls.from_table(data[0])
 
-    def serialise(self, to='numpy'):
+    def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return np.array(self.__array__(), dtype=self.dtype)
+            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
+                            h5loc=self.h5loc)
         if to == 'pandas':
-            return pd.DataFrame.from_records(self.serialise(to='numpy'))
+            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
     def __array__(self):
         return [(
@@ -181,6 +199,7 @@ class TimesliceInfo(with_metaclass(Serialisable)):
 class TimesliceFrameInfo(with_metaclass(Serialisable)):
     """JDAQTimeslice frame metadata.
     """
+    h5loc='/'
     dtype = np.dtype([
         ('dom_id', '<u4'),
         ('fifo_status', '<u4'),
@@ -207,15 +226,23 @@ class TimesliceFrameInfo(with_metaclass(Serialisable)):
         return cls(*args)
 
     @classmethod
-    def deserialise(cls, data, frame_id, fmt='numpy', h5loc='/'):
+    def deserialise(cls, *args, **kwargs):
+        return cls.conv_from(*args, **kwargs)
+
+    def serialise(self, *args, **kwargs):
+        return self.conv_to(*args, **kwargs)
+
+    @classmethod
+    def conv_from(cls, data, frame_id, fmt='numpy'):
         if fmt == 'numpy':
             return cls.from_table(data[0])
 
-    def serialise(self, to='numpy'):
+    def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return np.array(self.__array__(), dtype=self.dtype)
+            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
+                            h5loc=self.h5loc)
         if to == 'pandas':
-            return pd.DataFrame.from_records(self.serialise(to='numpy'))
+            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
     def __array__(self):
         return [(
@@ -245,6 +272,7 @@ class TimesliceFrameInfo(with_metaclass(Serialisable)):
 class SummaryframeInfo(with_metaclass(Serialisable)):
     """JDAQSummaryslice frame metadata.
     """
+    h5loc = '/'
     dtype = np.dtype([
         ('dom_id', '<u4'),
         ('fifo_status', '<u4'),
@@ -271,15 +299,23 @@ class SummaryframeInfo(with_metaclass(Serialisable)):
         return cls(*args)
 
     @classmethod
-    def deserialise(cls, data, frame_id, fmt='numpy', h5loc='/'):
+    def deserialise(cls, *args, **kwargs):
+        return cls.conv_from(*args, **kwargs)
+
+    def serialise(self, *args, **kwargs):
+        return self.conv_to(*args, **kwargs)
+
+    @classmethod
+    def conv_from(cls, data, frame_id, fmt='numpy'):
         if fmt == 'numpy':
             return cls.from_table(data[0])
 
-    def serialise(self, to='numpy'):
+    def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return np.array(self.__array__(), dtype=self.dtype)
+            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
+                            h5loc=self.h5loc)
         if to == 'pandas':
-            return pd.DataFrame.from_records(self.serialise(to='numpy'))
+            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
     def __array__(self):
         return [(
@@ -308,6 +344,7 @@ class SummaryframeInfo(with_metaclass(Serialisable)):
 class EventInfo(object):
     """Event Metadata.
     """
+    h5loc = '/'
     dtype = np.dtype([
         ('det_id', '<i4'),
         ('frame_index', '<u4'),
@@ -325,27 +362,34 @@ class EventInfo(object):
         ('event_id', '<u4'),
     ])
 
-    def __init__(self, arr, h5loc='/'):
+    def __init__(self, arr):
         self._arr = np.array(arr, dtype=self.dtype).reshape(1)
-        self.h5loc = h5loc
         for col in self.dtype.names:
             setattr(self, col, self._arr[col])
 
     @classmethod
-    def from_row(cls, row):
+    def from_row(cls, row, **kwargs):
         args = tuple((row[col] for col in cls.dtype.names))
-        return cls(np.array(args, dtype=cls.dtype))
+        return cls(np.array(args, dtype=cls.dtype), **kwargs)
 
     @classmethod
-    def deserialise(cls, data, event_id, h5loc='/', fmt='numpy'):
-        if fmt == 'numpy':
-            return cls.from_row(data)
+    def deserialise(cls, *args, **kwargs):
+        return cls.conv_from(*args, **kwargs)
 
-    def serialise(self, to='numpy'):
+    def serialise(self, *args, **kwargs):
+        return self.conv_to(*args, **kwargs)
+
+    @classmethod
+    def conv_from(cls, data, event_id, fmt='numpy', **kwargs):
+        if fmt == 'numpy':
+            return cls.from_row(data, **kwargs)
+
+    def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return np.array(self.__array__(), dtype=self.dtype)
+            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
+                            h5loc=self.h5loc)
         if to == 'pandas':
-            return pd.DataFrame.from_records(self.serialise(to='numpy'))
+            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
     def __array__(self):
         return self._arr
@@ -694,6 +738,7 @@ cdef class Track:
 class HitSeries(object):
     """Collection of multiple Hits.
     """
+    h5loc = '/'
     dtype = np.dtype([
         ('channel_id', 'u1'),
         ('dir_x', '<f8'),
@@ -849,18 +894,26 @@ class HitSeries(object):
         ) for row in table], dtype=cls.dtype), event_id)
 
     @classmethod
-    def deserialise(cls, data, event_id=None, fmt='numpy', h5loc='/'):
+    def deserialise(cls, *args, **kwargs):
+        return cls.conv_from(*args, **kwargs)
+
+    def serialise(self, *args, **kwargs):
+        return self.conv_to(*args, **kwargs)
+
+    @classmethod
+    def conv_from(cls, data, event_id=None, fmt='numpy'):
         # what is event_id doing here?
         if fmt == 'numpy':
             return cls(data)
         if fmt == 'pandas':
             return cls(data.to_records(index=False))
 
-    def serialise(self, to='numpy'):
+    def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return np.array(self.__array__(), dtype=self.dtype)
+            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
+                            h5loc=self.h5loc)
         if to == 'pandas':
-            return pd.DataFrame.from_records(self.serialise(to='numpy'))
+            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
     def __array__(self):
         return self._arr
@@ -882,7 +935,7 @@ class HitSeries(object):
 
     @property
     def first_hits(self):
-        h = self.serialise(to='pandas')
+        h = self.conv_to(to='pandas')
         h.sort_values('time', inplace=True)
         h = h.drop_duplicates(subset='dom_id')
         return HitSeries(h.to_records(index=False))
@@ -1037,16 +1090,24 @@ class TimesliceHitSeries(object):
         ) for row in table], dtype=cls.dtype), slice_id, frame_id)
 
     @classmethod
-    def deserialise(cls, data, slice_id, frame_id, fmt='numpy', h5loc='/'):
+    def deserialise(cls, *args, **kwargs):
+        return cls.conv_from(*args, **kwargs)
+
+    def serialise(self, *args, **kwargs):
+        return self.conv_to(*args, **kwargs)
+
+    @classmethod
+    def conv_from(cls, data, slice_id, frame_id, fmt='numpy'):
         if fmt == 'numpy':
             # return cls.from_table(data, frame_id)
             return cls(data, slice_id, frame_id)
 
-    def serialise(self, to='numpy'):
+    def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return np.array(self.__array__(), dtype=self.dtype)
+            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
+                            h5loc=self.h5loc)
         if to == 'pandas':
-            return pd.DataFrame.from_records(self.serialise(to='numpy'))
+            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
     def __array__(self):
         return self._arr
@@ -1136,6 +1197,7 @@ class TrackSeries(object):
         ('type', '<i4'),
         ('event_id', '<u4'),
     ])
+    h5loc = '/'
 
     def __init__(self, tracks, event_id):
         self._bjorkeny = None
@@ -1215,6 +1277,12 @@ class TrackSeries(object):
         tracks._type = types
         return tracks
 
+
+    @classmethod
+    def from_km3df(cls, km3df):
+        return cls.from_table(km3df.conv_to(to='numpy'),
+                              event_id=int(km3df['event_id']))
+
     @classmethod
     def from_table(cls, table, event_id):
         return cls([Track(
@@ -1231,15 +1299,23 @@ class TrackSeries(object):
         ) for row in table], event_id)
 
     @classmethod
-    def deserialise(cls, data, event_id, fmt='numpy', h5loc='/'):
+    def deserialise(cls, *args, **kwargs):
+        return cls.conv_from(*args, **kwargs)
+
+    def serialise(self, *args, **kwargs):
+        return self.conv_to(*args, **kwargs)
+
+    @classmethod
+    def conv_from(cls, data, event_id, fmt='numpy'):
         if fmt == 'numpy':
             return cls.from_table(data, event_id)
 
-    def serialise(self, to='numpy'):
+    def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return np.array(self.__array__(), dtype=self.dtype)
+            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
+                            h5loc=self.h5loc)
         if to == 'pandas':
-            return pd.DataFrame.from_records(self.serialise(to='numpy'))
+            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
     def __array__(self):
         return [(
@@ -1390,7 +1466,7 @@ class SummaryframeSeries(object):
         ('n_received_packets', '<u4'),
         ('slice_id', '<u4'),
         ])
-
+    h5loc = '/'
     def __init__(self, arr):
         self._arr = arr
         self._index = 0
@@ -1417,16 +1493,24 @@ class SummaryframeSeries(object):
         ) for row in table], dtype=cls.dtype), slice_id)
 
     @classmethod
-    def deserialise(cls, data, slice_id, fmt='numpy', h5loc='/'):
+    def deserialise(cls, *args, **kwargs):
+        return cls.conv_from(*args, **kwargs)
+
+    def serialise(self, *args, **kwargs):
+        return self.conv_to(*args, **kwargs)
+
+    @classmethod
+    def conv_from(cls, data, slice_id, fmt='numpy'):
         if fmt == 'numpy':
             # return cls.from_table(data, event_id)
             return cls(data)
 
-    def serialise(self, to='numpy'):
+    def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return np.array(self.__array__(), dtype=self.dtype)
+            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
+                            h5loc=self.h5loc)
         if to == 'pandas':
-            return pd.DataFrame.from_records(self.serialise(to='numpy'))
+            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
     @property
     def n_received_packets(self):
@@ -1476,32 +1560,55 @@ class SummaryframeSeries(object):
             yield self._arr[i]
 
 
-class ArrayTaco(object):
-    """Wrapper around Numpy arrays.
+class KM3Array(np.ndarray):
+    """Numpy NDarray + metadata.
 
-    Parameters
+    This class adds the following to ``np.ndarray``:
+
+    Attributes
     ----------
-    arr: np.array
-        (Structured) numpy array to store.
+    h5loc: str, default='/'
+        HDF5 group where to write into.
 
-    h5loc: str, optional [default='/']
-        HDF5 Group to store table. (The table name is the blob key).
+    Methods
+    -------
+    deserialise(data, h5loc='/', fmt='pandas')
+        Factory to init from data.
+    serialise(to='numpy')
+        Convert for storage.
     """
+
+    def __new__(cls, arr, h5loc='/'):
+        obj = np.asarray(arr).view(cls)
+        obj.h5loc = h5loc
+        return obj
 
     def __init__(self, arr, h5loc='/'):
         self.array = arr
         self.h5loc = h5loc
 
+    def __array_finalize__(self, obj):
+        if obj is None:
+            return
+        self.h5loc = getattr(obj, 'h5loc', None)
+
     @classmethod
-    def deserialise(cls, data, event_id, h5loc='/', fmt='numpy'):
+    def deserialise(cls, *args, **kwargs):
+        return cls.conv_from(*args, **kwargs)
+
+    def serialise(self, *args, **kwargs):
+        return self.conv_to(*args, **kwargs)
+
+    @classmethod
+    def conv_from(cls, data, event_id, h5loc='/', fmt='numpy'):
         if fmt == 'numpy':
             return cls(data, h5loc)
 
-    def serialise(self, to='numpy'):
+    def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return self.array
+            return self
         if to == 'pandas':
-            return pd.DataFrame.from_records(self.serialise(to='numpy'))
+            return KM3DataFrame.conv_from(self, fmt='numpy')
 
     @classmethod
     def from_dict(cls, map, dtype=None, **kwargs):
@@ -1509,22 +1616,6 @@ class ArrayTaco(object):
             dtype = np.dtype([(key, float) for key in sorted(map.keys())])
         return cls(np.array([tuple((map[key] for key in dtype.names))],
                             dtype=dtype), **kwargs)
-
-    @property
-    def dtype(self):
-        return self.array.dtype
-
-    def __len__(self):
-        return len(self.array)
-
-    def __getitem__(self, item):
-        return self.array[item]
-
-    def __repr__(self):
-        return self.__str__()
-
-    def __str__(self):
-        return "Array with dtype %s" % str(self.dtype)
 
 
 class KM3DataFrame(pd.DataFrame):
@@ -1553,26 +1644,34 @@ class KM3DataFrame(pd.DataFrame):
     # default value
     h5loc = '/'
 
-    @classmethod
-    def deserialise(cls, data, event_id=None, h5loc='/', fmt='pandas'):
-        if fmt in {'numpy', 'pandas'}:
-            df = cls(data)
-            df.h5loc = h5loc
-            return df
-        if fmt == 'dict':
-            df = cls(data, index=[0])
-            df.h5loc = h5loc
-            return df
-
-    def serialise(self, to='numpy'):
-        if to == 'numpy':
-            return self.to_records(index=False)
-        if to == 'pandas':
-            return self
-
     @property
     def _constructor(self):
         return KM3DataFrame
+
+    def __init__(self, *args, **kwargs):
+        h5loc = kwargs.pop('h5loc', '/')
+        super(KM3DataFrame, self).__init__(*args, **kwargs)
+        self.h5loc = h5loc
+
+    @classmethod
+    def deserialise(cls, *args, **kwargs):
+        return cls.conv_from(*args, **kwargs)
+
+    def serialise(self, *args, **kwargs):
+        return self.conv_to(*args, **kwargs)
+
+    @classmethod
+    def conv_from(cls, data, event_id=None, h5loc='/', fmt='pandas'):
+        if fmt in {'numpy', 'pandas'}:
+            return cls(data, h5loc=h5loc)
+        if fmt == 'dict':
+            return cls(data, index=[0], h5loc=h5loc)
+
+    def conv_to(self, to='numpy'):
+        if to == 'numpy':
+            return KM3Array(self.to_records(index=False), h5loc=self.h5loc)
+        if to == 'pandas':
+            return self
 
 
 deserialise_map = {

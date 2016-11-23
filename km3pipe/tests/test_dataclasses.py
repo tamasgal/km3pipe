@@ -19,7 +19,7 @@ from km3pipe.dataclasses import (Hit, Track, Position, Direction_,
                                  HitSeries, TimesliceHitSeries,
                                  EventInfo, SummarysliceInfo, TimesliceInfo,
                                  Serialisable, TrackSeries, SummaryframeSeries,
-                                 ArrayTaco, KM3DataFrame)
+                                 KM3Array, KM3DataFrame)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -586,23 +586,23 @@ class TestEventInfo(TestCase):
         self.assertAlmostEqual(e.serialise(), np.array(exp, e.dtype))
 
 
-class TestWrapper(TestCase):
-    def test_wrapper(self):
+class TestKM3Array(TestCase):
+    def test_km3array(self):
         dt = np.dtype(sorted([('x', int), ('y', float),
                               ('did_converge', bool)]))
         dat = {'x': 4, 'y': 2.0, 'did_converge': True}
-        rec = ArrayTaco.from_dict(dat, dtype=dt)
+        rec = KM3Array.from_dict(dat, dtype=dt)
         print(rec)
         print(rec.dtype)
         self.assertAlmostEqual(rec.dtype, dt)
         self.assertTrue(rec['did_converge'])
         self.assertAlmostEqual(rec['x'], 4)
 
-    def test_wrapper_serialise(self):
+    def test_km3array_serialise(self):
         dt = np.dtype(sorted([('x', int), ('y', float),
                               ('did_converge', bool)]))
         dat = {'x': 4, 'y': 2.0, 'did_converge': True}
-        rec = ArrayTaco.from_dict(dat, dtype=dt).serialise()
+        rec = KM3Array.from_dict(dat, dtype=dt).serialise()
         print(rec)
         print(rec.dtype)
         self.assertTrue(rec[0][0])
