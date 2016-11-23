@@ -94,12 +94,10 @@ class DBManager(object):
             self.restore_ression(config.db_session_cookie)
         else:
             username, password = config.db_credentials
-            if config.db_session_cookie is None and \
-                    not self._temporary and \
-               input("Request permanent session? ([y]/n)") in 'yY ':
+            login_ok = self.login(username, password)
+            if login_ok and not self._temporary and \
+               input("Request permanent session? (y/n)") in 'yY':
                 self.request_permanent_session(username, password)
-            else:
-                self.login(username, password)
 
     def datalog(self, parameter, run, maxrun=None, det_id='D_ARCA001'):
         "Retrieve datalogs for given parameter, run(s) and detector"
@@ -284,8 +282,9 @@ class DBManager(object):
         log.debug("Opening '{0}'".format(target_url))
         try:
             f = self.opener.open(target_url)
-        except HTTPError:
+        except HTTPError as e:
             log.error("HTTP error, your session may be expired.")
+            log.error(e)
             return None
         log.debug("Accessing '{0}'".format(target_url))
         try:
@@ -326,7 +325,11 @@ class DBManager(object):
         if username is None and password is None:
             username, password = config.db_credentials
         cookie = self.request_sid_cookie(username, password)
-        config.set('DB', 'session_cookie', cookie)
+        print("The following permanent session cookie has been stored in "
+              "~/.km3net and will be used from now on to authenticate with "
+              "the KM3NeT Oracle DB:\n\n"
+              "    {0}\n\n".format(cookie))
+        config.set('DB', 'session_cookie', str(cookie))
         self.restore_ression(cookie)
 
     def login(self, username, password):
