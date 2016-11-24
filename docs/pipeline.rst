@@ -1,6 +1,8 @@
 Pipeline Workflow
 =================
 
+.. contents:: :local:
+
 KM3Pipe is a basic framework which tries to give you a lose structure and
 workflow for data analysis. It has a simple, yet powerful module system
 which allows you to organise and reuse code.
