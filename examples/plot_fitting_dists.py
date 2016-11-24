@@ -33,7 +33,7 @@ noise_bmg = 0.5
 data = np.random.normal(bmg, noise_bmg)[:, np.newaxis]
 
 # make X axis for plots
-x = np.linspace(5, 35, N+1)
+x = np.linspace(5, 35, 3*N+1)
 
 ##############################################################################
 # Histograms (nonparametric)
