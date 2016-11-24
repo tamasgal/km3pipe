@@ -53,8 +53,9 @@ Or you can of course use `pip`::
 Configuration
 -------------
 
-KM3Pipe can read frequently used information (like DB credentials, API tokens,
-etc.) from a configuration file, which is expected to be `~/.km3net`.
+KM3Pipe can read frequently used information (like DB session cookies,
+API tokens, etc.) from a configuration file, which is expected to
+be `~/.km3net`.
 
 Here is an example configuration::
 
@@ -62,8 +63,7 @@ Here is an example configuration::
     check_for_updates=no
 
     [DB]
-    username=fooman
-    password=god
+    cookie=sid_fooman_123.34.56.78_
 
     [Slack]
     token=xoxp-2355837568-2397897846-8945924372-395f023485
