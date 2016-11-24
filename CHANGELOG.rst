@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 
+5.5.2 / 2016-11-24
+~~~~~~~~~~~~~~~~~~
+* Updated docs
+
 5.5.1 / 2016-11-24
 ~~~~~~~~~~~~~~~~~~
 * Cuckoo now can be called directly
@@ -9,7 +13,7 @@ Unreleased changes
 * DOM class to represent DOMs retrieved by the DBManager
 
 5.5 / 2016-11-18
-~~~~~~~~~~~~~~~~
+----------------
 * New ``KM3DataFrame + KM3Array`` dataclasses, np/pandas subclasses + metadata
 * replaced ``ArrayTaco`` with ``KM3Array``
 * ``H5Mono`` pump to read HDF5 with flat table structure
