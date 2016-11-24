@@ -16,7 +16,6 @@ Options:
 from __future__ import division, absolute_import, print_function
 
 from collections import defaultdict
-import sys
 
 import km3pipe as kp
 from km3pipe import version
