@@ -42,7 +42,7 @@ def idr(x, perc=10):
 
 
 def tensor_of_inertia(self, pos_x, pos_y, pos_z, weight=1):
-    """Tensor of Intertia.
+    """Tensor of Inertia.
 
     Adapted from Thomas Heid' EventID (ROOT implementation).
     """
