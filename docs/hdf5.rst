@@ -1,6 +1,8 @@
 HDF5
 ====
 
+.. contents:: :local:
+
 HDF5 files are the prefered input and primary output type in KM3Pipe.
 It is a general format for hierarchical storage of large amount of numerical
 data. Unlike e.g. ROOT, HDF5 is a general-purpose dataformat and not 

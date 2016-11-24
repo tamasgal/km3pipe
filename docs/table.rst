@@ -1,6 +1,8 @@
 Table / SciPy Workflow
 ======================
 
+.. contents:: :local:
+
 This page only gives a brief overview of the SciPy family.
 If you want get started on Python for Science, I *highly* recommend the
 SciPy Lecture Notes at `scipy-lectures.org <http://www.scipy-lectures.org/>`_.

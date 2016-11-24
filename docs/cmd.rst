@@ -1,6 +1,8 @@
 Command Line Tools
 ==================
 
+.. contents:: :local:
+
 If you've installed KM3Pipe via ``pip``, you have access to some useful
 command line utilities out of the box.
 

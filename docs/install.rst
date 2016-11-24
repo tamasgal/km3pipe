@@ -1,6 +1,8 @@
 Installation
 ===========
 
+.. contents:: :local:
+
 Requirements
 ------------
 

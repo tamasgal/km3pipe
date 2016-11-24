@@ -1,9 +1,12 @@
 DBManager
 =========
 
+.. contents:: :local:
+
 The ``DBManager`` class provides an easy access to data stored in the KM3NeT
-Oracle database and takes care of the whole authentication procedure.
-All you have to do is create an instance of the ``DBManager`` class.
+Oracle database and takes care of the whole authentication procedure. It uses
+an in-memory cache for the fetched data to reduce network traffic and I/O.
+All you need to do is create an instance of the ``DBManager`` class.
 
 Dataformats
 ~~~~~~~~~~~
