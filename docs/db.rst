@@ -160,7 +160,7 @@ Here are some examples how to use these methods::
     >>> print(a_dom)
     DU2-DOM16
     >>> a_dom.clb_upi
-    u'3.4.3.2/V2-2-1/2.594'
+    '3.4.3.2/V2-2-1/2.594'
     >>> a_dom.floor
     16
     >>> a_dom.du
@@ -191,7 +191,7 @@ accessible as an attribute of the ``DBManager``::
     >>> db.parameters
     <km3pipe.db.ParametersContainer object at 0x110d22250>
 
-A quick peek on ``help(db.parameters)`` reviels a few methods and attributes::
+A quick peek on ``help(db.parameters)`` reveals a few methods and attributes::
 
     >>> help(db.parameters)
     class ParametersContainer(__builtin__.object)
@@ -215,4 +215,67 @@ A quick peek on ``help(db.parameters)`` reviels a few methods and attributes::
      |
      |  names
      |      A list of parameter names
+
+The ``names`` attribute gives you a list of available parameters::
+
+    >>> len(db.parameters.names)
+    277
+    >>> db.parameters.names[:5]
+    ['led_model', 'pmt_serialnumber', 'bps_breaker', 'humid',
+    'pwr_meas[9] power_measurement_12v_lvl']
+
+The above example shows the first 5 parameters out of 277 entries.
+If you see a number enclosed by brackets in a parameter name, like
+``"pwr_meas[9] power_measurement_12v_lvl"`` in the list above, it means that
+``"pwr_meas"`` is a parameter-array and the value at index ``9`` is aliased to
+``power_measurement_12v_lvl``. The latter name should be used if you want
+to retrieve the corresponding data from the DB.
+
+Parameter Units and Value Conversions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``ParametersContainer`` has three methods to access information about a
+given parameter.
+The ``get_converter()`` method returns a function to be used to convert
+the raw values stored for a given parameter to match the target unit, which
+is returned by the ``unit()`` method::
+
+    >>> humid_converter = db.parameters.get_converter("humid")
+    >>> humid_converter(987)
+    9.870000000000001
+    >>> db.parameters.unit("humid")
+    '%'
+
+Retrieving Parameter Data
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``datalog`` method provides an easy way to retrieve data for a given
+detector and run or range of runs. It returns a pandas ``DataFrame`` instance::
+
+    >>> humid = db.datalog("humid", run=4780, det_id="D_ARCA003")
+    Database lookup took 3.931s (CPU 0.192s).
+    >>> type(humid)
+    <class 'pandas.core.frame.DataFrame'>
+
+The ``head()`` and ``tail()`` methods can be used to get the first or last
+rows::
+
+    >>> humid.head(3)
+        RUN       UNIXTIME           SOURCE_NAME PARAMETER_NAME  DATA_VALUE  \
+    0  4780  1478735722766  3.4.3.2/V2-2-1/2.138          humid        3694
+    1  4780  1478735732768  3.4.3.2/V2-2-1/2.138          humid        3694
+    2  4780  1478735742766  3.4.3.2/V2-2-1/2.138          humid        3694
+
+                              DATETIME  VALUE
+    0 2016-11-09 23:55:22.766000+00:00  36.94
+    1 2016-11-09 23:55:32.768000+00:00  36.94
+    2 2016-11-09 23:55:42.766000+00:00  36.94
+
+The ``DATA_VALUE`` is the column which holds the recorded data
+(the "raw values"). The ``VALUE`` column is automatically added by the
+``DBManager`` -- if the parameter has a valid unit and conversion score entry in
+the database -- by applying the above mentioned ``get_converter()`` method
+on the ``DATA_VALUE`` column.
+If the data contains a ``UNIXTIME`` column, a ``DATETIME`` field will be added
+too, which allows using all the magical date filtering methods.
 
