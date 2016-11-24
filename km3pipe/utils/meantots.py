@@ -66,4 +66,4 @@ def main():
     from docopt import docopt
     args = docopt(__doc__, version=version)
 
-    meantots(args["FILE"], args["PLOT"])
+    meantots(args["FILE"], args["-p"])
