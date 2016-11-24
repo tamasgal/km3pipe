@@ -174,3 +174,45 @@ Here are some examples how to use these methods::
        DOM UPI: 3.4/CH39H/1.53
        CLB UPI: 3.4.3.2/V2-2-1/2.296
        DET OID: D_ARCA003
+
+
+Datalogs
+~~~~~~~~
+This is probably the most interesting part of the database. The datalogs
+is a meta table which provides access to hundreds of different parameter types.
+
+Parameters
+^^^^^^^^^^
+
+The available parameters can be inspected via the ``ParametersContainer`` class
+which is -- just like the ``DOMContainer`` -- automatically instantiated and
+accessible as an attribute of the ``DBManager``::
+
+    >>> db.parameters
+    <km3pipe.db.ParametersContainer object at 0x110d22250>
+
+A quick peek on ``help(db.parameters)`` reviels a few methods and attributes::
+
+    >>> help(db.parameters)
+    class ParametersContainer(__builtin__.object)
+     |  Provides easy access to parameters
+     |
+     |  Methods defined here:
+     |
+     |  __init__(self, parameters)
+     |
+     |  get_converter(self, parameter)
+     |      Generate unit conversion function for given parameter
+     |
+     |  get_parameter(self, parameter)
+     |      Return a dict for given parameter
+     |
+     |  unit(self, parameter)
+     |      Get the unit for given parameter
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  names
+     |      A list of parameter names
+
