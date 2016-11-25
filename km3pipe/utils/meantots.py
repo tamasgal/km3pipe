@@ -72,7 +72,7 @@ def meantots(filename, plotfilename):
     pipe.attach(StatusBar, every=5000)
     pipe.attach(MeanToTPlotter, plotfilename=plotfilename,
                 only_if="TimesliceHits")
-    pipe.drain()
+    pipe.drain(100000)
 
 
 def main():
