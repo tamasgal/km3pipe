@@ -19,6 +19,7 @@ from collections import defaultdict
 
 import km3pipe as kp
 from km3pipe import version
+import pandas as pd
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
@@ -66,11 +67,44 @@ class MeanToTPlotter(kp.Module):
         plt.savefig(self.plotfilename)
 
 
+class FastMeanToTPlotter(kp.Module):
+    """Create a plot of mean ToTs for each PMT."""
+    def configure(self):
+        self.tot_data = defaultdict(list)
+        self.plotfilename = self.get("plotfilename") or "meantots.pdf"
+        self.db = kp.db.DBManager()
+
+    def process(self, blob):
+        hits = blob["TimesliceHits"]
+        self.tot_data['dom_id'] += hits.dom_id
+        self.tot_data['channel_id'] += hits.channel_id
+        self.tot_data['tot'] += hits.tot
+
+    def finish(self):
+        gmm = GaussianMixture()
+        xs, ys = [], []
+        df = pd.DataFrame(self.tot_data)
+        for (dom_id, channel_id), data in df.groupby(['dom_id', 'channel_id']):
+            tots = data['tots']
+            dom = self.db.doms.via_dom_id(dom_id)
+            gmm.fit(tots[:, np.newaxis]).means_[0][0]
+            mean_tot = gmm.means_[0][0]
+            xs.append(31*(dom.floor - 1) + channel_id + 600*(dom.du-1))
+            ys.append(mean_tot)
+
+        fig, ax = plt.subplots()
+        ax.scatter(xs, ys, marker="+")
+        ax.set_xlabel("31$\cdot$(floor - 1) + channel_id + 600$\cdot$(DU - 1)")
+        ax.set_ylabel("ToT [ns]")
+        plt.title("Mean ToT per PMT")
+        plt.savefig(self.plotfilename)
+
+
 def meantots(filename, plotfilename):
     pipe = kp.Pipeline()
     pipe.attach(kp.io.JPPPump, filename=filename, with_timeslice_hits=True)
     pipe.attach(StatusBar, every=5000)
-    pipe.attach(MeanToTPlotter, plotfilename=plotfilename,
+    pipe.attach(FastMeanToTPlotter, plotfilename=plotfilename,
                 only_if="TimesliceHits")
     pipe.drain(100000)
 
