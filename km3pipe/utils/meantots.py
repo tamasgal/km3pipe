@@ -76,9 +76,9 @@ class FastMeanToTPlotter(kp.Module):
 
     def process(self, blob):
         hits = blob["TimesliceHits"]
-        self.tot_data['dom_id'] += hits.dom_id
-        self.tot_data['channel_id'] += hits.channel_id
-        self.tot_data['tot'] += hits.tot
+        self.tot_data['dom_id'] += list(hits.dom_id)
+        self.tot_data['channel_id'] += list(hits.channel_id)
+        self.tot_data['tot'] += list(hits.tot)
 
     def finish(self):
         gmm = GaussianMixture()
