@@ -50,6 +50,7 @@ class MeanToTPlotter(kp.Module):
             self.tot_data[(hit.dom_id, hit.channel_id)].append(hit.tot)
 
     def finish(self):
+        print("Calculating mean ToT for each PMT from gaussian fits...")
         gmm = GaussianMixture()
         xs, ys = [], []
         for (dom_id, channel_id), tots in self.tot_data.iteritems():
@@ -68,7 +69,10 @@ class MeanToTPlotter(kp.Module):
 
 
 class FastMeanToTPlotter(kp.Module):
-    """Create a plot of mean ToTs for each PMT."""
+    """Create a plot of mean ToTs for each PMT.
+
+    This module is under development.
+    """
     def configure(self):
         self.tot_data = defaultdict(list)
         self.plotfilename = self.get("plotfilename") or "meantots.pdf"
@@ -81,7 +85,7 @@ class FastMeanToTPlotter(kp.Module):
         self.tot_data['tot'] += list(hits.tot)
 
     def finish(self):
-        print("Calculating mean ToT from gaussian fit...")
+        print("Calculating mean ToT for each PMT from gaussian fits...")
         gmm = GaussianMixture()
         xs, ys = [], []
         df = pd.DataFrame(self.tot_data)
@@ -105,7 +109,7 @@ def meantots(filename, plotfilename):
     pipe = kp.Pipeline()
     pipe.attach(kp.io.JPPPump, filename=filename, with_timeslice_hits=True)
     pipe.attach(StatusBar, every=5000)
-    pipe.attach(FastMeanToTPlotter, plotfilename=plotfilename,
+    pipe.attach(MeanToTPlotter, plotfilename=plotfilename,
                 only_if="TimesliceHits")
     pipe.drain(100000)
 
