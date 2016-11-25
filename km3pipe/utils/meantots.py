@@ -81,11 +81,12 @@ class FastMeanToTPlotter(kp.Module):
         self.tot_data['tot'] += list(hits.tot)
 
     def finish(self):
+        print("Calculating mean ToT from gaussian fit...")
         gmm = GaussianMixture()
         xs, ys = [], []
         df = pd.DataFrame(self.tot_data)
         for (dom_id, channel_id), data in df.groupby(['dom_id', 'channel_id']):
-            tots = data['tots']
+            tots = data['tot']
             dom = self.db.doms.via_dom_id(dom_id)
             gmm.fit(tots[:, np.newaxis]).means_[0][0]
             mean_tot = gmm.means_[0][0]
