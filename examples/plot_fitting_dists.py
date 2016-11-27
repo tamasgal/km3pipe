@@ -33,7 +33,7 @@ noise_bmg = 0.5
 data = np.random.normal(bmg, noise_bmg)[:, np.newaxis]
 
 # make X axis for plots
-x = np.linspace(5, 35, N+1)
+x = np.linspace(5, 35, 3*N+1)
 
 ##############################################################################
 # Histograms (nonparametric)
@@ -79,7 +79,8 @@ plt.hist(data, bins=knuth_binlims, alpha=.5, normed=True)
 # Fit Distribution via Maximum Likelihood
 # ---------------------------------------
 #
-# If we have a hypothesis what the distribution looks like (e.g. gaussian), and want to fit its parameters.
+# If we have a hypothesis what the distribution looks like (e.g. gaussian),
+# and want to fit its parameters.
 #
 # The nice thing is, you can define your own PDFs in scipy and fit it.
 # Or take one from the dozens of pre-defined ones.
@@ -111,15 +112,17 @@ gmm.fit(data)
 
 mu1 = gmm.means_[0, 0]
 mu2 = gmm.means_[1, 0]
-sig1, sig2 = gmm.covariances_
+var1, var2 = gmm.covariances_
 wgt1, wgt2 = gmm.weights_
 print('''Fit:
-      1: Mean {:.4}, stdev {:.4}, weight {:.4}
-      2: Mean {:.4}, stdev {:.4}, weight {:.4}
-'''.format(mu1, sig1, wgt1, mu2, sig2, wgt2))
+      1: Mean {:.4}, var {:.4}, weight {:.4}
+      2: Mean {:.4}, var {:.4}, weight {:.4}
+'''.format(mu1, var1, wgt1, mu2, var2, wgt2))
 
 plt.hist(data, bins='auto', alpha=.3, normed=True)
 plt.vlines((mu1, mu2), ymin=0, ymax=0.35, label='Fitted Means')
+plt.plot(x, norm.pdf(x, mu1, np.sqrt(var1)))
+plt.plot(x, norm.pdf(x, mu2, np.sqrt(var2)))
 plt.legend()
 plt.title('Gaussian Mixture Model')
 
