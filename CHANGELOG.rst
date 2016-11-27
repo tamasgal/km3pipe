@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 
+5.5.3 / 2016/11/28
+~~~~~~~~~~~~~~~~~~
+* Add fix_event_id option to h5pump
+
 5.5.2 / 2016-11-24
 ~~~~~~~~~~~~~~~~~~
 * Updated docs
