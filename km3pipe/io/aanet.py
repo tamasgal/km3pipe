@@ -179,20 +179,20 @@ class AanetPump(Pump):
             recos = read_mini_dst(event, event_id)
             for recname, reco in recos.items():
                 blob[recname] = reco
-        if self.format == 'jevt_jgandalf':
+        if self.format in ('jevt_jgandalf', 'gandalf', 'jgandalf'):
             track, dtype = parse_jevt_jgandalf(event, event_id)
             if track:
-                blob['JEvtJGandalf'] = KM3Array.from_dict(track, dtype,
+                blob['Gandalf'] = KM3Array.from_dict(track, dtype,
                                                            h5loc='/reco')
         if self.format == 'generic_track':
             track, dtype = parse_generic_event(event, event_id)
             if track:
                 blob['Track'] = KM3Array.from_dict(track, dtype,
                                                     h5loc='/reco')
-        if self.format == 'ancient_recolns':
+        if self.format in ('ancient_recolns', 'orca_recolns'):
             track, dtype = parse_ancient_recolns(event, event_id)
             if track:
-                blob['AncientRecoLNS'] = KM3Array.from_dict(track, dtype,
+                blob['OrcaRecoLNS'] = KM3Array.from_dict(track, dtype,
                                                              h5loc='/reco')
         return blob
 
@@ -269,9 +269,9 @@ def parse_ancient_recolns(aanet_event, event_id):
         out['sin_theta'] = sin_theta
         out['beta'] = np.sqrt(sin_theta * sin_theta * sigma2_phi + sigma2_theta)
     except IndexError:
-        keys = {'quality', 'n_hits_used', 'pos_x', 'pos_y', 'pos_z',
-                'dir_x', 'dir_y', 'dir_z', 'energy_muon', 'energy_neutrino',
-                'bjorken_y', 'beta', 'sigma2_theta', 'sigma2_phi',
+        keys = {'quality', 'n_hits_used', 'pos_x', 'pos_y', 'pos_z',        # noqa
+                'dir_x', 'dir_y', 'dir_z', 'energy_muon', 'energy_neutrino',        # noqa
+                'bjorken_y', 'beta', 'sigma2_theta', 'sigma2_phi',      # noqa
                 'sin_theta', }    #noqa
         out = {key: 0 for key in keys}
     dt = [(key, float) for key in sorted(out.keys())]
