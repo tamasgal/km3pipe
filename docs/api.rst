@@ -1,6 +1,8 @@
 API Reference
 =============
 
+.. contents:: :local:
+
 KM3Pipe: Main Framework
 -----------------------
 

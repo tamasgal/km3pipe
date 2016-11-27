@@ -176,6 +176,8 @@ class HDF5Pump(Pump):
             log.critical("No /event_info table found.")
             raise SystemExit
 
+        self.fix_event_id = self.get('fix_event_id') or None
+
         self._n_events = len(self.event_ids)
 
     def _check_version(self):
@@ -216,6 +218,8 @@ class HDF5Pump(Pump):
             except KeyError:
                 dc = KM3Array
             arr = tab.read_where('event_id == %d' % event_id)
+            if self.fix_event_id:
+                event_id += np.full_like(event_id, self.fix_event_id)
             blob[tabname] = dc.deserialise(arr, event_id=event_id)
         return blob
 
