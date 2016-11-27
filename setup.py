@@ -85,7 +85,7 @@ setup(name='km3pipe',
           'astropy',
           'statsmodels',
           'scipy>=0.18',
-          'matplotlib==2.0.0b4',
+          'matplotlib>=2.0.0b4',
       ],
       extra_require={
           'scikit-learn': ['sklearn'],
