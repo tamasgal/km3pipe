@@ -35,10 +35,10 @@ __all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries',
 
 
 IS_CC = {
-    3: False,
-    2: True,
-    1: False,
-    0: True,
+    3: 0,         # False,
+    2: 1,         # True,
+    1: 0,         # False,
+    0: 1,         # True,
 }
 
 
@@ -700,7 +700,7 @@ cdef class Track:
     """
     cdef public int id, time, type, interaction_channel
     cdef public float energy, length, bjorkeny
-    cdef public bint is_cc
+    cdef public unsigned short int is_cc
     cdef public np.ndarray pos
     cdef public np.ndarray dir
 
@@ -710,7 +710,7 @@ cdef class Track:
                   float energy,
                   int id,
                   np.int64_t interaction_channel,
-                  bint is_cc,
+                  unsigned short int is_cc,
                   float length,
                   pos,
                   int time,
@@ -1191,7 +1191,7 @@ class TrackSeries(object):
         ('energy', '<f8'),
         ('id', '<u4'),
         ('interaction_channel', '<u4'),
-        ('is_cc', '?'),
+        ('is_cc', '<u4'),
         ('length', '<f8'),
         ('pos_x', '<f8'),
         ('pos_y', '<f8'),
