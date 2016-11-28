@@ -317,7 +317,8 @@ class H5Mono(Pump):
         else:
             event_id = self.event_ids[index]
             arr = self.table.read_where('%s == %d' % (self.id_col, event_id))
-        arr = KM3Array.deserialise(arr, event_id=event_id, h5loc=self.h5loc)
+        arr = KM3Array.deserialise(arr, event_id=event_id, h5loc=self.h5loc,
+                                   evt_id_col='EventID')
         blob[self.blobkey] = arr
         return blob
 

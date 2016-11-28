@@ -1600,11 +1600,12 @@ class KM3Array(np.ndarray):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_from(cls, data, event_id=None, h5loc='/', fmt='numpy'):
+    def conv_from(cls, data, event_id=None, h5loc='/', fmt='numpy',
+                  evt_id_col='event_id'):
         if fmt == 'numpy':
             arr = cls(data, h5loc)
             if event_id is not None:
-                arr['event_id'] = event_id
+                arr[evt_id_col] = event_id
             return arr
 
     def conv_to(self, to='numpy'):
