@@ -176,8 +176,6 @@ class HDF5Pump(Pump):
             log.critical("No /event_info table found.")
             raise SystemExit
 
-        self.fix_event_id = self.get('fix_event_id') or None
-
         self._n_events = len(self.event_ids)
 
     def _check_version(self):
@@ -209,8 +207,6 @@ class HDF5Pump(Pump):
             self._reset_index()
             raise StopIteration
         event_id = self.event_ids[index]
-        if self.fix_event_id:
-            event_id += np.full_like(event_id, self.fix_event_id)
         blob = {}
         for tab in self.h5_file.walk_nodes(classname="Table"):
             loc, tabname = os.path.split(tab._v_pathname)
