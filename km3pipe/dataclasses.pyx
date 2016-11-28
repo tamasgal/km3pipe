@@ -104,7 +104,7 @@ class SummarysliceInfo(with_metaclass(Serialisable)):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_from(cls, data, event_id, fmt='numpy'):
+    def conv_from(cls, data, event_id, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
             return cls.from_table(data[0])
 
@@ -165,7 +165,7 @@ class TimesliceInfo(with_metaclass(Serialisable)):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_from(cls, data, frame_id, fmt='numpy'):
+    def conv_from(cls, data, frame_id, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
             return cls.from_table(data[0])
 
@@ -233,7 +233,7 @@ class TimesliceFrameInfo(with_metaclass(Serialisable)):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_from(cls, data, frame_id, fmt='numpy'):
+    def conv_from(cls, data, frame_id, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
             return cls.from_table(data[0])
 
@@ -306,7 +306,7 @@ class SummaryframeInfo(with_metaclass(Serialisable)):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_from(cls, data, frame_id, fmt='numpy'):
+    def conv_from(cls, data, frame_id, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
             return cls.from_table(data[0])
 
@@ -344,7 +344,6 @@ class SummaryframeInfo(with_metaclass(Serialisable)):
 class EventInfo(object):
     """Event Metadata.
     """
-    h5loc = '/'
     dtype = np.dtype([
         ('det_id', '<i4'),
         ('frame_index', '<u4'),
@@ -362,10 +361,11 @@ class EventInfo(object):
         ('event_id', '<u4'),
     ])
 
-    def __init__(self, arr):
+    def __init__(self, arr, h5loc='/'):
         self._arr = np.array(arr, dtype=self.dtype).reshape(1)
         for col in self.dtype.names:
             setattr(self, col, self._arr[col])
+        self.h5loc = h5loc
 
     @classmethod
     def from_row(cls, row, **kwargs):
@@ -380,7 +380,7 @@ class EventInfo(object):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_from(cls, data, event_id, fmt='numpy', **kwargs):
+    def conv_from(cls, data, event_id, fmt='numpy', h5loc='/', **kwargs):
         if fmt == 'numpy':
             return cls.from_row(data, **kwargs)
 
@@ -738,7 +738,6 @@ cdef class Track:
 class HitSeries(object):
     """Collection of multiple Hits.
     """
-    h5loc = '/'
     dtype = np.dtype([
         ('channel_id', 'u1'),
         ('dir_x', '<f8'),
@@ -758,10 +757,11 @@ class HitSeries(object):
         ('event_id', '<u4'),
     ])
 
-    def __init__(self, arr):
+    def __init__(self, arr, h5loc='/'):
         self._arr = arr
         self._index = 0
         self._hits = None
+        self.h5loc = h5loc
 
     @classmethod
     def from_aanet(cls, hits, event_id):
@@ -901,7 +901,7 @@ class HitSeries(object):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_from(cls, data, event_id=None, fmt='numpy'):
+    def conv_from(cls, data, event_id=None, fmt='numpy', h5loc='/'):
         # what is event_id doing here?
         if fmt == 'numpy':
             return cls(data)
@@ -1097,7 +1097,7 @@ class TimesliceHitSeries(object):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_from(cls, data, slice_id, frame_id, fmt='numpy'):
+    def conv_from(cls, data, slice_id, frame_id, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
             # return cls.from_table(data, frame_id)
             return cls(data, slice_id, frame_id)
@@ -1197,9 +1197,8 @@ class TrackSeries(object):
         ('type', '<i4'),
         ('event_id', '<u4'),
     ])
-    h5loc = '/'
 
-    def __init__(self, tracks, event_id):
+    def __init__(self, tracks, event_id, h5loc='/'):
         self._bjorkeny = None
         self._dir = None
         self._energy = None
@@ -1214,6 +1213,7 @@ class TrackSeries(object):
         self._tracks = tracks
         self._type = None
         self.event_id = event_id
+        self.h5loc = h5loc
 
     @classmethod
     def from_aanet(cls, tracks, event_id):
@@ -1306,7 +1306,7 @@ class TrackSeries(object):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_from(cls, data, event_id, fmt='numpy'):
+    def conv_from(cls, data, event_id, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
             return cls.from_table(data, event_id)
 
@@ -1500,7 +1500,7 @@ class SummaryframeSeries(object):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_from(cls, data, slice_id, fmt='numpy'):
+    def conv_from(cls, data, slice_id, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
             # return cls.from_table(data, event_id)
             return cls(data)
@@ -1600,9 +1600,13 @@ class KM3Array(np.ndarray):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_from(cls, data, event_id, h5loc='/', fmt='numpy'):
+    def conv_from(cls, data, event_id=None, h5loc='/', fmt='numpy',
+                  evt_id_col='event_id'):
         if fmt == 'numpy':
-            return cls(data, h5loc)
+            arr = cls(data, h5loc)
+            if event_id is not None:
+                arr[evt_id_col] = event_id
+            return arr
 
     def conv_to(self, to='numpy'):
         if to == 'numpy':
