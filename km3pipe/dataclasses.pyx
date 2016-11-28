@@ -347,8 +347,11 @@ class EventInfo(object):
     dtype = np.dtype([
         ('det_id', '<i4'),
         ('frame_index', '<u4'),
+        ('livetime_sec', '<u8'),
         ('mc_id', '<i4'),
         ('mc_t', '<f8'),
+        ('n_events_gen', '<u8'),
+        ('n_files_gen', '<u8'),
         ('overlays', '<u4'),
         # ('run_id', '<u4'),
         ('trigger_counter', '<u8'),
@@ -384,12 +387,13 @@ class EventInfo(object):
         if fmt == 'numpy':
             return cls.from_row(data, **kwargs)
 
-    def conv_to(self, to='numpy'):
+    def conv_to(self, to='numpy', **kwargs):
         if to == 'numpy':
             return KM3Array(np.array(self.__array__(), dtype=self.dtype),
                             h5loc=self.h5loc)
         if to == 'pandas':
-            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
+            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc,
+                                **kwargs)
 
     def __array__(self):
         return self._arr
