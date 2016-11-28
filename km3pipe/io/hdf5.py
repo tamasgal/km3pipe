@@ -209,6 +209,8 @@ class HDF5Pump(Pump):
             self._reset_index()
             raise StopIteration
         event_id = self.event_ids[index]
+        if self.fix_event_id:
+            event_id += np.full_like(event_id, self.fix_event_id)
         blob = {}
         for tab in self.h5_file.walk_nodes(classname="Table"):
             loc, tabname = os.path.split(tab._v_pathname)
@@ -218,8 +220,6 @@ class HDF5Pump(Pump):
             except KeyError:
                 dc = KM3Array
             arr = tab.read_where('event_id == %d' % event_id)
-            if self.fix_event_id:
-                event_id += np.full_like(event_id, self.fix_event_id)
             blob[tabname] = dc.deserialise(arr, event_id=event_id, h5loc=loc)
         return blob
 
