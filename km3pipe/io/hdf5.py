@@ -113,7 +113,6 @@ class HDF5Sink(Module):
                 except AttributeError:
                     tabname = decamelise(key)
 
-                where = os.path.join(h5loc, tabname)
                 entry = self._to_array(entry)
                 if entry is None:
                     continue
@@ -121,6 +120,7 @@ class HDF5Sink(Module):
                     dt = np.dtype((entry.dtype, [(key, entry.dtype)]))
                     entry = entry.view(dt)
                     h5loc = '/misc'
+                where = os.path.join(h5loc, tabname)
                 self._write_array(where, entry, title=key)
 
         if not self.index % 1000:
@@ -220,7 +220,7 @@ class HDF5Pump(Pump):
             arr = tab.read_where('event_id == %d' % event_id)
             if self.fix_event_id:
                 event_id += np.full_like(event_id, self.fix_event_id)
-            blob[tabname] = dc.deserialise(arr, event_id=event_id)
+            blob[tabname] = dc.deserialise(arr, event_id=event_id, h5loc=loc)
         return blob
 
     def finish(self):
@@ -321,8 +321,8 @@ class H5Mono(Pump):
         else:
             event_id = self.event_ids[index]
             arr = self.table.read_where('%s == %d' % (self.id_col, event_id))
-        blob[self.blobkey] = KM3Array.deserialise(arr, event_id=event_id,
-                                                  h5loc=self.h5loc)
+        arr = KM3Array.deserialise(arr, event_id=event_id, h5loc=self.h5loc)
+        blob[self.blobkey] = arr
         return blob
 
     def process(self, blob):

@@ -192,7 +192,7 @@ class AanetPump(Pump):
         if self.format in ('ancient_recolns', 'orca_recolns'):
             track, dtype = parse_ancient_recolns(event, event_id)
             if track:
-                blob['OrcaRecoLNS'] = KM3Array.from_dict(track, dtype,
+                blob['OrcaRecoLns'] = KM3Array.from_dict(track, dtype,
                                                              h5loc='/reco')
         return blob
 
