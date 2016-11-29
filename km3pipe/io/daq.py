@@ -213,9 +213,11 @@ class DAQProcessor(Module):
             header.det_id,
             self.index,
             # header.time_slice,
+            0,  # livetime_sec
             0, 0,  # MC ID and time
+            0, 0,  # n evts/files gen
             event.overlays,
-            #header.run,
+            # header.run,
             event.trigger_counter, event.trigger_mask,
             header.ticks * 16, header.time_stamp,
             0, 0, 0,  # MC weights
