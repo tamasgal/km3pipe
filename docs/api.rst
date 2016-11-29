@@ -156,20 +156,6 @@ KM3Pipe: Main Framework
   DBManager
 
 
-``km3pipe.astro``: Astro Tools
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. automodule:: km3pipe.astro
-  :no-members:
-  :no-inherited-members:
-
-.. currentmodule:: km3pipe.astro
-
-.. autosummary::
-  :toctree: api
-
-  to_frame
-
 
 KM3Modules: Pipeline Segments
 -----------------------------
@@ -243,3 +229,19 @@ KM3Modules: Pipeline Segments
   uniform_chi2
   idr
   tensor_of_intertia
+
+  
+``km3modules.astro``: Astro Tools
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: km3modules.astro
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3modules.astro
+
+.. autosummary::
+  :toctree: api
+
+  to_frame
+
