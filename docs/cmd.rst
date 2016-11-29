@@ -142,15 +142,17 @@ Example::
       -o OUTFILE          Output file.
 
 
-``h5tree``
-~~~~~~~~~~
+``pdump`` (from PyTables)
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Inspect the contents of a HDF5 file, walking through all the subgroups.
+
+Read the `PyTables docs http://www.pytables.org/usersguide/utilities.html#id1`_ for more details.
 
 Example output::
 
     ┌─[moritz@averroes ~/km3net/data ]
-    └─╼ h5tree nueCC.h5
+    └─╼ ptdump nueCC.h5
     / (RootGroup) ''
     /event_info (Table(121226,), shuffle, zlib(5)) ''
     /hits (Table(0,), shuffle, zlib(5)) ''
@@ -163,18 +165,6 @@ Example output::
     /reco/q_strategy (Table(121226,), shuffle, zlib(5)) ''
     /reco/reco_lns (Table(121226,), shuffle, zlib(5)) ''
     /reco/thomas_features (Table(121226,), shuffle, zlib(5)) ''
-
-    $ h5tree --help
-    Print the HDF5 file structure.
-
-    Usage:
-        h5tree FILE
-        h5tree (-h | --help)
-        h5tree --version
-    
-    Options:
-        FILE       Input file.
-        -h --help  Show this screen.
 
 
 ``h5info``
@@ -200,4 +190,3 @@ Example::
       FILE        Input file.
       -r --raw    Dump raw metadata.
       -h --help   Show this screen.
-
