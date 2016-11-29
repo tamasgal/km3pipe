@@ -17,6 +17,8 @@ from __future__ import division, absolute_import, print_function
 
 import tables
 
+from km3pipe.tools import deprecated
+
 __author__ = "Moritz Lotze"
 __copyright__ = "Copyright 2016, Moritz Lotze and the KM3NeT collaboration."
 __credits__ = []
@@ -26,6 +28,9 @@ __email__ = "mlotze@km3net.de"
 __status__ = "Development"
 
 
+MSG = "Use `ptdump` from pytables instead, it's better!"
+
+@deprecated(MSG)
 def h5tree(h5name):
     with tables.open_file(h5name) as h5:
         for node in h5.walk_nodes():
@@ -36,4 +41,5 @@ def main():
     from docopt import docopt
     arguments = docopt(__doc__)
 
+    print('DeprecationWarning: h5tree.py is deprecated. ' + MSG)
     h5tree(arguments['FILE'])
