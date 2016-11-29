@@ -279,8 +279,8 @@ class TestHitSeries(TestCase):
             (11, 25, 39, 53, 67, 81, 95, 109, 123, 137),
             tuple(hit_series.time))
         self.assertTupleEqual(
-            (1, 1, 1, 1, 1, 1, 1, 1,
-             1, 1),
+            # triggered is an unsigned short integer
+            (13, 27, 41, 55, 69, 83, 97, 111, 125, 139),
             tuple(hit_series.triggered))
         self.assertTupleEqual(
             (12, 26, 40, 54, 68, 82, 96, 110, 124, 138),
