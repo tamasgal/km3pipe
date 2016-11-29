@@ -279,8 +279,8 @@ class TestHitSeries(TestCase):
             (11, 25, 39, 53, 67, 81, 95, 109, 123, 137),
             tuple(hit_series.time))
         self.assertTupleEqual(
-            (True, True, True, True, True, True, True, True,
-             True, True),
+            # triggered is an unsigned short integer
+            (13, 27, 41, 55, 69, 83, 97, 111, 125, 139),
             tuple(hit_series.triggered))
         self.assertTupleEqual(
             (12, 26, 40, 54, 68, 82, 96, 110, 124, 138),
@@ -337,7 +337,7 @@ class TestHit(TestCase):
 
     def setUp(self):
         self.hit = Hit(1, nan, nan, nan, 2, 3, 4,
-                       nan, nan, nan, 0, 5, 6, True)
+                       nan, nan, nan, 0, 5, 6, 1)
 
     def test_attributes(self):
         hit = self.hit
@@ -354,12 +354,12 @@ class TestHit(TestCase):
         self.assertAlmostEqual(0, hit.t0)
         self.assertAlmostEqual(5, hit.time)
         self.assertAlmostEqual(6, hit.tot)
-        self.assertTrue(hit.triggered)
+        self.assertAlmostEqual(1, hit.triggered)
 
     def test_string_representation(self):
         hit = self.hit
         representation = "Hit: channel_id(1), dom_id(2), pmt_id(4), tot(6), " \
-                         "time(5), triggered(True)"
+                         "time(5), triggered(1)"
         self.assertEqual(representation, str(hit))
 
 
@@ -516,21 +516,24 @@ class TestSummarysliceInfo(TestCase):
 
 class TestEventInfo(TestCase):
     def test_event_info(self):
-        e = EventInfo(tuple(range(13)))
+        e = EventInfo(tuple(range(16)))
         self.assertAlmostEqual(0, e.det_id)
         self.assertAlmostEqual(1, e.frame_index)
-        self.assertAlmostEqual(2, e.mc_id)
-        self.assertAlmostEqual(3, e.mc_t)
-        self.assertAlmostEqual(4, e.overlays)
+        self.assertAlmostEqual(2, e.livetime_sec)
+        self.assertAlmostEqual(3, e.mc_id)
+        self.assertAlmostEqual(4, e.mc_t)
+        self.assertAlmostEqual(5, e.n_events_gen)
+        self.assertAlmostEqual(6, e.n_files_gen)
+        self.assertAlmostEqual(7, e.overlays)
         # self.assertAlmostEqual(6, e.run_id)
-        self.assertAlmostEqual(5, e.trigger_counter)
-        self.assertAlmostEqual(6, e.trigger_mask)
-        self.assertAlmostEqual(7, e.utc_nanoseconds)
-        self.assertAlmostEqual(8, e.utc_seconds)
-        self.assertAlmostEqual(9, e.weight_w1)
-        self.assertAlmostEqual(10, e.weight_w2)
-        self.assertAlmostEqual(11, e.weight_w3)
-        self.assertAlmostEqual(12, e.event_id)
+        self.assertAlmostEqual(8, e.trigger_counter)
+        self.assertAlmostEqual(9, e.trigger_mask)
+        self.assertAlmostEqual(10, e.utc_nanoseconds)
+        self.assertAlmostEqual(11, e.utc_seconds)
+        self.assertAlmostEqual(12, e.weight_w1)
+        self.assertAlmostEqual(13, e.weight_w2)
+        self.assertAlmostEqual(14, e.weight_w3)
+        self.assertAlmostEqual(15, e.event_id)
 
     def test_from_table(self):
         e = EventInfo.from_row({
@@ -548,6 +551,9 @@ class TestEventInfo(TestCase):
             'weight_w2': 11,
             'weight_w3': 12,
             'event_id': 1,
+            'livetime_sec': 13,
+            'n_events_gen': 14,
+            'n_files_gen': 15,
             })
 
         self.assertAlmostEqual(0, e.det_id)
@@ -564,13 +570,19 @@ class TestEventInfo(TestCase):
         self.assertAlmostEqual(11, e.weight_w2)
         self.assertAlmostEqual(12, e.weight_w3)
         self.assertAlmostEqual(1, e.event_id)
+        self.assertAlmostEqual(13, e.livetime_sec)
+        self.assertAlmostEqual(14, e.n_events_gen)
+        self.assertAlmostEqual(15, e.n_files_gen)
 
     def test_array(self):
         e = EventInfo.from_row({
             'det_id': 0,
             'frame_index': 2,
+            'livetime_sec': 13,
             'mc_id': 3,
             'mc_t': 4.0,
+            'n_events_gen': 14,
+            'n_files_gen': 15,
             'overlays': 5,
             # 'run_id': 6,
             'trigger_counter': 6,
@@ -582,7 +594,7 @@ class TestEventInfo(TestCase):
             'weight_w3': 12.0,
             'event_id': 1,
             })
-        exp = (0, 2, 3, 4.0, 5, 6, 7, 8, 9, 10.0, 11.0, 12.0, 1)
+        exp = (0, 2, 13, 3, 4.0, 14, 15, 5, 6, 7, 8, 9, 10.0, 11.0, 12.0, 1,)
         self.assertAlmostEqual(e.serialise(), np.array(exp, e.dtype))
 
 

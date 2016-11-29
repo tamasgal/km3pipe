@@ -163,7 +163,11 @@ class AanetPump(Pump):
         try:
             blob['EventInfo'] = EventInfo((
                 event.det_id, event.frame_index,
-                event.mc_id, event.mc_t, event.overlays,
+                0, # livetime_sec
+                event.mc_id, event.mc_t,
+                0, # n_events_gen
+                0, # n_files_gen
+                event.overlays,
                 # event.run_id,
                 event.trigger_counter, event.trigger_mask,
                 event.t.GetNanoSec(), event.t.GetSec(),
@@ -192,7 +196,7 @@ class AanetPump(Pump):
         if self.format in ('ancient_recolns', 'orca_recolns'):
             track, dtype = parse_ancient_recolns(event, event_id)
             if track:
-                blob['OrcaRecoLNS'] = KM3Array.from_dict(track, dtype,
+                blob['OrcaRecoLns'] = KM3Array.from_dict(track, dtype,
                                                              h5loc='/reco')
         return blob
 

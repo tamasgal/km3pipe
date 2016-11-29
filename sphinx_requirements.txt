@@ -1,1 +1,10 @@
+astropy
+pillow
+numpydoc
+ipython
+sphinx-gallery
+sphinx>=1.4
 sphinxcontrib-napoleon
+scikit-learn
+statsmodels
+seaborn

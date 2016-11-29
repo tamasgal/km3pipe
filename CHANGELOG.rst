@@ -1,6 +1,12 @@
 Unreleased changes
 ------------------
 
+6.0.0 2016-11-29
+~~~~~~~~~~~~~~~~~~
+* change all bool dataclasses to int
+* add new fields to event_info: livetime_sec, n_evs_gen, n_files_gen
+* update KM3HDF -> v3
+
 5.5.3 / 2016/11/28
 ~~~~~~~~~~~~~~~~~~
 * Add fix_event_id option to h5pump
