@@ -199,7 +199,7 @@ class TimesliceInfo(with_metaclass(Serialisable)):
 class TimesliceFrameInfo(with_metaclass(Serialisable)):
     """JDAQTimeslice frame metadata.
     """
-    h5loc='/'
+    h5loc = '/'
     dtype = np.dtype([
         ('dom_id', '<u4'),
         ('fifo_status', '<u4'),
@@ -532,11 +532,11 @@ cdef class Hit:
     t0 : int
     time : int
     tot : int
-    triggered : bool
+    triggered : int
 
     """
     cdef public int id, dom_id, time, tot, channel_id, pmt_id
-    cdef public bint triggered
+    cdef public unsigned short int triggered
     cdef public float pos_x, pos_y, pos_z, dir_x, dir_y, dir_z, t0
 
     def __cinit__(self,
@@ -553,7 +553,7 @@ cdef class Hit:
                   int t0,
                   int time,
                   int tot,
-                  bint triggered,
+                  unsigned short int triggered,
                   int event_id=0        # ignore this!
                   ):
         self.channel_id = channel_id
@@ -644,11 +644,11 @@ cdef class MCHit:
     pos : Position or numpy.ndarray
     time : int
     tot : int
-    triggered : bool
+    triggered : int
 
     """
     cdef public int id, dom_id, time, tot, channel_id, pmt_id
-    cdef public bint triggered
+    cdef public unsigned short int triggered
     cdef public np.ndarray pos
     cdef public np.ndarray dir
 
@@ -659,7 +659,7 @@ cdef class MCHit:
                   int pmt_id,
                   int time,
                   int tot,
-                  bint triggered,
+                  unsigned short int triggered,
                   ):
         self.channel_id = channel_id
         self.dom_id = dom_id
@@ -692,7 +692,7 @@ cdef class Track:
     energy : float
     id : int
     interaction_channel : int
-    is_cc : bool
+    is_cc : int
     length : float
     pos : Position or numpy.ndarray
     time : int
@@ -757,7 +757,7 @@ class HitSeries(object):
         ('t0', '<i4'),
         ('time', '<i4'),
         ('tot', 'u1'),
-        ('triggered', '?'),
+        ('triggered', 'u1'),
         ('event_id', '<u4'),
     ])
 
@@ -1281,7 +1281,6 @@ class TrackSeries(object):
         tracks._type = types
         return tracks
 
-
     @classmethod
     def from_km3df(cls, km3df):
         return cls.from_table(km3df.conv_to(to='numpy'),
@@ -1471,6 +1470,7 @@ class SummaryframeSeries(object):
         ('slice_id', '<u4'),
         ])
     h5loc = '/'
+
     def __init__(self, arr):
         self._arr = arr
         self._index = 0

@@ -279,8 +279,8 @@ class TestHitSeries(TestCase):
             (11, 25, 39, 53, 67, 81, 95, 109, 123, 137),
             tuple(hit_series.time))
         self.assertTupleEqual(
-            (True, True, True, True, True, True, True, True,
-             True, True),
+            (1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1),
             tuple(hit_series.triggered))
         self.assertTupleEqual(
             (12, 26, 40, 54, 68, 82, 96, 110, 124, 138),
@@ -337,7 +337,7 @@ class TestHit(TestCase):
 
     def setUp(self):
         self.hit = Hit(1, nan, nan, nan, 2, 3, 4,
-                       nan, nan, nan, 0, 5, 6, True)
+                       nan, nan, nan, 0, 5, 6, 1)
 
     def test_attributes(self):
         hit = self.hit
@@ -354,12 +354,12 @@ class TestHit(TestCase):
         self.assertAlmostEqual(0, hit.t0)
         self.assertAlmostEqual(5, hit.time)
         self.assertAlmostEqual(6, hit.tot)
-        self.assertTrue(hit.triggered)
+        self.assertAlmostEqual(1, hit.triggered)
 
     def test_string_representation(self):
         hit = self.hit
         representation = "Hit: channel_id(1), dom_id(2), pmt_id(4), tot(6), " \
-                         "time(5), triggered(True)"
+                         "time(5), triggered(1)"
         self.assertEqual(representation, str(hit))
 
 

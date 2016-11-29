@@ -1,9 +1,9 @@
 Unreleased changes
 ------------------
 
-6.0.0 (unreleased)
+6.0.0 2016-11-29
 ~~~~~~~~~~~~~~~~~~
-* change track.is_cc to int
+* change all bool dataclasses to int
 * add new fields to event_info: livetime_sec, n_evs_gen, n_files_gen
 * update KM3HDF -> v3
 
