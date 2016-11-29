@@ -179,6 +179,8 @@ KM3Modules: Pipeline Segments
   BlobIndexer
   StatusBar
   MemoryObserver
+  GetAngle
+  Cut
 
 ``km3modules.hits``: Hit Processing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -209,22 +211,8 @@ KM3Modules: Pipeline Segments
   :toctree: api
   
   Reconstruction
-  PrimFitter
-
-``km3modules.feature_extraction``: Feature Extraction
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. automodule:: km3modules.feature_extraction
-  :no-members:
-  :no-inherited-members:
-
-.. currentmodule:: km3modules.feature_extraction
-
-.. autosummary::
-  :toctree: api
-  
+  SvdFit
   Trawler
-  TrawlerMod
-  TrackMuxer
   bimod
   uniform_chi2
   idr
@@ -245,3 +233,32 @@ KM3Modules: Pipeline Segments
 
   to_frame
 
+
+``km3modules.topology``
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: km3modules.topology
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3modules.topology
+
+.. autosummary::
+  :toctree: api
+  
+  TriggeredDUs
+
+  
+``km3modules.parser``
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: km3modules.parser
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3modules.parser
+
+.. autosummary::
+  :toctree: api
+  
+  CHParser
