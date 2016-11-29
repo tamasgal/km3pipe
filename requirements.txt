@@ -1,4 +1,3 @@
-astropy
 controlhost
 cython
 docopt
