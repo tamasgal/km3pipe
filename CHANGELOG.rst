@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 
+6.0.1
+~~~~~
+* FIX freeze numpy version
+
 6.0.0 2016-11-29
 ~~~~~~~~~~~~~~~~~~
 * change all bool dataclasses to int
