@@ -22,7 +22,7 @@ import pandas as pd
 
 from km3pipe.tools import peak_memory_usage, ignored
 from km3pipe.hardware import Detector
-from km3pipe.dataclasses import Position, Direction, HitSeries
+from km3pipe.dataclasses import HitSeries
 from km3pipe.logger import logging
 
 __author__ = "Tamas Gal"
@@ -188,7 +188,7 @@ class Pipeline(object):
                 module.pre_finish()
                 self._timeit[module]['finish'] = timer() - start_time
                 self._timeit[module]['finish_cpu'] = \
-                        time.clock() - start_time_cpu
+                    time.clock() - start_time_cpu
             except AttributeError:
                 log.info("Skipping function module {0}".format(module.name))
         self._timeit['finish'] = timer()
@@ -259,10 +259,10 @@ class Pipeline(object):
             process_times = self._timeit[module]['process']
             process_times_cpu = self._timeit[module]['process_cpu']
             print(module.name +
-                " - process: {0:.3f}s (CPU {1:.3f}s)"
-                " - finish: {2:.3f}s (CPU {3:.3f}s)"
-                .format(sum(process_times), sum(process_times_cpu),
-                        finish_time, finish_time_cpu))
+                  " - process: {0:.3f}s (CPU {1:.3f}s)"
+                  " - finish: {2:.3f}s (CPU {3:.3f}s)"
+                  .format(sum(process_times), sum(process_times_cpu),
+                          finish_time, finish_time_cpu))
             if len(process_times) > 0:
                 print(statsf('wall', calc_stats(process_times)))
             if len(process_times_cpu) > 0:
