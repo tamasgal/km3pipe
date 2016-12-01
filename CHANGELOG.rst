@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 
+6.0.2
+~~~~~
+* Make blob ordered by default + actually use it in the pumps.
+
 6.0.1
 ~~~~~
 * FIX freeze numpy version
