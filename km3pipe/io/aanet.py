@@ -9,7 +9,7 @@ import os.path
 
 import numpy as np
 
-from km3pipe import Pump
+from km3pipe import Pump, Blob
 from km3pipe.dataclasses import (HitSeries, TrackSeries, EventInfo,
                                  KM3Array, KM3DataFrame)
 from km3pipe.logger import logging
@@ -145,7 +145,7 @@ class AanetPump(Pump):
         else:
             w1 = w2 = w3 = np.nan
 
-        blob = {}
+        blob = Blob()
         blob['Evt'] = event
         event_id = event.id
         if self.id_offset:
@@ -162,21 +162,34 @@ class AanetPump(Pump):
         blob['Header'] = self.header
         try:
             blob['EventInfo'] = EventInfo((
-                event.det_id, event.frame_index,
+                event.det_id,
+                event.frame_index,
                 0, # livetime_sec
-                event.mc_id, event.mc_t,
+                event.mc_id,
+                event.mc_t,
                 0, # n_events_gen
                 0, # n_files_gen
                 event.overlays,
                 # event.run_id,
-                event.trigger_counter, event.trigger_mask,
-                event.t.GetNanoSec(), event.t.GetSec(),
+                event.trigger_counter,
+                event.trigger_mask,
+                event.t.GetNanoSec(),
+                event.t.GetSec(),
                 w1, w2, w3,
                 event_id))
         except AttributeError:
-            blob['EventInfo'] = EventInfo((0, event.frame_index,
-                                           0, 0, 0,
-                                           0, 0, 0, 0,
+            blob['EventInfo'] = EventInfo((0,   # det_id
+                                           event.frame_index,
+                                           0,   # livetime_sec
+                                           0,   # mc_id
+                                           0,   # mc_t
+                                           0,   # n_events_gen
+                                           0,   # n_files_gen
+                                           0,   # overlays
+                                           0,   # trigger_counter
+                                           0,   # trigger_mask
+                                           0,   # nanose
+                                           0,   # sec
                                            w1, w2, w3,
                                            event_id))
         if self.format == 'minidst':
