@@ -4,13 +4,12 @@
 Convert HDF5 to vanilla ROOT.
 
 Usage:
-     hdf2root FILE [-o OUTFILE]
+     hdf2root FILES...
      hdf2root (-h | --help)
      hdf2root --version
 
 Options:
     -h --help           Show this screen.
-    -o OUTFILE          Output file.
 """
 
 from __future__ import division, absolute_import, print_function
@@ -56,6 +55,6 @@ def main():
     from docopt import docopt
     args = docopt(__doc__, version=version)
 
-    infile = args['FILE']
-    outfile = args['-o'] or infile + '.root'
-    hdf2root(infile, outfile)
+    files = args['FILES']
+    for fn in files:
+        hdf2root(fn, fn+'.root')

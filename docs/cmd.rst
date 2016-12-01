@@ -127,19 +127,17 @@ Convert a HDF5 file to a plain ROOT file (requires ``rootpy`` + ``root_numpy``).
 
 Example::
 
-  hdf52root FOO.h5
+  hdf52root FOO.h5 BAR.h5
 
   $ hdf2root --help
   Convert HDF5 to vanilla ROOT.
 
   Usage:
-       hdf2root FILE [-o OUTFILE]
+       hdf2root FILES...
        hdf2root (-h | --help)
-       hdf2root --version
   
   Options:
       -h --help           Show this screen.
-      -o OUTFILE          Output file.
 
 
 ``pdump`` (from PyTables)
