@@ -9,8 +9,7 @@ The core of the KM3Pipe framework.
 """
 from __future__ import division, absolute_import, print_function
 
-from collections import deque, defaultdict
-from functools import partial
+from collections import deque, OrderedDict
 import inspect
 import signal
 import gzip
@@ -372,8 +371,8 @@ class Pump(Module):
         self.close_file()
 
 
-class Blob(dict):
-    """A simple dict with a fancy name. This should hold the data."""
+class Blob(OrderedDict):
+    """A simple (ordered) dict with a fancy name. This should hold the data."""
     pass
 
 
