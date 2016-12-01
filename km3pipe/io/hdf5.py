@@ -14,7 +14,7 @@ import numpy as np
 import tables as tb
 
 import km3pipe as kp
-from km3pipe import Pump, Module
+from km3pipe import Pump, Module, Blob
 from km3pipe.dataclasses import KM3Array, deserialise_map
 from km3pipe.logger import logging
 from km3pipe.tools import camelise, decamelise, split
@@ -59,7 +59,7 @@ class HDF5Sink(Module):
         self.n_rows_expected = self.get('n_rows_expected') or 10000
 
         self.index = 1
-        self.h5file = tb.open_file(self.filename, mode="w", title="KM3NeT")
+        self.h5_file = tb.open_file(self.filename, mode="w", title="KM3NeT")
         self.filters = tb.Filters(complevel=5, shuffle=True,
                                   fletcher32=True, complib='zlib')
         self._tables = OrderedDict()
@@ -85,7 +85,7 @@ class HDF5Sink(Module):
         if where not in self._tables:
             dtype = arr.dtype
             loc, tabname = os.path.split(where)
-            tab = self.h5file.create_table(
+            tab = self.h5_file.create_table(
                 loc, tabname, description=dtype, title=title,
                 filters=self.filters, createparents=True,
                 expectedrows=self.n_rows_expected,
@@ -131,9 +131,9 @@ class HDF5Sink(Module):
         return blob
 
     def finish(self):
-        self.h5file.root._v_attrs.km3pipe = np.string_(kp.__version__)
-        self.h5file.root._v_attrs.pytables = np.string_(tb.__version__)
-        self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
+        self.h5_file.root._v_attrs.km3pipe = np.string_(kp.__version__)
+        self.h5_file.root._v_attrs.pytables = np.string_(tb.__version__)
+        self.h5_file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
         print("Creating index tables. This may take a few minutes...")
         for tab in self._tables.itervalues():
             if 'frame_id' in tab.colnames:
@@ -145,7 +145,7 @@ class HDF5Sink(Module):
             if 'event_id' in tab.colnames:
                 tab.cols.event_id.create_index()
             tab.flush()
-        self.h5file.close()
+        self.h5_file.close()
 
 
 class HDF5Pump(Pump):
@@ -207,7 +207,7 @@ class HDF5Pump(Pump):
             self._reset_index()
             raise StopIteration
         event_id = self.event_ids[index]
-        blob = {}
+        blob = Blob()
         for tab in self.h5_file.walk_nodes(classname="Table"):
             loc, tabname = os.path.split(tab._v_pathname)
             tabname = camelise(tabname)
@@ -310,7 +310,7 @@ class H5Mono(Pump):
         if self.index >= self._n_events:
             self._reset_index()
             raise StopIteration
-        blob = {}
+        blob = Blob()
         if self.id_col is None:
             arr = self.table[index]
             event_id = index
