@@ -9,7 +9,7 @@ import os.path
 
 import numpy as np
 
-from km3pipe import Pump
+from km3pipe import Pump, Blob
 from km3pipe.dataclasses import (HitSeries, TrackSeries, EventInfo,
                                  KM3Array, KM3DataFrame)
 from km3pipe.logger import logging
@@ -145,7 +145,7 @@ class AanetPump(Pump):
         else:
             w1 = w2 = w3 = np.nan
 
-        blob = {}
+        blob = Blob()
         blob['Evt'] = event
         event_id = event.id
         if self.id_offset:

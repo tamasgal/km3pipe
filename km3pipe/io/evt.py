@@ -11,7 +11,7 @@ import sys
 
 from collections import namedtuple
 
-from km3pipe import Pump
+from km3pipe import Pump, Blob
 from km3pipe.logger import logging
 
 from km3pipe.dataclasses import Point, Direction, HitSeries
@@ -159,7 +159,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
                                                       self.index)
                 return blob
             if line.startswith('start_event:'):
-                blob = {}
+                blob = Blob()
                 tag, value = line.split(':')
                 blob[tag] = value.split()
                 continue
