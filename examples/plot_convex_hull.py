@@ -11,7 +11,7 @@ Lifted from ``scipy.spatial.qhull.pyx``.
 from scipy.spatial import ConvexHull
 import matplotlib.pyplot as plt
 
-import km3pipe.stule
+import km3pipe.style
 km3pipe.style.use('default')
 
 points = np.random.rand(30, 2)   # 30 random points in 2-D
