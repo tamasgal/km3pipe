@@ -8,6 +8,7 @@ Convex hull of a random set of points.
 Lifted from ``scipy.spatial.qhull.pyx``.
 """
 
+import numpy as np
 from scipy.spatial import ConvexHull
 import matplotlib.pyplot as plt
 
