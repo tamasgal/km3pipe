@@ -287,7 +287,7 @@ class DBManager(object):
             log.error(e)
             if input("Request new permanent session and retry? (y/n)") in 'yY':
                 self.request_permanent_session()
-                self._get_content(url)
+                return self._get_content(url)
             else:
                 return None
         log.debug("Accessing '{0}'".format(target_url))
