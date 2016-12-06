@@ -137,7 +137,6 @@ class Pipeline(object):
             while not self._stop:
                 cycle_start = timer()
                 cycle_start_cpu = time.clock()
-                self._cycle_count += 1
 
                 log.debug("Pumping blob #{0}".format(self._cycle_count))
                 self.blob = Blob()
@@ -165,6 +164,7 @@ class Pipeline(object):
                 self._timeit['cycles'].append(timer() - cycle_start)
                 self._timeit['cycles_cpu'].append(time.clock() -
                                                   cycle_start_cpu)
+                self._cycle_count += 1
                 if cycles and self._cycle_count >= cycles:
                     raise StopIteration
         except StopIteration:

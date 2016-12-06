@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* Ask for requesting new DB session when session expired.
 
 6.0.2
 ~~~~~
