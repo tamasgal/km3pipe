@@ -1,8 +1,8 @@
 controlhost
 cython
 docopt
-matplotlib==2.0.0b4
-numpy==1.11.2
+matplotlib==2.0.0rc1
+numpy
 pandas
 scipy
 tables
