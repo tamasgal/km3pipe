@@ -82,6 +82,7 @@ setup(name='km3pipe',
           'tornado',
           'urwid',
           'websocket-client',
+          'statsmodels',
       ],
       extra_require={
           'docs': ['sphinx >= 1.4', 'sphinx-gallery', 'numpydoc',
