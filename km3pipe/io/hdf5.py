@@ -70,7 +70,7 @@ class HDF5Sink(Module):
         if len(data) <= 0:
             return
         try:
-            return data.to_records()
+            return data.to_records(index=False)
         except AttributeError:
             pass
         try:
@@ -112,7 +112,6 @@ class HDF5Sink(Module):
                     tabname = entry.tabname
                 except AttributeError:
                     tabname = decamelise(key)
-
                 entry = self._to_array(entry)
                 if entry is None:
                     continue
