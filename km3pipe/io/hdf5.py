@@ -29,7 +29,7 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-FORMAT_VERSION = np.string_('3.0')
+FORMAT_VERSION = np.string_('3.1')
 MINIMUM_FORMAT_VERSION = np.string_('3.0')
 
 
@@ -60,8 +60,14 @@ class HDF5Sink(Module):
 
         self.index = 1
         self.h5_file = tb.open_file(self.filename, mode="w", title="KM3NeT")
-        self.filters = tb.Filters(complevel=5, shuffle=True,
-                                  fletcher32=True, complib='zlib')
+        try:
+            self.filters = tb.Filters(complevel=5, shuffle=True,
+                                      fletcher32=True, complib='blosc')
+        except tb.exceptions.FiltersWarning:
+            log.error("BLOSC Compression not available, "
+                      "falling back to zlib...")
+            self.filters = tb.Filters(complevel=5, shuffle=True,
+                                      fletcher32=True, complib='zlib')
         self._tables = OrderedDict()
 
     def _to_array(self, data):
