@@ -1,5 +1,9 @@
 Unreleased changes
 ------------------
+
+6.0.3
+~~~~~
+* Fix Dataclass + IO conversion signatures towards consistency
 * Ask for requesting new DB session when session expired.
 
 6.0.2

@@ -29,7 +29,7 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-FORMAT_VERSION = np.string_('3.0')
+FORMAT_VERSION = np.string_('3.1')
 MINIMUM_FORMAT_VERSION = np.string_('3.0')
 
 
@@ -60,8 +60,14 @@ class HDF5Sink(Module):
 
         self.index = 1
         self.h5_file = tb.open_file(self.filename, mode="w", title="KM3NeT")
-        self.filters = tb.Filters(complevel=5, shuffle=True,
-                                  fletcher32=True, complib='zlib')
+        try:
+            self.filters = tb.Filters(complevel=5, shuffle=True,
+                                      fletcher32=True, complib='blosc')
+        except tb.exceptions.FiltersWarning:
+            log.error("BLOSC Compression not available, "
+                      "falling back to zlib...")
+            self.filters = tb.Filters(complevel=5, shuffle=True,
+                                      fletcher32=True, complib='zlib')
         self._tables = OrderedDict()
 
     def _to_array(self, data):
@@ -70,7 +76,7 @@ class HDF5Sink(Module):
         if len(data) <= 0:
             return
         try:
-            return data.to_records()
+            return data.to_records(index=False)
         except AttributeError:
             pass
         try:
@@ -112,7 +118,6 @@ class HDF5Sink(Module):
                     tabname = entry.tabname
                 except AttributeError:
                     tabname = decamelise(key)
-
                 entry = self._to_array(entry)
                 if entry is None:
                     continue
@@ -299,26 +304,16 @@ class H5Mono(Pump):
         self._reset_index()
 
         self.table = self.h5_file.get_node(os.path.join('/', self.tabname))
-        self.id_col = self.get('id_col') or None
-        if self.id_col is None:
-            self._n_events = self.table.shape[0]
-        else:
-            self.event_ids = np.unique(self.table.read(field=self.id_col))
-            self._n_events = len(self.event_ids)
+        self._n_events = self.table.shape[0]
 
     def get_blob(self, index):
         if self.index >= self._n_events:
             self._reset_index()
             raise StopIteration
         blob = Blob()
-        if self.id_col is None:
-            arr = self.table[index]
-            event_id = index
-        else:
-            event_id = self.event_ids[index]
-            arr = self.table.read_where('%s == %d' % (self.id_col, event_id))
-        arr = KM3Array.deserialise(arr, event_id=event_id, h5loc=self.h5loc,
-                                   evt_id_col='EventID')
+        arr = self.table[index]
+        event_id = index
+        arr = KM3Array.deserialise(arr, event_id=event_id, h5loc=self.h5loc,)
         blob[self.blobkey] = arr
         return blob
 
