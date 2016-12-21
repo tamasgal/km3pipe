@@ -150,6 +150,18 @@ def read_group(group, max_id=None, **kwargs):
     return df
 
 
+def merge_event_ids(df):
+    cols = list(df.columns)
+    ids = list(c for c in cols if 'event_id' in c)
+    if not ids:
+        return df
+    non_id = list(c for c in cols if c not in ids)
+    event_ids = df[ids[0]]
+    df.drop(ids, axis=1, inplace=True)
+    df['event_id'] = event_ids
+    return df
+
+
 def df_to_h5(df, filename, where):
     """Write pandas dataframes with proper columns.
 

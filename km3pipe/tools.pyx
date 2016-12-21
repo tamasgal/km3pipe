@@ -318,25 +318,34 @@ class Timer(object):
         self.precision = precision
 
     def __enter__(self):
+        self.start()
+
+    def __exit__(self, type, value, traceback):
+        self.stop()
+
+    def start(self):
         self.__start = timer()
         self.__start_cpu = time.clock()
 
-    def __exit__(self, type, value, traceback):
+    def stop(self):
         self.__finish = timer()
         self.__finish_cpu = time.clock()
         self.log()
+        return self.seconds
 
-    def get_seconds(self):
+    @property
+    def seconds(self):
         return self.__finish - self.__start
 
-    def get_seconds_cpu(self):
+    @property
+    def cpu_seconds(self):
         return self.__finish_cpu - self.__start_cpu
 
     def log(self):
-        seconds = self.get_seconds()
-        seconds_cpu = self.get_seconds_cpu()
         print("{0} took {1:.{3}f}s (CPU {2:.{3}f}s)."
-              .format(self.message, seconds, seconds_cpu, self.precision))
+              .format(self.message,
+                      self.seconds, self.cpu_seconds,
+                      self.precision))
 
 
 class Cuckoo(object):
