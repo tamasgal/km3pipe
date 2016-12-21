@@ -9,6 +9,7 @@ from __future__ import division, absolute_import, print_function
 
 from collections import OrderedDict
 import os.path
+from six import itervalues
 
 import numpy as np
 import tables as tb
@@ -140,7 +141,7 @@ class HDF5Sink(Module):
         self.h5_file.root._v_attrs.pytables = np.string_(tb.__version__)
         self.h5_file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
         print("Creating index tables. This may take a few minutes...")
-        for tab in self._tables.itervalues():
+        for tab in itervalues(self._tables):
             if 'frame_id' in tab.colnames:
                 tab.cols.frame_id.create_index()
             if 'slice_id' in tab.colnames:
