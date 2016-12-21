@@ -1,6 +1,13 @@
 Unreleased changes
 ------------------
 
+6.0.4 / 2016-12-21
+~~~~~~~~~~~~~~~~~~
+* fix: H5Sink in py3 actually creates indextables + closes file now
+* HDF5 3.1: Change compression to BLOSC, fallback to zlib
+* MergeDF module
+* Easier access to seconds in timer
+
 6.0.3
 ~~~~~
 * Fix Dataclass + IO conversion signatures towards consistency
