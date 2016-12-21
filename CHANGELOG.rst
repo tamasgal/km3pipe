@@ -2,41 +2,41 @@ Unreleased changes
 ------------------
 
 6.0.4 / 2016-12-21
-~~~~~~~~~~~~~~~~~~
+------------------
 * fix: H5Sink in py3 actually creates indextables + closes file now
 * HDF5 3.1: Change compression to BLOSC, fallback to zlib
 * MergeDF module
 * Easier access to seconds in timer
 
 6.0.3
-~~~~~
+-----
 * Fix Dataclass + IO conversion signatures towards consistency
 * Ask for requesting new DB session when session expired.
 
 6.0.2
-~~~~~
+-----
 * Make blob ordered by default + actually use it in the pumps.
 
 6.0.1
-~~~~~
+-----
 * FIX freeze numpy version
 
 6.0.0 2016-11-29
-~~~~~~~~~~~~~~~~~~
+------------------
 * change all bool dataclasses to int
 * add new fields to event_info: livetime_sec, n_evs_gen, n_files_gen
 * update KM3HDF -> v3
 
 5.5.3 / 2016/11/28
-~~~~~~~~~~~~~~~~~~
+------------------
 * Add fix_event_id option to h5pump
 
 5.5.2 / 2016-11-24
-~~~~~~~~~~~~~~~~~~
+------------------
 * Updated docs
 
 5.5.1 / 2016-11-24
-~~~~~~~~~~~~~~~~~~
+------------------
 * Cuckoo now can be called directly
 * CHPump uses Cuckoo for log.warn to avoid spamming in case of
   high network traffic
@@ -49,15 +49,15 @@ Unreleased changes
 * ``H5Mono`` pump to read HDF5 with flat table structure
 
 5.4 / 2016-11-08
-~~~~~~~~~~~~~~~~
+----------------
 * Add a bunch of useful km3modules
 
 5.3.3 / 2016-11-04
-~~~~~~~~~~~~~~~~~~
+------------------
 * Fix time calib application
 
 5.3.2 / 2016-11-03
-~~~~~~~~~~~~~~~~~~
+------------------
 * add preliminary bootstrap script
 
 5.3.0 / 2016-11-03
@@ -67,7 +67,7 @@ Unreleased changes
 * pld3 function in tools, to calculate point-line-distance in 3d
 
 5.2.2 / 2016-10-26
-~~~~~~~~~~~~~~~~~~
+------------------
 * Fixes Cython dependency
 * ``kp.io.pandas.H5Chain`` now returns N _events_, not _rows_
 
@@ -77,11 +77,11 @@ Unreleased changes
   override ``__init__`` and call ``super``. You can, though ;)
 
 5.1.5 / 2016-10-24
-~~~~~~~~~~~~~~~~~~
+------------------
 * DB/Dataclass bugfixes
 
 5.1.2 / 2016-10-20
-~~~~~~~~~~~~~~~~~~
+------------------
 * Unify Reco + Wrapper dataclass. Reco(map, dtype) -> ArrayTaco.from_dict()
 * add ``to='pandas'`` option to ``Dataclass.serialise()``
 * Tweak internal array/dataframe handling
@@ -104,15 +104,15 @@ Unreleased changes
   the default style.
 
 4.8.3 / 2016-10-13
-~~~~~~~~~~~~~~~~~~
+------------------
 * Fixes t0 application in HitSeries
 
 4.8.2 / 2016-10-13
-~~~~~~~~~~~~~~~~~~
+------------------
 * Fixes geometry application in HitSeries
 
 4.8.1 / 2016-10-12
-~~~~~~~~~~~~~~~~~~
+------------------
 * Forcing matplotlib 2.0.0b4 as dependency. Don't blame us!
 * New unified style for all plots, using `import km3pipe.style`
 * aanet / jgandalf: write zeroed row if no track in event
@@ -129,7 +129,7 @@ Unreleased changes
 * ``tohdf5`` / ``GenericPump`` now supports multiple input files for aanet files
 
 4.7.1 / 2016-09-29
-~~~~~~~~~~~~~~~~~~
+------------------
 * Improved documentation
 * Fixed event_id indexing for the /hits table in HDF5
 * root sub-package added (via rootpy)
@@ -148,7 +148,7 @@ Unreleased changes
 * ...
 
 4.5.1
-~~~~~
+-----
 * Bugfixes
 
 4.5.0
@@ -156,7 +156,7 @@ Unreleased changes
 * Full L0 readout support via ``JPPPump``
 
 4.4.1
-~~~~~
+-----
 * Bugfixes
 
 4.4.0
@@ -169,11 +169,11 @@ Unreleased changes
 * Introduces HDF5 format versioning
 
 4.2.2
-~~~~~
+-----
 * Bugfixes
 
 4.2.1
-~~~~~
+-----
 * Bugfixes
 
 4.2.0
@@ -181,11 +181,11 @@ Unreleased changes
 * ...
 
 4.1.2
-~~~~~
+-----
 * Bugfixes
 
 4.1.1 / 2016-08-09
-~~~~~~~~~~~~~~~~~~
+------------------
 * Bugfixes
 
 4.1.0 / 2016-08-04
