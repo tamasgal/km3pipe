@@ -20,6 +20,9 @@ class Wrap(Module):
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.keys = self.get('keys') or None
+        key = self.get('key') or None
+        if key and not self.keys:
+            self.keys = [key]
 
     def process(self, blob):
         keys = sorted(blob.keys()) if self.keys is None else self.keys
@@ -47,6 +50,9 @@ class Dump(Module):
         super(self.__class__, self).__init__(**context)
         self.keys = self.get('keys') or None
         self.full = self.get('full') or False
+        key = self.get('key') or None
+        if key and not self.keys:
+            self.keys = [key]
 
     def process(self, blob):
         keys = sorted(blob.keys()) if self.keys is None else self.keys
@@ -70,6 +76,9 @@ class Delete(Module):
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.keys = self.get('keys') or set()
+        key = self.get('key') or None
+        if key and not self.keys:
+            self.keys = [key]
 
     def process(self, blob):
         for key in self.keys:
@@ -88,6 +97,9 @@ class Keep(Module):
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.keys = self.get('keys') or set()
+        key = self.get('key') or None
+        if key and not self.keys:
+            self.keys = [key]
 
     def process(self, blob):
         for key in blob.keys():
