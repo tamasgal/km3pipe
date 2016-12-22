@@ -1,7 +1,19 @@
 Installation
-===========
+============
+
 
 .. contents:: :local:
+
+
+Important Note
+--------------
+
+KM3Pipe is preinstalled on the Lyon computing centre. Put this into your
+`~/.bashrc` or `~/.zshenv` (or whatever login script you prefer):::
+
+    source /afs/in2p3.fr/throng/km3net/src/python/pyenv.sh
+
+And you are ready to go!
 
 Requirements
 ------------
