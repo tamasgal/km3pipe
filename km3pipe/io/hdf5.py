@@ -164,7 +164,7 @@ class HDF5Pump(Pump):
         """
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
-        self.filename = self.get('filename')
+        self.filename = self.get('filename') or None
         self.filenames = self.get('filenames') or []
         self.skip_version_check = bool(self.get('skip_version_check')) or False
         if not self.filename and not self.filenames:
@@ -173,11 +173,11 @@ class HDF5Pump(Pump):
         if self.filename:
             self.filenames.append(self.filename)
 
-        self.current_file = self.filenames[0]
         self.filequeue = list(self.filenames)
+        self._set_next_file()
 
         self.event_ids = OrderedDict()
-        self.n_each = OrderedDict()
+        self._n_each = OrderedDict()
         self.h5files = OrderedDict()
         for fn in self.filenames:
             # Open all files before reading any events
@@ -192,17 +192,18 @@ class HDF5Pump(Pump):
             try:
                 event_info = h5file.get_node('/', 'event_info')
                 self.event_ids[fn] = event_info.cols.event_id[:]
-                self._n_events[fn]
+                self._n_each[fn] = len(self.event_ids[fn])
             except tb.NoSuchNodeError:
                 log.critical("No /event_info table found: '{0}'"
                              .format(fn))
                 raise SystemExit
-        self._n_events = np.sum((v for k, v in self.n_each.items()))
-        self.minmax = {}
+            self.h5files[fn] = h5file
+        self._n_events = np.sum((v for k, v in self._n_each.items()))
+        self.minmax = OrderedDict()
         n_read = 0
-        for fn, n in enumerate(iteritems(self.n_each)):
+        for fn, n in iteritems(self._n_each):
             min = n_read
-            max = n_read + n
+            max = n_read + n -1
             n_read += n
             self.minmax[fn] = (min, max)
         self.index = None
@@ -232,14 +233,15 @@ class HDF5Pump(Pump):
         self.index += 1
         return blob
 
-    def _need_next(self, index, fname):
+    def _need_next(self, index):
+        fname = self.current_file
         min, max = self.minmax[fname]
         return (index < min) or (index > max)
 
-    def _get_next_file(self):
+    def _set_next_file(self):
         if not self.filequeue:
             raise IndexError('No more files available!')
-        return self.filequeue.pop(0)
+        self.current_file = self.filequeue.pop(0)
 
     def _translate_index(self, fname, index):
         min, _ = self.minmax[fname]
@@ -250,11 +252,11 @@ class HDF5Pump(Pump):
             self._reset_index()
             raise StopIteration
         blob = Blob()
-
-        if self._need_next(index, self.current_file):
-            fname = self._get_next_file()
-            h5file = self.h5files[fname]
-            evt_ids = self.event_ids[fname]
+        if self._need_next(index):
+            self._set_next_file()
+        fname = self.current_file
+        h5file = self.h5files[fname]
+        evt_ids = self.event_ids[fname]
         local_index = self._translate_index(fname, index)
         event_id = evt_ids[local_index]
 
@@ -310,6 +312,7 @@ class HDF5Pump(Pump):
         for i in range(start, stop, step):
             yield self.get_blob(i)
 
+        self.current_file = None
 
 class H5Mono(Pump):
     """Read HDF5 files with one big table.
