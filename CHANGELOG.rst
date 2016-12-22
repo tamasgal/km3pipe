@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* H5Pump now supports multiple files
 
 6.0.4 / 2016-12-21
 ------------------
