@@ -1,7 +1,7 @@
 controlhost
 cython
 docopt
-matplotlib==2.0.0rc1
+matplotlib==2.0.0rc2
 numpy
 pandas
 scipy
