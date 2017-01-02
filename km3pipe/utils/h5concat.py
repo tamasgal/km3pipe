@@ -4,13 +4,13 @@
 Convert ROOT and EVT files to HDF5.
 
 Usage:
-    h5concat [-v] OUTFILE INFILES...
+    h5concat [--verbose] OUTFILE INFILES...
     h5concat (-h | --help)
     h5concat --version
 
 Options:
     -h --help               Show this screen.
-    -v --verbose            Print out more progress. [default: False].
+    --verbose               Print out more progress. [default: False].
 """
 
 from __future__ import division, absolute_import, print_function
@@ -48,6 +48,6 @@ def main():
 
     infiles = args['INFILES']
     outfile = args['OUTFILE']
-    verb = bool(args['-v'])
+    verb = bool(args['--verbose'])
 
     h5concat(outfile, infiles, verbose=verb)
