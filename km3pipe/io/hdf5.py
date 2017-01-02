@@ -185,7 +185,7 @@ class HDF5Pump(Pump):
             if os.path.isfile(fn):
                 h5file = tb.open_file(fn, 'r')
                 if not self.skip_version_check:
-                    self._check_version()
+                    self._check_version(fn)
             else:
                 raise IOError("No such file or directory: '{0}'"
                               .format(fn))
@@ -203,25 +203,26 @@ class HDF5Pump(Pump):
         n_read = 0
         for fn, n in iteritems(self._n_each):
             min = n_read
-            max = n_read + n -1
+            max = n_read + n - 1
             n_read += n
             self.minmax[fn] = (min, max)
         self.index = None
         self._reset_index()
 
-    def _check_version(self):
+    def _check_version(self, filename):
         try:
             version = np.string_(self.h5file.root._v_attrs.format_version)
         except AttributeError:
-            log.error("Could not determine HDF5 format version, you may "
-                      "encounter unexpected errors! Good luck...")
+            log.error("Could not determine HDF5 format version: '%s'."
+                      "You may encounter unexpected errors! Good luck..."
+                      % filename)
             return
         if split(version, int, np.string_('.')) < \
                 split(MINIMUM_FORMAT_VERSION, int, np.string_('.')):
             raise SystemExit("HDF5 format version {0} or newer required!\n"
                              "'{1}' has HDF5 format version {2}."
                              .format(MINIMUM_FORMAT_VERSION,
-                                     self.filename,
+                                     filename,
                                      version))
 
     def process(self, blob):
@@ -313,6 +314,7 @@ class HDF5Pump(Pump):
             yield self.get_blob(i)
 
         self.current_file = None
+
 
 class H5Mono(Pump):
     """Read HDF5 files with one big table.
