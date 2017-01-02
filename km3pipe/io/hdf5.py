@@ -9,7 +9,7 @@ from __future__ import division, absolute_import, print_function
 
 from collections import OrderedDict
 import os.path
-from six import itervalues
+from six import itervalues, iteritems
 
 import numpy as np
 import tables as tb
@@ -60,7 +60,7 @@ class HDF5Sink(Module):
         self.n_rows_expected = self.get('n_rows_expected') or 10000
 
         self.index = 1
-        self.h5_file = tb.open_file(self.filename, mode="w", title="KM3NeT")
+        self.h5file = tb.open_file(self.filename, mode="w", title="KM3NeT")
         try:
             self.filters = tb.Filters(complevel=5, shuffle=True,
                                       fletcher32=True, complib='blosc')
@@ -92,7 +92,7 @@ class HDF5Sink(Module):
         if where not in self._tables:
             dtype = arr.dtype
             loc, tabname = os.path.split(where)
-            tab = self.h5_file.create_table(
+            tab = self.h5file.create_table(
                 loc, tabname, description=dtype, title=title,
                 filters=self.filters, createparents=True,
                 expectedrows=self.n_rows_expected,
@@ -137,9 +137,9 @@ class HDF5Sink(Module):
         return blob
 
     def finish(self):
-        self.h5_file.root._v_attrs.km3pipe = np.string_(kp.__version__)
-        self.h5_file.root._v_attrs.pytables = np.string_(tb.__version__)
-        self.h5_file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
+        self.h5file.root._v_attrs.km3pipe = np.string_(kp.__version__)
+        self.h5file.root._v_attrs.pytables = np.string_(tb.__version__)
+        self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
         print("Creating index tables. This may take a few minutes...")
         for tab in itervalues(self._tables):
             if 'frame_id' in tab.colnames:
@@ -151,7 +151,7 @@ class HDF5Sink(Module):
             if 'event_id' in tab.colnames:
                 tab.cols.event_id.create_index()
             tab.flush()
-        self.h5_file.close()
+        self.h5file.close()
 
 
 class HDF5Pump(Pump):
@@ -164,29 +164,54 @@ class HDF5Pump(Pump):
         """
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
-        self.filename = self.require('filename')
-        if os.path.isfile(self.filename):
-            self.h5_file = tb.open_file(self.filename, 'r')
-            if not self.get("skip_version_check"):
-                self._check_version()
-        else:
-            raise IOError("No such file or directory: '{0}'"
-                          .format(self.filename))
+        self.filename = self.get('filename') or None
+        self.filenames = self.get('filenames') or []
+        self.skip_version_check = bool(self.get('skip_version_check')) or False
+        if not self.filename and not self.filenames:
+            raise ValueError("No filename(s) defined")
+
+        if self.filename:
+            self.filenames.append(self.filename)
+
+        self.filequeue = list(self.filenames)
+        self._set_next_file()
+
+        self.event_ids = OrderedDict()
+        self._n_each = OrderedDict()
+        self.h5files = OrderedDict()
+        for fn in self.filenames:
+            # Open all files before reading any events
+            # So we can raise version mismatches etc before reading anything
+            if os.path.isfile(fn):
+                h5file = tb.open_file(fn, 'r')
+                if not self.skip_version_check:
+                    self._check_version()
+            else:
+                raise IOError("No such file or directory: '{0}'"
+                              .format(fn))
+            try:
+                event_info = h5file.get_node('/', 'event_info')
+                self.event_ids[fn] = event_info.cols.event_id[:]
+                self._n_each[fn] = len(self.event_ids[fn])
+            except tb.NoSuchNodeError:
+                log.critical("No /event_info table found: '{0}'"
+                             .format(fn))
+                raise SystemExit
+            self.h5files[fn] = h5file
+        self._n_events = np.sum((v for k, v in self._n_each.items()))
+        self.minmax = OrderedDict()
+        n_read = 0
+        for fn, n in iteritems(self._n_each):
+            min = n_read
+            max = n_read + n -1
+            n_read += n
+            self.minmax[fn] = (min, max)
         self.index = None
         self._reset_index()
 
-        try:
-            event_info = self.h5_file.get_node('/', 'event_info')
-            self.event_ids = event_info.cols.event_id[:]
-        except tb.NoSuchNodeError:
-            log.critical("No /event_info table found.")
-            raise SystemExit
-
-        self._n_events = len(self.event_ids)
-
     def _check_version(self):
         try:
-            version = np.string_(self.h5_file.root._v_attrs.format_version)
+            version = np.string_(self.h5file.root._v_attrs.format_version)
         except AttributeError:
             log.error("Could not determine HDF5 format version, you may "
                       "encounter unexpected errors! Good luck...")
@@ -208,13 +233,34 @@ class HDF5Pump(Pump):
         self.index += 1
         return blob
 
+    def _need_next(self, index):
+        fname = self.current_file
+        min, max = self.minmax[fname]
+        return (index < min) or (index > max)
+
+    def _set_next_file(self):
+        if not self.filequeue:
+            raise IndexError('No more files available!')
+        self.current_file = self.filequeue.pop(0)
+
+    def _translate_index(self, fname, index):
+        min, _ = self.minmax[fname]
+        return index - min
+
     def get_blob(self, index):
         if self.index >= self._n_events:
             self._reset_index()
             raise StopIteration
-        event_id = self.event_ids[index]
         blob = Blob()
-        for tab in self.h5_file.walk_nodes(classname="Table"):
+        if self._need_next(index):
+            self._set_next_file()
+        fname = self.current_file
+        h5file = self.h5files[fname]
+        evt_ids = self.event_ids[fname]
+        local_index = self._translate_index(fname, index)
+        event_id = evt_ids[local_index]
+
+        for tab in h5file.walk_nodes(classname="Table"):
             loc, tabname = os.path.split(tab._v_pathname)
             tabname = camelise(tabname)
             try:
@@ -222,12 +268,13 @@ class HDF5Pump(Pump):
             except KeyError:
                 dc = KM3Array
             arr = tab.read_where('event_id == %d' % event_id)
-            blob[tabname] = dc.deserialise(arr, event_id=event_id, h5loc=loc)
+            blob[tabname] = dc.deserialise(arr, event_id=index, h5loc=loc)
         return blob
 
     def finish(self):
         """Clean everything up"""
-        self.h5_file.close()
+        for h5 in itervalues(self.h5files):
+            h5.close()
 
     def _reset_index(self):
         """Reset index to default value"""
@@ -265,6 +312,7 @@ class HDF5Pump(Pump):
         for i in range(start, stop, step):
             yield self.get_blob(i)
 
+        self.current_file = None
 
 class H5Mono(Pump):
     """Read HDF5 files with one big table.
@@ -291,20 +339,20 @@ class H5Mono(Pump):
         super(H5Mono, self).__init__(**context)
         self.filename = self.require('filename')
         if os.path.isfile(self.filename):
-            self.h5_file = tb.open_file(self.filename, 'r')
+            self.h5file = tb.open_file(self.filename, 'r')
         else:
             raise IOError("No such file or directory: '{0}'"
                           .format(self.filename))
         self.tabname = self.get('table') or None
         if self.tabname is None:
-            self.table = self.h5_file.list_nodes('/', classname='Table')[0]
+            self.table = self.h5file.list_nodes('/', classname='Table')[0]
             self.tabname = self.table.name
         self.blobkey = self.tabname
         self.h5loc = self.get('h5loc') or '/'
         self.index = None
         self._reset_index()
 
-        self.table = self.h5_file.get_node(os.path.join('/', self.tabname))
+        self.table = self.h5file.get_node(os.path.join('/', self.tabname))
         self._n_events = self.table.shape[0]
 
     def get_blob(self, index):
@@ -329,7 +377,7 @@ class H5Mono(Pump):
 
     def finish(self):
         """Clean everything up"""
-        self.h5_file.close()
+        self.h5file.close()
 
     def _reset_index(self):
         """Reset index to default value"""

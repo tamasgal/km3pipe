@@ -1,6 +1,11 @@
 Unreleased changes
 ------------------
 
+6.1.0 / 2017-01-02
+------------------
+* H5Pump now supports multiple files
+* h5concat util for concatenating multiple H5 files
+
 6.0.4 / 2016-12-21
 ------------------
 * fix: H5Sink in py3 actually creates indextables + closes file now
