@@ -1,5 +1,8 @@
 Unreleased changes
 ------------------
+
+6.1.0 / 2017-01-02
+------------------
 * H5Pump now supports multiple files
 * h5concat util for concatenating multiple H5 files
 
