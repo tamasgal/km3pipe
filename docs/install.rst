@@ -1,7 +1,21 @@
 Installation
-===========
+============
+
 
 .. contents:: :local:
+
+
+Important Note for Users of the CC-IN3P3 in Lyon
+------------------------------------------------
+
+KM3Pipe is preinstalled on the Lyon computing centre. Put this into your
+`~/.bashrc` or `~/.zshenv` (or whatever login script you prefer):::
+
+    source /afs/in2p3.fr/throng/km3net/src/python/pyenv.sh
+
+And you are ready to go!
+The Python environment also contains all important and commonly used scientific
+packages like scipy, numpy, scikit-learn, pandas etc.
 
 Requirements
 ------------
