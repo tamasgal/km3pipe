@@ -10,7 +10,7 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 import pandas as pd
 
-from km3pipe import Module
+from km3pipe import Module, Blob
 from km3pipe.tools import peak_memory_usage, zenith, azimuth
 from km3pipe.dataclasses import KM3DataFrame, KM3Array     # noqa
 from km3pipe.io.pandas import merge_event_ids
@@ -104,10 +104,11 @@ class Keep(Module):
             self.keys = [key]
 
     def process(self, blob):
+        out = Blob()
         for key in blob.keys():
-            if key not in self.keys:
-                blob.pop(key, None)
-        return blob
+            if key in self.keys:
+                out[key] = blob[key]
+        return out
 
 
 class HitCounter(Module):
@@ -160,19 +161,29 @@ class MemoryObserver(Module):
 
 
 class Cut(Module):
-    """Drop an event from the pipe if certain criteria are met.
+    """Drop an event from the pipe, depending on some condition.
 
-    This is handled by the ``km3pipe.core.SkipException``.
+    Parameters
+    ----------
+    key: string
+        Blob content to cut on (must have `.conv_to(to='pandas')` method)
+    condition: string
+        Condition to eval on the dataframe, e.g. "zenith >= 1.4".
+    verbose: bool, optional (default=False)
+        Print extra info?
     """
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
-        self.key = self.get('key')
-        self.cond = self.get('condition')
+        self.key = self.require('key')
+        self.cond = self.require('condition')
+        self.verbose = self.get('verbose') or False
 
     def process(self, blob):
         df = blob[self.key].conv_to(to='pandas')
         ok = df.eval(self.cond).all()
         if not ok:
+            if self.verbose:
+                print('Condition "%s" not met, dropping...' % self.cond)
             return
         blob[self.key] = df
         return blob
@@ -182,7 +193,7 @@ class GetAngle(Module):
     """Convert pos(x, y, z) to zenith, azimuth."""
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
-        self.key = self.get('key')
+        self.key = self.require('key')
 
     def process(self, blob):
         df = blob[self.key].conv_to(to='pandas')
