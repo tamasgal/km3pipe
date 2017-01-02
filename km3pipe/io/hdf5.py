@@ -167,6 +167,7 @@ class HDF5Pump(Pump):
         self.filename = self.get('filename') or None
         self.filenames = self.get('filenames') or []
         self.skip_version_check = bool(self.get('skip_version_check')) or False
+        self.verbose = bool(self.get('verbose'))
         if not self.filename and not self.filenames:
             raise ValueError("No filename(s) defined")
 
@@ -243,6 +244,8 @@ class HDF5Pump(Pump):
         if not self.filequeue:
             raise IndexError('No more files available!')
         self.current_file = self.filequeue.pop(0)
+        if self.verbose:
+            ("Reading %s..." % self.current_file)
 
     def _translate_index(self, fname, index):
         min, _ = self.minmax[fname]
