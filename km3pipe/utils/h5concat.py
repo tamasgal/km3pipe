@@ -26,7 +26,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-def h5concat(input_files, output_file):
+def h5concat(output_file, input_files):
     """Convert Any file to HDF5 file"""
     from km3pipe import Pipeline  # noqa
     from km3pipe.io import HDF5Pump, HDF5Sink  # noqa
