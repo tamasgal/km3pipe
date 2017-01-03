@@ -25,10 +25,10 @@ class McTruth(Module):
         return row['flavor'] in NEUTRINOS
 
     def process(self, blob):
-        mc = blob['McTracks'].conv_to('pandas')[:, 0]
+        mc = blob['McTracks'].conv_to('pandas').head(1)
         mc['zenith'] = zenith(mc[['dir_x', 'dir_y', 'dir_z']])
         mc['azimuth'] = azimuth(mc[['dir_x', 'dir_y', 'dir_z']])
-        mc['flavor'] = mc.apply(cls.t2f, axis=1)
-        mc['is_neutrino'] = mc.apply(cls.is_nu, axis=1)
+        mc['flavor'] = mc.apply(self.t2f, axis=1)
+        mc['is_neutrino'] = mc.apply(self.is_nu, axis=1)
         blob['McTruth'] = mc
         return blob
