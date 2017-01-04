@@ -21,14 +21,14 @@ class McTruth(Module):
         return pdg2name(row['type'])
 
     @classmethod
-    def is_nu(cls, row):
-        return row['flavor'] in NEUTRINOS
+    def is_nu(cls, flavor):
+        return flavor in NEUTRINOS
 
     def process(self, blob):
         mc = blob['McTracks'].conv_to('pandas').head(1)
         mc['zenith'] = zenith(mc[['dir_x', 'dir_y', 'dir_z']])
         mc['azimuth'] = azimuth(mc[['dir_x', 'dir_y', 'dir_z']])
-        mc['flavor'] = mc.apply(self.t2f, axis=1)
-        mc['is_neutrino'] = mc.apply(self.is_nu, axis=1)
+        flavor = mc.apply(self.t2f, axis=1)
+        mc['is_neutrino'] = flavor.apply(self.is_nu)
         blob['McTruth'] = mc
         return blob
