@@ -140,12 +140,12 @@ Example::
       -h --help           Show this screen.
 
 
-``pdump`` (from PyTables)
+``ptdump`` (from PyTables)
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Inspect the contents of a HDF5 file, walking through all the subgroups.
 
-Read the `PyTables docs http://www.pytables.org/usersguide/utilities.html#id1`_ for more details.
+Read the `PyTables docs <http://www.pytables.org/usersguide/utilities.html#id1>`_ for more details.
 
 Example output::
 
