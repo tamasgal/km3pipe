@@ -7,7 +7,6 @@ Pandas Helpers.
 """
 from __future__ import division, absolute_import, print_function
 
-from collections import defaultdict
 import os.path
 from six import string_types
 
@@ -42,27 +41,13 @@ class H5Chain(object):
     Examples
     --------
     >>> filenames = ['numu_cc.h5', 'anue_nc.h5']
-    >>> n_evts = {'numu_cc.h5': None, 'anue_nc.h5': 100, }
-    # either tables keys below '/', or group names
-    >>> keys = ['hits', 'reco']
-    >>> step = {'mc_tracks': 2}
-
     >>> c = H5Chain(filenames)
-    >>> coll = c(n_evts, keys, step)
-    {'mc_tracks': pd.Dataframe, 'hits' pd.DataFrame, 'reco': dataframe}
-
-    >>> # these are pandas Dataframes
-    >>> X = coll['reco']
-    >>> wgt = coll['event_info']['weights_w2']
-    >>> Y_ene = coll['mc_tracks']['energy']
+    >>> X = c['/reco/gandalf']
     """
     def __init__(self, filenames):
         self.h5files = {}
-        if isinstance(filenames, dict):
-            self.h5files.update(filenames)
-            return
         for fn in filenames:
-            h5 = tb.open_file(fn, 'r')
+            h5 = pd.HDFStore(fn, 'r')
             self.h5files[fn] = h5
 
     def close(self):
@@ -75,52 +60,22 @@ class H5Chain(object):
     def __enter__(self):
         return self
 
-    def __call__(self, n_evts=None, keys=None, ignore_events=False):
+    def __getitem__(self, key):
+        dfs = []
+        for fname, h5 in self.h5files.items():
+            df = h5[key]
+            dfs.append(df)
+        dfs = pd.concat(dfs, axis=0, ignore_index=True)
+        return dfs
+
+    def __call__(self, key):
         """
         Parameters
         ----------
-        n_evts: int or dict(str->int) (default=None)
-            Number of events to read. If None, read every event from all.
-            If int, read that many from all.  In case of dict: If a
-            filename is in the dict, read that many events from the file.
-
-        keys: list(str) (default=None)
-            Names of the tables/groups to read. If None, read all.
-            Refers only to nodes sitting below '/',
-            e.g. '/mc_tracks' (Table) or '/reco' (Group).
+        key: str
+            H5 path of the object to retrieve, e.g. '/reco/gandalf'.
         """
-        store = defaultdict(list)
-        for fname, h5 in self.h5files.items():
-            n = n_evts
-            if isinstance(n_evts, dict):
-                n = n_evts[fname]
-            if ignore_events:
-                max_id = n
-            else:
-                max_id = np.unique(
-                    h5.root.event_info.read(field='event_id', stop=n)
-                )[-1]
-            # tables under '/', e.g. mc_tracks
-            for tab in h5.iter_nodes('/', classname='Table'):
-                tabname = tab.name
-                if keys is not None and tabname not in keys:
-                    continue
-                arr = _read_table(tab, max_id, ignore_events)
-                arr = pd.DataFrame.from_records(arr)
-                store[tabname].append(arr)
-
-            # groups under '/', e.g. '/reco'
-            # tables sitting below will be merged
-            for gr in h5.iter_nodes('/', classname='Group'):
-                groupname = gr._v_name
-                if keys is not None and groupname not in keys:
-                    continue
-                arr = read_group(gr, max_id)
-                store[groupname].append(arr)
-
-        for key, dfs in sorted(store.items()):
-            store[key] = pd.concat(dfs, axis=0, ignore_index=True)
-        return store
+        return self[key]
 
 
 def map2df(map):
