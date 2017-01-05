@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* H5Chain now is just a Multifile pd.HDFStore
 
 6.1.0 / 2017-01-02
 ------------------
