@@ -207,6 +207,12 @@ def geant2pdg(geant_code):
 
 
 _PDG2NAME = {
+    1: 'd',
+    2: 'u',
+    3: 's',
+    4: 'c',
+    5: 'b',
+    6: 't',
     11: 'e-',
     -11: 'e+',
     12: 'nu_e',
