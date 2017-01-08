@@ -6,6 +6,7 @@ A collection of commonly used modules.
 
 """
 from __future__ import division, absolute_import, print_function
+from time import time
 
 import numpy as np
 import pandas as pd
@@ -134,15 +135,40 @@ class BlobIndexer(Module):
 
 
 class StatusBar(Module):
-    """Displays the current blob number"""
+    """Displays the current blob number."""
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
-        self.every = self.get('every') or 1
+        self.every = self.get('every') or 100
         self.blob_index = 0
 
     def process(self, blob):
         if self.blob_index % self.every == 0:
             print('-'*23 + "[Blob {0:>7}]".format(self.blob_index) + '-'*23)
+        self.blob_index += 1
+        return blob
+
+    def finish(self):
+        print('=' * 60)
+
+
+class TickTock(Module):
+    """Display the elapsed time.
+
+    Parameters
+    ----------
+    every: int, optional [default=1]
+        Number of iterations between printout.
+    """
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.every = self.get('every') or 100
+        self.blob_index = 0
+        self.t0 = time()
+
+    def process(self, blob):
+        if self.blob_index % self.every == 0:
+            t1 = (time() - self.t0)/60
+            print('-'*23 + "[Time/min: {:>.2}]".format(t1) + '-'*21)
         self.blob_index += 1
         return blob
 
