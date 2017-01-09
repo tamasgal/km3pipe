@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 from km3pipe import Module, Blob
-from km3pipe.tools import peak_memory_usage, zenith, azimuth
+from km3pipe.tools import peak_memory_usage, zenith, azimuth, prettyln
 from km3pipe.dataclasses import KM3DataFrame, KM3Array     # noqa
 from km3pipe.io.pandas import merge_event_ids
 
@@ -143,12 +143,12 @@ class StatusBar(Module):
 
     def process(self, blob):
         if self.blob_index % self.every == 0:
-            print('-'*23 + "[Blob {0:>7}]".format(self.blob_index) + '-'*23)
+            prettyln("Blob {0:>7}".format(self.blob_index))
         self.blob_index += 1
         return blob
 
     def finish(self):
-        print('=' * 60)
+        println(".", fill='=')
 
 
 class TickTock(Module):
@@ -168,12 +168,9 @@ class TickTock(Module):
     def process(self, blob):
         if self.blob_index % self.every == 0:
             t1 = (time() - self.t0)/60
-            print('-'*23 + "[Time/min: {:>.2}]".format(t1) + '-'*21)
+            prettyln("Time/min: {0:.3f}".format(t1))
         self.blob_index += 1
         return blob
-
-    def finish(self):
-        print('=' * 60)
 
 
 class MemoryObserver(Module):
@@ -191,7 +188,7 @@ class MemoryObserver(Module):
     def process(self, blob):
         if self.blob_index % self.every == 0:
             memory = peak_memory_usage()
-            print('-'*23 + "[Memory peak: {0:.3f} MB]".format(memory) + '-'*21)
+            prettyln("Memory peak: {0:.3f} MB]".format(memory))
         self.blob_index += 1
         return blob
 
