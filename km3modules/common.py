@@ -156,7 +156,7 @@ class TickTock(Module):
 
     Parameters
     ----------
-    every: int, optional [default=1]
+    every: int, optional [default=100]
         Number of iterations between printout.
     """
     def __init__(self, **context):
@@ -177,13 +177,23 @@ class TickTock(Module):
 
 
 class MemoryObserver(Module):
-    """Shows the maximum memory usage"""
+    """Shows the maximum memory usage
+    Parameters
+    ----------
+    every: int, optional [default=100]
+        Number of iterations between printout.
+    """
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
+        self.every = self.get('every') or 100
+        self.blob_index = 0
 
     def process(self, blob):
-        memory = peak_memory_usage()
-        print("Memory peak usage: {0:.3f} MB".format(memory))
+        if self.blob_index % self.every == 0:
+            memory = peak_memory_usage()
+            print('-'*23 + "[Memory peak: {0:.3f} MB]".format(memory) + '-'*21)
+        self.blob_index += 1
+        return blob
 
 
 class Cut(Module):
