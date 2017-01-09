@@ -188,7 +188,7 @@ class MemoryObserver(Module):
     def process(self, blob):
         if self.blob_index % self.every == 0:
             memory = peak_memory_usage()
-            prettyln("Memory peak: {0:.3f} MB]".format(memory))
+            prettyln("Memory peak: {0:.3f} MB".format(memory))
         self.blob_index += 1
         return blob
 
