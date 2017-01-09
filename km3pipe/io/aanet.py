@@ -160,14 +160,17 @@ class AanetPump(Pump):
                                                   event_id)
         blob['filename'] = filename
         blob['Header'] = self.header
+        livetime = self.header['livetime'][0]
+        livetime_err = self.header['livetime'][1]
+        ngen = self.header['genvol'][4]
         try:
             blob['EventInfo'] = EventInfo((
                 event.det_id,
                 event.frame_index,
-                0, # livetime_sec
+                livetime, # livetime_sec
                 event.mc_id,
                 event.mc_t,
-                0, # n_events_gen
+                ngen, # n_events_gen
                 0, # n_files_gen
                 event.overlays,
                 # event.run_id,
@@ -180,10 +183,10 @@ class AanetPump(Pump):
         except AttributeError:
             blob['EventInfo'] = EventInfo((0,   # det_id
                                            event.frame_index,
-                                           0,   # livetime_sec
+                                           livetime,   # livetime_sec
                                            0,   # mc_id
                                            0,   # mc_t
-                                           0,   # n_events_gen
+                                           ngen,   # n_events_gen
                                            0,   # n_files_gen
                                            0,   # overlays
                                            0,   # trigger_counter
