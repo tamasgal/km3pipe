@@ -616,3 +616,10 @@ def flat_weights(x, bins):
     wgt = 1 / pop
     wgt *= len(wgt) / np.sum(wgt)
     return wgt
+
+
+def prettyln(text, fill='-', align='^', prefix='[ ', suffix=' ]', length=69):
+    """Wrap `text` in a pretty line with maximum length."""
+    text = '{prefix}{0}{suffix}'.format(text, prefix=prefix, suffix=suffix)
+    print("{0:{fill}{align}{length}}"
+          .format(text, fill=fill, align=align, length=length))
