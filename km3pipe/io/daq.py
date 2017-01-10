@@ -7,6 +7,7 @@ Pumps for the DAQ data formats.
 """
 from __future__ import division, absolute_import, print_function
 
+from io import BytesIO
 import math
 import struct
 from struct import unpack
@@ -16,7 +17,6 @@ import numpy as np
 
 from km3pipe import Pump, Module, Blob
 from km3pipe.dataclasses import EventInfo, HitSeries
-from km3pipe.common import StringIO
 from km3pipe.tools import ignored
 from km3pipe.logger import logging
 
@@ -172,7 +172,7 @@ class DAQProcessor(Module):
         return blob
 
     def process_event(self, data, blob):
-        data_io = StringIO(data)
+        data_io = BytesIO(data)
         preamble = DAQPreamble(file_obj=data_io)  # noqa
         event = DAQEvent(file_obj=data_io)
         header = event.header
@@ -227,7 +227,7 @@ class DAQProcessor(Module):
         self.index += 1
 
     def process_summaryslice(self, data, blob):
-        data_io = StringIO(data)
+        data_io = BytesIO(data)
         preamble = DAQPreamble(file_obj=data_io)
         summaryslice = DAQSummaryslice(file_obj=data_io)
         blob["RawSummaryslice"] = summaryslice
