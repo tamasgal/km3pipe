@@ -148,7 +148,7 @@ class StatusBar(Module):
         return blob
 
     def finish(self):
-        println(".", fill='=')
+        prettyln(".", fill='=')
 
 
 class TickTock(Module):
