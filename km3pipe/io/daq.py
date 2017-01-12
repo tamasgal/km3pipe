@@ -342,6 +342,7 @@ class DAQSummaryslice(object):
       summary_frames (dict): The PMT rates for each DOM. The key is the DOM
         identifier and the corresponding value is a sorted list of PMT rates
         in [Hz].
+      dom_rates (dict): The overall DOM rate for each DOM.
 
     """
     def __init__(self, file_obj):
@@ -350,6 +351,7 @@ class DAQSummaryslice(object):
         self.summary_frames = {}
         self.dq_status = {}
         self.dom_status = {}
+        self.dom_rates = {}
 
         self._parse_summary_frames(file_obj)
 
@@ -364,6 +366,7 @@ class DAQSummaryslice(object):
             self.summary_frames[dom_id] = pmt_rates
             self.dq_status[dom_id] = dq_status
             self.dom_status[dom_id] = dom_status
+            self.dom_rates[dom_id] = np.sum(pmt_rates)
 
     def _get_rate(self, value):
         """Return the rate in Hz from the short int value"""
