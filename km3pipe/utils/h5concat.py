@@ -4,12 +4,13 @@
 Convert ROOT and EVT files to HDF5.
 
 Usage:
-    h5concat OUTFILE INFILES...
+    h5concat [--verbose] OUTFILE INFILES...
     h5concat (-h | --help)
     h5concat --version
 
 Options:
-    -h --help                  Show this screen.
+    -h --help               Show this screen.
+    --verbose               Print out more progress. [default: False].
 """
 
 from __future__ import division, absolute_import, print_function
@@ -26,14 +27,17 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-def h5concat(input_files, output_file):
+def h5concat(output_file, input_files, verbose=False):
     """Convert Any file to HDF5 file"""
     from km3pipe import Pipeline  # noqa
     from km3pipe.io import HDF5Pump, HDF5Sink  # noqa
 
     pipe = Pipeline()
-    pipe.attach(HDF5Pump, filenames=input_files)
-    pipe.attach(StatusBar, every=1000)
+    pipe.attach(HDF5Pump, filenames=input_files, verbose=verbose)
+    if verbose:
+        pipe.attach(StatusBar, every=100)
+    else:
+        pipe.attach(StatusBar, every=1000)
     pipe.attach(HDF5Sink, filename=output_file)
     pipe.drain()
 
@@ -44,5 +48,6 @@ def main():
 
     infiles = args['INFILES']
     outfile = args['OUTFILE']
+    verb = bool(args['--verbose'])
 
-    h5concat(outfile, infiles)
+    h5concat(outfile, infiles, verbose=verb)

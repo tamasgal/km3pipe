@@ -1,6 +1,12 @@
 Unreleased changes
 ------------------
 
+6.1.1 / 2017-01-12
+------------------
+* H5Chain now is just a Multifile pd.HDFStore
+* `prettyln` for nicely formatted headers
+* Online DAQ readout is now Python3 proof
+
 6.1.0 / 2017-01-02
 ------------------
 * H5Pump now supports multiple files

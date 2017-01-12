@@ -6,12 +6,13 @@ A collection of commonly used modules.
 
 """
 from __future__ import division, absolute_import, print_function
+from time import time
 
 import numpy as np
 import pandas as pd
 
-from km3pipe import Module
-from km3pipe.tools import peak_memory_usage, zenith, azimuth
+from km3pipe import Module, Blob
+from km3pipe.tools import peak_memory_usage, zenith, azimuth, prettyln
 from km3pipe.dataclasses import KM3DataFrame, KM3Array     # noqa
 from km3pipe.io.pandas import merge_event_ids
 
@@ -104,10 +105,11 @@ class Keep(Module):
             self.keys = [key]
 
     def process(self, blob):
+        out = Blob()
         for key in blob.keys():
-            if key not in self.keys:
-                blob.pop(key, None)
-        return blob
+            if key in self.keys:
+                out[key] = blob[key]
+        return out
 
 
 class HitCounter(Module):
@@ -133,46 +135,88 @@ class BlobIndexer(Module):
 
 
 class StatusBar(Module):
-    """Displays the current blob number"""
+    """Displays the current blob number."""
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
-        self.every = self.get('every') or 1
+        self.every = self.get('every') or 100
         self.blob_index = 0
 
     def process(self, blob):
         if self.blob_index % self.every == 0:
-            print('-'*23 + "[Blob {0:>7}]".format(self.blob_index) + '-'*23)
+            prettyln("Blob {0:>7}".format(self.blob_index))
         self.blob_index += 1
         return blob
 
     def finish(self):
-        print('=' * 60)
+        prettyln(".", fill='=')
 
 
-class MemoryObserver(Module):
-    """Shows the maximum memory usage"""
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+class TickTock(Module):
+    """Display the elapsed time.
 
-    def process(self, blob):
-        memory = peak_memory_usage()
-        print("Memory peak usage: {0:.3f} MB".format(memory))
-
-
-class Cut(Module):
-    """Drop an event from the pipe if certain criteria are met.
-
-    This is handled by the ``km3pipe.core.SkipException``.
+    Parameters
+    ----------
+    every: int, optional [default=100]
+        Number of iterations between printout.
     """
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
-        self.key = self.get('key')
-        self.cond = self.get('condition')
+        self.every = self.get('every') or 100
+        self.blob_index = 0
+        self.t0 = time()
+
+    def process(self, blob):
+        if self.blob_index % self.every == 0:
+            t1 = (time() - self.t0)/60
+            prettyln("Time/min: {0:.3f}".format(t1))
+        self.blob_index += 1
+        return blob
+
+
+class MemoryObserver(Module):
+    """Shows the maximum memory usage
+    Parameters
+    ----------
+    every: int, optional [default=100]
+        Number of iterations between printout.
+    """
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.every = self.get('every') or 100
+        self.blob_index = 0
+
+    def process(self, blob):
+        if self.blob_index % self.every == 0:
+            memory = peak_memory_usage()
+            prettyln("Memory peak: {0:.3f} MB".format(memory))
+        self.blob_index += 1
+        return blob
+
+
+class Cut(Module):
+    """Drop an event from the pipe, depending on some condition.
+
+    Parameters
+    ----------
+    key: string
+        Blob content to cut on (must have `.conv_to(to='pandas')` method)
+    condition: string
+        Condition to eval on the dataframe, e.g. "zenith >= 1.4".
+    verbose: bool, optional (default=False)
+        Print extra info?
+    """
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.key = self.require('key')
+        self.cond = self.require('condition')
+        self.verbose = self.get('verbose') or False
 
     def process(self, blob):
         df = blob[self.key].conv_to(to='pandas')
         ok = df.eval(self.cond).all()
         if not ok:
+            if self.verbose:
+                print('Condition "%s" not met, dropping...' % self.cond)
             return
         blob[self.key] = df
         return blob
@@ -182,7 +226,7 @@ class GetAngle(Module):
     """Convert pos(x, y, z) to zenith, azimuth."""
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
-        self.key = self.get('key')
+        self.key = self.require('key')
 
     def process(self, blob):
         df = blob[self.key].conv_to(to='pandas')
