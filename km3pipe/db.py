@@ -97,7 +97,7 @@ class DBManager(object):
         if username is not None and password is not None:
             self.login(username, password)
         elif config.db_session_cookie not in (None, ''):
-            self.restore_ression(config.db_session_cookie)
+            self.restore_session(config.db_session_cookie)
         else:
             username, password = config.db_credentials
             login_ok = self.login(username, password)
@@ -324,7 +324,7 @@ class DBManager(object):
         cookie = urlopen(target_url).read()
         return cookie
 
-    def restore_ression(self, cookie):
+    def restore_session(self, cookie):
         """Establish databse connection using permanent session cookie"""
         opener = build_opener()
         opener.addheaders.append(('Cookie', cookie))
@@ -341,7 +341,7 @@ class DBManager(object):
             cookie_str = str(cookie)  # Python 2
         log.debug("Session cookie: {0}".format(cookie_str))
         config.set('DB', 'session_cookie', cookie_str)
-        self.restore_ression(cookie)
+        self.restore_session(cookie)
 
     def login(self, username, password):
         "Login to the databse and store cookies for upcoming requests."
