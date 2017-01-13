@@ -623,3 +623,10 @@ def prettyln(text, fill='-', align='^', prefix='[ ', suffix=' ]', length=69):
     text = '{prefix}{0}{suffix}'.format(text, prefix=prefix, suffix=suffix)
     print("{0:{fill}{align}{length}}"
           .format(text, fill=fill, align=align, length=length))
+
+
+def we_are_in_lyon():
+    """Check if we are on a Lyon machine"""
+    hostname = socket.gethostname()
+    ip = socket.gethostbyname(hostname)
+    return ip.startswith("134.158.")
