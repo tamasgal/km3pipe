@@ -10,7 +10,6 @@ from __future__ import division, absolute_import, print_function
 from datetime import datetime
 import ssl
 import sys
-import socket
 import json
 import re
 import pytz

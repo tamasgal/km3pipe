@@ -15,6 +15,7 @@ import os
 import base64
 import subprocess
 import collections
+import socket
 from collections import namedtuple
 from itertools import chain
 from datetime import datetime
