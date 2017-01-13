@@ -10,6 +10,7 @@ from __future__ import division, absolute_import, print_function
 from datetime import datetime
 import ssl
 import sys
+import socket
 import json
 import re
 import pytz
@@ -19,7 +20,7 @@ try:
 except ImportError:
     print("The database utilities needs pandas: pip install pandas")
 
-from km3pipe.tools import Timer
+from km3pipe.tools import Timer, we_are_in_lyon
 from km3pipe.config import Config
 from km3pipe.logger import logging
 
@@ -87,6 +88,12 @@ class DBManager(object):
             self._db_url = config.db_url or BASE_URL
 
         self._login_url = self._db_url + '/home.htm'
+
+        if we_are_in_lyon():
+            self.restore_session(
+                "sid=_kmcprod_134.158_lyo7783844001343100343mcprod1223user"
+            )
+            return
 
         if username is not None and password is not None:
             self.login(username, password)
