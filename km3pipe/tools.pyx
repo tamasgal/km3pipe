@@ -28,7 +28,6 @@ import warnings
 import numpy as np
 import scipy.linalg
 
-from km3pipe.db import DBManager
 
 from km3pipe.logger import logging
 
@@ -637,6 +636,7 @@ def we_are_in_lyon():
 def irods_filepath(det_id, run_id):
     """Generate the iRODS filepath for given detector (O)ID and run ID"""
     data_path = "/in2p3/km3net/data/raw/sea"
+    from km3pipe.db import DBManager
     if not isinstance(det_id, int):
         dts = DBManager().detectors
         det_id = int(dts[dts.OID == det_id].SERIALNUMBER.values[0])
