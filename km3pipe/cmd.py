@@ -108,6 +108,11 @@ def update_km3pipe(git_branch=''):
 
 
 def retrieve(run_id, det_id):
+    """Retrieve run from iRODS for a given detector (O)ID"""
+    try:
+        det_id = int(det_id)
+    except ValueError:
+        pass
     path = irods_filepath(det_id, run_id)
     os.system("iget -Pv {0}".format(path))
 
