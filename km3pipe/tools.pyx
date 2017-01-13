@@ -28,7 +28,7 @@ import warnings
 import numpy as np
 import scipy.linalg
 
-from km3pipe.db import DBManager()
+from km3pipe.db import DBManager
 
 from km3pipe.logger import logging
 
