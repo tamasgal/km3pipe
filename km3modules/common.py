@@ -6,12 +6,13 @@ A collection of commonly used modules.
 
 """
 from __future__ import division, absolute_import, print_function
+from time import time
 
 import numpy as np
 import pandas as pd
 
 from km3pipe import Module, Blob
-from km3pipe.tools import peak_memory_usage, zenith, azimuth
+from km3pipe.tools import peak_memory_usage, zenith, azimuth, prettyln
 from km3pipe.dataclasses import KM3DataFrame, KM3Array     # noqa
 from km3pipe.io.pandas import merge_event_ids
 
@@ -134,30 +135,62 @@ class BlobIndexer(Module):
 
 
 class StatusBar(Module):
-    """Displays the current blob number"""
+    """Displays the current blob number."""
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
-        self.every = self.get('every') or 1
+        self.every = self.get('every') or 100
         self.blob_index = 0
 
     def process(self, blob):
         if self.blob_index % self.every == 0:
-            print('-'*23 + "[Blob {0:>7}]".format(self.blob_index) + '-'*23)
+            prettyln("Blob {0:>7}".format(self.blob_index))
         self.blob_index += 1
         return blob
 
     def finish(self):
-        print('=' * 60)
+        prettyln(".", fill='=')
+
+
+class TickTock(Module):
+    """Display the elapsed time.
+
+    Parameters
+    ----------
+    every: int, optional [default=100]
+        Number of iterations between printout.
+    """
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.every = self.get('every') or 100
+        self.blob_index = 0
+        self.t0 = time()
+
+    def process(self, blob):
+        if self.blob_index % self.every == 0:
+            t1 = (time() - self.t0)/60
+            prettyln("Time/min: {0:.3f}".format(t1))
+        self.blob_index += 1
+        return blob
 
 
 class MemoryObserver(Module):
-    """Shows the maximum memory usage"""
+    """Shows the maximum memory usage
+    Parameters
+    ----------
+    every: int, optional [default=100]
+        Number of iterations between printout.
+    """
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
+        self.every = self.get('every') or 100
+        self.blob_index = 0
 
     def process(self, blob):
-        memory = peak_memory_usage()
-        print("Memory peak usage: {0:.3f} MB".format(memory))
+        if self.blob_index % self.every == 0:
+            memory = peak_memory_usage()
+            prettyln("Memory peak: {0:.3f} MB".format(memory))
+        self.blob_index += 1
+        return blob
 
 
 class Cut(Module):

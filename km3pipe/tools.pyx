@@ -206,39 +206,55 @@ def geant2pdg(geant_code):
         return 0
 
 
+_PDG2NAME = {
+    1: 'd',
+    2: 'u',
+    3: 's',
+    4: 'c',
+    5: 'b',
+    6: 't',
+    11: 'e-',
+    -11: 'e+',
+    12: 'nu_e',
+    -12: 'anu_e',
+    13: 'mu-',
+    -13: 'mu+',
+    14: 'nu_mu',
+    -14: 'anu_mu',
+    15: 'tau-',
+    -15: 'tau+',
+    16: 'nu_tau',
+    -16: 'anu_tau',
+    22: 'photon',
+    111: 'pi0',
+    130: 'K0L',
+    211: 'pi-',
+    -211: 'pi+',
+    310: 'K0S',
+    311: 'K0',
+    321: 'K+',
+    -321: 'K-',
+    2112: 'n',
+    2212: 'p',
+    -2212: 'p-',
+}
+
+_NAME2PDG = {val: key for key, val in _PDG2NAME.items()}      # noqa
+
+
 def pdg2name(pdg_id):
     """Convert PDG ID to human readable names"""
     # pylint: disable=C0330
-    conversion_table = {
-        11: 'e-',
-        -11: 'e+',
-        12: 'nu_e',
-        -12: 'anu_e',
-        13: 'mu-',
-        -13: 'mu+',
-        14: 'nu_mu',
-        -14: 'anu_mu',
-        15: 'tau-',
-        -15: 'tau+',
-        16: 'nu_tau',
-        -16: 'anu_tau',
-        22: 'photon',
-        111: 'pi0',
-        130: 'K0L',
-        211: 'pi-',
-        -211: 'pi+',
-        310: 'K0S',
-        311: 'K0',
-        321: 'K+',
-        -321: 'K-',
-        2112: 'n',
-        2212: 'p',
-        -2212: 'p-',
-    }
     try:
-        return conversion_table[pdg_id]
+        return _PDG2NAME[pdg_id]
     except KeyError:
         return "N/A"
+
+def name2pdg(name):
+    try:
+        return _NAME2PDG[name]
+    except KeyError:
+        return 0
 
 
 def total_seconds(td):
@@ -600,3 +616,10 @@ def flat_weights(x, bins):
     wgt = 1 / pop
     wgt *= len(wgt) / np.sum(wgt)
     return wgt
+
+
+def prettyln(text, fill='-', align='^', prefix='[ ', suffix=' ]', length=69):
+    """Wrap `text` in a pretty line with maximum length."""
+    text = '{prefix}{0}{suffix}'.format(text, prefix=prefix, suffix=suffix)
+    print("{0:{fill}{align}{length}}"
+          .format(text, fill=fill, align=align, length=length))
