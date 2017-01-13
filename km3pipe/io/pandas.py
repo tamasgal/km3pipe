@@ -110,26 +110,27 @@ def merge_event_ids(df):
     ids = list(c for c in cols if 'event_id' in c)
     if not ids:
         return df
-    non_id = list(c for c in cols if c not in ids)
+    # non_id = list(c for c in cols if c not in ids)
     event_ids = df[ids[0]]
     df.drop(ids, axis=1, inplace=True)
     df['event_id'] = event_ids
     return df
 
 
-def df_to_h5(df, filename, where):
+def df_to_h5(df, h5file, where):
     """Write pandas dataframes with proper columns.
 
     Example:
         >>> df = pd.DataFrame(...)
         >>> df_to_h5(df, 'foo.h5', '/some/loc/my_df')
     """
-    write_table(df.to_records(index=False), filename, where)
+    write_table(df.to_records(index=False), h5file, where)
 
 
 def write_table(array, h5file, where):
     """Write a structured numpy array into a H5 table.
     """
+    own_h5 = False
     if isinstance(h5file, string_types):
         own_h5 = True
         h5file = tb.open_file(h5file, 'a')
