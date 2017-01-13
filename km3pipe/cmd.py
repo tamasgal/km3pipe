@@ -113,7 +113,7 @@ def retrieve(run_id, det_id):
         det_id = int(det_id)
     except ValueError:
         pass
-    path = irods_filepath(det_id, run_id)
+    path = irods_filepath(det_id, int(run_id))
     os.system("iget -Pv {0}".format(path))
 
 
