@@ -12,3 +12,4 @@ websocket-client
 sphinx>=1.5.1
 numpydoc
 sphinx_gallery
+astropy
