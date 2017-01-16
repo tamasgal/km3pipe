@@ -10,3 +10,4 @@ tornado
 urwid
 websocket-client
 sphinx>=1.4.3
+numpydoc
