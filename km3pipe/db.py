@@ -19,7 +19,7 @@ try:
 except ImportError:
     print("The database utilities needs pandas: pip install pandas")
 
-from km3pipe.tools import Timer
+from km3pipe.tools import Timer, we_are_in_lyon
 from km3pipe.config import Config
 from km3pipe.logger import logging
 
@@ -88,10 +88,16 @@ class DBManager(object):
 
         self._login_url = self._db_url + '/home.htm'
 
+        if we_are_in_lyon():
+            self.restore_session(
+                "sid=_kmcprod_134.158_lyo7783844001343100343mcprod1223user"
+            )
+            return
+
         if username is not None and password is not None:
             self.login(username, password)
         elif config.db_session_cookie not in (None, ''):
-            self.restore_ression(config.db_session_cookie)
+            self.restore_session(config.db_session_cookie)
         else:
             username, password = config.db_credentials
             login_ok = self.login(username, password)
@@ -318,7 +324,7 @@ class DBManager(object):
         cookie = urlopen(target_url).read()
         return cookie
 
-    def restore_ression(self, cookie):
+    def restore_session(self, cookie):
         """Establish databse connection using permanent session cookie"""
         opener = build_opener()
         opener.addheaders.append(('Cookie', cookie))
@@ -335,7 +341,7 @@ class DBManager(object):
             cookie_str = str(cookie)  # Python 2
         log.debug("Session cookie: {0}".format(cookie_str))
         config.set('DB', 'session_cookie', cookie_str)
-        self.restore_ression(cookie)
+        self.restore_session(cookie)
 
     def login(self, username, password):
         "Login to the databse and store cookies for upcoming requests."
