@@ -11,9 +11,9 @@ import os
 import stat
 import pytz
 try:
-    from configparser import ConfigParser, Error
+    from configparser import ConfigParser, Error, NoOptionError
 except ImportError:
-    from six.moves.configparser import ConfigParser, Error
+    from six.moves.configparser import ConfigParser, Error, NoOptionError
 
 import getpass
 try:
@@ -74,6 +74,12 @@ class Config(object):
         self.config.set(section, key, value)
         with open(self._config_path, 'w') as f:
             self.config.write(f)
+
+    def get(self, section, key):
+        try:
+            return self.config.get(section, key)
+        except NoOptionError:
+            return None
 
     def create_irods_session(self):
         try:
