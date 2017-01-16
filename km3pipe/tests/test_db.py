@@ -32,7 +32,7 @@ class TestDBManager(TestCase):
         pwd = 'god'
 
         DBManager.login = MagicMock()
-        db = DBManager(username=user, password=pwd)
+        db = DBManager(username=user, password=pwd, temporary=True)
         self.assertEqual(1, DBManager.login.call_count)
         self.assertTupleEqual((user, pwd), DBManager.login.call_args[0])
 
