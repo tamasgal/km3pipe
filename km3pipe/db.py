@@ -88,7 +88,7 @@ class DBManager(object):
 
         self._login_url = self._db_url + '/home.htm'
 
-        if we_are_in_lyon():
+        if not temporary and we_are_in_lyon():
             self.restore_session(
                 "sid=_kmcprod_134.158_lyo7783844001343100343mcprod1223user"
             )
