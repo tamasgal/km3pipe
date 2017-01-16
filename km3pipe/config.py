@@ -77,7 +77,11 @@ class Config(object):
 
     def get(self, section, key):
         try:
-            return self.config.get(section, key)
+            value = self.config.get(section, key)
+            try:
+                return int(value)
+            except ValueError:
+                return value
         except NoOptionError:
             return None
 
