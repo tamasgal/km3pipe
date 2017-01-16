@@ -2,7 +2,7 @@ controlhost
 cython
 docopt
 matplotlib==2.0.0rc2
-numpy
+numpy<=1.11
 pandas
 scipy
 tables
