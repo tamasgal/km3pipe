@@ -9,5 +9,5 @@ tables
 tornado
 urwid
 websocket-client
-sphinx>=1.4.3
+sphinx>=1.4.8
 numpydoc
