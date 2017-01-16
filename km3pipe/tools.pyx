@@ -626,13 +626,6 @@ def prettyln(text, fill='-', align='^', prefix='[ ', suffix=' ]', length=69):
           .format(text, fill=fill, align=align, length=length))
 
 
-def we_are_in_lyon():
-    """Check if we are on a Lyon machine"""
-    hostname = socket.gethostname()
-    ip = socket.gethostbyname(hostname)
-    return ip.startswith("134.158.")
-
-
 def irods_filepath(det_id, run_id):
     """Generate the iRODS filepath for given detector (O)ID and run ID"""
     data_path = "/in2p3/km3net/data/raw/sea"

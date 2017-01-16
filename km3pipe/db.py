@@ -19,7 +19,7 @@ try:
 except ImportError:
     print("The database utilities needs pandas: pip install pandas")
 
-from km3pipe.tools import Timer, we_are_in_lyon
+from km3pipe.tools import Timer
 from km3pipe.config import Config
 from km3pipe.logger import logging
 
@@ -66,6 +66,14 @@ except AttributeError:
               "Please update your Python installation!")
 
 BASE_URL = 'https://km3netdbweb.in2p3.fr'
+
+
+
+def we_are_in_lyon():
+    """Check if we are on a Lyon machine"""
+    hostname = socket.gethostname()
+    ip = socket.gethostbyname(hostname)
+    return ip.startswith("134.158.")
 
 
 class DBManager(object):
