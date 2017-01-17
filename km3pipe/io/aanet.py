@@ -160,9 +160,14 @@ class AanetPump(Pump):
                                                   event_id)
         blob['filename'] = filename
         blob['Header'] = self.header
-        livetime = self.header['livetime'][0]
-        livetime_err = self.header['livetime'][1]
-        ngen = self.header['genvol'][4]
+        # livetime = self.header.livetime[0]
+        # livetime_err = self.header['livetime'][1]
+        # ngen = self.header['genvol'][4]
+        # nfilgen = self.header['genvol'][4]
+        livetime = 0
+        livetime_err = 0
+        ngen = 0
+        nfilgen = 0
         try:
             blob['EventInfo'] = EventInfo((
                 event.det_id,
@@ -170,8 +175,8 @@ class AanetPump(Pump):
                 livetime, # livetime_sec
                 event.mc_id,
                 event.mc_t,
-                ngen, # n_events_gen
-                0, # n_files_gen
+                ngen,   # n_events_gen
+                nfilgen, # n_files_gen
                 event.overlays,
                 # event.run_id,
                 event.trigger_counter,
@@ -187,7 +192,7 @@ class AanetPump(Pump):
                                            0,   # mc_id
                                            0,   # mc_t
                                            ngen,   # n_events_gen
-                                           0,   # n_files_gen
+                                           nfilgen,   # n_files_gen
                                            0,   # overlays
                                            0,   # trigger_counter
                                            0,   # trigger_mask
