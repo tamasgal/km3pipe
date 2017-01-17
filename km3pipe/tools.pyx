@@ -29,7 +29,7 @@ import numpy as np
 import scipy.linalg
 
 
-from km3pipe.logger import logging
+from .logger import logging
 
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -624,13 +624,6 @@ def prettyln(text, fill='-', align='^', prefix='[ ', suffix=' ]', length=69):
     text = '{prefix}{0}{suffix}'.format(text, prefix=prefix, suffix=suffix)
     print("{0:{fill}{align}{length}}"
           .format(text, fill=fill, align=align, length=length))
-
-
-def we_are_in_lyon():
-    """Check if we are on a Lyon machine"""
-    hostname = socket.gethostname()
-    ip = socket.gethostbyname(hostname)
-    return ip.startswith("134.158.")
 
 
 def irods_filepath(det_id, run_id):

@@ -10,7 +10,7 @@ from __future__ import division, absolute_import, print_function
 
 import numpy as np
 
-from km3pipe import Pump, Blob
+from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import (EventInfo, TimesliceFrameInfo,
                                  SummaryframeInfo, HitSeries,
                                  TimesliceHitSeries)

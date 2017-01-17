@@ -9,7 +9,7 @@ from __future__ import absolute_import
 import socket
 import struct
 
-from km3pipe.logger import logging
+from .logger import logging
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

@@ -1,6 +1,12 @@
 Unreleased changes
 ------------------
 
+
+6.2.1 / 2017-01-17
+------------------
+* Use numpy-style imports
+* AanetPump: Don't use `evt.id` for event_id by default, until we all agree on it
+
 6.2.0 / 2017-01-16
 ------------------
 * The DB client now automatically uses the production cookie on Lyon.

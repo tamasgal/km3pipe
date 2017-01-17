@@ -9,7 +9,7 @@ import os.path
 
 import numpy as np
 
-from km3pipe import Pump, Blob
+from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import (HitSeries, TrackSeries, EventInfo,
                                  KM3Array, KM3DataFrame)
 from km3pipe.logger import logging
@@ -48,7 +48,7 @@ class AanetPump(Pump):
         self.indices = self.get('indices')
         self.additional = self.get('additional')
         self.format = self.get('aa_fmt')
-        self.id_offset = self.get('id_offset') or 0
+        self.use_id = self.get('use_id') or False
         if self.additional:
             self.id = self.get('id')
             self.return_without_match = self.get("return_without_match")
@@ -74,6 +74,7 @@ class AanetPump(Pump):
 
         self.header = None
         self.blobs = self.blob_generator()
+        self.i = 0
 
         if self.additional:
             dummy_evt = ROOT.Evt()
@@ -147,9 +148,10 @@ class AanetPump(Pump):
 
         blob = Blob()
         blob['Evt'] = event
-        event_id = event.id
-        if self.id_offset:
-            event_id += self.id_offset
+        if self.use_id:
+            event_id = event.id
+        else:
+            event_id = self.i
         try:
             blob['Hits'] = HitSeries.from_aanet(event.hits, event_id)
             blob['McHits'] = HitSeries.from_aanet(event.mc_hits,
@@ -160,15 +162,23 @@ class AanetPump(Pump):
                                                   event_id)
         blob['filename'] = filename
         blob['Header'] = self.header
+        # livetime = self.header.livetime[0]
+        # livetime_err = self.header['livetime'][1]
+        # ngen = self.header['genvol'][4]
+        # nfilgen = self.header['genvol'][4]
+        livetime = 0
+        livetime_err = 0
+        ngen = 0
+        nfilgen = 0
         try:
             blob['EventInfo'] = EventInfo((
                 event.det_id,
                 event.frame_index,
-                0, # livetime_sec
+                livetime, # livetime_sec
                 event.mc_id,
                 event.mc_t,
-                0, # n_events_gen
-                0, # n_files_gen
+                ngen,   # n_events_gen
+                nfilgen, # n_files_gen
                 event.overlays,
                 # event.run_id,
                 event.trigger_counter,
@@ -180,11 +190,11 @@ class AanetPump(Pump):
         except AttributeError:
             blob['EventInfo'] = EventInfo((0,   # det_id
                                            event.frame_index,
-                                           0,   # livetime_sec
+                                           livetime,   # livetime_sec
                                            0,   # mc_id
                                            0,   # mc_t
-                                           0,   # n_events_gen
-                                           0,   # n_files_gen
+                                           ngen,   # n_events_gen
+                                           nfilgen,   # n_files_gen
                                            0,   # overlays
                                            0,   # trigger_counter
                                            0,   # trigger_mask

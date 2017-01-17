@@ -15,7 +15,7 @@ import numpy as np
 import tables as tb
 
 import km3pipe as kp
-from km3pipe import Pump, Module, Blob
+from km3pipe.core import Pump, Module, Blob
 from km3pipe.dataclasses import KM3Array, deserialise_map
 from km3pipe.logger import logging
 from km3pipe.tools import camelise, decamelise, split
