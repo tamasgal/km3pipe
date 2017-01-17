@@ -11,8 +11,7 @@ from time import sleep
 from km3pipe.testing import TestCase, MagicMock, StringIO
 from km3pipe.tools import (unpack_nfirst, split, namedtuple_with_defaults,
                            angle_between, pld3, com, geant2pdg, pdg2name,
-                           Cuckoo, total_seconds, zenith,
-                           azimuth,
+                           Cuckoo, total_seconds, zenith, azimuth,
                            remain_file_pointer, decamelise, camelise)
 
 __author__ = "Tamas Gal"
