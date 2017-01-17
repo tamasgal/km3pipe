@@ -20,7 +20,7 @@ import pandas as pd
 
 np.import_array()
 
-from km3pipe.tools import angle_between, geant2pdg, pdg2name
+from .tools import angle_between, geant2pdg, pdg2name
 
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -1581,7 +1581,6 @@ class KM3Array(np.ndarray):
     serialise(to='numpy')
         Convert for storage.
     """
-
     def __new__(cls, arr, h5loc='/'):
         obj = np.asarray(arr).view(cls)
         obj.h5loc = h5loc
@@ -1604,19 +1603,16 @@ class KM3Array(np.ndarray):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_from(cls, data, event_id=None, h5loc='/', fmt='numpy',
-                  evt_id_col='event_id'):
+    def conv_from(cls, data, event_id=None, h5loc='/', fmt='numpy', **kwargs):
         if fmt == 'numpy':
-            arr = cls(data, h5loc)
-            if event_id is not None:
-                arr[evt_id_col] = event_id
+            arr = cls(data, h5loc, **kwargs)
             return arr
 
-    def conv_to(self, to='numpy'):
+    def conv_to(self, to='numpy', **kwargs):
         if to == 'numpy':
             return self
         if to == 'pandas':
-            return KM3DataFrame.conv_from(self, fmt='numpy')
+            return KM3DataFrame.conv_from(self, fmt='numpy', **kwargs)
 
     @classmethod
     def from_dict(cls, map, dtype=None, **kwargs):
@@ -1669,15 +1665,16 @@ class KM3DataFrame(pd.DataFrame):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_from(cls, data, event_id=None, h5loc='/', fmt='pandas'):
+    def conv_from(cls, data, event_id=None, h5loc='/', fmt='pandas', **kwargs):
         if fmt in {'numpy', 'pandas'}:
-            return cls(data, h5loc=h5loc)
+            return cls(data, h5loc=h5loc, **kwargs)
         if fmt == 'dict':
-            return cls(data, index=[0], h5loc=h5loc)
+            return cls(data, index=[0], h5loc=h5loc, **kwargs)
 
-    def conv_to(self, to='numpy'):
+    def conv_to(self, to='numpy', **kwargs):
         if to == 'numpy':
-            return KM3Array(self.to_records(index=False), h5loc=self.h5loc)
+            return KM3Array(self.to_records(index=False), h5loc=self.h5loc,
+                            **kwargs)
         if to == 'pandas':
             return self
 

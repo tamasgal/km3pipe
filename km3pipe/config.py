@@ -11,9 +11,9 @@ import os
 import stat
 import pytz
 try:
-    from configparser import ConfigParser, Error
+    from configparser import ConfigParser, Error, NoOptionError
 except ImportError:
-    from six.moves.configparser import ConfigParser, Error
+    from six.moves.configparser import ConfigParser, Error, NoOptionError
 
 import getpass
 try:
@@ -21,7 +21,7 @@ try:
 except NameError:
     pass
 
-from km3pipe.logger import logging
+from .logger import logging
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -74,6 +74,16 @@ class Config(object):
         self.config.set(section, key, value)
         with open(self._config_path, 'w') as f:
             self.config.write(f)
+
+    def get(self, section, key):
+        try:
+            value = self.config.get(section, key)
+            try:
+                return int(value)
+            except ValueError:
+                return value
+        except NoOptionError:
+            return None
 
     def create_irods_session(self):
         try:

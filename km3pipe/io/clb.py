@@ -13,7 +13,7 @@ from collections import namedtuple
 import datetime
 import pytz
 
-from km3pipe import Pump
+from km3pipe.core import Pump
 from km3pipe.tools import ignored
 from km3pipe.logger import logging
 

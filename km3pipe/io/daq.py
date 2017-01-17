@@ -7,6 +7,7 @@ Pumps for the DAQ data formats.
 """
 from __future__ import division, absolute_import, print_function
 
+from io import BytesIO
 import math
 import struct
 from struct import unpack
@@ -14,9 +15,8 @@ import pprint
 
 import numpy as np
 
-from km3pipe import Pump, Module, Blob
+from km3pipe.core import Pump, Module, Blob
 from km3pipe.dataclasses import EventInfo, HitSeries
-from km3pipe.common import StringIO
 from km3pipe.tools import ignored
 from km3pipe.logger import logging
 
@@ -172,7 +172,7 @@ class DAQProcessor(Module):
         return blob
 
     def process_event(self, data, blob):
-        data_io = StringIO(data)
+        data_io = BytesIO(data)
         preamble = DAQPreamble(file_obj=data_io)  # noqa
         event = DAQEvent(file_obj=data_io)
         header = event.header
@@ -227,7 +227,7 @@ class DAQProcessor(Module):
         self.index += 1
 
     def process_summaryslice(self, data, blob):
-        data_io = StringIO(data)
+        data_io = BytesIO(data)
         preamble = DAQPreamble(file_obj=data_io)
         summaryslice = DAQSummaryslice(file_obj=data_io)
         blob["RawSummaryslice"] = summaryslice
@@ -342,6 +342,7 @@ class DAQSummaryslice(object):
       summary_frames (dict): The PMT rates for each DOM. The key is the DOM
         identifier and the corresponding value is a sorted list of PMT rates
         in [Hz].
+      dom_rates (dict): The overall DOM rate for each DOM.
 
     """
     def __init__(self, file_obj):
@@ -350,6 +351,7 @@ class DAQSummaryslice(object):
         self.summary_frames = {}
         self.dq_status = {}
         self.dom_status = {}
+        self.dom_rates = {}
 
         self._parse_summary_frames(file_obj)
 
@@ -364,6 +366,7 @@ class DAQSummaryslice(object):
             self.summary_frames[dom_id] = pmt_rates
             self.dq_status[dom_id] = dq_status
             self.dom_status[dom_id] = dom_status
+            self.dom_rates[dom_id] = np.sum(pmt_rates)
 
     def _get_rate(self, value):
         """Return the rate in Hz from the short int value"""

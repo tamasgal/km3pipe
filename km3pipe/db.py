@@ -13,15 +13,16 @@ import sys
 import json
 import re
 import pytz
+import socket
 
 try:
     import pandas as pd
 except ImportError:
     print("The database utilities needs pandas: pip install pandas")
 
-from km3pipe.tools import Timer
-from km3pipe.config import Config
-from km3pipe.logger import logging
+from .tools import Timer
+from .config import Config
+from .logger import logging
 
 try:
     input = raw_input
@@ -68,6 +69,14 @@ except AttributeError:
 BASE_URL = 'https://km3netdbweb.in2p3.fr'
 
 
+
+def we_are_in_lyon():
+    """Check if we are on a Lyon machine"""
+    hostname = socket.gethostname()
+    ip = socket.gethostbyname(hostname)
+    return ip.startswith("134.158.")
+
+
 class DBManager(object):
     """A wrapper for the KM3NeT Web DB"""
     def __init__(self, username=None, password=None, url=None, temporary=False):
@@ -88,10 +97,16 @@ class DBManager(object):
 
         self._login_url = self._db_url + '/home.htm'
 
+        if not temporary and we_are_in_lyon():
+            self.restore_session(
+                "sid=_kmcprod_134.158_lyo7783844001343100343mcprod1223user"
+            )
+            return
+
         if username is not None and password is not None:
             self.login(username, password)
         elif config.db_session_cookie not in (None, ''):
-            self.restore_ression(config.db_session_cookie)
+            self.restore_session(config.db_session_cookie)
         else:
             username, password = config.db_credentials
             login_ok = self.login(username, password)
@@ -285,7 +300,11 @@ class DBManager(object):
         except HTTPError as e:
             log.error("HTTP error, your session may be expired.")
             log.error(e)
-            return None
+            if input("Request new permanent session and retry? (y/n)") in 'yY':
+                self.request_permanent_session()
+                return self._get_content(url)
+            else:
+                return None
         log.debug("Accessing '{0}'".format(target_url))
         try:
             content = f.read()
@@ -314,7 +333,7 @@ class DBManager(object):
         cookie = urlopen(target_url).read()
         return cookie
 
-    def restore_ression(self, cookie):
+    def restore_session(self, cookie):
         """Establish databse connection using permanent session cookie"""
         opener = build_opener()
         opener.addheaders.append(('Cookie', cookie))
@@ -331,7 +350,7 @@ class DBManager(object):
             cookie_str = str(cookie)  # Python 2
         log.debug("Session cookie: {0}".format(cookie_str))
         config.set('DB', 'session_cookie', cookie_str)
-        self.restore_ression(cookie)
+        self.restore_session(cookie)
 
     def login(self, username, password):
         "Login to the databse and store cookies for upcoming requests."

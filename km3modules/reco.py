@@ -10,14 +10,26 @@ import numpy as np
 import pandas as pd     # noqa
 from scipy.linalg import eigvals
 from scipy.stats import (
-    chisquare, kurtosis, skew, entropy, iqr, mode, kurtosistest, normaltest,
+    chisquare, kurtosis, skew, entropy, mode, kurtosistest, normaltest,
     skewtest, tmean, tvar, tstd,
 )
+
 from statsmodels.robust.scale import mad
 
 from km3pipe import Module
 from km3pipe.dataclasses import KM3Array, KM3DataFrame     # noqa
 from km3pipe.tools import azimuth, zenith, dist, unit_vector
+from km3pipe.logger import logging
+
+log = logging.getLogger(__name__)  # pylint: disable=C0103
+
+
+try:
+    from scipy.stats import iqr
+except ImportError:
+    log.warning("Please update your scipy installation in order to use the "
+                "`iqr` function. It will now return `np.nan`.")
+    iqr = lambda x: np.nan
 
 
 def bimod(skew, kurt, n, is_fisher=True):

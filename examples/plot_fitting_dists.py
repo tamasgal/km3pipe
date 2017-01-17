@@ -27,8 +27,8 @@ km3pipe.style.use('default')
 # First generate some pseudodata: A bimodal gaussian, + noise.
 
 N = 100
-bmg = np.concatenate((np.random.normal(15, 1, 0.3 * N),
-                      np.random.normal(20, 1, 0.7 * N)))
+bmg = np.concatenate((np.random.normal(15, 1, int(0.3 * N)),
+                      np.random.normal(20, 1, int(0.7 * N))))
 noise_bmg = 0.5
 data = np.random.normal(bmg, noise_bmg)[:, np.newaxis]
 
@@ -90,7 +90,7 @@ plt.hist(data, bins=knuth_binlims, alpha=.5, normed=True)
 
 mu, sig = norm.fit(data)
 
-plt.fill(x, norm(mu, sig).pdf(x), alpha=.5, label='Fitted')
+plt.fill_between(x, norm(mu, sig).pdf(x), alpha=.5, label='Fitted')
 plt.legend()
 print('Unimodal Gaussian Fit:  Mean {:.4}, stdev {:.4}'.format(mu, sig))
 plt.hist(data, bins='auto', alpha=.3, normed=True)
@@ -145,7 +145,7 @@ dens = sm.nonparametric.KDEUnivariate(data)
 dens.fit()
 
 kde_sm = dens.evaluate(x)
-plt.fill(x, kde_sm, alpha=.5, label='KDE')
+plt.fill_between(x, kde_sm, alpha=.5, label='KDE')
 plt.hist(data, bins='auto', alpha=.3, normed=True)
 
 ##############################################################################
@@ -162,7 +162,7 @@ kde_best = grid.best_estimator_
 kde_sk = np.exp(
     kde_best.score_samples(x[:, np.newaxis])
 )
-plt.fill(x, kde_sk, alpha=.5, label='KDE')
+plt.fill_between(x, kde_sk, alpha=.5, label='KDE')
 plt.hist(data, bins='auto', alpha=.3, normed=True)
 
 

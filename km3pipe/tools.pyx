@@ -15,6 +15,7 @@ import os
 import base64
 import subprocess
 import collections
+import socket
 from collections import namedtuple
 from itertools import chain
 from datetime import datetime
@@ -28,7 +29,7 @@ import numpy as np
 import scipy.linalg
 
 
-from km3pipe.logger import logging
+from .logger import logging
 
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -206,39 +207,55 @@ def geant2pdg(geant_code):
         return 0
 
 
+_PDG2NAME = {
+    1: 'd',
+    2: 'u',
+    3: 's',
+    4: 'c',
+    5: 'b',
+    6: 't',
+    11: 'e-',
+    -11: 'e+',
+    12: 'nu_e',
+    -12: 'anu_e',
+    13: 'mu-',
+    -13: 'mu+',
+    14: 'nu_mu',
+    -14: 'anu_mu',
+    15: 'tau-',
+    -15: 'tau+',
+    16: 'nu_tau',
+    -16: 'anu_tau',
+    22: 'photon',
+    111: 'pi0',
+    130: 'K0L',
+    211: 'pi-',
+    -211: 'pi+',
+    310: 'K0S',
+    311: 'K0',
+    321: 'K+',
+    -321: 'K-',
+    2112: 'n',
+    2212: 'p',
+    -2212: 'p-',
+}
+
+_NAME2PDG = {val: key for key, val in _PDG2NAME.items()}      # noqa
+
+
 def pdg2name(pdg_id):
     """Convert PDG ID to human readable names"""
     # pylint: disable=C0330
-    conversion_table = {
-        11: 'e-',
-        -11: 'e+',
-        12: 'nu_e',
-        -12: 'anu_e',
-        13: 'mu-',
-        -13: 'mu+',
-        14: 'nu_mu',
-        -14: 'anu_mu',
-        15: 'tau-',
-        -15: 'tau+',
-        16: 'nu_tau',
-        -16: 'anu_tau',
-        22: 'photon',
-        111: 'pi0',
-        130: 'K0L',
-        211: 'pi-',
-        -211: 'pi+',
-        310: 'K0S',
-        311: 'K0',
-        321: 'K+',
-        -321: 'K-',
-        2112: 'n',
-        2212: 'p',
-        -2212: 'p-',
-    }
     try:
-        return conversion_table[pdg_id]
+        return _PDG2NAME[pdg_id]
     except KeyError:
         return "N/A"
+
+def name2pdg(name):
+    try:
+        return _NAME2PDG[name]
+    except KeyError:
+        return 0
 
 
 def total_seconds(td):
@@ -318,25 +335,34 @@ class Timer(object):
         self.precision = precision
 
     def __enter__(self):
+        self.start()
+
+    def __exit__(self, type, value, traceback):
+        self.stop()
+
+    def start(self):
         self.__start = timer()
         self.__start_cpu = time.clock()
 
-    def __exit__(self, type, value, traceback):
+    def stop(self):
         self.__finish = timer()
         self.__finish_cpu = time.clock()
         self.log()
+        return self.seconds
 
-    def get_seconds(self):
+    @property
+    def seconds(self):
         return self.__finish - self.__start
 
-    def get_seconds_cpu(self):
+    @property
+    def cpu_seconds(self):
         return self.__finish_cpu - self.__start_cpu
 
     def log(self):
-        seconds = self.get_seconds()
-        seconds_cpu = self.get_seconds_cpu()
         print("{0} took {1:.{3}f}s (CPU {2:.{3}f}s)."
-              .format(self.message, seconds, seconds_cpu, self.precision))
+              .format(self.message,
+                      self.seconds, self.cpu_seconds,
+                      self.precision))
 
 
 class Cuckoo(object):
@@ -591,3 +617,21 @@ def flat_weights(x, bins):
     wgt = 1 / pop
     wgt *= len(wgt) / np.sum(wgt)
     return wgt
+
+
+def prettyln(text, fill='-', align='^', prefix='[ ', suffix=' ]', length=69):
+    """Wrap `text` in a pretty line with maximum length."""
+    text = '{prefix}{0}{suffix}'.format(text, prefix=prefix, suffix=suffix)
+    print("{0:{fill}{align}{length}}"
+          .format(text, fill=fill, align=align, length=length))
+
+
+def irods_filepath(det_id, run_id):
+    """Generate the iRODS filepath for given detector (O)ID and run ID"""
+    data_path = "/in2p3/km3net/data/raw/sea"
+    from km3pipe.db import DBManager
+    if not isinstance(det_id, int):
+        dts = DBManager().detectors
+        det_id = int(dts[dts.OID == det_id].SERIALNUMBER.values[0])
+    return data_path + "/KM3NeT_{0:08}/{2}/KM3NeT_{0:08}_{1:08}.root" \
+           .format(det_id, run_id, run_id//1000)

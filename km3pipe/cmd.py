@@ -9,6 +9,7 @@ Usage:
     km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID]
     km3pipe runtable [-n RUNS] [-s REGEX] [--temporary] DET_ID
     km3pipe runinfo [--temporary] DET_ID RUN
+    km3pipe retrieve DET_ID RUN
     km3pipe (-h | --help)
     km3pipe --version
 
@@ -31,10 +32,11 @@ import sys
 import os
 from datetime import datetime
 
-from km3pipe import version
-from km3pipe.db import DBManager
+from . import version
+from .tools import irods_filepath
+from .db import DBManager
 from km3modules import StatusBar
-from km3pipe.hardware import Detector
+from .hardware import Detector
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -105,6 +107,16 @@ def update_km3pipe(git_branch=''):
               .format(git_branch))
 
 
+def retrieve(run_id, det_id):
+    """Retrieve run from iRODS for a given detector (O)ID"""
+    try:
+        det_id = int(det_id)
+    except ValueError:
+        pass
+    path = irods_filepath(det_id, int(run_id))
+    os.system("iget -Pv {0}".format(path))
+
+
 def detx(det_id, calibration='', t0set=''):
     now = datetime.now()
     filename = "KM3NeT_{0}{1:08d}_{2}.detx" \
@@ -135,6 +147,9 @@ def main():
 
     if args['runinfo']:
         runinfo(args['RUN'], args['DET_ID'], temporary=args["--temporary"])
+
+    if args['retrieve']:
+        retrieve(args['RUN'], args['DET_ID'])
 
     if args['detx']:
         t0set = args['-t']
