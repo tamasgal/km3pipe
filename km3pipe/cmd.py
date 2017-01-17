@@ -32,11 +32,11 @@ import sys
 import os
 from datetime import datetime
 
-from km3pipe import version
-from km3pipe.tools import irods_filepath
-from km3pipe.db import DBManager
+from . import version
+from .tools import irods_filepath
+from .db import DBManager
 from km3modules import StatusBar
-from km3pipe.hardware import Detector
+from .hardware import Detector
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

@@ -13,11 +13,11 @@ import sys
 
 import numpy as np
 
-from km3pipe.tools import unpack_nfirst, split, com  # , ignored
-from km3pipe.dataclasses import Point, Direction
-from km3pipe.db import DBManager
+from .tools import unpack_nfirst, split, com  # , ignored
+from .dataclasses import Point, Direction
+from .db import DBManager
 
-from km3pipe.logger import logging
+from .logger import logging
 
 if sys.version_info[0] > 2:
     from io import StringIO

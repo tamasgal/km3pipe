@@ -29,7 +29,7 @@ import numpy as np
 import scipy.linalg
 
 
-from km3pipe.logger import logging
+from .logger import logging
 
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

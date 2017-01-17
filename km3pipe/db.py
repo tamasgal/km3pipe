@@ -20,9 +20,9 @@ try:
 except ImportError:
     print("The database utilities needs pandas: pip install pandas")
 
-from km3pipe.tools import Timer
-from km3pipe.config import Config
-from km3pipe.logger import logging
+from .tools import Timer
+from .config import Config
+from .logger import logging
 
 try:
     input = raw_input

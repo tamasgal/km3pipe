@@ -12,21 +12,20 @@ from six import string_types
 import numpy as np
 import pandas as pd
 
-from km3pipe import Geometry, Run
-from km3pipe.io.evt import EvtPump  # noqa
-from km3pipe.io.daq import DAQPump  # noqa
-from km3pipe.io.clb import CLBPump  # noqa
-from km3pipe.io.aanet import AanetPump  # noqa
-from km3pipe.io.jpp import JPPPump  # noqa
-from km3pipe.io.ch import CHPump  # noqa
-from km3pipe.io.hdf5 import HDF5Pump  # noqa
-from km3pipe.io.hdf5 import HDF5Sink  # noqa
-from km3pipe.io.pickle import PicklePump  # noqa
+from .evt import EvtPump  # noqa
+from .daq import DAQPump  # noqa
+from .clb import CLBPump  # noqa
+from .aanet import AanetPump  # noqa
+from .jpp import JPPPump  # noqa
+from .ch import CHPump  # noqa
+from .hdf5 import HDF5Pump  # noqa
+from .hdf5 import HDF5Sink  # noqa
+from .pickle import PicklePump  # noqa
+from .pandas import (H5Chain, df_to_h5, map2df,
+                     read_group, write_table,)
+
 from km3pipe.tools import insert_prefix_to_dtype
-from km3pipe.io.pandas import (H5Chain, df_to_h5, map2df,
-                               read_group, write_table,)
-
-
+from km3pipe.core import Geometry, Run
 from km3pipe.logger import logging
 
 __author__ = "Tamas Gal"
