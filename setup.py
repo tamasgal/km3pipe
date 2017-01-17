@@ -68,7 +68,6 @@ setup(name='km3pipe',
       include_package_data=True,
       platforms='any',
       install_requires=[
-          'controlhost>=0.5.1',
           'cython',
           'docopt',
           'matplotlib==2.0.0rc2',

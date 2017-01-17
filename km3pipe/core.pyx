@@ -20,10 +20,10 @@ import types
 import numpy as np
 import pandas as pd
 
-from km3pipe.tools import peak_memory_usage, ignored
-from km3pipe.hardware import Detector
-from km3pipe.dataclasses import HitSeries
-from km3pipe.logger import logging
+from .tools import peak_memory_usage, ignored
+from .hardware import Detector
+from .dataclasses import HitSeries
+from .logger import logging
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

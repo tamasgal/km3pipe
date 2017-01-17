@@ -15,7 +15,7 @@ import pprint
 
 import numpy as np
 
-from km3pipe import Pump, Module, Blob
+from km3pipe.core import Pump, Module, Blob
 from km3pipe.dataclasses import EventInfo, HitSeries
 from km3pipe.tools import ignored
 from km3pipe.logger import logging

@@ -11,7 +11,7 @@ import sys
 
 from collections import namedtuple
 
-from km3pipe import Pump, Blob
+from km3pipe.core import Pump, Blob
 from km3pipe.logger import logging
 
 from km3pipe.dataclasses import Point, Direction, HitSeries
