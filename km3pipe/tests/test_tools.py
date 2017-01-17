@@ -11,7 +11,7 @@ from time import sleep
 from km3pipe.testing import TestCase, MagicMock, StringIO
 from km3pipe.tools import (unpack_nfirst, split, namedtuple_with_defaults,
                            angle_between, pld3, com, geant2pdg, pdg2name,
-                           PMTReplugger, Cuckoo, total_seconds, zenith,
+                           Cuckoo, total_seconds, zenith,
                            azimuth,
                            remain_file_pointer, decamelise, camelise)
 
@@ -188,42 +188,6 @@ class TestTools(TestCase):
         time2 = time1 + timedelta(seconds=seconds)
         td = time2 - time1
         self.assertAlmostEqual(seconds, total_seconds(td))
-
-
-# [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)]
-PMT_COMBS = list(itertools.combinations(range(4), 2))
-ANGLES = range(len(PMT_COMBS))
-
-
-class TestPMTReplugger(TestCase):
-
-    def setUp(self):
-        self.replugger = PMTReplugger(PMT_COMBS, ANGLES, [])
-
-    def test_angle_for(self):
-        # self.assertEqual(0, self.replugger.angle_for((0, 1)))
-        # self.assertEqual(1, self.replugger.angle_for((0, 2)))
-        pass
-
-    def test_switch(self):
-        self.replugger.switch([0, 1], [1, 0])
-        self.assertEqual(self.replugger._new_combs,
-                         [(0, 1), (1, 2), (1, 3), (0, 2), (0, 3), (2, 3)])
-
-    def test_switch_three_indicies(self):
-        self.replugger.switch([0, 1, 2], [1, 2, 0])
-        self.assertEqual(self.replugger._new_combs,
-                         [(1, 2), (0, 1), (1, 3), (0, 2), (2, 3), (0, 3)])
-
-    def test_angle_is_correct_if_two_pmts_are_switched(self):
-        self.replugger.switch([0, 1], [1, 0])
-        self.assertEqual(0, self.replugger.angle_for((0, 1)))
-        self.assertEqual(3, self.replugger.angle_for((0, 2)))
-        self.assertEqual(4, self.replugger.angle_for((0, 3)))
-
-    def test_angles_are_ordered_correctly_after_switch(self):
-        self.replugger.switch([0, 1, 2], [1, 2, 0])
-        self.assertListEqual([1, 3, 5, 0, 2, 4], self.replugger.angles)
 
 
 class TestCuckoo(TestCase):
