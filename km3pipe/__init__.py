@@ -12,17 +12,16 @@ try:
 except NameError:
     __KM3PIPE_SETUP__ = False
 
-from km3pipe.__version__ import version, version_info  # noqa
+from .__version__ import version, version_info  # noqa
 
 if not __KM3PIPE_SETUP__:
-    import km3pipe      # noqa
-    from km3pipe.core import (Pipeline, Module, Pump, Blob, Run,  # noqa
+    from .core import (Pipeline, Module, Pump, Blob, Run,  # noqa
                               Geometry, AanetGeometry)
-    from km3pipe import io  # noqa
-    from km3pipe import utils  # noqa
-    from km3pipe import srv  # noqa
-    from km3pipe.srv import srv_event  # noqa
-    from km3pipe.io import GenericPump, read_hdf5  # noqa
+    from . import io  # noqa
+    from . import utils  # noqa
+    from . import srv  # noqa
+    from .srv import srv_event  # noqa
+    from .io import GenericPump, read_hdf5  # noqa
 
 
 __author__ = "Tamas Gal and Moritz Lotze"

@@ -10,7 +10,7 @@ from __future__ import division, absolute_import, print_function
 import pickle
 from collections import namedtuple
 
-from km3pipe import Pump
+from km3pipe.core import Pump
 from km3pipe.logger import logging
 
 __author__ = "Tamas Gal"

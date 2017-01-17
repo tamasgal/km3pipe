@@ -27,8 +27,8 @@ km3pipe.style.use('default')
 # First generate some pseudodata: A bimodal gaussian, + noise.
 
 N = 100
-bmg = np.concatenate((np.random.normal(15, 1, 0.3 * N),
-                      np.random.normal(20, 1, 0.7 * N)))
+bmg = np.concatenate((np.random.normal(15, 1, int(0.3 * N)),
+                      np.random.normal(20, 1, int(0.7 * N))))
 noise_bmg = 0.5
 data = np.random.normal(bmg, noise_bmg)[:, np.newaxis]
 

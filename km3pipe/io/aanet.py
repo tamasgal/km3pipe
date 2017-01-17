@@ -9,7 +9,7 @@ import os.path
 
 import numpy as np
 
-from km3pipe import Pump, Blob
+from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import (HitSeries, TrackSeries, EventInfo,
                                  KM3Array, KM3DataFrame)
 from km3pipe.logger import logging
@@ -48,7 +48,7 @@ class AanetPump(Pump):
         self.indices = self.get('indices')
         self.additional = self.get('additional')
         self.format = self.get('aa_fmt')
-        self.id_offset = self.get('id_offset') or 0
+        self.use_id = self.get('use_id') or False
         if self.additional:
             self.id = self.get('id')
             self.return_without_match = self.get("return_without_match")
@@ -74,6 +74,7 @@ class AanetPump(Pump):
 
         self.header = None
         self.blobs = self.blob_generator()
+        self.i = 0
 
         if self.additional:
             dummy_evt = ROOT.Evt()
@@ -147,9 +148,10 @@ class AanetPump(Pump):
 
         blob = Blob()
         blob['Evt'] = event
-        event_id = event.id
-        if self.id_offset:
-            event_id += self.id_offset
+        if self.use_id:
+            event_id = event.id
+        else:
+            event_id = self.i
         try:
             blob['Hits'] = HitSeries.from_aanet(event.hits, event_id)
             blob['McHits'] = HitSeries.from_aanet(event.mc_hits,

@@ -25,11 +25,11 @@ import pandas as pd
 import numpy as np
 import websocket
 
-from km3pipe.core import Geometry
-from km3pipe.config import Config
-from km3pipe.dataclasses import HitSeries
-from km3pipe.tools import token_urlsafe
-from km3pipe.logger import logging
+from .core import Geometry
+from .config import Config
+from .dataclasses import HitSeries
+from .tools import token_urlsafe
+from .logger import logging
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

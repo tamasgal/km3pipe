@@ -1,8 +1,12 @@
 Unreleased changes
 ------------------
+
+6.2.0 / 2017-01-16
+------------------
 * The DB client now automatically uses the production cookie on Lyon.
   No need to deal with session requests anymore...
 * New command line utility to download runs from iRODS: `km3pipe retrieve ...`
+* Integrates the controlhost package
 
 6.1.1 / 2017-01-12
 ------------------

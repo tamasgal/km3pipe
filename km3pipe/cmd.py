@@ -7,6 +7,7 @@ Usage:
     km3pipe test
     km3pipe update [GIT_BRANCH]
     km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID]
+    km3pipe detectors [-s REGEX] [--temporary]
     km3pipe runtable [-n RUNS] [-s REGEX] [--temporary] DET_ID
     km3pipe runinfo [--temporary] DET_ID RUN
     km3pipe retrieve DET_ID RUN
@@ -32,11 +33,11 @@ import sys
 import os
 from datetime import datetime
 
-from km3pipe import version
-from km3pipe.tools import irods_filepath
-from km3pipe.db import DBManager
+from . import version
+from .tools import irods_filepath
+from .db import DBManager
 from km3modules import StatusBar
-from km3pipe.hardware import Detector
+from .hardware import Detector
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -127,6 +128,15 @@ def detx(det_id, calibration='', t0set=''):
         det.write(filename)
 
 
+def detectors(regex=None, sep='\t', temporary=False):
+    """Print the detectors table"""
+    db = DBManager(temporary=temporary)
+    dt = db.detectors
+    if regex is not None:
+        dt = dt[dt['OID'].str.match(regex) | dt['CITY'].str.match(regex)]
+    dt.to_csv(sys.stdout, sep=sep)
+
+
 def main():
     from docopt import docopt
     args = docopt(__doc__, version=version)
@@ -156,3 +166,7 @@ def main():
         calibration = args['-c']
         det_id = int(('-' if args['-m'] else '') + args['DET_ID'])
         detx(det_id, calibration, t0set)
+
+    if args['detectors']:
+        detectors(regex=args['-s'], temporary=args["--temporary"])
+
