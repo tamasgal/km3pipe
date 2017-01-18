@@ -169,6 +169,9 @@ def main():
     if args['runinfo']:
         runinfo(args['RUN'], args['DET_ID'], temporary=args["--temporary"])
 
+    if args['rundetsn']:
+        runinfo(args['RUN'], args['DETECTOR'], temporary=args["--temporary"])
+
     if args['retrieve']:
         retrieve(args['RUN'], args['DET_ID'])
 
