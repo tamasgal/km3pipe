@@ -1,9 +1,10 @@
 Unreleased changes
 ------------------
+* Introduces `BinaryStruct` which makes handling binary data much more easier.
 
 6.2.2 / 2017-01-19
 ------------------
-* ad ``rundetsn`` cmd tool
+* add ``rundetsn`` cmd tool
 
 6.2.1 / 2017-01-17
 ------------------
