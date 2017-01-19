@@ -1,6 +1,6 @@
 Unreleased changes
 ------------------
-
+* ad ``rundetsn`` cmd tool
 
 6.2.1 / 2017-01-17
 ------------------
