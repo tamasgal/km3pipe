@@ -10,6 +10,7 @@ Usage:
     km3pipe detectors [-s REGEX] [--temporary]
     km3pipe runtable [-n RUNS] [-s REGEX] [--temporary] DET_ID
     km3pipe runinfo [--temporary] DET_ID RUN
+    km3pipe rundetsn [--temporary] RUN DETECTOR
     km3pipe retrieve DET_ID RUN
     km3pipe (-h | --help)
     km3pipe --version
@@ -23,6 +24,7 @@ Options:
     -s REGEX            Regular expression to filter the runsetup name/id.
     --temporary         Do not request a permanent session, but a temporary one. [default=False]
     DET_ID              Detector ID (eg. D_ARCA001).
+    DETECTOR            Detector (eg. ARCA).
     GIT_BRANCH          Git branch to pull (eg. develop).
     RUN                 Run number.
 """
@@ -137,6 +139,15 @@ def detectors(regex=None, sep='\t', temporary=False):
     dt.to_csv(sys.stdout, sep=sep)
 
 
+def rundetsn(run_id, detector="ARCA", temporary=False):
+    """Print the detector serial number for a given run of ARCA/ORCA"""
+    db = DBManager(temporary=temporary)
+    dts=db.detectors
+    for det_id in dts[dts.OID.str.contains(detector)].SERIALNUMBER:
+        if run_id in db.run_table(det_id).RUN.values:
+            return det_id
+
+
 def main():
     from docopt import docopt
     args = docopt(__doc__, version=version)
@@ -158,6 +169,9 @@ def main():
     if args['runinfo']:
         runinfo(args['RUN'], args['DET_ID'], temporary=args["--temporary"])
 
+    if args['rundetsn']:
+        rundetsn(args['RUN'], args['DETECTOR'], temporary=args["--temporary"])
+
     if args['retrieve']:
         retrieve(args['RUN'], args['DET_ID'])
 
@@ -169,4 +183,3 @@ def main():
 
     if args['detectors']:
         detectors(regex=args['-s'], temporary=args["--temporary"])
-

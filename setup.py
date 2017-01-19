@@ -70,7 +70,7 @@ setup(name='km3pipe',
       install_requires=[
           'cython',
           'docopt',
-          'matplotlib==2.0.0rc2',
+          'matplotlib>=2.0.0',
           'mock',
           'numpy<=1.11',
           'pandas',

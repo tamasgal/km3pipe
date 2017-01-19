@@ -38,6 +38,8 @@ class AanetPump(Pump):
     aa_fmt: string, optional
         Subformat of aanet in the file. Possible values:
         ``'minidst', 'jevt_jgandalf', 'generic_track', 'ancient_recolns'``
+    use_aart_sps_lib: bool, optional [default=False]
+        Use Aart's local SPS copy (@ Lyon) via ``gSystem.Load``?
     """
 
     def __init__(self, **context):
@@ -49,6 +51,7 @@ class AanetPump(Pump):
         self.additional = self.get('additional')
         self.format = self.get('aa_fmt')
         self.use_id = self.get('use_id') or False
+        self.use_aart_sps_lib = self.get('use_aart_sps_lib') or False
         if self.additional:
             self.id = self.get('id')
             self.return_without_match = self.get("return_without_match")
@@ -69,6 +72,9 @@ class AanetPump(Pump):
         self.aalib = self.get('aa_lib')
         if self.aalib:
             ROOT.gSystem.Load(self.aalib) # noqa
+        elif self.use_aart_sps_lib:
+            aapath = '/sps/km3net/users/heijboer/aanet/libaa.so'
+            ROOT.gSystem.Load(aapath) # noqa
         else:
             import aa  # noqa
 
