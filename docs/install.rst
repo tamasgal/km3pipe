@@ -28,6 +28,8 @@ To install km3pipe, you need:
 
 - C compiler, e.g. ``gcc``.
 
+- HDF5 (the hdf5lib C library, e.g. `apt-get install hdf5`)
+
 (Recommended) Virtual Environments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
