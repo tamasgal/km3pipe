@@ -158,6 +158,7 @@ class AanetPump(Pump):
             event_id = event.id
         else:
             event_id = self.i
+        self.i += 1
         try:
             blob['Hits'] = HitSeries.from_aanet(event.hits, event_id)
             blob['McHits'] = HitSeries.from_aanet(event.mc_hits,
