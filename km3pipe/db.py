@@ -72,8 +72,11 @@ BASE_URL = 'https://km3netdbweb.in2p3.fr'
 
 def we_are_in_lyon():
     """Check if we are on a Lyon machine"""
-    hostname = socket.gethostname()
-    ip = socket.gethostbyname(hostname)
+    try:
+        hostname = socket.gethostname()
+        ip = socket.gethostbyname(hostname)
+    except socket.gaierror:
+        return False
     return ip.startswith("134.158.")
 
 
