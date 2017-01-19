@@ -155,6 +155,28 @@ KM3Pipe: Main Framework
 
   DBManager
 
+  
+``km3pipe.cmd``: Command Line Tools
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: km3pipe.cmd
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3pipe.cmd
+
+.. autosummary::
+  :toctree: api
+
+
+  run_tests
+  runtable
+  runinfo
+  update_km3pipe
+  retrieve
+  detx
+  detectors
+  rundetsn
 
 
 KM3Modules: Pipeline Segments
