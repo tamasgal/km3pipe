@@ -11,6 +11,8 @@ from six import with_metaclass
 
 import numpy as np
 from numpy import nan
+from io import BytesIO
+import struct
 
 from km3pipe.testing import TestCase
 from km3pipe.testing.mocks import FakeAanetHit
@@ -19,7 +21,7 @@ from km3pipe.dataclasses import (Hit, Track, Position, Direction_,
                                  HitSeries, TimesliceHitSeries,
                                  EventInfo, SummarysliceInfo, TimesliceInfo,
                                  Serialisable, TrackSeries, SummaryframeSeries,
-                                 KM3Array, KM3DataFrame)
+                                 KM3Array, KM3DataFrame, BinaryStruct)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -631,3 +633,28 @@ class TestKM3DataFrame(TestCase):
         df.h5loc = '/reco'
         self.assertEqual('/reco', df.h5loc)
         self.assertEqual('/reco', df[[0, 1]].h5loc)
+
+
+class TestBinaryStruct(TestCase):
+    def test_init(self):
+        stream = BytesIO(b'')
+        b = BinaryStruct(stream)
+
+    def test_parsing(self):
+        structure = '<2i3fc'
+        values = (1, 2, 3.4, 5.6, 7.8, b'a')
+        fields = 'abcdef'
+
+        data = BytesIO(struct.pack(structure, *values))
+
+        class Dummy(BinaryStruct):
+            _structure = structure
+            _fields = fields
+
+        dummy = Dummy(data)
+        self.assertEqual(1, dummy.a)
+        self.assertEqual(2, dummy.b)
+        self.assertAlmostEqual(3.4, dummy.c, 5)
+        self.assertAlmostEqual(5.6, dummy.d, 5)
+        self.assertAlmostEqual(7.8, dummy.e, 5)
+        self.assertEqual(b'a', dummy.f)
