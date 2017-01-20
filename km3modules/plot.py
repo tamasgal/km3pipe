@@ -72,7 +72,7 @@ def plot_dom_parameters(data, detector, filename, label, title,
     ax.set_xlabel("DU")
     ax.set_ylabel("DOM")
     ax.set_ylim(-2)
-    ax.set_yticks(range(1, N_DOMS+1))
+    ax.set_yticks(range(1, 18+1))
     major_locator = pylab.MaxNLocator(integer=True)
     sc_inactive.axes.xaxis.set_major_locator(major_locator)
 
