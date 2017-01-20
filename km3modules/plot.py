@@ -47,7 +47,7 @@ def plot_dom_parameters(data, detector, filename, label, title,
         'vmin': vmin,
         'vmax': vmax,
     }
-    sc_inactive = ax.scatter(x, y, c='lightgray', label='missing',
+    sc_inactive = ax.scatter(x, y, c='lightgray', label='missing', s=m_size,
                              **scatter_args)
 
     xa, ya = map(np.array, zip(*data.keys()))
