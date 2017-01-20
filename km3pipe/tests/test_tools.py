@@ -212,6 +212,34 @@ class TestCuckoo(TestCase):
         cuckoo.msg(message)
         callback.assert_called_with(message)
 
+    def test_msg_calls_callback_with_empty_args(self):
+        callback = MagicMock()
+        message = 'a'
+        cuckoo = Cuckoo(callback=callback)
+        cuckoo.msg()
+        callback.assert_called_with()
+
+    def test_msg_calls_callback_with_multiple_args(self):
+        callback = MagicMock()
+        message = 'a'
+        cuckoo = Cuckoo(callback=callback)
+        cuckoo.msg(1, 2, 3)
+        callback.assert_called_with(1, 2, 3)
+
+    def test_msg_calls_callback_with_multiple_kwargs(self):
+        callback = MagicMock()
+        message = 'a'
+        cuckoo = Cuckoo(callback=callback)
+        cuckoo.msg(a=1, b=2)
+        callback.assert_called_with(a=1, b=2)
+
+    def test_msg_calls_callback_with_mixed_args_and_kwargs(self):
+        callback = MagicMock()
+        message = 'a'
+        cuckoo = Cuckoo(callback=callback)
+        cuckoo.msg(1, 2, c=3, d=4)
+        callback.assert_called_with(1, 2, c=3, d=4)
+
     def test_direct_call_calls_callback(self):
         callback = MagicMock()
         message = 'a'
