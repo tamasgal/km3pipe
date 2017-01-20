@@ -1,6 +1,7 @@
 Unreleased changes
 ------------------
 * Introduces `BinaryStruct` which makes handling binary data much more easier.
+* `Cuckoo` now allows args and kwargs to be passed to the callback function.
 
 6.2.2 / 2017-01-19
 ------------------
