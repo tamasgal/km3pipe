@@ -15,6 +15,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib import pylab
+import numpy as np
 
 import km3pipe as kp
 import km3pipe.style
