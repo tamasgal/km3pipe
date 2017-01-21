@@ -1,5 +1,9 @@
 Unreleased changes
 ------------------
+
+
+6.3.0 / 2017-01-21
+------------------
 * Introduces `BinaryStruct` which makes handling binary data much more easier.
 * `Cuckoo` now allows args and kwargs to be passed to the callback function.
 * km3modules.plot module added including a unified DOM plotter
