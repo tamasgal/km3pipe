@@ -1,9 +1,17 @@
 Unreleased changes
 ------------------
 
+
+6.3.0 / 2017-01-21
+------------------
+* Introduces `BinaryStruct` which makes handling binary data much more easier.
+* `Cuckoo` now allows args and kwargs to be passed to the callback function.
+* km3modules.plot module added including a unified DOM plotter
+* km3modules.fit module added including k40 coincidence fit
+
 6.2.2 / 2017-01-19
 ------------------
-* ad ``rundetsn`` cmd tool
+* add ``rundetsn`` cmd tool
 
 6.2.1 / 2017-01-17
 ------------------

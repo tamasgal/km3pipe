@@ -88,7 +88,7 @@ class CHPump(Pump):
                 log.debug("Waiting for data from network...")
                 prefix, data = self.client.get_message()
                 log.debug("{0} bytes received from network.".format(len(data)))
-            except struct.error:
+            except ValueError:
                 log.error("Corrupt data recieved, skipping...")
                 continue
             if not data:

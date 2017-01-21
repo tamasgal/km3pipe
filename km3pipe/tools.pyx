@@ -312,10 +312,10 @@ class Cuckoo(object):
         self.callback = callback
         self.timestamp = None
 
-    def msg(self, message=None):
+    def msg(self, *args, **kwargs):
         "Only execute callback when interval is reached."
         if self.timestamp is None or self._interval_reached():
-            self.callback(message)
+            self.callback(*args, **kwargs)
             self.reset()
 
     def reset(self):
@@ -326,9 +326,9 @@ class Cuckoo(object):
         "Check if defined interval is reached"
         return total_seconds(datetime.now() - self.timestamp) > self.interval
 
-    def __call__(self, message):
+    def __call__(self, *args, **kwargs):
         "Run the msg function when called directly."
-        self.msg(message)
+        self.msg(*args, **kwargs)
 
 
 def ifiles(irods_path):

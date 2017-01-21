@@ -68,7 +68,12 @@ class Client(object):
     def get_message(self):
         while True:
             log.info("     Waiting for control host Prefix")
-            prefix = Prefix(data=self.socket.recv(Prefix.SIZE))
+            try:
+                prefix = Prefix(data=self.socket.recv(Prefix.SIZE))
+            except (UnicodeDecodeError, OSError, struct.error):
+                log.error("Failed to construct Prefix.")
+                self._reconnect()
+                raise ValueError
             if str(prefix.tag) not in self.valid_tags:
                 log.error("Invalid tag '{0}' received, ignoring the message."
                           .format(prefix.tag))
@@ -84,7 +89,11 @@ class Client(object):
             log.info("          message length: {0}".format(len(message)))
             log.info("            (getting next part)")
             buffer_size = min((BUFFER_SIZE, (prefix.length - len(message))))
-            message += self.socket.recv(buffer_size)
+            try:
+                message += self.socket.recv(buffer_size)
+            except OSError:
+                log.error("Failed to construct message.")
+                raise ValueError
         log.info("     ------ returning message with {0} bytes"
                  .format(len(message)))
         return prefix, message

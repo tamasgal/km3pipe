@@ -12,6 +12,7 @@ from __future__ import division, absolute_import, print_function
 import ctypes
 from libcpp cimport bool as c_bool  # noqa
 from six import with_metaclass
+from struct import Struct, calcsize
 
 import numpy as np
 cimport numpy as np
@@ -1689,3 +1690,30 @@ deserialise_map = {
     'SummaryframeInfo': SummaryframeInfo,
     'Tracks': TrackSeries,
 }
+
+
+class BinaryStruct(object):
+    """A binary struct superclass which parses itself from a given stream.
+
+    Overwrite `_structure` and `_fields` after subclassing.
+    `_structure` should have the standard Python struct format type syntax.
+    The `_fields` are automatically translated into instance attributes
+    at init.
+
+    Parameters
+    ----------
+    _structure: struct-format as str, like '<i2f'
+    _fields: iterable of str
+
+    """
+    _structure = ''
+    _fields = ()
+
+    def __init__(self, stream):
+        data = Struct(self._structure).unpack_from(stream.read(self._size))
+        for attr, value in zip(self._fields, data):
+            setattr(self, attr, value)
+
+    @property
+    def _size(self):
+        return calcsize(self._structure)

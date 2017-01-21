@@ -7,6 +7,7 @@ Pumps for the DAQ data formats.
 """
 from __future__ import division, absolute_import, print_function
 
+from collections import defaultdict
 from io import BytesIO
 import math
 import struct
@@ -474,3 +475,26 @@ class THMCData(object):
 
     def __repr__(self):
         return self.__str__()
+
+
+class TimesliceParser(Module):
+    """Preliminary timeslice parser"""
+    def process(self, blob):
+        data = BytesIO(blob['CHData'])
+        tsl_size, datatype = unpack('<ii', data.read(8))
+        det_id, run, sqnr = unpack('<iii', data.read(12))
+        timestamp, ns_ticks, n_frames = unpack('<iii', data.read(12))
+
+        ts_frames = blob['TimesliceFrames'] = defaultdict(list)
+
+        for i in range(n_frames):
+            frame_size, datatype = unpack('<ii', data.read(8))
+            det_id, run, sqnr = unpack('<iii', data.read(12))
+            timestamp, ns_ticks, dom_id = unpack('<iii', data.read(12))
+            dom_status = unpack('<iiiii', data.read(5*4))
+            n_hits = unpack('<i', data.read(4))[0]
+            hits = []
+            for j in range(n_hits):
+                hit = unpack('!BlB', data.read(6))
+                ts_frames[dom_id].append(hit)
+        return blob
