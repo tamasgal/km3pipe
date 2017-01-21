@@ -74,11 +74,11 @@ def runtable(det_id, n=5, sep='\t', regex=None, temporary=False):
 def runinfo(run_id, det_id, temporary=False):
     db = DBManager(temporary=temporary)
     df = db.run_table(det_id)
-    row = df[df['RUN'] == int(run_id)]
+    row = df[df['RUN'] == run_id]
     if len(row) == 0:
         print("No database entry for run {0} found.".format(run_id))
         return
-    next_row = df[df['RUN'] == (int(run_id) + 1)]
+    next_row = df[df['RUN'] == (run_id + 1)]
     if len(next_row) != 0:
         end_time = next_row['DATETIME'].values[0]
         duration = (next_row['UNIXSTARTTIME'].values[0] -
@@ -116,7 +116,7 @@ def retrieve(run_id, det_id):
         det_id = int(det_id)
     except ValueError:
         pass
-    path = irods_filepath(det_id, int(run_id))
+    path = irods_filepath(det_id, run_id)
     os.system("iget -Pv {0}".format(path))
 
 
@@ -145,7 +145,8 @@ def rundetsn(run_id, detector="ARCA", temporary=False):
     dts=db.detectors
     for det_id in dts[dts.OID.str.contains(detector)].SERIALNUMBER:
         if run_id in db.run_table(det_id).RUN.values:
-            return det_id
+            print(det_id)
+            return
 
 
 def main():
@@ -167,13 +168,13 @@ def main():
         runtable(args['DET_ID'], n, regex=args['-s'], temporary=args["--temporary"])
 
     if args['runinfo']:
-        runinfo(args['RUN'], args['DET_ID'], temporary=args["--temporary"])
+        runinfo(int(args['RUN']), args['DET_ID'], temporary=args["--temporary"])
 
     if args['rundetsn']:
-        rundetsn(args['RUN'], args['DETECTOR'], temporary=args["--temporary"])
+        rundetsn(int(args['RUN']), args['DETECTOR'], temporary=args["--temporary"])
 
     if args['retrieve']:
-        retrieve(args['RUN'], args['DET_ID'])
+        retrieve(int(args['RUN']), args['DET_ID'])
 
     if args['detx']:
         t0set = args['-t']
