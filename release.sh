@@ -39,7 +39,8 @@ git commit -m "Bumps changelog"
 
 git flow release finish "${VERSION}"
 
-#python setup.py sdist register upload
+rm -rf dist/*
+python setup.py sdist
 twine upload dist/*
 
 git checkout master
