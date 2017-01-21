@@ -32,7 +32,8 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 __all__ = ('EventInfo', 'Point', 'Position', 'Direction', 'HitSeries',
            'TimesliceHitSeries', 'Hit',
-           'Track', 'TrackSeries', 'Serialisable', 'SummaryframeInfo')
+           'Track', 'TrackSeries', 'Serialisable', 'SummaryframeInfo',
+           'BinaryStruct')
 
 
 IS_CC = {
