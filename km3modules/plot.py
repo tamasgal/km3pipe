@@ -23,7 +23,8 @@ import km3pipe.style
 
 def plot_dom_parameters(data, detector, filename, label, title,
                         vmin=0.0, vmax=10.0,
-                        cmap='RdYlGn_r', under='deepskyblue', over='deeppink'):
+                        cmap='RdYlGn_r', under='deepskyblue', over='deeppink',
+                        missing='lightgray'):
     """Creates a plot in the classical monitoring.km3net.de style.
 
     Parameters
@@ -47,7 +48,7 @@ def plot_dom_parameters(data, detector, filename, label, title,
         'vmin': vmin,
         'vmax': vmax,
     }
-    sc_inactive = ax.scatter(x, y, c='lightgray', label='missing', s=m_size,
+    sc_inactive = ax.scatter(x, y, c=missing, label='missing', s=m_size,
                              **scatter_args)
 
     xa, ya = map(np.array, zip(*data.keys()))
