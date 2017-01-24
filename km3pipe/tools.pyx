@@ -415,6 +415,7 @@ def tai_timestamp():
         (1993, 7, 1), (1994, 7, 1), (1996, 1, 1),
         (1997, 7, 1), (1999, 1, 1), (2006, 1, 1),
         (2009, 1, 1), (2012, 7, 1), (2015, 7, 1),
+        (2017, 1, 1),
     ]
     for idx, leap_date in enumerate(leap_seconds):
         if leap_date >= (date.year, date.month, date.day):
