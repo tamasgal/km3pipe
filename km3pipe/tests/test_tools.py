@@ -12,7 +12,8 @@ from km3pipe.testing import TestCase, MagicMock, StringIO
 from km3pipe.tools import (unpack_nfirst, split, namedtuple_with_defaults,
                            angle_between, pld3, com, geant2pdg, pdg2name,
                            Cuckoo, total_seconds, zenith, azimuth,
-                           remain_file_pointer, decamelise, camelise, Timer)
+                           remain_file_pointer, decamelise, camelise, Timer,
+                           irods_filepath)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -406,3 +407,9 @@ class TestTimer(TestCase):
         sleep(sleep_time)
         timer.stop()
         self.assertAlmostEqual(sleep_time, timer.seconds, 2)
+
+
+class TestIrodsFilepath(TestCase):
+    def test_irods_filepath(self):
+        path = "/in2p3/km3net/data/raw/sea/KM3NeT_00000123/4/KM3NeT_00000123_00004556.root"
+        self.assertEqual(path, irods_filepath(123, 4556))
