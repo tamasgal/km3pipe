@@ -3,7 +3,7 @@
 # pylint: disable=locally-disabled,C0111,R0904,C0103
 from __future__ import division, absolute_import, print_function
 
-from io import StringIO
+from io import BytesIO
 import numpy as np
 import itertools
 from datetime import datetime, timedelta
@@ -306,7 +306,7 @@ class TestCuckoo(TestCase):
 class TestRemainFilePointer(TestCase):
 
     def test_remains_file_pointer_in_function(self):
-        dummy_file = StringIO('abcdefg')
+        dummy_file = BytesIO('abcdefg')
 
         @remain_file_pointer
         def seek_into_file(file_obj):
@@ -318,7 +318,7 @@ class TestRemainFilePointer(TestCase):
         self.assertEqual(2, dummy_file.tell())
 
     def test_remains_file_pointer_and_return_value_in_function(self):
-        dummy_file = StringIO('abcdefg')
+        dummy_file = BytesIO('abcdefg')
 
         @remain_file_pointer
         def seek_into_file(file_obj):
@@ -335,7 +335,7 @@ class TestRemainFilePointer(TestCase):
 
         class FileSeekerClass(object):
             def __init__(self):
-                self.dummy_file = StringIO('abcdefg')
+                self.dummy_file = BytesIO('abcdefg')
 
             @remain_file_pointer
             def seek_into_file(self, file_obj):
@@ -351,7 +351,7 @@ class TestRemainFilePointer(TestCase):
 
         class FileSeekerClass(object):
             def __init__(self):
-                self.dummy_file = StringIO('abcdefg')
+                self.dummy_file = BytesIO('abcdefg')
 
             @remain_file_pointer
             def seek_into_file(self, file_obj):

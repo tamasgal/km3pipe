@@ -11,7 +11,6 @@ import os
 import shutil
 import time
 import threading
-from io import StringIO
 
 import matplotlib
 # Force matplotlib to not use any Xwindows backend.

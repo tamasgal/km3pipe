@@ -10,6 +10,7 @@ from __future__ import division, absolute_import, print_function
 from collections import OrderedDict, defaultdict
 import os
 import sys
+from io import BytesIO
 
 import numpy as np
 
@@ -19,10 +20,6 @@ from .db import DBManager
 
 from .logger import logging
 
-if sys.version_info[0] > 2:
-    from io import StringIO
-else:
-    from StringIO import StringIO
 
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -80,7 +77,7 @@ class Detector(object):
                   .format(det_id))
             db = DBManager()
             detx = db.detx(det_id, t0set=t0set, calibration=calibration)
-            self._det_file = StringIO(detx)
+            self._det_file = BytesIO(detx)
             self._parse_header()
             self._parse_doms()
             if self.n_doms < 1:

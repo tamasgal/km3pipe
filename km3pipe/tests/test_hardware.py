@@ -16,7 +16,7 @@ dom_id line_id floor_id npmts
 """
 from __future__ import division, absolute_import, print_function
 
-from io import StringIO
+from io import BytesIO
 
 from km3pipe.testing import TestCase, skipIf
 from km3pipe.hardware import Detector, PMT
@@ -30,7 +30,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-EXAMPLE_DETX = StringIO("\n".join((
+EXAMPLE_DETX = BytesIO("\n".join((
     "1 3",
     "1 1 1 3",
     " 1 1.1 1.2 1.3 -1.1  0.2  0.3 10",
@@ -45,7 +45,7 @@ EXAMPLE_DETX = StringIO("\n".join((
     " 8 3.4 3.5 3.6  0.1 -1.2  0.3 80",
     " 9 3.7 3.8 3.9  0.1  0.2 -1.3 90",)))
 
-EXAMPLE_DETX_MIXED_IDS = StringIO("\n".join((
+EXAMPLE_DETX_MIXED_IDS = BytesIO("\n".join((
     "1 3",
     "8 1 1 3",
     " 83 1.1 1.2 1.3 -1.1  0.2  0.3 10",
@@ -60,7 +60,7 @@ EXAMPLE_DETX_MIXED_IDS = StringIO("\n".join((
     " 63 3.4 3.5 3.6  0.1 -1.2  0.3 80",
     " 61 3.7 3.8 3.9  0.1  0.2 -1.3 90",)))
 
-EXAMPLE_DETX_WRITE = StringIO("\n".join((
+EXAMPLE_DETX_WRITE = BytesIO("\n".join((
     "1 3",
     "1 1 1 3",
     " 1 1.1 1.2 1.3 1.0 0.0 0.0 10.0",
@@ -75,7 +75,7 @@ EXAMPLE_DETX_WRITE = StringIO("\n".join((
     " 8 3.4 3.5 3.6 0.0 1.0 0.0 80.0",
     " 9 3.7 3.8 3.9 1.0 0.0 0.0 90.0\n",)))
 
-EXAMPLE_MC_DETX_WRITE_MIXED_IDS = StringIO("\n".join((
+EXAMPLE_MC_DETX_WRITE_MIXED_IDS = BytesIO("\n".join((
     "-1 3",
     "6 1 1 3",
     " 31 1.1 1.2 1.3 1.0 0.0 0.0 10.0",

@@ -5,7 +5,7 @@ from __future__ import division, absolute_import, print_function
 
 import operator
 from functools import reduce
-from io import StringIO
+from io import BytesIO
 
 from km3pipe.testing import TestCase
 from km3pipe.io import EvtPump
@@ -89,7 +89,7 @@ class TestEvtParser(TestCase):
             ))
 
         self.pump = EvtPump()
-        self.pump.blob_file = StringIO(self.valid_evt_header)
+        self.pump.blob_file = BytesIO(self.valid_evt_header)
 
     def tearDown(self):
         self.pump.blob_file.close()
@@ -101,7 +101,7 @@ class TestEvtParser(TestCase):
         self.assertAlmostEqual(1, float(raw_header['cut_nu'][2]))
 
 #    def test_incomplete_header_raises_value_error(self):
-#        temp_file = StringIO(self.corrupt_evt_header)
+#        temp_file = BytesIO(self.corrupt_evt_header)
 #        pump = EvtPump()
 #        pump.blob_file = temp_file
 #        with self.assertRaises(ValueError):
@@ -109,7 +109,7 @@ class TestEvtParser(TestCase):
 #        temp_file.close()
 
     def test_record_offset_saves_correct_offset(self):
-        self.pump.blob_file = StringIO('a'*42)
+        self.pump.blob_file = BytesIO('a'*42)
         offsets = [1, 4, 9, 12, 23]
         for offset in offsets:
             self.pump.blob_file.seek(0, 0)
@@ -127,7 +127,7 @@ class TestEvtParser(TestCase):
         self.assertListEqual([88, 233, 700], self.pump.event_offsets)
 
     def test_rebuild_offsets_without_header(self):
-        self.pump.blob_file = StringIO(self.no_evt_header)
+        self.pump.blob_file = BytesIO(self.no_evt_header)
         self.pump.extract_header()
         self.pump._cache_offsets()
         self.assertListEqual([0, 145, 612], self.pump.event_offsets)
@@ -221,7 +221,7 @@ class TestEvtParser(TestCase):
         self.assertEqual(['13', '1'], blobs[0]['start_event'])
 
     def test_create_blob_entry_for_line_ignores_corrupt_line(self):
-        self.pump.blob_file = StringIO(self.corrupt_line)
+        self.pump.blob_file = BytesIO(self.corrupt_line)
         self.pump.extract_header()
         self.pump.prepare_blobs()
         self.pump.get_blob(0)

@@ -7,7 +7,9 @@
 """
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import TestCase, StringIO, skipIf
+from io import BytesIO
+
+from km3pipe.testing import TestCase, skipIf
 from km3pipe.io.daq import (DAQPreamble, DAQHeader, DAQSummaryslice)
 
 from binascii import unhexlify
@@ -33,11 +35,7 @@ HEX_DATA = ''.join("85000000d1070000ae01000001000000000000000000000003000000" +
                    "000000000000000200000065000000040a1a130022650000000a0e1a" +
                    "1300280200000065000000040a1a130022650000000a0e1a130028")
 BINARY_DATA = unhexlify(HEX_DATA.encode())
-try:
-    TEST_FILE = StringIO(BINARY_DATA)
-except TypeError:
-    from io import BytesIO
-    TEST_FILE = BytesIO(BINARY_DATA)
+TEST_FILE = BytesIO(BINARY_DATA)
 
 
 class TestDAQPump(TestCase):
