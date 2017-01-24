@@ -27,8 +27,8 @@ log = kp.logger.logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 
-def calibrate_t0s(filename, dom_id, detx):
-    """Calibrate intra DOM PMT time offsets"""
+def calibrate_dom(filename, dom_id, detx):
+    """Calibrate intra DOM PMT time offsets and efficiencies"""
     loaders = {'.txt': load_k40_coincidences_from_txt,
                '.root': load_k40_coincidences_from_rootfile}
     try:
@@ -42,7 +42,22 @@ def calibrate_t0s(filename, dom_id, detx):
     angles = calculate_angles(detx)
     fitted_rates, _ = fit_angular_distribution(angles, rates)
     opt_t0s = minimize_t0s(means, fitted_rates)
-    return opt_t0s
+    opt_qes = minimize_qes(fitted_rates, rates, fitted_rates)
+    corrected_means = correct_means(means, opt_t0s.x)
+    corrected_rates = correct_rates(rates, opt_qes.x)
+    rms_means, rms_corrected_means = calculate_rms_means(means, 
+                                                         corrected_means)
+    rms_rates, rms_corrected_rates = calculate_rms_rates(rates, fitted_rates, 
+                                                         corrected_rates)
+    return_data = {'opt_t0s': opt_t0s, 'opt_qes': opt_qes, 'data': data,
+                   'means': means, 'rates': rates, 'fitted_rates': fitted_rates,
+                   'angles': angles, 'corrected_means': corrected_means, 
+                   'corrected_rates': corrected_rates, 
+                   'rms_means': rms_means,
+                   'rms_corrected_means': rms_corrected_means,
+                   'rms_rates': rms_rates,
+                   'rms_corrected_rates': rms_corrected_rates}
+    return return_data
 
 def load_k40_coincidences_from_txt(filename, dom_id):
     """Load k40 coincidences from txt file"""
@@ -69,11 +84,11 @@ def load_k40_coincidences_from_rootfile(filename, dom_id):
         weight = weights_histo.GetBinContent(i)
         label = weights_histo.GetXaxis().GetBinLabel(i)
         weights[label[3:]] = weight
-    try:
-        data = np.array(data) / weights[dom_id]
-    except KeyError:
-        log.critical('DOM Id {0} not found.'.format(dom_id))
-        raise KeyError
+    #try:
+    #    data = np.array(data) / weights[dom_id]
+    #except KeyError:
+    #    log.critical('DOM Id {0} not found.'.format(dom_id))
+    #    raise KeyError
     return np.array(data), weights[dom_id]
 
 
@@ -259,6 +274,42 @@ def correct_rates(rates, opt_qes):
     corrected_rates = np.array([rate / opt_qes[comb[0]] / opt_qes[comb[1]]  \
                             for rate, comb in zip(rates, combs)])
     return corrected_rates
+
+
+def calculate_rms_means(means, corrected_means):
+    """Calculates RMS of means from zero before and after correction
+    
+    Parameters
+    ----------
+    means: numpy array of means of gaussians of all PMT combinations
+    corrected_means: numpy array of corrected gaussian means for all PMT combs
+
+    Returns
+    -------
+    rms_means: RMS of means from zero 
+    rms_corrected_means: RMS of corrected_means from zero  
+    """
+    rms_means = np.sqrt(np.mean((means - 0)**2))
+    rms_corrected_means = np.sqrt(np.mean((corrected_means - 0)**2))
+    return rms_means, rms_corrected_means
+
+
+def calculate_rms_rates(rates, fitted_rates, corrected_rates):
+    """Calculates RMS of rates from fitted_rates before and after correction
+    
+    Parameters
+    ----------
+    rates: numpy array of rates of all PMT combinations
+    corrected_rates: numpy array of corrected rates for all PMT combinations
+
+    Returns
+    -------
+    rms_rates: RMS of rates from fitted_rates
+    rms_corrected_rates: RMS of corrected_ratesrates from fitted_rates 
+    """
+    rms_rates = np.sqrt(np.mean((rates - fitted_rates)**2))
+    rms_corrected_rates = np.sqrt(np.mean((corrected_rates - fitted_rates)**2))
+    return rms_rates, rms_corrected_rates
 
 
 jmonitork40_comb_indices =  \
