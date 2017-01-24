@@ -20,7 +20,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-CONFIGURATION = StringIO("\n".join((
+CONFIGURATION = StringIO(u"\n".join((
     "[DB]",
     "username=foo",
     "password=narf",
