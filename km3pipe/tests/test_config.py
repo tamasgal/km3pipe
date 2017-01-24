@@ -6,7 +6,7 @@ Test suite for configuration related functions and classes.
 """
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import TestCase, StringIO
+from km3pipe.testing import TestCase, StringIO, patch
 from km3pipe.config import Config
 
 __author__ = "Tamas Gal"
@@ -18,10 +18,25 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
+orig_import = __import__
+try:
+    __builtin__
+except NameError:
+    builtins_name = "builtins"
+else:
+    builtins_name = "__builtin__"
+
+def import_mock(name, *args):
+    if name == 'irods.session.iRODSSession':
+        return "narf"
+    return orig_import(name, *args)
+
+
 CONFIGURATION = StringIO("\n".join((
     "[DB]",
     "username=foo",
     "password=narf",
+    "timeout=10",
     )))
 
 
@@ -44,3 +59,25 @@ class TestConfig(TestCase):
     def test_slack_token_raises_error_by_default(self):
         with self.assertRaises(ValueError):
             self.config.slack_token
+
+    def test_get_retrieves_correct_value(self):
+        self.assertEqual("foo", self.config.get("DB", "username"))
+
+    def test_get_returns_none_if_section_not_found(self):
+        self.assertTrue(self.config.get("a", "b") is None)
+
+    def test_get_returns_none_if_option_not_found(self):
+        self.assertTrue(self.config.get("DB", "a") is None)
+
+    def test_get_returns_float_if_option_is_numberlike(self):
+        self.assertTrue(isinstance(self.config.get("DB", "timeout"), float))
+
+    def test_create_irods_session_returns_none_if_irods_module_missing(self):
+        session = self.config.create_irods_session()
+        self.assertTrue(session is None)
+
+#    TODO: this is a big complicated ;)
+#    @patch(builtins_name + '.__import__', side_effect=import_mock)
+#    def test_irods_session(self, mock_irods_session):
+#        session = self.config.create_irods_session()
+#        self.assertTrue(import_mock.call_args())
