@@ -405,4 +405,4 @@ class TestTimer(TestCase):
         timer.start()
         sleep(sleep_time)
         timer.stop()
-        self.assertAlmostEqual(0.01, timer.seconds, 2)
+        self.assertAlmostEqual(sleep_time, timer.seconds, 2)
