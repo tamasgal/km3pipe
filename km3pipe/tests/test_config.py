@@ -39,6 +39,14 @@ CONFIGURATION = StringIO("\n".join((
     "timeout=10",
     )))
 
+IRODS_CONFIGURATION = StringIO("\n".join((
+    "[iRODS]",
+    "user=foo",
+    "password=narf",
+    "host=what.ever",
+    "port=1234",
+    "zone=area51",
+    )))
 
 class TestConfig(TestCase):
     def setUp(self):
@@ -77,7 +85,16 @@ class TestConfig(TestCase):
         self.assertTrue(session is None)
 
 #    TODO: this is a big complicated ;)
-#    @patch(builtins_name + '.__import__', side_effect=import_mock)
-#    def test_irods_session(self, mock_irods_session):
-#        session = self.config.create_irods_session()
+    @patch(builtins_name + '.__import__', side_effect=import_mock)
+    def test_irods_session(self, mock_irods_session):
+        session = self.config.create_irods_session()
 #        self.assertTrue(import_mock.call_args())
+
+#    TODO: this is a big complicated too ;)
+    @patch(builtins_name + '.__import__', side_effect=import_mock)
+    def test_irods_session_with_valid_config(self, mock_irods_session):
+        config = Config(None)
+        config._read_from_file(IRODS_CONFIGURATION)
+        IRODS_CONFIGURATION.seek(0, 0)
+        session = config.create_irods_session()
+        self.assertTrue(session is None)
