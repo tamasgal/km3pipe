@@ -12,7 +12,7 @@ from km3pipe.testing import TestCase, MagicMock, StringIO
 from km3pipe.tools import (unpack_nfirst, split, namedtuple_with_defaults,
                            angle_between, pld3, com, geant2pdg, pdg2name,
                            Cuckoo, total_seconds, zenith, azimuth,
-                           remain_file_pointer, decamelise, camelise)
+                           remain_file_pointer, decamelise, camelise, Timer)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -381,3 +381,28 @@ class TestCamelCaseConverter(TestCase):
         text = "camel_case"
         self.assertEqual("camelCase", camelise(text, capital_first=False))
 
+
+class TestTimer(TestCase):
+    def test_init(self):
+        t = Timer()
+
+    def test_context_manager(self):
+        mock = MagicMock()
+        with Timer(callback=mock) as t:
+            pass
+        mock.assert_called_once()
+
+    def test_context_manager_calls_with_standard_text(self):
+        mock = MagicMock()
+        with Timer(callback=mock) as t:
+            pass
+        self.assertTrue(mock.call_args[0][0].startswith("It "))
+
+    def test_context_manager_calls_with_standard_text(self):
+        mock = MagicMock()
+        sleep_time = 0.0123
+        timer = Timer(callback=mock)
+        timer.start()
+        sleep(sleep_time)
+        timer.stop()
+        self.assertAlmostEqual(0.01, timer.seconds, 2)

@@ -269,9 +269,10 @@ def total_seconds(td):
 
 class Timer(object):
     """A very simple, accurate and easy to use timer context"""
-    def __init__(self, message='It', precision=3):
+    def __init__(self, message='It', precision=3, callback=print):
         self.message = message
         self.precision = precision
+        self.callback = callback
 
     def __enter__(self):
         self.start()
@@ -298,10 +299,10 @@ class Timer(object):
         return self.__finish_cpu - self.__start_cpu
 
     def log(self):
-        print("{0} took {1:.{3}f}s (CPU {2:.{3}f}s)."
-              .format(self.message,
-                      self.seconds, self.cpu_seconds,
-                      self.precision))
+        self.callback("{0} took {1:.{3}f}s (CPU {2:.{3}f}s)."
+                      .format(self.message,
+                              self.seconds, self.cpu_seconds,
+                              self.precision))
 
 
 class Cuckoo(object):
