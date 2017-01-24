@@ -3,7 +3,9 @@
 # pylint: disable=C0111,E1003,R0904,C0103,R0201,C0102
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import TestCase, StringIO, MagicMock, patch
+from io import StringIO
+
+from km3pipe.testing import TestCase, MagicMock, patch
 from km3pipe.core import Pipeline, Module, Pump, Blob, Geometry
 from km3pipe.dataclasses import HitSeries
 

@@ -5,8 +5,9 @@ from __future__ import division, absolute_import, print_function
 
 import operator
 from functools import reduce
+from io import StringIO
 
-from km3pipe.testing import TestCase, StringIO
+from km3pipe.testing import TestCase
 from km3pipe.io import EvtPump
 from km3pipe.io.evt import Track, TrackIn, Neutrino, EvtHit, EvtRawHit, TrackFit
 

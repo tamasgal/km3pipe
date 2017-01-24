@@ -7,9 +7,10 @@ A collection of parsers.
 """
 from __future__ import division, absolute_import, print_function
 
+from io import StringIO
+
 from km3pipe import Module
 from km3pipe.io.daq import DAQPreamble, DAQSummaryslice, DAQEvent
-from km3pipe.common import StringIO
 
 
 class CHParser(Module):

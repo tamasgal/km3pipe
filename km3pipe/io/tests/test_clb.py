@@ -7,7 +7,9 @@
 """
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import TestCase, StringIO
+from io import StringIO
+
+from km3pipe.testing import TestCase
 from km3pipe.io.clb import CLBPump, CLBHeader, PMTData
 
 import binascii

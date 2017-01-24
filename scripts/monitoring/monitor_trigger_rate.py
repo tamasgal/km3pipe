@@ -10,6 +10,7 @@ import os
 import shutil
 import time
 import threading
+from io import StringIO
 
 import matplotlib
 # Force matplotlib to not use any Xwindows backend.
@@ -21,7 +22,6 @@ import numpy as np
 
 import km3pipe as kp
 from km3pipe import Pipeline, Module
-from km3pipe.common import StringIO
 from km3pipe.config import Config
 from km3pipe.hardware import Detector
 from km3pipe.io import CHPump
@@ -47,7 +47,7 @@ lock = threading.Lock()
 def trigger_rate_sampling_period():
     try:
         return int(Config().get("Monitoring", "trigger_rate_sampling_period"))
-    except TypeError, ValueError:
+    except (TypeError, ValueError):
         return 180
 
 

@@ -11,6 +11,7 @@ import os
 import shutil
 import time
 import threading
+from io import StringIO
 
 import matplotlib
 # Force matplotlib to not use any Xwindows backend.
@@ -26,7 +27,7 @@ import numpy as np
 
 from km3pipe import Pipeline, Module, Geometry
 from km3pipe.dataclasses import HitSeries
-from km3pipe.common import StringIO, Queue, Empty
+from km3pipe.common import Queue, Empty
 from km3pipe.hardware import Detector
 from km3pipe.io import CHPump
 from km3pipe.io.daq import (DAQProcessor, DAQPreamble, DAQSummaryslice,

@@ -3,12 +3,13 @@
 # pylint: disable=locally-disabled,C0111,R0904,C0103
 from __future__ import division, absolute_import, print_function
 
+from io import StringIO
 import numpy as np
 import itertools
 from datetime import datetime, timedelta
 from time import sleep
 
-from km3pipe.testing import TestCase, MagicMock, StringIO
+from km3pipe.testing import TestCase, MagicMock
 from km3pipe.tools import (unpack_nfirst, split, namedtuple_with_defaults,
                            angle_between, pld3, com, geant2pdg, pdg2name,
                            Cuckoo, total_seconds, zenith, azimuth,

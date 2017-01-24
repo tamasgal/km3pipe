@@ -13,6 +13,7 @@ import os
 import shutil
 import time
 import threading
+from io import StringIO
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
@@ -22,7 +23,6 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 
-from km3pipe.common import StringIO
 from km3pipe import Pipeline, Module
 from km3pipe.hardware import Detector
 from km3pipe.io import CHPump
