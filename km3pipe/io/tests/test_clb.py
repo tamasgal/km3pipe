@@ -7,9 +7,7 @@
 """
 from __future__ import division, absolute_import, print_function
 
-from io import BytesIO
-
-from km3pipe.testing import TestCase
+from km3pipe.testing import TestCase, StringIO
 from km3pipe.io.clb import CLBPump, CLBHeader, PMTData
 
 import binascii
@@ -144,7 +142,12 @@ HEX_DATA = ("7A0500005454444300000000000000030000684200BEBC2030BEAF008000000" +
 
 
 BINARY_DATA = binascii.unhexlify(HEX_DATA.encode())
-TEST_FILE = BytesIO(BINARY_DATA)
+try:
+    TEST_FILE = StringIO(BINARY_DATA)
+except TypeError:
+    from io import BytesIO
+    TEST_FILE = BytesIO(BINARY_DATA)
+#    TEST_FILE = StringIO(str(BINARY_DATA))
 
 
 class TestCLBPump(TestCase):

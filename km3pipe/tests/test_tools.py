@@ -3,18 +3,16 @@
 # pylint: disable=locally-disabled,C0111,R0904,C0103
 from __future__ import division, absolute_import, print_function
 
-from io import BytesIO
 import numpy as np
 import itertools
 from datetime import datetime, timedelta
 from time import sleep
 
-from km3pipe.testing import TestCase, MagicMock
+from km3pipe.testing import TestCase, MagicMock, StringIO
 from km3pipe.tools import (unpack_nfirst, split, namedtuple_with_defaults,
                            angle_between, pld3, com, geant2pdg, pdg2name,
                            Cuckoo, total_seconds, zenith, azimuth,
-                           remain_file_pointer, decamelise, camelise, Timer,
-                           irods_filepath)
+                           remain_file_pointer, decamelise, camelise, Timer)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -306,7 +304,7 @@ class TestCuckoo(TestCase):
 class TestRemainFilePointer(TestCase):
 
     def test_remains_file_pointer_in_function(self):
-        dummy_file = BytesIO('abcdefg')
+        dummy_file = StringIO('abcdefg')
 
         @remain_file_pointer
         def seek_into_file(file_obj):
@@ -318,7 +316,7 @@ class TestRemainFilePointer(TestCase):
         self.assertEqual(2, dummy_file.tell())
 
     def test_remains_file_pointer_and_return_value_in_function(self):
-        dummy_file = BytesIO('abcdefg')
+        dummy_file = StringIO('abcdefg')
 
         @remain_file_pointer
         def seek_into_file(file_obj):
@@ -335,7 +333,7 @@ class TestRemainFilePointer(TestCase):
 
         class FileSeekerClass(object):
             def __init__(self):
-                self.dummy_file = BytesIO('abcdefg')
+                self.dummy_file = StringIO('abcdefg')
 
             @remain_file_pointer
             def seek_into_file(self, file_obj):
@@ -351,7 +349,7 @@ class TestRemainFilePointer(TestCase):
 
         class FileSeekerClass(object):
             def __init__(self):
-                self.dummy_file = BytesIO('abcdefg')
+                self.dummy_file = StringIO('abcdefg')
 
             @remain_file_pointer
             def seek_into_file(self, file_obj):
@@ -408,9 +406,3 @@ class TestTimer(TestCase):
         sleep(sleep_time)
         timer.stop()
         self.assertAlmostEqual(sleep_time, timer.seconds, 2)
-
-
-class TestIrodsFilepath(TestCase):
-    def test_irods_filepath(self):
-        path = "/in2p3/km3net/data/raw/sea/KM3NeT_00000123/4/KM3NeT_00000123_00004556.root"
-        self.assertEqual(path, irods_filepath(123, 4556))

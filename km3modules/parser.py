@@ -7,10 +7,9 @@ A collection of parsers.
 """
 from __future__ import division, absolute_import, print_function
 
-from io import BytesIO
-
 from km3pipe import Module
 from km3pipe.io.daq import DAQPreamble, DAQSummaryslice, DAQEvent
+from km3pipe.common import StringIO
 
 
 class CHParser(Module):
@@ -39,7 +38,7 @@ class CHParser(Module):
             return blob
 
         data = blob['CHData']
-        data_io = BytesIO(data)
+        data_io = StringIO(data)
         preamble = DAQPreamble(file_obj=data_io)  # noqa
 
         blob_key, ParserClass = self.parse_map[tag]

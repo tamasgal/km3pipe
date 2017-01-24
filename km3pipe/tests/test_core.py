@@ -3,9 +3,7 @@
 # pylint: disable=C0111,E1003,R0904,C0103,R0201,C0102
 from __future__ import division, absolute_import, print_function
 
-from io import BytesIO
-
-from km3pipe.testing import TestCase, MagicMock, patch
+from km3pipe.testing import TestCase, StringIO, MagicMock, patch
 from km3pipe.core import Pipeline, Module, Pump, Blob, Geometry
 from km3pipe.dataclasses import HitSeries
 
@@ -227,7 +225,7 @@ class TestPump(TestCase):
 
     def test_rewind_file(self):
         pump = Pump()
-        test_file = BytesIO("Some content")
+        test_file = StringIO("Some content")
         pump.blob_file = test_file
         pump.blob_file.read(1)
         self.assertEqual(1, pump.blob_file.tell())

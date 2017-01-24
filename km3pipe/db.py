@@ -14,7 +14,6 @@ import json
 import re
 import pytz
 import socket
-from io import BytesIO
 
 try:
     import pandas as pd
@@ -35,6 +34,7 @@ if sys.version_info[0] > 2:
     from urllib.request import (Request, build_opener, urlopen,
                                 HTTPCookieProcessor, HTTPHandler)
     from urllib.error import URLError, HTTPError
+    from io import StringIO
     from http.cookiejar import CookieJar
     from http.client import IncompleteRead
 else:
@@ -42,6 +42,7 @@ else:
     from urllib2 import (Request, build_opener, urlopen,
                          HTTPCookieProcessor, HTTPHandler,
                          URLError, HTTPError)
+    from StringIO import StringIO
     from cookielib import CookieJar
     from httplib import IncompleteRead
 
@@ -137,7 +138,7 @@ class DBManager(object):
             log.error(content)
             return None
         try:
-            dataframe = pd.read_csv(BytesIO(content), sep="\t")
+            dataframe = pd.read_csv(StringIO(content), sep="\t")
         except ValueError:
             log.warning("Empty dataset")  # ...probably. Waiting for more info
             return pd.DataFrame()
@@ -154,7 +155,7 @@ class DBManager(object):
         url = 'streamds/runs.txt?detid={0}'.format(det_id)
         content = self._get_content(url)
         try:
-            dataframe = pd.read_csv(BytesIO(content), sep="\t")
+            dataframe = pd.read_csv(StringIO(content), sep="\t")
         except ValueError:
             log.warning("Empty dataset")
             return None
@@ -194,7 +195,7 @@ class DBManager(object):
     def _get_detectors(self):
         content = self._get_content('streamds/detectors.txt')
         try:
-            dataframe = pd.read_csv(BytesIO(content), sep="\t")
+            dataframe = pd.read_csv(StringIO(content), sep="\t")
         except ValueError:
             log.warning("Empty dataset")
             return pd.DataFrame()
@@ -205,7 +206,7 @@ class DBManager(object):
         content = self._get_content('streamds/t0sets.txt?detid={0}'
                                     .format(det_id))
         try:
-            dataframe = pd.read_csv(BytesIO(content), sep="\t")
+            dataframe = pd.read_csv(StringIO(content), sep="\t")
         except ValueError:
             log.warning("Empty dataset")
             return pd.DataFrame()
@@ -272,7 +273,7 @@ class DBManager(object):
             log.error(content)
             return None
         try:
-            dataframe = pd.read_csv(BytesIO(content), sep="\t")
+            dataframe = pd.read_csv(StringIO(content), sep="\t")
         except ValueError:
             log.warning("Empty dataset")  # ...probably. Waiting for more info
             return pd.DataFrame()
