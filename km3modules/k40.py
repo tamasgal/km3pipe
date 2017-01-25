@@ -28,19 +28,22 @@ log = kp.logger.logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 
-def calibrate_dom(filename, dom_id, detx):
-    """Calibrate intra DOM PMT time offsets and efficiencies"""
-    loaders = {'.h5': load_k40_coincidences_from_hdf5,
-               '.root': load_k40_coincidences_from_rootfile}
-    try:
-        loader = loaders[os.path.splitext(filename)[1]]
-    except KeyError:
-        log.critical('File format not supported.')
-        raise IOError
-    else:
-        data, livetime = loader(filename, dom_id)
+def calibrate_dom(dom_id, detx, data, livetime=None):
+    """Calibrate intra DOM PMT time offsets and efficiencies"""#
+    if isinstance(data, str):
+        filename = data
+        loaders = {'.h5': load_k40_coincidences_from_hdf5,
+                   '.root': load_k40_coincidences_from_rootfile}
+        try:
+            loader = loaders[os.path.splitext(filename)[1]]
+        except KeyError:
+            log.critical('File format not supported.')
+            raise IOError
+        else:
+            data, livetime = loader(filename, dom_id)
+    
 
-    rates, means, popts = fit_delta_ts(data, livetime )
+    rates, means, popts = fit_delta_ts(data, livetime)
     angles = calculate_angles(detx)
     fitted_rates, _ = fit_angular_distribution(angles, rates)
     #t0_weights = np.array([0. if a>1. else 1. for a in angles])
@@ -64,6 +67,10 @@ def calibrate_dom(filename, dom_id, detx):
                    'livetime': livetime}
     return return_data
 
+
+
+
+
 def load_k40_coincidences_from_hdf5(filename, dom_id):
     """Load k40 coincidences from hdf5 file"""
     with h5py.File(filename, 'r') as h5f:
@@ -78,7 +85,7 @@ def load_k40_coincidences_from_rootfile(filename, dom_id):
     """Load k40 coincidences from JMonitorK40 ROOT file"""
     from ROOT import TFile
     root_file_monitor = TFile( filename, "READ" )
-    dom_name = dom_id + ".2S"
+    dom_name = str(dom_id) + ".2S"
     histo_2d_monitor = root_file_monitor.Get(dom_name)
     data = []
     #for c in jmonitork40_comb_indices:
@@ -99,7 +106,7 @@ def load_k40_coincidences_from_rootfile(filename, dom_id):
     #except KeyError:
     #    log.critical('DOM Id {0} not found.'.format(dom_id))
     #    raise KeyError
-    return np.array(data), weights[dom_id]
+    return np.array(data), weights[str(dom_id)]
 
 
 def gaussian(x, mean, sigma, rate, offset):
