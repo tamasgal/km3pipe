@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* Pushover client! Push messages to your mobile phone or computer via
+  ``pushover the message you want``.
 
 
 6.3.0 / 2017-01-21
