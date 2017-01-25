@@ -12,6 +12,7 @@ from itertools import combinations
 
 from scipy import optimize
 import numpy as np
+import h5py
 
 
 import km3pipe as kp
@@ -29,7 +30,7 @@ log = kp.logger.logging.getLogger(__name__)  # pylint: disable=C0103
 
 def calibrate_dom(filename, dom_id, detx):
     """Calibrate intra DOM PMT time offsets and efficiencies"""
-    loaders = {'.txt': load_k40_coincidences_from_txt,
+    loaders = {'.h5': load_k40_coincidences_from_hdf5,
                '.root': load_k40_coincidences_from_rootfile}
     try:
         loader = loaders[os.path.splitext(filename)[1]]
@@ -37,10 +38,12 @@ def calibrate_dom(filename, dom_id, detx):
         log.critical('File format not supported.')
         raise IOError
     else:
-        data, weight = loader(filename, dom_id)
-    rates, means = fit_delta_ts(data, weight)
+        data, livetime = loader(filename, dom_id)
+
+    rates, means, popts = fit_delta_ts(data, livetime )
     angles = calculate_angles(detx)
     fitted_rates, _ = fit_angular_distribution(angles, rates)
+    #t0_weights = np.array([0. if a>1. else 1. for a in angles])
     opt_t0s = minimize_t0s(means, fitted_rates)
     opt_qes = minimize_qes(fitted_rates, rates, fitted_rates)
     corrected_means = correct_means(means, opt_t0s.x)
@@ -56,13 +59,19 @@ def calibrate_dom(filename, dom_id, detx):
                    'rms_means': rms_means,
                    'rms_corrected_means': rms_corrected_means,
                    'rms_rates': rms_rates,
-                   'rms_corrected_rates': rms_corrected_rates}
+                   'rms_corrected_rates': rms_corrected_rates,
+                   'gaussian_popts': popts,
+                   'livetime': livetime}
     return return_data
 
-def load_k40_coincidences_from_txt(filename, dom_id):
-    """Load k40 coincidences from txt file"""
-    data = np.loadtxt(filename)
-    return data
+def load_k40_coincidences_from_hdf5(filename, dom_id):
+    """Load k40 coincidences from hdf5 file"""
+    with h5py.File(filename, 'r') as h5f:
+        data = h5f['/k40counts/{0}'.format(dom_id)]
+        livetime = data.attrs['livetime']
+        data = np.array(data)
+        
+    return data, livetime
 
 
 def load_k40_coincidences_from_rootfile(filename, dom_id):
@@ -72,7 +81,8 @@ def load_k40_coincidences_from_rootfile(filename, dom_id):
     dom_name = dom_id + ".2S"
     histo_2d_monitor = root_file_monitor.Get(dom_name)
     data = []
-    for c in jmonitork40_comb_indices:
+    #for c in jmonitork40_comb_indices:
+    for c in range(1, histo_2d_monitor.GetNbinsX() + 1):
         combination = []
         for b in range(1, histo_2d_monitor.GetNbinsY() + 1):
             combination.append(histo_2d_monitor.GetBinContent(c, b))
@@ -92,37 +102,42 @@ def load_k40_coincidences_from_rootfile(filename, dom_id):
     return np.array(data), weights[dom_id]
 
 
-def fit_delta_ts(data, time_s):
+def gaussian(x, mean, sigma, rate, offset):
+    return rate / np.sqrt(2 * np.pi) /  \
+           sigma * np.exp(-(x-mean)**2 / sigma**2) + offset
+
+
+def fit_delta_ts(data, livetime):
     """Fits gaussians to delta t for each PMT pair.
 
     Parameters
     ----------
     data: 2d np.array: x = PMT combinations (465), y = time, entry = frequency
-    time_s: length of data taking in seconds
+    livetime: length of data taking in seconds
 
     Returns
     -------
     numpy arrays with rates and means for all PMT combinations
     """
 
-    data = data / time_s
+    data = data / livetime
     start = -(data.shape[1] - 1) / 2
     end = -start + 1
     xs = np.arange(start, end)
-    def gaussian(x, mean, sigma, rate, offset):
-        return rate / np.sqrt(2 * np.pi) /  \
-               sigma * np.exp(-(x-mean)**2 / sigma**2) + offset
+    
     rates = []
     means = []
+    popts = []
     for combination in data:
         try:
             popt, _ = optimize.curve_fit(gaussian, xs, combination,
-                                         p0=[0, 2, 1000, 20])
+                                         p0=[0., 4., 10., 0.1])
         except RuntimeError:
             popt = (0, 0, 0, 0)
         rates.append(popt[2])
         means.append(popt[0])
-    return np.array(rates), np.array(means)
+        popts.append(popt)
+    return np.array(rates), np.array(means), np.array(popts)
 
 
 def calculate_angles(detector_file):
@@ -346,4 +361,42 @@ jmonitork40_comb_indices =  \
     334, 449, 245, 125, 210, 398, 261, 321, 420, 421, 422, 322, 367, 368,
     323, 345, 413, 232, 143, 268, 446, 361, 463, 464, 346, 453, 454, 416,
     374, 233, 337, 458, 349, 414, 457, 338, 350, 445, 269, 362, 390, 437, 438))
+
+"""
+jmonitork40_comb_indices =  \
+    np.array((417, 418, 419, 420, 421, 422, 363, 364, 365, 366, 367, 368,
+    318, 319, 320, 321, 322, 323, 156, 157, 158, 159, 160, 161, 96, 97, 98,
+    99, 100, 101, 461, 369, 324, 371, 464, 427, 331, 237, 238, 333, 434, 415,
+    339, 231, 175, 232, 342, 278, 184, 61, 62, 186, 281, 220, 162, 54, 13,
+    56, 168, 459, 370, 325, 374, 423, 428, 328, 244, 239, 338, 343, 411, 346,
+    226, 178, 229, 270, 271, 181, 68, 69, 191, 170, 216, 164, 50, 16, 58,
+    462, 373, 326, 327, 429, 424, 337, 240, 245, 222, 345, 412, 347, 228, 179,
+    180, 272, 273, 190, 70, 71, 48, 163, 217, 172, 57, 17, 463, 372, 234,
+    332, 430, 431, 334, 241, 174, 230, 340, 416, 341, 233, 60, 185, 279, 280,
+    187, 63, 12, 52, 165, 221, 166, 59, 460, 242, 235, 336, 425, 432, 330,
+    223, 176, 225, 348, 413, 350, 64, 65, 189, 274, 275, 183, 49, 14, 55,
+    173, 218, 169, 335, 236, 243, 329, 433, 426, 344, 224, 177, 227, 349, 414,
+    188, 66, 67, 182, 276, 277, 171, 53, 15, 51, 167, 219, 387, 204, 128,
+    209, 396, 443, 435, 263, 112, 120, 249, 375, 283, 73, 6, 85, 301, 310,
+    306, 148, 22, 28, 154, 388, 208, 126, 211, 254, 451, 452, 256, 104, 105,
+    282, 383, 285, 84, 1, 87, 144, 312, 313, 150, 24, 25, 395, 210, 129,
+    110, 262, 436, 445, 248, 121, 72, 284, 376, 300, 86, 7, 18, 146, 307,
+    314, 152, 29, 389, 205, 111, 118, 247, 446, 437, 265, 4, 81, 299, 377,
+    287, 75, 19, 26, 149, 315, 308, 155, 390, 255, 102, 103, 257, 453, 454,
+    80, 0, 83, 286, 384, 289, 145, 20, 21, 151, 316, 317, 444, 246, 119,
+    113, 264, 438, 298, 82, 5, 74, 288, 378, 311, 147, 27, 23, 153, 309,
+    351, 136, 42, 138, 354, 403, 194, 33, 34, 200, 410, 385, 292, 91, 3,
+    94, 297, 359, 137, 44, 133, 399, 404, 196, 40, 35, 202, 290, 379, 303,
+    92, 10, 79, 352, 132, 45, 192, 405, 400, 198, 36, 41, 88, 302, 380,
+    294, 78, 11, 353, 139, 30, 195, 406, 407, 201, 37, 2, 90, 293, 386,
+    296, 95, 360, 38, 31, 197, 401, 408, 203, 89, 8, 77, 295, 381, 305,
+    193, 32, 39, 199, 409, 402, 291, 76, 9, 93, 304, 382, 355, 134, 46,
+    141, 362, 455, 439, 251, 108, 124, 269, 356, 140, 43, 143, 258, 447, 448,
+    260, 116, 117, 361, 142, 47, 106, 250, 440, 457, 268, 125, 357, 135, 107,
+    122, 267, 458, 441, 253, 358, 259, 114, 115, 261, 449, 450, 456, 266, 123,
+    109, 252, 442, 391, 212, 127, 214, 394, 397, 213, 130, 207, 392, 206, 131,
+    393, 215, 398))
+"""
+
+
 
