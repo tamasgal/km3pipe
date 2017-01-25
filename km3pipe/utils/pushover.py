@@ -44,8 +44,8 @@ def main():
     token = config.get("Pushover", "token")
     user_key = config.get("Pushover", "user_key")
     if token is None or user_key is None:
-        log.critical("Please define your 'token' and 'user_key' in the "
-                     "'Pushover' section of your ~/.km3net configuration.")
+        print("Please define your 'token' and 'user_key' in the "
+              "'Pushover' section of your ~/.km3net configuration.")
         exit(1)
 
     conn = httplib.HTTPSConnection("api.pushover.net:443")
