@@ -114,9 +114,23 @@ class AanetPump(Pump):
             except Exception:
                 raise SystemExit("Could not open file")
 
+            self.livetime = 0
+            self.livetime_err = 0
+            self.ngen = 0
+            self.nfilgen = 0
             try:
                 self.header = event_file.rootfile().Get("Header")
+                self.header_dict = {}
+                livetime = self.header.livetime[0]
+                livetime_err = self.header['livetime'][1]
+                ngen = self.header['genvol'][4]
+                nfilgen = self.header['genvol'][4]
+                self.livetime = livetime
+                self.livetime_err = livetime_err
+                self.ngen = ngen
+                self.nfilgen = nfilgen
             except (AttributeError, TypeError):
+                self.header = None
                 log.warn(filename + ": can't read header.")
                 pass
 
@@ -168,24 +182,15 @@ class AanetPump(Pump):
         blob['McTracks'] = TrackSeries.from_aanet(event.mc_trks,
                                                   event_id)
         blob['filename'] = filename
-        blob['Header'] = self.header
-        # livetime = self.header.livetime[0]
-        # livetime_err = self.header['livetime'][1]
-        # ngen = self.header['genvol'][4]
-        # nfilgen = self.header['genvol'][4]
-        livetime = 0
-        livetime_err = 0
-        ngen = 0
-        nfilgen = 0
         try:
             blob['EventInfo'] = EventInfo((
                 event.det_id,
                 event.frame_index,
-                livetime, # livetime_sec
+                self.livetime, # livetime_sec
                 event.mc_id,
                 event.mc_t,
-                ngen,   # n_events_gen
-                nfilgen, # n_files_gen
+                self.ngen,   # n_events_gen
+                self.nfilgen, # n_files_gen
                 event.overlays,
                 # event.run_id,
                 event.trigger_counter,
@@ -197,11 +202,11 @@ class AanetPump(Pump):
         except AttributeError:
             blob['EventInfo'] = EventInfo((0,   # det_id
                                            event.frame_index,
-                                           livetime,   # livetime_sec
+                                           self.livetime,   # livetime_sec
                                            0,   # mc_id
                                            0,   # mc_t
-                                           ngen,   # n_events_gen
-                                           nfilgen,   # n_files_gen
+                                           self.ngen,   # n_events_gen
+                                           self.nfilgen,   # n_files_gen
                                            0,   # overlays
                                            0,   # trigger_counter
                                            0,   # trigger_mask
