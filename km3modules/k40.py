@@ -52,6 +52,7 @@ class InterDOMCalibrator(kp.Module):
                 log.error(" skipping DOM '{0}'.".format(dom_id))
             else:
                 blob["InterDOMCalibration"][dom_id] = calib
+        return blob
 
 
 class CoincidenceFinder(kp.Module):
