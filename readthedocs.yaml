@@ -1,0 +1,11 @@
+formats:
+  - none
+requirements_file: requirements.txt
+python:
+     version: 3
+python:
+     pip_install: true
+python:
+    extra_requirements:
+        - testing
+        - docs
