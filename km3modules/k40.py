@@ -28,8 +28,8 @@ log = kp.logger.logging.getLogger(__name__)  # pylint: disable=C0103
 # log.setLevel(logging.DEBUG)
 
 
-class InterDOMCalibrator(kp.Module):
-    """Inter DOM calibrator which performs the calibration from K40Counts.
+class IntraDOMCalibrator(kp.Module):
+    """Intra DOM calibrator which performs the calibration from K40Counts.
 
     The K40 counts are taken from blob['K40Counts'].
 
@@ -41,7 +41,7 @@ class InterDOMCalibrator(kp.Module):
 
     def process(self, blob):
         print("Starting calibration:")
-        blob["InterDOMCalibration"] = {}
+        blob["IntraDOMCalibration"] = {}
         for dom_id, data in blob[self.input_key].items():
             print(" calibrating DOM '{0}'".format(dom_id))
             try:
@@ -51,7 +51,7 @@ class InterDOMCalibrator(kp.Module):
             except RuntimeError:
                 log.error(" skipping DOM '{0}'.".format(dom_id))
             else:
-                blob["InterDOMCalibration"][dom_id] = calib
+                blob["IntraDOMCalibration"][dom_id] = calib
         return blob
 
 
