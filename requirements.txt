@@ -13,3 +13,5 @@ numpydoc
 sphinx_gallery
 astropy
 sklearn
+patsy
+h5py
