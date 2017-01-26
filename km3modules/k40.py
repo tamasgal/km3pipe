@@ -81,6 +81,7 @@ class CoincidenceFinder(kp.Module):
             blob["K40Counts"] = self.counts
             blob["Livetime"] = self.n_timeslices / 10
             self.n_timeslices = 0
+            self.counts = defaultdict(partial(np.zeros, (465, 41)))
             return blob
 
     def mongincidence(self, times, tdcs, tmax=20):
