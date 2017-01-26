@@ -9,6 +9,9 @@ from __future__ import division, absolute_import, print_function
 
 import os
 from itertools import combinations
+from collections import defaultdict
+from functools import partial
+from datetime import datetime
 
 from scipy import optimize
 import numpy as np
@@ -25,10 +28,75 @@ log = kp.logger.logging.getLogger(__name__)  # pylint: disable=C0103
 # log.setLevel(logging.DEBUG)
 
 
+class InterDOMCalibrator(kp.Module):
+    """Inter DOM calibrator which performs the calibration from K40Counts.
+
+    The K40 counts are taken from blob['K40Counts'].
+
+    """
+    def configure(self):
+        det_id = self.get("det_id") or 14
+        self.input_key = self.get("input_key") or 'K40Counts'
+        self.detector = kp.hardware.Detector(det_id=det_id)
+
+    def process(self, blob):
+        print("Starting calibration:")
+        blob["InterDOMCalibration"] = {}
+        for dom_id, data in blob[self.input_key].items():
+            print(" calibrating DOM '{0}'".format(dom_id))
+            try:
+                calib = calibrate_dom(dom_id, data,
+                                      self.detector,
+                                      livetime=blob['Livetime'])
+            except RuntimeError:
+                log.error(" skipping DOM '{0}'.".format(dom_id))
+            else:
+                blob["InterDOMCalibration"][dom_id] = calib
 
 
+class CoincidenceFinder(kp.Module):
+    """Finds K40 coincidences in TimesliceFrames"""
+    def configure(self):
+        self.accumulate = self.get("accumulate") or 100
+        self.counts = defaultdict(partial(np.zeros, (465, 41)))
+        self.n_timeslices = 0
+        self.start_time = datetime.utcnow()
 
-def calibrate_dom(dom_id, detx, data, livetime=None):
+    def process(self, blob):
+        for dom_id, hits in blob['TimesliceFrames'].items():
+            hits.sort(key=lambda x: x[1])
+            coinces = self.mongincidence([t for (_,t,_) in hits],
+                                         [t for (t,_,_) in hits])
+
+            combs = list(combinations(range(31), 2))
+            for pmt_pair, t in coinces:
+                if pmt_pair[0] > pmt_pair[1]:
+                    pmt_pair = (pmt_pair[1], pmt_pair[0])
+                    t = -t
+                self.counts[dom_id][combs.index(pmt_pair), t+20] += 1
+
+        self.n_timeslices += 1
+        if self.n_timeslices == self.accumulate:
+            print("Calibrating DOMs")
+            blob["K40Counts"] = self.counts
+            blob["Livetime"] = self.n_timeslices / 10
+            self.n_timeslices = 0
+            return blob
+
+    def mongincidence(self, times, tdcs, tmax=20):
+        coincidences = []
+        cur_t = 0
+        las_t = 0
+        for t_idx, t in enumerate(times):
+            cur_t = t
+            diff = cur_t - las_t
+            if diff <= tmax and t_idx > 0 and tdcs[t_idx - 1] != tdcs[t_idx]:
+                coincidences.append(((tdcs[t_idx - 1], tdcs[t_idx]), diff))
+            las_t = cur_t
+        return coincidences
+
+
+def calibrate_dom(dom_id, data, detector, livetime=None):
     """Calibrate intra DOM PMT time offsets and efficiencies"""#
     if isinstance(data, str):
         filename = data
@@ -41,24 +109,24 @@ def calibrate_dom(dom_id, detx, data, livetime=None):
             raise IOError
         else:
             data, livetime = loader(filename, dom_id)
-    
+
 
     rates, means, popts = fit_delta_ts(data, livetime)
-    angles = calculate_angles(detx)
+    angles = calculate_angles(detector)
     fitted_rates, _ = fit_angular_distribution(angles, rates)
     #t0_weights = np.array([0. if a>1. else 1. for a in angles])
     opt_t0s = minimize_t0s(means, fitted_rates)
     opt_qes = minimize_qes(fitted_rates, rates, fitted_rates)
     corrected_means = correct_means(means, opt_t0s.x)
     corrected_rates = correct_rates(rates, opt_qes.x)
-    rms_means, rms_corrected_means = calculate_rms_means(means, 
+    rms_means, rms_corrected_means = calculate_rms_means(means,
                                                          corrected_means)
-    rms_rates, rms_corrected_rates = calculate_rms_rates(rates, fitted_rates, 
+    rms_rates, rms_corrected_rates = calculate_rms_rates(rates, fitted_rates,
                                                          corrected_rates)
     return_data = {'opt_t0s': opt_t0s, 'opt_qes': opt_qes, 'data': data,
                    'means': means, 'rates': rates, 'fitted_rates': fitted_rates,
-                   'angles': angles, 'corrected_means': corrected_means, 
-                   'corrected_rates': corrected_rates, 
+                   'angles': angles, 'corrected_means': corrected_means,
+                   'corrected_rates': corrected_rates,
                    'rms_means': rms_means,
                    'rms_corrected_means': rms_corrected_means,
                    'rms_rates': rms_rates,
@@ -77,7 +145,7 @@ def load_k40_coincidences_from_hdf5(filename, dom_id):
         data = h5f['/k40counts/{0}'.format(dom_id)]
         livetime = data.attrs['livetime']
         data = np.array(data)
-        
+
     return data, livetime
 
 
@@ -94,7 +162,7 @@ def load_k40_coincidences_from_rootfile(filename, dom_id):
         for b in range(1, histo_2d_monitor.GetNbinsY() + 1):
             combination.append(histo_2d_monitor.GetBinContent(c, b))
         data.append(combination)
-    
+
     weights = {}
     weights_histo = root_file_monitor.Get('weights_hist')
     for i in range(1, weights_histo.GetNbinsX() + 1):
@@ -131,7 +199,7 @@ def fit_delta_ts(data, livetime):
     start = -(data.shape[1] - 1) / 2
     end = -start + 1
     xs = np.arange(start, end)
-    
+
     rates = []
     means = []
     popts = []
@@ -147,25 +215,24 @@ def fit_delta_ts(data, livetime):
     return np.array(rates), np.array(means), np.array(popts)
 
 
-def calculate_angles(detector_file):
-    """Calculates angles between PMT combinations according to positions in 
+def calculate_angles(detector):
+    """Calculates angles between PMT combinations according to positions in
     detector_file
-    
+
     Parameters
     ----------
     detector_file: file from which to read the PMT positions (.detx)
-    
+
     Returns
     -------
     angles: numpy array of angles between all PMT combinations
 
-    """    
+    """
     angles = []
     pmt_combinations = list(combinations(range(31), 2))
-    det = kp.hardware.Detector(filename = detector_file)
-    pmt_angles = det.pmt_angles
+    pmt_angles = detector.pmt_angles
     for first, second in pmt_combinations:
-        angles.append(kp.tools.angle_between(np.array(pmt_angles[first]), 
+        angles.append(kp.tools.angle_between(np.array(pmt_angles[first]),
                                              np.array(pmt_angles[second])))
     return np.array(angles)
 
@@ -175,18 +242,18 @@ def exponential_polinomial(x, p1, p2, p3, p4):
 
 
 def fit_angular_distribution(angles, rates):
-    """Fits angular distribution of rates. 
-        
+    """Fits angular distribution of rates.
+
     Parameters
     ----------
     rates: numpy array with rates for all PMT combinations
     angles: numpy array with angles for all PMT combinations
-    
+
     Returns
     -------
     fitted_rates: numpy array of fitted rates (fit_function(angles, *popt))
 
-    """    
+    """
     cos_angles = np.cos(angles)
     popt, _ = optimize.curve_fit(exponential_polinomial,cos_angles, rates)
     fitted_rates = exponential_polinomial(cos_angles, *popt)
@@ -195,12 +262,12 @@ def fit_angular_distribution(angles, rates):
 
 def minimize_t0s(means, weights):
     """Varies t0s to minimize the deviation of the gaussian means from zero.
-    
+
     Parameters
     ----------
-    fitted_rates: numpy array of fitted rates from fit_angular_distribution 
+    fitted_rates: numpy array of fitted rates from fit_angular_distribution
     means: numpy array of means of all PMT combinations
-    weights: numpy array of weights for the squared sum 
+    weights: numpy array of weights for the squared sum
 
     Returns
     -------
@@ -226,13 +293,13 @@ def minimize_t0s(means, weights):
 
 def minimize_qes(fitted_rates, rates, weights):
     """Varies QEs to minimize the deviation of the rates from the fitted_rates.
-    
+
     Parameters
     ----------
-    fitted_rates: numpy array of fitted rates from fit_angular_distribution 
+    fitted_rates: numpy array of fitted rates from fit_angular_distribution
     rates: numpy array of rates of all PMT combinations
-    weights: numpy array of weights for the squared sum   
-    
+    weights: numpy array of weights for the squared sum
+
     Returns
     -------
     opt_qes: optimal qe values for all PMTs
@@ -244,7 +311,7 @@ def minimize_qes(fitted_rates, rates, weights):
             sq_sum = 0
             for fitted_rate, comb, rate, weight  \
                     in zip(fitted_rates, combs, rates, weights):
-                sq_sum += ((rate / qes[comb[0]] / qes[comb[1]] 
+                sq_sum += ((rate / qes[comb[0]] / qes[comb[1]]
                             - fitted_rate) * weight)**2
             return sq_sum
         return quality_function
@@ -257,41 +324,41 @@ def minimize_qes(fitted_rates, rates, weights):
 
 
 def correct_means(means, opt_t0s):
-    """Applies optimal t0s to gaussians means. 
-    
+    """Applies optimal t0s to gaussians means.
+
     Should be around zero afterwards.
-    
+
     Parameters
     ----------
     means: numpy array of means of gaussians of all PMT combinations
     opt_t0s: numpy array of optimal t0 values for all PMTs
-    
+
     Returns
     -------
     corrected_means: numpy array of corrected gaussian means for all PMT combs
 
     """
     combs = list(combinations(range(31), 2))
-    corrected_means = np.array([(opt_t0s[comb[1]] - opt_t0s[comb[0]]) 
+    corrected_means = np.array([(opt_t0s[comb[1]] - opt_t0s[comb[0]])
                                 - mean for mean, comb in zip(means, combs)])
     return corrected_means
 
 
 def correct_rates(rates, opt_qes):
-    """Applies optimal qes to rates. 
+    """Applies optimal qes to rates.
 
     Should be closer to fitted_rates afterwards.
-    
+
     Parameters
     ----------
     rates: numpy array of rates of all PMT combinations
     opt_qes: numpy array of optimal qe values for all PMTs
-    
+
     Returns
     -------
     corrected_rates: numpy array of corrected rates for all PMT combinations
     """
-    
+
     combs = list(combinations(range(31), 2))
     corrected_rates = np.array([rate / opt_qes[comb[0]] / opt_qes[comb[1]]  \
                             for rate, comb in zip(rates, combs)])
@@ -300,7 +367,7 @@ def correct_rates(rates, opt_qes):
 
 def calculate_rms_means(means, corrected_means):
     """Calculates RMS of means from zero before and after correction
-    
+
     Parameters
     ----------
     means: numpy array of means of gaussians of all PMT combinations
@@ -308,8 +375,8 @@ def calculate_rms_means(means, corrected_means):
 
     Returns
     -------
-    rms_means: RMS of means from zero 
-    rms_corrected_means: RMS of corrected_means from zero  
+    rms_means: RMS of means from zero
+    rms_corrected_means: RMS of corrected_means from zero
     """
     rms_means = np.sqrt(np.mean((means - 0)**2))
     rms_corrected_means = np.sqrt(np.mean((corrected_means - 0)**2))
@@ -318,7 +385,7 @@ def calculate_rms_means(means, corrected_means):
 
 def calculate_rms_rates(rates, fitted_rates, corrected_rates):
     """Calculates RMS of rates from fitted_rates before and after correction
-    
+
     Parameters
     ----------
     rates: numpy array of rates of all PMT combinations
@@ -327,7 +394,7 @@ def calculate_rms_rates(rates, fitted_rates, corrected_rates):
     Returns
     -------
     rms_rates: RMS of rates from fitted_rates
-    rms_corrected_rates: RMS of corrected_ratesrates from fitted_rates 
+    rms_corrected_rates: RMS of corrected_ratesrates from fitted_rates
     """
     rms_rates = np.sqrt(np.mean((rates - fitted_rates)**2))
     rms_corrected_rates = np.sqrt(np.mean((corrected_rates - fitted_rates)**2))
