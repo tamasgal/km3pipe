@@ -42,6 +42,39 @@ MINIMAL_RATE_HZ = 2.0e3
 MAXIMAL_RATE_HZ = 2.0e6
 
 
+
+class TimesliceParser(Module):
+    """Preliminary parser for DAQTimeslice"""
+    def process(self, blob):
+        if str(blob['CHPrefix'].tag) != 'IO_TSL':
+            log.error("Not an IO_TSL blob")
+            return
+
+        try:
+            data = BytesIO(blob['CHData'])
+            tsl_size, datatype = unpack('<ii', data.read(8))
+            det_id, run, sqnr = unpack('<iii', data.read(12))
+            timestamp, ns_ticks, n_frames = unpack('<iii', data.read(12))
+
+            ts_frames = blob['TimesliceFrames'] = defaultdict(list)
+
+            for i in range(n_frames):
+                frame_size, datatype = unpack('<ii', data.read(8))
+                det_id, run, sqnr = unpack('<iii', data.read(12))
+                timestamp, ns_ticks, dom_id = unpack('<iii', data.read(12))
+                dom_status = unpack('<iiiii', data.read(5*4))
+                n_hits = unpack('<i', data.read(4))[0]
+                hits = []
+                for j in range(n_hits):
+                    hit = unpack('!BlB', data.read(6))
+                    ts_frames[dom_id].append(hit)
+        except struct.error:
+            log.error("Could not parse Timeslice")
+            log.error(blob.keys())
+        else:
+            return blob
+
+
 class DAQPump(Pump):
     """A pump for binary DAQ files."""
 
