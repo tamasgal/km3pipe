@@ -23,6 +23,7 @@ before_install:
     - pip install -U pip setuptools
     - pip install -U numpy cython
     - pip install -U pytest mock
+    - pip install -U statsmodels==0.8.0rc1
     - ls -al
 
 install:
