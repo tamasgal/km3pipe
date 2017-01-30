@@ -104,6 +104,7 @@ setup(name='km3pipe',
               'meantots=km3pipe.utils.meantots:main',
               'pushover=km3pipe.utils.pushover:main',
               'ztplot=km3pipe.utils.ztplot:main',
+              'k40calib=km3pipe.utils.k40calib:main',
           ],
       },
       classifiers=[
