@@ -6,7 +6,7 @@ KM3Pipe command line utility.
 Usage:
     km3pipe test
     km3pipe update [GIT_BRANCH]
-    km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID]
+    km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID] [-o OUTFILE]
     km3pipe detectors [-s REGEX] [--temporary]
     km3pipe runtable [-n RUNS] [-s REGEX] [--temporary] DET_ID
     km3pipe runinfo [--temporary] DET_ID RUN
@@ -19,6 +19,7 @@ Options:
     -h --help           Show this screen.
     -m                  Get the MC detector file (flips the sign of DET_ID).
     -c CALIBR_ID        Geometrical calibration ID (eg. A01466417)
+    -o OUTFILE          Output filename.
     -t T0_SET           Time calibration ID (eg. A01466431)
     -n EVENTS/RUNS      Number of events/runs.
     -s REGEX            Regular expression to filter the runsetup name/id.
@@ -120,11 +121,12 @@ def retrieve(run_id, det_id):
     os.system("iget -Pv {0}".format(path))
 
 
-def detx(det_id, calibration='', t0set=''):
+def detx(det_id, calibration='', t0set='', filename=None):
     now = datetime.now()
-    filename = "KM3NeT_{0}{1:08d}_{2}.detx" \
-               .format('-' if det_id < 0 else '', abs(det_id),
-                       now.strftime("%d%m%Y"))
+    if filename is None:
+        filename = "KM3NeT_{0}{1:08d}_{2}.detx" \
+                   .format('-' if det_id < 0 else '', abs(det_id),
+                           now.strftime("%d%m%Y"))
     det = Detector(det_id=det_id, t0set=t0set, calibration=calibration)
     if det.n_doms > 0:
         det.write(filename)
@@ -179,8 +181,9 @@ def main():
     if args['detx']:
         t0set = args['-t']
         calibration = args['-c']
+        outfile = args['-o']
         det_id = int(('-' if args['-m'] else '') + args['DET_ID'])
-        detx(det_id, calibration, t0set)
+        detx(det_id, calibration, t0set, outfile)
 
     if args['detectors']:
         detectors(regex=args['-s'], temporary=args["--temporary"])
