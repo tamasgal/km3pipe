@@ -1,7 +1,7 @@
 # coding=utf-8
 # Filename: k40calib.py
 """
-Convert ROOT and EVT files to HDF5.
+Calculate t0set and write it to a CSV file.
 
 Usage:
     k40calib FILE
@@ -30,14 +30,33 @@ def k40calib(input_file):
     from km3modules import k40
     import km3pipe as kp
     import ROOT
+    import time
+
     f = ROOT.TFile(input_file)
     dom_ids = [n.GetName().split('.')[0]
                for n in f.GetListOfKeys()
                if '.2S' in n.GetName()]
     detector = kp.hardware.Detector(det_id=14)
+    now = int(time.time())
+    csv_filename = input_file + "_t0s.csv"
+    csv_file = open(csv_filename, 'w')
+    csv_file.write("timestamp, dom_id, tdc_channel, t0\n")
     for dom_id in dom_ids:
-        calibration = k40.calibrate_dom(dom_id, input_file, detector)
-        print(calibration.keys())
+        print("Calibrating {0}...".format(dom_id))
+        try:
+            calibration = k40.calibrate_dom(dom_id, input_file, detector)
+        except ValueError:
+            print("   no data found, skipping.")
+            continue
+        t0set = calibration['opt_t0s'].x
+        for tdc_channel, t0 in enumerate(t0set):
+            csv_file.write("{0}, {1}, {2}, {3}\n"
+                           .format(now, dom_id, tdc_channel, t0))
+        print("    done.")
+    csv_file.close()
+    print("Calibration done, the t0 values were written to '{0}'."
+          .format(csv_filename))
+
 
 def main():
     from docopt import docopt
