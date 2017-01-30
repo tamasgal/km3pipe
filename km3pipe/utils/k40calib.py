@@ -28,11 +28,16 @@ __status__ = "Development"
 def k40calib(input_file):
     """K40 Calibration"""
     from km3modules import k40
+    import km3pipe as kp
     import ROOT
     f = ROOT.TFile(input_file)
-    keys = f.GetListOfKeys()
-    for key in keys:
-        print(key)
+    dom_ids = [n.GetName().split('.')[0]
+               for n in f.GetListOfKeys()
+               if '.2S' in n.GetName()]
+    detector = kp.hardware.Detector(det_id=14)
+    for dom_id in dom_ids:
+        calibration = k40.calibrate_dom(dom_id, input_file, detector)
+        print(calibration.keys())
 
 def main():
     from docopt import docopt
