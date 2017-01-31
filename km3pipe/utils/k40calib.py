@@ -31,20 +31,18 @@ def k40calib(input_file, output_file=None):
     from km3modules import k40
     import km3pipe as kp
     import ROOT
-    import time
 
     f = ROOT.TFile(input_file)
     dom_ids = [n.GetName().split('.')[0]
                for n in f.GetListOfKeys()
                if '.2S' in n.GetName()]
     detector = kp.hardware.Detector(det_id=14)
-    now = int(time.time())
     if output_file is None:
         csv_filename = input_file + "_t0s.csv"
     else:
         csv_filename = output_file
     csv_file = open(csv_filename, 'w')
-    csv_file.write("timestamp, dom_id, tdc_channel, t0\n")
+    csv_file.write("dom_id, tdc_channel, t0\n")
     for dom_id in dom_ids:
         print("Calibrating {0}...".format(dom_id))
         try:
@@ -54,8 +52,8 @@ def k40calib(input_file, output_file=None):
             continue
         t0set = calibration['opt_t0s'].x
         for tdc_channel, t0 in enumerate(t0set):
-            csv_file.write("{0}, {1}, {2}, {3}\n"
-                           .format(now, dom_id, tdc_channel, t0))
+            csv_file.write("{0}, {1}, {2}\n"
+                           .format(dom_id, tdc_channel, t0))
         print("    done.")
     csv_file.close()
     print("Calibration done, the t0 values were written to '{0}'."
