@@ -42,7 +42,7 @@ def k40calib(input_file, output_file=None):
     else:
         csv_filename = output_file
     csv_file = open(csv_filename, 'w')
-    csv_file.write("dom_id, tdc_channel, t0\n")
+    csv_file.write("dom_id,tdc_channel,t0\n")
     for dom_id in dom_ids:
         print("Calibrating {0}...".format(dom_id))
         try:
