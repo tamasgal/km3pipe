@@ -9,8 +9,8 @@ Usage:
     k40calib --version
 
 Options:
-    -o         CSV file containing the t0 values.
-    -h --help  Show this screen.
+    -o OUTFILE   CSV file containing the t0 values.
+    -h --help    Show this screen.
 """
 
 from __future__ import division, absolute_import, print_function
