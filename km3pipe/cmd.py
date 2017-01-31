@@ -11,7 +11,7 @@ Usage:
     km3pipe runtable [-n RUNS] [-s REGEX] [--temporary] DET_ID
     km3pipe runinfo [--temporary] DET_ID RUN
     km3pipe rundetsn [--temporary] RUN DETECTOR
-    km3pipe retrieve DET_ID RUN
+    km3pipe retrieve DET_ID RUN [-o OUTFILE]
     km3pipe (-h | --help)
     km3pipe --version
 
