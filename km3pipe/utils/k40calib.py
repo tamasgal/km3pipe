@@ -4,11 +4,12 @@
 Calculate t0set and write it to a CSV file.
 
 Usage:
-    k40calib FILE
+    k40calib FILE [-o OUTFILE]
     k40calib (-h | --help)
     k40calib --version
 
 Options:
+    -o         CSV file containing the t0 values.
     -h --help  Show this screen.
 """
 
@@ -25,7 +26,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-def k40calib(input_file):
+def k40calib(input_file, output_file=None):
     """K40 Calibration"""
     from km3modules import k40
     import km3pipe as kp
@@ -38,7 +39,10 @@ def k40calib(input_file):
                if '.2S' in n.GetName()]
     detector = kp.hardware.Detector(det_id=14)
     now = int(time.time())
-    csv_filename = input_file + "_t0s.csv"
+    if output_file is None:
+        csv_filename = input_file + "_t0s.csv"
+    else:
+        csv_filename = output_file
     csv_file = open(csv_filename, 'w')
     csv_file.write("timestamp, dom_id, tdc_channel, t0\n")
     for dom_id in dom_ids:
@@ -63,4 +67,4 @@ def main():
     args = docopt(__doc__, version=version)
 
     infile = args['FILE']
-    k40calib(infile)
+    k40calib(infile, args['-o'])

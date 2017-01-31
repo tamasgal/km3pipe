@@ -111,7 +111,7 @@ def update_km3pipe(git_branch=''):
               .format(git_branch))
 
 
-def retrieve(run_id, det_id):
+def retrieve(run_id, det_id, outfile=None):
     """Retrieve run from iRODS for a given detector (O)ID"""
     try:
         det_id = int(det_id)
@@ -176,7 +176,7 @@ def main():
         rundetsn(int(args['RUN']), args['DETECTOR'], temporary=args["--temporary"])
 
     if args['retrieve']:
-        retrieve(int(args['RUN']), args['DET_ID'])
+        retrieve(int(args['RUN']), args['DET_ID'], args['-o'])
 
     if args['detx']:
         t0set = args['-t']
