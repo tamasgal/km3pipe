@@ -1,7 +1,7 @@
 # coding=utf-8
 # Filename: h5concat.py
 """
-Convert ROOT and EVT files to HDF5.
+Concatenate HDF5 Files.
 
 Usage:
     h5concat [--verbose] [--ignore-id] OUTFILE INFILES...
@@ -11,7 +11,6 @@ Usage:
 Options:
     -h --help               Show this screen.
     --verbose               Print out more progress. [default: False].
-    --ignore-id             use "Events are rows", not "read_where('X == event_id')"
 """
 
 from __future__ import division, absolute_import, print_function
@@ -28,7 +27,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-def h5concat(output_file, input_files, verbose=False, ignore_id=False):
+def h5concat(output_file, input_files, verbose=False):
     """Convert Any file to HDF5 file"""
     from km3pipe import Pipeline  # noqa
     from km3pipe.io import HDF5Pump, HDF5Sink  # noqa
@@ -39,10 +38,7 @@ def h5concat(output_file, input_files, verbose=False, ignore_id=False):
         pipe.attach(StatusBar, every=100)
     else:
         pipe.attach(StatusBar, every=1000)
-    if ignore_id:
-        pipe.attach(H5Mono, filename=output_file)
-    else:
-        pipe.attach(HDF5Sink, filename=output_file)
+    pipe.attach(HDF5Sink, filename=output_file)
     pipe.drain()
 
 
@@ -52,7 +48,6 @@ def main():
 
     infiles = args['INFILES']
     outfile = args['OUTFILE']
-    ignore_id=bool(args['--ignore-id'])
     verb = bool(args['--verbose'])
 
-    h5concat(outfile, infiles, verbose=verb, ignore_id=ignore_id)
+    h5concat(outfile, infiles, verbose=verb)
