@@ -6,7 +6,7 @@ Test suite for configuration related functions and classes.
 """
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import TestCase, StringIO
+from km3pipe.testing import TestCase, StringIO, patch
 from km3pipe.config import Config
 
 __author__ = "Tamas Gal"
@@ -22,6 +22,7 @@ CONFIGURATION = StringIO("\n".join((
     "[DB]",
     "username=foo",
     "password=narf",
+    "timeout=10",
     )))
 
 
@@ -44,3 +45,19 @@ class TestConfig(TestCase):
     def test_slack_token_raises_error_by_default(self):
         with self.assertRaises(ValueError):
             self.config.slack_token
+
+    def test_get_retrieves_correct_value(self):
+        self.assertEqual("foo", self.config.get("DB", "username"))
+
+    def test_get_returns_none_if_section_not_found(self):
+        self.assertTrue(self.config.get("a", "b") is None)
+
+    def test_get_returns_none_if_option_not_found(self):
+        self.assertTrue(self.config.get("DB", "a") is None)
+
+    def test_get_returns_float_if_option_is_numberlike(self):
+        self.assertTrue(isinstance(self.config.get("DB", "timeout"), float))
+
+    def test_create_irods_session_returns_none_if_irods_module_missing(self):
+        session = self.config.create_irods_session()
+        self.assertTrue(session is None)

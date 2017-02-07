@@ -11,9 +11,10 @@ import os
 import stat
 import pytz
 try:
-    from configparser import ConfigParser, Error, NoOptionError
+    from configparser import ConfigParser, Error, NoOptionError, NoSectionError
 except ImportError:
-    from six.moves.configparser import ConfigParser, Error, NoOptionError
+    from six.moves.configparser import (ConfigParser, Error, NoOptionError,
+                                        NoSectionError)
 
 import getpass
 try:
@@ -79,10 +80,10 @@ class Config(object):
         try:
             value = self.config.get(section, key)
             try:
-                return int(value)
+                return float(value)
             except ValueError:
                 return value
-        except NoOptionError:
+        except (NoOptionError, NoSectionError):
             return None
 
     def create_irods_session(self):

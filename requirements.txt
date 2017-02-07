@@ -1,7 +1,7 @@
+numpy>=1.12
 cython
 docopt
-matplotlib==2.0.0rc2
-numpy<=1.11
+matplotlib>=2.0.0
 pandas
 scipy
 tables
@@ -13,3 +13,5 @@ numpydoc
 sphinx_gallery
 astropy
 sklearn
+patsy
+h5py

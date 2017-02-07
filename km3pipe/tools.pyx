@@ -269,9 +269,10 @@ def total_seconds(td):
 
 class Timer(object):
     """A very simple, accurate and easy to use timer context"""
-    def __init__(self, message='It', precision=3):
+    def __init__(self, message='It', precision=3, callback=print):
         self.message = message
         self.precision = precision
+        self.callback = callback
 
     def __enter__(self):
         self.start()
@@ -298,10 +299,10 @@ class Timer(object):
         return self.__finish_cpu - self.__start_cpu
 
     def log(self):
-        print("{0} took {1:.{3}f}s (CPU {2:.{3}f}s)."
-              .format(self.message,
-                      self.seconds, self.cpu_seconds,
-                      self.precision))
+        self.callback("{0} took {1:.{3}f}s (CPU {2:.{3}f}s)."
+                      .format(self.message,
+                              self.seconds, self.cpu_seconds,
+                              self.precision))
 
 
 class Cuckoo(object):
@@ -414,6 +415,7 @@ def tai_timestamp():
         (1993, 7, 1), (1994, 7, 1), (1996, 1, 1),
         (1997, 7, 1), (1999, 1, 1), (2006, 1, 1),
         (2009, 1, 1), (2012, 7, 1), (2015, 7, 1),
+        (2017, 1, 1),
     ]
     for idx, leap_date in enumerate(leap_seconds):
         if leap_date >= (date.year, date.month, date.day):

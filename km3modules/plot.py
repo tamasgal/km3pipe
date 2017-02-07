@@ -24,6 +24,7 @@ import km3pipe.style
 def plot_dom_parameters(data, detector, filename, label, title,
                         vmin=0.0, vmax=10.0,
                         cmap='RdYlGn_r', under='deepskyblue', over='deeppink',
+                        underfactor=1.0, overfactor=1.0,
                         missing='lightgray'):
     """Creates a plot in the classical monitoring.km3net.de style.
 
@@ -34,6 +35,8 @@ def plot_dom_parameters(data, detector, filename, label, title,
     filename: filename or filepath
     label: str
     title: str
+    underfactor: a scale factor for the points used for underflow values
+    overfactor: a scale factor for the points used for overflow values
 
     """
     x, y, _ = zip(*detector.doms.values())
@@ -48,7 +51,8 @@ def plot_dom_parameters(data, detector, filename, label, title,
         'vmin': vmin,
         'vmax': vmax,
     }
-    sc_inactive = ax.scatter(x, y, c=missing, label='missing', s=m_size*0.90,
+    sc_inactive = ax.scatter(x, y, c=missing, label='missing',
+                             s=m_size*0.9,
                              **scatter_args)
 
     xa, ya = map(np.array, zip(*data.keys()))
@@ -59,11 +63,13 @@ def plot_dom_parameters(data, detector, filename, label, title,
                     **scatter_args)
     under_idx = zs < vmin
     sc_under = ax.scatter(xa[under_idx], ya[under_idx],
-                         c=under, label='< {0}'.format(vmin), s=m_size/2,
+                         c=under, label='< {0}'.format(vmin),
+                         s=m_size*underfactor,
                          **scatter_args)
     over_idx = zs > vmax
-    sc_under = ax.scatter(xa[over_idx], ya[over_idx],
-                         c=over, label='> {0}'.format(vmax), s=m_size*2,
+    sc_over = ax.scatter(xa[over_idx], ya[over_idx],
+                         c=over, label='> {0}'.format(vmax),
+                         s=m_size*overfactor,
                          **scatter_args)
 
     cb = plt.colorbar(sc)

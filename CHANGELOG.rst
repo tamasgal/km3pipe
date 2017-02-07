@@ -2,6 +2,13 @@ Unreleased changes
 ------------------
 
 
+6.4.0 / 2017-02-08
+------------------
+* K40 calibration module from Jonas!
+* Pushover client! Push messages to your mobile phone or computer via
+  ``pushover the message you want``.
+* Minor bugfixes
+
 6.3.0 / 2017-01-21
 ------------------
 * Introduces `BinaryStruct` which makes handling binary data much more easier.

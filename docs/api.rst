@@ -204,6 +204,32 @@ KM3Modules: Pipeline Segments
   GetAngle
   Cut
 
+``km3modules.k40``: K40 calibration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: km3modules.k40
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3modules.k40
+
+.. autosummary::
+  :toctree: api
+
+  IntraDOMCalibrator
+  CoincidenceFinder
+  calibrate_dom
+  load_k40_coincidences_from_hdf5
+  load_k40_coincidences_from_rootfile
+  fit_delta_ts
+  calculate_angles
+  fit_angular_distribution
+  minimize_t0s
+  minimize_qes
+  correct_means
+  correct_rates
+  calculate_rms_means
+  calculate_rms_rates
+
 ``km3modules.hits``: Hit Processing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. automodule:: km3modules.hits

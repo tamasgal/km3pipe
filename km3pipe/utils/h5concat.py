@@ -1,10 +1,10 @@
 # coding=utf-8
 # Filename: h5concat.py
 """
-Convert ROOT and EVT files to HDF5.
+Concatenate HDF5 Files.
 
 Usage:
-    h5concat [--verbose] OUTFILE INFILES...
+    h5concat [--verbose] [--ignore-id] OUTFILE INFILES...
     h5concat (-h | --help)
     h5concat --version
 
