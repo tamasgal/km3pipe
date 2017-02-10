@@ -6,6 +6,103 @@ API Reference
 KM3Pipe: Main Framework
 -----------------------
 
+``km3pipe.core``
+~~~~~~~~~~~~~~~~
+
+.. automodule:: km3pipe.core
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3pipe.core
+
+.. autosummary::
+  :toctree: api
+
+  AanetGeometry
+  Blob
+  Geometry
+  Module
+  Pipeline
+  Pump
+  Run
+
+
+``km3pipe.cmd``: Command Line Tools
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: km3pipe.cmd
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3pipe.cmd
+
+.. autosummary::
+  :toctree: api
+
+
+  detectors
+  detx
+  retrieve
+  run_tests
+  rundetsn
+  runinfo
+  runtable
+  update_km3pipe
+
+
+``km3pipe.dataclasses``: Internal Data Structures
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: km3pipe.dataclasses
+  :no-members:
+  :no-inherited-members:
+
+
+.. currentmodule:: km3pipe.dataclasses
+
+.. autosummary::
+  :toctree: api
+
+  EventInfo
+  Hit
+  HitSeries
+  KM3Array
+  KM3DataFrame
+  Track
+  TrackSeries
+
+
+``km3pipe.db``: Database Tools
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: km3pipe.db
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3pipe.db
+
+.. autosummary::
+  :toctree: api
+
+  DBManager
+
+
+``km3pipe.hardware``
+~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: km3pipe.hardware
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3pipe.hardware
+
+.. autosummary::
+  :toctree: api
+
+  Detector
+  PMT
+
+
 ``km3pipe.io``: Data Input / Output
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -33,64 +130,6 @@ KM3Pipe: Main Framework
   read_hdf5
   write_table
 
-
-``km3pipe.dataclasses``: Internal Data Structures
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. automodule:: km3pipe.dataclasses
-  :no-members:
-  :no-inherited-members:
-
-
-.. currentmodule:: km3pipe.dataclasses
-
-.. autosummary::
-  :toctree: api
-
-  EventInfo
-  Hit
-  HitSeries
-  Track
-  TrackSeries
-  KM3Array
-  KM3DataFrame
-
-
-``km3pipe.core``
-~~~~~~~~~~~~~~~~
-
-.. automodule:: km3pipe.core
-  :no-members:
-  :no-inherited-members:
-
-.. currentmodule:: km3pipe.core
-
-.. autosummary::
-  :toctree: api
-
-  Pipeline
-  Module
-  Pump
-  Blob
-  Geometry
-  AanetGeometry
-  Run
-
-
-``km3pipe.hardware``
-~~~~~~~~~~~~~~~~~~~~
-
-.. automodule:: km3pipe.hardware
-  :no-members:
-  :no-inherited-members:
-
-.. currentmodule:: km3pipe.hardware
-
-.. autosummary::
-  :toctree: api
-
-  Detector
-  PMT
 
 
 ``km3pipe.logger``
@@ -135,48 +174,10 @@ KM3Pipe: Main Framework
 .. autosummary::
   :toctree: api
 
-  pdg2name
-  geant2pdg
-  decamelise
   camelise
-
-
-``km3pipe.db``: Database Tools
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. automodule:: km3pipe.db
-  :no-members:
-  :no-inherited-members:
-
-.. currentmodule:: km3pipe.db
-
-.. autosummary::
-  :toctree: api
-
-  DBManager
-
-  
-``km3pipe.cmd``: Command Line Tools
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. automodule:: km3pipe.cmd
-  :no-members:
-  :no-inherited-members:
-
-.. currentmodule:: km3pipe.cmd
-
-.. autosummary::
-  :toctree: api
-
-
-  run_tests
-  runtable
-  runinfo
-  update_km3pipe
-  retrieve
-  detx
-  detectors
-  rundetsn
+  decamelise
+  geant2pdg
+  pdg2name
 
 
 KM3Modules: Pipeline Segments
@@ -193,16 +194,16 @@ KM3Modules: Pipeline Segments
 .. autosummary::
   :toctree: api
 
-  Wrap
-  Dump
-  Delete
-  Keep
-  HitCounter
   BlobIndexer
-  StatusBar
-  MemoryObserver
-  GetAngle
   Cut
+  Delete
+  Dump
+  GetAngle
+  HitCounter
+  Keep
+  MemoryObserver
+  StatusBar
+  Wrap
 
 ``km3modules.k40``: K40 calibration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -215,20 +216,20 @@ KM3Modules: Pipeline Segments
 .. autosummary::
   :toctree: api
 
-  IntraDOMCalibrator
   CoincidenceFinder
-  calibrate_dom
-  load_k40_coincidences_from_hdf5
-  load_k40_coincidences_from_rootfile
-  fit_delta_ts
+  IntraDOMCalibrator
   calculate_angles
-  fit_angular_distribution
-  minimize_t0s
-  minimize_qes
-  correct_means
-  correct_rates
   calculate_rms_means
   calculate_rms_rates
+  calibrate_dom
+  correct_means
+  correct_rates
+  fit_angular_distribution
+  fit_delta_ts
+  load_k40_coincidences_from_hdf5
+  load_k40_coincidences_from_rootfile
+  minimize_qes
+  minimize_t0s
 
 ``km3modules.hits``: Hit Processing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -241,10 +242,10 @@ KM3Modules: Pipeline Segments
 .. autosummary::
   :toctree: api
 
+  FirstHits
+  HitSelector
   HitStatistics
   NDoms
-  HitSelector
-  FirstHits
   TrimmedHits
 
 ``km3modules.reco``: Simple Reconstructions
@@ -262,9 +263,9 @@ KM3Modules: Pipeline Segments
   SvdFit
   Trawler
   bimod
-  uniform_chi2
   idr
   tensor_of_intertia
+  uniform_chi2
 
   
 ``km3modules.astro``: Astro Tools
