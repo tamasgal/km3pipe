@@ -40,9 +40,16 @@ class H5Chain(object):
 
     Examples
     --------
+
     >>> filenames = ['numu_cc.h5', 'anue_nc.h5']
     >>> c = H5Chain(filenames)
     >>> X = c['/reco/gandalf']
+
+    A context manager is also available:
+
+    >>> with H5Chain(filenames) as h5:
+    >>>     reco = h5['/reco']
+
     """
     def __init__(self, filenames):
         self.h5files = {}
