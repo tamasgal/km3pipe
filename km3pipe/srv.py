@@ -20,6 +20,7 @@ import subprocess
 import math
 
 from time import sleep
+from six import itervalues, iterkeys
 
 import pandas as pd
 import numpy as np
@@ -75,7 +76,7 @@ class ClientManager(object):
         while True:
             log.info("Pinging {0} clients.".format(len(self._clients)))
             print(self._clients)
-            for client in self._clients.itervalues():
+            for client in itervalues(self._clients):
                 print(client)
                 client.message("Ping.")
             sleep(interval)
@@ -107,7 +108,7 @@ class ClientManager(object):
 
     def broadcast(self, data, kind="info"):
         log.info("Broatcasting to {0} clients.".format(len(self._clients)))
-        for token in self._clients.iterkeys():
+        for token in iterkeys(self._clients):
             self.message_to(token, data, kind)
 
 
