@@ -73,7 +73,7 @@ def use(style='km3pipe'):
               style):
         try:
             plt.style.use(s)
-        except OSError:
+        except (OSError, IOError):
             pass
         else:
             print("Loading style definitions from '{0}'".format(s))
