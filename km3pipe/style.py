@@ -77,7 +77,7 @@ def use(style='km3pipe'):
             pass
         else:
             print("Loading style definitions from '{0}'".format(s))
-            break
+            return
     print("Could not find style: '{0}'".format(style))
 
 
@@ -126,4 +126,4 @@ class ColourCycler(object):
 
 
 # Automatically load default style on import.
-use('default')
+use('km3pipe')
