@@ -1,6 +1,11 @@
 Unreleased changes
 ------------------
 
+6.4.1 / 2017-02-16
+------------------
+* API doc fixes
+* add missing requirements to setup.py
+* minor py2/py3 compat fix
 
 6.4.0 / 2017-02-08
 ------------------
