@@ -1,6 +1,11 @@
 Unreleased changes
 ------------------
 
+6.4.2 / 2017-02-21
+------------------
+* Fix aanet header
+* style update
+
 6.4.1 / 2017-02-16
 ------------------
 * API doc fixes
