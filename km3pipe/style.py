@@ -63,19 +63,22 @@ else:
             return nb, resources
 
 
-def get_style_path(style='km3pipe'):
-    if style in ('default', 'km3pipe'):
-        style = ''
-    else:
-        style = '-' + style
-    return style_dir + '/km3pipe' + style + '.mplstyle'
+def get_style_path(style):
+    return style_dir + '/' + style + '.mplstyle'
 
 
-def use(style):
-    if style in ('default', 'km3pipe', 'talk', 'notepad', 'poster'):
-        style = get_style_path(style)
-        plt.style.use(get_style_path('default'))
-    plt.style.use(style)
+def use(style='km3pipe'):
+    for s in (get_style_path('km3pipe-'+style),
+              get_style_path(style),
+              style):
+        try:
+            plt.style.use(s)
+        except (OSError, IOError):
+            pass
+        else:
+            print("Loading style definitions from '{0}'".format(s))
+            return
+    print("Could not find style: '{0}'".format(style))
 
 
 class ColourCycler(object):
@@ -123,4 +126,4 @@ class ColourCycler(object):
 
 
 # Automatically load default style on import.
-use('default')
+use('km3pipe')

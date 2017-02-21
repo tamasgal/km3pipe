@@ -19,13 +19,9 @@ class TestStyle(TestCase):
 
     def test_get_style_path(self):
         gsp = get_style_path
-        default = "kp-data/stylelib/km3pipe.mplstyle"
-        self.assertTrue(gsp().startswith('/'))
-        self.assertTrue(gsp().endswith(default))
-        self.assertTrue(gsp('km3pipe').endswith(default))
-        self.assertTrue(gsp('default').endswith(default))
-        self.assertTrue(gsp('foo').endswith("/stylelib/km3pipe-foo.mplstyle"))
-        self.assertTrue(gsp('bar').endswith("/stylelib/km3pipe-bar.mplstyle"))
+        self.assertTrue(gsp('km3pipe').endswith("kp-data/stylelib/km3pipe.mplstyle"))
+        self.assertTrue(gsp('foo').endswith("/stylelib/foo.mplstyle"))
+        self.assertTrue(gsp('bar').endswith("/stylelib/bar.mplstyle"))
 
 
 class TestColourCycler(TestCase):
