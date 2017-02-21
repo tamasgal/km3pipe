@@ -115,30 +115,36 @@ class AanetPump(Pump):
                 raise SystemExit("Could not open file")
 
             # http://jenkins.km3net.de/job/aanet_trunk/doxygen/Head_8hh_source.html
+            livetime = 0
+            livetime_err = 0
+            n_gen = 0
+            nfilgen = 0
             try:
                 self.header = event_file.rootfile().Get("Head")
                 livetime = self.header.get_field('livetime', 0)
                 livetime_err = self.header.get_field('livetime', 1)
                 ngen = self.header.get_field('genvol', 4)
-            except (AttributeError, TypeError):
-                self.header = None
+            except (ValueError, UnicodeEncodeError):
                 log.warn(filename + ": can't read header.")
-                pass
             try:
                 self.livetime = float(livetime)
-            except ValueError:
+            except (ValueError, UnicodeEncodeError):
+                log.warn(filename + ": can't read livetime.")
                 self.livetime = 0
             try:
-                self.livetime_err = livetime_err
-            except ValueError:
+                self.livetime_err = float(livetime_err)
+            except (ValueError, UnicodeEncodeError):
+                log.warn(filename + ": can't read livetime_err.")
                 self.livetime_err = 0
             try:
-                self.ngen = ngen
-            except ValueError:
+                self.ngen = float(ngen)
+            except (ValueError, UnicodeEncodeError):
+                log.warn(filename + ": can't read ngen.")
                 self.ngen = 0
             try:
-                self.nfilgen = nfilgen
-            except ValueError:
+                self.nfilgen = float(nfilgen)
+            except (ValueError, UnicodeEncodeError):
+                log.warn(filename + ": can't read nfilgen.")
                 self.nfilgen = 0
 
             if self.format == 'ancient_recolns':
