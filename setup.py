@@ -85,7 +85,7 @@ setup(name='km3pipe',
       ],
       extras_require={
           'docs': ['sphinx>=1.5.1', 'sphinx-gallery', 'numpydoc',
-                   'scikit-learn', 'statsmodels==0.8.rc1', 'seaborn',
+                   'scikit-learn', 'statsmodels>=0.8', 'seaborn',
                    'pillow', 'ipython', 'sphinxcontrib-napoleon',
                    'astropy', 'h5py', 'patsy'],
           'jppy': ['jppy'],

@@ -3,6 +3,9 @@
 """
 Pump for the Aanet data format.
 
+This is undoubtedly the ugliest module in the entire framework.
+If you have a way to read aanet files via the Jpp interface,
+your pull request is more than welcome!
 """
 from __future__ import division, absolute_import, print_function
 import os.path
@@ -119,24 +122,24 @@ class AanetPump(Pump):
             livetime_err = 0
             n_gen = 0
             nfilgen = 0
+
             try:
                 self.header = event_file.rootfile().Get("Head")
-                livetime = self.header.get_field('livetime', 0)
-                livetime_err = self.header.get_field('livetime', 1)
-                ngen = self.header.get_field('genvol', 4)
             except (ValueError, UnicodeEncodeError):
                 log.warn(filename + ": can't read header.")
             try:
+                lt_line = self.header.get_line('livetime')
+                if len(lt_line) > 0:
+                    livetime, livetime_err = lt_line.split()
+                #livetime = self.header.get_field('livetime', 0)
+                #livetime_err = self.header.get_field('livetime', 1)
+                self.livetime_err = float(livetime_err)
                 self.livetime = float(livetime)
             except (ValueError, UnicodeEncodeError):
                 log.warn(filename + ": can't read livetime.")
                 self.livetime = 0
             try:
-                self.livetime_err = float(livetime_err)
-            except (ValueError, UnicodeEncodeError):
-                log.warn(filename + ": can't read livetime_err.")
-                self.livetime_err = 0
-            try:
+                ngen = self.header.get_field('genvol', 4)
                 self.ngen = float(ngen)
             except (ValueError, UnicodeEncodeError):
                 log.warn(filename + ": can't read ngen.")
