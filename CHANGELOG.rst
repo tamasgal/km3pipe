@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 
+6.4.3 / 2017-02-22
+-----------------
+* Fix pyroot segfault when reading aanet header
+
 6.4.2 / 2017-02-21
 ------------------
 * Fix aanet header
