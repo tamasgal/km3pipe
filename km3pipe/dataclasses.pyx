@@ -106,7 +106,7 @@ class SummarysliceInfo(with_metaclass(Serialisable)):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_from(cls, data, event_id, fmt='numpy', h5loc='/'):
+    def conv_from(cls, data, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
             return cls.from_table(data[0])
 
@@ -348,6 +348,7 @@ class EventInfo(object):
     """
     dtype = np.dtype([
         ('det_id', '<i4'),
+        ('event_id', '<u4'),
         ('frame_index', '<u4'),
         ('livetime_sec', '<u8'),
         ('mc_id', '<i4'),
@@ -355,7 +356,7 @@ class EventInfo(object):
         ('n_events_gen', '<u8'),
         ('n_files_gen', '<u8'),
         ('overlays', '<u4'),
-        # ('run_id', '<u4'),
+        ('run_id', '<u4'),
         ('trigger_counter', '<u8'),
         ('trigger_mask', '<u8'),
         ('utc_nanoseconds', '<u8'),
@@ -363,7 +364,6 @@ class EventInfo(object):
         ('weight_w1', '<f8'),
         ('weight_w2', '<f8'),
         ('weight_w3', '<f8'),
-        ('event_id', '<u4'),
     ])
 
     def __init__(self, arr, h5loc='/'):
@@ -385,7 +385,7 @@ class EventInfo(object):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_from(cls, data, event_id, fmt='numpy', h5loc='/', **kwargs):
+    def conv_from(cls, data, fmt='numpy', h5loc='/', **kwargs):
         if fmt == 'numpy':
             return cls.from_row(data, **kwargs)
 
@@ -415,7 +415,7 @@ class EventInfo(object):
                        self.frame_index, self.utc_seconds,
                        self.utc_nanoseconds, self.mc_id, self.mc_t,
                        self.overlays, self.trigger_counter, self.trigger_mask,
-                       # self.run_id,
+                       self.run_id,
                        )
 
     def __repr__(self):
@@ -556,7 +556,6 @@ cdef class Hit:
                   int time,
                   int tot,
                   unsigned short int triggered,
-                  int event_id=0        # ignore this!
                   ):
         self.channel_id = channel_id
         self.dir_x = dir_x
@@ -755,12 +754,10 @@ class HitSeries(object):
         ('pos_x', '<f8'),
         ('pos_y', '<f8'),
         ('pos_z', '<f8'),
-        # ('run_id', '<u4'),
         ('t0', '<i4'),
         ('time', '<i4'),
         ('tot', 'u1'),
         ('triggered', 'u1'),
-        ('event_id', '<u4'),
     ])
 
     def __init__(self, arr, h5loc='/'):
@@ -770,7 +767,7 @@ class HitSeries(object):
         self.h5loc = h5loc
 
     @classmethod
-    def from_aanet(cls, hits, event_id):
+    def from_aanet(cls, hits):
         try:
             return cls(np.array([(
                 h.channel_id,
@@ -787,7 +784,6 @@ class HitSeries(object):
                 h.t,
                 h.tot,
                 h.trig,
-                event_id,
             ) for h in hits], dtype=cls.dtype))
         except ValueError:
             # Older aanet format.
@@ -806,11 +802,10 @@ class HitSeries(object):
                 h.t,
                 h.tot,
                 h.trig,
-                event_id,
             ) for h in hits], dtype=cls.dtype))
 
     @classmethod
-    def from_evt(cls, hits, event_id):
+    def from_evt(cls, hits):
         return cls(np.array([(
             0,     # channel_id
             np.nan,
@@ -826,13 +821,12 @@ class HitSeries(object):
             h.time,
             h.tot,
             0,     # triggered
-            event_id,
         ) for h in hits], dtype=cls.dtype))
 
     @classmethod
     def from_arrays(cls, channel_ids, dir_xs, dir_ys, dir_zs, dom_ids, ids,
                     pmt_ids, pos_xs, pos_ys, pos_zs, t0s, times, tots,
-                    triggereds, event_id):
+                    triggereds):
         # do we need shape[0] or does len() work too?
         try:
             length = channel_ids.shape[0]
@@ -853,13 +847,10 @@ class HitSeries(object):
         hits['time'] = times
         hits['tot'] = tots
         hits['triggered'] = triggereds
-        hits['event_id'] = np.full(length, event_id, dtype='<u4')
         return cls(hits)
 
     @classmethod
-    def from_dict(cls, map, event_id):
-        if event_id is None:
-            event_id = map['event_id']
+    def from_dict(cls, map):
         return cls.from_arrays(
             map['channel_id'],
             map['dir_x'],
@@ -875,13 +866,10 @@ class HitSeries(object):
             map['time'],
             map['tot'],
             map['triggered'],
-            event_id,
         )
 
     @classmethod
-    def from_table(cls, table, event_id):
-        if event_id is None:
-            event_id = table[0]['event_id']
+    def from_table(cls, table):
         return cls(np.array([(
             row['channel_id'],
             row['dir_x'],
@@ -897,7 +885,7 @@ class HitSeries(object):
             row['time'],
             row['tot'],
             row['triggered'],
-        ) for row in table], dtype=cls.dtype), event_id)
+        ) for row in table], dtype=cls.dtype)
 
     @classmethod
     def deserialise(cls, *args, **kwargs):
@@ -907,8 +895,7 @@ class HitSeries(object):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_from(cls, data, event_id=None, fmt='numpy', h5loc='/'):
-        # what is event_id doing here?
+    def conv_from(cls, data, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
             return cls(data)
         if fmt == 'pandas':
@@ -1198,13 +1185,11 @@ class TrackSeries(object):
         ('pos_x', '<f8'),
         ('pos_y', '<f8'),
         ('pos_z', '<f8'),
-        # ('run_id', '<u4'),
         ('time', '<i4'),
         ('type', '<i4'),
-        ('event_id', '<u4'),
     ])
 
-    def __init__(self, tracks, event_id, h5loc='/'):
+    def __init__(self, tracks, h5loc='/'):
         self._bjorkeny = None
         self._dir = None
         self._energy = None
@@ -1218,11 +1203,10 @@ class TrackSeries(object):
         self._time = None
         self._tracks = tracks
         self._type = None
-        self.event_id = event_id
         self.h5loc = h5loc
 
     @classmethod
-    def from_aanet(cls, tracks, event_id):
+    def from_aanet(cls, tracks):
         return cls([Track(cls.get_usr_item(t, 1),               # bjorkeny
                           Direction((t.dir.x, t.dir.y, t.dir.z)),
                           t.E,
@@ -1242,7 +1226,7 @@ class TrackSeries(object):
                           # geant2pdg(t.type))
                           t.type,
                           )
-                    for t in tracks], event_id)
+                    for t in tracks])
 
     @classmethod
     def from_arrays(cls,
@@ -1260,7 +1244,6 @@ class TrackSeries(object):
                     positions_z,
                     times,
                     types,
-                    event_id,
                     ):
         directions = np.column_stack((directions_x, directions_y,
                                       directions_z))
@@ -1269,8 +1252,7 @@ class TrackSeries(object):
         args = bjorkenys, directions, energies, \
             ids, interaction_channels, is_ccs, lengths, positions, \
             times, types
-        tracks = cls([Track(*track_args) for track_args in zip(*args)],
-                     event_id)
+        tracks = cls([Track(*track_args) for track_args in zip(*args)],)
         tracks._bjorkeny = bjorkenys
         tracks._dir = zip(directions_x, directions_y, directions_z)
         tracks._energy = energies
@@ -1285,11 +1267,10 @@ class TrackSeries(object):
 
     @classmethod
     def from_km3df(cls, km3df):
-        return cls.from_table(km3df.conv_to(to='numpy'),
-                              event_id=int(km3df['event_id']))
+        return cls.from_table(km3df.conv_to(to='numpy'),)
 
     @classmethod
-    def from_table(cls, table, event_id):
+    def from_table(cls, table,):
         return cls([Track(
             row['bjorkeny'],
             np.array((row['dir_x'], row['dir_y'], row['dir_z'],)),
@@ -1301,7 +1282,7 @@ class TrackSeries(object):
             np.array((row['pos_x'], row['pos_y'], row['pos_z'],)),
             row['time'],
             row['type']
-        ) for row in table], event_id)
+        ) for row in table])
 
     @classmethod
     def deserialise(cls, *args, **kwargs):
@@ -1311,9 +1292,9 @@ class TrackSeries(object):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_from(cls, data, event_id, fmt='numpy', h5loc='/'):
+    def conv_from(cls, data, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
-            return cls.from_table(data, event_id)
+            return cls.from_table(data)
 
     def conv_to(self, to='numpy'):
         if to == 'numpy':
@@ -1327,7 +1308,6 @@ class TrackSeries(object):
             t.bjorkeny, t.dir[0], t.dir[1], t.dir[2], t.energy,
             t.id, t.interaction_channel, t.is_cc,
             t.length, t.pos[0], t.pos[1], t.pos[2], t.time, t.type,
-            self.event_id,
         ) for t in self._tracks]
 
     @classmethod
@@ -1508,7 +1488,6 @@ class SummaryframeSeries(object):
     @classmethod
     def conv_from(cls, data, slice_id, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
-            # return cls.from_table(data, event_id)
             return cls(data)
 
     def conv_to(self, to='numpy'):
@@ -1605,7 +1584,7 @@ class KM3Array(np.ndarray):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_from(cls, data, event_id=None, h5loc='/', fmt='numpy', **kwargs):
+    def conv_from(cls, data, h5loc='/', fmt='numpy', **kwargs):
         if fmt == 'numpy':
             arr = cls(data, h5loc, **kwargs)
             return arr
@@ -1667,7 +1646,7 @@ class KM3DataFrame(pd.DataFrame):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_from(cls, data, event_id=None, h5loc='/', fmt='pandas', **kwargs):
+    def conv_from(cls, data, h5loc='/', fmt='pandas', **kwargs):
         if fmt in {'numpy', 'pandas'}:
             return cls(data, h5loc=h5loc, **kwargs)
         if fmt == 'dict':
