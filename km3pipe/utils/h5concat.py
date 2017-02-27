@@ -17,6 +17,7 @@ from __future__ import division, absolute_import, print_function
 
 from km3modules import StatusBar
 from km3pipe import version
+from km3pipe.tools import deprecated
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -27,6 +28,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
+@deprecated('Multiple Input hdf5 files do not work when writing to hdf5')
 def h5concat(output_file, input_files, verbose=False):
     """Convert Any file to HDF5 file"""
     from km3pipe import Pipeline  # noqa
