@@ -1,6 +1,12 @@
 Unreleased changes
 ------------------
 
+6.4.4 / 2017-02-27
+------------------
+* h5concat (multi-h5-to-h5) deprecated because buggy. Going to drop all 
+  event_id for 7.0 (for now use ptconcat
+* Clean up setup.py
+
 6.4.3 / 2017-02-22
 -----------------
 * Fix pyroot segfault when reading aanet header
