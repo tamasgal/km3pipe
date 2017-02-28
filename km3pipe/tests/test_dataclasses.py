@@ -245,7 +245,7 @@ class TestHitSeries(TestCase):
         n_hits = 10
         hits = [FakeAanetHit(*p) for p in
                 np.arange(n_hits * n_params).reshape(n_hits, n_params)]
-        hit_series = HitSeries.from_aanet(hits, 0)
+        hit_series = HitSeries.from_aanet(hits)
 
         self.assertAlmostEqual(6, hit_series.pmt_id[0])
         self.assertAlmostEqual(6, hit_series[0].pmt_id)
@@ -262,7 +262,7 @@ class TestHitSeries(TestCase):
         n_hits = 10
         hits = [FakeAanetHit(*p) for p in
                 np.arange(n_hits * n_params).reshape(n_hits, n_params)]
-        hit_series = HitSeries.from_aanet(hits, 0)
+        hit_series = HitSeries.from_aanet(hits)
 
         self.assertTupleEqual((5, 19, 33, 47, 61, 75, 89, 103, 117, 131),
                               tuple(hit_series.id))
@@ -293,7 +293,7 @@ class TestHitSeries(TestCase):
                 np.arange(n_hits * n_params).reshape(n_hits, n_params)]
         print(len(hits))
         print(len(hits[0]))
-        hit_series = HitSeries.from_evt(hits, 0)
+        hit_series = HitSeries.from_evt(hits)
 
         self.assertAlmostEqual(1, hit_series[0].pmt_id)
         self.assertAlmostEqual(0, hit_series[1].channel_id)  # always 0 for MC
@@ -309,7 +309,7 @@ class TestHitSeries(TestCase):
         n_hits = 10
         hits = [EvtRawHit(*p) for p in
                 np.arange(n_hits * n_params).reshape(n_hits, n_params)]
-        hit_series = HitSeries.from_evt(hits, 0)
+        hit_series = HitSeries.from_evt(hits)
 
         self.assertTupleEqual((0, 4, 8, 12, 16, 20, 24, 28, 32, 36),
                               tuple(hit_series.id))
@@ -467,8 +467,8 @@ class TestTrackSeries(TestCase):
             'time': 13,
             'type': 14,
             }])
-        exp = [(0.0, 1.0, 2.0, 3, 4.0, 0, 6, 7, True, 9.0, 10.0, 12.0, 12.0,
-                13, 14), ]
+        exp = [(
+            0.0, 1.0, 2.0, 3, 4.0, 6, 7, True, 9.0, 10.0, 12.0, 12.0, 13, 14),]
         exp = np.array(exp, dtype=ts.dtype)
         self.assertEqual(1, len(ts))
         # self.assertAlmostEqual(exp, ts.serialise())
@@ -515,33 +515,37 @@ class TestSummarysliceInfo(TestCase):
 
 class TestEventInfo(TestCase):
     def test_event_info(self):
-        e = EventInfo(tuple(range(16)))
+        e = EventInfo(tuple(range(17)))
         self.assertAlmostEqual(0, e.det_id)
-        self.assertAlmostEqual(1, e.frame_index)
-        self.assertAlmostEqual(2, e.livetime_sec)
-        self.assertAlmostEqual(3, e.mc_id)
-        self.assertAlmostEqual(4, e.mc_t)
-        self.assertAlmostEqual(5, e.n_events_gen)
-        self.assertAlmostEqual(6, e.n_files_gen)
-        self.assertAlmostEqual(7, e.overlays)
-        self.assertAlmostEqual(6, e.run_id)
-        self.assertAlmostEqual(8, e.trigger_counter)
-        self.assertAlmostEqual(9, e.trigger_mask)
-        self.assertAlmostEqual(10, e.utc_nanoseconds)
-        self.assertAlmostEqual(11, e.utc_seconds)
-        self.assertAlmostEqual(12, e.weight_w1)
-        self.assertAlmostEqual(13, e.weight_w2)
-        self.assertAlmostEqual(14, e.weight_w3)
-        self.assertAlmostEqual(15, e.event_id)
+        self.assertAlmostEqual(1, e.event_id)
+        self.assertAlmostEqual(2, e.frame_index)
+        self.assertAlmostEqual(3, e.livetime_sec)
+        self.assertAlmostEqual(4, e.mc_id)
+        self.assertAlmostEqual(5, e.mc_t)
+        self.assertAlmostEqual(6, e.n_events_gen)
+        self.assertAlmostEqual(7, e.n_files_gen)
+        self.assertAlmostEqual(8, e.overlays)
+        self.assertAlmostEqual(9, e.run_id)
+        self.assertAlmostEqual(10, e.trigger_counter)
+        self.assertAlmostEqual(11, e.trigger_mask)
+        self.assertAlmostEqual(12, e.utc_nanoseconds)
+        self.assertAlmostEqual(13, e.utc_seconds)
+        self.assertAlmostEqual(14, e.weight_w1)
+        self.assertAlmostEqual(15, e.weight_w2)
+        self.assertAlmostEqual(16, e.weight_w3)
 
     def test_from_table(self):
         e = EventInfo.from_row({
             'det_id': 0,
+            'event_id': 1,
             'frame_index': 2,
+            'livetime_sec': 13,
             'mc_id': 3,
             'mc_t': 4,
+            'n_events_gen': 14,
+            'n_files_gen': 15,
             'overlays': 5,
-            'run_id': 6,
+            'run_id': 16,
             'trigger_counter': 6,
             'trigger_mask': 7,
             'utc_nanoseconds': 8,
@@ -549,18 +553,15 @@ class TestEventInfo(TestCase):
             'weight_w1': 10,
             'weight_w2': 11,
             'weight_w3': 12,
-            'event_id': 1,
-            'livetime_sec': 13,
-            'n_events_gen': 14,
-            'n_files_gen': 15,
             })
 
         self.assertAlmostEqual(0, e.det_id)
+        self.assertAlmostEqual(1, e.event_id)
         self.assertAlmostEqual(2, e.frame_index)
         self.assertAlmostEqual(3, e.mc_id)
         self.assertAlmostEqual(4, e.mc_t)
         self.assertAlmostEqual(5, e.overlays)
-        self.assertAlmostEqual(6, e.run_id)
+        self.assertAlmostEqual(16, e.run_id)
         self.assertAlmostEqual(6, e.trigger_counter)
         self.assertAlmostEqual(7, e.trigger_mask)
         self.assertAlmostEqual(8, e.utc_nanoseconds)
@@ -575,6 +576,7 @@ class TestEventInfo(TestCase):
     def test_array(self):
         e = EventInfo.from_row({
             'det_id': 0,
+            'event_id': 1,
             'frame_index': 2,
             'livetime_sec': 13,
             'mc_id': 3,
@@ -582,7 +584,7 @@ class TestEventInfo(TestCase):
             'n_events_gen': 14,
             'n_files_gen': 15,
             'overlays': 5,
-            'run_id': 6,
+            'run_id': 16,
             'trigger_counter': 6,
             'trigger_mask': 7,
             'utc_nanoseconds': 8,
@@ -591,7 +593,7 @@ class TestEventInfo(TestCase):
             'weight_w2': 11.0,
             'weight_w3': 12.0,
             })
-        exp = (0, 2, 13, 3, 4.0, 14, 15, 5, 6, 7, 8, 9, 10.0, 11.0, 12.0, 1,)
+        exp = (0, 1, 2, 13, 3, 4.0, 14, 15, 5, 16, 6, 7, 8, 9, 10.0, 11.0, 12.0, )
         self.assertAlmostEqual(e.serialise(), np.array(exp, e.dtype))
 
 

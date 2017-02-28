@@ -310,7 +310,6 @@ class TestGeometry(TestCase):
             times,
             tots,
             triggereds,
-            0,      # event_id
         )
 
         self.assertEqual(0, hits[0].time)

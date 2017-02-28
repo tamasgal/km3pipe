@@ -53,7 +53,6 @@ class TestSelector(TestCase):
             times,
             tots,
             triggereds,
-            0,      # event_id
         )
         self.blob = {'Hits': self.hits}
 
