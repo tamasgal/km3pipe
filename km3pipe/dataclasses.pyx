@@ -942,7 +942,7 @@ class HitSeries(object):
             row['time'],
             row['tot'],
             row['triggered'],
-        ) for row in table], dtype=cls.dtype)
+        ) for row in table], dtype=cls.dtype))
 
     @classmethod
     def deserialise(cls, *args, **kwargs):
@@ -1229,7 +1229,7 @@ class McHitSeries(object):
             row['time'],
             row['tot'],
             row['triggered'],
-        ) for row in table], dtype=cls.dtype)
+        ) for row in table], dtype=cls.dtype))
 
     @classmethod
     def deserialise(cls, *args, **kwargs):
@@ -1532,7 +1532,7 @@ class TrackSeries(object):
         ('time', '<i4'),
         ('type', '<i4'),
     ])
-    h5loc = '/tracks
+    h5loc = '/tracks'
 
     def __init__(self, tracks):
         self._bjorkeny = None
@@ -1809,7 +1809,7 @@ class McTrackSeries(object):
         ('time', '<i4'),
         ('type', '<i4'),
     ])
-    h5loc = '/mc_tracks
+    h5loc = '/mc_tracks'
 
     def __init__(self, tracks):
         self._bjorkeny = None
@@ -2293,7 +2293,7 @@ deserialise_map = {
 }
 
 
-evt_per_table_structs = {
+split_per_event = {
     'Hits',
     'McHits',
     'McTracks',
