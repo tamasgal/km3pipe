@@ -141,7 +141,7 @@ class AanetPump(Pump):
             try:
                 ngen = self.header.get_field('genvol', 4)
                 self.ngen = float(ngen)
-            except (ValueError, UnicodeEncodeError):
+            except (ValueError, UnicodeEncodeError, AttributeError):
                 log.warn(filename + ": can't read ngen.")
                 self.ngen = 0
             try:
