@@ -205,7 +205,6 @@ class TestHitSeries(TestCase):
             times,
             tots,
             triggereds,
-            0,      # event_id
         )
 
     def test_from_arrays(self):
@@ -235,7 +234,6 @@ class TestHitSeries(TestCase):
             times,
             tots,
             triggereds,
-            0,      # event_id
         )
 
         self.assertAlmostEqual(1, hits[1].id)
@@ -446,7 +444,6 @@ class TestTrackSeries(TestCase):
             pos_zs,
             times,
             types,
-            event_id=0,
         )
 
         self.assertAlmostEqual(1, tracks[1].id)
@@ -469,7 +466,7 @@ class TestTrackSeries(TestCase):
             'pos_z': 12.0,
             'time': 13,
             'type': 14,
-            }], event_id=0)
+            }])
         exp = [(0.0, 1.0, 2.0, 3, 4.0, 0, 6, 7, True, 9.0, 10.0, 12.0, 12.0,
                 13, 14), ]
         exp = np.array(exp, dtype=ts.dtype)
@@ -527,7 +524,7 @@ class TestEventInfo(TestCase):
         self.assertAlmostEqual(5, e.n_events_gen)
         self.assertAlmostEqual(6, e.n_files_gen)
         self.assertAlmostEqual(7, e.overlays)
-        # self.assertAlmostEqual(6, e.run_id)
+        self.assertAlmostEqual(6, e.run_id)
         self.assertAlmostEqual(8, e.trigger_counter)
         self.assertAlmostEqual(9, e.trigger_mask)
         self.assertAlmostEqual(10, e.utc_nanoseconds)
@@ -544,7 +541,7 @@ class TestEventInfo(TestCase):
             'mc_id': 3,
             'mc_t': 4,
             'overlays': 5,
-            # 'run_id': 6,
+            'run_id': 6,
             'trigger_counter': 6,
             'trigger_mask': 7,
             'utc_nanoseconds': 8,
@@ -563,7 +560,7 @@ class TestEventInfo(TestCase):
         self.assertAlmostEqual(3, e.mc_id)
         self.assertAlmostEqual(4, e.mc_t)
         self.assertAlmostEqual(5, e.overlays)
-        # self.assertAlmostEqual(6, e.run_id)
+        self.assertAlmostEqual(6, e.run_id)
         self.assertAlmostEqual(6, e.trigger_counter)
         self.assertAlmostEqual(7, e.trigger_mask)
         self.assertAlmostEqual(8, e.utc_nanoseconds)
@@ -571,7 +568,6 @@ class TestEventInfo(TestCase):
         self.assertAlmostEqual(10, e.weight_w1)
         self.assertAlmostEqual(11, e.weight_w2)
         self.assertAlmostEqual(12, e.weight_w3)
-        self.assertAlmostEqual(1, e.event_id)
         self.assertAlmostEqual(13, e.livetime_sec)
         self.assertAlmostEqual(14, e.n_events_gen)
         self.assertAlmostEqual(15, e.n_files_gen)
@@ -586,7 +582,7 @@ class TestEventInfo(TestCase):
             'n_events_gen': 14,
             'n_files_gen': 15,
             'overlays': 5,
-            # 'run_id': 6,
+            'run_id': 6,
             'trigger_counter': 6,
             'trigger_mask': 7,
             'utc_nanoseconds': 8,
@@ -594,7 +590,6 @@ class TestEventInfo(TestCase):
             'weight_w1': 10.0,
             'weight_w2': 11.0,
             'weight_w3': 12.0,
-            'event_id': 1,
             })
         exp = (0, 2, 13, 3, 4.0, 14, 15, 5, 6, 7, 8, 9, 10.0, 11.0, 12.0, 1,)
         self.assertAlmostEqual(e.serialise(), np.array(exp, e.dtype))
