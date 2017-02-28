@@ -16,7 +16,7 @@ import tables as tb
 
 import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
-from km3pipe.dataclasses import KM3Array, deserialise_map
+from km3pipe.dataclasses import KM3Array, deserialise_map, split_per_event
 from km3pipe.logger import logging
 from km3pipe.tools import camelise, decamelise, split
 
@@ -92,6 +92,8 @@ class HDF5Sink(Module):
         if where not in self._tables:
             dtype = arr.dtype
             loc, tabname = os.path.split(where)
+            if tabname in split_per_event:
+                loc += '/{}'.format(self.index)
             tab = self.h5file.create_table(
                 loc, tabname, description=dtype, title=title,
                 filters=self.filters, createparents=True,
@@ -264,11 +266,18 @@ class HDF5Pump(Pump):
         local_index = self._translate_index(fname, index)
         event_id = evt_ids[local_index]
 
+        # TODO
+        # obviously, this makes little sense when below '/hits' or something.
+        # a) # if 'hits' in node.path: continue
+        # b) ????
         for tab in h5file.walk_nodes(classname="Table"):
             loc, tabname = os.path.split(tab._v_pathname)
             tabname = camelise(tabname)
+            self.table_per_evt = False
             try:
                 dc = deserialise_map[tabname]
+                if tabname in ['Hits', 'McHits', 'Tracks', 'McTracks']:
+                    self.table_per_evt = True
             except KeyError:
                 dc = KM3Array
             arr = tab.read_where('event_id == %d' % event_id)
