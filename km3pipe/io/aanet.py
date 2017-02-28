@@ -135,7 +135,7 @@ class AanetPump(Pump):
                 #livetime_err = self.header.get_field('livetime', 1)
                 self.livetime_err = float(livetime_err)
                 self.livetime = float(livetime)
-            except (ValueError, UnicodeEncodeError):
+            except (ValueError, UnicodeEncodeError, AttributeError):
                 log.warn(filename + ": can't read livetime.")
                 self.livetime = 0
             try:
