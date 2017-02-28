@@ -59,7 +59,7 @@ class HDF5Sink(Module):
         # might be able to set to `None`, I don't know...
         self.n_rows_expected = self.get('n_rows_expected') or 10000
 
-        self.index = 1
+        self.index = 0
         self.h5file = tb.open_file(self.filename, mode="w", title="KM3NeT")
         try:
             self.filters = tb.Filters(complevel=5, shuffle=True,
