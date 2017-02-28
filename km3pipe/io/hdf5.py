@@ -272,6 +272,10 @@ class HDF5Pump(Pump):
         # b) ????
         for tab in h5file.walk_nodes(classname="Table"):
             loc, tabname = os.path.split(tab._v_pathname)
+            if loc in {'/hits', '/mc_hits', '/tracks', '/mc_tracks'}:
+                if int(tabname) != index:
+                    continue
+                is_single_event_table = True
             tabname = camelise(tabname)
             self.table_per_evt = False
             try:
