@@ -402,6 +402,7 @@ class EventInfo(object):
 
     def __str__(self):
         return "Event #{0}:\n" \
+               "    event id:        {0}\n" \
                "    detector id:     {1}\n" \
                "    frame index:     {2}\n" \
                "    UTC seconds:     {3}\n" \
