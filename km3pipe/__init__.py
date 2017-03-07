@@ -20,7 +20,6 @@ if not __KM3PIPE_SETUP__:
     from . import io  # noqa
     from . import utils  # noqa
     from . import srv  # noqa
-    from .srv import srv_event  # noqa
     from .io import GenericPump, read_hdf5  # noqa
 
 
