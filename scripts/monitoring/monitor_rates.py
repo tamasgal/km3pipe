@@ -35,7 +35,7 @@ class MonitorRates(kp.Module):
         self.index = 0
         self.k40_2fold = {}
         self.rates = {}
-        self.cuckoo = kp.tools.Cuckoo(60, self.create_plot)
+        self.cuckoo = kp.time.Cuckoo(60, self.create_plot)
         self.n_slices = 0
 
     def process(self, blob):
@@ -48,7 +48,7 @@ class MonitorRates(kp.Module):
         preamble = kp.io.daq.DAQPreamble(file_obj=data_io)
         summaryslice = kp.io.daq.DAQSummaryslice(file_obj=data_io)
         timestamp = summaryslice.header.time_stamp
-        now = kp.tools.tai_timestamp()
+        now = kp.time.tai_timestamp()
         for dom_id, rates in summaryslice.summary_frames.iteritems():
             du, dom, _ = detector.doms[dom_id]
             self.rates[(du, dom)] = np.sum(rates) / 1000

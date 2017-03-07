@@ -31,7 +31,7 @@ from km3pipe.hardware import Detector
 from km3pipe.io import CHPump
 from km3pipe.io.daq import (DAQProcessor, DAQPreamble, DAQSummaryslice,
                                DAQEvent)
-from km3pipe.tools import tai_timestamp
+from km3pipe.time import tai_timestamp
 import km3pipe.style
 
 from km3pipe.logger import logging
