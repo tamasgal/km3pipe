@@ -25,6 +25,7 @@ before_install:
     - pip install -U pytest mock
     - pip install -U statsmodels==0.8.0rc1
     - pip install -U tables
+    - pip install -U tornado
     - ls -al
 
 install:
