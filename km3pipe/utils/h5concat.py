@@ -17,7 +17,7 @@ from __future__ import division, absolute_import, print_function
 
 from km3modules import StatusBar
 from km3pipe import version
-from km3pipe.tools import deprecated
+from km3pipe.dev import deprecated
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

@@ -15,7 +15,7 @@ from six.moves import xrange
 
 import numpy as np
 
-from .tools import unpack_nfirst, split
+from .dev import unpack_nfirst, split
 from .math import com  # , ignored
 from .dataclasses import Point, Direction
 from .db import DBManager

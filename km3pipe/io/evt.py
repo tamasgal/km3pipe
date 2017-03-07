@@ -15,7 +15,7 @@ from km3pipe.core import Pump, Blob
 from km3pipe.logger import logging
 
 from km3pipe.dataclasses import Point, Direction, HitSeries
-from km3pipe.tools import unpack_nfirst
+from km3pipe.dev import unpack_nfirst
 from km3pipe.mc import pdg2name, geant2pdg
 from km3pipe.sys import ignored
 

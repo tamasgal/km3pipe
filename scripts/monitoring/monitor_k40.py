@@ -50,7 +50,7 @@ class MonitorK40(kp.Module):
         self.index = 0
         self.k40_2fold = {}
         self.rates = {}
-        self.cuckoo = kp.tools.Cuckoo(300, self.create_plot)
+        self.cuckoo = kp.time.Cuckoo(300, self.create_plot)
         self.n_slices = 0
 
     def process(self, blob):
