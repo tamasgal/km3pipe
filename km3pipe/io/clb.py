@@ -14,7 +14,7 @@ import datetime
 import pytz
 
 from km3pipe.core import Pump
-from km3pipe.tools import ignored
+from km3pipe.sys import ignored
 from km3pipe.logger import logging
 
 __author__ = "Tamas Gal"

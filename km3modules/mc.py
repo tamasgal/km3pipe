@@ -5,7 +5,8 @@
 from __future__ import division, absolute_import, print_function
 
 from km3pipe import Module
-from km3pipe.tools import zenith, azimuth, pdg2name, name2pdg
+from km3pipe.tools import pdg2name, name2pdg
+from km3pipe.math import zenith, azimuth
 
 
 NEUTRINOS = {'nu_e', 'anu_e', 'nu_mu', 'anu_mu', }      # noqa
