@@ -10,7 +10,7 @@ from time import sleep
 
 from km3pipe.testing import TestCase, MagicMock, StringIO
 from km3pipe.tools import (unpack_nfirst, split, namedtuple_with_defaults,
-                           geant2pdg, pdg2name, Cuckoo, total_seconds,
+                           Cuckoo, total_seconds,
                            remain_file_pointer, decamelise, camelise, Timer)
 
 __author__ = "Tamas Gal"
@@ -77,21 +77,6 @@ class TestTools(TestCase):
         self.assertEqual(1, node.val)
         self.assertEqual(2, node.left)
         self.assertEqual(3, node.right)
-
-
-    def test_geant2pdg(self):
-        self.assertEqual(22, geant2pdg(1))
-        self.assertEqual(-13, geant2pdg(5))
-
-    def test_geant2pdg_returns_0_for_unknown_particle_id(self):
-        self.assertEqual(0, geant2pdg(-999))
-
-    def test_pdg2name(self):
-        self.assertEqual('mu-', pdg2name(13))
-        self.assertEqual('anu_tau', pdg2name(-16))
-
-    def test_pdg2name_returns_NA_for_unknown_particle(self):
-        self.assertEqual('N/A', pdg2name(0))
 
     def test_total_seconds(self):
         seconds = 3

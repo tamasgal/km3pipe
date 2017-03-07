@@ -22,7 +22,7 @@ import pandas as pd
 np.import_array()
 
 from .math import angle_between
-from .tools import geant2pdg, pdg2name
+from .mc import geant2pdg, pdg2name
 
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
