@@ -73,8 +73,6 @@ require_groups = {
 require_groups['most'] = list(chain.from_iterable(
     [require_groups[k] for k in ('docs', 'base', 'analysis', 'io', 'web')],
 ))
-print(require_groups['most'])
-
 
 setup(name='km3pipe',
       version=version,
