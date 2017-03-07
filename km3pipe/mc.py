@@ -9,21 +9,6 @@ Some unsorted, frequently used logic.
 """
 from __future__ import division, absolute_import, print_function
 
-import resource
-import sys
-import os
-import base64
-import subprocess
-import collections
-import socket
-from collections import namedtuple
-from itertools import chain
-from datetime import datetime
-import time
-from timeit import default_timer as timer
-import re
-import warnings
-
 
 from .logger import logging
 
