@@ -268,21 +268,6 @@ KM3Modules: Pipeline Segments
   uniform_chi2
 
   
-``km3modules.astro``: Astro Tools
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. automodule:: km3modules.astro
-  :no-members:
-  :no-inherited-members:
-
-.. currentmodule:: km3modules.astro
-
-.. autosummary::
-  :toctree: api
-
-  to_frame
-
-
 ``km3modules.topology``
 ~~~~~~~~~~~~~~~~~~~~~~~
 

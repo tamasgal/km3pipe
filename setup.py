@@ -56,7 +56,7 @@ dataclasses = Extension('km3pipe.dataclasses',
                         define_macros=[('CYTHON_TRACE', CYTHON_TRACE)])
 
 require_groups = {
-          'docs': ['astropy', 'ipython', 'numpydoc', 'patsy', 'pillow',
+          'docs': ['ipython', 'numpydoc', 'patsy', 'pillow',
                    'scikit-learn', 'seaborn', 'sphinx-gallery',
                    'sphinx>=1.5.1', 'sphinxcontrib-napoleon', 'statsmodels', ],
           'base': ['cython', 'docopt', 'numpy>=1.12', 'pandas', 'pytz',
@@ -73,8 +73,6 @@ require_groups = {
 require_groups['most'] = list(chain.from_iterable(
     [require_groups[k] for k in ('docs', 'base', 'analysis', 'io', 'web')],
 ))
-print(require_groups['most'])
-
 
 setup(name='km3pipe',
       version=version,
