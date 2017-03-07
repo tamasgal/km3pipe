@@ -12,7 +12,9 @@ import numpy as np
 import pandas as pd
 
 from km3pipe import Module, Blob
-from km3pipe.tools import peak_memory_usage, zenith, azimuth, prettyln
+from km3pipe.tools import prettyln
+from km3pipe.sys import peak_memory_usage
+from km3pipe.math import zenith, azimuth
 from km3pipe.dataclasses import KM3DataFrame, KM3Array     # noqa
 from km3pipe.io.pandas import merge_event_ids
 

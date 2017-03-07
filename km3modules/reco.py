@@ -18,7 +18,7 @@ from statsmodels.robust.scale import mad
 
 from km3pipe import Module
 from km3pipe.dataclasses import KM3Array, KM3DataFrame     # noqa
-from km3pipe.tools import azimuth, zenith, dist, unit_vector
+from km3pipe.math import azimuth, zenith, dist, unit_vector
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103

@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* remove astro stuff, move to git.km3net.de/moritz/km3astro
+* split up tools into tools/math/sys/dev/time/mc
 
 7.0.0 / 2017-XX-XX
 ------------------
