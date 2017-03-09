@@ -9,8 +9,6 @@ from __future__ import division, absolute_import, print_function
 
 import time
 
-import os
-
 import km3pipe as kp
 
 __author__ = "Jonas Reubelt and Tamas Gal"
@@ -44,11 +42,14 @@ class PhidgetsController(kp.Module):
         self.e = 13250.
         self.s = 70500.
 
-    def drive_angle(self, ang, motor_id=0):
+        self.reset_positions()
+
+    def drive_angle(self, ang, motor_id=0, relative=False):
         stepper_dest = int(ang * self.s / 360.)
         encoder_dest = abs(int(stepper_dest / self.s * self.e))
         self.wake_up()
-        self.reset_positions()
+        if relative:
+            self.reset_positions()
         time.sleep(0.1)
         self.stepper.setTargetPosition(motor_id, stepper_dest)
         while abs(self.encoder.getPosition(motor_id)) < encoder_dest:
