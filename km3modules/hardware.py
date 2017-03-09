@@ -24,19 +24,22 @@ class PhidgetsController(kp.Module):
     def configure(self):
         from Phidgets.Devices.Stepper import Stepper
         from Phidgets.Devices.Encoder import Encoder
+        self.current_limit = self.get("current_limit") or 2.5
+        self.motor_id = self.get("motor_id") or 0
         self.stepper = Stepper()
         self.encoder = Encoder()
-        self.setup()
+        self.setup(self.motor_id)
 
-    def setup(self):
+    def setup(self, motor_id):
         self.stepper.openPhidget()
         self.stepper.waitForAttach(10000)
 
         self.encoder.openPhidget()
         self.encoder.waitForAttach(10000)
 
-        self.stepper.setVelocityLimit(0,1000)
-        self.stepper.setAcceleration(0,5000)
+        self.stepper.setVelocityLimit(motor_id, 1000)
+        self.stepper.setAcceleration(motor_id, 5000)
+        self.stepper.setCurrentLimit(motor_id, 2.5)
 
         self.e = 13250.
         self.s = 70500.
