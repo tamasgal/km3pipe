@@ -48,11 +48,11 @@ class PhidgetsController(kp.Module):
         self.reset_positions()
         time.sleep(1)
         self.stepper.setTargetPosition(motor_id, stepper_dest)
-        while abs(encoder.getPosition(motor_id)) < encoder_dest:
+        while abs(self.encoder.getPosition(motor_id)) < encoder_dest:
             while abs(self.stepper.getCurrentPosition(motor_id)) < abs(stepper_dest):
                 time.sleep(0.1)
                 self.log_positions()
-            self.stepper.setCurrentPosition(motor_id, int(encoder.getPosition(0) / self.e * self.s))
+            self.stepper.setCurrentPosition(motor_id, int(self.encoder.getPosition(0) / self.e * self.s))
             self.stepper.setTargetPosition(motor_id, stepper_dest)
             time.sleep(1)
 
@@ -71,5 +71,5 @@ class PhidgetsController(kp.Module):
 
     def log_positions(self, motor_id=0):
         log.info("Stepper position: {0}\nEncoder position:{1}"
-                 .format(stepper.getCurrentPosition(motor_id) / self.s * 360,
-                         encoder.getPosition(motor_id) / self.e * 360))
+                 .format(self.stepper.getCurrentPosition(motor_id) / self.s * 360,
+                         self.encoder.getPosition(motor_id) / self.e * 360))
