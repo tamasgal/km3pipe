@@ -71,7 +71,11 @@ require_groups = {
           'utils': ['urwid', ],
 }
 require_groups['most'] = list(chain.from_iterable(
-    [require_groups[k] for k in ('base', 'io', 'web')],
+    [require_groups[k] for k in ('base', 'io', 'web', 'utils')],
+))
+require_groups['full'] = list(chain.from_iterable(
+    [require_groups[k] for k in ('base', 'io', 'web', 'utils', 'analysis',
+                                 'testing', 'daq', 'docs')],
 ))
 
 setup(name='km3pipe',
