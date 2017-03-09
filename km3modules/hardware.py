@@ -47,7 +47,7 @@ class PhidgetsController(kp.Module):
 
         self.reset_positions()
 
-    def drive_angle(self, ang, motor_id=0, relative=False):
+    def drive_to_angle(self, ang, motor_id=0, relative=False):
         stepper_dest = self._stepper_dest = self.raw_stepper_position(ang)
         encoder_dest = self._encoder_dest = self.raw_encoder_position(ang)
 
@@ -59,15 +59,16 @@ class PhidgetsController(kp.Module):
 
         self.stepper_target_pos = stepper_dest
         self.wait_for_stepper()
+        self.log_offset()
 
-        log.critical("Difference: ".format(self.encoder_pos - encoder_dest))
-
-        # while abs(self.encoder_pos - encoder_dest) > 5:
-        #     log.info("Difference: ".format(self.encoder_pos - encoder_dest))
-        #     while self.stepper_pos != stepper_dest:
-        #         time.sleep(0.1)
-        #         self.log_positions()
-        #     self.stepper_pos = stepper_dest
+        while abs(self.offset) > 1:
+            self.log_offset()
+            stepper_offset = round(self.offset / self.e * self.s)
+            log.debug("Correcting stepper by {0}".format(stepper_offset))
+            log.debug("Stepper target pos: {0}".format(self.stepper_target_pos))
+            log.debug("Stepper pos: {0}".format(self.stepper_pos))
+            self.stepper_target_pos = self.stepper_dest + stepper_offset
+            self.wait_for_stepper()
 
         self.log_positions()
         self.stand_by()
@@ -77,12 +78,20 @@ class PhidgetsController(kp.Module):
             time.sleep(0.1)
             self.log_positions()
 
+    def log_offset(self):
+        log.debug("Difference (encoder): {0}".format(self.offset))
+
+    @property
+    def offset(self):
+        return self._encoder_dest - self.encoder_pos
+
     @property
     def stepper_target_pos(self):
         return self.stepper.getTargetPosition(self.motor_id)
 
     @stepper_target_pos.setter
     def stepper_target_pos(self, val):
+        self._stepper_dest = int(val)
         self.stepper.setTargetPosition(self.motor_id, int(val))
 
     @property
