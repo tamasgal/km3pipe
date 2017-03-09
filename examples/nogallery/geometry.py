@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from km3pipe import Pipeline, Geometry, Module
 from km3pipe.io import EvtPump
-from km3modules import StatusBar
+from km3modules.common import StatusBar
 import os
 import time
 
