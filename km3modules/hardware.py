@@ -43,11 +43,11 @@ class PhidgetsController(kp.Module):
 
     def drive_angle(self, ang, motor_id=0):
         stepper_dest = int(ang * self.s / 360.)
-        encoder_dest = abs(int(dest / self.s * self.e))
+        encoder_dest = abs(int(stepper_dest / self.s * self.e))
         self.wake_up()
         self.reset_positions()
         time.sleep(1)
-        stepper.setTargetPosition(motor_id, dest)
+        stepper.setTargetPosition(motor_id, stepper_dest)
         while abs(encoder.getPosition(motor_id)) < encoder_dest:
             while abs(stepper.getCurrentPosition(motor_id)) < abs(stepper_dest):
                 time.sleep(0.1)
