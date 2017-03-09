@@ -24,19 +24,22 @@ class PhidgetsController(kp.Module):
     def configure(self):
         from Phidgets.Devices.Stepper import Stepper
         from Phidgets.Devices.Encoder import Encoder
+        self.current_limit = self.get("current_limit") or 2.5
+        self.motor_id = self.get("motor_id") or 0
         self.stepper = Stepper()
         self.encoder = Encoder()
-        self.setup()
+        self.setup(self.motor_id)
 
-    def setup(self):
+    def setup(self, motor_id):
         self.stepper.openPhidget()
         self.stepper.waitForAttach(10000)
 
         self.encoder.openPhidget()
         self.encoder.waitForAttach(10000)
 
-        self.stepper.setVelocityLimit(0,1000)
-        self.stepper.setAcceleration(0,5000)
+        self.stepper.setVelocityLimit(motor_id, 1000)
+        self.stepper.setAcceleration(motor_id, 5000)
+        self.stepper.setCurrentLimit(motor_id, 2.5)
 
         self.e = 13250.
         self.s = 70500.
@@ -48,11 +51,11 @@ class PhidgetsController(kp.Module):
         self.reset_positions()
         time.sleep(1)
         self.stepper.setTargetPosition(motor_id, stepper_dest)
-        while abs(encoder.getPosition(motor_id)) < encoder_dest:
+        while abs(self.encoder.getPosition(motor_id)) < encoder_dest:
             while abs(self.stepper.getCurrentPosition(motor_id)) < abs(stepper_dest):
                 time.sleep(0.1)
                 self.log_positions()
-            self.stepper.setCurrentPosition(motor_id, int(encoder.getPosition(0) / self.e * self.s))
+            self.stepper.setCurrentPosition(motor_id, int(self.encoder.getPosition(0) / self.e * self.s))
             self.stepper.setTargetPosition(motor_id, stepper_dest)
             time.sleep(1)
 
@@ -71,5 +74,5 @@ class PhidgetsController(kp.Module):
 
     def log_positions(self, motor_id=0):
         log.info("Stepper position: {0}\nEncoder position:{1}"
-                 .format(stepper.getCurrentPosition(motor_id) / self.s * 360,
-                         encoder.getPosition(motor_id) / self.e * 360))
+                 .format(self.stepper.getCurrentPosition(motor_id) / self.s * 360,
+                         self.encoder.getPosition(motor_id) / self.e * 360))
