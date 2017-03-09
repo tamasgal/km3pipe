@@ -49,7 +49,7 @@ class PhidgetsController(kp.Module):
 
     def drive_to_angle(self, ang, motor_id=0, relative=False):
         stepper_dest = self._stepper_dest = self.raw_stepper_position(ang)
-        encoder_dest = self._encoder_dest = self.raw_encoder_position(ang)
+        self._encoder_dest = self.raw_encoder_position(ang)
 
         if relative:
             self.reset_positions()
@@ -67,7 +67,7 @@ class PhidgetsController(kp.Module):
             log.debug("Correcting stepper by {0}".format(stepper_offset))
             log.debug("Stepper target pos: {0}".format(self.stepper_target_pos))
             log.debug("Stepper pos: {0}".format(self.stepper_pos))
-            self.stepper_target_pos = self.stepper_dest + stepper_offset
+            self.stepper_target_pos = self.stepper_pos + stepper_offset
             self.wait_for_stepper()
 
         self.log_positions()
