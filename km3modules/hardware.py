@@ -42,27 +42,40 @@ class PhidgetsController(kp.Module):
         self.e = 13250.
         self.s = 70500.
 
+        self._stepper_dest = 0
+        self._encoder_dest = 0
+
         self.reset_positions()
 
     def drive_angle(self, ang, motor_id=0, relative=False):
-        stepper_dest = self.raw_stepper_position(ang)
-        encoder_dest = self.raw_encoder_position(ang)
+        stepper_dest = self._stepper_dest = self.raw_stepper_position(ang)
+        encoder_dest = self._encoder_dest = self.raw_encoder_position(ang)
+
         if relative:
             self.reset_positions()
+
         self.wake_up()
         time.sleep(0.1)
 
         self.stepper_target_pos = stepper_dest
+        self.wait_for_stepper()
 
-        while abs(self.encoder_pos - encoder_dest) > 5:
-            log.info("Difference: ".format(self.encoder_pos - encoder_dest))
-            while self.stepper_pos != stepper_dest:
-                time.sleep(0.1)
-                self.log_positions()
-            self.stepper_pos = stepper_dest
+        log.critical("Difference: ".format(self.encoder_pos - encoder_dest))
+
+        # while abs(self.encoder_pos - encoder_dest) > 5:
+        #     log.info("Difference: ".format(self.encoder_pos - encoder_dest))
+        #     while self.stepper_pos != stepper_dest:
+        #         time.sleep(0.1)
+        #         self.log_positions()
+        #     self.stepper_pos = stepper_dest
 
         self.log_positions()
         self.stand_by()
+
+    def wait_for_stepper(self):
+        while self.stepper_pos != self._stepper_dest:
+            time.sleep(0.1)
+            self.log_positions()
 
     @property
     def stepper_target_pos(self):
