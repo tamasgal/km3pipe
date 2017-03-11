@@ -4,7 +4,7 @@
 # cython: embedsignature=True
 # pylint: disable=C0103
 """
-Some unsorted, frequently used logic.
+Monte Carlo related things.
 
 """
 from __future__ import division, absolute_import, print_function
