@@ -129,4 +129,7 @@ class ColourCycler(object):
 
 
 # Automatically load default style on import.
-use('km3pipe')
+try:
+    use('km3pipe')
+except NameError:
+    print("Could not load default matplotlib style.")
