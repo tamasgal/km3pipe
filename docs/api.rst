@@ -185,11 +185,11 @@ KM3Modules: Pipeline Segments
 
 ``km3modules``: Useful helpers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. automodule:: km3modules
+.. automodule:: km3modules.core
   :no-members:
   :no-inherited-members:
 
-.. currentmodule:: km3modules
+.. currentmodule:: km3modules.core
 
 .. autosummary::
   :toctree: api
