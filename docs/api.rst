@@ -183,13 +183,13 @@ KM3Pipe: Main Framework
 KM3Modules: Pipeline Segments
 -----------------------------
 
-``km3modules``: Useful helpers
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. automodule:: km3modules.core
+``km3modules.common``: Useful helpers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: km3modules.common
   :no-members:
   :no-inherited-members:
 
-.. currentmodule:: km3modules.core
+.. currentmodule:: km3modules.common
 
 .. autosummary::
   :toctree: api
