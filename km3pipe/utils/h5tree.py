@@ -17,7 +17,7 @@ from __future__ import division, absolute_import, print_function
 
 import tables
 
-from km3pipe.tools import deprecated
+from km3pipe.dev import deprecated
 
 __author__ = "Moritz Lotze"
 __copyright__ = "Copyright 2016, Moritz Lotze and the KM3NeT collaboration."

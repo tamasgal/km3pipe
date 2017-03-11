@@ -19,7 +19,7 @@ import os
 from datetime import datetime
 
 from km3pipe import version
-from km3modules import StatusBar
+from km3modules.common import StatusBar
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

@@ -17,8 +17,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 
-from km3modules import StatusBar
-from km3pipe.tools import pld3
+from km3modules.common import StatusBar
+from km3pipe.math import pld3
 import km3pipe.style
 
 km3pipe.style.use('default')

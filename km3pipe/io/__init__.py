@@ -10,7 +10,6 @@ import os.path
 from six import string_types
 
 import numpy as np
-import pandas as pd
 
 from .evt import EvtPump  # noqa
 from .daq import DAQPump  # noqa
@@ -97,6 +96,8 @@ def read_hdf5(filename, detx=None, det_id=None, det_from_file=False):
     or retrieved from the database by passing a detector ID, or by reading
     the detector id from the event info in the file.
     """
+    import pandas as pd
+
     h5 = pd.HDFStore(filename)
     opts = {}
     opts['event_info'] = h5.get('event_info')

@@ -17,10 +17,6 @@ from .__version__ import version, version_info  # noqa
 if not __KM3PIPE_SETUP__:
     from .core import (Pipeline, Module, Pump, Blob, Run,  # noqa
                               Geometry, AanetGeometry)
-    from . import io  # noqa
-    from . import utils  # noqa
-    from . import srv  # noqa
-    from .srv import srv_event  # noqa
     from .io import GenericPump, read_hdf5  # noqa
 
 

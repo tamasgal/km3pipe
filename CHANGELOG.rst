@@ -1,6 +1,16 @@
 Unreleased changes
 ------------------
 
+
+6.5.0 / 2017-03-11
+------------------
+* remove astro stuff, move to git.km3net.de/moritz/km3astro
+* fixed HDF5 version warning
+* some cleanup in __init__.pys, so be prepared to change some import statements
+  * split up tools into tools/math/sys/dev/time/mc
+  * stuff under km3modules is now in km3modules.common
+
+
 6.4.4 / 2017-02-27
 ------------------
 * h5concat (multi-h5-to-h5) deprecated because buggy. Going to drop all 

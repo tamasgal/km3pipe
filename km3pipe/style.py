@@ -10,7 +10,10 @@ from __future__ import division, absolute_import, print_function
 import os
 from itertools import cycle
 
-import matplotlib.pyplot as plt
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    print("Please install matplotlib: `pip install matplotlib`")
 import km3pipe as kp
 
 
@@ -126,4 +129,7 @@ class ColourCycler(object):
 
 
 # Automatically load default style on import.
-use('km3pipe')
+try:
+    use('km3pipe')
+except NameError:
+    print("Could not load default matplotlib style.")

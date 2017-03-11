@@ -32,7 +32,7 @@ class DOMActivityPlotter(kp.Module):
         super(self.__class__, self).__init__(**context)
         self.index = 0
         self.rates = defaultdict(partial(deque, maxlen=4000))
-        self.cuckoo = kp.tools.Cuckoo(60, self.create_plot)
+        self.cuckoo = kp.time.Cuckoo(60, self.create_plot)
 
     def process(self, blob):
         self.index += 1
@@ -49,7 +49,7 @@ class DOMActivityPlotter(kp.Module):
         preamble = kp.io.daq.DAQPreamble(file_obj=data_io)
         summaryslice = kp.io.daq.DAQSummaryslice(file_obj=data_io)
         timestamp = summaryslice.header.time_stamp
-        now = kp.tools.tai_timestamp()
+        now = kp.time.tai_timestamp()
         for dom_id, rates in summaryslice.summary_frames.iteritems():
             du, dom, _ = detector.doms[dom_id]
             self.rates[(du, dom)] = now - timestamp

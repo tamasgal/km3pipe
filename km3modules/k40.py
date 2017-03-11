@@ -234,8 +234,8 @@ def calculate_angles(detector):
     pmt_combinations = list(combinations(range(31), 2))
     pmt_angles = detector.pmt_angles
     for first, second in pmt_combinations:
-        angles.append(kp.tools.angle_between(np.array(pmt_angles[first]),
-                                             np.array(pmt_angles[second])))
+        angles.append(kp.math.angle_between(np.array(pmt_angles[first]),
+                                            np.array(pmt_angles[second])))
     return np.array(angles)
 
 

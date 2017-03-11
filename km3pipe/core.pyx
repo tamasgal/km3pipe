@@ -20,7 +20,7 @@ import types
 import numpy as np
 import pandas as pd
 
-from .tools import peak_memory_usage, ignored
+from .sys import peak_memory_usage, ignored
 from .hardware import Detector
 from .dataclasses import HitSeries
 from .logger import logging

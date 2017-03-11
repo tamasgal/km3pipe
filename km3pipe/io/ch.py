@@ -10,7 +10,7 @@ from __future__ import division, absolute_import, print_function
 
 from km3pipe.core import Pump
 from km3pipe.controlhost import Client
-from km3pipe.tools import Cuckoo
+from km3pipe.time import Cuckoo
 from km3pipe.logger import logging
 import threading
 import struct

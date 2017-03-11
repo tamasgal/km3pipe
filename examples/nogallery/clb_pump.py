@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from km3pipe import Pipeline, Module
 from km3pipe.io import CLBPump
-from km3modules import StatusBar
+from km3modules.common import StatusBar
 
 class TOTHisto(Module):
     def __init__(self, **context):

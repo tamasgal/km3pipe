@@ -3,7 +3,7 @@ from __future__ import division, print_function
 import os
 import km3pipe as kp
 from km3pipe.dataclasses import HitSeriesA, CHitSeries, CPosition, Position
-from km3modules import StatusBar
+from km3modules.common import StatusBar
 
 import ROOT
 

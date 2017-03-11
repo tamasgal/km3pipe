@@ -20,7 +20,7 @@ try:
 except ImportError:
     print("The database utilities needs pandas: pip install pandas")
 
-from .tools import Timer
+from .time import Timer
 from .config import Config
 from .logger import logging
 
