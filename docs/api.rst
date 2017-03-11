@@ -174,10 +174,65 @@ KM3Pipe: Main Framework
 .. autosummary::
   :toctree: api
 
-  camelise
+  ifiles
+  token_urlsafe
+  prettyln
+  irods_filepath
+
+
+``km3pipe.dev``
+~~~~~~~~~~~~~~~
+
+.. automodule:: km3pipe.dev
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3pipe.dev
+
+.. autosummary::
+  :toctree: api
+
+  unpack_nfirst
+  split
   decamelise
+  camelise
+  deprecated
+
+
+``km3pipe.time``
+~~~~~~~~~~~~~~~~
+
+.. automodule:: km3pipe.time
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3pipe.time
+
+.. autosummary::
+  :toctree: api
+
+  Timer
+  Cuckoo
+  total_seconds
+  tai_timestamp
+
+
+``km3pipe.mc``
+~~~~~~~~~~~~~~
+
+.. automodule:: km3pipe.mc
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3pipe.mc
+
+.. autosummary::
+  :toctree: api
+
   geant2pdg
   pdg2name
+  name2pdg
+
 
 
 KM3Modules: Pipeline Segments
