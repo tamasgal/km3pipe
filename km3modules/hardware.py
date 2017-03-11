@@ -9,8 +9,6 @@ from __future__ import division, absolute_import, print_function
 
 import time
 
-import os
-
 import km3pipe as kp
 
 __author__ = "Jonas Reubelt and Tamas Gal"
@@ -44,23 +42,75 @@ class PhidgetsController(kp.Module):
         self.e = 13250.
         self.s = 70500.
 
-    def drive_angle(self, ang, motor_id=0):
-        stepper_dest = int(ang * self.s / 360.)
-        encoder_dest = abs(int(stepper_dest / self.s * self.e))
-        self.wake_up()
+        self._stepper_dest = 0
+        self._encoder_dest = 0
+
         self.reset_positions()
+
+    def drive_to_angle(self, ang, motor_id=0, relative=False):
+        stepper_dest = self._stepper_dest = self.raw_stepper_position(ang)
+        self._encoder_dest = self.raw_encoder_position(ang)
+
+        if relative:
+            self.reset_positions()
+
+        self.wake_up()
         time.sleep(0.1)
-        self.stepper.setTargetPosition(motor_id, stepper_dest)
-        while abs(self.encoder.getPosition(motor_id)) < encoder_dest:
-            while abs(self.stepper.getCurrentPosition(motor_id)) < abs(stepper_dest):
-                time.sleep(0.1)
-                self.log_positions()
-            self.stepper.setCurrentPosition(motor_id, int(self.encoder.getPosition(0) / self.e * self.s))
-            self.stepper.setTargetPosition(motor_id, stepper_dest)
-            time.sleep(0.1)
+
+        self.stepper_target_pos = stepper_dest
+        self.wait_for_stepper()
+        self.log_offset()
+
+        while abs(self.offset) > 1:
+            self.log_offset()
+            stepper_offset = round(self.offset / self.e * self.s)
+            log.debug("Correcting stepper by {0}".format(stepper_offset))
+            log.debug("Stepper target pos: {0}".format(self.stepper_target_pos))
+            log.debug("Stepper pos: {0}".format(self.stepper_pos))
+            self.stepper_target_pos = self.stepper_pos + stepper_offset
+            self.wait_for_stepper()
 
         self.log_positions()
         self.stand_by()
+
+    def wait_for_stepper(self):
+        while self.stepper_pos != self._stepper_dest:
+            time.sleep(0.1)
+            self.log_positions()
+
+    def log_offset(self):
+        log.debug("Difference (encoder): {0}".format(self.offset))
+
+    @property
+    def offset(self):
+        return self._encoder_dest - self.encoder_pos
+
+    @property
+    def stepper_target_pos(self):
+        return self.stepper.getTargetPosition(self.motor_id)
+
+    @stepper_target_pos.setter
+    def stepper_target_pos(self, val):
+        self._stepper_dest = int(val)
+        self.stepper.setTargetPosition(self.motor_id, int(val))
+
+    @property
+    def stepper_pos(self):
+        return self.stepper.getCurrentPosition(self.motor_id)
+
+    @stepper_pos.setter
+    def stepper_pos(self, val):
+        self.stepper.setCurrentPosition(self.motor_id, int(val))
+
+    @property
+    def encoder_pos(self):
+        return self.encoder.getPosition(self.motor_id)
+
+    def raw_stepper_position(self, angle):
+        return round(angle * self.s / 360)
+
+    def raw_encoder_position(self, angle):
+        return round(angle * self.e / 360)
 
     def wake_up(self, motor_id=0):
         self.stepper.setEngaged(motor_id, 1)
@@ -74,5 +124,5 @@ class PhidgetsController(kp.Module):
 
     def log_positions(self, motor_id=0):
         log.info("Stepper position: {0}\nEncoder position:{1}"
-                 .format(self.stepper.getCurrentPosition(motor_id) / self.s * 360,
-                         self.encoder.getPosition(motor_id) / self.e * 360))
+                 .format(self.stepper_pos / self.s * 360,
+                         self.encoder_pos / self.e * 360))
