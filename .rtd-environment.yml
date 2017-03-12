@@ -1,7 +1,11 @@
 name: km3pipe
+channels:
+  - defaults
+  - conda-forge
 
 dependencies:
-  - python>=3.6*
+  - python=3.6
+  - sphinx=1.5.3
   - numpy
   - pandas
   - matplotlib
@@ -10,4 +14,3 @@ dependencies:
   - pillow
   - pip:
     - sphinx-gallery
-    - sphinx>=1.5.3
