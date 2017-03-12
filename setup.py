@@ -42,7 +42,7 @@ else:
 
 
 # Needed for line_profiler - disable for production code
-CYTHON_TRACE = bool(os.getenv('KM3PIPE_DEBUG', False))
+CYTHON_TRACE = int(os.getenv('KM3PIPE_DEBUG', False))
 directives = {
     'linetrace': CYTHON_TRACE,
     'profile': CYTHON_TRACE,
