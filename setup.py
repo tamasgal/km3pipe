@@ -63,7 +63,6 @@ require_groups = {
                    'six', ],
           'analysis': ['matplotlib>=2.0.0', 'sklearn', 'statsmodels>=0.8',
                        'scipy', 'seaborn', 'ipython', 'patsy', ],
-          'daq': ['controlhost', ],
           'io': ['tables', 'h5py', ],
           'jpp': ['jppy>=1.3.1', ],
           'web': ['tornado', 'websocket-client', ],
@@ -75,7 +74,7 @@ require_groups['most'] = list(chain.from_iterable(
 ))
 require_groups['full'] = list(chain.from_iterable(
     [require_groups[k] for k in ('base', 'io', 'web', 'utils', 'analysis',
-                                 'testing', 'daq', 'docs')],
+                                 'testing', 'docs')],
 ))
 
 setup(name='km3pipe',
