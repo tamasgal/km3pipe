@@ -1,6 +1,9 @@
 Unreleased changes
 ------------------
 
+6.5.1 / 2017-03-12
+------------------
+* Fixed Cython/numpy dependency, now they should install automatically.
 
 6.5.0 / 2017-03-11
 ------------------

@@ -16,7 +16,8 @@ import sys
 import os
 from datetime import date
 
-sys.path.append('../')
+# what is this?
+#sys.path.append('../')
 
 import km3pipe  # noqa
 
