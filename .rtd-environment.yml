@@ -16,6 +16,9 @@ dependencies:
   - pillow
   - pytables
   - h5py
+  - scikit-learn
+  - patsy
+  - statsmodels
   - pip:
     - sphinx==1.5.3
     - sphinx-gallery==0.1.8
@@ -26,6 +29,3 @@ dependencies:
     - websocket-client
     - numpydoc
     - sphinx_gallery
-    - sklearn
-    - patsy
-    - statsmodels>=0.8
