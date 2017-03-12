@@ -27,18 +27,14 @@ try:
 except ImportError:
     cythonize = False
 
-try:
-    import numpy
-except ImportError:
-    class build_ext(_build_ext):
-        def finalize_options(self):
-            _build_ext.finalize_options(self)
-            # Prevent numpy from thinking it is still in its setup process:
-            builtins.__NUMPY_SETUP__ = False
-            import numpy
-            self.include_dirs.append(numpy.get_include())
-else:
-    build_ext = _build_ext
+
+class build_ext(_build_ext):
+    def finalize_options(self):
+        _build_ext.finalize_options(self)
+        # Prevent numpy from thinking it is still in its setup process:
+        builtins.__NUMPY_SETUP__ = False
+        import numpy
+        self.include_dirs.append(numpy.get_include())
 
 
 # Needed for line_profiler - disable for production code
