@@ -1,0 +1,7 @@
+name: km3pipe
+dependencies:
+  - numpy
+  - pandas
+  - matplotlib
+  - scipy
+  - cython
