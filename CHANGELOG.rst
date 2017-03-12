@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 
+6.5.2 / 2017-03-12
+------------------
+* Support for KM3PIPE_DEBUG env variable to enable line tracing (set it to 1)
+
 6.5.1 / 2017-03-12
 ------------------
 * Fixed Cython/numpy dependency, now they should install automatically.
@@ -21,7 +25,7 @@ Unreleased changes
 * Clean up setup.py
 
 6.4.3 / 2017-02-22
------------------
+------------------
 * Fix pyroot segfault when reading aanet header
 
 6.4.2 / 2017-02-21
