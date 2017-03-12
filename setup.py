@@ -37,6 +37,8 @@ except ImportError:
             builtins.__NUMPY_SETUP__ = False
             import numpy
             self.include_dirs.append(numpy.get_include())
+else:
+    build_ext = _build_ext
 
 
 # Needed for line_profiler - disable for production code
