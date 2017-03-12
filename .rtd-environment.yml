@@ -14,8 +14,8 @@ dependencies:
   - scipy
   - cython
   - pillow
-	- pytables
-	- h5py
+  - pytables
+  - h5py
   - pip:
     - sphinx==1.5.3
     - sphinx-gallery==0.1.8
