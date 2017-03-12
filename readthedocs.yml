@@ -2,7 +2,7 @@ conda:
     file: .rtd-environment.yml
 
 python:
-  setup_pip_install: true
+  pip_install: true
 
 formats:
   - none
