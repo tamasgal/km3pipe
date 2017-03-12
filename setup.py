@@ -21,8 +21,7 @@ try:
 except ImportError:
     numpy = lambda : None
     numpy.get_include = lambda : ''
-    cythonize = lambda x, y: ''
-    pass
+    def cythonize(a, compiler_directives): pass
 #    raise SystemExit("\nCython and Numpy are required to compile KM3Pipe.\n"
 #                     "You can install it easily via pip:\n\n"
 #                     "    > pip install cython numpy")
