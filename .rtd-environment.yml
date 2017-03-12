@@ -2,6 +2,7 @@ name: km3pipe
 
 dependencies:
   - python>=3.6*
+  - sphinx>=1.5.3
   - numpy
   - pandas
   - matplotlib
