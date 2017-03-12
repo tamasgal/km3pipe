@@ -19,8 +19,8 @@ try:
     # from Cython.Compiler.Options import directive_defaults
     import numpy
 except ImportError:
-    numpy = lambda x: None
-    numpy.get_include = lambda x: ''
+    numpy = lambda : None
+    numpy.get_include = lambda : ''
     pass
 #    raise SystemExit("\nCython and Numpy are required to compile KM3Pipe.\n"
 #                     "You can install it easily via pip:\n\n"
