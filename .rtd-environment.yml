@@ -18,3 +18,4 @@ dependencies:
     - sphinx==1.5.3
     - sphinx-gallery==0.1.8
     - sphinxcontrib-napoleon==0.6.1
+    - tables
