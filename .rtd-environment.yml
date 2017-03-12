@@ -19,8 +19,8 @@ dependencies:
   - scikit-learn
   - patsy
   - statsmodels
-  - sphinx==1.5.3
-  - sphinx-gallery==0.1.8
+  - sphinx=1.5.3
+  - sphinx-gallery=0.1.8
   - tornado
   - websocket-client
   - urwid
