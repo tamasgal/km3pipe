@@ -19,13 +19,13 @@ dependencies:
   - scikit-learn
   - patsy
   - statsmodels
+  - sphinx==1.5.3
+  - sphinx-gallery==0.1.8
+  - tornado
+  - websocket-client
+  - urwid
   - pip:
-    - sphinx==1.5.3
-    - sphinx-gallery==0.1.8
     - sphinxcontrib-napoleon==0.6.1
     - docopt
-    - tornado
-    - urwid
-    - websocket-client
     - numpydoc
-    - sphinx_gallery
+    - controlhost
