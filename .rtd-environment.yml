@@ -16,16 +16,16 @@ dependencies:
   - pillow
   - pytables
   - h5py
+  - scikit-learn
+  - patsy
+  - statsmodels
+  - tornado
+  - websocket-client
+  - urwid
   - pip:
+    - sphinxcontrib-napoleon==0.6.1
     - sphinx==1.5.3
     - sphinx-gallery==0.1.8
-    - sphinxcontrib-napoleon==0.6.1
     - docopt
-    - tornado
-    - urwid
-    - websocket-client
     - numpydoc
-    - sphinx_gallery
-    - sklearn
-    - patsy
-    - statsmodels>=0.8
+    - controlhost
