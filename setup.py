@@ -19,12 +19,9 @@ try:
     # from Cython.Compiler.Options import directive_defaults
     import numpy
 except ImportError:
-    numpy = lambda : None
-    numpy.get_include = lambda : ''
-    def cythonize(a, compiler_directives): pass
-#    raise SystemExit("\nCython and Numpy are required to compile KM3Pipe.\n"
-#                     "You can install it easily via pip:\n\n"
-#                     "    > pip install cython numpy")
+    raise SystemExit("\nCython and Numpy are required to compile KM3Pipe.\n"
+                     "You can install it easily via pip:\n\n"
+                     "    > pip install cython numpy")
 
 
 # This hack is "stolen" from numpy and allows to detect the setup procedure
@@ -66,6 +63,7 @@ require_groups = {
                    'six', ],
           'analysis': ['matplotlib>=2.0.0', 'sklearn', 'statsmodels>=0.8',
                        'scipy', 'seaborn', 'ipython', 'patsy', ],
+          'daq': ['controlhost', ],
           'io': ['tables', 'h5py', ],
           'jpp': ['jppy>=1.3.1', ],
           'web': ['tornado', 'websocket-client', ],
@@ -77,7 +75,7 @@ require_groups['most'] = list(chain.from_iterable(
 ))
 require_groups['full'] = list(chain.from_iterable(
     [require_groups[k] for k in ('base', 'io', 'web', 'utils', 'analysis',
-                                 'testing', 'docs')],
+                                 'testing', 'daq', 'docs')],
 ))
 
 setup(name='km3pipe',
@@ -93,7 +91,6 @@ setup(name='km3pipe',
       cmdclass={'build_ext': build_ext},
       include_package_data=True,
       platforms='any',
-      setup_requires=['setuptools>=18.0', 'cython', 'numpy>=1.12'],
       install_requires=['cython', 'docopt', 'numpy>=1.12', 'pandas', 'pytz',
                         'six', ],
       extras_require=require_groups,
