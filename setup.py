@@ -6,6 +6,8 @@ KM3Pipe setup script.
 
 """
 from setuptools import setup, Extension
+from setuptools.command.build_ext import build_ext as _build_ext
+
 from itertools import chain
 import sys
 
@@ -13,15 +15,22 @@ if sys.version_info[0] >= 3:
     import builtins
 else:
     import __builtin__ as builtins
-try:
-    from Cython.Distutils import build_ext
-    from Cython.Build import cythonize
-    # from Cython.Compiler.Options import directive_defaults
-    import numpy
-except ImportError:
-    raise SystemExit("\nCython and Numpy are required to compile KM3Pipe.\n"
-                     "You can install it easily via pip:\n\n"
-                     "    > pip install cython numpy")
+# try:
+#     from Cython.Distutils import build_ext
+#     from Cython.Build import cythonize
+#     # from Cython.Compiler.Options import directive_defaults
+# except ImportError:
+#     raise SystemExit("\nCython and Numpy are required to compile KM3Pipe.\n"
+#                      "You can install it easily via pip:\n\n"
+#                      "    > pip install cython numpy")
+
+class build_ext(_build_ext):
+    def finalize_options(self):
+        _build_ext.finalize_options(self)
+        # Prevent numpy from thinking it is still in its setup process:
+        builtins.__NUMPY_SETUP__ = False
+        import numpy
+        self.include_dirs.append(numpy.get_include())
 
 
 # This hack is "stolen" from numpy and allows to detect the setup procedure
@@ -41,18 +50,15 @@ from km3pipe import version  # noqa
 
 tools = Extension('km3pipe.tools', sources=['km3pipe/tools.pyx'],
                   extra_compile_args=['-O3', '-march=native', '-w'],
-                  include_dirs=[numpy.get_include()],
                   define_macros=[('CYTHON_TRACE', CYTHON_TRACE)])
 
 core = Extension('km3pipe.core', sources=['km3pipe/core.pyx'],
                  extra_compile_args=['-O3', '-march=native', '-w'],
-                 include_dirs=[numpy.get_include()],
                  define_macros=[('CYTHON_TRACE', CYTHON_TRACE)])
 
 dataclasses = Extension('km3pipe.dataclasses',
                         sources=['km3pipe/dataclasses.pyx'],
                         extra_compile_args=['-O3', '-march=native', '-w'],
-                        include_dirs=[numpy.get_include()],
                         define_macros=[('CYTHON_TRACE', CYTHON_TRACE)])
 
 require_groups = {
@@ -86,11 +92,13 @@ setup(name='km3pipe',
       author_email='tgal@km3net.de',
       packages=['km3pipe', 'km3pipe.testing', 'km3pipe.io', 'km3pipe.utils',
                 'km3modules', 'pipeinspector'],
-      ext_modules=cythonize([tools, core, dataclasses],
-                            compiler_directives=directives),
+#      ext_modules=cythonize([tools, core, dataclasses],
+#                            compiler_directives=directives),
+      ext_modules=[tools, core, dataclasses],
       cmdclass={'build_ext': build_ext},
       include_package_data=True,
       platforms='any',
+      setup_requires=['setuptools>=18.0', 'cython', 'numpy'],
       install_requires=['cython', 'docopt', 'numpy>=1.12', 'pandas', 'pytz',
                         'six', ],
       extras_require=require_groups,
