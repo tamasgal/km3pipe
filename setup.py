@@ -10,6 +10,7 @@ from setuptools.command.build_ext import build_ext as _build_ext
 
 from itertools import chain
 import sys
+import os
 
 if sys.version_info[0] >= 3:
     import builtins
@@ -38,12 +39,12 @@ class build_ext(_build_ext):
 builtins.__KM3PIPE_SETUP__ = True
 
 # Needed for line_profiler - disable for production code
-directives = {
-    'linetrace': True,
-    'profile': True,
-    'binding': True,
-}
-CYTHON_TRACE = '1'
+# directives = {
+#     'linetrace': True,
+#     'profile': True,
+#     'binding': True,
+# }
+CYTHON_TRACE = str(int(os.getenv('KM3PIPE_DEBUG', False)))
 
 from km3pipe import version  # noqa
 
