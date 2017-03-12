@@ -1,7 +1,12 @@
 name: km3pipe
+
 dependencies:
+  - python>=3.6*
   - numpy
   - pandas
   - matplotlib
   - scipy
   - cython
+  - pillow
+  - pip:
+    - sphinx-gallery
