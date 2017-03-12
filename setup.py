@@ -19,9 +19,10 @@ try:
     # from Cython.Compiler.Options import directive_defaults
     import numpy
 except ImportError:
-    raise SystemExit("\nCython and Numpy are required to compile KM3Pipe.\n"
-                     "You can install it easily via pip:\n\n"
-                     "    > pip install cython numpy")
+    pass
+#    raise SystemExit("\nCython and Numpy are required to compile KM3Pipe.\n"
+#                     "You can install it easily via pip:\n\n"
+#                     "    > pip install cython numpy")
 
 
 # This hack is "stolen" from numpy and allows to detect the setup procedure
