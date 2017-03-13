@@ -163,3 +163,9 @@ class Agilent33220A(object):
     def output(self, value):
         self.tmc.write("OUTP {0}".format("ON" if value else "OFF").encode())
         self._output = value
+
+    def set_amplitude(self, low, high):
+        diff = high - low
+        offset = diff / 2
+        self.tmc.write("VOLT:OFFS {0}".format(offset).encode())
+        self.tmc.write("VOLT {0}".format(diff).encode())
