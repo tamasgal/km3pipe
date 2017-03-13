@@ -8,6 +8,7 @@ A collection of controllers and hardware related stuff.
 from __future__ import division, absolute_import, print_function
 
 import time
+import os
 
 import km3pipe as kp
 
@@ -126,3 +127,39 @@ class PhidgetsController(kp.Module):
         log.info("Stepper position: {0}\nEncoder position:{1}"
                  .format(self.stepper_pos / self.s * 360,
                          self.encoder_pos / self.e * 360))
+
+
+class USBTMC(object):
+    "USB TMC communicator"
+    def __init__(self, path):
+        self.device = os.open(path, os.O_RDWR)
+
+    def write(self, msg):
+        os.write(self.device, msg)
+
+    def read(self, size=1000):
+        return os.read(self.device, size)
+
+    @property
+    def name(self):
+        self.write(b"*IDN?")
+        return self.read()
+
+    def reset(self):
+        self.write(b"*RST")
+
+
+class Agilent33220A(object):
+    """Controller for the Arbitrary Waveform Generator"""
+    def __init__(self, path):
+        self.tmc = USBTMC(path)
+        self._output = False
+
+    @property
+    def output(self):
+        return self._output
+
+    @output.setter
+    def output(self, value):
+        self.tmc.write("OUTP {0}".format("ON" if value else "OFF").encode())
+        self._output = value
