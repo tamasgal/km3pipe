@@ -154,6 +154,9 @@ class Agilent33220A(object):
     def __init__(self, path):
         self.tmc = USBTMC(path)
         self._output = False
+        self._amplitude = None
+        self._frequency = None
+        self._mode = None
 
     @property
     def output(self):
@@ -164,8 +167,39 @@ class Agilent33220A(object):
         self.tmc.write("OUTP {0}".format("ON" if value else "OFF").encode())
         self._output = value
 
-    def set_amplitude(self, low, high):
+    @property
+    def amplitude(self):
+        return self._amplitude
+
+    @amplitude.setter
+    def amplitude(self, val):
+        low, high = val
         diff = high - low
         offset = diff / 2
         self.tmc.write("VOLT:OFFS {0}".format(offset).encode())
         self.tmc.write("VOLT {0}".format(diff).encode())
+        self._amplitude = val
+        self._mode = None
+
+    @property
+    def frequency(self):
+        return self._frequency
+
+    @frequency.setter
+    def frequency(self, val):
+        self.tmc.write("FREQ {0}".format(val).encode())
+        self._frequency = val
+
+    @property
+    def mode(self):
+        return self._mode
+
+    @mode.setter
+    def mode(self, val):
+        valid_modes = ('sin', 'squ', 'ramp', 'puls', 'nois', 'dc', 'user')
+        if val not in valid_modes:
+            print("Not a valid mode: '{0}'. Valid modes are: {1}"
+                  .format(val, valid_modes))
+            return
+        self.tmc.write("FUNC {0}".format(val.upper()).encode())
+        self._mode = val
