@@ -10,12 +10,17 @@ from __future__ import division, absolute_import, print_function
 from datetime import datetime
 import os
 
+import numpy as np
 import matplotlib
 # Force matplotlib to not use any Xwindows backend.
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib import pylab
-import numpy as np
+
+try:
+    import healpy as hp
+except ImportError:
+    pass
 
 import km3pipe as kp
 import km3pipe.style
@@ -90,3 +95,16 @@ def plot_dom_parameters(data, detector, filename, label, title,
 
     plt.savefig(filename, dpi=120, bbox_inches="tight")
     plt.close('all')
+
+
+def make_dom_map(pmt_positions, values, nside=512, d=0.2, smoothing=0.1):
+    """Create a mollweide projection of a DOM with given PMTs."""
+    discs = [hp.query_disc(nside, p, 0.2) for p in pmt_positions]
+    npix = hp.nside2npix(nside)
+    pixels = np.zeros(npix)
+    for disc, value in zip(discs, values):
+        for d in disc:
+            pixels[d] = value
+    if smoothing > 0:
+        return hp.sphtfunc.smoothing(pixels, fwhm=smoothing, iter=1)
+    return pixels
