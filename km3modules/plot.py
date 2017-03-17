@@ -98,7 +98,10 @@ def plot_dom_parameters(data, detector, filename, label, title,
 
 
 def make_dom_map(pmt_positions, values, nside=512, d=0.2, smoothing=0.1):
-    """Create a mollweide projection of a DOM with given PMTs."""
+    """Create a mollweide projection of a DOM with given PMTs.
+
+    The output can be used to call the `healpy.mollview` function.
+    """
     discs = [hp.query_disc(nside, p, 0.2) for p in pmt_positions]
     npix = hp.nside2npix(nside)
     pixels = np.zeros(npix)
