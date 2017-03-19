@@ -3,7 +3,7 @@
 # vim: ts=4 sw=4 et
 """
 ============================
-UDP Forwared for ControlHost
+UDP Forwarder for ControlHost
 ============================
 
 A simple UDP forwarder for ControlHost messages.
