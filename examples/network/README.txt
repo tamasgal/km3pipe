@@ -1,4 +1,4 @@
-.. _networkj_examples:
+.. _network_examples:
 
 Network
 ----------------
