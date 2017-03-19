@@ -1,6 +1,16 @@
 #!/usr/bin/env python
 # coding=utf-8
 # vim: ts=4 sw=4 et
+"""
+============================
+UDP Forwared for ControlHost
+============================
+
+A simple UDP forwarder for ControlHost messages.
+"""
+
+# Author: Tamas Gal <tgal@km3net.de>
+# License: MIT
 from __future__ import print_function
 
 import socket
