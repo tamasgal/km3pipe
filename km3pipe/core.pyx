@@ -24,6 +24,7 @@ from .sys import peak_memory_usage, ignored
 from .hardware import Detector
 from .dataclasses import HitSeries
 from .logger import logging
+from .time import Timer
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -53,6 +54,9 @@ class Pipeline(object):
     """
 
     def __init__(self, blob=None, timeit=False):
+        self.init_timer = Timer("Pipeline and module initialisation")
+        self.init_timer.start()
+
         self.modules = []
         self.geometry = None
         self.blob = blob or Blob()
@@ -173,6 +177,7 @@ class Pipeline(object):
 
     def drain(self, cycles=None):
         """Execute _drain while trapping KeyboardInterrupt"""
+        self.init_timer.stop()
         log.info("Trapping CTRL+C and starting to drain.")
         signal.signal(signal.SIGINT, self._handle_ctrl_c)
         with ignored(KeyboardInterrupt):
