@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* Show initialisation time for pipeline and modules.
 
 6.5.2 / 2017-03-12
 ------------------
