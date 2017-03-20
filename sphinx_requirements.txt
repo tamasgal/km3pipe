@@ -5,5 +5,4 @@ sphinx-gallery
 sphinx>=1.5.1
 sphinxcontrib-napoleon
 scikit-learn
-statsmodels==0.8.0rc1
 seaborn
