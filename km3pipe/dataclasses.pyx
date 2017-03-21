@@ -1224,12 +1224,12 @@ class TrackSeries(object):
 
     @classmethod
     def from_aanet(cls, tracks, event_id):
-        return cls([Track(cls.get_usr_item(t, 1),               # bjorkeny
+        return cls([Track(cls.get_usr_name(t, str('by')),               # bjorkeny
                           Direction((t.dir.x, t.dir.y, t.dir.z)),
                           t.E,
                           t.id,
-                          cls.get_usr_item(t, 2),               # ichan
-                          IS_CC[cls.get_usr_item(t, 0)],        # is_cc
+                          cls.get_usr_name(t, str('ichan')),               # ichan
+                          IS_CC[cls.get_usr_name(t, str('cc'))],        # is_cc
                           cls.get_len(t),
                           Position((t.pos.x, t.pos.y, t.pos.z)),
                           t.t,
@@ -1239,6 +1239,8 @@ class TrackSeries(object):
                           # the two vector elements might follow _different_
                           # conventions. Yep, 2 conventions for
                           # 2 vector elements...
+                          #
+                          # UPDATE 2017-03/21: aanet now has all casted to PDG
                           #
                           # geant2pdg(t.type))
                           t.type,
@@ -1345,6 +1347,10 @@ class TrackSeries(object):
         except IndexError:
             item = 0.
         return item
+
+    @classmethod
+    def get_usr_name(cls, track, name):
+        return track.getusr(name)
 
     @property
     def highest_energetic_muon(self):
