@@ -51,7 +51,7 @@ class Serialisable(type):
     The classes should define a `dtype` attribute in their body and are not
     meant to define `__init__` (it will be overwritten).
 
-    The class will also inherit from `SerialisableProtocol`.
+    The class will also inherit from `Convertible`.
 
     Example using six.with_metaclass for py2/py3 compat
     ---------------------------------------------------
