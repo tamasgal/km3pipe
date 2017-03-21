@@ -1,7 +1,23 @@
 Unreleased changes
 ------------------
+* Show initialisation time for pipeline and modules.
+
+6.5.2 / 2017-03-12
+------------------
+* Support for KM3PIPE_DEBUG env variable to enable line tracing (set it to 1)
+
+6.5.1 / 2017-03-12
+------------------
+* Fixed Cython/numpy dependency, now they should install automatically.
+
+6.5.0 / 2017-03-11
+------------------
 * remove astro stuff, move to git.km3net.de/moritz/km3astro
-* split up tools into tools/math/sys/dev/time/mc
+* fixed HDF5 version warning
+* some cleanup in __init__.pys, so be prepared to change some import statements
+  * split up tools into tools/math/sys/dev/time/mc
+  * stuff under km3modules is now in km3modules.common
+
 
 7.0.0 / 2017-XX-XX
 ------------------
@@ -14,7 +30,7 @@ Unreleased changes
 * Clean up setup.py
 
 6.4.3 / 2017-02-22
------------------
+------------------
 * Fix pyroot segfault when reading aanet header
 
 6.4.2 / 2017-02-21

@@ -1,4 +1,16 @@
 #!/usr/bin/env python
+# coding=utf-8
+# vim: ts=4 sw=4 et
+"""
+=============
+Log.io Module
+=============
+
+A module to send live log messages to a log.io server.
+"""
+
+# Author: Tamas Gal <tgal@km3net.de>
+# License: MIT
 import socket
 import time
 
@@ -7,8 +19,7 @@ from km3pipe.pumps import CHPump
 
 
 class LogIO(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         url = 'pi2089.physik.uni-erlangen.de'
         port = 28777
 

@@ -188,7 +188,7 @@ class HDF5Pump(Pump):
             if os.path.isfile(fn):
                 h5file = tb.open_file(fn, 'r')
                 if not self.skip_version_check:
-                    self._check_version(fn)
+                    self._check_version(h5file, fn)
             else:
                 raise IOError("No such file or directory: '{0}'"
                               .format(fn))
@@ -212,9 +212,9 @@ class HDF5Pump(Pump):
         self.index = None
         self._reset_index()
 
-    def _check_version(self, filename):
+    def _check_version(self, h5file, filename):
         try:
-            version = np.string_(self.h5file.root._v_attrs.format_version)
+            version = np.string_(h5file.root._v_attrs.format_version)
         except AttributeError:
             log.error("Could not determine HDF5 format version: '%s'."
                       "You may encounter unexpected errors! Good luck..."

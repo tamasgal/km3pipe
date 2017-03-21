@@ -17,11 +17,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 
-from km3modules import StatusBar
+from km3modules.common import StatusBar
 from km3pipe.math import pld3
 import km3pipe.style
-
-km3pipe.style.use('default')
+km3pipe.style.use("km3pipe")
 
 
 filename = "data/km3net_jul13_90m_muatm50T655.km3_v5r1.JTE_r2356.root.0-499.h5"

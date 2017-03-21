@@ -131,7 +131,6 @@ KM3Pipe: Main Framework
   write_table
 
 
-
 ``km3pipe.logger``
 ~~~~~~~~~~~~~~~~~~
 
@@ -174,22 +173,76 @@ KM3Pipe: Main Framework
 .. autosummary::
   :toctree: api
 
-  camelise
+  ifiles
+  token_urlsafe
+  prettyln
+  irods_filepath
+
+
+``km3pipe.dev``
+~~~~~~~~~~~~~~~
+
+.. automodule:: km3pipe.dev
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3pipe.dev
+
+.. autosummary::
+  :toctree: api
+
+  unpack_nfirst
+  split
   decamelise
+  camelise
+  deprecated
+
+
+``km3pipe.time``
+~~~~~~~~~~~~~~~~
+
+.. automodule:: km3pipe.time
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3pipe.time
+
+.. autosummary::
+  :toctree: api
+
+  Timer
+  Cuckoo
+  total_seconds
+  tai_timestamp
+
+
+``km3pipe.mc``
+~~~~~~~~~~~~~~
+
+.. automodule:: km3pipe.mc
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3pipe.mc
+
+.. autosummary::
+  :toctree: api
+
   geant2pdg
   pdg2name
+  name2pdg
 
 
 KM3Modules: Pipeline Segments
 -----------------------------
 
-``km3modules``: Useful helpers
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. automodule:: km3modules
+``km3modules.common``: Useful helpers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: km3modules.common
   :no-members:
   :no-inherited-members:
 
-.. currentmodule:: km3modules
+.. currentmodule:: km3modules.common
 
 .. autosummary::
   :toctree: api
@@ -204,6 +257,7 @@ KM3Modules: Pipeline Segments
   MemoryObserver
   StatusBar
   Wrap
+
 
 ``km3modules.k40``: K40 calibration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -231,43 +285,7 @@ KM3Modules: Pipeline Segments
   minimize_qes
   minimize_t0s
 
-``km3modules.hits``: Hit Processing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. automodule:: km3modules.hits
-  :no-members:
-  :no-inherited-members:
 
-.. currentmodule:: km3modules.hits
-
-.. autosummary::
-  :toctree: api
-
-  FirstHits
-  HitSelector
-  HitStatistics
-  NDoms
-  TrimmedHits
-
-``km3modules.reco``: Simple Reconstructions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. automodule:: km3modules.reco
-  :no-members:
-  :no-inherited-members:
-
-.. currentmodule:: km3modules.reco
-
-.. autosummary::
-  :toctree: api
-  
-  Reconstruction
-  SvdFit
-  Trawler
-  bimod
-  idr
-  tensor_of_intertia
-  uniform_chi2
-
-  
 ``km3modules.topology``
 ~~~~~~~~~~~~~~~~~~~~~~~
 

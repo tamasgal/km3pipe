@@ -26,6 +26,7 @@ before_install:
     - pip install -U statsmodels==0.8.0rc1
     - pip install -U tables
     - pip install -U tornado
+    - pip install matplotlib==2.0.0
     - ls -al
 
 install:

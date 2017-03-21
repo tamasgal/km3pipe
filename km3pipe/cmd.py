@@ -39,7 +39,7 @@ from datetime import datetime
 from . import version
 from .tools import irods_filepath
 from .db import DBManager
-from km3modules import StatusBar
+from km3modules.common import StatusBar
 from .hardware import Detector
 
 __author__ = "Tamas Gal"

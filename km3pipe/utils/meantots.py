@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 import km3pipe.style  # noqa
 from sklearn.mixture import GaussianMixture
 
-from km3modules import StatusBar
+from km3modules.common import StatusBar
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

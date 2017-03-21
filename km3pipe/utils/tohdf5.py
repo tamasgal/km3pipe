@@ -36,7 +36,7 @@ import os
 from six import string_types
 import sys
 
-from km3modules import StatusBar
+from km3modules.common import StatusBar
 from km3pipe import version
 
 __author__ = "Tamas Gal"
