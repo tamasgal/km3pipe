@@ -1179,12 +1179,12 @@ class TrackSeries(object):
 
     @classmethod
     def from_aanet(cls, tracks, event_id):
-        return cls([Track(cls.get_usr_name(t, str('by')),               # bjorkeny
+        return cls([Track(cls.get_usr_name(t, str('by'), 1),               # bjorkeny
                           Direction((t.dir.x, t.dir.y, t.dir.z)),
                           t.E,
                           t.id,
-                          cls.get_usr_name(t, str('ichan')),               # ichan
-                          IS_CC[cls.get_usr_name(t, str('cc'))],        # is_cc
+                          cls.get_usr_name(t, str('ichan'), 2),               # ichan
+                          IS_CC[cls.get_usr_name(t, str('cc'), 0)],        # is_cc
                           cls.get_len(t),
                           Position((t.pos.x, t.pos.y, t.pos.z)),
                           t.t,
@@ -1296,7 +1296,7 @@ class TrackSeries(object):
             return 0
 
     @classmethod
-    def get_usr_item(cls, track, index):
+    def get_usr_item(cls, track, index=None):
         try:
             item = track.usr[index]
         except IndexError:
@@ -1304,7 +1304,13 @@ class TrackSeries(object):
         return item
 
     @classmethod
-    def get_usr_name(cls, track, name):
+    def get_usr_name(cls, track, name, index=None):
+        """Try to retrieve item based on name from aanet.
+
+        If that fails (old aanet), try getting it via index.
+        """
+        if len(track.usr) > len(track.usr_names):
+            return cls.get_usr_item(track, index)
         return track.getusr(name)
 
     @property
