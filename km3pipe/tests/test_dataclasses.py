@@ -17,7 +17,7 @@ import struct
 from km3pipe.testing import TestCase
 from km3pipe.testing.mocks import FakeAanetHit
 from km3pipe.io.evt import EvtRawHit
-from km3pipe.dataclasses import (Hit, Track, Position, Direction_,
+from km3pipe.dataclasses import (Hit, Track, Position,
                                  HitSeries, TimesliceHitSeries,
                                  EventInfo, SummarysliceInfo, TimesliceInfo,
                                  Serialisable, TrackSeries, SummaryframeSeries,
@@ -107,44 +107,6 @@ class TestPosition(TestCase):
 #       self.assertAlmostEqual(4, pos[1])
 #       self.assertAlmostEqual(3, pos.size)
 #       self.assertTupleEqual((3,), pos.shape)
-
-
-class TestDirection(TestCase):
-
-    def test_direction(self):
-        direction = Direction_((1, 0, 0))
-        self.assertAlmostEqual(1, np.linalg.norm(direction))
-        self.assertEqual(1, direction.x)
-        self.assertEqual(0, direction.y)
-        self.assertEqual(0, direction.z)
-
-    def test_direction_normalises_on_init(self):
-        direction = Direction_((1, 2, 3))
-        self.assertAlmostEqual(0.26726124, direction.x)
-        self.assertAlmostEqual(0.53452248, direction.y)
-        self.assertAlmostEqual(0.80178372, direction.z)
-
-    def test_direction_normalises_on_change_attribute(self):
-        direction = Direction_((1, 2, 3))
-        self.assertAlmostEqual(1, np.linalg.norm(direction))
-        direction.x = 10
-        self.assertAlmostEqual(1, np.linalg.norm(direction))
-        direction.y = 20
-        self.assertAlmostEqual(1, np.linalg.norm(direction))
-        direction.z = 30
-        self.assertAlmostEqual(1, np.linalg.norm(direction))
-
-    def test_direction_zenith(self):
-        direction = Direction_((0, 0, -1))
-        self.assertAlmostEqual(0, direction.zenith)
-        direction = Direction_((0, 0, 1))
-        self.assertAlmostEqual(np.pi, direction.zenith)
-        direction = Direction_((0, 1, 0))
-        self.assertAlmostEqual(np.pi/2, direction.zenith)
-
-    def test_direction_str(self):
-        direction = Direction_((1, 2, 3))
-        self.assertEqual("(0.2673, 0.5345, 0.8018)", str(direction))
 
 
 class TestTimesliceHitSeries(TestCase):
@@ -514,6 +476,21 @@ class TestSummarysliceInfo(TestCase):
         self.assertAlmostEqual(1, s.frame_index)
         self.assertAlmostEqual(2, s.run_id)
         self.assertAlmostEqual(3, s.slice_id)
+
+    def test_serialise_to_numpy(self):
+        s = SummarysliceInfo(*range(4))
+        s_serialised = s.serialise(to='numpy')
+        self.assertTupleEqual((1,), s_serialised.shape)
+        self.assertTupleEqual((0, 1, 2, 3), tuple(s_serialised[0]))
+
+    def test_serialise_to_pandas(self):
+        s = SummarysliceInfo(*range(4))
+        s_serialised = s.serialise(to='pandas')
+        self.assertTupleEqual((1, 4), s_serialised.shape)
+        self.assertEqual(0, s_serialised.det_id[0])
+        self.assertEqual(1, s_serialised.frame_index[0])
+        self.assertEqual(2, s_serialised.run_id[0])
+        self.assertEqual(3, s_serialised.slice_id[0])
 
 
 class TestEventInfo(TestCase):

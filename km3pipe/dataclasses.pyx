@@ -51,6 +51,8 @@ class Serialisable(type):
     The classes should define a `dtype` attribute in their body and are not
     meant to define `__init__` (it will be overwritten).
 
+    The class will also inherit from `Convertible`.
+
     Example using six.with_metaclass for py2/py3 compat
     ---------------------------------------------------
 
@@ -75,7 +77,31 @@ class Serialisable(type):
 
         attr['__init__'] = __init__
 
+        class_parents = (Convertible,)
+
         return type(class_name, class_parents, attr)
+
+
+class Convertible(object):
+    """Implements basic conversion methods."""
+    @classmethod
+    def deserialise(cls, *args, **kwargs):
+        return cls.conv_from(*args, **kwargs)
+
+    def serialise(self, *args, **kwargs):
+        return self.conv_to(*args, **kwargs)
+
+    @classmethod
+    def conv_from(cls, data, data_id, fmt='numpy', h5loc='/'):
+        if fmt == 'numpy':
+            return cls.from_table(data[0])
+
+    def conv_to(self, to='numpy'):
+        if to == 'numpy':
+            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
+                            h5loc=self.h5loc)
+        if to == 'pandas':
+            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
 
 class SummarysliceInfo(with_metaclass(Serialisable)):
@@ -99,24 +125,6 @@ class SummarysliceInfo(with_metaclass(Serialisable)):
                 args.append(np.nan)
         return cls(*args)
 
-    @classmethod
-    def deserialise(cls, *args, **kwargs):
-        return cls.conv_from(*args, **kwargs)
-
-    def serialise(self, *args, **kwargs):
-        return self.conv_to(*args, **kwargs)
-
-    @classmethod
-    def conv_from(cls, data, event_id, fmt='numpy', h5loc='/'):
-        if fmt == 'numpy':
-            return cls.from_table(data[0])
-
-    def conv_to(self, to='numpy'):
-        if to == 'numpy':
-            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
-                            h5loc=self.h5loc)
-        if to == 'pandas':
-            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
     def __array__(self):
         return [(
@@ -462,59 +470,6 @@ class Point(np.ndarray):
 
 
 Position = Direction = Point  # Backwards compatibility
-
-
-class Direction_(Point):
-    """Represents a direction in a 3D space
-
-    The direction vector always normalises itself when an attribute is changed.
-
-    """
-    def __new__(cls, input_array=(1, 0, 0)):
-        """Add x, y and z to the ndarray"""
-        normed_array = np.array(input_array) / np.linalg.norm(input_array)
-        obj = np.asarray(normed_array).view(cls)
-        return obj
-
-    def _normalise(self):
-        normed_array = self / np.linalg.norm(self)
-        self[0] = normed_array[0]
-        self[1] = normed_array[1]
-        self[2] = normed_array[2]
-
-    @property
-    def x(self):
-        return self[0]
-
-    @x.setter
-    def x(self, value):
-        self[0] = value
-        self._normalise()
-
-    @property
-    def y(self):
-        return self[1]
-
-    @y.setter
-    def y(self, value):
-        self[1] = value
-        self._normalise()
-
-    @property
-    def z(self):
-        return self[2]
-
-    @z.setter
-    def z(self, value):
-        self[2] = value
-        self._normalise()
-
-    @property
-    def zenith(self):
-        return angle_between(self, (0, 0, -1))
-
-    def __str__(self):
-        return "({0:.4}, {1:.4}, {2:.4})".format(self.x, self.y, self.z)
 
 
 cdef class Hit:
@@ -1224,12 +1179,12 @@ class TrackSeries(object):
 
     @classmethod
     def from_aanet(cls, tracks, event_id):
-        return cls([Track(cls.get_usr_item(t, 1),               # bjorkeny
+        return cls([Track(cls.get_usr_name(t, str('by')),               # bjorkeny
                           Direction((t.dir.x, t.dir.y, t.dir.z)),
                           t.E,
                           t.id,
-                          cls.get_usr_item(t, 2),               # ichan
-                          IS_CC[cls.get_usr_item(t, 0)],        # is_cc
+                          cls.get_usr_name(t, str('ichan')),               # ichan
+                          IS_CC[cls.get_usr_name(t, str('cc'))],        # is_cc
                           cls.get_len(t),
                           Position((t.pos.x, t.pos.y, t.pos.z)),
                           t.t,
@@ -1239,6 +1194,8 @@ class TrackSeries(object):
                           # the two vector elements might follow _different_
                           # conventions. Yep, 2 conventions for
                           # 2 vector elements...
+                          #
+                          # UPDATE 2017-03/21: aanet now has all casted to PDG
                           #
                           # geant2pdg(t.type))
                           t.type,
@@ -1345,6 +1302,10 @@ class TrackSeries(object):
         except IndexError:
             item = 0.
         return item
+
+    @classmethod
+    def get_usr_name(cls, track, name):
+        return track.getusr(name)
 
     @property
     def highest_energetic_muon(self):

@@ -1,6 +1,12 @@
 Unreleased changes
 ------------------
 
+6.5.3 / 2017-03-12
+------------------
+* Show initialisation time for pipeline and modules.
+* Doc update / more examples
+* aanet: fix ``mc_tracks.usr`` readout (use ``.getusr()``)
+
 6.5.2 / 2017-03-12
 ------------------
 * Support for KM3PIPE_DEBUG env variable to enable line tracing (set it to 1)

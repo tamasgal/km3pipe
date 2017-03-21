@@ -12,7 +12,7 @@ Create a simple histogram of the PMT signals (ToTs) in all events.
 import pandas as pd
 import matplotlib.pyplot as plt
 import km3pipe.style
-km3pipe.style.use('default')
+km3pipe.style.use("km3pipe")
 
 
 filename = "data/km3net_jul13_90m_muatm50T655.km3_v5r1.JTE_r2356.root.0-499.h5"
