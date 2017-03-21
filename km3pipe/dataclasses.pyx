@@ -92,7 +92,7 @@ class Convertible(object):
         return self.conv_to(*args, **kwargs)
 
     @classmethod
-    def conv_from(cls, data, event_id, fmt='numpy', h5loc='/'):
+    def conv_from(cls, data, data_id, fmt='numpy', h5loc='/'):
         if fmt == 'numpy':
             return cls.from_table(data[0])
 
