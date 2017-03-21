@@ -589,7 +589,7 @@ cdef class Track:
         return self.__str__()
 
 
-class HitSeries(object):
+class HitSeries(Convertible):
     """Collection of multiple Hits.
     """
     dtype = np.dtype([
@@ -1414,7 +1414,7 @@ class SummaryframeSeries(object):
             yield self._arr[i]
 
 
-class KM3Array(np.ndarray):
+class KM3Array(np.ndarray, Convertible):
     """Numpy NDarray + metadata.
 
     This class adds the following to ``np.ndarray``:
@@ -1444,25 +1444,6 @@ class KM3Array(np.ndarray):
         if obj is None:
             return
         self.h5loc = getattr(obj, 'h5loc', None)
-
-    @classmethod
-    def deserialise(cls, *args, **kwargs):
-        return cls.conv_from(*args, **kwargs)
-
-    def serialise(self, *args, **kwargs):
-        return self.conv_to(*args, **kwargs)
-
-    @classmethod
-    def conv_from(cls, data, event_id=None, h5loc='/', fmt='numpy', **kwargs):
-        if fmt == 'numpy':
-            arr = cls(data, h5loc, **kwargs)
-            return arr
-
-    def conv_to(self, to='numpy', **kwargs):
-        if to == 'numpy':
-            return self
-        if to == 'pandas':
-            return KM3DataFrame.conv_from(self, fmt='numpy', **kwargs)
 
     @classmethod
     def from_dict(cls, map, dtype=None, **kwargs):
