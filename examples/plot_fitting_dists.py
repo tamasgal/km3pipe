@@ -20,7 +20,7 @@ from sklearn.grid_search import GridSearchCV
 from sklearn.neighbors import KernelDensity
 
 import km3pipe.style
-km3pipe.style.use('default')
+km3pipe.style.use("km3pipe")
 
 ##############################################################################
 # First generate some pseudodata: A bimodal gaussian, + noise.

@@ -6,4 +6,5 @@ python:
   pip_install: true
 
 formats:
-  - none
+    - epub
+    - pdf

@@ -13,7 +13,7 @@ from scipy.spatial import ConvexHull
 import matplotlib.pyplot as plt
 
 import km3pipe.style
-km3pipe.style.use('default')
+km3pipe.style.use("km3pipe")
 
 points = np.random.rand(30, 2)   # 30 random points in 2-D
 hull = ConvexHull(points)

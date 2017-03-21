@@ -4,7 +4,10 @@
 Orca Astro Test.
 ================
 
-This example needs Astropy: `pip install astropy`.
+This example needs Astropy: ``pip install astropy``.
+
+You'll also want to check out the ``km3astro`` project, which wraps a nicer
+API around this: git.km3net.de/moritz/km3astro
 
 Take some events in the detector and transform them
 to galactic coordinates.
@@ -19,7 +22,7 @@ import numpy as np
 
 from km3pipe.constants import orca_longitude, orca_latitude, orca_height
 import km3pipe.style
-km3pipe.style.use('default')
+km3pipe.style.use("km3pipe")
 
 
 # load orca coordinates
