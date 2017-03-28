@@ -1,6 +1,15 @@
 Unreleased changes
 ------------------
+
+6.5.4 / 2017-03-21
+------------------
+* fix aanet mc_tracks usr backwards compat
+
+6.5.3 / 2017-03-21
+------------------
 * Show initialisation time for pipeline and modules.
+* Doc update / more examples
+* aanet: fix ``mc_tracks.usr`` readout (use ``.getusr()``)
 
 6.5.2 / 2017-03-12
 ------------------
