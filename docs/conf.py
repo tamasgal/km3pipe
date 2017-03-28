@@ -282,11 +282,14 @@ sphinx_gallery_conf = {
     'default_thumb_file': '_static/default_gallery_thumbnail.png',
     'examples_dirs': ['../examples'],
     'gallery_dirs': ['auto_examples'],
-#     'reference_url':  {
-#         'km3pipe': None,
-#         'matplotlib': 'http://matplotlib.org',
-#         'numpy': 'http://docs.scipy.org/doc/numpy-1.9.1',
-#     }
+    # 'reference_url': {
+    #     'km3pipe': None,
+    #     'matplotlib': 'http://matplotlib.org',
+    #     'numpy': 'http://docs.scipy.org/doc/numpy-1.9.1',
+    # }
 }
 
 autosummary_generate = ["api.rst"]
+
+# don't show the method summary twice
+numpydoc_show_class_members = False
