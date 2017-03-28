@@ -78,7 +78,10 @@ class JPPPump(Pump):
             self.summaryslice_index += 1
 
         while self.event_reader.has_next:
-            yield self.extract_event()
+            try:
+                yield self.extract_event()
+            except IndexError:
+                pass
 
         raise StopIteration
 
