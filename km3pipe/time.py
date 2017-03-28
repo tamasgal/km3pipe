@@ -56,7 +56,8 @@ class Timer(object):
     def stop(self):
         self.__finish = timer()
         self.__finish_cpu = time.clock()
-        self.log()
+        if self.callback is not None:
+            self.log()
         return self.seconds
 
     @property
