@@ -1,5 +1,8 @@
 Unreleased changes
 ------------------
+
+* KM3HDF5 v4: No more 'event_id' column. 
+
 * add corsika evt tag reader (seamuon/seaneutrino)
 
 6.5.5 / 2017-03-29
@@ -31,11 +34,6 @@ Unreleased changes
 * some cleanup in __init__.pys, so be prepared to change some import statements
   * split up tools into tools/math/sys/dev/time/mc
   * stuff under km3modules is now in km3modules.common
-
-
-7.0.0 / 2017-XX-XX
-------------------
-* KM3HDF5 v4: No more 'event_id' column. 
 
 6.4.4 / 2017-02-27
 ------------------
