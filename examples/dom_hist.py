@@ -42,7 +42,8 @@ class DOMHits(kp.Module):
 
     def process(self, blob):
         hits = blob['Hits']
-        muons = blob['Muons']
+        #muons = blob['Muons']
+        muons = blob['McTracks']
 
         highest_energetic_muon = max(muons, key=lambda x: x.energy)
         muon = highest_energetic_muon

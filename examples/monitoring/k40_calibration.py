@@ -62,7 +62,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
 
     def save_hdf5(self, calibration):
         print("Saving calibration information...")
-        store = pd.HDFStore('data/k40calib.h5')
+        store = pd.HDFStore('data/k40calib.h5', 'r')
         now = int(time.time())
         timestamps = (now,) * 31
         for dom_id, calib in calibration.items():
