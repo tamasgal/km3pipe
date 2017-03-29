@@ -477,7 +477,7 @@ class DAQEvent(object):
         return string
 
 
-class THMCData(object):
+class TMCHData(object):
     """Monitoring Channel data."""
     def __init__(self, file_obj):
         f = file_obj
