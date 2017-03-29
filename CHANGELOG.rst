@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 
+6.5.5 / 2017-03-29
+------------------
+* fix decoding issues in EvtPump
+
 6.5.4 / 2017-03-21
 ------------------
 * fix aanet mc_tracks usr backwards compat

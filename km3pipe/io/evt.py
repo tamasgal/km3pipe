@@ -30,6 +30,13 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
+def try_decode_string(foo):
+    try:
+        return foo.decode('ascii')
+    except AttributeError:
+        return foo
+
+
 class EvtPump(Pump):  # pylint: disable:R0902
     """Provides a pump for EVT-files"""
 
@@ -71,13 +78,15 @@ class EvtPump(Pump):  # pylint: disable:R0902
     def extract_header(self):
         """Create a dictionary with the EVT header information"""
         raw_header = self.raw_header = {}
-        first_line = self.blob_file.readline().decode('ascii')
+        first_line = self.blob_file.readline()
+        first_line = try_decode_string(first_line)
         self.blob_file.seek(0, 0)
         if not first_line.startswith(str('start_run')):
             log.warning("No header found.")
             return raw_header
         for line in iter(self.blob_file.readline, ''):
-            line = line.decode('ascii').strip()
+            line = try_decode_string(line)
+            line = line.strip()
             try:
                 tag, value = str(line).split(':')
             except ValueError:
@@ -130,7 +139,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
         else:
             self.blob_file.seek(self.event_offsets[-1], 0)
         for line in iter(self.blob_file.readline, ''):
-            line = line.decode('ascii')
+            line = try_decode_string(line)
             if line.startswith('end_event:'):
                 self._record_offset()
                 if len(self.event_offsets) % 100 == 0:
@@ -153,7 +162,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
         """Parse the next event from the current file position"""
         blob = None
         for line in self.blob_file:
-            line = line.decode('ascii')
+            line = try_decode_string(line)
             line = line.strip()
             if line.startswith('end_event:') and blob:
                 blob['raw_header'] = self.raw_header
@@ -363,7 +372,9 @@ def __add_raw_hit__(self, other):
     """Add two hits by adding the ToT and preserve time and pmt_id
     of the earlier one."""
     first = self if self.time <= other.time else other
-    return EvtRawHit(first.id, first.pmt_id, self.tot+other.tot, first.time)
+    return EvtRawHit(first.id, first.pmt_id, self.tot + other.tot, first.time)
+
+
 EvtRawHit = namedtuple('EvtRawHit', 'id pmt_id tot time')
 EvtRawHit.__new__.__defaults__ = (None, None, None, None)
 EvtRawHit.__add__ = __add_raw_hit__
