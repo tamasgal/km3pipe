@@ -71,13 +71,13 @@ class EvtPump(Pump):  # pylint: disable:R0902
     def extract_header(self):
         """Create a dictionary with the EVT header information"""
         raw_header = self.raw_header = {}
-        first_line = str(self.blob_file.readline())
+        first_line = self.blob_file.readline().decode('ascii')
         self.blob_file.seek(0, 0)
         if not first_line.startswith(str('start_run')):
             log.warning("No header found.")
             return raw_header
         for line in iter(self.blob_file.readline, ''):
-            line = str(line).strip()
+            line = line.decode('ascii').strip()
             try:
                 tag, value = str(line).split(':')
             except ValueError:
@@ -130,8 +130,8 @@ class EvtPump(Pump):  # pylint: disable:R0902
         else:
             self.blob_file.seek(self.event_offsets[-1], 0)
         for line in iter(self.blob_file.readline, ''):
-            line = str(line.strip())
-            if line.startswith(str('end_event:')):
+            line = line.decode('ascii')
+            if line.startswith('end_event:'):
                 self._record_offset()
                 if len(self.event_offsets) % 100 == 0:
                     if verbose:
@@ -153,6 +153,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
         """Parse the next event from the current file position"""
         blob = None
         for line in self.blob_file:
+            line = line.decode('ascii')
             line = line.strip()
             if line.startswith('end_event:') and blob:
                 blob['raw_header'] = self.raw_header
