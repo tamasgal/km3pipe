@@ -31,7 +31,7 @@ def filter_muons(blob):
     """Write all muons from McTracks to Muons."""
     tracks = blob['McTracks']
     muons = [t for t in blob['McTracks'] if t.type == 5]
-    blob["Muons"] = kp.dataclasses.TrackSeries(muons, tracks.event_id)
+    blob["Muons"] = kp.dataclasses.McTrackSeries(muons)
     return blob
 
 
