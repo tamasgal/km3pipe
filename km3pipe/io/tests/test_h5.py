@@ -46,20 +46,6 @@ class TestMultiTable(TestCase):
         self.assertEqual(exp_foo, pref_foo.dtype.names)
         self.assertEqual(exp_bar, pref_bar.dtype.names)
 
-    #def test_group_read(self):
-    #    tabs = read_group(self.h5file.root)
-    #    exp_cols = (
-    #        'bar_aa', 'bar_bb', 'bar_cc',
-    #        'foo_a', 'foo_b', 'foo_c',
-    #    )
-    #    exp_shape = (2, 6)
-    #    res_shape = tabs.shape
-    #    res_cols = tuple(tabs.columns)
-    #    print(exp_cols)
-    #    print(res_cols)
-    #    self.assertEqual(exp_shape, res_shape)
-    #    self.assertEqual(exp_cols, res_cols)
-
 
 class TestH5Pump(TestCase):
     def setUp(self):
