@@ -107,7 +107,7 @@ class Convertible(object):
 class SummarysliceInfo(with_metaclass(Serialisable)):
     """JDAQSummaryslice Metadata.
     """
-    h5loc = '/'
+    h5loc = '/summary_slice'
     dtype = np.dtype([
         ('det_id', '<i4'),
         ('frame_index', '<u4'),
@@ -168,7 +168,7 @@ class SummarysliceInfo(with_metaclass(Serialisable)):
 class TimesliceInfo(with_metaclass(Serialisable)):
     """JDAQTimeslice metadata.
     """
-    h5loc = '/'
+    h5loc = '/time_slice'
     dtype = np.dtype([
         ('dom_id', '<u4'),
         ('frame_id', '<u4'),
@@ -228,7 +228,7 @@ class TimesliceInfo(with_metaclass(Serialisable)):
 class TimesliceFrameInfo(with_metaclass(Serialisable)):
     """JDAQTimeslice frame metadata.
     """
-    h5loc = '/'
+    h5loc = '/time_slice_info'
     dtype = np.dtype([
         ('dom_id', '<u4'),
         ('fifo_status', '<u4'),
@@ -301,7 +301,7 @@ class TimesliceFrameInfo(with_metaclass(Serialisable)):
 class SummaryframeInfo(with_metaclass(Serialisable)):
     """JDAQSummaryslice frame metadata.
     """
-    h5loc = '/'
+    h5loc = '/summary_slice_info'
     dtype = np.dtype([
         ('dom_id', '<u4'),
         ('fifo_status', '<u4'),
@@ -373,6 +373,7 @@ class SummaryframeInfo(with_metaclass(Serialisable)):
 class EventInfo(object):
     """Event Metadata.
     """
+    h5loc = '/'
     dtype = np.dtype([
         ('det_id', '<i4'),
         ('event_id', '<u4'),
@@ -393,11 +394,10 @@ class EventInfo(object):
         ('weight_w3', '<f8'),
     ])
 
-    def __init__(self, arr, h5loc='/'):
+    def __init__(self, arr):
         self._arr = np.array(arr, dtype=self.dtype).reshape(1)
         for col in self.dtype.names:
             setattr(self, col, self._arr[col])
-        self.h5loc = h5loc
 
     @classmethod
     def from_row(cls, row, **kwargs):
@@ -2059,7 +2059,7 @@ class SummaryframeSeries(object):
         ('n_received_packets', '<u4'),
         ('slice_id', '<u4'),
         ])
-    h5loc = '/'
+    h5loc = '/summary_frame'
 
     def __init__(self, arr):
         self._arr = arr
@@ -2281,10 +2281,10 @@ deserialise_map = {
 
 
 split_per_event = {
-    'Hits',
-    'McHits',
-    'McTracks',
-    'Tracks',
+    'hits',
+    'mc_hits',
+    'mc_tracks',
+    'tracks',
 }
 
 class BinaryStruct(object):
