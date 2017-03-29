@@ -41,8 +41,11 @@ class H5VersionError(Exception):
 class HDF5Sink(Module):
     """Write KM3NeT-formatted HDF5 files, event-by-event.
 
-    The data can be a numpy structured array, a pandas DataFrame,
-    or a km3pipe dataclass object with a `serialise()` method.
+    The data has to have
+    - a `h5loc` attribute
+    - a `conv_to('numpy')` method
+    To save numpy arrays/pandas dataframes, put them into a
+    km3array/km3dataframe.
 
     The name of the corresponding H5 table is the decamelised
     blob-key, so values which are stored in the blob under `FooBar`
@@ -54,16 +57,17 @@ class HDF5Sink(Module):
         Where to store the events.
     h5file: pytables.File instance, optional (default: None)
         Opened file to write to. This is mutually exclusive with filename.
+    verbose: optional (default: False)
     """
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
         self.ext_h5file = self.get('h5file') or None
+        self.verbose = self.get('verbose') or False
         # magic 10000: this is the default of the "expectedrows" arg
         # from the tables.File.create_table() function
         # at least according to the docs
         # might be able to set to `None`, I don't know...
-        self.n_rows_expected = self.get('n_rows_expected') or 10000
 
         self.index = 0
 
@@ -81,71 +85,37 @@ class HDF5Sink(Module):
                       "falling back to zlib...")
             self.filters = tb.Filters(complevel=5, shuffle=True,
                                       fletcher32=True, complib='zlib')
-        self._tables = OrderedDict()
-
-    def _to_array(self, data):
-        if np.isscalar(data):
-            return np.asarray(data).reshape((1,))
-        if len(data) <= 0:
-            return
-        try:
-            return data.to_records(index=False)
-        except AttributeError:
-            pass
-        try:
-            return data.serialise()
-        except AttributeError:
-            pass
-        return data
 
     def _write_array(self, where, arr, title=''):
-        level = len(where.split('/'))
-
-        if where not in self._tables:
+        loc, tabname = os.path.split(where)
+        if where not in self.h5file:
             dtype = arr.dtype
-            loc, tabname = os.path.split(where)
-            if tabname in split_per_event:
-                loc += '/{}'.format(self.index)
-            tab = self.h5file.create_table(
-                loc, tabname, description=dtype, title=title,
-                filters=self.filters, createparents=True,
-                expectedrows=self.n_rows_expected,
-            )
-            if(level < 4):
-                self._tables[where] = tab
+            tab = self.h5file.create_table(loc, tabname, description=dtype,
+                    title=title, filters=self.filters, createparents=True)
         else:
-            tab = self._tables[where]
-
+            tab = self.h5file.get_node(where)
         tab.append(arr)
 
-        if(level < 4):
-            tab.flush()
-
     def process(self, blob):
-        for key, entry in sorted(blob.items()):
-            serialisable_attributes = ('dtype', 'serialise', 'to_records')
-            if any(hasattr(entry, a) for a in serialisable_attributes):
-                try:
-                    h5loc = entry.h5loc
-                except AttributeError:
-                    h5loc = '/'
-                try:
-                    tabname = entry.tabname
-                except AttributeError:
-                    tabname = decamelise(key)
-                entry = self._to_array(entry)
-                if entry is None:
-                    continue
-                if entry.dtype.names is None:
-                    dt = np.dtype((entry.dtype, [(key, entry.dtype)]))
-                    entry = entry.view(dt)
-                    h5loc = '/misc'
+        for key, entry in sorted(iteritems(blob)):
+            if not (hasattr(entry, 'h5loc') and hasattr(entry, 'conv_to')):
+                continue
+            try:
+                tabname = entry.tabname
+            except AttributeError:
+                tabname = decamelise(key)
+            entry = entry.conv_to('numpy')
+            if entry.dtype.names is None:
+                dt = np.dtype((entry.dtype, [(key, entry.dtype)]))
+                entry = entry.view(dt)
+            h5loc = entry.h5loc
+            if tabname in split_per_event:
+                print('yay!')
+                where = '{}/{}'.format(h5loc, self.index)
+            else:
+                print('booh!')
                 where = os.path.join(h5loc, tabname)
-                self._write_array(where, entry, title=key)
-
-        if not self.index % 1000:
-            for tab in self._tables.values():
-                tab.flush()
+            self._write_array(where, entry, title=key)
 
         self.index += 1
         return blob
@@ -154,17 +124,6 @@ class HDF5Sink(Module):
         self.h5file.root._v_attrs.km3pipe = np.string_(kp.__version__)
         self.h5file.root._v_attrs.pytables = np.string_(tb.__version__)
         self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
-        print("Creating index tables. This may take a few minutes...")
-        for tab in itervalues(self._tables):
-            if 'frame_id' in tab.colnames:
-                tab.cols.frame_id.create_index()
-            if 'slice_id' in tab.colnames:
-                tab.cols.slice_id.create_index()
-            if 'dom_id' in tab.colnames:
-                tab.cols.dom_id.create_index()
-            if 'event_id' in tab.colnames:
-                tab.cols.event_id.create_index()
-            tab.flush()
         self.h5file.close()
 
 
@@ -213,7 +172,7 @@ class HDF5Pump(Pump):
                              .format(fn))
                 raise SystemExit
             self.h5files[fn] = h5file
-        self._n_events = np.sum((v for k, v in self._n_each.items()))
+        self._n_events = np.sum((v for k, v in iteritems(self._n_each)))
         self.minmax = OrderedDict()
         n_read = 0
         for fn, n in iteritems(self._n_each):
