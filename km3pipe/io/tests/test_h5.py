@@ -9,6 +9,7 @@ import km3pipe as kp
 from km3pipe import Pipeline
 from km3pipe.io import read_group   # noqa
 from km3pipe.io import HDF5Pump, HDF5Sink   # noqa
+from km3pipe.io.hdf5 import H5VersionError
 from km3pipe.io.pandas import H5Chain   # noqa
 from km3pipe.tools import insert_prefix_to_dtype
 from km3pipe.testing import TestCase
@@ -66,9 +67,13 @@ class TestH5Pump(TestCase):
         self.old_fname = data_dir + 'numu_cc_test.h5'
         self.new_fname = None
 
-    def test_version_clash(self):
+    def test_init_has_to_be_explicit(self):
         with self.assertRaises(TypeError):
             HDF5Pump(self.old_fname)
+
+    def test_version_clash(self):
+        with self.assertRaises(H5VersionError):
+            HDF5Pump(filename=self.old_fname)
 
     def test_standalone(self):
         with self.assertRaises(ValueError):
@@ -95,10 +100,11 @@ class TestH5Sink(TestCase):
             HDF5Sink(self.out)
 
     def test_pipe(self):
-        p = Pipeline()
-        p.attach(HDF5Pump, filename=self.fname)
-        p.attach(HDF5Sink, h5file=self.out)
-        p.drain()
+        with self.assertRaises(H5VersionError):
+            p = Pipeline()
+            p.attach(HDF5Pump, filename=self.fname)
+            p.attach(HDF5Sink, h5file=self.out)
+            p.drain()
 
     def tearDown(self):
         self.out.close()
