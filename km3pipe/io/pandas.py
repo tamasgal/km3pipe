@@ -85,19 +85,27 @@ class H5Chain(object):
         return self[key]
 
 
+def read_hdf_group(path, key, **kwargs):
+    """Call `pd.read_hdf` on a (flat) group, e.g. `/hits/`"""
+    with pd.HDFStore(path, mode='r') as h5:
+        node = h5.get_node(key)
+        leaves = (leaf.name
+                  for leaf in node._f_list_nodes(classname='Leaf'))
+        tables = (h5.get(os.path.join(node._v_pathname, leaf))
+                  for leaf in leaves)
+        return pd.concat(tables, axis=0)
+
+
 def map2df(map):
     return pd.DataFrame.from_records(map, index=np.ones(1, dtype=int))
 
 
-def read_group(group, max_id=None, **kwargs):
+def read_group(group, **kwargs):
     # Store through groupname, insert tablename into dtype
     df = []
     for tab in group._f_iter_nodes(classname='Table'):
         tabname = tab.name
-        if max_id is None:
-            arr = tab.read(**kwargs)
-        else:
-            arr = _read_table(tab, max_id)
+        arr = tab.read(**kwargs)
         arr = insert_prefix_to_dtype(arr, tabname)
         arr = pd.DataFrame.from_records(arr)
         df.append(arr)
