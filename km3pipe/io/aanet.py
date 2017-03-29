@@ -13,8 +13,9 @@ import os.path
 import numpy as np
 
 from km3pipe.core import Pump, Blob
-from km3pipe.dataclasses import (HitSeries, TrackSeries, EventInfo,
-                                 KM3Array, KM3DataFrame)
+from km3pipe.dataclasses import (
+    HitSeries, TrackSeries, EventInfo, McHitSeries, McTrackSeries,
+    KM3Array, KM3DataFrame)
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -190,17 +191,16 @@ class AanetPump(Pump):
             event_id = self.i
         self.i += 1
         try:
-            blob['Hits'] = HitSeries.from_aanet(event.hits, event_id)
-            blob['McHits'] = HitSeries.from_aanet(event.mc_hits,
-                                                  event_id)
+            blob['Hits'] = HitSeries.from_aanet(event.hits)
+            blob['McHits'] = McHitSeries.from_aanet(event.mc_hits)
         except AttributeError:
             pass
-        blob['McTracks'] = TrackSeries.from_aanet(event.mc_trks,
-                                                  event_id)
+        blob['McTracks'] = McTrackSeries.from_aanet(event.mc_trks)
         blob['filename'] = filename
         try:
             blob['EventInfo'] = EventInfo((
                 event.det_id,
+                event_id,
                 event.frame_index,
                 self.livetime, # livetime_sec
                 event.mc_id,
@@ -208,44 +208,46 @@ class AanetPump(Pump):
                 self.ngen,   # n_events_gen
                 self.nfilgen, # n_files_gen
                 event.overlays,
-                # event.run_id,
+                event.run_id,
                 event.trigger_counter,
                 event.trigger_mask,
                 event.t.GetNanoSec(),
                 event.t.GetSec(),
                 w1, w2, w3,
-                event_id))
+                ))
         except AttributeError:
             blob['EventInfo'] = EventInfo((0,   # det_id
+                                           event_id,
                                            event.frame_index,
                                            self.livetime,   # livetime_sec
                                            0,   # mc_id
                                            0,   # mc_t
                                            self.ngen,   # n_events_gen
                                            self.nfilgen,   # n_files_gen
-                                           0,   # overlays
+                                           0,   # overlays,
+                                           0,   # run_id
                                            0,   # trigger_counter
                                            0,   # trigger_mask
                                            0,   # nanose
                                            0,   # sec
                                            w1, w2, w3,
-                                           event_id))
+                                           ))
         if self.format == 'minidst':
-            recos = read_mini_dst(event, event_id)
+            recos = read_mini_dst(event)
             for recname, reco in recos.items():
                 blob[recname] = reco
         if self.format in ('jevt_jgandalf', 'gandalf', 'jgandalf'):
-            track, dtype = parse_jevt_jgandalf(event, event_id)
+            track, dtype = parse_jevt_jgandalf(event, )
             if track:
                 blob['Gandalf'] = KM3Array.from_dict(track, dtype,
                                                            h5loc='/reco')
         if self.format == 'generic_track':
-            track, dtype = parse_generic_event(event, event_id)
+            track, dtype = parse_generic_event(event, )
             if track:
                 blob['Track'] = KM3Array.from_dict(track, dtype,
                                                     h5loc='/reco')
         if self.format in ('ancient_recolns', 'orca_recolns'):
-            track, dtype = parse_ancient_recolns(event, event_id)
+            track, dtype = parse_ancient_recolns(event, )
             if track:
                 blob['OrcaRecoLns'] = KM3Array.from_dict(track, dtype,
                                                              h5loc='/reco')
@@ -292,7 +294,7 @@ class AanetPump(Pump):
         return next(self.blobs)
 
 
-def parse_ancient_recolns(aanet_event, event_id):
+def parse_ancient_recolns(aanet_event, ):
     # the final recontructed track is in f.evt.trks, at the index 5
     # trks[0] ==> prefit track
     # trks[1] ==> m-estimator track
@@ -330,13 +332,13 @@ def parse_ancient_recolns(aanet_event, event_id):
                 'sin_theta', }    #noqa
         out = {key: 0 for key in keys}
     dt = [(key, float) for key in sorted(out.keys())]
-    out['event_id'] = event_id
-    dt.append(('event_id', '<u4'))
+    #out['event_id'] = event_id
+    #dt.append(('event_id', '<u4'))
     dt = np.dtype(dt)
     return out, dt
 
 
-def parse_jevt_jgandalf(aanet_event, event_id):
+def parse_jevt_jgandalf(aanet_event):
     try:
         track = aanet_event.trks[0]     # this might throw IndexError
         map = {}
@@ -362,13 +364,13 @@ def parse_jevt_jgandalf(aanet_event, event_id):
                 'lik', 'lik_red', 'energy', }
         map = {key: 0 for key in keys}
     dt = [(key, float) for key in sorted(map.keys())]
-    map['event_id'] = event_id
-    dt.append(('event_id', '<u4'))
+    #map['event_id'] = event_id
+    #dt.append(('event_id', '<u4'))
     dt = np.dtype(dt)
     return map, dt
 
 
-def parse_generic_event(aanet_event, event_id):
+def parse_generic_event(aanet_event):
     map = {}
     try:
         track = aanet_event.trks[0]
@@ -393,13 +395,13 @@ def parse_generic_event(aanet_event, event_id):
     for k, entry in enumerate(track.error_matrix):
         map['error_matrix_{}'.format(k)] = entry
     dt = [(key, float) for key in sorted(map.keys())]
-    map['event_id'] = event_id
-    dt.append(('event_id', '<u4'))
+    #map['event_id'] = event_id
+    #dt.append(('event_id', '<u4'))
     dt = np.dtype(dt)
     return map, dt
 
 
-def read_mini_dst(aanet_event, event_id):
+def read_mini_dst(aanet_event):
     pos_to_recname = {
         0: 'RecoLNS',
         1: 'JGandalf',
@@ -446,7 +448,7 @@ def parse_track(trk):
     return out
 
 
-def parse_thomasfeatures(aanet_usr, event_id=0):
+def parse_thomasfeatures(aanet_usr):
     out = {}
     did_converge = len(aanet_usr) > 1
 
@@ -504,8 +506,8 @@ def parse_thomasfeatures(aanet_usr, event_id=0):
 
     out['did_converge'] = did_converge
     dtype.append(('did_converge', bool))
-    out['event_id'] = event_id
-    dtype.append(('event_id', '<u4'))
+    #out['event_id'] = event_id
+    #dtype.append(('event_id', '<u4'))
     dtype = np.dtype(dtype)
 
     if not did_converge:
@@ -517,7 +519,7 @@ def parse_thomasfeatures(aanet_usr, event_id=0):
     return out, dtype
 
 
-def parse_recolns(aanet_trk, event_id=0):
+def parse_recolns(aanet_trk):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
 
@@ -526,8 +528,8 @@ def parse_recolns(aanet_trk, event_id=0):
     dtype = [(key, float) for key in recolns_keys + list(out.keys())]
     out['did_converge'] = did_converge
     dtype.append(('did_converge', bool))
-    out['event_id'] = event_id
-    dtype.append(('event_id', '<u4'))
+    #out['event_id'] = event_id
+    #dtype.append(('event_id', '<u4'))
     dtype = np.dtype(dtype)
 
     if not did_converge:
@@ -539,7 +541,7 @@ def parse_recolns(aanet_trk, event_id=0):
     return out, dtype
 
 
-def parse_jgandalf(aanet_trk, event_id=0):
+def parse_jgandalf(aanet_trk):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
 
@@ -548,8 +550,8 @@ def parse_jgandalf(aanet_trk, event_id=0):
     dtype = [(key, float) for key in jgandalf_keys + list(out.keys())]
     out['did_converge'] = did_converge
     dtype.append(('did_converge', bool))
-    out['event_id'] = event_id
-    dtype.append(('event_id', '<u4'))
+    #out['event_id'] = event_id
+    #dtype.append(('event_id', '<u4'))
     dtype = np.dtype(dtype)
 
     if not did_converge:
@@ -561,7 +563,7 @@ def parse_jgandalf(aanet_trk, event_id=0):
     return out, dtype
 
 
-def parse_aashowerfit(aanet_trk, event_id=0):
+def parse_aashowerfit(aanet_trk):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
 
@@ -570,8 +572,8 @@ def parse_aashowerfit(aanet_trk, event_id=0):
     dtype = [(key, float) for key in aashow_keys + list(out.keys())]
     out['did_converge'] = did_converge
     dtype.append(('did_converge', bool))
-    out['event_id'] = event_id
-    dtype.append(('event_id', '<u4'))
+    #out['event_id'] = event_id
+    #dtype.append(('event_id', '<u4'))
     dtype = np.dtype(dtype)
 
     if not did_converge:
@@ -583,7 +585,7 @@ def parse_aashowerfit(aanet_trk, event_id=0):
     return out, dtype
 
 
-def parse_qstrategy(aanet_trk, event_id=0):
+def parse_qstrategy(aanet_trk):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
 
@@ -592,8 +594,8 @@ def parse_qstrategy(aanet_trk, event_id=0):
     dtype = [(key, float) for key in qstrat_keys + list(out.keys())]
     out['did_converge'] = did_converge
     dtype.append(('did_converge', bool))
-    out['event_id'] = event_id
-    dtype.append(('event_id', '<u4'))
+    #out['event_id'] = event_id
+    #dtype.append(('event_id', '<u4'))
     dtype = np.dtype(dtype)
 
     if not did_converge:
@@ -641,8 +643,8 @@ def parse_dusj(aanet_trk, event_id=0):
     dtype = [(key, float) for key in dusj_keys + list(out.keys())]
     out['did_converge'] = did_converge
     dtype.append(('did_converge', bool))
-    out['event_id'] = event_id
-    dtype.append(('event_id', '<u4'))
+    #out['event_id'] = event_id
+    #dtype.append(('event_id', '<u4'))
     dtype = np.dtype(dtype)
 
     if not did_converge:
