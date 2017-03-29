@@ -429,3 +429,14 @@ class TestEvtFilePump(TestCase):
         pump = EvtPump(filename=self.fname)
         pump.next()
         pump.finish()
+
+
+class TestCorsika(TestCase):
+    def setUp(self):
+        data_dir = os.path.dirname(kp.__file__) + '/kp-data/test_data/'
+        self.fname = data_dir + 'example_corant_propa.evt'
+
+    def test_pipe(self):
+        pump = EvtPump(filename=self.fname)
+        pump.next()
+        pump.finish()

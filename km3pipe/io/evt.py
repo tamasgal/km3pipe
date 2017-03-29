@@ -185,7 +185,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
         except ValueError:
             log.warning("Corrupt line in EVT file:\n{0}".format(line))
             return
-        if tag in ('track_in', 'track_fit', 'hit', 'hit_raw'):
+        if tag in ('track_in', 'track_fit', 'hit', 'hit_raw', 'track_seamuon', 'track_seaneutrino'):
             values = [float(x) for x in value.split()]
             blob.setdefault(tag, []).append(values)
             if tag == 'hit':
@@ -199,10 +199,20 @@ class EvtPump(Pump):  # pylint: disable:R0902
                 blob.setdefault("TrackIns", []).append(TrackIn(values))
             if tag == "track_fit":
                 blob.setdefault("TrackFits", []).append(TrackFit(values))
+            if tag == "track_seamuon":
+                blob.setdefault("TrackSeamuon", []).append(TrackIn(values))
+            if tag == "track_seaneutrino":
+                blob.setdefault("TrackSeaneutrino", []).append(TrackIn(values))
         else:
             if tag == 'neutrino':
                 values = [float(x) for x in value.split()]
                 blob['Neutrino'] = Neutrino(values)
+            elif tag == 'center_on_can':
+                values = [float(x) for x in value.split()]
+                blob['CenterOnCan'] = TrackIn(values)
+            elif tag == 'primary':
+                values = [float(x) for x in value.split()]
+                blob['Primary'] = TrackIn(values)
             else:
                 blob[tag] = value.split()
 
@@ -279,12 +289,24 @@ class TrackIn(Track):
             self.length = self.args[1]
         except IndexError:
             self.length = 0
+        try:
+            self.charmed = bool(self.args[1])
+            self.mother = int(self.args[2])
+            self.grandmother = int(self.args[3])
+        except IndexError:
+            pass
 
     def __repr__(self):
         text = super(self.__class__, self).__repr__()
         text += " type: {0} '{1}' [PDG]\n".format(self.particle_type,
                                                   pdg2name(self.particle_type))
         text += " length: {0} [m]\n".format(self.length)
+        try:
+            text += " charmed: {0}\n".format(self.charmed)
+            text += " mother: {0} [Corsika]\n".format(self.mother)
+            text += " grandmother: {0} [Corsika]\n".format(self.grandmother)
+        except AttributeError:
+            pass
         return text
 
 
