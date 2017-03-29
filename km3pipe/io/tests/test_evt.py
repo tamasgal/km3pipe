@@ -9,7 +9,6 @@ from functools import reduce
 
 import km3pipe as kp
 from km3pipe.testing import TestCase, StringIO
-from km3pipe import Pipeline
 from km3pipe.io import EvtPump
 from km3pipe.io.evt import Track, TrackIn, Neutrino, EvtHit, EvtRawHit, TrackFit
 
@@ -427,6 +426,6 @@ class TestEvtFilePump(TestCase):
         self.fname = data_dir + 'example_numuNC.evt'
 
     def test_pipe(self):
-        pipe = Pipeline()
-        pipe.attach(EvtPump, filename=self.fname)
-        pipe.drain()
+        pump = EvtPump(filename=self.fname)
+        pump.next()
+        pump.finish()
