@@ -48,11 +48,13 @@ class HDF5Sink(Module):
     ----------
     filename: str, optional (default: 'dump.h5')
         Where to store the events.
+    h5file: pytables.File instance, optional (default: None)
+        Opened file to write to. This is mutually exclusive with filename.
     """
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
-
+        self.ext_h5file = self.get('h5file') or None
         # magic 10000: this is the default of the "expectedrows" arg
         # from the tables.File.create_table() function
         # at least according to the docs
@@ -60,7 +62,13 @@ class HDF5Sink(Module):
         self.n_rows_expected = self.get('n_rows_expected') or 10000
 
         self.index = 0
-        self.h5file = tb.open_file(self.filename, mode="w", title="KM3NeT")
+
+        if self.filename != 'dump.h5' and self.ext_h5file is not None:
+            raise IOError("Can't specify both filename and file object!")
+        elif self.filename == 'dump.h5' and self.ext_h5file is not None:
+            self.h5file = self.ext_h5file
+        else:
+            self.h5file = tb.open_file(self.filename, mode="w", title="KM3NeT")
         try:
             self.filters = tb.Filters(complevel=5, shuffle=True,
                                       fletcher32=True, complib='blosc')
