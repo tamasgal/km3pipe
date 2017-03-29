@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* add corsika evt tag reader (seamuon/seaneutrino)
 
 6.5.5 / 2017-03-29
 ------------------
