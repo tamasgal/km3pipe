@@ -481,7 +481,11 @@ class TMCHData(object):
     """Monitoring Channel data."""
     def __init__(self, file_obj):
         f = file_obj
-        self.data_type = unpack('>I', f.read(4))[0]
+
+        data_type = f.read(4)
+        if data_type != b'TMCH':
+            raise ValueError("Invalid datatype: {0}".format(data_type))
+
         self.run = unpack('>I', f.read(4))[0]
         self.sequence_number = unpack('>I', f.read(4))[0]  # not sure
         self.utc_seconds = unpack('>I', f.read(4))[0]
