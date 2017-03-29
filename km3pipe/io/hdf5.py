@@ -17,7 +17,8 @@ import tables as tb
 
 import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
-from km3pipe.dataclasses import KM3Array, deserialise_map, split_per_event
+from km3pipe.dataclasses import (KM3Array, deserialise_map, split_per_event,
+        HitSeries, McHitSeries, TrackSeries, McTrackSeries)
 from km3pipe.logger import logging
 from km3pipe.dev import camelise, decamelise, split
 
@@ -88,6 +89,8 @@ class HDF5Sink(Module):
         if where not in self.h5file:
             dtype = arr.dtype
             with warnings.catch_warnings():
+                # suppress those those NaturalNameWarnigns
+                # because we have integes like `/hits/0`
                 warnings.simplefilter("ignore")
                 tab = self.h5file.create_table(loc, tabname,
                         description=dtype, title=title, filters=self.filters,
@@ -145,12 +148,11 @@ class HDF5Pump(Pump):
         if self.filename:
             self.filenames.append(self.filename)
 
-        self.filequeue = list(self.filenames)
+        self._filequeue = list(self.filenames)
         self._set_next_file()
 
-        self.event_ids = OrderedDict()
-        self._n_each = OrderedDict()
-        self.h5files = OrderedDict()
+        self._n_events = OrderedDict()
+        self._h5files = OrderedDict()
         for fn in self.filenames:
             # Open all files before reading any events
             # So we can raise version mismatches etc before reading anything
@@ -163,23 +165,50 @@ class HDF5Pump(Pump):
                               .format(fn))
             try:
                 event_info = h5file.get_node('/', 'event_info')
-                self.event_ids[fn] = event_info.cols.event_id[:]
-                self._n_each[fn] = len(self.event_ids[fn])
+                self._n_events[fn] = event_info.shape[0]
             except tb.NoSuchNodeError:
                 log.critical("No /event_info table found: '{0}'"
                              .format(fn))
                 raise SystemExit
-            self.h5files[fn] = h5file
-        self._n_events = np.sum((v for k, v in iteritems(self._n_each)))
-        self.minmax = OrderedDict()
+            self._check_available_tables(h5file)
+            self._h5files[fn] = h5file
+        self._n_events_total = np.sum((v for k, v in iteritems(self._n_events)))
+        self._minmax = OrderedDict()
         n_read = 0
-        for fn, n in iteritems(self._n_each):
+        for fn, n in iteritems(self._n_events):
             min = n_read
             max = n_read + n - 1
             n_read += n
-            self.minmax[fn] = (min, max)
+            self._minmax[fn] = (min, max)
         self.index = None
         self._reset_index()
+
+
+    def _check_available_tables(self, h5):
+        self._has_hits = False
+        self._has_mc_hits = False
+        self._has_tracks = False
+        self._has_mc_tracks = False
+        self._ordinary_tabs = set()
+        # so far we ignore slices/frames
+        for leaf in h5.walk_nodes(classname='Leaf'):
+            if '/hits' in leaf._v_pathname:
+                if not self._has_hits:
+                    self._has_hits = True
+                continue
+            if '/mc_hits' in leaf._v_pathname:
+                if not self._has_mc_hits:
+                    self._has_mc_hits = True
+                continue
+            if '/tracks' in leaf._v_pathname:
+                if not self._has_tracks:
+                    self._has_tracks = True
+                continue
+            if '/mc_tracks' in leaf._v_pathname:
+                if not self._has_mc_tracks:
+                    self._has_mc_tracks = True
+                continue
+            self._ordinary_tabs.add(leaf._v_pathname)
 
     def _check_version(self, h5file, filename):
         try:
@@ -191,11 +220,10 @@ class HDF5Pump(Pump):
             return
         if split(version, int, np.string_('.')) < \
                 split(MINIMUM_FORMAT_VERSION, int, np.string_('.')):
-            raise H5VersionError("HDF5 format version {0} or newer required!\n"
-                                 "'{1}' has HDF5 format version {2}."
-                                 .format(MINIMUM_FORMAT_VERSION,
-                                         filename,
-                                         version))
+            raise H5VersionError(
+                    "HDF5 format version {0} or newer required!\n"
+                    "'{1}' has HDF5 format version {2}." .format(
+                        MINIMUM_FORMAT_VERSION, filename, version))
 
     def process(self, blob):
         try:
@@ -208,53 +236,58 @@ class HDF5Pump(Pump):
 
     def _need_next(self, index):
         fname = self.current_file
-        min, max = self.minmax[fname]
+        min, max = self._minmax[fname]
         return (index < min) or (index > max)
 
     def _set_next_file(self):
-        if not self.filequeue:
+        if not self._filequeue:
             raise IndexError('No more files available!')
-        self.current_file = self.filequeue.pop(0)
+        self.current_file = self._filequeue.pop(0)
         if self.verbose:
             ("Reading %s..." % self.current_file)
 
     def _translate_index(self, fname, index):
-        min, _ = self.minmax[fname]
+        min, _ = self._minmax[fname]
         return index - min
 
+    def _is_split_per_event(self, where):
+        for k in split_per_event:
+            if k in where:
+                return True
+        return False
+
     def get_blob(self, index):
-        if self.index >= self._n_events:
+        if self.index >= self._n_events_total:
             self._reset_index()
             raise StopIteration
         blob = Blob()
         if self._need_next(index):
             self._set_next_file()
         fname = self.current_file
-        h5file = self.h5files[fname]
-        evt_ids = self.event_ids[fname]
+        h5file = self._h5files[fname]
+        n_events = self._n_events[fname]
         local_index = self._translate_index(fname, index)
-        event_id = evt_ids[local_index]
 
-        # TODO
-        # obviously, this makes little sense when below '/hits' or something.
-        # a) # if 'hits' in node.path: continue
-        # b) ????
-        for tab in h5file.walk_nodes(classname="Table"):
-            loc, tabname = os.path.split(tab._v_pathname)
-            if loc in {'/hits', '/mc_hits', '/tracks', '/mc_tracks'}:
-                if int(tabname) != index:
-                    continue
-                is_single_event_table = True
+        if self._has_hits:
+            hits = h5file.get_node('/hits/{}'.format(local_index))[:]
+            blob['Hits'] = HitSeries.conv_from(hits)
+        if self._has_mc_hits:
+            mc_hits = h5file.get_node('/mc_hits/{}'.format(local_index))[:]
+            blob['McHits'] = McHitSeries.conv_from(mc_hits)
+        if self._has_tracks:
+            tracks = h5file.get_node('/tracks/{}'.format(local_index))[:]
+            blob['Tracks'] = TrackSeries.conv_from(tracks)
+        if self._has_mc_tracks:
+            mc_tracks = h5file.get_node('/mc_tracks/{}'.format(local_index))[:]
+            blob['McTracks'] = McTrackSeries.conv_from(mc_tracks)
+
+        for where in self._ordinary_tabs:
+            tab = h5file.get_node(where)
+            loc, tabname = os.path.split(where)
             tabname = camelise(tabname)
-            self.table_per_evt = False
-            try:
-                dc = deserialise_map[tabname]
-                if tabname in ['Hits', 'McHits', 'Tracks', 'McTracks']:
-                    self.table_per_evt = True
-            except KeyError:
-                dc = KM3Array
-            arr = tab.read_where('event_id == %d' % event_id)
-            blob[tabname] = dc.deserialise(arr, event_id=index, h5loc=loc)
+            #arr = tab.read_where('event_id == %d' % event_id)
+            arr = np.atleast_1d(tab[local_index])
+            blob[tabname] = KM3Array.conv_from(arr, h5loc=loc)
         return blob
 
     def finish(self):
@@ -267,7 +300,7 @@ class HDF5Pump(Pump):
         self.index = 0
 
     def __len__(self):
-        return self._n_events
+        return self._n_events_total
 
     def __iter__(self):
         return self
@@ -277,7 +310,7 @@ class HDF5Pump(Pump):
         return self.__next__()
 
     def __next__(self):
-        if self.index >= self._n_events:
+        if self.index >= self._n_events_total:
             self._reset_index()
             raise StopIteration
         blob = self.get_blob(self.index)
@@ -349,7 +382,7 @@ class H5Mono(Pump):
         blob = Blob()
         arr = self.table[index]
         event_id = index
-        arr = KM3Array.deserialise(arr, event_id=event_id, h5loc=self.h5loc,)
+        arr = KM3Array.conv_from(arr, event_id=event_id, h5loc=self.h5loc,)
         blob[self.blobkey] = arr
         return blob
 
