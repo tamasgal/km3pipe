@@ -8,7 +8,7 @@ lines.markersize: 7
 lines.solid_capstyle: round
 
 legend.fancybox: true
-legend.frameon: False
+legend.frameon: false
 legend.numpoints: 1
 legend.scatterpoints: 1
 legend.fontsize: 10

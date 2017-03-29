@@ -3,9 +3,11 @@
 # pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
 from __future__ import division, absolute_import, print_function
 
+import os.path
 import operator
 from functools import reduce
 
+import km3pipe as kp
 from km3pipe.testing import TestCase, StringIO
 from km3pipe.io import EvtPump
 from km3pipe.io.evt import Track, TrackIn, Neutrino, EvtHit, EvtRawHit, TrackFit
@@ -85,7 +87,7 @@ class TestEvtParser(TestCase):
             "start_event: 1 1",
             "corrupt line",
             "end_event:"
-            ))
+        ))
 
         self.pump = EvtPump()
         self.pump.blob_file = StringIO(self.valid_evt_header)
@@ -108,7 +110,7 @@ class TestEvtParser(TestCase):
 #        temp_file.close()
 
     def test_record_offset_saves_correct_offset(self):
-        self.pump.blob_file = StringIO('a'*42)
+        self.pump.blob_file = StringIO('a' * 42)
         offsets = [1, 4, 9, 12, 23]
         for offset in offsets:
             self.pump.blob_file.seek(0, 0)
@@ -416,3 +418,14 @@ class TestEvtRawHit(TestCase):
         self.assertEqual(1, merged_hit.time)
         self.assertEqual(60, merged_hit.tot)
         self.assertEqual(2, merged_hit.pmt_id)
+
+
+class TestEvtFilePump(TestCase):
+    def setUp(self):
+        data_dir = os.path.dirname(kp.__file__) + '/kp-data/test_data/'
+        self.fname = data_dir + 'example_numuNC.evt'
+
+    def test_pipe(self):
+        pump = EvtPump(filename=self.fname)
+        pump.next()
+        pump.finish()

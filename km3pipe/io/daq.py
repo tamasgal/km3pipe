@@ -213,6 +213,8 @@ class DAQProcessor(Module):
 
         hits = event.snapshot_hits
         n_hits = event.n_snapshot_hits
+        if n_hits == 0:
+            return
         dom_ids, channel_ids, times, tots = zip(*hits)
         zeros = np.zeros(n_hits)
         nans = np.full_like(zeros, np.nan)
