@@ -1704,3 +1704,15 @@ class BinaryStruct(object):
     @property
     def _size(self):
         return calcsize(self._structure)
+
+
+class BinaryComposite(object):
+    """A composition of BinaryStructs."""
+    _structure = ''
+
+    def __init__(sefl, stream):
+        pass
+
+#    @property
+#    def _size(self):
+#        return sum(s._size for s in self._structure
