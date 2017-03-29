@@ -1526,8 +1526,6 @@ class TrackSeries(object):
 
     @classmethod
     def from_aanet(cls, tracks):
-        return cls([Track(cls.get_usr_item(t, 1),               # bjorkeny
-    def from_aanet(cls, tracks, event_id):
         return cls([Track(cls.get_usr_name(t, str('by'), 1),               # bjorkeny
                           Direction((t.dir.x, t.dir.y, t.dir.z)),
                           t.E,
