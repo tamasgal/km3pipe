@@ -34,6 +34,10 @@ FORMAT_VERSION = np.string_('3.1')
 MINIMUM_FORMAT_VERSION = np.string_('3.0')
 
 
+class H5VersionError(Exception):
+    pass
+
+
 class HDF5Sink(Module):
     """Write KM3NeT-formatted HDF5 files, event-by-event.
 
@@ -228,11 +232,11 @@ class HDF5Pump(Pump):
             return
         if split(version, int, np.string_('.')) < \
                 split(MINIMUM_FORMAT_VERSION, int, np.string_('.')):
-            raise SystemExit("HDF5 format version {0} or newer required!\n"
-                             "'{1}' has HDF5 format version {2}."
-                             .format(MINIMUM_FORMAT_VERSION,
-                                     filename,
-                                     version))
+            raise H5VersionError("HDF5 format version {0} or newer required!\n"
+                                 "'{1}' has HDF5 format version {2}."
+                                 .format(MINIMUM_FORMAT_VERSION,
+                                         filename,
+                                         version))
 
     def process(self, blob):
         try:
