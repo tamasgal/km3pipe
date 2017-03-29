@@ -222,7 +222,7 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
             log.warn("Removing ROOT file {0}".format(rootfilepath))
             os.remove(rootfilepath)
 
-        hits = pd.read_hdf(h5filepath, 'hits')
+        hits = pd.read_hdf(h5filepath, 'hits', mode='r')
         snapshot_hits = hits[(hits['event_id'] == event_id)].copy()
         triggered_hits = hits[(hits['event_id'] == event_id) &
                               (hits['triggered'] == True)]
