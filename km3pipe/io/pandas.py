@@ -89,13 +89,6 @@ def map2df(map):
     return pd.DataFrame.from_records(map, index=np.ones(1, dtype=int))
 
 
-def _read_table(tab, max_id=None, ignore_events=False):
-    if ignore_events:
-        return tab[:max_id]
-    else:
-        return tab.read_where('event_id <= %d' % max_id)
-
-
 def read_group(group, max_id=None, **kwargs):
     # Store through groupname, insert tablename into dtype
     df = []
