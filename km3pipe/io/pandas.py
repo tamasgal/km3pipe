@@ -93,7 +93,8 @@ def read_hdf_group(path, key, **kwargs):
                   for leaf in node._f_list_nodes(classname='Leaf'))
         tables = (h5.get(os.path.join(node._v_pathname, leaf))
                   for leaf in leaves)
-        return pd.concat(tables, axis=0)
+        out = pd.concat(tables, axis=0)
+    return out
 
 
 def map2df(map):

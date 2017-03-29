@@ -98,7 +98,7 @@ def read_hdf5(filename, detx=None, det_id=None, det_from_file=False):
     """
     import pandas as pd
 
-    h5 = pd.HDFStore(filename)
+    h5 = pd.HDFStore(filename, 'r')
     opts = {}
     opts['event_info'] = h5.get('event_info')
     optional_keys = {'hits', 'mc_hits', 'mc_tracks'}       # noqa
