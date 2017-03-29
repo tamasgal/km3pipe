@@ -10,6 +10,7 @@ from __future__ import division, absolute_import, print_function
 from collections import OrderedDict
 import os.path
 from six import itervalues, iteritems
+import warnings
 
 import numpy as np
 import tables as tb
@@ -64,10 +65,6 @@ class HDF5Sink(Module):
         self.filename = self.get('filename') or 'dump.h5'
         self.ext_h5file = self.get('h5file') or None
         self.verbose = self.get('verbose') or False
-        # magic 10000: this is the default of the "expectedrows" arg
-        # from the tables.File.create_table() function
-        # at least according to the docs
-        # might be able to set to `None`, I don't know...
 
         self.index = 0
 
@@ -90,8 +87,11 @@ class HDF5Sink(Module):
         loc, tabname = os.path.split(where)
         if where not in self.h5file:
             dtype = arr.dtype
-            tab = self.h5file.create_table(loc, tabname, description=dtype,
-                    title=title, filters=self.filters, createparents=True)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                tab = self.h5file.create_table(loc, tabname,
+                        description=dtype, title=title, filters=self.filters,
+                        createparents=True)
         else:
             tab = self.h5file.get_node(where)
         tab.append(arr)
@@ -110,10 +110,8 @@ class HDF5Sink(Module):
                 entry = entry.view(dt)
             h5loc = entry.h5loc
             if tabname in split_per_event:
-                print('yay!')
                 where = '{}/{}'.format(h5loc, self.index)
             else:
-                print('booh!')
                 where = os.path.join(h5loc, tabname)
             self._write_array(where, entry, title=key)
 
