@@ -1,0 +1,48 @@
+start_run:       23
+cut_nu: 0.100E+03 0.100E+09-0.100E+01 0.100E+01
+physics: GENHEN  7.1-120213  140220 1233
+drawing: Volume
+seed: GENHEN 3       4245         0         0
+seed: KM3         3     1000
+seed: MODK40   3    12345678           0           0
+spectrum: -1.40
+PDF: 4      58
+model: 1       3       1       1      10
+genhencut: 0.200E+04 0.000E+00
+nuflux: 0       3       0 0.500E+00 0.000E+00 0.200E+01 0.300E+01
+kcut: 2
+target: isoscalar
+xparam: OFF
+sourcemode: diffuse
+usedetfile: true
+detector: /sps/km3net/users/tseitz/detector/km3net_115.det 1 1
+detector: km3net_115.det                                                                                                           1 1
+can: -405.93    508.68    706.21
+genvol: -405.93    508.68    706.21  0.1433E+10  0.5000E+04
+simul: KM3  3.06-281009 140220 1258
+simul: MODK40  4.10-281009 140221 1039
+node: 
+water_model: partic  55.14  56.85  488.000    0.000    0.000    0.000    0.170
+muon_desc_file: km3-km3net_800m_muon-100gev_v5r1.desc
+PM1_type_area_TTS: 1    45.0000     2.0000
+coord_origin: 13.887     6.713   405.932
+v_light: 2
+k40:     5000  1000     500
+rawhits:        0      25       0       0
+merg:    0.5  1
+end_event:
+start_event:        2       1
+neutrino: 1    388.374    109.881    343.123  0.834348 -0.219804 -0.505518   0.143023E+03   0.0  0.197226  0.949820  -1  14   3
+w2list: 0.9427E+38  0.1041E+04  0.3075E-40  0.5509E+10  0.1000E+01  0.3086E+02
+weights: 0.1433E+10  0.4326E+10  0.5304E+06
+w3list: 0  0.1226E-03  0.5304E+06
+track_in: 1    388.374    109.881    343.123  0.785066 -0.035906 -0.618369   0.717690E+01   0.000000E+00  4
+track_in: 2    388.374    109.881    343.123  0.836827 -0.224449 -0.499343   0.448172E+02   0.000000E+00 13
+hit:        1   34618  0.8756E+00    259.31  -3   2         1    261.10
+hit:        2   51919  0.1101E+01    327.77  -3   2         1    330.11
+hit:        3   34618  0.5787E+00    260.63  -3   4         1    261.90
+hit:        4   50793  0.7719E+00    484.44  -3   4         1    486.46
+hit:        5   51950  0.6948E+00    440.99  -3  11         1    440.40
+hit:        6      36  0.5127E+00    745.57  -1   0         1    746.11
+total_hits:    6
+end_event:
