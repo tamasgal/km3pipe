@@ -1327,9 +1327,17 @@ class TrackSeries(object):
 
         If that fails (old aanet), try getting it via index.
         """
-        if len(track.usr) > len(track.usr_names):
+        try:
+          name_len = len(track.usr_names)
+        except AttributeError:
+          name_len = 0
+        if len(track.usr) > name_len:
             return cls.get_usr_item(track, index)
-        return track.getusr(name)
+        try:
+          out = track.getusr(name)
+        except (AttributeError, KeyError):
+          out = 0
+        return out
 
     @property
     def highest_energetic_muon(self):
