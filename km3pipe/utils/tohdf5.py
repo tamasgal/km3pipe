@@ -4,8 +4,8 @@
 Convert ROOT and EVT files to HDF5.
 
 Usage:
-    tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [--aa-format=<fmt>] [--aa-lib=<lib.so>] FILE...
-    tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [-j] [-s] [-l] FILE...
+    tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [--disable-blosc] [--aa-format=<fmt>] [--aa-lib=<lib.so>] FILE...
+    tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [--disable-blosc] [-j] [-s] [-l] FILE...
     tohdf5 (-h | --help)
     tohdf5 --version
 
@@ -87,7 +87,7 @@ def main():
     use_jppy_pump = args['--jppy']
     aa_format = args['--aa-format']
     aa_lib = args['--aa-lib']
-    disable_blosc = bool(args['--disable_blosc'])
+    disable_blosc = bool(args['--disable-blosc'])
     with_summaryslices = args['--with-summaryslices']
     with_timeslice_hits = args['--with-timeslice-hits']
     tohdf5(infiles,
@@ -98,5 +98,5 @@ def main():
            aa_lib=aa_lib,
            with_summaryslices=with_summaryslices,
            with_timeslice_hits=with_timeslice_hits,
-           n_rows_expected=n_rows_expected
+           n_rows_expected=n_rows_expected,
            disable_blosc=disable_blosc)
