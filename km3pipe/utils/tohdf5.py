@@ -11,7 +11,7 @@ Usage:
 
 Options:
     --aa-format=<fmt>          tohdf5: Which aanet subformat ('minidst',
-                               'ancient_recolns', 'jevt_jgandalf',
+                               'orca_recolns', 'gandalf',
                                'generic_track') [default: None]
     --aa-lib-<lib.so>          tohdf5: path to aanet binary (for old versions which
                                must be loaded via `ROOT.gSystem.Load()` instead
@@ -22,6 +22,8 @@ Options:
     -n EVENTS/RUNS             Number of events/runs.
     -o OUTFILE                 Output file.
     -s --with-summaryslices    Include summary slices [default: False]
+    --disable-blosc            Disable blosc:zlib compression filter.
+                               Use bare zlib instead.
     -e --expected-rows NROWS   Approximate number of events.  Providing a
                                rough estimate for this (100, 10000000, ...)
                                will greatly improve reading/writing speed and
@@ -85,6 +87,7 @@ def main():
     use_jppy_pump = args['--jppy']
     aa_format = args['--aa-format']
     aa_lib = args['--aa-lib']
+    disable_blosc = bool(args['--disable_blosc'])
     with_summaryslices = args['--with-summaryslices']
     with_timeslice_hits = args['--with-timeslice-hits']
     tohdf5(infiles,
@@ -95,4 +98,5 @@ def main():
            aa_lib=aa_lib,
            with_summaryslices=with_summaryslices,
            with_timeslice_hits=with_timeslice_hits,
-           n_rows_expected=n_rows_expected)
+           n_rows_expected=n_rows_expected
+           disable_blosc=disable_blosc)

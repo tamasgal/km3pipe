@@ -54,11 +54,14 @@ class HDF5Sink(Module):
         Where to store the events.
     h5file: pytables.File instance, optional (default: None)
         Opened file to write to. This is mutually exclusive with filename.
+    disable_blosc: bool, optional (default: True)
+        Don't use the blosc filter, but bare zlib instead.
     """
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
         self.ext_h5file = self.get('h5file') or None
+        self.disable_blosc = self.get('disable_blosc') or False
         # magic 10000: this is the default of the "expectedrows" arg
         # from the tables.File.create_table() function
         # at least according to the docs
@@ -73,15 +76,22 @@ class HDF5Sink(Module):
             self.h5file = self.ext_h5file
         else:
             self.h5file = tb.open_file(self.filename, mode="w", title="KM3NeT")
+        self.filters = self._set_filter()
+        self._tables = OrderedDict()
+
+    def _set_filter(self):
+        zlib_ = tb.Filters(complevel=5, shuffle=True, fletcher32=True,
+                           complib='zlib')
+        if self.disable_blosc:
+            return zlib_
         try:
-            self.filters = tb.Filters(complevel=5, shuffle=True,
-                                      fletcher32=True, complib='blosc')
+            blosc_ = tb.Filters(complevel=5, shuffle=True,
+                                fletcher32=True, complib='blosc')
+            return blosc_
         except tb.exceptions.FiltersWarning:
             log.error("BLOSC Compression not available, "
                       "falling back to zlib...")
-            self.filters = tb.Filters(complevel=5, shuffle=True,
-                                      fletcher32=True, complib='zlib')
-        self._tables = OrderedDict()
+            return zlib_
 
     def _to_array(self, data):
         if np.isscalar(data):
