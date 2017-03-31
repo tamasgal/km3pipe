@@ -99,7 +99,3 @@ class TestH5Sink(TestCase):
         p.attach(HDF5Pump, filename=self.fname)
         p.attach(HDF5Sink, h5file=self.out)
         p.drain()
-
-    def test_filter(self):
-        h5 = HDF5Sink(h5file=self.out)
-        h5.
