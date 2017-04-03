@@ -34,6 +34,10 @@ FORMAT_VERSION = np.string_('3.1')
 MINIMUM_FORMAT_VERSION = np.string_('3.0')
 
 
+class H5VersionError(Exception):
+    pass
+
+
 class HDF5Sink(Module):
     """Write KM3NeT-formatted HDF5 files, event-by-event.
 
@@ -48,27 +52,30 @@ class HDF5Sink(Module):
     ----------
     filename: str, optional (default: 'dump.h5')
         Where to store the events.
+    h5file: pytables.File instance, optional (default: None)
+        Opened file to write to. This is mutually exclusive with filename.
     """
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
-
+        self.ext_h5file = self.get('h5file') or None
+        self.pytab_file_args = self.get('pytab_file_args') or dict()
         # magic 10000: this is the default of the "expectedrows" arg
         # from the tables.File.create_table() function
         # at least according to the docs
         # might be able to set to `None`, I don't know...
         self.n_rows_expected = self.get('n_rows_expected') or 10000
-
         self.index = 0
-        self.h5file = tb.open_file(self.filename, mode="w", title="KM3NeT")
-        try:
-            self.filters = tb.Filters(complevel=5, shuffle=True,
-                                      fletcher32=True, complib='blosc')
-        except tb.exceptions.FiltersWarning:
-            log.error("BLOSC Compression not available, "
-                      "falling back to zlib...")
-            self.filters = tb.Filters(complevel=5, shuffle=True,
-                                      fletcher32=True, complib='zlib')
+
+        if self.filename != 'dump.h5' and self.ext_h5file is not None:
+            raise IOError("Can't specify both filename and file object!")
+        elif self.filename == 'dump.h5' and self.ext_h5file is not None:
+            self.h5file = self.ext_h5file
+        else:
+            self.h5file = tb.open_file(self.filename, mode="w", title="KM3NeT",
+                                       **self.pytab_file_args)
+        self.filters = tb.Filters(complevel=5, shuffle=True, fletcher32=True,
+                                  complib='zlib')
         self._tables = OrderedDict()
 
     def _to_array(self, data):
@@ -220,11 +227,11 @@ class HDF5Pump(Pump):
             return
         if split(version, int, np.string_('.')) < \
                 split(MINIMUM_FORMAT_VERSION, int, np.string_('.')):
-            raise SystemExit("HDF5 format version {0} or newer required!\n"
-                             "'{1}' has HDF5 format version {2}."
-                             .format(MINIMUM_FORMAT_VERSION,
-                                     filename,
-                                     version))
+            raise H5VersionError("HDF5 format version {0} or newer required!\n"
+                                 "'{1}' has HDF5 format version {2}."
+                                 .format(MINIMUM_FORMAT_VERSION,
+                                         filename,
+                                         version))
 
     def process(self, blob):
         try:

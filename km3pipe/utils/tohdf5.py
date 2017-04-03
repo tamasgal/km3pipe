@@ -11,7 +11,7 @@ Usage:
 
 Options:
     --aa-format=<fmt>          tohdf5: Which aanet subformat ('minidst',
-                               'ancient_recolns', 'jevt_jgandalf',
+                               'orca_recolns', 'gandalf',
                                'generic_track') [default: None]
     --aa-lib-<lib.so>          tohdf5: path to aanet binary (for old versions which
                                must be loaded via `ROOT.gSystem.Load()` instead
@@ -95,4 +95,5 @@ def main():
            aa_lib=aa_lib,
            with_summaryslices=with_summaryslices,
            with_timeslice_hits=with_timeslice_hits,
-           n_rows_expected=n_rows_expected)
+           n_rows_expected=n_rows_expected,
+           )

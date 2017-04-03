@@ -21,7 +21,8 @@ from km3pipe.dataclasses import (Hit, Track, Position,
                                  HitSeries, TimesliceHitSeries,
                                  EventInfo, SummarysliceInfo, TimesliceInfo,
                                  Serialisable, TrackSeries, SummaryframeSeries,
-                                 KM3Array, KM3DataFrame, BinaryStruct)
+                                 KM3Array, KM3DataFrame, BinaryStruct,
+                                 BinaryComposite)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -635,3 +636,9 @@ class TestBinaryStruct(TestCase):
         self.assertAlmostEqual(5.6, dummy.d, 5)
         self.assertAlmostEqual(7.8, dummy.e, 5)
         self.assertEqual(b'a', dummy.f)
+
+
+class TestBinaryComposite(TestCase):
+    def test_init(self):
+        stream = BytesIO(b'')
+        b = BinaryComposite(stream)
