@@ -15,6 +15,7 @@
 import sys
 import os
 from datetime import date
+import sphinx_rtd_theme
 
 # what is this?
 #sys.path.append('../')
@@ -112,12 +113,10 @@ pygments_style = 'sphinx'
 
 # -- Options for HTML output ----------------------------------------------
 
-html_theme = 'alabaster'
-html_theme_options = {
-    'font_family': "'Open Sans', sans",
-    'head_font_family': "'Lato', sans",
-    'code_font_family': "'Roboto Mono', monospace",
-}
+html_theme = 'sphinx_rtd_theme'
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+#html_theme_options = {
+#}
 
 
 # The name for this set of Sphinx documents.  If None, it defaults to
