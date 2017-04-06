@@ -7,3 +7,4 @@ sphinxcontrib-napoleon
 scikit-learn
 statsmodels==0.8.0rc1
 seaborn
+sphinx_rtd_theme
