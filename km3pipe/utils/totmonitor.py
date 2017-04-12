@@ -5,7 +5,7 @@
 Display the mean ToT for each TDC channel for given DOM.
 
 Usage:
-    totmonitor [-l LIGIER] [-p PORT] [-o OPTIMAL_TOT] [-t tolerance] DOM_ID
+    totmonitor [-l LIGIER] [-p PORT] [-o OPTIMAL_TOT] [-t TOLERANCE] [-u UPDATE] DOM_ID
     totmonitor (-h | --help)
     totmonitor --version
 
@@ -14,6 +14,7 @@ Options:
     -p PORT         Ligier port [default: 5553].
     -o OPTIMAL_TOT  Target ToT in ns [default: 26.4].
     -t TOLERANCE    Defines the range for valid ToT [default: 0.3].
+    -u UPDATE       Update frequency in seconds [default: 10].
     -h --help       Show this screen.
 """
 from __future__ import division
@@ -57,6 +58,9 @@ class TimesliceCreator(kp.core.Module):
 
 class MeanTotDisplay(kp.core.Module):
     def configure(self):
+        self.optimal_tot = self.get("optimal_tot") or 26.4 
+        self.tolerance = self.get("tolerance") or 0.3
+        self.update_frequency = self.get("update_frequency") or 10
         self.tots = defaultdict(list)
         self.counter = 0
 
@@ -68,7 +72,7 @@ class MeanTotDisplay(kp.core.Module):
             self.tots[channel] += list(tots)
 
         self.counter += 1
-        if self.counter % 100 == 0:
+        if self.counter % int(self.update_frequency * 10) == 0:
             self.update_display()
             self.tots = defaultdict(list)
             self.counter = 0
@@ -84,9 +88,9 @@ class MeanTotDisplay(kp.core.Module):
             if np.isnan(mean_tot):
                 mean_tot = 0
             color = 'green'
-            if mean_tot > self.optimal_tot + self.tolreance:
+            if mean_tot > self.optimal_tot + self.tolerance:
                 color = 'red'
-            if mean_tot < self.optimal_tot - self.tolreance:
+            if mean_tot < self.optimal_tot - self.tolerance:
                 color = 'blue'
             cprint("Channel {0:02d}: {1:.1f}ns    {2}"
                    .format(channel, mean_tot, int(mean_tot) * '|'),
@@ -116,7 +120,8 @@ def main():
     pipe.attach(TimesliceCreator, dom_id=int(args['DOM_ID']))
     pipe.attach(MeanTotDisplay,
                 optimal_tot=float(args['-o']),
-                tolreance=float(args['-t']))
+                update_frequency=float(args['-u']),
+                tolerance=float(args['-t']))
     pipe.drain()
 
 
