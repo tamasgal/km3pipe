@@ -44,6 +44,8 @@ class TimesliceCreator(kp.core.Module):
     def process(self, blob):
         hits =  blob['TimesliceFrames'][self.dom_id]
         n_hits = len(hits)
+        if n_hits == 0:
+            return blob
         channel_ids, times, tots = zip(*hits)
         ts_hits = kp.dataclasses.TimesliceHitSeries.from_arrays(
                   np.array(channel_ids),
@@ -119,6 +121,7 @@ def main():
     pipe.attach(kp.io.daq.TimesliceParser)
     pipe.attach(TimesliceCreator, dom_id=int(args['DOM_ID']))
     pipe.attach(MeanTotDisplay,
+                only_if="TimesliceHits",
                 optimal_tot=float(args['-o']),
                 update_frequency=float(args['-u']),
                 tolerance=float(args['-t']))
