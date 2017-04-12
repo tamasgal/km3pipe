@@ -84,9 +84,9 @@ class MeanTotDisplay(kp.core.Module):
             if np.isnan(mean_tot):
                 mean_tot = 0
             color = 'green'
-            if mean_tot > OPTIMAL_TOT + TOLERANCE:
+            if mean_tot > self.optimal_tot + self.tolreance:
                 color = 'red'
-            if mean_tot < OPTIMAL_TOT - TOLERANCE:
+            if mean_tot < self.optimal_tot - self.tolreance:
                 color = 'blue'
             cprint("Channel {0:02d}: {1:.1f}ns    {2}"
                    .format(channel, mean_tot, int(mean_tot) * '|'),
@@ -105,7 +105,6 @@ class MeanTotDisplay(kp.core.Module):
 def main():
     from docopt import docopt
     args = docopt(__doc__)
-    print(args)
     pipe = kp.Pipeline()
     pipe.attach(kp.io.ch.CHPump,
                 host=args['-l'],
