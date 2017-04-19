@@ -1,5 +1,9 @@
 Unreleased changes
 ------------------
+
+6.6.6 / 2017-04-03
+------------------
+* change blosc compression -> zlib compression
 * add corsika evt tag reader (seamuon/seaneutrino)
 
 6.5.5 / 2017-03-29

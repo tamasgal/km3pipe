@@ -125,7 +125,7 @@ class AanetPump(Pump):
 
             try:
                 self.header = event_file.rootfile().Get("Head")
-            except (ValueError, UnicodeEncodeError):
+            except (ValueError, UnicodeEncodeError, TypeError):
                 log.warn(filename + ": can't read header.")
             try:
                 lt_line = self.header.get_line('livetime')

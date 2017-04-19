@@ -5,6 +5,7 @@ recursive-include km3pipe *.pyxbld
 recursive-include docs *
 recursive-include km3pipe/tests *.py
 recursive-include km3pipe/io/tests *.py
+recursive-include km3pipe/style *.py
 recursive-include km3pipe/kp-data *
 
 recursive-exclude docs *.pyc

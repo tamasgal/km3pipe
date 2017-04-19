@@ -87,6 +87,9 @@ class TestH5Sink(TestCase):
         self.out = tb.open_file("out_test.h5", "w", driver="H5FD_CORE",
                                 driver_core_backing_store=0)
 
+    def tearDown(self):
+        self.out.close()
+
     def test_init_has_to_be_explicit(self):
         with self.assertRaises(TypeError):
             HDF5Sink(self.out)
@@ -96,6 +99,3 @@ class TestH5Sink(TestCase):
         p.attach(HDF5Pump, filename=self.fname)
         p.attach(HDF5Sink, h5file=self.out)
         p.drain()
-
-    def tearDown(self):
-        self.out.close()

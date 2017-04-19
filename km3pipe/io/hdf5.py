@@ -59,12 +59,12 @@ class HDF5Sink(Module):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
         self.ext_h5file = self.get('h5file') or None
+        self.pytab_file_args = self.get('pytab_file_args') or dict()
         # magic 10000: this is the default of the "expectedrows" arg
         # from the tables.File.create_table() function
         # at least according to the docs
         # might be able to set to `None`, I don't know...
         self.n_rows_expected = self.get('n_rows_expected') or 10000
-
         self.index = 0
 
         if self.filename != 'dump.h5' and self.ext_h5file is not None:
@@ -72,15 +72,10 @@ class HDF5Sink(Module):
         elif self.filename == 'dump.h5' and self.ext_h5file is not None:
             self.h5file = self.ext_h5file
         else:
-            self.h5file = tb.open_file(self.filename, mode="w", title="KM3NeT")
-        try:
-            self.filters = tb.Filters(complevel=5, shuffle=True,
-                                      fletcher32=True, complib='blosc')
-        except tb.exceptions.FiltersWarning:
-            log.error("BLOSC Compression not available, "
-                      "falling back to zlib...")
-            self.filters = tb.Filters(complevel=5, shuffle=True,
-                                      fletcher32=True, complib='zlib')
+            self.h5file = tb.open_file(self.filename, mode="w", title="KM3NeT",
+                                       **self.pytab_file_args)
+        self.filters = tb.Filters(complevel=5, shuffle=True, fletcher32=True,
+                                  complib='zlib')
         self._tables = OrderedDict()
 
     def _to_array(self, data):

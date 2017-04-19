@@ -126,10 +126,3 @@ class ColourCycler(object):
     def next(self):
         """Return the next colour in current palette"""
         return next(self._cycler)
-
-
-# Automatically load default style on import.
-try:
-    use('km3pipe')
-except NameError:
-    print("Could not load default matplotlib style.")

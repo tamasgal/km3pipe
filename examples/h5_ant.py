@@ -8,7 +8,7 @@ Seatray has a builtint HDF5 writer. This is how to read the file.
 
 import pandas as pd
 
-store = pd.HDFStore("example.hd5")
+store = pd.HDFStore("example.hd5", mode='r')
 
 # Do a selection on the dataframe
 
