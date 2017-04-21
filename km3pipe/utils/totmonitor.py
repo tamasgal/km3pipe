@@ -22,7 +22,7 @@ from __future__ import division
 import os
 from collections import defaultdict
 
-from termcolor import colored, cprint
+from km3pipe.dev import cprint
 
 import km3pipe as kp
 import numpy as np
@@ -60,7 +60,7 @@ class TimesliceCreator(kp.core.Module):
 
 class MeanTotDisplay(kp.core.Module):
     def configure(self):
-        self.optimal_tot = self.get("optimal_tot") or 26.4 
+        self.optimal_tot = self.get("optimal_tot") or 26.4
         self.tolerance = self.get("tolerance") or 0.3
         self.update_frequency = self.get("update_frequency") or 10
         self.tots = defaultdict(list)
