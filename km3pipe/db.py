@@ -171,6 +171,7 @@ class DBManager(object):
         def convert_data(timestamp):
             return datetime.fromtimestamp(float(timestamp) / 1e3, UTC_TZ)
         try:
+            log.debug("Adding DATETIME column to the data")
             converted = dataframe[timestamp_key].apply(convert_data)
             dataframe['DATETIME'] = converted
         except KeyError:
@@ -180,6 +181,7 @@ class DBManager(object):
         """Add an additional DATA_VALUE column with converted VALUEs"""
         convert_unit = self.parameters.get_converter(parameter)
         try:
+            log.debug("Adding unit converted DATA_VALUE to the data")
             dataframe[key] = dataframe['DATA_VALUE'].apply(convert_unit)
         except KeyError:
             log.warn("Missing 'VALUE': no unit conversion.")
@@ -322,15 +324,23 @@ class DBManager(object):
     def opener(self):
         "A reusable connection manager"
         if self._opener is None:
+            log.debug("Creating connection handler")
             opener = build_opener()
+            if self._cookies:
+                log.debug("Appending cookies")
+            else:
+                log.debug("No cookies to append")
             for cookie in self._cookies:
                 cookie_str = cookie.name + '=' + cookie.value
                 opener.addheaders.append(('Cookie', cookie_str))
             self._opener = opener
+        else:
+            log.debug("Reusing connection manager")
         return self._opener
 
     def request_sid_cookie(self, username, password):
         """Request cookie for permanent session token."""
+        log.debug("Requesting SID cookie")
         target_url = self._login_url + '?usr={0}&pwd={1}&persist=y' \
                                       .format(username, password)
         cookie = urlopen(target_url).read()
@@ -338,13 +348,16 @@ class DBManager(object):
 
     def restore_session(self, cookie):
         """Establish databse connection using permanent session cookie"""
+        log.debug("Restoring session from cookie")
         opener = build_opener()
         opener.addheaders.append(('Cookie', cookie))
         self._opener = opener
 
     def request_permanent_session(self, username=None, password=None):
+        log.debug("Requesting permanent session")
         config = Config()
         if username is None and password is None:
+            log.debug("Checking configuration file for DB credentials")
             username, password = config.db_credentials
         cookie = self.request_sid_cookie(username, password)
         try:
@@ -352,15 +365,18 @@ class DBManager(object):
         except TypeError:
             cookie_str = str(cookie)  # Python 2
         log.debug("Session cookie: {0}".format(cookie_str))
+        log.debug("Storing cookie in configuration file")
         config.set('DB', 'session_cookie', cookie_str)
         self.restore_session(cookie)
 
     def login(self, username, password):
-        "Login to the databse and store cookies for upcoming requests."
+        "Login to the database and store cookies for upcoming requests."
+        log.debug("Logging in to the DB")
         opener = self._build_opener()
         values = {'usr': username, 'pwd': password}
         req = self._make_request(self._login_url, values)
         try:
+            log.debug("Sending login request")
             f = opener.open(req)
         except URLError as e:
             log.error("Failed to connect to the database -> probably down!")
