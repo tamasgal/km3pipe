@@ -24,6 +24,7 @@
 
     install
     user_guide
+    logging
     examples
     api
     contribute
