@@ -4,7 +4,7 @@ docopt
 matplotlib>=2.0.0
 pandas
 scipy
-tables
+tables=3.4.0
 tornado
 urwid
 websocket-client
