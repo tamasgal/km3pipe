@@ -3,7 +3,7 @@ cython
 docopt
 matplotlib>=2.0.0
 pandas
-tables=3.4.0
+tables==3.4.0
 scipy>=0.19
 tornado
 urwid
