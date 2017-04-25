@@ -70,3 +70,6 @@ docs/api
 
 # jupyter files
 .ipynb_checkpoints/
+
+# 
+junit.xml

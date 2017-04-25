@@ -76,7 +76,7 @@ require_groups = {
           'base': ['cython', 'docopt', 'numpy>=1.12', 'pandas', 'pytz',
                    'six', ],
           'analysis': ['matplotlib>=2.0.0', 'sklearn', 'statsmodels>=0.8',
-                       'scipy', 'seaborn', 'ipython', 'patsy', ],
+                       'scipy>=0.19', 'seaborn', 'ipython', 'patsy', ],
           'daq': ['controlhost', ],
           'io': ['tables==3.4.0', 'h5py', ],
           'jpp': ['jppy>=1.3.1', ],
