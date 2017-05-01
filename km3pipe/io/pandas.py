@@ -124,17 +124,17 @@ def merge_event_ids(df):
     return df
 
 
-def df_to_h5(df, h5file, where):
+def df_to_h5(df, h5file, where, **kwargs):
     """Write pandas dataframes with proper columns.
 
     Example:
         >>> df = pd.DataFrame(...)
         >>> df_to_h5(df, 'foo.h5', '/some/loc/my_df')
     """
-    write_table(df.to_records(index=False), h5file, where)
+    write_table(df.to_records(index=False), h5file, where, **kwargs)
 
 
-def write_table(array, h5file, where):
+def write_table(array, h5file, where, force=False):
     """Write a structured numpy array into a H5 table.
     """
     own_h5 = False
@@ -145,8 +145,11 @@ def write_table(array, h5file, where):
     loc, tabname = os.path.split(where)
     if loc == '':
         loc = '/'
-    h5file.create_table(loc, tabname, obj=array, createparents=True,
-                        filters=filt)
+    try:
+        h5file.create_table(loc, tabname, obj=array, createparents=True,
+                            filters=filt)
+    except tb.exceptions.NodeError:
+        h5file.get_node(where)[:] = array
     if own_h5:
         h5file.close()
 
