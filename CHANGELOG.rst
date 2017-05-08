@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
+
+6.7.0 / 2017-05-08
+------------------
 * ``totmonitor`` command line utility added
+* bump library versions (scipy >=0.19)
 
 6.6.6 / 2017-04-03
 ------------------
