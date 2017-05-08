@@ -6,3 +6,4 @@ sphinx>=1.5.1
 sphinxcontrib-napoleon
 scikit-learn
 seaborn
+sphinx_rtd_theme

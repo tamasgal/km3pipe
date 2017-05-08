@@ -197,6 +197,8 @@ class EvtPump(Pump):  # pylint: disable:R0902
                 blob.setdefault("EvtRawHits", []).append(raw_hit)
             if tag == "track_in":
                 blob.setdefault("TrackIns", []).append(TrackIn(values))
+            if tag == "track_neutrinos":
+                blob.setdefault("TrackInNeutrinos", []).append(TrackIn(values))
             if tag == "track_fit":
                 blob.setdefault("TrackFits", []).append(TrackFit(values))
             if tag == "track_seamuon":
@@ -209,10 +211,10 @@ class EvtPump(Pump):  # pylint: disable:R0902
                 blob['Neutrino'] = Neutrino(values)
             elif tag == 'center_on_can':
                 values = [float(x) for x in value.split()]
-                blob['CenterOnCan'] = TrackIn(values)
-            elif tag == 'primary':
+                blob['CenterOnCan'] = TrackCorsika(values)
+            elif tag == 'track_primary':
                 values = [float(x) for x in value.split()]
-                blob['Primary'] = TrackIn(values)
+                blob['Primary'] = TrackCorsika(values)
             else:
                 blob[tag] = value.split()
 
@@ -284,11 +286,40 @@ class TrackIn(Track):
     """Representation of a track_in entry in an EVT file"""
     def __init__(self, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
-        self.particle_type = geant2pdg(int(self.args[0]))
         try:
-            self.length = self.args[1]
-        except IndexError:
+            self.particle_type = int(self.args[0])
+            self.charmed = bool(self.args[1])
+            self.mother = int(self.args[2])
+            self.grandmother = int(self.args[3])
             self.length = 0
+        except IndexError:
+            self.particle_type = geant2pdg(int(self.args[0]))
+            try:
+                self.length = self.args[1]
+            except IndexError:
+                self.length = 0
+
+    def __repr__(self):
+        text = super(self.__class__, self).__repr__()
+        text += " length: {0} [m]\n".format(self.length)
+        try:
+            text += " type: {0} [Corsika]\n".format(self.particle_type)
+            text += " charmed: {0}\n".format(self.charmed)
+            text += " mother: {0} [Corsika]\n".format(self.mother)
+            text += " grandmother: {0} [Corsika]\n".format(self.grandmother)
+        except AttributeError:
+            text += " type: {0} '{1}' [PDG]\n".format(self.particle_type,
+                                                      pdg2name(self.particle_type))
+            pass
+
+        return text
+
+
+class TrackCorsika(Track):
+    """Representation of a track in a corsika output file"""
+    def __init__(self, *args, **kwargs):
+        super(self.__class__, self).__init__(*args, **kwargs)
+        self.particle_type = int(self.args[0])
         try:
             self.charmed = bool(self.args[1])
             self.mother = int(self.args[2])
@@ -298,9 +329,7 @@ class TrackIn(Track):
 
     def __repr__(self):
         text = super(self.__class__, self).__repr__()
-        text += " type: {0} '{1}' [PDG]\n".format(self.particle_type,
-                                                  pdg2name(self.particle_type))
-        text += " length: {0} [m]\n".format(self.length)
+        text += " type: {0} [Corsika]\n".format(self.particle_type)
         try:
             text += " charmed: {0}\n".format(self.charmed)
             text += " mother: {0} [Corsika]\n".format(self.mother)
@@ -308,7 +337,6 @@ class TrackIn(Track):
         except AttributeError:
             pass
         return text
-
 
 class TrackFit(Track):
     """Representation of a track_fit entry in an EVT file"""

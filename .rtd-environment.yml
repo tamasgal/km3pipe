@@ -11,7 +11,7 @@ dependencies:
   - numpy
   - pandas
   - matplotlib
-  - scipy
+  - scipy>=0.19
   - cython
   - pillow
   - pytables

@@ -386,7 +386,7 @@ class Geometry(Module):
 
     Parameters
     ----------
-    should_apply: bool, optional [default=False]
+    apply: bool, optional [default=False]
         Apply the geometry to the hits (add position/direction/t0)?
     filename: str, optional [default=None]
         DetX file with detector description.

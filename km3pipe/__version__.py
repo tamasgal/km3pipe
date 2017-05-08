@@ -28,7 +28,7 @@ __author__ = 'tamasgal'
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
-version_info = (6, 6, 6, 'final', 0)
+version_info = (6, 7, 0, 'final', 0)
 
 
 def _get_version(version_info):
@@ -73,4 +73,7 @@ def check_for_update():
 version = _get_version(version_info)
 if config is not None:
     if config.check_for_updates:
-        check_for_update()
+        try:
+            check_for_update()
+        except (ValueError, TypeError, OSError):
+            pass

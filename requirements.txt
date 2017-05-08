@@ -3,8 +3,8 @@ cython
 docopt
 matplotlib>=2.0.0
 pandas
-scipy
-tables
+tables==3.4.0
+scipy>=0.19
 tornado
 urwid
 websocket-client

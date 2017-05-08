@@ -1,0 +1,15 @@
+axes.linewidth: 2
+
+image.cmap: viridis
+
+font.sans-serif: Roboto, sans-serif
+font.serif: Roboto Slab, serif
+font.monospace: Roboto Mono, serif
+
+hist.bins: auto
+
+savefig.bbox: tight
+savefig.format: svg
+savefig.transparent: false
+
+svg.fonttype: none

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Filename: tohdf5.py
+# Filename: pushover.py
 """
 Send a push message to a device using Pushover.net API.
 
