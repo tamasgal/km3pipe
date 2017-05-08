@@ -1,6 +1,7 @@
 Unreleased changes
 ------------------
 
+
 6.7.0 / 2017-05-08
 ------------------
 * ``totmonitor`` command line utility added
