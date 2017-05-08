@@ -54,7 +54,7 @@ class H5Chain(object):
     def __init__(self, filenames):
         self.h5files = {}
         for fn in filenames:
-            h5 = pd.HDFStore(fn, 'r')
+            h5 = tb.File(fn, 'r')
             self.h5files[fn] = h5
 
     def close(self):
@@ -70,7 +70,8 @@ class H5Chain(object):
     def __getitem__(self, key):
         dfs = []
         for fname, h5 in self.h5files.items():
-            df = h5[key]
+            tab = h5.get_node(key)[:]
+            df = pd.DataFrame(tab)
             dfs.append(df)
         dfs = pd.concat(dfs, axis=0, ignore_index=True)
         return dfs
