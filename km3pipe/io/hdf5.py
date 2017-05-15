@@ -104,7 +104,7 @@ class HDF5Sink(Module):
                 filters=self.filters, createparents=True,
                 expectedrows=self.n_rows_expected,
             )
-            if(level < 4):
+            if(level < 5):
                 self._tables[where] = tab
         else:
             tab = self._tables[where]
