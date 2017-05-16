@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* ControlHost improvements
 
 
 6.7.0 / 2017-05-08
