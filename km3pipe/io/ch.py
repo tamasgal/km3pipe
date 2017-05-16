@@ -88,9 +88,12 @@ class CHPump(Pump):
                 log.debug("Waiting for data from network...")
                 prefix, data = self.client.get_message()
                 log.debug("{0} bytes received from network.".format(len(data)))
-            except ValueError:
-                log.error("Corrupt data recieved, skipping...")
-                continue
+            except EOFError:
+                log.warn("EOF from Ligier, aborting...")
+                break
+            except BufferError:
+                log.error("Buffer error in Ligier stream, aborting...")
+                break
             if not data:
                 log.critical("No data received, connection died.\n" +
                              "Trying to reconnect in 30 seconds.")
@@ -125,4 +128,5 @@ class CHPump(Pump):
     def finish(self):
         """Clean up the JLigier controlhost connection"""
         log.debug("Disconnecting from JLigier.")
+        self.client.socket.shutdown(socket.SHUT_RDWR)
         self.client._disconnect()
