@@ -69,15 +69,20 @@ class Client(object):
         while True:
             log.info("     Waiting for control host Prefix")
             try:
-                prefix = Prefix(data=self.socket.recv(Prefix.SIZE))
+                data = self.socket.recv(Prefix.SIZE)
+                log.info("    raw prefix data received: '{0}'".format(data))
+                if data == b'':
+                    raise EOFError
+                prefix = Prefix(data=data)
             except (UnicodeDecodeError, OSError, struct.error):
-                log.error("Failed to construct Prefix.")
+                log.error("Failed to construct Prefix, reconnecting.")
                 self._reconnect()
-                raise ValueError
+                continue
             if str(prefix.tag) not in self.valid_tags:
-                log.error("Invalid tag '{0}' received, ignoring the message."
-                          .format(prefix.tag))
-                print("Valid tags are: {0}".format(self.valid_tags))
+                log.error("Invalid tag '{0}' received, ignoring the message \n"
+                          "and reconnecting.\n"
+                          "  -> valid tags are: {0}"
+                          .format(prefix.tag, self.valid_tags))
                 self._reconnect()
                 continue
             else:
@@ -93,7 +98,7 @@ class Client(object):
                 message += self.socket.recv(buffer_size)
             except OSError:
                 log.error("Failed to construct message.")
-                raise ValueError
+                raise BufferError
         log.info("     ------ returning message with {0} bytes"
                  .format(len(message)))
         return prefix, message
