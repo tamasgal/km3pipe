@@ -72,7 +72,7 @@ else:
 require_groups = {
           'docs': ['numpydoc', 'pillow',
                    'scikit-learn', 'sphinx-gallery',
-                   'sphinx>=1.5.1', 'sphinxcontrib-napoleon', ],
+                   'sphinx==1.5.6', 'sphinxcontrib-napoleon', ],
           'base': ['cython', 'docopt', 'numpy>=1.12', 'pandas', 'pytz',
                    'six', ],
           'analysis': ['matplotlib>=2.0.0', 'sklearn', 'statsmodels>=0.8',
