@@ -97,6 +97,11 @@ class Pipeline(object):
         else:
             module.only_if = None
 
+        if 'every' in kwargs:
+            module.every = kwargs['every']
+        else:
+            module.every = 1
+
         self._timeit[module] = {'process': deque(maxlen=STAT_LIMIT),
                                 'process_cpu': deque(maxlen=STAT_LIMIT),
                                 'finish': 0,
@@ -154,6 +159,11 @@ class Pipeline(object):
                             module.only_if not in self.blob:
                         log.debug("Skipping {0}, due to missing required key"
                                   "'{1}'.".format(module.name, module.only_if))
+                        continue
+
+                    if (self._cycle_count + 1) % module.every != 0:
+                        log.debug("Skipping {0} (every {1} iterations)."
+                                  .format(module.name, module.every))
                         continue
 
                     log.debug("Processing {0} ".format(module.name))
@@ -282,6 +292,7 @@ class Module(object):
         self._name = name
         self.parameters = parameters
         self.only_if = None
+        self.every = 1
         self.detector = None
         self.timeit = self.get('timeit') or False
         self._timeit = {'process': deque(maxlen=STAT_LIMIT),

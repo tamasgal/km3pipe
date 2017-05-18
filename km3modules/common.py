@@ -138,15 +138,12 @@ class BlobIndexer(Module):
 
 class StatusBar(Module):
     """Displays the current blob number."""
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
-        self.every = self.get('every') or 100
-        self.blob_index = 0
+    def configure(self):
+        self.iteration = 1
 
     def process(self, blob):
-        if self.blob_index % self.every == 0:
-            prettyln("Blob {0:>7}".format(self.blob_index))
-        self.blob_index += 1
+        prettyln("Blob {0:>7}".format(self.every * self.iteration))
+        self.iteration += 1
         return blob
 
     def finish(self):
@@ -158,20 +155,15 @@ class TickTock(Module):
 
     Parameters
     ----------
-    every: int, optional [default=100]
+    every: int, optional [default=1]
         Number of iterations between printout.
     """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
-        self.every = self.get('every') or 100
-        self.blob_index = 0
+    def configure(self):
         self.t0 = time()
 
     def process(self, blob):
-        if self.blob_index % self.every == 0:
-            t1 = (time() - self.t0)/60
-            prettyln("Time/min: {0:.3f}".format(t1))
-        self.blob_index += 1
+        t1 = (time() - self.t0)/60
+        prettyln("Time/min: {0:.3f}".format(t1))
         return blob
 
 
@@ -179,19 +171,12 @@ class MemoryObserver(Module):
     """Shows the maximum memory usage
     Parameters
     ----------
-    every: int, optional [default=100]
+    every: int, optional [default=1]
         Number of iterations between printout.
     """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
-        self.every = self.get('every') or 100
-        self.blob_index = 0
-
     def process(self, blob):
-        if self.blob_index % self.every == 0:
-            memory = peak_memory_usage()
-            prettyln("Memory peak: {0:.3f} MB".format(memory))
-        self.blob_index += 1
+        memory = peak_memory_usage()
+        prettyln("Memory peak: {0:.3f} MB".format(memory))
         return blob
 
 
