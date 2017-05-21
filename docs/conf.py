@@ -276,7 +276,7 @@ texinfo_documents = [
 # -- Options for Example Gallery ------------------------------------------
 sphinx_gallery_conf = {
     # path to store the module using example template
-    'mod_example_dir': 'modules/generated',
+    'backreferences_dir': 'modules/generated',
     'doc_module': ('km3pipe', ),
     'default_thumb_file': '_static/default_gallery_thumbnail.png',
     'examples_dirs': ['../examples'],
