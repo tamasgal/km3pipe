@@ -1,4 +1,5 @@
 axes.linewidth: 2
+axes.prop_cycle: cycler('color', ["ff7869", "4babe1", "96ad3e", "e4823d", "5d72b2", "e2a3c2", "fd9844", "e480e7"])
 
 image.cmap: viridis
 
