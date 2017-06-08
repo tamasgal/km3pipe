@@ -4,12 +4,13 @@
 Convert HDF5 to vanilla ROOT.
 
 Usage:
-     hdf2root FILES...
+     hdf2root [--verbose] FILES...
      hdf2root (-h | --help)
      hdf2root --version
 
 Options:
     -h --help           Show this screen.
+    --verbose           Print more info [default: False]
 """
 
 from __future__ import division, absolute_import, print_function
@@ -17,6 +18,8 @@ from __future__ import division, absolute_import, print_function
 import sys
 import os
 from datetime import datetime
+
+import numpy as np
 
 from km3pipe import version
 from km3modules.common import StatusBar
@@ -30,7 +33,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-def hdf2root(infile, outfile):
+def hdf2root(infile, outfile, verbose=False):
     from rootpy.io import root_open
     from rootpy import asrootpy
     from root_numpy import array2tree
@@ -45,7 +48,11 @@ def hdf2root(infile, outfile):
     # => this moronic nested loop instead of simple `walk`
     for group in h5.walk_groups():
         for leafname, leaf in group._v_leaves.items():
-            tree = asrootpy(array2tree(leaf[:], name=leaf._v_pathname))
+            arr = leaf[:]
+            if arr.dtype.names is None:
+                dt = np.dtype((arr.dtype, [(leafname, arr.dtype)]))
+                arr = arr.view(dt)
+            tree = asrootpy(array2tree(arr, name=leaf._v_pathname))
             tree.write()
     rf.close()
     h5.close()
@@ -56,5 +63,6 @@ def main():
     args = docopt(__doc__, version=version)
 
     files = args['FILES']
+    verbose = bool(args['--verbose'])
     for fn in files:
-        hdf2root(fn, fn+'.root')
+        hdf2root(fn, fn+'.root', verbose=verbose)

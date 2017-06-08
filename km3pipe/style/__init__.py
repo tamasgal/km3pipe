@@ -13,7 +13,7 @@ from itertools import cycle
 try:
     import matplotlib.pyplot as plt
 except ImportError:
-    print("Please install matplotlib: `pip install matplotlib`")
+    raise ImportError("Please install matplotlib: `pip install matplotlib`")
 import km3pipe as kp
 
 

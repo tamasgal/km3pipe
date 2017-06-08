@@ -2,7 +2,7 @@ pillow
 numpydoc
 ipython
 sphinx-gallery
-sphinx>=1.5.1
+sphinx==1.5.6
 sphinxcontrib-napoleon
 scikit-learn
 seaborn

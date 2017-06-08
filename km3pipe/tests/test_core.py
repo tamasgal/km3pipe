@@ -134,6 +134,31 @@ class TestPipeline(TestCase):
         self.assertEqual(1, pl.modules[1].process.call_count)
         self.assertEqual(1, pl.modules[2].process.call_count)
 
+    def test_condition_every(self):
+        pl = Pipeline(blob=1)
+
+        pl.attach(Module, 'module1')
+        pl.attach(Module, 'module2', every=3)
+        pl.attach(Module, 'module3', every=9)
+        pl.attach(Module, 'module4', every=10)
+        pl.attach(Module, 'module5')
+
+        func_module = MagicMock()
+        func_module.__name__ = "MagicMock"
+        pl.attach(func_module, 'funcmodule', every=4)
+
+        for module in pl.modules:
+            module.process = MagicMock(return_value={})
+
+        pl.drain(9)
+
+        self.assertEqual(9, pl.modules[0].process.call_count)
+        self.assertEqual(3, pl.modules[1].process.call_count)
+        self.assertEqual(1, pl.modules[2].process.call_count)
+        self.assertEqual(0, pl.modules[3].process.call_count)
+        self.assertEqual(9, pl.modules[4].process.call_count)
+        self.assertEqual(2, func_module.call_count)
+
     def test_drain_calls_function_modules(self):
         pl = Pipeline(blob=1)
 
