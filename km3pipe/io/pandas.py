@@ -68,7 +68,11 @@ class H5Chain(object):
         dfs = []
         for fname in self.filenames:
             with h5py.File(fname, 'r') as h5:
-                tab = h5[key][:]
+                try:
+                    tab = h5[key][:]
+                except KeyError as ke:
+                    log.error('{} does not exist in {}!'.format(key, fname))
+                    raise ke
             df = pd.DataFrame(tab)
             dfs.append(df)
         dfs = pd.concat(dfs, axis=0, ignore_index=True)
