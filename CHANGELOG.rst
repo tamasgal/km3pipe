@@ -1,7 +1,11 @@
 Unreleased changes
 ------------------
-* ControlHost improvements
 
+6.7.1 / 2017-06-08
+------------------
+* ControlHost improvements
+* Change ``every`` behavior in pipeline
+* h5chain multifile fix
 
 6.7.0 / 2017-05-08
 ------------------

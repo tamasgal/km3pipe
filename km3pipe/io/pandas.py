@@ -13,6 +13,7 @@ from six import string_types
 import numpy as np
 import pandas as pd
 import tables as tb
+import h5py
 
 from km3pipe.logger import logging
 from km3pipe.tools import insert_prefix_to_dtype
@@ -52,14 +53,10 @@ class H5Chain(object):
 
     """
     def __init__(self, filenames):
-        self.h5files = {}
-        for fn in filenames:
-            h5 = tb.File(fn, 'r')
-            self.h5files[fn] = h5
+        self.filenames = filenames
 
     def close(self):
-        for h5 in self.h5files.values():
-            h5.close()
+        pass
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
@@ -69,8 +66,13 @@ class H5Chain(object):
 
     def __getitem__(self, key):
         dfs = []
-        for fname, h5 in self.h5files.items():
-            tab = h5.get_node(key)[:]
+        for fname in self.filenames:
+            with h5py.File(fname, 'r') as h5:
+                try:
+                    tab = h5[key][:]
+                except KeyError as ke:
+                    log.error('{} does not exist in {}!'.format(key, fname))
+                    raise ke
             df = pd.DataFrame(tab)
             dfs.append(df)
         dfs = pd.concat(dfs, axis=0, ignore_index=True)
