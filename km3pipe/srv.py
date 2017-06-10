@@ -278,7 +278,7 @@ def srv_event(token, hits, url=RBA_URL):
         time = list(hits['time'])
         tot = list(hits['tot'])
     if isinstance(hits, HitSeries):
-        pos = [(h.pos.x, h.pos.y, h.pos.z) for h in hits]
+        pos = [(h.pos_x, h.pos_y, h.pos_z) for h in hits]
         time = [h.time for h in hits]
         tot = [h.tot for h in hits]
 
