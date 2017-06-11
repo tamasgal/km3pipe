@@ -52,7 +52,8 @@ def hdf2root(infile, outfile, verbose=False):
             if arr.dtype.names is None:
                 dt = np.dtype((arr.dtype, [(leafname, arr.dtype)]))
                 arr = arr.view(dt)
-            tree = asrootpy(array2tree(arr, name=leaf._v_pathname))
+            treename = leaf._v_pathname.strip('/')
+            tree = asrootpy(array2tree(arr, name=treename))
             tree.write()
     rf.close()
     h5.close()
