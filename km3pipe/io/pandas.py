@@ -76,6 +76,9 @@ class H5Chain(object):
                 except KeyError as ke:
                     log.error('{} does not exist in {}!'.format(key, fname))
                     raise ke
+                except tb.exceptions.NodeError as ne:
+                    log.error('{} does not exist in {}!'.format(key, fname))
+                    raise ne
             if self.verbose:
                 print(tab.shape)
             df = pd.DataFrame(tab)
