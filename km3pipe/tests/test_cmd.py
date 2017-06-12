@@ -17,7 +17,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-KM3PIPE_GIT = "http://git.km3net.de/tgal/km3pipe.git"
+KM3PIPE_GIT = "http://git.km3net.de/km3py/km3pipe.git"
 
 
 class TestDetx(TestCase):
