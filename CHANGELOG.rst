@@ -1,5 +1,9 @@
 Unreleased changes
 ------------------
+
+
+6.8.0 / 2017-06-13
+------------------
 * minor bugfixes
 * git repository changed, ``km3pipe update develop`` is broken for
   all versions below 6.8.0
