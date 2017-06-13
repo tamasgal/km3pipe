@@ -46,7 +46,7 @@ To install the latest stable version:::
 
 To get the development version, use:::
 
-    $ pip install git+http://git.km3net.de/tgal/km3pipe.git@develop
+    $ pip install git+http://git.km3net.de/km3py/km3pipe.git@develop
 
 
 Updating

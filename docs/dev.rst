@@ -14,7 +14,7 @@ Enter the virtualenv::
 Make a Fork of KM3Pipe
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Go to ``http://git.km3net.de/tgal/km3pipe`` and click on "Fork".
+Go to ``http://git.km3net.de/km3py/km3pipe`` and click on "Fork".
 
 
 Install in Developer Mode
