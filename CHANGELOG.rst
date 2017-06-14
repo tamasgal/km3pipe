@@ -1,5 +1,10 @@
 Unreleased changes
 ------------------
+
+
+6.8.1 / 2017-06-15
+------------------
+- DOI citation added
 - tohdf5: aa pump: make zed correction (mc tracks) optional
 
 6.8.0 / 2017-06-13
