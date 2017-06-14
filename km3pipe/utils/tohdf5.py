@@ -4,7 +4,7 @@
 Convert ROOT and EVT files to HDF5.
 
 Usage:
-    tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [--aa-format=<fmt>] [--aa-lib=<lib.so>] FILE...
+    tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [--correct-zed] [--aa-format=<fmt>] [--aa-lib=<lib.so>] FILE...
     tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [-j] [-s] [-l] FILE...
     tohdf5 (-h | --help)
     tohdf5 --version
@@ -22,6 +22,7 @@ Options:
     -n EVENTS/RUNS             Number of events/runs.
     -o OUTFILE                 Output file.
     -s --with-summaryslices    Include summary slices [default: False]
+    --correct-zed              Correc toffset in mc tracks (aanet) [default: False]
     -e --expected-rows NROWS   Approximate number of events.  Providing a
                                rough estimate for this (100, 10000000, ...)
                                will greatly improve reading/writing speed and
@@ -87,6 +88,7 @@ def main():
     aa_lib = args['--aa-lib']
     with_summaryslices = args['--with-summaryslices']
     with_timeslice_hits = args['--with-timeslice-hits']
+    correct_zed = args['--correct-zed']
     tohdf5(infiles,
            outfile,
            n,
@@ -96,4 +98,5 @@ def main():
            with_summaryslices=with_summaryslices,
            with_timeslice_hits=with_timeslice_hits,
            n_rows_expected=n_rows_expected,
+           apply_zed_correction=correct_zed,
            )

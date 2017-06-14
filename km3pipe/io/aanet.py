@@ -43,6 +43,8 @@ class AanetPump(Pump):
         ``'minidst', 'jevt_jgandalf', 'generic_track', 'ancient_recolns'``
     use_aart_sps_lib: bool, optional [default=False]
         Use Aart's local SPS copy (@ Lyon) via ``gSystem.Load``?
+    apply_zed_correction: bool, optional [default=False]
+        correct ~400m offset in mc tracks.
     """
 
     def __init__(self, **context):
@@ -55,6 +57,7 @@ class AanetPump(Pump):
         self.format = self.get('aa_fmt')
         self.use_id = self.get('use_id') or False
         self.use_aart_sps_lib = self.get('use_aart_sps_lib') or False
+        self.apply_zed_correction = self.get('apply_zed_correction') or False
         if self.additional:
             self.id = self.get('id')
             self.return_without_match = self.get("return_without_match")
@@ -171,7 +174,7 @@ class AanetPump(Pump):
 
     def _read_event(self, event, filename):
         try:
-            if event.det_id <= 0:  # apply ZED correction
+            if self.apply_zed_correction:  #if event.det_id <= 0:  # apply ZED correction
                 for track in event.mc_trks:
                     track.pos.z += 405.93
         except AttributeError:
