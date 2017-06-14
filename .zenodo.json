@@ -1,0 +1,30 @@
+{
+    "description": "<p>KM3Pipe - pipeline framework for KM3NeT.</p>", 
+    "license": "MIT", 
+    "title": "tamasgal/km3pipe: KM3Pipe 6.8.0", 
+    "upload_type": "software", 
+    "publication_date": "2017-06-14", 
+    "creators": [
+        {
+            "affiliation": "Erlangen Centre for Astroparticle Physics (ECAP)", 
+            "name": "Tamas Gal"
+        }, 
+        {
+            "affiliation": "Instituto de Física Corpuscular (IFIC)", 
+            "name": "Moritz Lotze"
+        }
+    ], 
+    "access_right": "open", 
+    "related_identifiers": [
+        {
+            "scheme": "url", 
+            "identifier": "https://github.com/tamasgal/km3pipe/tree/v6.8.0", 
+            "relation": "isSupplementTo"
+        }, 
+        {
+            "scheme": "doi", 
+            "identifier": "10.5281/zenodo.808829", 
+            "relation": "isPartOf"
+        }
+    ]
+}

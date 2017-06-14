@@ -11,6 +11,9 @@
 .. image:: https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat
     :target: http://km3pipe.readthedocs.io/en/latest/
 
+.. image:: https://zenodo.org/badge/24634697.svg
+   :target: https://zenodo.org/badge/latestdoi/24634697
+
 .. include:: summary.rst
 
 .. toctree::
