@@ -1,8 +1,8 @@
 pillow
 numpydoc
 ipython
-sphinx-gallery
-sphinx==1.5.6
+sphinx-gallery>=0.1.11
+sphinx
 sphinxcontrib-napoleon
 scikit-learn
 statsmodels>=0.8

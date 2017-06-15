@@ -8,7 +8,7 @@ scipy>=0.19
 tornado
 urwid
 websocket-client
-sphinx==1.5.6
+sphinx
 numpydoc
 sphinx_gallery
 sklearn
