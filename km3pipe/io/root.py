@@ -48,9 +48,8 @@ def get_hist(rfile, histname, get_overflow=False):
     hist = rfile[histname]
     xlims = np.array(list(hist.xedges()))
     bin_values = rnp.hist2array(hist, include_overflow=get_overflow)
-    #bin_errors = list(hist.xerror())
     rfile.close()
-    return bin_values, xlims#, bin_errors
+    return bin_values, xlims
 
 
 def get_hist2d(rfile, histname, get_overflow=False):
@@ -60,9 +59,8 @@ def get_hist2d(rfile, histname, get_overflow=False):
     xlims = np.array(list(hist.xedges()))
     ylims = np.array(list(hist.yedges()))
     bin_values = rnp.hist2array(hist, include_overflow=get_overflow)
-    #bin_errors = list(hist.xerror())
     rfile.close()
-    return bin_values, xlims, ylims#, bin_errors
+    return bin_values, xlims, ylims
 
 
 def get_hist3d(rfile, histname, get_overflow=False):
@@ -70,9 +68,8 @@ def get_hist3d(rfile, histname, get_overflow=False):
     rfile = open_rfile(rfile)
     hist = rfile[histname]
     xlims = np.array(list(hist.xedges()))
-    ylims = np.array(list(hist.xedges()))
+    ylims = np.array(list(hist.yedges()))
     zlims = np.array(list(hist.zedges()))
     bin_values = rnp.hist2array(hist, include_overflow=get_overflow)
-    #bin_errors = list(hist.xerror())
     rfile.close()
-    return bin_values, xlims, ylims, zlims#, bin_errors
+    return bin_values, xlims, ylims, zlims
