@@ -6,6 +6,7 @@ KM3Pipe command line utility.
 Usage:
     km3pipe test
     km3pipe update [GIT_BRANCH]
+    km3pipe createconf [--overwrite]
     km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID] [-o OUTFILE]
     km3pipe detectors [-s REGEX] [--temporary]
     km3pipe runtable [-n RUNS] [-s REGEX] [--temporary] DET_ID
@@ -23,7 +24,8 @@ Options:
     -t T0_SET           Time calibration ID (eg. A01466431)
     -n EVENTS/RUNS      Number of events/runs.
     -s REGEX            Regular expression to filter the runsetup name/id.
-    --temporary         Do not request a permanent session, but a temporary one. [default=False]
+    --temporary         Do not request a permanent session, but a temporary one. [default: False]
+    --overwrite         Overwrite existing config [default: False]
     DET_ID              Detector ID (eg. D_ARCA001).
     DETECTOR            Detector (eg. ARCA).
     GIT_BRANCH          Git branch to pull (eg. develop).
@@ -152,6 +154,20 @@ def rundetsn(run_id, detector="ARCA", temporary=False):
             return
 
 
+def createconf(overwrite=False):
+    import os.path
+    from os import environ
+    fname = environ['HOME'] + '/.km3net'
+    if not overwrite and os.path.exists(fname):
+        print('Config exists, not overwriting')
+        return
+    defaultconf = '[General]\ncheck_for_updates=yes'
+    with open(fname, 'w') as f:
+        f.write(defaultconf)
+    print('Wrote default config to ', fname)
+    os.chmod(fname, 0o600)
+
+
 def main():
     from docopt import docopt
     args = docopt(__doc__, version=version)
@@ -166,6 +182,11 @@ def main():
 
     if args['update']:
         update_km3pipe(args['GIT_BRANCH'])
+
+    if args['createconf']:
+        overwrite_conf = bool(args['--overwrite'])
+        createconf(overwrite_conf)
+
 
     if args['runtable']:
         runtable(args['DET_ID'], n, regex=args['-s'], temporary=args["--temporary"])
