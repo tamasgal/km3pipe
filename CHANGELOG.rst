@@ -1,7 +1,7 @@
 Unreleased changes
 ------------------
 
-6.8.2 / 2017-06-15
+6.8.2 / 2017-06-20
 ------------------
 * add option to create default config file
 * fix wrong readout in `io.root.get_hist3d`
