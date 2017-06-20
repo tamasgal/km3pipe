@@ -1,6 +1,6 @@
 Unreleased changes
 ------------------
-
+* add option to create default config file
 
 6.8.1 / 2017-06-15
 ------------------
