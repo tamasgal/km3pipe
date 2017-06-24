@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* add ``TMCHRepump`` to replay IO_MONIT dumps
 
 6.8.2 / 2017-06-20
 ------------------
