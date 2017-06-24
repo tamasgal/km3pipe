@@ -516,7 +516,7 @@ class TMCHData(object):
         return self.__str__()
 
 
-class TMCHRepump(kp.Pump):
+class TMCHRepump(Pump):
     """Takes a IO_MONIT raw dump and replays it."""
     def configure(self):
         self.filename = self.require("filename")
