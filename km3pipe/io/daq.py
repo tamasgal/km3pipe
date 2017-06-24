@@ -504,10 +504,10 @@ class TMCHData(object):
         self.hx, self.hy, self.hz = unpack('>fff', f.read(12))
         self.temp = unpack('>H', f.read(2))[0] / 100.0
         self.humidity = unpack('>H', f.read(2))[0] / 100.0
-        self.det_id = unpack('>I', f.read(4))[0]  # not sure
-        self.n_packets = unpack('>H', f.read(2))[0]  # not sure
-        self.highest_packet_number = unpack('>H', f.read(2))[0]  # not sure
-        self.n_items = unpack('>I', f.read(4))[0]  # not sure
+        # self.det_id = unpack('>I', f.read(4))[0]  # not sure
+        # self.n_packets = unpack('>H', f.read(2))[0]  # not sure
+        # self.highest_packet_number = unpack('>H', f.read(2))[0]  # not sure
+        # self.n_items = unpack('>I', f.read(4))[0]  # not sure
 
     def __str__(self):
         return str(vars(self))
