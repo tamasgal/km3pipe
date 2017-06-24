@@ -496,7 +496,7 @@ class TMCHData(object):
         self.dom_status_3 = unpack('>I', f.read(4))[0]  # not sure
         self.dom_status_4 = unpack('>I', f.read(4))[0]  # not sure
         self.pmt_rates = [r*10.0 for r in unpack('>' + 31*'I', f.read(31*4))]
-        #self.pad = unpack('>I', f.read(4))[0]  # not sure
+        self.pad = unpack('>I', f.read(4))[0]  # not sure
         self.valid = unpack('>I', f.read(4))[0]  # not sure
         self.yaw, self.pitch, self.roll = unpack('>fff', f.read(12))
         self.ax, self.ay, self.az = unpack('>fff', f.read(12))
