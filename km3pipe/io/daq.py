@@ -514,3 +514,24 @@ class TMCHData(object):
 
     def __repr__(self):
         return self.__str__()
+
+
+class TMCHRepump(kp.Pump):
+    """Takes a IO_MONIT raw dump and replays it."""
+    def configure(self):
+        self.filename = self.require("filename")
+        self.fobj = open(filename, "rb")
+    
+    def process(self, blob):
+        try:
+            while True:
+                datatype = self.fobj.read(4)
+                if datatype == b'TMCH':
+                    self.fobj.seek(-4, 1)
+                    blob['TMCHData'] = kp.io.daq.TMCHData(self.fobj)
+                    return blob
+        except struct.error:
+            raise StopIteration
+
+    def finish(self):
+        self.fobj.close()
