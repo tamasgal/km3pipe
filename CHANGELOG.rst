@@ -4,7 +4,7 @@ Unreleased changes
 * add ``RawHitSeries`` to represent uncalibrated hitseries
 * use ``RawHitSeries`` and nested structure in HDF5 files when converting
   from aanet
-* HDF5 version changed from to 4.0. Only the hits-readout is affected though!
+* HDF5 version changed from to 3.3. Only the hits-readout is affected though!
   DST, reco and track readout were not changed and should be compatible
   down to 3.0
 
