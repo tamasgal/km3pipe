@@ -799,6 +799,49 @@ class RawHitSeries(object):
     def __array__(self):
         return self._arr
 
+    @property
+    def triggered(self):
+        return self._arr['triggered']
+
+    @property
+    def tot(self):
+        return self._arr['tot']
+
+    @property
+    def dom_id(self):
+        return self._arr['dom_id']
+
+    @property
+    def channel_id(self):
+        return self._arr['channel_id']
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        if self._index >= len(self):
+            self._index = 0
+            raise StopIteration
+        hit = self[self._index]
+        self._index += 1
+        return hit
+
+    def __getitem__(self, index):
+        if isinstance(index, int):
+            hit = Hit(*self._arr[index])
+            return hit
+        elif isinstance(index, slice):
+            return self._slice_generator(index)
+        else:
+            raise TypeError("index must be int or slice")
+
+    def _slice_generator(self, index):
+        """A simple slice generator for iterations"""
+        start, stop, step = index.indices(len(self))
+        for i in range(start, stop, step):
+            yield Hit(*self._arr[i])
+
     def __iter__(self):
         return self
 
