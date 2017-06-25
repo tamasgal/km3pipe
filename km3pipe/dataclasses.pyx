@@ -772,7 +772,8 @@ class RawHitSeries(object):
 
     @property
     def triggered_hits(self):
-        return RawHitSeries(self._arr[self._arr['triggered'] == True])  # noqa
+        return RawHitSeries(self._arr[self._arr['triggered'] == True],
+                            self.event_id)  # noqa
 
     @classmethod
     def deserialise(cls, *args, **kwargs):
