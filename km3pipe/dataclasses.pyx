@@ -715,6 +715,99 @@ cdef class Track:
         return self.__str__()
 
 
+class RawHitSeries(object):
+    """A collection of hits without any calibration parameter."""
+    dtype = np.dtype([
+        ('channel_id', 'u1'),
+        ('dom_id', '<u4'),
+        ('time', '<i4'),
+        ('tot', 'u1'),
+        ('triggered', 'u1')
+    ])
+
+    def __init__(self, arr, event_id, h5loc='/'):
+        self._arr = arr
+        self._index = 0
+        self._hits = None
+        self.event_id = event_id
+        self.h5loc = h5loc
+
+    @classmethod
+    def from_aanet(cls, hits, event_id):
+        try:
+            return cls(np.array([(
+                h.channel_id,
+                h.dom_id,
+                h.t,
+                h.tot,
+                h.trig,
+            ) for h in hits], dtype=cls.dtype), event_id)
+        except ValueError:
+            # Older aanet format.
+            return cls(np.array([(
+                ord(h.channel_id),
+                h.dom_id,
+                h.t,
+                h.tot,
+                h.trig,
+                event_id,
+            ) for h in hits], dtype=cls.dtype), event_id)
+
+    @classmethod
+    def from_arrays(cls, channel_ids, dom_ids, times, tots, triggereds,
+                    event_id):
+        # do we need shape[0] or does len() work too?
+        try:
+            length = channel_ids.shape[0]
+        except AttributeError:
+            length = len(channel_ids)
+        hits = np.empty(length, cls.dtype)
+        hits['channel_id'] = channel_ids
+        hits['dom_id'] = dom_ids
+        hits['time'] = times
+        hits['tot'] = tots
+        hits['triggered'] = triggereds
+        return cls(hits, event_id)
+
+    @classmethod
+    def deserialise(cls, *args, **kwargs):
+        return cls.conv_from(*args, **kwargs)
+
+    def serialise(self, *args, **kwargs):
+        return self.conv_to(*args, **kwargs)
+
+    @classmethod
+    def conv_from(cls, data, event_id=None, fmt='numpy', h5loc='/'):
+        if fmt == 'numpy':
+            return cls(data, event_id)
+        if fmt == 'pandas':
+            return cls(data.to_records(index=False), event_id)
+
+    def conv_to(self, to='numpy'):
+        if to == 'numpy':
+            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
+                            h5loc=self.h5loc)
+        if to == 'pandas':
+            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
+
+    def __array__(self):
+        return self._arr
+
+    def __iter__(self):
+        return self
+
+    def __str__(self):
+        n_hits = len(self)
+        plural = 's' if n_hits > 1 or n_hits == 0 else ''
+        return("RawHitSeries with {0} hit{1}.".format(len(self), plural))
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __insp__(self):
+        return '\n'.join([str(hit) for hit in self._hits])
+
+
 class HitSeries(object):
     """Collection of multiple Hits.
     """
