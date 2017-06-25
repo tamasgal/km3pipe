@@ -1,6 +1,9 @@
 Unreleased changes
 ------------------
 * add ``TMCHRepump`` to replay IO_MONIT dumps
+* add ``RawHitSeries`` to represent uncalibrated hitseries
+* use ``RawHitSeries`` and nested structure in HDF5 files when converting
+  from aanet
 
 6.8.2 / 2017-06-20
 ------------------
