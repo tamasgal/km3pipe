@@ -1770,7 +1770,7 @@ class KM3DataFrame(pd.DataFrame):
 
 deserialise_map = {
     'McHits': HitSeries,
-    'Hits': HitSeries,
+    'Hits': RawHitSeries,
     'TimesliceHits': TimesliceHitSeries,
     'McTracks': TrackSeries,
     'EventInfo': EventInfo,
