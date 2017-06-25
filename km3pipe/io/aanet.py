@@ -193,20 +193,20 @@ class AanetPump(Pump):
             event_id = self.i
         self.i += 1
         try:
-            blob['Hits'] = RawHitSeries.from_aanet(
-                    event.hits,
-                    event_id,
-                    h5loc='/hits/{0}'.format(event_id)
-            )
-            blob['McHits'] = RawHitSeries.from_aanet(
-                    event.mc_hits,
-                    event_id,
-                    h5loc='/mc_hits/{0}'.format(event_id)
-            )
+            hits = RawHitSeries.from_aanet(event.hits, event_id)
+            hits.h5loc = h5loc='/hits/{0}'.format(event_id)
+            blob['Hits'] = hits
         except AttributeError:
-            pass
-        blob['McTracks'] = TrackSeries.from_aanet(event.mc_trks,
-                                                  event_id)
+            log.warn("No hits found.")
+        try:
+            mc_hits = RawHitSeries.from_aanet(event.mc_hits, event_id)
+            mc_hits.h5loc = h5loc='/mc_hits/{0}'.format(event_id)
+            blob['McHits'] = mc_hits
+        except AttributeError:
+            log.warn("No MC hits found.")
+
+        blob['McTracks'] = TrackSeries.from_aanet(event.mc_trks, event_id)
+
         blob['filename'] = filename
         try:
             blob['EventInfo'] = EventInfo((

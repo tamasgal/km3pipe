@@ -796,6 +796,9 @@ class RawHitSeries(object):
     def __iter__(self):
         return self
 
+    def __len__(self):
+        return self._arr.shape[0]
+
     def __str__(self):
         n_hits = len(self)
         plural = 's' if n_hits > 1 or n_hits == 0 else ''
