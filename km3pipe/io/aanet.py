@@ -193,14 +193,12 @@ class AanetPump(Pump):
             event_id = self.i
         self.i += 1
         try:
-            hits = RawHitSeries.from_aanet(event.hits, event_id)
-            hits.h5loc = h5loc='/hits/{0}'.format(event_id)
-            blob['Hits'] = hits
+            blob['Hits'] = RawHitSeries.from_aanet(event.hits, event_id)
         except AttributeError:
             log.warn("No hits found.")
         try:
             mc_hits = RawHitSeries.from_aanet(event.mc_hits, event_id)
-            mc_hits.h5loc = h5loc='/mc_hits/{0}'.format(event_id)
+            mc_hits.h5loc = '/mc_hits'
             blob['McHits'] = mc_hits
         except AttributeError:
             log.warn("No MC hits found.")
