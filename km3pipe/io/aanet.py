@@ -13,7 +13,7 @@ import os.path
 import numpy as np
 
 from km3pipe.core import Pump, Blob
-from km3pipe.dataclasses import (HitSeries, TrackSeries, EventInfo,
+from km3pipe.dataclasses import (RawHitSeries, TrackSeries, EventInfo,
                                  KM3Array, KM3DataFrame)
 from km3pipe.logger import logging
 
@@ -193,9 +193,16 @@ class AanetPump(Pump):
             event_id = self.i
         self.i += 1
         try:
-            blob['Hits'] = HitSeries.from_aanet(event.hits, event_id)
-            blob['McHits'] = HitSeries.from_aanet(event.mc_hits,
-                                                  event_id)
+            blob['Hits'] = RawHitSeries.from_aanet(
+                    event.hits,
+                    event_id,
+                    h5loc='/hits/{0}'.format(event_id)
+            )
+            blob['McHits'] = RawHitSeries.from_aanet(
+                    event.mc_hits,
+                    event_id,
+                    h5loc='/mc_hits/{0}'.format(event_id)
+            )
         except AttributeError:
             pass
         blob['McTracks'] = TrackSeries.from_aanet(event.mc_trks,
