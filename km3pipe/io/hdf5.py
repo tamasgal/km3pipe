@@ -10,6 +10,7 @@ from __future__ import division, absolute_import, print_function
 from collections import OrderedDict
 import os.path
 from six import itervalues, iteritems
+import warnings
 
 import numpy as np
 import tables as tb
@@ -99,11 +100,13 @@ class HDF5Sink(Module):
         if where not in self._tables:
             dtype = arr.dtype
             loc, tabname = os.path.split(where)
-            tab = self.h5file.create_table(
-                loc, tabname, description=dtype, title=title,
-                filters=self.filters, createparents=True,
-                expectedrows=self.n_rows_expected,
-            )
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', tb.NaturalNameWarning)
+                tab = self.h5file.create_table(
+                    loc, tabname, description=dtype, title=title,
+                    filters=self.filters, createparents=True,
+                    expectedrows=self.n_rows_expected,
+                )
             if(level < 5):
                 self._tables[where] = tab
         else:
