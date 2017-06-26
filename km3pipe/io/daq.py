@@ -519,7 +519,7 @@ class TMCHData(object):
 class TMCHRepump(Pump):
     """Takes a IO_MONIT raw dump and replays it."""
     def configure(self):
-        self.filename = self.require("filename")
+        filename = self.require("filename")
         self.fobj = open(filename, "rb")
     
     def process(self, blob):
