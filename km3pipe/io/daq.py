@@ -528,7 +528,7 @@ class TMCHRepump(Pump):
                 datatype = self.fobj.read(4)
                 if datatype == b'TMCH':
                     self.fobj.seek(-4, 1)
-                    blob['TMCHData'] = kp.io.daq.TMCHData(self.fobj)
+                    blob['TMCHData'] = TMCHData(self.fobj)
                     return blob
         except struct.error:
             raise StopIteration
