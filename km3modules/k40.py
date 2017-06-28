@@ -167,7 +167,7 @@ def load_k40_coincidences_from_rootfile(filename, dom_id):
 
     weights = {}
     weights_histo = root_file_monitor.Get('weights_hist')
-    if weights_hist is None:
+    if weights_histo is None:
         log.info("Weights histogram not found, setting weight to 1.")
         dom_weight = 1.
     else:
