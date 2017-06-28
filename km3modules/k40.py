@@ -167,17 +167,17 @@ def load_k40_coincidences_from_rootfile(filename, dom_id):
 
     weights = {}
     weights_histo = root_file_monitor.Get('weights_hist')
-    if weights_histo is None:
-        log.info("Weights histogram not found, setting weight to 1.")
-        dom_weight = 1.
-    else:
+    try:
         for i in range(1, weights_histo.GetNbinsX() + 1):
             # we have to read all the entries, unfortunately
             weight = weights_histo.GetBinContent(i)
             label = weights_histo.GetXaxis().GetBinLabel(i)
             weights[label[3:]] = weight
         dom_weight = weights[str(dom_id)]
-        
+    except AttributeError:
+        log.info("Weights histogram broken or not found, setting weight to 1.")
+        dom_weight = 1.
+
     return np.array(data), dom_weight
     
 
