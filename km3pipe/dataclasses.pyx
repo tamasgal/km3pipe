@@ -725,13 +725,13 @@ class RawHitSeries(object):
         ('triggered', 'u1')
     ])
 
-    def __init__(self, arr, event_id, h5loc='/hits'):
+    def __init__(self, arr, event_id, h5loc='/'):
         self._arr = arr
         self._index = 0
         self._hits = None
         self.event_id = event_id
         self.h5loc = h5loc
-        self.tabname = str(event_id)
+#        self.tabname = str(event_id)  # used when h5loc='/hits'
 
     @classmethod
     def from_aanet(cls, hits, event_id):
