@@ -409,7 +409,7 @@ class ParametersContainer(object):
     @property
     def names(self):
         "A list of parameter names"
-        return self._parameters.keys()
+        return list(self._parameters.keys())
 
     def get_parameter(self, parameter):
         "Return a dict for given parameter"
