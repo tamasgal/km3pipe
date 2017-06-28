@@ -208,9 +208,10 @@ def fit_delta_ts(data, livetime):
     means = []
     popts = []
     for combination in data:
+        mean_start = np.argmax(combination) + start
         try:
             popt, _ = optimize.curve_fit(gaussian, xs, combination,
-                                         p0=[0., 4., 10., 0.1])
+                                         p0=[mean_start, 4., 10., 0.1])
         except RuntimeError:
             popt = (0, 0, 0, 0)
         rates.append(popt[2])
