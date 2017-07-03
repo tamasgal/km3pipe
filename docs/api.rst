@@ -66,10 +66,15 @@ KM3Pipe: Main Framework
   EventInfo
   Hit
   HitSeries
-  KM3Array
-  KM3DataFrame
+  McHit
+  McHitSeries
+  RawHitSeries
   Track
   TrackSeries
+  McTrack
+  McTrackSeries
+  KM3Array
+  KM3DataFrame
 
 
 ``km3pipe.db``: Database Tools
