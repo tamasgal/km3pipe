@@ -853,6 +853,10 @@ class RawHitSeries(object):
         return self._arr['tot']
 
     @property
+    def time(self):
+        return self._arr['time']
+
+    @property
     def dom_id(self):
         return self._arr['dom_id']
 
