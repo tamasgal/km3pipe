@@ -5,6 +5,5 @@ sphinx-gallery>=0.1.11
 sphinx
 sphinxcontrib-napoleon
 scikit-learn
-statsmodels>=0.8
 seaborn
 sphinx_rtd_theme
