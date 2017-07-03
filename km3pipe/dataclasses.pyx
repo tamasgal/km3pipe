@@ -568,6 +568,48 @@ cdef class Hit:
         return self.__str__()
 
 
+cdef class RawHit:
+    """RawHit on a PMT.
+
+    Parameters
+    ----------
+    channel_id : int
+    dom_id : int
+    time : int
+    tot : int
+    triggered : int
+
+    """
+    cdef public dom_id, time, tot, channel_id
+    cdef public unsigned short int triggered
+
+    def __cinit__(self,
+                  int channel_id,
+                  int dom_id,
+                  int time,
+                  int tot,
+                  unsigned short int triggered,
+                  int event_id=0        # ignore this! just for init * magic
+                  ):
+        self.channel_id = channel_id
+        self.dom_id = dom_id
+        self.time = time
+        self.tot = tot
+        self.triggered = triggered
+
+    def __str__(self):
+        return "RawHit: channel_id({0}), dom_id({1}), tot({2}), " \
+               "time({3}), triggered({4})" \
+               .format(self.channel_id, self.dom_id, self.tot, self.time,
+                       self.triggered)
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __insp__(self):
+        return self.__str__()
+
+
 cdef class TimesliceHit:
     """Timeslice hit on a PMT.
 
@@ -722,7 +764,8 @@ class RawHitSeries(object):
         ('dom_id', '<u4'),
         ('time', '<i4'),
         ('tot', 'u1'),
-        ('triggered', 'u1')
+        ('triggered', 'u1'),
+        ('event_id', '<u4')
     ])
 
     def __init__(self, arr, event_id, h5loc='/'):
@@ -742,6 +785,7 @@ class RawHitSeries(object):
                 h.t,
                 h.tot,
                 h.trig,
+                event_id,
             ) for h in hits], dtype=cls.dtype), event_id)
         except ValueError:
             # Older aanet format.
@@ -768,6 +812,7 @@ class RawHitSeries(object):
         hits['time'] = times
         hits['tot'] = tots
         hits['triggered'] = triggereds
+        hits['event_id'] = np.full(length, event_id, dtype='<u4')
         return cls(hits, event_id)
 
     @property
@@ -829,7 +874,7 @@ class RawHitSeries(object):
 
     def __getitem__(self, index):
         if isinstance(index, int):
-            hit = Hit(*self._arr[index])
+            hit = RawHit(*self._arr[index])
             return hit
         elif isinstance(index, slice):
             return self._slice_generator(index)
@@ -840,7 +885,7 @@ class RawHitSeries(object):
         """A simple slice generator for iterations"""
         start, stop, step = index.indices(len(self))
         for i in range(start, stop, step):
-            yield Hit(*self._arr[i])
+            yield RawHit(*self._arr[i])
 
     def __iter__(self):
         return self
