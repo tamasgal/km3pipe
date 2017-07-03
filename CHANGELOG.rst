@@ -1,5 +1,8 @@
 Unreleased changes
 ------------------
+
+6.9.0 / 2017-07-03
+------------------
 * add ``TMCHRepump`` to replay IO_MONIT dumps
 * add ``RawHitSeries`` to represent uncalibrated hitseries
 * use ``RawHitSeries`` and nested structure in HDF5 files when converting
