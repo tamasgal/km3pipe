@@ -30,8 +30,8 @@ geo = kp.Geometry(filename="data/km3net_jul13_90m_r1494_corrected.detx")
 def filter_muons(blob):
     """Write all muons from McTracks to Muons."""
     tracks = blob['McTracks']
-    muons = [t for t in blob['McTracks'] if t.type == 5]
-    blob["Muons"] = kp.dataclasses.TrackSeries(muons, tracks.event_id)
+    muons = [t for t in tracks if t.type == 5]
+    blob["Muons"] = kp.dataclasses.McTrackSeries(muons, tracks.event_id)
     return blob
 
 
@@ -61,7 +61,7 @@ class DOMHits(kp.Module):
         df = pd.DataFrame(self.hit_statistics)
         sdf = df[(df['distance'] < 200) & (df['n_hits'] < 50)]
         plt.hist2d(sdf['distance'], sdf['n_hits'], cmap='plasma',
-                   bins=(max(sdf['distance'])-1, max(sdf['n_hits'])-1),
+                   bins=(max(sdf['distance']) - 1, max(sdf['n_hits']) - 1),
                    norm=LogNorm())
         plt.xlabel('Distance between hit and muon track [m]')
         plt.ylabel('Number of hits on DOM')

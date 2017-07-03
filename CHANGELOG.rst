@@ -1,5 +1,16 @@
 Unreleased changes
 ------------------
+
+7.0.0 / 2017-07-03
+------------------
+* add ``MCHitSeries`` to represent Monte Carlo hitseries
+* add ``MCTrackSeries`` to represent Monte Carlo trackseries
+* add ``MCHit`` to represent Monte Carlo hits
+* add ``MCTrack`` to represent Monte Carlo tracks
+* add run id to event_info
+
+6.9.0 / 2017-07-03
+------------------
 * add ``TMCHRepump`` to replay IO_MONIT dumps
 * add ``RawHitSeries`` to represent uncalibrated hitseries
 * use ``RawHitSeries`` and nested structure in HDF5 files when converting
