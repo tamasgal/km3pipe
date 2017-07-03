@@ -1,6 +1,16 @@
 Unreleased changes
 ------------------
 
+6.9.0 / 2017-07-03
+------------------
+* add ``TMCHRepump`` to replay IO_MONIT dumps
+* add ``RawHitSeries`` to represent uncalibrated hitseries
+* use ``RawHitSeries`` and nested structure in HDF5 files when converting
+  from aanet
+* HDF5 version changed from to 3.3. Only the hits-readout is affected though!
+  DST, reco and track readout were not changed and should be compatible
+  down to 3.0
+
 6.8.2 / 2017-06-20
 ------------------
 * add option to create default config file

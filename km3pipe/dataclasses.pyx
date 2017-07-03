@@ -715,6 +715,151 @@ cdef class Track:
         return self.__str__()
 
 
+class RawHitSeries(object):
+    """A collection of hits without any calibration parameter."""
+    dtype = np.dtype([
+        ('channel_id', 'u1'),
+        ('dom_id', '<u4'),
+        ('time', '<i4'),
+        ('tot', 'u1'),
+        ('triggered', 'u1')
+    ])
+
+    def __init__(self, arr, event_id, h5loc='/'):
+        self._arr = arr
+        self._index = 0
+        self._hits = None
+        self.event_id = event_id
+        self.h5loc = h5loc
+#        self.tabname = str(event_id)  # used when h5loc='/hits'
+
+    @classmethod
+    def from_aanet(cls, hits, event_id):
+        try:
+            return cls(np.array([(
+                h.channel_id,
+                h.dom_id,
+                h.t,
+                h.tot,
+                h.trig,
+            ) for h in hits], dtype=cls.dtype), event_id)
+        except ValueError:
+            # Older aanet format.
+            return cls(np.array([(
+                ord(h.channel_id),
+                h.dom_id,
+                h.t,
+                h.tot,
+                h.trig,
+                event_id,
+            ) for h in hits], dtype=cls.dtype), event_id)
+
+    @classmethod
+    def from_arrays(cls, channel_ids, dom_ids, times, tots, triggereds,
+                    event_id):
+        # do we need shape[0] or does len() work too?
+        try:
+            length = channel_ids.shape[0]
+        except AttributeError:
+            length = len(channel_ids)
+        hits = np.empty(length, cls.dtype)
+        hits['channel_id'] = channel_ids
+        hits['dom_id'] = dom_ids
+        hits['time'] = times
+        hits['tot'] = tots
+        hits['triggered'] = triggereds
+        return cls(hits, event_id)
+
+    @property
+    def triggered_hits(self):
+        return RawHitSeries(self._arr[self._arr['triggered'] == True],
+                            self.event_id)  # noqa
+
+    @classmethod
+    def deserialise(cls, *args, **kwargs):
+        return cls.conv_from(*args, **kwargs)
+
+    def serialise(self, *args, **kwargs):
+        return self.conv_to(*args, **kwargs)
+
+    @classmethod
+    def conv_from(cls, data, event_id=None, fmt='numpy', h5loc='/'):
+        if fmt == 'numpy':
+            return cls(data, event_id)
+        if fmt == 'pandas':
+            return cls(data.to_records(index=False), event_id)
+
+    def conv_to(self, to='numpy'):
+        if to == 'numpy':
+            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
+                            h5loc=self.h5loc)
+        if to == 'pandas':
+            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
+
+    def __array__(self):
+        return self._arr
+
+    @property
+    def triggered(self):
+        return self._arr['triggered']
+
+    @property
+    def tot(self):
+        return self._arr['tot']
+
+    @property
+    def dom_id(self):
+        return self._arr['dom_id']
+
+    @property
+    def channel_id(self):
+        return self._arr['channel_id']
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        if self._index >= len(self):
+            self._index = 0
+            raise StopIteration
+        hit = self[self._index]
+        self._index += 1
+        return hit
+
+    def __getitem__(self, index):
+        if isinstance(index, int):
+            hit = Hit(*self._arr[index])
+            return hit
+        elif isinstance(index, slice):
+            return self._slice_generator(index)
+        else:
+            raise TypeError("index must be int or slice")
+
+    def _slice_generator(self, index):
+        """A simple slice generator for iterations"""
+        start, stop, step = index.indices(len(self))
+        for i in range(start, stop, step):
+            yield Hit(*self._arr[i])
+
+    def __iter__(self):
+        return self
+
+    def __len__(self):
+        return self._arr.shape[0]
+
+    def __str__(self):
+        n_hits = len(self)
+        plural = 's' if n_hits > 1 or n_hits == 0 else ''
+        return("RawHitSeries with {0} hit{1}.".format(len(self), plural))
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __insp__(self):
+        return '\n'.join([str(hit) for hit in self._hits])
+
+
 class HitSeries(object):
     """Collection of multiple Hits.
     """
@@ -1677,7 +1822,7 @@ class KM3DataFrame(pd.DataFrame):
 
 deserialise_map = {
     'McHits': HitSeries,
-    'Hits': HitSeries,
+    'Hits': RawHitSeries,
     'TimesliceHits': TimesliceHitSeries,
     'McTracks': TrackSeries,
     'EventInfo': EventInfo,
