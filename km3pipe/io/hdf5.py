@@ -142,6 +142,7 @@ class HDF5Sink(Module):
                 where = os.path.join(h5loc, tabname)
                 self._write_array(where, entry, title=key)
 
+                print(entry)
                 if isinstance(entry, RawHitSeries):  # hit index table
                     print("meta for rawhitseries")
                     n_hits = len(entry)
