@@ -143,6 +143,7 @@ class HDF5Sink(Module):
                 self._write_array(where, entry, title=key)
 
                 if isinstance(entry, RawHitSeries):  # hit index table
+                    print("meta for rawhitseries")
                     n_hits = len(entry)
                     self.hit_indices["n_hits"].append(n_hits)
                     self.hit_indices["hit_index"].append(self.hit_index)
