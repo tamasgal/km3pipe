@@ -120,6 +120,10 @@ class HDF5Sink(Module):
         if(level < 4):
             tab.flush()
 
+    def _write_separate_columns(self, where, obj, title=''):
+        #for name in obj.dtype.names:
+        pass
+
     def process(self, blob):
         for key, entry in sorted(blob.items()):
             serialisable_attributes = ('dtype', 'serialise', 'to_records')
@@ -140,7 +144,14 @@ class HDF5Sink(Module):
                     data = data.view(dt)
                     h5loc = '/misc'
                 where = os.path.join(h5loc, tabname)
-                self._write_array(where, data, title=key)
+
+                try:
+                    if entry.write_separate_columns:
+                        self._write_separate_columns(where, entry, title=key)
+                    else:
+                        self._write_array(where, data, title=key)
+                except AttributeError:  # backwards compatibility
+                    self._write_array(where, data, title=key)
 
                 if isinstance(entry, RawHitSeries):  # hit index table
                     n_hits = len(entry)

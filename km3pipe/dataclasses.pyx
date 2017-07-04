@@ -770,6 +770,7 @@ class RawHitSeries(object):
         ('triggered', 'u1'),
         ('event_id', '<u4')
     ])
+    write_separate_columns = True
 
     def __init__(self, arr, event_id, h5loc='/'):
         self._arr = arr
