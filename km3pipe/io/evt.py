@@ -205,6 +205,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
                 blob.setdefault("TrackSeamuon", []).append(TrackIn(values))
             if tag == "track_seaneutrino":
                 blob.setdefault("TrackSeaneutrino", []).append(TrackIn(values))
+
         else:
             if tag == 'neutrino':
                 values = [float(x) for x in value.split()]
@@ -215,6 +216,10 @@ class EvtPump(Pump):  # pylint: disable:R0902
             elif tag == 'track_primary':
                 values = [float(x) for x in value.split()]
                 blob['Primary'] = TrackCorsika(values)
+            elif tag == "track_bundle":
+                values = [float(x) for x in value.split()]
+                values.append(0)
+                blob["CenterOnCan"] = Track(values)
             else:
                 blob[tag] = value.split()
 
