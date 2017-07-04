@@ -1,18 +1,18 @@
 Unreleased changes
 ------------------
 
-7.0.0 / 2017-07-03
+7.0.0 / 2017-
 ------------------
+
+6.9.1 / 2017-07-04
+------------------
+* Last version freeze before 7.0
+* Fix event_id and run_id
 * add ``MCHitSeries`` to represent Monte Carlo hitseries
 * add ``MCTrackSeries`` to represent Monte Carlo trackseries
 * add ``MCHit`` to represent Monte Carlo hits
 * add ``MCTrack`` to represent Monte Carlo tracks
 * add run id to event_info
-
-6.9.1 / 2017-07-04
-------------------
-* Last version before 7.0
-* Fix event_id and run_id
 
 6.9.0 / 2017-07-03
 ------------------
