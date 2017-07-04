@@ -141,7 +141,7 @@ class TriggerRate(Module):
         self.event_times = deque(maxlen=4000)  # max events per interval
         self.trigger_rates = deque(maxlen=60*48)  # minutes
         self.thread = threading.Thread(target=self.plot).start()
-        self.store = pd.HDFStore('data/trigger_rates.h5')
+        self.store = pd.HDFStore('data/trigger_rates.h5', 'r')
         self.restore_data()
 
     def restore_data(self):

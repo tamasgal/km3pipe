@@ -7,7 +7,7 @@ Read and write KM3NeT-formatted HDF5 files.
 """
 from __future__ import division, absolute_import, print_function
 
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 import os.path
 from six import itervalues, iteritems
 import warnings
@@ -17,7 +17,8 @@ import tables as tb
 
 import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
-from km3pipe.dataclasses import KM3Array, deserialise_map
+from km3pipe.dataclasses import KM3Array, KM3DataFrame, RawHitSeries
+from km3pipe.dataclasses import deserialise_map
 from km3pipe.logger import logging
 from km3pipe.dev import camelise, decamelise, split
 
@@ -31,7 +32,7 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-FORMAT_VERSION = np.string_('3.3')
+FORMAT_VERSION = np.string_('4.3')
 MINIMUM_FORMAT_VERSION = np.string_('3.0')
 
 
@@ -61,6 +62,8 @@ class HDF5Sink(Module):
         self.filename = self.get('filename') or 'dump.h5'
         self.ext_h5file = self.get('h5file') or None
         self.pytab_file_args = self.get('pytab_file_args') or dict()
+        self.hit_indices = defaultdict(list)
+        self.hit_index = 0
         # magic 10000: this is the default of the "expectedrows" arg
         # from the tables.File.create_table() function
         # at least according to the docs
@@ -129,15 +132,22 @@ class HDF5Sink(Module):
                     tabname = entry.tabname
                 except AttributeError:
                     tabname = decamelise(key)
-                entry = self._to_array(entry)
-                if entry is None:
+                data = self._to_array(entry)
+                if data is None:
                     continue
-                if entry.dtype.names is None:
-                    dt = np.dtype((entry.dtype, [(key, entry.dtype)]))
-                    entry = entry.view(dt)
+                if data.dtype.names is None:
+                    dt = np.dtype((data.dtype, [(key, data.dtype)]))
+                    data = data.view(dt)
                     h5loc = '/misc'
                 where = os.path.join(h5loc, tabname)
-                self._write_array(where, entry, title=key)
+                self._write_array(where, data, title=key)
+
+                if isinstance(entry, RawHitSeries):  # hit index table
+                    n_hits = len(entry)
+                    self.hit_indices["n_hits"].append(n_hits)
+                    self.hit_indices["hit_index"].append(self.hit_index)
+                    self.hit_index += n_hits
+
 
         if not self.index % 1000:
             for tab in self._tables.values():
@@ -150,6 +160,10 @@ class HDF5Sink(Module):
         self.h5file.root._v_attrs.km3pipe = np.string_(kp.__version__)
         self.h5file.root._v_attrs.pytables = np.string_(tb.__version__)
         self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
+        print("Adding hit index table.")
+        hit_indices = KM3DataFrame(self.hit_indices, h5loc='/_hit_indices')
+        self._write_array("/_hit_indices", self._to_array(hit_indices),
+                          title="Hit Indices")
         print("Creating index tables. This may take a few minutes...")
         for tab in itervalues(self._tables):
             if 'frame_id' in tab.colnames:

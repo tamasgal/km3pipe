@@ -221,6 +221,7 @@ class AanetPump(Pump):
                 event.t.GetNanoSec(),
                 event.t.GetSec(),
                 w1, w2, w3,
+                event.run_id,
                 event_id))
         except AttributeError:
             blob['EventInfo'] = EventInfo((0,   # det_id
@@ -236,6 +237,7 @@ class AanetPump(Pump):
                                            0,   # nanose
                                            0,   # sec
                                            w1, w2, w3,
+                                           event.run_id,
                                            event_id))
         if self.format == 'minidst':
             recos = read_mini_dst(event, event_id)
