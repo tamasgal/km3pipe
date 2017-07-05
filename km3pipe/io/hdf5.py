@@ -194,7 +194,7 @@ class HDF5Sink(Module):
         self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
         print("Adding index tables.")
         for where, data in self.indices.items():
-            h5loc = where + "/indices"
+            h5loc = where + "/_indices"
             print("  -> {0}".format(h5loc))
             indices = KM3DataFrame(data["indices"], h5loc=h5loc)
             self._write_array(h5loc, self._to_array(indices), title="Indices")
