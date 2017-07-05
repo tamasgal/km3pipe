@@ -62,8 +62,7 @@ class HDF5Sink(Module):
         self.filename = self.get('filename') or 'dump.h5'
         self.ext_h5file = self.get('h5file') or None
         self.pytab_file_args = self.get('pytab_file_args') or dict()
-        self.hit_indices = defaultdict(list)
-        self.hit_index = 0
+        self.indices = {}
         # magic 10000: this is the default of the "expectedrows" arg
         # from the tables.File.create_table() function
         # at least according to the docs
@@ -139,6 +138,17 @@ class HDF5Sink(Module):
                 arr = getattr(group, col)
             arr.append(data)
 
+        # create index table
+        if where not in self.indices:
+            self.indices[where] = {}
+            self.indices[where]["index"] = 0
+            self.indices[where]["indices"] = []
+            self.indices[where]["n_items"] = []
+        d = self.indices[where]
+        n_items = len(entry)
+        d["indices"].append(d["index"])
+        d["n_items"].append(n_items)
+        d["index"] += n_items
 
     def process(self, blob):
         for key, entry in sorted(blob.items()):
@@ -169,11 +179,6 @@ class HDF5Sink(Module):
                 except AttributeError:  # backwards compatibility
                     self._write_array(where, data, title=key)
 
-                if isinstance(entry, RawHitSeries):  # hit index table
-                    n_hits = len(entry)
-                    self.hit_indices["n_hits"].append(n_hits)
-                    self.hit_indices["hit_index"].append(self.hit_index)
-                    self.hit_index += n_hits
 
 
         if not self.index % 1000:
@@ -187,11 +192,13 @@ class HDF5Sink(Module):
         self.h5file.root._v_attrs.km3pipe = np.string_(kp.__version__)
         self.h5file.root._v_attrs.pytables = np.string_(tb.__version__)
         self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
-        print("Adding hit index table.")
-        hit_indices = KM3DataFrame(self.hit_indices, h5loc='/_hit_indices')
-        self._write_array("/_hit_indices", self._to_array(hit_indices),
-                          title="Hit Indices")
-        print("Creating index tables. This may take a few minutes...")
+        print("Adding index tables.")
+        for where, data in self.indices:
+            h5loc = where + "/indices"
+            print("  -> {0}".format(h5loc))
+            indices = KM3DataFrame(data["indices"], h5loc=h5loc)
+            self._write_array(h5loc, self._to_array(indices), title="Indices")
+        print("Creating pytables index tables. This may take a few minutes...")
         for tab in itervalues(self._tables):
             if 'frame_id' in tab.colnames:
                 tab.cols.frame_id.create_index()
