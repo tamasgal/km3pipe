@@ -145,7 +145,7 @@ class HDF5Sink(Module):
             self.indices[where]["indices"] = []
             self.indices[where]["n_items"] = []
         d = self.indices[where]
-        n_items = len(entry)
+        n_items = len(obj)
         d["indices"].append(d["index"])
         d["n_items"].append(n_items)
         d["index"] += n_items
