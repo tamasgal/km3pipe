@@ -215,7 +215,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
                 blob['CenterOnCan'] = TrackCorsika(values)
             elif tag == 'track_primary':
                 values = [float(x) for x in value.split()]
-                blob['Primary'] = TrackCorsika(values)
+                blob['Primary'] = TrackCorsika(values, zed_correction=0)
             elif tag == "track_bundle":
                 values = [float(x) for x in value.split()]
                 values.append(0)
