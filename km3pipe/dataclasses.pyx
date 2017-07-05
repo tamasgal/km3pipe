@@ -656,30 +656,30 @@ cdef class McHit:
 
     Parameters
     ----------
+    a : float
+    origin : int
     pmt_id : int
-    time : int
-    tot : int
-    triggered : int
+    time : float
 
     """
-    cdef public int time, tot, pmt_id
-    cdef public unsigned short int triggered
+    cdef public int a, time
+    cdef public int origin, pmt_id
 
     def __cinit__(self,
+                  float a,
+                  int origin,
                   int pmt_id,
-                  int time,
-                  int tot,
-                  unsigned short int triggered,
+                  float time,
                   int event_id=0        # ignore this! just for init * magic
                   ):
+        self.a = a
+        self.origin = origin
         self.pmt_id = pmt_id
         self.time = time
-        self.tot = tot
-        self.triggered = triggered
 
     def __str__(self):
-        return "Mc Hit: pmt_id({2}), tot({3}), time({4}), triggered({5})" \
-               .format(self.pmt_id, self.tot, self.time, self.triggered)
+        return "Mc Hit: pmt_id({0}), a({1}), time({2}), origin({3})" \
+               .format(self.pmt_id, self.a, self.time, self.origin)
 
     def __repr__(self):
         return self.__str__()
@@ -963,12 +963,13 @@ class McHitSeries(object):
     """
     h5loc = '/mc_hits'
     dtype = np.dtype([
+        ('a', 'f4'),
+        ('origin', '<u4'),
         ('pmt_id', '<u4'),
-        ('time', '<i4'),
-        ('tot', 'u1'),
-        ('triggered', 'u1'),
+        ('time', 'f4'),
         ('event_id', '<u4'),
     ])
+    write_separate_columns = True
 
     def __init__(self, arr, h5loc='/'):
         self._arr = arr
@@ -979,20 +980,20 @@ class McHitSeries(object):
     @classmethod
     def from_aanet(cls, hits, event_id):
         return cls(np.array([(
+            h.a,
+            h.origin,
             h.pmt_id,
             h.t,
-            h.tot,
-            h.trig,
             event_id,
         ) for h in hits], dtype=cls.dtype))
 
     @classmethod
     def from_evt(cls, hits, event_id):
         return cls(np.array([(
+            h.a,
+            h.origin,
             h.pmt_id,
             h.time,
-            h.tot,
-            0,     # triggered
             event_id,
         ) for h in hits], dtype=cls.dtype))
 
@@ -1004,10 +1005,10 @@ class McHitSeries(object):
         except AttributeError:
             length = len(times)
         hits = np.empty(length, cls.dtype)
+        hits['a'] = tots
+        hits['origin'] = triggereds
         hits['pmt_id'] = pmt_ids
         hits['time'] = times
-        hits['tot'] = tots
-        hits['triggered'] = triggereds
         hits['event_id'] = np.full(length, event_id, dtype='<u4')
         return cls(hits)
 
@@ -1016,10 +1017,10 @@ class McHitSeries(object):
         if event_id is None:
             event_id = map['event_id']
         return cls.from_arrays(
+            map['a'],
+            map['origin'],
             map['pmt_id'],
             map['time'],
-            map['tot'],
-            map['triggered'],
             event_id,
         )
 
@@ -1028,10 +1029,10 @@ class McHitSeries(object):
         if event_id is None:
             event_id = table[0]['event_id']
         return cls(np.array([(
+            row['a'],
+            row['origin'],
             row['pmt_id'],
             row['time'],
-            row['tot'],
-            row['triggered'],
         ) for row in table], dtype=cls.dtype), event_id)
 
     @classmethod
@@ -1067,16 +1068,12 @@ class McHitSeries(object):
         return self._arr['time']
 
     @property
-    def triggered_hits(self):
-        return McHitSeries(self._arr[self._arr['triggered'] == True])     # noqa
+    def a(self):
+        return self._arr['a']
 
     @property
-    def triggered(self):
-        return self._arr['triggered']
-
-    @property
-    def tot(self):
-        return self._arr['tot']
+    def origin(self):
+        return self._arr['origin']
 
     @property
     def pmt_id(self):
