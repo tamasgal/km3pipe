@@ -196,7 +196,8 @@ class HDF5Sink(Module):
         for where, data in self.indices.items():
             h5loc = where + "/_indices"
             print("  -> {0}".format(h5loc))
-            indices = KM3DataFrame(data["indices"], h5loc=h5loc)
+            indices = KM3DataFrame({"index": data["indices"],
+                                    "n_items": data["n_items"]}, h5loc=h5loc)
             self._write_array(h5loc, self._to_array(indices), title="Indices")
         print("Creating pytables index tables. This may take a few minutes...")
         for tab in itervalues(self._tables):
