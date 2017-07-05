@@ -121,8 +121,23 @@ class HDF5Sink(Module):
             tab.flush()
 
     def _write_separate_columns(self, where, obj, title=''):
-        #for name in obj.dtype.names:
-        pass
+        f = self.h5file
+        loc, group_name = os.path.split(where)
+        if where not in f:
+            group = f.create_group(loc, group_name, obj.__class__.__name__)
+        else:
+            group = f.get_node(where)
+
+        for col, (dt, _) in hits.dtype.fields.items():
+            data = obj.__array__()[col]
+
+            if col not in group:
+                a = tb.Atom.from_dtype(dt)
+                arr = f.create_earray(group, col, a, (0,), col.capitalize())
+            else:
+                arr = getattr(group, col)
+            arr.append(data)
+
 
     def process(self, blob):
         for key, entry in sorted(blob.items()):
