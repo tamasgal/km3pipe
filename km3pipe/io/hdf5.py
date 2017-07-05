@@ -32,7 +32,7 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-FORMAT_VERSION = np.string_('4.3')
+FORMAT_VERSION = np.string_('4.0')
 MINIMUM_FORMAT_VERSION = np.string_('3.0')
 
 
