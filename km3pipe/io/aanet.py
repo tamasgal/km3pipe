@@ -197,7 +197,7 @@ class AanetPump(Pump):
         except AttributeError:
             log.warn("No hits found.")
         try:
-            mc_hits = RawHitSeries.from_aanet(event.mc_hits, event_id)
+            mc_hits = McHitSeries.from_aanet(event.mc_hits, event_id)
             blob['McHits'] = mc_hits
         except AttributeError:
             log.warn("No MC hits found.")
