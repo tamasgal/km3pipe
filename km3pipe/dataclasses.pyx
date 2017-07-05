@@ -656,44 +656,30 @@ cdef class McHit:
 
     Parameters
     ----------
-    channel_id : int
-    dir : Direction or numpy.ndarray
-    dom_id : int
-    id : int
     pmt_id : int
-    pos : Position or numpy.ndarray
     time : int
     tot : int
     triggered : int
 
     """
-    cdef public int id, dom_id, time, tot, channel_id, pmt_id
+    cdef public int time, tot, pmt_id
     cdef public unsigned short int triggered
-    cdef public np.ndarray pos
-    cdef public np.ndarray dir
 
     def __cinit__(self,
-                  int channel_id,
-                  int dom_id,
-                  int id,
                   int pmt_id,
                   int time,
                   int tot,
                   unsigned short int triggered,
+                  int event_id=0        # ignore this! just for init * magic
                   ):
-        self.channel_id = channel_id
-        self.dom_id = dom_id
-        self.id = id
         self.pmt_id = pmt_id
         self.time = time
         self.tot = tot
         self.triggered = triggered
 
     def __str__(self):
-        return "Mc Hit: channel_id({0}), dom_id({1}), pmt_id({2}), tot({3}), " \
-               "time({4}), triggered({5})" \
-               .format(self.channel_id, self.dom_id, self.pmt_id, self.tot,
-                       self.time, self.triggered)
+        return "Mc Hit: pmt_id({2}), tot({3}), time({4}), triggered({5})" \
+               .format(self.pmt_id, self.tot, self.time, self.triggered)
 
     def __repr__(self):
         return self.__str__()
@@ -977,17 +963,7 @@ class McHitSeries(object):
     """
     h5loc = '/mc_hits'
     dtype = np.dtype([
-        ('channel_id', 'u1'),
-        ('dir_x', '<f8'),
-        ('dir_y', '<f8'),
-        ('dir_z', '<f8'),
-        ('dom_id', '<u4'),
-        ('id', '<u4'),
         ('pmt_id', '<u4'),
-        ('pos_x', '<f8'),
-        ('pos_y', '<f8'),
-        ('pos_z', '<f8'),
-        ('t0', '<i4'),
         ('time', '<i4'),
         ('tot', 'u1'),
         ('triggered', 'u1'),
@@ -1002,58 +978,18 @@ class McHitSeries(object):
 
     @classmethod
     def from_aanet(cls, hits, event_id):
-        try:
-            return cls(np.array([(
-                h.channel_id,
-                np.nan,     # h.dir.x,
-                np.nan,     # h.dir.y,
-                np.nan,     # h.dir.z,
-                h.dom_id,
-                h.id,
-                h.pmt_id,
-                np.nan,     # h.pos.x,
-                np.nan,     # h.pos.y,
-                np.nan,     # h.pos.z,
-                0,          # t0
-                h.t,
-                h.tot,
-                h.trig,
-                event_id,
-            ) for h in hits], dtype=cls.dtype))
-        except ValueError:
-            # Older aanet format.
-            return cls(np.array([(
-                ord(h.channel_id),
-                np.nan,     # h.dir.x,
-                np.nan,     # h.dir.y,
-                np.nan,     # h.dir.z,
-                h.dom_id,
-                h.id,
-                h.pmt_id,
-                np.nan,     # h.pos.x,
-                np.nan,     # h.pos.y,
-                np.nan,     # h.pos.z,
-                0,          # t0
-                h.t,
-                h.tot,
-                h.trig,
-                event_id,
-            ) for h in hits], dtype=cls.dtype))
+        return cls(np.array([(
+            h.pmt_id,
+            h.t,
+            h.tot,
+            h.trig,
+            event_id,
+        ) for h in hits], dtype=cls.dtype))
 
     @classmethod
     def from_evt(cls, hits, event_id):
         return cls(np.array([(
-            0,     # channel_id
-            np.nan,
-            np.nan,
-            np.nan,
-            0,     # dom_id
-            h.id,
             h.pmt_id,
-            np.nan,
-            np.nan,
-            np.nan,
-            0,      # t0
             h.time,
             h.tot,
             0,     # triggered
@@ -1061,26 +997,14 @@ class McHitSeries(object):
         ) for h in hits], dtype=cls.dtype))
 
     @classmethod
-    def from_arrays(cls, channel_ids, dir_xs, dir_ys, dir_zs, dom_ids, ids,
-                    pmt_ids, pos_xs, pos_ys, pos_zs, t0s, times, tots,
-                    triggereds, event_id):
+    def from_arrays(cls, pmt_ids, times, tots, triggereds, event_id):
         # do we need shape[0] or does len() work too?
         try:
-            length = channel_ids.shape[0]
+            length = times.shape[0]
         except AttributeError:
-            length = len(channel_ids)
+            length = len(times)
         hits = np.empty(length, cls.dtype)
-        hits['channel_id'] = channel_ids
-        hits['dir_x'] = dir_xs
-        hits['dir_y'] = dir_ys
-        hits['dir_z'] = dir_zs
-        hits['dom_id'] = dom_ids
-        hits['id'] = ids
         hits['pmt_id'] = pmt_ids
-        hits['pos_x'] = pos_xs
-        hits['pos_y'] = pos_ys
-        hits['pos_z'] = pos_zs
-        hits['t0'] = t0s
         hits['time'] = times
         hits['tot'] = tots
         hits['triggered'] = triggereds
@@ -1092,17 +1016,7 @@ class McHitSeries(object):
         if event_id is None:
             event_id = map['event_id']
         return cls.from_arrays(
-            map['channel_id'],
-            map['dir_x'],
-            map['dir_y'],
-            map['dir_z'],
-            map['dom_id'],
-            map['id'],
             map['pmt_id'],
-            map['pos_x'],
-            map['pos_y'],
-            map['pos_z'],
-            map['t0'],
             map['time'],
             map['tot'],
             map['triggered'],
@@ -1114,17 +1028,7 @@ class McHitSeries(object):
         if event_id is None:
             event_id = table[0]['event_id']
         return cls(np.array([(
-            row['channel_id'],
-            row['dir_x'],
-            row['dir_y'],
-            row['dir_z'],
-            row['dom_id'],
-            row['id'],
             row['pmt_id'],
-            row['pos_x'],
-            row['pos_y'],
-            row['pos_z'],
-            row['t0'],
             row['time'],
             row['tot'],
             row['triggered'],
@@ -1159,23 +1063,12 @@ class McHitSeries(object):
         return self
 
     @property
-    def id(self):
-        return self._arr['id']
-
-    @property
     def time(self):
         return self._arr['time']
 
     @property
     def triggered_hits(self):
         return McHitSeries(self._arr[self._arr['triggered'] == True])     # noqa
-
-    @property
-    def first_hits(self):
-        h = self.conv_to(to='pandas')
-        h.sort_values('time', inplace=True)
-        h = h.drop_duplicates(subset='dom_id')
-        return McHitSeries(h.to_records(index=False))
 
     @property
     def triggered(self):
@@ -1186,48 +1079,8 @@ class McHitSeries(object):
         return self._arr['tot']
 
     @property
-    def dom_id(self):
-        return self._arr['dom_id']
-
-    @property
     def pmt_id(self):
         return self._arr['pmt_id']
-
-    @property
-    def id(self):
-        return self._arr['id']
-
-    @property
-    def channel_id(self):
-        return self._arr['channel_id']
-
-    @property
-    def pos_x(self):
-        return self._arr['pos_x']
-
-    @property
-    def pos_y(self):
-        return self._arr['pos_y']
-
-    @property
-    def pos_z(self):
-        return self._arr['pos_z']
-
-    @property
-    def dir_x(self):
-        return self._arr['dir_x']
-
-    @property
-    def dir_y(self):
-        return self._arr['dir_y']
-
-    @property
-    def dir_z(self):
-        return self._arr['dir_z']
-
-    @property
-    def t0(self):
-        return self._arr['t0']
 
     def next(self):
         """Python 2/3 compatibility for iterators"""
