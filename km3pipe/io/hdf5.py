@@ -128,7 +128,7 @@ class HDF5Sink(Module):
         else:
             group = f.get_node(where)
 
-        for col, (dt, _) in hits.dtype.fields.items():
+        for col, (dt, _) in obj.dtype.fields.items():
             data = obj.__array__()[col]
 
             if col not in group:
