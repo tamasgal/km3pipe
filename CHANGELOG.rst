@@ -4,6 +4,12 @@ Unreleased changes
 7.0.0 / 2017-
 ------------------
 
+6.9.2 / 2017-07-06
+------------------
+* Hotfix
+* HDF5 version was accidentally set to 4.3 in km3pipe v6.9.1, now it is 3.4
+* minor change in EvtPump
+
 6.9.1 / 2017-07-04
 ------------------
 * Last version freeze before 7.0
