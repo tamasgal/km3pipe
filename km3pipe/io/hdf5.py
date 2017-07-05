@@ -133,7 +133,8 @@ class HDF5Sink(Module):
 
             if col not in group:
                 a = tb.Atom.from_dtype(dt)
-                arr = f.create_earray(group, col, a, (0,), col.capitalize())
+                arr = f.create_earray(group, col, a, (0,), col.capitalize(),
+                                      filters=self.filters)
             else:
                 arr = getattr(group, col)
             arr.append(data)
