@@ -13,7 +13,8 @@ import os.path
 import numpy as np
 
 from km3pipe.core import Pump, Blob
-from km3pipe.dataclasses import (RawHitSeries, TrackSeries, EventInfo,
+from km3pipe.dataclasses import (RawHitSeries, McHitSeries,
+                                 TrackSeries, EventInfo,
                                  KM3Array, KM3DataFrame)
 from km3pipe.logger import logging
 
