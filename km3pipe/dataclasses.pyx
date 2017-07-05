@@ -662,7 +662,7 @@ cdef class McHit:
     time : float
 
     """
-    cdef public int a, time
+    cdef public float a, time
     cdef public int origin, pmt_id
 
     def __cinit__(self,
