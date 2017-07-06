@@ -352,10 +352,10 @@ class HDF5Pump(Pump):
             end = idx + n_items
             if loc == '/hits':
                 channel_id = h5file.get_node("/hits/channel_id")[idx:end]
-                dom_id = h5file.get_node("/hits/channel_id")[idx:end]
-                time = h5file.get_node("/hits/channel_id")[idx:end]
-                tot = h5file.get_node("/hits/channel_id")[idx:end]
-                triggered = h5file.get_node("/hits/channel_id")[idx:end]
+                dom_id = h5file.get_node("/hits/dom_id")[idx:end]
+                time = h5file.get_node("/hits/time_id")[idx:end]
+                tot = h5file.get_node("/hits/tot_id")[idx:end]
+                triggered = h5file.get_node("/hits/triggered")[idx:end]
                 blob["Hits"] = RawHitSeries.from_arrays(
                     channel_id, dom_id, time, tot, triggered, event_id)
             if loc == '/mc_hits':
