@@ -998,17 +998,17 @@ class McHitSeries(object):
         ) for h in hits], dtype=cls.dtype))
 
     @classmethod
-    def from_arrays(cls, pmt_ids, times, tots, triggereds, event_id):
+    def from_arrays(cls, a, origin, pmt_id, time, event_id):
         # do we need shape[0] or does len() work too?
         try:
-            length = times.shape[0]
+            length = time.shape[0]
         except AttributeError:
-            length = len(times)
+            length = len(time)
         hits = np.empty(length, cls.dtype)
-        hits['a'] = tots
-        hits['origin'] = triggereds
-        hits['pmt_id'] = pmt_ids
-        hits['time'] = times
+        hits['a'] = a
+        hits['origin'] = origin
+        hits['pmt_id'] = pmt_id
+        hits['time'] = time
         hits['event_id'] = np.full(length, event_id, dtype='<u4')
         return cls(hits)
 
