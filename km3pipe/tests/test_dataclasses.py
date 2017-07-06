@@ -368,25 +368,25 @@ class TestRawHitSeries(TestCase):
 class TestMcHitSeries(TestCase):
     def setUp(self):
         n = 10
-        pmt_ids = np.arange(n)
-        times = np.arange(n)
-        tots = np.arange(n)
-        triggereds = np.ones(n)
+        a = np.arange(n)
+        origin = np.arange(n)
+        pmt_id = np.arange(n)
+        time = np.ones(n)
 
         self.hits = McHitSeries.from_arrays(
-            pmt_ids,
-            times,
-            tots,
-            triggereds,
+            a,
+            origin,
+            pmt_id,
+            time,
             0,      # event_id
         )
 
     def test_from_arrays(self):
         hits = self.hits
         self.assertAlmostEqual(9, hits[9].pmt_id)
-        self.assertAlmostEqual(9, hits[9].time)
+        self.assertAlmostEqual(1.0, hits[9].time)
         self.assertAlmostEqual(9, hits[9].a)
-        self.assertAlmostEqual(1, hits[9].origin)
+        self.assertAlmostEqual(9, hits[9].origin)
         self.assertEqual(10, len(hits))
 
     def test_from_aanet(self):

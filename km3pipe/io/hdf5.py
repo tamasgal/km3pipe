@@ -359,7 +359,7 @@ class HDF5Pump(Pump):
                 blob["Hits"] = RawHitSeries.from_arrays(
                     channel_id, dom_id, time, tot, triggered, event_id)
             if loc == '/mc_hits':
-                a = h5file.get_node("/mc_hits/origin")[idx:end]
+                a = h5file.get_node("/mc_hits/a")[idx:end]
                 origin = h5file.get_node("/mc_hits/origin")[idx:end]
                 pmt_id = h5file.get_node("/mc_hits/pmt_id")[idx:end]
                 time = h5file.get_node("/mc_hits/time")[idx:end]
