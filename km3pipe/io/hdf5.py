@@ -17,8 +17,8 @@ import tables as tb
 
 import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
-from km3pipe.dataclasses import KM3Array, KM3DataFrame, RawHitSeries
-from km3pipe.dataclasses import deserialise_map
+from km3pipe.dataclasses import (KM3Array, KM3DataFrame, RawHitSeries,
+                                 McHitSeries, deserialise_map)
 from km3pipe.logger import logging
 from km3pipe.dev import camelise, decamelise, split
 
@@ -227,6 +227,7 @@ class HDF5Pump(Pump):
         self.filenames = self.get('filenames') or []
         self.skip_version_check = bool(self.get('skip_version_check')) or False
         self.verbose = bool(self.get('verbose'))
+        self.indices = {}
         if not self.filename and not self.filenames:
             raise ValueError("No filename(s) defined")
 
@@ -323,8 +324,18 @@ class HDF5Pump(Pump):
         local_index = self._translate_index(fname, index)
         event_id = evt_ids[local_index]
 
+        # skip groups with separate columns
+        # and deal with them later
+        # this should be solved using hdf5 attributes in near future
+        skipped_locs = []
         for tab in h5file.walk_nodes(classname="Table"):
             loc, tabname = os.path.split(tab._v_pathname)
+            if loc in skipped_locs:
+                continue;
+            if tabname == "_indices":
+                skipped_locs.append(loc)
+                self.indices[loc] = h5file.get_node(loc + '/' + '_indices')
+                continue
             tabname = camelise(tabname)
             try:
                 dc = deserialise_map[tabname]
@@ -332,6 +343,29 @@ class HDF5Pump(Pump):
                 dc = KM3Array
             arr = tab.read_where('event_id == %d' % event_id)
             blob[tabname] = dc.deserialise(arr, event_id=index, h5loc=loc)
+
+        # skipped locs are now column wise datasets (usually hits)
+        # currently hardcoded, in future using hdf5 attributes
+        # to get the right constructor
+        for loc in skipped_locs:
+            idx, n_items = self.indices[loc][event_id]
+            end = idx + n_items
+            if loc == '/hits':
+                channel_id = h5file.get_node("/hits/channel_id")[idx:end]
+                dom_id = h5file.get_node("/hits/channel_id")[idx:end]
+                time = h5file.get_node("/hits/channel_id")[idx:end]
+                tot = h5file.get_node("/hits/channel_id")[idx:end]
+                triggered = h5file.get_node("/hits/channel_id")[idx:end]
+                blob["Hits"] = RawHitSeries.from_arrays(
+                    channel_id, dom_id, time, tot, triggered, event_id)
+            if loc == '/mc_hits':
+                a = h5file.get_node("/mc_hits/origin")[idx:end]
+                origin = h5file.get_node("/mc_hits/origin")[idx:end]
+                pmt_id = h5file.get_node("/mc_hits/pmt_id")[idx:end]
+                time = h5file.get_node("/mc_hits/time")[idx:end]
+                blob["McHits"] = McHitSeries.from_arrays(
+                    a, origin, pmt_id, time, event_id)
+
         return blob
 
     def finish(self):
