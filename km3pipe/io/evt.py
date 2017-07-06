@@ -47,6 +47,9 @@ class EvtPump(Pump):  # pylint: disable:R0902
         self.basename = self.get('basename') or None
         self.index_start = self.get('index_start') or 1
         self.index_stop = self.get('index_stop') or 1
+        self.exclude_tags = self.get('exclude_tags')
+        if self.exclude_tags is None:
+            self.exclude_tags = []
 
         self.raw_header = None
         self.event_offsets = []
@@ -184,6 +187,8 @@ class EvtPump(Pump):  # pylint: disable:R0902
             tag, value = line.split(':')
         except ValueError:
             log.warning("Corrupt line in EVT file:\n{0}".format(line))
+            return
+        if tag in self.exclude_tags:
             return
         if tag in ('track_in', 'track_fit', 'hit', 'hit_raw', 'track_seamuon', 'track_seaneutrino'):
             values = [float(x) for x in value.split()]
