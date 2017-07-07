@@ -60,24 +60,24 @@ class TestMultiTable(TestCase):
     #    self.assertEqual(exp_cols, res_cols)
 
 
-class TestH5Pump(TestCase):
-    def setUp(self):
-        data_dir = os.path.dirname(kp.__file__) + '/kp-data/test_data/'
-        self.fname = data_dir + 'numu_cc_test.h5'
-
-    def test_init_has_to_be_explicit(self):
-        with self.assertRaises(TypeError):
-            HDF5Pump(self.fname)
-
-    def test_standalone(self):
-        pump = HDF5Pump(filename=self.fname)
-        pump.next()
-        pump.finish()
-
-    def test_pipe(self):
-        p = Pipeline()
-        p.attach(HDF5Pump, filename=self.fname)
-        p.drain()
+# class TestH5Pump(TestCase):
+#     def setUp(self):
+#         data_dir = os.path.dirname(kp.__file__) + '/kp-data/test_data/'
+#         self.fname = data_dir + 'numu_cc_test.h5'
+#
+#     def test_init_has_to_be_explicit(self):
+#         with self.assertRaises(TypeError):
+#             HDF5Pump(self.fname)
+#
+#     def test_standalone(self):
+#         pump = HDF5Pump(filename=self.fname)
+#         pump.next()
+#         pump.finish()
+#
+#     def test_pipe(self):
+#         p = Pipeline()
+#         p.attach(HDF5Pump, filename=self.fname)
+#         p.drain()
 
 
 # class TestH5Sink(TestCase):
