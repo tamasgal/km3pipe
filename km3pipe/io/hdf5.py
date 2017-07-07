@@ -17,8 +17,8 @@ import tables as tb
 
 import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
-from km3pipe.dataclasses import KM3Array, KM3DataFrame, RawHitSeries
-from km3pipe.dataclasses import deserialise_map
+from km3pipe.dataclasses import (KM3Array, KM3DataFrame, RawHitSeries,
+                                 McHitSeries, deserialise_map)
 from km3pipe.logger import logging
 from km3pipe.dev import camelise, decamelise, split
 
@@ -32,8 +32,8 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-FORMAT_VERSION = np.string_('3.4')
-MINIMUM_FORMAT_VERSION = np.string_('3.0')
+FORMAT_VERSION = np.string_('4.0')
+MINIMUM_FORMAT_VERSION = np.string_('4.0')
 
 
 class H5VersionError(Exception):
@@ -62,8 +62,7 @@ class HDF5Sink(Module):
         self.filename = self.get('filename') or 'dump.h5'
         self.ext_h5file = self.get('h5file') or None
         self.pytab_file_args = self.get('pytab_file_args') or dict()
-        self.hit_indices = defaultdict(list)
-        self.hit_index = 0
+        self.indices = {}
         # magic 10000: this is the default of the "expectedrows" arg
         # from the tables.File.create_table() function
         # at least according to the docs
@@ -120,6 +119,37 @@ class HDF5Sink(Module):
         if(level < 4):
             tab.flush()
 
+    def _write_separate_columns(self, where, obj, title=''):
+        f = self.h5file
+        loc, group_name = os.path.split(where)
+        if where not in f:
+            group = f.create_group(loc, group_name, obj.__class__.__name__)
+        else:
+            group = f.get_node(where)
+
+        for col, (dt, _) in obj.dtype.fields.items():
+            data = obj.__array__()[col]
+
+            if col not in group:
+                a = tb.Atom.from_dtype(dt)
+                arr = f.create_earray(group, col, a, (0,), col.capitalize(),
+                                      filters=self.filters)
+            else:
+                arr = getattr(group, col)
+            arr.append(data)
+
+        # create index table
+        if where not in self.indices:
+            self.indices[where] = {}
+            self.indices[where]["index"] = 0
+            self.indices[where]["indices"] = []
+            self.indices[where]["n_items"] = []
+        d = self.indices[where]
+        n_items = len(obj)
+        d["indices"].append(d["index"])
+        d["n_items"].append(n_items)
+        d["index"] += n_items
+
     def process(self, blob):
         for key, entry in sorted(blob.items()):
             serialisable_attributes = ('dtype', 'serialise', 'to_records')
@@ -140,13 +170,15 @@ class HDF5Sink(Module):
                     data = data.view(dt)
                     h5loc = '/misc'
                 where = os.path.join(h5loc, tabname)
-                self._write_array(where, data, title=key)
 
-                if isinstance(entry, RawHitSeries):  # hit index table
-                    n_hits = len(entry)
-                    self.hit_indices["n_hits"].append(n_hits)
-                    self.hit_indices["hit_index"].append(self.hit_index)
-                    self.hit_index += n_hits
+                try:
+                    if entry.write_separate_columns:
+                        self._write_separate_columns(where, entry, title=key)
+                    else:
+                        self._write_array(where, data, title=key)
+                except AttributeError:  # backwards compatibility
+                    self._write_array(where, data, title=key)
+
 
 
         if not self.index % 1000:
@@ -160,11 +192,14 @@ class HDF5Sink(Module):
         self.h5file.root._v_attrs.km3pipe = np.string_(kp.__version__)
         self.h5file.root._v_attrs.pytables = np.string_(tb.__version__)
         self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
-        print("Adding hit index table.")
-        hit_indices = KM3DataFrame(self.hit_indices, h5loc='/_hit_indices')
-        self._write_array("/_hit_indices", self._to_array(hit_indices),
-                          title="Hit Indices")
-        print("Creating index tables. This may take a few minutes...")
+        print("Adding index tables.")
+        for where, data in self.indices.items():
+            h5loc = where + "/_indices"
+            print("  -> {0}".format(h5loc))
+            indices = KM3DataFrame({"index": data["indices"],
+                                    "n_items": data["n_items"]}, h5loc=h5loc)
+            self._write_array(h5loc, self._to_array(indices), title="Indices")
+        print("Creating pytables index tables. This may take a few minutes...")
         for tab in itervalues(self._tables):
             if 'frame_id' in tab.colnames:
                 tab.cols.frame_id.create_index()
@@ -192,6 +227,7 @@ class HDF5Pump(Pump):
         self.filenames = self.get('filenames') or []
         self.skip_version_check = bool(self.get('skip_version_check')) or False
         self.verbose = bool(self.get('verbose'))
+        self.indices = {}
         if not self.filename and not self.filenames:
             raise ValueError("No filename(s) defined")
 
@@ -288,8 +324,18 @@ class HDF5Pump(Pump):
         local_index = self._translate_index(fname, index)
         event_id = evt_ids[local_index]
 
+        # skip groups with separate columns
+        # and deal with them later
+        # this should be solved using hdf5 attributes in near future
+        skipped_locs = []
         for tab in h5file.walk_nodes(classname="Table"):
             loc, tabname = os.path.split(tab._v_pathname)
+            if loc in skipped_locs:
+                continue;
+            if tabname == "_indices":
+                skipped_locs.append(loc)
+                self.indices[loc] = h5file.get_node(loc + '/' + '_indices')
+                continue
             tabname = camelise(tabname)
             try:
                 dc = deserialise_map[tabname]
@@ -297,6 +343,29 @@ class HDF5Pump(Pump):
                 dc = KM3Array
             arr = tab.read_where('event_id == %d' % event_id)
             blob[tabname] = dc.deserialise(arr, event_id=index, h5loc=loc)
+
+        # skipped locs are now column wise datasets (usually hits)
+        # currently hardcoded, in future using hdf5 attributes
+        # to get the right constructor
+        for loc in skipped_locs:
+            idx, n_items = self.indices[loc][event_id]
+            end = idx + n_items
+            if loc == '/hits':
+                channel_id = h5file.get_node("/hits/channel_id")[idx:end]
+                dom_id = h5file.get_node("/hits/dom_id")[idx:end]
+                time = h5file.get_node("/hits/time")[idx:end]
+                tot = h5file.get_node("/hits/tot")[idx:end]
+                triggered = h5file.get_node("/hits/triggered")[idx:end]
+                blob["Hits"] = RawHitSeries.from_arrays(
+                    channel_id, dom_id, time, tot, triggered, event_id)
+            if loc == '/mc_hits':
+                a = h5file.get_node("/mc_hits/a")[idx:end]
+                origin = h5file.get_node("/mc_hits/origin")[idx:end]
+                pmt_id = h5file.get_node("/mc_hits/pmt_id")[idx:end]
+                time = h5file.get_node("/mc_hits/time")[idx:end]
+                blob["McHits"] = McHitSeries.from_arrays(
+                    a, origin, pmt_id, time, event_id)
+
         return blob
 
     def finish(self):

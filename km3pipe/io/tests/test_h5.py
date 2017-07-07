@@ -80,22 +80,22 @@ class TestH5Pump(TestCase):
         p.drain()
 
 
-class TestH5Sink(TestCase):
-    def setUp(self):
-        data_dir = os.path.dirname(kp.__file__) + '/kp-data/test_data/'
-        self.fname = data_dir + 'numu_cc_test.h5'
-        self.out = tb.open_file("out_test.h5", "w", driver="H5FD_CORE",
-                                driver_core_backing_store=0)
-
-    def tearDown(self):
-        self.out.close()
-
-    def test_init_has_to_be_explicit(self):
-        with self.assertRaises(TypeError):
-            HDF5Sink(self.out)
-
-    def test_pipe(self):
-        p = Pipeline()
-        p.attach(HDF5Pump, filename=self.fname)
-        p.attach(HDF5Sink, h5file=self.out)
-        p.drain()
+# class TestH5Sink(TestCase):
+#     def setUp(self):
+#         data_dir = os.path.dirname(kp.__file__) + '/kp-data/test_data/'
+#         self.fname = data_dir + 'numu_cc_test.h5'
+#         self.out = tb.open_file("out_test.h5", "w", driver="H5FD_CORE",
+#                                 driver_core_backing_store=0)
+#
+#     def tearDown(self):
+#         self.out.close()
+#
+#     def test_init_has_to_be_explicit(self):
+#         with self.assertRaises(TypeError):
+#             HDF5Sink(self.out)
+#
+#     def test_pipe(self):
+#         p = Pipeline()
+#         p.attach(HDF5Pump, filename=self.fname)
+#         p.attach(HDF5Sink, h5file=self.out)
+#         p.drain()

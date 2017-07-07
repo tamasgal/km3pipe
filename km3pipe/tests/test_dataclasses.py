@@ -18,7 +18,8 @@ from km3pipe.testing import TestCase
 from km3pipe.testing.mocks import FakeAanetHit
 from km3pipe.io.evt import EvtRawHit
 from km3pipe.dataclasses import (RawHit, Hit, Track, Position,
-                                 RawHitSeries, HitSeries, TimesliceHitSeries,
+                                 RawHitSeries, HitSeries, McHitSeries,
+                                 TimesliceHitSeries,
                                  EventInfo, SummarysliceInfo, TimesliceInfo,
                                  Serialisable, TrackSeries, SummaryframeSeries,
                                  KM3Array, KM3DataFrame, BinaryStruct,
@@ -206,7 +207,7 @@ class TestHitSeries(TestCase):
         self.assertEqual(10, len(hits))
 
     def test_from_aanet(self):
-        n_params = 14
+        n_params = 16
         n_hits = 10
         hits = [FakeAanetHit(*p) for p in
                 np.arange(n_hits * n_params).reshape(n_hits, n_params)]
@@ -214,41 +215,41 @@ class TestHitSeries(TestCase):
 
         self.assertAlmostEqual(6, hit_series.pmt_id[0])
         self.assertAlmostEqual(6, hit_series[0].pmt_id)
-        self.assertAlmostEqual(14, hit_series[1].channel_id)
-        self.assertAlmostEqual(47, hit_series[3].id)
-        self.assertAlmostEqual(82, hit_series[5].tot)
+        self.assertAlmostEqual(16, hit_series[1].channel_id)
+        self.assertAlmostEqual(53, hit_series[3].id)
+        self.assertAlmostEqual(92, hit_series[5].tot)
         self.assertTrue(hit_series[9].triggered)
-        self.assertAlmostEqual(102, hit_series[7].dom_id)
-        self.assertAlmostEqual(137, hit_series[9].time)
+        self.assertAlmostEqual(116, hit_series[7].dom_id)
+        self.assertAlmostEqual(155, hit_series[9].time)
         self.assertEqual(n_hits, len(hit_series))
 
     def test_attributes_via_from_aanet(self):
-        n_params = 14
+        n_params = 16
         n_hits = 10
         hits = [FakeAanetHit(*p) for p in
                 np.arange(n_hits * n_params).reshape(n_hits, n_params)]
         hit_series = HitSeries.from_aanet(hits, 0)
 
-        self.assertTupleEqual((5, 19, 33, 47, 61, 75, 89, 103, 117, 131),
+        self.assertTupleEqual((5, 21, 37, 53, 69, 85, 101, 117, 133, 149),
                               tuple(hit_series.id))
         self.assertTupleEqual(
-            (4, 18, 32, 46, 60, 74, 88, 102, 116, 130),
+            (4, 20, 36, 52, 68, 84, 100, 116, 132, 148),
             tuple(hit_series.dom_id))
         self.assertTupleEqual(
-            (6, 20, 34, 48, 62, 76, 90, 104, 118, 132),
+            (6, 22, 38, 54, 70, 86, 102, 118, 134, 150),
             tuple(hit_series.pmt_id))
         self.assertTupleEqual(
-            (0, 14, 28, 42, 56, 70, 84, 98, 112, 126),
+            (0, 16, 32, 48, 64, 80, 96, 112, 128, 144),
             tuple(hit_series.channel_id))
         self.assertTupleEqual(
-            (11, 25, 39, 53, 67, 81, 95, 109, 123, 137),
+            (11, 27, 43, 59, 75, 91, 107, 123, 139, 155),
             tuple(hit_series.time))
         self.assertTupleEqual(
             # triggered is an unsigned short integer
-            (13, 27, 41, 55, 69, 83, 97, 111, 125, 139),
+            (13, 29, 45, 61, 77, 93, 109, 125, 141, 157),
             tuple(hit_series.triggered))
         self.assertTupleEqual(
-            (12, 26, 40, 54, 68, 82, 96, 110, 124, 138),
+            (12, 28, 44, 60, 76, 92, 108, 124, 140, 156),
             tuple(hit_series.tot))
 
     def test_from_evt(self):
@@ -326,42 +327,101 @@ class TestRawHitSeries(TestCase):
         self.assertEqual(10, len(hits))
 
     def test_from_aanet(self):
-        n_params = 14
+        n_params = 16
         n_hits = 10
         hits = [FakeAanetHit(*p) for p in
                 np.arange(n_hits * n_params).reshape(n_hits, n_params)]
         hit_series = RawHitSeries.from_aanet(hits, 0)
 
-        self.assertAlmostEqual(14, hit_series[1].channel_id)
-        self.assertAlmostEqual(82, hit_series[5].tot)
+        self.assertAlmostEqual(16, hit_series[1].channel_id)
+        self.assertAlmostEqual(92, hit_series[5].tot)
         self.assertTrue(hit_series[9].triggered)
-        self.assertAlmostEqual(102, hit_series[7].dom_id)
-        self.assertAlmostEqual(137, hit_series[9].time)
+        self.assertAlmostEqual(116, hit_series[7].dom_id)
+        self.assertAlmostEqual(155, hit_series[9].time)
         self.assertEqual(n_hits, len(hit_series))
 
     def test_attributes_via_from_aanet(self):
-        n_params = 14
+        n_params = 16
         n_hits = 10
         hits = [FakeAanetHit(*p) for p in
                 np.arange(n_hits * n_params).reshape(n_hits, n_params)]
         hit_series = RawHitSeries.from_aanet(hits, 0)
 
         self.assertTupleEqual(
-            (4, 18, 32, 46, 60, 74, 88, 102, 116, 130),
+            (4, 20, 36, 52, 68, 84, 100, 116, 132, 148),
             tuple(hit_series.dom_id))
         self.assertTupleEqual(
-            (0, 14, 28, 42, 56, 70, 84, 98, 112, 126),
+            (0, 16, 32, 48, 64, 80, 96, 112, 128, 144),
             tuple(hit_series.channel_id))
         self.assertTupleEqual(
-            (11, 25, 39, 53, 67, 81, 95, 109, 123, 137),
+            (11, 27, 43, 59, 75, 91, 107, 123, 139, 155),
             tuple(hit_series.time))
         self.assertTupleEqual(
             # triggered is an unsigned short integer
-            (13, 27, 41, 55, 69, 83, 97, 111, 125, 139),
+            (13, 29, 45, 61, 77, 93, 109, 125, 141, 157),
             tuple(hit_series.triggered))
         self.assertTupleEqual(
-            (12, 26, 40, 54, 68, 82, 96, 110, 124, 138),
+            (12, 28, 44, 60, 76, 92, 108, 124, 140, 156),
             tuple(hit_series.tot))
+
+
+class TestMcHitSeries(TestCase):
+    def setUp(self):
+        n = 10
+        a = np.arange(n)
+        origin = np.arange(n)
+        pmt_id = np.arange(n)
+        time = np.ones(n)
+
+        self.hits = McHitSeries.from_arrays(
+            a,
+            origin,
+            pmt_id,
+            time,
+            0,      # event_id
+        )
+
+    def test_from_arrays(self):
+        hits = self.hits
+        self.assertAlmostEqual(9, hits[9].pmt_id)
+        self.assertAlmostEqual(1.0, hits[9].time)
+        self.assertAlmostEqual(9, hits[9].a)
+        self.assertAlmostEqual(9, hits[9].origin)
+        self.assertEqual(10, len(hits))
+
+    def test_from_aanet(self):
+        n_params = 16
+        n_hits = 10
+        hits = [FakeAanetHit(*p) for p in
+                np.arange(n_hits * n_params).reshape(n_hits, n_params)]
+        hit_series = McHitSeries.from_aanet(hits, 0)
+
+        self.assertAlmostEqual(22, hit_series[1].pmt_id)
+        self.assertAlmostEqual(94, hit_series[5].a)
+        self.assertTrue(hit_series[9].origin)
+        self.assertAlmostEqual(155, hit_series[9].time)
+        self.assertEqual(n_hits, len(hit_series))
+
+    def test_attributes_via_from_aanet(self):
+        n_params = 16
+        n_hits = 10
+        hits = [FakeAanetHit(*p) for p in
+                np.arange(n_hits * n_params).reshape(n_hits, n_params)]
+        hit_series = McHitSeries.from_aanet(hits, 0)
+
+        self.assertTupleEqual(
+            (6, 22, 38, 54, 70, 86, 102, 118, 134, 150),
+            tuple(hit_series.pmt_id))
+        self.assertTupleEqual(
+            (11.0, 27.0, 43.0, 59.0, 75.0, 91.0, 107.0, 123.0, 139.0, 155.0),
+            tuple(hit_series.time))
+        self.assertTupleEqual(
+            # triggered is an unsigned short integer
+            (15, 31, 47, 63, 79, 95, 111, 127, 143, 159),
+            tuple(hit_series.origin))
+        self.assertTupleEqual(
+            (14.0, 30.0, 46.0, 62.0, 78.0, 94.0, 110.0, 126.0, 142.0, 158.0),
+            tuple(hit_series.a))
 
 
 class TestHit(TestCase):
