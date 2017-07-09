@@ -1,8 +1,13 @@
 Unreleased changes
 ------------------
 
-7.0.0 / 2017-
+7.0.0 / 2017-07-09
 ------------------
+* New KM3HDF5 version 4.0
+* HDF5Pump now creates ``RawHitSeries``. The other pumps will be updated too.
+* ``Geometry.apply()`` will return ``HitSeries`` if a ``RawHitSeries`` instance
+  is the input.
+* Several bug fixes and speedups.
 
 6.9.2 / 2017-07-06
 ------------------
