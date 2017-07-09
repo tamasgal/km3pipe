@@ -26,6 +26,8 @@ from km3pipe.dev import cprint
 
 import km3pipe as kp
 import numpy as np
+from sklearn import mixture
+
 
 __author__ = "Tamas Gal and Jonas Reubelt"
 __copyright__ = "Copyright 2017, the KM3NeT collaboration."
@@ -34,6 +36,8 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Jonas Reubelt"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
+
+GMM = mixture.GaussianMixture(n_components=1)
 
 
 class TimesliceCreator(kp.core.Module):
@@ -55,6 +59,7 @@ class TimesliceCreator(kp.core.Module):
                   0,
                   0)
         blob['TimesliceHits'] = ts_hits
+        blob['DOM_ID'] = self.dom_id
         return blob
 
 
@@ -65,9 +70,11 @@ class MeanTotDisplay(kp.core.Module):
         self.update_frequency = self.get("update_frequency") or 10
         self.tots = defaultdict(list)
         self.counter = 0
+        self.dom_id = None
 
     def process(self, blob):
         hits = blob["TimesliceHits"]
+        self.dom_id = blob["DOM_ID"]
         for channel in range(31):
             idx = hits.channel_id == channel
             tots = hits.tot[idx]
@@ -83,10 +90,12 @@ class MeanTotDisplay(kp.core.Module):
     def update_display(self):
         os.system('clear')
         self.print_header()
-        for channel, tots in self.tots.iteritems():
+        for channel, tots in self.tots.items():
             if channel % 8 == 0:
                 self.print_scale()
-            mean_tot = np.mean(tots)
+            GMM.fit(np.array(tots)[:, np.newaxis])
+            mean_tot = GMM.means_[np.argmin(GMM.covariances_)][0]
+            #mean_tot = np.median(tots)
             if np.isnan(mean_tot):
                 mean_tot = 0
             color = 'green'
@@ -98,14 +107,20 @@ class MeanTotDisplay(kp.core.Module):
                    .format(channel, mean_tot, int(mean_tot) * '|'),
                    color)
         self.print_scale()
-        self.print_header()
+        self.print_footer()
 
     def print_header(self):
+        print("Mean ToT (average over {0}s) for DOM: {1}"
+              .format(self.update_frequency, self.dom_id))
+        print("                     "
+              "0         10        20        30        40        50")
+
+    def print_footer(self):
         print("                     "
               "0         10        20        30        40        50")
 
     def print_scale(self):
-        print("                     " + '|----+----' * 10)
+        print("                     " + '|----+----' * 5)
 
 
 def main():

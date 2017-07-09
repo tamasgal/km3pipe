@@ -22,7 +22,7 @@ import pandas as pd
 
 from .sys import peak_memory_usage, ignored
 from .hardware import Detector
-from .dataclasses import HitSeries
+from .dataclasses import HitSeries, RawHitSeries, McHitSeries
 from .logger import logging
 from .time import Timer
 
@@ -435,11 +435,20 @@ class Geometry(Module):
         return self.detector
 
     def apply(self, hits):
-        """Add x, y, z, t0 (and du, floor if DataFrame) columns to hit"""
+        """Add x, y, z, t0 (and du, floor if DataFrame) columns to hit.
+
+        When applying to ``RawHitSeries`` or ``McHitSeries``, a ``HitSeries``
+        will be returned with the geometry information added.
+        
+        """
         if isinstance(hits, (HitSeries, list)):
             self._apply_to_hitseries(hits)
         elif isinstance(hits, pd.DataFrame):
             self._apply_to_table(hits)
+        elif isinstance(hits, RawHitSeries):
+            return self._apply_to_rawhitseries(hits)
+        elif isinstance(hits, McHitSeries):
+            return self._apply_to_mchitseries(hits)
         else:
             raise TypeError("Don't know how to apply geometry to '{0}'."
                             .format(hits.__class__.__name__))
@@ -460,6 +469,92 @@ class Geometry(Module):
             hits._arr['t0'][idx] = pmt.t0
             hits._arr['time'][idx] += pmt.t0
             # hit.a = hit.tot
+
+    def _apply_to_rawhitseries(self, hits):
+        """Create a HitSeries from RawHitSeries and add pos, dir and t0.
+        
+        Note that existing arrays like tot, dom_id, channel_id etc. will be
+        copied by reference for better performance.
+        
+        """
+        n = len(hits)
+        pos_x = np.empty(n)
+        pos_y = np.empty(n)
+        pos_z = np.empty(n)
+        dir_x = np.empty(n)
+        dir_y = np.empty(n)
+        dir_z = np.empty(n)
+        t0 = np.empty(n)
+        for idx, hit in enumerate(hits):
+            pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
+            pos_x[idx] = pmt.pos[0]
+            pos_y[idx] = pmt.pos[1]
+            pos_z[idx] = pmt.pos[2]
+            dir_x[idx] = pmt.dir[0]
+            dir_y[idx] = pmt.dir[1]
+            dir_z[idx] = pmt.dir[2]
+            t0[idx] = pmt.t0
+        h = np.empty(n, HitSeries.dtype)
+        h['channel_id'] = hits.channel_id
+        h['dir_x'] = dir_x
+        h['dir_y'] = dir_y
+        h['dir_z'] = dir_z
+        h['dom_id'] = hits.dom_id
+        h['id'] = np.arange(n)
+        h['pmt_id'] = np.zeros(n, dtype=int)
+        h['pos_x'] = pos_x
+        h['pos_y'] = pos_y
+        h['pos_z'] = pos_z
+        h['t0'] = t0
+        h['time'] = hits.time + t0
+        h['tot'] = hits.tot
+        h['triggered'] = hits.triggered
+        h['event_id'] = hits._arr['event_id']
+        return HitSeries(h)
+
+    def _apply_to_mchitseries(self, hits):
+        """Create a HitSeries from McHitSeries and add pos, dir and t0.
+        
+        Note that existing arrays like a, origin, pmt_id will be copied by
+        reference for better performance.
+
+        The attributes ``a`` and ``origin`` are not implemented yet.
+        
+        """
+        n = len(hits)
+        pos_x = np.empty(n)
+        pos_y = np.empty(n)
+        pos_z = np.empty(n)
+        dir_x = np.empty(n)
+        dir_y = np.empty(n)
+        dir_z = np.empty(n)
+        t0 = np.empty(n)
+        for idx, hit in enumerate(hits):
+            pmt = self.detector.pmt_with_id(hit.pmt_id)
+            pos_x[idx] = pmt.pos[0]
+            pos_y[idx] = pmt.pos[1]
+            pos_z[idx] = pmt.pos[2]
+            dir_x[idx] = pmt.dir[0]
+            dir_y[idx] = pmt.dir[1]
+            dir_z[idx] = pmt.dir[2]
+            t0[idx] = pmt.t0
+        h = np.empty(n, HitSeries.dtype)
+        h['channel_id'] = np.zeros(n, dtype=int)
+        h['dir_x'] = dir_x
+        h['dir_y'] = dir_y
+        h['dir_z'] = dir_z
+        h['dom_id'] = np.zeros(n, dtype=int)
+        h['id'] = np.arange(n)
+        h['pmt_id'] = hits._arr['pmt_id']
+        h['pos_x'] = pos_x
+        h['pos_y'] = pos_y
+        h['pos_z'] = pos_z
+        h['t0'] = t0
+        h['time'] = hits.time + t0
+        h['tot'] = np.zeros(n, dtype=int)
+        h['triggered'] = np.zeros(n, dtype=bool)
+        h['event_id'] = hits._arr['event_id']
+        return HitSeries(h)
 
     def _apply_to_table(self, table):
         """Add x, y, z and du, floor columns to hit table"""
