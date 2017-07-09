@@ -83,7 +83,7 @@ class MeanTotDisplay(kp.core.Module):
     def update_display(self):
         os.system('clear')
         self.print_header()
-        for channel, tots in self.tots.iteritems():
+        for channel, tots in self.tots.items():
             if channel % 8 == 0:
                 self.print_scale()
             mean_tot = np.mean(tots)
