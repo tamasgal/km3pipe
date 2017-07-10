@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* Increased performance for Geometry.apply
 
 7.0.0 / 2017-07-09
 ------------------
