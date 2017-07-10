@@ -586,18 +586,19 @@ cdef class RawHit:
     ----------
     channel_id : int
     dom_id : int
-    time : int
+    time : float
     tot : int
     triggered : int
 
     """
-    cdef public dom_id, time, tot, channel_id
+    cdef public int dom_id, tot, channel_id
+    cdef public float time
     cdef public unsigned short int triggered
 
     def __cinit__(self,
                   int channel_id,
                   int dom_id,
-                  int time,
+                  float time,
                   int tot,
                   unsigned short int triggered,
                   int event_id=0        # ignore this! just for init * magic
@@ -760,7 +761,7 @@ class RawHitSeries(object):
     dtype = np.dtype([
         ('channel_id', 'u1'),
         ('dom_id', '<u4'),
-        ('time', '<i4'),
+        ('time', '<f4'),
         ('tot', 'u1'),
         ('triggered', 'u1'),
         ('event_id', '<u4')
