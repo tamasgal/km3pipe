@@ -541,7 +541,7 @@ class Geometry(Module):
         dir_z = np.empty(n)
         t0s = np.empty(n)
         for idx, hit in enumerate(hits):
-            pos, dir, t0s = self._pos_dir_t0_by_pmt_id[hit.pmt_id]
+            pos, dir, t0 = self._pos_dir_t0_by_pmt_id[hit.pmt_id]
             pos_x[idx] = pos[0]
             pos_y[idx] = pos[1]
             pos_z[idx] = pos[2]
