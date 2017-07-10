@@ -642,7 +642,8 @@ class TestSummarysliceInfo(TestCase):
 
 class TestEventInfo(TestCase):
     def test_event_info(self):
-        e = EventInfo(tuple(range(17)))
+        ran = np.array(tuple(range(17)), dtype=EventInfo.dtype)
+        e = EventInfo(ran)
         print(e.trigger_counter)
         print(e)
         self.assertAlmostEqual(0, e.det_id)
@@ -724,6 +725,33 @@ class TestEventInfo(TestCase):
         })
         exp = (0, 2, 13, 3, 4.0, 14, 15, 5, 6, 7, 8, 9, 10.0, 11.0, 12.0, 16, 1,)
         self.assertAlmostEqual(e.serialise(), np.array(exp, e.dtype))
+
+    def test_missing_run_id(self):
+        dt = EventInfo.dtype
+        fields = dict(dt.descr)
+        del fields['run_id']
+        sparse_dt = np.dtype([(k, v) for k, v in fields.items()])
+        e = np.ones(1, dtype=sparse_dt)
+        print(e)
+        ei = EventInfo(e)
+        print(ei)
+        self.assertAlmostEqual(1, ei.det_id)
+        self.assertAlmostEqual(1, ei.frame_index)
+        self.assertAlmostEqual(1, ei.mc_id)
+        self.assertAlmostEqual(1, ei.mc_t)
+        self.assertAlmostEqual(1, ei.overlays)
+        self.assertAlmostEqual(1, ei.trigger_counter)
+        self.assertAlmostEqual(1, ei.trigger_mask)
+        self.assertAlmostEqual(1, ei.utc_nanoseconds)
+        self.assertAlmostEqual(1, ei.utc_seconds)
+        self.assertAlmostEqual(1, ei.weight_w1)
+        self.assertAlmostEqual(1, ei.weight_w2)
+        self.assertAlmostEqual(1, ei.weight_w3)
+        self.assertAlmostEqual(1, ei.event_id)
+        self.assertAlmostEqual(1, ei.livetime_sec)
+        self.assertAlmostEqual(1, ei.n_events_gen)
+        self.assertAlmostEqual(1, ei.n_files_gen)
+        self.assertAlmostEqual(0, ei.run_id)
 
 
 class TestKM3Array(TestCase):
