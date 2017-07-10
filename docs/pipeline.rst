@@ -20,7 +20,7 @@ There is a ``Pump`` which is in this case a dummy data generator. The other
 Modules do some modifications on the data and pass them through to the next
 module in the pipeline.
 
-.. literalinclude:: ../examples/module_workflow.py
+.. literalinclude:: ../examples/nogallery/module_workflow.py
    :language: python
       :linenos:
 
@@ -38,7 +38,7 @@ User defined parameters are accessible via the ``get()`` method, which either
 returns the actual value or ``None`` if not defined.
 This allows an easy way to define default values as seen in the example below.
 
-.. literalinclude:: ../examples/module_workflow.py
+.. literalinclude:: ../examples/nogallery/module_workflow.py
    :pyobject: Foo
    :emphasize-lines: 5-6
    :linenos:
@@ -73,6 +73,6 @@ a list of dictionaries and "io" one blob after another on each
 ``process()`` call to the next module in the pipeline.
 
 
-.. literalinclude:: ../examples/module_workflow.py
+.. literalinclude:: ../examples/nogallery/module_workflow.py
    :pyobject: DummyPump
    :linenos:

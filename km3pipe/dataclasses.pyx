@@ -390,15 +390,24 @@ class EventInfo(object):
         ('weight_w1', '<f8'),
         ('weight_w2', '<f8'),
         ('weight_w3', '<f8'),
-        ('run_id', '<u4'),
+        ('run_id', '<u8'),
         ('event_id', '<u4'),
     ])
 
     def __init__(self, arr, h5loc='/'):
+        if 'run_id' not in arr.dtype.fields:
+            arr = self._append_run_id(arr)
         self._arr = np.array(arr, dtype=self.dtype).reshape(1)
         for col in self.dtype.names:
             setattr(self, col, self._arr[col])
         self.h5loc = h5loc
+
+    @classmethod
+    def _append_run_id(cls, info, fill_value=0):
+        from numpy.lib.recfunctions import append_fields
+        run_id = np.full(len(info), fill_value, '<u8')
+        info = append_fields(info, 'run_id', run_id)
+        return info
 
     @classmethod
     def from_row(cls, row, **kwargs):

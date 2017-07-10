@@ -578,7 +578,7 @@ class TestTrackSeries(TestCase):
             'pos_z': 12.0,
             'time': 13,
             'type': 14,
-            }], event_id=0)
+        }], event_id=0)
         exp = [(0.0, 1.0, 2.0, 3, 4.0, 0, 6, 7, True, 9.0, 10.0, 12.0, 12.0,
                 13, 14), ]
         exp = np.array(exp, dtype=ts.dtype)
@@ -642,7 +642,8 @@ class TestSummarysliceInfo(TestCase):
 
 class TestEventInfo(TestCase):
     def test_event_info(self):
-        e = EventInfo(tuple(range(17)))
+        ran = np.array(tuple(range(17)), dtype=EventInfo.dtype)
+        e = EventInfo(ran)
         print(e.trigger_counter)
         print(e)
         self.assertAlmostEqual(0, e.det_id)
@@ -682,7 +683,7 @@ class TestEventInfo(TestCase):
             'n_files_gen': 15,
             'run_id': 16,
             'event_id': 1,
-            })
+        })
 
         self.assertAlmostEqual(0, e.det_id)
         self.assertAlmostEqual(2, e.frame_index)
@@ -721,9 +722,37 @@ class TestEventInfo(TestCase):
             'weight_w3': 12.0,
             'run_id': 16,
             'event_id': 1,
-            })
+        })
         exp = (0, 2, 13, 3, 4.0, 14, 15, 5, 6, 7, 8, 9, 10.0, 11.0, 12.0, 16, 1,)
         self.assertAlmostEqual(e.serialise(), np.array(exp, e.dtype))
+
+    def test_missing_run_id(self):
+        dt = EventInfo.dtype
+        fields = dict(dt.descr)
+        del fields['run_id']
+        sparse_dt = np.dtype([(k, v) for k, v in fields.items()])
+        e = np.ones(1, dtype=sparse_dt)
+        print(e)
+        print(e.dtype)
+        print('run_id' in e.dtype.fields)
+        ei = EventInfo(e)
+        self.assertAlmostEqual(1, ei.det_id)
+        self.assertAlmostEqual(1, ei.frame_index)
+        self.assertAlmostEqual(1, ei.mc_id)
+        self.assertAlmostEqual(1, ei.mc_t)
+        self.assertAlmostEqual(1, ei.overlays)
+        self.assertAlmostEqual(1, ei.trigger_counter)
+        self.assertAlmostEqual(1, ei.trigger_mask)
+        self.assertAlmostEqual(1, ei.utc_nanoseconds)
+        self.assertAlmostEqual(1, ei.utc_seconds)
+        self.assertAlmostEqual(1, ei.weight_w1)
+        self.assertAlmostEqual(1, ei.weight_w2)
+        self.assertAlmostEqual(1, ei.weight_w3)
+        self.assertAlmostEqual(1, ei.event_id)
+        self.assertAlmostEqual(1, ei.livetime_sec)
+        self.assertAlmostEqual(1, ei.n_events_gen)
+        self.assertAlmostEqual(1, ei.n_files_gen)
+        self.assertAlmostEqual(0, ei.run_id)
 
 
 class TestKM3Array(TestCase):
@@ -764,7 +793,7 @@ class TestKM3DataFrame(TestCase):
 class TestBinaryStruct(TestCase):
     def test_init(self):
         stream = BytesIO(b'')
-        b = BinaryStruct(stream)
+        b = BinaryStruct(stream)        # noqa
 
     def test_parsing(self):
         structure = '<2i3fc'
@@ -789,4 +818,4 @@ class TestBinaryStruct(TestCase):
 class TestBinaryComposite(TestCase):
     def test_init(self):
         stream = BytesIO(b'')
-        b = BinaryComposite(stream)
+        b = BinaryComposite(stream)     # noqa

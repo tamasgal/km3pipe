@@ -6,7 +6,7 @@ __author__ = 'tamasgal'
 from km3pipe.core import Pipeline, Module, Pump
 
 
-class Pump(Pump):
+class DummyPump(Pump):
     """A pump demonstration with a dummy list as data."""
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
@@ -23,7 +23,6 @@ class Pump(Pump):
 
 
 class Foo(Module):
-
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.foo = self.get('foo') or 'default_foo'
