@@ -1,6 +1,7 @@
 Unreleased changes
 ------------------
 * Increased performance for Geometry.apply
+* Changed type of time to float in ``RawHitSeries``
 
 7.0.0 / 2017-07-09
 ------------------
