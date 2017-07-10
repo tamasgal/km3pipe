@@ -495,16 +495,16 @@ class Geometry(Module):
         dir_y = np.empty(n)
         dir_z = np.empty(n)
         t0s = np.empty(n)
-        for idx, hit in enumerate(hits):
+        for i in range(n):
             lookup = self._pos_dir_t0_by_dom_and_channel
-            pos, dir, t0 = lookup[hit.dom_id][hit.channel_id]
-            pos_x[idx] = pos[0]
-            pos_y[idx] = pos[1]
-            pos_z[idx] = pos[2]
-            dir_x[idx] = dir[0]
-            dir_y[idx] = dir[1]
-            dir_z[idx] = dir[2]
-            t0s[idx] = t0
+            pos, dir, t0 = lookup[hits._arr['dom_id'][i]][hits._arr['channel_id'][i]]
+            pos_x[i] = pos[0]
+            pos_y[i] = pos[1]
+            pos_z[i] = pos[2]
+            dir_x[i] = dir[0]
+            dir_y[i] = dir[1]
+            dir_z[i] = dir[2]
+            t0s[i] = t0
         h = np.empty(n, HitSeries.dtype)
         h['channel_id'] = hits.channel_id
         h['dir_x'] = dir_x
@@ -540,15 +540,15 @@ class Geometry(Module):
         dir_y = np.empty(n)
         dir_z = np.empty(n)
         t0s = np.empty(n)
-        for idx, hit in enumerate(hits):
-            pos, dir, t0 = self._pos_dir_t0_by_pmt_id[hit.pmt_id]
-            pos_x[idx] = pos[0]
-            pos_y[idx] = pos[1]
-            pos_z[idx] = pos[2]
-            dir_x[idx] = dir[0]
-            dir_y[idx] = dir[1]
-            dir_z[idx] = dir[2]
-            t0s[idx] = t0
+        for i in range(n):
+            pos, dir, t0 = self._pos_dir_t0_by_pmt_id[hits._arr['pmt_id'][i]]
+            pos_x[i] = pos[0]
+            pos_y[i] = pos[1]
+            pos_z[i] = pos[2]
+            dir_x[i] = dir[0]
+            dir_y[i] = dir[1]
+            dir_z[i] = dir[2]
+            t0s[i] = t0
         h = np.empty(n, HitSeries.dtype)
         h['channel_id'] = np.zeros(n, dtype=int)
         h['dir_x'] = dir_x
