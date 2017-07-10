@@ -19,8 +19,7 @@ from sklearn.mixture import GaussianMixture
 from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KernelDensity
 
-import km3pipe.style
-km3pipe.style.use("km3pipe")
+import km3pipe.style.moritz
 
 ##############################################################################
 # First generate some pseudodata: A bimodal gaussian, + noise.
