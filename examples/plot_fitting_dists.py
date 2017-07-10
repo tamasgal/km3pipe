@@ -16,7 +16,7 @@ import statsmodels.api as sm
 
 from scipy.stats import norm
 from sklearn.mixture import GaussianMixture
-from sklearn.grid_search import GridSearchCV
+from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KernelDensity
 
 import km3pipe.style
@@ -32,7 +32,7 @@ noise_bmg = 0.5
 data = np.random.normal(bmg, noise_bmg)[:, np.newaxis]
 
 # make X axis for plots
-x = np.linspace(5, 35, 3*N+1)
+x = np.linspace(5, 35, 3 * N + 1)
 
 ##############################################################################
 # Histograms (nonparametric)
