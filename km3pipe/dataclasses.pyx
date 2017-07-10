@@ -395,7 +395,7 @@ class EventInfo(object):
     ])
 
     def __init__(self, arr, h5loc='/'):
-        if 'run_id' not in arr.dtype:
+        if 'run_id' not in arr.dtype.fields:
             arr = self._append_run_id(arr)
         self._arr = np.array(arr, dtype=self.dtype).reshape(1)
         for col in self.dtype.names:
