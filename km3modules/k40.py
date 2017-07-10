@@ -252,7 +252,7 @@ def fit_angular_distribution(angles, rates):
 
     Returns
     -------
-    fitted_rates: numpy array of fitted rates (fit_function(angles, *popt))
+    fitted_rates: numpy array of fitted rates ``(fit_function(angles, *popt))``
     """
     cos_angles = np.cos(angles)
     popt, _ = optimize.curve_fit(exponential_polinomial, cos_angles, rates)
