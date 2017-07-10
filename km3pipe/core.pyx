@@ -488,36 +488,24 @@ class Geometry(Module):
         
         """
         n = len(hits)
-        pos_x = np.empty(n)
-        pos_y = np.empty(n)
-        pos_z = np.empty(n)
-        dir_x = np.empty(n)
-        dir_y = np.empty(n)
-        dir_z = np.empty(n)
-        t0s = np.empty(n)
+        cal = np.empty(n, 7)
         for i in range(n):
             lookup = self._pos_dir_t0_by_dom_and_channel
-            pos, dir, t0 = lookup[hits._arr['dom_id'][i]][hits._arr['channel_id'][i]]
-            pos_x[i] = pos[0]
-            pos_y[i] = pos[1]
-            pos_z[i] = pos[2]
-            dir_x[i] = dir[0]
-            dir_y[i] = dir[1]
-            dir_z[i] = dir[2]
-            t0s[i] = t0
+            calib = lookup[hits._arr['dom_id'][i]][hits._arr['channel_id'][i]]
+            cal[i] = calib
         h = np.empty(n, HitSeries.dtype)
         h['channel_id'] = hits.channel_id
-        h['dir_x'] = dir_x
-        h['dir_y'] = dir_y
-        h['dir_z'] = dir_z
+        h['dir_x'] = cal[:, 3]
+        h['dir_y'] = cal[:, 4]
+        h['dir_z'] = cal[:, 5]
         h['dom_id'] = hits.dom_id
         h['id'] = np.arange(n)
         h['pmt_id'] = np.zeros(n, dtype=int)
-        h['pos_x'] = pos_x
-        h['pos_y'] = pos_y
-        h['pos_z'] = pos_z
-        h['t0'] = t0s
-        h['time'] = hits.time + t0s
+        h['pos_x'] = cal[:, 0]
+        h['pos_y'] = cal[:, 1]
+        h['pos_z'] = cal[:, 2]
+        h['t0'] = cal[:, 6]
+        h['time'] = hits.time + cal[:, 6]
         h['tot'] = hits.tot
         h['triggered'] = hits.triggered
         h['event_id'] = hits._arr['event_id']
@@ -533,35 +521,23 @@ class Geometry(Module):
         
         """
         n = len(hits)
-        pos_x = np.empty(n)
-        pos_y = np.empty(n)
-        pos_z = np.empty(n)
-        dir_x = np.empty(n)
-        dir_y = np.empty(n)
-        dir_z = np.empty(n)
-        t0s = np.empty(n)
+        cal = np.empty(n, 7)
         for i in range(n):
-            pos, dir, t0 = self._pos_dir_t0_by_pmt_id[hits._arr['pmt_id'][i]]
-            pos_x[i] = pos[0]
-            pos_y[i] = pos[1]
-            pos_z[i] = pos[2]
-            dir_x[i] = dir[0]
-            dir_y[i] = dir[1]
-            dir_z[i] = dir[2]
-            t0s[i] = t0
+            lookup = self._pos_dir_t0_by_pmt_id
+            calib = lookup[hits._arr['pmt_id'][i]]
         h = np.empty(n, HitSeries.dtype)
         h['channel_id'] = np.zeros(n, dtype=int)
-        h['dir_x'] = dir_x
-        h['dir_y'] = dir_y
-        h['dir_z'] = dir_z
+        h['dir_x'] = cal[:, 3]
+        h['dir_y'] = cal[:, 4]
+        h['dir_z'] = cal[:, 5]
         h['dom_id'] = np.zeros(n, dtype=int)
         h['id'] = np.arange(n)
         h['pmt_id'] = hits._arr['pmt_id']
-        h['pos_x'] = pos_x
-        h['pos_y'] = pos_y
-        h['pos_z'] = pos_z
-        h['t0'] = t0s
-        h['time'] = hits.time + t0s
+        h['pos_x'] = cal[:, 0]
+        h['pos_y'] = cal[:, 1]
+        h['pos_z'] = cal[:, 2]
+        h['t0'] = cal[:, 6]
+        h['time'] = hits.time + cal[:, 6]
         h['tot'] = np.zeros(n, dtype=int)
         h['triggered'] = np.zeros(n, dtype=bool)
         h['event_id'] = hits._arr['event_id']
@@ -589,7 +565,13 @@ class Geometry(Module):
             for pmt in pmts:
                 if dom_id not in data:
                     data[dom_id] = {}
-                data[dom_id][pmt.channel_id] = (pmt.pos, pmt.dir, pmt.t0)
+                data[dom_id][pmt.channel_id] = np.array((pmt.pos[0],
+                                                        pmt.pos[1],
+                                                        pmt.pos[2],
+                                                        pmt.dir[0],
+                                                        pmt.dir[1],
+                                                        pmt.dir[2],
+                                                        pmt.t0))
         self._pos_dir_t0_by_dom_and_channel = data
 
     def _create_pmt_id_lookup(self):
