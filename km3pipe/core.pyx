@@ -577,7 +577,13 @@ class Geometry(Module):
     def _create_pmt_id_lookup(self):
         data = {}
         for pmt_id, pmt in self.detector._pmts_by_id.items():
-            data[pmt_id] = (pmt.pos, pmt.dir, pmt.t0)
+            data[pmt_id] = np.array((pmt.pos[0],
+                                     pmt.pos[1],
+                                     pmt.pos[2],
+                                     pmt.dir[0],
+                                     pmt.dir[1],
+                                     pmt.dir[2],
+                                     pmt.t0))
         self._pos_dir_t0_by_pmt_id = data
 
     def __repr__(self):
