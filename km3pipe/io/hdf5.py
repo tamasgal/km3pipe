@@ -40,6 +40,23 @@ class H5VersionError(Exception):
     pass
 
 
+def check_version(h5file, filename):
+    try:
+        version = np.string_(h5file.root._v_attrs.format_version)
+    except AttributeError:
+        log.error("Could not determine HDF5 format version: '%s'."
+                  "You may encounter unexpected errors! Good luck..."
+                  % filename)
+        return
+    if split(version, int, np.string_('.')) < \
+            split(MINIMUM_FORMAT_VERSION, int, np.string_('.')):
+        raise H5VersionError("HDF5 format version {0} or newer required!\n"
+                             "'{1}' has HDF5 format version {2}."
+                             .format(MINIMUM_FORMAT_VERSION.decode("utf-8"),
+                                     filename,
+                                     version.decode("utf-8")))
+
+
 class HDF5Sink(Module):
     """Write KM3NeT-formatted HDF5 files, event-by-event.
 
@@ -246,7 +263,7 @@ class HDF5Pump(Pump):
             if os.path.isfile(fn):
                 h5file = tb.open_file(fn, 'r')
                 if not self.skip_version_check:
-                    self._check_version(h5file, fn)
+                    check_version(h5file, fn)
             else:
                 raise IOError("No such file or directory: '{0}'"
                               .format(fn))
@@ -270,21 +287,6 @@ class HDF5Pump(Pump):
         self.index = None
         self._reset_index()
 
-    def _check_version(self, h5file, filename):
-        try:
-            version = np.string_(h5file.root._v_attrs.format_version)
-        except AttributeError:
-            log.error("Could not determine HDF5 format version: '%s'."
-                      "You may encounter unexpected errors! Good luck..."
-                      % filename)
-            return
-        if split(version, int, np.string_('.')) < \
-                split(MINIMUM_FORMAT_VERSION, int, np.string_('.')):
-            raise H5VersionError("HDF5 format version {0} or newer required!\n"
-                                 "'{1}' has HDF5 format version {2}."
-                                 .format(MINIMUM_FORMAT_VERSION,
-                                         filename,
-                                         version))
 
     def process(self, blob):
         try:
