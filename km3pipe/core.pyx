@@ -494,7 +494,7 @@ class Geometry(Module):
         dir_x = np.empty(n)
         dir_y = np.empty(n)
         dir_z = np.empty(n)
-        t0 = np.empty(n)
+        t0s = np.empty(n)
         for idx, hit in enumerate(hits):
             lookup = self._pos_dir_t0_by_dom_and_channel
             pos, dir, t0 = lookup[hit.dom_id][hit.channel_id]
@@ -504,7 +504,7 @@ class Geometry(Module):
             dir_x[idx] = dir[0]
             dir_y[idx] = dir[1]
             dir_z[idx] = dir[2]
-            t0[idx] = t0
+            t0s[idx] = t0
         h = np.empty(n, HitSeries.dtype)
         h['channel_id'] = hits.channel_id
         h['dir_x'] = dir_x
@@ -516,8 +516,8 @@ class Geometry(Module):
         h['pos_x'] = pos_x
         h['pos_y'] = pos_y
         h['pos_z'] = pos_z
-        h['t0'] = t0
-        h['time'] = hits.time + t0
+        h['t0'] = t0s
+        h['time'] = hits.time + t0s
         h['tot'] = hits.tot
         h['triggered'] = hits.triggered
         h['event_id'] = hits._arr['event_id']
@@ -539,16 +539,16 @@ class Geometry(Module):
         dir_x = np.empty(n)
         dir_y = np.empty(n)
         dir_z = np.empty(n)
-        t0 = np.empty(n)
+        t0s = np.empty(n)
         for idx, hit in enumerate(hits):
-            pos, dir, t0 = self._pos_dir_t0_by_pmt_id[hit.pmt_id]
+            pos, dir, t0s = self._pos_dir_t0_by_pmt_id[hit.pmt_id]
             pos_x[idx] = pos[0]
             pos_y[idx] = pos[1]
             pos_z[idx] = pos[2]
             dir_x[idx] = dir[0]
             dir_y[idx] = dir[1]
             dir_z[idx] = dir[2]
-            t0[idx] = t0
+            t0s[idx] = t0
         h = np.empty(n, HitSeries.dtype)
         h['channel_id'] = np.zeros(n, dtype=int)
         h['dir_x'] = dir_x
@@ -560,8 +560,8 @@ class Geometry(Module):
         h['pos_x'] = pos_x
         h['pos_y'] = pos_y
         h['pos_z'] = pos_z
-        h['t0'] = t0
-        h['time'] = hits.time + t0
+        h['t0'] = t0s
+        h['time'] = hits.time + t0s
         h['tot'] = np.zeros(n, dtype=int)
         h['triggered'] = np.zeros(n, dtype=bool)
         h['event_id'] = hits._arr['event_id']
