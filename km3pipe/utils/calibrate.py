@@ -27,7 +27,7 @@ def calibrate_hits(f, geo):
     dom_ids = f.get_node("/hits/dom_id")[:]
     channel_ids = f.get_node("/hits/channel_id")[:]
     n = len(dom_ids)
-    calib = np.empty((n, 7))
+    calib = np.empty((n, 7), dtype='f4')
     for i in range(n):
         dom_id = dom_ids[i]
         channel_id = channel_ids[i]
@@ -39,7 +39,7 @@ def calibrate_hits(f, geo):
 def calibrate_mc_hits(f, geo):
     pmt_ids = f.get_node("/mc_hits/pmt_id")[:]
     n = len(pmt_ids)
-    calib = np.empty((n, 7))
+    calib = np.empty((n, 7), dtype='f4')
     for i in range(n):
         pmt_id = pmt_ids[i]
         calib[i] = geo._pos_dir_t0_by_pmt_id[pmt_id]
@@ -48,15 +48,15 @@ def calibrate_mc_hits(f, geo):
 
 
 def apply_calibration(calib, f, n, loc):
-    f8_atom = tb.Float64Atom()
+    f4_atom = tb.Float32Atom()
     for i, node in enumerate([p+'_'+s for p in ['pos', 'dir'] for s in 'xyz']):
         print("  ...creating " + node)
-        ca = f.create_carray(loc, node, f8_atom, (n,), filters=FILTERS)
+        ca = f.create_carray(loc, node, f4_atom, (n,), filters=FILTERS)
         ca[:] = calib[:, i]
     if loc == "/hits":
         print("  ...creating t0")
         print("  ...adding t0s to hit times")
-        ca = f.create_carray(loc, "t0", f8_atom, (n,), filters=FILTERS)
+        ca = f.create_carray(loc, "t0", f4_atom, (n,), filters=FILTERS)
         ca[:] = calib[:, 6]
         f.get_node(loc + "/time")[:] += calib[:, 6]
 
