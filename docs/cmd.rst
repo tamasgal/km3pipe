@@ -194,20 +194,22 @@ Show some H5 metadata (KM3 H5 version, km3pipe version, etc).
 
 Example::
 
-  $ h5info km3net_jul13_90m_muatm50T655.km3_v5r1.JTE_r2356.root.0-299.h5
-  km3pipe: 4.2.1
-  pytables: 3.2.3.1
+    $ h5info km3net_jul13_90m_muatm50T655.km3_v5r1.JTE_r2356.root.0-499.h5
+    format_version: b'4.1'
+    km3pipe: b'7.1.2.dev'
+    pytables: b'3.4.0'
 
-  $ h5info --help
 
-  Show the km3pipe etc. version used to write a H5 file.
+    $ h5info --help
 
-  Usage:
+    Show the km3pipe etc. version used to write a H5 file.
+
+    Usage:
       h5info FILE [-r]
       h5info (-h | --help)
       h5info --version
 
-  Options:
+    Options:
       FILE        Input file.
       -r --raw    Dump raw metadata.
       -h --help   Show this screen.
