@@ -207,7 +207,7 @@ class AanetPump(Pump):
 
         blob['filename'] = filename
         try:
-            blob['EventInfo'] = EventInfo((
+            ei_data = np.array((
                 event.det_id,
                 event.frame_index,
                 self.livetime, # livetime_sec
@@ -223,23 +223,25 @@ class AanetPump(Pump):
                 event.t.GetSec(),
                 w1, w2, w3,
                 event.run_id,
-                event_id))
+                event_id), dtype=EventInfo.dtype)
+            blob['EventInfo'] = EventInfo(ei_data)
         except AttributeError:
-            blob['EventInfo'] = EventInfo((0,   # det_id
-                                           event.frame_index,
-                                           self.livetime,   # livetime_sec
-                                           0,   # mc_id
-                                           0,   # mc_t
-                                           self.ngen,   # n_events_gen
-                                           self.nfilgen,   # n_files_gen
-                                           0,   # overlays
-                                           0,   # trigger_counter
-                                           0,   # trigger_mask
-                                           0,   # nanose
-                                           0,   # sec
-                                           w1, w2, w3,
-                                           event.run_id,
-                                           event_id))
+            ei_data = np.array((0,   # det_id
+                               event.frame_index,
+                               self.livetime,   # livetime_sec
+                               0,   # mc_id
+                               0,   # mc_t
+                               self.ngen,   # n_events_gen
+                               self.nfilgen,   # n_files_gen
+                               0,   # overlays
+                               0,   # trigger_counter
+                               0,   # trigger_mask
+                               0,   # nanose
+                               0,   # sec
+                               w1, w2, w3,
+                               event.run_id,
+                               event_id), dtype=EventInfo.dtype)
+            blob['EventInfo'] = EventInfo(ei_data)
         if self.format == 'minidst':
             recos = read_mini_dst(event, event_id)
             for recname, reco in recos.items():

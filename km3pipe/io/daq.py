@@ -487,27 +487,27 @@ class TMCHData(object):
             raise ValueError("Invalid datatype: {0}".format(data_type))
 
         self.run = unpack('>I', f.read(4))[0]
-        self.sequence_number = unpack('>I', f.read(4))[0]  # not sure
+        self.udp_sequence_number = unpack('>I', f.read(4))[0]  
         self.utc_seconds = unpack('>I', f.read(4))[0]
-        self.utc_nanoseconds = unpack('>I', f.read(4))[0] * 16
+        self.nanoseconds = unpack('>I', f.read(4))[0] * 16
         self.dom_id = unpack('>I', f.read(4))[0]
-        self.dom_status_1 = unpack('>I', f.read(4))[0]  # not sure
-        self.dom_status_2 = unpack('>I', f.read(4))[0]  # not sure
-        self.dom_status_3 = unpack('>I', f.read(4))[0]  # not sure
-        self.dom_status_4 = unpack('>I', f.read(4))[0]  # not sure
+        self.dom_status_0 = unpack('>I', f.read(4))[0]  
+        self.dom_status_1 = unpack('>I', f.read(4))[0]  
+        self.dom_status_2 = unpack('>I', f.read(4))[0]  
+        self.dom_status_3 = unpack('>I', f.read(4))[0]  
         self.pmt_rates = [r*10.0 for r in unpack('>' + 31*'I', f.read(31*4))]
-        self.pad = unpack('>I', f.read(4))[0]  # not sure
-        self.valid = unpack('>I', f.read(4))[0]  # not sure
+        self.hrvbmp = unpack('>I', f.read(4))[0]
+        self.flags = unpack('>I', f.read(4))[0]
         self.yaw, self.pitch, self.roll = unpack('>fff', f.read(12))
         self.ax, self.ay, self.az = unpack('>fff', f.read(12))
         self.gx, self.gy, self.gz = unpack('>fff', f.read(12))
         self.hx, self.hy, self.hz = unpack('>fff', f.read(12))
         self.temp = unpack('>H', f.read(2))[0] / 100.0
         self.humidity = unpack('>H', f.read(2))[0] / 100.0
-        # self.det_id = unpack('>I', f.read(4))[0]  # not sure
-        # self.n_packets = unpack('>H', f.read(2))[0]  # not sure
-        # self.highest_packet_number = unpack('>H', f.read(2))[0]  # not sure
-        # self.n_items = unpack('>I', f.read(4))[0]  # not sure
+        self.tdcfull = unpack('>I', f.read(4))[0]
+        self.aesfull = unpack('>I', f.read(4))[0]
+        self.flushc = unpack('>I', f.read(4))[0]
+        self.ts_duration_microseconds = unpack('>I', f.read(4))[0]
 
     def __str__(self):
         return str(vars(self))

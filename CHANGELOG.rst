@@ -1,5 +1,19 @@
 Unreleased changes
 ------------------
+* Added 5 last lines in: daq.py - TMCHdata for reading the monitoring file
+
+7.1.1 / 2017-07-11
+------------------
+* Fixed bug with aanet pump
+
+7.1.0 / 2017-07-11
+------------------
+* Increased performance for Geometry.apply
+* Changed type of time to float in ``RawHitSeries``
+* Introducing ``CRawHitSeries`` and ``CMcHitSeries`` which represent calibrated
+  hit series
+* New command line argument to apply geometry/time calibration to an HDF5 file
+  usage: ``calibrate DETXFILE HDF5FILE``
 
 7.0.0 / 2017-07-09
 ------------------

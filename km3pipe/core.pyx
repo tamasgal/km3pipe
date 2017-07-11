@@ -488,36 +488,24 @@ class Geometry(Module):
         
         """
         n = len(hits)
-        pos_x = np.empty(n)
-        pos_y = np.empty(n)
-        pos_z = np.empty(n)
-        dir_x = np.empty(n)
-        dir_y = np.empty(n)
-        dir_z = np.empty(n)
-        t0 = np.empty(n)
-        for idx, hit in enumerate(hits):
+        cal = np.empty(n, 7)
+        for i in range(n):
             lookup = self._pos_dir_t0_by_dom_and_channel
-            pos, dir, t0 = lookup[hit.dom_id][hit.channel_id]
-            pos_x[idx] = pos[0]
-            pos_y[idx] = pos[1]
-            pos_z[idx] = pos[2]
-            dir_x[idx] = dir[0]
-            dir_y[idx] = dir[1]
-            dir_z[idx] = dir[2]
-            t0[idx] = t0
+            calib = lookup[hits._arr['dom_id'][i]][hits._arr['channel_id'][i]]
+            cal[i] = calib
         h = np.empty(n, HitSeries.dtype)
         h['channel_id'] = hits.channel_id
-        h['dir_x'] = dir_x
-        h['dir_y'] = dir_y
-        h['dir_z'] = dir_z
+        h['dir_x'] = cal[:, 3]
+        h['dir_y'] = cal[:, 4]
+        h['dir_z'] = cal[:, 5]
         h['dom_id'] = hits.dom_id
         h['id'] = np.arange(n)
         h['pmt_id'] = np.zeros(n, dtype=int)
-        h['pos_x'] = pos_x
-        h['pos_y'] = pos_y
-        h['pos_z'] = pos_z
-        h['t0'] = t0
-        h['time'] = hits.time + t0
+        h['pos_x'] = cal[:, 0]
+        h['pos_y'] = cal[:, 1]
+        h['pos_z'] = cal[:, 2]
+        h['t0'] = cal[:, 6]
+        h['time'] = hits.time + cal[:, 6]
         h['tot'] = hits.tot
         h['triggered'] = hits.triggered
         h['event_id'] = hits._arr['event_id']
@@ -533,35 +521,23 @@ class Geometry(Module):
         
         """
         n = len(hits)
-        pos_x = np.empty(n)
-        pos_y = np.empty(n)
-        pos_z = np.empty(n)
-        dir_x = np.empty(n)
-        dir_y = np.empty(n)
-        dir_z = np.empty(n)
-        t0 = np.empty(n)
-        for idx, hit in enumerate(hits):
-            pos, dir, t0 = self._pos_dir_t0_by_pmt_id[hit.pmt_id]
-            pos_x[idx] = pos[0]
-            pos_y[idx] = pos[1]
-            pos_z[idx] = pos[2]
-            dir_x[idx] = dir[0]
-            dir_y[idx] = dir[1]
-            dir_z[idx] = dir[2]
-            t0[idx] = t0
+        cal = np.empty(n, 7)
+        for i in range(n):
+            lookup = self._pos_dir_t0_by_pmt_id
+            calib = lookup[hits._arr['pmt_id'][i]]
         h = np.empty(n, HitSeries.dtype)
         h['channel_id'] = np.zeros(n, dtype=int)
-        h['dir_x'] = dir_x
-        h['dir_y'] = dir_y
-        h['dir_z'] = dir_z
+        h['dir_x'] = cal[:, 3]
+        h['dir_y'] = cal[:, 4]
+        h['dir_z'] = cal[:, 5]
         h['dom_id'] = np.zeros(n, dtype=int)
         h['id'] = np.arange(n)
         h['pmt_id'] = hits._arr['pmt_id']
-        h['pos_x'] = pos_x
-        h['pos_y'] = pos_y
-        h['pos_z'] = pos_z
-        h['t0'] = t0
-        h['time'] = hits.time + t0
+        h['pos_x'] = cal[:, 0]
+        h['pos_y'] = cal[:, 1]
+        h['pos_z'] = cal[:, 2]
+        h['t0'] = cal[:, 6]
+        h['time'] = hits.time + cal[:, 6]
         h['tot'] = np.zeros(n, dtype=int)
         h['triggered'] = np.zeros(n, dtype=bool)
         h['event_id'] = hits._arr['event_id']
@@ -589,13 +565,25 @@ class Geometry(Module):
             for pmt in pmts:
                 if dom_id not in data:
                     data[dom_id] = {}
-                data[dom_id][pmt.channel_id] = (pmt.pos, pmt.dir, pmt.t0)
+                data[dom_id][pmt.channel_id] = np.array((pmt.pos[0],
+                                                        pmt.pos[1],
+                                                        pmt.pos[2],
+                                                        pmt.dir[0],
+                                                        pmt.dir[1],
+                                                        pmt.dir[2],
+                                                        pmt.t0))
         self._pos_dir_t0_by_dom_and_channel = data
 
     def _create_pmt_id_lookup(self):
         data = {}
         for pmt_id, pmt in self.detector._pmts_by_id.items():
-            data[pmt_id] = (pmt.pos, pmt.dir, pmt.t0)
+            data[pmt_id] = np.array((pmt.pos[0],
+                                     pmt.pos[1],
+                                     pmt.pos[2],
+                                     pmt.dir[0],
+                                     pmt.dir[1],
+                                     pmt.dir[2],
+                                     pmt.t0))
         self._pos_dir_t0_by_pmt_id = data
 
     def __repr__(self):
