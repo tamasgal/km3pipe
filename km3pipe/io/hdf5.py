@@ -113,7 +113,7 @@ class HDF5Sink(Module):
             pass
         return data
 
-    def _write_array(self, where, arr, title=''):
+    def _write_array(self, where, arr, datatype, title=''):
         level = len(where.split('/'))
 
         if where not in self._tables:
@@ -126,6 +126,7 @@ class HDF5Sink(Module):
                     filters=self.filters, createparents=True,
                     expectedrows=self.n_rows_expected,
                 )
+            tab._v_attrs.datatype = datatype
             if(level < 5):
                 self._tables[where] = tab
         else:
@@ -140,7 +141,9 @@ class HDF5Sink(Module):
         f = self.h5file
         loc, group_name = os.path.split(where)
         if where not in f:
-            group = f.create_group(loc, group_name, obj.__class__.__name__)
+            datatype = obj.__class__.__name__
+            group = f.create_group(loc, group_name, datatype)
+            group._v_attrs.datatype = datatype
         else:
             group = f.get_node(where)
 
@@ -187,14 +190,15 @@ class HDF5Sink(Module):
                     data = data.view(dt)
                     h5loc = '/misc'
                 where = os.path.join(h5loc, tabname)
+                datatype = entry.__class__.__name__
 
                 try:
                     if entry.write_separate_columns:
                         self._write_separate_columns(where, entry, title=key)
                     else:
-                        self._write_array(where, data, title=key)
+                        self._write_array(where, data, datatype, title=key)
                 except AttributeError:  # backwards compatibility
-                    self._write_array(where, data, title=key)
+                    self._write_array(where, data, datatype, title=key)
 
 
 
@@ -215,7 +219,10 @@ class HDF5Sink(Module):
             print("  -> {0}".format(h5loc))
             indices = KM3DataFrame({"index": data["indices"],
                                     "n_items": data["n_items"]}, h5loc=h5loc)
-            self._write_array(h5loc, self._to_array(indices), title="Indices")
+            self._write_array(h5loc,
+                              self._to_array(indices),
+                              'Indices',
+                              title="Indices")
         print("Creating pytables index tables. This may take a few minutes...")
         for tab in itervalues(self._tables):
             if 'frame_id' in tab.colnames:
