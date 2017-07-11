@@ -80,11 +80,11 @@ class Serialisable(type):
         class_parents = (Convertible,)
 
         return type(class_name, class_parents, attr)
-    
+
 
 class DTypeAttr(object):
     """Helper class to make dtype names accessible using the dot-syntax
-    
+
     Simply subclass it and make sure your class has a ``.dtype`` attribute
     with ``names``.
     """
@@ -913,6 +913,8 @@ class CRawHitSeries(DTypeAttr):
         ('dir_y', '<f4'),
         ('dir_z', '<f4'),
         ('dom_id', '<u4'),
+        ('du', 'u1'),
+        ('floor', 'u1'),
         ('pos_x', '<f4'),
         ('pos_y', '<f4'),
         ('pos_z', '<f4'),
@@ -931,8 +933,8 @@ class CRawHitSeries(DTypeAttr):
         self.h5loc = h5loc
 
     @classmethod
-    def from_arrays(cls, channel_ids, dir_xs, dir_ys, dir_zs, dom_ids,
-                    pos_xs, pos_ys, pos_zs, t0s, times, tots,
+    def from_arrays(cls, channel_ids, dir_xs, dir_ys, dir_zs, dom_ids, dus,
+                    floors, pos_xs, pos_ys, pos_zs, t0s, times, tots,
                     triggereds, event_id):
         # do we need shape[0] or does len() work too?
         try:
@@ -945,6 +947,8 @@ class CRawHitSeries(DTypeAttr):
         hits['dir_y'] = dir_ys
         hits['dir_z'] = dir_zs
         hits['dom_id'] = dom_ids
+        hits['du'] = dus
+        hits['floor'] = floors
         hits['pos_x'] = pos_xs
         hits['pos_y'] = pos_ys
         hits['pos_z'] = pos_zs
