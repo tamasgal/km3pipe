@@ -73,3 +73,7 @@ docs/api
 
 # 
 junit.xml
+
+# misc
+*~
+*.dqd
