@@ -80,6 +80,14 @@ class Serialisable(type):
         class_parents = (Convertible,)
 
         return type(class_name, class_parents, attr)
+    
+
+class DTypeAttr(object):
+    def __getattr__(self, name):
+        if name in self.dtype.names:
+            return self._arr[name]
+        else:
+            raise AttributeError
 
 
 class Convertible(object):
@@ -755,7 +763,7 @@ cdef class Track:
         return self.__str__()
 
 
-class RawHitSeries(object):
+class RawHitSeries(DTypeAttr):
     """A collection of hits without any calibration parameter."""
     h5loc = '/raw_hits'
     dtype = np.dtype([
@@ -843,26 +851,6 @@ class RawHitSeries(object):
 
     def __array__(self):
         return self._arr
-
-    @property
-    def triggered(self):
-        return self._arr['triggered']
-
-    @property
-    def tot(self):
-        return self._arr['tot']
-
-    @property
-    def time(self):
-        return self._arr['time']
-
-    @property
-    def dom_id(self):
-        return self._arr['dom_id']
-
-    @property
-    def channel_id(self):
-        return self._arr['channel_id']
 
     def next(self):
         """Python 2/3 compatibility for iterators"""
@@ -968,7 +956,7 @@ cdef class McTrack:
         return self.__str__()
 
 
-class McHitSeries(object):
+class McHitSeries(DTypeAttr):
     """Collection of multiple Hits.
     """
     h5loc = '/mc_hits'
@@ -1073,22 +1061,6 @@ class McHitSeries(object):
     def __iter__(self):
         return self
 
-    @property
-    def time(self):
-        return self._arr['time']
-
-    @property
-    def a(self):
-        return self._arr['a']
-
-    @property
-    def origin(self):
-        return self._arr['origin']
-
-    @property
-    def pmt_id(self):
-        return self._arr['pmt_id']
-
     def next(self):
         """Python 2/3 compatibility for iterators"""
         return self.__next__()
@@ -1131,7 +1103,7 @@ class McHitSeries(object):
         return '\n'.join([str(hit) for hit in self._hits])
 
 
-class HitSeries(object):
+class HitSeries(DTypeAttr):
     """Collection of multiple Hits.
     """
     h5loc = '/hits'
@@ -1318,14 +1290,6 @@ class HitSeries(object):
         return self
 
     @property
-    def id(self):
-        return self._arr['id']
-
-    @property
-    def time(self):
-        return self._arr['time']
-
-    @property
     def triggered_hits(self):
         return HitSeries(self._arr[self._arr['triggered'] == True])     # noqa
 
@@ -1335,58 +1299,6 @@ class HitSeries(object):
         h.sort_values('time', inplace=True)
         h = h.drop_duplicates(subset='dom_id')
         return HitSeries(h.to_records(index=False))
-
-    @property
-    def triggered(self):
-        return self._arr['triggered']
-
-    @property
-    def tot(self):
-        return self._arr['tot']
-
-    @property
-    def dom_id(self):
-        return self._arr['dom_id']
-
-    @property
-    def pmt_id(self):
-        return self._arr['pmt_id']
-
-    @property
-    def id(self):
-        return self._arr['id']
-
-    @property
-    def channel_id(self):
-        return self._arr['channel_id']
-
-    @property
-    def pos_x(self):
-        return self._arr['pos_x']
-
-    @property
-    def pos_y(self):
-        return self._arr['pos_y']
-
-    @property
-    def pos_z(self):
-        return self._arr['pos_z']
-
-    @property
-    def dir_x(self):
-        return self._arr['dir_x']
-
-    @property
-    def dir_y(self):
-        return self._arr['dir_y']
-
-    @property
-    def dir_z(self):
-        return self._arr['dir_z']
-
-    @property
-    def t0(self):
-        return self._arr['t0']
 
     def next(self):
         """Python 2/3 compatibility for iterators"""
@@ -1430,7 +1342,7 @@ class HitSeries(object):
         return '\n'.join([str(hit) for hit in self._hits])
 
 
-class TimesliceHitSeries(object):
+class TimesliceHitSeries(DTypeAttr):
     """Collection of multiple timeslice hits.
     """
     h5loc = '/time_slice_hits'
@@ -1511,22 +1423,6 @@ class TimesliceHitSeries(object):
 
     def __iter__(self):
         return self
-
-    @property
-    def time(self):
-        return self._arr['time']
-
-    @property
-    def tot(self):
-        return self._arr['tot']
-
-    @property
-    def dom_id(self):
-        return self._arr['dom_id']
-
-    @property
-    def channel_id(self):
-        return self._arr['channel_id']
 
     def next(self):
         """Python 2/3 compatibility for iterators"""
