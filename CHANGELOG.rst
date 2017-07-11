@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* ``AANetPump`` now parses the full header and ``HDF5Pump`` writes it to 
+  /header as attributes
 
 
 7.2.1 / 2017-07-11
