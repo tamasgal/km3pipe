@@ -1,6 +1,6 @@
 Unreleased changes
 ------------------
-
+* Added 5 last lines in: daq.py - TMCHdata for reading the monitoring file
 
 7.1.1 / 2017-07-11
 ------------------
