@@ -62,7 +62,16 @@ get a 1D numpy array containing all the ToTs of the hits (in the order of the
 hits). So you can for example quickly have a look at the ToT distribution of
 the full event.
 
-In order to obtain the position, direction and the t0 correction, you
+Calibrating Hits and McHits
+---------------------------
+
+Both ``RawHitSeries`` and ``McHitSeries`` have a corresponding
+``CRawHitSeries`` and ``CMcHitSeries``. The "C" stands for "Calibrated" and
+those classes has additional attributes to access the position, direction and
+calibrated hit times. They also provide access to the DU and floor which the
+hit was registered.
+
+In order to obtain the position, direction, the t0 correction and DU/floor, you
 need to apply a geometry. KM3Pipe provides the ``Geometry`` class to do this
 for you.
 
@@ -75,5 +84,15 @@ To apply the geometry to a set of hits::
 
     calibrated_hits = geo.apply(hits)
 
-That's it, you will get a ``HitSeries`` instance with ``pos_x``, ``pos_y``,
-... and also ``dir_x``, ``dir_y``...
+That's it, you will get a ``CHitSeries`` or ``CMcHitSeries`` instance
+respectively, with ``pos_x``, ``pos_y``, ... and also ``dir_x``, ``dir_y``...
+and ``du``, ``floor``.
+
+
+Another, even easier way is to calibrate your file beforehand, using the
+``calibrate`` command line utility::
+
+    calibrate DETXFILE HDF5FILE
+
+If you read in the file with the ``km3pipe.io.hdf5.HDF5Pump``, it will 
+automatically recognise the calibration and use the correct classes.
