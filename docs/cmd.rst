@@ -193,6 +193,7 @@ Example output::
 Show some H5 metadata (KM3 H5 version, km3pipe version, etc).
 
 Example::
+
   $ h5info km3net_jul13_90m_muatm50T655.km3_v5r1.JTE_r2356.root.0-299.h5
   km3pipe: 4.2.1
   pytables: 3.2.3.1
