@@ -18,7 +18,7 @@ import tables as tb
 import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
 from km3pipe.dataclasses import (KM3Array, KM3DataFrame, RawHitSeries,
-                                 McHitSeries, deserialise_map)
+                                 CRawHitSeries, McHitSeries, deserialise_map)
 from km3pipe.logger import logging
 from km3pipe.dev import camelise, decamelise, split
 
@@ -365,15 +365,53 @@ class HDF5Pump(Pump):
                 time = h5file.get_node("/hits/time")[idx:end]
                 tot = h5file.get_node("/hits/tot")[idx:end]
                 triggered = h5file.get_node("/hits/triggered")[idx:end]
-                blob["Hits"] = RawHitSeries.from_arrays(
-                    channel_id, dom_id, time, tot, triggered, event_id)
+
+                try:
+                    datatype = h5file.get_node("/hits")._v_attrs.datatype
+                except AttributeError:
+                    datatype = "RawHitSeries"
+
+                if datatype == "RawHitSeries":
+                    blob["Hits"] = RawHitSeries.from_arrays(
+                        channel_id, dom_id, time, tot, triggered, event_id)
+                if datatype == "CRawHitSeries":
+                    pos_x = h5file.get_node("/hits/pos_x")[idx:end]
+                    pos_y = h5file.get_node("/hits/pos_y")[idx:end]
+                    pos_z = h5file.get_node("/hits/pos_z")[idx:end]
+                    dir_x = h5file.get_node("/hits/dir_x")[idx:end]
+                    dir_y = h5file.get_node("/hits/dir_y")[idx:end]
+                    dir_z = h5file.get_node("/hits/dir_z")[idx:end]
+                    t0s = h5file.get_node("/hits/t0")[idx:end]
+                    time += t0s
+                    blob["Hits"] = CRawHitSeries.from_arrays(
+                        channel_id, dir_x, dir_y, dir_z, dom_id,
+                        pos_x, pos_y, pos_z, t0s, time, tot, triggered,
+                        event_id)
+
             if loc == '/mc_hits':
                 a = h5file.get_node("/mc_hits/a")[idx:end]
                 origin = h5file.get_node("/mc_hits/origin")[idx:end]
                 pmt_id = h5file.get_node("/mc_hits/pmt_id")[idx:end]
                 time = h5file.get_node("/mc_hits/time")[idx:end]
-                blob["McHits"] = McHitSeries.from_arrays(
-                    a, origin, pmt_id, time, event_id)
+
+                try:
+                    datatype = h5file.get_node("/mc_hits")._v_attrs.datatype
+                except AttributeError:
+                    datatype = "CMcHitSeries"
+
+                if datatype == "CMcitSeries":
+                    blob["McHits"] = CMcHitSeries.from_arrays(
+                        a, origin, pmt_id, time, event_id)
+                if datatype == "CRawHitSeries":
+                    pos_x = h5file.get_node("/mc_hits/pos_x")[idx:end]
+                    pos_y = h5file.get_node("/mc_hits/pos_y")[idx:end]
+                    pos_z = h5file.get_node("/mc_hits/pos_z")[idx:end]
+                    dir_x = h5file.get_node("/mc_hits/dir_x")[idx:end]
+                    dir_y = h5file.get_node("/mc_hits/dir_y")[idx:end]
+                    dir_z = h5file.get_node("/mc_hits/dir_z")[idx:end]
+                    blob["McHits"] = CMcHitSeries.from_arrays(
+                        a, dir_x, dir_y, dir_z, origin, pmt_id,
+                        pos_x, pos_y, pos_z, time, event_id)
 
         return blob
 

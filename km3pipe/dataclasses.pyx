@@ -1202,6 +1202,90 @@ class McHitSeries(DTypeAttr):
         return '\n'.join([str(hit) for hit in self._hits])
 
 
+class CMcHitSeries(DTypeAttr):
+    """Collection of calibrated MC Hits.
+    """
+    h5loc = '/mc_hits'
+    dtype = np.dtype([
+        ('a', 'f4'),
+        ('dir_x', '<f4'),
+        ('dir_y', '<f4'),
+        ('dir_z', '<f4'),
+        ('origin', '<u4'),
+        ('pmt_id', '<u4'),
+        ('pos_x', '<f4'),
+        ('pos_y', '<f4'),
+        ('pos_z', '<f4'),
+        ('time', 'f4'),
+        ('event_id', '<u4'),
+    ])
+    write_separate_columns = True
+
+    def __init__(self, arr, h5loc='/'):
+        self._arr = arr
+        self._index = 0
+        self._hits = None
+        self.h5loc = h5loc
+
+    @classmethod
+    def from_arrays(cls, a, dir_x, dir_y, dir_z, origin,
+                    pos_x, pos_y, pos_z, pmt_id, time, event_id):
+        # do we need shape[0] or does len() work too?
+        try:
+            length = time.shape[0]
+        except AttributeError:
+            length = len(time)
+        hits = np.empty(length, cls.dtype)
+        hits['a'] = a
+        hits['dir_x'] = dir_x
+        hits['dir_y'] = dir_y
+        hits['dir_z'] = dir_z
+        hits['origin'] = origin
+        hits['pos_x'] = pos_x
+        hits['pos_y'] = pos_y
+        hits['pos_z'] = pos_z
+        hits['pmt_id'] = pmt_id
+        hits['time'] = time
+        hits['event_id'] = np.full(length, event_id, dtype='<u4')
+        return cls(hits)
+
+    @classmethod
+    def deserialise(cls, *args, **kwargs):
+        return cls.conv_from(*args, **kwargs)
+
+    def serialise(self, *args, **kwargs):
+        return self.conv_to(*args, **kwargs)
+
+    @classmethod
+    def conv_from(cls, data, event_id=None, fmt='numpy', h5loc='/'):
+        # what is event_id doing here?
+        if fmt == 'numpy':
+            return cls(data)
+        if fmt == 'pandas':
+            return cls(data.to_records(index=False))
+
+    def conv_to(self, to='numpy'):
+        if to == 'numpy':
+            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
+                            h5loc=self.h5loc)
+        if to == 'pandas':
+            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
+
+    def __array__(self):
+        return self._arr
+
+    def __len__(self):
+        return self._arr.shape[0]
+
+    def __str__(self):
+        n_hits = len(self)
+        plural = 's' if n_hits > 1 or n_hits == 0 else ''
+        return("CMcHitSeries with {0} hit{1}.".format(len(self), plural))
+
+    def __repr__(self):
+        return self.__str__()
+
+
 class HitSeries(DTypeAttr):
     """Collection of multiple Hits.
     """
