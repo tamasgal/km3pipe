@@ -83,7 +83,14 @@ class Serialisable(type):
     
 
 class DTypeAttr(object):
+    """Helper class to make dtype names accessible using the dot-syntax
+    
+    Simply subclass it and make sure your class has a ``.dtype`` attribute
+    with ``names``.
+    """
     def __getattr__(self, name):
+        if not hasattr(self, "dtype"):
+            raise AttributeError
         if name in self.dtype.names:
             return self._arr[name]
         else:

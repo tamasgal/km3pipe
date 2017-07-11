@@ -23,7 +23,7 @@ from km3pipe.dataclasses import (RawHit, Hit, Track, Position,
                                  EventInfo, SummarysliceInfo, TimesliceInfo,
                                  Serialisable, TrackSeries, SummaryframeSeries,
                                  KM3Array, KM3DataFrame, BinaryStruct,
-                                 BinaryComposite)
+                                 BinaryComposite, DTypeAttr)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -819,3 +819,39 @@ class TestBinaryComposite(TestCase):
     def test_init(self):
         stream = BytesIO(b'')
         b = BinaryComposite(stream)     # noqa
+
+
+class TestDTypeAttr(TestCase):
+    def test_subclassing(self):
+        class Foo(DTypeAttr):
+            pass
+
+    def test_access_attribute(self):
+        class Foo(DTypeAttr):
+            def __init__(self):
+                self.dtype = lambda x: x  # quick hack to add subattr
+                self.dtype.names = ['bar']
+                self._arr = {"bar": 23}
+
+        foo = Foo()
+        self.assertEqual(23, foo.bar)
+
+    def test_access_missing_attribute(self):
+        class Foo(DTypeAttr):
+            def __init__(self):
+                self.dtype = lambda x: x  # quick hack to add subattr
+                self.dtype.names = ['bar']
+                self._arr = {"bar": 23}
+
+        foo = Foo()
+        with self.assertRaises(AttributeError):
+            foo.baz
+
+    def test_subclassing_a_class_without_dtype(self):
+        class Foo(DTypeAttr):
+            def __init__(self):
+                pass
+
+        with self.assertRaises(AttributeError):
+            foo = Foo()
+            foo.bar
