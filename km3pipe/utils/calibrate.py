@@ -27,11 +27,11 @@ def calibrate_hits(f, geo):
     dom_ids = f.get_node("/hits/dom_id")[:]
     channel_ids = f.get_node("/hits/channel_id")[:]
     n = len(dom_ids)
-    calib = np.empty((n, 7), dtype='f4')
+    calib = np.empty((n, 9), dtype='f4')
     for i in range(n):
         dom_id = dom_ids[i]
         channel_id = channel_ids[i]
-        calib[i] = geo._pos_dir_t0_by_dom_and_channel[dom_id][channel_id]
+        calib[i] = geo._calib_by_dom_and_channel[dom_id][channel_id]
     apply_calibration(calib, f, n, "/hits")
     f.get_node("/hits")._v_attrs.datatype = "CRawHitSeries"
 
@@ -39,20 +39,29 @@ def calibrate_hits(f, geo):
 def calibrate_mc_hits(f, geo):
     pmt_ids = f.get_node("/mc_hits/pmt_id")[:]
     n = len(pmt_ids)
-    calib = np.empty((n, 7), dtype='f4')
+    calib = np.empty((n, 9), dtype='f4')
     for i in range(n):
         pmt_id = pmt_ids[i]
-        calib[i] = geo._pos_dir_t0_by_pmt_id[pmt_id]
+        calib[i] = geo._calib_by_pmt_id[pmt_id]
     apply_calibration(calib, f, n, "/mc_hits")
     f.get_node("/mc_hits")._v_attrs.datatype = "CMcHitSeries"
 
 
 def apply_calibration(calib, f, n, loc):
     f4_atom = tb.Float32Atom()
+    u1_atom = tb.UInt8Atom()
     for i, node in enumerate([p+'_'+s for p in ['pos', 'dir'] for s in 'xyz']):
         print("  ...creating " + node)
         ca = f.create_carray(loc, node, f4_atom, (n,), filters=FILTERS)
         ca[:] = calib[:, i]
+    
+    print("  ...creating du")
+    du = f.create_carray(loc, 'du', u1_atom, (n,), filters=FILTERS)
+    du[:] = calib[:, 7].astype('u1')
+    print("  ...creating floor")
+    floor = f.create_carray(loc, 'floor', u1_atom, (n,), filters=FILTERS)
+    floor[:] = calib[:, 8].astype('u1')
+
     if loc == "/hits":
         print("  ...creating t0")
         print("  ...adding t0s to hit times")

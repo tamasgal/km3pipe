@@ -33,8 +33,8 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-FORMAT_VERSION = np.string_('4.0')
-MINIMUM_FORMAT_VERSION = np.string_('4.0')
+FORMAT_VERSION = np.string_('4.1')
+MINIMUM_FORMAT_VERSION = np.string_('4.1')
 
 
 class H5VersionError(Exception):
@@ -367,10 +367,7 @@ class HDF5Pump(Pump):
                 tot = h5file.get_node("/hits/tot")[idx:end]
                 triggered = h5file.get_node("/hits/triggered")[idx:end]
 
-                try:
-                    datatype = h5file.get_node("/hits")._v_attrs.datatype
-                except AttributeError:
-                    datatype = "RawHitSeries"
+                datatype = h5file.get_node("/hits")._v_attrs.datatype
 
                 if datatype == "RawHitSeries":
                     blob["Hits"] = RawHitSeries.from_arrays(
@@ -382,11 +379,13 @@ class HDF5Pump(Pump):
                     dir_x = h5file.get_node("/hits/dir_x")[idx:end]
                     dir_y = h5file.get_node("/hits/dir_y")[idx:end]
                     dir_z = h5file.get_node("/hits/dir_z")[idx:end]
+                    du = h5file.get_node("/hits/du")[idx:end]
+                    floor = h5file.get_node("/hits/floor")[idx:end]
                     t0s = h5file.get_node("/hits/t0")[idx:end]
                     time += t0s
                     blob["Hits"] = CRawHitSeries.from_arrays(
-                        channel_id, dir_x, dir_y, dir_z, dom_id,
-                        pos_x, pos_y, pos_z, t0s, time, tot, triggered,
+                        channel_id, dir_x, dir_y, dir_z, dom_id, du,
+                        floor, pos_x, pos_y, pos_z, t0s, time, tot, triggered,
                         event_id)
 
             if loc == '/mc_hits':
@@ -395,10 +394,7 @@ class HDF5Pump(Pump):
                 pmt_id = h5file.get_node("/mc_hits/pmt_id")[idx:end]
                 time = h5file.get_node("/mc_hits/time")[idx:end]
 
-                try:
-                    datatype = h5file.get_node("/mc_hits")._v_attrs.datatype
-                except AttributeError:
-                    datatype = "McHitSeries"
+                datatype = h5file.get_node("/mc_hits")._v_attrs.datatype
 
                 if datatype == "McHitSeries":
                     blob["McHits"] = McHitSeries.from_arrays(
