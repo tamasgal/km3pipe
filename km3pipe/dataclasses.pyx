@@ -904,6 +904,98 @@ class RawHitSeries(DTypeAttr):
         return '\n'.join([str(hit) for hit in self._hits])
 
 
+class CRawHitSeries(DTypeAttr):
+    """A collection of calibrated hits."""
+    h5loc = '/hits'
+    dtype = np.dtype([
+        ('channel_id', 'u1'),
+        ('dir_x', '<f4'),
+        ('dir_y', '<f4'),
+        ('dir_z', '<f4'),
+        ('dom_id', '<u4'),
+        ('pos_x', '<f4'),
+        ('pos_y', '<f4'),
+        ('pos_z', '<f4'),
+        ('t0', '<f4'),
+        ('time', '<f4'),
+        ('tot', 'u1'),
+        ('triggered', 'u1'),
+        ('event_id', '<u4')
+    ])
+    write_separate_columns = True
+
+    def __init__(self, arr, event_id, h5loc='/'):
+        self._arr = arr
+        self._index = 0
+        self.event_id = event_id
+        self.h5loc = h5loc
+
+    @classmethod
+    def from_arrays(cls, channel_ids, dir_xs, dir_ys, dir_zs, dom_ids,
+                    pos_xs, pos_ys, pos_zs, t0s, times, tots,
+                    triggereds, event_id):
+        # do we need shape[0] or does len() work too?
+        try:
+            length = channel_ids.shape[0]
+        except AttributeError:
+            length = len(channel_ids)
+        hits = np.empty(length, cls.dtype)
+        hits['channel_id'] = channel_ids
+        hits['dir_x'] = dir_xs
+        hits['dir_y'] = dir_ys
+        hits['dir_z'] = dir_zs
+        hits['dom_id'] = dom_ids
+        hits['pos_x'] = pos_xs
+        hits['pos_y'] = pos_ys
+        hits['pos_z'] = pos_zs
+        hits['t0'] = t0s
+        hits['time'] = times
+        hits['tot'] = tots
+        hits['triggered'] = triggereds
+        hits['event_id'] = np.full(length, event_id, dtype='<u4')
+        return cls(hits, event_id)
+
+    @property
+    def triggered_hits(self):
+        return CRawHitSeries(self._arr[self._arr['triggered'] == True],
+                            self.event_id)  # noqa
+
+    @classmethod
+    def deserialise(cls, *args, **kwargs):
+        return cls.conv_from(*args, **kwargs)
+
+    def serialise(self, *args, **kwargs):
+        return self.conv_to(*args, **kwargs)
+
+    @classmethod
+    def conv_from(cls, data, event_id=None, fmt='numpy', h5loc='/'):
+        if fmt == 'numpy':
+            return cls(data, event_id)
+        if fmt == 'pandas':
+            return cls(data.to_records(index=False), event_id)
+
+    def conv_to(self, to='numpy'):
+        if to == 'numpy':
+            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
+                            h5loc=self.h5loc)
+        if to == 'pandas':
+            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
+
+    def __array__(self):
+        return self._arr
+
+    def __len__(self):
+        return self._arr.shape[0]
+
+    def __str__(self):
+        n_hits = len(self)
+        plural = 's' if n_hits > 1 or n_hits == 0 else ''
+        return("CRawHitSeries with {0} hit{1}.".format(len(self), plural))
+
+    def __repr__(self):
+        return self.__str__()
+
+
 cdef class McTrack:
     """Monte Carlo Particle track.
 
