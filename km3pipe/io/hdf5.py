@@ -81,6 +81,7 @@ class HDF5Sink(Module):
         self.ext_h5file = self.get('h5file') or None
         self.pytab_file_args = self.get('pytab_file_args') or dict()
         self.indices = {}
+        self._header_written = False
         # magic 10000: this is the default of the "expectedrows" arg
         # from the tables.File.create_table() function
         # at least according to the docs
@@ -172,6 +173,16 @@ class HDF5Sink(Module):
         d["index"] += n_items
 
     def process(self, blob):
+
+        if not self._header_written and "Header" in blob \
+                and blob["Header"] is not None:
+            header = self.h5file.create_group('/', 'header', 'Header')
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', tb.NaturalNameWarning)
+                for field, value in blob["Header"].items():
+                    header._v_attrs[field] = value
+            self._header_written = True
+
         for key, entry in sorted(blob.items()):
             serialisable_attributes = ('dtype', 'serialise', 'to_records')
             if any(hasattr(entry, a) for a in serialisable_attributes):
