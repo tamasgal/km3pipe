@@ -177,8 +177,10 @@ class HDF5Sink(Module):
         if not self._header_written and "Header" in blob \
                 and blob["Header"] is not None:
             header = self.h5file.create_group('/', 'header', 'Header')
-            for field, value in blob["Header"].items():
-                header._v_attrs[field] = value
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', tb.NaturalNameWarning)
+                for field, value in blob["Header"].items():
+                    header._v_attrs[field] = value
             self._header_written = True
 
         for key, entry in sorted(blob.items()):
