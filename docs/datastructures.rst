@@ -37,7 +37,7 @@ will.
 Both the ``*Series`` and the elementary hit classes have attributes which can
 be accessed through the following getters:
 
-+---------------------+--------------+---------+-----------+----------+----------------------+
++---------------------+--------------+---------+-----------+----------+-----------+----------+
 | information         | getter       | type    | RawHit    | McHit    | CRawHit   | CMcHit   |
 +=====================+==============+=========+===========+==========+===========+==========|
 | hit time            | .time        | float32 | X         | X        | X         | X        |
