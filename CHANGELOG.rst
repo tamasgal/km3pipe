@@ -1,8 +1,11 @@
 Unreleased changes
 ------------------
+
+
+7.2.2 / 2017-07-11
+------------------
 * ``AANetPump`` now parses the full header and ``HDF5Pump`` writes it to 
   /header as attributes
-
 
 7.2.1 / 2017-07-11
 ------------------
