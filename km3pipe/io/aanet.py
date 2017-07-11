@@ -342,7 +342,7 @@ def get_aanet_header(event_file):
         fields, values = [s.split() for s in line.split(':')]
         for field in fields:
             for value in values:
-                d[field+'-'+value] = f.header.get_field(field, value)
+                d[field+'-'+value] = event_file.header.get_field(field, value)
     return d
 
 
