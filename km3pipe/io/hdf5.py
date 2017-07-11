@@ -368,7 +368,8 @@ class HDF5Pump(Pump):
                 triggered = h5file.get_node("/hits/triggered")[idx:end]
 
                 try:
-                    datatype = h5file.get_node("/hits")._v_attrs.datatype
+                    datatype = h5file.get_node("/hits") \
+                                   ._v_attrs.datatype.decode("utf-8")
                 except AttributeError:
                     datatype = "RawHitSeries"
 
@@ -396,7 +397,8 @@ class HDF5Pump(Pump):
                 time = h5file.get_node("/mc_hits/time")[idx:end]
 
                 try:
-                    datatype = h5file.get_node("/mc_hits")._v_attrs.datatype
+                    datatype = h5file.get_node("/mc_hits")  \
+                                   ._v_attrs.datatype.decode("utf-8")
                 except AttributeError:
                     datatype = "McHitSeries"
 
