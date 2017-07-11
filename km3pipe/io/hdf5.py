@@ -17,8 +17,9 @@ import tables as tb
 
 import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
-from km3pipe.dataclasses import (KM3Array, KM3DataFrame, RawHitSeries,
-                                 McHitSeries, deserialise_map)
+from km3pipe.dataclasses import (KM3Array, KM3DataFrame,
+                                 RawHitSeries, CRawHitSeries,
+                                 McHitSeries, CMcHitSeries, deserialise_map)
 from km3pipe.logger import logging
 from km3pipe.dev import camelise, decamelise, split
 
@@ -38,6 +39,23 @@ MINIMUM_FORMAT_VERSION = np.string_('4.0')
 
 class H5VersionError(Exception):
     pass
+
+
+def check_version(h5file, filename):
+    try:
+        version = np.string_(h5file.root._v_attrs.format_version)
+    except AttributeError:
+        log.error("Could not determine HDF5 format version: '%s'."
+                  "You may encounter unexpected errors! Good luck..."
+                  % filename)
+        return
+    if split(version, int, np.string_('.')) < \
+            split(MINIMUM_FORMAT_VERSION, int, np.string_('.')):
+        raise H5VersionError("HDF5 format version {0} or newer required!\n"
+                             "'{1}' has HDF5 format version {2}."
+                             .format(MINIMUM_FORMAT_VERSION.decode("utf-8"),
+                                     filename,
+                                     version.decode("utf-8")))
 
 
 class HDF5Sink(Module):
@@ -96,7 +114,7 @@ class HDF5Sink(Module):
             pass
         return data
 
-    def _write_array(self, where, arr, title=''):
+    def _write_array(self, where, arr, datatype, title=''):
         level = len(where.split('/'))
 
         if where not in self._tables:
@@ -109,6 +127,7 @@ class HDF5Sink(Module):
                     filters=self.filters, createparents=True,
                     expectedrows=self.n_rows_expected,
                 )
+            tab._v_attrs.datatype = datatype
             if(level < 5):
                 self._tables[where] = tab
         else:
@@ -123,7 +142,9 @@ class HDF5Sink(Module):
         f = self.h5file
         loc, group_name = os.path.split(where)
         if where not in f:
-            group = f.create_group(loc, group_name, obj.__class__.__name__)
+            datatype = obj.__class__.__name__
+            group = f.create_group(loc, group_name, datatype)
+            group._v_attrs.datatype = datatype
         else:
             group = f.get_node(where)
 
@@ -170,14 +191,15 @@ class HDF5Sink(Module):
                     data = data.view(dt)
                     h5loc = '/misc'
                 where = os.path.join(h5loc, tabname)
+                datatype = entry.__class__.__name__
 
                 try:
                     if entry.write_separate_columns:
                         self._write_separate_columns(where, entry, title=key)
                     else:
-                        self._write_array(where, data, title=key)
+                        self._write_array(where, data, datatype, title=key)
                 except AttributeError:  # backwards compatibility
-                    self._write_array(where, data, title=key)
+                    self._write_array(where, data, datatype, title=key)
 
 
 
@@ -198,7 +220,10 @@ class HDF5Sink(Module):
             print("  -> {0}".format(h5loc))
             indices = KM3DataFrame({"index": data["indices"],
                                     "n_items": data["n_items"]}, h5loc=h5loc)
-            self._write_array(h5loc, self._to_array(indices), title="Indices")
+            self._write_array(h5loc,
+                              self._to_array(indices),
+                              'Indices',
+                              title="Indices")
         print("Creating pytables index tables. This may take a few minutes...")
         for tab in itervalues(self._tables):
             if 'frame_id' in tab.colnames:
@@ -246,7 +271,7 @@ class HDF5Pump(Pump):
             if os.path.isfile(fn):
                 h5file = tb.open_file(fn, 'r')
                 if not self.skip_version_check:
-                    self._check_version(h5file, fn)
+                    check_version(h5file, fn)
             else:
                 raise IOError("No such file or directory: '{0}'"
                               .format(fn))
@@ -270,21 +295,6 @@ class HDF5Pump(Pump):
         self.index = None
         self._reset_index()
 
-    def _check_version(self, h5file, filename):
-        try:
-            version = np.string_(h5file.root._v_attrs.format_version)
-        except AttributeError:
-            log.error("Could not determine HDF5 format version: '%s'."
-                      "You may encounter unexpected errors! Good luck..."
-                      % filename)
-            return
-        if split(version, int, np.string_('.')) < \
-                split(MINIMUM_FORMAT_VERSION, int, np.string_('.')):
-            raise H5VersionError("HDF5 format version {0} or newer required!\n"
-                                 "'{1}' has HDF5 format version {2}."
-                                 .format(MINIMUM_FORMAT_VERSION,
-                                         filename,
-                                         version))
 
     def process(self, blob):
         try:
@@ -356,15 +366,53 @@ class HDF5Pump(Pump):
                 time = h5file.get_node("/hits/time")[idx:end]
                 tot = h5file.get_node("/hits/tot")[idx:end]
                 triggered = h5file.get_node("/hits/triggered")[idx:end]
-                blob["Hits"] = RawHitSeries.from_arrays(
-                    channel_id, dom_id, time, tot, triggered, event_id)
+
+                try:
+                    datatype = h5file.get_node("/hits")._v_attrs.datatype
+                except AttributeError:
+                    datatype = "RawHitSeries"
+
+                if datatype == "RawHitSeries":
+                    blob["Hits"] = RawHitSeries.from_arrays(
+                        channel_id, dom_id, time, tot, triggered, event_id)
+                if datatype == "CRawHitSeries":
+                    pos_x = h5file.get_node("/hits/pos_x")[idx:end]
+                    pos_y = h5file.get_node("/hits/pos_y")[idx:end]
+                    pos_z = h5file.get_node("/hits/pos_z")[idx:end]
+                    dir_x = h5file.get_node("/hits/dir_x")[idx:end]
+                    dir_y = h5file.get_node("/hits/dir_y")[idx:end]
+                    dir_z = h5file.get_node("/hits/dir_z")[idx:end]
+                    t0s = h5file.get_node("/hits/t0")[idx:end]
+                    time += t0s
+                    blob["Hits"] = CRawHitSeries.from_arrays(
+                        channel_id, dir_x, dir_y, dir_z, dom_id,
+                        pos_x, pos_y, pos_z, t0s, time, tot, triggered,
+                        event_id)
+
             if loc == '/mc_hits':
                 a = h5file.get_node("/mc_hits/a")[idx:end]
                 origin = h5file.get_node("/mc_hits/origin")[idx:end]
                 pmt_id = h5file.get_node("/mc_hits/pmt_id")[idx:end]
                 time = h5file.get_node("/mc_hits/time")[idx:end]
-                blob["McHits"] = McHitSeries.from_arrays(
-                    a, origin, pmt_id, time, event_id)
+
+                try:
+                    datatype = h5file.get_node("/mc_hits")._v_attrs.datatype
+                except AttributeError:
+                    datatype = "McHitSeries"
+
+                if datatype == "McHitSeries":
+                    blob["McHits"] = McHitSeries.from_arrays(
+                        a, origin, pmt_id, time, event_id)
+                if datatype == "CMcHitSeries":
+                    pos_x = h5file.get_node("/mc_hits/pos_x")[idx:end]
+                    pos_y = h5file.get_node("/mc_hits/pos_y")[idx:end]
+                    pos_z = h5file.get_node("/mc_hits/pos_z")[idx:end]
+                    dir_x = h5file.get_node("/mc_hits/dir_x")[idx:end]
+                    dir_y = h5file.get_node("/mc_hits/dir_y")[idx:end]
+                    dir_z = h5file.get_node("/mc_hits/dir_z")[idx:end]
+                    blob["McHits"] = CMcHitSeries.from_arrays(
+                        a, dir_x, dir_y, dir_z, origin, pmt_id,
+                        pos_x, pos_y, pos_z, time, event_id)
 
         return blob
 

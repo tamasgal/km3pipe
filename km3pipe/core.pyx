@@ -416,6 +416,12 @@ class Geometry(Module):
         self.t0set = self.get('t0set') or None
         self.calibration = self.get('calibration') or None
         self.detector = self.get('detector') or None
+        self._pos_dom_channel = None
+        self._dir_dom_channel = None
+        self._t0_dom_channel = None
+        self._pos_pmt_id = None
+        self._dir_pmt_id = None
+        self._t0_pmt_id = None
 
         if self.filename or self.det_id:
             if self.filename is not None:
@@ -424,6 +430,10 @@ class Geometry(Module):
                 self.detector = Detector(det_id=self.det_id,
                                          t0set=self.t0set,
                                          calibration=self.calibration)
+
+        if self.detector is not None:
+            self._create_dom_channel_lookup()
+            self._create_pmt_id_lookup()
 
     def process(self, blob, key='Hits'):
         if self._should_apply:
@@ -478,35 +488,24 @@ class Geometry(Module):
         
         """
         n = len(hits)
-        pos_x = np.empty(n)
-        pos_y = np.empty(n)
-        pos_z = np.empty(n)
-        dir_x = np.empty(n)
-        dir_y = np.empty(n)
-        dir_z = np.empty(n)
-        t0 = np.empty(n)
-        for idx, hit in enumerate(hits):
-            pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
-            pos_x[idx] = pmt.pos[0]
-            pos_y[idx] = pmt.pos[1]
-            pos_z[idx] = pmt.pos[2]
-            dir_x[idx] = pmt.dir[0]
-            dir_y[idx] = pmt.dir[1]
-            dir_z[idx] = pmt.dir[2]
-            t0[idx] = pmt.t0
+        cal = np.empty(n, 7)
+        for i in range(n):
+            lookup = self._pos_dir_t0_by_dom_and_channel
+            calib = lookup[hits._arr['dom_id'][i]][hits._arr['channel_id'][i]]
+            cal[i] = calib
         h = np.empty(n, HitSeries.dtype)
         h['channel_id'] = hits.channel_id
-        h['dir_x'] = dir_x
-        h['dir_y'] = dir_y
-        h['dir_z'] = dir_z
+        h['dir_x'] = cal[:, 3]
+        h['dir_y'] = cal[:, 4]
+        h['dir_z'] = cal[:, 5]
         h['dom_id'] = hits.dom_id
         h['id'] = np.arange(n)
         h['pmt_id'] = np.zeros(n, dtype=int)
-        h['pos_x'] = pos_x
-        h['pos_y'] = pos_y
-        h['pos_z'] = pos_z
-        h['t0'] = t0
-        h['time'] = hits.time + t0
+        h['pos_x'] = cal[:, 0]
+        h['pos_y'] = cal[:, 1]
+        h['pos_z'] = cal[:, 2]
+        h['t0'] = cal[:, 6]
+        h['time'] = hits.time + cal[:, 6]
         h['tot'] = hits.tot
         h['triggered'] = hits.triggered
         h['event_id'] = hits._arr['event_id']
@@ -522,35 +521,23 @@ class Geometry(Module):
         
         """
         n = len(hits)
-        pos_x = np.empty(n)
-        pos_y = np.empty(n)
-        pos_z = np.empty(n)
-        dir_x = np.empty(n)
-        dir_y = np.empty(n)
-        dir_z = np.empty(n)
-        t0 = np.empty(n)
-        for idx, hit in enumerate(hits):
-            pmt = self.detector.pmt_with_id(hit.pmt_id)
-            pos_x[idx] = pmt.pos[0]
-            pos_y[idx] = pmt.pos[1]
-            pos_z[idx] = pmt.pos[2]
-            dir_x[idx] = pmt.dir[0]
-            dir_y[idx] = pmt.dir[1]
-            dir_z[idx] = pmt.dir[2]
-            t0[idx] = pmt.t0
+        cal = np.empty(n, 7)
+        for i in range(n):
+            lookup = self._pos_dir_t0_by_pmt_id
+            calib = lookup[hits._arr['pmt_id'][i]]
         h = np.empty(n, HitSeries.dtype)
         h['channel_id'] = np.zeros(n, dtype=int)
-        h['dir_x'] = dir_x
-        h['dir_y'] = dir_y
-        h['dir_z'] = dir_z
+        h['dir_x'] = cal[:, 3]
+        h['dir_y'] = cal[:, 4]
+        h['dir_z'] = cal[:, 5]
         h['dom_id'] = np.zeros(n, dtype=int)
         h['id'] = np.arange(n)
         h['pmt_id'] = hits._arr['pmt_id']
-        h['pos_x'] = pos_x
-        h['pos_y'] = pos_y
-        h['pos_z'] = pos_z
-        h['t0'] = t0
-        h['time'] = hits.time + t0
+        h['pos_x'] = cal[:, 0]
+        h['pos_y'] = cal[:, 1]
+        h['pos_z'] = cal[:, 2]
+        h['t0'] = cal[:, 6]
+        h['time'] = hits.time + cal[:, 6]
         h['tot'] = np.zeros(n, dtype=int)
         h['triggered'] = np.zeros(n, dtype=bool)
         h['event_id'] = hits._arr['event_id']
@@ -571,6 +558,33 @@ class Geometry(Module):
         table['t0'] = table.apply(lambda h: get_pmt(h).t0, axis=1)
         table['du'] = table.apply(lambda h: get_pmt(h).omkey[0], axis=1)
         table['floor'] = table.apply(lambda h: get_pmt(h).omkey[1], axis=1)
+
+    def _create_dom_channel_lookup(self):
+        data = {}
+        for dom_id, pmts in self.detector._pmts_by_dom_id.items():
+            for pmt in pmts:
+                if dom_id not in data:
+                    data[dom_id] = {}
+                data[dom_id][pmt.channel_id] = np.array((pmt.pos[0],
+                                                        pmt.pos[1],
+                                                        pmt.pos[2],
+                                                        pmt.dir[0],
+                                                        pmt.dir[1],
+                                                        pmt.dir[2],
+                                                        pmt.t0))
+        self._pos_dir_t0_by_dom_and_channel = data
+
+    def _create_pmt_id_lookup(self):
+        data = {}
+        for pmt_id, pmt in self.detector._pmts_by_id.items():
+            data[pmt_id] = np.array((pmt.pos[0],
+                                     pmt.pos[1],
+                                     pmt.pos[2],
+                                     pmt.dir[0],
+                                     pmt.dir[1],
+                                     pmt.dir[2],
+                                     pmt.t0))
+        self._pos_dir_t0_by_pmt_id = data
 
     def __repr__(self):
         return self.__str__()

@@ -296,6 +296,10 @@ class TestGeometry(TestCase):
     def test_apply_to_hitseries(self):
 
         class FakeDetector(object):
+            def __init__(self):
+                self._pmts_by_dom_id = {}
+                self._pmts_by_id = {}
+
             def pmt_with_id(self, i):
                 pmt = MagicMock(dir=np.array((i*10+i, i*10+i+1, i*10+i+2)),
                                 pos=np.array((i*100+i, i*100+i+1, i*100+i+2)),

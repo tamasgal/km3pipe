@@ -124,6 +124,7 @@ setup(name='km3pipe',
               'ztplot=km3pipe.utils.ztplot:main',
               'k40calib=km3pipe.utils.k40calib:main',
               'totmonitor=km3pipe.utils.totmonitor:main',
+              'calibrate=km3pipe.utils.calibrate:main',
           ],
       },
       classifiers=[
