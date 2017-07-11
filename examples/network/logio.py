@@ -49,7 +49,6 @@ class LogIO(Module):
         self.sock.close()
 
 
-
 pipe = Pipeline()
 pipe.attach(CHPump, host='127.0.0.1',
                     port=5553,

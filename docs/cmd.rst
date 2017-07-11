@@ -141,7 +141,7 @@ Example::
 
 
 ``ptdump`` (from PyTables)
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Inspect the contents of a HDF5 file, walking through all the subgroups.
 
