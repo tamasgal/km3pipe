@@ -2,6 +2,10 @@ Unreleased changes
 ------------------
 
 
+7.1.1 / 2017-07-11
+------------------
+* Fixed bug with aanet pump
+
 7.1.0 / 2017-07-11
 ------------------
 * Increased performance for Geometry.apply
