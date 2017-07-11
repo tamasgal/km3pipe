@@ -17,8 +17,9 @@ import tables as tb
 
 import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
-from km3pipe.dataclasses import (KM3Array, KM3DataFrame, RawHitSeries,
-                                 CRawHitSeries, McHitSeries, deserialise_map)
+from km3pipe.dataclasses import (KM3Array, KM3DataFrame,
+                                 RawHitSeries, CRawHitSeries,
+                                 McHitSeries, CMcHitSeries, deserialise_map)
 from km3pipe.logger import logging
 from km3pipe.dev import camelise, decamelise, split
 
@@ -397,12 +398,12 @@ class HDF5Pump(Pump):
                 try:
                     datatype = h5file.get_node("/mc_hits")._v_attrs.datatype
                 except AttributeError:
-                    datatype = "CMcHitSeries"
+                    datatype = "McHitSeries"
 
-                if datatype == "CMcitSeries":
-                    blob["McHits"] = CMcHitSeries.from_arrays(
+                if datatype == "McHitSeries":
+                    blob["McHits"] = McHitSeries.from_arrays(
                         a, origin, pmt_id, time, event_id)
-                if datatype == "CRawHitSeries":
+                if datatype == "CMcHitSeries":
                     pos_x = h5file.get_node("/mc_hits/pos_x")[idx:end]
                     pos_y = h5file.get_node("/mc_hits/pos_y")[idx:end]
                     pos_z = h5file.get_node("/mc_hits/pos_z")[idx:end]

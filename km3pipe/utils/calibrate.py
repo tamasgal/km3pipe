@@ -33,6 +33,7 @@ def calibrate_hits(f, geo):
         channel_id = channel_ids[i]
         calib[i] = geo._pos_dir_t0_by_dom_and_channel[dom_id][channel_id]
     apply_calibration(calib, f, n, "/hits")
+    f.get_node("/hits")._v_attrs.datatype = "CRawHitSeries"
 
 
 def calibrate_mc_hits(f, geo):
@@ -43,6 +44,7 @@ def calibrate_mc_hits(f, geo):
         pmt_id = pmt_ids[i]
         calib[i] = geo._pos_dir_t0_by_pmt_id[pmt_id]
     apply_calibration(calib, f, n, "/mc_hits")
+    f.get_node("/mc_hits")._v_attrs.datatype = "CMcHitSeries"
 
 
 def apply_calibration(calib, f, n, loc):

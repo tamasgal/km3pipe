@@ -1229,7 +1229,7 @@ class CMcHitSeries(DTypeAttr):
 
     @classmethod
     def from_arrays(cls, a, dir_x, dir_y, dir_z, origin,
-                    pos_x, pos_y, pos_z, pmt_id, time, event_id):
+                    pmt_id, pos_x, pos_y, pos_z, time, event_id):
         # do we need shape[0] or does len() work too?
         try:
             length = time.shape[0]
@@ -1241,10 +1241,10 @@ class CMcHitSeries(DTypeAttr):
         hits['dir_y'] = dir_y
         hits['dir_z'] = dir_z
         hits['origin'] = origin
+        hits['pmt_id'] = pmt_id
         hits['pos_x'] = pos_x
         hits['pos_y'] = pos_y
         hits['pos_z'] = pos_z
-        hits['pmt_id'] = pmt_id
         hits['time'] = time
         hits['event_id'] = np.full(length, event_id, dtype='<u4')
         return cls(hits)
