@@ -344,7 +344,7 @@ def get_aanet_header(event_file):
             for value in values:
                 if field == "physics" and value == "date":  # segfaults
                     continue
-                d[field+'-'+value] = header.get_field(field, value)
+                d[field+'_'+value] = header.get_field(field, value)
     return d
 
 
