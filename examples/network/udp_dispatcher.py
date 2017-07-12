@@ -1,19 +1,16 @@
 #!/usr/bin/env python
-# coding=utf-8
-# vim: ts=4 sw=4 et
-"""
-============================
-UDP Forwarder for ControlHost
-============================
-
-A simple UDP forwarder for ControlHost messages.
-"""
 # Author: Tamas Gal <tgal@km3net.de>
 # License: MIT
 #!/usr/bin/env python
 # coding=utf-8
 # vim: ts=4 sw=4 et
 """
+=============================
+UDP Forwarder for ControlHost
+=============================
+
+A simple UDP forwarder for ControlHost messages.
+
 This application is used to forward monitoring channel data from Ligier
 to a given UDP address.
 
@@ -44,13 +41,12 @@ class UDPForwarder(kp.Module):
         return blob
 
 
-
 pipe = kp.Pipeline()
 pipe.attach(kp.io.CHPump,
             host='localhost',
             port=5553,
             tags='IO_MONIT',
-            timeout=60*60*24*7,
+            timeout=60 * 60 * 24 * 7,
             max_queue=1000,
             timeit=True)
 pipe.attach(UDPForwarder)

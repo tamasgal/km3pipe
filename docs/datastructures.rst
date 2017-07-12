@@ -37,32 +37,51 @@ will.
 Both the ``*Series`` and the elementary hit classes have attributes which can
 be accessed through the following getters:
 
-+---------------------+--------------+-----------+-----------+----------+
-| information         | getter       | type      | RawHit    | McHit   |
-+=====================+==============+===========+===========+==========+
-| hit time            | .time        | numeric   | X         | X        |
-+---------------------+--------------+-----------+-----------+----------+
-| time over threshold | .tot         | numeric   | X         |          |
-+---------------------+--------------+-----------+-----------+----------+
-| a (number of p.e.)  | .a           | numeric   |           | X        |
-+---------------------+--------------+-----------+-----------+----------+
-| PMT ID              | .pmt_id      | numeric   |           | X        |
-+---------------------+--------------+-----------+-----------+----------+
-| Channel ID          | .channel_id  | numeric   | X         |          |
-+---------------------+--------------+-----------+-----------+----------+
-| DOM ID              | .dom_id      | numeric   | X         |          |
-+---------------------+--------------+-----------+-----------+----------+
-| trigger information | .triggered   | bool      | X         |          |
-+---------------------+--------------+-----------+-----------+----------+
-| origin (track ID)   | .origin      | numeric   |           | X        |
-+---------------------+--------------+-----------+-----------+----------+
++---------------------+--------------+---------+-----------+----------+-----------+----------+
+| information         | getter       | type    | RawHit    | McHit    | CRawHit   | CMcHit   |
++=====================+==============+=========+===========+==========+===========+==========+
+| hit time            | .time        | float32 | X         | X        | X         | X        |
++---------------------+--------------+---------+-----------+----------+-----------+----------+
+| time over threshold | .tot         | uint8   | X         |          | X         |          |
++---------------------+--------------+---------+-----------+----------+-----------+----------+
+| a (number of p.e.)  | .a           | float32 |           | X        |           | X        |
++---------------------+--------------+---------+-----------+----------+-----------+----------+
+| PMT ID              | .pmt_id      | uint32  |           | X        |           | X        |
++---------------------+--------------+---------+-----------+----------+-----------+----------+
+| Channel ID          | .channel_id  | uint8   | X         |          | X         |          |
++---------------------+--------------+---------+-----------+----------+-----------+----------+
+| DOM ID              | .dom_id      | uint32  | X         |          | X         |          |
++---------------------+--------------+---------+-----------+----------+-----------+----------+
+| trigger information | .triggered   | bool    | X         |          | X         |          |
++---------------------+--------------+---------+-----------+----------+-----------+----------+
+| origin (track ID)   | .origin      | uint32  |           | X        |           | X        |
++---------------------+--------------+---------+-----------+----------+-----------+----------+
+| position            | .pos_[xzy]   | float32 |           |          | X         | X        |
++---------------------+--------------+---------+-----------+----------+-----------+----------+
+| direction           | .dir_[xzy]   | float32 |           |          | X         | X        |
++---------------------+--------------+---------+-----------+----------+-----------+----------+
+| t0                  | .t0          | float32 |           |          | X         |          |
++---------------------+--------------+---------+-----------+----------+-----------+----------+
+| du                  | .du          | uint8   |           |          | X         | X        |
++---------------------+--------------+---------+-----------+----------+-----------+----------+
+| floor               | .floor       | uint8   |           |          | X         | X        |
++---------------------+--------------+---------+-----------+----------+-----------+----------+
 
 Note that if you access ``.tot`` of a ``RawHitSeries`` for example, you will
 get a 1D numpy array containing all the ToTs of the hits (in the order of the
 hits). So you can for example quickly have a look at the ToT distribution of
 the full event.
 
-In order to obtain the position, direction and the t0 correction, you
+Calibrating Hits and McHits
+---------------------------
+
+Both ``RawHitSeries`` and ``McHitSeries`` have a corresponding
+``CRawHitSeries`` and ``CMcHitSeries``. The "C" stands for "Calibrated" and
+those classes has additional attributes to access the position, direction and
+calibrated hit times. They also provide access to the DU and floor which the
+hit was registered.
+
+In order to obtain the position, direction, the t0 correction and DU/floor, you
 need to apply a geometry. KM3Pipe provides the ``Geometry`` class to do this
 for you.
 
@@ -75,5 +94,15 @@ To apply the geometry to a set of hits::
 
     calibrated_hits = geo.apply(hits)
 
-That's it, you will get a ``HitSeries`` instance with ``pos_x``, ``pos_y``,
-... and also ``dir_x``, ``dir_y``...
+That's it, you will get a ``CRawHitSeries`` or ``CMcHitSeries`` instance
+respectively, with ``pos_x``, ``pos_y``, ... and also ``dir_x``, ``dir_y``...
+and ``du``, ``floor``.
+
+
+Another, even easier way is to calibrate your file beforehand, using the
+``calibrate`` command line utility::
+
+    calibrate DETXFILE HDF5FILE
+
+If you read in the file with the ``km3pipe.io.hdf5.HDF5Pump``, it will 
+automatically recognise the calibration and use the correct classes.

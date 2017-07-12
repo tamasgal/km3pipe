@@ -82,6 +82,21 @@ class Serialisable(type):
         return type(class_name, class_parents, attr)
 
 
+class DTypeAttr(object):
+    """Helper class to make dtype names accessible using the dot-syntax
+
+    Simply subclass it and make sure your class has a ``.dtype`` attribute
+    with ``names``.
+    """
+    def __getattr__(self, name):
+        if not hasattr(self, "dtype"):
+            raise AttributeError
+        if name in self.dtype.names:
+            return self._arr[name]
+        else:
+            raise AttributeError
+
+
 class Convertible(object):
     """Implements basic conversion methods."""
     @classmethod
@@ -390,15 +405,24 @@ class EventInfo(object):
         ('weight_w1', '<f8'),
         ('weight_w2', '<f8'),
         ('weight_w3', '<f8'),
-        ('run_id', '<u4'),
+        ('run_id', '<u8'),
         ('event_id', '<u4'),
     ])
 
     def __init__(self, arr, h5loc='/'):
+        if 'run_id' not in arr.dtype.fields:
+            arr = self._append_run_id(arr)
         self._arr = np.array(arr, dtype=self.dtype).reshape(1)
         for col in self.dtype.names:
             setattr(self, col, self._arr[col])
         self.h5loc = h5loc
+
+    @classmethod
+    def _append_run_id(cls, info, fill_value=0):
+        from numpy.lib.recfunctions import append_fields
+        run_id = np.full(len(info), fill_value, '<u8')
+        info = append_fields(info, 'run_id', run_id)
+        return info
 
     @classmethod
     def from_row(cls, row, **kwargs):
@@ -577,18 +601,19 @@ cdef class RawHit:
     ----------
     channel_id : int
     dom_id : int
-    time : int
+    time : float
     tot : int
     triggered : int
 
     """
-    cdef public dom_id, time, tot, channel_id
+    cdef public int dom_id, tot, channel_id
+    cdef public float time
     cdef public unsigned short int triggered
 
     def __cinit__(self,
                   int channel_id,
                   int dom_id,
-                  int time,
+                  float time,
                   int tot,
                   unsigned short int triggered,
                   int event_id=0        # ignore this! just for init * magic
@@ -745,13 +770,13 @@ cdef class Track:
         return self.__str__()
 
 
-class RawHitSeries(object):
+class RawHitSeries(DTypeAttr):
     """A collection of hits without any calibration parameter."""
     h5loc = '/raw_hits'
     dtype = np.dtype([
         ('channel_id', 'u1'),
         ('dom_id', '<u4'),
-        ('time', '<i4'),
+        ('time', '<f4'),
         ('tot', 'u1'),
         ('triggered', 'u1'),
         ('event_id', '<u4')
@@ -834,26 +859,6 @@ class RawHitSeries(object):
     def __array__(self):
         return self._arr
 
-    @property
-    def triggered(self):
-        return self._arr['triggered']
-
-    @property
-    def tot(self):
-        return self._arr['tot']
-
-    @property
-    def time(self):
-        return self._arr['time']
-
-    @property
-    def dom_id(self):
-        return self._arr['dom_id']
-
-    @property
-    def channel_id(self):
-        return self._arr['channel_id']
-
     def next(self):
         """Python 2/3 compatibility for iterators"""
         return self.__next__()
@@ -897,6 +902,102 @@ class RawHitSeries(object):
 
     def __insp__(self):
         return '\n'.join([str(hit) for hit in self._hits])
+
+
+class CRawHitSeries(DTypeAttr):
+    """A collection of calibrated hits."""
+    h5loc = '/hits'
+    dtype = np.dtype([
+        ('channel_id', 'u1'),
+        ('dir_x', '<f4'),
+        ('dir_y', '<f4'),
+        ('dir_z', '<f4'),
+        ('dom_id', '<u4'),
+        ('du', 'u1'),
+        ('floor', 'u1'),
+        ('pos_x', '<f4'),
+        ('pos_y', '<f4'),
+        ('pos_z', '<f4'),
+        ('t0', '<f4'),
+        ('time', '<f4'),
+        ('tot', 'u1'),
+        ('triggered', 'u1'),
+        ('event_id', '<u4')
+    ])
+    write_separate_columns = True
+
+    def __init__(self, arr, event_id, h5loc='/'):
+        self._arr = arr
+        self._index = 0
+        self.event_id = event_id
+        self.h5loc = h5loc
+
+    @classmethod
+    def from_arrays(cls, channel_ids, dir_xs, dir_ys, dir_zs, dom_ids, dus,
+                    floors, pos_xs, pos_ys, pos_zs, t0s, times, tots,
+                    triggereds, event_id):
+        # do we need shape[0] or does len() work too?
+        try:
+            length = channel_ids.shape[0]
+        except AttributeError:
+            length = len(channel_ids)
+        hits = np.empty(length, cls.dtype)
+        hits['channel_id'] = channel_ids
+        hits['dir_x'] = dir_xs
+        hits['dir_y'] = dir_ys
+        hits['dir_z'] = dir_zs
+        hits['dom_id'] = dom_ids
+        hits['du'] = dus
+        hits['floor'] = floors
+        hits['pos_x'] = pos_xs
+        hits['pos_y'] = pos_ys
+        hits['pos_z'] = pos_zs
+        hits['t0'] = t0s
+        hits['time'] = times
+        hits['tot'] = tots
+        hits['triggered'] = triggereds
+        hits['event_id'] = np.full(length, event_id, dtype='<u4')
+        return cls(hits, event_id)
+
+    @property
+    def triggered_hits(self):
+        return CRawHitSeries(self._arr[self._arr['triggered'] == True],
+                            self.event_id)  # noqa
+
+    @classmethod
+    def deserialise(cls, *args, **kwargs):
+        return cls.conv_from(*args, **kwargs)
+
+    def serialise(self, *args, **kwargs):
+        return self.conv_to(*args, **kwargs)
+
+    @classmethod
+    def conv_from(cls, data, event_id=None, fmt='numpy', h5loc='/'):
+        if fmt == 'numpy':
+            return cls(data, event_id)
+        if fmt == 'pandas':
+            return cls(data.to_records(index=False), event_id)
+
+    def conv_to(self, to='numpy'):
+        if to == 'numpy':
+            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
+                            h5loc=self.h5loc)
+        if to == 'pandas':
+            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
+
+    def __array__(self):
+        return self._arr
+
+    def __len__(self):
+        return self._arr.shape[0]
+
+    def __str__(self):
+        n_hits = len(self)
+        plural = 's' if n_hits > 1 or n_hits == 0 else ''
+        return("CRawHitSeries with {0} hit{1}.".format(len(self), plural))
+
+    def __repr__(self):
+        return self.__str__()
 
 
 cdef class McTrack:
@@ -958,7 +1059,7 @@ cdef class McTrack:
         return self.__str__()
 
 
-class McHitSeries(object):
+class McHitSeries(DTypeAttr):
     """Collection of multiple Hits.
     """
     h5loc = '/mc_hits'
@@ -1063,22 +1164,6 @@ class McHitSeries(object):
     def __iter__(self):
         return self
 
-    @property
-    def time(self):
-        return self._arr['time']
-
-    @property
-    def a(self):
-        return self._arr['a']
-
-    @property
-    def origin(self):
-        return self._arr['origin']
-
-    @property
-    def pmt_id(self):
-        return self._arr['pmt_id']
-
     def next(self):
         """Python 2/3 compatibility for iterators"""
         return self.__next__()
@@ -1121,7 +1206,91 @@ class McHitSeries(object):
         return '\n'.join([str(hit) for hit in self._hits])
 
 
-class HitSeries(object):
+class CMcHitSeries(DTypeAttr):
+    """Collection of calibrated MC Hits.
+    """
+    h5loc = '/mc_hits'
+    dtype = np.dtype([
+        ('a', 'f4'),
+        ('dir_x', '<f4'),
+        ('dir_y', '<f4'),
+        ('dir_z', '<f4'),
+        ('origin', '<u4'),
+        ('pmt_id', '<u4'),
+        ('pos_x', '<f4'),
+        ('pos_y', '<f4'),
+        ('pos_z', '<f4'),
+        ('time', 'f4'),
+        ('event_id', '<u4'),
+    ])
+    write_separate_columns = True
+
+    def __init__(self, arr, h5loc='/'):
+        self._arr = arr
+        self._index = 0
+        self._hits = None
+        self.h5loc = h5loc
+
+    @classmethod
+    def from_arrays(cls, a, dir_x, dir_y, dir_z, origin,
+                    pmt_id, pos_x, pos_y, pos_z, time, event_id):
+        # do we need shape[0] or does len() work too?
+        try:
+            length = time.shape[0]
+        except AttributeError:
+            length = len(time)
+        hits = np.empty(length, cls.dtype)
+        hits['a'] = a
+        hits['dir_x'] = dir_x
+        hits['dir_y'] = dir_y
+        hits['dir_z'] = dir_z
+        hits['origin'] = origin
+        hits['pmt_id'] = pmt_id
+        hits['pos_x'] = pos_x
+        hits['pos_y'] = pos_y
+        hits['pos_z'] = pos_z
+        hits['time'] = time
+        hits['event_id'] = np.full(length, event_id, dtype='<u4')
+        return cls(hits)
+
+    @classmethod
+    def deserialise(cls, *args, **kwargs):
+        return cls.conv_from(*args, **kwargs)
+
+    def serialise(self, *args, **kwargs):
+        return self.conv_to(*args, **kwargs)
+
+    @classmethod
+    def conv_from(cls, data, event_id=None, fmt='numpy', h5loc='/'):
+        # what is event_id doing here?
+        if fmt == 'numpy':
+            return cls(data)
+        if fmt == 'pandas':
+            return cls(data.to_records(index=False))
+
+    def conv_to(self, to='numpy'):
+        if to == 'numpy':
+            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
+                            h5loc=self.h5loc)
+        if to == 'pandas':
+            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
+
+    def __array__(self):
+        return self._arr
+
+    def __len__(self):
+        return self._arr.shape[0]
+
+    def __str__(self):
+        n_hits = len(self)
+        plural = 's' if n_hits > 1 or n_hits == 0 else ''
+        return("CMcHitSeries with {0} hit{1}.".format(len(self), plural))
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class HitSeries(DTypeAttr):
     """Collection of multiple Hits.
     """
     h5loc = '/hits'
@@ -1308,14 +1477,6 @@ class HitSeries(object):
         return self
 
     @property
-    def id(self):
-        return self._arr['id']
-
-    @property
-    def time(self):
-        return self._arr['time']
-
-    @property
     def triggered_hits(self):
         return HitSeries(self._arr[self._arr['triggered'] == True])     # noqa
 
@@ -1325,58 +1486,6 @@ class HitSeries(object):
         h.sort_values('time', inplace=True)
         h = h.drop_duplicates(subset='dom_id')
         return HitSeries(h.to_records(index=False))
-
-    @property
-    def triggered(self):
-        return self._arr['triggered']
-
-    @property
-    def tot(self):
-        return self._arr['tot']
-
-    @property
-    def dom_id(self):
-        return self._arr['dom_id']
-
-    @property
-    def pmt_id(self):
-        return self._arr['pmt_id']
-
-    @property
-    def id(self):
-        return self._arr['id']
-
-    @property
-    def channel_id(self):
-        return self._arr['channel_id']
-
-    @property
-    def pos_x(self):
-        return self._arr['pos_x']
-
-    @property
-    def pos_y(self):
-        return self._arr['pos_y']
-
-    @property
-    def pos_z(self):
-        return self._arr['pos_z']
-
-    @property
-    def dir_x(self):
-        return self._arr['dir_x']
-
-    @property
-    def dir_y(self):
-        return self._arr['dir_y']
-
-    @property
-    def dir_z(self):
-        return self._arr['dir_z']
-
-    @property
-    def t0(self):
-        return self._arr['t0']
 
     def next(self):
         """Python 2/3 compatibility for iterators"""
@@ -1420,7 +1529,7 @@ class HitSeries(object):
         return '\n'.join([str(hit) for hit in self._hits])
 
 
-class TimesliceHitSeries(object):
+class TimesliceHitSeries(DTypeAttr):
     """Collection of multiple timeslice hits.
     """
     h5loc = '/time_slice_hits'
@@ -1501,22 +1610,6 @@ class TimesliceHitSeries(object):
 
     def __iter__(self):
         return self
-
-    @property
-    def time(self):
-        return self._arr['time']
-
-    @property
-    def tot(self):
-        return self._arr['tot']
-
-    @property
-    def dom_id(self):
-        return self._arr['dom_id']
-
-    @property
-    def channel_id(self):
-        return self._arr['channel_id']
 
     def next(self):
         """Python 2/3 compatibility for iterators"""

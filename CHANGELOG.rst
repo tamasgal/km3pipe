@@ -1,6 +1,34 @@
 Unreleased changes
 ------------------
 
+
+7.2.2 / 2017-07-11
+------------------
+* ``AANetPump`` now parses the full header and ``HDF5Pump`` writes it to 
+  /header as attributes
+
+7.2.1 / 2017-07-11
+------------------
+* Fixes ``HDF5Pump`` for Python3
+
+7.2.0 / 2017-07-11
+------------------
+* KM5HDF5 v4.1 now have DU and Floor information when calibrating
+* Added 5 last lines in: daq.py - TMCHdata for reading the monitoring file
+
+7.1.1 / 2017-07-11
+------------------
+* Fixed bug with aanet pump
+
+7.1.0 / 2017-07-11
+------------------
+* Increased performance for Geometry.apply
+* Changed type of time to float in ``RawHitSeries``
+* Introducing ``CRawHitSeries`` and ``CMcHitSeries`` which represent calibrated
+  hit series
+* New command line argument to apply geometry/time calibration to an HDF5 file
+  usage: ``calibrate DETXFILE HDF5FILE``
+
 7.0.0 / 2017-07-09
 ------------------
 * New KM3HDF5 version 4.0

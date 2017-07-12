@@ -169,6 +169,7 @@ class TickTock(Module):
 
 class MemoryObserver(Module):
     """Shows the maximum memory usage
+
     Parameters
     ----------
     every: int, optional [default=1]
