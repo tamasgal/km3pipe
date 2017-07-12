@@ -94,8 +94,9 @@ class CHPump(Pump):
             self.loop_cycle += 1
             try:
                 log.debug("Waiting for data from network...")
-                prefix, data = self.client.get_message()
                 self._add_packet_dt()
+                prefix, data = self.client.get_message()
+                self.performance_warn()
                 log.debug("{0} bytes received from network.".format(len(data)))
             except EOFError:
                 log.warn("EOF from Ligier, aborting...")
@@ -124,7 +125,6 @@ class CHPump(Pump):
     def process(self, blob):
         """Wait for the next packet and put it in the blob"""
         self._add_process_dt()
-        self.performance_warn()
         try:
             log.debug("Waiting for queue items.")
             prefix, data = self.queue.get(timeout=self.timeout)
@@ -138,7 +138,10 @@ class CHPump(Pump):
 
     def show_performance_statistics(self):
         dt = np.mean(self.packet_dt) - np.mean(self.process_dt)
-        print("Average idle time per packet: {0}".format(dt))
+        current_qsize = self.queue.qsize()
+        log_func = print if dt > 0 else log.warn
+        log_func("Average idle time per packet: {0:.3f}us (queue size: {1})"
+                 .format(dt * 1e6, current_qsize))
 
     def _add_process_dt(self):
         now = time.time()
