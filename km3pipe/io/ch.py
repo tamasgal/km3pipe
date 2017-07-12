@@ -49,9 +49,9 @@ class CHPump(Pump):
         self.cuckoo_warn = Cuckoo(60*5, log.warn)
         self.performance_warn = Cuckoo(10, self.show_performance_statistics)
 
-        self.process_dt = deque(100)
+        self.process_dt = deque(maxlen=100)
         self.process_timer = time.time()
-        self.packet_dt = deque(100)
+        self.packet_dt = deque(maxlen=100)
         self.packet_timer = time.time()
 
         self.loop_cycle = 0
