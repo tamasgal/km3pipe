@@ -1,5 +1,19 @@
 Unreleased changes
 ------------------
+
+
+7.2.2 / 2017-07-11
+------------------
+* ``AANetPump`` now parses the full header and ``HDF5Pump`` writes it to 
+  /header as attributes
+
+7.2.1 / 2017-07-11
+------------------
+* Fixes ``HDF5Pump`` for Python3
+
+7.2.0 / 2017-07-11
+------------------
+* KM5HDF5 v4.1 now have DU and Floor information when calibrating
 * Added 5 last lines in: daq.py - TMCHdata for reading the monitoring file
 
 7.1.1 / 2017-07-11

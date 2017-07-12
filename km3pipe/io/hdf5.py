@@ -33,8 +33,8 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-FORMAT_VERSION = np.string_('4.0')
-MINIMUM_FORMAT_VERSION = np.string_('4.0')
+FORMAT_VERSION = np.string_('4.1')
+MINIMUM_FORMAT_VERSION = np.string_('4.1')
 
 
 class H5VersionError(Exception):
@@ -81,6 +81,7 @@ class HDF5Sink(Module):
         self.ext_h5file = self.get('h5file') or None
         self.pytab_file_args = self.get('pytab_file_args') or dict()
         self.indices = {}
+        self._header_written = False
         # magic 10000: this is the default of the "expectedrows" arg
         # from the tables.File.create_table() function
         # at least according to the docs
@@ -172,6 +173,20 @@ class HDF5Sink(Module):
         d["index"] += n_items
 
     def process(self, blob):
+
+        if not self._header_written and "Header" in blob \
+                and blob["Header"] is not None:
+            header = self.h5file.create_group('/', 'header', 'Header')
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', tb.NaturalNameWarning)
+                for field, value in blob["Header"].items():
+                    try:
+                        value = float(value)
+                    except ValueError:
+                        pass
+                    header._v_attrs[field] = value
+            self._header_written = True
+
         for key, entry in sorted(blob.items()):
             serialisable_attributes = ('dtype', 'serialise', 'to_records')
             if any(hasattr(entry, a) for a in serialisable_attributes):
@@ -367,26 +382,25 @@ class HDF5Pump(Pump):
                 tot = h5file.get_node("/hits/tot")[idx:end]
                 triggered = h5file.get_node("/hits/triggered")[idx:end]
 
-                try:
-                    datatype = h5file.get_node("/hits")._v_attrs.datatype
-                except AttributeError:
-                    datatype = "RawHitSeries"
+                datatype = h5file.get_node("/hits")._v_attrs.datatype
 
-                if datatype == "RawHitSeries":
+                if datatype == np.string_("RawHitSeries"):
                     blob["Hits"] = RawHitSeries.from_arrays(
                         channel_id, dom_id, time, tot, triggered, event_id)
-                if datatype == "CRawHitSeries":
+                if datatype == np.string_("CRawHitSeries"):
                     pos_x = h5file.get_node("/hits/pos_x")[idx:end]
                     pos_y = h5file.get_node("/hits/pos_y")[idx:end]
                     pos_z = h5file.get_node("/hits/pos_z")[idx:end]
                     dir_x = h5file.get_node("/hits/dir_x")[idx:end]
                     dir_y = h5file.get_node("/hits/dir_y")[idx:end]
                     dir_z = h5file.get_node("/hits/dir_z")[idx:end]
+                    du = h5file.get_node("/hits/du")[idx:end]
+                    floor = h5file.get_node("/hits/floor")[idx:end]
                     t0s = h5file.get_node("/hits/t0")[idx:end]
                     time += t0s
                     blob["Hits"] = CRawHitSeries.from_arrays(
-                        channel_id, dir_x, dir_y, dir_z, dom_id,
-                        pos_x, pos_y, pos_z, t0s, time, tot, triggered,
+                        channel_id, dir_x, dir_y, dir_z, dom_id, du,
+                        floor, pos_x, pos_y, pos_z, t0s, time, tot, triggered,
                         event_id)
 
             if loc == '/mc_hits':
@@ -395,15 +409,12 @@ class HDF5Pump(Pump):
                 pmt_id = h5file.get_node("/mc_hits/pmt_id")[idx:end]
                 time = h5file.get_node("/mc_hits/time")[idx:end]
 
-                try:
-                    datatype = h5file.get_node("/mc_hits")._v_attrs.datatype
-                except AttributeError:
-                    datatype = "McHitSeries"
+                datatype = h5file.get_node("/mc_hits")._v_attrs.datatype
 
-                if datatype == "McHitSeries":
+                if datatype == np.string_("McHitSeries"):
                     blob["McHits"] = McHitSeries.from_arrays(
                         a, origin, pmt_id, time, event_id)
-                if datatype == "CMcHitSeries":
+                if datatype == np.string_("CMcHitSeries"):
                     pos_x = h5file.get_node("/mc_hits/pos_x")[idx:end]
                     pos_y = h5file.get_node("/mc_hits/pos_y")[idx:end]
                     pos_z = h5file.get_node("/mc_hits/pos_z")[idx:end]
