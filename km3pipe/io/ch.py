@@ -94,9 +94,9 @@ class CHPump(Pump):
             self.loop_cycle += 1
             try:
                 log.debug("Waiting for data from network...")
-                self._add_packet_dt()
+                # self._add_packet_dt()
                 prefix, data = self.client.get_message()
-                self.performance_warn()
+                # self.performance_warn()
                 log.debug("{0} bytes received from network.".format(len(data)))
             except EOFError:
                 log.warn("EOF from Ligier, aborting...")
@@ -124,7 +124,7 @@ class CHPump(Pump):
 
     def process(self, blob):
         """Wait for the next packet and put it in the blob"""
-        self._add_process_dt()
+        # self._add_process_dt()
         try:
             log.debug("Waiting for queue items.")
             prefix, data = self.queue.get(timeout=self.timeout)
