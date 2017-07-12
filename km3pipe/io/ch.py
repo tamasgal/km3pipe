@@ -15,7 +15,9 @@ from km3pipe.logger import logging
 import threading
 import struct
 import socket
-from time import sleep
+import time
+import numpy as np
+from collections import deque
 try:
     from Queue import Queue, Empty
 except ImportError:
@@ -45,6 +47,12 @@ class CHPump(Pump):
         self.key_for_data = self.get('key_for_data') or 'CHData'
         self.key_for_prefix = self.get('key_for_prefix') or 'CHPrefix'
         self.cuckoo_warn = Cuckoo(60*5, log.warn)
+        self.performance_warn = Cuckoo(10, self.show_performance_statistics)
+
+        self.process_dt = deque(100)
+        self.process_timer = time.time()
+        self.packet_dt = deque(100)
+        self.packet_timer = time.time()
 
         self.loop_cycle = 0
         self.queue = Queue()
@@ -87,6 +95,7 @@ class CHPump(Pump):
             try:
                 log.debug("Waiting for data from network...")
                 prefix, data = self.client.get_message()
+                self._add_packet_dt()
                 log.debug("{0} bytes received from network.".format(len(data)))
             except EOFError:
                 log.warn("EOF from Ligier, aborting...")
@@ -97,7 +106,7 @@ class CHPump(Pump):
             if not data:
                 log.critical("No data received, connection died.\n" +
                              "Trying to reconnect in 30 seconds.")
-                sleep(30)
+                time.sleep(30)
                 try:
                     log.debug("Reinitialising new CH connection.")
                     self._init_controlhost()
@@ -114,6 +123,8 @@ class CHPump(Pump):
 
     def process(self, blob):
         """Wait for the next packet and put it in the blob"""
+        self._add_process_dt()
+        self.performance_warn()
         try:
             log.debug("Waiting for queue items.")
             prefix, data = self.queue.get(timeout=self.timeout)
@@ -124,6 +135,20 @@ class CHPump(Pump):
         blob[self.key_for_prefix] = prefix
         blob[self.key_for_data] = data
         return blob
+
+    def show_performance_statistics(self):
+        dt = np.mean(self.packet_dt) - np.mean(self.process_dt)
+        print("Average idle time per packet: {0}".format(dt))
+
+    def _add_process_dt(self):
+        now = time.time()
+        self.process_dt.append(now - self.process_timer)
+        self.process_timer = now
+
+    def _add_packet_dt(self):
+        now = time.time()
+        self.packet_dt.append(now - self.packet_timer)
+        self.packet_timer = now
 
     def finish(self):
         """Clean up the JLigier controlhost connection"""
