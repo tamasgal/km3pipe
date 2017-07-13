@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 
+* No more error messages in ``Detector`` or ``Geometry`` (which uses
+  ``Detector``) when reading in corrupt DETX with negative line ids.
+
+
 
 7.2.2 / 2017-07-11
 ------------------
