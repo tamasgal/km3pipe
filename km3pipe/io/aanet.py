@@ -86,6 +86,7 @@ class AanetPump(Pump):
             import aa  # noqa
 
         self.header = None
+        self.aanet_header = None
         self.blobs = self.blob_generator()
         self.i = 0
 
@@ -121,6 +122,7 @@ class AanetPump(Pump):
             except Exception:
                 raise SystemExit("Could not open file")
 
+            # OLD HEADER CRAZINESS
             # http://jenkins.km3net.de/job/aanet_trunk/doxygen/Head_8hh_source.html
             livetime = 0
             livetime_err = 0
@@ -153,15 +155,22 @@ class AanetPump(Pump):
             except (ValueError, UnicodeEncodeError):
                 log.warn(filename + ": can't read nfilgen.")
                 self.nfilgen = 0
+            # END OF OLD HEADER CRAZINESS
+
+
+            # NEW HEADER CRAZINESS
+            self.aanet_header = get_aanet_header(event_file)
 
             if self.format == 'ancient_recolns':
                 while event_file.next():
                     event = event_file.evt
                     blob = self._read_event(event, filename)
+                    blob["Header"] = self.aanet_header
                     yield blob
             else:
                 for event in event_file:
                     blob = self._read_event(event, filename)
+                    blob["Header"] = self.aanet_header
                     yield blob
             del event_file
 
@@ -207,7 +216,7 @@ class AanetPump(Pump):
 
         blob['filename'] = filename
         try:
-            blob['EventInfo'] = EventInfo((
+            ei_data = np.array((
                 event.det_id,
                 event.frame_index,
                 self.livetime, # livetime_sec
@@ -223,23 +232,25 @@ class AanetPump(Pump):
                 event.t.GetSec(),
                 w1, w2, w3,
                 event.run_id,
-                event_id))
+                event_id), dtype=EventInfo.dtype)
+            blob['EventInfo'] = EventInfo(ei_data)
         except AttributeError:
-            blob['EventInfo'] = EventInfo((0,   # det_id
-                                           event.frame_index,
-                                           self.livetime,   # livetime_sec
-                                           0,   # mc_id
-                                           0,   # mc_t
-                                           self.ngen,   # n_events_gen
-                                           self.nfilgen,   # n_files_gen
-                                           0,   # overlays
-                                           0,   # trigger_counter
-                                           0,   # trigger_mask
-                                           0,   # nanose
-                                           0,   # sec
-                                           w1, w2, w3,
-                                           event.run_id,
-                                           event_id))
+            ei_data = np.array((0,   # det_id
+                               event.frame_index,
+                               self.livetime,   # livetime_sec
+                               0,   # mc_id
+                               0,   # mc_t
+                               self.ngen,   # n_events_gen
+                               self.nfilgen,   # n_files_gen
+                               0,   # overlays
+                               0,   # trigger_counter
+                               0,   # trigger_mask
+                               0,   # nanose
+                               0,   # sec
+                               w1, w2, w3,
+                               event.run_id,
+                               event_id), dtype=EventInfo.dtype)
+            blob['EventInfo'] = EventInfo(ei_data)
         if self.format == 'minidst':
             recos = read_mini_dst(event, event_id)
             for recname, reco in recos.items():
@@ -300,6 +311,43 @@ class AanetPump(Pump):
 
     def __next__(self):
         return next(self.blobs)
+
+
+def get_aanet_header(event_file):
+    """Returns a dict of the header entries.
+
+    http://trac.km3net.de/browser/dataformats/aanet/trunk/evt/Head.hh
+
+    """
+    header = event_file.header
+    desc = ("cut_primary cut_seamuon cut_in cut_nu:Emin Emax cosTmin cosTmax\n"
+            "generator physics simul: program version date time\n"
+            "seed:program level iseed\n"
+            "PM1_type_area:type area TTS\n"
+            "PDF:i1 i2\n"
+            "model:interaction muon scattering numberOfEnergyBins\n"
+            "can:zmin zmax r\n"
+            "genvol:zmin zmax r volume numberOfEvents\n"
+            "merge:time gain\n"
+            "coord_origin:x y z\n"
+            "genhencut:gDir Emin\n"
+            "k40: rate time\n"
+            "norma:primaryFlux numberOfPrimaries\n"
+            "livetime:numberOfSeconds errorOfSeconds\n"
+            "flux:type key file_1 file_2\n"
+            "spectrum:alpha\n"
+            "start_run:run_id")
+    d = {}
+    for line in desc.split("\n"):
+        fields, values = [s.split() for s in line.split(':')]
+        for field in fields:
+            for value in values:
+                if field == "physics" and value == "date":  # segfaults
+                    continue
+                d[field+'_'+value] = header.get_field(field, value)
+    return d
+
+
 
 
 def parse_ancient_recolns(aanet_event, event_id):
@@ -435,7 +483,7 @@ def read_mini_dst(aanet_event, event_id):
         minidst[recname] = KM3Array.from_dict(reco_map, dtype,
                                                h5loc='/reco')
 
-    thomas_map, dtype = parse_thomasfeatures(aanet_event.usr)
+    thomas_map, dtype = parse_thomasfeatures(aanet_event.usr, aanet_event.usr_names)
     minidst['ThomasFeatures'] = KM3Array.from_dict(thomas_map, dtype,
                                                     h5loc='/reco')
 
@@ -456,59 +504,13 @@ def parse_track(trk):
     return out
 
 
-def parse_thomasfeatures(aanet_usr, event_id=0):
+def parse_thomasfeatures(aanet_usr, aanet_usr_names, event_id=0):
     out = {}
     did_converge = len(aanet_usr) > 1
 
-    Thomas_keys = ['Slopeo1000_o100',
-                   'Slope50_1000',
-                   'YIntersept0_1000',
-                   'Slopeo1000_1000',
-                   'Chi2200_1000',
-                   'TimeResidualNumberOfHits',
-                   'Chi2o1000_o20',
-                   'YInterspotDiffo1000_o100',
-                   'YIntersepto1000_o100',
-                   'Slope200_1000',
-                   'Chi2o1000_0',
-                   'Slope100_1000',
-                   'Slopeo1000_o20',
-                   'YIntersepto1000_o10',
-                   'Chi2100_1000',
-                   'Chi2o1000_o100',
-                   'YIntersepto1000_o50',
-                   'Chi2o1000_1000',
-                   'YIntersept25_1000',
-                   'Chi225_1000',
-                   'YInterspotDiffo1000_o20',
-                   'YInterspotDiffo1000_o10',
-                   'Chi2o1000_o10',
-                   'YInterspotDiffo1000_o50',
-                   'YIntersept50_1000',
-                   'TimeResidualMean',
-                   'Chi20_1000',
-                   'Chi2o1000_o50',
-                   'YIntersept200_1000',
-                   'Slope0_1000',
-                   'YIntersepto1000_1000',
-                   'Slope25_1000',
-                   'Slopeo1000_o10',
-                   'TimeResidualMedian',
-                   'YIntersepto1000_o20',
-                   'Slopeo1000_o50',
-                   'TimeResidualRMS',
-                   'YInterspotDiffo1000_0',
-                   'Slopeo1000_0',
-                   'YIntersepto1000_0',
-                   'YIntersept100_1000',
-                   'Chi250_1000',
-                   'TimeResidualWidth15_85',
-                   'MiddleInertia',
-                   'GParameter',
-                   'SmallInertia',
-                   'RelativeInertia',
-                   'BigInertia',
-                   'GoldParameter']
+    Thomas_keys = []
+    for e in aanet_usr_names:
+        Thomas_keys.append(e)
 
     dtype = [(key, float) for key in Thomas_keys + list(out.keys())]
 

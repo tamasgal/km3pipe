@@ -488,9 +488,9 @@ class Geometry(Module):
         
         """
         n = len(hits)
-        cal = np.empty(n, 7)
+        cal = np.empty(n, 9)
         for i in range(n):
-            lookup = self._pos_dir_t0_by_dom_and_channel
+            lookup = self._calib_by_dom_and_channel
             calib = lookup[hits._arr['dom_id'][i]][hits._arr['channel_id'][i]]
             cal[i] = calib
         h = np.empty(n, HitSeries.dtype)
@@ -499,6 +499,8 @@ class Geometry(Module):
         h['dir_y'] = cal[:, 4]
         h['dir_z'] = cal[:, 5]
         h['dom_id'] = hits.dom_id
+        h['du'] = cal[:, 7]
+        h['floor'] = cal[:, 8]
         h['id'] = np.arange(n)
         h['pmt_id'] = np.zeros(n, dtype=int)
         h['pos_x'] = cal[:, 0]
@@ -521,9 +523,9 @@ class Geometry(Module):
         
         """
         n = len(hits)
-        cal = np.empty(n, 7)
+        cal = np.empty(n, 9)
         for i in range(n):
-            lookup = self._pos_dir_t0_by_pmt_id
+            lookup = self._calib_by_pmt_id
             calib = lookup[hits._arr['pmt_id'][i]]
         h = np.empty(n, HitSeries.dtype)
         h['channel_id'] = np.zeros(n, dtype=int)
@@ -531,6 +533,8 @@ class Geometry(Module):
         h['dir_y'] = cal[:, 4]
         h['dir_z'] = cal[:, 5]
         h['dom_id'] = np.zeros(n, dtype=int)
+        h['du'] = cal[:, 7]
+        h['floor'] = cal[:, 8]
         h['id'] = np.arange(n)
         h['pmt_id'] = hits._arr['pmt_id']
         h['pos_x'] = cal[:, 0]
@@ -571,14 +575,25 @@ class Geometry(Module):
                                                         pmt.dir[0],
                                                         pmt.dir[1],
                                                         pmt.dir[2],
-                                                        pmt.t0))
-        self._pos_dir_t0_by_dom_and_channel = data
+                                                        pmt.t0,
+                                                        pmt.omkey[0],
+                                                        pmt.omkey[1]))
+        self._calib_by_dom_and_channel = data
 
     def _create_pmt_id_lookup(self):
         data = {}
         for pmt_id, pmt in self.detector._pmts_by_id.items():
-            data[pmt_id] = (pmt.pos, pmt.dir, pmt.t0)
-        self._pos_dir_t0_by_pmt_id = data
+            data[pmt_id] = np.array((pmt.pos[0],
+                                     pmt.pos[1],
+                                     pmt.pos[2],
+                                     pmt.dir[0],
+                                     pmt.dir[1],
+                                     pmt.dir[2],
+                                     pmt.t0,
+                                     pmt.omkey[0],
+                                     pmt.omkey[1],
+                                     ))
+        self._calib_by_pmt_id = data
 
     def __repr__(self):
         return self.__str__()

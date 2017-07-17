@@ -89,36 +89,58 @@ Convert an aanet/root/evt/jpp file to hdf5.
 
 Example::
 
-  tohdf5 --aa-fmt=jevt_jgandalf some_jgandalf_file.aa.root
+    tohdf5 --aa-fmt=jevt_jgandalf some_jgandalf_file.aa.root
 
     $ tohdf5 --help
     Convert ROOT and EVT files to HDF5.
 
     Usage:
-	tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [--correct-zed] [--aa-format=<fmt>] [--aa-lib=<lib.so>] FILE...
-	tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [-j] [-s] [-l] FILE...
-	tohdf5 (-h | --help)
-	tohdf5 --version
+        tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [--correct-zed] [--aa-format=<fmt>] [--aa-lib=<lib.so>] FILE...
+        tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [-j] [-s] [-l] FILE...
+        tohdf5 (-h | --help)
+        tohdf5 --version
 
     Options:
-	--aa-format=<fmt>          tohdf5: Which aanet subformat ('minidst',
-				   'orca_recolns', 'gandalf',
-				   'generic_track') [default: None]
-	--aa-lib-<lib.so>          tohdf5: path to aanet binary (for old versions which
-				   must be loaded via `ROOT.gSystem.Load()` instead
-				   of `import aa`)
-	-h --help                  Show this screen.
-	-j --jppy                  tohdf5: Use jppy (not aanet) for Jpp readout
-	-l --with-timeslice-hits   Include timeslice-hits [default: False]
-	-n EVENTS/RUNS             Number of events/runs.
-	-o OUTFILE                 Output file.
-	-s --with-summaryslices    Include summary slices [default: False]
-	--correct-zed              Correc toffset in mc tracks (aanet) [default: False]
-	-e --expected-rows NROWS   Approximate number of events.  Providing a
-				   rough estimate for this (100, 10000000, ...)
-				   will greatly improve reading/writing speed and
-				   memory usage. Strongly recommended if the
-				   table/array size is >= 100 MB. [default: 10000]
+        --aa-format=<fmt>          tohdf5: Which aanet subformat ('minidst',
+                                   'orca_recolns', 'gandalf',
+                                   'generic_track') [default: None]
+        --aa-lib-<lib.so>          tohdf5: path to aanet binary (for old versions which
+                                   must be loaded via `ROOT.gSystem.Load()` instead
+                                   of `import aa`)
+        -h --help                  Show this screen.
+        -j --jppy                  tohdf5: Use jppy (not aanet) for Jpp readout
+        -l --with-timeslice-hits   Include timeslice-hits [default: False]
+        -n EVENTS/RUNS             Number of events/runs.
+        -o OUTFILE                 Output file.
+        -s --with-summaryslices    Include summary slices [default: False]
+        --correct-zed              Correc toffset in mc tracks (aanet) [default: False]
+        -e --expected-rows NROWS   Approximate number of events.  Providing a
+                                   rough estimate for this (100, 10000000, ...)
+                                   will greatly improve reading/writing speed and
+                                   memory usage. Strongly recommended if the
+                                   table/array size is >= 100 MB. [default: 10000]
+
+
+``calibrate``
+~~~~~~~~~~~~~
+
+Apply geometry and time calibration to an HDF5 file.
+
+Example::
+
+    calibrate km3net_jul13_90m_r1494.detx km3net_jul13_90m_muatm10T23.h5
+
+    $ calibrate -h
+    Apply geometry and time calibration from a DETX to an HDF5 file.
+
+    Usage:
+        calibrate DETXFILE HDF5FILE
+        calibrate (-h | --help)
+        calibrate --version
+
+    Options:
+        -h --help       Show this screen.
+
 
 ``hdf2root``
 ~~~~~~~~~~~~
@@ -135,7 +157,7 @@ Example::
   Usage:
        hdf2root FILES...
        hdf2root (-h | --help)
-  
+
   Options:
       -h --help           Show this screen.
 
@@ -171,20 +193,23 @@ Example output::
 Show some H5 metadata (KM3 H5 version, km3pipe version, etc).
 
 Example::
-  $ h5info km3net_jul13_90m_muatm50T655.km3_v5r1.JTE_r2356.root.0-299.h5
-  km3pipe: 4.2.1
-  pytables: 3.2.3.1
 
-  $ h5info --help
+    $ h5info km3net_jul13_90m_muatm50T655.km3_v5r1.JTE_r2356.root.0-499.h5
+    format_version: b'4.1'
+    km3pipe: b'7.1.2.dev'
+    pytables: b'3.4.0'
 
-  Show the km3pipe etc. version used to write a H5 file.
 
-  Usage:
+    $ h5info --help
+
+    Show the km3pipe etc. version used to write a H5 file.
+
+    Usage:
       h5info FILE [-r]
       h5info (-h | --help)
       h5info --version
-  
-  Options:
+
+    Options:
       FILE        Input file.
       -r --raw    Dump raw metadata.
       -h --help   Show this screen.
