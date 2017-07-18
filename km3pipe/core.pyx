@@ -22,7 +22,8 @@ import pandas as pd
 
 from .sys import peak_memory_usage, ignored
 from .hardware import Detector
-from .dataclasses import CRawHitSeries, HitSeries, RawHitSeries, McHitSeries
+from .dataclasses import (CRawHitSeries, HitSeries, RawHitSeries,
+                          CMcHitSeries, McHitSeries)
 from .logger import logging
 from .time import Timer
 
@@ -501,8 +502,6 @@ class Geometry(Module):
         h['dom_id'] = hits.dom_id
         h['du'] = cal[:, 7]
         h['floor'] = cal[:, 8]
-        h['id'] = np.arange(n)
-        h['pmt_id'] = np.zeros(n, dtype=int)
         h['pos_x'] = cal[:, 0]
         h['pos_y'] = cal[:, 1]
         h['pos_z'] = cal[:, 2]
@@ -511,7 +510,7 @@ class Geometry(Module):
         h['tot'] = hits.tot
         h['triggered'] = hits.triggered
         h['event_id'] = hits._arr['event_id']
-        return HitSeries(h)
+        return CRawHitSeries(h, hits.event_id)
 
     def _apply_to_mchitseries(self, hits):
         """Create a HitSeries from McHitSeries and add pos, dir and t0.
@@ -527,15 +526,13 @@ class Geometry(Module):
         for i in range(n):
             lookup = self._calib_by_pmt_id
             calib = lookup[hits._arr['pmt_id'][i]]
-        h = np.empty(n, CRawHitSeries.dtype)
+        h = np.empty(n, CMcHitSeries.dtype)
         h['channel_id'] = np.zeros(n, dtype=int)
         h['dir_x'] = cal[:, 3]
         h['dir_y'] = cal[:, 4]
         h['dir_z'] = cal[:, 5]
-        h['dom_id'] = np.zeros(n, dtype=int)
         h['du'] = cal[:, 7]
         h['floor'] = cal[:, 8]
-        h['id'] = np.arange(n)
         h['pmt_id'] = hits._arr['pmt_id']
         h['pos_x'] = cal[:, 0]
         h['pos_y'] = cal[:, 1]
@@ -545,7 +542,7 @@ class Geometry(Module):
         h['tot'] = np.zeros(n, dtype=int)
         h['triggered'] = np.zeros(n, dtype=bool)
         h['event_id'] = hits._arr['event_id']
-        return HitSeries(h)
+        return CMcHitSeries(h, hits.event_id)
 
     def _apply_to_table(self, table):
         """Add x, y, z and du, floor columns to hit table"""
