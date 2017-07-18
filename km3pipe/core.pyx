@@ -22,7 +22,7 @@ import pandas as pd
 
 from .sys import peak_memory_usage, ignored
 from .hardware import Detector
-from .dataclasses import CHitSeries, HitSeries, RawHitSeries, McHitSeries
+from .dataclasses import CRawHitSeries, HitSeries, RawHitSeries, McHitSeries
 from .logger import logging
 from .time import Timer
 
@@ -493,7 +493,7 @@ class Geometry(Module):
             lookup = self._calib_by_dom_and_channel
             calib = lookup[hits._arr['dom_id'][i]][hits._arr['channel_id'][i]]
             cal[i] = calib
-        h = np.empty(n, CHitSeries.dtype)
+        h = np.empty(n, CRawHitSeries.dtype)
         h['channel_id'] = hits.channel_id
         h['dir_x'] = cal[:, 3]
         h['dir_y'] = cal[:, 4]
@@ -527,7 +527,7 @@ class Geometry(Module):
         for i in range(n):
             lookup = self._calib_by_pmt_id
             calib = lookup[hits._arr['pmt_id'][i]]
-        h = np.empty(n, CHitSeries.dtype)
+        h = np.empty(n, CRawHitSeries.dtype)
         h['channel_id'] = np.zeros(n, dtype=int)
         h['dir_x'] = cal[:, 3]
         h['dir_y'] = cal[:, 4]
