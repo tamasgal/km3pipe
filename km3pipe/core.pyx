@@ -488,7 +488,7 @@ class Geometry(Module):
         
         """
         n = len(hits)
-        cal = np.empty(n, 9)
+        cal = np.empty((n, 9))
         for i in range(n):
             lookup = self._calib_by_dom_and_channel
             calib = lookup[hits._arr['dom_id'][i]][hits._arr['channel_id'][i]]
@@ -523,7 +523,7 @@ class Geometry(Module):
         
         """
         n = len(hits)
-        cal = np.empty(n, 9)
+        cal = np.empty((n, 9))
         for i in range(n):
             lookup = self._calib_by_pmt_id
             calib = lookup[hits._arr['pmt_id'][i]]
