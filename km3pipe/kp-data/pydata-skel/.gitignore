@@ -1,0 +1,71 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyxbldc
+
+# C extensions
+*.so
+
+# Temporary Cython *.c files
+km3pipe/core.c
+km3pipe/dataclasses.c
+km3pipe/tools.c
+
+# Distribution / packaging
+.Python
+env/
+bin/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+# Rope
+.ropeproject
+
+# Django stuff:
+*.log
+*.pot
+
+# Sphinx documentation
+doc/_build/
+doc/auto_examples/
+doc/modules/
+doc/api
+
+# VI swap files
+*.swp
+
+# PyCharm files
+.idea
+
+# jupyter files
+.ipynb_checkpoints/

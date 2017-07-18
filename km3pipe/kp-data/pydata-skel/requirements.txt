@@ -1,0 +1,11 @@
+numpy>=1.12
+pandas
+numpydoc
+pillow
+pytest
+pytest-cov
+sphinx>=1.5.1
+sphinx-gallery
+sphinx_gallery
+sphinxcontrib-napoleon
+twine
