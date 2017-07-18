@@ -1,0 +1,31 @@
+# colorbrewer qualitative set 9, in modified order
+axes.prop_cycle: cycler('color', [(0.22, 0.50, 0.72), (0.89, 0.10, 0.11), (0.30, 0.69, 0.29), (0.60, 0.31, 0.64), (1.0, 0.5, 0), (1., 1., .2), (0.65, 0.34, 0.16), (0.97, 0.51, 0.75), (.6, .6, .6)])
+patch.facecolor: 0.22, 0.50, 0.72
+lines.color: 0.22, 0.50, 0.72
+lines.markersize: 3
+lines.markeredgewidth: 0.25
+axes.titlesize: medium
+axes.linewidth: 0.5
+# all figures must be square, whether it makes sense or not
+figure.figsize: 3.375, 3.1
+figure.subplot.left: 0.22
+figure.subplot.bottom: 0.145
+figure.subplot.right: 0.93
+figure.subplot.top: 0.915
+figure.facecolor: w
+figure.edgecolor: w
+savefig.dpi: 100
+image.interpolation: None
+# harmonize mathtext
+font.family: serif
+font.serif: Latin Modern Roman, Bitstream Vera Serif
+font.size: 10
+text.usetex: True
+grid.linestyle: -
+grid.linewidth: 0.1
+image.cmap: viridis
+legend.fontsize: small
+legend.frameon: False
+legend.numpoints: 1
+legend.handlelength: 1.5
+lines.linewidth: 1.5
