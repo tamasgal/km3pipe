@@ -3,6 +3,7 @@ Unreleased changes
 
 * No more error messages in ``Detector`` or ``Geometry`` (which uses
   ``Detector``) when reading in corrupt DETX with negative line ids.
+* Fixes "TypeError: data type not understood" for Geometry.apply
 
 
 
