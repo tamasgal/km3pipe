@@ -180,6 +180,10 @@ class HDF5Sink(Module):
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore', tb.NaturalNameWarning)
                 for field, value in blob["Header"].items():
+                    try:
+                        value = float(value)
+                    except ValueError:
+                        pass
                     header._v_attrs[field] = value
             self._header_written = True
 

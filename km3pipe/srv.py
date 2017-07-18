@@ -28,7 +28,7 @@ import websocket
 
 from .core import Geometry
 from .config import Config
-from .dataclasses import HitSeries
+from .dataclasses import HitSeries, CRawHitSeries
 from .tools import token_urlsafe
 from .logger import logging
 
@@ -277,10 +277,14 @@ def srv_event(token, hits, url=RBA_URL):
         pos = [tuple(x) for x in hits[['x', 'y', 'z']].values]
         time = list(hits['time'])
         tot = list(hits['tot'])
-    if isinstance(hits, HitSeries):
-        pos = [(h.pos_x, h.pos_y, h.pos_z) for h in hits]
-        time = [h.time for h in hits]
-        tot = [h.tot for h in hits]
+    elif isinstance(hits, (CRawHitSeries, HitSeries)):
+        pos = list(zip(hits.pos_x, hits.pos_y, hits.pos_z))
+        time = list(hits.time)
+        tot = list(hits.tot)
+    else:
+        log.error("No calibration information found in hits (type: {0})"
+                  .format(type(hits)))
+        return
 
     event = {
         "hits": {

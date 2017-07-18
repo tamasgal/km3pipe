@@ -149,7 +149,7 @@ class Detector(object):
                     t0 = float(t0)
                     if floor_id < 0:
                         _, new_floor_id, _ = self._pmtid2omkey_old(pmt_id)
-                        log.error("Floor ID is negative for PMT {0}.\n"
+                        log.debug("Floor ID is negative for PMT {0}.\n"
                                   "Guessing correct id: {1}"
                                   .format(pmt_id, new_floor_id))
                         floor_id = new_floor_id
