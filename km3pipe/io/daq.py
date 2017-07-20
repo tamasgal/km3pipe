@@ -507,7 +507,7 @@ class TMCHData(object):
         self.tdcfull = unpack('>I', f.read(4))[0]
         self.aesfull = unpack('>I', f.read(4))[0]
         self.flushc = unpack('>I', f.read(4))[0]
-#        self.ts_duration_microseconds = unpack('>I', f.read(4))[0]
+     #   self.ts_duration_microseconds = unpack('>I', f.read(4))[0]
 
     def __str__(self):
         return str(vars(self))
