@@ -126,6 +126,7 @@ setup(name='km3pipe',
               'k40calib=km3pipe.utils.k40calib:main',
               'totmonitor=km3pipe.utils.totmonitor:main',
               'calibrate=km3pipe.utils.calibrate:main',
+              'rba=km3pipe.utils.rba:main',
           ],
       },
       classifiers=[
