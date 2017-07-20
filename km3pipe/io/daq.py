@@ -491,7 +491,7 @@ class TMCHData(object):
         self.utc_seconds = unpack('>I', f.read(4))[0]
         self.nanoseconds = unpack('>I', f.read(4))[0] * 16
         self.dom_id = unpack('>I', f.read(4))[0]
-        self.dom_status_0 = unpack('>I', f.read(4))[0]  
+        self.dom_status_0 = unpack('<I', f.read(4))[0]  
         self.dom_status_1 = unpack('>I', f.read(4))[0]  
         self.dom_status_2 = unpack('>I', f.read(4))[0]  
         self.dom_status_3 = unpack('>I', f.read(4))[0]  
