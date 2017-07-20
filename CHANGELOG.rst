@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 
+7.2.4 / 2017-07-20
+------------------
+* drop ``read_hdf5`` from top level module import (would make pytables a hard 
+  requirement)
 
 7.2.3 / 2017-07-19
 ------------------
