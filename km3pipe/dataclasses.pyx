@@ -985,6 +985,11 @@ class CRawHitSeries(DTypeAttr):
         if to == 'pandas':
             return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
+    @property
+    def triggered_hits(self):
+        return CRawHitSeries(self._arr[self._arr['triggered'] == True],
+                             self.event_id)  # noqa
+
     def __array__(self):
         return self._arr
 

@@ -38,7 +38,7 @@ pyenv install ${TARGET_PYTHON_VERSION}
 echo -e "${GREEN}Done.${NC}"
 
 echo -e "${RED}Upgrading pip and setuptools.${NC}"
-pip install -U pip setuptools
+pip install -U pip>=9.0.1 setuptools>=24.3
 echo -e "${GREEN}Done.${NC}"
 
 echo -e "${RED}Installing numpy and cython.${NC}"

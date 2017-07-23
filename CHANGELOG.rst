@@ -1,6 +1,21 @@
 Unreleased changes
 ------------------
 
+7.2.5 / 2017-07-20
+------------------
+* drop ``read_hdf5`` and ``GenericPump`` from top level module import 
+  (would make pytables a hard requirement)
+
+7.2.3 / 2017-07-19
+------------------
+* No more error messages in ``Detector`` or ``Geometry`` (which uses
+  ``Detector``) when reading in corrupt DETX with negative line ids.
+* Fixes "TypeError: data type not understood" for Geometry.apply
+* Various fixes to support the new HitSeries format (e.g. for RainbowaAlga2)
+* New styles
+* SciPy histogram showoff by Moritz
+* Minor updates in docs
+* Skeleton for future project bootstrap
 
 7.2.2 / 2017-07-11
 ------------------

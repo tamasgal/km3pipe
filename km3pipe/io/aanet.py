@@ -483,7 +483,7 @@ def read_mini_dst(aanet_event, event_id):
         minidst[recname] = KM3Array.from_dict(reco_map, dtype,
                                                h5loc='/reco')
 
-    thomas_map, dtype = parse_thomasfeatures(aanet_event.usr)
+    thomas_map, dtype = parse_thomasfeatures(aanet_event.usr, aanet_event.usr_names)
     minidst['ThomasFeatures'] = KM3Array.from_dict(thomas_map, dtype,
                                                     h5loc='/reco')
 
@@ -504,59 +504,13 @@ def parse_track(trk):
     return out
 
 
-def parse_thomasfeatures(aanet_usr, event_id=0):
+def parse_thomasfeatures(aanet_usr, aanet_usr_names, event_id=0):
     out = {}
     did_converge = len(aanet_usr) > 1
 
-    Thomas_keys = ['Slopeo1000_o100',
-                   'Slope50_1000',
-                   'YIntersept0_1000',
-                   'Slopeo1000_1000',
-                   'Chi2200_1000',
-                   'TimeResidualNumberOfHits',
-                   'Chi2o1000_o20',
-                   'YInterspotDiffo1000_o100',
-                   'YIntersepto1000_o100',
-                   'Slope200_1000',
-                   'Chi2o1000_0',
-                   'Slope100_1000',
-                   'Slopeo1000_o20',
-                   'YIntersepto1000_o10',
-                   'Chi2100_1000',
-                   'Chi2o1000_o100',
-                   'YIntersepto1000_o50',
-                   'Chi2o1000_1000',
-                   'YIntersept25_1000',
-                   'Chi225_1000',
-                   'YInterspotDiffo1000_o20',
-                   'YInterspotDiffo1000_o10',
-                   'Chi2o1000_o10',
-                   'YInterspotDiffo1000_o50',
-                   'YIntersept50_1000',
-                   'TimeResidualMean',
-                   'Chi20_1000',
-                   'Chi2o1000_o50',
-                   'YIntersept200_1000',
-                   'Slope0_1000',
-                   'YIntersepto1000_1000',
-                   'Slope25_1000',
-                   'Slopeo1000_o10',
-                   'TimeResidualMedian',
-                   'YIntersepto1000_o20',
-                   'Slopeo1000_o50',
-                   'TimeResidualRMS',
-                   'YInterspotDiffo1000_0',
-                   'Slopeo1000_0',
-                   'YIntersepto1000_0',
-                   'YIntersept100_1000',
-                   'Chi250_1000',
-                   'TimeResidualWidth15_85',
-                   'MiddleInertia',
-                   'GParameter',
-                   'SmallInertia',
-                   'RelativeInertia',
-                   'BigInertia',
-                   'GoldParameter']
+    Thomas_keys = []
+    for e in aanet_usr_names:
+        Thomas_keys.append(e)
 
     dtype = [(key, float) for key in Thomas_keys + list(out.keys())]
 
