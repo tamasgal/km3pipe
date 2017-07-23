@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 
+7.2.5 / 2017-07-20
+------------------
+* drop ``read_hdf5`` and ``GenericPump`` from top level module import 
+  (would make pytables a hard requirement)
 
 7.2.3 / 2017-07-19
 ------------------

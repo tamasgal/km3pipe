@@ -17,7 +17,6 @@ from .__version__ import version, version_info  # noqa
 if not __KM3PIPE_SETUP__:
     from .core import (Pipeline, Module, Pump, Blob, Run,  # noqa
                               Geometry, AanetGeometry)
-    from .io import GenericPump, read_hdf5  # noqa
 
 
 __author__ = "Tamas Gal and Moritz Lotze"
