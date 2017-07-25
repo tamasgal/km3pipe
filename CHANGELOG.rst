@@ -2,6 +2,7 @@ Unreleased changes
 ------------------
 * drop deprecated ``h5tree``, from ``km3pipe.utils`` (use ``ptdump`` instead)
 * drop deprecated ``km3pipe.io.hdf5.H5Mono``
+* read aanet ``mc_id = evt.frame_index - 1``
 
 7.2.5 / 2017-07-20
 ------------------

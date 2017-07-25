@@ -46,6 +46,9 @@ class AanetPump(Pump):
         Use Aart's local SPS copy (@ Lyon) via ``gSystem.Load``?
     apply_zed_correction: bool, optional [default=False]
         correct ~400m offset in mc tracks.
+    old_mc_id: bool, optional [default: False]
+        Whether to read MC if from `evt.mc_id`. Newer aanet
+        processings have `mc_id = evt.frame_index - 1` instead.
     """
 
     def __init__(self, **context):
@@ -58,6 +61,7 @@ class AanetPump(Pump):
         self.format = self.get('aa_fmt')
         self.use_id = self.get('use_id') or False
         self.use_aart_sps_lib = self.get('use_aart_sps_lib') or False
+        self.old_mc_id = self.get('old_mc_id') or False
         self.apply_zed_correction = self.get('apply_zed_correction') or False
         if self.additional:
             self.id = self.get('id')
@@ -216,11 +220,18 @@ class AanetPump(Pump):
 
         blob['filename'] = filename
         try:
+            if self.old_mc_id:
+                mc_id = evt.mc_id
+            else:
+                mc_id = evt.frame_index - 1
+        except AttributeError:
+            mc_id = 0
+        try:
             ei_data = np.array((
                 event.det_id,
                 event.frame_index,
                 self.livetime, # livetime_sec
-                event.mc_id,
+                mc_id,
                 event.mc_t,
                 self.ngen,   # n_events_gen
                 self.nfilgen, # n_files_gen
@@ -238,7 +249,7 @@ class AanetPump(Pump):
             ei_data = np.array((0,   # det_id
                                event.frame_index,
                                self.livetime,   # livetime_sec
-                               0,   # mc_id
+                               mc_id,   # mc_id
                                0,   # mc_t
                                self.ngen,   # n_events_gen
                                self.nfilgen,   # n_files_gen
