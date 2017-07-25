@@ -470,7 +470,7 @@ class HDF5Pump(Pump):
 
         self.current_file = None
 
-@deprecated
+@deprecated("H5Mono is deprecated. Please use pandas for this.")
 class H5Mono(Pump):
     """Read HDF5 files with one big table.
 
