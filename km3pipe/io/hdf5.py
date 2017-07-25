@@ -21,7 +21,7 @@ from km3pipe.dataclasses import (KM3Array, KM3DataFrame,
                                  RawHitSeries, CRawHitSeries,
                                  McHitSeries, CMcHitSeries, deserialise_map)
 from km3pipe.logger import logging
-from km3pipe.dev import camelise, decamelise, split, deprecated
+from km3pipe.dev import camelise, decamelise, split
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -469,105 +469,3 @@ class HDF5Pump(Pump):
             yield self.get_blob(i)
 
         self.current_file = None
-
-@deprecated("H5Mono is deprecated. Please use pandas for this.")
-class H5Mono(Pump):
-    """Read HDF5 files with one big table.
-
-    Each event corresponds to a single row. Optionally, a table can have
-    an index column which will be used as event id.
-
-    A good example are the files produced by ``rootpy.root2hdf5``.
-
-    Parameters
-    ----------
-    filename: str
-        From where to read events.
-    table: str, optional [default=None]
-        Name of the table to read. If None, take the first table
-        encountered in the file.
-    id_col: str, optional [default=None]
-        Column to use as event id. If None, simply enumerate
-        the events instead.
-    h5loc: str, optional [default='/']
-        Path where to store when serializing to KM3HDF5.
-    """
-    def __init__(self, **context):
-        super(H5Mono, self).__init__(**context)
-        self.filename = self.require('filename')
-        if os.path.isfile(self.filename):
-            self.h5file = tb.open_file(self.filename, 'r')
-        else:
-            raise IOError("No such file or directory: '{0}'"
-                          .format(self.filename))
-        self.tabname = self.get('table') or None
-        if self.tabname is None:
-            self.table = self.h5file.list_nodes('/', classname='Table')[0]
-            self.tabname = self.table.name
-        self.blobkey = self.tabname
-        self.h5loc = self.get('h5loc') or '/'
-        self.index = None
-        self._reset_index()
-
-        self.table = self.h5file.get_node(os.path.join('/', self.tabname))
-        self._n_events = self.table.shape[0]
-
-    def get_blob(self, index):
-        if self.index >= self._n_events:
-            self._reset_index()
-            raise StopIteration
-        blob = Blob()
-        arr = self.table[index]
-        event_id = index
-        arr = KM3Array.deserialise(arr, event_id=event_id, h5loc=self.h5loc,)
-        blob[self.blobkey] = arr
-        return blob
-
-    def process(self, blob):
-        try:
-            blob = self.get_blob(self.index)
-        except KeyError:
-            self._reset_index()
-            raise StopIteration
-        self.index += 1
-        return blob
-
-    def finish(self):
-        """Clean everything up"""
-        self.h5file.close()
-
-    def _reset_index(self):
-        """Reset index to default value"""
-        self.index = 0
-
-    def __len__(self):
-        return self._n_events
-
-    def __iter__(self):
-        return self
-
-    def next(self):
-        """Python 2/3 compatibility for iterators"""
-        return self.__next__()
-
-    def __next__(self):
-        if self.index >= self._n_events:
-            self._reset_index()
-            raise StopIteration
-        blob = self.get_blob(self.index)
-        self.index += 1
-        return blob
-
-    def __getitem__(self, index):
-        if isinstance(index, int):
-            return self.get_blob(index)
-        elif isinstance(index, slice):
-            return self._slice_generator(index)
-        else:
-            raise TypeError("index must be int or slice")
-
-    def _slice_generator(self, index):
-        """A simple slice generator for iterations"""
-        start, stop, step = index.indices(len(self))
-        for i in range(start, stop, step):
-            yield self.get_blob(i)
