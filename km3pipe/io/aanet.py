@@ -221,9 +221,9 @@ class AanetPump(Pump):
         blob['filename'] = filename
         try:
             if self.old_mc_id:
-                mc_id = evt.mc_id
+                mc_id = event.mc_id
             else:
-                mc_id = evt.frame_index - 1
+                mc_id = event.frame_index - 1
         except AttributeError:
             mc_id = 0
         try:
