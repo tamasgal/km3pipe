@@ -21,7 +21,7 @@ from km3pipe.dataclasses import (KM3Array, KM3DataFrame,
                                  RawHitSeries, CRawHitSeries,
                                  McHitSeries, CMcHitSeries, deserialise_map)
 from km3pipe.logger import logging
-from km3pipe.dev import camelise, decamelise, split
+from km3pipe.dev import camelise, decamelise, split, deprecated
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -470,7 +470,7 @@ class HDF5Pump(Pump):
 
         self.current_file = None
 
-
+@deprecated
 class H5Mono(Pump):
     """Read HDF5 files with one big table.
 

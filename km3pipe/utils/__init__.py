@@ -1,12 +1,11 @@
 # coding=utf-8
-# Filename: __init__.py
 """
 A collection of utils.
 
 """
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.utils import h5tree, h5info, tohdf5, ptconcat         # noqa
+from km3pipe.utils import rtree, h5info, tohdf5, ptconcat         # noqa
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

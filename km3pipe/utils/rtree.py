@@ -1,5 +1,4 @@
 # coding=utf-8
-# Filename: h5tree.py
 """
 Print the ROOT file structure.
 
