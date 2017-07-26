@@ -23,6 +23,8 @@ except ImportError:
     from unittest.mock import Mock  # noqa
     from unittest.mock import patch  # noqa
 
+from numpy.testing import assert_allclose       # noqa
+
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
