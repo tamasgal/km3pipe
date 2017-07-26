@@ -4,25 +4,27 @@
 Convert ROOT and EVT files to HDF5.
 
 Usage:
-    tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [--correct-zed] [--aa-format=<fmt>] [--aa-lib=<lib.so>] FILE...
+    tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [--correct-zed] [--aa-old-mc-id] [--aa-format=<fmt>] [--aa-lib=<lib.so>] FILE...
     tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [-j] [-s] [-l] FILE...
     tohdf5 (-h | --help)
     tohdf5 --version
 
 Options:
-    --aa-format=<fmt>          tohdf5: Which aanet subformat ('minidst',
+    --aa-format=<fmt>          (Aanet): Which aanet subformat ('minidst',
                                'orca_recolns', 'gandalf',
                                'generic_track') [default: None]
-    --aa-lib-<lib.so>          tohdf5: path to aanet binary (for old versions which
+    --aa-lib-<lib.so>          (Aanet): path to aanet binary (for old versions which
                                must be loaded via `ROOT.gSystem.Load()` instead
                                of `import aa`)
+    --aa-old-mc-id             (aanet): read mc id as `evt.mc_id`, instead
+                               of the newer `mc_id = evt.frame_index - 1`
     -h --help                  Show this screen.
-    -j --jppy                  tohdf5: Use jppy (not aanet) for Jpp readout
+    -j --jppy                  (Jpp): Use jppy (not aanet) for Jpp readout
     -l --with-timeslice-hits   Include timeslice-hits [default: False]
     -n EVENTS/RUNS             Number of events/runs.
     -o OUTFILE                 Output file.
     -s --with-summaryslices    Include summary slices [default: False]
-    --correct-zed              Correc toffset in mc tracks (aanet) [default: False]
+    --correct-zed              (Aanet) Correc toffset in mc tracks (aanet) [default: False]
     -e --expected-rows NROWS   Approximate number of events.  Providing a
                                rough estimate for this (100, 10000000, ...)
                                will greatly improve reading/writing speed and
@@ -86,6 +88,7 @@ def main():
     use_jppy_pump = args['--jppy']
     aa_format = args['--aa-format']
     aa_lib = args['--aa-lib']
+    aa_old_mc_id = args['--aa-old-mc-id']
     with_summaryslices = args['--with-summaryslices']
     with_timeslice_hits = args['--with-timeslice-hits']
     correct_zed = args['--correct-zed']
@@ -99,4 +102,5 @@ def main():
            with_timeslice_hits=with_timeslice_hits,
            n_rows_expected=n_rows_expected,
            apply_zed_correction=correct_zed,
+           old_mc_id=aa_old_mc_id,
            )

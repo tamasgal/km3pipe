@@ -1,3 +1,12 @@
+Best Practices
+--------------
+
+Refrain from importing ROOT utils in an init file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Seriously, don't. ROOT is a very optional requirement, and even if you have 
+it installed, you get very weird crashes in unexpected places.
+
 Install in Developer Mode
 -------------------------
 
@@ -51,6 +60,5 @@ Install & run the ``pytest`` suite::
 
 Create a Merge Request (aka Pull Request)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 
 
