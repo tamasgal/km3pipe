@@ -1,6 +1,13 @@
 Unreleased changes
 ------------------
 
+7.3.0 / 2017-08-02
+------------------
+* add ``i3toroot`` and ``i3root2hdf5`` CLI utils for converting I3 files
+* drop deprecated ``h5tree``, from ``km3pipe.utils`` (use ``ptdump`` instead)
+* drop deprecated ``km3pipe.io.hdf5.H5Mono``
+* read aanet ``mc_id = evt.frame_index - 1``
+
 7.2.5 / 2017-07-20
 ------------------
 * drop ``read_hdf5`` and ``GenericPump`` from top level module import 
