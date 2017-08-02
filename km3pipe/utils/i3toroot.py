@@ -22,7 +22,7 @@ from icecube.tableio import I3TableWriter
 from icecube.rootwriter import I3ROOTTableService
 
 
-def main(infile):
+def i3toroot(infile):
     rootfile = infile + '.root'
     tray = I3Tray()
     tray.AddModule('I3Reader', 'i3reader', filename=infile)
@@ -41,7 +41,7 @@ def main(infile):
 def main():
     args = docopt(__doc__)
     infile = args['INFILE']
-    main(infile)
+    i3toroot(infile)
 
 
 if __name__ == '__main__':
