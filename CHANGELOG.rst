@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* add ``i3toroot`` and ``i3root2hdf5`` CLI utils for converting I3 files
 * drop deprecated ``h5tree``, from ``km3pipe.utils`` (use ``ptdump`` instead)
 * drop deprecated ``km3pipe.io.hdf5.H5Mono``
 * read aanet ``mc_id = evt.frame_index - 1``

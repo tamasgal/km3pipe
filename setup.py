@@ -126,6 +126,8 @@ setup(name='km3pipe',
               'totmonitor=km3pipe.utils.totmonitor:main',
               'calibrate=km3pipe.utils.calibrate:main',
               'rba=km3pipe.utils.rba:main',
+              'i3toroot=km3pipe.utils.i3toroot:main',
+              'i3root2hdf5=km3pipe.utils.i3root2hdf5:main',
           ],
       },
       classifiers=[
