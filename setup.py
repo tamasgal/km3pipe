@@ -128,6 +128,7 @@ setup(name='km3pipe',
               'rba=km3pipe.utils.rba:main',
               'i3toroot=km3pipe.utils.i3toroot:main',
               'i3root2hdf5=km3pipe.utils.i3root2hdf5:main',
+              'i3shower2hdf5=km3pipe.utils.i3shower2hdf5:main',
           ],
       },
       classifiers=[
