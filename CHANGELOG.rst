@@ -1,6 +1,7 @@
 Unreleased changes
 ------------------
-* add ``i3shower2hdf5``CLI util for converting orcadusj files
+* add ``i3shower2hdf5`` CLI util for converting orcadusj files
+* add ``kp.math.space_angle``
 
 7.3.1 / 2017-08-02
 ------------------
