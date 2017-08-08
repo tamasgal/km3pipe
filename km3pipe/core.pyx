@@ -240,7 +240,7 @@ class Pipeline(object):
                 unit = 'min'
             else:
                 unit = 's'
-            return "{0:.2f}{1}".format(time, unit)
+            return "{0:.6f}{1}".format(time, unit)
 
         def statsf(prefix, values):
             stats = "  mean: {0}  medi: {1}  min: {2}  max: {3}  std: {4}"
