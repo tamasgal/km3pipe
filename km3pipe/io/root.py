@@ -73,3 +73,17 @@ def get_hist3d(rfile, histname, get_overflow=False):
     bin_values = rnp.hist2array(hist, include_overflow=get_overflow)
     rfile.close()
     return bin_values, xlims, ylims, zlims
+
+
+class ROOTPump(Pump):
+    """A Pump for vanilla ROOT files (not aanet/jpp/...).
+    """
+    def __init__(self, **context):
+        super(self.__class__, self).__init__(**context)
+        self.filename = self.require('filename')
+        self.rootfile = open_rfile(self.filename)
+        self.blobkey = self.get('blobkey') or 'ROOT'
+        self.keys = [k.name for k in rf.keys()]
+
+    def process(self, blob=None):
+        blob = {k: self.rootfile[k]
