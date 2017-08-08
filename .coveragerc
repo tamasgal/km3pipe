@@ -9,6 +9,7 @@ include =
 omit =
     */tests/*
     */*/tests/*
+    km3pipe/utils/*
 exclude_lines =
     pragma: no cover
     raise AssertionError
