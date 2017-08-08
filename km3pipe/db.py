@@ -69,7 +69,6 @@ except AttributeError:
 BASE_URL = 'https://km3netdbweb.in2p3.fr'
 
 
-
 def we_are_in_lyon():
     """Check if we are on a Lyon machine"""
     try:
@@ -341,8 +340,8 @@ class DBManager(object):
     def request_sid_cookie(self, username, password):
         """Request cookie for permanent session token."""
         log.debug("Requesting SID cookie")
-        target_url = self._login_url + '?usr={0}&pwd={1}&persist=y' \
-                                      .format(username, password)
+        target_url = self._login_url + '?usr={0}&pwd={1}&persist=y'.format(
+            username, password)
         cookie = urlopen(target_url).read()
         return cookie
 
