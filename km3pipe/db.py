@@ -15,7 +15,12 @@ import re
 import pytz
 import socket
 from functools import partial
-from inspect import Signature, Parameter 
+try:
+    from inspect import Signature, Parameter 
+except ImportError:
+    with_signatures = False
+else:
+    with_signatures = True
 
 try:
     import pandas as pd
@@ -420,12 +425,13 @@ class StreamDS(object):
             mandatory_sel = [r for r in row[3].split(',') if r != '-']
             optional_sel = [r for r in row[4].split(',') if r != '-']
             getter = partial(self.get, stream=stream)
-            getter.__signature__ = Signature(
-                    parameters = {
-                        Parameter(s, Parameter.POSITIONAL_OR_KEYWORD):None
-                            for s in mandatory_sel + optional_sel
-                    }
-            )
+            if with_signatures:
+                getter.__signature__ = Signature(
+                        parameters = {
+                            Parameter(s, Parameter.POSITIONAL_OR_KEYWORD):None
+                                for s in mandatory_sel + optional_sel
+                        }
+                )
             setattr(self, stream, getter)
 
 
