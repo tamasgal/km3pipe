@@ -1,5 +1,9 @@
 Unreleased changes
 ------------------
+
+
+7.4.0 / 2017-08-18
+------------------
 * Introduces ``StreamDS`` in ``km3pipe.db`` which allows easy access to all
   streamds tables
 
