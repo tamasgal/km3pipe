@@ -279,3 +279,115 @@ on the ``DATA_VALUE`` column.
 If the data contains a ``UNIXTIME`` column, a ``DATETIME`` field will be added
 too, which allows using all the magical date filtering methods.
 
+
+StreamDS
+~~~~~~~~
+
+You already learned how to use the ``DBManager`` to connect to the database
+and access information. The ``StreamDS`` class is a specific helper, which
+connects to the StreamDS_ (Stream Data Service) of the KM3NeT database web
+server interface. The StreamDS is used to retrieve large datasets which could
+possibly reach and exceed GB size.
+
+.. _StreamDS: http://wiki.km3net.physik.uni-erlangen.de/index.php/Database/Stream_Data_Service
+
+``StreamDS`` uses the ``DBManager`` to connect to the database and you
+instantiate the same way::
+
+    >>> import km3pipe as kp
+    >>> sds = kp.db.StreamDS()
+    Please enter your KM3NeT DB username: tgal
+    Password:
+    Request permanent session? (y/n)y
+
+Notice that you won't be asked for the password or session if you already
+put your credentials into your ``~/.km3net`` configuration or created a
+permanent session before (and your IP has not changed since then).
+
+If you type ``sds.`` and press ``<TAB>``, you will see a list of available
+methods and getters for all available streams. The methods are generated
+dynamically, so it is always up to date with the latest web API::
+
+    >>> sds.
+    sds.ahrs(                        sds.pmt_available_hvtuned_sets(
+    sds.clbmap(                      sds.pmt_best_hv_settings(
+    sds.clbmon(                      sds.pmt_hv_run_settings(
+    sds.clbmondomid(                 sds.pmt_hv_settings(
+    sds.clbmonpos(                   sds.pmt_hv_tuning_settings(
+    sds.clbmonupi(                   sds.pmtdarkbox(
+    sds.datalogevents(               sds.print_streams(
+    sds.datalognumbers(              sds.runs(
+    sds.datalogstrings(              sds.runsummarynumbers(
+    sds.detcalibrations(             sds.streams
+    sds.detectors(                   sds.t0(
+    sds.dmvars(                      sds.t0sets(
+    sds.get(                         sds.toa(
+    sds.integration(                 sds.toashort(
+    sds.jobs(                        sds.upi(
+    sds.mandatory_selectors(         sds.vendorhv(
+    sds.optional_selectors(          sds.vendorhvrunsetup(
+
+To get a full list of available streams::
+
+    >>> sds.streams
+    ['detectors', 'runs', 'jobs', 'datalognumbers', 'datalogstrings',
+     'datalogevents', 'vendorhv', 'vendorhvrunsetup', 't0sets', 't0',
+     'ahrs', 'upi', 'pmtdarkbox', 'dmvars', 'detcalibrations',
+     'pmt_hv_settings', 'pmt_hv_tuning_settings', 'pmt_hv_run_settings',
+     'pmt_best_hv_settings', 'pmt_available_hvtuned_sets', 'integration',
+     'clbmon', 'clbmonupi', 'clbmondomid', 'clbmonpos', 'clbmap', 'toa',
+     'toashort', 'runsummarynumbers']
+
+To print all streams including their selectors and data formats, use the
+``sds.print_streams()`` function::
+
+    >>> sds.print_streams()
+    detectors
+    Shows all the detectors, optionally selecting by site oid or city.
+      available formats:   txt
+      mandatory selectors: -
+      optional selectors:  locationid,city
+
+    runs
+    Shows all runs for a detector (mandatory selection by detid or serialnumber). Optionally, a single run may be specified.
+      available formats:   txt
+      mandatory selectors: detid
+      optional selectors:  run
+
+    jobs
+    Shows all detector run jobs for a detector within a minimum and maximum Unix time (all mandatory selections). Optionally, selections may consider priority, runsetupid, oid.
+      available formats:   txt
+      mandatory selectors: detid,unixmintime,unixmaxtime
+      optional selectors:  priority,runsetupid,oid,localid
+    ...
+    ...
+    ...
+
+If you are using ``ipython`` (recommended), you can get a quick help if you
+type for example ``sds.vendorhv?`` to see what the ``vendorhv`` stream does and
+which selectors it needs (if you are using the plain ``python`` REPL,
+type ``help(sds.vendorhv)`` instead. Also notice that some completion features
+are only supported for Python 3.3+ (you should update to Python 3.6 anyways...)::
+
+    >>> sds.vendorhv?
+    Signature: sds.vendorhv(detid, *, pmtserial)
+    Docstring: Shows vendor-suggested HV for a detector (mandatory selection by detid or serialnumber). Optionally, a single PMT may be specified.
+    File:      ~/Dev/km3pipe/km3pipe/db.py
+    Type:      function
+
+As you can see, the ``Signature`` indicates that ``detid`` is mandatory and
+the keyword(s) after the ``*`` are optional (in this case ``pmtserial``).
+
+
+Let's retrieve some data::
+
+    >>> sds.vendorhv(detid=14)
+      DUID  FLOORID  CABLEPOS  PMTSERIAL  PMT_SUPPLY_VOLTAGE
+      0        1        1         0       1838               -1010
+      1        2        1         0        704               -1080
+      2        3        1         0       5586               -1030
+      3        2        1         1       6461                -990
+      4        3        1         1       6483               -1100
+      5        1        1         1       4944                -930
+
+That's it. You always get a Pandas ``DataFrame`` back. Have fun!
