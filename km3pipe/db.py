@@ -14,12 +14,15 @@ import json
 import re
 import pytz
 import socket
+from functools import partial
+from inspect import Signature, Parameter 
 
 try:
     import pandas as pd
 except ImportError:
     print("The database utilities needs pandas: pip install pandas")
 
+from .dev import colored, cprint
 from .time import Timer
 from .config import Config
 from .logger import logging
@@ -398,6 +401,58 @@ class DBManager(object):
     def _make_request(self, url, values):
         data = urlencode(values)
         return Request(url, data.encode('utf-8'))
+
+
+class StreamDS(object):
+    def __init__(self, username=None, password=None, url=None, temporary=False):
+        self._db = DBManager(username, password, url, temporary)
+        self._stream_df = None
+
+        self._update_streams()
+        self._set_stream_getters()
+
+    def _update_streams(self):
+        c = self._db._get_content("streamds")
+        self._stream_df = pd.read_csv(StringIO(c), sep='\t')
+
+    def _set_stream_getters(self):
+        for row in self._stream_df.itertuples():
+            stream = row[1]
+            mandatory_sel = [r for r in row[3].split(',') if r != '-']
+            optional_sel = [r for r in row[4].split(',') if r != '-']
+            getter = partial(self.get, stream=stream)
+            getter.__signature__ = Signature(
+                    parameters = {
+                        Parameter(s, Parameter.POSITIONAL_OR_KEYWORD):None
+                            for s in mandatory_sel + optional_sel
+                    }
+            )
+            setattr(self, stream, getter)
+
+
+    @property
+    def streams(self):
+        return list(self._stream_df["STREAM"].values)
+
+    def print_streams(self):
+        for row in self._stream_df.itertuples():
+            cprint("{1}".format(*row), "magenta", attrs=["bold"])
+            print("{5}".format(*row))
+            cprint("  available formats:   {2}".format(*row), "blue")
+            cprint("  mandatory selectors: {3}".format(*row), "red")
+            cprint("  optional selectors:  {4}".format(*row), "green")
+            print()
+
+    def get(self, stream, fmt='txt', **kwargs):
+        sel = ''.join(["&{0}={1}".format(k, v) for (k, v) in kwargs.items()])
+        url = "streamds/{0}.{1}?{2}".format(stream, fmt, sel[1:])
+        print(url)
+        data = self._db._get_content(url)
+        if fmt=="txt":
+            return pd.read_csv(StringIO(data), sep='\t')
+        
+        return data
+
 
 
 class ParametersContainer(object):
