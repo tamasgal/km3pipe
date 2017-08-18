@@ -66,15 +66,15 @@ class CoincidenceFinder(kp.Module):
     def process(self, blob):
         for dom_id, hits in blob['TimesliceFrames'].items():
             hits.sort(key=lambda x: x[1])
-            coinces = self.mongincidence([t for (_, t, _) in hits],
-                                         [t for (t, _, _) in hits])
+            coinces = self.mongincidence([t for (_,t,_) in hits],
+                                         [t for (t,_,_) in hits])
 
             combs = list(combinations(range(31), 2))
             for pmt_pair, t in coinces:
                 if pmt_pair[0] > pmt_pair[1]:
                     pmt_pair = (pmt_pair[1], pmt_pair[0])
                     t = -t
-                self.counts[dom_id][combs.index(pmt_pair), t + 20] += 1
+                self.counts[dom_id][combs.index(pmt_pair), t+20] += 1
 
         self.n_timeslices += 1
         if self.n_timeslices == self.accumulate:
@@ -98,8 +98,8 @@ class CoincidenceFinder(kp.Module):
         return coincidences
 
 
-def calibrate_dom(dom_id, data, detector, livetime=None):
-    """Calibrate intra DOM PMT time offsets and efficiencies"""
+def calibrate_dom(dom_id, data, detector, livetime=None, fixed_ang_dist=None, auto_scale=False):
+    """Calibrate intra DOM PMT time offsets and efficiencies"""#
     if isinstance(data, str):
         filename = data
         loaders = {'.h5': load_k40_coincidences_from_hdf5,
@@ -112,11 +112,27 @@ def calibrate_dom(dom_id, data, detector, livetime=None):
         else:
             data, livetime = loader(filename, dom_id)
 
-    rates, means, popts = fit_delta_ts(data, livetime)
+    try:
+        rates, means, sigmas, popts, pcovs = fit_delta_ts(data, livetime)
+    except:
+        return 0
     angles = calculate_angles(detector)
-    fitted_rates, _ = fit_angular_distribution(angles, rates)
+    rate_errors = np.array([np.diag(pc)[2] for pc in pcovs])
+    mean_errors = np.array([np.diag(pc)[0] for pc in pcovs])
+    scale_factor = None
+    if type(fixed_ang_dist) in (list, np.ndarray):
+        if auto_scale:
+            scale_factor = np.mean(rates[angles<1.5]) / np.mean(fixed_ang_dist[angles<1.5])
+            fitted_rates = fixed_ang_dist * scale_factor
+        else:
+            fitted_rates = fixed_ang_dist
+        exp_popts = []
+        print('Using fixed angular distribution')
+    else:
+        fitted_rates, exp_popts = fit_angular_distribution(angles, rates, rate_errors)
     #t0_weights = np.array([0. if a>1. else 1. for a in angles])
     opt_t0s = minimize_t0s(means, fitted_rates)
+    opt_sigmas = minimize_sigmas(sigmas, fitted_rates)
     opt_qes = minimize_qes(fitted_rates, rates, fitted_rates)
     corrected_means = correct_means(means, opt_t0s.x)
     corrected_rates = correct_rates(rates, opt_qes.x)
@@ -133,8 +149,15 @@ def calibrate_dom(dom_id, data, detector, livetime=None):
                    'rms_rates': rms_rates,
                    'rms_corrected_rates': rms_corrected_rates,
                    'gaussian_popts': popts,
-                   'livetime': livetime}
+                   'livetime': livetime,
+                   'exp_popts': exp_popts,
+                   'scale_factor': scale_factor,
+                   'opt_sigmas': opt_sigmas,
+                   'sigmas': sigmas}
     return return_data
+
+
+
 
 
 def load_k40_coincidences_from_hdf5(filename, dom_id):
@@ -150,7 +173,7 @@ def load_k40_coincidences_from_hdf5(filename, dom_id):
 def load_k40_coincidences_from_rootfile(filename, dom_id):
     """Load k40 coincidences from JMonitorK40 ROOT file"""
     from ROOT import TFile
-    root_file_monitor = TFile(filename, "READ")
+    root_file_monitor = TFile( filename, "READ" )
     dom_name = str(dom_id) + ".2S"
     histo_2d_monitor = root_file_monitor.Get(dom_name)
     data = []
@@ -173,13 +196,12 @@ def load_k40_coincidences_from_rootfile(filename, dom_id):
     except AttributeError:
         log.info("Weights histogram broken or not found, setting weight to 1.")
         dom_weight = 1.
-
     return np.array(data), dom_weight
 
 
 def gaussian(x, mean, sigma, rate, offset):
-    return rate / np.sqrt(2 * np.pi) / \
-        sigma * np.exp(-0.5 * (x - mean) ** 2 / sigma**2) + offset
+    return rate / np.sqrt(2 * np.pi) /  \
+           sigma * np.exp(-0.5*(x-mean)**2 / sigma**2) + offset
 
 
 def fit_delta_ts(data, livetime):
@@ -201,19 +223,24 @@ def fit_delta_ts(data, livetime):
     xs = np.arange(start, end)
 
     rates = []
+    sigmas = []
     means = []
     popts = []
+    pcovs = []
     for combination in data:
-        mean_start = np.argmax(combination) + start
+        mean0 = np.argmax(combination) + start
         try:
-            popt, _ = optimize.curve_fit(gaussian, xs, combination,
-                                         p0=[mean_start, 4., 10., 0.1])
+            popt, pcov = optimize.curve_fit(gaussian, xs, combination,
+                                         p0=[mean0, 4., 5., 0.1],
+                                         bounds = ([-20, 0, 0, 0], [20, 10, 10, 5]))
         except RuntimeError:
             popt = (0, 0, 0, 0)
         rates.append(popt[2])
         means.append(popt[0])
+        sigmas.append(popt[1])
         popts.append(popt)
-    return np.array(rates), np.array(means), np.array(popts)
+        pcovs.append(pcov)
+    return np.array(rates), np.array(means), np.array(sigmas), np.array(popts), np.array(pcovs)
 
 
 def calculate_angles(detector):
@@ -239,24 +266,35 @@ def calculate_angles(detector):
 
 
 def exponential_polinomial(x, p1, p2, p3, p4):
-    return 1 * np.exp(p1 + x * (p2 + x * (p3 + x * p4)))
+    return  1 * np.exp(p1 + x * (p2 + x * (p3 + x * p4)))
 
+def exponential(x, a, b):
+    return a * np.exp(b * x)
 
-def fit_angular_distribution(angles, rates):
+def fit_angular_distribution(angles, rates, rate_errors, shape='pexp'):
     """Fits angular distribution of rates.
 
     Parameters
     ----------
     rates: numpy array with rates for all PMT combinations
     angles: numpy array with angles for all PMT combinations
+    shape: which function to fit exp for exponential or pexp for exponential_polinomial
 
     Returns
     -------
-    fitted_rates: numpy array of fitted rates ``(fit_function(angles, *popt))``
+    fitted_rates: numpy array of fitted rates (fit_function(angles, *popt))
+
     """
+    if shape == 'exp':
+        fit_function = exponential
+        p0 = [-0.91871169,  2.72224241, -1.19065965,  1.48054122]
+    if shape == 'pexp':
+        fit_function = exponential_polinomial
+        p0 = [ 0.34921202,  2.8629577 ]
+
     cos_angles = np.cos(angles)
-    popt, _ = optimize.curve_fit(exponential_polinomial, cos_angles, rates)
-    fitted_rates = exponential_polinomial(cos_angles, *popt)
+    popt, _ = optimize.curve_fit(fit_function, cos_angles, rates, sigma=rate_errors)
+    fitted_rates = fit_function(cos_angles, *popt)
     return fitted_rates, popt
 
 
@@ -276,7 +314,6 @@ def minimize_t0s(means, weights):
     """
     def make_quality_function(means, weights):
         combs = list(combinations(range(31), 2))
-
         def quality_function(t0s):
             sq_sum = 0
             for mean, comb, weight in zip(means, combs, weights):
@@ -287,10 +324,38 @@ def minimize_t0s(means, weights):
     qfunc = make_quality_function(means, weights)
     #t0s = np.zeros(31)
     t0s = np.random.rand(31)
-    bounds = [(0, 0)] + [(-10., 10.)] * 30
+    bounds = [(0, 0)]+[(-10., 10.)] * 30
     opt_t0s = optimize.minimize(qfunc, t0s, bounds=bounds)
     return opt_t0s
 
+def minimize_sigmas(sigmas, weights):
+    """Varies sigmas to minimize gaussian sigma12 - sqrt(sigma1² + sigma2²).
+
+    Parameters
+    ----------
+    sigmas: numpy array of fitted sigmas of gaussians
+    weights: numpy array of weights for the squared sum
+
+    Returns
+    -------
+    opt_sigmas: optimal sigma values for all PMTs
+
+    """
+    def make_quality_function(sigmas, weights):
+        combs = list(combinations(range(31), 2))
+        def quality_function(s):
+            sq_sum = 0
+            for sigma, comb, weight in zip(sigmas, combs, weights):
+                sq_sum += ((sigma - np.sqrt(s[comb[1]]**2 + s[comb[0]]**2)) * weight)**2
+            return sq_sum
+        return quality_function
+
+    qfunc = make_quality_function(sigmas, weights)
+    s = np.ones(31) * 2.5
+    #s = np.random.rand(31)
+    bounds =[(0., 5.)] * 31
+    opt_sigmas = optimize.minimize(qfunc, s, bounds=bounds)
+    return opt_sigmas
 
 def minimize_qes(fitted_rates, rates, weights):
     """Varies QEs to minimize the deviation of the rates from the fitted_rates.
@@ -308,13 +373,12 @@ def minimize_qes(fitted_rates, rates, weights):
     """
     def make_quality_function(fitted_rates, rates, weights):
         combs = list(combinations(range(31), 2))
-
         def quality_function(qes):
             sq_sum = 0
             for fitted_rate, comb, rate, weight  \
                     in zip(fitted_rates, combs, rates, weights):
-                sq_sum += ((rate / qes[comb[0]] / qes[comb[1]] -
-                            fitted_rate) * weight)**2
+                sq_sum += ((rate / qes[comb[0]] / qes[comb[1]]
+                            - fitted_rate) * weight)**2
             return sq_sum
         return quality_function
 
@@ -341,8 +405,8 @@ def correct_means(means, opt_t0s):
 
     """
     combs = list(combinations(range(31), 2))
-    corrected_means = np.array([(opt_t0s[comb[1]] - opt_t0s[comb[0]]) -
-                                mean for mean, comb in zip(means, combs)])
+    corrected_means = np.array([(opt_t0s[comb[1]] - opt_t0s[comb[0]])
+                                - mean for mean, comb in zip(means, combs)])
     return corrected_means
 
 
@@ -362,8 +426,8 @@ def correct_rates(rates, opt_qes):
     """
 
     combs = list(combinations(range(31), 2))
-    corrected_rates = np.array([rate / opt_qes[comb[0]] / opt_qes[comb[1]]
-                                for rate, comb in zip(rates, combs)])
+    corrected_rates = np.array([rate / opt_qes[comb[0]] / opt_qes[comb[1]]  \
+                            for rate, comb in zip(rates, combs)])
     return corrected_rates
 
 
@@ -405,38 +469,38 @@ def calculate_rms_rates(rates, fitted_rates, corrected_rates):
 
 jmonitork40_comb_indices =  \
     np.array((254, 423, 424, 391, 392, 255, 204, 205, 126, 120, 121, 0,
-              22, 12, 80, 81, 23, 48, 49, 148, 150, 96, 296, 221, 190, 191, 297, 312,
-              313, 386, 355, 132, 110, 431, 42, 433, 113, 256, 134, 358, 192, 74,
-              176, 36, 402, 301, 270, 69, 384, 2, 156, 38, 178, 70, 273, 404, 302,
-              77, 202, 351, 246, 440, 133, 262, 103, 118, 44, 141, 34, 4, 64, 30,
-              196, 91, 172, 61, 292, 84, 157, 198, 276, 182, 281, 410, 381, 289,
-              405, 439, 247, 356, 102, 263, 119, 140, 45, 35, 88, 65, 194, 31,
-              7, 60, 173, 82, 294, 158, 409, 277, 280, 183, 200, 288, 382, 406,
-              212, 432, 128, 388, 206, 264, 105, 72, 144, 52, 283, 6, 19, 14,
-              169, 24, 310, 97, 379, 186, 218, 59, 93, 152, 317, 304, 111, 387,
-              129, 207, 104, 265, 73, 18, 53, 5, 284, 146, 168, 15, 308, 26,
-              98, 92, 187, 58, 219, 380, 316, 154, 305, 112, 434, 257, 357, 135,
-              193, 300, 177, 401, 37, 75, 68, 271, 1, 385, 159, 403, 179, 272,
-              71, 39, 76, 303, 203, 213, 393, 248, 442, 298, 145, 184, 89, 377,
-              315, 216, 57, 309, 27, 99, 8, 54, 16, 171, 287, 153, 21, 78,
-              394, 441, 249, 299, 314, 185, 376, 90, 147, 56, 217, 25, 311, 100,
-              286, 55, 170, 17, 9, 20, 155, 79, 425, 426, 383, 306, 220, 290,
-              291, 307, 188, 189, 149, 151, 101, 86, 13, 50, 51, 87, 28, 29,
-              3, 352, 399, 375, 274, 407, 197, 285, 180, 279, 83, 295, 160, 199,
-              66, 174, 63, 33, 10, 95, 40, 400, 282, 275, 195, 408, 378, 278,
-              181, 293, 85, 161, 32, 67, 62, 175, 201, 94, 11, 41, 435, 415,
-              359, 360, 436, 347, 348, 258, 259, 318, 136, 162, 222, 223, 137, 114,
-              115, 43, 451, 443, 266, 389, 335, 456, 208, 396, 363, 250, 238, 327,
-              235, 107, 130, 215, 116, 343, 344, 452, 461, 462, 331, 332, 417, 226,
-              324, 371, 372, 229, 240, 241, 163, 142, 267, 230, 412, 122, 428, 319,
-              353, 227, 340, 166, 47, 108, 253, 138, 444, 411, 231, 427, 123, 320,
-              46, 228, 165, 341, 354, 252, 109, 139, 455, 336, 395, 209, 364, 106,
-              239, 234, 328, 251, 214, 131, 117, 373, 447, 243, 418, 164, 369, 325,
-              460, 342, 329, 237, 224, 242, 448, 419, 339, 370, 459, 326, 167, 236,
-              330, 225, 127, 365, 124, 333, 244, 450, 430, 397, 211, 260, 366, 429,
-              334, 449, 245, 125, 210, 398, 261, 321, 420, 421, 422, 322, 367, 368,
-              323, 345, 413, 232, 143, 268, 446, 361, 463, 464, 346, 453, 454, 416,
-              374, 233, 337, 458, 349, 414, 457, 338, 350, 445, 269, 362, 390, 437, 438))
+    22, 12, 80, 81, 23, 48, 49, 148, 150, 96, 296, 221, 190, 191, 297, 312,
+    313, 386, 355, 132, 110, 431, 42, 433, 113, 256, 134, 358, 192, 74,
+    176, 36, 402, 301, 270, 69, 384, 2, 156, 38, 178, 70, 273, 404, 302,
+    77, 202, 351, 246, 440, 133, 262, 103, 118, 44, 141, 34, 4, 64, 30,
+    196, 91, 172, 61, 292, 84, 157, 198, 276, 182, 281, 410, 381, 289,
+    405, 439, 247, 356, 102, 263, 119, 140, 45, 35, 88, 65, 194, 31,
+    7, 60, 173, 82, 294, 158, 409, 277, 280, 183, 200, 288, 382, 406,
+    212, 432, 128, 388, 206, 264, 105, 72, 144, 52, 283, 6, 19, 14,
+    169, 24, 310, 97, 379, 186, 218, 59, 93, 152, 317, 304, 111, 387,
+    129, 207, 104, 265, 73, 18, 53, 5, 284, 146, 168, 15, 308, 26,
+    98, 92, 187, 58, 219, 380, 316, 154, 305, 112, 434, 257, 357, 135,
+    193, 300, 177, 401, 37, 75, 68, 271, 1, 385, 159, 403, 179, 272,
+    71, 39, 76, 303, 203, 213, 393, 248, 442, 298, 145, 184, 89, 377,
+    315, 216, 57, 309, 27, 99, 8, 54, 16, 171, 287, 153, 21, 78,
+    394, 441, 249, 299, 314, 185, 376, 90, 147, 56, 217, 25, 311, 100,
+    286, 55, 170, 17, 9, 20, 155, 79, 425, 426, 383, 306, 220, 290,
+    291, 307, 188, 189, 149, 151, 101, 86, 13, 50, 51, 87, 28, 29,
+    3, 352, 399, 375, 274, 407, 197, 285, 180, 279, 83, 295, 160, 199,
+    66, 174, 63, 33, 10, 95, 40, 400, 282, 275, 195, 408, 378, 278,
+    181, 293, 85, 161, 32, 67, 62, 175, 201, 94, 11, 41, 435, 415,
+    359, 360, 436, 347, 348, 258, 259, 318, 136, 162, 222, 223, 137, 114,
+    115, 43, 451, 443, 266, 389, 335, 456, 208, 396, 363, 250, 238, 327,
+    235, 107, 130, 215, 116, 343, 344, 452, 461, 462, 331, 332, 417, 226,
+    324, 371, 372, 229, 240, 241, 163, 142, 267, 230, 412, 122, 428, 319,
+    353, 227, 340, 166, 47, 108, 253, 138, 444, 411, 231, 427, 123, 320,
+    46, 228, 165, 341, 354, 252, 109, 139, 455, 336, 395, 209, 364, 106,
+    239, 234, 328, 251, 214, 131, 117, 373, 447, 243, 418, 164, 369, 325,
+    460, 342, 329, 237, 224, 242, 448, 419, 339, 370, 459, 326, 167, 236,
+    330, 225, 127, 365, 124, 333, 244, 450, 430, 397, 211, 260, 366, 429,
+    334, 449, 245, 125, 210, 398, 261, 321, 420, 421, 422, 322, 367, 368,
+    323, 345, 413, 232, 143, 268, 446, 361, 463, 464, 346, 453, 454, 416,
+    374, 233, 337, 458, 349, 414, 457, 338, 350, 445, 269, 362, 390, 437, 438))
 
 """
 jmonitork40_comb_indices =  \
@@ -473,3 +537,6 @@ jmonitork40_comb_indices =  \
     109, 252, 442, 391, 212, 127, 214, 394, 397, 213, 130, 207, 392, 206, 131,
     393, 215, 398))
 """
+
+
+
