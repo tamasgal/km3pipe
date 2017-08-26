@@ -1,5 +1,4 @@
 # coding=utf-8
-# Filename: h5tree.py
 """
 Show the km3pipe etc. version used to write a H5 file.
 

@@ -1,6 +1,24 @@
 Unreleased changes
 ------------------
 
+
+7.4.0 / 2017-08-18
+------------------
+* Introduces ``StreamDS`` in ``km3pipe.db`` which allows easy access to all
+  streamds tables
+
+7.3.2 / 2017-08-08
+------------------
+* add ``i3shower2hdf5`` CLI util for converting orcadusj files
+* add ``kp.math.space_angle``
+
+7.3.1 / 2017-08-02
+------------------
+* add ``i3toroot`` and ``i3root2hdf5`` CLI utils for converting I3 files
+* drop deprecated ``h5tree``, from ``km3pipe.utils`` (use ``ptdump`` instead)
+* drop deprecated ``km3pipe.io.hdf5.H5Mono``
+* read aanet ``mc_id = evt.frame_index - 1``
+
 7.2.5 / 2017-07-20
 ------------------
 * drop ``read_hdf5`` and ``GenericPump`` from top level module import 

@@ -14,12 +14,20 @@ import json
 import re
 import pytz
 import socket
+from collections import OrderedDict
+try:
+    from inspect import Signature, Parameter 
+except ImportError:
+    with_signatures = False
+else:
+    with_signatures = True
 
 try:
     import pandas as pd
 except ImportError:
     print("The database utilities needs pandas: pip install pandas")
 
+from .dev import colored, cprint
 from .time import Timer
 from .config import Config
 from .logger import logging
@@ -67,7 +75,6 @@ except AttributeError:
               "Please update your Python installation!")
 
 BASE_URL = 'https://km3netdbweb.in2p3.fr'
-
 
 
 def we_are_in_lyon():
@@ -341,8 +348,8 @@ class DBManager(object):
     def request_sid_cookie(self, username, password):
         """Request cookie for permanent session token."""
         log.debug("Requesting SID cookie")
-        target_url = self._login_url + '?usr={0}&pwd={1}&persist=y' \
-                                      .format(username, password)
+        target_url = self._login_url + '?usr={0}&pwd={1}&persist=y'.format(
+            username, password)
         cookie = urlopen(target_url).read()
         return cookie
 
@@ -398,6 +405,92 @@ class DBManager(object):
     def _make_request(self, url, values):
         data = urlencode(values)
         return Request(url, data.encode('utf-8'))
+
+
+class StreamDS(object):
+    """Access to the streamds data stored in the KM3NeT database."""
+    def __init__(self, username=None, password=None, url=None, temporary=False):
+        self._db = DBManager(username, password, url, temporary)
+        self._stream_df = None
+        self._streams = None
+
+        self._update_streams()
+
+    def _update_streams(self):
+        """Update the list of available straems"""
+        c = self._db._get_content("streamds")
+        self._stream_df = pd.read_csv(StringIO(c), sep='\t')
+        self._streams = None
+        for stream in self.streams:
+            setattr(self, stream, self.__getattr__(stream))
+
+    def __getattr__(self, attr):
+        """Magic getter which optionally populates the function signatures"""
+        if attr in self.streams:
+            stream = attr
+        else:
+            raise AttributeError
+        
+        def func(**kwargs):
+            return self.get(stream, **kwargs)
+
+        func.__doc__ = self._stream_parameter(stream, "DESCRIPTION")
+
+        if with_signatures:
+            sig_dict = OrderedDict()
+            for sel in self.mandatory_selectors(stream):
+                if sel == '-':
+                    continue
+                sig_dict[Parameter(sel, Parameter.POSITIONAL_OR_KEYWORD)] = None
+            for sel in self.optional_selectors(stream):
+                if sel == '-':
+                    continue
+                sig_dict[Parameter(sel, Parameter.KEYWORD_ONLY)] = None
+            func.__signature__ = Signature(parameters=sig_dict)
+
+        return func
+
+    @property
+    def streams(self):
+        """A list of available streams"""
+        if self._streams is None:
+            self._streams = list(self._stream_df["STREAM"].values)
+        return self._streams
+
+    def _stream_parameter(self, stream, parameter):
+        data = self._stream_df[self._stream_df.STREAM == stream]
+        if 'SELECTORS' in parameter:
+            return list(data[parameter].values[0].split(','))
+        else:
+            return data[parameter].values[0]
+
+    def mandatory_selectors(self, stream):
+        """A list of mandatory selectors for a given stream"""
+        return self._stream_parameter(stream, 'MANDATORY_SELECTORS')
+
+    def optional_selectors(self, stream):
+        """A list of optional selectors for a given stream"""
+        return self._stream_parameter(stream, 'OPTIONAL_SELECTORS')
+
+    def print_streams(self):
+        """Print a coloured list of streams and its parameters"""
+        for row in self._stream_df.itertuples():
+            cprint("{1}".format(*row), "magenta", attrs=["bold"])
+            print("{5}".format(*row))
+            cprint("  available formats:   {2}".format(*row), "blue")
+            cprint("  mandatory selectors: {3}".format(*row), "red")
+            cprint("  optional selectors:  {4}".format(*row), "green")
+            print()
+
+    def get(self, stream, fmt='txt', **kwargs):
+        """Get the data for a given stream manually"""
+        sel = ''.join(["&{0}={1}".format(k, v) for (k, v) in kwargs.items()])
+        url = "streamds/{0}.{1}?{2}".format(stream, fmt, sel[1:])
+        data = self._db._get_content(url)
+        if fmt=="txt":
+            return pd.read_csv(StringIO(data), sep='\t')
+        return data
+
 
 
 class ParametersContainer(object):

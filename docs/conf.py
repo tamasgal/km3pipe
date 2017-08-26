@@ -46,6 +46,8 @@ extensions = [
     #'nbsphinx',
 ]
 
+autosummary_generate = True
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -124,7 +126,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 html_title = "KM3Pipe {}".format(km3pipe.__version__)
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
-html_short_title = 'Home'
+# html_short_title = 'Home'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
@@ -281,11 +283,9 @@ sphinx_gallery_conf = {
     'default_thumb_file': '_static/default_gallery_thumbnail.png',
     'examples_dirs': ['../examples'],
     'gallery_dirs': ['auto_examples'],
-    # 'reference_url': {
-    #     'km3pipe': None,
-    #     'matplotlib': 'http://matplotlib.org',
-    #     'numpy': 'http://docs.scipy.org/doc/numpy-1.9.1',
-    # }
+    'reference_url': {
+        'km3pipe': None,
+    }
 }
 
 autosummary_generate = ["api.rst"]

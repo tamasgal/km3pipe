@@ -5,7 +5,7 @@
 Display the mean ToT for each TDC channel for given DOM.
 
 Usage:
-    totmonitor [-l LIGIER] [-p PORT] [-o OPTIMAL_TOT] [-t TOLERANCE] [-u UPDATE] DOM_ID
+    totmonitor [options] DOM_ID
     totmonitor (-h | --help)
     totmonitor --version
 

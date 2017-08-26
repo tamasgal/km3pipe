@@ -41,7 +41,6 @@ from datetime import datetime
 from . import version
 from .tools import irods_filepath
 from .db import DBManager
-from km3modules.common import StatusBar
 from .hardware import Detector
 
 __author__ = "Tamas Gal"
@@ -147,7 +146,7 @@ def detectors(regex=None, sep='\t', temporary=False):
 def rundetsn(run_id, detector="ARCA", temporary=False):
     """Print the detector serial number for a given run of ARCA/ORCA"""
     db = DBManager(temporary=temporary)
-    dts=db.detectors
+    dts = db.detectors
     for det_id in dts[dts.OID.str.contains(detector)].SERIALNUMBER:
         if run_id in db.run_table(det_id).RUN.values:
             print(det_id)
@@ -186,7 +185,6 @@ def main():
     if args['createconf']:
         overwrite_conf = bool(args['--overwrite'])
         createconf(overwrite_conf)
-
 
     if args['runtable']:
         runtable(args['DET_ID'], n, regex=args['-s'], temporary=args["--temporary"])

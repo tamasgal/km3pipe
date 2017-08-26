@@ -10,6 +10,7 @@ Manipulating time and so...
 from __future__ import division, absolute_import, print_function
 
 from datetime import datetime
+import numpy as np
 import time
 from timeit import default_timer as timer
 
@@ -32,7 +33,7 @@ def total_seconds(td):
     try:
         s = td.total_seconds()
     except AttributeError:
-        s = (td.microseconds + (td.seconds + td.days*24*3600) * 10**6) / 10**6
+        s = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6
     return s
 
 
@@ -125,3 +126,10 @@ def tai_timestamp():
         if leap_date >= (date.year, date.month, date.day):
             return idx - 1 + offset
     return len(leap_seconds) - 1 + offset
+
+
+def np_to_datetime(intime):
+    """Convert numpy/pandas datetime64 to list[datetime]."""
+    nptime = np.atleast_1d(intime)
+    np_corr = (nptime - np.datetime64('1970-01-01T00:00:00')) / np.timedelta64(1, 's')
+    return [datetime.utcfromtimestamp(t) for t in np_corr]

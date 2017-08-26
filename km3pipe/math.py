@@ -86,7 +86,7 @@ def pld3(p1, p2, d2):
 
 
 def lpnorm(x, p=2):
-    return np.power(np.sum(np.power(x, p)), 1/p)
+    return np.power(np.sum(np.power(x, p)), 1 / p)
 
 
 def dist(x1, x2):
@@ -132,3 +132,13 @@ def flat_weights(x, bins):
     wgt = 1 / pop
     wgt *= len(wgt) / np.sum(wgt)
     return wgt
+
+
+def hsin(theta):
+    """haversine"""
+    return (1.0 - np.cos(theta)) / 2.
+
+
+def space_angle(zen_1, zen_2, azi_1, azi_2):
+    """Space angle between two directions specified by zenith and azimuth."""
+    return hsin(azi_2 - azi_1) + np.cos(azi_1) * np.cos(azi_2) * hsin(zen_2 - zen_1)
