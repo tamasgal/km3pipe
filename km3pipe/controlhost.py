@@ -71,10 +71,11 @@ class Client(object):
             log.info("     Waiting for control host Prefix")
             try:
                 data = self.socket.recv(Prefix.SIZE)
+                timestamp = time.time()
                 log.info("    raw prefix data received: '{0}'".format(data))
                 if data == b'':
                     raise EOFError
-                prefix = Prefix(data=data, timestamp=time.time())
+                prefix = Prefix(data=data, timestamp=timestamp)
             except (UnicodeDecodeError, OSError, struct.error):
                 log.error("Failed to construct Prefix, reconnecting.")
                 self._reconnect()
