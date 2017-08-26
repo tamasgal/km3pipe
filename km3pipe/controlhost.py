@@ -8,6 +8,7 @@ from __future__ import absolute_import
 
 import socket
 import struct
+import time
 
 from .logger import logging
 
@@ -182,6 +183,7 @@ class Prefix(object):
         else:
             self.tag = Tag(tag)
             self.length = length
+        self.timestamp = time.time()
 
     @property
     def data(self):
