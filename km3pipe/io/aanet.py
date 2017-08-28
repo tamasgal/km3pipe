@@ -206,15 +206,16 @@ class AanetPump(Pump):
         else:
             event_id = self.i
         self.i += 1
-        try:
-            blob['Hits'] = RawHitSeries.from_aanet(event.hits, event_id)
-        except AttributeError:
-            log.warn("No hits found.")
-        try:
-            mc_hits = McHitSeries.from_aanet(event.mc_hits, event_id)
-            blob['McHits'] = mc_hits
-        except AttributeError:
-            log.warn("No MC hits found.")
+        if self.format != 'ancient_recolns':
+            try:
+                blob['Hits'] = RawHitSeries.from_aanet(event.hits, event_id)
+            except AttributeError:
+                log.warn("No hits found.")
+            try:
+                mc_hits = McHitSeries.from_aanet(event.mc_hits, event_id)
+                blob['McHits'] = mc_hits
+            except AttributeError:
+                log.warn("No MC hits found.")
 
         blob['McTracks'] = TrackSeries.from_aanet(event.mc_trks, event_id)
 
