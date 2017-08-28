@@ -8,6 +8,7 @@ from __future__ import absolute_import
 
 import socket
 import struct
+import time
 
 from .logger import logging
 
@@ -70,10 +71,11 @@ class Client(object):
             log.info("     Waiting for control host Prefix")
             try:
                 data = self.socket.recv(Prefix.SIZE)
+                timestamp = time.time()
                 log.info("    raw prefix data received: '{0}'".format(data))
                 if data == b'':
                     raise EOFError
-                prefix = Prefix(data=data)
+                prefix = Prefix(data=data, timestamp=timestamp)
             except (UnicodeDecodeError, OSError, struct.error):
                 log.error("Failed to construct Prefix, reconnecting.")
                 self._reconnect()
@@ -176,12 +178,16 @@ class Prefix(object):
     """The prefix of a ControlHost message."""
     SIZE = 16
 
-    def __init__(self, tag=None, length=None, data=None):
+    def __init__(self, tag=None, length=None, data=None, timestamp=None):
         if data:
             self.data = data
         else:
             self.tag = Tag(tag)
             self.length = length
+        if timestamp is None:
+            self.timestamp = time.time()
+        else:
+            self.timestamp = timestamp
 
     @property
     def data(self):

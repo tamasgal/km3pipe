@@ -26,8 +26,9 @@ from icecube.icetray import I3Module, I3Bool, I3Int
 from icecube.dataclasses import I3Double
 from I3Tray import I3Tray
 # CRUCIAL import this after the ones before
-from icecube import antares_common     # noqa
+from icecube import antares_common, antares_reader     # noqa
 from icecube.gulliver import I3LogLikelihoodFitParams       # noqa
+
 
 __author__ = "Moritz Lotze"
 __copyright__ = "Copyright 2017, Moritz Lotze and the KM3NeT collaboration."
