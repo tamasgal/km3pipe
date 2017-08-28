@@ -1,6 +1,7 @@
 Unreleased changes
 ------------------
-
+* minor fixes for i3 files + old aanet
+* Add arrival timestamp to controlhost Prefix
 
 7.4.0 / 2017-08-18
 ------------------
