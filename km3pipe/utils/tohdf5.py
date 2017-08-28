@@ -14,7 +14,7 @@ Options:
     --aa-format=<fmt>          (Aanet): Which aanet subformat ('minidst',
                                'orca_recolns', 'gandalf',
                                'generic_track') [default: None]
-    --aa-lib-<lib.so>          (Aanet): path to aanet binary (for old
+    --aa-lib=<lib.so>          (Aanet): path to aanet binary (for old
                                versions which must be loaded via
                                `ROOT.gSystem.Load()` instead of `import aa`)
     --aa-old-mc-id             (aanet): read mc id as `evt.mc_id`, instead
