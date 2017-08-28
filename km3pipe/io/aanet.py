@@ -15,7 +15,7 @@ import numpy as np
 from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import (RawHitSeries, McHitSeries,
                                  TrackSeries, EventInfo,
-                                 KM3Array, KM3DataFrame)
+                                 KM3Array)
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -130,7 +130,7 @@ class AanetPump(Pump):
             # http://jenkins.km3net.de/job/aanet_trunk/doxygen/Head_8hh_source.html
             livetime = 0
             livetime_err = 0
-            n_gen = 0
+            ngen = 0
             nfilgen = 0
 
             try:
@@ -141,8 +141,8 @@ class AanetPump(Pump):
                 lt_line = self.header.get_line('livetime')
                 if len(lt_line) > 0:
                     livetime, livetime_err = lt_line.split()
-                #livetime = self.header.get_field('livetime', 0)
-                #livetime_err = self.header.get_field('livetime', 1)
+                # livetime = self.header.get_field('livetime', 0)
+                # livetime_err = self.header.get_field('livetime', 1)
                 self.livetime_err = float(livetime_err)
                 self.livetime = float(livetime)
             except (ValueError, UnicodeEncodeError, AttributeError):
@@ -161,9 +161,9 @@ class AanetPump(Pump):
                 self.nfilgen = 0
             # END OF OLD HEADER CRAZINESS
 
-
             # NEW HEADER CRAZINESS
-            self.aanet_header = get_aanet_header(event_file)
+            if self.format != 'ancient_recolns':
+                self.aanet_header = get_aanet_header(event_file)
 
             if self.format == 'ancient_recolns':
                 while event_file.next():
@@ -188,7 +188,7 @@ class AanetPump(Pump):
 
     def _read_event(self, event, filename):
         try:
-            if self.apply_zed_correction:  #if event.det_id <= 0:  # apply ZED correction
+            if self.apply_zed_correction:  # if event.det_id <= 0:  # apply ZED correction      # noqa
                 for track in event.mc_trks:
                     track.pos.z += 405.93
         except AttributeError:
@@ -230,11 +230,11 @@ class AanetPump(Pump):
             ei_data = np.array((
                 event.det_id,
                 event.frame_index,
-                self.livetime, # livetime_sec
+                self.livetime,      # livetime_sec
                 mc_id,
                 event.mc_t,
-                self.ngen,   # n_events_gen
-                self.nfilgen, # n_files_gen
+                self.ngen,      # n_events_gen
+                self.nfilgen,   # n_files_gen
                 event.overlays,
                 # event.run_id,
                 event.trigger_counter,
@@ -269,18 +269,18 @@ class AanetPump(Pump):
         if self.format in ('jevt_jgandalf', 'gandalf', 'jgandalf'):
             track, dtype = parse_jevt_jgandalf(event, event_id)
             if track:
-                blob['Gandalf'] = KM3Array.from_dict(track, dtype,
-                                                           h5loc='/reco')
+                blob['Gandalf'] = KM3Array.from_dict(
+                        track, dtype, h5loc='/reco')
         if self.format == 'generic_track':
             track, dtype = parse_generic_event(event, event_id)
             if track:
-                blob['Track'] = KM3Array.from_dict(track, dtype,
-                                                    h5loc='/reco')
+                blob['Track'] = KM3Array.from_dict(
+                        track, dtype, h5loc='/reco')
         if self.format in ('ancient_recolns', 'orca_recolns'):
             track, dtype = parse_ancient_recolns(event, event_id)
             if track:
-                blob['OrcaRecoLns'] = KM3Array.from_dict(track, dtype,
-                                                             h5loc='/reco')
+                blob['OrcaRecoLns'] = KM3Array.from_dict(
+                        track, dtype, h5loc='/reco')
         return blob
 
     def event_index(self, blob):
@@ -359,8 +359,6 @@ def get_aanet_header(event_file):
     return d
 
 
-
-
 def parse_ancient_recolns(aanet_event, event_id):
     # the final recontructed track is in f.evt.trks, at the index 5
     # trks[0] ==> prefit track
@@ -391,12 +389,13 @@ def parse_ancient_recolns(aanet_event, event_id):
         out['sigma2_phi'] = sigma2_phi
         sin_theta = np.sin(np.arccos(aanet_event.trks[3].dir.z))
         out['sin_theta'] = sin_theta
-        out['beta'] = np.sqrt(sin_theta * sin_theta * sigma2_phi + sigma2_theta)
+        out['beta'] = np.sqrt(
+                sin_theta * sin_theta * sigma2_phi + sigma2_theta)
     except IndexError:
         keys = {'quality', 'n_hits_used', 'pos_x', 'pos_y', 'pos_z',        # noqa
                 'dir_x', 'dir_y', 'dir_z', 'energy_muon', 'energy_neutrino',        # noqa
                 'bjorken_y', 'beta', 'sigma2_theta', 'sigma2_phi',      # noqa
-                'sin_theta', }    #noqa
+                'sin_theta', }    # noqa
         out = {key: 0 for key in keys}
     dt = [(key, float) for key in sorted(out.keys())]
     out['event_id'] = event_id
@@ -442,7 +441,7 @@ def parse_generic_event(aanet_event, event_id):
     try:
         track = aanet_event.trks[0]
     except IndexError:
-        #TODO: don't return empty map
+        # TODO: don't return empty map
         return map, None
     map['id'] = track.id
     map['pos_x'] = track.pos[0]
@@ -491,12 +490,13 @@ def read_mini_dst(aanet_event, event_id):
         reader = recname_to_reader[recname]
 
         reco_map, dtype = reader(trk)
-        minidst[recname] = KM3Array.from_dict(reco_map, dtype,
-                                               h5loc='/reco')
+        minidst[recname] = KM3Array.from_dict(
+                reco_map, dtype, h5loc='/reco')
 
-    thomas_map, dtype = parse_thomasfeatures(aanet_event.usr, aanet_event.usr_names)
-    minidst['ThomasFeatures'] = KM3Array.from_dict(thomas_map, dtype,
-                                                    h5loc='/reco')
+    thomas_map, dtype = parse_thomasfeatures(
+            aanet_event.usr, aanet_event.usr_names)
+    minidst['ThomasFeatures'] = KM3Array.from_dict(
+            thomas_map, dtype, h5loc='/reco')
 
     return minidst
 
