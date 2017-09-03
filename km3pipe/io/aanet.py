@@ -1,4 +1,4 @@
- Filename: aanet.py
+# Filename: aanet.py
 # pylint: disable=locally-disabled
 """
 Pump for the Aanet data format.
