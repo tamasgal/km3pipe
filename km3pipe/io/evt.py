@@ -348,6 +348,7 @@ class TrackCorsika(Track):
             pass
         return text
 
+
 class TrackFit(Track):
     """Representation of a track_fit entry in an EVT file"""
     def __init__(self, *args, **kwargs):
