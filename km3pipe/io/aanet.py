@@ -41,7 +41,7 @@ class AanetPump(Pump):
         List of files to open.
     aa_fmt: string, optional
         Subformat of aanet in the file. Possible values:
-        ``'minidst', 'jevt_jgandalf', 'generic_track', 'ancient_recolns'``
+        ``'minidst', 'jevt_jgandalf', 'gandalf_new', 'generic_track', 'ancient_recolns'``
     use_aart_sps_lib: bool, optional [default=False]
         Use Aart's local SPS copy (@ Lyon) via ``gSystem.Load``?
     apply_zed_correction: bool, optional [default=False]
@@ -275,6 +275,11 @@ class AanetPump(Pump):
             if track:
                 blob['Gandalf'] = KM3Array.from_dict(
                     track, dtype, h5loc='/reco')
+        if self.format in ('gandalf_new', 'jgandalf_new'):
+            track, dtype = parse_jgandalf_new(event, event_id, self.missing)
+            if track:
+                blob['Gandalf'] = KM3Array.from_dict(
+                    track, dtype, h5loc='/reco')
         if self.format == 'generic_track':
             track, dtype = parse_generic_event(event, event_id, self.missing)
             if track:
@@ -433,6 +438,39 @@ def parse_jevt_jgandalf(aanet_event, event_id, missing=0):
                 'time', 'type', 'rec_type', 'rec_stage', 'beta0', 'beta1',
                 'lik', 'lik_red', 'energy', }
         map = {key: missing for key in keys}
+    dt = [(key, float) for key in sorted(map.keys())]
+    map['event_id'] = event_id
+    dt.append(('event_id', '<u4'))
+    dt = np.dtype(dt)
+    return map, dt
+
+
+def parse_jgandalf_new(aanet_event, event_id, missing=0):
+    fitinv_enum = [
+        'beta0', 'beta1', 'chi2', 'n_hits', 'jenergy_energy' 'jenergy_chi2',
+        'lambda', 'n_iter', 'jstart_npe_mip', 'jstart_npe_mip_total',
+        'jstart_length', 'jveto_npe', 'jveto_nhits']
+    all_keys = [
+        'id', 'pos_x', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z',
+        'time', 'type', 'rec_type', 'rec_stage',
+    ].extend(fitinv_enum)
+    try:
+        track = aanet_event.trks[0]
+        map = {}
+        map['pos_x'] = track.pos.x
+        map['pos_y'] = track.pos.y
+        map['pos_z'] = track.pos.z
+        map['dir_x'] = track.dir.x
+        map['dir_y'] = track.dir.y
+        map['dir_z'] = track.dir.z
+        map['time'] = track.t
+        map['type'] = track.type
+        map['rec_type'] = track.rec_type
+        map['rec_stage'] = track.rec_stage
+        for i, key in enumerate(fitinv_enum):
+            map[key] = track.fitinf[i]
+    except IndexError:
+        map = {key: missing for key in all_keys}
     dt = [(key, float) for key in sorted(map.keys())]
     map['event_id'] = event_id
     dt.append(('event_id', '<u4'))
