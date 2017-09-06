@@ -34,9 +34,13 @@ __status__ = "Development"
 
 
 def hdf2root(infile, outfile, verbose=False):
-    from rootpy.io import root_open
-    from rootpy import asrootpy
-    from root_numpy import array2tree
+    try:
+        from rootpy.io import root_open
+        from rootpy import asrootpy
+        from root_numpy import array2tree
+    except ImporError:
+        raise ImportError("Please install rootpy + root_numpy:   `pip install rootpy root_numpy`")
+
     from tables import open_file
 
     h5 = open_file(infile, 'r')
