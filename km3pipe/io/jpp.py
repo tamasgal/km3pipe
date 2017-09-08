@@ -105,7 +105,7 @@ class JPPPump(Pump):
             nans, nans, nans, nans, times, tots, triggereds, self.event_index
         )
 
-        event_info = EventInfo((
+        event_info = EventInfo(np.array((
             r.det_id, r.frame_index,
             0, # livetime_sec
             0, 0,  # MC ID and time
@@ -117,7 +117,7 @@ class JPPPump(Pump):
             r.utc_nanoseconds, r.utc_seconds,
             np.nan, np.nan, np.nan,   # w1-w3
             self.event_index,
-            ))
+            )))
 
         self.event_index += 1
         blob['EventInfo'] = event_info
