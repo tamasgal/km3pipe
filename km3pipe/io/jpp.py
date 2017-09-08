@@ -117,7 +117,7 @@ class JPPPump(Pump):
             r.utc_nanoseconds, r.utc_seconds,
             np.nan, np.nan, np.nan,   # w1-w3
             self.event_index,
-            )))
+            ), dtype=EventInfo.dtype))
 
         self.event_index += 1
         blob['EventInfo'] = event_info
