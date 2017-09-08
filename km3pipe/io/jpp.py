@@ -107,15 +107,15 @@ class JPPPump(Pump):
 
         event_info = EventInfo(np.array((
             r.det_id, r.frame_index,
-            0, # livetime_sec
+            0,  # livetime_sec
             0, 0,  # MC ID and time
-            0, # n_events_gen
-            0, # n_files_gen
+            0,  # n_events_gen
+            0,  # n_files_gen
             r.overlays,
-            # r.run_id,
             r.trigger_counter, r.trigger_mask,
             r.utc_nanoseconds, r.utc_seconds,
             np.nan, np.nan, np.nan,   # w1-w3
+            0,  # run
             self.event_index,
             ), dtype=EventInfo.dtype))
 
