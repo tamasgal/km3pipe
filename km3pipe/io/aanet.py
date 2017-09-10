@@ -41,7 +41,8 @@ class AanetPump(Pump):
         List of files to open.
     aa_fmt: string, optional
         Subformat of aanet in the file. Possible values:
-        ``'minidst', 'jevt_jgandalf', 'gandalf_new', 'generic_track', 'ancient_recolns'``
+        ``'minidst', 'jevt_jgandalf', 'gandalf_new', 'generic_track',
+        'ancient_recolns'``
     use_aart_sps_lib: bool, optional [default=False]
         Use Aart's local SPS copy (@ Lyon) via ``gSystem.Load``?
     apply_zed_correction: bool, optional [default=False]
@@ -447,13 +448,24 @@ def parse_jevt_jgandalf(aanet_event, event_id, missing=0):
 
 def parse_jgandalf_new(aanet_event, event_id, missing=0):
     fitinv_enum = [
-        'beta0', 'beta1', 'chi2', 'n_hits', 'jenergy_energy' 'jenergy_chi2',
-        'lambda', 'n_iter', 'jstart_npe_mip', 'jstart_npe_mip_total',
-        'jstart_length', 'jveto_npe', 'jveto_nhits']
+        'beta0',
+        'beta1',
+        'chi2',
+        'n_hits',
+        'jenergy_energy'
+        'jenergy_chi2',
+        'lambda',
+        'n_iter',
+        'jstart_npe_mip',
+        'jstart_npe_mip_total',
+        'jstart_length',
+        # 'jveto_npe',
+        # 'jveto_nhits'
+        ]
     all_keys = [
-        'id', 'pos_x', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z',
+        'pos_x', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z',
         'time', 'type', 'rec_type', 'rec_stage',
-    ].extend(fitinv_enum)
+    ] + fitinv_enum
     try:
         track = aanet_event.trks[0]
         map = {}
