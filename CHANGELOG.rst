@@ -1,5 +1,8 @@
 Unreleased changes
 ------------------
+
+7.4.2 / 2017-09-11
+------------------
 * Numpy style slicing for ``***Series``
 * skip aanet header, optionally
 
