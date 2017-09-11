@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* Numpy style slicing for ***Series
 
 7.4.1 / 2017-08-28
 ------------------

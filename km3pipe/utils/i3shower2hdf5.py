@@ -115,12 +115,15 @@ class ReadLLHValues(I3Module):
         self.llh_cont = self.GetParameter("LLHParamContainer")
 
     def Physics(self, frame):
-        llh_params = frame.Get(self.llh_cont)
-        for name, param in llh_params.items():
-            try:
-                frame.Put(name, I3Double(param))
-            except RuntimeError:
-                continue
+        try:
+            llh_params = frame.Get(self.llh_cont)
+            for name, param in llh_params.items():
+                try:
+                    frame.Put(name, I3Double(param))
+                except RuntimeError:
+                    continue
+        except KeyError:
+            pass
         self.PushFrame(frame)
 
 
@@ -140,6 +143,7 @@ class ReadRecoParticle(I3Module):
             particle = frame.Get(self.particlename)
         except Exception:
             self.PushFrame(frame)
+            return
         particle_map = self._read_particle(particle)
         for key, val in iteritems(particle_map):
             name = self.particlename + '_' + key
@@ -205,7 +209,10 @@ class Compare(I3Module):
 
     def Physics(self, frame):
         self.OK = True
-        self.GetParticles(frame)
+        try:
+            self.GetParticles(frame)
+        except KeyError:
+            pass
         self.Check(frame)
 
     def Check(self, frame):
@@ -232,11 +239,14 @@ class Distance(Compare):
         Compare.Configure(self)
 
     def Physics(self, frame):
-        Compare.Physics(self, frame)
-        if self.OK:
-            self.get_vertex()
-            self.get_distance()
-            frame.Put("Distance", I3Double(self.Distance))
+        try:
+            Compare.Physics(self, frame)
+            if self.OK:
+                self.get_vertex()
+                self.get_distance()
+                frame.Put("Distance", I3Double(self.Distance))
+        except IndexError:
+            pass
         self.PushFrame(frame)
 
     def get_vertex(self):
@@ -262,11 +272,14 @@ class TimeDistance(Compare):
         Compare.Configure(self)
 
     def Physics(self, frame):
-        Compare.Physics(self, frame)
-        if self.OK:
-            self.GetTime()
-            self.GetTimeDifference()
-            frame.Put("TimeDistance", I3Double(self.TimeDifference))
+        try:
+            Compare.Physics(self, frame)
+            if self.OK:
+                self.GetTime()
+                self.GetTimeDifference()
+                frame.Put("TimeDistance", I3Double(self.TimeDifference))
+        except IndexError:
+            pass
         self.PushFrame(frame)
 
     def GetTime(self):
@@ -285,7 +298,7 @@ def i3extract(infile, outfile=None):
         outfile = infile + '.h5'
     tray = I3Tray()
     tray.AddModule('I3Reader', 'i3_reader', filename=infile)
-    tray.AddModule(KeepReconstructed, "event_selector")
+    # tray.AddModule(KeepReconstructed, "event_selector")
     tray.AddModule(ReadEventMeta, 'read_meta')      # grab the event ID
     tray.AddModule(Distance, "compare_space",
                    particle_1="best_FirstDusjOrcaVertexFit_FitResult",
