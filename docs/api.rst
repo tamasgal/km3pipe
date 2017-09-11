@@ -18,7 +18,6 @@ KM3Pipe: Main Framework
 .. autosummary::
   :toctree: api
 
-  AanetGeometry
   Blob
   Geometry
   Module

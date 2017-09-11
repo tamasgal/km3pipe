@@ -605,17 +605,3 @@ class Run(object):
     def __init__(self, **tables):
         for key, val in tables.items():
             setattr(self, key, val)
-
-
-class AanetGeometry(Module):
-    """AAnet based Geometry using Det()"""
-    def __init__(self, **context):
-        import aa  # noqa
-        from ROOT import Det
-        super(self.__class__, self).__init__(**context)
-        filename = self.get('filename')
-        self.detector = Det(filename)
-
-    def get_detector(self):
-        """Return the detector"""
-        return self.detector

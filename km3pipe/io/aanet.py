@@ -41,7 +41,8 @@ class AanetPump(Pump):
         List of files to open.
     aa_fmt: string, optional
         Subformat of aanet in the file. Possible values:
-        ``'minidst', 'jevt_jgandalf', 'generic_track', 'ancient_recolns'``
+        ``'minidst', 'jevt_jgandalf', 'gandalf_new', 'generic_track',
+        'ancient_recolns'``
     use_aart_sps_lib: bool, optional [default=False]
         Use Aart's local SPS copy (@ Lyon) via ``gSystem.Load``?
     apply_zed_correction: bool, optional [default=False]
@@ -49,6 +50,9 @@ class AanetPump(Pump):
     old_mc_id: bool, optional [default: False]
         Whether to read MC if from `evt.mc_id`. Newer aanet
         processings have `mc_id = evt.frame_index - 1` instead.
+    missing: numeric, optional [default: 0]
+        Filler for missing values.
+    skip_header: bool, optional [default=False]
     """
 
     def __init__(self, **context):
@@ -63,6 +67,8 @@ class AanetPump(Pump):
         self.use_aart_sps_lib = self.get('use_aart_sps_lib') or False
         self.old_mc_id = self.get('old_mc_id') or False
         self.apply_zed_correction = self.get('apply_zed_correction') or False
+        self.skip_header = self.get('skip_header') or False
+        self.missing = self.get('missing') or 0
         if self.additional:
             self.id = self.get('id')
             self.return_without_match = self.get("return_without_match")
@@ -134,10 +140,12 @@ class AanetPump(Pump):
             nfilgen = 0
 
             try:
+                print("Reading header...")
                 self.header = event_file.rootfile().Get("Head")
             except (ValueError, UnicodeEncodeError, TypeError):
                 log.warn(filename + ": can't read header.")
             try:
+                print("Reading livetime...")
                 lt_line = self.header.get_line('livetime')
                 if len(lt_line) > 0:
                     livetime, livetime_err = lt_line.split()
@@ -149,12 +157,14 @@ class AanetPump(Pump):
                 log.warn(filename + ": can't read livetime.")
                 self.livetime = 0
             try:
+                print("Reading genvol...")
                 ngen = self.header.get_field('genvol', 4)
                 self.ngen = float(ngen)
             except (ValueError, UnicodeEncodeError, AttributeError):
                 log.warn(filename + ": can't read ngen.")
                 self.ngen = 0
             try:
+                print("Reading number of generated files...")
                 self.nfilgen = float(nfilgen)
             except (ValueError, UnicodeEncodeError):
                 log.warn(filename + ": can't read nfilgen.")
@@ -162,16 +172,19 @@ class AanetPump(Pump):
             # END OF OLD HEADER CRAZINESS
 
             # NEW HEADER CRAZINESS
-            if self.format != 'ancient_recolns':
+            if not self.skip_header and (self.format != 'ancient_recolns'):
+                print("Retrieving aanet header...")
                 self.aanet_header = get_aanet_header(event_file)
 
             if self.format == 'ancient_recolns':
+                print("Generating blobs through old aanet API...")
                 while event_file.next():
                     event = event_file.evt
                     blob = self._read_event(event, filename)
                     blob["Header"] = self.aanet_header
                     yield blob
             else:
+                print("Generating blobs through new aanet API...")
                 for event in event_file:
                     blob = self._read_event(event, filename)
                     blob["Header"] = self.aanet_header
@@ -232,7 +245,7 @@ class AanetPump(Pump):
                 event.det_id,
                 event.frame_index,
                 self.livetime,      # livetime_sec
-                mc_id,
+                mc_id,       # mc_id,
                 event.mc_t,
                 self.ngen,      # n_events_gen
                 self.nfilgen,   # n_files_gen
@@ -268,20 +281,25 @@ class AanetPump(Pump):
             for recname, reco in recos.items():
                 blob[recname] = reco
         if self.format in ('jevt_jgandalf', 'gandalf', 'jgandalf'):
-            track, dtype = parse_jevt_jgandalf(event, event_id)
+            track, dtype = parse_jevt_jgandalf(event, event_id, self.missing)
             if track:
                 blob['Gandalf'] = KM3Array.from_dict(
-                        track, dtype, h5loc='/reco')
+                    track, dtype, h5loc='/reco')
+        if self.format in ('gandalf_new', 'jgandalf_new'):
+            track, dtype = parse_jgandalf_new(event, event_id, self.missing)
+            if track:
+                blob['Gandalf'] = KM3Array.from_dict(
+                    track, dtype, h5loc='/reco')
         if self.format == 'generic_track':
-            track, dtype = parse_generic_event(event, event_id)
+            track, dtype = parse_generic_event(event, event_id, self.missing)
             if track:
                 blob['Track'] = KM3Array.from_dict(
-                        track, dtype, h5loc='/reco')
+                    track, dtype, h5loc='/reco')
         if self.format in ('ancient_recolns', 'orca_recolns'):
-            track, dtype = parse_ancient_recolns(event, event_id)
+            track, dtype = parse_ancient_recolns(event, event_id, self.missing)
             if track:
                 blob['OrcaRecoLns'] = KM3Array.from_dict(
-                        track, dtype, h5loc='/reco')
+                    track, dtype, h5loc='/reco')
         return blob
 
     def event_index(self, blob):
@@ -356,11 +374,11 @@ def get_aanet_header(event_file):
             for value in values:
                 if field == "physics" and value == "date":  # segfaults
                     continue
-                d[field+'_'+value] = header.get_field(field, value)
+                d[field + '_' + value] = header.get_field(field, value)
     return d
 
 
-def parse_ancient_recolns(aanet_event, event_id):
+def parse_ancient_recolns(aanet_event, event_id, missing=0):
     # the final recontructed track is in f.evt.trks, at the index 5
     # trks[0] ==> prefit track
     # trks[1] ==> m-estimator track
@@ -383,21 +401,21 @@ def parse_ancient_recolns(aanet_event, event_id):
         out['dir_z'] = aanet_event.trks[5].dir.z
 
         sigma2_theta = aanet_event.trks[3].error_matrix[18] \
-            if aanet_event.trks[3].error_matrix[18] > 0 else 0
+            if aanet_event.trks[3].error_matrix[18] > 0 else missing
         out['sigma2_theta'] = sigma2_theta
         sigma2_phi = aanet_event.trks[3].error_matrix[24] \
-            if aanet_event.trks[3].error_matrix[24] > 0 else 0
+            if aanet_event.trks[3].error_matrix[24] > 0 else missing
         out['sigma2_phi'] = sigma2_phi
         sin_theta = np.sin(np.arccos(aanet_event.trks[3].dir.z))
         out['sin_theta'] = sin_theta
         out['beta'] = np.sqrt(
-                sin_theta * sin_theta * sigma2_phi + sigma2_theta)
+            sin_theta * sin_theta * sigma2_phi + sigma2_theta)
     except IndexError:
         keys = {'quality', 'n_hits_used', 'pos_x', 'pos_y', 'pos_z',        # noqa
                 'dir_x', 'dir_y', 'dir_z', 'energy_muon', 'energy_neutrino',        # noqa
                 'bjorken_y', 'beta', 'sigma2_theta', 'sigma2_phi',      # noqa
                 'sin_theta', }    # noqa
-        out = {key: 0 for key in keys}
+        out = {key: missing for key in keys}
     dt = [(key, float) for key in sorted(out.keys())]
     out['event_id'] = event_id
     dt.append(('event_id', '<u4'))
@@ -405,7 +423,7 @@ def parse_ancient_recolns(aanet_event, event_id):
     return out, dt
 
 
-def parse_jevt_jgandalf(aanet_event, event_id):
+def parse_jevt_jgandalf(aanet_event, event_id, missing=0):
     try:
         track = aanet_event.trks[0]     # this might throw IndexError
         map = {}
@@ -429,7 +447,51 @@ def parse_jevt_jgandalf(aanet_event, event_id):
         keys = {'id', 'pos_x', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z',
                 'time', 'type', 'rec_type', 'rec_stage', 'beta0', 'beta1',
                 'lik', 'lik_red', 'energy', }
-        map = {key: 0 for key in keys}
+        map = {key: missing for key in keys}
+    dt = [(key, float) for key in sorted(map.keys())]
+    map['event_id'] = event_id
+    dt.append(('event_id', '<u4'))
+    dt = np.dtype(dt)
+    return map, dt
+
+
+def parse_jgandalf_new(aanet_event, event_id, missing=0):
+    fitinv_enum = [
+        'beta0',
+        'beta1',
+        'chi2',
+        'n_hits',
+        'jenergy_energy'
+        'jenergy_chi2',
+        'lambda',
+        'n_iter',
+        'jstart_npe_mip',
+        'jstart_npe_mip_total',
+        'jstart_length',
+        # 'jveto_npe',
+        # 'jveto_nhits'
+        ]
+    all_keys = [
+        'pos_x', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z',
+        'time', 'type', 'rec_type', 'rec_stage',
+    ] + fitinv_enum
+    try:
+        track = aanet_event.trks[0]
+        map = {}
+        map['pos_x'] = track.pos.x
+        map['pos_y'] = track.pos.y
+        map['pos_z'] = track.pos.z
+        map['dir_x'] = track.dir.x
+        map['dir_y'] = track.dir.y
+        map['dir_z'] = track.dir.z
+        map['time'] = track.t
+        map['type'] = track.type
+        map['rec_type'] = track.rec_type
+        map['rec_stage'] = track.rec_stage
+        for i, key in enumerate(fitinv_enum):
+            map[key] = track.fitinf[i]
+    except IndexError:
+        map = {key: missing for key in all_keys}
     dt = [(key, float) for key in sorted(map.keys())]
     map['event_id'] = event_id
     dt.append(('event_id', '<u4'))
@@ -492,13 +554,12 @@ def read_mini_dst(aanet_event, event_id):
 
         reco_map, dtype = reader(trk)
         minidst[recname] = KM3Array.from_dict(
-                reco_map, dtype, h5loc='/reco')
+            reco_map, dtype, h5loc='/reco')
 
     thomas_map, dtype = parse_thomasfeatures(
-            aanet_event.usr, aanet_event.usr_names)
+        aanet_event.usr, aanet_event.usr_names)
     minidst['ThomasFeatures'] = KM3Array.from_dict(
-            thomas_map, dtype, h5loc='/reco')
-
+        thomas_map, dtype, h5loc='/reco')
     return minidst
 
 
@@ -629,7 +690,7 @@ def parse_qstrategy(aanet_trk, event_id=0):
     return out, dtype
 
 
-def parse_dusj(aanet_trk, event_id=0):
+def parse_dusj(aanet_trk, event_id=0, missing=0):
     out = parse_track(aanet_trk)
     did_converge = aanet_trk.rec_stage > -9999
 
@@ -671,7 +732,7 @@ def parse_dusj(aanet_trk, event_id=0):
 
     if not did_converge:
         for key in dusj_keys:
-            out[key] = np.nan
+            out[key] = missing
     else:
         for count, key in enumerate(dusj_keys):
             out[key] = aanet_trk.usr[count]
