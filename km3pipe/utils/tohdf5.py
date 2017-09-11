@@ -25,6 +25,11 @@ Options:
     -s --with-summaryslices    Include summary slices [default: False]
     --correct-zed              (Aanet) Correct offset in mc tracks (aanet)
                                [default: False]
+    --skip-header              (Aanet) don't read the full header.
+                               Entries like `genvol` and `neventgen` will
+                               still be retrived. This switch enables
+                               skipping the `get_aanet_header` function only.
+                               [default: False]
     -e --expected-rows NROWS   Approximate number of events.  Providing a
                                rough estimate for this (100, 10000000, ...)
                                will greatly improve reading/writing speed and
@@ -87,6 +92,7 @@ def main():
     with_summaryslices = args['--with-summaryslices']
     with_timeslice_hits = args['--with-timeslice-hits']
     correct_zed = args['--correct-zed']
+    skip_header = args['--skip-header']
     tohdf5(infiles,
            outfile,
            n,
@@ -98,4 +104,5 @@ def main():
            n_rows_expected=n_rows_expected,
            apply_zed_correction=correct_zed,
            old_mc_id=aa_old_mc_id,
+           skip_header=skip_header
            )

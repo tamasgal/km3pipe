@@ -52,6 +52,7 @@ class AanetPump(Pump):
         processings have `mc_id = evt.frame_index - 1` instead.
     missing: numeric, optional [default: 0]
         Filler for missing values.
+    skip_header: bool, optional [default=False]
     """
 
     def __init__(self, **context):
@@ -66,6 +67,7 @@ class AanetPump(Pump):
         self.use_aart_sps_lib = self.get('use_aart_sps_lib') or False
         self.old_mc_id = self.get('old_mc_id') or False
         self.apply_zed_correction = self.get('apply_zed_correction') or False
+        self.skip_header = self.get('skip_header') or False
         self.missing = self.get('missing') or 0
         if self.additional:
             self.id = self.get('id')
@@ -138,10 +140,12 @@ class AanetPump(Pump):
             nfilgen = 0
 
             try:
+                print("Reading header...")
                 self.header = event_file.rootfile().Get("Head")
             except (ValueError, UnicodeEncodeError, TypeError):
                 log.warn(filename + ": can't read header.")
             try:
+                print("Reading livetime...")
                 lt_line = self.header.get_line('livetime')
                 if len(lt_line) > 0:
                     livetime, livetime_err = lt_line.split()
@@ -153,12 +157,14 @@ class AanetPump(Pump):
                 log.warn(filename + ": can't read livetime.")
                 self.livetime = 0
             try:
+                print("Reading genvol...")
                 ngen = self.header.get_field('genvol', 4)
                 self.ngen = float(ngen)
             except (ValueError, UnicodeEncodeError, AttributeError):
                 log.warn(filename + ": can't read ngen.")
                 self.ngen = 0
             try:
+                print("Reading number of generated files...")
                 self.nfilgen = float(nfilgen)
             except (ValueError, UnicodeEncodeError):
                 log.warn(filename + ": can't read nfilgen.")
@@ -166,16 +172,19 @@ class AanetPump(Pump):
             # END OF OLD HEADER CRAZINESS
 
             # NEW HEADER CRAZINESS
-            if self.format != 'ancient_recolns':
+            if not self.skip_header and (self.format != 'ancient_recolns'):
+                print("Retrieving aanet header...")
                 self.aanet_header = get_aanet_header(event_file)
 
             if self.format == 'ancient_recolns':
+                print("Generating blobs through old aanet API...")
                 while event_file.next():
                     event = event_file.evt
                     blob = self._read_event(event, filename)
                     blob["Header"] = self.aanet_header
                     yield blob
             else:
+                print("Generating blobs through new aanet API...")
                 for event in event_file:
                     blob = self._read_event(event, filename)
                     blob["Header"] = self.aanet_header
@@ -236,7 +245,7 @@ class AanetPump(Pump):
                 event.det_id,
                 event.frame_index,
                 self.livetime,      # livetime_sec
-                mc_id,
+                mc_id,       # mc_id,
                 event.mc_t,
                 self.ngen,      # n_events_gen
                 self.nfilgen,   # n_files_gen
