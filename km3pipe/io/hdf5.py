@@ -7,7 +7,7 @@ Read and write KM3NeT-formatted HDF5 files.
 """
 from __future__ import division, absolute_import, print_function
 
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict
 import os.path
 from six import itervalues, iteritems
 import warnings
@@ -74,6 +74,9 @@ class HDF5Sink(Module):
         Where to store the events.
     h5file: pytables.File instance, optional (default: None)
         Opened file to write to. This is mutually exclusive with filename.
+    pytab_file_args: dict [optional]
+        pass more arguments to the pytables File init
+    n_rows_expected = int, optional [default: 10000]
     """
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
@@ -216,8 +219,6 @@ class HDF5Sink(Module):
                 except AttributeError:  # backwards compatibility
                     self._write_array(where, data, datatype, title=key)
 
-
-
         if not self.index % 1000:
             for tab in self._tables.values():
                 tab.flush()
@@ -310,7 +311,6 @@ class HDF5Pump(Pump):
         self.index = None
         self._reset_index()
 
-
     def process(self, blob):
         try:
             blob = self.get_blob(self.index)
@@ -356,7 +356,7 @@ class HDF5Pump(Pump):
         for tab in h5file.walk_nodes(classname="Table"):
             loc, tabname = os.path.split(tab._v_pathname)
             if loc in skipped_locs:
-                continue;
+                continue
             if tabname == "_indices":
                 skipped_locs.append(loc)
                 self.indices[loc] = h5file.get_node(loc + '/' + '_indices')
