@@ -4,10 +4,10 @@
 from __future__ import division, absolute_import, print_function
 
 import numpy as np
-from time import sleep
 
 from km3pipe.testing import TestCase
-from km3pipe.math import (angle_between, pld3, com, zenith, azimuth)
+from km3pipe.math import (angle_between, pld3, com, zenith, azimuth,
+                          Polygon)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -26,12 +26,12 @@ class TestMath(TestCase):
                               [3., 1., 2.],
                               [4., 1., 1.]])
         self.v = (1, 2, 3)
-        self.unit_v = np.array([ 0.26726124,  0.53452248,  0.80178373])
-        self.unit_vecs = np.array([[ 0.        ,  0.19611614,  0.98058068],
-                                  [ 0.23570226,  0.23570226,  0.94280904],
-                                  [ 0.53452248,  0.26726124,  0.80178373],
-                                  [ 0.80178373,  0.26726124,  0.53452248],
-                                  [ 0.94280904,  0.23570226,  0.23570226]])
+        self.unit_v = np.array([0.26726124, 0.53452248, 0.80178373])
+        self.unit_vecs = np.array([[0., 0.19611614, 0.98058068],
+                                   [0.23570226, 0.23570226, 0.94280904],
+                                   [0.53452248, 0.26726124, 0.80178373],
+                                   [0.80178373, 0.26726124, 0.53452248],
+                                   [0.94280904, 0.23570226, 0.23570226]])
 
     def test_zenith(self):
         self.assertAlmostEqual(np.pi, zenith((0, 0, 1)))
@@ -62,22 +62,21 @@ class TestMath(TestCase):
         v2 = (0, 1, 0)
         v3 = (-1, 0, 0)
         self.assertAlmostEqual(0, angle_between(v1, v1))
-        self.assertAlmostEqual(np.pi/2, angle_between(v1, v2))
+        self.assertAlmostEqual(np.pi / 2, angle_between(v1, v2))
         self.assertAlmostEqual(np.pi, angle_between(v1, v3))
         self.assertAlmostEqual(angle_between(self.v, v1), 1.3002465638163236)
         self.assertAlmostEqual(angle_between(self.v, v2), 1.0068536854342678)
         self.assertAlmostEqual(angle_between(self.v, v3), 1.8413460897734695)
         self.assertTrue(np.allclose(angle_between(self.vecs, v1),
-                                    np.array([1.57079633, 1.3328552 , 1.00685369,
+                                    np.array([1.57079633, 1.3328552, 1.00685369,
                                               0.64052231, 0.33983691])))
         self.assertTrue(np.allclose(angle_between(self.vecs, v2),
-                                    np.array([1.37340077, 1.3328552 , 1.30024656,
-                                              1.30024656, 1.3328552 ])))
+                                    np.array([1.37340077, 1.3328552, 1.30024656,
+                                              1.30024656, 1.3328552])))
         self.assertTrue(np.allclose(angle_between(self.vecs, v3),
                                     np.array([1.57079633, 1.80873745,
                                               2.13473897, 2.50107034,
                                               2.80175574])))
-
 
     def test_angle_between_returns_nan_for_zero_length_vectors(self):
         v1 = (0, 0, 0)
@@ -118,3 +117,27 @@ class TestMath(TestCase):
         self.assertEqual((1, 2, 3), tuple(center_of_mass))
         center_of_mass = com(((1, 1, 1), (0, 0, 0)))
         self.assertEqual((0.5, 0.5, 0.5), tuple(center_of_mass))
+
+
+class TestPoly(TestCase):
+    def test_poly_containmend(self):
+        polygon = Polygon([
+            (-60, 120),
+            (80, 120),
+            (110, 60),
+            (110, -30),
+            (70, -110),
+            (-70, -110),
+            (-90, -70),
+            (-90, 60),
+        ])
+        point_in = (-40, -40)
+        point_out = (-140, -140)
+        points = [
+            (-40, -40),
+            (-140, -140),
+            (40, -140),
+        ]
+        assert np.all(polygon.contains(point_in))
+        assert not np.any(polygon.contains(point_out))
+        assert np.all(polygon.contains(points) == [True, False, False])

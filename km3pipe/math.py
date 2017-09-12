@@ -9,6 +9,7 @@ Maths.
 """
 from __future__ import division, absolute_import, print_function
 
+from matplotlib.path import Path
 import numpy as np
 import scipy.linalg
 
@@ -142,3 +143,15 @@ def hsin(theta):
 def space_angle(zen_1, zen_2, azi_1, azi_2):
     """Space angle between two directions specified by zenith and azimuth."""
     return hsin(azi_2 - azi_1) + np.cos(azi_1) * np.cos(azi_2) * hsin(zen_2 - zen_1)
+
+
+class Polygon(object):
+    """A polygon, to implement containment conditions."""
+    def __init__(self, vertices):
+        self.poly = Path(vertices)
+
+    def contains(self, points):
+        points = np.atleast_1d(points)
+        points_flat = points.reshape((-1, 2))
+        is_contained = self.poly.contains_points(points_flat)
+        return is_contained
