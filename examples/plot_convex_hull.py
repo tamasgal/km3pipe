@@ -19,8 +19,7 @@ km3pipe.style.use("km3pipe")
 
 filename = "data/orca_115strings_av23min20mhorizontal_18OMs_alt9mvertical_v1.detx"
 detector = Detector(filename)
-dom_pos = detector.dom_positions
-xy = np.array([(pos[0], pos[1]) for _, pos in dom_pos.items()])
+xy = detector.xy_positions
 hull = ConvexHull(xy)
 
 ##############################################################################
@@ -37,7 +36,6 @@ for simplex in hull.simplices:
 plt.plot(xy[hull.vertices, 0], xy[hull.vertices, 1], 'r--', lw=2)
 plt.plot(xy[hull.vertices[0], 0], xy[hull.vertices[0], 1], 'ro')
 plt.show()
-plt.savefig('foo.pdf')
 
 ##############################################################################
 # Now let's draw a polygon inside, and see which points are contained.
@@ -63,4 +61,3 @@ plt.plot(xy[contain_mask, 0], xy[contain_mask, 1], 'yo')
 plt.plot(xy[~contain_mask, 0], xy[~contain_mask, 1], 'bo')
 plt.plot(poly_vertices[:, 0], poly_vertices[:, 1], 'k-')
 plt.show()
-plt.savefig('bar.pdf')

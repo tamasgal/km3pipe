@@ -169,6 +169,11 @@ class TestDetector(TestCase):
         self.assertEqual((95, 7, 16), tuple(pmtid2omkey(52810.0)))
         self.assertEqual((95, 4, 13), tuple(pmtid2omkey(52900.0)))
 
+    def test_xy_pos(self):
+        self.det._parse_doms()
+        xy = self.det.xy_positions
+        assert xy is not None
+
 
 class TestPMT(TestCase):
 

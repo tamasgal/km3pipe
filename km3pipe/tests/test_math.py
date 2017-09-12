@@ -160,4 +160,4 @@ class TestShapes(TestCase):
             (-100, 20, 10),
             (10, 90, 10),
         ]
-        np.all(prism.contains(points) == [True, False, True])
+        assert np.all(prism.contains(points) == [True, False, True])
