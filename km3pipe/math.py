@@ -151,7 +151,26 @@ class Polygon(object):
         self.poly = Path(vertices)
 
     def contains(self, points):
-        points = np.atleast_1d(points)
+        points = np.atleast_2d(points)
         points_flat = points.reshape((-1, 2))
         is_contained = self.poly.contains_points(points_flat)
         return is_contained
+
+
+class IrregularPrism(object):
+    """Like a cylinder, but the top is an irregular Polygon."""
+    def __init__(self, xy_vertices, z_min, z_max):
+        self.poly = Polygon(xy_vertices)
+        self.z_min = z_min
+        self.z_max = z_max
+
+    def _is_z_contained(self, z):
+        return (self.z_min <= z) & (z <= self.z_max)
+
+    def contains(self, points):
+        points = np.atleast_2d(points)
+        points_xy = points[:, [0, 1]]
+        points_z = points[:, 2]
+        is_xy_contained = self.poly.contains(points_xy)
+        is_z_contained = self._is_z_contained(points_z)
+        return is_xy_contained & is_z_contained

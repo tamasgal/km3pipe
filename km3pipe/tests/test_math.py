@@ -7,7 +7,7 @@ import numpy as np
 
 from km3pipe.testing import TestCase
 from km3pipe.math import (angle_between, pld3, com, zenith, azimuth,
-                          Polygon)
+                          Polygon, IrregularPrism)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -119,8 +119,8 @@ class TestMath(TestCase):
         self.assertEqual((0.5, 0.5, 0.5), tuple(center_of_mass))
 
 
-class TestPoly(TestCase):
-    def test_poly_containmend(self):
+class TestShapes(TestCase):
+    def test_poly_containment(self):
         polygon = Polygon([
             (-60, 120),
             (80, 120),
@@ -141,3 +141,23 @@ class TestPoly(TestCase):
         assert np.all(polygon.contains(point_in))
         assert not np.any(polygon.contains(point_out))
         assert np.all(polygon.contains(points) == [True, False, False])
+
+    def test_prism_contained(self):
+        xy = [
+            (-60, 120),
+            (80, 120),
+            (110, 60),
+            (110, -30),
+            (70, -110),
+            (-70, -110),
+            (-90, -70),
+            (-90, 60),
+        ]
+        z = (-90, 90)
+        prism = IrregularPrism(xy, z[0], z[1])
+        points = [
+            (0, 1, 2),
+            (-100, 20, 10),
+            (10, 90, 10),
+        ]
+        np.all(prism.contains(points) == [True, False, True])

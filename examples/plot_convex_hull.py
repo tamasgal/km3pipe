@@ -40,7 +40,7 @@ plt.show()
 plt.savefig('foo.pdf')
 
 ##############################################################################
-# Now let's draw a polygon inside, and color the points which are contained.
+# Now let's draw a polygon inside, and see which points are contained.
 
 poly_vertices = np.array([
     (-60, 120),
@@ -54,6 +54,10 @@ poly_vertices = np.array([
 ])
 poly = Polygon(poly_vertices)
 contain_mask = poly.contains(xy)
+
+##############################################################################
+# and color them accordingly
+
 plt.clf()
 plt.plot(xy[contain_mask, 0], xy[contain_mask, 1], 'yo')
 plt.plot(xy[~contain_mask, 0], xy[~contain_mask, 1], 'bo')
