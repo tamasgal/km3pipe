@@ -6,8 +6,10 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 
 from km3pipe.testing import TestCase
-from km3pipe.math import (angle_between, pld3, com, zenith, azimuth,
-                          Polygon, IrregularPrism)
+from km3pipe.math import (
+    angle_between, pld3, com, zenith, azimuth, Polygon, IrregularPrism,
+    rotation_matrix, SparseCone,
+)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -161,3 +163,21 @@ class TestShapes(TestCase):
             (10, 90, 10),
         ]
         assert np.all(prism.contains(points) == [True, False, True])
+
+
+class TestRotation(TestCase):
+    def test_rotmat(self):
+        v = [3, 5, 0]
+        axis = [4, 4, 1]
+        theta = 1.2
+        newvec = np.dot(rotation_matrix(axis, theta), v)
+        self.assertTrue(np.allclose(
+            newvec, np.array([2.74911638, 4.77180932, 1.91629719])))
+
+    def test_cone(self):
+        spike = [1, 0, 0]
+        bottom = [0, 2, 0]
+        angle = np.pi / 4
+        cone = SparseCone(spike, bottom, angle)
+        samp = cone.sample_circle(n_angles=6)
+        assert samp is not None
