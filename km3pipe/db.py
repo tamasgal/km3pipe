@@ -16,7 +16,7 @@ import pytz
 import socket
 from collections import OrderedDict
 try:
-    from inspect import Signature, Parameter 
+    from inspect import Signature, Parameter
 except ImportError:
     with_signatures = False
 else:
@@ -27,7 +27,7 @@ try:
 except ImportError:
     print("The database utilities needs pandas: pip install pandas")
 
-from .dev import colored, cprint
+from .dev import cprint
 from .time import Timer
 from .config import Config
 from .logger import logging
@@ -89,7 +89,8 @@ def we_are_in_lyon():
 
 class DBManager(object):
     """A wrapper for the KM3NeT Web DB"""
-    def __init__(self, username=None, password=None, url=None, temporary=False):
+    def __init__(self, username=None, password=None, url=None,
+                 temporary=False):
         "Create database connection"
         self._cookies = []
         self._parameters = None
@@ -409,7 +410,8 @@ class DBManager(object):
 
 class StreamDS(object):
     """Access to the streamds data stored in the KM3NeT database."""
-    def __init__(self, username=None, password=None, url=None, temporary=False):
+    def __init__(self, username=None, password=None, url=None,
+                 temporary=False):
         self._db = DBManager(username, password, url, temporary)
         self._stream_df = None
         self._streams = None
@@ -430,7 +432,7 @@ class StreamDS(object):
             stream = attr
         else:
             raise AttributeError
-        
+
         def func(**kwargs):
             return self.get(stream, **kwargs)
 
@@ -487,10 +489,9 @@ class StreamDS(object):
         sel = ''.join(["&{0}={1}".format(k, v) for (k, v) in kwargs.items()])
         url = "streamds/{0}.{1}?{2}".format(stream, fmt, sel[1:])
         data = self._db._get_content(url)
-        if fmt=="txt":
+        if fmt == "txt":
             return pd.read_csv(StringIO(data), sep='\t')
         return data
-
 
 
 class ParametersContainer(object):
