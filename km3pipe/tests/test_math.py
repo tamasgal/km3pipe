@@ -13,7 +13,7 @@ from km3pipe.math import (
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
-__credits__ = []
+__credits__ = ["Moritz Lotze"]
 __license__ = "MIT"
 __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
@@ -122,8 +122,8 @@ class TestMath(TestCase):
 
 
 class TestShapes(TestCase):
-    def test_poly_containment(self):
-        polygon = Polygon([
+    def setUp(self):
+        self.poly = [
             (-60, 120),
             (80, 120),
             (110, 60),
@@ -132,7 +132,10 @@ class TestShapes(TestCase):
             (-70, -110),
             (-90, -70),
             (-90, 60),
-        ])
+        ]
+
+    def test_poly_containment(self):
+        polygon = Polygon(self.poly)
         point_in = (-40, -40)
         point_out = (-140, -140)
         points = [
@@ -145,18 +148,8 @@ class TestShapes(TestCase):
         assert np.all(polygon.contains(points) == [True, False, False])
 
     def test_prism_contained(self):
-        xy = [
-            (-60, 120),
-            (80, 120),
-            (110, 60),
-            (110, -30),
-            (70, -110),
-            (-70, -110),
-            (-90, -70),
-            (-90, 60),
-        ]
         z = (-90, 90)
-        prism = IrregularPrism(xy, z[0], z[1])
+        prism = IrregularPrism(self.poly, z[0], z[1])
         points = [
             (0, 1, 2),
             (-100, 20, 10),
