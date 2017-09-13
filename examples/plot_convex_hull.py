@@ -11,6 +11,7 @@ Derived from ``scipy.spatial.qhull.pyx``.
 import numpy as np
 from scipy.spatial import ConvexHull
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 from km3pipe.core import Detector
 from km3pipe.math import Polygon
@@ -60,4 +61,18 @@ plt.clf()
 plt.plot(xy[contain_mask, 0], xy[contain_mask, 1], 'yo')
 plt.plot(xy[~contain_mask, 0], xy[~contain_mask, 1], 'bo')
 plt.plot(poly_vertices[:, 0], poly_vertices[:, 1], 'k-')
+plt.show()
+
+
+##############################################################################
+# plot the same in 3D because why not?
+
+plt.clf()
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(xy[:, 0], xy[:, 1], 90, 'yo')
+ax.scatter(xy[:, 0], xy[:, 1], -90, 'bo')
+ax.plot(poly_vertices[:, 0], poly_vertices[:, 1], 90, 'k-')
+for simplex in hull.simplices:
+    ax.plot(xy[simplex, 0], xy[simplex, 1], -90, 'k-')
 plt.show()
