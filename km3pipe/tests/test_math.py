@@ -168,10 +168,10 @@ class TestRotation(TestCase):
             newvec, np.array([2.74911638, 4.77180932, 1.91629719])))
 
     def test_cone(self):
-        spike = [1, 0, 0]
+        spike = [1, 1, 0]
         bottom = [0, 2, 0]
         angle = np.pi / 4
-        n_angles = 6
+        n_angles = 20
         cone = SparseCone(spike, bottom, angle)
         circ_samp = cone.sample_circle(n_angles=n_angles)
         axis_samp = cone.sample_axis
