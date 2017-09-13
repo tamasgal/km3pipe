@@ -246,3 +246,12 @@ class SparseCone(object):
             for theta in angles
         ]
         return points_on_circle
+
+    @property
+    def sample_axis(self):
+        return [self.spike_pos, self.bottom_center_pos]
+
+    def sample(self, n_circle=4):
+        points = self.sample_circle(n_circle)
+        points.extend(self.sample_axis)
+        return points

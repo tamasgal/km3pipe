@@ -171,6 +171,11 @@ class TestRotation(TestCase):
         spike = [1, 0, 0]
         bottom = [0, 2, 0]
         angle = np.pi / 4
+        n_angles = 6
         cone = SparseCone(spike, bottom, angle)
-        samp = cone.sample_circle(n_angles=6)
-        assert samp is not None
+        circ_samp = cone.sample_circle(n_angles=n_angles)
+        axis_samp = cone.sample_axis
+        samp = cone.sample(n_angles)
+        assert len(circ_samp) == n_angles
+        assert len(axis_samp) == 2
+        assert len(samp) == len(circ_samp) + 2
