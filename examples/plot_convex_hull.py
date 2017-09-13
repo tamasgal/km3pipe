@@ -11,7 +11,7 @@ Derived from ``scipy.spatial.qhull.pyx``.
 import numpy as np
 from scipy.spatial import ConvexHull
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d import Axes3D     # noqa
 
 from km3pipe.core import Detector
 from km3pipe.math import Polygon
