@@ -1,5 +1,8 @@
 Unreleased changes
 ------------------
+
+7.5.0 / 2017-09-14
+------------------
 * Adds sorting for ``***Series``` and other `DTypeAttr` subclasses.
 
 7.4.2 / 2017-09-11
