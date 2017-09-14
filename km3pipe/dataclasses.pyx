@@ -96,6 +96,10 @@ class DTypeAttr(object):
         else:
             raise AttributeError
 
+    def sorted(self, by='time'):
+        sort_idc = np.argsort(self._arr[by])
+        return self.__class__(self._arr[sort_idc], self.event_id)
+
 
 class Convertible(object):
     """Implements basic conversion methods."""
