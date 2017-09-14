@@ -641,6 +641,70 @@ cdef class RawHit:
         return self.__str__()
 
 
+cdef class CRawHit:
+    """RawHit on a PMT.
+
+    Parameters
+    ----------
+    channel_id : int
+    dir_x, dir_y, dir_z: float
+    dom_id : int
+    du: int
+    floor: int
+    pos_x, pos_y, pos_z: float
+    t0 : float
+    time : float
+    tot : int
+    triggered : int
+
+    """
+    cdef public int dom_id, tot, channel_id, du, floor
+    cdef public float dir_x, dir_y, dir_z, pos_x, pos_y, pos_z, time, t0
+    cdef public unsigned short int triggered
+
+    def __cinit__(self,
+                  int channel_id,
+                  float dir_x,
+                  float dir_y,
+                  float dir_z,
+                  int dom_id,
+                  int du,
+                  int floor,
+                  float pos_x,
+                  float pos_y,
+                  float pos_z,
+                  float t0,
+                  float time,
+                  int tot,
+                  unsigned short int triggered,
+                  int event_id=0        # ignore this! just for init * magic
+                  ):
+        self.channel_id = channel_id
+        self.dir_x, self.dir_y, self.dir_z = dir_x, dir_y, dir_z
+        self.dom_id = dom_id
+        self.du = du
+        self.floor = floor
+        self.pos_x, self.pos_y, self.pos_z = pos_x, pos_y, pos_z
+        self.t0 = t0
+        self.time = time
+        self.tot = tot
+        self.triggered = triggered
+
+    def __str__(self):
+        return "CRawHit: channel_id({0}), dom_id({1}), tot({2}), " \
+               "time({3}), triggered({4}), " \
+               "pos({5}, {6}, {7}), dir({8}, {9}, {10})" \
+               .format(self.channel_id, self.dom_id, self.tot, self.time,
+                       self.triggered, self.pos_x, self.pos_y, self.pos_z,
+                       self.dir_x, self.dir_y, self.dir_z)
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __insp__(self):
+        return self.__str__()
+
+
 cdef class TimesliceHit:
     """Timeslice hit on a PMT.
 
@@ -987,6 +1051,27 @@ class CRawHitSeries(DTypeAttr):
 
     def __array__(self):
         return self._arr
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        if self._index >= len(self):
+            self._index = 0
+            raise StopIteration
+        hit = self[self._index]
+        self._index += 1
+        return hit
+
+    def __getitem__(self, index):
+        if isinstance(index, int):
+            hit = CRawHit(*self._arr[index])
+            return hit
+        return self.__class__(self._arr[index], self.event_id)
+
+    def __iter__(self):
+        return self
 
     def __len__(self):
         return self._arr.shape[0]
