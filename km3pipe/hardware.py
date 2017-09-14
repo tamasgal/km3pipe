@@ -74,6 +74,7 @@ class Detector(object):
         self._pmts_by_id = OrderedDict()
         self._pmts_by_dom_id = defaultdict(list)
         self._pmt_angles = []
+        self._xy_pos = []
 
         if filename:
             self._init_from_file(filename)
@@ -180,6 +181,16 @@ class Detector(object):
                 self._dom_positions[dom_id] = com(pmt_positions)
         return self._dom_positions
 
+    @property
+    def xy_positions(self):
+        """XY positions of all doms."""
+        if not self._xy_pos:
+            dom_pos = self.dom_positions
+            xy = np.unique([(pos[0], pos[1]) for pos in dom_pos.values()],
+                           axis=0)
+            self._xy_pos = xy
+        return self._xy_pos
+
     def translate_detector(self, vector):
         vector = np.array(vector, dtype=float)
         for pmt in self.pmts:
@@ -213,7 +224,7 @@ class Detector(object):
                         pmt.id, pmt.pos[0], pmt.pos[1], pmt.pos[2],
                         pmt.dir[0], pmt.dir[1], pmt.dir[2],
                         pmt.t0
-                        )
+                )
         return header + "\n" + doms
 
     def write(self, filename):

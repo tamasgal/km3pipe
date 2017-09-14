@@ -4,11 +4,11 @@
 # cython: embedsignature=True
 # pylint: disable=C0103
 """
-Maths.
-
+Maths, Geometry, coordinates.
 """
 from __future__ import division, absolute_import, print_function
 
+from matplotlib.path import Path
 import numpy as np
 import scipy.linalg
 
@@ -142,3 +142,116 @@ def hsin(theta):
 def space_angle(zen_1, zen_2, azi_1, azi_2):
     """Space angle between two directions specified by zenith and azimuth."""
     return hsin(azi_2 - azi_1) + np.cos(azi_1) * np.cos(azi_2) * hsin(zen_2 - zen_1)
+
+
+def rotation_matrix(axis, theta):
+    """The Euler–Rodrigues formula.
+
+    Return the rotation matrix associated with counterclockwise rotation about
+    the given axis by theta radians.
+
+    Parameters
+    ----------
+    axis: vector to rotate around
+    theta: rotation angle, in rad
+    """
+    axis = np.asarray(axis)
+    axis = axis / np.linalg.norm(axis)
+    a = np.cos(theta / 2)
+    b, c, d = -axis * np.sin(theta / 2)
+    aa, bb, cc, dd = a * a, b * b, c * c, d * d
+    bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
+    return np.array([
+        [aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac)],
+        [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
+        [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc],
+    ])
+
+
+class Polygon(object):
+    """A polygon, to implement containment conditions."""
+    def __init__(self, vertices):
+        self.poly = Path(vertices)
+
+    def contains(self, points):
+        points = np.atleast_2d(points)
+        points_flat = points.reshape((-1, 2))
+        is_contained = self.poly.contains_points(points_flat)
+        return is_contained
+
+
+class IrregularPrism(object):
+    """Like a cylinder, but the top is an irregular Polygon."""
+    def __init__(self, xy_vertices, z_min, z_max):
+        self.poly = Polygon(xy_vertices)
+        self.z_min = z_min
+        self.z_max = z_max
+
+    def _is_z_contained(self, z):
+        return (self.z_min <= z) & (z <= self.z_max)
+
+    def contains(self, points):
+        points = np.atleast_2d(points)
+        points_xy = points[:, [0, 1]]
+        points_z = points[:, 2]
+        is_xy_contained = self.poly.contains(points_xy)
+        is_z_contained = self._is_z_contained(points_z)
+        return is_xy_contained & is_z_contained
+
+
+class SparseCone(object):
+    """A Cone, represented by sparse samples.
+
+    This samples evenly spaced points from the base circle.
+
+    Parameters
+    ----------
+    spike_pos: coordinates of the top
+    bottom_center_pos: center of the bottom circle
+    opening_angle: cone opening angle, in rad
+        theta, axis to mantle, *not* mantle-mantle. So this is the angle
+        to the axis, and mantle-to-mantle (aperture) is 2 theta.
+    """
+    def __init__(self, spike_pos, bottom_center_pos, opening_angle):
+        self.spike_pos = np.asarray(spike_pos)
+        self.bottom_center_pos = np.asarray(bottom_center_pos)
+        self.opening_angle = opening_angle
+        self.top_bottom_vec = self.bottom_center_pos - self.spike_pos
+        self.height = np.linalg.norm(self.top_bottom_vec)
+        self.mantle_length = self.height / np.cos(self.opening_angle)
+        self.radius = self.height * np.tan(self.opening_angle * self.height)
+
+    @classmethod
+    def _equidistant_angles_from_circle(cls, n_angles=4):
+        return np.linspace(0, 2 * np.pi, n_angles + 1)[:-1]
+
+    @property
+    def _random_circle_vector(self):
+        k = self.top_bottom_vec
+        r = self.radius
+        x = np.random.randn(3)
+        x -= x.dot(k) * k
+        x *= r / np.linalg.norm(x)
+        return x
+
+    def sample_circle(self, n_angles=4):
+        angles = self._equidistant_angles_from_circle(n_angles)
+        random_circle_vector = self._random_circle_vector
+        # rotate the radius vector around the cone axis
+        points_on_circle = [
+            np.dot(
+                rotation_matrix(self.top_bottom_vec, theta),
+                random_circle_vector
+            )
+            for theta in angles
+        ]
+        return points_on_circle
+
+    @property
+    def sample_axis(self):
+        return [self.spike_pos, self.bottom_center_pos]
+
+    def sample(self, n_circle=4):
+        points = self.sample_circle(n_circle)
+        points.extend(self.sample_axis)
+        return points

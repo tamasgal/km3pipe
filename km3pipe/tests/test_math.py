@@ -4,16 +4,18 @@
 from __future__ import division, absolute_import, print_function
 
 import numpy as np
-from time import sleep
 
 from km3pipe.testing import TestCase
-from km3pipe.math import (angle_between, pld3, com, zenith, azimuth)
+from km3pipe.math import (
+    angle_between, pld3, com, zenith, azimuth, Polygon, IrregularPrism,
+    rotation_matrix, SparseCone,
+)
 
-__author__ = "Tamas Gal"
-__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
-__credits__ = []
+__author__ = ["Tamas Gal", "Moritz Lotze"]
+__copyright__ = "Copyright 2016, KM3Pipe developers and the KM3NeT collaboration."
+__credits__ = ["Thomas Heid"]
 __license__ = "MIT"
-__maintainer__ = "Tamas Gal"
+__maintainer__ = ["Tamas Gal", "Moritz Lotze"]
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
@@ -26,12 +28,12 @@ class TestMath(TestCase):
                               [3., 1., 2.],
                               [4., 1., 1.]])
         self.v = (1, 2, 3)
-        self.unit_v = np.array([ 0.26726124,  0.53452248,  0.80178373])
-        self.unit_vecs = np.array([[ 0.        ,  0.19611614,  0.98058068],
-                                  [ 0.23570226,  0.23570226,  0.94280904],
-                                  [ 0.53452248,  0.26726124,  0.80178373],
-                                  [ 0.80178373,  0.26726124,  0.53452248],
-                                  [ 0.94280904,  0.23570226,  0.23570226]])
+        self.unit_v = np.array([0.26726124, 0.53452248, 0.80178373])
+        self.unit_vecs = np.array([[0., 0.19611614, 0.98058068],
+                                   [0.23570226, 0.23570226, 0.94280904],
+                                   [0.53452248, 0.26726124, 0.80178373],
+                                   [0.80178373, 0.26726124, 0.53452248],
+                                   [0.94280904, 0.23570226, 0.23570226]])
 
     def test_zenith(self):
         self.assertAlmostEqual(np.pi, zenith((0, 0, 1)))
@@ -62,22 +64,21 @@ class TestMath(TestCase):
         v2 = (0, 1, 0)
         v3 = (-1, 0, 0)
         self.assertAlmostEqual(0, angle_between(v1, v1))
-        self.assertAlmostEqual(np.pi/2, angle_between(v1, v2))
+        self.assertAlmostEqual(np.pi / 2, angle_between(v1, v2))
         self.assertAlmostEqual(np.pi, angle_between(v1, v3))
         self.assertAlmostEqual(angle_between(self.v, v1), 1.3002465638163236)
         self.assertAlmostEqual(angle_between(self.v, v2), 1.0068536854342678)
         self.assertAlmostEqual(angle_between(self.v, v3), 1.8413460897734695)
         self.assertTrue(np.allclose(angle_between(self.vecs, v1),
-                                    np.array([1.57079633, 1.3328552 , 1.00685369,
+                                    np.array([1.57079633, 1.3328552, 1.00685369,
                                               0.64052231, 0.33983691])))
         self.assertTrue(np.allclose(angle_between(self.vecs, v2),
-                                    np.array([1.37340077, 1.3328552 , 1.30024656,
-                                              1.30024656, 1.3328552 ])))
+                                    np.array([1.37340077, 1.3328552, 1.30024656,
+                                              1.30024656, 1.3328552])))
         self.assertTrue(np.allclose(angle_between(self.vecs, v3),
                                     np.array([1.57079633, 1.80873745,
                                               2.13473897, 2.50107034,
                                               2.80175574])))
-
 
     def test_angle_between_returns_nan_for_zero_length_vectors(self):
         v1 = (0, 0, 0)
@@ -118,3 +119,103 @@ class TestMath(TestCase):
         self.assertEqual((1, 2, 3), tuple(center_of_mass))
         center_of_mass = com(((1, 1, 1), (0, 0, 0)))
         self.assertEqual((0.5, 0.5, 0.5), tuple(center_of_mass))
+
+
+class TestShapes(TestCase):
+    def setUp(self):
+        self.poly = [
+            (-60, 120),
+            (80, 120),
+            (110, 60),
+            (110, -30),
+            (70, -110),
+            (-70, -110),
+            (-90, -70),
+            (-90, 60),
+        ]
+
+    def test_poly_containment(self):
+        polygon = Polygon(self.poly)
+        point_in = (-40, -40)
+        point_out = (-140, -140)
+        points = [
+            (-40, -40),
+            (-140, -140),
+            (40, -140),
+        ]
+        assert np.all(polygon.contains(point_in))
+        assert not np.any(polygon.contains(point_out))
+        assert np.all(polygon.contains(points) == [True, False, False])
+
+    def test_prism_contained(self):
+        z = (-90, 90)
+        prism = IrregularPrism(self.poly, z[0], z[1])
+        points = [
+            (0, 1, 2),
+            (-100, 20, 10),
+            (10, 90, 10),
+        ]
+        assert np.all(prism.contains(points) == [True, False, True])
+
+
+class TestRotation(TestCase):
+    def test_rotmat(self):
+        v = [3, 5, 0]
+        axis = [4, 4, 1]
+        theta = 1.2
+        newvec = np.dot(rotation_matrix(axis, theta), v)
+        self.assertTrue(np.allclose(
+            newvec, np.array([2.74911638, 4.77180932, 1.91629719])))
+
+    def test_cone(self):
+        spike = [1, 1, 0]
+        bottom = [0, 2, 0]
+        angle = np.pi / 4
+        n_angles = 20
+        cone = SparseCone(spike, bottom, angle)
+        circ_samp = cone.sample_circle(n_angles=n_angles)
+        axis_samp = cone.sample_axis
+        samp = cone.sample(n_angles)
+        assert len(circ_samp) == n_angles
+        assert len(axis_samp) == 2
+        assert len(samp) == len(circ_samp) + 2
+
+
+def inertia(x, y, z, weight=None):
+    """Inertia tensor, stolen of thomas"""
+    if weight is None:
+        weight = 1
+    tensor_of_inertia = np.zeros((3, 3), dtype=float)
+    tensor_of_inertia[0][0] = (y * y + z * z) * weight
+    tensor_of_inertia[0][1] = (-1) * x * y * weight
+    tensor_of_inertia[0][2] = (-1) * x * z * weight
+    tensor_of_inertia[1][0] = (-1) * x * y * weight
+    tensor_of_inertia[1][1] = (x * x + z * z) * weight
+    tensor_of_inertia[1][2] = (-1) * y * z * weight
+    tensor_of_inertia[2][0] = (-1) * x * z * weight
+    tensor_of_inertia[2][1] = (-1) * z * y * weight
+    tensor_of_inertia[2][2] = (x * x + y * y) * weight
+
+    eigen_values = np.linalg.eigvals(tensor_of_inertia)
+    small_inertia = eigen_values[2][2]
+    middle_inertia = eigen_values[1][1]
+    big_inertia = eigen_values[0][0]
+    return small_inertia, middle_inertia, big_inertia
+
+
+def g_parameter(time_residual):
+    """stolen from thomas"""
+    mean = np.mean(time_residual)
+    time_residual_prime = (time_residual - np.ones(time_residual.shape) * mean)
+    time_residual_prime *= time_residual_prime / (-2 * 1.5 * 1.5)
+    time_residual_prime = np.exp(time_residual_prime)
+    g = np.sum(time_residual_prime) / len(time_residual)
+    return g
+
+
+def gold_parameter(time_residual):
+    """stolen from thomas"""
+    gold = np.exp(
+        -1 * time_residual * time_residual / (2 * 1.5 * 1.5)
+    ) / len(time_residual)
+    gold = np.sum(gold)
