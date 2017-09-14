@@ -106,3 +106,52 @@ Another, even easier way is to calibrate your file beforehand, using the
 
 If you read in the file with the ``km3pipe.io.hdf5.HDF5Pump``, it will 
 automatically recognise the calibration and use the correct classes.
+
+Sorting of Hits
+---------------
+
+All `HitSeries` classes derive from `DTypeAttr` which implements a very fast
+sorting using the `numpy.argsort` method.
+
+Here is an example showing how to sort a dummy hit series with 3 hits::
+
+    In [1]: import km3pipe as kp
+
+    In [2]: hits = kp.dataclasses.RawHitSeries.from_arrays(
+       ...:     [13, 21, 12],
+       ...:     [10, 11, 10],
+       ...:     [3, 1, 2],
+       ...:     [22, 23, 24],
+       ...:     [False, True, True],
+       ...:     23)
+       ...: hits
+       ...:
+    Out[2]: RawHitSeries with 3 hits.
+
+    In [3]: for h in hits:
+       ...:     print(h)
+       ...:
+    RawHit: channel_id(13), dom_id(10), tot(22), time(3.0), triggered(0)
+    RawHit: channel_id(21), dom_id(11), tot(23), time(1.0), triggered(1)
+    RawHit: channel_id(12), dom_id(10), tot(24), time(2.0), triggered(1)
+
+    In [4]: for h in hits.sorted():
+       ...:     print(h)
+       ...:
+    RawHit: channel_id(21), dom_id(11), tot(23), time(1.0), triggered(1)
+    RawHit: channel_id(12), dom_id(10), tot(24), time(2.0), triggered(1)
+    RawHit: channel_id(13), dom_id(10), tot(22), time(3.0), triggered(0)
+
+    In [5]: for h in hits.sorted('channel_id'):
+       ...:     print(h)
+       ...:
+    RawHit: channel_id(12), dom_id(10), tot(24), time(2.0), triggered(1)
+    RawHit: channel_id(13), dom_id(10), tot(22), time(3.0), triggered(0)
+    RawHit: channel_id(21), dom_id(11), tot(23), time(1.0), triggered(1)
+
+    In [6]: for h in hits.sorted('dom_id'):
+       ...:     print(h)
+       ...:
+    RawHit: channel_id(13), dom_id(10), tot(22), time(3.0), triggered(0)
+    RawHit: channel_id(12), dom_id(10), tot(24), time(2.0), triggered(1)
+    RawHit: channel_id(21), dom_id(11), tot(23), time(1.0), triggered(1)
