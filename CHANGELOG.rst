@@ -5,6 +5,8 @@ Unreleased changes
   This should be now the default behaviour for all pumps.
 * ``tohdf5`` now has the option to ``--do-not-correct-mc-times`` in case
   the automatic conversion from JTE to MC hit time is not wanted
+* Freezes six-dependency to version 1.10 as the metaclass stuff for
+  Python 2 is broken in 1.11
 
 Version 7
 ---------
