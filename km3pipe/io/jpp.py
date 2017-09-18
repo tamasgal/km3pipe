@@ -28,7 +28,20 @@ __status__ = "Development"
 
 
 class JPPPump(Pump):
-    """A pump for JPP ROOT files."""
+    """A pump for JPP ROOT files.
+
+    Parameters
+    ----------
+    filename: str
+        Name of the file to open. 
+    index: int
+        The number to start the event indexing with [default: 0]
+    with_summaryslices: bool
+        Extract summary slices [default: False]
+    with_timeslice_hits: bool
+        Extract the hits from the timeslices.
+        This can make the file huge. [default: False]
+    """
 
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
