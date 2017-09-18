@@ -25,7 +25,7 @@ Options:
     -s --with-summaryslices         Include summary slices [default: False]
     --correct-zed                   (Aanet) Correct offset in mc tracks (aanet)
                                     [default: False]
-    '--do-not-correct-mc-times      Don't correct MC times.
+    --do-not-correct-mc-times       Don't correct MC times.
     --skip-header                   (Aanet) don't read the full header.
                                     Entries like `genvol` and `neventgen` will
                                     still be retrived. This switch enables
@@ -107,5 +107,5 @@ def main():
            apply_zed_correction=correct_zed,
            old_mc_id=aa_old_mc_id,
            skip_header=skip_header,
-           correct_mc_times= not bool(do_not_correct_mc_times)
+           correct_mc_times=not bool(do_not_correct_mc_times)
            )
