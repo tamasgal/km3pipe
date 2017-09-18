@@ -74,7 +74,7 @@ require_groups = {
                    'scikit-learn', 'sphinx-gallery>=0.1.11',
                    'sphinx', 'sphinxcontrib-napoleon', ],
           'base': ['cython', 'docopt', 'numpy>=1.12', 'pandas', 'pytz',
-                   'six', ],
+                   'six==1.10', ],
           'analysis': ['matplotlib>=2.0.0', 'sklearn', 'statsmodels>=0.8',
                        'scipy>=0.19', 'seaborn', 'ipython', 'patsy', ],
           'daq': ['controlhost', ],
