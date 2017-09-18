@@ -1,6 +1,9 @@
 Unreleased changes
 ------------------
 
+* The AANetPump now automatically converts hit times from JTE time to MC time.
+  This should be now the default behaviour for all pumps.
+
 7.5.0 / 2017-09-14
 ------------------
 * Adds sorting for ``***Series``` and other `DTypeAttr` subclasses.
