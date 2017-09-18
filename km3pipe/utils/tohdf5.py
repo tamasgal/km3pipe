@@ -9,32 +9,33 @@ Usage:
     tohdf5 --version
 
 Options:
-    -n EVENTS                  Number of events/runs.
-    -o OUTFILE                 Output file.
-    --aa-format=<fmt>          (Aanet): Which aanet subformat ('minidst',
-                               'orca_recolns', 'gandalf',
-                               'generic_track') [default: None]
-    --aa-lib=<lib.so>          (Aanet): path to aanet binary (for old
-                               versions which must be loaded via
-                               `ROOT.gSystem.Load()` instead of `import aa`)
-    --aa-old-mc-id             (aanet): read mc id as `evt.mc_id`, instead
-                               of the newer `mc_id = evt.frame_index - 1`
-    -h --help                  Show this screen.
-    -j --jppy                  (Jpp): Use jppy (not aanet) for Jpp readout
-    -l --with-timeslice-hits   Include timeslice-hits [default: False]
-    -s --with-summaryslices    Include summary slices [default: False]
-    --correct-zed              (Aanet) Correct offset in mc tracks (aanet)
-                               [default: False]
-    --skip-header              (Aanet) don't read the full header.
-                               Entries like `genvol` and `neventgen` will
-                               still be retrived. This switch enables
-                               skipping the `get_aanet_header` function only.
-                               [default: False]
-    -e --expected-rows NROWS   Approximate number of events.  Providing a
-                               rough estimate for this (100, 10000000, ...)
-                               will greatly improve reading/writing speed and
-                               memory usage. Strongly recommended if the
-                               table/array size is >= 100 MB. [default: 10000]
+    -n EVENTS                       Number of events/runs.
+    -o OUTFILE                      Output file.
+    --aa-format=<fmt>               (Aanet): Which aanet subformat ('minidst',
+                                    'orca_recolns', 'gandalf',
+                                    'generic_track') [default: None]
+    --aa-lib=<lib.so>               (Aanet): path to aanet binary (for old
+                                    versions which must be loaded via
+                                    `ROOT.gSystem.Load()` instead of `import aa`)
+    --aa-old-mc-id                  (aanet): read mc id as `evt.mc_id`, instead
+                                    of the newer `mc_id = evt.frame_index - 1`
+    -h --help                       Show this screen.
+    -j --jppy                       (Jpp): Use jppy (not aanet) for Jpp readout
+    -l --with-timeslice-hits        Include timeslice-hits [default: False]
+    -s --with-summaryslices         Include summary slices [default: False]
+    --correct-zed                   (Aanet) Correct offset in mc tracks (aanet)
+                                    [default: False]
+    '--do-not-correct-mc-times      Don't correct MC times.
+    --skip-header                   (Aanet) don't read the full header.
+                                    Entries like `genvol` and `neventgen` will
+                                    still be retrived. This switch enables
+                                    skipping the `get_aanet_header` function only.
+                                    [default: False]
+    -e --expected-rows NROWS        Approximate number of events.  Providing a
+                                    rough estimate for this (100, 10000000, ...)
+                                    will greatly improve reading/writing speed and
+                                    memory usage. Strongly recommended if the
+                                    table/array size is >= 100 MB. [default: 10000]
 """
 
 from __future__ import division, absolute_import, print_function
@@ -106,5 +107,5 @@ def main():
            apply_zed_correction=correct_zed,
            old_mc_id=aa_old_mc_id,
            skip_header=skip_header,
-           correct_mc_times=!do_not_correct_mc_times
+           correct_mc_times= not bool(do_not_correct_mc_times)
            )
