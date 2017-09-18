@@ -106,7 +106,7 @@ setup(name='km3pipe',
       platforms='any',
       setup_requires=['setuptools>=24.3', 'pip>=9.0.1', 'cython', 'numpy'],
       install_requires=['cython', 'docopt', 'numpy>=1.12', 'pandas', 'pytz',
-                        'six', ],
+                        'six==1.10', ],
       extras_require=require_groups,
       entry_points={
           'console_scripts': [
