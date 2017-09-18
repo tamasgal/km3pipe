@@ -53,6 +53,7 @@ class AanetPump(Pump):
     missing: numeric, optional [default: 0]
         Filler for missing values.
     skip_header: bool, optional [default=False]
+    correct_mc_times: convert hit times from JTE to MC time [default=True']
     """
 
     def __init__(self, **context):
@@ -69,7 +70,7 @@ class AanetPump(Pump):
         self.apply_zed_correction = self.get('apply_zed_correction') or False
         self.skip_header = self.get('skip_header') or False
         self.missing = self.get('missing') or 0
-        self.correct_mc_times = self.get('correct_mc_times') or True
+        self.correct_mc_times = bool(self.get('correct_mc_times'))
         if not self.correct_mc_times:
             log.warning("Hit times are not converted from JTE to MC now.")
         if self.additional:
