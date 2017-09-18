@@ -70,6 +70,8 @@ class AanetPump(Pump):
         self.skip_header = self.get('skip_header') or False
         self.missing = self.get('missing') or 0
         self.correct_mc_times = self.get('correct_mc_times') or True
+        if not self.correct_mc_times:
+            log.warning("Hit times are not converted from JTE to MC now.")
         if self.additional:
             self.id = self.get('id')
             self.return_without_match = self.get("return_without_match")
