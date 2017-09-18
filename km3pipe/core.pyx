@@ -108,15 +108,11 @@ class Pipeline(object):
                                 'finish': 0,
                                 'finish_cpu': 0}
 
-        try:
-            module.get_detector()
+        if hasattr(module, 'get_detector'):  # Geometry-like module
             self.geometry = module
             if module._should_apply:
                 self.modules.append(module)
-        except AttributeError:
-            if len(self.modules) < 1 and not isinstance(module, Pump):
-                log.error("The first module to attach to the pipeline should "
-                          "be a Pump!")
+        else:  # normal module
             module.geometry = self.geometry
             self.modules.append(module)
 
@@ -197,7 +193,7 @@ class Pipeline(object):
     def finish(self):
         """Call finish() on each attached module"""
         for module in self.modules:
-            try:
+            if hasattr(module, 'pre_finish'):
                 log.info("Finishing {0}".format(module.name))
                 start_time = timer()
                 start_time_cpu = time.clock()
@@ -205,7 +201,7 @@ class Pipeline(object):
                 self._timeit[module]['finish'] = timer() - start_time
                 self._timeit[module]['finish_cpu'] = \
                     time.clock() - start_time_cpu
-            except AttributeError:
+            else:
                 log.info("Skipping function module {0}".format(module.name))
         self._timeit['finish'] = timer()
         self._timeit['finish_cpu'] = time.clock()
