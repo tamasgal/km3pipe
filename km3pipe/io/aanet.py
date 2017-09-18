@@ -69,6 +69,7 @@ class AanetPump(Pump):
         self.apply_zed_correction = self.get('apply_zed_correction') or False
         self.skip_header = self.get('skip_header') or False
         self.missing = self.get('missing') or 0
+        self.correct_mc_times = self.get('correct_mc_times') or True
         if self.additional:
             self.id = self.get('id')
             self.return_without_match = self.get("return_without_match")
@@ -221,7 +222,14 @@ class AanetPump(Pump):
         self.i += 1
         if self.format != 'ancient_recolns':
             try:
-                blob['Hits'] = RawHitSeries.from_aanet(event.hits, event_id)
+                hits = RawHitSeries.from_aanet(event.hits, event_id)
+                if self.correct_mc_times:
+                    def converter(t):
+                        ns = event.t.GetSec()*1e9 + event.t.GetNanoSec()
+                        return t + ns - event.mc_t
+                    uconverter = np.frompyfunc(converter, 1, 1)
+                    hits._arr["time"] = uconverter(hits.time)
+                blob['Hits'] = hits
             except AttributeError:
                 log.warn("No hits found.")
             try:

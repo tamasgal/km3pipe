@@ -93,6 +93,7 @@ def main():
     with_timeslice_hits = args['--with-timeslice-hits']
     correct_zed = args['--correct-zed']
     skip_header = args['--skip-header']
+    do_not_correct_mc_times = args['--do-not-correct-mc-times']
     tohdf5(infiles,
            outfile,
            n,
@@ -104,5 +105,6 @@ def main():
            n_rows_expected=n_rows_expected,
            apply_zed_correction=correct_zed,
            old_mc_id=aa_old_mc_id,
-           skip_header=skip_header
+           skip_header=skip_header,
+           correct_mc_times=!do_not_correct_mc_times
            )
