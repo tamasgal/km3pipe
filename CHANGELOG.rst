@@ -1,6 +1,11 @@
 Unreleased changes
 ------------------
 
+Version 7
+---------
+
+7.5.1 / 2017-09-19
+~~~~~~~~~~~~~~~~~~
 * The AANetPump now automatically converts hit times from JTE time to MC time.
   This should be now the default behaviour for all pumps.
 * ``tohdf5`` now has the option to ``--do-not-correct-mc-times`` in case
@@ -9,9 +14,6 @@ Unreleased changes
   It is however backwards compatible to 4.1.
 * Freezes six-dependency to version 1.10 as the metaclass stuff for
   Python 2 is broken in 1.11
-
-Version 7
----------
 
 7.5.0 / 2017-09-14
 ~~~~~~~~~~~~~~~~~~
