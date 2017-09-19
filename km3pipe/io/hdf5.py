@@ -252,6 +252,7 @@ class HDF5Sink(Module):
                 tab.cols.event_id.create_index()
             tab.flush()
         self.h5file.close()
+        print("HDF5 file written to: {}".format(self.filename))
 
 
 class HDF5Pump(Pump):
