@@ -5,6 +5,8 @@ Unreleased changes
   This should be now the default behaviour for all pumps.
 * ``tohdf5`` now has the option to ``--do-not-correct-mc-times`` in case
   the automatic conversion from JTE to MC hit time is not wanted
+* HDF5 version updated to 4.2 due to the new handling of JTE/MC times.
+  It is however backwards compatible to 4.1.
 * Freezes six-dependency to version 1.10 as the metaclass stuff for
   Python 2 is broken in 1.11
 
