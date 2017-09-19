@@ -53,6 +53,7 @@ class AanetPump(Pump):
     missing: numeric, optional [default: 0]
         Filler for missing values.
     skip_header: bool, optional [default=False]
+    correct_mc_times: convert hit times from JTE to MC time [default=True']
     """
 
     def __init__(self, **context):
@@ -69,6 +70,8 @@ class AanetPump(Pump):
         self.apply_zed_correction = self.get('apply_zed_correction') or False
         self.skip_header = self.get('skip_header') or False
         self.missing = self.get('missing') or 0
+        self.correct_mc_times = bool(self.get('correct_mc_times'))
+
         if self.additional:
             self.id = self.get('id')
             self.return_without_match = self.get("return_without_match")
@@ -221,7 +224,14 @@ class AanetPump(Pump):
         self.i += 1
         if self.format != 'ancient_recolns':
             try:
-                blob['Hits'] = RawHitSeries.from_aanet(event.hits, event_id)
+                hits = RawHitSeries.from_aanet(event.hits, event_id)
+                if self.correct_mc_times:
+                    def converter(t):
+                        ns = event.t.GetSec()*1e9 + event.t.GetNanoSec()
+                        return t + ns - event.mc_t
+                    uconverter = np.frompyfunc(converter, 1, 1)
+                    hits._arr["time"] = uconverter(hits.time)
+                blob['Hits'] = hits
             except AttributeError:
                 log.warn("No hits found.")
             try:
