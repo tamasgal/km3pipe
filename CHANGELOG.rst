@@ -1,6 +1,9 @@
 Unreleased changes
 ------------------
 
+* fixed but in math.spatial_angle (zenith vs latitude)
+* (aanet) jgandalf_new now computes a ton of fit-spread-related metrics 
+
 Version 7
 ---------
 
