@@ -27,12 +27,23 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 def zenith(v):
-    """Return the zenith angle in radians"""
+    """Return the zenith angle in radians.
+
+    Defined as 'Angle respective to downgoing'.
+    Downgoing event: zenith = 0
+    Horizont: 90deg
+    Upgoing: zenith = 180deg
+    """
     return angle_between((0, 0, -1), v)
 
 
 def azimuth(v):
-    """Return the azimuth angle in radians"""
+    """Return the azimuth angle in radians.
+
+    This is the 'normal' azimuth definition -- beware of how you
+    define your coordinates. KM3NeT defines azimuth
+    differently than e.g. SLALIB, astropy, the AAS.org
+    """
     v = np.atleast_2d(v)
     phi = np.arctan2(v[:, 1], v[:, 0])
     phi[phi < 0] += 2 * np.pi
