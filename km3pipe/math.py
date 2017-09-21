@@ -171,6 +171,10 @@ class Polygon(object):
         is_contained = self.poly.contains_points(points_flat)
         return is_contained
 
+    def contains_xy(self, x, y):
+        xy = np.column_stack((x, y))
+        return self.contains(xy)
+
 
 class IrregularPrism(object):
     """Like a cylinder, but the top is an irregular Polygon."""
@@ -189,6 +193,10 @@ class IrregularPrism(object):
         is_xy_contained = self.poly.contains(points_xy)
         is_z_contained = self._is_z_contained(points_z)
         return is_xy_contained & is_z_contained
+
+    def contains_xyz(self, x, y, z):
+        xyz = np.column_stack((x, y, z))
+        return self.contains(xyz)
 
 
 class SparseCone(object):

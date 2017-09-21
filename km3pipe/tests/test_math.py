@@ -159,6 +159,13 @@ class TestShapes(TestCase):
         assert not np.any(polygon.contains(point_out))
         assert np.all(polygon.contains(points) == [True, False, False])
 
+    def test_poly_xy(self):
+        polygon = Polygon(self.poly)
+        x = (-40, -140, 40)
+        y = (-40, -140, -140)
+        assert np.all(polygon.contains_xy(x, y) == [True, False, False])
+
+
     def test_prism_contained(self):
         z = (-90, 90)
         prism = IrregularPrism(self.poly, z[0], z[1])
@@ -168,6 +175,14 @@ class TestShapes(TestCase):
             (10, 90, 10),
         ]
         assert np.all(prism.contains(points) == [True, False, True])
+
+    def test_prism_contained_xyz(self):
+        z = (-90, 90)
+        prism = IrregularPrism(self.poly, z[0], z[1])
+        x = (0, -100, 10)
+        y = (1, 20, 90)
+        z = (2, 10, 10)
+        assert np.all(prism.contains_xyz(x, y, z) == [True, False, True])
 
 
 class TestRotation(TestCase):
