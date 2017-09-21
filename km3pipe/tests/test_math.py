@@ -8,7 +8,7 @@ import numpy as np
 from km3pipe.testing import TestCase
 from km3pipe.math import (
     angle_between, pld3, com, zenith, azimuth, Polygon, IrregularPrism,
-    rotation_matrix, SparseCone,
+    rotation_matrix, SparseCone, space_angle, hsin,
 )
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
@@ -84,6 +84,18 @@ class TestMath(TestCase):
         v1 = (0, 0, 0)
         v2 = (1, 0, 0)
         self.assertTrue(np.isnan(angle_between(v1, v2)))
+
+    def test_space_angle(self):
+        p1 = (np.pi / 2, np.pi)
+        p2 = (np.pi, 0)
+        assert space_angle(p1[0], p2[0], p1[1], p2[1]) == 0.5
+        p3 = (0, np.pi)
+        p4 = (np.pi / 2, 0)
+        assert space_angle(p3[0], p4[0], p3[1], p4[1]) == 0.5
+
+    def test_hsin(self):
+        assert np.all(hsin((np.pi, 0)) == (1, 0))
+        self.assertAlmostEqual(hsin(np.pi/2), 0.5)
 
     def test_pld3(self):
         p1 = np.array((0, 0, 0))
@@ -179,5 +191,3 @@ class TestRotation(TestCase):
         assert len(circ_samp) == n_angles
         assert len(axis_samp) == 2
         assert len(samp) == len(circ_samp) + 2
-
-

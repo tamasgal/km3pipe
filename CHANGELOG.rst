@@ -1,8 +1,8 @@
 Unreleased changes
 ------------------
 
-* fixed but in math.spatial_angle (zenith vs latitude)
-* (aanet) jgandalf_new now computes a ton of fit-spread-related metrics 
+* fixed bug in math.spatial_angle (zenith vs latitude)
+* (aanet) jgandalf_new now computes a ton of fit-spread-related metrics  (updated in tohdf5 help string, too)
 * added usage warning to math.azimuth. for rest-of-world compatible coordinates, use KM3Astro
 
 Version 7

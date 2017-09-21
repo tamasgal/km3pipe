@@ -121,30 +121,6 @@ def circ_permutation(items):
     return permutations
 
 
-def add_empty_flow_bins(bins):
-    """Add empty over- and underflow bins.
-    """
-    bins = list(bins)
-    bins.insert(0, 0)
-    bins.append(0)
-    return np.array(bins)
-
-
-def flat_weights(x, bins):
-    """Get weights to produce a flat histogram.
-    """
-    bin_width = np.abs(bins[1] - bins[0])
-    hist, _ = np.histogram(x, bins=bins)
-    hist = hist.astype(float)
-    hist = add_empty_flow_bins(hist)
-    hist *= bin_width
-    which = np.digitize(x, bins=bins, right=True)
-    pop = hist[which]
-    wgt = 1 / pop
-    wgt *= len(wgt) / np.sum(wgt)
-    return wgt
-
-
 def hsin(theta):
     """haversine"""
     return (1.0 - np.cos(theta)) / 2.
