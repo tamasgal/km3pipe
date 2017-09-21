@@ -38,8 +38,31 @@ def try_decode_string(foo):
 
 
 class EvtPump(Pump):  # pylint: disable:R0902
-    """Provides a pump for EVT-files"""
+    """Provides a pump for EVT-files.
 
+    Parameters
+    ----------
+    filename: str
+        The file to read the events from.
+    cache_enabled: bool
+        If enabled, a cache of the event indices is created when loading
+        the file. Enable it if you want to jump around and inspect the
+        events non-consecutively. [default: False]
+    basename: str
+        The common part of the filenames if you want to process multiple
+        files e.g. file1.evt, file2.evt and file3.evt. During processing,
+        the files will be concatenated behind the scenes.
+        You need to specify the `index_stop` and `index_start`
+        (1 and 3 for the example).
+    index_start: int
+        The starting index if you process multiple files at once. [default: 1]
+    index_stop: int
+        The last index if you process multiple files at once. [default: 1]
+    exclude_tags: list of strings
+        The tags in the EVT file, which should be ignored (e.g. if they
+        cause parse errors)
+    
+    """
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename')
