@@ -271,3 +271,43 @@ class SparseCone(object):
         points = self.sample_circle(n_circle)
         points.extend(self.sample_axis)
         return points
+
+
+def inertia(x, y, z, weight=None):
+    """Inertia tensor, stolen of thomas"""
+    if weight is None:
+        weight = 1
+    tensor_of_inertia = np.zeros((3, 3), dtype=float)
+    tensor_of_inertia[0][0] = (y * y + z * z) * weight
+    tensor_of_inertia[0][1] = (-1) * x * y * weight
+    tensor_of_inertia[0][2] = (-1) * x * z * weight
+    tensor_of_inertia[1][0] = (-1) * x * y * weight
+    tensor_of_inertia[1][1] = (x * x + z * z) * weight
+    tensor_of_inertia[1][2] = (-1) * y * z * weight
+    tensor_of_inertia[2][0] = (-1) * x * z * weight
+    tensor_of_inertia[2][1] = (-1) * z * y * weight
+    tensor_of_inertia[2][2] = (x * x + y * y) * weight
+
+    eigen_values = np.linalg.eigvals(tensor_of_inertia)
+    small_inertia = eigen_values[2][2]
+    middle_inertia = eigen_values[1][1]
+    big_inertia = eigen_values[0][0]
+    return small_inertia, middle_inertia, big_inertia
+
+
+def g_parameter(time_residual):
+    """stolen from thomas"""
+    mean = np.mean(time_residual)
+    time_residual_prime = (time_residual - np.ones(time_residual.shape) * mean)
+    time_residual_prime *= time_residual_prime / (-2 * 1.5 * 1.5)
+    time_residual_prime = np.exp(time_residual_prime)
+    g = np.sum(time_residual_prime) / len(time_residual)
+    return g
+
+
+def gold_parameter(time_residual):
+    """stolen from thomas"""
+    gold = np.exp(
+        -1 * time_residual * time_residual / (2 * 1.5 * 1.5)
+    ) / len(time_residual)
+    gold = np.sum(gold)
