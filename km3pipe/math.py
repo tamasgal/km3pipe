@@ -140,8 +140,13 @@ def hsin(theta):
 
 
 def space_angle(zen_1, zen_2, azi_1, azi_2):
-    """Space angle between two directions specified by zenith and azimuth."""
-    return hsin(azi_2 - azi_1) + np.cos(azi_1) * np.cos(azi_2) * hsin(zen_2 - zen_1)
+    """Space angle between two directions specified by zenith and azimuth.
+
+    Space angle only makes sense in lon-lat, so convert zenith -> latitude.
+    """
+    lon_1 = np.pi - zen_1
+    lon_2 = np.pi - zen_2
+    return hsin(azi_2 - azi_1) + np.cos(azi_1) * np.cos(azi_2) * hsin(lon_2 - lon_1)
 
 
 def rotation_matrix(axis, theta):
