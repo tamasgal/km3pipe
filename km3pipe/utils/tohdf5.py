@@ -12,7 +12,7 @@ Options:
     -n EVENTS                       Number of events/runs.
     -o OUTFILE                      Output file.
     --aa-format=<fmt>               (Aanet): Which aanet subformat ('minidst',
-                                    'orca_recolns', 'gandalf',
+                                    'orca_recolns', 'gandalf', 'gandalf_new',
                                     'generic_track') [default: None]
     --aa-lib=<lib.so>               (Aanet): path to aanet binary (for old
                                     versions which must be loaded via
