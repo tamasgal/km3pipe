@@ -247,8 +247,7 @@ class DAQProcessor(Module):
 
         event_info = EventInfo(np.array(
             (header.det_id,
-            self.index,
-            # header.time_slice,
+            self.index, # header.time_slice,
             0,  # livetime_sec
             0, 0,  # MC ID and time
             0, 0,  # n evts/files gen
@@ -257,6 +256,7 @@ class DAQProcessor(Module):
             event.trigger_counter, event.trigger_mask,
             header.ticks * 16, header.time_stamp,
             0, 0, 0,  # MC weights
+            0, # run id
             0), dtype=EventInfo.dtype))
         blob['EventInfo'] = event_info
 
