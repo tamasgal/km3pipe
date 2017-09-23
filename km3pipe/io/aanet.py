@@ -8,6 +8,8 @@ If you have a way to read aanet files via the Jpp interface,
 your pull request is more than welcome!
 """
 from __future__ import division, absolute_import, print_function
+
+from collections import defaultdict
 import os.path
 
 import numpy as np
@@ -27,6 +29,22 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
+
+FITINF_ENUM = [
+    'beta0',
+    'beta1',
+    'chi2',
+    'n_hits',
+    'jenergy_energy'
+    'jenergy_chi2',
+    'lambda',
+    'n_iter',
+    'jstart_npe_mip',
+    'jstart_npe_mip_total',
+    'jstart_length',
+    # 'jveto_npe',
+    # 'jveto_nhits'
+]
 
 
 class AanetPump(Pump):
@@ -227,7 +245,7 @@ class AanetPump(Pump):
                 hits = RawHitSeries.from_aanet(event.hits, event_id)
                 if self.correct_mc_times:
                     def converter(t):
-                        ns = event.t.GetSec()*1e9 + event.t.GetNanoSec()
+                        ns = event.t.GetSec() * 1e9 + event.t.GetNanoSec()
                         return t + ns - event.mc_t
                     uconverter = np.frompyfunc(converter, 1, 1)
                     hits._arr["time"] = uconverter(hits.time)
@@ -466,25 +484,11 @@ def parse_jevt_jgandalf(aanet_event, event_id, missing=0):
 
 
 def parse_jgandalf_new(aanet_event, event_id, missing=0):
-    fitinv_enum = [
-        'beta0',
-        'beta1',
-        'chi2',
-        'n_hits',
-        'jenergy_energy'
-        'jenergy_chi2',
-        'lambda',
-        'n_iter',
-        'jstart_npe_mip',
-        'jstart_npe_mip_total',
-        'jstart_length',
-        # 'jveto_npe',
-        # 'jveto_nhits'
-        ]
+    """Read JGandalf (ORCA at least) files from MXtrigger on."""
     all_keys = [
         'pos_x', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z',
         'time', 'type', 'rec_type', 'rec_stage',
-    ] + fitinv_enum
+    ] + FITINF_ENUM
     try:
         track = aanet_event.trks[0]
         map = {}
@@ -498,8 +502,20 @@ def parse_jgandalf_new(aanet_event, event_id, missing=0):
         map['type'] = track.type
         map['rec_type'] = track.rec_type
         map['rec_stage'] = track.rec_stage
-        for i, key in enumerate(fitinv_enum):
+        for i, key in enumerate(FITINF_ENUM):
             map[key] = track.fitinf[i]
+
+        spread_tracks = get_track_spread(aanet_event.trks)
+        for k, v in spread_tracks.items():
+            map['spread_' + k + '_stdev'] = np.stdev(v)
+            map['spread_' + k + '_mean'] = np.mean(v)
+            v_median = np.median(v)
+            mad = np.median(np.abs(v - v_median))
+            map['spread_' + k + '_median'] = v_median
+            map['spread_' + k + '_mad'] = mad
+        up_chi2, down_chi2 = upgoing_vs_downgoing(aanet_event.trks)
+        map['upgoing_vs_downgoing_chi2_diff'] = up_chi2 - down_chi2
+        map['upgoing_vs_downgoing_chi2_ratio'] = up_chi2 / down_chi2
     except IndexError:
         map = {key: missing for key in all_keys}
     dt = [(key, float) for key in sorted(map.keys())]
@@ -507,6 +523,32 @@ def parse_jgandalf_new(aanet_event, event_id, missing=0):
     dt.append(('event_id', '<u4'))
     dt = np.dtype(dt)
     return map, dt
+
+
+def upgoing_vs_downgoing(tracks):
+    """Compare upgoing vs downgoing hypothesis."""
+    upgoing_chi2 = np.amin([track.fitinf[2] for track in tracks
+                            if track.dir.z > 0])
+    downgoing_chi2 = np.amin([track.fitinf[2] for track in tracks
+                              if track.dir.z < 0])
+    return upgoing_chi2, downgoing_chi2
+
+
+def get_track_spread(tracks):
+    """Grab metrics from all tracks which pass muon length fit."""
+    out = defaultdict(list)
+    for track in tracks:
+        if track.fiting[10] < 0:
+            continue
+        out['dir_x'].append(track.dir.x)
+        out['dir_y'].append(track.dir.y)
+        out['dir_z'].append(track.dir.z)
+        out['pos_x'].append(track.pos.x)
+        out['pos_y'].append(track.pos.y)
+        out['pos_z'].append(track.pos.z)
+        for k in range(6):
+            out[FITINF_ENUM[k]].append(track.fitinf[k])
+    return out
 
 
 def parse_generic_event(aanet_event, event_id):

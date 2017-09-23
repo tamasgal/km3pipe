@@ -27,12 +27,23 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 def zenith(v):
-    """Return the zenith angle in radians"""
+    """Return the zenith angle in radians.
+
+    Defined as 'Angle respective to downgoing'.
+    Downgoing event: zenith = 0
+    Horizont: 90deg
+    Upgoing: zenith = 180deg
+    """
     return angle_between((0, 0, -1), v)
 
 
 def azimuth(v):
-    """Return the azimuth angle in radians"""
+    """Return the azimuth angle in radians.
+
+    This is the 'normal' azimuth definition -- beware of how you
+    define your coordinates. KM3NeT defines azimuth
+    differently than e.g. SLALIB, astropy, the AAS.org
+    """
     v = np.atleast_2d(v)
     phi = np.arctan2(v[:, 1], v[:, 0])
     phi[phi < 0] += 2 * np.pi
@@ -110,38 +121,19 @@ def circ_permutation(items):
     return permutations
 
 
-def add_empty_flow_bins(bins):
-    """Add empty over- and underflow bins.
-    """
-    bins = list(bins)
-    bins.insert(0, 0)
-    bins.append(0)
-    return np.array(bins)
-
-
-def flat_weights(x, bins):
-    """Get weights to produce a flat histogram.
-    """
-    bin_width = np.abs(bins[1] - bins[0])
-    hist, _ = np.histogram(x, bins=bins)
-    hist = hist.astype(float)
-    hist = add_empty_flow_bins(hist)
-    hist *= bin_width
-    which = np.digitize(x, bins=bins, right=True)
-    pop = hist[which]
-    wgt = 1 / pop
-    wgt *= len(wgt) / np.sum(wgt)
-    return wgt
-
-
 def hsin(theta):
     """haversine"""
     return (1.0 - np.cos(theta)) / 2.
 
 
 def space_angle(zen_1, zen_2, azi_1, azi_2):
-    """Space angle between two directions specified by zenith and azimuth."""
-    return hsin(azi_2 - azi_1) + np.cos(azi_1) * np.cos(azi_2) * hsin(zen_2 - zen_1)
+    """Space angle between two directions specified by zenith and azimuth.
+
+    Space angle only makes sense in lon-lat, so convert zenith -> latitude.
+    """
+    lon_1 = np.pi - zen_1
+    lon_2 = np.pi - zen_2
+    return hsin(azi_2 - azi_1) + np.cos(azi_1) * np.cos(azi_2) * hsin(lon_2 - lon_1)
 
 
 def rotation_matrix(axis, theta):
@@ -179,6 +171,10 @@ class Polygon(object):
         is_contained = self.poly.contains_points(points_flat)
         return is_contained
 
+    def contains_xy(self, x, y):
+        xy = np.column_stack((x, y))
+        return self.contains(xy)
+
 
 class IrregularPrism(object):
     """Like a cylinder, but the top is an irregular Polygon."""
@@ -197,6 +193,10 @@ class IrregularPrism(object):
         is_xy_contained = self.poly.contains(points_xy)
         is_z_contained = self._is_z_contained(points_z)
         return is_xy_contained & is_z_contained
+
+    def contains_xyz(self, x, y, z):
+        xyz = np.column_stack((x, y, z))
+        return self.contains(xyz)
 
 
 class SparseCone(object):
@@ -255,3 +255,43 @@ class SparseCone(object):
         points = self.sample_circle(n_circle)
         points.extend(self.sample_axis)
         return points
+
+
+def inertia(x, y, z, weight=None):
+    """Inertia tensor, stolen of thomas"""
+    if weight is None:
+        weight = 1
+    tensor_of_inertia = np.zeros((3, 3), dtype=float)
+    tensor_of_inertia[0][0] = (y * y + z * z) * weight
+    tensor_of_inertia[0][1] = (-1) * x * y * weight
+    tensor_of_inertia[0][2] = (-1) * x * z * weight
+    tensor_of_inertia[1][0] = (-1) * x * y * weight
+    tensor_of_inertia[1][1] = (x * x + z * z) * weight
+    tensor_of_inertia[1][2] = (-1) * y * z * weight
+    tensor_of_inertia[2][0] = (-1) * x * z * weight
+    tensor_of_inertia[2][1] = (-1) * z * y * weight
+    tensor_of_inertia[2][2] = (x * x + y * y) * weight
+
+    eigen_values = np.linalg.eigvals(tensor_of_inertia)
+    small_inertia = eigen_values[2][2]
+    middle_inertia = eigen_values[1][1]
+    big_inertia = eigen_values[0][0]
+    return small_inertia, middle_inertia, big_inertia
+
+
+def g_parameter(time_residual):
+    """stolen from thomas"""
+    mean = np.mean(time_residual)
+    time_residual_prime = (time_residual - np.ones(time_residual.shape) * mean)
+    time_residual_prime *= time_residual_prime / (-2 * 1.5 * 1.5)
+    time_residual_prime = np.exp(time_residual_prime)
+    g = np.sum(time_residual_prime) / len(time_residual)
+    return g
+
+
+def gold_parameter(time_residual):
+    """stolen from thomas"""
+    gold = np.exp(
+        -1 * time_residual * time_residual / (2 * 1.5 * 1.5)
+    ) / len(time_residual)
+    gold = np.sum(gold)
