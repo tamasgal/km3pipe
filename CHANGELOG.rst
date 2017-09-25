@@ -1,6 +1,6 @@
 Unreleased changes
 ------------------
-
+* Option to Ignore hits in pumps
 
 Version 7
 ---------
