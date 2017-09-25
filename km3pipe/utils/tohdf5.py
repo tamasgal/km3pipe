@@ -96,7 +96,7 @@ def main():
     correct_zed = args['--correct-zed']
     skip_header = args['--skip-header']
     do_not_correct_mc_times = args['--do-not-correct-mc-times']
-    ignore_hits_arg = args['--ignore_hits']
+    ignore_hits_arg = args['--ignore-hits']
     tohdf5(infiles,
            outfile,
            n,
