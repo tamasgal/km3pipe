@@ -231,6 +231,9 @@ class AanetPump(Pump):
 
         if len(event.w) == 3:
             w1, w2, w3 = event.w
+        elif len(event.w) == 4:
+            # what the hell is w4?
+            w1, w2, w3, w4 = event.w
         else:
             w1 = w2 = w3 = np.nan
 
@@ -509,12 +512,13 @@ def parse_jgandalf_new(aanet_event, event_id, missing=0):
             out['spread_' + k + '_mad'] = mad(v)
         return out
 
-    posdir = ['pos_x', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z',]
+    posdir = ['pos_x', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z', ]
     metrics = ['std', 'mean', 'median', 'mad']
-    spread_keys = ['spread_{}_{}'.format(var, metric)
+    spread_keys = [
+            'spread_{}_{}'.format(var, metric)
             for var in posdir + FITINF_ENUM[:6]
             for metric in metrics
-            ]
+    ]
     spread_keys.append('upgoing_vs_downgoing')
     all_keys = posdir + spread_keys + FITINF_ENUM + posdir + [
             'time', 'type', 'rec_type', 'rec_stage']
@@ -533,7 +537,6 @@ def parse_jgandalf_new(aanet_event, event_id, missing=0):
         outmap['rec_stage'] = track.rec_stage
         for i, key in enumerate(FITINF_ENUM):
             outmap[key] = track.fitinf[i]
-
 
         spread_tracks = get_track_spread(aanet_event.trks)
         outmap.update(spread_tracks)
