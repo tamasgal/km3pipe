@@ -31,6 +31,7 @@ Options:
                                     still be retrived. This switch enables
                                     skipping the `get_aanet_header` function only.
                                     [default: False]
+    --ignore-hits                   Don't read the hits, please [default: False].
     -e --expected-rows NROWS        Approximate number of events.  Providing a
                                     rough estimate for this (100, 10000000, ...)
                                     will greatly improve reading/writing speed and
@@ -95,6 +96,7 @@ def main():
     correct_zed = args['--correct-zed']
     skip_header = args['--skip-header']
     do_not_correct_mc_times = args['--do-not-correct-mc-times']
+    ignore_hits_arg = args['--ignore_hits']
     tohdf5(infiles,
            outfile,
            n,
@@ -107,5 +109,6 @@ def main():
            apply_zed_correction=correct_zed,
            old_mc_id=aa_old_mc_id,
            skip_header=skip_header,
-           correct_mc_times=not bool(do_not_correct_mc_times)
-           )
+           correct_mc_times=not bool(do_not_correct_mc_times),
+           ignore_hits=bool(ignore_hits_arg),
+          )

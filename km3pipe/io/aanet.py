@@ -72,7 +72,8 @@ class AanetPump(Pump):
     missing: numeric, optional [default: 0]
         Filler for missing values.
     skip_header: bool, optional [default=False]
-    correct_mc_times: convert hit times from JTE to MC time [default=True']
+    correct_mc_times: convert hit times from JTE to MC time [default=True]
+    ignore_hits: bool, optional [default=False]
     """
 
     def __init__(self, **context):
@@ -90,6 +91,7 @@ class AanetPump(Pump):
         self.skip_header = self.get('skip_header') or False
         self.missing = self.get('missing') or 0
         self.correct_mc_times = bool(self.get('correct_mc_times'))
+        self.ignore_hits = bool(self.get('ignore_hits'))
 
         if self.additional:
             self.id = self.get('id')
@@ -244,7 +246,7 @@ class AanetPump(Pump):
         else:
             event_id = self.i
         self.i += 1
-        if self.format != 'ancient_recolns':
+        if self.format != 'ancient_recolns' and not self.ignore_hits:
             try:
                 hits = RawHitSeries.from_aanet(event.hits, event_id)
                 if np.allclose(event.mc_t, 0) and self.correct_mc_times:
