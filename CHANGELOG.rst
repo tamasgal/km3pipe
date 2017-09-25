@@ -1,11 +1,20 @@
 Unreleased changes
 ------------------
+* Use mc_t to detect if MC time conversion (from JTE to MC time) should be
+  applied. Should be more reliable since some MC could use positive DET_ID
+  which should only be used for real data
 
 
 Version 7
 ---------
 
-7.5.1 / 2017-09-22
+7.5.3 / 2017-09-23
+~~~~~~~~~~~~~~~~~~
+* Fixed bug which converted MC times in real data. Now it checks for a
+  positive DET_ID and does not convert (even if told so...)
+* Fixes zt-plot, which did not use the newly implemented datatypes
+
+7.5.2 / 2017-09-22
 ~~~~~~~~~~~~~~~~~~
 * fixed bug in math.spatial_angle (zenith vs latitude)
 * (aanet) jgandalf_new now computes a ton of fit-spread-related metrics (updated in tohdf5 help string, too)

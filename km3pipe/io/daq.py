@@ -245,10 +245,9 @@ class DAQProcessor(Module):
 
         blob['Hits'] = hit_series
 
-        event_info = EventInfo((
-            header.det_id,
-            self.index,
-            # header.time_slice,
+        event_info = EventInfo(np.array(
+            (header.det_id,
+            self.index, # header.time_slice,
             0,  # livetime_sec
             0, 0,  # MC ID and time
             0, 0,  # n evts/files gen
@@ -257,7 +256,8 @@ class DAQProcessor(Module):
             event.trigger_counter, event.trigger_mask,
             header.ticks * 16, header.time_stamp,
             0, 0, 0,  # MC weights
-            0))
+            0, # run id
+            0), dtype=EventInfo.dtype))
         blob['EventInfo'] = event_info
 
         self.index += 1
@@ -507,7 +507,7 @@ class TMCHData(object):
         self.tdcfull = unpack('>I', f.read(4))[0]
         self.aesfull = unpack('>I', f.read(4))[0]
         self.flushc = unpack('>I', f.read(4))[0]
-        self.ts_duration_microseconds = unpack('>I', f.read(4))[0]
+        # self.ts_duration_microseconds = unpack('>I', f.read(4))[0]
 
     def __str__(self):
         return str(vars(self))
