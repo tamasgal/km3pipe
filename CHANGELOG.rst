@@ -1,12 +1,17 @@
 Unreleased changes
 ------------------
-* Use mc_t to detect if MC time conversion (from JTE to MC time) should be
-  applied. Should be more reliable since some MC could use positive DET_ID
-  which should only be used for real data
 
 
 Version 7
 ---------
+
+7.5.4 / 2017-09-25
+~~~~~~~~~~~~~~~~~~
+* fix aanet (optional) 4-element event.weight vector readout. the weights
+  can now be read again :-)
+* Use mc_t to detect if MC time conversion (from JTE to MC time) should be
+  applied. Should be more reliable since some MC could use positive DET_ID
+  which should only be used for real data
 
 7.5.3 / 2017-09-23
 ~~~~~~~~~~~~~~~~~~
