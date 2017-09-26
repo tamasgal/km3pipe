@@ -16,7 +16,7 @@ from datetime import datetime
 from scipy import optimize
 import numpy as np
 import h5py
-
+import pickle
 
 import km3pipe as kp
 
@@ -59,7 +59,8 @@ class CoincidenceFinder(kp.Module):
     """Finds K40 coincidences in TimesliceFrames"""
     def configure(self):
         self.accumulate = self.get("accumulate") or 100
-        self.counts = defaultdict(partial(np.zeros, (465, 41)))
+        self.tmax = self.get("tmax") or 20
+        self.counts = defaultdict(partial(np.zeros, (465, self.tmax * 2 + 1)))
         self.n_timeslices = 0
         self.start_time = datetime.utcnow()
 
@@ -74,25 +75,26 @@ class CoincidenceFinder(kp.Module):
                 if pmt_pair[0] > pmt_pair[1]:
                     pmt_pair = (pmt_pair[1], pmt_pair[0])
                     t = -t
-                self.counts[dom_id][combs.index(pmt_pair), t+20] += 1
+                self.counts[dom_id][combs.index(pmt_pair), t+self.tmax] += 1
 
         self.n_timeslices += 1
         if self.n_timeslices == self.accumulate:
             print("Calibrating DOMs")
             blob["K40Counts"] = self.counts
             blob["Livetime"] = self.n_timeslices / 10
+            pickle.dump({'data': self.counts, 'livetime': self.n_timeslices / 10}, open("coinc_counts.p", "wb"))
             self.n_timeslices = 0
             self.counts = defaultdict(partial(np.zeros, (465, 41)))
             return blob
 
-    def mongincidence(self, times, tdcs, tmax=20):
+    def mongincidence(self, times, tdcs):
         coincidences = []
         cur_t = 0
         las_t = 0
         for t_idx, t in enumerate(times):
             cur_t = t
             diff = cur_t - las_t
-            if diff <= tmax and t_idx > 0 and tdcs[t_idx - 1] != tdcs[t_idx]:
+            if diff <= self.tmax and t_idx > 0 and tdcs[t_idx - 1] != tdcs[t_idx]:
                 coincidences.append(((tdcs[t_idx - 1], tdcs[t_idx]), diff))
             las_t = cur_t
         return coincidences
@@ -260,6 +262,7 @@ def fit_delta_ts(data, livetime):
     start = -(data.shape[1] - 1) / 2
     end = -start + 1
     xs = np.arange(start, end)
+    print (start, end)
 
     rates = []
     sigmas = []

@@ -8,7 +8,7 @@ import numpy as np
 from km3pipe.testing import TestCase
 from km3pipe.math import (
     angle_between, pld3, com, zenith, azimuth, Polygon, IrregularPrism,
-    rotation_matrix, SparseCone,
+    rotation_matrix, SparseCone, space_angle, hsin,
 )
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
@@ -85,6 +85,18 @@ class TestMath(TestCase):
         v2 = (1, 0, 0)
         self.assertTrue(np.isnan(angle_between(v1, v2)))
 
+    def test_space_angle(self):
+        p1 = (np.pi / 2, np.pi)
+        p2 = (np.pi, 0)
+        assert space_angle(p1[0], p2[0], p1[1], p2[1]) == 0.5
+        p3 = (0, np.pi)
+        p4 = (np.pi / 2, 0)
+        assert space_angle(p3[0], p4[0], p3[1], p4[1]) == 0.5
+
+    def test_hsin(self):
+        assert np.all(hsin((np.pi, 0)) == (1, 0))
+        self.assertAlmostEqual(hsin(np.pi/2), 0.5)
+
     def test_pld3(self):
         p1 = np.array((0, 0, 0))
         p2 = np.array((0, 0, 1))
@@ -147,6 +159,13 @@ class TestShapes(TestCase):
         assert not np.any(polygon.contains(point_out))
         assert np.all(polygon.contains(points) == [True, False, False])
 
+    def test_poly_xy(self):
+        polygon = Polygon(self.poly)
+        x = (-40, -140, 40)
+        y = (-40, -140, -140)
+        assert np.all(polygon.contains_xy(x, y) == [True, False, False])
+
+
     def test_prism_contained(self):
         z = (-90, 90)
         prism = IrregularPrism(self.poly, z[0], z[1])
@@ -156,6 +175,14 @@ class TestShapes(TestCase):
             (10, 90, 10),
         ]
         assert np.all(prism.contains(points) == [True, False, True])
+
+    def test_prism_contained_xyz(self):
+        z = (-90, 90)
+        prism = IrregularPrism(self.poly, z[0], z[1])
+        x = (0, -100, 10)
+        y = (1, 20, 90)
+        z = (2, 10, 10)
+        assert np.all(prism.contains_xyz(x, y, z) == [True, False, True])
 
 
 class TestRotation(TestCase):
@@ -179,43 +206,3 @@ class TestRotation(TestCase):
         assert len(circ_samp) == n_angles
         assert len(axis_samp) == 2
         assert len(samp) == len(circ_samp) + 2
-
-
-def inertia(x, y, z, weight=None):
-    """Inertia tensor, stolen of thomas"""
-    if weight is None:
-        weight = 1
-    tensor_of_inertia = np.zeros((3, 3), dtype=float)
-    tensor_of_inertia[0][0] = (y * y + z * z) * weight
-    tensor_of_inertia[0][1] = (-1) * x * y * weight
-    tensor_of_inertia[0][2] = (-1) * x * z * weight
-    tensor_of_inertia[1][0] = (-1) * x * y * weight
-    tensor_of_inertia[1][1] = (x * x + z * z) * weight
-    tensor_of_inertia[1][2] = (-1) * y * z * weight
-    tensor_of_inertia[2][0] = (-1) * x * z * weight
-    tensor_of_inertia[2][1] = (-1) * z * y * weight
-    tensor_of_inertia[2][2] = (x * x + y * y) * weight
-
-    eigen_values = np.linalg.eigvals(tensor_of_inertia)
-    small_inertia = eigen_values[2][2]
-    middle_inertia = eigen_values[1][1]
-    big_inertia = eigen_values[0][0]
-    return small_inertia, middle_inertia, big_inertia
-
-
-def g_parameter(time_residual):
-    """stolen from thomas"""
-    mean = np.mean(time_residual)
-    time_residual_prime = (time_residual - np.ones(time_residual.shape) * mean)
-    time_residual_prime *= time_residual_prime / (-2 * 1.5 * 1.5)
-    time_residual_prime = np.exp(time_residual_prime)
-    g = np.sum(time_residual_prime) / len(time_residual)
-    return g
-
-
-def gold_parameter(time_residual):
-    """stolen from thomas"""
-    gold = np.exp(
-        -1 * time_residual * time_residual / (2 * 1.5 * 1.5)
-    ) / len(time_residual)
-    gold = np.sum(gold)

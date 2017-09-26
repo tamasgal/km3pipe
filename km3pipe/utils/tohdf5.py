@@ -9,28 +9,29 @@ Usage:
     tohdf5 --version
 
 Options:
+    -h --help                       Show this screen.
     -n EVENTS                       Number of events/runs.
     -o OUTFILE                      Output file.
+    -j --jppy                       (Jpp): Use jppy (not aanet) for Jpp readout
+    -l --with-timeslice-hits        (Jpp) Include timeslice-hits [default: False]
+    -s --with-summaryslices         (Jpp) Include summary slices [default: False]
     --aa-format=<fmt>               (Aanet): Which aanet subformat ('minidst',
-                                    'orca_recolns', 'gandalf',
+                                    'orca_recolns', 'gandalf', 'gandalf_new',
                                     'generic_track') [default: None]
     --aa-lib=<lib.so>               (Aanet): path to aanet binary (for old
                                     versions which must be loaded via
                                     `ROOT.gSystem.Load()` instead of `import aa`)
     --aa-old-mc-id                  (aanet): read mc id as `evt.mc_id`, instead
                                     of the newer `mc_id = evt.frame_index - 1`
-    -h --help                       Show this screen.
-    -j --jppy                       (Jpp): Use jppy (not aanet) for Jpp readout
-    -l --with-timeslice-hits        Include timeslice-hits [default: False]
-    -s --with-summaryslices         Include summary slices [default: False]
     --correct-zed                   (Aanet) Correct offset in mc tracks (aanet)
                                     [default: False]
-    --do-not-correct-mc-times       Don't correct MC times.
+    --do-not-correct-mc-times       (Aanet) Don't correct MC times.
     --skip-header                   (Aanet) don't read the full header.
                                     Entries like `genvol` and `neventgen` will
                                     still be retrived. This switch enables
                                     skipping the `get_aanet_header` function only.
                                     [default: False]
+    --ignore-hits                   Don't read the hits, please [default: False].
     -e --expected-rows NROWS        Approximate number of events.  Providing a
                                     rough estimate for this (100, 10000000, ...)
                                     will greatly improve reading/writing speed and
@@ -95,6 +96,7 @@ def main():
     correct_zed = args['--correct-zed']
     skip_header = args['--skip-header']
     do_not_correct_mc_times = args['--do-not-correct-mc-times']
+    ignore_hits_arg = args['--ignore-hits']
     tohdf5(infiles,
            outfile,
            n,
@@ -107,5 +109,6 @@ def main():
            apply_zed_correction=correct_zed,
            old_mc_id=aa_old_mc_id,
            skip_header=skip_header,
-           correct_mc_times=not bool(do_not_correct_mc_times)
-           )
+           correct_mc_times=not bool(do_not_correct_mc_times),
+           ignore_hits=bool(ignore_hits_arg),
+          )

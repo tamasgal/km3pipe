@@ -1,5 +1,3 @@
-# Filename: aanet.py
-# pylint: disable=locally-disabled
 """
 Pump for the Aanet data format.
 
@@ -8,15 +6,19 @@ If you have a way to read aanet files via the Jpp interface,
 your pull request is more than welcome!
 """
 from __future__ import division, absolute_import, print_function
+
+from collections import defaultdict
 import os.path
 
 import numpy as np
+from scipy.stats import iqr
 
 from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import (RawHitSeries, McHitSeries,
                                  TrackSeries, EventInfo,
                                  KM3Array)
 from km3pipe.logger import logging
+from km3pipe.math import mad
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -27,6 +29,22 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
+
+FITINF_ENUM = [
+    'beta0',
+    'beta1',
+    'chi2',
+    'n_hits',
+    'jenergy_energy'
+    'jenergy_chi2',
+    'lambda',
+    'n_iter',
+    'jstart_npe_mip',
+    'jstart_npe_mip_total',
+    'jstart_length',
+    # 'jveto_npe',
+    # 'jveto_nhits'
+]
 
 
 class AanetPump(Pump):
@@ -53,7 +71,8 @@ class AanetPump(Pump):
     missing: numeric, optional [default: 0]
         Filler for missing values.
     skip_header: bool, optional [default=False]
-    correct_mc_times: convert hit times from JTE to MC time [default=True']
+    correct_mc_times: convert hit times from JTE to MC time [default=True]
+    ignore_hits: bool, optional [default=False]
     """
 
     def __init__(self, **context):
@@ -71,6 +90,7 @@ class AanetPump(Pump):
         self.skip_header = self.get('skip_header') or False
         self.missing = self.get('missing') or 0
         self.correct_mc_times = bool(self.get('correct_mc_times'))
+        self.ignore_hits = bool(self.get('ignore_hits'))
 
         if self.additional:
             self.id = self.get('id')
@@ -212,6 +232,9 @@ class AanetPump(Pump):
 
         if len(event.w) == 3:
             w1, w2, w3 = event.w
+        elif len(event.w) == 4:
+            # what the hell is w4?
+            w1, w2, w3, w4 = event.w
         else:
             w1 = w2 = w3 = np.nan
 
@@ -222,12 +245,12 @@ class AanetPump(Pump):
         else:
             event_id = self.i
         self.i += 1
-        if self.format != 'ancient_recolns':
+        if self.format != 'ancient_recolns' and not self.ignore_hits:
             try:
                 hits = RawHitSeries.from_aanet(event.hits, event_id)
-                if self.correct_mc_times:
+                if np.allclose(event.mc_t, 0) and self.correct_mc_times:
                     def converter(t):
-                        ns = event.t.GetSec()*1e9 + event.t.GetNanoSec()
+                        ns = event.t.GetSec() * 1e9 + event.t.GetNanoSec()
                         return t + ns - event.mc_t
                     uconverter = np.frompyfunc(converter, 1, 1)
                     hits._arr["time"] = uconverter(hits.time)
@@ -466,47 +489,91 @@ def parse_jevt_jgandalf(aanet_event, event_id, missing=0):
 
 
 def parse_jgandalf_new(aanet_event, event_id, missing=0):
-    fitinv_enum = [
-        'beta0',
-        'beta1',
-        'chi2',
-        'n_hits',
-        'jenergy_energy'
-        'jenergy_chi2',
-        'lambda',
-        'n_iter',
-        'jstart_npe_mip',
-        'jstart_npe_mip_total',
-        'jstart_length',
-        # 'jveto_npe',
-        # 'jveto_nhits'
-        ]
-    all_keys = [
-        'pos_x', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z',
-        'time', 'type', 'rec_type', 'rec_stage',
-    ] + fitinv_enum
+    """Read JGandalf (ORCA at least) files from MXtrigger on."""
+
+    def get_track_spread(tracks):
+        """Grab metrics from all tracks which pass muon length fit."""
+        variates = defaultdict(list)
+        out = {}
+        for track in tracks:
+            if track.fitinf[10] < 0:
+                continue
+            variates['dir_x'].append(track.dir.x)
+            variates['dir_y'].append(track.dir.y)
+            variates['dir_z'].append(track.dir.z)
+            variates['pos_x'].append(track.pos.x)
+            variates['pos_y'].append(track.pos.y)
+            variates['pos_z'].append(track.pos.z)
+            for k in range(6):
+                variates[FITINF_ENUM[k]].append(track.fitinf[k])
+        for k, v in variates.items():
+            out['spread_' + k + '_std'] = np.std(v)
+            out['spread_' + k + '_mean'] = np.mean(v)
+            out['spread_' + k + '_median'] = np.median(v)
+            out['spread_' + k + '_mad'] = mad(v)
+            out['spread_' + k + '_iqr'] = iqr(v)
+        return out
+
+    posdir = ['pos_x', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z', ]
+    metrics = ['std', 'mean', 'median', 'mad', 'iqr']
+    spread_keys = [
+            'spread_{}_{}'.format(var, metric)
+            for var in posdir + FITINF_ENUM[:6]
+            for metric in metrics
+    ]
+    spread_keys.append('upgoing_vs_downgoing')
+    all_keys = posdir + spread_keys + FITINF_ENUM + posdir + [
+            'time', 'type', 'rec_type', 'rec_stage']
     try:
         track = aanet_event.trks[0]
-        map = {}
-        map['pos_x'] = track.pos.x
-        map['pos_y'] = track.pos.y
-        map['pos_z'] = track.pos.z
-        map['dir_x'] = track.dir.x
-        map['dir_y'] = track.dir.y
-        map['dir_z'] = track.dir.z
-        map['time'] = track.t
-        map['type'] = track.type
-        map['rec_type'] = track.rec_type
-        map['rec_stage'] = track.rec_stage
-        for i, key in enumerate(fitinv_enum):
-            map[key] = track.fitinf[i]
+        outmap = {}
+        outmap['pos_x'] = track.pos.x
+        outmap['pos_y'] = track.pos.y
+        outmap['pos_z'] = track.pos.z
+        outmap['dir_x'] = track.dir.x
+        outmap['dir_y'] = track.dir.y
+        outmap['dir_z'] = track.dir.z
+        outmap['time'] = track.t
+        outmap['type'] = track.type
+        outmap['rec_type'] = track.rec_type
+        outmap['rec_stage'] = track.rec_stage
+        for i, key in enumerate(FITINF_ENUM):
+            outmap[key] = track.fitinf[i]
+
+        spread_tracks = get_track_spread(aanet_event.trks)
+        outmap.update(spread_tracks)
+        outmap['upgoing_vs_downgoing'] = upgoing_vs_downgoing(aanet_event.trks)
     except IndexError:
-        map = {key: missing for key in all_keys}
-    dt = [(key, float) for key in sorted(map.keys())]
-    map['event_id'] = event_id
+        outmap = {key: missing for key in all_keys}
+    dt = [(key, float) for key in sorted(outmap.keys())]
+    outmap['event_id'] = event_id
     dt.append(('event_id', '<u4'))
     dt = np.dtype(dt)
-    return map, dt
+    return outmap, dt
+
+
+def upgoing_vs_downgoing(tracks, filler=9999):
+    """Compare upgoing vs downgoing hypothesis.
+
+    upvsdown = lik_upgoing - lik_downgoing
+    """
+    upgoing = [
+            track.fitinf[2]/track.fitinf[3] for track in tracks
+            if track.dir.z >= 0
+            ]
+    downgoing = [
+            track.fitinf[2]/track.fitinf[3] for track in tracks
+            if track.dir.z < 0
+            ]
+    if not upgoing:
+        return filler
+    if not downgoing:
+        return -filler
+
+    upgoing_chi2 = np.nanmin(upgoing)
+    downgoing_chi2 = np.nanmin(downgoing)
+    out = upgoing_chi2 - downgoing_chi2
+    return out
 
 
 def parse_generic_event(aanet_event, event_id):

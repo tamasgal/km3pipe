@@ -1,8 +1,30 @@
 Unreleased changes
 ------------------
+* Option to Ignore hits in pumps
 
 Version 7
 ---------
+
+7.5.4 / 2017-09-25
+~~~~~~~~~~~~~~~~~~
+* fix aanet (optional) 4-element event.weight vector readout. the weights
+  can now be read again :-)
+* Use mc_t to detect if MC time conversion (from JTE to MC time) should be
+  applied. Should be more reliable since some MC could use positive DET_ID
+  which should only be used for real data
+
+7.5.3 / 2017-09-23
+~~~~~~~~~~~~~~~~~~
+* Fixed bug which converted MC times in real data. Now it checks for a
+  positive DET_ID and does not convert (even if told so...)
+* Fixes zt-plot, which did not use the newly implemented datatypes
+
+7.5.2 / 2017-09-22
+~~~~~~~~~~~~~~~~~~
+* fixed bug in math.spatial_angle (zenith vs latitude)
+* (aanet) jgandalf_new now computes a ton of fit-spread-related metrics (updated in tohdf5 help string, too)
+* added usage warning to math.azimuth. for rest-of-world compatible coordinates, use KM3Astro
+* accept coords in polygon containment (contains_xy)
 
 7.5.1 / 2017-09-19
 ~~~~~~~~~~~~~~~~~~
