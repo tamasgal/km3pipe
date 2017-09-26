@@ -1,5 +1,3 @@
-# Filename: aanet.py
-# pylint: disable=locally-disabled
 """
 Pump for the Aanet data format.
 
@@ -13,6 +11,7 @@ from collections import defaultdict
 import os.path
 
 import numpy as np
+from scipy.stats import iqr
 
 from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import (RawHitSeries, McHitSeries,
@@ -512,10 +511,11 @@ def parse_jgandalf_new(aanet_event, event_id, missing=0):
             out['spread_' + k + '_mean'] = np.mean(v)
             out['spread_' + k + '_median'] = np.median(v)
             out['spread_' + k + '_mad'] = mad(v)
+            out['spread_' + k + '_iqr'] = iqr(v)
         return out
 
     posdir = ['pos_x', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z', ]
-    metrics = ['std', 'mean', 'median', 'mad']
+    metrics = ['std', 'mean', 'median', 'mad', 'iqr']
     spread_keys = [
             'spread_{}_{}'.format(var, metric)
             for var in posdir + FITINF_ENUM[:6]
