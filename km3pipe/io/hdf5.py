@@ -269,6 +269,7 @@ class HDF5Pump(Pump):
         self.filenames = self.get('filenames') or []
         self.skip_version_check = bool(self.get('skip_version_check')) or False
         self.verbose = bool(self.get('verbose'))
+        self.ignore_hits = bool(self.get('ignore_hits'))
         self.indices = {}
         if not self.filename and not self.filenames:
             raise ValueError("No filename(s) defined")
@@ -376,7 +377,7 @@ class HDF5Pump(Pump):
         for loc in skipped_locs:
             idx, n_items = self.indices[loc][event_id]
             end = idx + n_items
-            if loc == '/hits':
+            if loc == '/hits' and not self.ignore_hits:
                 channel_id = h5file.get_node("/hits/channel_id")[idx:end]
                 dom_id = h5file.get_node("/hits/dom_id")[idx:end]
                 time = h5file.get_node("/hits/time")[idx:end]
@@ -404,7 +405,7 @@ class HDF5Pump(Pump):
                         floor, pos_x, pos_y, pos_z, t0s, time, tot, triggered,
                         event_id)
 
-            if loc == '/mc_hits':
+            if loc == '/mc_hits' and not self.ignore_hits:
                 a = h5file.get_node("/mc_hits/a")[idx:end]
                 origin = h5file.get_node("/mc_hits/origin")[idx:end]
                 pmt_id = h5file.get_node("/mc_hits/pmt_id")[idx:end]

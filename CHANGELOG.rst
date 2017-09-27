@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 
+7.5.5 / 2017-09-27
+~~~~~~~~~~~~~~~~~~
+* Option to Ignore hits in pumps
+* fix aanet fitinf enum
 
 Version 7
 ---------

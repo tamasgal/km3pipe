@@ -1,5 +1,3 @@
-# Filename: aanet.py
-# pylint: disable=locally-disabled
 """
 Pump for the Aanet data format.
 
@@ -13,6 +11,7 @@ from collections import defaultdict
 import os.path
 
 import numpy as np
+from scipy.stats import iqr
 
 from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import (RawHitSeries, McHitSeries,
@@ -36,7 +35,7 @@ FITINF_ENUM = [
     'beta1',
     'chi2',
     'n_hits',
-    'jenergy_energy'
+    'jenergy_energy',
     'jenergy_chi2',
     'lambda',
     'n_iter',
@@ -72,7 +71,8 @@ class AanetPump(Pump):
     missing: numeric, optional [default: 0]
         Filler for missing values.
     skip_header: bool, optional [default=False]
-    correct_mc_times: convert hit times from JTE to MC time [default=True']
+    correct_mc_times: convert hit times from JTE to MC time [default=True]
+    ignore_hits: bool, optional [default=False]
     """
 
     def __init__(self, **context):
@@ -90,6 +90,7 @@ class AanetPump(Pump):
         self.skip_header = self.get('skip_header') or False
         self.missing = self.get('missing') or 0
         self.correct_mc_times = bool(self.get('correct_mc_times'))
+        self.ignore_hits = bool(self.get('ignore_hits'))
 
         if self.additional:
             self.id = self.get('id')
@@ -244,7 +245,7 @@ class AanetPump(Pump):
         else:
             event_id = self.i
         self.i += 1
-        if self.format != 'ancient_recolns':
+        if self.format != 'ancient_recolns' and not self.ignore_hits:
             try:
                 hits = RawHitSeries.from_aanet(event.hits, event_id)
                 if np.allclose(event.mc_t, 0) and self.correct_mc_times:
@@ -510,10 +511,11 @@ def parse_jgandalf_new(aanet_event, event_id, missing=0):
             out['spread_' + k + '_mean'] = np.mean(v)
             out['spread_' + k + '_median'] = np.median(v)
             out['spread_' + k + '_mad'] = mad(v)
+            out['spread_' + k + '_iqr'] = iqr(v)
         return out
 
     posdir = ['pos_x', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z', ]
-    metrics = ['std', 'mean', 'median', 'mad']
+    metrics = ['std', 'mean', 'median', 'mad', 'iqr']
     spread_keys = [
             'spread_{}_{}'.format(var, metric)
             for var in posdir + FITINF_ENUM[:6]
