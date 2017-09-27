@@ -35,7 +35,7 @@ FITINF_ENUM = [
     'beta1',
     'chi2',
     'n_hits',
-    'jenergy_energy'
+    'jenergy_energy',
     'jenergy_chi2',
     'lambda',
     'n_iter',
