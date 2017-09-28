@@ -23,10 +23,10 @@ class Dumper(Module):
         self.counter = 0
 
     def process(self, blob):
-	tag = str(blob['CHPrefix'].tag)
-	data = blob['CHData']
-	self.dump(data, tag)
-	print(blob["Hits"])
+        tag = str(blob['CHPrefix'].tag)
+        data = blob['CHData']
+        self.dump(data, tag)
+        print(blob["Hits"])
         return blob
 
     def dump(self, data, tag):
