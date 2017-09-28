@@ -80,7 +80,7 @@ require_groups = {
           'daq': ['controlhost', ],
           'io': ['tables==3.4.0', 'h5py', ],
           'jpp': ['jppy>=1.3.1', ],
-          'web': ['tornado', 'websocket-client', ],
+          'web': ['tornado', 'websocket-client', 'requests'],
           'testing': ['pytest', 'mock', ],
           'utils': ['urwid', ],
 }
