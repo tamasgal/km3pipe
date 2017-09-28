@@ -1,19 +1,16 @@
 #!/usr/bin/env python
-# Author: Tamas Gal <tgal@km3net.de>
-# License: MIT
 # coding=utf-8
 # vim: ts=4 sw=4 et
 """
-High-rate-veto.
+===========
+HRV Monitor
+===========
 
+The following script checks the high-rate-veto for each PMT.
 
-Usage:
-    hrv.py
-    hrv.py --version
-
-Option:
-    -h --help       Show this screen.
 """
+# Author: Tamas Gal <tgal@km3net.de>
+# License: MIT
 from datetime import datetime
 import io
 from collections import defaultdict
@@ -121,9 +118,6 @@ class PMTRates(kp.Module):
 
 
 def main():
-    from docopt import docopt
-    args = docopt(__doc__, version=VERSION)
-
     detector = kp.hardware.Detector(det_id=29)
     pipe = kp.Pipeline(timeit=True)
     pipe.attach(kp.io.CHPump, host='192.168.0.110',

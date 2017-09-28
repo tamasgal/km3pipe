@@ -1,19 +1,16 @@
 #!/usr/bin/env python
-# Author: Tamas Gal <tgal@km3net.de>
-# License: MIT
 # coding=utf-8
 # vim: ts=4 sw=4 et
 """
-PMT rates.
+======================
+Mean PMT Rates Monitor
+======================
 
+The following script calculates the mean PMT rates and updates the plot.
 
-Usage:
-    pmt_rates.py
-    pmt_rates.py --version
-
-Option:
-    -h --help       Show this screen.
 """
+# Author: Tamas Gal <tgal@km3net.de>
+# License: MIT
 from datetime import datetime
 import io
 from collections import defaultdict
@@ -122,9 +119,6 @@ class PMTRates(kp.Module):
 
 
 def main():
-    from docopt import docopt
-    args = docopt(__doc__, version=VERSION)
-
     detector = kp.hardware.Detector(det_id=29)
     pipe = kp.Pipeline(timeit=True)
     pipe.attach(kp.io.CHPump,
