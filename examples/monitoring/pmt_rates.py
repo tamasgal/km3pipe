@@ -81,17 +81,26 @@ class PMTRates(kp.Module):
 
     def update_plot(self):
         print("Updating plot at {}".format(self.plot_path))
+        now = time.time()
+        max_x = self.max_x
+        interval = self.interval
+
+        def xlabel_func(timestamp):
+            return datetime.utcfromtimestamp(timestamp).strftime("%H:%M")
+
         m = self.rates_matrix
         m[m > 15000] = 15000
         m[m < 5000] = 5000
         fig, ax = plt.subplots(figsize=(10, 6))
         ax.imshow(m, origin='lower')
         ax.set_title("Mean PMT Rates for DU-{} (colours from 5kHz to 15kHz)\n{}"
-                     .format(self.du, datetime.utcnow()))
-        ax.set_xlabel("time interval [{}s/px] (latest on the right)"
-                      .format(self.interval))
+                    .format(self.du, datetime.utcnow()))
+        ax.set_xlabel("UTC time [{}s/px]".format(interval))
         plt.yticks([i*31 for i in range(18)],
                    ["Floor {}".format(f) for f in range(1, 19)])
+        xtics_int = range(0, max_x, int(max_x/10))
+        plt.xticks([i for i in xtics_int],
+                   [xlabel_func(now - (max_x-i) * interval) for i in xtics_int])
         fig.tight_layout()
         plt.savefig(self.plot_path)
         plt.close('all')
