@@ -8,8 +8,7 @@ from km3pipe.core import Pipeline, Module, Pump
 
 class DummyPump(Pump):
     """A pump demonstration with a dummy list as data."""
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.data = [{'nr': 1}, {'nr': 2}]
         self.blobs = self.blob_generator()
 
@@ -23,21 +22,27 @@ class DummyPump(Pump):
 
 
 class Foo(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
-        self.foo = self.get('foo') or 'default_foo'
-        self.bar = self.get('bar') or 23
+    """A dummy module with optional and required parameters"""
+    def configure(self):
+        self.foo = self.get('foo') or 'default_foo'  # optional
+        self.bar = self.get('bar') or 23             # optional
+        self.baz = self.require('baz')               # required
+        self.i = 0
 
     def process(self, blob):
         print("This is the current blob: " + str(blob))
+        self.i += 1
         blob['foo_entry'] = self.foo
         return blob
 
+    def finish(self):
+        print("My process() method was called {} times.".format(self.i))
 
-class Moo(Module):
-    def process(self, blob):
-        blob['moo_entry'] = 42
-        return blob
+
+def moo(blob):
+    """A simple function to attach"""
+    blob['moo_entry'] = 42
+    return blob
 
 
 class PrintBlob(Module):
@@ -48,7 +53,7 @@ class PrintBlob(Module):
 
 pipe = Pipeline()
 pipe.attach(Pump, 'the_pump')
-pipe.attach(Foo, 'foo_module', foo='dummyfoo', bar='dummybar')
-pipe.attach(Moo, 'moo_module')
-pipe.attach(PrintBlob, 'print_blob')
+pipe.attach(Foo, bar='dummybar', baz="69")
+pipe.attach(moo)
+pipe.attach(PrintBlob)
 pipe.drain()
