@@ -71,3 +71,7 @@ class LogIO(object):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((self.url, self.port))
 
+
+def get(name):
+    """Helper function to get a logger"""
+    return logging.getLogger(name)
