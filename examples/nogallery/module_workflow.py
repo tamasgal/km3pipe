@@ -53,7 +53,7 @@ class PrintBlob(Module):
 
 pipe = Pipeline()
 pipe.attach(Pump, 'the_pump')
-pipe.attach(Foo, bar='dummybar', baz="69")
+pipe.attach(Foo, bar='dummybar', baz=69)
 pipe.attach(moo)
 pipe.attach(PrintBlob)
 pipe.drain()
