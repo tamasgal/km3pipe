@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* aa/gand: fix up-vs-downgoing normalisation (now difference over sum)
 
 7.5.5 / 2017-09-27
 ~~~~~~~~~~~~~~~~~~
