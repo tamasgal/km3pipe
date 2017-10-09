@@ -1,6 +1,11 @@
 Unreleased changes
 ------------------
+* HDF5 metadata now contains much more information; e.g. if the mc hit time
+  correction was applied, the aa-format, whether jppy was used etc
+* introduce "services" to the pipeline model. these are address via the 
+  ``expose`` method
 * aa/gand: fix up-vs-downgoing normalisation (now difference over sum)
+* fix the check if mc time correction needs to be applied
 
 7.5.5 / 2017-09-27
 ~~~~~~~~~~~~~~~~~~
