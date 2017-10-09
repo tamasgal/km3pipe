@@ -14,6 +14,7 @@ Unreleased changes
 * fix the check if mc time correction needs to be applied
 * ``h5tree`` CLI util, to print just the structure + nevents + nrows. 
   less verbose than ``ptdump``
+* KM3HDF5 4.3: introduce richer metadata
 
 7.5.5 / 2017-09-27
 ~~~~~~~~~~~~~~~~~~
