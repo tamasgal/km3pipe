@@ -251,6 +251,13 @@ class HDF5Sink(Module):
             if 'event_id' in tab.colnames:
                 tab.cols.event_id.create_index()
             tab.flush()
+
+        if "HDF5MetaData" in self.services:
+            print("Writing HDF5 meta data.")
+            metadata = self.services["HDF5MetaData"]
+            for name, value in metadata.items():
+                self.h5file.set_node_attr("/", name, value)
+
         self.h5file.close()
         print("HDF5 file written to: {}".format(self.filename))
 
@@ -471,3 +478,16 @@ class HDF5Pump(Pump):
             yield self.get_blob(i)
 
         self.current_file = None
+
+
+class HDF5MetaData(Module):
+    """Metadata to attach to the HDF5 file.
+
+    Parameters
+    ----------
+    data: dict
+
+    """
+    def configure(self):
+        self.data = self.require("data")
+        self.expose(self.data, "HDF5MetaData")
