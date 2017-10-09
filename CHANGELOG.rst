@@ -1,7 +1,7 @@
 Unreleased changes
 ------------------
 
-7.6.0 / 2017-10-09
+7.6.1 / 2017-10-09
 ~~~~~~~~~~~~~~~~~~
 * ``HDF5Sink`` now uses the new ``HDF5MetaData`` class two write more verbose
   metadata to the files (e.g. file conversion parameters)
@@ -14,6 +14,7 @@ Unreleased changes
 * fix the check if mc time correction needs to be applied
 * ``h5tree`` CLI util, to print just the structure + nevents + nrows. 
   less verbose than ``ptdump``
+* KM3HDF5 4.3: introduce richer metadata
 
 7.5.5 / 2017-09-27
 ~~~~~~~~~~~~~~~~~~
