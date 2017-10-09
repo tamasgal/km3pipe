@@ -1,10 +1,13 @@
 Unreleased changes
 ------------------
-* HDF5 metadata now contains much more information; e.g. if the mc hit time
+* ``HDF5Sink`` now uses the new ``HDF5MetaData`` class two write more verbose
+  metadata to the files (e.g. file conversion parameters)
+  HDF5 metadata now contains much more information; e.g. if the mc hit time
   correction was applied, the aa-format, whether jppy was used etc
-* introduce "services" to the pipeline model. these are address via the 
+* introduce "services" to the pipeline model. these are addressed via the 
   ``expose`` method
 * aa/gand: fix up-vs-downgoing normalisation (now difference over sum)
+* fix automatic JTE/MC time conversion
 * fix the check if mc time correction needs to be applied
 * ``h5tree`` CLI util, to print just the structure + nevents + nrows. 
   less verbose than ``ptdump``
