@@ -2,11 +2,11 @@
 # coding=utf-8
 # vim: ts=4 sw=4 et
 """
-======================
-Mean PMT Rates Monitor
-======================
+===========
+HRV Monitor
+===========
 
-The following script calculates the mean PMT rates and updates the plot.
+The following script checks the high-rate-veto for each PMT.
 
 """
 # Author: Tamas Gal <tgal@km3net.de>
@@ -29,19 +29,18 @@ __author__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 VERSION = "1.0"
 
-log = kp.logger.logging.getLogger("PMTrates")
-
+log = kp.logger.logging.getLogger("HRV")
 
 class PMTRates(kp.Module):
     def configure(self):
         self.detector = self.require("detector")
         self.du = self.require("du")
         self.interval = self.get("interval") or 10
-        self.plot_path = self.get("plot_path") or "km3web/plots/pmtrates.png"
+        self.plot_path = self.get("plot_path") or "km3web/plots/hrv.png"
         self.max_x = 800
         self.index = 0
-        self.rates = defaultdict(list)
-        self.rates_matrix = np.full((18*31, self.max_x), np.nan)
+        self.hrv = defaultdict(list)
+        self.hrv_matrix = np.full((18*31, self.max_x), np.nan)
         self.lock = threading.Lock()
         self.thread = threading.Thread(target=self.run, args=())
         self.thread.daemon = True
@@ -55,29 +54,28 @@ class PMTRates(kp.Module):
             self.add_column()
             self.update_plot()
             with self.lock:
-                self.rates = defaultdict(list)
+                self.hrv = defaultdict(list)
             delta_t = (datetime.now() - now).total_seconds()
             remaining_t = self.interval - delta_t
-            log.info("Delta t: {} -> waiting for {}s"
-                     .format(delta_t, self.interval - delta_t))
+            print("Delta t: {} -> waiting for {}s".format(delta_t, self.interval - delta_t))
             if(remaining_t < 0):
-                log.error("Can't keep up with plot production. "
-                          "Increase the interval!")
+                log.error("Can't keep up with plot production. Increase the interval!")
                 interval = 1
             else:
                 interval = remaining_t
 
     def add_column(self):
-        m = np.roll(self.rates_matrix, -1, 1)
+        m = np.roll(self.hrv_matrix, -1, 1)
         y_range = 18*31
-        mean_rates = np.full(y_range, np.nan)
+        mean_hrv = np.full(y_range, np.nan)
         for i in range(y_range):
-            if i not in self.rates:
+            if i not in self.hrv:
                 continue
-            mean_rates[i] = np.mean(self.rates[i])
+            mean_hrv[i] = np.mean(self.hrv[i])
 
-        m[:, self.max_x - 1] = mean_rates
-        self.rates_matrix = m
+        m[:,self.max_x - 1] = mean_hrv
+        self.hrv_matrix = m
+        print(self.hrv_matrix)
 
     def update_plot(self):
         print("Updating plot at {}".format(self.plot_path))
@@ -88,12 +86,10 @@ class PMTRates(kp.Module):
         def xlabel_func(timestamp):
             return datetime.utcfromtimestamp(timestamp).strftime("%H:%M")
 
-        m = self.rates_matrix
-        m[m > 15000] = 15000
-        m[m < 5000] = 5000
+        m = self.hrv_matrix
         fig, ax = plt.subplots(figsize=(10, 6))
         ax.imshow(m, origin='lower')
-        ax.set_title("Mean PMT Rates for DU-{} (colours from 5kHz to 15kHz)\n{}"
+        ax.set_title("HRV Ratios for DU-{}\n{}"
                     .format(self.du, datetime.utcnow()))
         ax.set_xlabel("UTC time [{}s/px]".format(interval))
         plt.yticks([i*31 for i in range(18)],
@@ -107,6 +103,7 @@ class PMTRates(kp.Module):
 
     def process(self, blob):
         tmch_data = TMCHData(io.BytesIO(blob['CHData']))
+        run_id = tmch_data.run
         dom_id = tmch_data.dom_id
 
         if dom_id not in self.detector.doms:
@@ -117,12 +114,14 @@ class PMTRates(kp.Module):
         if du != self.du:
             return blob
 
+        hrv_flags = reversed("{0:b}".format(tmch_data.hrvbmp).zfill(32))
+
         y_base = (floor - 1) * 31
 
-        for channel_id, rate in enumerate(tmch_data.pmt_rates):
+        for channel_id, hrv_flag in enumerate(hrv_flags):
             idx = y_base + channel_id
             with self.lock:
-                self.rates[idx].append(rate)
+                self.hrv[idx].append(int(hrv_flag))
 
         return blob
 
@@ -130,13 +129,12 @@ class PMTRates(kp.Module):
 def main():
     detector = kp.hardware.Detector(det_id=29)
     pipe = kp.Pipeline(timeit=True)
-    pipe.attach(kp.io.CHPump,
-                host='192.168.0.110',
-                port=5553,
-                tags='IO_MONIT',
-                timeout=60*60*24*7,
-                max_queue=1000)
-    pipe.attach(PMTRates, detector=detector, du=2, interval=2)
+    pipe.attach(kp.io.CHPump, host='192.168.0.110',
+                              port=5553,
+                              tags='IO_MONIT',
+                              timeout=60*60*24*7,
+                              max_queue=1000)
+    pipe.attach(PMTRates, detector=detector, du=2, interval=10)
     pipe.drain()
 
 

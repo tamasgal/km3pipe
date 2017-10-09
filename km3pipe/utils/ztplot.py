@@ -28,6 +28,7 @@ import numpy as np
 import km3pipe as kp
 from km3pipe.dataclasses import HitSeries
 import km3pipe.style  # noqa
+km3pipe.style.use("km3pipe")
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -76,7 +77,6 @@ def main():
         for ax, du in zip(axes, dus):
             du_hits = hits[hits.du == du]
             trig_hits = du_hits.triggered_hits
-            print(np.diff(du_hits.time))
 
             ax.scatter(du_hits.time - min(du_hits.time), du_hits.pos_z,
                        c='#09A9DE', label='hit')
@@ -86,7 +86,7 @@ def main():
 
         for ax in axes:
             ax.tick_params(labelsize=8)
-            ax.yaxis.set_major_locator(ticker.MultipleLocator(200))
+            ax.yaxis.set_major_locator(ticker.MultipleLocator(50))
             xlabels = ax.get_xticklabels()
             for label in xlabels:
                 label.set_rotation(45)

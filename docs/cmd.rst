@@ -91,35 +91,45 @@ Example::
 
     tohdf5 --aa-fmt=jevt_jgandalf some_jgandalf_file.aa.root
 
+Help output::
+
     $ tohdf5 --help
     Convert ROOT and EVT files to HDF5.
 
     Usage:
-        tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [--correct-zed] [--aa-format=<fmt>] [--aa-lib=<lib.so>] FILE...
-        tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [-j] [-s] [-l] FILE...
-        tohdf5 (-h | --help)
-        tohdf5 --version
+	tohdf5 [options] FILE...
+	tohdf5 (-h | --help)
+	tohdf5 --version
 
     Options:
-        --aa-format=<fmt>          tohdf5: Which aanet subformat ('minidst',
-                                   'orca_recolns', 'gandalf',
-                                   'generic_track') [default: None]
-        --aa-lib-<lib.so>          tohdf5: path to aanet binary (for old versions which
-                                   must be loaded via `ROOT.gSystem.Load()` instead
-                                   of `import aa`)
-        -h --help                  Show this screen.
-        -j --jppy                  tohdf5: Use jppy (not aanet) for Jpp readout
-        -l --with-timeslice-hits   Include timeslice-hits [default: False]
-        -n EVENTS/RUNS             Number of events/runs.
-        -o OUTFILE                 Output file.
-        -s --with-summaryslices    Include summary slices [default: False]
-        --correct-zed              Correc toffset in mc tracks (aanet) [default: False]
-        -e --expected-rows NROWS   Approximate number of events.  Providing a
-                                   rough estimate for this (100, 10000000, ...)
-                                   will greatly improve reading/writing speed and
-                                   memory usage. Strongly recommended if the
-                                   table/array size is >= 100 MB. [default: 10000]
-
+	-h --help                       Show this screen.
+	-n EVENTS                       Number of events/runs.
+	-o OUTFILE                      Output file.
+	-j --jppy                       (Jpp): Use jppy (not aanet) for Jpp readout
+	-l --with-timeslice-hits        (Jpp) Include timeslice-hits [default: False]
+	-s --with-summaryslices         (Jpp) Include summary slices [default: False]
+	--aa-format=<fmt>               (Aanet): Which aanet subformat ('minidst',
+					'orca_recolns', 'gandalf', 'gandalf_new',
+					'generic_track') [default: None]
+	--aa-lib=<lib.so>               (Aanet): path to aanet binary (for old
+					versions which must be loaded via
+					`ROOT.gSystem.Load()` instead of `import aa`)
+	--aa-old-mc-id                  (aanet): read mc id as `evt.mc_id`, instead
+					of the newer `mc_id = evt.frame_index - 1`
+	--correct-zed                   (Aanet) Correct offset in mc tracks (aanet)
+					[default: False]
+	--do-not-correct-mc-times       (Aanet) Don't correct MC times.
+	--skip-header                   (Aanet) don't read the full header.
+					Entries like `genvol` and `neventgen` will
+					still be retrived. This switch enables
+					skipping the `get_aanet_header` function only.
+					[default: False]
+	--ignore-hits                   Don't read the hits, please [default: False].
+	-e --expected-rows NROWS        Approximate number of events.  Providing a
+					rough estimate for this (100, 10000000, ...)
+					will greatly improve reading/writing speed and
+					memory usage. Strongly recommended if the
+					table/array size is >= 100 MB. [default: 10000]
 
 ``calibrate``
 ~~~~~~~~~~~~~

@@ -9,7 +9,7 @@ K40 Intra-DOM Calibration
 The following script calculates the PMT time offsets using K40 coincidences
 
 """
-# Author: Jonas Reubeld <jreubelt@km3net.de> and Tamas Gal <tgal@km3net.de>
+# Author: Jonas Reubelt <jreubelt@km3net.de> and Tamas Gal <tgal@km3net.de>
 # License: MIT
 import km3pipe as kp
 from km3pipe.logger import logging

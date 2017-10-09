@@ -248,7 +248,7 @@ class AanetPump(Pump):
         if self.format != 'ancient_recolns' and not self.ignore_hits:
             try:
                 hits = RawHitSeries.from_aanet(event.hits, event_id)
-                if np.allclose(event.mc_t, 0) and self.correct_mc_times:
+                if not np.allclose(event.mc_t, 0) and self.correct_mc_times:
                     def converter(t):
                         ns = event.t.GetSec() * 1e9 + event.t.GetNanoSec()
                         return t + ns - event.mc_t
@@ -552,10 +552,10 @@ def parse_jgandalf_new(aanet_event, event_id, missing=0):
     return outmap, dt
 
 
-def upgoing_vs_downgoing(tracks, filler=9999):
+def upgoing_vs_downgoing(tracks, filler=4.2):
     """Compare upgoing vs downgoing hypothesis.
 
-    upvsdown = lik_upgoing - lik_downgoing
+    upvsdown = (lik_upgoing - lik_downgoing)/(lik_upgoing + lik_downgoing)
     """
     upgoing = [
             track.fitinf[2]/track.fitinf[3] for track in tracks
@@ -572,7 +572,7 @@ def upgoing_vs_downgoing(tracks, filler=9999):
 
     upgoing_chi2 = np.nanmin(upgoing)
     downgoing_chi2 = np.nanmin(downgoing)
-    out = upgoing_chi2 - downgoing_chi2
+    out = (upgoing_chi2 - downgoing_chi2) / (upgoing_chi2 + downgoing_chi2)
     return out
 
 
