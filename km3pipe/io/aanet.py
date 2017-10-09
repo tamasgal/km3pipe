@@ -552,10 +552,10 @@ def parse_jgandalf_new(aanet_event, event_id, missing=0):
     return outmap, dt
 
 
-def upgoing_vs_downgoing(tracks, filler=9999):
+def upgoing_vs_downgoing(tracks, filler=4.2):
     """Compare upgoing vs downgoing hypothesis.
 
-    upvsdown = lik_upgoing - lik_downgoing
+    upvsdown = (lik_upgoing - lik_downgoing)/(lik_upgoing + lik_downgoing)
     """
     upgoing = [
             track.fitinf[2]/track.fitinf[3] for track in tracks
@@ -572,7 +572,7 @@ def upgoing_vs_downgoing(tracks, filler=9999):
 
     upgoing_chi2 = np.nanmin(upgoing)
     downgoing_chi2 = np.nanmin(downgoing)
-    out = upgoing_chi2 - downgoing_chi2
+    out = (upgoing_chi2 - downgoing_chi2) / (upgoing_chi2 + downgoing_chi2)
     return out
 
 
