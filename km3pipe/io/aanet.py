@@ -248,7 +248,7 @@ class AanetPump(Pump):
         if self.format != 'ancient_recolns' and not self.ignore_hits:
             try:
                 hits = RawHitSeries.from_aanet(event.hits, event_id)
-                if np.allclose(event.mc_t, 0) and self.correct_mc_times:
+                if not np.allclose(event.mc_t, 0) and self.correct_mc_times:
                     def converter(t):
                         ns = event.t.GetSec() * 1e9 + event.t.GetNanoSec()
                         return t + ns - event.mc_t
