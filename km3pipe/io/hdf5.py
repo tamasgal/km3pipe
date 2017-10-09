@@ -393,9 +393,6 @@ class HDF5Pump(Pump):
 
                 datatype = h5file.get_node("/hits")._v_attrs.datatype
 
-                if datatype == np.string_("RawHitSeries"):
-                    blob["Hits"] = RawHitSeries.from_arrays(
-                        channel_id, dom_id, time, tot, triggered, event_id)
                 if datatype == np.string_("CRawHitSeries"):
                     pos_x = h5file.get_node("/hits/pos_x")[idx:end]
                     pos_y = h5file.get_node("/hits/pos_y")[idx:end]
@@ -411,6 +408,9 @@ class HDF5Pump(Pump):
                         channel_id, dir_x, dir_y, dir_z, dom_id, du,
                         floor, pos_x, pos_y, pos_z, t0s, time, tot, triggered,
                         event_id)
+                else:
+                    blob["Hits"] = RawHitSeries.from_arrays(
+                        channel_id, dom_id, time, tot, triggered, event_id)
 
             if loc == '/mc_hits' and not self.ignore_hits:
                 a = h5file.get_node("/mc_hits/a")[idx:end]
@@ -420,9 +420,6 @@ class HDF5Pump(Pump):
 
                 datatype = h5file.get_node("/mc_hits")._v_attrs.datatype
 
-                if datatype == np.string_("McHitSeries"):
-                    blob["McHits"] = McHitSeries.from_arrays(
-                        a, origin, pmt_id, time, event_id)
                 if datatype == np.string_("CMcHitSeries"):
                     pos_x = h5file.get_node("/mc_hits/pos_x")[idx:end]
                     pos_y = h5file.get_node("/mc_hits/pos_y")[idx:end]
@@ -433,6 +430,9 @@ class HDF5Pump(Pump):
                     blob["McHits"] = CMcHitSeries.from_arrays(
                         a, dir_x, dir_y, dir_z, origin, pmt_id,
                         pos_x, pos_y, pos_z, time, event_id)
+                else:
+                    blob["McHits"] = McHitSeries.from_arrays(
+                        a, origin, pmt_id, time, event_id)
 
         return blob
 
