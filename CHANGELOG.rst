@@ -6,6 +6,8 @@ Unreleased changes
   ``expose`` method
 * aa/gand: fix up-vs-downgoing normalisation (now difference over sum)
 * fix the check if mc time correction needs to be applied
+* ``h5tree`` CLI util, to print just the structure + nevents + nrows. 
+  less verbose than ``ptdump``
 
 7.5.5 / 2017-09-27
 ~~~~~~~~~~~~~~~~~~
