@@ -365,3 +365,28 @@ class TestGeometry(TestCase):
                 break
 
         self.assertAlmostEqual(303.0, h.pos_x)
+
+
+class TestServices(TestCase):
+    def setUp(self):
+        self.pl = Pipeline()
+
+    def test_service(self):
+        class Service(Module):
+            def configure(self):
+                self.expose(23, "foo")
+                self.expose(self.whatever, "whatever")
+
+            def whatever(self, x):
+                return x*2
+
+        class UseService(Module):
+            def process(self, blob):
+                print(self.services)
+                assert 23 == self.services["foo"]
+                assert 2 == self.services["whatever"](1)
+                
+        self.pl.attach(Service)
+        self.pl.attach(UseService)
+        self.pl.drain(1)
+

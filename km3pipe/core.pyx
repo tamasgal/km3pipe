@@ -59,6 +59,7 @@ class Pipeline(object):
         self.init_timer.start()
 
         self.modules = []
+        self.services = {}
         self.geometry = None
         self.blob = blob or Blob()
         self.timeit = timeit
@@ -82,6 +83,10 @@ class Pipeline(object):
                 name == 'GenericPump':
             log.debug("Attaching as regular module")
             module = fac(name=name, **kwargs)
+            if hasattr(module, "services"):
+                for service_name, obj in module.services.items():
+                    self.services[service_name] = obj
+            module.services = self.services
         else:
             if isinstance(fac, types.FunctionType):
                 log.debug("Attaching as function module")
@@ -296,11 +301,16 @@ class Module(object):
                         'process_cpu': deque(maxlen=STAT_LIMIT),
                         'finish': 0,
                         'finish_cpu': 0}
+        self.services = {}
         self.configure()
 
     def configure(self):
         """Configure module, like instance variables etc."""
         pass
+
+    def expose(self, obj, name):
+        """Expose an object as a service to the Pipeline"""
+        self.services[name] = obj
 
     @property
     def name(self):
