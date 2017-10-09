@@ -56,10 +56,11 @@ __status__ = "Development"
 def tohdf5(input_files, output_file, n_events, **kwargs):
     """Convert Any file to HDF5 file"""
     from km3pipe import Pipeline  # noqa
-    from km3pipe.io import GenericPump, HDF5Sink  # noqa
+    from km3pipe.io import GenericPump, HDF5Sink, HDF5MetaData  # noqa
 
     pipe = Pipeline()
     pipe.attach(GenericPump, filenames=input_files, **kwargs)
+    pipe.attach(HDF5MetaData, data=kwargs)
     pipe.attach(StatusBar, every=250)
     pipe.attach(HDF5Sink, filename=output_file, **kwargs)
     pipe.drain(n_events)
