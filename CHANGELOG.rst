@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 * aa/gand: fix up-vs-downgoing normalisation (now difference over sum)
+* fix automatic JTE/MC time conversion
+* Services added to the pipeline
+* ``HDF5Sink`` now uses the new ``HDF5MetaData`` class two write more verbose
+  metadata to the files (e.g. file conversion parameters)
 
 7.5.5 / 2017-09-27
 ~~~~~~~~~~~~~~~~~~
