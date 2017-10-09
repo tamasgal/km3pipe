@@ -23,6 +23,7 @@ Options:
                                     `ROOT.gSystem.Load()` instead of `import aa`)
     --aa-old-mc-id                  (aanet): read mc id as `evt.mc_id`, instead
                                     of the newer `mc_id = evt.frame_index - 1`
+    --aa-run-id-from-header         (Aanet) read run id from header, not event.
     --correct-zed                   (Aanet) Correct offset in mc tracks (aanet)
                                     [default: False]
     --do-not-correct-mc-times       (Aanet) Don't correct MC times.
@@ -98,6 +99,7 @@ def main():
     skip_header = args['--skip-header']
     do_not_correct_mc_times = args['--do-not-correct-mc-times']
     ignore_hits_arg = args['--ignore-hits']
+    run_id_from_header = args['--run-id-from-header']
     tohdf5(infiles,
            outfile,
            n,
@@ -112,4 +114,5 @@ def main():
            skip_header=skip_header,
            correct_mc_times=not bool(do_not_correct_mc_times),
            ignore_hits=bool(ignore_hits_arg),
+           run_id_from_header=bool(run_id_from_header),
           )

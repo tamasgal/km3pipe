@@ -116,6 +116,7 @@ Help output::
 					`ROOT.gSystem.Load()` instead of `import aa`)
 	--aa-old-mc-id                  (aanet): read mc id as `evt.mc_id`, instead
 					of the newer `mc_id = evt.frame_index - 1`
+  --aa-run-id-from-header         (Aanet) read run id from header, not event.
 	--correct-zed                   (Aanet) Correct offset in mc tracks (aanet)
 					[default: False]
 	--do-not-correct-mc-times       (Aanet) Don't correct MC times.

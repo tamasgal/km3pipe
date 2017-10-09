@@ -71,8 +71,13 @@ class AanetPump(Pump):
     missing: numeric, optional [default: 0]
         Filler for missing values.
     skip_header: bool, optional [default=False]
-    correct_mc_times: convert hit times from JTE to MC time [default=True]
+    correct_mc_times: bool, optional [default=True]
+        convert hit times from JTE to MC time
     ignore_hits: bool, optional [default=False]
+        If true, don't read our the hits/mchits.
+    run_id_from_header: bool, optional [default=False]
+        Retrieve run ID from header; with (old) simulation JTE files,
+        the event.run_id is overwritten with the default (1).
     """
 
     def __init__(self, **context):
@@ -91,6 +96,7 @@ class AanetPump(Pump):
         self.missing = self.get('missing') or 0
         self.correct_mc_times = bool(self.get('correct_mc_times'))
         self.ignore_hits = bool(self.get('ignore_hits'))
+        self.run_id_from_header = bool(self.get('run_id_from_header'))
 
         if self.additional:
             self.id = self.get('id')
@@ -273,6 +279,11 @@ class AanetPump(Pump):
                 mc_id = event.frame_index - 1
         except AttributeError:
             mc_id = 0
+
+        if self.run_id_from_header:
+            run_id = self.header.get_field('start_run', 0)
+        else:
+            run_id = event.run_id
         try:
             ei_data = np.array((
                 event.det_id,
@@ -289,7 +300,7 @@ class AanetPump(Pump):
                 event.t.GetNanoSec(),
                 event.t.GetSec(),
                 w1, w2, w3,
-                event.run_id,
+                run_id,
                 event_id), dtype=EventInfo.dtype)
             blob['EventInfo'] = EventInfo(ei_data)
         except AttributeError:
@@ -306,7 +317,7 @@ class AanetPump(Pump):
                                0,   # nanose
                                0,   # sec
                                w1, w2, w3,
-                               event.run_id,
+                               run_id,
                                event_id), dtype=EventInfo.dtype)
             blob['EventInfo'] = EventInfo(ei_data)
         if self.format == 'minidst':

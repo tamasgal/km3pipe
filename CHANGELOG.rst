@@ -1,6 +1,12 @@
 Unreleased changes
 ------------------
 
+* (aanet/tohd5) new option to read run ID from header, not event. 
+  in old versions of JTE, the event.run_id is overwritten with the default, 1.
+
+Version 7
+---------
+
 7.6.1 / 2017-10-09
 ~~~~~~~~~~~~~~~~~~
 * ``HDF5Sink`` now uses the new ``HDF5MetaData`` class two write more verbose
@@ -20,9 +26,6 @@ Unreleased changes
 ~~~~~~~~~~~~~~~~~~
 * Option to Ignore hits in pumps
 * fix aanet fitinf enum
-
-Version 7
----------
 
 7.5.4 / 2017-09-25
 ~~~~~~~~~~~~~~~~~~
