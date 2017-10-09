@@ -1,7 +1,7 @@
 Unreleased changes
 ------------------
 
-7.6.0 / 2017-10-09
+7.6.1 / 2017-10-09
 ~~~~~~~~~~~~~~~~~~
 * ``HDF5Sink`` now uses the new ``HDF5MetaData`` class two write more verbose
   metadata to the files (e.g. file conversion parameters)
