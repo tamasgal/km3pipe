@@ -99,7 +99,7 @@ def main():
     skip_header = args['--skip-header']
     do_not_correct_mc_times = args['--do-not-correct-mc-times']
     ignore_hits_arg = args['--ignore-hits']
-    run_id_from_header = args['--run-id-from-header']
+    run_id_from_header = args['--aa-run-id-from-header']
     tohdf5(infiles,
            outfile,
            n,
