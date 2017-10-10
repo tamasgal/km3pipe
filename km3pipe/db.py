@@ -492,6 +492,9 @@ class StreamDS(object):
         sel = ''.join(["&{0}={1}".format(k, v) for (k, v) in kwargs.items()])
         url = "streamds/{0}.{1}?{2}".format(stream, fmt, sel[1:])
         data = self._db._get_content(url)
+        if(data.startswith("ERROR")):
+            log.error(data)
+            return
         if fmt == "txt":
             return pd.read_csv(StringIO(data), sep='\t')
         return data
