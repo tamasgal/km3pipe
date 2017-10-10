@@ -56,6 +56,31 @@ An example output is::
     857	3620	1465542060119	Y	A01466427	PHYS.1606v1-TMP.HV-SFP.Power-XTRA.700ns		2016-06-10 07:01:00.119000+00:00
 
 
+DataBase
+--------
+
+``streamds``
+~~~~~~~~~~~~
+The utility ``streamds`` can be used to
+interact with the database directly from the shell::
+
+    $ streamds --help
+    Access the KM3NeT StreamDS DataBase service.
+
+    Usage:
+        streamds
+        streamds list
+        streamds info STREAM
+        streamds STREAM [PARAMETERS...]
+        streamds (-h | --help)
+        streamds --version
+
+    Options:
+        STREAM      Name of the stream.
+        PARAMETERS  List of parameters separated by space (e.g. detid=29).
+        -h --help   Show this screen.
+
+
 PipeInspector
 -------------
 
