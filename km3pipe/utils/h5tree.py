@@ -17,6 +17,7 @@ Options:
     -h --help   Show this screen.
     --no-meta   Don't print meta data at top
     --titles    Print leaf titles.
+    --classic   Print like ptdump.
 
 """
 from __future__ import division, absolute_import, print_function
@@ -66,17 +67,33 @@ def meta(h5):
         pass
 
 
-def h5tree(h5name, print_meta=True, **kwargs):
+def h5tree(h5name, print_meta=True, pretty=True, **kwargs):
     with tables.open_file(h5name) as h5:
         if print_meta:
             meta(h5)
         node_kinds = h5.root._v_file._node_kinds[1:]
         what = h5.root._f_walk_groups()
-        for group in what:
-            print(str(group))
+        for k, group in enumerate(what):
+            if k == 0:
+                # dont print leading '/'
+                continue
+            d = group._v_depth
+            if pretty:
+                print('│  ' * (d - 1) + '├── ' * d + group._v_name)
+            else:
+                print(group._v_pathname)
             for kind in node_kinds:
-                for node in group._f_list_nodes(kind):
-                    print(nodeinfo(node, **kwargs))
+                for n, node in enumerate(group._f_list_nodes(kind)):
+                    if n == 0:
+                        n_siblings = node._v_parent._v_nchildren
+                    filler = '├── '
+                    if n == n_siblings - 1:
+                        filler = '└── '
+                    d = node._v_depth
+                    if pretty:
+                        print('│  ' * (d - 1) + filler + node._v_name)
+                    else:
+                        print(nodeinfo(node, **kwargs))
 
 
 def main():
@@ -85,7 +102,9 @@ def main():
     fname = args['FILE']
     do_titles = bool(args['--titles'])
     do_meta = not bool(args['--no-meta'])
+    do_classic = bool(args['--classic'])
     h5tree(fname,
            print_titles=do_titles,
            print_meta=do_meta,
+           print_pretty=not(do_classic),
           )

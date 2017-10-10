@@ -173,31 +173,6 @@ Example::
       -h --help           Show this screen.
 
 
-``ptdump`` (from PyTables)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Inspect the contents of a HDF5 file, walking through all the subgroups.
-
-Read the `PyTables docs <http://www.pytables.org/usersguide/utilities.html#id1>`_ for more details.
-
-Example output::
-
-    ┌─[moritz@averroes ~/km3net/data ]
-    └─╼ ptdump nueCC.h5
-    / (RootGroup) ''
-    /event_info (Table(121226,), shuffle, zlib(5)) ''
-    /hits (Table(0,), shuffle, zlib(5)) ''
-    /mc_hits (Table(0,), shuffle, zlib(5)) ''
-    /mc_tracks (Table(242452,), shuffle, zlib(5)) ''
-    /reco (Group) ''
-    /reco/aa_shower_fit (Table(121226,), shuffle, zlib(5)) ''
-    /reco/dusj (Table(121226,), shuffle, zlib(5)) ''
-    /reco/j_gandalf (Table(121226,), shuffle, zlib(5)) ''
-    /reco/q_strategy (Table(121226,), shuffle, zlib(5)) ''
-    /reco/reco_lns (Table(121226,), shuffle, zlib(5)) ''
-    /reco/thomas_features (Table(121226,), shuffle, zlib(5)) ''
-
-
 ``h5info``
 ~~~~~~~~~~
 
@@ -224,3 +199,66 @@ Example::
       FILE        Input file.
       -r --raw    Dump raw metadata.
       -h --help   Show this screen.
+
+``h5tree``
+~~~~~~~~~~
+
+Print header info (TODO)
+
+``h5tree``
+~~~~~~~~~~
+
+Print the structure of a H5 file + minimal metadata.
+
+For a less pretty, more verbose output, use the ``ptdump`` util instead.
+
+Example::
+
+  $ h5tree elec.h5
+  KM3HDF5 v4.2
+  Number of Events: 169163
+  ├── hits
+  │  ├── _indices
+  │  ├── channel_id
+  │  ├── dom_id
+  │  ├── event_id
+  │  ├── time
+  │  ├── tot
+  │  └── triggered
+  ├── mc_hits
+  │  ├── _indices
+  │  ├── a
+  │  ├── event_id
+  │  ├── origin
+  │  ├── pmt_id
+  │  └── time
+  ├── reco
+  │  └── gandalf
+  ├── talala
+
+
+``ptdump`` (from PyTables)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Inspect the contents of a HDF5 file, walking through all the subgroups.
+
+Read the `PyTables docs <http://www.pytables.org/usersguide/utilities.html#id1>`_ for more details.
+
+Example output::
+
+    ┌─[moritz@averroes ~/km3net/data ]
+    └─╼ ptdump nueCC.h5
+    / (RootGroup) ''
+    /event_info (Table(121226,), shuffle, zlib(5)) ''
+    /hits (Table(0,), shuffle, zlib(5)) ''
+    /mc_hits (Table(0,), shuffle, zlib(5)) ''
+    /mc_tracks (Table(242452,), shuffle, zlib(5)) ''
+    /reco (Group) ''
+    /reco/aa_shower_fit (Table(121226,), shuffle, zlib(5)) ''
+    /reco/dusj (Table(121226,), shuffle, zlib(5)) ''
+    /reco/j_gandalf (Table(121226,), shuffle, zlib(5)) ''
+    /reco/q_strategy (Table(121226,), shuffle, zlib(5)) ''
+    /reco/reco_lns (Table(121226,), shuffle, zlib(5)) ''
+    /reco/thomas_features (Table(121226,), shuffle, zlib(5)) ''
+
+
