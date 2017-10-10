@@ -424,7 +424,8 @@ class StreamDS(object):
     def _update_streams(self):
         """Update the list of available straems"""
         c = self._db._get_content("streamds")
-        self._stream_df = pd.read_csv(StringIO(c), sep='\t')
+        self._stream_df = pd.read_csv(StringIO(c), sep='\t')  \
+                          .sort_values("STREAM")
         self._streams = None
         for stream in self.streams:
             setattr(self, stream, self.__getattr__(stream))
@@ -477,15 +478,27 @@ class StreamDS(object):
         """A list of optional selectors for a given stream"""
         return self._stream_parameter(stream, 'OPTIONAL_SELECTORS')
 
+    def help(self, stream):
+        """Show the help for a given stream."""
+        if stream not in self.streams:
+            log.error("Stream '{}' not found in the database."
+                      .format(stream))
+        params = self._stream_df[self._stream_df['STREAM'] == stream].values[0]
+        self._print_stream_parameters(params)
+
     def print_streams(self):
         """Print a coloured list of streams and its parameters"""
         for row in self._stream_df.itertuples():
-            cprint("{1}".format(*row), "magenta", attrs=["bold"])
-            print("{5}".format(*row))
-            cprint("  available formats:   {2}".format(*row), "blue")
-            cprint("  mandatory selectors: {3}".format(*row), "red")
-            cprint("  optional selectors:  {4}".format(*row), "green")
-            print()
+            self._print_stream_parameters(row[1:])
+
+    def _print_stream_parameters(self, values):
+        """Print a coloured help for a given tuple of stream parameters."""
+        cprint("{0}".format(*values), "magenta", attrs=["bold"])
+        print("{4}".format(*values))
+        cprint("  available formats:   {1}".format(*values), "blue")
+        cprint("  mandatory selectors: {2}".format(*values), "red")
+        cprint("  optional selectors:  {3}".format(*values), "green")
+        print()
 
     def get(self, stream, fmt='txt', **kwargs):
         """Get the data for a given stream manually"""
