@@ -42,7 +42,7 @@ def plot_dom_parameters(data, detector, filename, label, title,
     title: str
     underfactor: a scale factor for the points used for underflow values
     overfactor: a scale factor for the points used for overflow values
-    hide_limits: do not show under/overfactors in the plot
+    hide_limits: do not show under/overflows in the plot
 
     """
     x, y, _ = zip(*detector.doms.values())
