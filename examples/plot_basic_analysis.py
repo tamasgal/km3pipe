@@ -156,12 +156,25 @@ plt.title('Zenith Distribution');
 
 
 #####################################################
-# 
+# Starting positions of primaries
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 plt.hist2d(primaries.pos_x, primaries.pos_y, bins=100);
 plt.xlabel('x [m]')
 plt.ylabel('y [m]')
 plt.title('2D Plane')
 plt.colorbar();
+
+#####################################################
+# If you have seaborn installed (`pip install seaborn`), you can easily create
+# nice jointplots:
+try:
+    import seaborn as sns
+except:
+    print("No seaborn found, skipping example.")
+else:
+    g = sns.jointplot('pos_x', 'pos_y', data=primaries, kind='hex')
+    g.set_axis_labels("x [m]", "y[m]")
+
 
 
 #####################################################
@@ -213,4 +226,3 @@ plt.hist((primaries.zenith - gandalfs.zenith)[lambda_cut].dropna(), bins=100)
 plt.xlabel(r'true zenith - reconstructed zenith [rad]')
 plt.ylabel('count')
 plt.title('Zenith Reconstruction Difference for lambda < {}'.format(l));
-
