@@ -157,7 +157,7 @@ plt.title('Zenith Distribution');
 #
 # Starting positions of primaries
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-plt.hist2d(primaries.pos_x, primaries.pos_y, bins=100);
+plt.hist2d(primaries.pos_x, primaries.pos_y, bins=100, cmap='viridis');
 plt.xlabel('x [m]')
 plt.ylabel('y [m]')
 plt.title('2D Plane')
@@ -175,6 +175,10 @@ except:
 else:
     g = sns.jointplot('pos_x', 'pos_y', data=primaries, kind='hex')
     g.set_axis_labels("x [m]", "y[m]")
+    sns.plt.subplots_adjust(right=0.90) # make room for the colorbar
+    plt.title("2D Plane")
+    plt.colorbar()
+    plt.legend()
 
 
 #####################################################
