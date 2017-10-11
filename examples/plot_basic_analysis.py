@@ -240,7 +240,7 @@ fig, ax = plt.subplots()
 for l in [100, 5, 2, 1, 0.1]:
     l_cut = gandalfs['lambda'] < l
     ax.hist((primaries.zenith - gandalfs.zenith)[l_cut].dropna(),
-            bins=100, label=r"$\lambda$ = {}".format(l))
+            bins=100, label=r"$\lambda$ = {}".format(l), alpha=.7)
 plt.xlabel(r'true zenith - reconstructed zenith [rad]')
 plt.ylabel('count')
 plt.legend()
@@ -298,6 +298,7 @@ absolute_deviation = np.abs(residuals_shifted_by_median)
 resid_mad = np.median(absolute_deviation)
 
 plt.hist(np.abs(residuals), alpha=.7, bins='auto', label='Absolute residuals')
-plt.axvline(resid_mad, label='MAD: {:.2f}'.format(resid_mad)))
+plt.axvline(resid_mad, label='MAD: {:.2f}'.format(resid_mad))
 plt.title("Average resolution: {:.3f} degree".format(resid_mad))
+plt.legend()
 plt.xlabel('Absolute zenith residuals / deg')
