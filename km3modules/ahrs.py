@@ -8,6 +8,7 @@ AHRS calibration.
 from __future__ import division, absolute_import, print_function
 
 import io
+from functools import lru_cache
 import xml.etree.ElementTree as ET
 
 import numpy as np
@@ -21,6 +22,7 @@ log = kp.logger.logging.getLogger(__name__)  # pylint: disable=C0103
 # log.setLevel(logging.DEBUG)
 
 
+@lru_cache(maxsize=None, typed=False)
 def get_latest_ahrs_calibration(clb_upi, max_version=3, db=None):
     """Retrieve the latest AHRS calibration data for a given CLB
 
