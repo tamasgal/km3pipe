@@ -30,8 +30,8 @@ def fit_ahrs(A, H, Aoff, Arot, Hoff, Hrot):
 
     Parameters
     ----------
-    A: numpy.array of shape (3,)
-    H: numpy.array of shape (3,)
+    A: list, tuple or numpy.array of shape (3,)
+    H: list, tuple or numpy.array of shape (3,)
     Aoff: numpy.array of shape(3,)
     Arot: numpy.array of shape(3, 3)
     Hoff: numpy.array of shape(3,)
