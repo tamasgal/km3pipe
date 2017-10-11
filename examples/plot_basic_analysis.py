@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt   # our plotting module
 import pandas as pd               # the main HDF5 reader
 import numpy as np                # must have
 import km3pipe as kp              # some KM3NeT related helper functions
-import seaborn as sb              # beautiful statistical plots!
+import seaborn as sns              # beautiful statistical plots!
 
 
 #####################################################
@@ -235,6 +235,7 @@ plt.title('Zenith Reconstruction Difference for lambda < {}'.format(l));
 #####################################################
 # Combined zenith reco plot for different lambda cuts
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 fig, ax = plt.subplots()
 for l in [100, 5, 2, 1, 0.1]:
     l_cut = gandalfs['lambda'] < l
@@ -246,8 +247,11 @@ plt.legend()
 plt.title('Zenith Reconstruction Difference for some Lambda Cuts');
 
 #####################################################
-# let's fit some distributions
-# gaussian + lorentz (aka norm + cauchy)
+# let's fit some distributions: gaussian + lorentz (aka norm + cauchy)
+# Fitting the gaussian to the whole range is a very bad fit, so
+# we make a second gaussian fit only to +- 10 degree.
+# Conversely, the Cauchy (lorentz) distribution is a perfect fit.
+# note that ``2 gamma = FWHM``
 
 from scipy.stats import cauchy, norm
 
@@ -264,19 +268,29 @@ pi = 180
 x = np.linspace(-pi, pi, 1000)
 
 c_loc, c_gamma = cauchy.fit(residuals)
-g_mu, g_sigma = norm.fit(residuals)
+fwhm = 2 * c_gamma
 
-plt.hist(residuals, bins='auto', label='Histogram', normed=True)
+g_mu_bad, g_sigma_bad = norm.fit(residuals)
+g_mu, g_sigma = norm.fit(residuals[np.abs(residuals) < 10])
+
+plt.hist(residuals, bins='auto', label='Histogram', normed=True,
+         alpha=.7)
 plt.plot(x, cauchy(c_loc, c_gamma).pdf(x),
-         label='Lorentz: $\gamma =${:.3f}'.format(c_gamma))
+         label='Lorentz: $FWHM =${:.3f}'.format(fwhm)
+        linewidth=2)
+plt.plot(x, norm(g_mu_bad, g_sigma_bad).pdf(x),
+         label='Unrestricted Gauss: $\sigma =$ {:.3f}'.format(g_sigma_bad)
+        linewidth=2)
 plt.plot(x, norm(g_mu, g_sigma).pdf(x),
-         label='Gauss: $\sigma =$ {:.3f}'.format(g_sigma))
+         label='+- 10 deg Gauss: $\sigma =$ {:.3f}'.format(g_sigma)
+        linewidth=2)
 plt.xlim(-pi/4, pi/4)
 plt.xlabel('Zenith residuals / deg')
 plt.legend()
 
-#####################################################
-# let's get the Median Absolute Deviation
+####################################################################
+# We can also look at the median resolution without doing any fits
+# In textbooks, this is also called Median Absolute Deviation
 
 resid_median = np.median(residuals)
 residuals_shifted_by_median = residuals - resid_median
