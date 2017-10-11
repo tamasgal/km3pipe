@@ -5,7 +5,7 @@ Basic Analysis Example
 ======================
 
 """
-# Author: Tamás Gál <tgal@km3net.de>
+# Authors: Tamás Gál <tgal@km3net.de>, Moritz Lotze <mlotze@km3net.de>
 # License: BSD-3
 # Date: 2017-10-10
 # Status: Under construction...
