@@ -175,7 +175,7 @@ except:
 else:
     g = sns.jointplot('pos_x', 'pos_y', data=primaries, kind='hex')
     g.set_axis_labels("x [m]", "y[m]")
-    sns.plt.subplots_adjust(right=0.90) # make room for the colorbar
+    plt.subplots_adjust(right=0.90) # make room for the colorbar
     plt.title("2D Plane")
     plt.colorbar()
     plt.legend()
