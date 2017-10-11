@@ -94,4 +94,4 @@ def _extract_calibration(xroot):
     Aoff = np.array(val[Aoff_ix])[vec_ic]
     Hrot = np.array(val[Hrot_ix]).reshape(3, 3)[col_ic, row_ic].reshape(3, 3)
 
-    return Arot, Aoff, Hrot
+    return Aoff, Arot, Hrot
