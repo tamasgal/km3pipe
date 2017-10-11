@@ -121,7 +121,7 @@ def _extract_calibration(xroot):
 
     """
     names = [c.text for c in xroot.findall(".//Name")]
-    val = [[i.text for i in c] for c in xroot.findall(".//Values")]
+    val = [[float(i.text) for i in c] for c in xroot.findall(".//Values")]
 
     # The fields has to be reindeced, these are the index mappings
     col_ic = [int(v) for v in val[names.index("AHRS_Matrix_Column(-)")]]
@@ -147,7 +147,7 @@ def _extract_calibration(xroot):
         values = []
         for t in ('Min', 'Max'):
             ix = names.index("AHRS_Magnetic_{}{}(G-)".format(q, t))
-            values.append(float(val[ix][0]))
+            values.append(val[ix][0])
         Hoff.append(sum(values) / 2.)
     Hoff = np.array(Hoff)
 
