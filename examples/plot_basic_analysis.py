@@ -267,15 +267,15 @@ g_mu, g_sigma = norm.fit(residuals[np.abs(residuals) < 10])
 plt.hist(residuals, bins='auto', label='Histogram', normed=True,
          alpha=.7)
 plt.plot(x, cauchy(c_loc, c_gamma).pdf(x),
-         label='Lorentz: $FWHM =${:.3f}'.format(fwhm)
-        linewidth=2)
+         label='Lorentz: $FWHM =${:.3f}'.format(fwhm),
+         linewidth=2)
 plt.plot(x, norm(g_mu_bad, g_sigma_bad).pdf(x),
-         label='Unrestricted Gauss: $\sigma =$ {:.3f}'.format(g_sigma_bad)
-        linewidth=2)
+         label='Unrestricted Gauss: $\sigma =$ {:.3f}'.format(g_sigma_bad),
+         linewidth=2)
 plt.plot(x, norm(g_mu, g_sigma).pdf(x),
-         label='+- 10 deg Gauss: $\sigma =$ {:.3f}'.format(g_sigma)
-        linewidth=2)
-plt.xlim(-pi/4, pi/4)
+         label='+- 10 deg Gauss: $\sigma =$ {:.3f}'.format(g_sigma),
+         linewidth=2)
+plt.xlim(-pi / 4, pi / 4)
 plt.xlabel('Zenith residuals / deg')
 plt.legend()
 
