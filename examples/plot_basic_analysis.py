@@ -169,6 +169,7 @@ plt.colorbar();
 # nice jointplots:
 try:
     import seaborn as sns
+    km3pipe.style.use("km3pipe")  # reset matplotlib style
 except:
     print("No seaborn found, skipping example.")
 else:
