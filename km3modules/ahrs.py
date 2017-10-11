@@ -89,7 +89,7 @@ def get_latest_ahrs_calibration(clb_upi, max_version=3, db=None):
     if db is None:
         db = kp.db.DBManager()
 
-    for version in range(max_version, 1, -1):
+    for version in range(max_version, 0, -1):
         raw_data = db._get_content("show_product_test.htm?upi={0}&"
                                    "testtype=AHRS-CALIBRATION-v{1}&n=1&out=xml"
                                    .format(ahrs_upi, version)) \
