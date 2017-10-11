@@ -94,4 +94,13 @@ def _extract_calibration(xroot):
     Aoff = np.array(val[Aoff_ix])[vec_ic]
     Hrot = np.array(val[Hrot_ix]).reshape(3, 3)[col_ic, row_ic].reshape(3, 3)
 
-    return Aoff, Arot, Hrot
+    Hoff = []
+    for q in 'XYZ':
+        values = []
+        for t in ('Min', 'Max'):
+            ix = names.index("AHRS_Magnetic_{}{}(G-)".format(q, t))
+            values.append(float(val[ix][0]))
+        Hoff.append(sum(values) / 2.)
+    Hoff = np.array(Hoff)
+
+    return Aoff, Arot, Hoff, Hrot
