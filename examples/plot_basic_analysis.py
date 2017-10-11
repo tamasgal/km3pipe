@@ -155,6 +155,8 @@ plt.title('Zenith Distribution');
 
 #####################################################
 #
+# Starting positions of primaries
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 plt.hist2d(primaries.pos_x, primaries.pos_y, bins=100);
 plt.xlabel('x [m]')
 plt.ylabel('y [m]')
@@ -163,15 +165,17 @@ plt.colorbar();
 
 #####################################################
 #
-plt.hexbin(primaries.pos_x, primaries.pos_y, gridsize=50);
-plt.xlabel('x [m]')
-plt.ylabel('y [m]')
-plt.title('2D Plane')
-plt.colorbar();
+# If you have seaborn installed (`pip install seaborn`), you can easily create
+# nice jointplots:
+try:
+    import seaborn as sns
+    km3pipe.style.use("km3pipe")  # reset matplotlib style
+except:
+    print("No seaborn found, skipping example.")
+else:
+    g = sns.jointplot('pos_x', 'pos_y', data=primaries, kind='hex')
+    g.set_axis_labels("x [m]", "y[m]")
 
-#####################################################
-#
-sb.jointplot(x='pos_x', y='pos_y', data=primaries, kind='hex');
 
 #####################################################
 #
