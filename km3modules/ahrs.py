@@ -29,6 +29,7 @@ def get_latest_ahrs_calibration(clb_upi, max_version=3, db=None):
     Parameters
     ----------
     clb_upi: str
+    max_version: int, maximum version to check, optional
     db: DBManager(), optional
 
     Returns
@@ -37,6 +38,8 @@ def get_latest_ahrs_calibration(clb_upi, max_version=3, db=None):
     Arot: numpy.array with shape(3,3)
     Hoff: numpy.array with shape(3,)
     Hrot: numpy.array with shape(3,3)
+
+    or None if no calibration found.
     
     """
     ahrs_upi = kp.db.clbupi2ahrsupi(clb_upi)
@@ -54,10 +57,41 @@ def get_latest_ahrs_calibration(clb_upi, max_version=3, db=None):
         except ET.ParseError:
             continue
         else:
-            names = [c.text for c in xroot.findall(".//Name")]
-            values = [[i.text for i in c] for c in xroot.findall(".//Values")]
-            Aoff_idx = names.index("AHRS_Acceleration_Offset(g/ms^2-)")
-            Arot_idx = names.index("AHRS_Acceleration_Rotation(-)")
-            return (np.array(values[Aoff_idx]),
-                    np.array(values[Arot_idx]).reshape(3, 3))
-        return None
+            return _extract_calibration(xroot)
+
+    return None
+
+
+def _extract_calibration(xroot):
+    """Extract AHRS calibration information from XML root.
+
+    Parameters
+    ----------
+    xroot: XML root
+
+
+    Returns
+    -------
+    Aoff: numpy.array with shape(3,)
+    Arot: numpy.array with shape(3,3)
+    Hoff: numpy.array with shape(3,)
+    Hrot: numpy.array with shape(3,3)
+
+    """
+    names = [c.text for c in xroot.findall(".//Name")]
+    val = [[i.text for i in c] for c in xroot.findall(".//Values")]
+
+    # The fields has to be reindeced, these are the index mappings
+    col_ic = [int(v) for v in val[names.index("AHRS_Matrix_Column(-)")]]
+    row_ic = [int(v) for v in val[names.index("AHRS_Matrix_Row(-)")]]
+    vec_ic = [int(v) for v in val[names.index("AHRS_Vector_Index(-)")]]
+
+    Aoff_ix = names.index("AHRS_Acceleration_Offset(g/ms^2-)")
+    Arot_ix = names.index("AHRS_Acceleration_Rotation(-)")
+    Hrot_ix = names.index("AHRS_Magnetic_Rotation(-)")
+
+    Arot = np.array(val[Arot_ix]).reshape(3, 3)[col_ic, row_ic].reshape(3, 3)
+    Aoff = np.array(val[Aoff_ix])[vec_ic]
+    Hrot = np.array(val[Hrot_ix]).reshape(3, 3)[col_ic, row_ic].reshape(3, 3)
+
+    return Arot, Aoff, Hrot
