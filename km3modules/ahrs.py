@@ -53,9 +53,9 @@ def fit_ahrs(A, H, Aoff, Arot, Hoff, Hrot):
     roll = arctan2(-Acal[1], -Acal[2])
     pitch= arctan2(Acal[0], np.sqrt(Acal[1]*Acal[1] + Acal[2]*Acal[2]))
     yaw = arctan2(Hcal[2]*sin(roll) - Hcal[1]*cos(roll),
-                  sum(Hcal[0]*cos(pitch),
-                      Hcal[1]*sin(pitch)*sin(roll),
-                      Hcal[2]*sin(pitch)*cos(roll)))
+                  sum((Hcal[0]*cos(pitch),
+                       Hcal[1]*sin(pitch)*sin(roll),
+                       Hcal[2]*sin(pitch)*cos(roll))))
 
     #yaw = (yaw + magnetic_declination + 360 ) % 360
     yaw = np.degrees(yaw)
