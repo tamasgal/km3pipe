@@ -56,6 +56,31 @@ An example output is::
     857	3620	1465542060119	Y	A01466427	PHYS.1606v1-TMP.HV-SFP.Power-XTRA.700ns		2016-06-10 07:01:00.119000+00:00
 
 
+DataBase
+--------
+
+``streamds``
+~~~~~~~~~~~~
+The utility ``streamds`` can be used to
+interact with the database directly from the shell::
+
+    $ streamds --help
+    Access the KM3NeT StreamDS DataBase service.
+
+    Usage:
+        streamds
+        streamds list
+        streamds info STREAM
+        streamds STREAM [PARAMETERS...]
+        streamds (-h | --help)
+        streamds --version
+
+    Options:
+        STREAM      Name of the stream.
+        PARAMETERS  List of parameters separated by space (e.g. detid=29).
+        -h --help   Show this screen.
+
+
 PipeInspector
 -------------
 
@@ -116,6 +141,7 @@ Help output::
 					`ROOT.gSystem.Load()` instead of `import aa`)
 	--aa-old-mc-id                  (aanet): read mc id as `evt.mc_id`, instead
 					of the newer `mc_id = evt.frame_index - 1`
+  --aa-run-id-from-header         (Aanet) read run id from header, not event.
 	--correct-zed                   (Aanet) Correct offset in mc tracks (aanet)
 					[default: False]
 	--do-not-correct-mc-times       (Aanet) Don't correct MC times.
@@ -172,31 +198,6 @@ Example::
       -h --help           Show this screen.
 
 
-``ptdump`` (from PyTables)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Inspect the contents of a HDF5 file, walking through all the subgroups.
-
-Read the `PyTables docs <http://www.pytables.org/usersguide/utilities.html#id1>`_ for more details.
-
-Example output::
-
-    ┌─[moritz@averroes ~/km3net/data ]
-    └─╼ ptdump nueCC.h5
-    / (RootGroup) ''
-    /event_info (Table(121226,), shuffle, zlib(5)) ''
-    /hits (Table(0,), shuffle, zlib(5)) ''
-    /mc_hits (Table(0,), shuffle, zlib(5)) ''
-    /mc_tracks (Table(242452,), shuffle, zlib(5)) ''
-    /reco (Group) ''
-    /reco/aa_shower_fit (Table(121226,), shuffle, zlib(5)) ''
-    /reco/dusj (Table(121226,), shuffle, zlib(5)) ''
-    /reco/j_gandalf (Table(121226,), shuffle, zlib(5)) ''
-    /reco/q_strategy (Table(121226,), shuffle, zlib(5)) ''
-    /reco/reco_lns (Table(121226,), shuffle, zlib(5)) ''
-    /reco/thomas_features (Table(121226,), shuffle, zlib(5)) ''
-
-
 ``h5info``
 ~~~~~~~~~~
 
@@ -223,3 +224,66 @@ Example::
       FILE        Input file.
       -r --raw    Dump raw metadata.
       -h --help   Show this screen.
+
+``h5tree``
+~~~~~~~~~~
+
+Print header info (TODO)
+
+``h5tree``
+~~~~~~~~~~
+
+Print the structure of a H5 file + minimal metadata.
+
+For a less pretty, more verbose output, use the ``ptdump`` util instead.
+
+Example::
+
+  $ h5tree elec.h5
+  KM3HDF5 v4.2
+  Number of Events: 169163
+  ├── hits
+  │  ├── _indices
+  │  ├── channel_id
+  │  ├── dom_id
+  │  ├── event_id
+  │  ├── time
+  │  ├── tot
+  │  └── triggered
+  ├── mc_hits
+  │  ├── _indices
+  │  ├── a
+  │  ├── event_id
+  │  ├── origin
+  │  ├── pmt_id
+  │  └── time
+  ├── reco
+  │  └── gandalf
+  ├── talala
+
+
+``ptdump`` (from PyTables)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Inspect the contents of a HDF5 file, walking through all the subgroups.
+
+Read the `PyTables docs <http://www.pytables.org/usersguide/utilities.html#id1>`_ for more details.
+
+Example output::
+
+    ┌─[moritz@averroes ~/km3net/data ]
+    └─╼ ptdump nueCC.h5
+    / (RootGroup) ''
+    /event_info (Table(121226,), shuffle, zlib(5)) ''
+    /hits (Table(0,), shuffle, zlib(5)) ''
+    /mc_hits (Table(0,), shuffle, zlib(5)) ''
+    /mc_tracks (Table(242452,), shuffle, zlib(5)) ''
+    /reco (Group) ''
+    /reco/aa_shower_fit (Table(121226,), shuffle, zlib(5)) ''
+    /reco/dusj (Table(121226,), shuffle, zlib(5)) ''
+    /reco/j_gandalf (Table(121226,), shuffle, zlib(5)) ''
+    /reco/q_strategy (Table(121226,), shuffle, zlib(5)) ''
+    /reco/reco_lns (Table(121226,), shuffle, zlib(5)) ''
+    /reco/thomas_features (Table(121226,), shuffle, zlib(5)) ''
+
+
