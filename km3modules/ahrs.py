@@ -1,0 +1,61 @@
+# coding=utf-8
+# Filename: ahrs.py
+# pylint: disable=locally-disabled
+"""
+AHRS calibration.
+
+"""
+from __future__ import division, absolute_import, print_function
+
+import io
+import xml.etree.ElementTree as ET
+
+import numpy as np
+import km3pipe as kp
+
+__author__ = "Tamas Gal"
+__email__ = "tgal@km3net.de"
+__status__ = "Development"
+
+log = kp.logger.logging.getLogger(__name__)  # pylint: disable=C0103
+# log.setLevel(logging.DEBUG)
+
+
+def get_latest_ahrs_calibration(clb_upi, max_version=3, db=None):
+    """Retrieve the latest AHRS calibration data for a given CLB
+
+    Parameters
+    ----------
+    clb_upi: str
+    db: DBManager(), optional
+
+    Returns
+    -------
+    Aoff: numpy.array with shape(3,)
+    Arot: numpy.array with shape(3,3)
+    Hoff: numpy.array with shape(3,)
+    Hrot: numpy.array with shape(3,3)
+    
+    """
+    ahrs_upi = kp.db.clbupi2ahrsupi(clb_upi)
+
+    if db is None:
+        db = kp.db.DBManager()
+
+    for version in range(max_version, 1, -1):
+        raw_data = db._get_content("show_product_test.htm?upi={0}&"
+                                   "testtype=AHRS-CALIBRATION-v{1}&n=1&out=xml"
+                                   .format(ahrs_upi, version)) \
+                                   .replace('\n', '') 
+        try:
+            xroot = ET.parse(io.StringIO(raw_data)).getroot()
+        except ET.ParseError:
+            continue
+        else:
+            names = [c.text for c in xroot.findall(".//Name")]
+            values = [[i.text for i in c] for c in xroot.findall(".//Values")]
+            Aoff_idx = names.index("AHRS_Acceleration_Offset(g/ms^2-)")
+            Arot_idx = names.index("AHRS_Acceleration_Rotation(-)")
+            return (np.array(values[Aoff_idx]),
+                    np.array(values[Arot_idx]).reshape(3, 3))
+        return None
