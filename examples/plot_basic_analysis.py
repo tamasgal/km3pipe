@@ -221,9 +221,23 @@ plt.title('Zenith Reconstruction Difference');
 
 #####################################################
 # 
-l = 5
+l = 0.2
 lambda_cut = gandalfs['lambda'] < l
 plt.hist((primaries.zenith - gandalfs.zenith)[lambda_cut].dropna(), bins=100)
 plt.xlabel(r'true zenith - reconstructed zenith [rad]')
 plt.ylabel('count')
 plt.title('Zenith Reconstruction Difference for lambda < {}'.format(l));
+
+
+#####################################################
+# Combined zenith reco plot for different lambda cuts
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+fig, ax = plt.subplots()
+for l in [100, 5, 2, 1, 0.1]:
+    l_cut = gandalfs['lambda'] < l
+    ax.hist((primaries.zenith - gandalfs.zenith)[l_cut].dropna(),
+            bins=100, label=r"$\lambda$ = {}".format(l))
+plt.xlabel(r'true zenith - reconstructed zenith [rad]')
+plt.ylabel('count')
+plt.legend()
+plt.title('Zenith Reconstruction Difference for some Lambda Cuts');
