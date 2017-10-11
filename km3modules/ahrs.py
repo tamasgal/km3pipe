@@ -12,6 +12,7 @@ from functools import lru_cache
 import xml.etree.ElementTree as ET
 
 import numpy as np
+from numpy import cos, sin, arctan2
 import km3pipe as kp
 
 __author__ = "Tamas Gal"
@@ -20,6 +21,47 @@ __status__ = "Development"
 
 log = kp.logger.logging.getLogger(__name__)  # pylint: disable=C0103
 # log.setLevel(logging.DEBUG)
+
+
+def fit_ahrs(A, H, Aoff, Arot, Hoff, Hrot):
+    """Calculate yaw, pitch and roll for given A/H and calibration set.
+
+    Author: Vladimir Kulikovsky
+
+    Parameters
+    ----------
+    A: numpy.array of shape (3,)
+    H: numpy.array of shape (3,)
+    Aoff: numpy.array of shape(3,)
+    Arot: numpy.array of shape(3, 3)
+    Hoff: numpy.array of shape(3,)
+    Hrot: numpy.array of shape(3, 3)
+
+    Returns
+    -------
+    yaw, pitch, roll
+
+    """
+    Acal = np.dot(A-Aoff, Arot)
+    Hcal = np.dot(H-Hoff, Hrot)
+
+    #invert axis for DOM upside down
+    for i in (1, 2):
+        Acal[i] = -Acal[i]
+        Hcal[i] = -Hcal[i]
+
+    roll = arctan2(-Acal[1], -Acal[2])
+    pitch= arctan2(Acal[0], np.sqrt(Acal[1]*Acal[1] + Acal[2]*Acal[2]))
+    yaw = arctan2(Hcal[2]*sin(roll) - Hcal[1]*cos(roll),
+                  sum(Hcal[0]*cos(pitch),
+                      Hcal[1]*sin(pitch)*sin(roll),
+                      Hcal[2]*sin(pitch)*cos(roll)))
+
+    #yaw = (yaw + magnetic_declination + 360 ) % 360
+    yaw = np.degrees(yaw)
+    roll = np.degrees(roll)
+    pitch = np.degrees(pitch)
+    return yaw, pitch, roll
 
 
 @lru_cache(maxsize=None, typed=False)
@@ -40,7 +82,7 @@ def get_latest_ahrs_calibration(clb_upi, max_version=3, db=None):
     Hrot: numpy.array with shape(3,3)
 
     or None if no calibration found.
-    
+
     """
     ahrs_upi = kp.db.clbupi2ahrsupi(clb_upi)
 
@@ -51,7 +93,7 @@ def get_latest_ahrs_calibration(clb_upi, max_version=3, db=None):
         raw_data = db._get_content("show_product_test.htm?upi={0}&"
                                    "testtype=AHRS-CALIBRATION-v{1}&n=1&out=xml"
                                    .format(ahrs_upi, version)) \
-                                   .replace('\n', '') 
+                                   .replace('\n', '')
         try:
             xroot = ET.parse(io.StringIO(raw_data)).getroot()
         except ET.ParseError:
