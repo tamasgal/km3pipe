@@ -247,11 +247,15 @@ plt.legend()
 plt.title('Zenith Reconstruction Difference for some Lambda Cuts');
 
 #####################################################
-# let's fit some distributions: gaussian + lorentz (aka norm + cauchy)
+# Fitting Angular resolutions
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# Let's fit some distributions: gaussian + lorentz (aka norm + cauchy)
+#
 # Fitting the gaussian to the whole range is a very bad fit, so
 # we make a second gaussian fit only to +- 10 degree.
-# Conversely, the Cauchy (lorentz) distribution is a perfect fit.
-# note that ``2 gamma = FWHM``
+# Conversely, the Cauchy (lorentz) distribution is a near perfect fit
+# (note that ``2 gamma = FWHM``).
 
 from scipy.stats import cauchy, norm
 
@@ -289,8 +293,9 @@ plt.xlabel('Zenith residuals / deg')
 plt.legend()
 
 ####################################################################
-# We can also look at the median resolution without doing any fits
-# In textbooks, this is also called Median Absolute Deviation
+# We can also look at the median resolution without doing any fits.
+#
+# In textbooks, this metric is also called Median Absolute Deviation.
 
 resid_median = np.median(residuals)
 residuals_shifted_by_median = residuals - resid_median
@@ -298,7 +303,7 @@ absolute_deviation = np.abs(residuals_shifted_by_median)
 resid_mad = np.median(absolute_deviation)
 
 plt.hist(np.abs(residuals), alpha=.7, bins='auto', label='Absolute residuals')
-plt.axvline(resid_mad, label='MAD: {:.2f}'.format(resid_mad))
+plt.axvline(resid_mad, label='MAD: {:.2f}'.format(resid_mad), linewidth=3)
 plt.title("Average resolution: {:.3f} degree".format(resid_mad))
 plt.legend()
 plt.xlabel('Absolute zenith residuals / deg')
