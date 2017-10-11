@@ -125,7 +125,10 @@ def _extract_calibration(xroot):
 
     # The fields has to be reindeced, these are the index mappings
     col_ic = [int(v) for v in val[names.index("AHRS_Matrix_Column(-)")]]
-    row_ic = [int(v) for v in val[names.index("AHRS_Matrix_Row(-)")]]
+    try:
+        row_ic = [int(v) for v in val[names.index("AHRS_Matrix_Row(-)")]]
+    except ValueError:
+        row_ic = [2, 2, 2, 1, 1, 1, 0, 0, 0]
     try:
         vec_ic = [int(v) for v in val[names.index("AHRS_Vector_Index(-)")]]
     except ValueError:
