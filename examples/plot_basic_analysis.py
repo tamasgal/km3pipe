@@ -276,7 +276,7 @@ g_mu, g_sigma = norm.fit(residuals[np.abs(residuals) < 10])
 plt.hist(residuals, bins='auto', label='Histogram', normed=True,
          alpha=.7)
 plt.plot(x, cauchy(c_loc, c_gamma).pdf(x),
-         label='Lorentz: $FWHM =${:.3f}'.format(fwhm),
+         label='Lorentz: FWHM $=${:.3f}'.format(fwhm),
          linewidth=2)
 plt.plot(x, norm(g_mu_bad, g_sigma_bad).pdf(x),
          label='Unrestricted Gauss: $\sigma =$ {:.3f}'.format(g_sigma_bad),
@@ -297,6 +297,7 @@ residuals_shifted_by_median = residuals - resid_median
 absolute_deviation = np.abs(residuals_shifted_by_median)
 resid_mad = np.median(absolute_deviation)
 
-plt.hist(np.abs(residuals), alpha=.7, bins='auto')
-plt.axvline(resid_mad)
+plt.hist(np.abs(residuals), alpha=.7, bins='auto', label='Absolute residuals')
+plt.axvline(resid_mad, label='MAD: {:.2f}'.format(resid_mad)))
 plt.title("Average resolution: {:.3f} degree".format(resid_mad))
+plt.xlabel('Absolute zenith residuals / deg')
