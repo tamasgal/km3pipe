@@ -499,9 +499,9 @@ class TMCHData(object):
         self.hrvbmp = unpack('>I', f.read(4))[0]
         self.flags = unpack('>I', f.read(4))[0]
         self.yaw, self.pitch, self.roll = unpack('>fff', f.read(12))
-        self.ax, self.ay, self.az = unpack('>fff', f.read(12))
-        self.gx, self.gy, self.gz = unpack('>fff', f.read(12))
-        self.hx, self.hy, self.hz = unpack('>fff', f.read(12))
+        self.A = unpack('>fff', f.read(12))
+        self.G = unpack('>fff', f.read(12))
+        self.H = unpack('>fff', f.read(12))
         self.temp = unpack('>H', f.read(2))[0] / 100.0
         self.humidity = unpack('>H', f.read(2))[0] / 100.0
         self.tdcfull = unpack('>I', f.read(4))[0]
