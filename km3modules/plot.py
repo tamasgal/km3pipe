@@ -30,7 +30,7 @@ def plot_dom_parameters(data, detector, filename, label, title,
                         vmin=0.0, vmax=10.0,
                         cmap='RdYlGn_r', under='deepskyblue', over='deeppink',
                         underfactor=1.0, overfactor=1.0,
-                        missing='lightgray'):
+                        missing='lightgray', hide_limits=False):
     """Creates a plot in the classical monitoring.km3net.de style.
 
     Parameters
@@ -42,6 +42,7 @@ def plot_dom_parameters(data, detector, filename, label, title,
     title: str
     underfactor: a scale factor for the points used for underflow values
     overfactor: a scale factor for the points used for overflow values
+    hide_limits: do not show under/overflows in the plot
 
     """
     x, y, _ = zip(*detector.doms.values())
@@ -66,16 +67,17 @@ def plot_dom_parameters(data, detector, filename, label, title,
     sc = ax.scatter(xa[in_range_idx], ya[in_range_idx],
                     c=zs[in_range_idx], cmap=cmap, s=m_size,
                     **scatter_args)
-    under_idx = zs < vmin
-    sc_under = ax.scatter(xa[under_idx], ya[under_idx],
-                         c=under, label='< {0}'.format(vmin),
-                         s=m_size*underfactor,
-                         **scatter_args)
-    over_idx = zs > vmax
-    sc_over = ax.scatter(xa[over_idx], ya[over_idx],
-                         c=over, label='> {0}'.format(vmax),
-                         s=m_size*overfactor,
-                         **scatter_args)
+    if not hide_limits:
+        under_idx = zs < vmin
+        sc_under = ax.scatter(xa[under_idx], ya[under_idx],
+                             c=under, label='< {0}'.format(vmin),
+                             s=m_size*underfactor,
+                             **scatter_args)
+        over_idx = zs > vmax
+        sc_over = ax.scatter(xa[over_idx], ya[over_idx],
+                             c=over, label='> {0}'.format(vmax),
+                             s=m_size*overfactor,
+                             **scatter_args)
 
     cb = plt.colorbar(sc)
     cb.set_label(label)

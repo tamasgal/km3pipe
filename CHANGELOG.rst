@@ -1,12 +1,17 @@
 Unreleased changes
 ------------------
 
-* (aanet/tohd5) new option to read run ID from header, not event. 
-  in old versions of JTE, the event.run_id is overwritten with the default, 1.
-* there is now a new command line utility called ``streamds`` for non-pythonistas
 
 Version 7
 ---------
+
+7.7.0 / 2017-10-11
+~~~~~~~~~~~~~~~~~~
+* (aanet/tohd5) new option to read run ID from header, not event. 
+  in old versions of JTE, the event.run_id is overwritten with the default, 1.
+* there is now a new command line utility called ``streamds`` for non-pythonistas
+* The new ``km3pipe.ahrs`` now contains AHRS calibration routines
+
 
 7.6.1 / 2017-10-09
 ~~~~~~~~~~~~~~~~~~
