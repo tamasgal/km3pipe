@@ -1,7 +1,6 @@
 Unreleased changes
 ------------------
 
-
 Version 7
 ---------
 
