@@ -198,6 +198,12 @@ class AanetPump(Pump):
             except (ValueError, UnicodeEncodeError):
                 log.warn(filename + ": can't read nfilgen.")
                 self.nfilgen = 0
+            try:
+                print("Reading run id...")
+                self.header_run_id = self.header.get_field('start_run', 0)
+            except (ValueError, UnicodeEncodeError, AttributeError):
+                log.warn(filename + ": can't read ngen.")
+                self.header_run_id = None
             # END OF OLD HEADER CRAZINESS
 
             # NEW HEADER CRAZINESS
@@ -280,14 +286,8 @@ class AanetPump(Pump):
         except AttributeError:
             mc_id = 0
 
-        try:
-            print("Reading run id...")
-            header_run_id = self.header.get_field('start_run', 0)
-        except (ValueError, UnicodeEncodeError, AttributeError):
-            log.warn(filename + ": can't read ngen.")
-            header_run_id = None
-        if not self.ignore_run_id_from_header and header_run_id is not None:
-            run_id = header_run_id
+        if not self.ignore_run_id_from_header and self.header_run_id is not None:
+            run_id = self.header_run_id
         else:
             run_id = event.run_id
         try:
