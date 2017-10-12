@@ -27,6 +27,7 @@ before_install:
     - pip install -U tables
     - pip install -U h5py
     - pip install -U tornado
+    - pip install -U requests
     - pip install matplotlib==2.0.0
     - ls -al
 

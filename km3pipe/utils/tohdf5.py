@@ -23,6 +23,7 @@ Options:
                                     `ROOT.gSystem.Load()` instead of `import aa`)
     --aa-old-mc-id                  (aanet): read mc id as `evt.mc_id`, instead
                                     of the newer `mc_id = evt.frame_index - 1`
+    --aa-ignore-run-id-from-header  (Aanet) read run id from event, not header.
     --correct-zed                   (Aanet) Correct offset in mc tracks (aanet)
                                     [default: False]
     --do-not-correct-mc-times       (Aanet) Don't correct MC times.
@@ -56,10 +57,11 @@ __status__ = "Development"
 def tohdf5(input_files, output_file, n_events, **kwargs):
     """Convert Any file to HDF5 file"""
     from km3pipe import Pipeline  # noqa
-    from km3pipe.io import GenericPump, HDF5Sink  # noqa
+    from km3pipe.io import GenericPump, HDF5Sink, HDF5MetaData  # noqa
 
     pipe = Pipeline()
     pipe.attach(GenericPump, filenames=input_files, **kwargs)
+    pipe.attach(HDF5MetaData, data=kwargs)
     pipe.attach(StatusBar, every=250)
     pipe.attach(HDF5Sink, filename=output_file, **kwargs)
     pipe.drain(n_events)
@@ -97,6 +99,7 @@ def main():
     skip_header = args['--skip-header']
     do_not_correct_mc_times = args['--do-not-correct-mc-times']
     ignore_hits_arg = args['--ignore-hits']
+    ignore_run_id_from_header = args['--aa-ignore-run-id-from-header']
     tohdf5(infiles,
            outfile,
            n,
@@ -111,4 +114,5 @@ def main():
            skip_header=skip_header,
            correct_mc_times=not bool(do_not_correct_mc_times),
            ignore_hits=bool(ignore_hits_arg),
+           ignore_run_id_from_header=bool(ignore_run_id_from_header),
           )

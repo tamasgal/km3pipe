@@ -33,7 +33,7 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-FORMAT_VERSION = np.string_('4.2')
+FORMAT_VERSION = np.string_('4.3')
 MINIMUM_FORMAT_VERSION = np.string_('4.1')
 
 
@@ -251,6 +251,13 @@ class HDF5Sink(Module):
             if 'event_id' in tab.colnames:
                 tab.cols.event_id.create_index()
             tab.flush()
+
+        if "HDF5MetaData" in self.services:
+            print("Writing HDF5 meta data.")
+            metadata = self.services["HDF5MetaData"]
+            for name, value in metadata.items():
+                self.h5file.set_node_attr("/", name, value)
+
         self.h5file.close()
         print("HDF5 file written to: {}".format(self.filename))
 
@@ -386,9 +393,6 @@ class HDF5Pump(Pump):
 
                 datatype = h5file.get_node("/hits")._v_attrs.datatype
 
-                if datatype == np.string_("RawHitSeries"):
-                    blob["Hits"] = RawHitSeries.from_arrays(
-                        channel_id, dom_id, time, tot, triggered, event_id)
                 if datatype == np.string_("CRawHitSeries"):
                     pos_x = h5file.get_node("/hits/pos_x")[idx:end]
                     pos_y = h5file.get_node("/hits/pos_y")[idx:end]
@@ -404,6 +408,9 @@ class HDF5Pump(Pump):
                         channel_id, dir_x, dir_y, dir_z, dom_id, du,
                         floor, pos_x, pos_y, pos_z, t0s, time, tot, triggered,
                         event_id)
+                else:
+                    blob["Hits"] = RawHitSeries.from_arrays(
+                        channel_id, dom_id, time, tot, triggered, event_id)
 
             if loc == '/mc_hits' and not self.ignore_hits:
                 a = h5file.get_node("/mc_hits/a")[idx:end]
@@ -413,9 +420,6 @@ class HDF5Pump(Pump):
 
                 datatype = h5file.get_node("/mc_hits")._v_attrs.datatype
 
-                if datatype == np.string_("McHitSeries"):
-                    blob["McHits"] = McHitSeries.from_arrays(
-                        a, origin, pmt_id, time, event_id)
                 if datatype == np.string_("CMcHitSeries"):
                     pos_x = h5file.get_node("/mc_hits/pos_x")[idx:end]
                     pos_y = h5file.get_node("/mc_hits/pos_y")[idx:end]
@@ -426,6 +430,9 @@ class HDF5Pump(Pump):
                     blob["McHits"] = CMcHitSeries.from_arrays(
                         a, dir_x, dir_y, dir_z, origin, pmt_id,
                         pos_x, pos_y, pos_z, time, event_id)
+                else:
+                    blob["McHits"] = McHitSeries.from_arrays(
+                        a, origin, pmt_id, time, event_id)
 
         return blob
 
@@ -471,3 +478,16 @@ class HDF5Pump(Pump):
             yield self.get_blob(i)
 
         self.current_file = None
+
+
+class HDF5MetaData(Module):
+    """Metadata to attach to the HDF5 file.
+
+    Parameters
+    ----------
+    data: dict
+
+    """
+    def configure(self):
+        self.data = self.require("data")
+        self.expose(self.data, "HDF5MetaData")

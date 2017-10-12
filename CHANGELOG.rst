@@ -1,9 +1,42 @@
 Unreleased changes
 ------------------
-* Option to Ignore hits in pumps
 
 Version 7
 ---------
+
+7.7.1 / 2017-10-12
+~~~~~~~~~~~~~~~~~~
+* (aanet/tohd5) run id is now read from header, per default; if that fails
+  (or the flag ``--ignore-run-id-from-header`` is set, fall back to 
+  the ``event.run_id``
+
+7.7.0 / 2017-10-11
+~~~~~~~~~~~~~~~~~~
+* (aanet/tohd5) new option to read run ID from header, not event. 
+  in old versions of JTE, the event.run_id is overwritten with the default, 1.
+* there is now a new command line utility called ``streamds`` for non-pythonistas
+* The new ``km3pipe.ahrs`` now contains AHRS calibration routines
+
+
+7.6.1 / 2017-10-09
+~~~~~~~~~~~~~~~~~~
+* ``HDF5Sink`` now uses the new ``HDF5MetaData`` class two write more verbose
+  metadata to the files (e.g. file conversion parameters)
+  HDF5 metadata now contains much more information; e.g. if the mc hit time
+  correction was applied, the aa-format, whether jppy was used etc
+* introduce "services" to the pipeline model. these are addressed via the 
+  ``expose`` method
+* aa/gand: fix up-vs-downgoing normalisation (now difference over sum)
+* fix automatic JTE/MC time conversion
+* fix the check if mc time correction needs to be applied
+* ``h5tree`` CLI util, to print just the structure + nevents + nrows. 
+  less verbose than ``ptdump``
+* KM3HDF5 4.3: introduce richer metadata
+
+7.5.5 / 2017-09-27
+~~~~~~~~~~~~~~~~~~
+* Option to Ignore hits in pumps
+* fix aanet fitinf enum
 
 7.5.4 / 2017-09-25
 ~~~~~~~~~~~~~~~~~~

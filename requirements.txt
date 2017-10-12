@@ -14,7 +14,9 @@ websocket-client
 sphinx
 numpydoc
 sphinx_gallery
+seaborn
 sklearn
 patsy
 h5py
 statsmodels>=0.8
+requests

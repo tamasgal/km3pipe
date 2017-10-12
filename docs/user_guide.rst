@@ -20,7 +20,9 @@ all ROOT/Text based km3net file format like Jpp, Aanet, Evt, etc.
 
     pipeline
     datastructures
+    performance
     table
     hdf5
     cmd
     db
+    tradition

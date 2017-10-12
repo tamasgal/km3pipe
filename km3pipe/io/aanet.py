@@ -35,7 +35,7 @@ FITINF_ENUM = [
     'beta1',
     'chi2',
     'n_hits',
-    'jenergy_energy'
+    'jenergy_energy',
     'jenergy_chi2',
     'lambda',
     'n_iter',
@@ -71,8 +71,13 @@ class AanetPump(Pump):
     missing: numeric, optional [default: 0]
         Filler for missing values.
     skip_header: bool, optional [default=False]
-    correct_mc_times: convert hit times from JTE to MC time [default=True]
+    correct_mc_times: bool, optional [default=True]
+        convert hit times from JTE to MC time
     ignore_hits: bool, optional [default=False]
+        If true, don't read our the hits/mchits.
+    ignore_run_id_from_header: bool, optional [default=False]
+        Ignore run ID from header, take from event instead;
+        often, the event.run_id is overwritten with the default (1).
     """
 
     def __init__(self, **context):
@@ -91,6 +96,7 @@ class AanetPump(Pump):
         self.missing = self.get('missing') or 0
         self.correct_mc_times = bool(self.get('correct_mc_times'))
         self.ignore_hits = bool(self.get('ignore_hits'))
+        self.ignore_run_id_from_header = bool(self.get('ignore_run_id_from_header'))
 
         if self.additional:
             self.id = self.get('id')
@@ -248,7 +254,7 @@ class AanetPump(Pump):
         if self.format != 'ancient_recolns' and not self.ignore_hits:
             try:
                 hits = RawHitSeries.from_aanet(event.hits, event_id)
-                if np.allclose(event.mc_t, 0) and self.correct_mc_times:
+                if not np.allclose(event.mc_t, 0) and self.correct_mc_times:
                     def converter(t):
                         ns = event.t.GetSec() * 1e9 + event.t.GetNanoSec()
                         return t + ns - event.mc_t
@@ -273,6 +279,17 @@ class AanetPump(Pump):
                 mc_id = event.frame_index - 1
         except AttributeError:
             mc_id = 0
+
+        try:
+            print("Reading run id...")
+            header_run_id = self.header.get_field('start_run', 0)
+        except (ValueError, UnicodeEncodeError, AttributeError):
+            log.warn(filename + ": can't read ngen.")
+            header_run_id = None
+        if not self.ignore_run_id_from_header and header_run_id is not None:
+            run_id = header_run_id
+        else:
+            run_id = event.run_id
         try:
             ei_data = np.array((
                 event.det_id,
@@ -289,7 +306,7 @@ class AanetPump(Pump):
                 event.t.GetNanoSec(),
                 event.t.GetSec(),
                 w1, w2, w3,
-                event.run_id,
+                run_id,
                 event_id), dtype=EventInfo.dtype)
             blob['EventInfo'] = EventInfo(ei_data)
         except AttributeError:
@@ -306,7 +323,7 @@ class AanetPump(Pump):
                                0,   # nanose
                                0,   # sec
                                w1, w2, w3,
-                               event.run_id,
+                               run_id,
                                event_id), dtype=EventInfo.dtype)
             blob['EventInfo'] = EventInfo(ei_data)
         if self.format == 'minidst':
@@ -552,10 +569,10 @@ def parse_jgandalf_new(aanet_event, event_id, missing=0):
     return outmap, dt
 
 
-def upgoing_vs_downgoing(tracks, filler=9999):
+def upgoing_vs_downgoing(tracks, filler=4.2):
     """Compare upgoing vs downgoing hypothesis.
 
-    upvsdown = lik_upgoing - lik_downgoing
+    upvsdown = (lik_upgoing - lik_downgoing)/(lik_upgoing + lik_downgoing)
     """
     upgoing = [
             track.fitinf[2]/track.fitinf[3] for track in tracks
@@ -572,7 +589,7 @@ def upgoing_vs_downgoing(tracks, filler=9999):
 
     upgoing_chi2 = np.nanmin(upgoing)
     downgoing_chi2 = np.nanmin(downgoing)
-    out = upgoing_chi2 - downgoing_chi2
+    out = (upgoing_chi2 - downgoing_chi2) / (upgoing_chi2 + downgoing_chi2)
     return out
 
 

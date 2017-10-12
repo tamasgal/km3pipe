@@ -19,6 +19,7 @@ from .jpp import JPPPump  # noqa
 from .ch import CHPump  # noqa
 from .hdf5 import HDF5Pump  # noqa
 from .hdf5 import HDF5Sink  # noqa
+from .hdf5 import HDF5MetaData  # noqa
 from .pickle import PicklePump  # noqa
 from .pandas import (H5Chain, df_to_h5, map2df,
                      read_group, write_table,)
