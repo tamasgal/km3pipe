@@ -14,6 +14,7 @@ websocket-client
 sphinx
 numpydoc
 sphinx_gallery
+seaborn
 sklearn
 patsy
 h5py
