@@ -28,6 +28,37 @@ log = kp.logger.logging.getLogger(__name__)  # pylint: disable=C0103
 # log.setLevel(logging.DEBUG)
 
 
+class K40BackgroundSubtractor(kp.Module):
+    """Subtracts random coincidence background from K40 data
+    
+    Input Keys
+    ----------
+    'PMTRates': dict (key=dom_id, value=list of pmt_rates)
+    'K40Counts': dict (key=dom_id, value=matrix of k40 counts 465x(dt*2+1))
+
+    Output Keys
+    -----------
+    'K40Counts': dict, Corrected K40 counts
+    
+    """
+    def configure(self, blob):
+        self.combs = list(combinations(range(31), 2))
+
+    def process(self, blob):
+        dom_ids = blob['K40Counts'].keys()
+        for dom_id in dom_ids:
+            pmt_rates = blob['PMTRates'][dom_id]
+            k40_counts = blob['K40Counts'][dom_id]
+
+            bg_rates = []
+            corrected_counts = {}
+            for c in self.combs:
+                bg_rates.append(pmt_rates[c[0]]*pmt_rates[c[1]]*1e-9)
+            corrected_counts[dom_id] = (k40_counts.T - np.array(bg_rates)).T
+        blob["K40Counts"] = corrected_counts
+        return blob
+
+
 class IntraDOMCalibrator(kp.Module):
     """Intra DOM calibrator which performs the calibration from K40Counts.
 
