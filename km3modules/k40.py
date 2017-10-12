@@ -149,7 +149,7 @@ class CoincidenceFinder(kp.Module):
 
 
 def calibrate_dom(dom_id, data, detector, livetime=None, fixed_ang_dist=None,
-                  auto_scale=False, ad_fit_shape='pexp'):
+                  auto_scale=False, ad_fit_shape='pexp', fit_background=True):
     """Calibrate intra DOM PMT time offsets, efficiencies and sigmas
 
         Parameters
@@ -179,7 +179,8 @@ def calibrate_dom(dom_id, data, detector, livetime=None, fixed_ang_dist=None,
             data, livetime = loader(filename, dom_id)
 
     try:
-        rates, means, sigmas, popts, pcovs = fit_delta_ts(data, livetime)
+        rates, means, sigmas, popts, pcovs = fit_delta_ts(data, livetime,
+                                                fit_background=fit_background)
     except:
         return 0
     angles = calculate_angles(detector)
@@ -298,7 +299,7 @@ def gaussian(x, mean, sigma, rate, offset):
            sigma * np.exp(-0.5*(x-mean)**2 / sigma**2) + offset
 
 
-def fit_delta_ts(data, livetime):
+def fit_delta_ts(data, livetime, fit_background=True):
     """Fits gaussians to delta t for each PMT pair.
 
     Parameters
@@ -322,12 +323,19 @@ def fit_delta_ts(data, livetime):
     means = []
     popts = []
     pcovs = []
+    if fit_background:
+        offset_start = 0.1
+        offset_bounds = (0, 5)
+    else:
+        offset_start = 0
+        offset_bounds = (0, 0)
     for combination in data:
         mean0 = np.argmax(combination) + start
         try:
             popt, pcov = optimize.curve_fit(gaussian, xs, combination,
-                                         p0=[mean0, 4., 5., 0.1],
-                                         bounds = ([-20, 0, 0, 0], [20, 10, 10, 5]))
+                                    p0=[mean0, 4., 5., offset_start],
+                                    bounds = ([-20, 0, 0, offset_bounds[0]],
+                                              [20, 10, 10, offset_bounds[1]]))
         except RuntimeError:
             popt = (0, 0, 0, 0)
         rates.append(popt[2])
