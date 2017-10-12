@@ -100,7 +100,8 @@ class CoincidenceFinder(kp.Module):
         return coincidences
 
 
-def calibrate_dom(dom_id, data, detector, livetime=None, fixed_ang_dist=None, auto_scale=False):
+def calibrate_dom(dom_id, data, detector, livetime=None, fixed_ang_dist=None,
+                  auto_scale=False, ad_fit_shape='pexp'):
     """Calibrate intra DOM PMT time offsets, efficiencies and sigmas
 
         Parameters
@@ -146,7 +147,10 @@ def calibrate_dom(dom_id, data, detector, livetime=None, fixed_ang_dist=None, au
         exp_popts = []
         print('Using fixed angular distribution')
     else:
-        fitted_rates, exp_popts = fit_angular_distribution(angles, rates, rate_errors)
+        fitted_rates, exp_popts, exp_pcov = fit_angular_distribution(angles,
+                                                           rates,
+                                                           rate_errors,
+                                                           shape=ad_fit_shape)
     #t0_weights = np.array([0. if a>1. else 1. for a in angles])
     opt_t0s = minimize_t0s(means, fitted_rates)
     opt_sigmas = minimize_sigmas(sigmas, fitted_rates)
@@ -168,6 +172,7 @@ def calibrate_dom(dom_id, data, detector, livetime=None, fixed_ang_dist=None, au
                    'gaussian_popts': popts,
                    'livetime': livetime,
                    'exp_popts': exp_popts,
+                   'exp_pcov': exp_pcov,
                    'scale_factor': scale_factor,
                    'opt_sigmas': opt_sigmas,
                    'sigmas': sigmas}
@@ -335,9 +340,9 @@ def fit_angular_distribution(angles, rates, rate_errors, shape='pexp'):
         p0 = [ 0.34921202,  2.8629577 ]
 
     cos_angles = np.cos(angles)
-    popt, _ = optimize.curve_fit(fit_function, cos_angles, rates, sigma=rate_errors)
+    popt, pcov = optimize.curve_fit(fit_function, cos_angles, rates, sigma=rate_errors)
     fitted_rates = fit_function(cos_angles, *popt)
-    return fitted_rates, popt
+    return fitted_rates, popt, pcov
 
 
 def minimize_t0s(means, weights):
