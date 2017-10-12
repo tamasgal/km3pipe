@@ -41,7 +41,7 @@ class K40BackgroundSubtractor(kp.Module):
     'K40Counts': dict, Corrected K40 counts
     
     """
-    def configure(self, blob):
+    def configure(self):
         self.combs = list(combinations(range(31), 2))
 
     def process(self, blob):
