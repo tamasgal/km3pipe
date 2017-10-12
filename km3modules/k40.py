@@ -62,7 +62,13 @@ class K40BackgroundSubtractor(kp.Module):
 class IntraDOMCalibrator(kp.Module):
     """Intra DOM calibrator which performs the calibration from K40Counts.
 
-    The K40 counts are taken from blob['K40Counts'].
+    Input Keys
+    ----------
+    'K40Counts': dict (key=dom_id, value=matrix of k40 counts 465x(dt*2+1))
+
+    Output Keys
+    -----------
+    'IntraDOMCalibration': dict (key=dom_id, value=calibration)
 
     """
     def configure(self):
@@ -87,7 +93,18 @@ class IntraDOMCalibrator(kp.Module):
 
 
 class CoincidenceFinder(kp.Module):
-    """Finds K40 coincidences in TimesliceFrames"""
+    """Finds K40 coincidences in TimesliceFrames
+
+    Input Keys
+    ----------
+    'TimesliceFrames': dict (key=dom_id, value=list of hits as tuples)
+
+    Output Keys
+    -----------
+    'K40Counts': dict (key=dom_id, value=matrix (465,(dt*2+1)))
+    'Livetime': float
+
+    """
     def configure(self):
         self.accumulate = self.get("accumulate") or 100
         self.tmax = self.get("tmax") or 20
