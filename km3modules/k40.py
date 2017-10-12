@@ -30,10 +30,13 @@ log = kp.logger.logging.getLogger(__name__)  # pylint: disable=C0103
 
 class K40BackgroundSubtractor(kp.Module):
     """Subtracts random coincidence background from K40 data
+
+    Required Services
+    -----------------
+    'MeanPMTRates': dict (key=dom_id, value=list of pmt rates)
     
     Input Keys
     ----------
-    'PMTRates': dict (key=dom_id, value=list of pmt_rates)
     'K40Counts': dict (key=dom_id, value=matrix of k40 counts 465x(dt*2+1))
 
     Output Keys
@@ -45,13 +48,14 @@ class K40BackgroundSubtractor(kp.Module):
         self.combs = list(combinations(range(31), 2))
 
     def process(self, blob):
-        dom_ids = blob['K40Counts'].keys()
+        dom_ids = list(blob['K40Counts'].keys())
+        mean_rates = self.services['MeanPMTRates']
+        corrected_counts = {}
         for dom_id in dom_ids:
-            pmt_rates = blob['PMTRates'][dom_id]
+            pmt_rates = mean_rates[dom_id]
             k40_counts = blob['K40Counts'][dom_id]
 
             bg_rates = []
-            corrected_counts = {}
             for c in self.combs:
                 bg_rates.append(pmt_rates[c[0]]*pmt_rates[c[1]]*1e-9)
             corrected_counts[dom_id] = (k40_counts.T - np.array(bg_rates)).T
@@ -133,7 +137,7 @@ class CoincidenceFinder(kp.Module):
             pickle.dump({'data': self.counts, 'livetime': self.n_timeslices / 10}, open("coinc_counts.p", "wb"))
             self.n_timeslices = 0
             self.counts = defaultdict(partial(np.zeros, (465, 41)))
-            return blob
+        return blob
 
     def mongincidence(self, times, tdcs):
         coincidences = []
