@@ -75,9 +75,9 @@ class AanetPump(Pump):
         convert hit times from JTE to MC time
     ignore_hits: bool, optional [default=False]
         If true, don't read our the hits/mchits.
-    run_id_from_header: bool, optional [default=False]
-        Retrieve run ID from header; with (old) simulation JTE files,
-        the event.run_id is overwritten with the default (1).
+    ignore_run_id_from_header: bool, optional [default=False]
+        Ignore run ID from header, take from event instead;
+        often, the event.run_id is overwritten with the default (1).
     """
 
     def __init__(self, **context):
@@ -96,7 +96,7 @@ class AanetPump(Pump):
         self.missing = self.get('missing') or 0
         self.correct_mc_times = bool(self.get('correct_mc_times'))
         self.ignore_hits = bool(self.get('ignore_hits'))
-        self.run_id_from_header = bool(self.get('run_id_from_header'))
+        self.ignore_run_id_from_header = bool(self.get('ignore_run_id_from_header'))
 
         if self.additional:
             self.id = self.get('id')
@@ -280,8 +280,14 @@ class AanetPump(Pump):
         except AttributeError:
             mc_id = 0
 
-        if self.run_id_from_header:
-            run_id = self.header.get_field('start_run', 0)
+        try:
+            print("Reading run id...")
+            header_run_id = self.header.get_field('start_run', 0)
+        except (ValueError, UnicodeEncodeError, AttributeError):
+            log.warn(filename + ": can't read ngen.")
+            header_run_id = None
+        if not self.ignore_run_id_from_header and header_run_id is not None:
+            run_id = header_run_id
         else:
             run_id = event.run_id
         try:
