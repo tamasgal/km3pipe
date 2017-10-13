@@ -92,7 +92,7 @@ class IntraDOMCalibrator(kp.Module):
                                       self.detector,
                                       livetime=blob['Livetime'],
                                       fit_background=self.fit_background,
-                                      ad_fit_shape'exp')
+                                      ad_fit_shape='exp')
             except RuntimeError:
                 log.error(" skipping DOM '{0}'.".format(dom_id))
             else:
