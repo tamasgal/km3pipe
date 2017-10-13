@@ -17,7 +17,7 @@ Options:
     -s --with-summaryslices         (Jpp) Include summary slices [default: False]
     --aa-format=<fmt>               (Aanet): Which aanet subformat ('minidst',
                                     'orca_recolns', 'gandalf', 'gandalf_new',
-                                    'generic_track') [default: None]
+                                    'generic_track') [default: gandalf_new]
     --aa-lib=<lib.so>               (Aanet): path to aanet binary (for old
                                     versions which must be loaded via
                                     `ROOT.gSystem.Load()` instead of `import aa`)
@@ -91,6 +91,7 @@ def main():
     n_rows_expected = int(args['--expected-rows'])
     use_jppy_pump = args['--jppy']
     aa_format = args['--aa-format']
+    print(aa_format)
     aa_lib = args['--aa-lib']
     aa_old_mc_id = args['--aa-old-mc-id']
     with_summaryslices = args['--with-summaryslices']
