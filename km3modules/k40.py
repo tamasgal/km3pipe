@@ -33,7 +33,7 @@ class K40BackgroundSubtractor(kp.Module):
 
     Required Services
     -----------------
-    'MeanPMTRates': dict (key=dom_id, value=list of pmt rates)
+    'MedianPMTRates()': dict (key=dom_id, value=list of pmt rates)
     
     Input Keys
     ----------
@@ -50,7 +50,7 @@ class K40BackgroundSubtractor(kp.Module):
     def process(self, blob):
         print('Subtracting random background calculated from single rates')
         dom_ids = list(blob['K40Counts'].keys())
-        mean_rates = self.services['GetMeanPMTRates']()
+        mean_rates = self.services['GetMedianPMTRates']()
         corrected_counts = {}
         livetime = blob['Livetime']
         for dom_id in dom_ids:
