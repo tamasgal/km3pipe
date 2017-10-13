@@ -42,7 +42,12 @@ Install
 
 To install the latest stable version:::
 
-    $ pip install km3pipe
+    $ pip install km3pipe[full]
+
+If you encounter any errors complaining about `pyx` files, install `Cython`
+first. At this point you might also install `numpy`::
+
+    $ pip install cython numpy
 
 To get the development version, use:::
 
