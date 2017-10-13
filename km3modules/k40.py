@@ -63,6 +63,7 @@ class K40BackgroundSubtractor(kp.Module):
             corrected_counts[dom_id] = (k40_rates.T - np.array(bg_rates)).T * livetime
         blob["K40Counts"] = corrected_counts
         pickle.dump({'data': corrected_counts, 'livetime': livetime}, open("k40_counts_bg_sub.p", "wb"))
+        pickle.dump(mean_rates, open('mean_rates.p', 'wb'))
         return blob
 
 
