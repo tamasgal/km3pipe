@@ -49,7 +49,7 @@ class K40BackgroundSubtractor(kp.Module):
 
     def process(self, blob):
         dom_ids = list(blob['K40Counts'].keys())
-        mean_rates = self.services['MeanPMTRates']
+        mean_rates = self.services['MeanPMTRates']()
         corrected_counts = {}
         for dom_id in dom_ids:
             pmt_rates = mean_rates[dom_id]
@@ -79,6 +79,7 @@ class IntraDOMCalibrator(kp.Module):
         det_id = self.get("det_id") or 14
         self.input_key = self.get("input_key") or 'K40Counts'
         self.detector = kp.hardware.Detector(det_id=det_id)
+        self.fit_background = self.get("fit_background") or True
 
     def process(self, blob):
         print("Starting calibration:")
@@ -88,7 +89,8 @@ class IntraDOMCalibrator(kp.Module):
             try:
                 calib = calibrate_dom(dom_id, data,
                                       self.detector,
-                                      livetime=blob['Livetime'])
+                                      livetime=blob['Livetime'],
+                                      fit_background=self.fit_background)
             except RuntimeError:
                 log.error(" skipping DOM '{0}'.".format(dom_id))
             else:
