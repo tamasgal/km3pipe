@@ -52,15 +52,17 @@ class K40BackgroundSubtractor(kp.Module):
         dom_ids = list(blob['K40Counts'].keys())
         mean_rates = self.services['GetMeanPMTRates']()
         corrected_counts = {}
+        livetime = blob['Livetime']
         for dom_id in dom_ids:
             pmt_rates = mean_rates[dom_id]
-            k40_counts = blob['K40Counts'][dom_id]
+            k40_rates = blob['K40Counts'][dom_id] / livetime
 
             bg_rates = []
             for c in self.combs:
                 bg_rates.append(pmt_rates[c[0]]*pmt_rates[c[1]]*1e-9)
-            corrected_counts[dom_id] = (k40_counts.T - np.array(bg_rates)).T
+            corrected_counts[dom_id] = (k40_rates.T - np.array(bg_rates)).T * livetime
         blob["K40Counts"] = corrected_counts
+        pickle.dump({'data': corrected_counts, 'livetime': livetime}, open("k40_counts_bg_sub.p", "wb"))
         return blob
 
 
@@ -138,7 +140,7 @@ class CoincidenceFinder(kp.Module):
             print("Calibrating DOMs")
             blob["K40Counts"] = self.counts
             blob["Livetime"] = self.n_timeslices / 10
-            pickle.dump({'data': self.counts, 'livetime': self.n_timeslices / 10}, open("coinc_counts.p", "wb"))
+            pickle.dump({'data': self.counts, 'livetime': self.n_timeslices / 10}, open("k40_counts.p", "wb"))
             self.n_timeslices = 0
             self.counts = defaultdict(partial(np.zeros, (465, 41)))
         return blob
