@@ -48,8 +48,9 @@ class K40BackgroundSubtractor(kp.Module):
         self.combs = list(combinations(range(31), 2))
 
     def process(self, blob):
+        print('Subtracting random background calculated from single rates')
         dom_ids = list(blob['K40Counts'].keys())
-        mean_rates = self.services['MeanPMTRates']()
+        mean_rates = self.services['GetMeanPMTRates']()
         corrected_counts = {}
         for dom_id in dom_ids:
             pmt_rates = mean_rates[dom_id]
@@ -90,7 +91,8 @@ class IntraDOMCalibrator(kp.Module):
                 calib = calibrate_dom(dom_id, data,
                                       self.detector,
                                       livetime=blob['Livetime'],
-                                      fit_background=self.fit_background)
+                                      fit_background=self.fit_background,
+                                      ad_fit_shape'exp')
             except RuntimeError:
                 log.error(" skipping DOM '{0}'.".format(dom_id))
             else:
@@ -304,6 +306,9 @@ def gaussian(x, mean, sigma, rate, offset):
     return rate / np.sqrt(2 * np.pi) /  \
            sigma * np.exp(-0.5*(x-mean)**2 / sigma**2) + offset
 
+def gaussian_wo_offset(x, mean, sigma, rate):
+    return rate / np.sqrt(2 * np.pi) / \
+           sigma * np.exp(-0.5*(x-mean)**2 / sigma**2)
 
 def fit_delta_ts(data, livetime, fit_background=True):
     """Fits gaussians to delta t for each PMT pair.
@@ -329,19 +334,18 @@ def fit_delta_ts(data, livetime, fit_background=True):
     means = []
     popts = []
     pcovs = []
-    if fit_background:
-        offset_start = 0.1
-        offset_bounds = (0, 5)
-    else:
-        offset_start = 0
-        offset_bounds = (0, 0)
     for combination in data:
         mean0 = np.argmax(combination) + start
         try:
-            popt, pcov = optimize.curve_fit(gaussian, xs, combination,
-                                    p0=[mean0, 4., 5., offset_start],
-                                    bounds = ([-20, 0, 0, offset_bounds[0]],
-                                              [20, 10, 10, offset_bounds[1]]))
+            if fit_background:
+                popt, pcov = optimize.curve_fit(gaussian, xs, combination,
+                                    p0=[mean0, 4., 5., 0.1],
+                                    bounds=([-20, 0, 0, 0],
+                                              [20, 10, 10, 1]))
+            else:
+                popt, pcov = optimize.curve_fit(gaussian_wo_offset, xs, combination,
+                                    p0=[mean0, 4., 5.],
+                                    bounds=([-20, 0, 0], [20, 10, 10]))
         except RuntimeError:
             popt = (0, 0, 0, 0)
         rates.append(popt[2])
@@ -402,7 +406,7 @@ def fit_angular_distribution(angles, rates, rate_errors, shape='pexp'):
         p0 = [ 0.34921202,  2.8629577 ]
 
     cos_angles = np.cos(angles)
-    popt, pcov = optimize.curve_fit(fit_function, cos_angles, rates, sigma=rate_errors)
+    popt, pcov = optimize.curve_fit(fit_function, cos_angles, rates)#, sigma=rate_errors)
     fitted_rates = fit_function(cos_angles, *popt)
     return fitted_rates, popt, pcov
 
