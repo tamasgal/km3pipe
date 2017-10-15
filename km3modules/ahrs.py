@@ -26,7 +26,7 @@ log = kp.logger.logging.getLogger(__name__)  # pylint: disable=C0103
 # log.setLevel(logging.DEBUG)
 
 
-class CalibrateAHRS(kp.Module):
+class AHRSCalibrator(kp.Module):
     """Calculates AHRS yaw, pitch and roll from median A and H of an interval.
 
     Required Parameters
