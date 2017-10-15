@@ -48,6 +48,15 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
         fn = filenames
     extension = os.path.splitext(fn)[1]
 
+    n_nonexist = 0
+    for fn in filenames:
+        if not os.path.exists(fn):
+            n_nonexist += 1
+            log.warn("File '{}' not found, skipping...".format(fn))
+    if n_nonexist == len(filenames):
+        log.critical("No pump found for '{0}'".format(extension))
+        raise IOError("None of the input files exist! Exiting.")
+
     io = {
         '.evt': EvtPump,
         '.h5': HDF5Pump,

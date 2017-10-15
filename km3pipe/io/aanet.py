@@ -57,7 +57,7 @@ class AanetPump(Pump):
         needs to be specified instead.
     filenames: list(str), optional
         List of files to open.
-    aa_fmt: string, optional
+    aa_fmt: string, optional (default: 'gandalf_new')
         Subformat of aanet in the file. Possible values:
         ``'minidst', 'jevt_jgandalf', 'gandalf_new', 'generic_track',
         'ancient_recolns'``
@@ -87,7 +87,7 @@ class AanetPump(Pump):
         self.filenames = self.get('filenames') or []
         self.indices = self.get('indices')
         self.additional = self.get('additional')
-        self.format = self.get('aa_fmt')
+        self.format = self.get('aa_fmt') or 'gandalf_new'
         self.use_id = self.get('use_id') or False
         self.use_aart_sps_lib = self.get('use_aart_sps_lib') or False
         self.old_mc_id = self.get('old_mc_id') or False
