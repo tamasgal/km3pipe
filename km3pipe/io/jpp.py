@@ -202,3 +202,60 @@ class JPPPump(Pump):
 
     def __next__(self):
         return next(self.blobs)
+
+
+
+
+class TimeslicePump(kp.Pump):
+    """A pump to read and extract timeslices. Currently only hits are read.
+    
+    Required Parameters
+    -------------------
+    filename: str
+    
+    """
+    def configure(self):
+        filename = self.require('filename')
+        self.blobs = self.timeslice_generator()
+        try:
+            import jppy  # noqa
+        except ImportError:
+            raise ImportError("\nPlease install the jppy package:\n\n"
+                              "    pip install jppy\n")
+        self.r = jppy.daqtimeslicereader.PyJDAQTimesliceReader(filename)
+
+    def process(self, blob):
+        blob['TSHits'] = next(self.blobs)
+        return blob
+
+    def timeslice_generator(self):
+        while self.r.has_next:
+            slice_id = 1
+            self.r.retrieve_next_timeslice()
+            channel_ids = np.array(())
+            dom_ids = np.array(())
+            times = np.array(())
+            tots = np.array(())
+            n_frames = 0
+            while self.r.has_next_superframe:
+                n_frames += 1
+                n = self.r.number_of_hits
+                if n == 0:
+                    self.r.retrieve_next_superframe()
+                    continue
+                _channel_ids = np.zeros(n, dtype='i')
+                _dom_ids = np.zeros(n, dtype='i')
+                _times = np.zeros(n, dtype='i')
+                _tots = np.zeros(n, dtype='i')
+                self.r.get_hits(_channel_ids, _dom_ids, _times, _tots)
+                channel_ids = np.concatenate((channel_ids, _channel_ids))
+                dom_ids = np.concatenate((dom_ids, _dom_ids))
+                times = np.concatenate((times, _times))
+                tots = np.concatenate((tots, _tots))
+                self.r.retrieve_next_superframe()
+
+            hits = kp.dataclasses.RawHitSeries.from_arrays(
+                    channel_ids, dom_ids, times, tots,
+                    np.zeros(len(channel_ids), dtype=bool), slice_id)
+            yield hits
+            slice_id += 1
