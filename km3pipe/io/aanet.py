@@ -326,30 +326,32 @@ class AanetPump(Pump):
                                run_id,
                                event_id), dtype=EventInfo.dtype)
             blob['EventInfo'] = EventInfo(ei_data)
-        if self.format == 'minidst':
-            recos = read_mini_dst(event, event_id)
-            for recname, reco in recos.items():
-                blob[recname] = reco
-        if self.format in ('jevt_jgandalf', 'gandalf', 'jgandalf'):
-            track, dtype = parse_jevt_jgandalf(event, event_id, self.missing)
-            if track:
-                blob['Gandalf'] = KM3Array.from_dict(
-                    track, dtype, h5loc='/reco')
-        if self.format in ('gandalf_new', 'jgandalf_new'):
-            track, dtype = parse_jgandalf_new(event, event_id, self.missing)
-            if track:
-                blob['Gandalf'] = KM3Array.from_dict(
-                    track, dtype, h5loc='/reco')
-        if self.format == 'generic_track':
-            track, dtype = parse_generic_event(event, event_id, self.missing)
-            if track:
-                blob['Track'] = KM3Array.from_dict(
-                    track, dtype, h5loc='/reco')
-        if self.format in ('ancient_recolns', 'orca_recolns'):
-            track, dtype = parse_ancient_recolns(event, event_id, self.missing)
-            if track:
-                blob['OrcaRecoLns'] = KM3Array.from_dict(
-                    track, dtype, h5loc='/reco')
+
+        if len(event.trks) > 0:
+            if self.format == 'minidst':
+                recos = read_mini_dst(event, event_id)
+                for recname, reco in recos.items():
+                    blob[recname] = reco
+            if self.format in ('jevt_jgandalf', 'gandalf', 'jgandalf'):
+                track, dtype = parse_jevt_jgandalf(event, event_id, self.missing)
+                if track:
+                    blob['Gandalf'] = KM3Array.from_dict(
+                        track, dtype, h5loc='/reco')
+            if self.format in ('gandalf_new', 'jgandalf_new'):
+                track, dtype = parse_jgandalf_new(event, event_id, self.missing)
+                if track:
+                    blob['Gandalf'] = KM3Array.from_dict(
+                        track, dtype, h5loc='/reco')
+            if self.format == 'generic_track':
+                track, dtype = parse_generic_event(event, event_id, self.missing)
+                if track:
+                    blob['Track'] = KM3Array.from_dict(
+                        track, dtype, h5loc='/reco')
+            if self.format in ('ancient_recolns', 'orca_recolns'):
+                track, dtype = parse_ancient_recolns(event, event_id, self.missing)
+                if track:
+                    blob['OrcaRecoLns'] = KM3Array.from_dict(
+                        track, dtype, h5loc='/reco')
         return blob
 
     def event_index(self, blob):
