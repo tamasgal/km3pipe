@@ -13,7 +13,7 @@ import numpy as np
 from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import (EventInfo, TimesliceFrameInfo,
                                  SummaryframeInfo, HitSeries,
-                                 TimesliceHitSeries)
+                                 TimesliceHitSeries, RawHitSeries)
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -206,7 +206,7 @@ class JPPPump(Pump):
 
 
 
-class TimeslicePump(kp.Pump):
+class TimeslicePump(Pump):
     """A pump to read and extract timeslices. Currently only hits are read.
     
     Required Parameters
@@ -254,7 +254,7 @@ class TimeslicePump(kp.Pump):
                 tots = np.concatenate((tots, _tots))
                 self.r.retrieve_next_superframe()
 
-            hits = kp.dataclasses.RawHitSeries.from_arrays(
+            hits = RawHitSeries.from_arrays(
                     channel_ids, dom_ids, times, tots,
                     np.zeros(len(channel_ids), dtype=bool), slice_id)
             yield hits
