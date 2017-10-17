@@ -33,7 +33,7 @@ db = kp.db.DBManager()
 
 log_core = kp.logger.get("km3pipe.core")
 #log_core.setLevel("DEBUG")
-
+PLOTS_PATH = "km3web/plots"
 
 class IntraDOMCalibrationPlotter(kp.Module):
     def process(self, blob):
@@ -54,7 +54,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
             ax.set_title("{0} - {1}".format(db.doms.via_dom_id(dom_id), dom_id))
             ax.set_ylim((-20, 20))
         plt.suptitle("{0} UTC".format(datetime.utcnow().strftime("%c")))
-        plt.savefig("km3web/plots/intradom.png", bbox_inches='tight')
+        plt.savefig(PLOTS_PATH + "/intradom.png", bbox_inches='tight')
         plt.close('all')
 
         fig, axes = plt.subplots(6, 3, figsize=(16, 20),
@@ -65,7 +65,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
             ax.set_title("{0} - {1}".format(db.doms.via_dom_id(dom_id), dom_id))
             ax.set_ylim((0, 15))
         plt.suptitle("{0} UTC".format(datetime.utcnow().strftime("%c")))
-        plt.savefig("km3web/plots/angular_k40rate_distribution.png",
+        plt.savefig(PLOTS_PATH + "/angular_k40rate_distribution.png",
                     bbox_inches='tight')
         plt.close('all')
 
@@ -130,10 +130,11 @@ pipe.attach(MemoryObserver, every=5000)
 pipe.attach(MedianPMTRatesService, only_if='IO_MONIT')
 pipe.attach(kp.io.daq.TimesliceParser, only_if='IO_TSL')
 pipe.attach(k40.CoincidenceFinder,
-            accumulate=10*60*1,
+            accumulate=10*60*20,
             only_if='TimesliceFrames',
             tmax=10)
 pipe.attach(k40.K40BackgroundSubtractor, only_if='K40Counts')
-pipe.attach(k40.IntraDOMCalibrator, only_if='K40Counts', fit_background=False)
+pipe.attach(k40.IntraDOMCalibrator, only_if='K40Counts', fit_background=False,
+            ctmin=0.)
 pipe.attach(IntraDOMCalibrationPlotter, only_if='IntraDOMCalibration')
 pipe.drain()
