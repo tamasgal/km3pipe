@@ -130,7 +130,7 @@ pipe.attach(MemoryObserver, every=5000)
 pipe.attach(MedianPMTRatesService, only_if='IO_MONIT')
 pipe.attach(kp.io.daq.TimesliceParser, only_if='IO_TSL')
 pipe.attach(k40.CoincidenceFinder,
-            accumulate=10*60*20,
+            accumulate=10*60*1,
             only_if='TimesliceFrames',
             tmax=10)
 pipe.attach(k40.K40BackgroundSubtractor, only_if='K40Counts')
