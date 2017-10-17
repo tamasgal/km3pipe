@@ -77,12 +77,15 @@ class HDF5Sink(Module):
     pytab_file_args: dict [optional]
         pass more arguments to the pytables File init
     n_rows_expected = int, optional [default: 10000]
+    append: bool, optional [default: False]
+
     """
     def __init__(self, **context):
         super(self.__class__, self).__init__(**context)
         self.filename = self.get('filename') or 'dump.h5'
         self.ext_h5file = self.get('h5file') or None
         self.pytab_file_args = self.get('pytab_file_args') or dict()
+        self.file_mode = 'a' if self.get('append') else 'w'
         self.indices = {}
         self._header_written = False
         # magic 10000: this is the default of the "expectedrows" arg
@@ -97,7 +100,8 @@ class HDF5Sink(Module):
         elif self.filename == 'dump.h5' and self.ext_h5file is not None:
             self.h5file = self.ext_h5file
         else:
-            self.h5file = tb.open_file(self.filename, mode="w", title="KM3NeT",
+            self.h5file = tb.open_file(self.filename, mode=self.file_mode,
+                                       title="KM3NeT",
                                        **self.pytab_file_args)
         self.filters = tb.Filters(complevel=5, shuffle=True, fletcher32=True,
                                   complib='zlib')
