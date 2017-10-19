@@ -34,7 +34,7 @@ class K40BackgroundSubtractor(kp.Module):
     Required Services
     -----------------
     'MedianPMTRates()': dict (key=dom_id, value=list of pmt rates)
-    
+
     Input Keys
     ----------
     'K40Counts': dict (key=dom_id, value=matrix of k40 counts 465x(dt*2+1))
@@ -42,7 +42,7 @@ class K40BackgroundSubtractor(kp.Module):
     Output Keys
     -----------
     'K40Counts': dict, Corrected K40 counts
-    
+
     """
     def configure(self):
         self.combs = list(combinations(range(31), 2))
@@ -122,10 +122,16 @@ class CoincidenceFinder(kp.Module):
     def configure(self):
         self.accumulate = self.get("accumulate") or 100
         self.tmax = self.get("tmax") or 20
-        self.counts = defaultdict(partial(np.zeros, (465, self.tmax * 2 + 1)))
-        self.n_timeslices = 0
+        self.counts = None
+        self.n_timeslices = None
+        self.reset()
         self.start_time = datetime.utcnow()
         print ('Tmax {}'.format(self.tmax))
+
+    def reset(self):
+        """Reset coincidence counter"""
+        self.counts = defaultdict(partial(np.zeros, (465, self.tmax * 2 + 1)))
+        self.n_timeslices = 0
 
     def process(self, blob):
         for dom_id, hits in blob['TimesliceFrames'].items():
@@ -145,9 +151,10 @@ class CoincidenceFinder(kp.Module):
             print("Calibrating DOMs")
             blob["K40Counts"] = self.counts
             blob["Livetime"] = self.n_timeslices / 10
-            pickle.dump({'data': self.counts, 'livetime': self.n_timeslices / 10}, open("k40_counts.p", "wb"))
-            self.n_timeslices = 0
-            self.counts = defaultdict(partial(np.zeros, (465, self.tmax * 2 + 1)))
+            pickle.dump({'data': self.counts,
+                         'livetime': self.n_timeslices / 10},
+                         open("k40_counts.p", "wb"))
+            self.reset()
         return blob
 
     def mongincidence(self, times, tdcs):
@@ -169,15 +176,19 @@ class CoincidenceFinder(kp.Module):
         while p <= n_hits:
             q = p + 1
             if (q < n_hits) and (times[q] - times[p] <= self.tmax):
-                coincidence = {'times': [times[p], times[q]], 'tdcs': [tdcs[p], tdcs[q]]}
+                coincidence = {'times': [times[p], times[q]],
+                               'tdcs': [tdcs[p], tdcs[q]]}
                 q += 1
                 while (q < n_hits) and (times[q] - times[p] <= self.tmax):
                     coincidence['times'].append(times[q])
                     coincidence['tdcs'].append(tdcs[q])
                     q += 1
-                if len(coincidence['times']) == 2 and coincidence['tdcs'][0] != coincidence['tdcs'][1]:
-                    coincidences.append(((coincidence['tdcs'][0], coincidence['tdcs'][1]), 
-                                          coincidence['times'][1] - coincidence['times'][0]))
+                cond1 = len(coincidence['times']) == 2
+                cond2 = coincidence['tdcs'][0] != coincidence['tdcs'][1]
+                if cond1 and cond2:
+                    dt = coincidence['times'][1] - coincidence['times'][0]
+                    coincidences.append(((coincidence['tdcs'][0],
+                                          coincidence['tdcs'][1]), dt))
             p = q
         return coincidences
 
@@ -212,21 +223,21 @@ def calibrate_dom(dom_id, data, detector, livetime=None, fixed_ang_dist=None,
             raise IOError
         else:
             data, livetime = loader(filename, dom_id)
-    
+
     combs = np.array(list(combinations(range(31), 2)))
     angles = calculate_angles(detector, combs)
     cos_angles = np.cos(angles)
     angles = angles[cos_angles>=ctmin]
     data = data[cos_angles>=ctmin]
     combs = combs[cos_angles>=ctmin]
-    
+
     try:
         rates, means, sigmas, popts, pcovs = fit_delta_ts(data, livetime,
                                                 fit_background=fit_background)
-    
+
     except:
         return 0
-    
+
     rate_errors = np.array([np.diag(pc)[2] for pc in pcovs])
     mean_errors = np.array([np.diag(pc)[0] for pc in pcovs])
     scale_factor = None
@@ -441,7 +452,7 @@ def fit_angular_distribution(angles, rates, rate_errors, shape='pexp'):
     if shape == 'pexp':
         fit_function = exponential_polinomial
         p0 = [ 0.34921202,  2.8629577 ]
-    
+
     cos_angles = np.cos(angles)
     popt, pcov = optimize.curve_fit(fit_function, cos_angles, rates)#, sigma=rate_errors)
     fitted_rates = fit_function(cos_angles, *popt)
@@ -499,7 +510,7 @@ def minimize_sigmas(sigmas, weights, combs):
                 sq_sum += ((sigma - np.sqrt(s[comb[1]]**2 + s[comb[0]]**2)) * weight)**2
             return sq_sum
         return quality_function
-    
+
     qfunc = make_quality_function(sigmas, weights, combs)
     s = np.ones(31) * 2.5
     #s = np.random.rand(31)
