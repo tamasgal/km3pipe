@@ -125,6 +125,7 @@ class CoincidenceFinder(kp.Module):
         self.counts = defaultdict(partial(np.zeros, (465, self.tmax * 2 + 1)))
         self.n_timeslices = 0
         self.start_time = datetime.utcnow()
+        print ('Tmax {}'.format(self.tmax))
 
     def process(self, blob):
         for dom_id, hits in blob['TimesliceFrames'].items():
@@ -146,7 +147,7 @@ class CoincidenceFinder(kp.Module):
             blob["Livetime"] = self.n_timeslices / 10
             pickle.dump({'data': self.counts, 'livetime': self.n_timeslices / 10}, open("k40_counts.p", "wb"))
             self.n_timeslices = 0
-            self.counts = defaultdict(partial(np.zeros, (465, 41)))
+            self.counts = defaultdict(partial(np.zeros, (465, self.tmax * 2 + 1)))
         return blob
 
     def mongincidence(self, times, tdcs):
