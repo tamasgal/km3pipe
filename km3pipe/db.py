@@ -15,6 +15,7 @@ import json
 import re
 import pytz
 import socket
+import requests
 import xml.etree.ElementTree as ET
 
 from collections import OrderedDict
@@ -359,7 +360,7 @@ class DBManager(object):
 
     def restore_session(self, cookie):
         """Establish databse connection using permanent session cookie"""
-        log.debug("Restoring session from cookie")
+        log.debug("Restoring session from cookie: {}".format(cookie))
         opener = build_opener()
         opener.addheaders.append(('Cookie', cookie))
         self._opener = opener
@@ -378,6 +379,7 @@ class DBManager(object):
         log.debug("Session cookie: {0}".format(cookie_str))
         log.debug("Storing cookie in configuration file")
         config.set('DB', 'session_cookie', cookie_str)
+        # self._cookies = [cookie]
         self.restore_session(cookie)
 
     def login(self, username, password):
@@ -401,6 +403,7 @@ class DBManager(object):
         return True
 
     def _build_opener(self):
+        log.debug("Building opener.")
         cj = CookieJar()
         self._cookies = cj
         opener = build_opener(HTTPCookieProcessor(cj), HTTPHandler())
@@ -409,6 +412,9 @@ class DBManager(object):
     def _make_request(self, url, values):
         data = urlencode(values)
         return Request(url, data.encode('utf-8'))
+
+    def _post(self, url, data):
+        pass
 
 
 class StreamDS(object):
@@ -509,7 +515,11 @@ class StreamDS(object):
             log.error(data)
             return
         if fmt == "txt":
-            return pd.read_csv(StringIO(data), sep='\t')
+            try:
+                return pd.read_csv(StringIO(data), sep='\t')
+            except pd.errors.EmptyDataError:
+                log.error("No data found.")
+                return None
         return data
 
 
