@@ -259,3 +259,41 @@ class TimeslicePump(Pump):
                     np.zeros(len(channel_ids), dtype=bool), slice_id)
             yield hits
             slice_id += 1
+
+
+class SummaryslicePump(Pump):
+    """Preliminary Summaryslice reader"""
+    def configure(self):
+        filename = self.require('filename')
+        self.blobs = self.summaryslice_generator()
+        try:
+            import jppy  # noqa
+        except ImportError:
+            raise ImportError("\nPlease install the jppy package:\n\n"
+                              "    pip install jppy\n")
+        self.r = jppy.daqsummaryslicereader.PyJDAQSummarysliceReader(filename)
+
+    def process(self, blob):
+        blob['Summaryslice'] = next(self.blobs)
+        return blob
+
+    def summaryslice_generator(self):
+        while self.r.has_next:
+            summary_slice = {}
+            self.r.retrieve_next_summaryslice()
+            while self.r.has_next_frame:
+                rates = np.zeros(31, dtype='f8')
+                self.r.get_rates(rates)
+                summary_slice[self.r.dom_id] = {
+                        'rates': rates,
+                        'n_udp_packets': self.r.number_of_received_packets,
+                        'max_sequence_number': self.r.max_sequence_number,
+                        'has_udp_trailer': self.r.has_udp_trailer,
+                        'high_rate_veto': self.r.high_rate_veto,
+                        'fifo_status': self.r.fifo_status,
+                        'frame_index': self.r.frame_index,
+                        'utc_seconds': self.r.utc_seconds,
+                        'utc_nanoseconds': self.r.utc_nanoseconds,
+                        }
+                self.r.retrieve_next_frame()
+            yield summary_slice

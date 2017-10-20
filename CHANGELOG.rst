@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* A preliminary version of ``SummaryslicePump``
 
 Version 7
 ---------
