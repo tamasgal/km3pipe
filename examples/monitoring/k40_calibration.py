@@ -63,7 +63,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
             ax.plot(np.cos(calib['angles']), calib["rates"], '.')
             ax.plot(np.cos(calib['angles']), calib["corrected_rates"], '.')
             ax.set_title("{0} - {1}".format(db.doms.via_dom_id(dom_id), dom_id))
-            ax.set_ylim((0, 15))
+            ax.set_ylim((0, 10))
         plt.suptitle("{0} UTC".format(datetime.utcnow().strftime("%c")))
         plt.savefig(PLOTS_PATH + "/angular_k40rate_distribution.png",
                     bbox_inches='tight')
