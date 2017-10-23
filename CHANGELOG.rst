@@ -1,6 +1,8 @@
 Unreleased changes
 ------------------
 
+* New command line utility to plot the trigger contributions: ``triggermap``
+
 
 Version 7
 ---------
