@@ -29,6 +29,9 @@ __status__ = "Development"
 
 class JPPPump(Pump):
     """A pump for JPP ROOT files.
+    
+    This pump will be replaced soon by ``EventPump``, ``TimeslicePump`` and
+    ``SummaryslicePump``.
 
     Parameters
     ----------
@@ -204,6 +207,89 @@ class JPPPump(Pump):
         return next(self.blobs)
 
 
+class EventPump(Pump):
+    """A pump for DAQEvents in JPP files.
+    
+    Parameters
+    ----------
+    filename: str
+        Name of the file to open. 
+
+    """
+    def configure(self):
+
+        try:
+            import jppy  # noqa
+        except ImportError:
+            raise ImportError("\nPlease install the jppy package:\n\n"
+                              "    pip install jppy\n")
+
+        self.event_index = self.get('index') or 0
+        self.filename = self.require('filename')
+
+        self.event_reader = jppy.PyJDAQEventReader(self.filename)
+        self.blobs = self.blob_generator()
+
+    def blob_generator(self):
+        while self.event_reader.has_next:
+            try:
+                yield self.extract_event()
+            except IndexError:
+                pass
+
+        raise StopIteration
+
+    def extract_event(self):
+        blob = Blob()
+        r = self.event_reader
+        r.retrieve_next_event()  # do it at the beginning!
+
+        n = r.number_of_snapshot_hits
+        channel_ids = np.zeros(n, dtype='i')
+        dom_ids = np.zeros(n, dtype='i')
+        times = np.zeros(n, dtype='i')
+        tots = np.zeros(n, dtype='i')
+        triggereds = np.zeros(n, dtype='i')
+
+        r.get_hits(channel_ids, dom_ids, times, tots, triggereds)
+
+        nans = np.full(n, np.nan, dtype='<f8')
+        hit_series = HitSeries.from_arrays(
+            channel_ids, nans, nans, nans, dom_ids, np.arange(n), np.zeros(n),
+            nans, nans, nans, nans, times, tots, triggereds, self.event_index
+        )
+
+        event_info = EventInfo(np.array((
+            r.det_id, r.frame_index,
+            0,  # livetime_sec
+            0, 0,  # MC ID and time
+            0,  # n_events_gen
+            0,  # n_files_gen
+            r.overlays,
+            r.trigger_counter, r.trigger_mask,
+            r.utc_nanoseconds, r.utc_seconds,
+            np.nan, np.nan, np.nan,   # w1-w3
+            0,  # run
+            self.event_index,
+            ), dtype=EventInfo.dtype))
+
+        self.event_index += 1
+        blob['EventInfo'] = event_info
+        blob['Hits'] = hit_series
+        return blob
+
+    def process(self, blob):
+        return next(self.blobs)
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        return next(self.blobs)
 
 
 class TimeslicePump(Pump):
