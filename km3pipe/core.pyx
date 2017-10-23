@@ -357,9 +357,9 @@ class Pump(Module):
     def __init__(self, *args, **kwargs):
         self.blob_file = None
         if args:
-            log.warn("Non-keywords argument passed. Please use keyword "
-                     "arguments to supress this warning. I will assume the "
-                     "first argument to be the `filename`.")
+            log.warning("Non-keywords argument passed. Please use keyword "
+                        "arguments to supress this warning. I will assume the "
+                        "first argument to be the `filename`.")
             Module.__init__(self, filename=args[0], **kwargs)
         else:
             Module.__init__(self, **kwargs)

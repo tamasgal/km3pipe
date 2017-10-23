@@ -87,7 +87,8 @@ class DAQPump(Pump):
             self.open_file(self.filename)
             self.determine_frame_positions()
         else:
-            log.warn("No filename specified. Take care of the file handling!")
+            log.warning("No filename specified. "
+                        "Take care of the file handling!")
 
     def next_blob(self):
         """Get the next frame from file"""

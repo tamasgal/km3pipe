@@ -149,7 +149,7 @@ class AanetPump(Pump):
         for filename in self.filenames:
             print("Reading from file: {0}".format(filename))
             if not os.path.exists(filename):
-                log.warn(filename + " not available: continue without it")
+                log.warning(filename + " not available: continue without it")
                 continue
 
             if not found_any_files:
@@ -171,7 +171,7 @@ class AanetPump(Pump):
                 print("Reading header...")
                 self.header = event_file.rootfile().Get("Head")
             except (ValueError, UnicodeEncodeError, TypeError):
-                log.warn(filename + ": can't read header.")
+                log.warning(filename + ": can't read header.")
             try:
                 print("Reading livetime...")
                 lt_line = self.header.get_line('livetime')
@@ -182,26 +182,26 @@ class AanetPump(Pump):
                 self.livetime_err = float(livetime_err)
                 self.livetime = float(livetime)
             except (ValueError, UnicodeEncodeError, AttributeError):
-                log.warn(filename + ": can't read livetime.")
+                log.warning(filename + ": can't read livetime.")
                 self.livetime = 0
             try:
                 print("Reading genvol...")
                 ngen = self.header.get_field('genvol', 4)
                 self.ngen = float(ngen)
             except (ValueError, UnicodeEncodeError, AttributeError):
-                log.warn(filename + ": can't read ngen.")
+                log.warning(filename + ": can't read ngen.")
                 self.ngen = 0
             try:
                 print("Reading number of generated files...")
                 self.nfilgen = float(nfilgen)
             except (ValueError, UnicodeEncodeError):
-                log.warn(filename + ": can't read nfilgen.")
+                log.warning(filename + ": can't read nfilgen.")
                 self.nfilgen = 0
             try:
                 print("Reading run id...")
                 self.header_run_id = self.header.get_field('start_run', 0)
             except (ValueError, UnicodeEncodeError, AttributeError):
-                log.warn(filename + ": can't read ngen.")
+                log.warning(filename + ": can't read ngen.")
                 self.header_run_id = None
             # END OF OLD HEADER CRAZINESS
 
@@ -267,12 +267,12 @@ class AanetPump(Pump):
                     hits._arr["time"] = uconverter(hits.time)
                 blob['Hits'] = hits
             except AttributeError:
-                log.warn("No hits found.")
+                log.warning("No hits found.")
             try:
                 mc_hits = McHitSeries.from_aanet(event.mc_hits, event_id)
                 blob['McHits'] = mc_hits
             except AttributeError:
-                log.warn("No MC hits found.")
+                log.warning("No MC hits found.")
 
         blob['McTracks'] = TrackSeries.from_aanet(event.mc_trks, event_id)
 
