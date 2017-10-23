@@ -107,11 +107,11 @@ class IntraDOMCalibrator(kp.Module):
 
 
 class CoincidenceFinder(kp.Module):
-    """Finds K40 coincidences in TimesliceFrames
+    """Finds K40 coincidences in Timeslice hits
 
     Input Keys
     ----------
-    'TimesliceFrames': dict (key=dom_id, value=list of hits as tuples)
+    'TSHits': RawHitSeries
 
     Output Keys
     -----------
@@ -134,11 +134,11 @@ class CoincidenceFinder(kp.Module):
         self.n_timeslices = 0
 
     def process(self, blob):
-        for dom_id, hits in blob['TimesliceFrames'].items():
-            hits.sort(key=lambda x: x[1])
-            coinces = self.spastincidence([t for (_,t,_) in hits],
-                                         [t for (t,_,_) in hits])
-
+        hits = blob['TSHits'].sorted()
+        dom_ids = np.unique(hits.dom_ids)
+        for dom_id in dom_ids:
+            dhits = hits[hits.dom_id == dom_id]
+            coinces = self.spastincidence(dhits.time, dhits.channel_id)
             combs = list(combinations(range(31), 2))
             for pmt_pair, t in coinces:
                 if pmt_pair[0] > pmt_pair[1]:
