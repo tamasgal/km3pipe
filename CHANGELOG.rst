@@ -1,12 +1,17 @@
 Unreleased changes
 ------------------
+
+
+Version 7
+---------
+
+7.8.0 / 2017-10-23
+~~~~~~~~~~~~~~~~~~
 * A preliminary version of ``SummaryslicePump``
 * A new pump for JPP events has been added: ``io.jpp.EventPump``. This will
   replace the ``JPPPump`` soon.
 * several changes to km3modules.k40 to improve the calibration procedure
 
-Version 7
----------
 
 7.7.1 / 2017-10-12
 ~~~~~~~~~~~~~~~~~~
