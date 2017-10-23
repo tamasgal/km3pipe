@@ -134,18 +134,20 @@ class CoincidenceFinder(kp.Module):
         self.n_timeslices = 0
 
     def process(self, blob):
+        log.debug("Processing timeslice")
         hits = blob['TSHits'].sorted()
         dom_ids = np.unique(hits.dom_id)
+        combs = list(combinations(range(31), 2))
+        combs_dict = {comb: idx for idx, comb in enumerate(combs)}
         for dom_id in dom_ids:
             dhits = hits[hits.dom_id == dom_id]
-            coinces = self.spastincidence(dhits.time, dhits.channel_id)
-            combs = list(combinations(range(31), 2))
+            coinces = self.spastincidence(dhits.time.astype('int'),
+                                          dhits.channel_id)
             for pmt_pair, t in coinces:
                 if pmt_pair[0] > pmt_pair[1]:
                     pmt_pair = (pmt_pair[1], pmt_pair[0])
                     t = -t
-                self.counts[dom_id][combs.index(pmt_pair),
-                                    int(t+self.tmax)] += 1
+                self.counts[dom_id][combs_dict[pmt_pair], t+self.tmax] += 1
 
         self.n_timeslices += 1
         if self.n_timeslices == self.accumulate:
