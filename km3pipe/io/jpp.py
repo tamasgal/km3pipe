@@ -51,8 +51,9 @@ class JPPPump(Pump):
         try:
             import jppy  # noqa
         except ImportError:
-            raise ImportError("\nPlease install the jppy package:\n\n"
-                              "    pip install jppy\n")
+            raise ImportError("\nEither Jpp or jppy could not be found."
+                              "\nMake sure you source the JPP environmanet "
+                              "and have jppy installed")
 
         self.event_index = self.get('index') or 0
         self.with_summaryslices = self.get('with_summaryslices') or False
@@ -220,8 +221,9 @@ class EventPump(Pump):
         try:
             import jppy  # noqa
         except ImportError:
-            raise ImportError("\nPlease install the jppy package:\n\n"
-                              "    pip install jppy\n")
+            raise ImportError("\nEither Jpp or jppy could not be found."
+                              "\nMake sure you source the JPP environmanet "
+                              "and have jppy installed")
 
         self.event_index = self.get('index') or 0
         self.filename = self.require('filename')
@@ -303,8 +305,9 @@ class TimeslicePump(Pump):
         try:
             import jppy  # noqa
         except ImportError:
-            raise ImportError("\nPlease install the jppy package:\n\n"
-                              "    pip install jppy\n")
+            raise ImportError("\nEither Jpp or jppy could not be found."
+                              "\nMake sure you source the JPP environmanet "
+                              "and have jppy installed")
         self.r = jppy.daqtimeslicereader.PyJDAQTimesliceReader(filename)
 
     def process(self, blob):
@@ -362,8 +365,9 @@ class SummaryslicePump(Pump):
         try:
             import jppy  # noqa
         except ImportError:
-            raise ImportError("\nPlease install the jppy package:\n\n"
-                              "    pip install jppy\n")
+            raise ImportError("\nEither Jpp or jppy could not be found."
+                              "\nMake sure you source the JPP environmanet "
+                              "and have jppy installed")
         self.r = jppy.daqsummaryslicereader.PyJDAQSummarysliceReader(filename)
 
     def process(self, blob):
