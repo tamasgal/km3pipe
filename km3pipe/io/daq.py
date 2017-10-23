@@ -77,7 +77,8 @@ class TimesliceParser(Module):
                     _tots.append(hit[2])
 
             tshits = RawHitSeries.from_arrays(
-                    channel_ids, dom_ids, times, tots, np.zeros(len(tots))
+                    channel_ids, dom_ids, times, tots, np.zeros(len(tots)),
+                    0  # event_id
                     )
             blob['TSHits'] = tshits
         except struct.error:
