@@ -29,8 +29,7 @@ detector = geometry.detector
 
 
 class DOMActivityPlotter(kp.Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.index = 0
         self.last_activity = defaultdict(partial(deque, maxlen=4000))
         self.cuckoo = kp.time.Cuckoo(60, self.create_plot)

@@ -36,9 +36,7 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 class CHPump(Pump):
     """A pump for ControlHost data."""
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
-
+    def configure(self):
         self.host = self.get('host') or '127.0.0.1'
         self.port = self.get('port') or 5553
         self.tags = self.get('tags') or "MSG"

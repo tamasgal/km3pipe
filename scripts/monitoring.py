@@ -43,8 +43,7 @@ lock = threading.Lock()
 
 
 class DOMHits(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.run = True
         self.max_events = 1000
         self.hits = deque(maxlen=1000)
@@ -125,8 +124,7 @@ class DOMHits(Module):
             self.thread.stop()
 
 class TriggerRate(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.run = True
         self.event_times = deque(maxlen=4000)
         self.trigger_rates = deque(maxlen=4000)
@@ -210,8 +208,7 @@ class TriggerRate(Module):
 
 
 class DOMActivityPlotter(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.index = 0
         self.rates = defaultdict(partial(deque, maxlen=4000))
         self.run = True

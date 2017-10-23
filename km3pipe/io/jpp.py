@@ -46,8 +46,7 @@ class JPPPump(Pump):
         This can make the file huge. [default: False]
     """
 
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
 
         try:
             import jppy  # noqa

@@ -80,8 +80,7 @@ class AanetPump(Pump):
         often, the event.run_id is overwritten with the default (1).
     """
 
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
 
         self.filename = self.get('filename')
         self.filenames = self.get('filenames') or []

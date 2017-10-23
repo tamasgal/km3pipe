@@ -25,8 +25,7 @@ class DAQSummaryslicePrinter(Module):
 
 
 class MeanHits(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.hits = []
 
     def process(self, blob):
@@ -44,8 +43,7 @@ class MeanHits(Module):
 
 
 class MeanRates(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.rates = {}
 
     def process(self, blob):

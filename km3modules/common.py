@@ -22,8 +22,7 @@ from km3pipe.io.pandas import merge_event_ids
 class Wrap(Module):
     """Wrap a key-val dictionary as a Serialisable.
     """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.keys = self.get('keys') or None
         key = self.get('key') or None
         if key and not self.keys:
@@ -51,8 +50,7 @@ class Dump(Module):
     full: bool, default=False
         Print blob values too, not just the keys?
     """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.keys = self.get('keys') or None
         self.full = self.get('full') or False
         key = self.get('key') or None
@@ -78,8 +76,7 @@ class Delete(Module):
     keys: collection(string), optional
         Keys to remove.
     """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.keys = self.get('keys') or set()
         key = self.get('key') or None
         if key and not self.keys:
@@ -99,8 +96,7 @@ class Keep(Module):
     keys: collection(string), optional
         Keys to keep. Everything else is removed.
     """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.keys = self.get('keys') or set()
         key = self.get('key') or None
         if key and not self.keys:
@@ -126,8 +122,7 @@ class HitCounter(Module):
 
 class BlobIndexer(Module):
     """Puts an incremented index in each blob for the key 'blob_index'"""
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.blob_index = 0
 
     def process(self, blob):
@@ -193,8 +188,7 @@ class Cut(Module):
     verbose: bool, optional (default=False)
         Print extra info?
     """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.key = self.require('key')
         self.cond = self.require('condition')
         self.verbose = self.get('verbose') or False
@@ -212,8 +206,7 @@ class Cut(Module):
 
 class GetAngle(Module):
     """Convert pos(x, y, z) to zenith, azimuth."""
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.key = self.require('key')
 
     def process(self, blob):
@@ -238,8 +231,7 @@ class MergeDF(Module):
     drop: bool, default=True
         Discard input tables?
     """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.keys = self.require('keys')
         self.out = self.require('out')
         self.merge_ids = bool(self.get('merge_ids')) or True

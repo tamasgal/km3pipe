@@ -45,8 +45,7 @@ def mongincidence(times, tdcs, tmax=20, offset=0):
 
 
 class MonitorK40(kp.Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.index = 0
         self.k40_2fold = {}
         self.rates = {}

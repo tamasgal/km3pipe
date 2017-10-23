@@ -34,8 +34,7 @@ UTC_TZ = pytz.timezone('UTC')
 class CLBPump(Pump):
     """A pump for binary CLB files."""
 
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.filename = self.get('filename')
         self.cache_enabled = self.get('cache_enabled') or False
         self.packet_positions = []
