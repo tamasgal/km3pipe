@@ -3,6 +3,8 @@
 """
 Convert HDF5 to vanilla ROOT.
 
+Can convert multiple files at once, "foo.h5" -> "foo.h5.root".
+
 Usage:
      hdf2root [--verbose] FILES...
      hdf2root (-h | --help)
@@ -15,16 +17,11 @@ Options:
 
 from __future__ import division, absolute_import, print_function
 
-import sys
-import os
-from datetime import datetime
-
 import numpy as np
 
 from km3pipe import version
-from km3modules.common import StatusBar
 
-__author__ = "Tamas Gal"
+__author__ = "Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
 __license__ = "MIT"
@@ -70,4 +67,5 @@ def main():
     files = args['FILES']
     verbose = bool(args['--verbose'])
     for fn in files:
-        hdf2root(fn, fn+'.root', verbose=verbose)
+        print('Converting {}...'.format(fn))
+        hdf2root(fn, fn + '.root', verbose=verbose)

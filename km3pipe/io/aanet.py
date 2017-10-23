@@ -57,7 +57,7 @@ class AanetPump(Pump):
         needs to be specified instead.
     filenames: list(str), optional
         List of files to open.
-    aa_fmt: string, optional
+    aa_fmt: string, optional (default: 'gandalf_new')
         Subformat of aanet in the file. Possible values:
         ``'minidst', 'jevt_jgandalf', 'gandalf_new', 'generic_track',
         'ancient_recolns'``
@@ -87,7 +87,7 @@ class AanetPump(Pump):
         self.filenames = self.get('filenames') or []
         self.indices = self.get('indices')
         self.additional = self.get('additional')
-        self.format = self.get('aa_fmt')
+        self.format = self.get('aa_fmt') or 'gandalf_new'
         self.use_id = self.get('use_id') or False
         self.use_aart_sps_lib = self.get('use_aart_sps_lib') or False
         self.old_mc_id = self.get('old_mc_id') or False
@@ -198,6 +198,12 @@ class AanetPump(Pump):
             except (ValueError, UnicodeEncodeError):
                 log.warn(filename + ": can't read nfilgen.")
                 self.nfilgen = 0
+            try:
+                print("Reading run id...")
+                self.header_run_id = self.header.get_field('start_run', 0)
+            except (ValueError, UnicodeEncodeError, AttributeError):
+                log.warn(filename + ": can't read ngen.")
+                self.header_run_id = None
             # END OF OLD HEADER CRAZINESS
 
             # NEW HEADER CRAZINESS
@@ -280,14 +286,8 @@ class AanetPump(Pump):
         except AttributeError:
             mc_id = 0
 
-        try:
-            print("Reading run id...")
-            header_run_id = self.header.get_field('start_run', 0)
-        except (ValueError, UnicodeEncodeError, AttributeError):
-            log.warn(filename + ": can't read ngen.")
-            header_run_id = None
-        if not self.ignore_run_id_from_header and header_run_id is not None:
-            run_id = header_run_id
+        if not self.ignore_run_id_from_header and self.header_run_id is not None:
+            run_id = self.header_run_id
         else:
             run_id = event.run_id
         try:
@@ -326,30 +326,32 @@ class AanetPump(Pump):
                                run_id,
                                event_id), dtype=EventInfo.dtype)
             blob['EventInfo'] = EventInfo(ei_data)
-        if self.format == 'minidst':
-            recos = read_mini_dst(event, event_id)
-            for recname, reco in recos.items():
-                blob[recname] = reco
-        if self.format in ('jevt_jgandalf', 'gandalf', 'jgandalf'):
-            track, dtype = parse_jevt_jgandalf(event, event_id, self.missing)
-            if track:
-                blob['Gandalf'] = KM3Array.from_dict(
-                    track, dtype, h5loc='/reco')
-        if self.format in ('gandalf_new', 'jgandalf_new'):
-            track, dtype = parse_jgandalf_new(event, event_id, self.missing)
-            if track:
-                blob['Gandalf'] = KM3Array.from_dict(
-                    track, dtype, h5loc='/reco')
-        if self.format == 'generic_track':
-            track, dtype = parse_generic_event(event, event_id, self.missing)
-            if track:
-                blob['Track'] = KM3Array.from_dict(
-                    track, dtype, h5loc='/reco')
-        if self.format in ('ancient_recolns', 'orca_recolns'):
-            track, dtype = parse_ancient_recolns(event, event_id, self.missing)
-            if track:
-                blob['OrcaRecoLns'] = KM3Array.from_dict(
-                    track, dtype, h5loc='/reco')
+
+        if len(event.trks) > 0:
+            if self.format == 'minidst':
+                recos = read_mini_dst(event, event_id)
+                for recname, reco in recos.items():
+                    blob[recname] = reco
+            if self.format in ('jevt_jgandalf', 'gandalf', 'jgandalf'):
+                track, dtype = parse_jevt_jgandalf(event, event_id, self.missing)
+                if track:
+                    blob['Gandalf'] = KM3Array.from_dict(
+                        track, dtype, h5loc='/reco')
+            if self.format in ('gandalf_new', 'jgandalf_new'):
+                track, dtype = parse_jgandalf_new(event, event_id, self.missing)
+                if track:
+                    blob['Gandalf'] = KM3Array.from_dict(
+                        track, dtype, h5loc='/reco')
+            if self.format == 'generic_track':
+                track, dtype = parse_generic_event(event, event_id, self.missing)
+                if track:
+                    blob['Track'] = KM3Array.from_dict(
+                        track, dtype, h5loc='/reco')
+            if self.format in ('ancient_recolns', 'orca_recolns'):
+                track, dtype = parse_ancient_recolns(event, event_id, self.missing)
+                if track:
+                    blob['OrcaRecoLns'] = KM3Array.from_dict(
+                        track, dtype, h5loc='/reco')
         return blob
 
     def event_index(self, blob):
@@ -569,7 +571,7 @@ def parse_jgandalf_new(aanet_event, event_id, missing=0):
     return outmap, dt
 
 
-def upgoing_vs_downgoing(tracks, filler=4.2):
+def upgoing_vs_downgoing(tracks):
     """Compare upgoing vs downgoing hypothesis.
 
     upvsdown = (lik_upgoing - lik_downgoing)/(lik_upgoing + lik_downgoing)
@@ -583,9 +585,9 @@ def upgoing_vs_downgoing(tracks, filler=4.2):
             if track.dir.z < 0
             ]
     if not upgoing:
-        return filler
+        return -np.inf
     if not downgoing:
-        return -filler
+        return np.inf
 
     upgoing_chi2 = np.nanmin(upgoing)
     downgoing_chi2 = np.nanmin(downgoing)
