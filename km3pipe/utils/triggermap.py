@@ -6,8 +6,8 @@
 This script creates histogram which shows the trigger contribution for events.
 
 Usage:
-    trigger_map.py [-d DU -p PLOT_FILENAME] FILENAME
-    trigger_map.py --version
+    triggermap [-d DET_ID -p PLOT_FILENAME -u DU] FILENAME
+    triggermap --version
 
 Option:
     FILENAME          Name of the input file.
