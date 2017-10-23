@@ -11,7 +11,8 @@ Usage:
 
 Option:
     FILENAME          Name of the input file.
-    -d DU             Only plot for the given DU.
+    -u DU             Only plot for the given DU.
+    -d DET_ID         Detector ID [default: 29].
     -p PLOT_FILENAME  The filename of the plot [default: trigger_map.png].
     -h --help         Show this screen.
 
@@ -106,8 +107,9 @@ class TriggerMap(kp.Module):
 
 def main():
     args = docopt(__doc__, version='1.0')
-    du = int(args['-d']) if args['-d'] else None
-    det = kp.hardware.Detector(det_id=29)
+    du = int(args['-u']) if args['-d'] else None
+    det_id = int(args['-d'])
+    det = kp.hardware.Detector(det_id=det_id)
     pipe = kp.Pipeline()
     pipe.attach(kp.io.jpp.EventPump, filename=args['FILENAME'])
     pipe.attach(TriggerMap,
