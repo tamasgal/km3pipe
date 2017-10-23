@@ -255,9 +255,15 @@ def calibrate_dom(dom_id, data, detector, livetime=None, fixed_ang_dist=None,
                                                            rate_errors,
                                                            shape=ad_fit_shape)
     #t0_weights = np.array([0. if a>1. else 1. for a in angles])
-    opt_t0s = minimize_t0s(means, fitted_rates, combs)
-    opt_sigmas = minimize_sigmas(sigmas, fitted_rates, combs)
-    opt_qes = minimize_qes(fitted_rates, rates, fitted_rates, combs)
+
+    if fit_background == False:
+        minimize_weights = calculate_weights(fitted_rates, data)
+    else:
+        minimize_weights = fitted_rates    
+    
+    opt_t0s = minimize_t0s(means, minimize_weights, combs)
+    opt_sigmas = minimize_sigmas(sigmas, minimize_weights, combs)
+    opt_qes = minimize_qes(fitted_rates, rates, minimize_weights, combs)
     corrected_means = correct_means(means, opt_t0s.x, combs)
     corrected_rates = correct_rates(rates, opt_qes.x, combs)
     rms_means, rms_corrected_means = calculate_rms_means(means,
@@ -279,12 +285,14 @@ def calibrate_dom(dom_id, data, detector, livetime=None, fixed_ang_dist=None,
                    'exp_pcov': exp_pcov,
                    'scale_factor': scale_factor,
                    'opt_sigmas': opt_sigmas,
-                   'sigmas': sigmas}
+                   'sigmas': sigmas, 'combs': combs}
     return return_data
 
 
-
-
+def calculate_weights(fitted_rates, data):
+    comb_mean_rates = np.mean(data, axis=1)
+    greater_zero = np.array(comb_mean_rates>0, dtype=int)    
+    return fitted_rates * greater_zero
 
 def load_k40_coincidences_from_hdf5(filename, dom_id):
     """Load k40 coincidences from hdf5 file
@@ -388,12 +396,12 @@ def fit_delta_ts(data, livetime, fit_background=True):
             if fit_background:
                 popt, pcov = optimize.curve_fit(gaussian, xs, combination,
                                     p0=[mean0, 4., 5., 0.1],
-                                    bounds=([-20, 0, 0, 0],
-                                              [20, 10, 10, 1]))
+                                    bounds=([start, 0, 0, 0],
+                                              [end, 10, 10, 1]))
             else:
                 popt, pcov = optimize.curve_fit(gaussian_wo_offset, xs, combination,
                                     p0=[mean0, 4., 5.],
-                                    bounds=([-20, 0, 0], [20, 10, 10]))
+                                    bounds=([start, 0, 0], [end, 10, 10]))
         except RuntimeError:
             popt = (0, 0, 0, 0)
         rates.append(popt[2])
