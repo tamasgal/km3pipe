@@ -60,8 +60,8 @@ class TimesliceParser(Module):
 
             _dom_ids = []
             _channel_ids = []
-            _times.append = []
-            _tots.append = []
+            _times = []
+            _tots = []
             for i in range(n_frames):
                 frame_size, datatype = unpack('<ii', data.read(8))
                 det_id, run, sqnr = unpack('<iii', data.read(12))
@@ -77,7 +77,11 @@ class TimesliceParser(Module):
                     _tots.append(hit[2])
 
             tshits = RawHitSeries.from_arrays(
-                    channel_ids, dom_ids, times, tots, np.zeros(len(tots)),
+                    np.array(_channel_ids),
+                    np.array(_dom_ids),
+                    np.array(_times),
+                    np.array(_tots),
+                    np.zeros(len(_tots)),  # triggered
                     0  # event_id
                     )
             blob['TSHits'] = tshits

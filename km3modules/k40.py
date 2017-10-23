@@ -135,7 +135,7 @@ class CoincidenceFinder(kp.Module):
 
     def process(self, blob):
         hits = blob['TSHits'].sorted()
-        dom_ids = np.unique(hits.dom_ids)
+        dom_ids = np.unique(hits.dom_id)
         for dom_id in dom_ids:
             dhits = hits[hits.dom_id == dom_id]
             coinces = self.spastincidence(dhits.time, dhits.channel_id)
@@ -144,7 +144,8 @@ class CoincidenceFinder(kp.Module):
                 if pmt_pair[0] > pmt_pair[1]:
                     pmt_pair = (pmt_pair[1], pmt_pair[0])
                     t = -t
-                self.counts[dom_id][combs.index(pmt_pair), t+self.tmax] += 1
+                self.counts[dom_id][combs.index(pmt_pair),
+                                    int(t+self.tmax)] += 1
 
         self.n_timeslices += 1
         if self.n_timeslices == self.accumulate:
