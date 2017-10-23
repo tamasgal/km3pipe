@@ -107,7 +107,7 @@ class TriggerMap(kp.Module):
 
 def main():
     args = docopt(__doc__, version='1.0')
-    du = int(args['-u']) if args['-d'] else None
+    du = int(args['-u']) if args['-u'] else None
     det_id = int(args['-d'])
     det = kp.hardware.Detector(det_id=det_id)
     pipe = kp.Pipeline()
