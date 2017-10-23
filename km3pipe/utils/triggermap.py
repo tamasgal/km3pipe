@@ -77,7 +77,8 @@ class TriggerMap(kp.Module):
         self.create_plot()
 
     def create_plot(self):
-        title = "Trigger Map\n{}".format(self.subtitle)
+        title_du = ' - DU {}'.format(self.du) if self.du else ''
+        title = "Trigger Map{}\n{}".format(title_du, self.subtitle)
         fig, ax = plt.subplots(figsize=(16, 8))
         ax.grid(True)
         ax.set_axisbelow(True)
