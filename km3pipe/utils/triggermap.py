@@ -104,7 +104,7 @@ class TriggerMap(kp.Module):
         plt.savefig(self.plot_filename, dpi=120, bbox_inches="tight")
 
 
-def main()
+def main():
     args = docopt(__doc__, version='1.0')
     du = int(args['-d']) if args['-d'] else None
     det = kp.hardware.Detector(det_id=29)
