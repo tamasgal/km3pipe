@@ -17,7 +17,7 @@ import pprint
 import numpy as np
 
 from km3pipe.core import Pump, Module, Blob
-from km3pipe.dataclasses import EventInfo, HitSeries
+from km3pipe.dataclasses import EventInfo, HitSeries, RawHitSeries
 from km3pipe.sys import ignored
 from km3pipe.logger import logging
 
@@ -58,6 +58,10 @@ class TimesliceParser(Module):
 
             ts_frames = blob['TimesliceFrames'] = defaultdict(list)
 
+            _dom_ids = []
+            _channel_ids = []
+            _times.append = []
+            _tots.append = []
             for i in range(n_frames):
                 frame_size, datatype = unpack('<ii', data.read(8))
                 det_id, run, sqnr = unpack('<iii', data.read(12))
@@ -67,7 +71,15 @@ class TimesliceParser(Module):
                 hits = []
                 for j in range(n_hits):
                     hit = unpack('!BlB', data.read(6))
-                    ts_frames[dom_id].append(hit)
+                    _dom_ids.append(dom_id)
+                    _channel_ids.append(hit[0])
+                    _times.append(hit[1])
+                    _tots.append(hit[2])
+
+            tshits = RawHitSeries.from_arrays(
+                    channel_ids, dom_ids, times, tots, np.zeros(len(tots))
+                    )
+            blob['TSHits'] = tshits
         except struct.error:
             log.error("Could not parse Timeslice")
             log.error(blob.keys())
