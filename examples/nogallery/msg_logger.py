@@ -35,8 +35,7 @@ RUN_NUMBER_URL='http://192.168.0.120:1301/mon/controlunit/runnumber'
 
 
 class MessageDumper(km3.Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.write_interval = self.get('write_interval') or 1
         self.path = self.get('path') or '.'
         self.det_sn = self.get('det_sn')

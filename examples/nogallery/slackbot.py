@@ -18,8 +18,7 @@ class CHPrinter(Module):
 
 
 class SlackSender(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.client = SlackClient('YOUR_SLACK_API_TOKEN_HERE')
         self.current_run = None
 

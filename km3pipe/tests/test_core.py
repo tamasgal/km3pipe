@@ -200,6 +200,16 @@ class TestPipeline(TestCase):
         with self.assertRaises(SystemExit):
             pl._handle_ctrl_c()  # second KeyboardInterrupt
 
+    def test_attaching_a_pump_allows_first_parameter_to_be_passed_as_filename(self):
+        pl = Pipeline()
+        
+        class APump(Pump):
+            def configure(self):
+                self.filename = self.require('filename')
+
+        p = APump('test')
+        self.assertEqual('test', p.filename)
+
 
 class TestModule(TestCase):
     """Tests for the pipeline module"""

@@ -159,8 +159,8 @@ class DBManager(object):
             try:
                 self._add_converted_units(dataframe, parameter)
             except KeyError:
-                log.warn("Could not add converted units for {0}"
-                         .format(parameter))
+                log.warning("Could not add converted units for {0}"
+                            .format(parameter))
             return dataframe
 
     def run_table(self, det_id='D_ARCA001'):
@@ -187,7 +187,7 @@ class DBManager(object):
             converted = dataframe[timestamp_key].apply(convert_data)
             dataframe['DATETIME'] = converted
         except KeyError:
-            log.warn("Could not add DATETIME column")
+            log.warning("Could not add DATETIME column")
 
     def _add_converted_units(self, dataframe, parameter, key='VALUE'):
         """Add an additional DATA_VALUE column with converted VALUEs"""
@@ -196,7 +196,7 @@ class DBManager(object):
             log.debug("Adding unit converted DATA_VALUE to the data")
             dataframe[key] = dataframe['DATA_VALUE'].apply(convert_unit)
         except KeyError:
-            log.warn("Missing 'VALUE': no unit conversion.")
+            log.warning("Missing 'VALUE': no unit conversion.")
         else:
             dataframe.unit = self.parameters.unit(parameter)
 
@@ -303,7 +303,7 @@ class DBManager(object):
         except AttributeError:
             json_content = json.loads(content)
         if json_content['Comment']:
-            log.warn(json_content['Comment'])
+            log.warning(json_content['Comment'])
         if json_content['Result'] != 'OK':
             raise ValueError('Error while retrieving the parameter list.')
         return json_content['Data']
@@ -636,8 +636,8 @@ class DOMContainer(object):
                   dom[from_key] == value and
                   dom['DetOID'] == det_id]
         if len(lookup) > 1:
-            log.warn("Multiple entries found: {0}".format(lookup) + "\n" +
-                     "Returning the first one.")
+            log.warning("Multiple entries found: {0}".format(lookup) + "\n" +
+                        "Returning the first one.")
         return lookup[0]
 
 

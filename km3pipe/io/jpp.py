@@ -29,14 +29,14 @@ __status__ = "Development"
 
 class JPPPump(Pump):
     """A pump for JPP ROOT files.
-    
+
     This pump will be replaced soon by ``EventPump``, ``TimeslicePump`` and
     ``SummaryslicePump``.
 
     Parameters
     ----------
     filename: str
-        Name of the file to open. 
+        Name of the file to open.
     index: int
         The number to start the event indexing with [default: 0]
     with_summaryslices: bool
@@ -46,8 +46,7 @@ class JPPPump(Pump):
         This can make the file huge. [default: False]
     """
 
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
 
         try:
             import jppy  # noqa
@@ -209,11 +208,11 @@ class JPPPump(Pump):
 
 class EventPump(Pump):
     """A pump for DAQEvents in JPP files.
-    
+
     Parameters
     ----------
     filename: str
-        Name of the file to open. 
+        Name of the file to open.
 
     """
     def configure(self):
@@ -253,10 +252,8 @@ class EventPump(Pump):
 
         r.get_hits(channel_ids, dom_ids, times, tots, triggereds)
 
-        nans = np.full(n, np.nan, dtype='<f8')
-        hit_series = HitSeries.from_arrays(
-            channel_ids, nans, nans, nans, dom_ids, np.arange(n), np.zeros(n),
-            nans, nans, nans, nans, times, tots, triggereds, self.event_index
+        hit_series = RawHitSeries.from_arrays(
+            channel_ids, dom_ids, times, tots, triggereds, self.event_index
         )
 
         event_info = EventInfo(np.array((
@@ -294,11 +291,11 @@ class EventPump(Pump):
 
 class TimeslicePump(Pump):
     """A pump to read and extract timeslices. Currently only hits are read.
-    
+
     Required Parameters
     -------------------
     filename: str
-    
+
     """
     def configure(self):
         filename = self.require('filename')

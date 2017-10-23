@@ -52,8 +52,7 @@ def trigger_rate_sampling_period():
 
 
 class TriggerRate(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.run = True
         self.interval = self.get("interval") or trigger_rate_sampling_period()
         self.event_times = deque(maxlen=4000)  # max events per interval

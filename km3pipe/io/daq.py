@@ -78,8 +78,7 @@ class TimesliceParser(Module):
 class DAQPump(Pump):
     """A pump for binary DAQ files."""
 
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.filename = self.get('filename')
         self.frame_positions = []
         self.index = 0
@@ -88,7 +87,8 @@ class DAQPump(Pump):
             self.open_file(self.filename)
             self.determine_frame_positions()
         else:
-            log.warn("No filename specified. Take care of the file handling!")
+            log.warning("No filename specified. "
+                        "Take care of the file handling!")
 
     def next_blob(self):
         """Get the next frame from file"""
@@ -190,8 +190,7 @@ class DAQPump(Pump):
 
 
 class DAQProcessor(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.index = 0
 
     def process(self, blob):

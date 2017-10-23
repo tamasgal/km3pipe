@@ -74,9 +74,6 @@ def h5tree(h5name, print_meta=True, pretty=True, **kwargs):
         node_kinds = h5.root._v_file._node_kinds[1:]
         what = h5.root._f_walk_groups()
         for k, group in enumerate(what):
-            if k == 0:
-                # dont print leading '/'
-                continue
             d = group._v_depth
             if pretty:
                 print('│  ' * (d - 1) + '├── ' * d + group._v_name)

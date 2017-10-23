@@ -28,7 +28,7 @@ __author__ = 'tamasgal'
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
-version_info = (7, 8, 0, 'final', 0)
+version_info = (7, 8, 1, 'final', 0)
 
 
 def _get_version(version_info):
@@ -64,10 +64,10 @@ def check_for_update():
     else:
         version = _get_version(version_info)
         if latest_version != version:
-            log.warn("There is an update for km3pipe available.\n" +
-                     "    Installed: {0}\n"
-                     "    Latest: {1}\n".format(version, latest_version) +
-                     "Please run `pip install --upgrade km3pipe` to update.")
+            log.warning("There is an update for km3pipe available.\n" +
+                        "    Installed: {0}\n"
+                        "    Latest: {1}\n".format(version, latest_version) +
+                        "Please run `pip install --upgrade km3pipe`.")
 
 
 version = _get_version(version_info)

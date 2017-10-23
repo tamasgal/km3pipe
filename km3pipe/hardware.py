@@ -143,7 +143,7 @@ class Detector(object):
                     pmt_id, x, y, z, rest = unpack_nfirst(pmt_info, 4)
                     dx, dy, dz, t0, rest = unpack_nfirst(rest, 4)
                     if rest:
-                        log.warn("Unexpected PMT values: '{0}'".format(rest))
+                        log.warning("Unexpected PMT values: {0}".format(rest))
                     pmt_id = int(pmt_id)
                     pmt_pos = [float(n) for n in (x, y, z)]
                     pmt_dir = [float(n) for n in (dx, dy, dz)]

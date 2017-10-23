@@ -50,8 +50,7 @@ lock = threading.Lock()
 
 
 class DOMHits(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.run = True
         self.max_events = 1000
         self.hits = deque(maxlen=1000)
@@ -134,8 +133,7 @@ class DOMHits(Module):
 
 
 class TriggerRate(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.run = True
         self.interval = 60
         self.event_times = deque(maxlen=4000)  # max events per interval
@@ -227,8 +225,7 @@ class TriggerRate(Module):
 
 
 class DOMActivityPlotter(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.index = 0
         self.rates = defaultdict(partial(deque, maxlen=4000))
         self.run = True
@@ -332,8 +329,7 @@ class DOMActivityPlotter(Module):
 
 
 class ZTPlot(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.run = True
         self.max_queue = 3
         self.queue = Queue()

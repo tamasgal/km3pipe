@@ -19,8 +19,7 @@ class McTruth(Module):
     ----------
     most_energetic_primary: bool, default=True
     """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.most_energetic_primary = bool(self.get('most_energetic_primary')) or True
 
     @classmethod

@@ -5,6 +5,10 @@ Unreleased changes
 Version 7
 ---------
 
+7.8.1 / 2017-10-23
+~~~~~~~~~~~~~~~~~~
+* Fixes the ``io.jpp.EventPump`` to use ``RawHitSeries``
+
 7.8.0 / 2017-10-23
 ~~~~~~~~~~~~~~~~~~
 * A preliminary version of ``SummaryslicePump``

@@ -26,8 +26,7 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 class PicklePump(Pump):
     """A pump for Python pickles."""
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
 
         self.filename = self.get('filename')
         self.events = pickle.load(open(self.filename, "rb"))

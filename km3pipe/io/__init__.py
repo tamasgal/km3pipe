@@ -52,7 +52,7 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
     for fn in filenames:
         if not os.path.exists(fn):
             n_nonexist += 1
-            log.warn("File '{}' not found, skipping...".format(fn))
+            log.warning("File '{}' not found, skipping...".format(fn))
     if n_nonexist == len(filenames):
         log.critical("No pump found for '{0}'".format(extension))
         raise IOError("None of the input files exist! Exiting.")

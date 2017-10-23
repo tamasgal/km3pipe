@@ -65,9 +65,9 @@ class TestH5Pump(TestCase):
         data_dir = os.path.dirname(kp.__file__) + '/kp-data/test_data/'
         self.fname = data_dir + 'numu_cc_test.h5'
 
-    def test_init_has_to_be_explicit(self):
-        with self.assertRaises(TypeError):
-            HDF5Pump(self.fname)
+    def test_init_sets_filename_if_no_keyword_arg_is_passed(self):
+        p = HDF5Pump(self.fname)
+        self.assertEqual(self.fname, p.filename)
 
     def test_standalone(self):
         pump = HDF5Pump(filename=self.fname)
@@ -92,9 +92,9 @@ class TestH5Sink(TestCase):
     def tearDown(self):
         self.out.close()
 
-    def test_init_has_to_be_explicit(self):
-        with self.assertRaises(TypeError):
-            HDF5Sink(self.out)
+    # def test_init_has_to_be_explicit(self):
+    #     with self.assertRaises(TypeError):
+    #         HDF5Sink(self.out)
 
     def test_pipe(self):
         from km3modules.common import Dump      # noqa
