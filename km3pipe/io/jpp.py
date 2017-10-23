@@ -346,6 +346,16 @@ class TimeslicePump(Pump):
             yield hits
             slice_id += 1
 
+    def __iter__(self):
+        return self
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        return next(self.blobs)
+
 
 class SummaryslicePump(Pump):
     """Preliminary Summaryslice reader"""
@@ -383,3 +393,13 @@ class SummaryslicePump(Pump):
                         }
                 self.r.retrieve_next_frame()
             yield summary_slice
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        return next(self.blobs)
