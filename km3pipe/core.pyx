@@ -321,9 +321,12 @@ class Module(object):
         """Add the parameter with the desired value to the dict"""
         self.parameters[name] = value
 
-    def get(self, name):
-        """Return the value of the requested parameter"""
-        return self.parameters.get(name)
+    def get(self, name, default=None):
+        """Return the value of the requested parameter or `default` if None."""
+        value = self.parameters.get(name)
+        if value is None:
+            return default
+        return value
 
     def require(self, name):
         """Return the value of the requested parameter or raise an error."""
