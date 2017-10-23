@@ -253,9 +253,8 @@ class EventPump(Pump):
         r.get_hits(channel_ids, dom_ids, times, tots, triggereds)
 
         nans = np.full(n, np.nan, dtype='<f8')
-        hit_series = HitSeries.from_arrays(
-            channel_ids, nans, nans, nans, dom_ids, np.arange(n), np.zeros(n),
-            nans, nans, nans, nans, times, tots, triggereds, self.event_index
+        hit_series = RawHitSeries.from_arrays(
+            channel_ids, dom_ids, times, tots, triggered, self.event_index
         )
 
         event_info = EventInfo(np.array((
