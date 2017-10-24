@@ -77,7 +77,8 @@ class TriggerMap(kp.Module):
         self.create_plot()
 
     def create_plot(self):
-        title = "Trigger Map\n{}".format(self.subtitle)
+        title_du = ' - DU {}'.format(self.du) if self.du else ''
+        title = "Trigger Map{}\n{}".format(title_du, self.subtitle)
         fig, ax = plt.subplots(figsize=(16, 8))
         ax.grid(True)
         ax.set_axisbelow(True)
@@ -87,7 +88,7 @@ class TriggerMap(kp.Module):
                         aspect='auto', origin='lower', zorder=3,
                         norm=LogNorm(vmin=1, vmax=np.amax(hit_mat)))
         yticks = np.arange(self.n_doms * self.n_dus)
-        ytick_label_templ = "DU{0:.0f}-DOM{1:02d}" if self.du else "DOM{1:02d}"
+        ytick_label_templ = "DOM{1:02d}" if self.du else "DU{0:.0f}-DOM{1:02d}"
         ytick_labels = [ytick_label_templ
                         .format(np.ceil((y+1)/self.n_doms), y % (self.n_doms) + 1)  \
                         for y in yticks]
@@ -107,7 +108,7 @@ class TriggerMap(kp.Module):
 
 def main():
     args = docopt(__doc__, version='1.0')
-    du = int(args['-u']) if args['-d'] else None
+    du = int(args['-u']) if args['-u'] else None
     det_id = int(args['-d'])
     det = kp.hardware.Detector(det_id=det_id)
     pipe = kp.Pipeline()
