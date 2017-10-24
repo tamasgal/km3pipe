@@ -127,6 +127,8 @@ class CoincidenceFinder(kp.Module):
         self.n_timeslices = None
         self.reset()
         self.start_time = datetime.utcnow()
+        combs = list(combinations(range(31), 2))
+        self._combs_dict = {comb: idx for idx, comb in enumerate(combs)}
         print ('Tmax {}'.format(self.tmax))
 
     def reset(self):
@@ -136,23 +138,21 @@ class CoincidenceFinder(kp.Module):
 
     def process(self, blob):
         log.debug("Processing timeslice")
-        hits = blob['TSHits'].sorted()
+        hits = blob['TSHits']
         dom_ids = np.unique(hits.dom_id)
-        combs = list(combinations(range(31), 2))
-        combs_dict = {comb: idx for idx, comb in enumerate(combs)}
         for dom_id in dom_ids:
-            dhits = hits[hits.dom_id == dom_id]
-            coinces = twofold_coincidences(dhits.time,
-                                           dhits.channel_id,
+            mask = hits.dom_id == dom_id
+            times = hits.time[mask]
+            channel_ids = hits.channel_id[mask]
+            sort_idc = np.argsort(times, kind='quicksort')
+            coinces = twofold_coincidences(times[sort_idc],
+                                           channel_ids[sort_idc],
                                            tmax=self.tmax)
             for pmt_pair, t in coinces:
-                if pmt_pair[0] > pmt_pair[1]:
-                    pmt_pair = (pmt_pair[1], pmt_pair[0])
-                    t = -t
-                self.counts[dom_id][combs_dict[pmt_pair], t+self.tmax] += 1
+                self.counts[dom_id][self._combs_dict[pmt_pair], t+self.tmax] += 1
 
         self.n_timeslices += 1
-        if self.n_timeslices == self.accumulate:
+        if False and self.n_timeslices == self.accumulate:
             print("Calibrating DOMs")
             blob["K40Counts"] = self.counts
             blob["Livetime"] = self.n_timeslices / 10
@@ -673,9 +673,16 @@ def twofold_coincidences(times, tdcs, tmax=10):
                 h_idx = c_idx
                 continue
             c_idx -= 1
-            if tdcs[h_idx] != tdcs[c_idx]:
-                dt = int(times[c_idx] - times[h_idx])
-                coincidences.append(((tdcs[h_idx], tdcs[c_idx]), dt))
+            h_tdc = tdcs[h_idx]
+            c_tdc = tdcs[c_idx]
+            h_time = times[h_idx]
+            c_time = times[c_idx]
+            if h_tdc != c_tdc:
+                dt = int(c_time - h_time)
+                if h_tdc > c_tdc:
+                    coincidences.append(((c_tdc, h_tdc), -dt))
+                else:
+                    coincidences.append(((h_tdc, c_tdc), dt))
         h_idx = c_idx
     return coincidences
 
