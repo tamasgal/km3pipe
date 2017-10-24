@@ -127,8 +127,6 @@ class CoincidenceFinder(kp.Module):
         self.n_timeslices = None
         self.reset()
         self.start_time = datetime.utcnow()
-        combs = list(combinations(range(31), 2))
-        self._combs_dict = {comb: idx for idx, comb in enumerate(combs)}
         print ('Tmax {}'.format(self.tmax))
 
     def reset(self):
@@ -145,14 +143,13 @@ class CoincidenceFinder(kp.Module):
             times = hits.time[mask]
             channel_ids = hits.channel_id[mask]
             sort_idc = np.argsort(times, kind='quicksort')
-            coinces = twofold_coincidences(times[sort_idc],
-                                           channel_ids[sort_idc],
-                                           tmax=self.tmax)
-            for pmt_pair, t in coinces:
-                self.counts[dom_id][self._combs_dict[pmt_pair], t+self.tmax] += 1
+            add_to_twofold_matrix(times[sort_idc],
+                                  channel_ids[sort_idc],
+                                  self.counts[dom_id],
+                                  tmax=self.tmax)
 
         self.n_timeslices += 1
-        if False and self.n_timeslices == self.accumulate:
+        if self.n_timeslices == self.accumulate:
             print("Calibrating DOMs")
             blob["K40Counts"] = self.counts
             blob["Livetime"] = self.n_timeslices / 10
@@ -642,25 +639,29 @@ def calculate_rms_rates(rates, fitted_rates, corrected_rates):
 
 
 @nb.jit
-def twofold_coincidences(times, tdcs, tmax=10):
-    """Return a list of twofold coincidences for a given `tmax`.
+def get_comb_index(i, j):
+    """Return the index of PMT pair combinations"""
+    return i*30-i*int((i+1)/2) + j-1
+
+
+@nb.jit
+def add_to_twofold_matrix(times, tdcs, mat, tmax=10):
+    """Add coincidence twofold coincidences for a given `tmax` to matrix.
+
+    Mutates `mat`.
 
     Parameters
     ----------
     times: np.ndarray of hit times (int32)
     tdcs: np.ndarray of channel_ids (uint8)
+    mat: coincidence matrix (np.array((465, tmax * 2 + 1)))
     tmax: int (time window)
-
-    Returns
-    -------
-    list of twofold coincidences ((channel_id_1, channel_id_2), time_delta)
 
     """
     h_idx = 0  # index of initial hit
     c_idx = 0  # index of coincident candidate hit
     n_hits = len(times)
     multiplicity = 0
-    coincidences = []
     while h_idx <= n_hits:
         c_idx = h_idx + 1
         if (c_idx < n_hits) and (times[c_idx] - times[h_idx] <= tmax):
@@ -680,11 +681,10 @@ def twofold_coincidences(times, tdcs, tmax=10):
             if h_tdc != c_tdc:
                 dt = int(c_time - h_time)
                 if h_tdc > c_tdc:
-                    coincidences.append(((c_tdc, h_tdc), -dt))
+                    mat[get_comb_index(c_tdc, h_tdc), -dt+tmax] += 1
                 else:
-                    coincidences.append(((h_tdc, c_tdc), dt))
+                    mat[get_comb_index(h_tdc, c_tdc), dt+tmax] += 1
         h_idx = c_idx
-    return coincidences
 
 
 jmonitork40_comb_indices =  \
