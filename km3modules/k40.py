@@ -17,6 +17,7 @@ from scipy import optimize
 import numpy as np
 import h5py
 import pickle
+import numba as nb
 
 import km3pipe as kp
 
@@ -141,8 +142,9 @@ class CoincidenceFinder(kp.Module):
         combs_dict = {comb: idx for idx, comb in enumerate(combs)}
         for dom_id in dom_ids:
             dhits = hits[hits.dom_id == dom_id]
-            coinces = self.spastincidence(dhits.time.astype('int'),
-                                          dhits.channel_id)
+            coinces = twofold_coincidences(dhits.time,
+                                           dhits.channel_id,
+                                           tmax=self.tmax)
             for pmt_pair, t in coinces:
                 if pmt_pair[0] > pmt_pair[1]:
                     pmt_pair = (pmt_pair[1], pmt_pair[0])
@@ -262,8 +264,8 @@ def calibrate_dom(dom_id, data, detector, livetime=None, fixed_ang_dist=None,
     if fit_background == False:
         minimize_weights = calculate_weights(fitted_rates, data)
     else:
-        minimize_weights = fitted_rates    
-    
+        minimize_weights = fitted_rates
+
     opt_t0s = minimize_t0s(means, minimize_weights, combs)
     opt_sigmas = minimize_sigmas(sigmas, minimize_weights, combs)
     opt_qes = minimize_qes(fitted_rates, rates, minimize_weights, combs)
@@ -294,7 +296,7 @@ def calibrate_dom(dom_id, data, detector, livetime=None, fixed_ang_dist=None,
 
 def calculate_weights(fitted_rates, data):
     comb_mean_rates = np.mean(data, axis=1)
-    greater_zero = np.array(comb_mean_rates>0, dtype=int)    
+    greater_zero = np.array(comb_mean_rates>0, dtype=int)
     return fitted_rates * greater_zero
 
 def load_k40_coincidences_from_hdf5(filename, dom_id):
@@ -637,6 +639,45 @@ def calculate_rms_rates(rates, fitted_rates, corrected_rates):
     rms_rates = np.sqrt(np.mean((rates - fitted_rates)**2))
     rms_corrected_rates = np.sqrt(np.mean((corrected_rates - fitted_rates)**2))
     return rms_rates, rms_corrected_rates
+
+
+@nb.jit
+def twofold_coincidences(times, tdcs, tmax=10):
+    """Return a list of twofold coincidences for a given `tmax`.
+
+    Parameters
+    ----------
+    times: np.ndarray of hit times (int32)
+    tdcs: np.ndarray of channel_ids (uint8)
+    tmax: int (time window)
+
+    Returns
+    -------
+    list of twofold coincidences ((channel_id_1, channel_id_2), time_delta)
+
+    """
+    h_idx = 0  # index of initial hit
+    c_idx = 0  # index of coincident candidate hit
+    n_hits = len(times)
+    multiplicity = 0
+    coincidences = []
+    while h_idx <= n_hits:
+        c_idx = h_idx + 1
+        if (c_idx < n_hits) and (times[c_idx] - times[h_idx] <= tmax):
+            multiplicity = 2
+            c_idx += 1
+            while (c_idx < n_hits) and (times[c_idx] - times[h_idx] <= tmax):
+                c_idx += 1
+                multiplicity += 1
+            if multiplicity != 2:
+                h_idx = c_idx
+                continue
+            c_idx -= 1
+            if tdcs[h_idx] != tdcs[c_idx]:
+                dt = int(times[c_idx] - times[h_idx])
+                coincidences.append(((tdcs[h_idx], tdcs[c_idx]), dt))
+        h_idx = c_idx
+    return coincidences
 
 
 jmonitork40_comb_indices =  \
