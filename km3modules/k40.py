@@ -642,7 +642,7 @@ def calculate_rms_rates(rates, fitted_rates, corrected_rates):
 @nb.jit
 def get_comb_index(i, j):
     """Return the index of PMT pair combinations"""
-    return i*30-i*int((i+1)/2) + j-1
+    return i*30-i*(i+1)//2 + j-1
 
 
 @nb.jit
