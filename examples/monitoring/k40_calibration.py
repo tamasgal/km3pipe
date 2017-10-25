@@ -15,7 +15,7 @@ import km3pipe as kp
 from km3pipe.io.daq import TMCHData
 from km3pipe.logger import logging
 from km3modules import k40
-from km3modules.common import StatusBar, MemoryObserver
+from km3modules.common import StatusBar, MemoryObserver, Siphon
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pylab as plt
@@ -31,8 +31,8 @@ km3pipe.style.use("km3pipe")
 
 db = kp.db.DBManager()
 
-log_core = kp.logger.get("km3pipe.core")
-#log_core.setLevel("DEBUG")
+log_k40 = kp.logger.get("km3modules.k40")
+# log_k40.setLevel("DEBUG")
 PLOTS_PATH = "km3web/plots"
 
 class IntraDOMCalibrationPlotter(kp.Module):
@@ -105,7 +105,6 @@ class MedianPMTRatesService(kp.Module):
         dom_id = tmch_data.dom_id
         for channel_id, rate in enumerate(tmch_data.pmt_rates):
             self.rates[dom_id][channel_id].append(rate)
-        return blob
 
     def get_median_rates(self):
         print("Calculating median PMT rates.")
@@ -117,7 +116,15 @@ class MedianPMTRatesService(kp.Module):
         return median_rates
 
 
-pipe = kp.Pipeline()
+class ResetTwofoldCounts(kp.Module):
+    def process(self, blob):
+        self.services['ResetTwofoldCounts']()
+        return blob
+
+
+
+
+pipe = kp.Pipeline(timeit=True)
 pipe.attach(kp.io.ch.CHPump,
             host='127.0.0.1',
             port=5553,
@@ -128,13 +135,11 @@ pipe.attach(CHTagger)
 pipe.attach(StatusBar, every=1000)
 pipe.attach(MemoryObserver, every=5000)
 pipe.attach(MedianPMTRatesService, only_if='IO_MONIT')
-pipe.attach(kp.io.daq.TimesliceParser, only_if='IO_TSL')
-pipe.attach(k40.CoincidenceFinder,
-            accumulate=10*10,
-            only_if='TSHits',
-            tmax=10)
-pipe.attach(k40.K40BackgroundSubtractor, only_if='K40Counts')
-pipe.attach(k40.IntraDOMCalibrator, only_if='K40Counts', fit_background=False,
-            ctmin=0.)
-pipe.attach(IntraDOMCalibrationPlotter, only_if='IntraDOMCalibration')
+pipe.attach(kp.io.daq.TimesliceParser)
+pipe.attach(k40.TwofoldCounter, tmax=10)
+pipe.attach(Siphon, volume=10*10*1, flush=True)
+pipe.attach(k40.K40BackgroundSubtractor)
+pipe.attach(k40.IntraDOMCalibrator, ctmin=0.)
+pipe.attach(IntraDOMCalibrationPlotter)
+pipe.attach(ResetTwofoldCounts)
 pipe.drain()

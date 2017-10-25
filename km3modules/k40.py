@@ -28,6 +28,8 @@ __status__ = "Development"
 log = kp.logger.logging.getLogger(__name__)  # pylint: disable=C0103
 # log.setLevel(logging.DEBUG)
 
+TIMESLICE_LENGTH = 0.1  # [s]
+
 
 class K40BackgroundSubtractor(kp.Module):
     """Subtracts random coincidence background from K40 data
@@ -35,10 +37,6 @@ class K40BackgroundSubtractor(kp.Module):
     Required Services
     -----------------
     'MedianPMTRates()': dict (key=dom_id, value=list of pmt rates)
-
-    Input Keys
-    ----------
-    'K40Counts': dict (key=dom_id, value=matrix of k40 counts 465x(dt*2+1))
 
     Output Keys
     -----------
@@ -50,19 +48,20 @@ class K40BackgroundSubtractor(kp.Module):
 
     def process(self, blob):
         print('Subtracting random background calculated from single rates')
-        dom_ids = list(blob['K40Counts'].keys())
+        counts = self.services['TwofoldCounts']
+        dom_ids = list(counts.keys())
         mean_rates = self.services['GetMedianPMTRates']()
         corrected_counts = {}
-        livetime = blob['Livetime']
+        livetime = self.services['GetLivetime']()
         for dom_id in dom_ids:
             pmt_rates = mean_rates[dom_id]
-            k40_rates = blob['K40Counts'][dom_id] / livetime
+            k40_rates = counts[dom_id] / livetime
 
             bg_rates = []
             for c in self.combs:
                 bg_rates.append(pmt_rates[c[0]]*pmt_rates[c[1]]*1e-9)
             corrected_counts[dom_id] = (k40_rates.T - np.array(bg_rates)).T * livetime
-        blob["K40Counts"] = corrected_counts
+        blob["CorrectedTwofoldCounts"] = corrected_counts
         pickle.dump({'data': corrected_counts, 'livetime': livetime}, open("k40_counts_bg_sub.p", "wb"))
         pickle.dump(mean_rates, open('mean_rates.p', 'wb'))
         return blob
@@ -82,23 +81,26 @@ class IntraDOMCalibrator(kp.Module):
     """
     def configure(self):
         det_id = self.get("det_id") or 14
-        self.input_key = self.get("input_key") or 'K40Counts'
         self.detector = kp.hardware.Detector(det_id=det_id)
-        self.fit_background = self.require("fit_background")
         self.ctmin = self.require("ctmin")
-        print ("ctmin: {}".format(self.ctmin))
-        print ("fit_background: {}".format(self.fit_background))
 
     def process(self, blob):
         print("Starting calibration:")
         blob["IntraDOMCalibration"] = {}
-        for dom_id, data in blob[self.input_key].items():
+        if 'CorrectedTwofoldCounts' in blob:
+            fit_background = False
+            counts = blob['CorrectedTwofoldCounts']
+        else:
+            counts = self.services['TwofoldCounts']
+            fit_background = True
+
+        for dom_id, data in counts.items():
             print(" calibrating DOM '{0}'".format(dom_id))
             try:
                 calib = calibrate_dom(dom_id, data,
                                       self.detector,
-                                      livetime=blob['Livetime'],
-                                      fit_background=self.fit_background,
+                                      livetime=self.services['GetLivetime'](),
+                                      fit_background=fit_background,
                                       ad_fit_shape='exp', ctmin=self.ctmin)
             except RuntimeError:
                 log.error(" skipping DOM '{0}'.".format(dom_id))
@@ -107,35 +109,55 @@ class IntraDOMCalibrator(kp.Module):
         return blob
 
 
-class CoincidenceFinder(kp.Module):
-    """Finds K40 coincidences in Timeslice hits
+class TwofoldCounter(kp.Module):
+    """Counts twofold coincidences in timeslice hits per PMT combination.
+
+    Parameters
+    ----------
+    'tmax': int
+      time window of twofold coincidences [ns]
+    'dump_filename': str
+      name for the dump file
 
     Input Keys
     ----------
     'TSHits': RawHitSeries
 
-    Output Keys
-    -----------
-    'K40Counts': dict (key=dom_id, value=matrix (465,(dt*2+1)))
-    'Livetime': float
+    Services
+    --------
+    'TwofoldCounts': dict (key=dom_id, value=matrix (465,(dt*2+1)))
+    'ResetTwofoldCounts': reset the TwofoldCounts dict
+    'GetLivetime()': float
+    'DumpTwofoldCounts': Writes twofold counts into 'dump_filename'
 
     """
     def configure(self):
-        self.accumulate = self.get("accumulate") or 100
         self.tmax = self.get("tmax") or 20
+        self.dump_filename = self.get("dump_filename")
+
         self.counts = None
         self.n_timeslices = None
-        self.reset()
         self.start_time = datetime.utcnow()
-        print ('Tmax {}'.format(self.tmax))
+        self.reset()
+
+        self.expose(self.counts, 'TwofoldCounts')
+        self.expose(self.get_livetime, 'GetLivetime')
+        self.expose(self.reset, 'ResetTwofoldCounts')
+        if self.dump_filename is not None:
+            self.expose(self.dump, 'DumpTwofoldCounts')
 
     def reset(self):
         """Reset coincidence counter"""
         self.counts = defaultdict(partial(np.zeros, (465, self.tmax * 2 + 1)))
         self.n_timeslices = 0
 
+    def get_livetime(self):
+        print("Accessing livetime")
+        return self.n_timeslices * TIMESLICE_LENGTH
+
     def process(self, blob):
         log.debug("Processing timeslice")
+        self.n_timeslices += 1
         hits = blob['TSHits']
         dom_ids = np.unique(hits.dom_id)
         for dom_id in dom_ids:
@@ -147,52 +169,14 @@ class CoincidenceFinder(kp.Module):
                                               channel_ids[sort_idc],
                                               self.counts[dom_id],
                                               tmax=self.tmax)
-
-        self.n_timeslices += 1
-        if self.n_timeslices == self.accumulate:
-            print("Calibrating DOMs")
-            blob["K40Counts"] = self.counts
-            blob["Livetime"] = self.n_timeslices / 10
-            pickle.dump({'data': self.counts,
-                         'livetime': self.n_timeslices / 10},
-                         open("k40_counts.p", "wb"))
-            self.reset()
         return blob
 
-    def mongincidence(self, times, tdcs):
-        coincidences = []
-        cur_t = 0
-        las_t = 0
-        for t_idx, t in enumerate(times):
-            cur_t = t
-            diff = cur_t - las_t
-            if diff <= self.tmax and t_idx > 0 and tdcs[t_idx - 1] != tdcs[t_idx]:
-                coincidences.append(((tdcs[t_idx - 1], tdcs[t_idx]), diff))
-            las_t = cur_t
-        return coincidences
-
-    def spastincidence(self, times, tdcs):
-        p = 0
-        n_hits = len(times)
-        coincidences = []
-        while p <= n_hits:
-            q = p + 1
-            if (q < n_hits) and (times[q] - times[p] <= self.tmax):
-                coincidence = {'times': [times[p], times[q]],
-                               'tdcs': [tdcs[p], tdcs[q]]}
-                q += 1
-                while (q < n_hits) and (times[q] - times[p] <= self.tmax):
-                    coincidence['times'].append(times[q])
-                    coincidence['tdcs'].append(tdcs[q])
-                    q += 1
-                cond1 = len(coincidence['times']) == 2
-                cond2 = coincidence['tdcs'][0] != coincidence['tdcs'][1]
-                if cond1 and cond2:
-                    dt = coincidence['times'][1] - coincidence['times'][0]
-                    coincidences.append(((coincidence['tdcs'][0],
-                                          coincidence['tdcs'][1]), dt))
-            p = q
-        return coincidences
+    def dump(self):
+        """Write coincidence counts into a Python pickle"""
+        print("Dumping data to {}".format(self.dump_filename))
+        pickle.dump({'data': self.counts,
+                     'livetime': self.livetime},
+                     open(self.dump_filename, "wb"))
 
 
 def calibrate_dom(dom_id, data, detector, livetime=None, fixed_ang_dist=None,
