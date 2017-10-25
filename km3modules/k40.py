@@ -147,7 +147,6 @@ class CoincidenceFinder(kp.Module):
                                               channel_ids[sort_idc],
                                               self.counts[dom_id],
                                               tmax=self.tmax)
-            np.add(coinc_mat, self.counts[dom_id], out=self.counts[dom_id])
 
         self.n_timeslices += 1
         if self.n_timeslices == self.accumulate:
