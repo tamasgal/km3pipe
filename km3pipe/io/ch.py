@@ -157,3 +157,9 @@ class CHPump(Pump):
         log.debug("Disconnecting from JLigier.")
         self.client.socket.shutdown(socket.SHUT_RDWR)
         self.client._disconnect()
+
+
+def CHTagger(blob):
+    tag = str(blob['CHPrefix'].tag)
+    blob[tag] = True
+    return blob
