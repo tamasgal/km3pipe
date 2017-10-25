@@ -132,14 +132,25 @@ def hsin(theta):
     return (1.0 - np.cos(theta)) / 2.
 
 
-def space_angle(zen_1, zen_2, azi_1, azi_2):
-    """Space angle between two directions specified by zenith and azimuth.
+def space_angle(phi1, theta1, phi2, theta2):
+    """Also called Great-circle-distance --
+    use long-ass formula from wikipedia (last in section):
+    https://en.wikipedia.org/wiki/Great-circle_distance#Computational_formulas
 
     Space angle only makes sense in lon-lat, so convert zenith -> latitude.
     """
-    lon_1 = np.pi - zen_1
-    lon_2 = np.pi - zen_2
-    return hsin(azi_2 - azi_1) + np.cos(azi_1) * np.cos(azi_2) * hsin(lon_2 - lon_1)
+    from numpy import pi, sin, cos, arctan2, sqrt, square
+    lamb1 = pi / 2 - theta1
+    lamb2 = pi / 2 - theta2
+    lambdelt = lamb2 - lamb1
+    under = sin(phi1) * sin(phi2) + cos(phi1) * cos(phi2) * cos(lambdelt)
+    over = sqrt(
+        np.square((cos(phi2) * sin(lambdelt))) + square(
+            cos(phi1) * sin(phi2) - sin(phi1) * cos(phi2) * cos(lambdelt)
+        )
+    )
+    angle = arctan2(over, under)
+    return angle
 
 
 def rotation_matrix(axis, theta):
