@@ -15,7 +15,7 @@ from .evt import EvtPump  # noqa
 from .daq import DAQPump  # noqa
 from .clb import CLBPump  # noqa
 from .aanet import AanetPump  # noqa
-from .jpp import JPPPump  # noqa
+from .jpp import EventPump  # noqa
 from .ch import CHPump  # noqa
 from .hdf5 import HDF5Pump  # noqa
 from .hdf5 import HDF5Sink  # noqa
@@ -60,7 +60,7 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
     io = {
         '.evt': EvtPump,
         '.h5': HDF5Pump,
-        '.root': JPPPump if use_jppy else AanetPump,
+        '.root': EventPump if use_jppy else AanetPump,
         '.dat': DAQPump,
         '.dqd': CLBPump,
     }

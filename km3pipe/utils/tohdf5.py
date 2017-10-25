@@ -13,8 +13,6 @@ Options:
     -n EVENTS                       Number of events/runs.
     -o OUTFILE                      Output file.
     -j --jppy                       (Jpp): Use jppy (not aanet) for Jpp readout
-    -l --with-timeslice-hits        (Jpp) Include timeslice-hits [default: False]
-    -s --with-summaryslices         (Jpp) Include summary slices [default: False]
     --aa-format=<fmt>               (Aanet): Which aanet subformat ('minidst',
                                     'orca_recolns', 'gandalf', 'gandalf_new',
                                     'generic_track') [default: gandalf_new]
@@ -94,8 +92,6 @@ def main():
     print(aa_format)
     aa_lib = args['--aa-lib']
     aa_old_mc_id = args['--aa-old-mc-id']
-    with_summaryslices = args['--with-summaryslices']
-    with_timeslice_hits = args['--with-timeslice-hits']
     correct_zed = args['--correct-zed']
     skip_header = args['--skip-header']
     do_not_correct_mc_times = args['--do-not-correct-mc-times']
@@ -107,8 +103,6 @@ def main():
            use_jppy=use_jppy_pump,
            aa_fmt=aa_format,
            aa_lib=aa_lib,
-           with_summaryslices=with_summaryslices,
-           with_timeslice_hits=with_timeslice_hits,
            n_rows_expected=n_rows_expected,
            apply_zed_correction=correct_zed,
            old_mc_id=aa_old_mc_id,
