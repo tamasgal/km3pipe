@@ -311,12 +311,12 @@ class TimeslicePump(Pump):
         self.r = jppy.daqtimeslicereader.PyJDAQTimesliceReader(filename)
 
     def process(self, blob):
-        blob['TSHits'] = next(self.blobs)
-        return blob
+        return next(self.blobs)
 
     def timeslice_generator(self):
         while self.r.has_next:
             slice_id = 1
+            blob = Blob()
             self.r.retrieve_next_timeslice()
             channel_ids = np.array(())
             dom_ids = np.array(())
@@ -343,7 +343,8 @@ class TimeslicePump(Pump):
             hits = RawHitSeries.from_arrays(
                     channel_ids, dom_ids, times, tots,
                     np.zeros(len(channel_ids), dtype=bool), slice_id)
-            yield hits
+            blob['TSHits'] = hits
+            yield blob
             slice_id += 1
 
     def __iter__(self):
@@ -371,13 +372,13 @@ class SummaryslicePump(Pump):
         self.r = jppy.daqsummaryslicereader.PyJDAQSummarysliceReader(filename)
 
     def process(self, blob):
-        blob['Summaryslice'] = next(self.blobs)
-        return blob
+        return next(self.blobs)
 
     def summaryslice_generator(self):
         while self.r.has_next:
             summary_slice = {}
             self.r.retrieve_next_summaryslice()
+            blob = Blob()
             while self.r.has_next_frame:
                 rates = np.zeros(31, dtype='f8')
                 self.r.get_rates(rates)
@@ -393,7 +394,8 @@ class SummaryslicePump(Pump):
                         'utc_nanoseconds': self.r.utc_nanoseconds,
                         }
                 self.r.retrieve_next_frame()
-            yield summary_slice
+            blob['Summaryslice'] = summary_slice
+            yield blob
 
     def __iter__(self):
         return self

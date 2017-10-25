@@ -17,6 +17,7 @@ from scipy import optimize
 import numpy as np
 import h5py
 import pickle
+import numba as nb
 
 import km3pipe as kp
 
@@ -135,19 +136,18 @@ class CoincidenceFinder(kp.Module):
 
     def process(self, blob):
         log.debug("Processing timeslice")
-        hits = blob['TSHits'].sorted()
+        hits = blob['TSHits']
         dom_ids = np.unique(hits.dom_id)
-        combs = list(combinations(range(31), 2))
-        combs_dict = {comb: idx for idx, comb in enumerate(combs)}
         for dom_id in dom_ids:
-            dhits = hits[hits.dom_id == dom_id]
-            coinces = self.spastincidence(dhits.time.astype('int'),
-                                          dhits.channel_id)
-            for pmt_pair, t in coinces:
-                if pmt_pair[0] > pmt_pair[1]:
-                    pmt_pair = (pmt_pair[1], pmt_pair[0])
-                    t = -t
-                self.counts[dom_id][combs_dict[pmt_pair], t+self.tmax] += 1
+            mask = hits.dom_id == dom_id
+            times = hits.time[mask]
+            channel_ids = hits.channel_id[mask]
+            sort_idc = np.argsort(times, kind='quicksort')
+            coinc_mat = twofold_matrix(times[sort_idc],
+                                       channel_ids[sort_idc],
+                                       self.counts[dom_id],
+                                       tmax=self.tmax)
+            np.add(coinc_mat, self.counts[dom_id], out=self.counts[dom_id])
 
         self.n_timeslices += 1
         if self.n_timeslices == self.accumulate:
@@ -262,8 +262,8 @@ def calibrate_dom(dom_id, data, detector, livetime=None, fixed_ang_dist=None,
     if fit_background == False:
         minimize_weights = calculate_weights(fitted_rates, data)
     else:
-        minimize_weights = fitted_rates    
-    
+        minimize_weights = fitted_rates
+
     opt_t0s = minimize_t0s(means, minimize_weights, combs)
     opt_sigmas = minimize_sigmas(sigmas, minimize_weights, combs)
     opt_qes = minimize_qes(fitted_rates, rates, minimize_weights, combs)
@@ -294,7 +294,7 @@ def calibrate_dom(dom_id, data, detector, livetime=None, fixed_ang_dist=None,
 
 def calculate_weights(fitted_rates, data):
     comb_mean_rates = np.mean(data, axis=1)
-    greater_zero = np.array(comb_mean_rates>0, dtype=int)    
+    greater_zero = np.array(comb_mean_rates>0, dtype=int)
     return fitted_rates * greater_zero
 
 def load_k40_coincidences_from_hdf5(filename, dom_id):
@@ -637,6 +637,58 @@ def calculate_rms_rates(rates, fitted_rates, corrected_rates):
     rms_rates = np.sqrt(np.mean((rates - fitted_rates)**2))
     rms_corrected_rates = np.sqrt(np.mean((corrected_rates - fitted_rates)**2))
     return rms_rates, rms_corrected_rates
+
+
+@nb.jit
+def get_comb_index(i, j):
+    """Return the index of PMT pair combinations"""
+    return i*30-i*int((i+1)/2) + j-1
+
+
+@nb.jit
+def twofold_matrix(times, tdcs, tmax=10):
+    """Count twofold coincidences for a given `tmax`.
+
+    Parameters
+    ----------
+    times: np.ndarray of hit times (int32)
+    tdcs: np.ndarray of channel_ids (uint8)
+    tmax: int (time window)
+
+    Returns
+    -------
+    mat: coincidence matrix (np.array((465, tmax * 2 + 1)))
+
+    """
+    h_idx = 0  # index of initial hit
+    c_idx = 0  # index of coincident candidate hit
+    n_hits = len(times)
+    multiplicity = 0
+    mat = np.zeros((465, tmax * 2 + 1))
+    while h_idx <= n_hits:
+        c_idx = h_idx + 1
+        if (c_idx < n_hits) and (times[c_idx] - times[h_idx] <= tmax):
+            multiplicity = 2
+            c_idx += 1
+            while (c_idx < n_hits) and (times[c_idx] - times[h_idx] <= tmax):
+                c_idx += 1
+                multiplicity += 1
+            if multiplicity != 2:
+                h_idx = c_idx
+                continue
+            c_idx -= 1
+            h_tdc = tdcs[h_idx]
+            c_tdc = tdcs[c_idx]
+            h_time = times[h_idx]
+            c_time = times[c_idx]
+            if h_tdc != c_tdc:
+                dt = int(c_time - h_time)
+                if h_tdc > c_tdc:
+                    mat[get_comb_index(c_tdc, h_tdc), -dt+tmax] += 1
+                else:
+                    mat[get_comb_index(h_tdc, c_tdc), dt+tmax] += 1
+        h_idx = c_idx
+    return mat
 
 
 jmonitork40_comb_indices =  \
