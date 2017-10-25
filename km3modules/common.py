@@ -11,12 +11,15 @@ from time import time
 import numpy as np
 import pandas as pd
 
+import km3pipe as kp
 from km3pipe import Module, Blob
 from km3pipe.tools import prettyln
 from km3pipe.sys import peak_memory_usage
 from km3pipe.math import zenith, azimuth
 from km3pipe.dataclasses import KM3DataFrame, KM3Array     # noqa
 from km3pipe.io.pandas import merge_event_ids
+
+log = kp.logger.get(__name__)
 
 
 class Wrap(Module):
@@ -250,3 +253,30 @@ class MergeDF(Module):
             cat = merge_event_ids(cat)
         blob[self.out] = cat
         return blob
+
+
+class Siphon(Module):
+    """A siphon to accumulate a given volume of blobs.
+
+    Parameters
+    ----------
+    volume: int
+      number of blobs to hold
+    flush: bool
+      discard blobs after accumulation
+
+    """
+    def configure(self):
+        self.volume = self.require('volume')  # [blobs]
+        self.flush = self.get('flush', default=False)
+
+        self.blob_count = 0
+
+    def process(self, blob):
+        self.blob_count += 1
+        if self.blob_count > self.volume:
+            log.debug("Siphone overflow reached!")
+            if self.flush:
+                log.debug("Flushing the siphon.")
+                self.blob_count = 0
+            return blob
