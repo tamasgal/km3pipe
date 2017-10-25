@@ -143,10 +143,10 @@ class CoincidenceFinder(kp.Module):
             times = hits.time[mask]
             channel_ids = hits.channel_id[mask]
             sort_idc = np.argsort(times, kind='quicksort')
-            coinc_mat = twofold_matrix(times[sort_idc],
-                                       channel_ids[sort_idc],
-                                       self.counts[dom_id],
-                                       tmax=self.tmax)
+            coinc_mat = add_to_twofold_matrix(times[sort_idc],
+                                              channel_ids[sort_idc],
+                                              self.counts[dom_id],
+                                              tmax=self.tmax)
             np.add(coinc_mat, self.counts[dom_id], out=self.counts[dom_id])
 
         self.n_timeslices += 1
@@ -646,13 +646,14 @@ def get_comb_index(i, j):
 
 
 @nb.jit
-def twofold_matrix(times, tdcs, tmax=10):
-    """Count twofold coincidences for a given `tmax`.
+def add_to_twofold_matrix(times, tdcs, mat, tmax=10):
+    """Add counts to twofold coincidences for a given `tmax`.
 
     Parameters
     ----------
     times: np.ndarray of hit times (int32)
     tdcs: np.ndarray of channel_ids (uint8)
+    mat: ref to a np.array((465, tmax * 2 + 1))
     tmax: int (time window)
 
     Returns
@@ -664,7 +665,6 @@ def twofold_matrix(times, tdcs, tmax=10):
     c_idx = 0  # index of coincident candidate hit
     n_hits = len(times)
     multiplicity = 0
-    mat = np.zeros((465, tmax * 2 + 1))
     while h_idx <= n_hits:
         c_idx = h_idx + 1
         if (c_idx < n_hits) and (times[c_idx] - times[h_idx] <= tmax):
@@ -688,7 +688,6 @@ def twofold_matrix(times, tdcs, tmax=10):
                 else:
                     mat[get_comb_index(h_tdc, c_tdc), dt+tmax] += 1
         h_idx = c_idx
-    return mat
 
 
 jmonitork40_comb_indices =  \
