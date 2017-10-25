@@ -93,9 +93,11 @@ class IntraDOMCalibrator(kp.Module):
         print("Starting calibration:")
         blob["IntraDOMCalibration"] = {}
         if 'CorrectedTwofoldCounts' in blob:
+            print("Using corrected twofold counts")
             fit_background = False
             counts = blob['CorrectedTwofoldCounts']
         else:
+            print("No corrected twofold counts found, fitting background.")
             counts = self.services['TwofoldCounts']
             fit_background = True
 
@@ -498,13 +500,13 @@ def fit_angular_distribution(angles, rates, rate_errors, shape='pexp'):
     """
     if shape == 'exp':
         fit_function = exponential
-        p0 = [-0.91871169,  2.72224241, -1.19065965,  1.48054122]
+        # p0 = [-0.91871169,  2.72224241, -1.19065965,  1.48054122]
     if shape == 'pexp':
         fit_function = exponential_polinomial
-        p0 = [0.34921202, 2.8629577]
+        # p0 = [0.34921202, 2.8629577]
 
     cos_angles = np.cos(angles)
-    popt, pcov = optimize.curve_fit(fit_function, cos_angles, rates, p0=p0)
+    popt, pcov = optimize.curve_fit(fit_function, cos_angles, rates)
     fitted_rates = fit_function(cos_angles, *popt)
     return fitted_rates, popt, pcov
 
