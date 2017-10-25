@@ -2,6 +2,7 @@ Unreleased changes
 ------------------
 
 * New command line utility to plot the trigger contributions: ``triggermap``
+* fix wrong spaceangle computation (duh!)
 
 
 Version 7

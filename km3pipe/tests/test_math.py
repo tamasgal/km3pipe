@@ -88,10 +88,10 @@ class TestMath(TestCase):
     def test_space_angle(self):
         p1 = (np.pi / 2, np.pi)
         p2 = (np.pi, 0)
-        assert space_angle(p1[0], p2[0], p1[1], p2[1]) == 0.5
+        self.assertAlmostEqual(space_angle(p1[0], p2[0], p1[1], p2[1]), 1.57079632679489)
         p3 = (0, np.pi)
         p4 = (np.pi / 2, 0)
-        assert space_angle(p3[0], p4[0], p3[1], p4[1]) == 0.5
+        self.assertAlmostEqual(space_angle(p3[0], p4[0], p3[1], p4[1]), 1.57079632679489)
 
     def test_hsin(self):
         assert np.all(hsin((np.pi, 0)) == (1, 0))
