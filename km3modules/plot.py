@@ -121,8 +121,8 @@ def make_dom_map(pmt_directions, values, nside=512, d=0.2, smoothing=0.1):
 
 class IntraDOMCalibrationPlotter(kp.Module):
     def configure(self):
-        self.plots_path = self.get('plots_path', default='./')
-        self.data_path = self.get('data_path', default='./')
+        self.plots_path = self.get('plots_path', default=os.getcwd())
+        self.data_path = self.get('data_path', default=os.getcwd())
         self.db = kp.db.DBManager()
 
     def process(self, blob):
