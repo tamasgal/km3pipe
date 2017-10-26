@@ -248,6 +248,7 @@ def calibrate_dom(dom_id, data, detector, livetime=None, fixed_ang_dist=None,
         else:
             fitted_rates = fixed_ang_dist
         exp_popts = []
+        exp_pcov = []
         print('Using fixed angular distribution')
     else:
         fitted_rates, exp_popts, exp_pcov = fit_angular_distribution(angles,
