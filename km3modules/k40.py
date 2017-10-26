@@ -209,7 +209,8 @@ class MedianPMTRatesService(kp.Module):
 class ResetTwofoldCounts(kp.Module):
     def process(self, blob):
         self.services['ResetTwofoldCounts']()
-        self.services['DumpTwofoldCounts']()
+        if 'DumpTwofoldCounts' in self.services:
+            self.services['DumpTwofoldCounts']()
         return blob
 
 
