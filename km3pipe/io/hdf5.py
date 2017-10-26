@@ -34,7 +34,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 FORMAT_VERSION = np.string_('4.4')
-MINIMUM_FORMAT_VERSION = np.string_('4.1')
+MINIMUM_FORMAT_VERSION = np.string_('4.4')
 
 
 class H5VersionError(Exception):
