@@ -142,9 +142,9 @@ class IntraDOMCalibrationPlotter(kp.Module):
             ax.plot(np.cos(calib['angles']), calib["corrected_means"], '.')
             ax.set_title("{0} - {1}"
                          .format(self.db.doms.via_dom_id(dom_id), dom_id))
-            ax.set_ylim((-20, 20))
+            ax.set_ylim((-10, 10))
         plt.suptitle("{0} UTC".format(datetime.utcnow().strftime("%c")))
-        plt.savefig(os.path.join(self.plots_path, "/intradom.png"),
+        plt.savefig(os.path.join(self.plots_path, "intradom.png"),
                     bbox_inches='tight')
         plt.close('all')
 
