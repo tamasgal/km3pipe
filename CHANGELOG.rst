@@ -1,9 +1,16 @@
 Unreleased changes
 ------------------
 
-
 Version 7
 ---------
+
+7.9.0 / 2017-10-27
+~~~~~~~~~~~~~~~~~~
+* New command line utility to plot the trigger contributions: ``triggermap``
+* fix wrong spaceangle computation (duh!)
+* KM3HDF5 Version 4.4 (minimum 4.1): RawHit time is now int32 =
+  instead of float32 and CRawHit*.time/CMcHit*.time is float64
+  fixes bugs which occured due to precision loss for large hit times
 
 7.8.1 / 2017-10-23
 ~~~~~~~~~~~~~~~~~~

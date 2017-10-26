@@ -51,8 +51,9 @@ class JPPPump(Pump):
         try:
             import jppy  # noqa
         except ImportError:
-            raise ImportError("\nPlease install the jppy package:\n\n"
-                              "    pip install jppy\n")
+            raise ImportError("\nEither Jpp or jppy could not be found."
+                              "\nMake sure you source the JPP environmanet "
+                              "and have jppy installed")
 
         self.event_index = self.get('index') or 0
         self.with_summaryslices = self.get('with_summaryslices') or False
@@ -220,8 +221,9 @@ class EventPump(Pump):
         try:
             import jppy  # noqa
         except ImportError:
-            raise ImportError("\nPlease install the jppy package:\n\n"
-                              "    pip install jppy\n")
+            raise ImportError("\nEither Jpp or jppy could not be found."
+                              "\nMake sure you source the JPP environmanet "
+                              "and have jppy installed")
 
         self.event_index = self.get('index') or 0
         self.filename = self.require('filename')
@@ -303,17 +305,18 @@ class TimeslicePump(Pump):
         try:
             import jppy  # noqa
         except ImportError:
-            raise ImportError("\nPlease install the jppy package:\n\n"
-                              "    pip install jppy\n")
+            raise ImportError("\nEither Jpp or jppy could not be found."
+                              "\nMake sure you source the JPP environmanet "
+                              "and have jppy installed")
         self.r = jppy.daqtimeslicereader.PyJDAQTimesliceReader(filename)
 
     def process(self, blob):
-        blob['TSHits'] = next(self.blobs)
-        return blob
+        return next(self.blobs)
 
     def timeslice_generator(self):
         while self.r.has_next:
             slice_id = 1
+            blob = Blob()
             self.r.retrieve_next_timeslice()
             channel_ids = np.array(())
             dom_ids = np.array(())
@@ -340,7 +343,8 @@ class TimeslicePump(Pump):
             hits = RawHitSeries.from_arrays(
                     channel_ids, dom_ids, times, tots,
                     np.zeros(len(channel_ids), dtype=bool), slice_id)
-            yield hits
+            blob['TSHits'] = hits
+            yield blob
             slice_id += 1
 
     def __iter__(self):
@@ -362,18 +366,19 @@ class SummaryslicePump(Pump):
         try:
             import jppy  # noqa
         except ImportError:
-            raise ImportError("\nPlease install the jppy package:\n\n"
-                              "    pip install jppy\n")
+            raise ImportError("\nEither Jpp or jppy could not be found."
+                              "\nMake sure you source the JPP environmanet "
+                              "and have jppy installed")
         self.r = jppy.daqsummaryslicereader.PyJDAQSummarysliceReader(filename)
 
     def process(self, blob):
-        blob['Summaryslice'] = next(self.blobs)
-        return blob
+        return next(self.blobs)
 
     def summaryslice_generator(self):
         while self.r.has_next:
             summary_slice = {}
             self.r.retrieve_next_summaryslice()
+            blob = Blob()
             while self.r.has_next_frame:
                 rates = np.zeros(31, dtype='f8')
                 self.r.get_rates(rates)
@@ -389,7 +394,8 @@ class SummaryslicePump(Pump):
                         'utc_nanoseconds': self.r.utc_nanoseconds,
                         }
                 self.r.retrieve_next_frame()
-            yield summary_slice
+            blob['Summaryslice'] = summary_slice
+            yield blob
 
     def __iter__(self):
         return self
