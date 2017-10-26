@@ -11,6 +11,7 @@ from time import time
 import numpy as np
 import pandas as pd
 
+import km3pipe as kp
 from km3pipe import Module, Blob
 from km3pipe.tools import prettyln
 from km3pipe.sys import peak_memory_usage
@@ -18,12 +19,13 @@ from km3pipe.math import zenith, azimuth
 from km3pipe.dataclasses import KM3DataFrame, KM3Array     # noqa
 from km3pipe.io.pandas import merge_event_ids
 
+log = kp.logger.get(__name__)
+
 
 class Wrap(Module):
     """Wrap a key-val dictionary as a Serialisable.
     """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.keys = self.get('keys') or None
         key = self.get('key') or None
         if key and not self.keys:
@@ -51,8 +53,7 @@ class Dump(Module):
     full: bool, default=False
         Print blob values too, not just the keys?
     """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.keys = self.get('keys') or None
         self.full = self.get('full') or False
         key = self.get('key') or None
@@ -78,8 +79,7 @@ class Delete(Module):
     keys: collection(string), optional
         Keys to remove.
     """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.keys = self.get('keys') or set()
         key = self.get('key') or None
         if key and not self.keys:
@@ -99,8 +99,7 @@ class Keep(Module):
     keys: collection(string), optional
         Keys to keep. Everything else is removed.
     """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.keys = self.get('keys') or set()
         key = self.get('key') or None
         if key and not self.keys:
@@ -126,8 +125,7 @@ class HitCounter(Module):
 
 class BlobIndexer(Module):
     """Puts an incremented index in each blob for the key 'blob_index'"""
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.blob_index = 0
 
     def process(self, blob):
@@ -193,8 +191,7 @@ class Cut(Module):
     verbose: bool, optional (default=False)
         Print extra info?
     """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.key = self.require('key')
         self.cond = self.require('condition')
         self.verbose = self.get('verbose') or False
@@ -212,8 +209,7 @@ class Cut(Module):
 
 class GetAngle(Module):
     """Convert pos(x, y, z) to zenith, azimuth."""
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.key = self.require('key')
 
     def process(self, blob):
@@ -238,8 +234,7 @@ class MergeDF(Module):
     drop: bool, default=True
         Discard input tables?
     """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.keys = self.require('keys')
         self.out = self.require('out')
         self.merge_ids = bool(self.get('merge_ids')) or True
@@ -258,3 +253,30 @@ class MergeDF(Module):
             cat = merge_event_ids(cat)
         blob[self.out] = cat
         return blob
+
+
+class Siphon(Module):
+    """A siphon to accumulate a given volume of blobs.
+
+    Parameters
+    ----------
+    volume: int
+      number of blobs to hold
+    flush: bool
+      discard blobs after accumulation
+
+    """
+    def configure(self):
+        self.volume = self.require('volume')  # [blobs]
+        self.flush = self.get('flush', default=False)
+
+        self.blob_count = 0
+
+    def process(self, blob):
+        self.blob_count += 1
+        if self.blob_count > self.volume:
+            log.debug("Siphone overflow reached!")
+            if self.flush:
+                log.debug("Flushing the siphon.")
+                self.blob_count = 0
+            return blob

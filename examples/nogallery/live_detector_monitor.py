@@ -19,8 +19,7 @@ class CHPrinter(Module):
 
 
 class ROySender(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.packet_handler = PacketHandler('131.188.161.241', 9999)
 
     def process(self, blob):

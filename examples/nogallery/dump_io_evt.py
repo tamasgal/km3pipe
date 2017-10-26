@@ -13,8 +13,7 @@ class CHPrinter(Module):
 
 
 class Dumper(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.counter = 0
         self.filenumber = int(time.time())
 

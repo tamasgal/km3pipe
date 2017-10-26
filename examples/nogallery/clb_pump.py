@@ -9,8 +9,7 @@ from km3pipe.io import CLBPump
 from km3modules.common import StatusBar
 
 class TOTHisto(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.tots = []
 
     def process(self, blob):

@@ -91,7 +91,7 @@ class AHRSCalibrator(kp.Module):
             clb_upi = self.db.doms.via_dom_id(dom_id).clb_upi
             ahrs_calib = get_latest_ahrs_calibration(clb_upi)
             if ahrs_calib is None:
-                log.warn("No AHRS calibration found for '{}'".format(dom_id))
+                log.warning("No AHRS calibration found for '{}'".format(dom_id))
                 continue
             du, floor, _ = self.detector.doms[dom_id]
             A = np.median(self.A[dom_id], axis=0)

@@ -54,8 +54,7 @@ lock = threading.Lock()
 
 
 class ZTPlot(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.run = True
         self.max_queue = 3
         self.queue = Queue()

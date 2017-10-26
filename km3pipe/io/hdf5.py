@@ -80,8 +80,7 @@ class HDF5Sink(Module):
     append: bool, optional [default: False]
 
     """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.filename = self.get('filename') or 'dump.h5'
         self.ext_h5file = self.get('h5file') or None
         self.pytab_file_args = self.get('pytab_file_args') or dict()
@@ -274,8 +273,7 @@ class HDF5Pump(Pump):
     filename: str
         From where to read events.
         """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.filename = self.get('filename') or None
         self.filenames = self.get('filenames') or []
         self.skip_version_check = bool(self.get('skip_version_check')) or False

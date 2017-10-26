@@ -24,8 +24,7 @@ class CHParser(Module):
         'IO_EVT': ['DAQEvent', DAQEvent],
         }
 
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.tags = self.get('tags') or []
 
     def process(self, blob):

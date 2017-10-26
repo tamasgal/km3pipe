@@ -39,7 +39,7 @@ After that, you can use it to log anywhere::
 
     log.debug("A debug message")
     log.info("An info message")
-    log.warn("A warning")
+    log.warning("A warning")
     log.error("An error")
     log.critical("A critical think")
 

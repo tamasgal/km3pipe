@@ -15,7 +15,7 @@ from .evt import EvtPump  # noqa
 from .daq import DAQPump  # noqa
 from .clb import CLBPump  # noqa
 from .aanet import AanetPump  # noqa
-from .jpp import JPPPump  # noqa
+from .jpp import EventPump  # noqa
 from .ch import CHPump  # noqa
 from .hdf5 import HDF5Pump  # noqa
 from .hdf5 import HDF5Sink  # noqa
@@ -52,7 +52,7 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
     for fn in filenames:
         if not os.path.exists(fn):
             n_nonexist += 1
-            log.warn("File '{}' not found, skipping...".format(fn))
+            log.warning("File '{}' not found, skipping...".format(fn))
     if n_nonexist == len(filenames):
         log.critical("No pump found for '{0}'".format(extension))
         raise IOError("None of the input files exist! Exiting.")
@@ -60,7 +60,7 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
     io = {
         '.evt': EvtPump,
         '.h5': HDF5Pump,
-        '.root': JPPPump if use_jppy else AanetPump,
+        '.root': EventPump if use_jppy else AanetPump,
         '.dat': DAQPump,
         '.dqd': CLBPump,
     }

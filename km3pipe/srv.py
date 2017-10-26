@@ -219,7 +219,7 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
                 self.message("There was a problem converting the data.")
 
         if os.path.exists(rootfilepath):
-            log.warn("Removing ROOT file {0}".format(rootfilepath))
+            log.warning("Removing ROOT file {0}".format(rootfilepath))
             os.remove(rootfilepath)
 
         hits = pd.read_hdf(h5filepath, 'hits', mode='r')
@@ -232,7 +232,7 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
                              len(snapshot_hits), len(triggered_hits)))
         geometry = Geometry(det_id=det_id)
         # detx_file = os.path.join(self.data_path, 'detx', det_dir_name + '.detx')
-        # log.warn("Using cached '{0}'".format(detx_file))
+        # log.warning("Using cached '{0}'".format(detx_file))
         # geometry = Geometry(filename=detx_file)
         geometry.apply(snapshot_hits)
 

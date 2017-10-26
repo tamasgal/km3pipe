@@ -36,9 +36,7 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 class CHPump(Pump):
     """A pump for ControlHost data."""
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
-
+    def configure(self):
         self.host = self.get('host') or '127.0.0.1'
         self.port = self.get('port') or 5553
         self.tags = self.get('tags') or "MSG"
@@ -46,7 +44,7 @@ class CHPump(Pump):
         self.max_queue = self.get('max_queue') or 50
         self.key_for_data = self.get('key_for_data') or 'CHData'
         self.key_for_prefix = self.get('key_for_prefix') or 'CHPrefix'
-        self.cuckoo_warn = Cuckoo(60*5, log.warn)
+        self.cuckoo_warn = Cuckoo(60*5, log.warning)
         self.performance_warn = Cuckoo(10, self.show_performance_statistics)
 
         self.process_dt = deque(maxlen=100)
@@ -99,7 +97,7 @@ class CHPump(Pump):
                 # self.performance_warn()
                 log.debug("{0} bytes received from network.".format(len(data)))
             except EOFError:
-                log.warn("EOF from Ligier, aborting...")
+                log.warning("EOF from Ligier, aborting...")
                 break
             except BufferError:
                 log.error("Buffer error in Ligier stream, aborting...")
@@ -130,7 +128,8 @@ class CHPump(Pump):
             prefix, data = self.queue.get(timeout=self.timeout)
             log.debug("Got {0} bytes from queue.".format(len(data)))
         except Empty:
-            log.warn("ControlHost timeout ({0}s) reached".format(self.timeout))
+            log.warning("ControlHost timeout ({0}s) reached"
+                        .format(self.timeout))
             raise StopIteration("ControlHost timeout reached.")
         blob[self.key_for_prefix] = prefix
         blob[self.key_for_data] = data
@@ -139,7 +138,7 @@ class CHPump(Pump):
     def show_performance_statistics(self):
         dt = np.mean(self.packet_dt) - np.mean(self.process_dt)
         current_qsize = self.queue.qsize()
-        log_func = print if dt > 0 else log.warn
+        log_func = print if dt > 0 else log.warning
         log_func("Average idle time per packet: {0:.3f}us (queue size: {1})"
                  .format(dt * 1e6, current_qsize))
 
@@ -158,3 +157,9 @@ class CHPump(Pump):
         log.debug("Disconnecting from JLigier.")
         self.client.socket.shutdown(socket.SHUT_RDWR)
         self.client._disconnect()
+
+
+def CHTagger(blob):
+    tag = str(blob['CHPrefix'].tag)
+    blob[tag] = True
+    return blob

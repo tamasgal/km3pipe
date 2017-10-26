@@ -321,9 +321,12 @@ class Module(object):
         """Add the parameter with the desired value to the dict"""
         self.parameters[name] = value
 
-    def get(self, name):
-        """Return the value of the requested parameter"""
-        return self.parameters.get(name)
+    def get(self, name, default=None):
+        """Return the value of the requested parameter or `default` if None."""
+        value = self.parameters.get(name)
+        if value is None:
+            return default
+        return value
 
     def require(self, name):
         """Return the value of the requested parameter or raise an error."""
@@ -354,9 +357,16 @@ class Module(object):
 class Pump(Module):
     """The pump with basic file or socket handling."""
 
-    def __init__(self, **context):
-        Module.__init__(self, **context)
+    def __init__(self, *args, **kwargs):
         self.blob_file = None
+        if args:
+            log.warning("Non-keywords argument passed. Please use keyword "
+                        "arguments to supress this warning. I will assume the "
+                        "first argument to be the `filename`.")
+            Module.__init__(self, filename=args[0], **kwargs)
+        else:
+            Module.__init__(self, **kwargs)
+
 
     def open_file(self, filename):
         """Open the file with filename"""
