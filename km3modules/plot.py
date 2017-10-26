@@ -132,6 +132,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
             proc.daemon = True
             proc.start()
             proc.join()
+        return blob
 
     def create_plot(self, calibration):
         print("Creating plot...")
