@@ -605,19 +605,19 @@ cdef class RawHit:
     ----------
     channel_id : int
     dom_id : int
-    time : float
+    time : int
     tot : int
     triggered : int
 
     """
     cdef public int dom_id, tot, channel_id
-    cdef public float time
+    cdef public int time
     cdef public unsigned short int triggered
 
     def __cinit__(self,
                   int channel_id,
                   int dom_id,
-                  float time,
+                  int time,
                   int tot,
                   unsigned short int triggered,
                   int event_id=0        # ignore this! just for init * magic
@@ -653,13 +653,14 @@ cdef class CRawHit:
     floor: int
     pos_x, pos_y, pos_z: float
     t0 : float
-    time : float
+    time : double
     tot : int
     triggered : int
 
     """
     cdef public int dom_id, tot, channel_id, du, floor
-    cdef public float dir_x, dir_y, dir_z, pos_x, pos_y, pos_z, time, t0
+    cdef public float dir_x, dir_y, dir_z, pos_x, pos_y, pos_z, t0
+    cdef public double time
     cdef public unsigned short int triggered
 
     def __cinit__(self,
@@ -674,7 +675,7 @@ cdef class CRawHit:
                   float pos_y,
                   float pos_z,
                   float t0,
-                  float time,
+                  double time,
                   int tot,
                   unsigned short int triggered,
                   int event_id=0        # ignore this! just for init * magic
@@ -752,17 +753,18 @@ cdef class McHit:
     a : float
     origin : int
     pmt_id : int
-    time : float
+    time : double
 
     """
-    cdef public float a, time
+    cdef public float a
+    cdef public double time
     cdef public int origin, pmt_id
 
     def __cinit__(self,
                   float a,
                   int origin,
                   int pmt_id,
-                  float time,
+                  double time,
                   int event_id=0        # ignore this! just for init * magic
                   ):
         self.a = a
@@ -844,7 +846,7 @@ class RawHitSeries(DTypeAttr):
     dtype = np.dtype([
         ('channel_id', 'u1'),
         ('dom_id', '<u4'),
-        ('time', '<f4'),
+        ('time', '<u4'),
         ('tot', 'u1'),
         ('triggered', 'u1'),
         ('event_id', '<u4')
@@ -978,7 +980,7 @@ class CRawHitSeries(DTypeAttr):
         ('pos_y', '<f4'),
         ('pos_z', '<f4'),
         ('t0', '<f4'),
-        ('time', '<f4'),
+        ('time', '<f8'),
         ('tot', 'u1'),
         ('triggered', 'u1'),
         ('event_id', '<u4')
@@ -1152,7 +1154,7 @@ class McHitSeries(DTypeAttr):
         ('a', 'f4'),
         ('origin', '<u4'),
         ('pmt_id', '<u4'),
-        ('time', 'f4'),
+        ('time', 'f8'),
         ('event_id', '<u4'),
     ])
     write_separate_columns = True
@@ -1295,7 +1297,7 @@ class CMcHitSeries(DTypeAttr):
         ('pos_x', '<f4'),
         ('pos_y', '<f4'),
         ('pos_z', '<f4'),
-        ('time', 'f4'),
+        ('time', 'f8'),
         ('event_id', '<u4'),
     ])
     write_separate_columns = True
