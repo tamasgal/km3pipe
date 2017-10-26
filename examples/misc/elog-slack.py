@@ -10,7 +10,7 @@ import re
 
 import pyinotify
 
-from pyslack import SlackClient
+from pyslack import SlackClient  # pip install pyslack-real
 
 
 wm = pyinotify.WatchManager()

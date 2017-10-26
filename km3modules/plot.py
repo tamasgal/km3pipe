@@ -121,8 +121,8 @@ def make_dom_map(pmt_directions, values, nside=512, d=0.2, smoothing=0.1):
 
 class IntraDOMCalibrationPlotter(kp.Module):
     def configure(self):
-        self.plots_path = self.get('plots_path', default='./')
-        self.data_path = self.get('data_path', default='./')
+        self.plots_path = self.get('plots_path', default=os.getcwd())
+        self.data_path = self.get('data_path', default=os.getcwd())
         self.db = kp.db.DBManager()
 
     def process(self, blob):
@@ -132,6 +132,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
             proc.daemon = True
             proc.start()
             proc.join()
+        return blob
 
     def create_plot(self, calibration):
         print("Creating plot...")
@@ -142,9 +143,9 @@ class IntraDOMCalibrationPlotter(kp.Module):
             ax.plot(np.cos(calib['angles']), calib["corrected_means"], '.')
             ax.set_title("{0} - {1}"
                          .format(self.db.doms.via_dom_id(dom_id), dom_id))
-            ax.set_ylim((-20, 20))
+            ax.set_ylim((-10, 10))
         plt.suptitle("{0} UTC".format(datetime.utcnow().strftime("%c")))
-        plt.savefig(os.path.join(self.plots_path, "/intradom.png"),
+        plt.savefig(os.path.join(self.plots_path, "intradom.png"),
                     bbox_inches='tight')
         plt.close('all')
 
