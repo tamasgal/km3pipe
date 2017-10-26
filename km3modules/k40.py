@@ -159,7 +159,6 @@ class TwofoldCounter(kp.Module):
         self.n_timeslices = 0
 
     def get_livetime(self):
-        print("Accessing livetime")
         return self.n_timeslices * TIMESLICE_LENGTH
 
     def process(self, blob):
