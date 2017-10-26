@@ -181,7 +181,7 @@ class TwofoldCounter(kp.Module):
         """Write coincidence counts into a Python pickle"""
         print("Dumping data to {}".format(self.dump_filename))
         pickle.dump({'data': self.counts,
-                     'livetime': self.livetime},
+                     'livetime': self.get_livetime()},
                     open(self.dump_filename, "wb"))
 
 
