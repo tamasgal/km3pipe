@@ -855,3 +855,27 @@ class TestDTypeAttr(TestCase):
         with self.assertRaises(AttributeError):
             foo = Foo()
             foo.bar
+
+    def test_adding_new_attribute(self):
+
+        data = np.array([(1.0, 2), (3.0, 4)], dtype=[('x', float), ('y', int)])
+
+        class Foo(DTypeAttr):
+            dtype = data.dtype
+            def __init__(self):
+                self._arr = data
+
+        foo = Foo()
+
+        self.assertAlmostEqual(1.0, foo.x[0])
+        self.assertAlmostEqual(3.0, foo.x[1])
+        self.assertEqual(2, foo.y[0])
+        self.assertEqual(4, foo.y[1])
+    
+        foo.append_fields('new', [5, 6])
+        self.assertAlmostEqual(1.0, foo.x[0])
+        self.assertAlmostEqual(3.0, foo.x[1])
+        self.assertEqual(2, foo.y[0])
+        self.assertEqual(4, foo.y[1])
+        self.assertEqual(5, foo.new[0])
+        self.assertEqual(6, foo.new[1])

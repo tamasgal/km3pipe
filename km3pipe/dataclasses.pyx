@@ -15,6 +15,7 @@ from six import with_metaclass
 from struct import Struct, calcsize
 
 import numpy as np
+from numpy.lib import recfunctions as rfn
 cimport numpy as np
 cimport cython
 import pandas as pd
@@ -99,6 +100,13 @@ class DTypeAttr(object):
     def sorted(self, by='time'):
         sort_idc = np.argsort(self._arr[by])
         return self.__class__(self._arr[sort_idc], self.event_id)
+
+    def append_fields(self, fields, values, **kwargs):
+        """Uses `numpy.lib.recfunctions.append_fields` to append new fields."""
+        new_arr = rfn.append_fields(self._arr, fields, values,
+                                    usemask=False, **kwargs)
+        self._arr = new_arr
+        self.dtype = new_arr.dtype
 
 
 class Convertible(object):
