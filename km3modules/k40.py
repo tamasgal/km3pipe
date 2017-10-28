@@ -56,9 +56,15 @@ class K40BackgroundSubtractor(kp.Module):
         corrected_counts = {}
         livetime = self.services['GetLivetime']()
         for dom_id in dom_ids:
-            pmt_rates = mean_rates[dom_id]
-            k40_rates = counts[dom_id] / livetime
+            try:
+                pmt_rates = mean_rates[dom_id]
+            except KeyError:
+                log.warning("Skipping BG correction for DOM {}."
+                            .format(dom_id))
+                corrected_counts[dom_id] = counts[dom_id]
+                continue
 
+            k40_rates = counts[dom_id] / livetime
             bg_rates = []
             for c in self.combs:
                 bg_rates.append(pmt_rates[c[0]]*pmt_rates[c[1]]*1e-9)
