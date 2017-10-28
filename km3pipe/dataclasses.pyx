@@ -108,6 +108,29 @@ class DTypeAttr(object):
         self._arr = new_arr
         self.dtype = new_arr.dtype
 
+    def __array__(self):
+        return self._arr
+
+    def __getitem__(self, index):
+        """Preliminary interface for accessing single elements, which
+        otherwise return a `np.void`"""
+        if isinstance(index, int):
+            element = AttrVoid(self._arr[index])
+            return element
+        new = self.__class__(self._arr[index])
+        new.dtype = self.dtype
+        return new
+
+
+class AttrVoid(np.ndarray):
+    """Allow `np.void` instances to access their fields via attributes."""
+    def __new__(cls, input_array):
+        obj = np.asarray(input_array).view(cls)
+        if obj.dtype.names is not None:
+            for name in obj.dtype.names:
+                setattr(obj, name, obj[name])
+        return obj
+
 
 class Convertible(object):
     """Implements basic conversion methods."""
@@ -953,7 +976,9 @@ class RawHitSeries(DTypeAttr):
         if isinstance(index, int):
             hit = RawHit(*self._arr[index])
             return hit
-        return self.__class__(self._arr[index], self.event_id)
+        new = self.__class__(self._arr[index], self.event_id)
+        new.dtype = self.dtype
+        return new
 
     def __iter__(self):
         return self
