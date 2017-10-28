@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* ``DTypeAttr`` now allows adding of additional fields to the numpy array
+  using the ``.append_fields`` method.
 
 Version 7
 ---------
