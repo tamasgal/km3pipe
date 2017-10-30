@@ -95,7 +95,8 @@ class AanetPump(Pump):
         self.missing = self.get('missing') or 0
         self.correct_mc_times = bool(self.get('correct_mc_times'))
         self.ignore_hits = bool(self.get('ignore_hits'))
-        self.ignore_run_id_from_header = bool(self.get('ignore_run_id_from_header'))
+        self.ignore_run_id_from_header = bool(
+                self.get('ignore_run_id_from_header'))
 
         if self.additional:
             self.id = self.get('id')
@@ -147,7 +148,7 @@ class AanetPump(Pump):
 
         found_any_files = False
         for filename in self.filenames:
-            print("Reading from file: {0}".format(filename))
+            log.info("Reading from file: {0}".format(filename))
             if not os.path.exists(filename):
                 log.warning(filename + " not available: continue without it")
                 continue
@@ -168,12 +169,12 @@ class AanetPump(Pump):
             nfilgen = 0
 
             try:
-                print("Reading header...")
+                log.info("Reading header...")
                 self.header = event_file.rootfile().Get("Head")
             except (ValueError, UnicodeEncodeError, TypeError):
                 log.warning(filename + ": can't read header.")
             try:
-                print("Reading livetime...")
+                log.info("Reading livetime...")
                 lt_line = self.header.get_line('livetime')
                 if len(lt_line) > 0:
                     livetime, livetime_err = lt_line.split()
@@ -185,20 +186,20 @@ class AanetPump(Pump):
                 log.warning(filename + ": can't read livetime.")
                 self.livetime = 0
             try:
-                print("Reading genvol...")
+                log.info("Reading genvol...")
                 ngen = self.header.get_field('genvol', 4)
                 self.ngen = float(ngen)
             except (ValueError, UnicodeEncodeError, AttributeError):
                 log.warning(filename + ": can't read ngen.")
                 self.ngen = 0
             try:
-                print("Reading number of generated files...")
+                log.info("Reading number of generated files...")
                 self.nfilgen = float(nfilgen)
             except (ValueError, UnicodeEncodeError):
                 log.warning(filename + ": can't read nfilgen.")
                 self.nfilgen = 0
             try:
-                print("Reading run id...")
+                log.info("Reading run id...")
                 self.header_run_id = self.header.get_field('start_run', 0)
             except (ValueError, UnicodeEncodeError, AttributeError):
                 log.warning(filename + ": can't read ngen.")
@@ -207,18 +208,18 @@ class AanetPump(Pump):
 
             # NEW HEADER CRAZINESS
             if not self.skip_header and (self.format != 'ancient_recolns'):
-                print("Retrieving aanet header...")
+                log.info("Retrieving aanet header...")
                 self.aanet_header = get_aanet_header(event_file)
 
             if self.format == 'ancient_recolns':
-                print("Generating blobs through old aanet API...")
+                log.info("Generating blobs through old aanet API...")
                 while event_file.next():
                     event = event_file.evt
                     blob = self._read_event(event, filename)
                     blob["Header"] = self.aanet_header
                     yield blob
             else:
-                print("Generating blobs through new aanet API...")
+                log.info("Generating blobs through new aanet API...")
                 for event in event_file:
                     blob = self._read_event(event, filename)
                     blob["Header"] = self.aanet_header
@@ -285,7 +286,8 @@ class AanetPump(Pump):
         except AttributeError:
             mc_id = 0
 
-        if not self.ignore_run_id_from_header and self.header_run_id is not None:
+        if not self.ignore_run_id_from_header \
+                and self.header_run_id is not None:
             run_id = self.header_run_id
         else:
             run_id = event.run_id
@@ -332,22 +334,26 @@ class AanetPump(Pump):
                 for recname, reco in recos.items():
                     blob[recname] = reco
             if self.format in ('jevt_jgandalf', 'gandalf', 'jgandalf'):
-                track, dtype = parse_jevt_jgandalf(event, event_id, self.missing)
+                track, dtype = parse_jevt_jgandalf(
+                        event, event_id, self.missing)
                 if track:
                     blob['Gandalf'] = KM3Array.from_dict(
                         track, dtype, h5loc='/reco')
             if self.format in ('gandalf_new', 'jgandalf_new'):
-                track, dtype = parse_jgandalf_new(event, event_id, self.missing)
+                track, dtype = parse_jgandalf_new(
+                        event, event_id, self.missing)
                 if track:
                     blob['Gandalf'] = KM3Array.from_dict(
                         track, dtype, h5loc='/reco')
             if self.format == 'generic_track':
-                track, dtype = parse_generic_event(event, event_id, self.missing)
+                track, dtype = parse_generic_event(
+                        event, event_id, self.missing)
                 if track:
                     blob['Track'] = KM3Array.from_dict(
                         track, dtype, h5loc='/reco')
             if self.format in ('ancient_recolns', 'orca_recolns'):
-                track, dtype = parse_ancient_recolns(event, event_id, self.missing)
+                track, dtype = parse_ancient_recolns(
+                        event, event_id, self.missing)
                 if track:
                     blob['OrcaRecoLns'] = KM3Array.from_dict(
                         track, dtype, h5loc='/reco')
@@ -562,6 +568,7 @@ def parse_jgandalf_new(aanet_event, event_id, missing=0):
         outmap.update(spread_tracks)
         outmap['upgoing_vs_downgoing'] = upgoing_vs_downgoing(aanet_event.trks)
     except IndexError:
+        log.warn("Could not read Gandalf track. Zeroing row...")
         outmap = {key: missing for key in all_keys}
     dt = [(key, float) for key in sorted(outmap.keys())]
     outmap['event_id'] = event_id
