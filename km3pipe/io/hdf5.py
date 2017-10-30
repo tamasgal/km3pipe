@@ -233,17 +233,17 @@ class HDF5Sink(Module):
         self.h5file.root._v_attrs.km3pipe = np.string_(kp.__version__)
         self.h5file.root._v_attrs.pytables = np.string_(tb.__version__)
         self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
-        print("Adding index tables.")
+        log.info("Adding index tables.")
         for where, data in self.indices.items():
             h5loc = where + "/_indices"
-            print("  -> {0}".format(h5loc))
+            log.info("  -> {0}".format(h5loc))
             indices = KM3DataFrame({"index": data["indices"],
                                     "n_items": data["n_items"]}, h5loc=h5loc)
             self._write_array(h5loc,
                               self._to_array(indices),
                               'Indices',
                               title="Indices")
-        print("Creating pytables index tables. This may take a few minutes...")
+        log.info("Creating pytables index tables. This may take a few minutes...")
         for tab in itervalues(self._tables):
             if 'frame_id' in tab.colnames:
                 tab.cols.frame_id.create_index()
@@ -256,13 +256,13 @@ class HDF5Sink(Module):
             tab.flush()
 
         if "HDF5MetaData" in self.services:
-            print("Writing HDF5 meta data.")
+            log.info("Writing HDF5 meta data.")
             metadata = self.services["HDF5MetaData"]
             for name, value in metadata.items():
                 self.h5file.set_node_attr("/", name, value)
 
         self.h5file.close()
-        print("HDF5 file written to: {}".format(self.filename))
+        log.info("HDF5 file written to: {}".format(self.filename))
 
 
 class HDF5Pump(Pump):
