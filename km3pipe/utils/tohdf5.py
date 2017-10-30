@@ -54,7 +54,7 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = logger.get('tohdf5')
+log = logger.get('km3pipe.io')
 
 
 def tohdf5(input_files, output_file, n_events, **kwargs):
