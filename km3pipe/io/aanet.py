@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Pump for the Aanet data format.
 
@@ -24,7 +26,7 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 __author__ = "Tamas Gal, Thomas Heid and Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
-__credits__ = ["Liam Quin & Javier Barrios Marti"]
+__credits__ = ["Liam Quinn & Javier Barrios Martí"]
 __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
@@ -79,7 +81,6 @@ class AanetPump(Pump):
         Ignore run ID from header, take from event instead;
         often, the event.run_id is overwritten with the default (1).
     """
-
     def configure(self):
 
         self.filename = self.get('filename')
@@ -357,6 +358,8 @@ class AanetPump(Pump):
                 if track:
                     blob['OrcaRecoLns'] = KM3Array.from_dict(
                         track, dtype, h5loc='/reco')
+        else:
+            log.warn("Event #{} does not have any tracks!".format(event_id))
         return blob
 
     def event_index(self, blob):
