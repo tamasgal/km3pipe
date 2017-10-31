@@ -6,8 +6,9 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 
 from km3pipe.testing import TestCase, StringIO
-from km3pipe.tools import (unpack_nfirst, split, namedtuple_with_defaults,
-                         remain_file_pointer, decamelise, camelise, bincenters)
+from km3pipe.tools import (
+    unpack_nfirst, split, namedtuple_with_defaults, remain_file_pointer,
+    decamelise, camelise, bincenters, issorted)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -156,8 +157,11 @@ class TestCamelCaseConverter(TestCase):
         self.assertEqual("camelCase", camelise(text, capital_first=False))
 
 
-
 class TestMisc(TestCase):
     def test_binlims(self):
         bins = np.linspace(0, 20, 21)
         assert bincenters(bins).shape[0] == bins.shape[0] - 1
+
+    def test_issorted(self):
+        assert issorted([1, 2, 3])
+        assert not issorted([2, 3, 1])
