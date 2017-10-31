@@ -11,3 +11,4 @@ If you have any questions, join us in the `#km3pipe`_ Slack channel.
 .. toctree::
   dev
   doc
+  logging
