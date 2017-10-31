@@ -15,7 +15,6 @@ import json
 import re
 import pytz
 import socket
-import requests
 import xml.etree.ElementTree as ET
 
 from collections import OrderedDict
@@ -31,7 +30,7 @@ try:
 except ImportError:
     print("The database utilities needs pandas: pip install pandas")
 
-from .dev import cprint
+from .tools import cprint
 from .time import Timer
 from .config import Config
 from .logger import logging
@@ -431,7 +430,7 @@ class StreamDS(object):
         """Update the list of available straems"""
         c = self._db._get_content("streamds")
         self._stream_df = pd.read_csv(StringIO(c), sep='\t')  \
-                          .sort_values("STREAM")
+            .sort_values("STREAM")
         self._streams = None
         for stream in self.streams:
             setattr(self, stream, self.__getattr__(stream))
@@ -681,7 +680,7 @@ def show_ahrs_calibration(clb_upi, version='3'):
     content = db._get_content("show_product_test.htm?upi={0}&"
                               "testtype=AHRS-CALIBRATION-v{1}&n=1&out=xml"
                               .format(ahrs_upi, version)) \
-                                  .replace('\n', '')
+        .replace('\n', '')
     try:
         root = ET.parse(io.StringIO(content)).getroot()
     except ET.ParseError:

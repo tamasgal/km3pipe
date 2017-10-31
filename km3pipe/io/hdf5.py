@@ -21,7 +21,7 @@ from km3pipe.dataclasses import (KM3Array, KM3DataFrame,
                                  RawHitSeries, CRawHitSeries,
                                  McHitSeries, CMcHitSeries, deserialise_map)
 from km3pipe.logger import logging
-from km3pipe.dev import camelise, decamelise, split
+from km3pipe.tools import camelise, decamelise, split
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 

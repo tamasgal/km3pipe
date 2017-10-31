@@ -355,3 +355,14 @@ def slack_msg(text, webhook_url):
         )
     else:
         return True
+
+
+def issorted(arr):
+    """Check if array is sorted."""
+    return np.all(np.diff(arr) >= 0)
+
+
+def bincenters(bins):
+    """Bincenters, assuming they are all equally spaced."""
+    bins = np.atleast_1d(bins)
+    return 0.5 * (bins[1:] + bins[:-1])
