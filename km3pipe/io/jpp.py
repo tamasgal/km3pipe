@@ -228,8 +228,24 @@ class EventPump(Pump):
         self.event_index = self.get('index') or 0
         self.filename = self.require('filename')
 
+        self.buf_size = 5000
+        self._channel_ids = np.zeros(self.buf_size, dtype='i')
+        self._dom_ids = np.zeros(self.buf_size, dtype='i')
+        self._times = np.zeros(self.buf_size, dtype='i')
+        self._tots = np.zeros(self.buf_size, dtype='i')
+        self._triggereds = np.zeros(self.buf_size, dtype='i')
+
         self.event_reader = jppy.PyJDAQEventReader(self.filename)
         self.blobs = self.blob_generator()
+
+    def _resize_buffers(self, buf_size):
+        log.info("Resizing hit buffers to {}.".format(buf_size))
+        self.buf_size = buf_size
+        self._channel_ids.resize(buf_size)
+        self._dom_ids.resize(buf_size)
+        self._times.resize(buf_size)
+        self._tots.resize(buf_size)
+        self._triggereds.resize(buf_size)
 
     def blob_generator(self):
         while self.event_reader.has_next:
@@ -246,16 +262,23 @@ class EventPump(Pump):
         r.retrieve_next_event()  # do it at the beginning!
 
         n = r.number_of_snapshot_hits
-        channel_ids = np.zeros(n, dtype='i')
-        dom_ids = np.zeros(n, dtype='i')
-        times = np.zeros(n, dtype='i')
-        tots = np.zeros(n, dtype='i')
-        triggereds = np.zeros(n, dtype='i')
 
-        r.get_hits(channel_ids, dom_ids, times, tots, triggereds)
+        if n > self.buf_size:
+            self._resize_buffers(int(n * 3 / 2))
+
+        r.get_hits(self._channel_ids,
+                   self._dom_ids,
+                   self._times,
+                   self._tots,
+                   self._triggereds)
 
         hit_series = RawHitSeries.from_arrays(
-            channel_ids, dom_ids, times, tots, triggereds, self.event_index
+            self._channel_ids[:n],
+            self._dom_ids[:n],
+            self._times[:n],
+            self._tots[:n],
+            self._triggereds[:n],
+            self.event_index
         )
 
         event_info = EventInfo(np.array((
