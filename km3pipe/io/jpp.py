@@ -333,11 +333,12 @@ class TimeslicePump(Pump):
                     start_index = total_hits
                     total_hits += n
                     if total_hits > buf_size:
-                        channel_ids.resize(total_hits)
-                        dom_ids.resize(total_hits)
-                        times.resize(total_hits)
-                        tots.resize(total_hits)
-                        triggereds.resize(total_hits)
+                        new_buf_size = int(total_hits * 3 / 2)
+                        channel_ids.resize(new_buf_size)
+                        dom_ids.resize(new_buf_size)
+                        times.resize(new_buf_size)
+                        tots.resize(new_buf_size)
+                        triggereds.resize(new_buf_size)
                     self.r.get_hits(channel_ids, dom_ids, times, tots,
                                     start_index)
                 self.r.retrieve_next_superframe()
