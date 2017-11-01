@@ -19,6 +19,7 @@ import types
 
 import numpy as np
 import pandas as pd
+import numba as nb
 
 from .sys import peak_memory_usage, ignored
 from .hardware import Detector
@@ -497,6 +498,7 @@ class Geometry(Module):
             hits._arr['time'][idx] += pmt.t0
             # hit.a = hit.tot
 
+    @nb.jit
     def _apply_to_rawhitseries(self, hits):
         """Create a HitSeries from RawHitSeries and add pos, dir and t0.
         
