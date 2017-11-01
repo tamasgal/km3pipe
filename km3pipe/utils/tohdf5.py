@@ -10,6 +10,8 @@ Usage:
 
 Options:
     -h --help                       Show this screen.
+    --verbose                       Print more output.
+    --debug                         Print everything.
     -n EVENTS                       Number of events/runs.
     -o OUTFILE                      Output file.
     -j --jppy                       (Jpp): Use jppy (not aanet) for Jpp readout
@@ -42,6 +44,7 @@ from __future__ import division, absolute_import, print_function
 
 from km3modules.common import StatusBar
 from km3pipe import version
+from km3pipe import logger
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -50,6 +53,8 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
+
+log = logger.get('km3pipe.io')
 
 
 def tohdf5(input_files, output_file, n_events, **kwargs):
@@ -89,7 +94,12 @@ def main():
     n_rows_expected = int(args['--expected-rows'])
     use_jppy_pump = args['--jppy']
     aa_format = args['--aa-format']
-    print(aa_format)
+    is_verbose = bool(args['--verbose'])
+    if is_verbose:
+        log.setLevel('INFO')
+    is_debug = bool(args['--debug'])
+    if is_debug:
+        log.setLevel('DEBUG')
     aa_lib = args['--aa-lib']
     aa_old_mc_id = args['--aa-old-mc-id']
     correct_zed = args['--correct-zed']

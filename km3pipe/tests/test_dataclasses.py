@@ -326,6 +326,40 @@ class TestRawHitSeries(TestCase):
         self.assertAlmostEqual(1, hits[9].triggered)
         self.assertEqual(10, len(hits))
 
+    def test_single_element_attr_access(self):
+        hits = self.hits
+        a_hit = hits[2]
+        self.assertAlmostEqual(2, a_hit.channel_id)
+        self.assertAlmostEqual(2, a_hit.dom_id)
+        self.assertAlmostEqual(2, a_hit.time)
+        self.assertAlmostEqual(2, a_hit.tot)
+        self.assertAlmostEqual(1, a_hit.triggered)
+
+    def test_slicing(self):
+        hits = self.hits
+        shits = self.hits[4:6]
+        self.assertTrue(isinstance(shits, RawHitSeries))
+        self.assertEqual(2, len(shits))
+        self.assertAlmostEqual(4, shits.time[0])
+
+    def test_slicing_then_single_element_access(self):
+        hits = self.hits
+        shits = self.hits[4:6]
+        a_hit = shits[1]
+        self.assertAlmostEqual(5, a_hit.time)
+
+    def test_appending_fields(self):
+        hits = self.hits
+        hits.append_fields('new', [1, 2, 3, 4])
+        self.assertEqual(1, hits.new[0])
+
+    def test_appending_fields_survives_slicing(self):
+        hits = self.hits
+        hits.append_fields('new', [1, 2, 3, 4])
+        shits = hits[2:4]
+        self.assertTrue(isinstance(shits, RawHitSeries))
+        self.assertEqual(3, shits.new[0])
+
     def test_from_aanet(self):
         n_params = 16
         n_hits = 10
@@ -855,3 +889,43 @@ class TestDTypeAttr(TestCase):
         with self.assertRaises(AttributeError):
             foo = Foo()
             foo.bar
+
+    def test_adding_new_attribute(self):
+
+        data = np.array([(1.0, 2), (3.0, 4)], dtype=[('x', float), ('y', int)])
+
+        class Foo(DTypeAttr):
+            dtype = data.dtype
+            def __init__(self):
+                self._arr = data
+
+        foo = Foo()
+
+        self.assertAlmostEqual(1.0, foo.x[0])
+        self.assertAlmostEqual(3.0, foo.x[1])
+        self.assertEqual(2, foo.y[0])
+        self.assertEqual(4, foo.y[1])
+    
+        foo.append_fields('new', [5, 6])
+        self.assertAlmostEqual(1.0, foo.x[0])
+        self.assertAlmostEqual(3.0, foo.x[1])
+        self.assertEqual(2, foo.y[0])
+        self.assertEqual(4, foo.y[1])
+        self.assertEqual(5, foo.new[0])
+        self.assertEqual(6, foo.new[1])
+
+    def test_adding_new_attribute_keeps_dtype_when_slicing(self):
+        data = np.array([(1.0, 2), (3.0, 4)], dtype=[('x', float), ('y', int)])
+
+        class Foo(DTypeAttr):
+            dtype = data.dtype
+            def __init__(self, data):
+                self._arr = data
+
+        foo = Foo(data)
+        foo.append_fields('new', [5, 6])
+        self.assertAlmostEqual(1.0, foo.x[0])
+        self.assertAlmostEqual(3.0, foo.x[1])
+        self.assertAlmostEqual(5, foo.new[0])
+        sliced_foo = foo[1:]
+        self.assertAlmostEqual(6, sliced_foo.new[0])

@@ -314,35 +314,40 @@ class TimeslicePump(Pump):
         return next(self.blobs)
 
     def timeslice_generator(self):
+        buf_size = 5000
+        channel_ids = np.zeros(buf_size, dtype='i')
+        dom_ids = np.zeros(buf_size, dtype='i')
+        times = np.zeros(buf_size, dtype='i')
+        tots = np.zeros(buf_size, dtype='i')
+        triggereds = np.zeros(buf_size, dtype=bool)
         while self.r.has_next:
             slice_id = 1
             blob = Blob()
             self.r.retrieve_next_timeslice()
-            channel_ids = np.array(())
-            dom_ids = np.array(())
-            times = np.array(())
-            tots = np.array(())
             n_frames = 0
+            total_hits = 0
             while self.r.has_next_superframe:
                 n_frames += 1
                 n = self.r.number_of_hits
-                if n == 0:
-                    self.r.retrieve_next_superframe()
-                    continue
-                _channel_ids = np.zeros(n, dtype='i')
-                _dom_ids = np.zeros(n, dtype='i')
-                _times = np.zeros(n, dtype='i')
-                _tots = np.zeros(n, dtype='i')
-                self.r.get_hits(_channel_ids, _dom_ids, _times, _tots)
-                channel_ids = np.concatenate((channel_ids, _channel_ids))
-                dom_ids = np.concatenate((dom_ids, _dom_ids))
-                times = np.concatenate((times, _times))
-                tots = np.concatenate((tots, _tots))
+                if n != 0:
+                    start_index = total_hits
+                    total_hits += n
+                    if total_hits > buf_size:
+                        channel_ids.resize(total_hits)
+                        dom_ids.resize(total_hits)
+                        times.resize(total_hits)
+                        tots.resize(total_hits)
+                        triggereds.resize(total_hits)
+                    self.r.get_hits(channel_ids, dom_ids, times, tots,
+                                    start_index)
                 self.r.retrieve_next_superframe()
 
-            hits = RawHitSeries.from_arrays(
-                    channel_ids, dom_ids, times, tots,
-                    np.zeros(len(channel_ids), dtype=bool), slice_id)
+            hits = RawHitSeries.from_arrays(channel_ids[:total_hits],
+                                            dom_ids[:total_hits],
+                                            times[:total_hits],
+                                            tots[:total_hits],
+                                            triggereds[:total_hits],
+                                            slice_id)
             blob['TSHits'] = hits
             yield blob
             slice_id += 1

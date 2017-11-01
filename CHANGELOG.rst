@@ -4,6 +4,14 @@ Unreleased changes
 Version 7
 ---------
 
+7.9.1 / 2017-11-01
+~~~~~~~~~~~~~~~~~~
+* Massiv(!) speedup of the JPP timeslice pump (factor 3 to 4), now only about
+  8% slower compared to raw JPP readout. We are at the I/O limit of ROOT ;)
+* ``DTypeAttr`` now allows adding of additional fields to the numpy array
+  using the ``.append_fields`` method.
+* merge ``kp.dev`` into ``kp.tools``
+
 7.9.0 / 2017-10-27
 ~~~~~~~~~~~~~~~~~~
 * New command line utility to plot the trigger contributions: ``triggermap``
@@ -27,12 +35,12 @@ Version 7
 7.7.1 / 2017-10-12
 ~~~~~~~~~~~~~~~~~~
 * (aanet/tohd5) run id is now read from header, per default; if that fails
-  (or the flag ``--ignore-run-id-from-header`` is set, fall back to 
+  (or the flag ``--ignore-run-id-from-header`` is set, fall back to
   the ``event.run_id``
 
 7.7.0 / 2017-10-11
 ~~~~~~~~~~~~~~~~~~
-* (aanet/tohd5) new option to read run ID from header, not event. 
+* (aanet/tohd5) new option to read run ID from header, not event.
   in old versions of JTE, the event.run_id is overwritten with the default, 1.
 * there is now a new command line utility called ``streamds`` for non-pythonistas
 * The new ``km3pipe.ahrs`` now contains AHRS calibration routines
@@ -44,12 +52,12 @@ Version 7
   metadata to the files (e.g. file conversion parameters)
   HDF5 metadata now contains much more information; e.g. if the mc hit time
   correction was applied, the aa-format, whether jppy was used etc
-* introduce "services" to the pipeline model. these are addressed via the 
+* introduce "services" to the pipeline model. these are addressed via the
   ``expose`` method
 * aa/gand: fix up-vs-downgoing normalisation (now difference over sum)
 * fix automatic JTE/MC time conversion
 * fix the check if mc time correction needs to be applied
-* ``h5tree`` CLI util, to print just the structure + nevents + nrows. 
+* ``h5tree`` CLI util, to print just the structure + nevents + nrows.
   less verbose than ``ptdump``
 * KM3HDF5 4.3: introduce richer metadata
 
@@ -123,7 +131,7 @@ Version 7
 
 7.2.5 / 2017-07-20
 ~~~~~~~~~~~~~~~~~~
-* drop ``read_hdf5`` and ``GenericPump`` from top level module import 
+* drop ``read_hdf5`` and ``GenericPump`` from top level module import
   (would make pytables a hard requirement)
 
 7.2.3 / 2017-07-19
@@ -139,7 +147,7 @@ Version 7
 
 7.2.2 / 2017-07-11
 ~~~~~~~~~~~~~~~~~~
-* ``AANetPump`` now parses the full header and ``HDF5Pump`` writes it to 
+* ``AANetPump`` now parses the full header and ``HDF5Pump`` writes it to
   /header as attributes
 
 7.2.1 / 2017-07-11
@@ -266,7 +274,7 @@ Version 6
 
 6.4.4 / 2017-02-27
 ~~~~~~~~~~~~~~~~~~
-* h5concat (multi-h5-to-h5) deprecated because buggy. Going to drop all 
+* h5concat (multi-h5-to-h5) deprecated because buggy. Going to drop all
   event_id for 7.0 (for now use ptconcat
 * Clean up setup.py
 

@@ -181,20 +181,6 @@ KM3Pipe: Main Framework
   token_urlsafe
   prettyln
   irods_filepath
-
-
-``km3pipe.dev``
-~~~~~~~~~~~~~~~
-
-.. automodule:: km3pipe.dev
-  :no-members:
-  :no-inherited-members:
-
-.. currentmodule:: km3pipe.dev
-
-.. autosummary::
-  :toctree: api
-
   unpack_nfirst
   split
   decamelise

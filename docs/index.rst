@@ -27,10 +27,9 @@
 
     install
     user_guide
-    logging
+    contribute
     examples
     api
-    contribute
     changelog
 
 * :ref:`genindex`

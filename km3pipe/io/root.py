@@ -7,23 +7,13 @@ Read and write Vanilla ROOT files.
 """
 from __future__ import division, absolute_import, print_function
 
-from collections import defaultdict
 from six import string_types
 
 import numpy as np
-import rootpy as rp
 import root_numpy as rnp
-import rootpy.ROOT as ROOT
 from rootpy.io import root_open
-from rootpy.plotting import Hist, Hist2D, Hist3D
-from rootpy.tree import Tree, TreeModel, FloatCol, IntCol
 
-import km3pipe as kp
-from km3pipe.core import Pump, Module
-from km3pipe.dataclasses import KM3Array, deserialise_map
 from km3pipe.logger import logging
-from km3pipe.dev import camelise, decamelise, split
-from km3pipe.tools import insert_prefix_to_dtype
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
