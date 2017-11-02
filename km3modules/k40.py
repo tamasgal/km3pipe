@@ -129,7 +129,7 @@ class IntraDOMCalibrator(kp.Module):
         print("Starting calibration:")
         calibration = {}
 
-        for dom_id, data in counts.items():
+        for dom_id, data in twofold_counts.items():
             print(" calibrating DOM '{0}'".format(dom_id))
             try:
                 calib = calibrate_dom(dom_id, data,
