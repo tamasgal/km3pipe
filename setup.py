@@ -32,9 +32,9 @@ class build_ext(_build_ext):
     def finalize_options(self):
         _build_ext.finalize_options(self)
         # Prevent numpy from thinking it is still in its setup process:
-            builtins.__NUMPY_SETUP__ = False
-            import numpy
-            self.include_dirs.append(numpy.get_include())
+        builtins.__NUMPY_SETUP__ = False
+        import numpy
+        self.include_dirs.append(numpy.get_include())
 
 
 # Needed for line_profiler - disable for production code
@@ -70,27 +70,27 @@ else:
 
 
 require_groups = {
-    'docs': [
-        'pillow',
-        'scikit-learn',
-        'sphinx==1.6.3',
-        'sphinx-gallery==0.1.12',
-        'sphinx-rtd-theme==0.2.4',
-        'sphinxcontrib-napoleon==0.6.1',
-        'sphinxcontrib-programoutput==0.11',
-        'sphinxcontrib-websupport==1.0.1',
-        'numpydoc==0.7.0',
-    ],
-    'base': ['cython', 'docopt', 'numpy>=1.12', 'pandas', 'pytz',
-             'six==1.10', ],
-    'analysis': ['matplotlib>=2.0.0', 'sklearn', 'statsmodels>=0.8',
-                 'scipy>=0.19', 'seaborn', 'ipython', 'patsy', ],
-    'daq': ['controlhost', ],
-    'io': ['tables==3.4.0', 'h5py', ],
-    'jpp': ['jppy>=1.3.1', ],
-    'web': ['tornado', 'websocket-client', 'requests'],
-    'testing': ['pytest', 'mock', ],
-    'utils': ['urwid', ],
+          'docs': [
+              'pillow',
+              'scikit-learn',
+              'sphinx==1.6.3',
+              'sphinx-gallery==0.1.12',
+              'sphinx-rtd-theme==0.2.4',
+              'sphinxcontrib-napoleon==0.6.1',
+              'sphinxcontrib-programoutput==0.11',
+              'sphinxcontrib-websupport==1.0.1',
+              'numpydoc==0.7.0',
+          ],
+          'base': ['cython', 'docopt', 'numpy>=1.12', 'pandas', 'pytz',
+                   'six==1.10', ],
+          'analysis': ['matplotlib>=2.0.0', 'sklearn', 'statsmodels>=0.8',
+                       'scipy>=0.19', 'seaborn', 'ipython', 'patsy', ],
+          'daq': ['controlhost', ],
+          'io': ['tables==3.4.0', 'h5py', ],
+          'jpp': ['jppy>=1.3.1', ],
+          'web': ['tornado', 'websocket-client', 'requests'],
+          'testing': ['pytest', 'mock', ],
+          'utils': ['urwid', ],
 }
 require_groups['most'] = list(chain.from_iterable(
     [require_groups[k] for k in ('base', 'io', 'web', 'utils')],
@@ -148,6 +148,6 @@ setup(name='km3pipe',
           'Intended Audience :: Science/Research',
           'Programming Language :: Python',
       ],
-     )
+      )
 
 __author__ = 'Tamas Gal and Moritz Lotze'
