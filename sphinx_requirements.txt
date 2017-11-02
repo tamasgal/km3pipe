@@ -1,5 +1,4 @@
 pillow
-numpydoc
 ipython
 scikit-learn
 seaborn
