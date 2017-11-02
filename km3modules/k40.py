@@ -145,7 +145,7 @@ class IntraDOMCalibrator(kp.Module):
         return calibration
 
     def finish(self):
-        if self.mode == 'online':
+        if self.mode == 'offline':
             print("Starting offline calibration")
             twofold_counts = self.services['TwofoldCounts']
             self.calibrate(twofold_counts, fit_background=True)
