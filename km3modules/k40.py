@@ -81,9 +81,21 @@ class K40BackgroundSubtractor(kp.Module):
 class IntraDOMCalibrator(kp.Module):
     """Intra DOM calibrator which performs the calibration from K40Counts.
 
+    Parameters
+    ----------
+    det_id: int
+      Detector ID [default: 14]
+    ctmin: float
+      Minimum cos(angle)
+    mode: str ('offline' | 'online')
+      Calibration mode [default: 'online']
+
     Input Keys
     ----------
-    'K40Counts': dict (key=dom_id, value=matrix of k40 counts 465x(dt*2+1))
+    'TwofoldCounts': dict (key=dom_id,
+                           value=matrix of k40 counts 465x(dt*2+1))
+    'CorrectedTwofoldCounts': dict (key=dom_id,
+                                    value=matrix of k40 counts 465x(dt*2+1))
 
     Output Keys
     -----------
@@ -94,18 +106,28 @@ class IntraDOMCalibrator(kp.Module):
         det_id = self.get("det_id") or 14
         self.detector = kp.hardware.Detector(det_id=det_id)
         self.ctmin = self.require("ctmin")
+        self.mode = self.get("mode", default="online")
 
     def process(self, blob):
-        print("Starting calibration:")
-        blob["IntraDOMCalibration"] = {}
+        if self.mode != 'online':
+            return blob
+
         if 'CorrectedTwofoldCounts' in blob:
-            print("Using corrected twofold counts")
+            log.info("Using corrected twofold counts")
             fit_background = False
-            counts = blob['CorrectedTwofoldCounts']
+            twofold_counts = blob['CorrectedTwofoldCounts']
         else:
-            print("No corrected twofold counts found, fitting background.")
-            counts = self.services['TwofoldCounts']
+            log.info("No corrected twofold counts found, fitting background.")
+            twofold_counts = self.services['TwofoldCounts']
             fit_background = True
+
+        blob['IntraDOMCalibration'] = self.calibrate(twofold_counts,
+                                                     fit_background)
+        return blob
+
+    def calibrate(self, twofold_counts, fit_background=False):
+        print("Starting calibration:")
+        calibration = {}
 
         for dom_id, data in counts.items():
             print(" calibrating DOM '{0}'".format(dom_id))
@@ -118,8 +140,15 @@ class IntraDOMCalibrator(kp.Module):
             except RuntimeError:
                 log.error(" skipping DOM '{0}'.".format(dom_id))
             else:
-                blob["IntraDOMCalibration"][dom_id] = calib
-        return blob
+                calibration[dom_id] = calib
+
+        return calibration
+
+    def finish(self):
+        if self.mode == 'online':
+            print("Starting offline calibration")
+            twofold_counts = self.services['TwofoldCounts']
+            self.calibrate(twofold_counts, fit_background=True)
 
 
 class TwofoldCounter(kp.Module):
