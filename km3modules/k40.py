@@ -224,6 +224,27 @@ class TwofoldCounter(kp.Module):
                     open(self.dump_filename, "wb"))
 
 
+class SummaryMedianPMTRateService(kp.Module):
+    def configure(self):
+        self.expose(self.get_median_rates, "GetMedianPMTRates")
+        self.filename = self.require('filename')
+
+    def get_median_rates(self):
+        rates = defaultdict(list)
+
+        p = kp.io.jpp.SummaryslicePump(filename=self.filename)
+        for b in p:
+            summary = b['Summaryslice']
+            for dom_id in summary.keys():
+                rates[dom_id].append(summary[dom_id]['rates'])
+
+        median_rates = {}
+        for dom_id in rates.keys():
+            median_rates[dom_id] = np.median(rates[dom_id], axis=0)
+
+        return median_rates
+
+
 class MedianPMTRatesService(kp.Module):
     def configure(self):
         self.rates = defaultdict(lambda: defaultdict(list))
