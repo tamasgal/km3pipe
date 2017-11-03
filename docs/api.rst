@@ -29,10 +29,6 @@ KM3Pipe: Main Framework
 ``km3pipe.cmd``: Command Line Tools
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: km3pipe.cmd
-  :no-members:
-  :no-inherited-members:
-
 .. currentmodule:: km3pipe.cmd
 
 .. autosummary::
