@@ -179,7 +179,7 @@ class IntraDOMCalibrator(kp.Module):
             calibration = self.calibrate(twofold_counts,
                                          fit_background=fit_background)
             print("Dumping calibration to '{}'.".format(self.calib_filename))
-            pickle.dump(calibration, self.calib_filename)
+            pickle.dump(self.calib_filename, calibration)
 
 
 class TwofoldCounter(kp.Module):
