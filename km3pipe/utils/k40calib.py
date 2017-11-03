@@ -42,7 +42,7 @@ __status__ = "Development"
 
 
 def k40calib(filename, tmax, ctmin, det_id):
-    pipe = kp.Pipeline(timeit=True)
+    pipe = kp.Pipeline()
     pipe.attach(kp.io.jpp.TimeslicePump, filename=filename)
     pipe.attach(StatusBar, every=5000)
     pipe.attach(MemoryObserver, every=10000)
