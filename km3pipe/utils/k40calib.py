@@ -16,7 +16,7 @@ Usage:
     k40calib --version
 
 Options:
-    FILE         Input file (ROOT). 
+    FILE         Input file (ROOT).
     DET_ID       Detector ID (e.g. 29).
     -t TMAX      Coincidence time window [default: 10].
     -c CTMIN     Minimum cos(angle) between PMTs for L2 [default: -1.0].
@@ -47,9 +47,12 @@ def k40calib(filename, tmax, ctmin, det_id):
     pipe.attach(StatusBar, every=5000)
     pipe.attach(MemoryObserver, every=10000)
     pipe.attach(k40.SummaryMedianPMTRateService, filename=filename)
-    pipe.attach(k40.TwofoldCounter, tmax=10)
+    pipe.attach(k40.TwofoldCounter, tmax=tmax)
     pipe.attach(k40.K40BackgroundSubtractor, mode='offline')
-    pipe.attach(k40.IntraDOMCalibrator, ctmin=0., mode='offline', det_id=29)
+    pipe.attach(k40.IntraDOMCalibrator,
+                ctmin=ctmin,
+                mode='offline',
+                det_id=det_id)
     pipe.drain()
 
 
