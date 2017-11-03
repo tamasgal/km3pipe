@@ -127,7 +127,7 @@ class IntraDOMCalibrator(kp.Module):
         self.detector = kp.hardware.Detector(det_id=det_id)
         self.ctmin = self.require("ctmin")
         self.mode = self.get("mode", default="online")
-        self.calib_filename = self.get("calib_filename", default="k40_cal.npy")
+        self.calib_filename = self.get("calib_filename", default="k40_cal.p")
 
     def process(self, blob):
         if self.mode != 'online':
@@ -179,7 +179,7 @@ class IntraDOMCalibrator(kp.Module):
             calibration = self.calibrate(twofold_counts,
                                          fit_background=fit_background)
             print("Dumping calibration to '{}'.".format(self.calib_filename))
-            np.save(self.calib_filename, calibration)
+            pickle.dump(calibration, self.calib_filename)
 
 
 class TwofoldCounter(kp.Module):
