@@ -332,50 +332,72 @@ class TimeslicePump(Pump):
                               "\nMake sure you source the JPP environmanet "
                               "and have jppy installed")
         self.r = jppy.daqtimeslicereader.PyJDAQTimesliceReader(filename)
+        self._scanner_initialised = False
+
+        self.buf_size = 5000
+        self._channel_ids = np.zeros(self.buf_size, dtype='i')
+        self._dom_ids = np.zeros(self.buf_size, dtype='i')
+        self._times = np.zeros(self.buf_size, dtype='i')
+        self._tots = np.zeros(self.buf_size, dtype='i')
+        self._triggereds = np.zeros(self.buf_size, dtype=bool)
 
     def process(self, blob):
         return next(self.blobs)
 
     def timeslice_generator(self):
-        buf_size = 5000
-        channel_ids = np.zeros(buf_size, dtype='i')
-        dom_ids = np.zeros(buf_size, dtype='i')
-        times = np.zeros(buf_size, dtype='i')
-        tots = np.zeros(buf_size, dtype='i')
-        triggereds = np.zeros(buf_size, dtype=bool)
         while self.r.has_next:
             slice_id = 1
             blob = Blob()
             self.r.retrieve_next_timeslice()
-            n_frames = 0
-            total_hits = 0
-            while self.r.has_next_superframe:
-                n_frames += 1
-                n = self.r.number_of_hits
-                if n != 0:
-                    start_index = total_hits
-                    total_hits += n
-                    if total_hits > buf_size:
-                        buf_size = int(total_hits * 3 / 2)
-                        log.info("Resizing hit buffer to {}.".format(buf_size))
-                        channel_ids.resize(buf_size)
-                        dom_ids.resize(buf_size)
-                        times.resize(buf_size)
-                        tots.resize(buf_size)
-                        triggereds.resize(buf_size)
-                    self.r.get_hits(channel_ids, dom_ids, times, tots,
-                                    start_index)
-                self.r.retrieve_next_superframe()
-
-            hits = RawHitSeries.from_arrays(channel_ids[:total_hits],
-                                            dom_ids[:total_hits],
-                                            times[:total_hits],
-                                            tots[:total_hits],
-                                            triggereds[:total_hits],
-                                            slice_id)
+            hits = self._extract_hits()
+            hits.slice_id = slice_id
             blob['TSHits'] = hits
             yield blob
             slice_id += 1
+
+    def _extract_hits(self):
+        n_frames = 0
+        total_hits = 0
+        while self.r.has_next_superframe:
+            n_frames += 1
+            n = self.r.number_of_hits
+            if n != 0:
+                start_index = total_hits
+                total_hits += n
+                if total_hits > self.buf_size:
+                    buf_size = int(total_hits * 3 / 2)
+                    self._resize_buffers(buf_size)
+                self.r.get_hits(self._channel_ids,
+                                self._dom_ids,
+                                self._times,
+                                self._tots,
+                                start_index)
+            self.r.retrieve_next_superframe()
+
+        hits = RawHitSeries.from_arrays(self._channel_ids[:total_hits],
+                                        self._dom_ids[:total_hits],
+                                        self._times[:total_hits],
+                                        self._tots[:total_hits],
+                                        self._triggereds[:total_hits],
+                                        0)
+        return hits
+
+    def _resize_buffers(self, buf_size):
+        log.info("Resizing hit buffers to {}.".format(buf_size))
+        self.buf_size = buf_size
+        self._channel_ids.resize(buf_size)
+        self._dom_ids.resize(buf_size)
+        self._times.resize(buf_size)
+        self._tots.resize(buf_size)
+        self._triggereds.resize(buf_size)
+
+    def get_by_frameindex(self, frame_index):
+        if not self._scanner_initialised:
+            self.r.init_tree_scanner()
+        blob = Blob()
+        self.r.retrieve_timeslice_at_frame_index(frame_index)
+        hits = self._extract_hits()
+        blob['TSHits'] = hits
 
     def __iter__(self):
         return self
