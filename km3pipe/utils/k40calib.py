@@ -11,15 +11,15 @@ The following script calculates the PMT time offsets using K40 coincidences
 
 
 Usage:
-    k40calib FILE DET_ID TMAX CTMIN
+    k40calib FILE DET_ID [-t TMAX -c CTMIN]
     k40calib (-h | --help)
     k40calib --version
 
 Options:
     FILE         Input file (ROOT). 
     DET_ID       Detector ID (e.g. 29).
-    TMAX         Coincidence time window [default: 10].
-    CTMIN        Minimum cos(angle) between PMTs for L2 [default: -1.0].
+    -t TMAX      Coincidence time window [default: 10].
+    -c CTMIN     Minimum cos(angle) between PMTs for L2 [default: -1.0].
     -h --help    Show this screen.
 """
 # Author: Jonas Reubelt <jreubelt@km3net.de> and Tamas Gal <tgal@km3net.de>
@@ -56,9 +56,8 @@ def k40calib(filename, tmax, ctmin, det_id):
 def main():
     from docopt import docopt
     args = docopt(__doc__, version=version)
-    print(args)
 
     k40calib(args['FILE'],
-             int(args['TMAX']),
-             float(args['CTMIN']),
+             int(args['-t']),
+             float(args['-c']),
              int(args['DET_ID']))
