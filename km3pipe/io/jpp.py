@@ -391,13 +391,15 @@ class TimeslicePump(Pump):
         self._tots.resize(buf_size)
         self._triggereds.resize(buf_size)
 
-    def get_by_frameindex(self, frame_index):
+    def get_by_frame_index(self, frame_index):
         if not self._scanner_initialised:
             self.r.init_tree_scanner()
+            self._scanner_initialised = True
         blob = Blob()
         self.r.retrieve_timeslice_at_frame_index(frame_index)
         hits = self._extract_hits()
         blob['TSHits'] = hits
+        return blob
 
     def __iter__(self):
         return self
