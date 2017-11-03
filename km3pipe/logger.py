@@ -75,3 +75,9 @@ class LogIO(object):
 def get(name):
     """Helper function to get a logger"""
     return logging.getLogger(name)
+
+
+def set_level(name, level):
+    """Set the log level for given logger"""
+    logger = get(name)
+    logger.setLevel(level)
