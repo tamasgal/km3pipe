@@ -47,9 +47,23 @@ class K40BackgroundSubtractor(kp.Module):
     """
     def configure(self):
         self.combs = list(combinations(range(31), 2))
+        self.mode = self.get("mode", default='online')
+        self.expose(self.get_corrected_counts, 'GetCorrectedTwofoldCounts')
+        self.corrected_counts = None
 
     def process(self, blob):
+        if self.mode != 'online':
+            return blob
         print('Subtracting random background calculated from single rates')
+        corrected_counts = self.subtract_background()
+        blob['CorrectedTwofoldCounts'] = corrected_counts
+
+        return blob
+
+    def get_corrected_counts(self):
+        return self.corrected_counts
+
+    def subtract_background(self):
         counts = self.services['TwofoldCounts']
         dom_ids = list(counts.keys())
         mean_rates = self.services['GetMedianPMTRates']()
@@ -70,12 +84,18 @@ class K40BackgroundSubtractor(kp.Module):
                 bg_rates.append(pmt_rates[c[0]]*pmt_rates[c[1]]*1e-9)
             corrected_counts[dom_id] = (k40_rates.T -
                                         np.array(bg_rates)).T * livetime
-        blob["CorrectedTwofoldCounts"] = corrected_counts
+        return corrected_counts
+
+    def finish(self):
+        if self.mode == 'offline':
+            print('Subtracting background calculated from summaryslices.')
+            self.corrected_counts = self.subtract_background()
+
+    def dump(self, mean_rates, corrected_counts, livetime):
+        pickle.dump(mean_rates, open('mean_rates.p', 'wb'))
         pickle.dump({'data': corrected_counts,
                      'livetime': livetime},
                     open("k40_counts_bg_sub.p", "wb"))
-        pickle.dump(mean_rates, open('mean_rates.p', 'wb'))
-        return blob
 
 
 class IntraDOMCalibrator(kp.Module):
@@ -148,11 +168,18 @@ class IntraDOMCalibrator(kp.Module):
     def finish(self):
         if self.mode == 'offline':
             print("Starting offline calibration")
-            twofold_counts = self.services['TwofoldCounts']
-            calibration = self.calibrate(twofold_counts, fit_background=True)
+            if 'GetCorrectedTwofoldCounts' in self.services:
+                print("Using corrected twofold counts")
+                twofold_counts = self.services['GetCorrectedTwofoldCounts']()
+                fit_background = False
+            else:
+                print("Using uncorrected twofold counts")
+                twofold_counts = self.services['TwofoldCounts']
+                fit_background = True
+            calibration = self.calibrate(twofold_counts,
+                                         fit_background=fit_background)
             print("Dumping calibration to '{}'.".format(self.calib_filename))
             np.save(self.calib_filename, calibration)
-
 
 
 class TwofoldCounter(kp.Module):
