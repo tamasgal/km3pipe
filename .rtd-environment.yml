@@ -17,6 +17,7 @@ dependencies:
   - pytables
   - h5py
   - scikit-learn
+  - numexpr
   - patsy
   - statsmodels
   - tornado
