@@ -11,7 +11,7 @@ from __future__ import division, absolute_import, print_function
 
 import os
 
-from .dev import lstrip
+from .tools import lstrip
 from .logger import logging
 
 __author__ = "Tamas Gal"
