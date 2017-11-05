@@ -35,6 +35,7 @@ JOB_TEMPLATE = lstrip("""
     #$ -j y
     #$ -o {log_path}/{job_name}.log
     #$ -P P_{group}
+    #$ -S {shell}
     #
     ## Walltime (HH:MM:SS)
     #$ -l ct={walltime}
@@ -65,7 +66,7 @@ JOB_TEMPLATE = lstrip("""
 
 
 def qsub(script, job_name, log_path=os.getcwd(), group='km3net',
-         walltime='00:10:00', vmem='1G', fsize='10G',
+         walltime='00:10:00', vmem='1G', fsize='8G', shell=os.environ['SHELL'],
          email=os.environ['USER']+'@km3net.de', send_mail='n',
          irods=False, sps=True, hpss=False, xrootd=False,
          dcache=False, oracle=False,
