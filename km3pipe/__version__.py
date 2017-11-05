@@ -71,9 +71,3 @@ def check_for_update():
 
 
 version = _get_version(version_info)
-if config is not None:
-    if config.check_for_updates:
-        try:
-            check_for_update()
-        except (ValueError, TypeError, OSError):
-            pass
