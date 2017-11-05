@@ -124,7 +124,7 @@ KM3Pipe: Main Framework
   H5Chain
   HDF5Pump
   HDF5Sink
-  JPPPump
+  EventPump
   PicklePump
   df_to_h5
   read_hdf5

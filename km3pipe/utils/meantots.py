@@ -107,7 +107,7 @@ class FastMeanToTPlotter(kp.Module):
 
 def meantots(filename, plotfilename):
     pipe = kp.Pipeline()
-    pipe.attach(kp.io.JPPPump, filename=filename, with_timeslice_hits=True)
+    pipe.attach(kp.io.EventPump, filename=filename, with_timeslice_hits=True)
     pipe.attach(StatusBar, every=5000)
     pipe.attach(MeanToTPlotter, plotfilename=plotfilename,
                 only_if="TimesliceHits")
