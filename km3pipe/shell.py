@@ -28,10 +28,11 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 JOB_TEMPLATE = lstrip("""
     ########################################################
-    #$ -j y
+    #$ -N {job_name}
     #$ -M {email}
     ## Send mail at: start (b), completion (e), never (n)
     #$ -m {send_mail}
+    #$ -j y
     #$ -o {log_path}/{job_name}.log
     #$ -P P_{group}
     #
@@ -83,7 +84,8 @@ def qsub(script, job_name, log_path=os.getcwd(), group='km3net',
         print(job_string)
     else:
         print("Calling qsub with the generated job script.")
-        p = subprocess.Popen('qsub -V', stdin=subprocess.PIPE, env=env)
+        p = subprocess.Popen('qsub -V', stdin=subprocess.PIPE, env=env,
+                             shell=True)
         p.communicate(input=bytes(job_string))
 
 
