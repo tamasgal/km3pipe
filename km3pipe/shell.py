@@ -33,7 +33,7 @@ JOB_TEMPLATE = lstrip("""
     #$ -m {send_mail}
     #$ -o {log_path}/{job_name}.log
     #$ -P P_{group}
-    # 
+    #
     ## Walltime (HH:MM:SS)
     #$ -l ct={walltime}
     ## Memory (Units: G, M, K, B; Min 64M)
@@ -66,21 +66,29 @@ def qsub(script, job_name, log_path=os.getcwd(), group='km3net',
          walltime='00:10:00', vmem='1G', fsize='10G',
          email=os.environ['USER']+'@km3net.de', send_mail='n',
          irods=False, sps=True, hpss=False, xrootd=False,
-         dcache=False, oracle=False):
+         dcache=False, oracle=False,
+         dryrun=False):
     """Submit a job via qsub."""
+    print("Preparing job script...")
     job_string = JOB_TEMPLATE.format(
             script=script, email=email, send_mail=send_mail, log_path=log_path,
             job_name=job_name, group=group, walltime=walltime, vmem=vmem,
             fsize=fsize, irods=irods, sps=sps, hpss=hpss, xrootd=xrootd,
             dcache=dcache, oracle=oracle)
     env = os.environ.copy()
-    p = subprocess.Popen('qsub -V', stdin=subprocess.PIPE, env=env)
-    p.communicate(input=bytes(job_string))
+    if dryrun:
+        print("This is a dry run! Here is the generated job file, which will "
+              "not be submitted:")
+        print(job_string)
+    else:
+        print("Calling qsub with the generated job script.")
+        p = subprocess.Popen('qsub -V', stdin=subprocess.PIPE, env=env)
+        p.communicate(input=bytes(job_string))
 
 
 def get_jpp_env(jpp_dir):
     """Return the environment dict of a loaded Jpp env.
-    
+
     The returned env can be passed to `subprocess.Popen("J...", env=env)`
     to execute Jpp commands.
 
