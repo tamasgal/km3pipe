@@ -10,6 +10,7 @@ Some shell helpers
 from __future__ import division, absolute_import, print_function
 
 import os
+import subprocess
 
 from .tools import lstrip
 from .logger import logging
@@ -93,7 +94,7 @@ def get_jpp_env(jpp_dir):
     to execute Jpp commands.
 
     """
-    env = {v[0]:''.join(v[1:]) for v in
+    env = {v[0]: ''.join(v[1:]) for v in
            [l.split('=') for l in
             os.popen("source {0}/setenv.sh {0} && env"
                      .format(jpp_dir)).read().split('\n')
