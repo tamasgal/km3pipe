@@ -16,12 +16,6 @@ try:
 except ImportError:
     from urllib.request import urlopen
 
-try:
-    from km3pipe.config import Config
-    config = Config()
-except ImportError:
-    config = None
-
 from km3pipe.logger import logging
 
 __author__ = 'tamasgal'
