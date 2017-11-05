@@ -77,7 +77,7 @@ def qsub(script, job_name, log_path=os.getcwd(), group='km3net',
             script=script, email=email, send_mail=send_mail, log_path=log_path,
             job_name=job_name, group=group, walltime=walltime, vmem=vmem,
             fsize=fsize, irods=irods, sps=sps, hpss=hpss, xrootd=xrootd,
-            dcache=dcache, oracle=oracle)
+            dcache=dcache, oracle=oracle, shell=shell)
     env = os.environ.copy()
     if dryrun:
         print("This is a dry run! Here is the generated job file, which will "
