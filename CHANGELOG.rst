@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* JPPPump removed
 
 Version 7
 ---------

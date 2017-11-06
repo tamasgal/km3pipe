@@ -52,7 +52,8 @@ def k40calib(filename, tmax, ctmin, det_id):
     pipe.attach(k40.IntraDOMCalibrator,
                 ctmin=ctmin,
                 mode='offline',
-                det_id=det_id)
+                det_id=det_id,
+                calib_filename=filename+'.k40calib.p')
     pipe.drain()
 
 
