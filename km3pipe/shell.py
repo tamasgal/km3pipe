@@ -67,7 +67,7 @@ JOB_TEMPLATE = lstrip("""
 
 
 def qsub(script, job_name, log_path=os.getcwd(), group='km3net', os='cl7',
-         walltime='00:10:00', vmem='1G', fsize='8G', shell=os.environ['SHELL'],
+         walltime='00:10:00', vmem='8G', fsize='8G', shell=os.environ['SHELL'],
          email=os.environ['USER']+'@km3net.de', send_mail='n',
          irods=False, sps=True, hpss=False, xrootd=False,
          dcache=False, oracle=False,
