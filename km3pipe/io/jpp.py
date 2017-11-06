@@ -255,7 +255,7 @@ class SummaryslicePump(Pump):
             blob = Blob()
             while self.r.has_next_frame:
                 rates = np.zeros(31, dtype='f8')
-                hrvs = np.zeros(31, dtype='bool')
+                hrvs = np.zeros(31, dtype=bool)
                 self.r.get_rates(rates)
                 self.r.get_hrvs(hrvs)
                 summary_slice[self.r.dom_id] = {
