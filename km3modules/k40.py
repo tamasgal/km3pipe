@@ -31,6 +31,7 @@ log = kp.logger.logging.getLogger(__name__)  # pylint: disable=C0103
 # log.setLevel(logging.DEBUG)
 
 TIMESLICE_LENGTH = 0.1  # [s]
+MC_ANG_DIST = np.array([-0.72337394,  2.59196335, -0.43594182,  1.10514914]) 
 
 
 class K40BackgroundSubtractor(kp.Module):
