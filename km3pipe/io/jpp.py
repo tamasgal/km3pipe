@@ -255,9 +255,12 @@ class SummaryslicePump(Pump):
             blob = Blob()
             while self.r.has_next_frame:
                 rates = np.zeros(31, dtype='f8')
+                hrvs = np.zeros(31, dtype='bool')
                 self.r.get_rates(rates)
+                self.r.get_hrvs(hrvs)
                 summary_slice[self.r.dom_id] = {
                         'rates': rates,
+                        'hrvs': hrvs,
                         'n_udp_packets': self.r.number_of_received_packets,
                         'max_sequence_number': self.r.max_sequence_number,
                         'has_udp_trailer': self.r.has_udp_trailer,
