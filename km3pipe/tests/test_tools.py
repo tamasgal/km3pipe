@@ -8,7 +8,7 @@ import numpy as np
 from km3pipe.testing import TestCase, StringIO
 from km3pipe.tools import (
     unpack_nfirst, split, namedtuple_with_defaults, remain_file_pointer,
-    decamelise, camelise, bincenters, issorted)
+    decamelise, camelise, bincenters, issorted, chunks)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
