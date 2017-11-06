@@ -88,7 +88,7 @@ def qsub(script, job_name, log_path=os.getcwd(), group='km3net', platform='cl7',
         print("Calling qsub with the generated job script.")
         p = subprocess.Popen('qsub -V', stdin=subprocess.PIPE, env=env,
                              shell=True)
-        p.communicate(input=bytes(job_string, encoding='utf-8'))
+        p.communicate(input=bytes(job_string))
 
 
 def get_jpp_env(jpp_dir):
