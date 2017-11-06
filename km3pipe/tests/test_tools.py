@@ -8,7 +8,7 @@ import numpy as np
 from km3pipe.testing import TestCase, StringIO
 from km3pipe.tools import (
     unpack_nfirst, split, namedtuple_with_defaults, remain_file_pointer,
-    decamelise, camelise, bincenters, issorted, lstrip)
+    decamelise, camelise, bincenters, issorted, lstrip, chunks)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -181,3 +181,12 @@ class TestLstrip(TestCase):
     def test_lstrip_on_single_line(self):
         text = '  a  '
         self.assertEqual(text.lstrip(), lstrip(text))
+
+
+class TestChunks(TestCase):
+    def test_chunks(self):
+        l = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        self.assertEqual([[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+                         list(chunks(l, 3)))
+        self.assertEqual([[1, 2, 3, 4], [5, 6, 7, 8], [9]],
+                         list(chunks(l, 4)))

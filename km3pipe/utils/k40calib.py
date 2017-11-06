@@ -11,16 +11,17 @@ The following script calculates the PMT time offsets using K40 coincidences
 
 
 Usage:
-    k40calib FILE DET_ID [-t TMAX -c CTMIN]
+    k40calib FILE DET_ID [-t TMAX -c CTMIN -o CALIB_FILE]
     k40calib (-h | --help)
     k40calib --version
 
 Options:
-    FILE         Input file (ROOT).
-    DET_ID       Detector ID (e.g. 29).
-    -t TMAX      Coincidence time window [default: 10].
-    -c CTMIN     Minimum cos(angle) between PMTs for L2 [default: -1.0].
-    -h --help    Show this screen.
+    FILE            Input file (ROOT).
+    DET_ID          Detector ID (e.g. 29).
+    -t TMAX         Coincidence time window [default: 10].
+    -c CTMIN        Minimum cos(angle) between PMTs for L2 [default: -1.0].
+    -o CALIB_FILE   Filename for the calibration output [default: k40_cal.p].
+    -h --help       Show this screen.
 """
 # Author: Jonas Reubelt <jreubelt@km3net.de> and Tamas Gal <tgal@km3net.de>
 # License: MIT
@@ -41,7 +42,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-def k40calib(filename, tmax, ctmin, det_id):
+def k40calib(filename, tmax, ctmin, det_id, calib_filename):
     pipe = kp.Pipeline()
     pipe.attach(kp.io.jpp.TimeslicePump, filename=filename)
     pipe.attach(StatusBar, every=5000)
@@ -53,7 +54,7 @@ def k40calib(filename, tmax, ctmin, det_id):
                 ctmin=ctmin,
                 mode='offline',
                 det_id=det_id,
-                calib_filename=filename+'.k40calib.p')
+                calib_filename=calib_filename)
     pipe.drain()
 
 
@@ -64,4 +65,5 @@ def main():
     k40calib(args['FILE'],
              int(args['-t']),
              float(args['-c']),
-             int(args['DET_ID']))
+             int(args['DET_ID']),
+             args['-o'])
