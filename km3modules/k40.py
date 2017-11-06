@@ -180,7 +180,7 @@ class IntraDOMCalibrator(kp.Module):
             calibration = self.calibrate(twofold_counts,
                                          fit_background=fit_background)
             print("Dumping calibration to '{}'.".format(self.calib_filename))
-            with open(self.calib_filename, 'w') as f:
+            with open(self.calib_filename, 'wb') as f:
                 pickle.dump(calibration, f)
 
 
