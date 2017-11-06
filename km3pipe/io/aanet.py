@@ -195,6 +195,7 @@ class AanetPump(Pump):
                 self.ngen = 0
             try:
                 log.info("Reading number of generated files...")
+                # nfligen = ?????
                 self.nfilgen = float(nfilgen)
             except (ValueError, UnicodeEncodeError):
                 log.warning(filename + ": can't read nfilgen.")
