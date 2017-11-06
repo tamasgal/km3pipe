@@ -34,7 +34,7 @@ JOB_TEMPLATE = lstrip("""
     #$ -m {send_mail}
     #$ -j y
     #$ -o {log_path}/{job_name}.log
-    #$ -l os={os}
+    #$ -l os={platform}
     #$ -P P_{group}
     #$ -S {shell}
     #
@@ -66,7 +66,7 @@ JOB_TEMPLATE = lstrip("""
 """)
 
 
-def qsub(script, job_name, log_path=os.getcwd(), group='km3net', os='cl7',
+def qsub(script, job_name, log_path=os.getcwd(), group='km3net', platform='cl7',
          walltime='00:10:00', vmem='8G', fsize='8G', shell=os.environ['SHELL'],
          email=os.environ['USER']+'@km3net.de', send_mail='n',
          irods=False, sps=True, hpss=False, xrootd=False,
@@ -78,7 +78,7 @@ def qsub(script, job_name, log_path=os.getcwd(), group='km3net', os='cl7',
             script=script, email=email, send_mail=send_mail, log_path=log_path,
             job_name=job_name, group=group, walltime=walltime, vmem=vmem,
             fsize=fsize, irods=irods, sps=sps, hpss=hpss, xrootd=xrootd,
-            dcache=dcache, oracle=oracle, shell=shell, os=os)
+            dcache=dcache, oracle=oracle, shell=shell, platform=platform)
     env = os.environ.copy()
     if dryrun:
         print("This is a dry run! Here is the generated job file, which will "
@@ -88,7 +88,7 @@ def qsub(script, job_name, log_path=os.getcwd(), group='km3net', os='cl7',
         print("Calling qsub with the generated job script.")
         p = subprocess.Popen('qsub -V', stdin=subprocess.PIPE, env=env,
                              shell=True)
-        p.communicate(input=bytes(job_string))
+        p.communicate(input=bytes(job_string, encoding='utf-8'))
 
 
 def get_jpp_env(jpp_dir):
