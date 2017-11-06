@@ -249,18 +249,21 @@ class SummaryslicePump(Pump):
         return next(self.blobs)
 
     def summaryslice_generator(self):
+        rates = np.zeros(31, dtype='f8')
+        hrvs = np.zeros(31, dtype='i4')
+        fifos = np.zeros(31, dtype='i4')
         while self.r.has_next:
             summary_slice = {}
             self.r.retrieve_next_summaryslice()
             blob = Blob()
             while self.r.has_next_frame:
-                rates = np.zeros(31, dtype='f8')
-                hrvs = np.zeros(31, dtype='i4')
                 self.r.get_rates(rates)
                 self.r.get_hrvs(hrvs)
+                self.r.get_fifos(fifos)
                 summary_slice[self.r.dom_id] = {
                         'rates': rates,
                         'hrvs': hrvs.astype(bool),
+                        'fifos': fifos.astype(bool),
                         'n_udp_packets': self.r.number_of_received_packets,
                         'max_sequence_number': self.r.max_sequence_number,
                         'has_udp_trailer': self.r.has_udp_trailer,
