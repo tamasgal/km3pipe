@@ -643,35 +643,26 @@ class TestSummaryframeSeries(TestCase):
 
 class TestTimesliceInfo(TestCase):
     def test_timeslice_info(self):
-        s = TimesliceInfo(*range(4))
-        self.assertAlmostEqual(0, s.dom_id)
-        self.assertAlmostEqual(1, s.frame_id)
+        s = TimesliceInfo(frame_index=0, slice_id=1, n_hits=2, timestamp=3,
+                          nanoseconds=4, n_frames=5)
+        self.assertAlmostEqual(0, s.frame_index)
         self.assertAlmostEqual(2, s.n_hits)
-        self.assertAlmostEqual(3, s.slice_id)
+        self.assertAlmostEqual(1, s.slice_id)
+        self.assertAlmostEqual(3, s.timestamp)
+        self.assertAlmostEqual(4, s.nanoseconds)
+        self.assertAlmostEqual(5, s.n_frames)
 
 
 class TestSummarysliceInfo(TestCase):
-    def test_summaryslice_info(self):
-        s = SummarysliceInfo(*range(4))
-        self.assertAlmostEqual(0, s.det_id)
-        self.assertAlmostEqual(1, s.frame_index)
-        self.assertAlmostEqual(2, s.run_id)
-        self.assertAlmostEqual(3, s.slice_id)
+    def test_timeslice_info(self):
+        s = SummarysliceInfo(frame_index=0, slice_id=1, timestamp=3,
+                             nanoseconds=4, n_frames=5)
+        self.assertAlmostEqual(0, s.frame_index)
+        self.assertAlmostEqual(1, s.slice_id)
+        self.assertAlmostEqual(3, s.timestamp)
+        self.assertAlmostEqual(4, s.nanoseconds)
+        self.assertAlmostEqual(5, s.n_frames)
 
-    def test_serialise_to_numpy(self):
-        s = SummarysliceInfo(*range(4))
-        s_serialised = s.serialise(to='numpy')
-        self.assertTupleEqual((1,), s_serialised.shape)
-        self.assertTupleEqual((0, 1, 2, 3), tuple(s_serialised[0]))
-
-    def test_serialise_to_pandas(self):
-        s = SummarysliceInfo(*range(4))
-        s_serialised = s.serialise(to='pandas')
-        self.assertTupleEqual((1, 4), s_serialised.shape)
-        self.assertEqual(0, s_serialised.det_id[0])
-        self.assertEqual(1, s_serialised.frame_index[0])
-        self.assertEqual(2, s_serialised.run_id[0])
-        self.assertEqual(3, s_serialised.slice_id[0])
 
 
 class TestEventInfo(TestCase):

@@ -1,10 +1,11 @@
 pillow
-numpydoc
 ipython
-sphinx-gallery>=0.1.11
-sphinx
-sphinxcontrib-napoleon
-sphinxcontrib-programoutput
 scikit-learn
 seaborn
-sphinx_rtd_theme
+sphinx==1.6.3
+sphinx-gallery==0.1.12
+sphinx-rtd-theme==0.2.4
+sphinxcontrib-napoleon==0.6.1
+sphinxcontrib-programoutput==0.11
+sphinxcontrib-websupport==1.0.1
+numpydoc==0.7.0

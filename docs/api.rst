@@ -29,10 +29,6 @@ KM3Pipe: Main Framework
 ``km3pipe.cmd``: Command Line Tools
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: km3pipe.cmd
-  :no-members:
-  :no-inherited-members:
-
 .. currentmodule:: km3pipe.cmd
 
 .. autosummary::
@@ -128,7 +124,7 @@ KM3Pipe: Main Framework
   H5Chain
   HDF5Pump
   HDF5Sink
-  JPPPump
+  EventPump
   PicklePump
   df_to_h5
   read_hdf5

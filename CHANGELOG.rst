@@ -1,8 +1,20 @@
 Unreleased changes
 ------------------
 
+
 Version 7
 ---------
+
+7.10.0 / 2017-11-07
+~~~~~~~~~~~~~~~~~~~
+* JPPPump removed
+* New ``k40calib`` command line tool to calibrate DOMs using the K40
+  method
+* ``TimeslicePump`` and ``SummaryslicePump`` now add meta information about
+  the slices to the blob: ``blob['TimesliceInfo']`` and 
+  ``blob['SummarysliceInfo']``
+* ``SummaryslicePump`` now reads out FIFO status and HRV for each PMT
+* ``kp.shell.qsub()`` can be used to submit jobs to SGE clusters
 
 7.9.1 / 2017-11-01
 ~~~~~~~~~~~~~~~~~~

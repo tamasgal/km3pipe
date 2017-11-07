@@ -31,6 +31,7 @@ log = kp.logger.logging.getLogger(__name__)  # pylint: disable=C0103
 # log.setLevel(logging.DEBUG)
 
 TIMESLICE_LENGTH = 0.1  # [s]
+MC_ANG_DIST = np.array([-0.72337394,  2.59196335, -0.43594182,  1.10514914]) 
 
 
 class K40BackgroundSubtractor(kp.Module):
@@ -47,9 +48,23 @@ class K40BackgroundSubtractor(kp.Module):
     """
     def configure(self):
         self.combs = list(combinations(range(31), 2))
+        self.mode = self.get("mode", default='online')
+        self.expose(self.get_corrected_counts, 'GetCorrectedTwofoldCounts')
+        self.corrected_counts = None
 
     def process(self, blob):
+        if self.mode != 'online':
+            return blob
         print('Subtracting random background calculated from single rates')
+        corrected_counts = self.subtract_background()
+        blob['CorrectedTwofoldCounts'] = corrected_counts
+
+        return blob
+
+    def get_corrected_counts(self):
+        return self.corrected_counts
+
+    def subtract_background(self):
         counts = self.services['TwofoldCounts']
         dom_ids = list(counts.keys())
         mean_rates = self.services['GetMedianPMTRates']()
@@ -70,20 +85,38 @@ class K40BackgroundSubtractor(kp.Module):
                 bg_rates.append(pmt_rates[c[0]]*pmt_rates[c[1]]*1e-9)
             corrected_counts[dom_id] = (k40_rates.T -
                                         np.array(bg_rates)).T * livetime
-        blob["CorrectedTwofoldCounts"] = corrected_counts
+        return corrected_counts
+
+    def finish(self):
+        if self.mode == 'offline':
+            print('Subtracting background calculated from summaryslices.')
+            self.corrected_counts = self.subtract_background()
+
+    def dump(self, mean_rates, corrected_counts, livetime):
+        pickle.dump(mean_rates, open('mean_rates.p', 'wb'))
         pickle.dump({'data': corrected_counts,
                      'livetime': livetime},
                     open("k40_counts_bg_sub.p", "wb"))
-        pickle.dump(mean_rates, open('mean_rates.p', 'wb'))
-        return blob
 
 
 class IntraDOMCalibrator(kp.Module):
     """Intra DOM calibrator which performs the calibration from K40Counts.
 
+    Parameters
+    ----------
+    det_id: int
+      Detector ID [default: 14]
+    ctmin: float
+      Minimum cos(angle)
+    mode: str ('offline' | 'online')
+      Calibration mode [default: 'online']
+
     Input Keys
     ----------
-    'K40Counts': dict (key=dom_id, value=matrix of k40 counts 465x(dt*2+1))
+    'TwofoldCounts': dict (key=dom_id,
+                           value=matrix of k40 counts 465x(dt*2+1))
+    'CorrectedTwofoldCounts': dict (key=dom_id,
+                                    value=matrix of k40 counts 465x(dt*2+1))
 
     Output Keys
     -----------
@@ -94,20 +127,31 @@ class IntraDOMCalibrator(kp.Module):
         det_id = self.get("det_id") or 14
         self.detector = kp.hardware.Detector(det_id=det_id)
         self.ctmin = self.require("ctmin")
+        self.mode = self.get("mode", default="online")
+        self.calib_filename = self.get("calib_filename", default="k40_cal.p")
 
     def process(self, blob):
-        print("Starting calibration:")
-        blob["IntraDOMCalibration"] = {}
+        if self.mode != 'online':
+            return blob
+
         if 'CorrectedTwofoldCounts' in blob:
-            print("Using corrected twofold counts")
+            log.info("Using corrected twofold counts")
             fit_background = False
-            counts = blob['CorrectedTwofoldCounts']
+            twofold_counts = blob['CorrectedTwofoldCounts']
         else:
-            print("No corrected twofold counts found, fitting background.")
-            counts = self.services['TwofoldCounts']
+            log.info("No corrected twofold counts found, fitting background.")
+            twofold_counts = self.services['TwofoldCounts']
             fit_background = True
 
-        for dom_id, data in counts.items():
+        blob['IntraDOMCalibration'] = self.calibrate(twofold_counts,
+                                                     fit_background)
+        return blob
+
+    def calibrate(self, twofold_counts, fit_background=False):
+        print("Starting calibration:")
+        calibration = {}
+
+        for dom_id, data in twofold_counts.items():
             print(" calibrating DOM '{0}'".format(dom_id))
             try:
                 calib = calibrate_dom(dom_id, data,
@@ -118,8 +162,26 @@ class IntraDOMCalibrator(kp.Module):
             except RuntimeError:
                 log.error(" skipping DOM '{0}'.".format(dom_id))
             else:
-                blob["IntraDOMCalibration"][dom_id] = calib
-        return blob
+                calibration[dom_id] = calib
+
+        return calibration
+
+    def finish(self):
+        if self.mode == 'offline':
+            print("Starting offline calibration")
+            if 'GetCorrectedTwofoldCounts' in self.services:
+                print("Using corrected twofold counts")
+                twofold_counts = self.services['GetCorrectedTwofoldCounts']()
+                fit_background = False
+            else:
+                print("Using uncorrected twofold counts")
+                twofold_counts = self.services['TwofoldCounts']
+                fit_background = True
+            calibration = self.calibrate(twofold_counts,
+                                         fit_background=fit_background)
+            print("Dumping calibration to '{}'.".format(self.calib_filename))
+            with open(self.calib_filename, 'wb') as f:
+                pickle.dump(calibration, f)
 
 
 class TwofoldCounter(kp.Module):
@@ -189,6 +251,27 @@ class TwofoldCounter(kp.Module):
         pickle.dump({'data': self.counts,
                      'livetime': self.get_livetime()},
                     open(self.dump_filename, "wb"))
+
+
+class SummaryMedianPMTRateService(kp.Module):
+    def configure(self):
+        self.expose(self.get_median_rates, "GetMedianPMTRates")
+        self.filename = self.require('filename')
+
+    def get_median_rates(self):
+        rates = defaultdict(list)
+
+        p = kp.io.jpp.SummaryslicePump(filename=self.filename)
+        for b in p:
+            summary = b['Summaryslice']
+            for dom_id in summary.keys():
+                rates[dom_id].append(summary[dom_id]['rates'])
+
+        median_rates = {}
+        for dom_id in rates.keys():
+            median_rates[dom_id] = np.median(rates[dom_id], axis=0)
+
+        return median_rates
 
 
 class MedianPMTRatesService(kp.Module):

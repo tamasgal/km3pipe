@@ -2,6 +2,7 @@ pip>=9.0.1
 setuptools>=24.3
 six==1.10
 numpy>=1.12
+numexpr
 cython
 docopt
 matplotlib>=2.0.0

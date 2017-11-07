@@ -422,3 +422,13 @@ def bincenters(bins):
     bins = np.atleast_1d(bins)
     return 0.5 * (bins[1:] + bins[:-1])
 
+
+def lstrip(text):
+    """Remove leading whitespace from each line of a multiline string."""
+    return '\n'.join(l.lstrip() for l in text.lstrip().split('\n'))
+
+
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    for i in range(0, len(l), n):
+        yield l[i:i + n]

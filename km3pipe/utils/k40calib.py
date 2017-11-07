@@ -1,24 +1,40 @@
+#!/usr/bin/env python
 # coding=utf-8
 # Filename: k40calib.py
+# vim: ts=4 sw=4 et
 """
-Calculate t0set and write it to a CSV file.
+=========================
+K40 Intra-DOM Calibration
+=========================
+
+The following script calculates the PMT time offsets using K40 coincidences
+
 
 Usage:
-    k40calib FILE [-o OUTFILE]
+    k40calib FILE DET_ID [-t TMAX -c CTMIN -o CALIB_FILE]
     k40calib (-h | --help)
     k40calib --version
 
 Options:
-    -o OUTFILE   CSV file containing the t0 values.
-    -h --help    Show this screen.
+    FILE            Input file (ROOT).
+    DET_ID          Detector ID (e.g. 29).
+    -t TMAX         Coincidence time window [default: 10].
+    -c CTMIN        Minimum cos(angle) between PMTs for L2 [default: -1.0].
+    -o CALIB_FILE   Filename for the calibration output [default: k40_cal.p].
+    -h --help       Show this screen.
 """
+# Author: Jonas Reubelt <jreubelt@km3net.de> and Tamas Gal <tgal@km3net.de>
+# License: MIT
 
 from __future__ import division, absolute_import, print_function
 
 from km3pipe import version
+import km3pipe as kp
+from km3modules import k40
+from km3modules.common import StatusBar, MemoryObserver
 
-__author__ = "Tamas Gal"
-__copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
+__author__ = "Tamas Gal and Jonas Reubelt"
+__copyright__ = "Copyright 2016, KM3NeT collaboration."
 __credits__ = []
 __license__ = "MIT"
 __maintainer__ = "Jonas Reubelt and Tamas Gal"
@@ -26,43 +42,28 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-def k40calib(input_file, output_file=None):
-    """K40 Calibration"""
-    from km3modules import k40
-    import km3pipe as kp
-    import ROOT
-
-    f = ROOT.TFile(input_file)
-    dom_ids = [n.GetName().split('.')[0]
-               for n in f.GetListOfKeys()
-               if '.2S' in n.GetName()]
-    detector = kp.hardware.Detector(det_id=14)
-    if output_file is None:
-        csv_filename = input_file + "_t0s.csv"
-    else:
-        csv_filename = output_file
-    csv_file = open(csv_filename, 'w')
-    csv_file.write("dom_id,tdc_channel,t0\n")
-    for dom_id in dom_ids:
-        print("Calibrating {0}...".format(dom_id))
-        try:
-            calibration = k40.calibrate_dom(dom_id, input_file, detector)
-        except ValueError:
-            print("   no data found, skipping.")
-            continue
-        t0set = calibration['opt_t0s'].x
-        for tdc_channel, t0 in enumerate(t0set):
-            csv_file.write("{0}, {1}, {2}\n"
-                           .format(dom_id, tdc_channel, t0))
-        print("    done.")
-    csv_file.close()
-    print("Calibration done, the t0 values were written to '{0}'."
-          .format(csv_filename))
+def k40calib(filename, tmax, ctmin, det_id, calib_filename):
+    pipe = kp.Pipeline()
+    pipe.attach(kp.io.jpp.TimeslicePump, filename=filename)
+    pipe.attach(StatusBar, every=5000)
+    pipe.attach(MemoryObserver, every=10000)
+    pipe.attach(k40.SummaryMedianPMTRateService, filename=filename)
+    pipe.attach(k40.TwofoldCounter, tmax=tmax)
+    pipe.attach(k40.K40BackgroundSubtractor, mode='offline')
+    pipe.attach(k40.IntraDOMCalibrator,
+                ctmin=ctmin,
+                mode='offline',
+                det_id=det_id,
+                calib_filename=calib_filename)
+    pipe.drain()
 
 
 def main():
     from docopt import docopt
     args = docopt(__doc__, version=version)
 
-    infile = args['FILE']
-    k40calib(infile, args['-o'])
+    k40calib(args['FILE'],
+             int(args['-t']),
+             float(args['-c']),
+             int(args['DET_ID']),
+             args['-o'])

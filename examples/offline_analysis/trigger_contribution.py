@@ -80,7 +80,7 @@ def omkey(dom_id):
 
 
 pipe = kp.Pipeline()
-pipe.attach(kp.io.jpp.JPPPump, filename=filename)
+pipe.attach(kp.io.jpp.EventPump, filename=filename)
 pipe.attach(StatusBar, every=5000)
 pipe.attach(TriggerContributionCalculator, dus=[2])
 pipe.drain()

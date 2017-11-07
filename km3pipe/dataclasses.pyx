@@ -9,6 +9,7 @@
 """
 from __future__ import division, absolute_import, print_function
 
+from collections import namedtuple
 import ctypes
 from libcpp cimport bool as c_bool  # noqa
 from six import with_metaclass
@@ -215,64 +216,21 @@ class SummarysliceInfo(with_metaclass(Serialisable)):
         return 1
 
 
-class TimesliceInfo(with_metaclass(Serialisable)):
-    """JDAQTimeslice metadata.
-    """
-    h5loc = '/time_slice_info'
-    dtype = np.dtype([
-        ('dom_id', '<u4'),
-        ('frame_id', '<u4'),
-        ('n_hits', '<u4'),
-        ('slice_id', '<u4'),
-    ])
+TimesliceInfo = namedtuple('TimesliceInfo',
+                           ['frame_index',
+                            'slice_id',
+                            'n_hits',
+                            'timestamp',
+                            'nanoseconds',
+                            'n_frames'])
 
-    @classmethod
-    def from_table(cls, row):
-        args = []
-        for col in cls.dtype.names:
-            try:
-                args.append(row[col])
-            except KeyError:
-                args.append(np.nan)
-        return cls(*args)
 
-    @classmethod
-    def deserialise(cls, *args, **kwargs):
-        return cls.conv_from(*args, **kwargs)
-
-    def serialise(self, *args, **kwargs):
-        return self.conv_to(*args, **kwargs)
-
-    @classmethod
-    def conv_from(cls, data, frame_id, fmt='numpy', h5loc='/'):
-        if fmt == 'numpy':
-            return cls.from_table(data[0])
-
-    def conv_to(self, to='numpy'):
-        if to == 'numpy':
-            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
-                            h5loc=self.h5loc)
-        if to == 'pandas':
-            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
-
-    def __array__(self):
-        return [(
-            self.dom_id, self.frame_id, self.n_hits, self.slice_id,
-        ), ]
-
-    def __str__(self):
-        return "Timeslice frame:\n" \
-               "    slice id: {0}\n" \
-               "    frame id: {1}\n" \
-               "    DOM id:   {2}\n" \
-               "    n_hits:   {3}\n" \
-               .format(self.slice_id, self.frame_id, self.dom_id, self.n_hits)
-
-    def __insp__(self):
-        return self.__str__()
-
-    def __len__(self):
-        return 1
+SummarysliceInfo = namedtuple('SummarysliceInfo',
+                              ['frame_index',
+                               'slice_id',
+                               'timestamp',
+                               'nanoseconds',
+                               'n_frames'])
 
 
 class TimesliceFrameInfo(with_metaclass(Serialisable)):
