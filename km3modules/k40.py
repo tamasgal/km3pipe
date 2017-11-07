@@ -31,7 +31,7 @@ log = kp.logger.logging.getLogger(__name__)  # pylint: disable=C0103
 # log.setLevel(logging.DEBUG)
 
 TIMESLICE_LENGTH = 0.1  # [s]
-MC_ANG_DIST = np.array([-0.72337394,  2.59196335, -0.43594182,  1.10514914]) 
+MC_ANG_DIST = np.array([-0.72337394,  2.59196335, -0.43594182,  1.10514914])
 
 
 class K40BackgroundSubtractor(kp.Module):
@@ -69,7 +69,7 @@ class K40BackgroundSubtractor(kp.Module):
         dom_ids = list(counts.keys())
         mean_rates = self.services['GetMedianPMTRates']()
         corrected_counts = {}
-        livetime = self.services['GetLivetime']()
+        livetimes = self.services['GetLivetime']()
         for dom_id in dom_ids:
             try:
                 pmt_rates = mean_rates[dom_id]
@@ -78,7 +78,7 @@ class K40BackgroundSubtractor(kp.Module):
                             .format(dom_id))
                 corrected_counts[dom_id] = counts[dom_id]
                 continue
-
+            livetime = livetimes[dom_id]
             k40_rates = counts[dom_id] / livetime
             bg_rates = []
             for c in self.combs:
@@ -154,9 +154,10 @@ class IntraDOMCalibrator(kp.Module):
         for dom_id, data in twofold_counts.items():
             print(" calibrating DOM '{0}'".format(dom_id))
             try:
+                livetime = self.services['GetLivetime']()[dom_id]
                 calib = calibrate_dom(dom_id, data,
                                       self.detector,
-                                      livetime=self.services['GetLivetime'](),
+                                      livetime=livetime,
                                       fit_background=fit_background,
                                       ad_fit_shape='exp', ctmin=self.ctmin)
             except RuntimeError:
@@ -202,7 +203,7 @@ class TwofoldCounter(kp.Module):
     --------
     'TwofoldCounts': dict (key=dom_id, value=matrix (465,(dt*2+1)))
     'ResetTwofoldCounts': reset the TwofoldCounts dict
-    'GetLivetime()': float
+    'GetLivetime()': dict (key=dom_id, value=float)
     'DumpTwofoldCounts': Writes twofold counts into 'dump_filename'
 
     """
@@ -221,20 +222,31 @@ class TwofoldCounter(kp.Module):
         if self.dump_filename is not None:
             self.expose(self.dump, 'DumpTwofoldCounts')
 
+        if 'GetSkippedFrames' in self.services:
+            self.skipped_frames = self.services['GetSkippedFrames']()
+        else:
+            self.skipped_frames = None
+
     def reset(self):
         """Reset coincidence counter"""
         self.counts = defaultdict(partial(np.zeros, (465, self.tmax * 2 + 1)))
-        self.n_timeslices = 0
+        self.n_timeslices = defaultdict(int)
 
     def get_livetime(self):
-        return self.n_timeslices * TIMESLICE_LENGTH
+        return {dom_id: n * TIMESLICE_LENGTH
+                for dom_id, n in self.n_timeslices.items()}
 
     def process(self, blob):
         log.debug("Processing timeslice")
-        self.n_timeslices += 1
         hits = blob['TSHits']
-        dom_ids = np.unique(hits.dom_id)
-        for dom_id in dom_ids:
+
+        frame_index = blob['TimesliceInfo'].frame_index
+        if self.skipped_frames is not None:
+            skipped_dom_ids = set(self.skipped_frames[frame_index])
+            dom_ids = set(np.unique(hits.dom_id))
+
+        for dom_id in dom_ids - skipped_dom_ids:
+            self.n_timeslices[dom_id] += 1
             mask = hits.dom_id == dom_id
             times = hits.time[mask]
             channel_ids = hits.channel_id[mask]
@@ -253,6 +265,24 @@ class TwofoldCounter(kp.Module):
                     open(self.dump_filename, "wb"))
 
 
+class HRVFIFOTimesliceFilter(kp.Module):
+    def configure(self):
+        filename = self.require('filename')
+        self.expose(self.get_skipped_frames, 'GetSkippedFrames')
+        self.skipped_frames = defaultdict(list)
+        p = kp.io.jpp.SummaryslicePump(filename=filename)
+        for b in p:
+            sum_info = b['SummarysliceInfo']
+            frame_index = sum_info.frame_index
+            summaryslice = b['Summaryslice']
+            for dom_id, sf in summaryslice.items():
+                if not sf['fifo_status'] or any(sf['hrvs']):
+                    self.skipped_frames[frame_index].append(dom_id)
+
+    def get_skipped_frames(self):
+        return self.skipped_frames
+
+
 class SummaryMedianPMTRateService(kp.Module):
     def configure(self):
         self.expose(self.get_median_rates, "GetMedianPMTRates")
@@ -261,10 +291,20 @@ class SummaryMedianPMTRateService(kp.Module):
     def get_median_rates(self):
         rates = defaultdict(list)
 
+        if 'GetSkippedFrames' in self.services:
+            skipped_frames = self.services['GetSkippedFrames']()
+        else:
+            skipped_frames = None
+
         p = kp.io.jpp.SummaryslicePump(filename=self.filename)
         for b in p:
+            sum_info = b['SummarysliceInfo']
+            frame_index = sum_info.frame_index
             summary = b['Summaryslice']
             for dom_id in summary.keys():
+                if skipped_frames is not None and \
+                        dom_id in skipped_frames[frame_index]:
+                    continue
                 rates[dom_id].append(summary[dom_id]['rates'])
 
         median_rates = {}
