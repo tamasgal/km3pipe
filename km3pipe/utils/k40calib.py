@@ -47,6 +47,7 @@ def k40calib(filename, tmax, ctmin, det_id, calib_filename):
     pipe.attach(kp.io.jpp.TimeslicePump, filename=filename)
     pipe.attach(StatusBar, every=5000)
     pipe.attach(MemoryObserver, every=10000)
+    pipe.attach(k40.HRVFIFOTimesliceFilter, filename=filename)
     pipe.attach(k40.SummaryMedianPMTRateService, filename=filename)
     pipe.attach(k40.TwofoldCounter, tmax=tmax)
     pipe.attach(k40.K40BackgroundSubtractor, mode='offline')
