@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* Hotfix of the SummaryslicePump (rates/fifos/hrvs reference issue)
 
 
 Version 7
