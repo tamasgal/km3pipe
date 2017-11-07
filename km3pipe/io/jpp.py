@@ -11,9 +11,8 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 
 from km3pipe.core import Pump, Blob
-from km3pipe.dataclasses import (EventInfo, TimesliceFrameInfo,
-                                 SummaryframeInfo, HitSeries,
-                                 TimesliceHitSeries, RawHitSeries)
+from km3pipe.dataclasses import (EventInfo, TimesliceInfo, SummarysliceInfo,
+                                 RawHitSeries)
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -165,12 +164,21 @@ class TimeslicePump(Pump):
         return next(self.blobs)
 
     def timeslice_generator(self):
+        slice_id = 0
         while self.r.has_next:
-            slice_id = 1
             blob = Blob()
             self.r.retrieve_next_timeslice()
             hits = self._extract_hits()
             hits.slice_id = slice_id
+            timeslice_info = TimesliceInfo(
+                    frame_index=self.r.frame_index,
+                    slice_id=slice_id,
+                    n_hits=len(hits),
+                    timestamp=self.r.utc_seconds,
+                    nanoseconds=self.r.utc_nanoseconds,
+                    n_frames=self.r.n_frames,
+                    )
+            blob['TimesliceInfo'] = timeslice_info
             blob['TSHits'] = hits
             yield blob
             slice_id += 1
@@ -252,10 +260,19 @@ class SummaryslicePump(Pump):
         rates = np.zeros(31, dtype='f8')
         hrvs = np.zeros(31, dtype='i4')
         fifos = np.zeros(31, dtype='i4')
+        slice_id = 0
         while self.r.has_next:
             summary_slice = {}
             self.r.retrieve_next_summaryslice()
             blob = Blob()
+            summaryslice_info = SummarysliceInfo(
+                    frame_index=self.r.frame_index,
+                    slice_id=slice_id,
+                    timestamp=self.r.utc_seconds,
+                    nanoseconds=self.r.utc_nanoseconds,
+                    n_frames=self.r.n_frames,
+                    )
+            blob['SummarysliceInfo'] = summaryslice_info
             while self.r.has_next_frame:
                 self.r.get_rates(rates)
                 self.r.get_hrvs(hrvs)
@@ -275,6 +292,7 @@ class SummaryslicePump(Pump):
                         }
                 self.r.retrieve_next_frame()
             blob['Summaryslice'] = summary_slice
+            slice_id += 1
             yield blob
 
     def __iter__(self):
