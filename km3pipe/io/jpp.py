@@ -286,9 +286,6 @@ class SummaryslicePump(Pump):
                         'has_udp_trailer': self.r.has_udp_trailer,
                         'high_rate_veto': self.r.high_rate_veto,
                         'fifo_status': self.r.fifo_status,
-                        'frame_index': self.r.frame_index,
-                        'utc_seconds': self.r.utc_seconds,
-                        'utc_nanoseconds': self.r.utc_nanoseconds,
                         }
                 self.r.retrieve_next_frame()
             blob['Summaryslice'] = summary_slice
