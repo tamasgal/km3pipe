@@ -240,6 +240,115 @@ class TimeslicePump(Pump):
         return next(self.blobs)
 
 
+class TimeslicePump2(Pump):
+    """A pump to read and extract timeslices. Currently only hits are read.
+
+    This pump creates MultiHitSeries.
+
+    Required Parameters
+    -------------------
+    filename: str
+
+    """
+    def configure(self):
+        filename = self.require('filename')
+        self.blobs = self.timeslice_generator()
+        try:
+            import jppy  # noqa
+        except ImportError:
+            raise ImportError("\nEither Jpp or jppy could not be found."
+                              "\nMake sure you source the JPP environmanet "
+                              "and have jppy installed")
+        self.r = jppy.daqtimeslicereader.PyJDAQTimesliceReader(filename)
+        self._scanner_initialised = False
+
+        self.buf_size = 5000
+        self._channel_ids = np.zeros(self.buf_size, dtype='i')
+        self._dom_ids = np.zeros(self.buf_size, dtype='i')
+        self._times = np.zeros(self.buf_size, dtype='i')
+        self._tots = np.zeros(self.buf_size, dtype='i')
+        self._triggereds = np.zeros(self.buf_size, dtype=bool)
+
+    def process(self, blob):
+        return next(self.blobs)
+
+    def timeslice_generator(self):
+        slice_id = 0
+        while self.r.has_next:
+            blob = Blob()
+            self.r.retrieve_next_timeslice()
+            hits = self._extract_hits()
+            hits.slice_id = slice_id
+            timeslice_info = TimesliceInfo(
+                    frame_index=self.r.frame_index,
+                    slice_id=slice_id,
+                    n_hits=len(hits),
+                    timestamp=self.r.utc_seconds,
+                    nanoseconds=self.r.utc_nanoseconds,
+                    n_frames=self.r.n_frames,
+                    )
+            blob['TimesliceInfo'] = timeslice_info
+            blob['TSHits'] = hits
+            yield blob
+            slice_id += 1
+
+    def _extract_hits(self):
+        n_frames = 0
+        total_hits = 0
+        while self.r.has_next_superframe:
+            n_frames += 1
+            n = self.r.number_of_hits
+            if n != 0:
+                start_index = total_hits
+                total_hits += n
+                if total_hits > self.buf_size:
+                    buf_size = int(total_hits * 3 / 2)
+                    self._resize_buffers(buf_size)
+                self.r.get_hits(self._channel_ids,
+                                self._dom_ids,
+                                self._times,
+                                self._tots,
+                                start_index)
+            self.r.retrieve_next_superframe()
+
+        hits = RawHitSeries.from_arrays(self._channel_ids[:total_hits],
+                                        self._dom_ids[:total_hits],
+                                        self._times[:total_hits],
+                                        self._tots[:total_hits],
+                                        self._triggereds[:total_hits],
+                                        0)
+        return hits
+
+    def _resize_buffers(self, buf_size):
+        log.info("Resizing hit buffers to {}.".format(buf_size))
+        self.buf_size = buf_size
+        self._channel_ids.resize(buf_size)
+        self._dom_ids.resize(buf_size)
+        self._times.resize(buf_size)
+        self._tots.resize(buf_size)
+        self._triggereds.resize(buf_size)
+
+    def get_by_frame_index(self, frame_index):
+        if not self._scanner_initialised:
+            self.r.init_tree_scanner()
+            self._scanner_initialised = True
+        blob = Blob()
+        self.r.retrieve_timeslice_at_frame_index(frame_index)
+        hits = self._extract_hits()
+        blob['TSHits'] = hits
+        return blob
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        return next(self.blobs)
+
+
 class SummaryslicePump(Pump):
     """Preliminary Summaryslice reader"""
     def configure(self):
