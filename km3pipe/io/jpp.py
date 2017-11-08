@@ -257,9 +257,6 @@ class SummaryslicePump(Pump):
         return next(self.blobs)
 
     def summaryslice_generator(self):
-        rates = np.zeros(31, dtype='f8')
-        hrvs = np.zeros(31, dtype='i4')
-        fifos = np.zeros(31, dtype='i4')
         slice_id = 0
         while self.r.has_next:
             summary_slice = {}
@@ -274,6 +271,9 @@ class SummaryslicePump(Pump):
                     )
             blob['SummarysliceInfo'] = summaryslice_info
             while self.r.has_next_frame:
+                rates = np.zeros(31, dtype='f8')
+                hrvs = np.zeros(31, dtype='i4')
+                fifos = np.zeros(31, dtype='i4')
                 self.r.get_rates(rates)
                 self.r.get_hrvs(hrvs)
                 self.r.get_fifos(fifos)
