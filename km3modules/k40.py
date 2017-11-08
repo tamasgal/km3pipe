@@ -241,9 +241,11 @@ class TwofoldCounter(kp.Module):
         hits = blob['TSHits']
 
         frame_index = blob['TimesliceInfo'].frame_index
+        dom_ids = set(np.unique(hits.dom_id))
         if self.skipped_frames is not None:
             skipped_dom_ids = set(self.skipped_frames[frame_index])
-            dom_ids = set(np.unique(hits.dom_id))
+        else:
+            skipped_dom_ids = set()
 
         for dom_id in dom_ids - skipped_dom_ids:
             self.n_timeslices[dom_id] += 1
