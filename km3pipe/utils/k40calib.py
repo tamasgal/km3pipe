@@ -11,13 +11,14 @@ The following script calculates the PMT time offsets using K40 coincidences
 
 
 Usage:
-    k40calib FILE DET_ID [-t TMAX -c CTMIN -o CALIB_FILE]
+    k40calib FILE DET_ID [-t TMAX -c CTMIN -r -o CALIB_FILE]
     k40calib (-h | --help)
     k40calib --version
 
 Options:
     FILE            Input file (ROOT).
     DET_ID          Detector ID (e.g. 29).
+    -r              Skip frames with with at least one PMT in HRV.
     -t TMAX         Coincidence time window [default: 10].
     -c CTMIN        Minimum cos(angle) between PMTs for L2 [default: -1.0].
     -o CALIB_FILE   Filename for the calibration output [default: k40_cal.p].
@@ -42,12 +43,13 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-def k40calib(filename, tmax, ctmin, det_id, calib_filename):
+def k40calib(filename, tmax, ctmin, filter_hrv, det_id, calib_filename):
     pipe = kp.Pipeline()
     pipe.attach(kp.io.jpp.TimeslicePump, filename=filename)
     pipe.attach(StatusBar, every=5000)
     pipe.attach(MemoryObserver, every=10000)
-    pipe.attach(k40.HRVFIFOTimesliceFilter, filename=filename)
+    pipe.attach(k40.HRVFIFOTimesliceFilter,
+                filter_hrv=filter_hrv, filename=filename)
     pipe.attach(k40.SummaryMedianPMTRateService, filename=filename)
     pipe.attach(k40.TwofoldCounter, tmax=tmax)
     pipe.attach(k40.K40BackgroundSubtractor, mode='offline')
@@ -66,5 +68,6 @@ def main():
     k40calib(args['FILE'],
              int(args['-t']),
              float(args['-c']),
+             args['-r'],
              int(args['DET_ID']),
              args['-o'])
