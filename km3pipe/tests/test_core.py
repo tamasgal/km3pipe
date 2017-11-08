@@ -4,7 +4,7 @@
 from __future__ import division, absolute_import, print_function
 
 from km3pipe.testing import TestCase, StringIO, MagicMock, patch
-from km3pipe.core import Pipeline, Module, Pump, Blob, Geometry
+from km3pipe.core import Pipeline, Module, Pump, Blob, Calibration
 from km3pipe.dataclasses import HitSeries
 
 import numpy as np
@@ -277,31 +277,31 @@ class TestBlob(TestCase):
         self.assertEqual(1, blob['foo'])
 
 
-class TestGeometry(TestCase):
-    """Tests for the Geometry class"""
+class TestCalibration(TestCase):
+    """Tests for the Calibration class"""
 
     def test_init_with_wrong_file_extension(self):
         with self.assertRaises(NotImplementedError):
-            geo = Geometry(filename='foo')
+            cal = Calibration(filename='foo')
 
     @patch('km3pipe.core.Detector')
     def test_init_with_filename(self, mock_detector):
-        geo = Geometry(filename='foo.detx')
+        cal = Calibration(filename='foo.detx')
         mock_detector.assert_called_with(filename='foo.detx')
 
     @patch('km3pipe.core.Detector')
     def test_init_with_det_id(self, mock_detector):
-        geo = Geometry(det_id=1)
+        cal = Calibration(det_id=1)
         mock_detector.assert_called_with(t0set=None, calibration=None, det_id=1)
-        geo = Geometry(det_id=1, calibration=2, t0set=3)
+        cal = Calibration(det_id=1, calibration=2, t0set=3)
         mock_detector.assert_called_with(t0set=3, calibration=2, det_id=1)
 
     def test_apply_to_list(self):
-        geo = Geometry()
+        cal = Calibration()
         hits = [1, 2, 3]
-        geo._apply_to_hitseries = MagicMock()
-        geo.apply(hits)
-        geo._apply_to_hitseries.assert_called_with(hits)
+        cal._apply_to_hitseries = MagicMock()
+        cal.apply(hits)
+        cal._apply_to_hitseries.assert_called_with(hits)
 
     def test_apply_to_hitseries(self):
 
@@ -316,7 +316,7 @@ class TestGeometry(TestCase):
                                 t0=1000*i)
                 return pmt
 
-        geo = Geometry(detector=FakeDetector())
+        cal = Calibration(detector=FakeDetector())
 
         n = 5
         ids = np.arange(n)
@@ -356,7 +356,7 @@ class TestGeometry(TestCase):
         self.assertEqual(4, hits[4].time)
         self.assertFalse(np.isnan(hits[2].pos_y))
 
-        geo._apply_to_hitseries(hits)
+        cal._apply_to_hitseries(hits)
 
         self.assertAlmostEqual(303, hits[3].pos_x)
         self.assertAlmostEqual(304, hits[3].pos_y)

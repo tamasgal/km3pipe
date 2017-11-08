@@ -25,8 +25,8 @@ from km3pipe.logger import logging
 
 
 PLOTS_PATH = 'www/plots'
-geometry = kp.core.Geometry(det_id=14)
-detector = geometry.detector
+cal = kp.core.Calibration(det_id=14)
+detector = cal.detector
 
 
 def mongincidence(times, tdcs, tmax=20, offset=0):

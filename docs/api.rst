@@ -19,7 +19,7 @@ KM3Pipe: Main Framework
   :toctree: api
 
   Blob
-  Geometry
+  Calibration
   Module
   Pipeline
   Pump

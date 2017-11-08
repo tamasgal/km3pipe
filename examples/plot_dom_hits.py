@@ -24,7 +24,7 @@ km3pipe.style.use("km3pipe")
 
 
 filename = "data/km3net_jul13_90m_muatm50T655.km3_v5r1.JTE_r2356.root.0-499.h5"
-geo = kp.Geometry(filename="data/km3net_jul13_90m_r1494_corrected.detx")
+cal = kp.Calibration(filename="data/km3net_jul13_90m_r1494_corrected.detx")
 
 
 def filter_muons(blob):
@@ -50,7 +50,7 @@ class DOMHits(kp.Module):
         triggered_hits = hits.triggered_hits
         dom_hits = Counter(triggered_hits.dom_id)
         for dom_id, n_hits in dom_hits.items():
-            distance = pld3(geo.detector.dom_positions[dom_id],
+            distance = pld3(cal.detector.dom_positions[dom_id],
                             muon.pos,
                             muon.dir)
             self.hit_statistics['n_hits'].append(n_hits)

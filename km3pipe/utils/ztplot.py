@@ -53,12 +53,12 @@ def main():
         event_info = blob['EventInfo']
         hits = blob['Hits']
         if(arguments['-d']):
-            geo = kp.core.Geometry(filename=arguments['-d'])
+            cal = kp.core.Calibration(filename=arguments['-d'])
         else:
-            geo = kp.core.Geometry(det_id=event_info.det_id)
-        hits = geo.apply(hits)
-        # triggered_dus = set(geo.detector.doms[h.dom_id][0] for h in hits)
-        det = geo.detector
+            cal = kp.core.Calibration(det_id=event_info.det_id)
+        hits = cal.apply(hits)
+        # triggered_dus = set(cal.detector.doms[h.dom_id][0] for h in hits)
+        det = cal.detector
         if arguments['-t']:
             dus = set(det.doms[h.dom_id][0] for h in hits if h.triggered)
         else:

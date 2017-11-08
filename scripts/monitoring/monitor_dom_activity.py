@@ -24,8 +24,8 @@ from km3pipe.logger import logging
 
 
 PLOTS_PATH = 'km3web/plots'
-geometry = kp.core.Geometry(det_id=29)
-detector = geometry.detector
+cal = kp.Calibration(det_id=29)
+detector = cal.detector
 
 
 class DOMActivityPlotter(kp.Module):
