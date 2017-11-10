@@ -26,7 +26,7 @@ import pandas as pd
 import numpy as np
 import websocket
 
-from .core import Geometry
+from .core import Calibration
 from .config import Config
 from .dataclasses import HitSeries, CRawHitSeries
 from .tools import token_urlsafe
@@ -230,11 +230,11 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
                      "Snapshot hits: {3}, Triggered hits: {4}"
                      .format(det_id, run_id, event_id,
                              len(snapshot_hits), len(triggered_hits)))
-        geometry = Geometry(det_id=det_id)
+        cal = Calibration(det_id=det_id)
         # detx_file = os.path.join(self.data_path, 'detx', det_dir_name + '.detx')
         # log.warning("Using cached '{0}'".format(detx_file))
-        # geometry = Geometry(filename=detx_file)
-        geometry.apply(snapshot_hits)
+        # cal = Calibration(filename=detx_file)
+        cal.apply(snapshot_hits)
 
         event = {
             "hits": {

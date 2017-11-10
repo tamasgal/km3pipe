@@ -82,17 +82,17 @@ calibrated hit times. They also provide access to the DU and floor which the
 hit was registered.
 
 In order to obtain the position, direction, the t0 correction and DU/floor, you
-need to apply a geometry. KM3Pipe provides the ``Geometry`` class to do this
+need to apply a calibration. KM3Pipe provides the ``Calibration`` class to do this
 for you.
 
-To create a geometry from a detector file::
+To create a calibration from a detector file::
 
-    geo = kp.Geometry(filename="path/to/detector.detx")
+    cal = kp.Calibration(filename="path/to/detector.detx")
 
 
-To apply the geometry to a set of hits::
+To apply the calibration to a set of hits::
 
-    calibrated_hits = geo.apply(hits)
+    calibrated_hits = cal.apply(hits)
 
 That's it, you will get a ``CRawHitSeries`` or ``CMcHitSeries`` instance
 respectively, with ``pos_x``, ``pos_y``, ... and also ``dir_x``, ``dir_y``...

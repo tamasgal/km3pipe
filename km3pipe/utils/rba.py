@@ -40,7 +40,7 @@ class RBAPrompt(Cmd):
         Cmd.__init__(self)
         self.filename = filename
         self.pump = kp.io.GenericPump(filename)
-        self.geo = kp.Geometry(filename=detx)
+        self.cal = kp.Calibration(filename=detx)
         self.prompt = "> "
         self.current_idx = 0
         self.token = None
@@ -85,7 +85,7 @@ class RBAPrompt(Cmd):
 
     def srv_event(self, event):
         print("Serving event #{0}".format(event))
-        hits = self.geo.apply(self.pump[event]["Hits"].triggered_hits)
+        hits = self.cal.apply(self.pump[event]["Hits"].triggered_hits)
         srv_event(self.token, hits) 
         self.current_idx = event
 

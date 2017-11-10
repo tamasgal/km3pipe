@@ -1,6 +1,7 @@
 Unreleased changes
 ------------------
 * Hotfix of the SummaryslicePump (rates/fifos/hrvs reference issue)
+* ``Geometry`` has been renamed to ``Calibration``
 
 
 Version 7
