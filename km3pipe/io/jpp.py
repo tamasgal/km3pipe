@@ -168,16 +168,15 @@ class TimeslicePump(Pump):
         while self.r.has_next:
             blob = Blob()
             self.r.retrieve_next_timeslice()
-            hits = self._extract_hits()
-            hits.slice_id = slice_id
             timeslice_info = TimesliceInfo(
                     frame_index=self.r.frame_index,
                     slice_id=slice_id,
-                    n_hits=len(hits),
                     timestamp=self.r.utc_seconds,
                     nanoseconds=self.r.utc_nanoseconds,
                     n_frames=self.r.n_frames,
                     )
+            hits = self._extract_hits()
+            hits.slice_id = slice_id
             blob['TimesliceInfo'] = timeslice_info
             blob['TSHits'] = hits
             yield blob

@@ -219,7 +219,6 @@ class SummarysliceInfo(with_metaclass(Serialisable)):
 TimesliceInfo = namedtuple('TimesliceInfo',
                            ['frame_index',
                             'slice_id',
-                            'n_hits',
                             'timestamp',
                             'nanoseconds',
                             'n_frames'])
