@@ -360,7 +360,7 @@ class AanetPump(Pump):
                     blob['OrcaRecoLns'] = KM3Array.from_dict(
                         track, dtype, h5loc='/reco')
         else:
-            log.warn("Event #{} does not have any tracks!".format(event_id))
+            log.debug("Event #{} does not have any tracks!".format(event_id))
         return blob
 
     def event_index(self, blob):
