@@ -431,8 +431,7 @@ class Calibration(Module):
     calibration: optional
         calibration (when retrieving from database).
     """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self._should_apply = self.get('apply') or False
         self.filename = self.get('filename') or None
         self.det_id = self.get('det_id') or None
@@ -455,8 +454,11 @@ class Calibration(Module):
                                          calibration=self.calibration)
 
         if self.detector is not None:
+            log.debug("Creating lookup tables")
             self._create_dom_channel_lookup()
             self._create_pmt_id_lookup()
+        else:
+            log.critical("No detector information loaded.")
 
     def process(self, blob, key='Hits'):
         if self._should_apply:
