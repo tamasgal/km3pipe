@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from km3pipe import Pipeline, Geometry, Module
+from km3pipe import Pipeline, Calibration, Module
 from km3pipe.io import EvtPump
 from km3modules.common import StatusBar
 import os
@@ -24,6 +24,6 @@ class PrintPositions(Module):
 pipe = Pipeline()
 pipe.attach(EvtPump, filename=os.path.join(PATH, DATA))
 pipe.attach(StatusBar)
-pipe.attach(Geometry, timeit=True, apply=True, filename=os.path.join(PATH, DETX))
+pipe.attach(Calibration, timeit=True, apply=True, filename=os.path.join(PATH, DETX))
 pipe.attach(PrintPositions, timeit=True)
 pipe.drain(3)

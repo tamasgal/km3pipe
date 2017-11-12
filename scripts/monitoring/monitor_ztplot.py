@@ -24,7 +24,7 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 
-from km3pipe import Pipeline, Module, Geometry
+from km3pipe import Pipeline, Module, Calibration
 from km3pipe.dataclasses import HitSeries
 from km3pipe.common import StringIO, Queue, Empty
 from km3pipe.hardware import Detector
@@ -45,8 +45,8 @@ from km3pipe.logger import logging
 PLOTS_PATH = 'www/plots'
 N_DOMS = 18
 N_DUS = 2 
-geometry = Geometry(det_id=14)
-detector = geometry.detector
+cal = Calibration(det_id=14)
+detector = cal.detector
 
 xfmt = md.DateFormatter('%Y-%m-%d %H:%M')
 lock = threading.Lock()
@@ -65,7 +65,7 @@ class ZTPlot(Module):
             return blob
 
         hits = blob['Hits'].serialise(to='pandas')
-        geometry.apply(hits)
+        cal.apply(hits)
         event_info = blob['EventInfo']
 
         if len(np.unique(hits[hits.triggered == True].du)) < 2:

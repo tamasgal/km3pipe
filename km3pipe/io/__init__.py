@@ -25,7 +25,7 @@ from .pandas import (H5Chain, df_to_h5, map2df,
                      read_group, write_table,)
 
 from km3pipe.tools import insert_prefix_to_dtype
-from km3pipe.core import Geometry, Run
+from km3pipe.core import Calibration, Run
 from km3pipe.logger import logging
 
 __author__ = "Tamas Gal"
@@ -76,12 +76,13 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
         return io[extension](filenames=filenames, name=name, **kwargs)
 
 
-def read_geometry(detx=None, det_id=None, from_file=False, det_id_table=None):
-    """Retrive geometry from file, the DB."""
+def read_calibration(detx=None, det_id=None, from_file=False,
+                     det_id_table=None):
+    """Retrive calibration from file, the DB."""
     if not detx or det_id or from_file:
         return None
     if detx is not None:
-        return Geometry(filename=detx)
+        return Calibration(filename=detx)
     if from_file:
         det_ids = np.unique(det_id_table)
         if len(det_ids) > 1:
@@ -93,16 +94,16 @@ def read_geometry(detx=None, det_id=None, from_file=False, det_id_table=None):
                         .format(det_id))
             return None
         try:
-            return Geometry(det_id=det_id)
+            return Calibration(det_id=det_id)
         except ValueError:
-            log.warning("Could not retrieve the geometry information.")
+            log.warning("Could not retrieve the calibration information.")
     return None
 
 
 def read_hdf5(filename, detx=None, det_id=None, det_from_file=False):
     """Open HDF5 file and retrieve all relevant information.
 
-    Optionally, a detector geometry can read by passing a detector file,
+    Optionally, a detector calibration can read by passing a detector file,
     or retrieved from the database by passing a detector ID, or by reading
     the detector id from the event info in the file.
     """
@@ -123,5 +124,6 @@ def read_hdf5(filename, detx=None, det_id=None, det_from_file=False):
         pass
     run = Run(**opts)
 
-    run.geometry = read_geometry(detx, det_id, det_from_file,
-                                 det_id_table=opts['event_info']['det_id'])
+    det_id_table = opts['event_info']['det_id']
+    run.calibration = read_calibration(detx, det_id, det_from_file,
+                                       det_id_table=det_id_table)

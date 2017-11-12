@@ -24,6 +24,7 @@ from .sys import peak_memory_usage, ignored
 from .hardware import Detector
 from .dataclasses import (CRawHitSeries, HitSeries, RawHitSeries,
                           CMcHitSeries, McHitSeries)
+from .tools import deprecated
 from .logger import logging
 from .time import Timer
 
@@ -60,7 +61,7 @@ class Pipeline(object):
 
         self.modules = []
         self.services = {}
-        self.geometry = None
+        self.calibration = None
         self.blob = blob or Blob()
         self.timeit = timeit
         self._timeit = {'init': timer(), 'init_cpu': time.clock(),
@@ -113,12 +114,12 @@ class Pipeline(object):
                                 'finish': 0,
                                 'finish_cpu': 0}
 
-        if hasattr(module, 'get_detector'):  # Geometry-like module
-            self.geometry = module
+        if hasattr(module, 'get_detector'):  # Calibration-like module
+            self.calibration = module
             if module._should_apply:
                 self.modules.append(module)
         else:  # normal module
-            module.geometry = self.geometry
+            module.calibration = self.calibration
             self.modules.append(module)
 
     def attach_bundle(self, modules):
@@ -139,10 +140,10 @@ class Pipeline(object):
         if not cycles:
             log.info("No cycle count, the pipeline may be drained forever.")
 
-        if self.geometry:
-            log.info("Setting up the detector geometry.")
+        if self.calibration:
+            log.info("Setting up the detector calibration.")
             for module in self.modules:
-                module.detector = self.geometry.get_detector()
+                module.detector = self.calibration.get_detector()
 
         try:
             while not self._stop:
@@ -409,13 +410,18 @@ class Blob(OrderedDict):
     pass
 
 
-class Geometry(Module):
-    """A very simple, preliminary Module which gives access to the geometry.
+class Geometry(object):
+    def __init__(self, *args, **kwargs):
+        log.error("The 'Geometry' class has been renamed to 'Calibration'!")
+
+
+class Calibration(Module):
+    """A very simple, preliminary Module which gives access to the calibration.
 
     Parameters
     ----------
     apply: bool, optional [default=False]
-        Apply the geometry to the hits (add position/direction/t0)?
+        Apply the calibration to the hits (add position/direction/t0)?
     filename: str, optional [default=None]
         DetX file with detector description.
     det_id: int, optional
@@ -425,8 +431,7 @@ class Geometry(Module):
     calibration: optional
         calibration (when retrieving from database).
     """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self._should_apply = self.get('apply') or False
         self.filename = self.get('filename') or None
         self.det_id = self.get('det_id') or None
@@ -449,8 +454,11 @@ class Geometry(Module):
                                          calibration=self.calibration)
 
         if self.detector is not None:
+            log.debug("Creating lookup tables")
             self._create_dom_channel_lookup()
             self._create_pmt_id_lookup()
+        else:
+            log.critical("No detector information loaded.")
 
     def process(self, blob, key='Hits'):
         if self._should_apply:
@@ -465,7 +473,7 @@ class Geometry(Module):
         """Add x, y, z, t0 (and du, floor if DataFrame) columns to hit.
 
         When applying to ``RawHitSeries`` or ``McHitSeries``, a ``HitSeries``
-        will be returned with the geometry information added.
+        will be returned with the calibration information added.
         
         """
         if isinstance(hits, (HitSeries, list)):
@@ -477,7 +485,7 @@ class Geometry(Module):
         elif isinstance(hits, McHitSeries):
             return self._apply_to_mchitseries(hits)
         else:
-            raise TypeError("Don't know how to apply geometry to '{0}'."
+            raise TypeError("Don't know how to apply calibration to '{0}'."
                             .format(hits.__class__.__name__))
 
     def _apply_to_hitseries(self, hits):
@@ -612,11 +620,11 @@ class Geometry(Module):
         return self.__str__()
 
     def __str__(self):
-        return "Geometry: det_id({0})".format(self.det_id)
+        return "Calibration: det_id({0})".format(self.det_id)
 
 
 class Run(object):
-    """A simple container for event info, hits, tracks and geometry.
+    """A simple container for event info, hits, tracks and calibration.
     """
     def __init__(self, **tables):
         for key, val in tables.items():

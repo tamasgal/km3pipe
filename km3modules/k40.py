@@ -241,9 +241,11 @@ class TwofoldCounter(kp.Module):
         hits = blob['TSHits']
 
         frame_index = blob['TimesliceInfo'].frame_index
+        dom_ids = set(np.unique(hits.dom_id))
         if self.skipped_frames is not None:
             skipped_dom_ids = set(self.skipped_frames[frame_index])
-            dom_ids = set(np.unique(hits.dom_id))
+        else:
+            skipped_dom_ids = set()
 
         for dom_id in dom_ids - skipped_dom_ids:
             self.n_timeslices[dom_id] += 1
@@ -266,8 +268,11 @@ class TwofoldCounter(kp.Module):
 
 
 class HRVFIFOTimesliceFilter(kp.Module):
+    """Creat a frame index lookup table which holds DOM IDs of frames with
+    at least one PMT in HRV."""
     def configure(self):
         filename = self.require('filename')
+        filter_hrv = self.get('filter_hrv', default=False)
         self.expose(self.get_skipped_frames, 'GetSkippedFrames')
         self.skipped_frames = defaultdict(list)
         p = kp.io.jpp.SummaryslicePump(filename=filename)
@@ -276,7 +281,7 @@ class HRVFIFOTimesliceFilter(kp.Module):
             frame_index = sum_info.frame_index
             summaryslice = b['Summaryslice']
             for dom_id, sf in summaryslice.items():
-                if not sf['fifo_status'] or any(sf['hrvs']):
+                if not sf['fifo_status'] or (filter_hrv and any(sf['hrvs'])):
                     self.skipped_frames[frame_index].append(dom_id)
 
     def get_skipped_frames(self):

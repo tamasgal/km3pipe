@@ -24,15 +24,13 @@ Options:
     --aa-old-mc-id                  (aanet): read mc id as `evt.mc_id`, instead
                                     of the newer `mc_id = evt.frame_index - 1`
     --aa-ignore-run-id-from-header  (Aanet) read run id from event, not header.
-    --correct-zed                   (Aanet) Correct offset in mc tracks (aanet)
-                                    [default: False]
-    --do-not-correct-mc-times       (Aanet) Don't correct MC times.
+    --correct-zed                   (Aanet) Correct offset in mc tracks (aanet).
+    --correct-mc-times              (Aanet) Correct MC times (from JTE to MC time).
     --skip-header                   (Aanet) don't read the full header.
                                     Entries like `genvol` and `neventgen` will
                                     still be retrived. This switch enables
                                     skipping the `get_aanet_header` function only.
-                                    [default: False]
-    --ignore-hits                   Don't read the hits, please [default: False].
+    --ignore-hits                   Don't read the hits.
     -e --expected-rows NROWS        Approximate number of events.  Providing a
                                     rough estimate for this (100, 10000000, ...)
                                     will greatly improve reading/writing speed and
@@ -104,7 +102,7 @@ def main():
     aa_old_mc_id = args['--aa-old-mc-id']
     correct_zed = args['--correct-zed']
     skip_header = args['--skip-header']
-    do_not_correct_mc_times = args['--do-not-correct-mc-times']
+    correct_mc_times = args['--correct-mc-times']
     ignore_hits_arg = args['--ignore-hits']
     ignore_run_id_from_header = args['--aa-ignore-run-id-from-header']
     tohdf5(infiles,
@@ -114,10 +112,10 @@ def main():
            aa_fmt=aa_format,
            aa_lib=aa_lib,
            n_rows_expected=n_rows_expected,
-           apply_zed_correction=correct_zed,
+           apply_zed_correction=bool(correct_zed),
            old_mc_id=aa_old_mc_id,
-           skip_header=skip_header,
-           correct_mc_times=not bool(do_not_correct_mc_times),
+           skip_header=bool(skip_header),
+           correct_mc_times=bool(correct_mc_times),
            ignore_hits=bool(ignore_hits_arg),
            ignore_run_id_from_header=bool(ignore_run_id_from_header),
           )

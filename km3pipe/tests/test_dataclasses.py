@@ -643,10 +643,9 @@ class TestSummaryframeSeries(TestCase):
 
 class TestTimesliceInfo(TestCase):
     def test_timeslice_info(self):
-        s = TimesliceInfo(frame_index=0, slice_id=1, n_hits=2, timestamp=3,
+        s = TimesliceInfo(frame_index=0, slice_id=1, timestamp=3,
                           nanoseconds=4, n_frames=5)
         self.assertAlmostEqual(0, s.frame_index)
-        self.assertAlmostEqual(2, s.n_hits)
         self.assertAlmostEqual(1, s.slice_id)
         self.assertAlmostEqual(3, s.timestamp)
         self.assertAlmostEqual(4, s.nanoseconds)

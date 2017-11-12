@@ -160,14 +160,14 @@ Help output::
 ``calibrate``
 ~~~~~~~~~~~~~
 
-Apply geometry and time calibration to an HDF5 file.
+Apply calibration and time calibration to an HDF5 file.
 
 Example::
 
     calibrate km3net_jul13_90m_r1494.detx km3net_jul13_90m_muatm10T23.h5
 
     $ calibrate -h
-    Apply geometry and time calibration from a DETX to an HDF5 file.
+    Apply calibration and time calibration from a DETX to an HDF5 file.
 
     Usage:
         calibrate DETXFILE HDF5FILE
