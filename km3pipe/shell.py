@@ -74,6 +74,8 @@ def qsub(script, job_name, log_path='qlogs', group='km3net', platform='cl7',
          dryrun=False):
     """Submit a job via qsub."""
     print("Preparing job script...")
+    if isinstance(script, Script):
+        script = str(script)
     log_path = os.path.join(os.getcwd(), log_path)
     job_string = JOB_TEMPLATE.format(
             script=script, email=email, send_mail=send_mail, log_path=log_path,
@@ -105,3 +107,22 @@ def get_jpp_env(jpp_dir):
                      .format(jpp_dir)).read().split('\n')
             if '=' in l]}
     return env
+
+
+class Script(object):
+    """A shell script which can be built line by line for `qsub`."""
+    def __init__(self):
+        self.lines = []
+
+    def add(self, line):
+        """Add a new line"""
+        self.lines.append(line)
+
+    def clear(self):
+        self.lines = []
+
+    def __str__(self):
+        return '\n'.join(self.lines)
+
+    def __repr__(self):
+        return "# Shell script\n" + str(self)
