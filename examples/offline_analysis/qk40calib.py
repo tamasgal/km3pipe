@@ -39,7 +39,7 @@ import os
 import re
 from glob import glob
 import time
-from km3pipe.shell import qsub
+from km3pipe.shell import qsub, Script
 import km3pipe as kp
 from docopt import docopt
 
@@ -71,40 +71,39 @@ def main():
                          glob(os.path.join(CALIB_PATH, '*.k40_cal.p')))
     remaining_runs = list(phys_runs - processed_runs)
     print("Remaining runs: {}".format(remaining_runs))
-    cmds = []
+    s = Script()
 
     for job_id, runs_chunk in enumerate(kp.tools.chunks(remaining_runs,
                                                         RUNS_PER_JOB)):
         n_runs = len(runs_chunk)
         print("Preparing batch script for a chunk of {} runs."
               .format(len(runs_chunk)))
-        cmds.append("cd $TMPDIR; mkdir -p $USER; cd $USER")
+        s.add("cd $TMPDIR; mkdir -p $USER; cd $USER")
         for run in runs_chunk:
-            cmds.append("echo Processing {}:".format(run))
+            s.add("echo Processing {}:".format(run))
             irods_path = kp.tools.irods_filepath(DET_ID, run)
             root_filename = os.path.basename(irods_path)
             calib_filename = root_filename + '.k40_cal.p'
-            cmds.append("iget -v {}".format(irods_path))
-            cmds.append("CTMIN=$(JPrint -f {}|grep '^ctMin'|awk '{{print $2}}')"
+            s.add("iget -v {}".format(irods_path))
+            s.add("CTMIN=$(JPrint -f {}|grep '^ctMin'|awk '{{print $2}}')"
                         .format(root_filename))
-            cmds.append("k40calib {} {} -t {} -c $CTMIN -o {}"
+            s.add("k40calib {} {} -t {} -c $CTMIN -o {}"
                         .format(root_filename, DET_ID, TMAX, calib_filename))
-            cmds.append("cp {} {}".format(calib_filename, CALIB_PATH))
-            cmds.append("rm -f {}".format(root_filename))
-            cmds.append("rm -f {}".format(calib_filename))
-            cmds.append("echo Run {} processed.".format(run))
-            cmds.append("echo " + 42*"=")
+            s.add("cp {} {}".format(calib_filename, CALIB_PATH))
+            s.add("rm -f {}".format(root_filename))
+            s.add("rm -f {}".format(calib_filename))
+            s.add("echo Run {} processed.".format(run))
+            s.add("echo " + 42*"=")
 
         walltime = time.strftime('%H:%M:%S', time.gmtime(ET_PER_RUN * n_runs))
-        script = '\n'.join(cmds)
-        qsub(script, '{}_{}'.format(JOB_NAME, job_id), walltime=walltime,
+        qsub(s, '{}_{}'.format(JOB_NAME, job_id), walltime=walltime,
              vmem=VMEM, log_path=LOG_PATH, irods=True, platform='sl6',
              dryrun=DRYRUN)
 
         if DRYRUN:
             break
 
-        cmds = []
+        s.clear()
 
 
 if __name__ == '__main__':
