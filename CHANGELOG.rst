@@ -2,7 +2,7 @@ Unreleased changes
 ------------------
 * Hotfix of the SummaryslicePump (rates/fifos/hrvs reference issue)
 * ``Geometry`` has been renamed to ``Calibration``
-
+* aanetpump now does not convert MC times by default
 
 Version 7
 ---------
