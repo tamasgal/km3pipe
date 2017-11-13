@@ -297,6 +297,12 @@ class Module(object):
         self.only_if = None
         self.every = 1
         self.detector = None
+        if self.__module__ == '__main__':
+            self.logger_name = self.__class__.__name__
+        else:
+            self.logger_name = self.__module__ + '.' + self.__class__.__name__
+        log.debug("Setting up logger '{}'".format(self.logger_name))
+        self.log = logging.getLogger(self.logger_name)
         self.timeit = self.get('timeit') or False
         self._timeit = {'process': deque(maxlen=STAT_LIMIT),
                         'process_cpu': deque(maxlen=STAT_LIMIT),
@@ -469,6 +475,16 @@ class Calibration(Module):
         """Return the detector"""
         return self.detector
 
+    def apply_t0(self, hits):
+        """Apply only t0s"""
+        n = len(hits)
+        cal = np.empty(n)
+        lookup = self._calib_by_dom_and_channel
+        for i in range(n):
+            calib = lookup[hits._arr['dom_id'][i]][hits._arr['channel_id'][i]]
+            cal[i] = calib[6]
+        hits.time += cal
+
     def apply(self, hits):
         """Add x, y, z, t0 (and du, floor if DataFrame) columns to hit.
 
@@ -476,12 +492,12 @@ class Calibration(Module):
         will be returned with the calibration information added.
         
         """
-        if isinstance(hits, (HitSeries, list)):
+        if isinstance(hits, RawHitSeries):
+            return self._apply_to_rawhitseries(hits)
+        elif isinstance(hits, (HitSeries, list)):
             self._apply_to_hitseries(hits)
         elif isinstance(hits, pd.DataFrame):
             self._apply_to_table(hits)
-        elif isinstance(hits, RawHitSeries):
-            return self._apply_to_rawhitseries(hits)
         elif isinstance(hits, McHitSeries):
             return self._apply_to_mchitseries(hits)
         else:
@@ -514,8 +530,8 @@ class Calibration(Module):
         """
         n = len(hits)
         cal = np.empty((n, 9))
+        lookup = self._calib_by_dom_and_channel
         for i in range(n):
-            lookup = self._calib_by_dom_and_channel
             calib = lookup[hits._arr['dom_id'][i]][hits._arr['channel_id'][i]]
             cal[i] = calib
         h = np.empty(n, CRawHitSeries.dtype)
