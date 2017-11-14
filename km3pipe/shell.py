@@ -70,7 +70,7 @@ JOB_TEMPLATE = lstrip("""
 def qsub(script, job_name, log_path='qlogs', group='km3net', platform='cl7',
          walltime='00:10:00', vmem='8G', fsize='8G', shell=os.environ['SHELL'],
          email=os.environ['USER']+'@km3net.de', send_mail='n',
-         job_array_start=None, job_array_stop=None,
+         job_array_start=1, job_array_stop=None,
          irods=False, sps=True, hpss=False, xrootd=False,
          dcache=False, oracle=False,
          dryrun=False):
@@ -79,7 +79,7 @@ def qsub(script, job_name, log_path='qlogs', group='km3net', platform='cl7',
     if isinstance(script, Script):
         script = str(script)
     log_path = os.path.join(os.getcwd(), log_path)
-    if job_array_start is not None and job_array_stop is not None:
+    if job_array_stop is not None:
         job_array_option = "#$ -t {}-{}"  \
                            .format(job_array_start, job_array_stop)
     else:
