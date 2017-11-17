@@ -115,9 +115,9 @@ class DTypeAttr(object):
     def __getitem__(self, index):
         """Preliminary interface for accessing single elements, which
         otherwise return a `np.void`"""
-        if isinstance(index, int):
-            element = AttrVoid(self._arr[index])
-            return element
+        # if isinstance(index, int):
+        #     element = AttrVoid(self._arr[index])
+        #     return element
         new = self.__class__(self._arr[index])
         new.dtype = self.dtype
         return new
@@ -931,9 +931,9 @@ class RawHitSeries(DTypeAttr):
 
     def __getitem__(self, index):
         if isinstance(index, int):
-            element = AttrVoid(self._arr[index])
-            # hit = RawHit(*self._arr[index])
-            return element
+            # element = AttrVoid(self._arr[index])  # TODO: MemoryLeak
+            hit = RawHit(*self._arr[index])
+            return hit
         new = self.__class__(self._arr[index], self.event_id)
         new.dtype = self.dtype
         return new
