@@ -605,16 +605,16 @@ class Calibration(Module):
         for dom_id, pmts in self.detector._pmts_by_dom_id.items():
             for pmt in pmts:
                 if dom_id not in data:
-                    data[dom_id] = {}
-                data[dom_id][pmt.channel_id] = np.array((pmt.pos[0],
-                                                        pmt.pos[1],
-                                                        pmt.pos[2],
-                                                        pmt.dir[0],
-                                                        pmt.dir[1],
-                                                        pmt.dir[2],
-                                                        pmt.t0,
-                                                        pmt.omkey[0],
-                                                        pmt.omkey[1]))
+                    data[dom_id] = np.zeros((31, 9))
+                data[dom_id][pmt.channel_id] = [pmt.pos[0],
+                                                pmt.pos[1],
+                                                pmt.pos[2],
+                                                pmt.dir[0],
+                                                pmt.dir[1],
+                                                pmt.dir[2],
+                                                pmt.t0,
+                                                pmt.omkey[0],
+                                                pmt.omkey[1]]
         self._calib_by_dom_and_channel = data
 
     def _create_pmt_id_lookup(self):
