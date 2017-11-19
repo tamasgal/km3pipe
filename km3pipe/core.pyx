@@ -39,6 +39,15 @@ __status__ = "Development"
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 # log.setLevel(logging.DEBUG)
 
+try:
+    import numba as nb
+except ImportError:
+    log.debug("No Numba support")
+    HAVE_NUMBA = False
+else:
+    log.debug("Running with Numba support")
+    HAVE_NUMBA = True
+
 STAT_LIMIT = 100000
 
 
@@ -450,6 +459,7 @@ class Calibration(Module):
         self._pos_pmt_id = None
         self._dir_pmt_id = None
         self._t0_pmt_id = None
+        self._lookup_tables = None  # for Numba
 
         if self.filename or self.det_id:
             if self.filename is not None:
@@ -477,20 +487,24 @@ class Calibration(Module):
 
     def apply_t0(self, hits):
         """Apply only t0s"""
-        n = len(hits)
-        cal = np.empty(n)
-        lookup = self._calib_by_dom_and_channel
-        for i in range(n):
-            calib = lookup[hits._arr['dom_id'][i]][hits._arr['channel_id'][i]]
-            cal[i] = calib[6]
-        hits.time += cal
+        if HAVE_NUMBA:
+            apply_t0_nb(hits.time, hits.dom_id, hits.channel_id,
+                        self._lookup_tables)
+        else:
+            n = len(hits)
+            cal = np.empty(n)
+            lookup = self._calib_by_dom_and_channel
+            for i in range(n):
+                calib = lookup[hits._arr['dom_id'][i]][hits._arr['channel_id'][i]]
+                cal[i] = calib[6]
+            hits.time += cal
 
     def apply(self, hits):
         """Add x, y, z, t0 (and du, floor if DataFrame) columns to hit.
 
         When applying to ``RawHitSeries`` or ``McHitSeries``, a ``HitSeries``
         will be returned with the calibration information added.
-        
+
         """
         if isinstance(hits, RawHitSeries):
             return self._apply_to_rawhitseries(hits)
@@ -523,10 +537,10 @@ class Calibration(Module):
 
     def _apply_to_rawhitseries(self, hits):
         """Create a HitSeries from RawHitSeries and add pos, dir and t0.
-        
+
         Note that existing arrays like tot, dom_id, channel_id etc. will be
         copied by reference for better performance.
-        
+
         """
         n = len(hits)
         cal = np.empty((n, 9))
@@ -554,12 +568,12 @@ class Calibration(Module):
 
     def _apply_to_mchitseries(self, hits):
         """Create a HitSeries from McHitSeries and add pos, dir and t0.
-        
+
         Note that existing arrays like a, origin, pmt_id will be copied by
         reference for better performance.
 
         The attributes ``a`` and ``origin`` are not implemented yet.
-        
+
         """
         n = len(hits)
         cal = np.empty((n, 9))
@@ -616,6 +630,8 @@ class Calibration(Module):
                                                 pmt.omkey[0],
                                                 pmt.omkey[1]]
         self._calib_by_dom_and_channel = data
+        if HAVE_NUMBA:
+            self._lookup_tables = [(dom, cal) for dom, cal in data.items()]
 
     def _create_pmt_id_lookup(self):
         data = {}
@@ -637,6 +653,24 @@ class Calibration(Module):
 
     def __str__(self):
         return "Calibration: det_id({0})".format(self.det_id)
+
+
+if HAVE_NUMBA:
+    log.info("Initialising Numba JIT functions")
+    @nb.jit
+    def apply_t0_nb(times, dom_ids, channel_ids, lookup_tables):
+        """Apply t0s using a lookup table of tuples (dom_id, calib)"""
+        dom_id = 0
+        lookup = np.empty((31, 9))
+        for i in range(len(times)):
+            cur_dom_id = dom_ids[i]
+            if cur_dom_id != dom_id:
+                dom_id = cur_dom_id
+                for (d, m) in lookup_tables:
+                    if d == dom_id:
+                        np.copyto(lookup, m)
+            t0 = lookup[channel_ids[i]][6]
+            times[i] += t0
 
 
 class Run(object):
