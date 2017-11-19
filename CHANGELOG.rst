@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* ``Calibration`` moved to ``kp.calib``, since core.pyx was Cython and numba
+  does not like cython files.
 
 Version 7
 ---------
