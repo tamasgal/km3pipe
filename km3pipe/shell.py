@@ -62,7 +62,7 @@ JOB_TEMPLATE = lstrip("""
     {script}
 
     echo "========================================================"
-    echo "Job exited on" $(date)
+    echo "JAWOLLJA! Job exited on" $(date)
     echo "========================================================"
 """)
 
