@@ -138,8 +138,10 @@ def fit_ahrs(A, H, Aoff, Arot, Hoff, Hrot):
                        Hcal[1]*sin(pitch)*sin(roll),
                        Hcal[2]*sin(pitch)*cos(roll))))
 
-    # yaw = (yaw + magnetic_declination + 360 ) % 360
     yaw = np.degrees(yaw)
+    while yaw < 0:
+        yaw += 360
+    # yaw = (yaw + magnetic_declination + 360 ) % 360
     roll = np.degrees(roll)
     pitch = np.degrees(pitch)
     return yaw, pitch, roll
