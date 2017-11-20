@@ -61,6 +61,3 @@ class TestConfig(TestCase):
     def test_create_irods_session_returns_none_if_irods_module_missing(self):
         session = self.config.create_irods_session()
         self.assertTrue(session is None)
-
-    def test_tofail(self):
-        assert False
