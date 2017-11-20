@@ -23,7 +23,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 log = kp.logger.logging.getLogger(__name__)  # pylint: disable=C0103
-# log.setLevel(logging.DEBUG)
+# log.setLevel("DEBUG")
 
 
 class AHRSCalibrator(kp.Module):
@@ -91,7 +91,7 @@ class AHRSCalibrator(kp.Module):
             clb_upi = self.db.doms.via_dom_id(dom_id).clb_upi
             ahrs_calib = get_latest_ahrs_calibration(clb_upi)
             if ahrs_calib is None:
-                log.warning("No AHRS calibration found for '{}'".format(dom_id))
+                log.warning("AHRS calibration missing for '{}'".format(dom_id))
                 continue
             du, floor, _ = self.detector.doms[dom_id]
             A = np.median(self.A[dom_id], axis=0)
@@ -171,10 +171,19 @@ def get_latest_ahrs_calibration(clb_upi, max_version=3, db=None):
         db = kp.db.DBManager()
 
     for version in range(max_version, 0, -1):
-        raw_data = db._get_content("show_product_test.htm?upi={0}&"
-                                   "testtype=AHRS-CALIBRATION-v{1}&n=1&out=xml"
-                                   .format(ahrs_upi, version)) \
-                                   .replace('\n', '')
+        raw_data = ""
+        for n in range(1, 100):
+            log.debug("Iteration #{} to get the calib data".format(n))
+            url = "show_product_test.htm?upi={0}&" \
+                  "testtype=AHRS-CALIBRATION-v{1}&n={2}&out=xml" \
+                  .format(ahrs_upi, version, n)
+            log.debug("AHRS calib DB URL: {}".format(url))
+            _raw_data = db._get_content(url).replace('\n', '')
+            log.debug("What I got back as AHRS calib: {}".format(_raw_data))
+            if len(_raw_data) == 0:
+                break
+            else:
+                raw_data = _raw_data
         try:
             xroot = ET.parse(io.StringIO(raw_data)).getroot()
         except ET.ParseError:
