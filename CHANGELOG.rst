@@ -2,6 +2,8 @@ Unreleased changes
 ------------------
 * ``Calibration`` moved to ``kp.calib``, since core.pyx was Cython and numba
   does not like cython files.
+* ``streamds`` now requires the ``get`` command to retrieve info on command
+  line
 
 Version 7
 ---------
