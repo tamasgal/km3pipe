@@ -6,6 +6,7 @@ Unreleased changes
   line
 * ``streamds`` can now upload to runsummary tables
 * remove obsolete ``kp.dev`` (now resides in ``kp.tools``
+* fixes EOF hang in ``kp.io.daq.TMCHRepump``
 
 Version 7
 ---------
