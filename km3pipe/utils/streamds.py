@@ -106,6 +106,10 @@ def upload_runsummary(csv_filename):
     if len(parameters) < 1:
         log.error("No parameter columns found.")
         return
+    
+    if len(df) == 0:
+        log.critical("Empty dataset.")
+        return
 
     print("Found data for parameters: {}."
           .format(', '.join(str(c) for c in parameters)))
