@@ -4,6 +4,8 @@ Unreleased changes
   does not like cython files.
 * ``streamds`` now requires the ``get`` command to retrieve info on command
   line
+* ``streamds`` can now upload to runsummary tables
+* remove obsolete ``kp.dev`` (now resides in ``kp.tools``
 
 Version 7
 ---------
