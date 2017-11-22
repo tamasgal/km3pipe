@@ -11,11 +11,9 @@ figure.figsize: 6, 5.51
 figure.facecolor: white
 figure.edgecolor: white
 
-font.family: serif
-font.sans-serif: Helvetica, sans-serif
-font.serif: Andada, serif
-font.monospace: Roboto Mono, monospace
-
+font.size: 14.0
+font.family: sans-serif
+font.sans-serif: Helvetica Neue, Helvetica, Liberation Sans, Bitstream Vera Sans, sans-serif
 grid.color: .8
 
 hist.bins: auto
