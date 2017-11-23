@@ -9,11 +9,10 @@ Pump for the jpp file read through aanet interface.
 from __future__ import division, absolute_import, print_function
 
 import numpy as np
-import pandas as pd
 
 from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import (EventInfo, TimesliceInfo, SummarysliceInfo,
-                                 RawHitSeries)
+                                 RawHitSeries, KM3DataFrame)
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -383,13 +382,13 @@ class FitPump(Pump):
             self._qualities,
             self._energies,
         )
-        fit_collection = pd.DataFrame({
-            'pos_x': self.pos_xs[:n],
-            'pos_y': self.pos_ys[:n],
-            'pos_z': self.pos_zs[:n],
-            'dir_x': self.dir_xs[:n],
-            'dir_y': self.dir_ys[:n],
-            'dir_z': self.dir_zs[:n],
+        fit_collection = KM3DataFrame({
+            'pos_x': self._pos_xs[:n],
+            'pos_y': self._pos_ys[:n],
+            'pos_z': self._pos_zs[:n],
+            'dir_x': self._dir_xs[:n],
+            'dir_y': self._dir_ys[:n],
+            'dir_z': self._dir_zs[:n],
             'ndf': self._ndfs[:n],
             'time': self._times[:n],
             'quality': self._qualities[:n],
