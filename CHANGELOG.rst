@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* Added preliminary ``kp.io.jpp.FitPump``, which reads ``JFit`` objects. 
+  However, it does not yet read the ``fitinf`` vector, yet.
 * ``Calibration`` moved to ``kp.calib``, since core.pyx was Cython and numba
   does not like cython files.
 * ``streamds`` now requires the ``get`` command to retrieve info on command
