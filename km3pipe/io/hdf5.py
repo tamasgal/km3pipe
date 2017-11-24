@@ -108,14 +108,18 @@ class HDF5Sink(Module):
 
     def _to_array(self, data):
         if np.isscalar(data):
+            log.debug('toarray: is a scalar')
             return np.asarray(data).reshape((1,))
         if len(data) <= 0:
+            log.debug('toarray: data has no length')
             return
         try:
+            log.debug('trying pandas-style `to_records()')
             return data.to_records(index=False)
         except AttributeError:
             pass
         try:
+            log.debug('trying dataclass-style `serialise()')
             return data.serialise()
         except AttributeError:
             pass
@@ -195,22 +199,30 @@ class HDF5Sink(Module):
 
         for key, entry in sorted(blob.items()):
             serialisable_attributes = ('dtype', 'serialise', 'to_records')
+            log.debug("Serialising {}...".format(key))
             if any(hasattr(entry, a) for a in serialisable_attributes):
                 try:
+                    log.debug("Looking for h5loc...")
                     h5loc = entry.h5loc
                 except AttributeError:
-                    h5loc = '/'
+                    log.debug("h5loc not found. setting to '/misc'...")
+                    h5loc = '/misc'
                 try:
+                    log.debug("Looking for `tabname` attribute...")
                     tabname = entry.tabname
                 except AttributeError:
+                    log.debug("`tabname` not found, using blob key...")
                     tabname = decamelise(key)
+                log.debug("Converting to numpy array...")
                 data = self._to_array(entry)
                 if data is None:
+                    log.debug("Conversion failed. moving on...")
                     continue
                 if data.dtype.names is None:
+                    log.debug("Array has no named dtype. "
+                              "using blob key as h5 column name")
                     dt = np.dtype((data.dtype, [(key, data.dtype)]))
                     data = data.view(dt)
-                    h5loc = '/misc'
                 where = os.path.join(h5loc, tabname)
                 datatype = entry.__class__.__name__
 
@@ -221,8 +233,12 @@ class HDF5Sink(Module):
                         self._write_array(where, data, datatype, title=key)
                 except AttributeError:  # backwards compatibility
                     self._write_array(where, data, datatype, title=key)
+            else:
+                log.debug('{} appears not to be serialisable '
+                          'to numpy. Skipping.'.format(key))
 
         if not self.index % 1000:
+            log.info('Flushing tables to disk...')
             for tab in self._tables.values():
                 tab.flush()
 
@@ -243,7 +259,8 @@ class HDF5Sink(Module):
                               self._to_array(indices),
                               'Indices',
                               title="Indices")
-        log.info("Creating pytables index tables. This may take a few minutes...")
+        log.info("Creating pytables index tables. "
+                 "This may take a few minutes...")
         for tab in itervalues(self._tables):
             if 'frame_id' in tab.colnames:
                 tab.cols.frame_id.create_index()
