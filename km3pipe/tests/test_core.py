@@ -210,6 +210,42 @@ class TestPipeline(TestCase):
         p = APump('test')
         self.assertEqual('test', p.filename)
 
+    def test_attaching_multiple_pumps(self):
+        pl = Pipeline()
+        
+        class APump(Pump):
+            def configure(self):
+                self.i = 0
+
+            def process(self, blob):
+                blob['A'] = self.i
+                self.i += 1
+                return blob
+
+        class BPump(Pump):
+            def configure(self):
+                self.i = 0
+
+            def process(self, blob):
+                blob['B'] = self.i
+                self.i += 1
+                return blob
+
+        class CheckBlob(Module):
+            def configure(self):
+                self.i = 0
+
+            def process(self, blob):
+                assert self.i == blob['A']
+                assert self.i == blob['B']
+                self.i += 1
+                return blob
+
+        pl.attach(APump)
+        pl.attach(BPump)
+        pl.attach(CheckBlob)
+        pl.drain(5)
+
 
 class TestModule(TestCase):
     """Tests for the pipeline module"""
