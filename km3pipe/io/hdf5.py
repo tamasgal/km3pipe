@@ -377,7 +377,13 @@ class HDF5Pump(Pump):
                 dc = deserialise_map[tabname]
             except KeyError:
                 dc = KM3Array
-            arr = tab.read_where('event_id == %d' % event_id)
+            try:
+                arr = tab.read_where('event_id == %d' % event_id)
+            except NotImplementedError:
+                # 64-bit unsigned integer columns like ``event_id``
+                # are not yet supported in conditions
+                arr = tab.read()
+                arr = arr[arr['event_id'] == event_id]
             blob[tabname] = dc.deserialise(arr, event_id=index, h5loc=loc)
 
         # skipped locs are now column wise datasets (usually hits)
