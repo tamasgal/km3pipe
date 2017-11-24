@@ -421,7 +421,9 @@ class FitPump(Pump):
         return blob
 
     def process(self, blob):
-        return next(self.blobs)
+        nextblob = next(self.blobs)
+        blob.update(nextblob)
+        return blob
 
     def __iter__(self):
         return self
