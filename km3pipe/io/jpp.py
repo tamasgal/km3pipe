@@ -394,6 +394,7 @@ class FitPump(Pump):
             'quality': self._qualities[:n],
             'energy': self._energies[:n],
         })
+        fit_collection['event_id'] = self.event_index
 
         # TODO make this into a datastructure
 
