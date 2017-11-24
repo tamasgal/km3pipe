@@ -26,7 +26,7 @@ import pandas as pd
 import numpy as np
 import websocket
 
-from .core import Calibration
+from .calib import Calibration
 from .config import Config
 from .dataclasses import HitSeries, CRawHitSeries
 from .tools import token_urlsafe

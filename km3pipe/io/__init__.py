@@ -25,7 +25,8 @@ from .pandas import (H5Chain, df_to_h5, map2df,
                      read_group, write_table,)
 
 from km3pipe.tools import insert_prefix_to_dtype
-from km3pipe.core import Calibration, Run
+from km3pipe.core import Run
+from km3pipe.calib import Calibration
 from km3pipe.logger import logging
 
 __author__ = "Tamas Gal"

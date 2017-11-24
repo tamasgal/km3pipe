@@ -4,6 +4,18 @@ Unreleased changes
 Version 7
 ---------
 
+7.12.0 / 2017-11-24
+~~~~~~~~~~~~~~~~~~~
+* Added preliminary ``kp.io.jpp.FitPump``, which reads ``JFit`` objects. 
+  However, it does not yet read the ``fitinf`` vector, yet.
+* ``Calibration`` moved to ``kp.calib``, since core.pyx was Cython and numba
+  does not like cython files.
+* ``streamds`` now requires the ``get`` command to retrieve info on command
+  line
+* ``streamds`` can now upload to runsummary tables
+* remove obsolete ``kp.dev`` (now resides in ``kp.tools``
+* fixes EOF hang in ``kp.io.daq.TMCHRepump``
+
 7.11.0 / 2017-11-12
 ~~~~~~~~~~~~~~~~~~~
 * Hotfix of the SummaryslicePump (rates/fifos/hrvs reference issue)

@@ -115,9 +115,9 @@ class DTypeAttr(object):
     def __getitem__(self, index):
         """Preliminary interface for accessing single elements, which
         otherwise return a `np.void`"""
-        if isinstance(index, int):
-            element = AttrVoid(self._arr[index])
-            return element
+        # if isinstance(index, int):
+        #     element = AttrVoid(self._arr[index])
+        #     return element
         new = self.__class__(self._arr[index])
         new.dtype = self.dtype
         return new
@@ -593,19 +593,19 @@ cdef class RawHit:
     ----------
     channel_id : int
     dom_id : int
-    time : int
+    time : float64
     tot : int
     triggered : int
 
     """
     cdef public int dom_id, tot, channel_id
-    cdef public int time
+    cdef public double time
     cdef public unsigned short int triggered
 
     def __cinit__(self,
                   int channel_id,
                   int dom_id,
-                  int time,
+                  double time,
                   int tot,
                   unsigned short int triggered,
                   int event_id=0        # ignore this! just for init * magic
@@ -834,7 +834,7 @@ class RawHitSeries(DTypeAttr):
     dtype = np.dtype([
         ('channel_id', 'u1'),
         ('dom_id', '<u4'),
-        ('time', '<u4'),
+        ('time', '<f8'),
         ('tot', 'u1'),
         ('triggered', 'u1'),
         ('event_id', '<u4')
@@ -931,6 +931,7 @@ class RawHitSeries(DTypeAttr):
 
     def __getitem__(self, index):
         if isinstance(index, int):
+            # element = AttrVoid(self._arr[index])  # TODO: MemoryLeak
             hit = RawHit(*self._arr[index])
             return hit
         new = self.__class__(self._arr[index], self.event_id)

@@ -37,6 +37,7 @@ JOB_TEMPLATE = lstrip("""
     #$ -l os={platform}
     #$ -P P_{group}
     #$ -S {shell}
+    {job_array_option}
     #
     ## Walltime (HH:MM:SS)
     #$ -l ct={walltime}
@@ -61,14 +62,15 @@ JOB_TEMPLATE = lstrip("""
     {script}
 
     echo "========================================================"
-    echo "Job exited on" $(date)
+    echo "JAWOLLJA! Job exited on" $(date)
     echo "========================================================"
 """)
 
 
 def qsub(script, job_name, log_path='qlogs', group='km3net', platform='cl7',
          walltime='00:10:00', vmem='8G', fsize='8G', shell=os.environ['SHELL'],
-         email=os.environ['USER']+'@km3net.de', send_mail='n',
+         email=os.environ['USER'] + '@km3net.de', send_mail='n',
+         job_array_start=1, job_array_stop=None, job_array_step=1,
          irods=False, sps=True, hpss=False, xrootd=False,
          dcache=False, oracle=False,
          dryrun=False):
@@ -77,11 +79,17 @@ def qsub(script, job_name, log_path='qlogs', group='km3net', platform='cl7',
     if isinstance(script, Script):
         script = str(script)
     log_path = os.path.join(os.getcwd(), log_path)
+    if job_array_stop is not None:
+        job_array_option = "#$ -t {}-{}:{}"  \
+                           .format(job_array_start, job_array_stop, job_array_step)
+    else:
+        job_array_option = "#"
     job_string = JOB_TEMPLATE.format(
-            script=script, email=email, send_mail=send_mail, log_path=log_path,
-            job_name=job_name, group=group, walltime=walltime, vmem=vmem,
-            fsize=fsize, irods=irods, sps=sps, hpss=hpss, xrootd=xrootd,
-            dcache=dcache, oracle=oracle, shell=shell, platform=platform)
+        script=script, email=email, send_mail=send_mail, log_path=log_path,
+        job_name=job_name, group=group, walltime=walltime, vmem=vmem,
+        fsize=fsize, irods=irods, sps=sps, hpss=hpss, xrootd=xrootd,
+        dcache=dcache, oracle=oracle, shell=shell, platform=platform,
+        job_array_option=job_array_option)
     env = os.environ.copy()
     if dryrun:
         print("This is a dry run! Here is the generated job file, which will "
@@ -92,6 +100,33 @@ def qsub(script, job_name, log_path='qlogs', group='km3net', platform='cl7',
         p = subprocess.Popen('qsub -V', stdin=subprocess.PIPE, env=env,
                              shell=True)
         p.communicate(input=bytes(job_string.encode('ascii')))
+
+
+def hppsgrab(irod_path, method='irods'):
+    """Generate command to download file from HPSS.
+
+    Parameters
+    ==========
+    hpss_path: string
+        Full path to resource, starting with ``"/in2p3.fr/group/km3net/"``
+    method: string, optional [default: 'irods']
+        Downloader client (``"irods"`` or ``"xrootd"``).
+    """
+    METHODS = {
+        'irods': {
+            'getter': 'iget -K -P -N0 -f ',
+            'prefix': '',
+        },
+        'xrootd': {
+            'getter': 'xrdcp -f ',
+            'prefix': 'root://ccxroot.in2p3.fr:1999//hpss',
+        }
+    }
+    meth = METHODS[method]
+    getter = meth['getter']
+    prefix = meth['prefix']
+    cmd = getter + prefix
+    return cmd
 
 
 def get_jpp_env(jpp_dir):

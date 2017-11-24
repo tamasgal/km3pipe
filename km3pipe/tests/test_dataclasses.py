@@ -504,7 +504,7 @@ class TestRawHit(TestCase):
     def test_string_representation(self):
         hit = self.hit
         representation = "RawHit: channel_id(1), dom_id(2), tot(4), " \
-                         "time(3), triggered(1)"
+                         "time(3.0), triggered(1)"
         self.assertEqual(representation, str(hit))
 
 

@@ -542,6 +542,8 @@ class TMCHRepump(Pump):
         try:
             while True:
                 datatype = self.fobj.read(4)
+                if len(datatype) == 0:
+                    raise StopIteration
                 if datatype == b'TMCH':
                     self.fobj.seek(-4, 1)
                     blob['TMCHData'] = TMCHData(self.fobj)
