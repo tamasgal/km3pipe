@@ -45,8 +45,9 @@ class TestMath(TestCase):
         self.assertTrue(np.allclose(0, phi((0, 0, 0))))
         self.assertTrue(np.allclose(phi(self.v), 1.10714872))
         self.assertTrue(np.allclose(phi(self.vecs),
-                                    np.array([1.57079633, 0.78539816, 0.46364761,
-                                              0.32175055, 0.24497866])))
+                                    np.array([1.57079633, 0.78539816,
+                                              0.46364761, 0.32175055,
+                                              0.24497866])))
 
     def test_zenith(self):
         self.assertTrue(np.allclose(np.pi, zenith((0, 0, 1))))
@@ -57,8 +58,9 @@ class TestMath(TestCase):
         self.assertTrue(np.allclose(np.pi / 4 * 3, zenith((0, -1, 1))))
         self.assertAlmostEqual(zenith(self.v), 2.5010703409103687)
         self.assertTrue(np.allclose(zenith(self.vecs),
-                                    np.array([2.94419709, 2.80175574, 2.50107034,
-                                              2.13473897, 1.80873745])))
+                                    np.array([2.94419709, 2.80175574,
+                                              2.50107034, 2.13473897,
+                                              1.80873745])))
 
     def test_azimuth(self):
         self.assertTrue(np.allclose(np.pi, azimuth((1, 0, 0))))
