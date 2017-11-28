@@ -3,6 +3,8 @@ Unreleased changes
 
 * ``kp.math``: ``zenith, azimuth, phi, theta`` now follow the correct 
   km3net definitions (finally)
+* JFit pump now follows multipump paradigm
+* improved logging in IO
 
 Version 7
 ---------
