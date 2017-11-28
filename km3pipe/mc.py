@@ -125,3 +125,20 @@ def leading_particle(df):
     if len(unique) == 1 and unique[0] == 0:
         leading = most_energetic(df)
     return leading
+
+
+def t2f(row):
+    """Convert the pdg types to human-readable, in a dataframe row."""
+    return pdg2name(row['type'])
+
+
+def is_nu(flavor):
+    return flavor in {'nu_e', 'anu_e',
+                      'nu_mu', 'anu_mu', 'nu_tau', 'anu_tau'}  # noqa
+
+
+def is_neutrino(df):
+    """Add is_neutrino column to mc data frame."""
+    flavor = df.apply(t2f, axis=1)
+    df['is_neutrino'] = flavor.apply(is_nu)
+    return df

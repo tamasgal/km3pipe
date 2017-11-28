@@ -26,10 +26,71 @@ __status__ = "Development"
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
-def mad(v):
-    """MAD -- Median absolute deviation. More robust than standard deviation.
+def neutrino_to_source_direction(phi, theta, radian=True):
+    """Flip the direction.
+
+    Parameters
+    ==========
+    phi, theta: neutrino direction
+    radian: bool [default=True]
+        receive + return angles in radian? (if false, use degree)
     """
-    return np.median(np.abs(v - np.median(v)))
+    phi = np.atleast_1d(phi).copy()
+    theta = np.atleast_1d(theta).copy()
+    if not radian:
+        phi *= np.pi / 180
+        theta *= np.pi / 180
+    assert np.all(phi <= 2 * np.pi)
+    assert np.all(theta <= np.pi)
+    azimuth = (phi + np.pi) % (2 * np.pi)
+    zenith = np.pi - theta
+    if not radian:
+        azimuth *= 180 / np.pi
+        zenith *= 180 / np.pi
+    return azimuth, zenith
+
+
+def source_to_neutrino_direction(azimuth, zenith, radian=True):
+    azimuth = np.atleast_1d(azimuth).copy()
+    zenith = np.atleast_1d(zenith).copy()
+    if not radian:
+        azimuth *= np.pi / 180
+        zenith *= np.pi / 180
+    phi = (azimuth - np.pi) % (2 * np.pi)
+    theta = np.pi - zenith
+    if not radian:
+        phi *= 180 / np.pi
+        theta *= 180 / np.pi
+    return phi, theta
+
+
+def theta(v):
+    """Neutrino direction in polar coordinates.
+
+    Downgoing event: theta = 180deg
+    Horizont: 90deg
+    Upgoing: theta = 0
+
+    Angles in radians.
+    """
+    dir_z = v[:2]
+    return np.acos(dir_z)
+
+
+def phi(v):
+    """Neutrino direction in polar coordinates.
+
+    ``phi``, ``theta`` is the opposite of ``zenith``, ``azimuth``.
+
+    Angles in radians.
+    """
+    dir_x = v[:0]
+    dir_y = v[:1]
+    p = np.arctan2(dir_y, dir_x)
+    p[p < 0] += 2 * np.pi
+    if len(p) == 1:
+        return p[0]
+    return p
 
 
 def zenith(v):
@@ -46,16 +107,18 @@ def zenith(v):
 def azimuth(v):
     """Return the azimuth angle in radians.
 
+    ``phi``, ``theta`` is the opposite of ``zenith``, ``azimuth``.
+
     This is the 'normal' azimuth definition -- beware of how you
     define your coordinates. KM3NeT defines azimuth
     differently than e.g. SLALIB, astropy, the AAS.org
     """
     v = np.atleast_2d(v)
-    phi = np.arctan2(v[:, 1], v[:, 0])
-    phi[phi < 0] += 2 * np.pi
-    if len(phi) == 1:
-        return phi[0]
-    return phi
+    azi = phi(v[:0], v[:1], v[:2]) - np.pi
+    azi[azi < 0] += 2 * np.pi
+    if len(azi) == 1:
+        return azi[0]
+    return azi
 
 
 def cartesian(phi, theta, radius=1):
@@ -312,3 +375,14 @@ def gold_parameter(time_residual):
         -1 * time_residual * time_residual / (2 * 1.5 * 1.5)
     ) / len(time_residual)
     gold = np.sum(gold)
+
+
+def drop_zero_variance(df):
+    """Remove columns from dataframe with zero variance."""
+    return df.copy().loc[:, df.var() != 0].copy()
+
+
+def mad(v):
+    """MAD -- Median absolute deviation. More robust than standard deviation.
+    """
+    return np.median(np.abs(v - np.median(v)))
