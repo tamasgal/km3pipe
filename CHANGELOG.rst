@@ -1,5 +1,14 @@
 Unreleased changes
 ------------------
+Version 7
+---------
+
+7.12.1 / 2017-11-28
+~~~~~~~~~~~~~~~~~~~
+* ``kp.math``: ``zenith, azimuth, phi, theta`` now follow the correct 
+  km3net definitions (finally)
+* JFit pump now follows multipump paradigm
+* improved logging in IO
 
 Version 7
 ---------

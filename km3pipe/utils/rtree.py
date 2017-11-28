@@ -3,7 +3,7 @@
 Print the ROOT file structure.
 
 Usage:
-    rtree FILE
+    rtree [options] FILE
     rtree (-h | --help)
     rtree --version
 
@@ -26,8 +26,7 @@ __status__ = "Development"
 
 def rtree(rfile):
     rfile = open_rfile(rfile)
-    for k in rfile.walk():
-        print(k)
+    print(rfile.ls())
     rfile.close()
 
 

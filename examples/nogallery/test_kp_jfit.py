@@ -16,11 +16,12 @@ def print_fits(blob):
     print(fits[:10])
 
 
-args = docopt(__doc__)
-fname = args['FILENAME']
+if __name__ == '__main__':
+    args = docopt(__doc__)
+    fname = args['FILENAME']
 
-pipe = Pipeline()
-pipe.attach(FitPump, filename=fname)
-pipe.attach(print_fits)
-pipe.attach(HDF5Sink, filename=fname + '.h5')
-pipe.drain(1)
+    pipe = Pipeline()
+    pipe.attach(FitPump, filename=fname)
+    pipe.attach(print_fits)
+    pipe.attach(HDF5Sink, filename=fname + '.h5')
+    pipe.drain(1)

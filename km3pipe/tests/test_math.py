@@ -8,7 +8,7 @@ import numpy as np
 from km3pipe.testing import TestCase
 from km3pipe.math import (
     angle_between, pld3, com, zenith, azimuth, Polygon, IrregularPrism,
-    rotation_matrix, SparseCone, space_angle, hsin,
+    rotation_matrix, SparseCone, space_angle, hsin, phi, theta
 )
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
@@ -22,42 +22,85 @@ __status__ = "Development"
 
 class TestMath(TestCase):
     def setUp(self):
-        self.vecs = np.array([[0., 1., 5.],
-                              [1., 1., 4.],
-                              [2., 1., 3.],
-                              [3., 1., 2.],
-                              [4., 1., 1.]])
-        self.v = (1, 2, 3)
-        self.unit_v = np.array([0.26726124, 0.53452248, 0.80178373])
-        self.unit_vecs = np.array([[0., 0.19611614, 0.98058068],
-                                   [0.23570226, 0.23570226, 0.94280904],
-                                   [0.53452248, 0.26726124, 0.80178373],
-                                   [0.80178373, 0.26726124, 0.53452248],
-                                   [0.94280904, 0.23570226, 0.23570226]])
+        # self.vecs = np.array([[0., 1., 5.],
+        #                       [1., 1., 4.],
+        #                       [2., 1., 3.],
+        #                       [3., 1., 2.],
+        #                       [4., 1., 1.]])
+        # self.v = (1, 2, 3)
+        self.v = np.array([0.26726124, 0.53452248, 0.80178373])
+        self.vecs = np.array([[0., 0.19611614, 0.98058068],
+                              [0.23570226, 0.23570226, 0.94280904],
+                              [0.53452248, 0.26726124, 0.80178373],
+                              [0.80178373, 0.26726124, 0.53452248],
+                              [0.94280904, 0.23570226, 0.23570226]])
+
+    def test_phi(self):
+        print(phi((1, 0, 0)))
+        self.assertTrue(np.allclose(0, phi((1, 0, 0))))
+        self.assertTrue(np.allclose(np.pi, phi((-1, 0, 0))))
+        self.assertTrue(np.allclose(np.pi / 2, phi((0, 1, 0))))
+        self.assertTrue(np.allclose(np.pi / 2 * 3, phi((0, -1, 0))))
+        self.assertTrue(np.allclose(np.pi / 2 * 3, phi((0, -1, 0))))
+        self.assertTrue(np.allclose(0, phi((0, 0, 0))))
+        self.assertTrue(np.allclose(phi(self.v), 1.10714872))
+        self.assertTrue(np.allclose(phi(self.vecs),
+                                    np.array([1.57079633, 0.78539816,
+                                              0.46364761, 0.32175055,
+                                              0.24497866])))
 
     def test_zenith(self):
-        self.assertAlmostEqual(np.pi, zenith((0, 0, 1)))
-        self.assertAlmostEqual(0, zenith((0, 0, -1)))
-        self.assertAlmostEqual(np.pi / 2, zenith((0, 1, 0)))
-        self.assertAlmostEqual(np.pi / 2, zenith((0, -1, 0)))
-        self.assertAlmostEqual(np.pi / 4 * 3, zenith((0, 1, 1)))
-        self.assertAlmostEqual(np.pi / 4 * 3, zenith((0, -1, 1)))
+        self.assertTrue(np.allclose(np.pi, zenith((0, 0, 1))))
+        self.assertTrue(np.allclose(0, zenith((0, 0, -1))))
+        self.assertTrue(np.allclose(np.pi / 2, zenith((0, 1, 0))))
+        self.assertTrue(np.allclose(np.pi / 2, zenith((0, -1, 0))))
+        self.assertTrue(np.allclose(np.pi / 4 * 3, zenith((0, 1, 1))))
+        self.assertTrue(np.allclose(np.pi / 4 * 3, zenith((0, -1, 1))))
         self.assertAlmostEqual(zenith(self.v), 2.5010703409103687)
         self.assertTrue(np.allclose(zenith(self.vecs),
-                                    np.array([2.94419709, 2.80175574, 2.50107034,
-                                              2.13473897, 1.80873745])))
+                                    np.array([2.94419709, 2.80175574,
+                                              2.50107034, 2.13473897,
+                                              1.80873745])))
 
     def test_azimuth(self):
-        self.assertAlmostEqual(0, azimuth((1, 0, 0)))
-        self.assertAlmostEqual(np.pi, azimuth((-1, 0, 0)))
-        self.assertAlmostEqual(np.pi / 2, azimuth((0, 1, 0)))
-        self.assertAlmostEqual(np.pi / 2 * 3, azimuth((0, -1, 0)))
-        self.assertAlmostEqual(np.pi / 2 * 3, azimuth((0, -1, 0)))
-        self.assertAlmostEqual(0, azimuth((0, 0, 0)))
-        self.assertAlmostEqual(azimuth(self.v), 1.10714872)
+        self.assertTrue(np.allclose(np.pi, azimuth((1, 0, 0))))
+        self.assertTrue(np.allclose(0, azimuth((-1, 0, 0))))
+
+        print(azimuth((0, 1, 0)))
+        print(azimuth((0, -1, 0)))
+        print(azimuth((0, 0, 0)))
+        print(azimuth(self.v))
+        print(azimuth(self.vecs))
+        self.assertTrue(np.allclose(np.pi / 2 * 3, azimuth((0, 1, 0))))
+        self.assertTrue(np.allclose(np.pi / 2, azimuth((0, -1, 0))))
+        self.assertTrue(np.allclose(np.pi, azimuth((0, 0, 0))))
+        self.assertTrue(np.allclose(azimuth(self.v), 4.24874137138))
         self.assertTrue(np.allclose(azimuth(self.vecs),
-                                    np.array([1.57079633, 0.78539816, 0.46364761,
-                                              0.32175055, 0.24497866])))
+                                    np.array([4.71238898, 3.92699082,
+                                              3.60524026, 3.46334321,
+                                              3.38657132]
+                                    )))
+
+    def test_theta(self):
+        print(theta((0, 0, -1)))
+        print(theta((0, 0, 1)))
+        print(theta((0, 1, 0)))
+        print(theta((0, -1, 0)))
+        print(theta((0, 1, 1)))
+        print(theta((0, -1, 1)))
+        print(theta(self.v))
+        print(theta(self.vecs))
+        self.assertTrue(np.allclose(0, theta((0, 0, 1))))
+        self.assertTrue(np.allclose(np.pi, theta((0, 0, -1))))
+        self.assertTrue(np.allclose(np.pi / 2, theta((0, 1, 0))))
+        self.assertTrue(np.allclose(np.pi / 2, theta((0, -1, 0))))
+        self.assertTrue(np.allclose(0, theta((0, 1, 1))))
+        self.assertTrue(np.allclose(0, theta((0, -1, 1))))
+        self.assertTrue(np.allclose(theta(self.v), 0.64052231))
+        self.assertTrue(np.allclose(theta(self.vecs),
+                                    np.array([0.19739554, 0.33983691,
+                                              0.64052231, 1.00685369,
+                                              1.3328552])))
 
     def test_angle_between(self):
         v1 = (1, 0, 0)
@@ -95,7 +138,7 @@ class TestMath(TestCase):
 
     def test_hsin(self):
         assert np.all(hsin((np.pi, 0)) == (1, 0))
-        self.assertAlmostEqual(hsin(np.pi/2), 0.5)
+        self.assertAlmostEqual(hsin(np.pi / 2), 0.5)
 
     def test_pld3(self):
         p1 = np.array((0, 0, 0))
@@ -164,7 +207,6 @@ class TestShapes(TestCase):
         x = (-40, -140, 40)
         y = (-40, -140, -140)
         assert np.all(polygon.contains_xy(x, y) == [True, False, False])
-
 
     def test_prism_contained(self):
         z = (-90, 90)

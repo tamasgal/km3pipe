@@ -158,7 +158,7 @@ def convert_runsummary_to_json(df, comment='Test Upload', prefix='TEST_'):
                     if parameter_name not in parameter_dict:
                         entry = {'Name': prefix + parameter_name, 'Data': []}
                         parameter_dict[parameter_name] = entry
-                    value = {'S': getattr(row, 'source'),
+                    value = {'S': str(getattr(row, 'source')),
                              'D': float(getattr(row, parameter_name))}
                     parameter_dict[parameter_name]['Data'].append(value)                
             for parameter_data in parameter_dict.values():
