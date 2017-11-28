@@ -73,8 +73,9 @@ def theta(v):
 
     Angles in radians.
     """
-    dir_z = v[:2]
-    return np.acos(dir_z)
+    v = np.atleast_2d(v)
+    dir_z = v[:, 2]
+    return np.arccos(dir_z)
 
 
 def phi(v):
@@ -84,12 +85,13 @@ def phi(v):
 
     Angles in radians.
     """
-    dir_x = v[:0]
-    dir_y = v[:1]
+    v = np.atleast_2d(v)
+    dir_x = v[:, 0]
+    dir_y = v[:, 1]
     p = np.arctan2(dir_y, dir_x)
     p[p < 0] += 2 * np.pi
-    if len(p) == 1:
-        return p[0]
+    # if len(p) == 1:
+    #     return p[0]
     return p
 
 
@@ -114,7 +116,7 @@ def azimuth(v):
     differently than e.g. SLALIB, astropy, the AAS.org
     """
     v = np.atleast_2d(v)
-    azi = phi(v[:0], v[:1], v[:2]) - np.pi
+    azi = phi(v) - np.pi
     azi[azi < 0] += 2 * np.pi
     if len(azi) == 1:
         return azi[0]
