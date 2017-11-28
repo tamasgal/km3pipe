@@ -1,6 +1,9 @@
 Unreleased changes
 ------------------
 
+* ``kp.math``: ``zenith, azimuth, phi, theta`` now follow the correct 
+  km3net definitions (finally)
+
 Version 7
 ---------
 
