@@ -141,10 +141,13 @@ def merge_event_ids(df):
     log.debug(ids)
     # non_id = list(c for c in cols if c not in ids)
     event_ids = df[ids[0]]
-    log.debug(event_ids.shape)
-    if event_ids.shape[1] > 1:
-        event_ids = event_ids.ix[:, 0]
-    log.debug(event_ids.shape)
+    try:
+        log.debug(event_ids.shape)
+        if event_ids.shape[1] > 1:
+            event_ids = event_ids.ix[:, 0]
+        log.debug(event_ids.shape)
+    except IndexError:
+        pass
     df.drop(ids, axis=1, inplace=True)
     log.debug(event_ids.shape)
     df['event_id'] = event_ids
