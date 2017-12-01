@@ -350,9 +350,9 @@ class ResetTwofoldCounts(kp.Module):
         return blob
 
 
-def calibrate_dom(dom_id, data, detector, livetime=None, fixed_ang_dist=None,
-                  auto_scale=False, ad_fit_shape='pexp', fit_background=True,
-                  ctmin=-1.):
+def calibrate_dom(dom_id, data, detector, livetime=None, fit_ang_dist=False, 
+                  scale_mc_to_data=True, ad_fit_shape='pexp', 
+                  fit_background=True, ctmin=-1.):
     """Calibrate intra DOM PMT time offsets, efficiencies and sigmas
 
         Parameters
@@ -397,22 +397,24 @@ def calibrate_dom(dom_id, data, detector, livetime=None, fixed_ang_dist=None,
     rate_errors = np.array([np.diag(pc)[2] for pc in pcovs])
     # mean_errors = np.array([np.diag(pc)[0] for pc in pcovs])
     scale_factor = None
-    if type(fixed_ang_dist) in (list, np.ndarray):
-        if auto_scale:
-            scale_factor = np.mean(rates[angles < 1.5]) /  \
-                           np.mean(fixed_ang_dist[angles < 1.5])
-            fitted_rates = fixed_ang_dist * scale_factor
-        else:
-            fitted_rates = fixed_ang_dist
-        exp_popts = []
-        exp_pcov = []
-        print('Using fixed angular distribution')
-    else:
+    if fit_ang_dist:
         fit_res = fit_angular_distribution(angles,
                                            rates,
                                            rate_errors,
                                            shape=ad_fit_shape)
         fitted_rates, exp_popts, exp_pcov = fit_res
+    else:
+        mc_fitted_rates = exponential_polinomial(np.cos(angles), *MC_ANG_DIST)
+        if scale_mc_to_data:
+            scale_factor = np.mean(rates[angles < 1.5]) /  \
+                           np.mean(mc_fitted_rates[angles < 1.5])
+        else:
+            scale_factor = 1.
+        fitted_rates = mc_fitted_rates * scale_factor
+        exp_popts = []
+        exp_pcov = []
+        print('Using angular distribution from Monte Carlo')
+        
     # t0_weights = np.array([0. if a>1. else 1. for a in angles])
 
     if not fit_background:
