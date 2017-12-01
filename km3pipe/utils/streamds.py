@@ -118,8 +118,13 @@ def upload_runsummary(csv_filename):
     print("We have {:.3f} MB to upload.".format(len(data) / 1024**2))
 
     print("Requesting database session.")
-    db = kp.db.DBManager()
-    session_cookie = kp.config.Config().get('DB', 'session_cookie')
+    db = kp.db.DBManager()  # noqa
+    if kp.db.we_are_in_lyon():
+        session_cookie = "sid=_kmcprod_134.158_lyo7783844001343100343mcprod1223user"
+    else:
+        session_cookie = kp.config.Config().get('DB', 'session_cookie')
+        if session_cookie is None:
+            raise SystemExit("Could not restore DB session.")
     log.debug("Using the session cookie: {}".format(session_cookie))
     cookie_key, sid = session_cookie.split('=')
     print("Uploading the data to the database.")
