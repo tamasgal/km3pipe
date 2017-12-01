@@ -45,8 +45,8 @@ MAXIMAL_RATE_HZ = 2.0e6
 class TimesliceParser(Module):
     """Preliminary parser for DAQTimeslice"""
     def process(self, blob):
-        if str(blob['CHPrefix'].tag) != 'IO_TSL':
-            log.info("Not an IO_TSL blob")
+        if not str(blob['CHPrefix'].tag).startswith('IO_TS'):
+            log.info("Not an IO_TS* blob")
             return
 
         try:
