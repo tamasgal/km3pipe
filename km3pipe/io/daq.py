@@ -47,7 +47,7 @@ class TimesliceParser(Module):
     def process(self, blob):
         if not str(blob['CHPrefix'].tag).startswith('IO_TS'):
             log.info("Not an IO_TS* blob")
-            return
+            return blob
 
         try:
             data = BytesIO(blob['CHData'])
