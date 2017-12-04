@@ -8,7 +8,6 @@ from __future__ import division, absolute_import, print_function
 
 import struct
 from struct import unpack
-from binascii import hexlify
 from collections import namedtuple
 import datetime
 import pytz
@@ -155,8 +154,7 @@ class CLBHeader(object):
         self.run_number = unpack('>i', byte_data[4:8])[0]
         self.udp_sequence = unpack('>i', byte_data[8:12])[0]
         self.timestamp, self.ns_ticks = unpack('>II', byte_data[12:20])
-        self.dom_id = hexlify(b''.join(unpack('cccc',
-                                              byte_data[20:24]))).decode()
+        self.dom_id = unpack('>i', byte_data[20:24])[0]
 
         dom_status_bits = unpack('>I', byte_data[24:28])[0]
         self.dom_status = "{0:032b}".format(dom_status_bits)
@@ -174,5 +172,6 @@ class CLBHeader(object):
         """
         byte_data = file_obj.read(self.size)
         self._parse_byte_data(byte_data)
+
 
 PMTData = namedtuple('PMTData', 'channel_id timestamp tot')
