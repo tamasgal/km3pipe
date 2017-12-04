@@ -6,6 +6,7 @@ Pumps for the CLB data formats.
 """
 from __future__ import division, absolute_import, print_function
 
+from io import BytesIO
 import struct
 from struct import unpack
 from collections import namedtuple
@@ -72,11 +73,14 @@ class CLBPump(Pump):
         blob = {'CLBHeader': header}
         remaining_length = length - header.size
         pmt_data = []
+        pmt_raw_data = self.blob_file.read(remaining_length)
+        pmt_raw_data_io = BytesIO(pmt_raw_data)
         for _ in range(int(remaining_length/6)):
-            channel_id, timestamp, tot = struct.unpack('>cic',
-                                                       self.blob_file.read(6))
-            pmt_data.append(PMTData(ord(channel_id), timestamp, ord(tot)))
+            channel_id, time, tot = struct.unpack('>cic',
+                                                  pmt_raw_data_io.read(6))
+            pmt_data.append(PMTData(ord(channel_id), time, ord(tot)))
         blob['PMTData'] = pmt_data
+        blob['PMTRawData'] = pmt_raw_data
         return blob
 
     def get_blob(self, index):
@@ -114,7 +118,7 @@ class CLBHeader(object):
       size (int): The size of the original DAQ byte representation.
 
     """
-    size = 28
+    size = 40
 
     def __init__(self, byte_data=None, file_obj=None):
         self.data_type = None
@@ -126,6 +130,7 @@ class CLBHeader(object):
         self.dom_id = None
         self.dom_status = None
         self.time_valid = None
+        self.byte_data = byte_data
         if byte_data:
             self._parse_byte_data(byte_data)
         if file_obj:
@@ -159,7 +164,6 @@ class CLBHeader(object):
         dom_status_bits = unpack('>I', byte_data[24:28])[0]
         self.dom_status = "{0:032b}".format(dom_status_bits)
 
-        print("Timestamp: {0}".format(self.timestamp))
         self.human_readable_timestamp = datetime.datetime.fromtimestamp(
             int(self.timestamp), UTC_TZ).strftime('%Y-%m-%d %H:%M:%S')
 
@@ -171,7 +175,8 @@ class CLBHeader(object):
 
         """
         byte_data = file_obj.read(self.size)
+        self.byte_data = byte_data
         self._parse_byte_data(byte_data)
 
 
-PMTData = namedtuple('PMTData', 'channel_id timestamp tot')
+PMTData = namedtuple('PMTData', 'channel_id time tot')
