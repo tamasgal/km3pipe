@@ -224,6 +224,17 @@ TimesliceInfo = namedtuple('TimesliceInfo',
                             'n_frames'])
 
 
+TimesliceFrameInfo = namedtuple('TimesliceFrameInfo',
+                                ['det_id',
+                                 'run',
+                                 'sqnr',  # frame_index ?
+                                 'timestamp',
+                                 'nanoseconds',
+                                 'dom_id',
+                                 'dom_status',
+                                 'n_hits'])
+
+
 SummarysliceInfo = namedtuple('SummarysliceInfo',
                               ['frame_index',
                                'slice_id',

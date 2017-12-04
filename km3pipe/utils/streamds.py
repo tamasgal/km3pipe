@@ -5,7 +5,7 @@ Access the KM3NeT StreamDS DataBase service.
 Usage:
     streamds
     streamds list
-    streamds upload CSV_FILE
+    streamds upload [-q] CSV_FILE
     streamds info STREAM
     streamds get STREAM [PARAMETERS...]
     streamds (-h | --help)
@@ -15,11 +15,13 @@ Options:
     STREAM      Name of the stream.
     CSV_FILE    Tab separated data for the runsummary tables.
     PARAMETERS  List of parameters separated by space (e.g. detid=29).
+    -q          Dryrun! This will upload the parameters with a TEST_ prefix.
     -h --help   Show this screen.
 
 """
 from __future__ import division, absolute_import, print_function
 
+import getpass
 import os
 import json
 import requests
@@ -82,7 +84,7 @@ def available_streams():
     print(', '.join(sorted(sds.streams)))
 
 
-def upload_runsummary(csv_filename):
+def upload_runsummary(csv_filename, dryrun=False):
     """Reads the CSV file and uploads its contents to the runsummary table"""
     print("Checking '{}' for consistency.".format(csv_filename))
     if not os.path.exists(csv_filename):
@@ -106,7 +108,7 @@ def upload_runsummary(csv_filename):
     if len(parameters) < 1:
         log.error("No parameter columns found.")
         return
-    
+
     if len(df) == 0:
         log.critical("Empty dataset.")
         return
@@ -114,12 +116,22 @@ def upload_runsummary(csv_filename):
     print("Found data for parameters: {}."
           .format(', '.join(str(c) for c in parameters)))
     print("Converting CSV data into JSON")
-    data = convert_runsummary_to_json(df)
+    if dryrun:
+        log.warn("Dryrun: adding 'TEST_' prefix to parameter names")
+        prefix = "TEST_"
+    else:
+        prefix = ""
+    data = convert_runsummary_to_json(df, prefix)
     print("We have {:.3f} MB to upload.".format(len(data) / 1024**2))
 
     print("Requesting database session.")
-    db = kp.db.DBManager()
-    session_cookie = kp.config.Config().get('DB', 'session_cookie')
+    db = kp.db.DBManager()  # noqa
+    if kp.db.we_are_in_lyon():
+        session_cookie = "sid=_kmcprod_134.158_lyo7783844001343100343mcprod1223user"  # noqa
+    else:
+        session_cookie = kp.config.Config().get('DB', 'session_cookie')
+        if session_cookie is None:
+            raise SystemExit("Could not restore DB session.")
     log.debug("Using the session cookie: {}".format(session_cookie))
     cookie_key, sid = session_cookie.split('=')
     print("Uploading the data to the database.")
@@ -141,17 +153,21 @@ def upload_runsummary(csv_filename):
         log.critical("Something went wrong...")
         return
 
-def convert_runsummary_to_json(df, comment='Test Upload', prefix='TEST_'):
+
+def convert_runsummary_to_json(df, comment='Uploaded via km3pipe.StreamDS',
+                               prefix='TEST_'):
     """Convert a Pandas DataFrame with runsummary to JSON for DB upload"""
     data_field = []
+    comment += ", by {}".format(getpass.getuser())
     for det_id, det_data in df.groupby('det_id'):
         runs_field = []
         data_field.append({"DetectorId": det_id, "Runs": runs_field})
-        
+
         for run, run_data in det_data.groupby('run'):
             parameters_field = []
-            runs_field.append({"Run":int(run), "Parameters": parameters_field})
-            
+            runs_field.append({"Run": int(run),
+                               "Parameters": parameters_field})
+
             parameter_dict = {}
             for row in run_data.itertuples():
                 for parameter_name in run_data.columns[3:]:
@@ -160,7 +176,7 @@ def convert_runsummary_to_json(df, comment='Test Upload', prefix='TEST_'):
                         parameter_dict[parameter_name] = entry
                     value = {'S': str(getattr(row, 'source')),
                              'D': float(getattr(row, parameter_name))}
-                    parameter_dict[parameter_name]['Data'].append(value)                
+                    parameter_dict[parameter_name]['Data'].append(value)
             for parameter_data in parameter_dict.values():
                 parameters_field.append(parameter_data)
     data_to_upload = {"Comment": comment, "Data": data_field}
@@ -177,7 +193,7 @@ def main():
     elif args['list']:
         print_streams()
     elif args['upload']:
-        upload_runsummary(args['CSV_FILE'])
+        upload_runsummary(args['CSV_FILE'], args['-q'])
     elif args['get']:
         get_data(args['STREAM'], args['PARAMETERS'])
     else:
