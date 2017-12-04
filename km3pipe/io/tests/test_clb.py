@@ -207,7 +207,7 @@ class TestCLBHeader(TestCase):
         self.assertEqual(0, header.run_number)
         self.assertEqual(3, header.udp_sequence)
         self.assertEqual(26690, header.timestamp)
-        self.assertEqual('30beaf00', header.dom_id)
+        self.assertEqual(817803008, header.dom_id)
         self.assertEqual('10000000000000000000000000000000', header.dom_status)
 
     def test_str_representation(self):
@@ -221,7 +221,7 @@ class TestCLBHeader(TestCase):
                       "    Time stamp:   26690\n" \
                       "                  1970-01-01 07:24:50\n" \
                       "    Ticks [16ns]: 12500000\n" \
-                      "    DOM ID:       30beaf00\n" \
+                      "    DOM ID:       817803008\n" \
                       "    DOM status:   10000000000000000000000000000000\n"
         self.assertEqual(description, str(header))
 
