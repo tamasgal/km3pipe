@@ -121,7 +121,7 @@ def upload_runsummary(csv_filename, dryrun=False):
         prefix = "TEST_"
     else:
         prefix = ""
-    data = convert_runsummary_to_json(df, prefix)
+    data = convert_runsummary_to_json(df, prefix=prefix)
     print("We have {:.3f} MB to upload.".format(len(data) / 1024**2))
 
     print("Requesting database session.")
