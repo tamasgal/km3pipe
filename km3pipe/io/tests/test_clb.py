@@ -174,20 +174,20 @@ class TestCLBPump(TestCase):
         blob = self.pump.get_blob(0)
         self.assertEqual(0, blob['CLBHeader'].run_number)
         self.assertEqual('TTDC', blob['CLBHeader'].data_type)
-        self.assertEqual(229, len(blob['PMTData']))
+        self.assertEqual(227, len(blob['PMTData']))
         a_pmt_data = blob['PMTData'][0]
-        self.assertEqual(0, a_pmt_data.channel_id)
-        self.assertEqual(66254747, a_pmt_data.timestamp)
-        self.assertEqual(12, a_pmt_data.tot)
+        self.assertEqual(15, a_pmt_data.channel_id)
+        self.assertEqual(66541067, a_pmt_data.time)
+        self.assertEqual(28, a_pmt_data.tot)
 
     def test_next_blob(self):
         self.pump.determine_packet_positions()
         blob = self.pump.next_blob()
-        self.assertEqual(229, len(blob['PMTData']))
+        self.assertEqual(227, len(blob['PMTData']))
         blob = self.pump.next_blob()
-        self.assertEqual(141, len(blob['PMTData']))
+        self.assertEqual(139, len(blob['PMTData']))
         blob = self.pump.next_blob()
-        self.assertEqual(229, len(blob['PMTData']))
+        self.assertEqual(227, len(blob['PMTData']))
 
     def test_next_blob_raises_stop_iteration_on_eof(self):
         self.pump.determine_packet_positions()
@@ -231,5 +231,5 @@ class TestPMTData(TestCase):
     def test_init(self):
         pmt_data = PMTData(1, 2, 3)
         self.assertEqual(1, pmt_data.channel_id)
-        self.assertEqual(2, pmt_data.timestamp)
+        self.assertEqual(2, pmt_data.time)
         self.assertEqual(3, pmt_data.tot)
