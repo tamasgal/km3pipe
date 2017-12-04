@@ -44,13 +44,18 @@ MAXIMAL_RATE_HZ = 2.0e6
 
 class TimesliceParser(Module):
     """Preliminary parser for DAQTimeslice"""
-    def process(self, blob):
-        if not str(blob['CHPrefix'].tag).startswith('IO_TS'):
-            log.info("Not an IO_TS* blob")
-            return blob
+    def _get_raw_data(self, blob):
+        if 'CHPrefix' in blob:
+            if not str(blob['CHPrefix'].tag).startswith('IO_TS'):
+                log.info("Not an IO_TS* blob")
+                return blob
+            return blob['CHData']
 
+    def process(self, blob):
+        data = self._get_raw_data(blob)
+        if data is None:
+            return blob
         try:
-            data = BytesIO(blob['CHData'])
             tsl_size, datatype = unpack('<ii', data.read(8))
             det_id, run, sqnr = unpack('<iii', data.read(12))
             timestamp, ns_ticks, n_frames = unpack('<iii', data.read(12))
@@ -94,6 +99,7 @@ class TimesliceParser(Module):
             log.error("Could not parse Timeslice")
             log.error(blob.keys())
         else:
+            print("Returning blob")
             return blob
 
 
@@ -542,19 +548,31 @@ class TMCHRepump(Pump):
     def configure(self):
         filename = self.require("filename")
         self.fobj = open(filename, "rb")
+        self.blobs = self.blob_generator()
 
     def process(self, blob):
-        try:
-            while True:
-                datatype = self.fobj.read(4)
-                if len(datatype) == 0:
-                    raise StopIteration
-                if datatype == b'TMCH':
-                    self.fobj.seek(-4, 1)
-                    blob['TMCHData'] = TMCHData(self.fobj)
-                    return blob
-        except struct.error:
-            raise StopIteration
+        return next(self.blobs)
+
+    def blob_generator(self):
+        while True:
+            blob = Blob()
+            datatype = self.fobj.read(4)
+            if len(datatype) == 0:
+                raise StopIteration
+            if datatype == b'TMCH':
+                self.fobj.seek(-4, 1)
+                blob['TMCHData'] = TMCHData(self.fobj)
+                yield blob
 
     def finish(self):
         self.fobj.close()
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        return next(self.blobs)
