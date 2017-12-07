@@ -1,6 +1,12 @@
 Unreleased changes
 ------------------
 
+
+Version 7
+---------
+
+7.13.0 / 2017-12-07
+~~~~~~~~~~~~~~~~~~~
 * Improved CLB raw data readout
 * Pipelines now return a ``finish blob`` which contains the return values
   of each modules finish method (this is for Tommaso)
@@ -12,19 +18,12 @@ Unreleased changes
   failed. Now it uses the permanent session which was created by Cristiano
 * Some smaller bugfixes and name-consistency-changes
 
-
-Version 7
----------
-
 7.12.1 / 2017-11-28
 ~~~~~~~~~~~~~~~~~~~
 * ``kp.math``: ``zenith, azimuth, phi, theta`` now follow the correct 
   km3net definitions (finally)
 * JFit pump now follows multipump paradigm
 * improved logging in IO
-
-Version 7
----------
 
 7.12.0 / 2017-11-24
 ~~~~~~~~~~~~~~~~~~~
