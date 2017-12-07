@@ -186,7 +186,7 @@ class Pipeline(object):
                     raise StopIteration
         except StopIteration:
             log.info("Nothing left to pump through.")
-        self.finish()
+        return self.finish()
 
     def drain(self, cycles=None):
         """Execute _drain while trapping KeyboardInterrupt"""
@@ -194,16 +194,17 @@ class Pipeline(object):
         log.info("Trapping CTRL+C and starting to drain.")
         signal.signal(signal.SIGINT, self._handle_ctrl_c)
         with ignored(KeyboardInterrupt):
-            self._drain(cycles)
+            return self._drain(cycles)
 
     def finish(self):
         """Call finish() on each attached module"""
+        finish_blob = Blob()
         for module in self.modules:
             if hasattr(module, 'pre_finish'):
                 log.info("Finishing {0}".format(module.name))
                 start_time = timer()
                 start_time_cpu = time.clock()
-                module.pre_finish()
+                finish_blob[module.name] = module.pre_finish()
                 self._timeit[module]['finish'] = timer() - start_time
                 self._timeit[module]['finish_cpu'] = \
                     time.clock() - start_time_cpu
@@ -213,6 +214,7 @@ class Pipeline(object):
         self._timeit['finish_cpu'] = time.clock()
         self._print_timeit_statistics()
         self._finished = True
+        return finish_blob
 
     def _handle_ctrl_c(self, *args):
         """Handle the keyboard interrupts."""

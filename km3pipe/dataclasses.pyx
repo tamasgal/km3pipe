@@ -224,6 +224,17 @@ TimesliceInfo = namedtuple('TimesliceInfo',
                             'n_frames'])
 
 
+TimesliceFrameInfo = namedtuple('TimesliceFrameInfo',
+                                ['det_id',
+                                 'run',
+                                 'sqnr',  # frame_index ?
+                                 'timestamp',
+                                 'nanoseconds',
+                                 'dom_id',
+                                 'dom_status',
+                                 'n_hits'])
+
+
 SummarysliceInfo = namedtuple('SummarysliceInfo',
                               ['frame_index',
                                'slice_id',
@@ -232,7 +243,7 @@ SummarysliceInfo = namedtuple('SummarysliceInfo',
                                'n_frames'])
 
 
-class TimesliceFrameInfo(with_metaclass(Serialisable)):
+class TimesliceFrameInfo_(with_metaclass(Serialisable)):
     """JDAQTimeslice frame metadata.
     """
     h5loc = '/time_slice_frame_info'
