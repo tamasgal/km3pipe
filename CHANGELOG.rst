@@ -1,5 +1,18 @@
 Unreleased changes
 ------------------
+
+* Improved CLB raw data readout
+* Pipelines now return a ``finish blob`` which contains the return values
+  of each modules finish method (this is for Tommaso)
+* ``TimesliceParser`` now reads all timeslice streams (L0, L1, L2, SN)
+* ``TimesliceParser`` now returns the blob even if it was not able to parse
+  the data
+* ``TMCHRepump`` now has an iterator interface
+* Fixed bug in ``StreamDS`` where it tried to create a session in Lyon and
+  failed. Now it uses the permanent session which was created by Cristiano
+* Some smaller bugfixes and name-consistency-changes
+
+
 Version 7
 ---------
 
