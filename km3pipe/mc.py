@@ -129,6 +129,7 @@ def leading_particle(df):
 
 def t2f(row):
     """Convert the pdg types to human-readable, in a dataframe row."""
+    assert 'type' in row
     return pdg2name(row['type'])
 
 
@@ -137,8 +138,14 @@ def is_nu(flavor):
                       'nu_mu', 'anu_mu', 'nu_tau', 'anu_tau'}  # noqa
 
 
+def get_flavor(df):
+    """Build a 'flavor' from the 'type' column."""
+    assert 'type' in df.columns
+    return df.apply(t2f, axis=1)
+
+
 def is_neutrino(df):
     """Add is_neutrino column to mc data frame."""
-    flavor = df.apply(t2f, axis=1)
+    flavor = get_flavor(df)
     df['is_neutrino'] = flavor.apply(is_nu)
     return df
