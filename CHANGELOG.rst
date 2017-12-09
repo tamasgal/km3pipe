@@ -1,7 +1,22 @@
 Unreleased changes
 ------------------
+
+
 Version 7
 ---------
+
+7.13.0 / 2017-12-07
+~~~~~~~~~~~~~~~~~~~
+* Improved CLB raw data readout
+* Pipelines now return a ``finish blob`` which contains the return values
+  of each modules finish method (this is for Tommaso)
+* ``TimesliceParser`` now reads all timeslice streams (L0, L1, L2, SN)
+* ``TimesliceParser`` now returns the blob even if it was not able to parse
+  the data
+* ``TMCHRepump`` now has an iterator interface
+* Fixed bug in ``StreamDS`` where it tried to create a session in Lyon and
+  failed. Now it uses the permanent session which was created by Cristiano
+* Some smaller bugfixes and name-consistency-changes
 
 7.12.1 / 2017-11-28
 ~~~~~~~~~~~~~~~~~~~
@@ -9,9 +24,6 @@ Version 7
   km3net definitions (finally)
 * JFit pump now follows multipump paradigm
 * improved logging in IO
-
-Version 7
----------
 
 7.12.0 / 2017-11-24
 ~~~~~~~~~~~~~~~~~~~

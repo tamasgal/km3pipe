@@ -172,7 +172,7 @@ class TestCLBPump(TestCase):
     def test_get_blob(self):
         self.pump.determine_packet_positions()
         blob = self.pump.get_blob(0)
-        self.assertEqual(0, blob['CLBHeader'].run_number)
+        self.assertEqual(0, blob['CLBHeader'].run)
         self.assertEqual('TTDC', blob['CLBHeader'].data_type)
         self.assertEqual(227, len(blob['PMTData']))
         a_pmt_data = blob['PMTData'][0]
@@ -204,7 +204,7 @@ class TestCLBHeader(TestCase):
         byte_data = binascii.unhexlify(raw_data.encode())
         header = CLBHeader(byte_data=byte_data)
         self.assertEqual('TTDC', header.data_type)
-        self.assertEqual(0, header.run_number)
+        self.assertEqual(0, header.run)
         self.assertEqual(3, header.udp_sequence)
         self.assertEqual(26690, header.timestamp)
         self.assertEqual(817803008, header.dom_id)

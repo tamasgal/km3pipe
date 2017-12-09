@@ -122,7 +122,7 @@ class CLBHeader(object):
 
     def __init__(self, byte_data=None, file_obj=None):
         self.data_type = None
-        self.run_number = None
+        self.run = None
         self.udp_sequence = None
         self.timestamp = None
         self.ns_ticks = None
@@ -140,7 +140,7 @@ class CLBHeader(object):
         # pylint: disable=E1124
         description = ("CLBHeader\n"
                        "    Data type:    {self.data_type}\n"
-                       "    Run number:   {self.run_number}\n"
+                       "    Run number:   {self.run}\n"
                        "    UDP sequence: {self.udp_sequence}\n"
                        "    Time stamp:   {self.timestamp}\n"
                        "                  {self.human_readable_timestamp}\n"
@@ -156,7 +156,7 @@ class CLBHeader(object):
     def _parse_byte_data(self, byte_data):
         """Extract the values from byte string."""
         self.data_type = b''.join(unpack('cccc', byte_data[:4])).decode()
-        self.run_number = unpack('>i', byte_data[4:8])[0]
+        self.run = unpack('>i', byte_data[4:8])[0]
         self.udp_sequence = unpack('>i', byte_data[8:12])[0]
         self.timestamp, self.ns_ticks = unpack('>II', byte_data[12:20])
         self.dom_id = unpack('>i', byte_data[20:24])[0]

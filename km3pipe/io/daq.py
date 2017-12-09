@@ -49,7 +49,9 @@ class TimesliceParser(Module):
             if not str(blob['CHPrefix'].tag).startswith('IO_TS'):
                 log.info("Not an IO_TS* blob")
                 return blob
-            return blob['CHData']
+            return BytesIO(blob['CHData'])
+        if 'FileIO' in blob:
+            return blob['FileIO']
 
     def process(self, blob):
         data = self._get_raw_data(blob)
@@ -99,7 +101,6 @@ class TimesliceParser(Module):
             log.error("Could not parse Timeslice")
             log.error(blob.keys())
         else:
-            print("Returning blob")
             return blob
 
 
