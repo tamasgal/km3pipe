@@ -8,6 +8,7 @@ import km3pipe as kp
 core_log = kp.logger.get("km3pipe.core")
 core_log.setLevel("DEBUG")
 
+
 def foo(blob):
     print("Module called")
     return blob

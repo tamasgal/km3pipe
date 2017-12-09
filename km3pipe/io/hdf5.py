@@ -80,6 +80,7 @@ class HDF5Sink(Module):
     append: bool, optional [default: False]
 
     """
+
     def configure(self):
         self.filename = self.get('filename') or 'dump.h5'
         self.ext_h5file = self.get('h5file') or None
@@ -290,6 +291,7 @@ class HDF5Pump(Pump):
     filename: str
         From where to read events.
         """
+
     def configure(self):
         self.filename = self.get('filename') or None
         self.filenames = self.get('filenames') or []
@@ -513,6 +515,7 @@ class HDF5MetaData(Module):
     data: dict
 
     """
+
     def configure(self):
         self.data = self.require("data")
         self.expose(self.data, "HDF5MetaData")

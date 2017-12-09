@@ -14,10 +14,9 @@ class CHPrinter(Module):
 
 pipe = Pipeline()
 pipe.attach(CHPump, host='127.0.0.1',
-                    port=5553,
-                    tags="foo, narf",
-                    timeout=1000,
-                    max_queue=42)
+            port=5553,
+            tags="foo, narf",
+            timeout=1000,
+            max_queue=42)
 pipe.attach(CHPrinter)
 pipe.drain()
-

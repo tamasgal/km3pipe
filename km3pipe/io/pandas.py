@@ -52,6 +52,7 @@ class H5Chain(object):
     >>>     reco = h5['/reco']
 
     """
+
     def __init__(self, filenames, verbose=False):
         self.filenames = filenames
         self.verbose = verbose

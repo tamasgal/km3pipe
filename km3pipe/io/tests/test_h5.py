@@ -45,7 +45,7 @@ class TestMultiTable(TestCase):
         self.assertEqual(exp_foo, pref_foo.dtype.names)
         self.assertEqual(exp_bar, pref_bar.dtype.names)
 
-    #def test_group_read(self):
+    # def test_group_read(self):
     #    tabs = read_group(self.h5file.root)
     #    exp_cols = (
     #        'bar_aa', 'bar_bb', 'bar_cc',

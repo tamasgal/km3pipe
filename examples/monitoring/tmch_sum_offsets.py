@@ -60,6 +60,7 @@ log = kp.logger.logging.getLogger("tmch_sum_offsets")
 
 class MonitoringChannelPicker(kp.Module):
     """Picks a monitoring channel packet with no HRV for a given DOM"""
+
     def configure(self):
         self.dom_id = self.require("dom_id")
 
@@ -176,7 +177,7 @@ def main():
                 host='127.0.0.1',
                 port=5553,
                 tags='IO_SUM, IO_MONIT',
-                timeout=60*60*24*7,
+                timeout=60 * 60 * 24 * 7,
                 max_queue=1000)
     pipe.attach(MonitoringChannelPicker, dom_id=dom_id)
     pipe.attach(SummarysliceMatcher,

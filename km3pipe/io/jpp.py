@@ -35,6 +35,7 @@ class EventPump(Pump):
         Name of the file to open.
 
     """
+
     def configure(self):
 
         try:
@@ -141,6 +142,7 @@ class TimeslicePump(Pump):
     filename: str
 
     """
+
     def configure(self):
         filename = self.require('filename')
         self.blobs = self.timeslice_generator()
@@ -241,6 +243,7 @@ class TimeslicePump(Pump):
 
 class SummaryslicePump(Pump):
     """Preliminary Summaryslice reader"""
+
     def configure(self):
         filename = self.require('filename')
         self.blobs = self.summaryslice_generator()
@@ -310,6 +313,7 @@ class FitPump(Pump):
     filename: str
         Name of the file to open.
     """
+
     def configure(self):
 
         try:

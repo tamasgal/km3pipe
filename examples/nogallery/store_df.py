@@ -6,9 +6,11 @@ dt = np.dtype([('hi', int), ('there', float)])
 dat = np.ones(5, dtype=dt)
 df = pd.DataFrame.from_records(dat)
 
+
 def foo(blob):
     blob["FooBar"] = df
     return blob
+
 
 p = kp.Pipeline()
 p.attach(foo)

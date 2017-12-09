@@ -12,7 +12,7 @@ store = pd.HDFStore("example.hd5", mode='r')
 
 # Do a selection on the dataframe
 
-store.CalibratedPulses[store.CalibratedPulses.Event==2]
+store.CalibratedPulses[store.CalibratedPulses.Event == 2]
 
 #############################################################################
 # .. raw:: html

@@ -92,6 +92,7 @@ def we_are_in_lyon():
 
 class DBManager(object):
     """A wrapper for the KM3NeT Web DB"""
+
     def __init__(self, username=None, password=None, url=None,
                  temporary=False):
         "Create database connection"
@@ -418,6 +419,7 @@ class DBManager(object):
 
 class StreamDS(object):
     """Access to the streamds data stored in the KM3NeT database."""
+
     def __init__(self, username=None, password=None, url=None,
                  temporary=False):
         self._db = DBManager(username, password, url, temporary)
@@ -452,7 +454,8 @@ class StreamDS(object):
             for sel in self.mandatory_selectors(stream):
                 if sel == '-':
                     continue
-                sig_dict[Parameter(sel, Parameter.POSITIONAL_OR_KEYWORD)] = None
+                sig_dict[Parameter(
+                    sel, Parameter.POSITIONAL_OR_KEYWORD)] = None
             for sel in self.optional_selectors(stream):
                 if sel == '-':
                     continue
@@ -524,6 +527,7 @@ class StreamDS(object):
 
 class ParametersContainer(object):
     """Provides easy access to parameters"""
+
     def __init__(self, parameters):
         self._parameters = parameters
         self._converters = {}
@@ -582,6 +586,7 @@ class ParametersContainer(object):
 
 class DOMContainer(object):
     """Provides easy access to DOM parameters stored in the DB."""
+
     def __init__(self, doms):
         self._json = doms
         self._ids = []
@@ -642,6 +647,7 @@ class DOMContainer(object):
 
 class DOM(object):
     """Represents a DOM"""
+
     def __init__(self, clb_upi, dom_id, dom_upi, du, det_oid, floor):
         self.clb_upi = clb_upi
         self.dom_id = dom_id

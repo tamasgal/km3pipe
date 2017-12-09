@@ -47,6 +47,7 @@ km3pipe.style.use('km3pipe')
 
 class TriggerMap(kp.Module):
     """Creates a plot to show the number of triggered hits for each DOM."""
+
     def configure(self):
         self.det = self.require('detector')
         self.plot_filename = self.require('plot_filename')
@@ -92,7 +93,7 @@ class TriggerMap(kp.Module):
         yticks = np.arange(self.n_doms * self.n_dus)
         ytick_label_templ = "DU{0:.0f}-DOM{1:02d}" if self.du else "DOM{1:02d}"
         ytick_labels = [ytick_label_templ
-                        .format(np.ceil((y+1)/self.n_doms), y % (self.n_doms) + 1)  \
+                        .format(np.ceil((y + 1) / self.n_doms), y % (self.n_doms) + 1)
                         for y in yticks]
         ax.set_yticks(yticks)
         ax.set_yticklabels(ytick_labels)

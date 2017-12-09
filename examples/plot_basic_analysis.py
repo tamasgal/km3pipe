@@ -131,7 +131,7 @@ print(primaries.head(5))
 primaries.energy.hist(bins=100, log=True)
 plt.xlabel('energy [GeV]')
 plt.ylabel('number of events')
-plt.title('Energy Distribution');
+plt.title('Energy Distribution')
 
 
 #####################################################
@@ -139,7 +139,7 @@ plt.title('Energy Distribution');
 primaries.bjorkeny.hist(bins=100)
 plt.xlabel('bjorken-y')
 plt.ylabel('number of events')
-plt.title('bjorken-y Distribution');
+plt.title('bjorken-y Distribution')
 
 
 #####################################################
@@ -150,18 +150,18 @@ primaries['zenith'] = zeniths
 plt.hist(np.cos(primaries.zenith), bins=21, histtype='step', linewidth=2)
 plt.xlabel(r'cos($\theta$)')
 plt.ylabel('number of events')
-plt.title('Zenith Distribution');
+plt.title('Zenith Distribution')
 
 
 #####################################################
 #
 # Starting positions of primaries
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-plt.hist2d(primaries.pos_x, primaries.pos_y, bins=100, cmap='viridis');
+plt.hist2d(primaries.pos_x, primaries.pos_y, bins=100, cmap='viridis')
 plt.xlabel('x [m]')
 plt.ylabel('y [m]')
 plt.title('2D Plane')
-plt.colorbar();
+plt.colorbar()
 
 #####################################################
 #
@@ -175,7 +175,7 @@ except:
 else:
     g = sns.jointplot('pos_x', 'pos_y', data=primaries, kind='hex')
     g.set_axis_labels("x [m]", "y[m]")
-    plt.subplots_adjust(right=0.90) # make room for the colorbar
+    plt.subplots_adjust(right=0.90)  # make room for the colorbar
     plt.title("2D Plane")
     plt.colorbar()
     plt.legend()
@@ -190,7 +190,7 @@ ax.scatter3D(primaries.pos_x, primaries.pos_y, primaries.pos_z, s=3)
 ax.set_xlabel('x [m]', labelpad=10)
 ax.set_ylabel('y [m]', labelpad=10)
 ax.set_zlabel('z [m]', labelpad=10)
-ax.set_title('3D Plane');
+ax.set_title('3D Plane')
 
 
 #####################################################
@@ -206,10 +206,10 @@ gandalfs.columns
 
 #####################################################
 #
-plt.hist(gandalfs['lambda'], bins=50, log=True);
+plt.hist(gandalfs['lambda'], bins=50, log=True)
 plt.xlabel('lambda parameter')
 plt.ylabel('count')
-plt.title('Lambda Distribution of Reconstructed Events');
+plt.title('Lambda Distribution of Reconstructed Events')
 
 
 #####################################################
@@ -219,7 +219,7 @@ gandalfs['zenith'] = kp.math.zenith(gandalfs.filter(regex='^dir_.?$'))
 plt.hist((gandalfs.zenith - primaries.zenith).dropna(), bins=100)
 plt.xlabel(r'true zenith - reconstructed zenith [rad]')
 plt.ylabel('count')
-plt.title('Zenith Reconstruction Difference');
+plt.title('Zenith Reconstruction Difference')
 
 
 #####################################################
@@ -229,7 +229,7 @@ lambda_cut = gandalfs['lambda'] < l
 plt.hist((gandalfs.zenith - primaries.zenith)[lambda_cut].dropna(), bins=100)
 plt.xlabel(r'true zenith - reconstructed zenith [rad]')
 plt.ylabel('count')
-plt.title('Zenith Reconstruction Difference for lambda < {}'.format(l));
+plt.title('Zenith Reconstruction Difference for lambda < {}'.format(l))
 
 
 #####################################################
@@ -244,7 +244,7 @@ for l in [100, 5, 2, 1, 0.1]:
 plt.xlabel(r'true zenith - reconstructed zenith [rad]')
 plt.ylabel('count')
 plt.legend()
-plt.title('Zenith Reconstruction Difference for some Lambda Cuts');
+plt.title('Zenith Reconstruction Difference for some Lambda Cuts')
 
 #####################################################
 # Fitting Angular resolutions

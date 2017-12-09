@@ -51,9 +51,9 @@ class LogIO(Module):
 
 pipe = Pipeline()
 pipe.attach(CHPump, host='127.0.0.1',
-                    port=5553,
-                    tags='MSG',
-                    timeout=60*60*24,
-                    max_queue=500)
+            port=5553,
+            tags='MSG',
+            timeout=60 * 60 * 24,
+            max_queue=500)
 pipe.attach(LogIO)
 pipe.drain()

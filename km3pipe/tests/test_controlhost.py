@@ -22,6 +22,7 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
+
 class TestTag(TestCase):
     def test_init(self):
         tag = Tag()
@@ -47,7 +48,6 @@ class TestTag(TestCase):
     def test_tag_has_correct_string_representation(self):
         tag = Tag(b'foo')
         self.assertEqual('foo', str(tag))
-
 
 
 class TestPrefix(TestCase):

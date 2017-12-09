@@ -663,7 +663,6 @@ class TestSummarysliceInfo(TestCase):
         self.assertAlmostEqual(5, s.n_frames)
 
 
-
 class TestEventInfo(TestCase):
     def test_event_info(self):
         ran = np.array(tuple(range(17)), dtype=EventInfo.dtype)
@@ -747,7 +746,8 @@ class TestEventInfo(TestCase):
             'run_id': 16,
             'event_id': 1,
         })
-        exp = (0, 2, 13, 3, 4.0, 14, 15, 5, 6, 7, 8, 9, 10.0, 11.0, 12.0, 16, 1,)
+        exp = (0, 2, 13, 3, 4.0, 14, 15, 5, 6,
+               7, 8, 9, 10.0, 11.0, 12.0, 16, 1,)
         self.assertAlmostEqual(e.serialise(), np.array(exp, e.dtype))
 
     def test_missing_run_id(self):
@@ -886,6 +886,7 @@ class TestDTypeAttr(TestCase):
 
         class Foo(DTypeAttr):
             dtype = data.dtype
+
             def __init__(self):
                 self._arr = data
 
@@ -895,7 +896,7 @@ class TestDTypeAttr(TestCase):
         self.assertAlmostEqual(3.0, foo.x[1])
         self.assertEqual(2, foo.y[0])
         self.assertEqual(4, foo.y[1])
-    
+
         foo.append_fields('new', [5, 6])
         self.assertAlmostEqual(1.0, foo.x[0])
         self.assertAlmostEqual(3.0, foo.x[1])
@@ -909,6 +910,7 @@ class TestDTypeAttr(TestCase):
 
         class Foo(DTypeAttr):
             dtype = data.dtype
+
             def __init__(self, data):
                 self._arr = data
 

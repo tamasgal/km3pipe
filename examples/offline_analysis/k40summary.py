@@ -52,7 +52,7 @@ def main():
 
         for fn in files:
             det_id, run_id = [int(x) for x
-                              in re.search("_(\\d{8})"*2, fn).groups()]
+                              in re.search("_(\\d{8})" * 2, fn).groups()]
             with open(fn, 'rb') as f:
                 data = pickle.load(f)
             if not data:

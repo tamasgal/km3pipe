@@ -61,21 +61,20 @@ class ROySender(Module):
         else:
             roy.send("evt_length", length, 'ns', '')
 
-        #if event.n_snapshot_hits < 30:
+        # if event.n_snapshot_hits < 30:
         #    tots = [tot for (_, _, _, tot) in event.snapshot_hits]
         #    for tot in tots[::3]:
         #        roy.send("tot", tot, 'ns', '')
-
 
         return blob
 
 
 pipe = Pipeline()
 pipe.attach(CHPump, host='localhost',
-                    port=5553,
-                    tags='IO_EVT',
-                    timeout=60*60*24,
-                    max_queue=50)
+            port=5553,
+            tags='IO_EVT',
+            timeout=60 * 60 * 24,
+            max_queue=50)
 pipe.attach(ROySender)
 pipe.attach(CHPrinter)
 

@@ -17,8 +17,10 @@ class MainFrame(urwid.Frame):
     Represents the main GUI
 
     """
+
     def __init__(self, pump):
-        self.header = urwid.AttrWrap(urwid.Text("PipeInspector", align='center'),
+        self.header = urwid.AttrWrap(urwid.Text("PipeInspector",
+                                                align='center'),
                                      'header')
 
         self.blob_browser = BlobBrowser()
@@ -41,7 +43,6 @@ class MainFrame(urwid.Frame):
     def blob_selected(self, index):
         self.info_area.set_text("Blob: {0}".format(index))
 
-        #blob = self.pump.process(None)
         blob = self.pump.get_blob(index)
         self.blob_browser.load(blob)
 

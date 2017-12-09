@@ -244,6 +244,7 @@ def rotation_matrix(axis, theta):
 
 class Polygon(object):
     """A polygon, to implement containment conditions."""
+
     def __init__(self, vertices):
         self.poly = Path(vertices)
 
@@ -260,6 +261,7 @@ class Polygon(object):
 
 class IrregularPrism(object):
     """Like a cylinder, but the top is an irregular Polygon."""
+
     def __init__(self, xy_vertices, z_min, z_max):
         self.poly = Polygon(xy_vertices)
         self.z_min = z_min
@@ -294,6 +296,7 @@ class SparseCone(object):
         theta, axis to mantle, *not* mantle-mantle. So this is the angle
         to the axis, and mantle-to-mantle (aperture) is 2 theta.
     """
+
     def __init__(self, spike_pos, bottom_center_pos, opening_angle):
         self.spike_pos = np.asarray(spike_pos)
         self.bottom_center_pos = np.asarray(bottom_center_pos)

@@ -23,7 +23,7 @@ CONFIGURATION = StringIO("\n".join((
     "username=foo",
     "password=narf",
     "timeout=10",
-    )))
+)))
 
 
 class TestConfig(TestCase):

@@ -146,6 +146,7 @@ def get_jpp_env(jpp_dir):
 
 class Script(object):
     """A shell script which can be built line by line for `qsub`."""
+
     def __init__(self):
         self.lines = []
 

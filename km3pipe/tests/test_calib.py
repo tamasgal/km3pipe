@@ -34,7 +34,8 @@ class TestCalibration(TestCase):
     @patch('km3pipe.calib.Detector')
     def test_init_with_det_id(self, mock_detector):
         cal = Calibration(det_id=1)
-        mock_detector.assert_called_with(t0set=None, calibration=None, det_id=1)
+        mock_detector.assert_called_with(
+            t0set=None, calibration=None, det_id=1)
         cal = Calibration(det_id=1, calibration=2, t0set=3)
         mock_detector.assert_called_with(t0set=3, calibration=2, det_id=1)
 
@@ -53,9 +54,10 @@ class TestCalibration(TestCase):
                 self._pmts_by_id = {}
 
             def pmt_with_id(self, i):
-                pmt = MagicMock(dir=np.array((i*10+i, i*10+i+1, i*10+i+2)),
-                                pos=np.array((i*100+i, i*100+i+1, i*100+i+2)),
-                                t0=1000*i)
+                pmt = MagicMock(dir=np.array((i * 10 + i, i * 10 + i + 1, i * 10 + i + 2)),
+                                pos=np.array(
+                                    (i * 100 + i, i * 100 + i + 1, i * 100 + i + 2)),
+                                t0=1000 * i)
                 return pmt
 
         cal = Calibration(detector=FakeDetector())

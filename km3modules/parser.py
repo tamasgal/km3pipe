@@ -22,7 +22,7 @@ class CHParser(Module):
     parse_map = {
         'IO_SUM': ['DAQSummaryslice', DAQSummaryslice],
         'IO_EVT': ['DAQEvent', DAQEvent],
-        }
+    }
 
     def configure(self):
         self.tags = self.get('tags') or []

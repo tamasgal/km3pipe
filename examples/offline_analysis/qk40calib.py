@@ -49,7 +49,7 @@ def main():
 
     DET_ID = int(args['-d'])
     TMAX = int(args['-t'])
-    ET_PER_RUN = int(args['-e'])*60  # [s]
+    ET_PER_RUN = int(args['-e']) * 60  # [s]
     RUNS_PER_JOB = int(args['-n'])  # runs per job
     VMEM = args['-m']
     CWD = os.getcwd()
@@ -86,14 +86,14 @@ def main():
             calib_filename = root_filename + '.k40_cal.p'
             s.add("iget -v {}".format(irods_path))
             s.add("CTMIN=$(JPrint -f {}|grep '^ctMin'|awk '{{print $2}}')"
-                        .format(root_filename))
+                  .format(root_filename))
             s.add("k40calib {} {} -t {} -c $CTMIN -o {}"
-                        .format(root_filename, DET_ID, TMAX, calib_filename))
+                  .format(root_filename, DET_ID, TMAX, calib_filename))
             s.add("cp {} {}".format(calib_filename, CALIB_PATH))
             s.add("rm -f {}".format(root_filename))
             s.add("rm -f {}".format(calib_filename))
             s.add("echo Run {} processed.".format(run))
-            s.add("echo " + 42*"=")
+            s.add("echo " + 42 * "=")
 
         walltime = time.strftime('%H:%M:%S', time.gmtime(ET_PER_RUN * n_runs))
         qsub(s, '{}_{}'.format(JOB_NAME, job_id), walltime=walltime,

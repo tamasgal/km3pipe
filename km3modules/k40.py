@@ -46,6 +46,7 @@ class K40BackgroundSubtractor(kp.Module):
     'K40Counts': dict, Corrected K40 counts
 
     """
+
     def configure(self):
         self.combs = list(combinations(range(31), 2))
         self.mode = self.get("mode", default='online')
@@ -82,7 +83,7 @@ class K40BackgroundSubtractor(kp.Module):
             k40_rates = counts[dom_id] / livetime
             bg_rates = []
             for c in self.combs:
-                bg_rates.append(pmt_rates[c[0]]*pmt_rates[c[1]]*1e-9)
+                bg_rates.append(pmt_rates[c[0]] * pmt_rates[c[1]] * 1e-9)
             corrected_counts[dom_id] = (k40_rates.T -
                                         np.array(bg_rates)).T * livetime
         return corrected_counts
@@ -123,6 +124,7 @@ class IntraDOMCalibrator(kp.Module):
     'IntraDOMCalibration': dict (key=dom_id, value=calibration)
 
     """
+
     def configure(self):
         det_id = self.get("det_id") or 14
         self.detector = kp.hardware.Detector(det_id=det_id)
@@ -207,6 +209,7 @@ class TwofoldCounter(kp.Module):
     'DumpTwofoldCounts': Writes twofold counts into 'dump_filename'
 
     """
+
     def configure(self):
         self.tmax = self.get("tmax") or 20
         self.dump_filename = self.get("dump_filename")
@@ -270,6 +273,7 @@ class TwofoldCounter(kp.Module):
 class HRVFIFOTimesliceFilter(kp.Module):
     """Creat a frame index lookup table which holds DOM IDs of frames with
     at least one PMT in HRV."""
+
     def configure(self):
         filename = self.require('filename')
         filter_hrv = self.get('filter_hrv', default=False)
@@ -350,8 +354,8 @@ class ResetTwofoldCounts(kp.Module):
         return blob
 
 
-def calibrate_dom(dom_id, data, detector, livetime=None, fit_ang_dist=False, 
-                  scale_mc_to_data=True, ad_fit_shape='pexp', 
+def calibrate_dom(dom_id, data, detector, livetime=None, fit_ang_dist=False,
+                  scale_mc_to_data=True, ad_fit_shape='pexp',
                   fit_background=True, ctmin=-1.):
     """Calibrate intra DOM PMT time offsets, efficiencies and sigmas
 
@@ -407,14 +411,14 @@ def calibrate_dom(dom_id, data, detector, livetime=None, fit_ang_dist=False,
         mc_fitted_rates = exponential_polinomial(np.cos(angles), *MC_ANG_DIST)
         if scale_mc_to_data:
             scale_factor = np.mean(rates[angles < 1.5]) /  \
-                           np.mean(mc_fitted_rates[angles < 1.5])
+                np.mean(mc_fitted_rates[angles < 1.5])
         else:
             scale_factor = 1.
         fitted_rates = mc_fitted_rates * scale_factor
         exp_popts = []
         exp_pcov = []
         print('Using angular distribution from Monte Carlo')
-        
+
     # t0_weights = np.array([0. if a>1. else 1. for a in angles])
 
     if not fit_background:
@@ -526,12 +530,12 @@ def load_k40_coincidences_from_rootfile(filename, dom_id):
 
 def gaussian(x, mean, sigma, rate, offset):
     return rate / np.sqrt(2 * np.pi) /  \
-           sigma * np.exp(-0.5*(x-mean)**2 / sigma**2) + offset
+        sigma * np.exp(-0.5 * (x - mean)**2 / sigma**2) + offset
 
 
 def gaussian_wo_offset(x, mean, sigma, rate):
     return rate / np.sqrt(2 * np.pi) / \
-           sigma * np.exp(-0.5*(x-mean)**2 / sigma**2)
+        sigma * np.exp(-0.5 * (x - mean)**2 / sigma**2)
 
 
 def fit_delta_ts(data, livetime, fit_background=True):
@@ -675,7 +679,7 @@ def minimize_t0s(means, weights, combs):
     qfunc = make_quality_function(means, weights, combs)
     # t0s = np.zeros(31)
     t0s = np.random.rand(31)
-    bounds = [(0, 0)]+[(-10., 10.)] * 30
+    bounds = [(0, 0)] + [(-10., 10.)] * 30
     opt_t0s = optimize.minimize(qfunc, t0s, bounds=bounds)
     return opt_t0s
 
@@ -781,7 +785,7 @@ def correct_rates(rates, opt_qes, combs):
     """
 
     corrected_rates = np.array([rate / opt_qes[comb[0]] / opt_qes[comb[1]]
-                               for rate, comb in zip(rates, combs)])
+                                for rate, comb in zip(rates, combs)])
     return corrected_rates
 
 
@@ -824,7 +828,7 @@ def calculate_rms_rates(rates, fitted_rates, corrected_rates):
 @nb.jit
 def get_comb_index(i, j):
     """Return the index of PMT pair combinations"""
-    return i*30-i*(i+1)//2 + j-1
+    return i * 30 - i * (i + 1) // 2 + j - 1
 
 
 @nb.jit
@@ -866,9 +870,9 @@ def add_to_twofold_matrix(times, tdcs, mat, tmax=10):
             if h_tdc != c_tdc:
                 dt = int(c_time - h_time)
                 if h_tdc > c_tdc:
-                    mat[get_comb_index(c_tdc, h_tdc), -dt+tmax] += 1
+                    mat[get_comb_index(c_tdc, h_tdc), -dt + tmax] += 1
                 else:
-                    mat[get_comb_index(h_tdc, c_tdc), dt+tmax] += 1
+                    mat[get_comb_index(h_tdc, c_tdc), dt + tmax] += 1
         h_idx = c_idx
 
 

@@ -14,7 +14,7 @@ class UI(object):
 
     palette = [
         ('default', fg, bg),
-        ('highlight', fg+',standout', bg),
+        ('highlight', fg + ',standout', bg),
         ('header', 'white', 'dark cyan'),
         ('footer', 'light gray', 'dark blue'),
         ('body', 'dark cyan', '', 'standout'),
@@ -23,7 +23,7 @@ class UI(object):
         ('blob', 'yellow', 'dark cyan'),
         ('blob_selected', 'dark cyan', 'yellow'),
         ('blob_scale', 'dark cyan', 'black'),
-        ]
+    ]
 
     keys = {
         'select': ('return', 'enter'),
@@ -37,4 +37,4 @@ class UI(object):
         'end': ('$',),
         'goto': ('g', 'G'),
         'help': ('?',),
-        }
+    }

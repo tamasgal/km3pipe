@@ -187,13 +187,16 @@ def main():
         createconf(overwrite_conf)
 
     if args['runtable']:
-        runtable(args['DET_ID'], n, regex=args['-s'], temporary=args["--temporary"])
+        runtable(args['DET_ID'], n, regex=args['-s'],
+                 temporary=args["--temporary"])
 
     if args['runinfo']:
-        runinfo(int(args['RUN']), args['DET_ID'], temporary=args["--temporary"])
+        runinfo(int(args['RUN']), args['DET_ID'],
+                temporary=args["--temporary"])
 
     if args['rundetsn']:
-        rundetsn(int(args['RUN']), args['DETECTOR'], temporary=args["--temporary"])
+        rundetsn(int(args['RUN']), args['DETECTOR'],
+                 temporary=args["--temporary"])
 
     if args['retrieve']:
         retrieve(int(args['RUN']), args['DET_ID'], args['-o'])

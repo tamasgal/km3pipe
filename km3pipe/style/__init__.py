@@ -33,9 +33,11 @@ class KM3PipePygmentsStyle(object):
     def __init__(self):
         raise ImportError("Module pygments could be not found")
 
+
 class LatexPreprocessor(object):
     def __init__(self):
         raise ImportError("Module nbconvert could be not found")
+
 
 try:
     from nbconvert.preprocessors.base import Preprocessor
@@ -59,10 +61,11 @@ else:
 
     class LatexPreprocessor(Preprocessor):
         """LaTeX processor for nbconvert"""
+
         def preprocess(self, nb, resources):
             from pygments.formatters import LatexFormatter
             resources["latex"]["pygments_definitions"] = \
-                    LatexFormatter(style=KM3PipePygmentsStyle).get_style_defs()
+                LatexFormatter(style=KM3PipePygmentsStyle).get_style_defs()
             return nb, resources
 
 
@@ -71,7 +74,7 @@ def get_style_path(style):
 
 
 def use(style='km3pipe'):
-    for s in (get_style_path('km3pipe-'+style),
+    for s in (get_style_path('km3pipe-' + style),
               get_style_path(style),
               style):
         try:
@@ -90,6 +93,7 @@ class ColourCycler(object):
     Instantiate with `cc = ColourCycler()` and use it in plots
     like `plt.plot(xs, ys, c=cs.next)`.
     """
+
     def __init__(self, palette='km3pipe'):
         self.colours = {}
         self.refresh_styles()

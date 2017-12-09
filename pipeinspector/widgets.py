@@ -42,7 +42,8 @@ class BlobBrowser(urwid.Frame):
         for key in sorted(blob.keys()):
             item_widget = ItemWidget(key, blob[key])
             new_items.append(item_widget)
-            urwid.connect_signal(item_widget, 'key_selected', self.key_selected)
+            urwid.connect_signal(
+                item_widget, 'key_selected', self.key_selected)
         self.listbox.body.extend(new_items)
         self.listbox.set_focus(self.cursor_position)
 
@@ -61,10 +62,10 @@ class BlobBrowser(urwid.Frame):
         self.popup = urwid.ListBox(content)
         popup_box = urwid.LineBox(self.popup)
         self.overlay = urwid.Overlay(popup_box, self.body,
-                                  'center',
-                                  ('relative', 80),
-                                  'middle',
-                                  ('relative', 80),)
+                                     'center',
+                                     ('relative', 80),
+                                     'middle',
+                                     ('relative', 80),)
         self.body = self.overlay
 
     def keypress(self, size, key):
@@ -80,7 +81,8 @@ class BlobBrowser(urwid.Frame):
 
 class ItemWidget (urwid.WidgetWrap):
     signals = ['key_selected']
-    def __init__ (self, key, data):
+
+    def __init__(self, key, data):
         self.key = key
         self.data = data
         try:
@@ -95,7 +97,6 @@ class ItemWidget (urwid.WidgetWrap):
                 urwid.AttrWrap(urwid.Text(key), 'body', 'focus'), left=2)),
             urwid.AttrWrap(urwid.Text(type_label), 'body', 'focus'),
             urwid.AttrWrap(urwid.Text(size_label), 'body', 'focus'),
-            #urwid.AttrWrap(urwid.Text(str(sys.getsizeof(data))), 'body', 'focus'),
         ]
         w = urwid.Columns(self.item)
         self.__super.__init__(w)
@@ -111,6 +112,7 @@ class ItemWidget (urwid.WidgetWrap):
 
 class BlobWidget(urwid.Pile):
     signals = ['blob_selected']
+
     def __init__(self):
         self.width = 50
         self.size = (0,)
@@ -169,7 +171,7 @@ class BlobWidget(urwid.Pile):
         lowest_tick = int(math.floor(start / 10) * 10)
         highest_tick = lowest_tick + self.width
         ticks_labels = ['{0:<10}'.format(i)
-                 for i in range(lowest_tick, highest_tick, 10)]
+                        for i in range(lowest_tick, highest_tick, 10)]
         slice_start = (start % 10)
         slice_end = (start % 10) + self.width
         ticks = ''.join(ticks_labels)[slice_start:slice_end]
@@ -186,5 +188,3 @@ class BlobWidget(urwid.Pile):
         return [('blob', icons[:start]),
                 ('blob_selected', icons[start]),
                 ('blob', icons[start + 1:])]
-
-

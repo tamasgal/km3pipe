@@ -19,7 +19,8 @@ class TestStyle(TestCase):
 
     def test_get_style_path(self):
         gsp = get_style_path
-        self.assertTrue(gsp('km3pipe').endswith("kp-data/stylelib/km3pipe.mplstyle"))
+        self.assertTrue(gsp('km3pipe').endswith(
+            "kp-data/stylelib/km3pipe.mplstyle"))
         self.assertTrue(gsp('foo').endswith("/stylelib/foo.mplstyle"))
         self.assertTrue(gsp('bar').endswith("/stylelib/bar.mplstyle"))
 

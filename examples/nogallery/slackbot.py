@@ -39,18 +39,19 @@ class SlackSender(Module):
         if not self.current_run == event.header.run:
             self.current_run = event.header.run
             self.client.chat_post_message("#du2-live",
-                                          "Run #{0} has started!".format(event.header.run),
+                                          "Run #{0} has started!".format(
+                                              event.header.run),
                                           username="slackbot")
 
         return blob
 
 
 pipe = Pipeline()
-pipe.attach(CHPump, host='localhost', # You'll need a VPN connection and several SSH tunnels
-                    port=5553,
-                    tags='IO_EVT',
-                    timeout=60*60*24,
-                    max_queue=50)
+pipe.attach(CHPump, host='localhost',  # You'll need a VPN connection and several SSH tunnels
+            port=5553,
+            tags='IO_EVT',
+            timeout=60 * 60 * 24,
+            max_queue=50)
 pipe.attach(SlackSender)
 pipe.attach(CHPrinter)
 

@@ -58,6 +58,7 @@ RBA_URL = Config().rba_url
 class ClientManager(object):
     """Manage km3srv clients.
     """
+
     def __init__(self):
         self._clients = {}
         threading.Thread(target=self.heartbeat).start()
@@ -129,6 +130,7 @@ class MessageProvider(tornado.websocket.WebSocketHandler):
 
 class EchoWebSocket(tornado.websocket.WebSocketHandler):
     """An echo handler for client/server messaging and debugging"""
+
     def __init__(self, *args, **kwargs):
         log.warning("EchoWebSocket created!")
         self.client_manager = kwargs.pop('client_manager')
@@ -238,7 +240,7 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
 
         event = {
             "hits": {
-                'pos' : [tuple(x) for x in snapshot_hits[['x', 'y', 'z']].values],
+                'pos': [tuple(x) for x in snapshot_hits[['x', 'y', 'z']].values],
                 'time': list(snapshot_hits['time']),
                 'tot': list(snapshot_hits['tot']),
             }
@@ -288,7 +290,7 @@ def srv_event(token, hits, url=RBA_URL):
 
     event = {
         "hits": {
-            'pos' : pos,
+            'pos': pos,
             'time': time,
             'tot': tot,
         }
@@ -327,7 +329,6 @@ def main():
                 'template_path': os.path.join(root, 'static/templates'),
                 }
 
-
     application = tornado.web.Application([
         (r"/test", EchoWebSocket, {'client_manager': client_manager,
                                    'server_status': server_status,
@@ -346,5 +347,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

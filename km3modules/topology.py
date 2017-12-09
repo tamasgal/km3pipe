@@ -14,6 +14,7 @@ from km3pipe import Module
 
 class TriggeredDUs(Module):
     """Check for triggered DUs."""
+
     def process(self, blob):
         triggered_hits = blob['Hits'].triggered_hits.serialise(to='pandas')
         self.calibration.apply(triggered_hits)

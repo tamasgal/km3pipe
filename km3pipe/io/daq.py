@@ -44,6 +44,7 @@ MAXIMAL_RATE_HZ = 2.0e6
 
 class TimesliceParser(Module):
     """Preliminary parser for DAQTimeslice"""
+
     def _get_raw_data(self, blob):
         if 'CHPrefix' in blob:
             if not str(blob['CHPrefix'].tag).startswith('IO_TS'):
@@ -62,7 +63,8 @@ class TimesliceParser(Module):
             det_id, run, sqnr = unpack('<iii', data.read(12))
             timestamp, ns_ticks, n_frames = unpack('<iii', data.read(12))
 
-            ts_info = TimesliceInfo(sqnr, 0, timestamp, ns_ticks*16, n_frames)
+            ts_info = TimesliceInfo(
+                sqnr, 0, timestamp, ns_ticks * 16, n_frames)
             ts_frameinfos = {}
 
             _dom_ids = []
@@ -73,12 +75,12 @@ class TimesliceParser(Module):
                 frame_size, datatype = unpack('<ii', data.read(8))
                 det_id, run, sqnr = unpack('<iii', data.read(12))
                 timestamp, ns_ticks, dom_id = unpack('<iii', data.read(12))
-                dom_status = unpack('<iiiii', data.read(5*4))
+                dom_status = unpack('<iiiii', data.read(5 * 4))
                 n_hits = unpack('<i', data.read(4))[0]
                 ts_frameinfos[dom_id] = TimesliceFrameInfo(
-                        det_id, run, sqnr, timestamp, ns_ticks*16, dom_id,
-                        dom_status, n_hits
-                        )
+                    det_id, run, sqnr, timestamp, ns_ticks * 16, dom_id,
+                    dom_status, n_hits
+                )
                 for j in range(n_hits):
                     hit = unpack('!BlB', data.read(6))
                     _dom_ids.append(dom_id)
@@ -87,13 +89,13 @@ class TimesliceParser(Module):
                     _tots.append(hit[2])
 
             tshits = RawHitSeries.from_arrays(
-                    np.array(_channel_ids),
-                    np.array(_dom_ids),
-                    np.array(_times),
-                    np.array(_tots),
-                    np.zeros(len(_tots)),  # triggered
-                    0  # event_id
-                    )
+                np.array(_channel_ids),
+                np.array(_dom_ids),
+                np.array(_times),
+                np.array(_tots),
+                np.zeros(len(_tots)),  # triggered
+                0  # event_id
+            )
             blob['TimesliceInfo'] = ts_info
             blob['TimesliceFrameInfos'] = ts_frameinfos
             blob['TSHits'] = tshits
@@ -409,6 +411,7 @@ class DAQSummaryslice(object):
       dom_rates (dict): The overall DOM rate for each DOM.
 
     """
+
     def __init__(self, file_obj):
         self.header = DAQHeader(file_obj=file_obj)
         self.n_summary_frames = unpack('<i', file_obj.read(4))[0]
@@ -425,7 +428,7 @@ class DAQSummaryslice(object):
             dom_id = unpack('<i', file_obj.read(4))[0]
             dq_status = file_obj.read(4)  # probably dom status? # noqa
             dom_status = unpack('<iiii', file_obj.read(16))
-            raw_rates = unpack('b'*31, file_obj.read(31))
+            raw_rates = unpack('b' * 31, file_obj.read(31))
             pmt_rates = [self._get_rate(value) for value in raw_rates]
             self.summary_frames[dom_id] = pmt_rates
             self.dq_status[dom_id] = dq_status
@@ -461,6 +464,7 @@ class DAQEvent(object):
         (dom_id, pmt_id, tdc_time, tot)
 
     """
+
     def __init__(self, file_obj):
         self.header = DAQHeader(file_obj=file_obj)
         self.trigger_counter = unpack('<Q', file_obj.read(8))[0]
@@ -483,7 +487,7 @@ class DAQEvent(object):
             tot = unpack('<b', file_obj.read(1))[0]
             trigger_mask = unpack('<Q', file_obj.read(8))
             self.triggered_hits.append((dom_id, pmt_id, tdc_time, tot,
-                                       trigger_mask))
+                                        trigger_mask))
 
     def _parse_snapshot_hits(self, file_obj):
         """Parse and store snapshot hits."""
@@ -507,6 +511,7 @@ class DAQEvent(object):
 
 class TMCHData(object):
     """Monitoring Channel data."""
+
     def __init__(self, file_obj):
         f = file_obj
 
@@ -523,7 +528,8 @@ class TMCHData(object):
         self.dom_status_1 = unpack('>I', f.read(4))[0]
         self.dom_status_2 = unpack('>I', f.read(4))[0]
         self.dom_status_3 = unpack('>I', f.read(4))[0]
-        self.pmt_rates = [r*10.0 for r in unpack('>' + 31*'I', f.read(31*4))]
+        self.pmt_rates = [
+            r * 10.0 for r in unpack('>' + 31 * 'I', f.read(31 * 4))]
         self.hrvbmp = unpack('>I', f.read(4))[0]
         self.flags = unpack('>I', f.read(4))[0]
         self.yaw, self.pitch, self.roll = unpack('>fff', f.read(12))
@@ -546,6 +552,7 @@ class TMCHData(object):
 
 class TMCHRepump(Pump):
     """Takes a IO_MONIT raw dump and replays it."""
+
     def configure(self):
         filename = self.require("filename")
         self.fobj = open(filename, "rb")

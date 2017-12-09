@@ -21,6 +21,7 @@ class TestSiphon(TestCase):
         class APump(kp.Pump):
             def configure(self):
                 self.i = 0
+
             def process(self, blob):
                 self.i += 1
                 blob['i'] = self.i
@@ -47,6 +48,7 @@ class TestSiphon(TestCase):
         class APump(kp.Pump):
             def configure(self):
                 self.i = 0
+
             def process(self, blob):
                 self.i += 1
                 blob['i'] = self.i
@@ -73,6 +75,7 @@ class TestSiphon(TestCase):
         class APump(kp.Pump):
             def configure(self):
                 self.i = 0
+
             def process(self, blob):
                 self.i += 1
                 blob['i'] = self.i
@@ -94,5 +97,3 @@ class TestSiphon(TestCase):
         pipe.attach(Siphon, volume=10, flush=True)
         pipe.attach(Observer)
         pipe.drain(22)
-
-        

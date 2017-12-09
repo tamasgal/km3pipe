@@ -13,7 +13,8 @@ from km3pipe.io.ch import CHPump
 from km3pipe.logger import logging
 
 #log_ch = logging.getLogger('km3pipe.io.ch')
-#log_ch.setLevel('DEBUG')
+# log_ch.setLevel('DEBUG')
+
 
 class TimesliceParser(Module):
     def process(self, blob):
@@ -31,7 +32,7 @@ class TimesliceParser(Module):
             frame_size, datatype = unpack('<ii', data.read(8))
             det_id, run, sqnr = unpack('<iii', data.read(12))
             timestamp, ns_ticks, dom_id = unpack('<iii', data.read(12))
-            dom_status = unpack('<iiiii', data.read(5*4))
+            dom_status = unpack('<iiiii', data.read(5 * 4))
             n_hits = unpack('<i', data.read(4))[0]
             hits = []
             for j in range(n_hits):
@@ -65,14 +66,15 @@ class CoincidenceFinder(Module):
     def process(self, blob):
         hits = blob['TimesliceFrames'][808447091]
         hits.sort(key=lambda x: x[1])
-        coinces = mongincidence([t for (_,t,_) in hits], [t for (t,_,_) in hits])
+        coinces = mongincidence([t for (_, t, _) in hits], [
+                                t for (t, _, _) in hits])
 
         combs = list(combinations(range(31), 2))
         for pmt_pair, t in coinces:
             if pmt_pair[0] > pmt_pair[1]:
                 pmt_pair = (pmt_pair[1], pmt_pair[0])
                 t = -t
-            self.m[combs.index(pmt_pair), t+20] += 1
+            self.m[combs.index(pmt_pair), t + 20] += 1
 
         print(self.m)
 
@@ -105,10 +107,10 @@ pipe = Pipeline()
 pipe.attach(CHPump, host='172.16.65.58',
             port=5553,
             tags='IO_TSL',
-            timeout=60*60*24,
+            timeout=60 * 60 * 24,
             max_queue=42)
-#pipe.attach(Dumper)
+# pipe.attach(Dumper)
 pipe.attach(TimesliceParser)
-#pipe.attach(printer)
+# pipe.attach(printer)
 pipe.attach(CoincidenceFinder)
 pipe.drain()

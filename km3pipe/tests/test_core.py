@@ -202,7 +202,7 @@ class TestPipeline(TestCase):
 
     def test_attaching_a_pump_allows_first_parameter_to_be_passed_as_filename(self):
         pl = Pipeline()
-        
+
         class APump(Pump):
             def configure(self):
                 self.filename = self.require('filename')
@@ -212,7 +212,7 @@ class TestPipeline(TestCase):
 
     def test_attaching_multiple_pumps(self):
         pl = Pipeline()
-        
+
         class APump(Pump):
             def configure(self):
                 self.i = 0
@@ -324,15 +324,14 @@ class TestServices(TestCase):
                 self.expose(self.whatever, "whatever")
 
             def whatever(self, x):
-                return x*2
+                return x * 2
 
         class UseService(Module):
             def process(self, blob):
                 print(self.services)
                 assert 23 == self.services["foo"]
                 assert 2 == self.services["whatever"](1)
-                
+
         self.pl.attach(Service)
         self.pl.attach(UseService)
         self.pl.drain(1)
-

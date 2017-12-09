@@ -15,27 +15,29 @@ Options:
     -n EVENTS                       Number of events/runs.
     -o OUTFILE                      Output file.
     -j --jppy                       (Jpp): Use jppy (not aanet) for Jpp readout
-    --aa-format=<fmt>               (Aanet): Which aanet subformat ('minidst',
+    --aa-format=<fmt>               (aa): Which aanet subformat ('minidst',
                                     'orca_recolns', 'gandalf', 'gandalf_new',
                                     'generic_track') [default: gandalf_new]
-    --aa-lib=<lib.so>               (Aanet): path to aanet binary (for old
+    --aa-lib=<lib.so>               (aa): path to aanet binary (for old
                                     versions which must be loaded via
-                                    `ROOT.gSystem.Load()` instead of `import aa`)
-    --aa-old-mc-id                  (aanet): read mc id as `evt.mc_id`, instead
+                                    `ROOT.gSystem.Load()` instead of
+                                    `import aa`)
+    --aa-old-mc-id                  (aa): read mc id as `evt.mc_id`, instead
                                     of the newer `mc_id = evt.frame_index - 1`
-    --aa-ignore-run-id-from-header  (Aanet) read run id from event, not header.
-    --correct-zed                   (Aanet) Correct offset in mc tracks (aanet).
-    --correct-mc-times              (Aanet) Correct MC times (from JTE to MC time).
-    --skip-header                   (Aanet) don't read the full header.
+    --aa-ignore-run-id-from-header  (aa) read run id from event, not header.
+    --correct-zed                   (aa) Correct offset in mc tracks (aanet).
+    --correct-mc-times              (aa) Correct MC times (from JTE to MC).
+    --skip-header                   (aa) don't read the full header.
                                     Entries like `genvol` and `neventgen` will
                                     still be retrived. This switch enables
-                                    skipping the `get_aanet_header` function only.
+                                    skipping the `get_aanet_header()`.
     --ignore-hits                   Don't read the hits.
     -e --expected-rows NROWS        Approximate number of events.  Providing a
-                                    rough estimate for this (100, 10000000, ...)
-                                    will greatly improve reading/writing speed and
-                                    memory usage. Strongly recommended if the
-                                    table/array size is >= 100 MB. [default: 10000]
+                                    rough estimate for this (100, 1000000, ...)
+                                    will greatly improve reading/writing speed
+                                    and memory usage.
+                                    Strongly recommended if the table/array
+                                    size is >= 100 MB. [default: 10000]
 """
 
 from __future__ import division, absolute_import, print_function
@@ -118,4 +120,4 @@ def main():
            correct_mc_times=bool(correct_mc_times),
            ignore_hits=bool(ignore_hits_arg),
            ignore_run_id_from_header=bool(ignore_run_id_from_header),
-          )
+           )

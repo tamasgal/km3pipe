@@ -8,6 +8,7 @@ class Printer(Module):
         print(blob['HitTable']['dom_id'])
         return blob
 
+
 FILENAME = '/Users/tamasgal/Data/KM3NeT/DU-2/KM3NeT_00000007_00001597.root.h5'
 
 pipe = Pipeline()

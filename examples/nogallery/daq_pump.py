@@ -66,5 +66,3 @@ pipeline.attach(DAQPump, 'daq_pump',
 #pipeline.attach(MeanRates, 'mean_rates')
 pipeline.attach(MeanHits, 'mean_hits')
 pipeline.drain()
-
-

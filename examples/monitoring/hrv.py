@@ -31,6 +31,7 @@ VERSION = "1.0"
 
 log = kp.logger.logging.getLogger("HRV")
 
+
 class PMTRates(kp.Module):
     def configure(self):
         self.detector = self.require("detector")
@@ -40,7 +41,7 @@ class PMTRates(kp.Module):
         self.max_x = 800
         self.index = 0
         self.hrv = defaultdict(list)
-        self.hrv_matrix = np.full((18*31, self.max_x), np.nan)
+        self.hrv_matrix = np.full((18 * 31, self.max_x), np.nan)
         self.lock = threading.Lock()
         self.thread = threading.Thread(target=self.run, args=())
         self.thread.daemon = True
@@ -57,23 +58,25 @@ class PMTRates(kp.Module):
                 self.hrv = defaultdict(list)
             delta_t = (datetime.now() - now).total_seconds()
             remaining_t = self.interval - delta_t
-            print("Delta t: {} -> waiting for {}s".format(delta_t, self.interval - delta_t))
+            print("Delta t: {} -> waiting for {}s".format(delta_t,
+                                                          self.interval - delta_t))
             if(remaining_t < 0):
-                log.error("Can't keep up with plot production. Increase the interval!")
+                log.error(
+                    "Can't keep up with plot production. Increase the interval!")
                 interval = 1
             else:
                 interval = remaining_t
 
     def add_column(self):
         m = np.roll(self.hrv_matrix, -1, 1)
-        y_range = 18*31
+        y_range = 18 * 31
         mean_hrv = np.full(y_range, np.nan)
         for i in range(y_range):
             if i not in self.hrv:
                 continue
             mean_hrv[i] = np.mean(self.hrv[i])
 
-        m[:,self.max_x - 1] = mean_hrv
+        m[:, self.max_x - 1] = mean_hrv
         self.hrv_matrix = m
         print(self.hrv_matrix)
 
@@ -90,13 +93,13 @@ class PMTRates(kp.Module):
         fig, ax = plt.subplots(figsize=(10, 6))
         ax.imshow(m, origin='lower')
         ax.set_title("HRV Ratios for DU-{}\n{}"
-                    .format(self.du, datetime.utcnow()))
+                     .format(self.du, datetime.utcnow()))
         ax.set_xlabel("UTC time [{}s/px]".format(interval))
-        plt.yticks([i*31 for i in range(18)],
+        plt.yticks([i * 31 for i in range(18)],
                    ["Floor {}".format(f) for f in range(1, 19)])
-        xtics_int = range(0, max_x, int(max_x/10))
+        xtics_int = range(0, max_x, int(max_x / 10))
         plt.xticks([i for i in xtics_int],
-                   [xlabel_func(now - (max_x-i) * interval) for i in xtics_int])
+                   [xlabel_func(now - (max_x - i) * interval) for i in xtics_int])
         fig.tight_layout()
         plt.savefig(self.plot_path)
         plt.close('all')
@@ -130,10 +133,10 @@ def main():
     detector = kp.hardware.Detector(det_id=29)
     pipe = kp.Pipeline(timeit=True)
     pipe.attach(kp.io.CHPump, host='192.168.0.110',
-                              port=5553,
-                              tags='IO_MONIT',
-                              timeout=60*60*24*7,
-                              max_queue=1000)
+                port=5553,
+                tags='IO_MONIT',
+                timeout=60 * 60 * 24 * 7,
+                max_queue=1000)
     pipe.attach(PMTRates, detector=detector, du=2, interval=10)
     pipe.drain()
 

@@ -28,6 +28,7 @@ BUFFER_SIZE = 1024
 
 class Client(object):
     """The ControlHost client"""
+
     def __init__(self, host, port=5553):
         self.host = host
         self.port = port
@@ -134,6 +135,7 @@ class Client(object):
 
 class Message(object):
     """The representation of a ControlHost message."""
+
     def __init__(self, tag, message=b''):
         self.prefix = Prefix(tag, len(message))
         self.message = message
@@ -191,14 +193,13 @@ class Prefix(object):
 
     @property
     def data(self):
-        return self.tag.data + struct.pack('>i', self.length) + b'\x00'*4
+        return self.tag.data + struct.pack('>i', self.length) + b'\x00' * 4
 
     @data.setter
     def data(self, value):
         self.tag = Tag(data=value[:Tag.SIZE])
-        self.length = struct.unpack('>i', value[Tag.SIZE:Tag.SIZE+4])[0]
+        self.length = struct.unpack('>i', value[Tag.SIZE:Tag.SIZE + 4])[0]
 
     def __str__(self):
         return ("ControlHost Prefix with tag '{0}' ({1} bytes of data)"
                 .format(self.tag, self.length))
-
