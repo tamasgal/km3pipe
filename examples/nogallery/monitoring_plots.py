@@ -6,7 +6,6 @@ from __future__ import division
 from datetime import datetime
 from collections import deque, defaultdict
 from functools import partial
-import math
 import os
 import shutil
 import time
@@ -17,27 +16,20 @@ import matplotlib.ticker as ticker
 import matplotlib.dates as md
 from matplotlib.colors import LogNorm
 from matplotlib import pylab
-import seaborn as sns
 import pandas as pd
 import numpy as np
 
 from km3pipe import Pipeline, Module, Calibration
 from km3pipe.dataclasses import HitSeries
 from km3pipe.common import StringIO, Queue, Empty
-from km3pipe.hardware import Detector
 from km3pipe.io import CHPump
 from km3pipe.io.daq import (DAQProcessor, DAQPreamble, DAQSummaryslice,
                             DAQEvent)
 from km3pipe.time import tai_timestamp
 import km3pipe.style
 
-from km3pipe.logger import logging
 
-# for logger_name, logger in logging.Logger.manager.loggerDict.iteritems():
-#     if logger_name.startswith('km3pipe.'):
-#         print("Setting log level to debug for '{0}'".format(logger_name))
-#         logger.setLevel("DEBUG")
-
+km3pipe.style.use('km3pipe')
 
 PLOTS_PATH = '/home/km3net/monitoring/www/plots'
 N_DOMS = 18
@@ -65,7 +57,7 @@ class DOMHits(Module):
 
         data = blob['CHData']
         data_io = StringIO(data)
-        preamble = DAQPreamble(file_obj=data_io)
+        preamble = DAQPreamble(file_obj=data_io)  # noqa
         event = DAQEvent(file_obj=data_io)
         with lock:
             hits = np.zeros(N_DOMS * N_DUS)
@@ -100,8 +92,8 @@ class DOMHits(Module):
         ax.set_axisbelow(True)
         hit_matrix = np.array([np.array(x) for x in hits]).transpose()
         im = ax.matshow(hit_matrix,
-                        interpolation='nearest', filternorm=None, cmap='plasma',
-                        aspect='auto', origin='lower', zorder=3,
+                        interpolation='nearest', filternorm=None,
+                        cmap='plasma', aspect='auto', origin='lower', zorder=3,
                         norm=LogNorm(vmin=1, vmax=np.amax(hit_matrix)))
         yticks = np.arange(N_DOMS * N_DUS)
         ytick_labels = ["DU{0:0.0f}-DOM{1:02d}"
@@ -157,7 +149,7 @@ class TriggerRate(Module):
 
         data = blob['CHData']
         data_io = StringIO(data)
-        preamble = DAQPreamble(file_obj=data_io)
+        preamble = DAQPreamble(file_obj=data_io)  # noqa
         event = DAQEvent(file_obj=data_io)
         timestamp = event.header.time_stamp
         with lock:
@@ -181,7 +173,8 @@ class TriggerRate(Module):
         self.trigger_rates.append((now, rate))
         try:
             self.store.append('trigger_rates',
-                              pd.DataFrame({'timestamp': [now], 'rate': [rate]}))
+                              pd.DataFrame({'timestamp': [now],
+                                            'rate': [rate]}))
         except pd.io.pytables.ClosedFileError:
             pass
         print("Number of rates recorded: {0} (last: {1}"
@@ -242,7 +235,7 @@ class DOMActivityPlotter(Module):
 
         data = blob['CHData']
         data_io = StringIO(data)
-        preamble = DAQPreamble(file_obj=data_io)
+        preamble = DAQPreamble(file_obj=data_io)  # noqa
         summaryslice = DAQSummaryslice(file_obj=data_io)
         timestamp = summaryslice.header.time_stamp
         with lock:
@@ -291,9 +284,9 @@ class DOMActivityPlotter(Module):
             sc_active = ax.scatter(xa[active_idx], ya[active_idx],
                                    c=ts[active_idx], cmap=cmap,
                                    **scatter_args)
-            sc_idle = ax.scatter(xa[~active_idx], ya[~active_idx],
-                                 c='deeppink', label='> {0} s'.format(vmax),
-                                 **scatter_args)
+            ax.scatter(xa[~active_idx], ya[~active_idx],
+                       c='deeppink', label='> {0} s'.format(vmax),
+                       **scatter_args)
             cb = plt.colorbar(sc_active)
             cb.set_label("last activity [s]")
             # ts_series = pd.Series(ts)
@@ -337,24 +330,24 @@ class ZTPlot(Module):
             return blob
 
         hits = blob['Hits']
-        event_info = blob['EventInfo']
+        e_info = blob['EventInfo']
 
         print("Event queue size: {0}".format(self.queue.qsize()))
         if self.queue.qsize() < self.max_queue:
-            self.queue.put((event_info, hits))
+            self.queue.put((e_info, hits))
 
         return blob
 
     def plot(self):
         while self.run:
             try:
-                event_info, hits = self.queue.get(timeout=50)
+                e_info, hits = self.queue.get(timeout=50)
             except Empty:
                 continue
             with lock:
-                self.create_plot(event_info, hits)
+                self.create_plot(e_info, hits)
 
-    def create_plot(self, event_info, hits):
+    def create_plot(self, e_info, hits):
         print(self.__class__.__name__ + ": updating plot.")
         cal.apply(hits)
         dus = set(detector.doms[h.dom_id][0] for h in hits)
@@ -364,8 +357,6 @@ class ZTPlot(Module):
         n_rows = int(n_plots / n_cols) + (n_plots % n_cols > 0)
         fig, axes = plt.subplots(ncols=n_cols, nrows=n_rows,
                                  sharex=True, sharey=True, figsize=(16, 8))
-
-        # [axes.flat[-1 - i].axis('off') for i in range(len(axes.flat) - n_plots)]
 
         for ax, du in zip(axes.flat, dus):
             _hits = [h for h in hits
@@ -387,9 +378,9 @@ class ZTPlot(Module):
                 label.set_rotation(45)
 
         plt.suptitle("Run {0}, FrameIndex {1}, TriggerCounter {2}\n{3}"
-                     .format(event_info.run_id, event_info.frame_index,
-                             event_info.trigger_counter,
-                             datetime.utcfromtimestamp(event_info.utc_seconds)),
+                     .format(e_info.run_id, e_info.frame_index,
+                             e_info.trigger_counter,
+                             datetime.utcfromtimestamp(e_info.utc_seconds)),
                      fontsize=16)
         fig.text(0.5, 0.01, 'time [ns]', ha='center')
         fig.text(0.08, 0.5, 'z [m]', va='center', rotation='vertical')

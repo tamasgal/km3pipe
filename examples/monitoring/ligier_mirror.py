@@ -17,9 +17,6 @@ import socket
 
 from km3pipe import Pipeline, Module
 from km3pipe.io import CHPump
-import controlhost as ch
-
-from km3pipe.logger import logging
 
 
 class LigierSender(Module):

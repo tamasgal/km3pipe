@@ -71,7 +71,7 @@ class TestSiphon(TestCase):
         pipe.attach(Observer)
         pipe.drain(21)
 
-    def test_siphon_with_flush(self):
+    def test_siphon_with_flush_2(self):
         class APump(kp.Pump):
             def configure(self):
                 self.i = 0

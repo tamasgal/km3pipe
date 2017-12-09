@@ -213,7 +213,8 @@ class EvtPump(Pump):  # pylint: disable:R0902
             return
         if tag in self.exclude_tags:
             return
-        if tag in ('track_in', 'track_fit', 'hit', 'hit_raw', 'track_seamuon', 'track_seaneutrino'):
+        if tag in ('track_in', 'track_fit', 'hit', 'hit_raw',
+                   'track_seamuon', 'track_seaneutrino'):
             values = [float(x) for x in value.split()]
             blob.setdefault(tag, []).append(values)
             if tag == 'hit':
@@ -343,8 +344,9 @@ class TrackIn(Track):
             text += " mother: {0} [Corsika]\n".format(self.mother)
             text += " grandmother: {0} [Corsika]\n".format(self.grandmother)
         except AttributeError:
-            text += " type: {0} '{1}' [PDG]\n".format(self.particle_type,
-                                                      pdg2name(self.particle_type))
+            text += " type: {0} '{1}' [PDG]\n"  \
+                    .format(self.particle_type,
+                            pdg2name(self.particle_type))
             pass
 
         return text

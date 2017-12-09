@@ -29,34 +29,30 @@ __status__ = "Development"
 style_dir = os.path.dirname(kp.__file__) + '/kp-data/stylelib'
 
 
-class KM3PipePygmentsStyle(object):
-    def __init__(self):
-        raise ImportError("Module pygments could be not found")
-
-
-class LatexPreprocessor(object):
-    def __init__(self):
-        raise ImportError("Module nbconvert could be not found")
-
-
 try:
     from nbconvert.preprocessors.base import Preprocessor
     from pygments.style import Style
     import pygments.token as token
 except ImportError:
-    pass
+    class KM3PipePygmentsStyle(object):
+        def __init__(self):
+            raise ImportError("Module pygments could be not found")
+
+    class LatexPreprocessor(object):
+        def __init__(self):
+            raise ImportError("Module nbconvert could be not found")
 else:
     class KM3PipePygmentsStyle(Style):
         default_style = ""
         styles = {
-            token.Comment:         '#aaa',
-            token.Keyword:         '#0095B5',
+            token.Comment: '#aaa',
+            token.Keyword: '#0095B5',
             token.Keyword.Control: '#0095B5',
-            token.Name:            '#333',
-            token.Name.Function:   '#FF0082',
-            token.Name.Class:      'bold #FF0082',
-            token.String:          '#666',
-            token.Operator:        '#346F8A',
+            token.Name: '#333',
+            token.Name.Function: '#FF0082',
+            token.Name.Class: 'bold #FF0082',
+            token.String: '#666',
+            token.Operator: '#346F8A',
         }
 
     class LatexPreprocessor(Preprocessor):

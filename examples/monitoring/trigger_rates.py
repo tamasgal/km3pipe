@@ -20,11 +20,10 @@ import threading
 
 import matplotlib
 # Force matplotlib to not use any Xwindows backend.
-matplotlib.use('Agg')
+matplotlib.use('Agg')  # noqa
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 import matplotlib.ticker as ticker
-import numpy as np
 
 import km3pipe as kp
 from km3pipe.config import Config
@@ -33,16 +32,14 @@ from km3pipe.io.daq import (DAQPreamble, DAQEvent)
 import km3pipe.style
 km3pipe.style.use('km3pipe')
 
-from km3pipe.logger import logging
-
-log = logging.getLogger("trigger_rate")
+log = kp.logger.get("trigger_rate")
 
 PLOTS_PATH = 'km3web/plots'
 
 xfmt = md.DateFormatter('%Y-%m-%d %H:%M')
 lock = threading.Lock()
 
-general_style = dict(markersize=6,  linestyle='None')
+general_style = dict(markersize=6, linestyle='None')
 styles = {
     "Overall": dict(marker='D',
                     markerfacecolor='None',
@@ -93,7 +90,7 @@ class TriggerRate(kp.Module):
 
         data = blob['CHData']
         data_io = BytesIO(data)
-        preamble = DAQPreamble(file_obj=data_io)
+        preamble = DAQPreamble(file_obj=data_io)  # noqa
         event = DAQEvent(file_obj=data_io)
         tm = event.trigger_mask
         with lock:

@@ -6,16 +6,7 @@
 Trigger Map
 ===========
 
-This script creates a histogram which shows the trigger contribution for events.
-
-"""
-# Author: Tamas Gal <tgal@km3net.de>
-# License: MIT
-#!/usr/bin/env python
-# coding=utf-8
-# vim: ts=4 sw=4 et
-"""
-This script creates a histogram which shows the trigger contribution for events.
+This script creates a histogram to show the trigger contribution for events.
 
 Usage:
     trigger_map.py [-d DU -p PLOT_FILENAME] FILENAME
@@ -33,11 +24,9 @@ from __future__ import division
 from docopt import docopt
 import matplotlib
 # Force matplotlib to not use any Xwindows backend.
-matplotlib.use('Agg')
+matplotlib.use('Agg')  # noqa
 import matplotlib.pyplot as plt
-import matplotlib.dates as md
 from matplotlib.colors import LogNorm
-from matplotlib import pylab
 import numpy as np
 
 import km3pipe as kp
@@ -87,13 +76,14 @@ class TriggerMap(kp.Module):
         ax.set_axisbelow(True)
         hit_mat = np.array([np.array(x) for x in self.hit_counts]).transpose()
         im = ax.matshow(hit_mat,
-                        interpolation='nearest', filternorm=None, cmap='plasma',
-                        aspect='auto', origin='lower', zorder=3,
+                        interpolation='nearest', filternorm=None,
+                        cmap='plasma', aspect='auto', origin='lower', zorder=3,
                         norm=LogNorm(vmin=1, vmax=np.amax(hit_mat)))
         yticks = np.arange(self.n_doms * self.n_dus)
         ytick_label_templ = "DU{0:.0f}-DOM{1:02d}" if self.du else "DOM{1:02d}"
         ytick_labels = [ytick_label_templ
-                        .format(np.ceil((y + 1) / self.n_doms), y % (self.n_doms) + 1)
+                        .format(np.ceil((y + 1) / self.n_doms),
+                                y % (self.n_doms) + 1)
                         for y in yticks]
         ax.set_yticks(yticks)
         ax.set_yticklabels(ytick_labels)

@@ -9,10 +9,7 @@ from __future__ import absolute_import, print_function
 
 from km3pipe.controlhost import Tag, Message, Prefix
 
-from km3pipe.testing import TestCase, MagicMock
-
-from km3pipe.db import DBManager, DOMContainer
-from km3pipe.logger import logging
+from km3pipe.testing import TestCase
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -24,9 +21,6 @@ __status__ = "Development"
 
 
 class TestTag(TestCase):
-    def test_init(self):
-        tag = Tag()
-
     def test_empty_tag_has_correct_length(self):
         tag = Tag()
         self.assertEqual(Tag.SIZE, len(tag))
@@ -52,9 +46,9 @@ class TestTag(TestCase):
 
 class TestPrefix(TestCase):
     def test_init(self):
-        prefix = Prefix(b'foo', 1)
+        Prefix(b'foo', 1)
 
 
 class TestMessage(TestCase):
     def test_init(self):
-        message = Message('')
+        Message('')

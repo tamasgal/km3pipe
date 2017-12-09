@@ -15,9 +15,9 @@ except NameError:
 from .__version__ import version, version_info  # noqa
 
 if not __KM3PIPE_SETUP__:
-    from .core import (Pipeline, Module, Pump, Blob, Run, Geometry)
-    from .io import Calibration
-    import km3pipe.io
+    from .core import (Pipeline, Module, Pump, Blob, Run, Geometry)  # noqa
+    from .io import Calibration  # noqa
+    import km3pipe.io  # noqa
 
 
 __author__ = "Tamas Gal and Moritz Lotze"

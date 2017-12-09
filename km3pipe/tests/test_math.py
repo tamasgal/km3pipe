@@ -12,7 +12,7 @@ from km3pipe.math import (
 )
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
-__copyright__ = "Copyright 2016, KM3Pipe developers and the KM3NeT collaboration."
+__copyright__ = "Copyright 2016, KM3Pipe devs and the KM3NeT collaboration."
 __credits__ = ["Thomas Heid"]
 __license__ = "MIT"
 __maintainer__ = ["Tamas Gal", "Moritz Lotze"]
@@ -113,10 +113,10 @@ class TestMath(TestCase):
         self.assertAlmostEqual(angle_between(self.v, v2), 1.0068536854342678)
         self.assertAlmostEqual(angle_between(self.v, v3), 1.8413460897734695)
         self.assertTrue(np.allclose(angle_between(self.vecs, v1),
-                                    np.array([1.57079633, 1.3328552, 1.00685369,
+                                    np.array([1.57079633, 1.3328552, 1.0068537,
                                               0.64052231, 0.33983691])))
         self.assertTrue(np.allclose(angle_between(self.vecs, v2),
-                                    np.array([1.37340077, 1.3328552, 1.30024656,
+                                    np.array([1.37340077, 1.3328552, 1.3002466,
                                               1.30024656, 1.3328552])))
         self.assertTrue(np.allclose(angle_between(self.vecs, v3),
                                     np.array([1.57079633, 1.80873745,

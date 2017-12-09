@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from __future__ import division
-import time
 from time import ctime
 from pyslack import SlackClient
 
@@ -13,7 +12,7 @@ from km3pipe.common import StringIO
 class CHPrinter(Module):
     def process(self, blob):
         print("New blob:")
-        print blob['CHPrefix']
+        print(blob['CHPrefix'])
         return blob
 
 
@@ -23,8 +22,6 @@ class SlackSender(Module):
         self.current_run = None
 
     def process(self, blob):
-        data_size = blob['CHPrefix'].length
-
         data = blob['CHData']
         data_io = StringIO(data)
 
@@ -47,7 +44,8 @@ class SlackSender(Module):
 
 
 pipe = Pipeline()
-pipe.attach(CHPump, host='localhost',  # You'll need a VPN connection and several SSH tunnels
+pipe.attach(CHPump,
+            host='127.0.0.1',  # You'll need an SSH tunnel
             port=5553,
             tags='IO_EVT',
             timeout=60 * 60 * 24,

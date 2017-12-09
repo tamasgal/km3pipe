@@ -60,9 +60,9 @@ class MeanRates(Module):
 
 pipeline = Pipeline()
 pipeline.attach(DAQPump, 'daq_pump',
-                filename='/Users/tamasgal/Desktop/RUN-PPM_DU-00430-20140730-121124_detx.dat')
-#pipeline.attach(DAQEventPrinter, 'moo')
-#pipeline.attach(DAQSummaryslicePrinter, 'summaryslice_printer')
-#pipeline.attach(MeanRates, 'mean_rates')
+                filename='dump.dat')
+# pipeline.attach(DAQEventPrinter, 'moo')
+# pipeline.attach(DAQSummaryslicePrinter, 'summaryslice_printer')
+# pipeline.attach(MeanRates, 'mean_rates')
 pipeline.attach(MeanHits, 'mean_hits')
 pipeline.drain()

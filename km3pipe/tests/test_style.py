@@ -26,9 +26,6 @@ class TestStyle(TestCase):
 
 
 class TestColourCycler(TestCase):
-    def test_init_with_palette(self):
-        cc = ColourCycler('km3pipe')
-
     def test_available(self):
         cc = ColourCycler()
         self.assertTrue('km3pipe' in cc.available)
@@ -50,4 +47,4 @@ class TestColourCycler(TestCase):
 
     def test_raise_keyerror_if_style_not_available(self):
         with self.assertRaises(KeyError):
-            cc = ColourCycler("foo")
+            cc = ColourCycler("foo")  # noqa

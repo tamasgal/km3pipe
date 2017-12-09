@@ -3,11 +3,8 @@
 # pylint: disable=C0111,E1003,R0904,C0103,R0201,C0102
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import TestCase, StringIO, MagicMock, patch
+from km3pipe.testing import TestCase, StringIO, MagicMock
 from km3pipe.core import Pipeline, Module, Pump, Blob
-from km3pipe.dataclasses import HitSeries
-
-import numpy as np
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -200,9 +197,7 @@ class TestPipeline(TestCase):
         with self.assertRaises(SystemExit):
             pl._handle_ctrl_c()  # second KeyboardInterrupt
 
-    def test_attaching_a_pump_allows_first_parameter_to_be_passed_as_filename(self):
-        pl = Pipeline()
-
+    def test_attaching_a_pump_allows_first_param_to_be_passed_as_fname(self):
         class APump(Pump):
             def configure(self):
                 self.filename = self.require('filename')

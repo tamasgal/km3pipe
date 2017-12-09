@@ -13,7 +13,6 @@ from km3pipe.controlhost import Client
 from km3pipe.time import Cuckoo
 from km3pipe.logger import logging
 import threading
-import struct
 import socket
 import time
 import numpy as np

@@ -21,10 +21,10 @@ from .hdf5 import HDF5Pump  # noqa
 from .hdf5 import HDF5Sink  # noqa
 from .hdf5 import HDF5MetaData  # noqa
 from .pickle import PicklePump  # noqa
-from .pandas import (H5Chain, df_to_h5, map2df,
-                     read_group, write_table,)
+from .pandas import (H5Chain, df_to_h5, map2df,  # noqa
+                     read_group, write_table,)  # noqa
 
-from km3pipe.tools import insert_prefix_to_dtype
+from km3pipe.tools import insert_prefix_to_dtype  # noqa
 from km3pipe.core import Run
 from km3pipe.calib import Calibration
 from km3pipe.logger import logging

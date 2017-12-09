@@ -16,7 +16,7 @@ dom_id line_id floor_id npmts
 """
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import TestCase, StringIO, skipIf
+from km3pipe.testing import TestCase, StringIO
 from km3pipe.hardware import Detector, PMT
 
 __author__ = "Tamas Gal"

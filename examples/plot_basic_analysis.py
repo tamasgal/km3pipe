@@ -13,7 +13,8 @@ Basic Analysis Example
 #####################################################
 # Preparation
 # -----------
-# The very first thing we do is importing our libraries and setting up the Jupyter Notebook environment.
+# The very first thing we do is importing our libraries and setting up
+# the Jupyter Notebook environment.
 
 import matplotlib.pyplot as plt   # our plotting module
 import pandas as pd               # the main HDF5 reader
@@ -36,7 +37,8 @@ km3pipe.style.use("km3pipe")
 # from ROOT to HDF5 using the ``tohdf5`` command line tool provided by
 # ``KM3Pipe``.
 #
-# You can find the documentation here: http://km3pipe.readthedocs.io/en/latest/cmd.html#tohdf
+# You can find the documentation here:
+# http://km3pipe.readthedocs.io/en/latest/cmd.html#tohdf
 
 #####################################################
 # Note for Lyon Users
@@ -77,7 +79,8 @@ filepath = "data/basic_analysis_sample.h5"
 
 
 #####################################################
-# We can have a quick look at the file with the ``ptdump`` command in the terminal::
+# We can have a quick look at the file with the ``ptdump`` command
+# in the terminal::
 #
 #     ptdump filename.h5
 #
@@ -168,7 +171,7 @@ plt.colorbar()
 # If you have seaborn installed (`pip install seaborn`), you can easily create
 # nice jointplots:
 try:
-    import seaborn as sns
+    import seaborn as sns  # noqa
     km3pipe.style.use("km3pipe")  # reset matplotlib style
 except:
     print("No seaborn found, skipping example.")
@@ -183,7 +186,7 @@ else:
 
 #####################################################
 #
-from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d import Axes3D  # noqa
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 ax.scatter3D(primaries.pos_x, primaries.pos_y, primaries.pos_z, s=3)
@@ -257,7 +260,7 @@ plt.title('Zenith Reconstruction Difference for some Lambda Cuts')
 # Conversely, the Cauchy (lorentz) distribution is a near perfect fit
 # (note that ``2 gamma = FWHM``).
 
-from scipy.stats import cauchy, norm
+from scipy.stats import cauchy, norm  # noqa
 
 residuals = gandalfs.zenith - primaries.zenith
 cut = (gandalfs['lambda'] < l) & (np.abs(residuals) < 2 * np.pi)

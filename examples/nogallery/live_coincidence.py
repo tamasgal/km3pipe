@@ -1,44 +1,12 @@
 """Read & dump events through the CH Pump.
 """
-from collections import defaultdict
 from itertools import combinations
-from struct import unpack
-from io import BytesIO
-from time import sleep
 
 import numpy as np
 
 from km3pipe import Pipeline, Module
 from km3pipe.io.ch import CHPump
-from km3pipe.logger import logging
-
-#log_ch = logging.getLogger('km3pipe.io.ch')
-# log_ch.setLevel('DEBUG')
-
-
-class TimesliceParser(Module):
-    def process(self, blob):
-        data = BytesIO(blob['CHData'])
-        tsl_size, datatype = unpack('<ii', data.read(8))
-        det_id, run, sqnr = unpack('<iii', data.read(12))
-        timestamp, ns_ticks, n_frames = unpack('<iii', data.read(12))
-
-#        print("Det ID: {0}, Run: {1}, Sequence Nr.: {2}, Frames: {3}"
-#              .format(det_id, run, sqnr, n_frames))
-
-        ts_frames = blob['TimesliceFrames'] = defaultdict(list)
-
-        for i in range(n_frames):
-            frame_size, datatype = unpack('<ii', data.read(8))
-            det_id, run, sqnr = unpack('<iii', data.read(12))
-            timestamp, ns_ticks, dom_id = unpack('<iii', data.read(12))
-            dom_status = unpack('<iiiii', data.read(5 * 4))
-            n_hits = unpack('<i', data.read(4))[0]
-            hits = []
-            for j in range(n_hits):
-                hit = unpack('!BlB', data.read(6))
-                ts_frames[dom_id].append(hit)
-        return blob
+from km3pipe.io.daq import TimesliceParser
 
 
 def printer(blob):

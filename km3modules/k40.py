@@ -31,7 +31,7 @@ log = kp.logger.logging.getLogger(__name__)  # pylint: disable=C0103
 # log.setLevel(logging.DEBUG)
 
 TIMESLICE_LENGTH = 0.1  # [s]
-MC_ANG_DIST = np.array([-0.72337394,  2.59196335, -0.43594182,  1.10514914])
+MC_ANG_DIST = np.array([-0.72337394, 2.59196335, -0.43594182, 1.10514914])
 
 
 class K40BackgroundSubtractor(kp.Module):
@@ -735,8 +735,8 @@ def minimize_qes(fitted_rates, rates, weights, combs):
             sq_sum = 0
             for fitted_rate, comb, rate, weight  \
                     in zip(fitted_rates, combs, rates, weights):
-                sq_sum += ((rate / qes[comb[0]] / qes[comb[1]]
-                            - fitted_rate) * weight)**2
+                sq_sum += ((rate / qes[comb[0]] / qes[comb[1]] -
+                            fitted_rate) * weight)**2
             return sq_sum
         return quality_function
 
@@ -763,8 +763,8 @@ def correct_means(means, opt_t0s, combs):
     corrected_means: numpy array of corrected gaussian means for all PMT combs
 
     """
-    corrected_means = np.array([(opt_t0s[comb[1]] - opt_t0s[comb[0]])
-                                - mean for mean, comb in zip(means, combs)])
+    corrected_means = np.array([(opt_t0s[comb[1]] - opt_t0s[comb[0]]) -
+                               mean for mean, comb in zip(means, combs)])
     return corrected_means
 
 

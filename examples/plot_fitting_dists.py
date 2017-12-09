@@ -19,7 +19,7 @@ from sklearn.mixture import GaussianMixture
 from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KernelDensity
 
-import km3pipe.style.moritz
+import km3pipe.style.moritz  # noqa
 
 ##############################################################################
 # First generate some pseudodata: A bimodal gaussian, + noise.
@@ -158,5 +158,9 @@ plt.hist(data, bins='auto', alpha=.3, normed=True)
 # ----------
 #
 # - B.W. Silverman, “Density Estimation for Statistics and Data Analysis”
-# - Hastie, Tibshirani and Friedman, “The Elements of Statistical Learning: Data Mining, Inference, and Prediction”, Springer (2009)
-# - Liu, R., Yang, L. “Kernel estimation of multivariate cumulative distribution function.” Journal of Nonparametric Statistics (2008)
+# - Hastie, Tibshirani and Friedman,
+#   “The Elements of Statistical Learning: Data Mining, Inference,
+#   and Prediction”, Springer (2009)
+# - Liu, R., Yang, L.
+#   “Kernel estimation of multivariate cumulative distribution function.”
+#   Journal of Nonparametric Statistics (2008)

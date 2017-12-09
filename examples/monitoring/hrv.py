@@ -20,7 +20,7 @@ import km3pipe as kp
 from km3pipe.io.daq import TMCHData
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use('Agg')  # noqa
 import matplotlib.pyplot as plt
 import km3pipe.style as kpst
 kpst.use("km3pipe")
@@ -58,11 +58,11 @@ class PMTRates(kp.Module):
                 self.hrv = defaultdict(list)
             delta_t = (datetime.now() - now).total_seconds()
             remaining_t = self.interval - delta_t
-            print("Delta t: {} -> waiting for {}s".format(delta_t,
-                                                          self.interval - delta_t))
+            print("Delta t: {} -> waiting for {}s"
+                  .format(delta_t, self.interval - delta_t))
             if(remaining_t < 0):
-                log.error(
-                    "Can't keep up with plot production. Increase the interval!")
+                log.error("Can't keep up with plot production. "
+                          "Increase the interval!")
                 interval = 1
             else:
                 interval = remaining_t
@@ -99,14 +99,14 @@ class PMTRates(kp.Module):
                    ["Floor {}".format(f) for f in range(1, 19)])
         xtics_int = range(0, max_x, int(max_x / 10))
         plt.xticks([i for i in xtics_int],
-                   [xlabel_func(now - (max_x - i) * interval) for i in xtics_int])
+                   [xlabel_func(now - (max_x - i) * interval)
+                    for i in xtics_int])
         fig.tight_layout()
         plt.savefig(self.plot_path)
         plt.close('all')
 
     def process(self, blob):
         tmch_data = TMCHData(io.BytesIO(blob['CHData']))
-        run_id = tmch_data.run
         dom_id = tmch_data.dom_id
 
         if dom_id not in self.detector.doms:

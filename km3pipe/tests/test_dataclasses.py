@@ -336,14 +336,12 @@ class TestRawHitSeries(TestCase):
         self.assertAlmostEqual(1, a_hit.triggered)
 
     def test_slicing(self):
-        hits = self.hits
         shits = self.hits[4:6]
         self.assertTrue(isinstance(shits, RawHitSeries))
         self.assertEqual(2, len(shits))
         self.assertAlmostEqual(4, shits.time[0])
 
     def test_slicing_then_single_element_access(self):
-        hits = self.hits
         shits = self.hits[4:6]
         a_hit = shits[1]
         self.assertAlmostEqual(5, a_hit.time)

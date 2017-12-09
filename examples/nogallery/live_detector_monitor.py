@@ -14,7 +14,7 @@ from km3pipe.common import StringIO
 class CHPrinter(Module):
     def process(self, blob):
         print("New blob:")
-        print blob['CHPrefix']
+        print(blob['CHPrefix'])
         return blob
 
 

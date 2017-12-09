@@ -20,7 +20,7 @@ import km3pipe as kp
 from km3pipe.io.daq import TMCHData
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use('Agg')  # noqa
 import matplotlib.pyplot as plt
 import km3pipe.style as kpst
 kpst.use("km3pipe")
@@ -93,14 +93,15 @@ class PMTRates(kp.Module):
         m[m < 5000] = 5000
         fig, ax = plt.subplots(figsize=(10, 6))
         ax.imshow(m, origin='lower')
-        ax.set_title("Mean PMT Rates for DU-{} (colours from 5kHz to 15kHz)\n{}"
+        ax.set_title("Mean PMT Rates for DU{} (colours from 5kHz to 15kHz)\n{}"
                      .format(self.du, datetime.utcnow()))
         ax.set_xlabel("UTC time [{}s/px]".format(interval))
         plt.yticks([i * 31 for i in range(18)],
                    ["Floor {}".format(f) for f in range(1, 19)])
         xtics_int = range(0, max_x, int(max_x / 10))
         plt.xticks([i for i in xtics_int],
-                   [xlabel_func(now - (max_x - i) * interval) for i in xtics_int])
+                   [xlabel_func(now - (max_x - i) * interval)
+                    for i in xtics_int])
         fig.tight_layout()
         plt.savefig(self.plot_path)
         plt.close('all')

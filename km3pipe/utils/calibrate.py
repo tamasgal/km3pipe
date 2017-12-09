@@ -51,7 +51,8 @@ def calibrate_mc_hits(f, cal):
 def apply_calibration(calib, f, n, loc):
     f4_atom = tb.Float32Atom()
     u1_atom = tb.UInt8Atom()
-    for i, node in enumerate([p + '_' + s for p in ['pos', 'dir'] for s in 'xyz']):
+    for i, node in enumerate([p + '_' + s for p in ['pos', 'dir']
+                              for s in 'xyz']):
         print("  ...creating " + node)
         ca = f.create_carray(loc, node, f4_atom, (n,), filters=FILTERS)
         ca[:] = calib[:, i]

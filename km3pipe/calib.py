@@ -188,7 +188,7 @@ class Calibration(Module):
         cal = np.empty((n, 9))
         for i in range(n):
             lookup = self._calib_by_pmt_id
-            calib = lookup[hits._arr['pmt_id'][i]]
+            cal[i] = lookup[hits._arr['pmt_id'][i]]
         h = np.empty(n, CMcHitSeries.dtype)
         h['channel_id'] = np.zeros(n, dtype=int)
         h['dir_x'] = cal[:, 3]

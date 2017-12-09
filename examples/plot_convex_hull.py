@@ -18,7 +18,7 @@ from km3pipe.math import Polygon
 import km3pipe.style
 km3pipe.style.use("km3pipe")
 
-filename = "data/orca_115strings_av23min20mhorizontal_18OMs_alt9mvertical_v1.detx"
+filename = "data/orca_115strings_av23min20mhorizontal_18OMs_alt9mvertical_v1.detx"  # noqa
 detector = Detector(filename)
 xy = detector.xy_positions
 hull = ConvexHull(xy)

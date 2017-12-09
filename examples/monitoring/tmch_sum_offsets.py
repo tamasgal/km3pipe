@@ -21,32 +21,8 @@ Options:
     -h --help        Show this screen.
 
 """
-#!/usr/bin/env python
-# coding=utf-8
-# vim: ts=4 sw=4 et
-# Author: Tamas Gal <tgal@km3net.de>
-# License: MIT
-"""
-This script picks a monitoring channel packet with no HRV flags for any PMT
-and tries to match one of the following 50 summaryslices using the PMT rates.
-The index of the summaryslice, the rates-diff and the time offsets are logged
-in a CSV file.
-
-Usage:
-    tmch_sum_offsets.py DOM_ID [-n N_TIMESLICES]
-    tmch_sum_offsets.py (-h | --help)
-
-Options:
-    DOM_ID           The DOM ID.
-    -n N_TIMESLICES  The number of timeslices to investigate [default: 50].
-    -h --help        Show this screen.
-
-"""
 import io
 import os
-import sys
-import time
-from collections import deque
 import km3pipe as kp
 from km3pipe.io.daq import TMCHData, DAQPreamble, DAQSummaryslice
 import numpy as np
@@ -120,7 +96,7 @@ class SummarysliceMatcher(kp.Module):
         tag = str(blob['CHPrefix'].tag)
         if tag == 'IO_SUM':
             data = io.BytesIO(blob['CHData'])
-            preamble = DAQPreamble(file_obj=data)
+            preamble = DAQPreamble(file_obj=data)  # noqa
             summary = DAQSummaryslice(file_obj=data)
             try:
                 rates = np.array(summary.summary_frames[self.dom_id])
