@@ -131,9 +131,11 @@ def drop_duplicate_columns(df):
     return df.T.drop_duplicates().T
 
 
-def merge_event_ids(df):
+def merge_event_ids(df, drop_duplicates=False):
     cols = list(df.columns)
-    cols = drop_duplicate_columns(df)
+    if drop_duplicates:
+        # that function some times reaches max recursion depth, whyever
+        cols = drop_duplicate_columns(df)
     ids = list(c for c in cols if 'event_id' in c)
     log.debug(ids)
     if not ids:
