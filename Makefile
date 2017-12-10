@@ -5,7 +5,7 @@ all: install
 build: 
 	python setup.py build_ext --inplace -j 4
 
-install: 
+install: dependencies
 	pip install -e ".[full]"
 
 clean:
@@ -23,13 +23,13 @@ test-nocov: build
 	py.test --junitxml=./junit.xml
 	py.test km3modules
 
-docs:
-	cd docs
-	make clean
-	make html
-
 flake8: 
 	py.test --flake8
+	py.test --flake8 km3modules
+
+lint: 
+	py.test --pylint
+	py.test --pylint km3modules
 
 pep8: flake8
 
