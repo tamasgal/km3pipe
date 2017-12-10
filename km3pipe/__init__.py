@@ -12,7 +12,7 @@ try:
 except NameError:
     __KM3PIPE_SETUP__ = False
 
-from .__version__ import version, version_info  # noqa
+from .__version__ import version, VERSION_INFO  # noqa
 
 if not __KM3PIPE_SETUP__:
     from .core import (Pipeline, Module, Pump, Blob, Run, Geometry)  # noqa
