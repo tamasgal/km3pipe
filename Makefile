@@ -5,7 +5,7 @@ all: install
 build: 
 	python setup.py build_ext --inplace -j 4
 
-install: dependencies
+install: 
 	pip install -e ".[full]"
 
 clean:
