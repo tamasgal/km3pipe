@@ -124,6 +124,7 @@ class HDF5Sink(Module):
             return data.serialise()
         except AttributeError:
             pass
+        data = np.asarray(data)
         return data
 
     def _write_array(self, where, arr, datatype, title=''):
@@ -184,7 +185,6 @@ class HDF5Sink(Module):
         d["index"] += n_items
 
     def process(self, blob):
-
         if not self._header_written and "Header" in blob \
                 and blob["Header"] is not None:
             header = self.h5file.create_group('/', 'header', 'Header')
