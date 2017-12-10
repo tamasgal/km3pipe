@@ -14,12 +14,12 @@ clean:
 	rm -f -r build/
 	rm -f $(PKGNAME)/*.so
 
-test:
+test: build
 	py.test --junitxml=./junit.xml \
 		--cov ./ --cov-report term-missing --cov-report xml
 	py.test km3modules
 
-test-nocov:
+test-nocov: build
 	py.test --junitxml=./junit.xml
 	py.test km3modules
 
