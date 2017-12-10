@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-"""Convert jupyter notebook to sphinx gallery notebook styled examples.
+"""
+Convert jupyter notebook to sphinx gallery notebook styled examples.
 Needs pypandoc (`pip install pypandoc`).
 
 Usage:
@@ -16,9 +17,10 @@ from km3pipe import version
 
 def convert_ipynb_to_gallery(file_name):
     """
-    Blatantly stolen + adapted from https://gist.github.com/wuhuikai/4a7ceb8bc52454e17a4eb8327d538d85
-    """
+    Blatantly stolen + adapted from
+    https://gist.github.com/wuhuikai/4a7ceb8bc52454e17a4eb8327d538d85
 
+    """
     python_file = ""
 
     nb_dict = json.load(open(file_name))
