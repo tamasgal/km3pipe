@@ -23,6 +23,11 @@ test-nocov: build
 	py.test --junitxml=./junit.xml
 	py.test km3modules
 
+test-loop: build
+	pip install -U pytest-watch
+	py.test
+	ptw --ext=.py,.pyx --beforerun "make build"
+
 docs:
 	cd docs
 	make clean
