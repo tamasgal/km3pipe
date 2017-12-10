@@ -4,6 +4,8 @@ Unreleased changes
 * add a makefile
 * flake8 all the things
 * make compatible for upcoming numpy 1.14
+* add ``nb2shpx`` util for notebook -> sphinx gallery exampe
+* some pandas bits and bobs
 
 Version 7
 ---------
