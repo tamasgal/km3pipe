@@ -24,7 +24,7 @@ Options:
     -t T0_SET           Time calibration ID (eg. A01466431)
     -n EVENTS/RUNS      Number of events/runs.
     -s REGEX            Regular expression to filter the runsetup name/id.
-    --temporary         Do not request a permanent session, but a temporary one. [default: False]
+    --temporary         Use a temporary session. [default: False]
     --overwrite         Overwrite existing config [default: False]
     DET_ID              Detector ID (eg. D_ARCA001).
     DETECTOR            Detector (eg. ARCA).
@@ -187,13 +187,16 @@ def main():
         createconf(overwrite_conf)
 
     if args['runtable']:
-        runtable(args['DET_ID'], n, regex=args['-s'], temporary=args["--temporary"])
+        runtable(args['DET_ID'], n, regex=args['-s'],
+                 temporary=args["--temporary"])
 
     if args['runinfo']:
-        runinfo(int(args['RUN']), args['DET_ID'], temporary=args["--temporary"])
+        runinfo(int(args['RUN']), args['DET_ID'],
+                temporary=args["--temporary"])
 
     if args['rundetsn']:
-        rundetsn(int(args['RUN']), args['DETECTOR'], temporary=args["--temporary"])
+        rundetsn(int(args['RUN']), args['DETECTOR'],
+                 temporary=args["--temporary"])
 
     if args['retrieve']:
         retrieve(int(args['RUN']), args['DET_ID'], args['-o'])

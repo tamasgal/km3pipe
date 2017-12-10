@@ -1,9 +1,17 @@
 Unreleased changes
 ------------------
 
-
 Version 7
 ---------
+
+7.13.1 / 2017-12-10
+~~~~~~~~~~~~~~~~~~~
+* add a makefile
+* flake8 all the things
+* make compatible for upcoming numpy 1.14
+* add ``nb2shpx`` util for notebook -> sphinx gallery exampe
+* some pandas bits and bobs
+
 
 7.13.0 / 2017-12-07
 ~~~~~~~~~~~~~~~~~~~

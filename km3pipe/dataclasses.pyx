@@ -149,8 +149,7 @@ class Convertible(object):
 
     def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
-                            h5loc=self.h5loc)
+            return self.__array__()
         if to == 'pandas':
             return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
@@ -190,15 +189,14 @@ class SummarysliceInfo(with_metaclass(Serialisable)):
 
     def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
-                            h5loc=self.h5loc)
+            return self.__array__()
         if to == 'pandas':
             return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
     def __array__(self):
-        return [(
+        return np.array([(
             self.det_id, self.frame_index, self.run_id, self.slice_id,
-        ), ]
+        ), ], dtype=self.dtype)
 
     def __str__(self):
         return "Summaryslice #{0}:\n" \
@@ -286,18 +284,17 @@ class TimesliceFrameInfo_(with_metaclass(Serialisable)):
 
     def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
-                            h5loc=self.h5loc)
+            return self.__array__()
         if to == 'pandas':
             return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
     def __array__(self):
-        return [(
+        return np.array([(
             self.dom_id, self.fifo_status, self.frame_id, self.frame_index,
             self.has_udp_trailer, self.high_rate_veto,
             self.max_sequence_number, self.n_packets, self.slice_id,
             self.utc_nanoseconds, self.utc_seconds, self.white_rabbit_status
-        ), ]
+        ), ], dtype=self.dtype)
 
     def __str__(self):
         return "Timeslice frame:\n" \
@@ -359,18 +356,17 @@ class SummaryframeInfo(with_metaclass(Serialisable)):
 
     def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
-                            h5loc=self.h5loc)
+            return self.__array__()
         if to == 'pandas':
             return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
     def __array__(self):
-        return [(
+        return np.array([(
             self.dom_id, self.fifo_status, self.frame_id, self.frame_index,
             self.has_udp_trailer, self.high_rate_veto,
             self.max_sequence_number, self.n_packets, self.slice_id,
             self.utc_nanoseconds, self.utc_seconds, self.white_rabbit_status
-        ), ]
+        )], dtype=self.dtype)
 
     def __str__(self):
         return "Summaryslice frame #{0}:\n" \
@@ -413,19 +409,11 @@ class EventInfo(object):
     ])
 
     def __init__(self, arr, h5loc='/'):
-        if 'run_id' not in arr.dtype.fields:
-            arr = self._append_run_id(arr)
+        assert 'run_id' in arr.dtype.fields
         self._arr = np.array(arr, dtype=self.dtype).reshape(1)
         for col in self.dtype.names:
             setattr(self, col, self._arr[col])
         self.h5loc = h5loc
-
-    @classmethod
-    def _append_run_id(cls, info, fill_value=0):
-        from numpy.lib.recfunctions import append_fields
-        run_id = np.full(len(info), fill_value, '<u8')
-        info = append_fields(info, 'run_id', run_id)
-        return info
 
     @classmethod
     def from_row(cls, row, **kwargs):
@@ -446,8 +434,7 @@ class EventInfo(object):
 
     def conv_to(self, to='numpy', **kwargs):
         if to == 'numpy':
-            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
-                            h5loc=self.h5loc)
+            return self.__array__()
         if to == 'pandas':
             return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc,
                                 **kwargs)
@@ -772,8 +759,8 @@ cdef class McHit:
         self.time = time
 
     def __str__(self):
-        return "Mc Hit: pmt_id({0}), a({1}), time({2}), origin({3})" \
-               .format(self.pmt_id, self.a, self.time, self.origin)
+        return "McHit: a({0}), origin({1}), pmt_id({2}), time({3})" \
+               .format(self.a, self.origin, self.pmt_id, self.time)
 
     def __repr__(self):
         return self.__str__()
@@ -920,8 +907,7 @@ class RawHitSeries(DTypeAttr):
 
     def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
-                            h5loc=self.h5loc)
+            return self.__array__()
         if to == 'pandas':
             return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
@@ -1043,8 +1029,7 @@ class CRawHitSeries(DTypeAttr):
 
     def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
-                            h5loc=self.h5loc)
+            return self.__array__()
         if to == 'pandas':
             return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
@@ -1122,7 +1107,7 @@ cdef class McTrack:
                   pos,
                   int time,
                   int type,
-                  int event_id,
+                  int event_id=0,
                   ):
         self.bjorkeny = bjorkeny
         self.is_cc = is_cc
@@ -1134,10 +1119,9 @@ cdef class McTrack:
         self.pos = pos
         self.time = time
         self.type = type
-        self.event_id = event_id
 
     def __str__(self):
-        return "Track: pos({0}), dir({1}), t={2}, E={3}, type={4} ({5})" \
+        return "McTrack: pos({0}), dir({1}), t={2}, E={3}, type={4} ({5})" \
                .format(self.pos, self.dir, self.time, self.energy,
                        self.type, pdg2name(self.type))
 
@@ -1242,8 +1226,7 @@ class McHitSeries(DTypeAttr):
 
     def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
-                            h5loc=self.h5loc)
+            return self.__array__()
         if to == 'pandas':
             return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
@@ -1349,8 +1332,7 @@ class CMcHitSeries(DTypeAttr):
 
     def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
-                            h5loc=self.h5loc)
+            return self.__array__()
         if to == 'pandas':
             return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
@@ -1544,8 +1526,7 @@ class HitSeries(DTypeAttr):
 
     def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
-                            h5loc=self.h5loc)
+            return self.__array__()
         if to == 'pandas':
             return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
@@ -1669,8 +1650,7 @@ class TimesliceHitSeries(DTypeAttr):
 
     def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
-                            h5loc=self.h5loc)
+            return self.__array__()
         if to == 'pandas':
             return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
@@ -1853,18 +1833,17 @@ class McTrackSeries(object):
 
     def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
-                            h5loc=self.h5loc)
+            return self.__array__()
         if to == 'pandas':
             return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
     def __array__(self):
-        return [(
+        return np.array([(
             t.bjorkeny, t.dir[0], t.dir[1], t.dir[2], t.energy,
             t.id, t.interaction_channel, t.is_cc,
             t.length, t.pos[0], t.pos[1], t.pos[2], t.time, t.type,
             self.event_id,
-        ) for t in self._tracks]
+        ) for t in self._tracks], dtype=self.dtype)
 
     @classmethod
     def get_len(cls, track):
@@ -2157,18 +2136,17 @@ class TrackSeries(object):
 
     def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
-                            h5loc=self.h5loc)
+            return self.__array__()
         if to == 'pandas':
             return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
     def __array__(self):
-        return [(
+        return np.array([(
             t.bjorkeny, t.dir[0], t.dir[1], t.dir[2], t.energy,
             t.id, t.interaction_channel, t.is_cc,
             t.length, t.pos[0], t.pos[1], t.pos[2], t.time, t.type,
             self.event_id,
-        ) for t in self._tracks]
+        ) for t in self._tracks], dtype=self.dtype)
 
     @classmethod
     def get_len(cls, track):
@@ -2372,8 +2350,7 @@ class SummaryframeSeries(object):
 
     def conv_to(self, to='numpy'):
         if to == 'numpy':
-            return KM3Array(np.array(self.__array__(), dtype=self.dtype),
-                            h5loc=self.h5loc)
+            return self.__array__()
         if to == 'pandas':
             return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
@@ -2534,8 +2511,7 @@ class KM3DataFrame(pd.DataFrame):
 
     def conv_to(self, to='numpy', **kwargs):
         if to == 'numpy':
-            return KM3Array(self.to_records(index=False), h5loc=self.h5loc,
-                            **kwargs)
+            return self.__array__()
         if to == 'pandas':
             return self
 

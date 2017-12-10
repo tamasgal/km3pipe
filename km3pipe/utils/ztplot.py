@@ -26,7 +26,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import km3pipe as kp
-from km3pipe.dataclasses import HitSeries
 import km3pipe.style  # noqa
 km3pipe.style.use("km3pipe")
 
@@ -70,7 +69,6 @@ def main():
         fig, axes = plt.subplots(ncols=n_cols, nrows=n_rows,
                                  sharex=True, sharey=True, figsize=(16, 16))
 
-        # [axes.flat[-1 - i].axis('off') for i in range(len(axes.flat) - n_plots)]
         if n_cols == 1 and n_rows == 1:
             axes = (axes, )
 

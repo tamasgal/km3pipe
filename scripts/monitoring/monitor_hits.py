@@ -4,9 +4,7 @@
 from __future__ import division
 
 from datetime import datetime
-from collections import deque, defaultdict
-from functools import partial
-import math
+from collections import deque
 import os
 import shutil
 import time
@@ -14,37 +12,23 @@ import threading
 
 import matplotlib
 # Force matplotlib to not use any Xwindows backend.
-matplotlib.use('Agg')
+matplotlib.use('Agg')  # noqa
 import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 import matplotlib.dates as md
 from matplotlib.colors import LogNorm
-from matplotlib import pylab
-import seaborn as sns
-import pandas as pd
 import numpy as np
 
 from km3pipe import Pipeline, Module, Calibration
-from km3pipe.dataclasses import HitSeries
-from km3pipe.common import StringIO, Queue, Empty
-from km3pipe.hardware import Detector
+from km3pipe.common import StringIO
 from km3pipe.io import CHPump
-from km3pipe.io.daq import (DAQProcessor, DAQPreamble, DAQSummaryslice,
-                               DAQEvent)
-from km3pipe.time import tai_timestamp
+from km3pipe.io.daq import (DAQProcessor, DAQPreamble, DAQEvent)
 import km3pipe.style
 
-from km3pipe.logger import logging
-
-# for logger_name, logger in logging.Logger.manager.loggerDict.iteritems():
-#     if logger_name.startswith('km3pipe.'):
-#         print("Setting log level to debug for '{0}'".format(logger_name))
-#         logger.setLevel("DEBUG")
-
+km3pipe.style.use('km3pipe')
 
 PLOTS_PATH = 'www/plots'
 N_DOMS = 18
-N_DUS = 2 
+N_DUS = 2
 cal = Calibration(det_id=14)
 detector = cal.detector
 
@@ -68,7 +52,7 @@ class DOMHits(Module):
 
         data = blob['CHData']
         data_io = StringIO(data)
-        preamble = DAQPreamble(file_obj=data_io)
+        preamble = DAQPreamble(file_obj=data_io)  # noqa
         event = DAQEvent(file_obj=data_io)
         with lock:
             hits = np.zeros(N_DOMS * N_DUS)
@@ -95,30 +79,30 @@ class DOMHits(Module):
             self.create_plot(self.hits, "Hits on DOMs", 'hits_on_doms')
         if len(self.triggered_hits) > 0:
             self.create_plot(self.triggered_hits, "Triggered Hits on DOMs",
-                        'triggered_hits_on_doms')
+                             'triggered_hits_on_doms')
 
     def create_plot(self, hits, title, filename):
-        fig, ax = plt.subplots(figsize=(16,8))
+        fig, ax = plt.subplots(figsize=(16, 8))
         ax.grid(True)
         ax.set_axisbelow(True)
         hit_matrix = np.array([np.array(x) for x in hits]).transpose()
         im = ax.matshow(hit_matrix,
-                  interpolation='nearest', filternorm=None, cmap='plasma',
-                  aspect='auto', origin='lower', zorder=3,
-                  norm=LogNorm(vmin=1, vmax=np.amax(hit_matrix)))
+                        interpolation='nearest', filternorm=None,
+                        cmap='plasma', aspect='auto', origin='lower', zorder=3,
+                        norm=LogNorm(vmin=1, vmax=np.amax(hit_matrix)))
         yticks = np.arange(N_DOMS * N_DUS)
         ytick_labels = ["DU{0:0.0f}-DOM{1:02d}"
-                        .format(np.ceil((y+1)/N_DOMS), y % (N_DOMS) + 1) \
+                        .format(np.ceil((y + 1) / N_DOMS), y % (N_DOMS) + 1)
                         for y in yticks]
-        ax.set_yticks(yticks);
-        ax.set_yticklabels(ytick_labels);
+        ax.set_yticks(yticks)
+        ax.set_yticklabels(ytick_labels)
         ax.tick_params(labelbottom=False)
         ax.tick_params(labeltop=False)
         ax.set_xlabel("event (latest on the right)")
         ax.set_title("{0} - via the last {1} Events\n{2} UTC"
                      .format(title, self.max_events,
                              datetime.utcnow().strftime("%c")))
-        cb = fig.colorbar(im, pad = 0.05)
+        cb = fig.colorbar(im, pad=0.05)
         cb.set_label("number of hits")
 
         fig.tight_layout()
@@ -135,13 +119,12 @@ class DOMHits(Module):
             self.thread.stop()
 
 
-
 pipe = Pipeline()
 pipe.attach(CHPump, host='127.0.0.1',
-                    port=5553,
-                    tags='IO_EVT, IO_SUM',
-                    timeout=60*60*24*7,
-                    max_queue=2000)
+            port=5553,
+            tags='IO_EVT, IO_SUM',
+            timeout=60 * 60 * 24 * 7,
+            max_queue=2000)
 pipe.attach(DAQProcessor)
 pipe.attach(DOMHits)
 pipe.drain()

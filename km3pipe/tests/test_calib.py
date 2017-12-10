@@ -3,8 +3,7 @@
 # pylint: disable=C0111,E1003,R0904,C0103,R0201,C0102
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import TestCase, StringIO, MagicMock, patch
-from km3pipe.core import Pipeline, Module, Pump, Blob
+from km3pipe.testing import TestCase, MagicMock, patch
 from km3pipe.calib import Calibration
 from km3pipe.dataclasses import HitSeries
 
@@ -24,18 +23,19 @@ class TestCalibration(TestCase):
 
     def test_init_with_wrong_file_extension(self):
         with self.assertRaises(NotImplementedError):
-            cal = Calibration(filename='foo')
+            Calibration(filename='foo')
 
     @patch('km3pipe.calib.Detector')
     def test_init_with_filename(self, mock_detector):
-        cal = Calibration(filename='foo.detx')
+        Calibration(filename='foo.detx')
         mock_detector.assert_called_with(filename='foo.detx')
 
     @patch('km3pipe.calib.Detector')
     def test_init_with_det_id(self, mock_detector):
-        cal = Calibration(det_id=1)
-        mock_detector.assert_called_with(t0set=None, calibration=None, det_id=1)
-        cal = Calibration(det_id=1, calibration=2, t0set=3)
+        Calibration(det_id=1)
+        mock_detector.assert_called_with(
+            t0set=None, calibration=None, det_id=1)
+        Calibration(det_id=1, calibration=2, t0set=3)
         mock_detector.assert_called_with(t0set=3, calibration=2, det_id=1)
 
     def test_apply_to_list(self):
@@ -53,9 +53,9 @@ class TestCalibration(TestCase):
                 self._pmts_by_id = {}
 
             def pmt_with_id(self, i):
-                pmt = MagicMock(dir=np.array((i*10+i, i*10+i+1, i*10+i+2)),
-                                pos=np.array((i*100+i, i*100+i+1, i*100+i+2)),
-                                t0=1000*i)
+                dir_ = np.array((i * 10 + i, i * 10 + i + 1, i * 10 + i + 2))
+                pos = np.array((i * 100 + i, i * 100 + i + 1, i * 100 + i + 2))
+                pmt = MagicMock(dir=dir_, pos=pos, t0=1000 * i)
                 return pmt
 
         cal = Calibration(detector=FakeDetector())

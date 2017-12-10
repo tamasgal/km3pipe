@@ -23,7 +23,6 @@ from time import sleep
 from six import itervalues, iterkeys
 
 import pandas as pd
-import numpy as np
 import websocket
 
 from .calib import Calibration
@@ -58,6 +57,7 @@ RBA_URL = Config().rba_url
 class ClientManager(object):
     """Manage km3srv clients.
     """
+
     def __init__(self):
         self._clients = {}
         threading.Thread(target=self.heartbeat).start()
@@ -94,7 +94,7 @@ class ClientManager(object):
         self.raw_message_to(token, message)
 
     def raw_message_to(self, token, message):
-        """Convert message to json and send it to the client with given token"""
+        """Convert message to JSON and send it to the client with token"""
         if token not in self._clients:
             log.critical("Client with token '{0}' not found!".format(token))
             return
@@ -129,6 +129,7 @@ class MessageProvider(tornado.websocket.WebSocketHandler):
 
 class EchoWebSocket(tornado.websocket.WebSocketHandler):
     """An echo handler for client/server messaging and debugging"""
+
     def __init__(self, *args, **kwargs):
         log.warning("EchoWebSocket created!")
         self.client_manager = kwargs.pop('client_manager')
@@ -225,20 +226,18 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
         hits = pd.read_hdf(h5filepath, 'hits', mode='r')
         snapshot_hits = hits[(hits['event_id'] == event_id)].copy()
         triggered_hits = hits[(hits['event_id'] == event_id) &
-                              (hits['triggered'] == True)]
+                              (hits['triggered'] == True)]  # noqa
         self.message("Det ID: {0} Run ID: {1} Event ID: {2} - "
                      "Snapshot hits: {3}, Triggered hits: {4}"
                      .format(det_id, run_id, event_id,
                              len(snapshot_hits), len(triggered_hits)))
         cal = Calibration(det_id=det_id)
-        # detx_file = os.path.join(self.data_path, 'detx', det_dir_name + '.detx')
-        # log.warning("Using cached '{0}'".format(detx_file))
-        # cal = Calibration(filename=detx_file)
         cal.apply(snapshot_hits)
 
         event = {
             "hits": {
-                'pos' : [tuple(x) for x in snapshot_hits[['x', 'y', 'z']].values],
+                'pos': [tuple(x) for x
+                        in snapshot_hits[['x', 'y', 'z']].values],
                 'time': list(snapshot_hits['time']),
                 'tot': list(snapshot_hits['tot']),
             }
@@ -258,7 +257,6 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
 
     def message(self, data, kind="info"):
         """Convert message to json and send it to the clients"""
-        #message = json.dumps({'kind': kind, 'data': data})
         message = pd.io.json.dumps({'kind': kind, 'data': data})
         print("Sent {0} bytes.".format(len(message)))
         self.write_message(message)
@@ -288,7 +286,7 @@ def srv_event(token, hits, url=RBA_URL):
 
     event = {
         "hits": {
-            'pos' : pos,
+            'pos': pos,
             'time': time,
             'tot': tot,
         }
@@ -307,7 +305,6 @@ def srv_data(url, token, data, kind):
 
 def main():
     root = os.path.dirname(__file__)
-    cwd = os.getcwd()
 
     options.parse_command_line()
 
@@ -327,7 +324,6 @@ def main():
                 'template_path': os.path.join(root, 'static/templates'),
                 }
 
-
     application = tornado.web.Application([
         (r"/test", EchoWebSocket, {'client_manager': client_manager,
                                    'server_status': server_status,
@@ -346,5 +342,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

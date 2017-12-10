@@ -81,7 +81,8 @@ def qsub(script, job_name, log_path='qlogs', group='km3net', platform='cl7',
     log_path = os.path.join(os.getcwd(), log_path)
     if job_array_stop is not None:
         job_array_option = "#$ -t {}-{}:{}"  \
-                           .format(job_array_start, job_array_stop, job_array_step)
+                           .format(job_array_start, job_array_stop,
+                                   job_array_step)
     else:
         job_array_option = "#"
     job_string = JOB_TEMPLATE.format(
@@ -146,6 +147,7 @@ def get_jpp_env(jpp_dir):
 
 class Script(object):
     """A shell script which can be built line by line for `qsub`."""
+
     def __init__(self):
         self.lines = []
 

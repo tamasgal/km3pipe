@@ -8,20 +8,11 @@ from functools import partial
 from io import BytesIO
 import os
 
-import numpy as np
-
 import km3pipe as kp
 from km3modules.plot import plot_dom_parameters
 import km3pipe.style
+
 km3pipe.style.use('km3pipe')
-
-from km3pipe.logger import logging
-
-# for logger_name, logger in logging.Logger.manager.loggerDict.items():
-#     if logger_name.startswith('km3pipe.'):
-#         print("Setting log level to debug for '{0}'".format(logger_name))
-#         logger.setLevel("DEBUG")
-
 
 PLOTS_PATH = 'km3web/plots'
 cal = kp.Calibration(det_id=29)
@@ -46,7 +37,7 @@ class DOMActivityPlotter(kp.Module):
 
         data = blob['CHData']
         data_io = BytesIO(data)
-        preamble = kp.io.daq.DAQPreamble(file_obj=data_io)
+        preamble = kp.io.daq.DAQPreamble(file_obj=data_io)  # noqa
         summaryslice = kp.io.daq.DAQSummaryslice(file_obj=data_io)
         timestamp = summaryslice.header.time_stamp
 
@@ -68,14 +59,14 @@ class DOMActivityPlotter(kp.Module):
         plot_dom_parameters(delta_ts, detector, filename,
                             'last activity [s]',
                             "DOM Activity - via Summary Slices",
-                            vmin=0.0, vmax=15*60)
+                            vmin=0.0, vmax=15 * 60)
 
 
 pipe = kp.Pipeline()
 pipe.attach(kp.io.ch.CHPump, host='127.0.0.1',
             port=5553,
             tags='IO_SUM',
-            timeout=60*60*24*7,
+            timeout=60 * 60 * 24 * 7,
             max_queue=2000)
 pipe.attach(kp.io.daq.DAQProcessor)
 pipe.attach(DOMActivityPlotter)

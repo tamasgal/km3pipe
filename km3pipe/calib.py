@@ -53,6 +53,7 @@ class Calibration(Module):
     calibration: optional
         calibration (when retrieving from database).
     """
+
     def configure(self):
         self._should_apply = self.get('apply') or False
         self.filename = self.get('filename') or None
@@ -102,7 +103,8 @@ class Calibration(Module):
             cal = np.empty(n)
             lookup = self._calib_by_dom_and_channel
             for i in range(n):
-                calib = lookup[hits._arr['dom_id'][i]][hits._arr['channel_id'][i]]
+                calib = lookup[hits._arr['dom_id']
+                               [i]][hits._arr['channel_id'][i]]
                 cal[i] = calib[6]
             hits.time += cal
 
@@ -186,7 +188,7 @@ class Calibration(Module):
         cal = np.empty((n, 9))
         for i in range(n):
             lookup = self._calib_by_pmt_id
-            calib = lookup[hits._arr['pmt_id'][i]]
+            cal[i] = lookup[hits._arr['pmt_id'][i]]
         h = np.empty(n, CMcHitSeries.dtype)
         h['channel_id'] = np.zeros(n, dtype=int)
         h['dir_x'] = cal[:, 3]
@@ -264,6 +266,7 @@ class Calibration(Module):
 
 if HAVE_NUMBA:
     log.info("Initialising Numba JIT functions")
+
     @nb.jit
     def apply_t0_nb(times, dom_ids, channel_ids, lookup_tables):
         """Apply t0s using a lookup table of tuples (dom_id, calib)"""

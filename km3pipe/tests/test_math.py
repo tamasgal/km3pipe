@@ -4,15 +4,17 @@
 from __future__ import division, absolute_import, print_function
 
 import numpy as np
+import pytest
 
 from km3pipe.testing import TestCase
 from km3pipe.math import (
     angle_between, pld3, com, zenith, azimuth, Polygon, IrregularPrism,
-    rotation_matrix, SparseCone, space_angle, hsin, phi, theta
+    rotation_matrix, SparseCone, space_angle, hsin, phi, theta,
+    unit_vector
 )
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
-__copyright__ = "Copyright 2016, KM3Pipe developers and the KM3NeT collaboration."
+__copyright__ = "Copyright 2016, KM3Pipe devs and the KM3NeT collaboration."
 __credits__ = ["Thomas Heid"]
 __license__ = "MIT"
 __maintainer__ = ["Tamas Gal", "Moritz Lotze"]
@@ -79,7 +81,7 @@ class TestMath(TestCase):
                                     np.array([4.71238898, 3.92699082,
                                               3.60524026, 3.46334321,
                                               3.38657132]
-                                    )))
+                                             )))
 
     def test_theta(self):
         print(theta((0, 0, -1)))
@@ -102,6 +104,14 @@ class TestMath(TestCase):
                                               0.64052231, 1.00685369,
                                               1.3328552])))
 
+    def test_unit_vector(self):
+        v1 = (1, 0, 0)
+        v2 = (1, 1, 0)
+        v3 = (-1, 2, 0)
+        assert np.allclose(v1, unit_vector(v1))
+        assert np.allclose(np.array(v2) / np.sqrt(2), unit_vector(v2))
+        assert np.allclose(np.array(v3) / np.sqrt(5), unit_vector(v3))
+
     def test_angle_between(self):
         v1 = (1, 0, 0)
         v2 = (0, 1, 0)
@@ -113,10 +123,10 @@ class TestMath(TestCase):
         self.assertAlmostEqual(angle_between(self.v, v2), 1.0068536854342678)
         self.assertAlmostEqual(angle_between(self.v, v3), 1.8413460897734695)
         self.assertTrue(np.allclose(angle_between(self.vecs, v1),
-                                    np.array([1.57079633, 1.3328552, 1.00685369,
+                                    np.array([1.57079633, 1.3328552, 1.0068537,
                                               0.64052231, 0.33983691])))
         self.assertTrue(np.allclose(angle_between(self.vecs, v2),
-                                    np.array([1.37340077, 1.3328552, 1.30024656,
+                                    np.array([1.37340077, 1.3328552, 1.3002466,
                                               1.30024656, 1.3328552])))
         self.assertTrue(np.allclose(angle_between(self.vecs, v3),
                                     np.array([1.57079633, 1.80873745,
@@ -126,15 +136,18 @@ class TestMath(TestCase):
     def test_angle_between_returns_nan_for_zero_length_vectors(self):
         v1 = (0, 0, 0)
         v2 = (1, 0, 0)
-        self.assertTrue(np.isnan(angle_between(v1, v2)))
+        with pytest.warns(RuntimeWarning):
+            self.assertTrue(np.isnan(angle_between(v1, v2)))
 
     def test_space_angle(self):
         p1 = (np.pi / 2, np.pi)
         p2 = (np.pi, 0)
-        self.assertAlmostEqual(space_angle(p1[0], p2[0], p1[1], p2[1]), 1.57079632679489)
+        self.assertAlmostEqual(space_angle(
+            p1[0], p2[0], p1[1], p2[1]), 1.57079632679489)
         p3 = (0, np.pi)
         p4 = (np.pi / 2, 0)
-        self.assertAlmostEqual(space_angle(p3[0], p4[0], p3[1], p4[1]), 1.57079632679489)
+        self.assertAlmostEqual(space_angle(
+            p3[0], p4[0], p3[1], p4[1]), 1.57079632679489)
 
     def test_hsin(self):
         assert np.all(hsin((np.pi, 0)) == (1, 0))

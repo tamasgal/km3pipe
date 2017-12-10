@@ -20,11 +20,10 @@ import threading
 
 import matplotlib
 # Force matplotlib to not use any Xwindows backend.
-matplotlib.use('Agg')
+matplotlib.use('Agg')  # noqa
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 import matplotlib.ticker as ticker
-import numpy as np
 
 import km3pipe as kp
 from km3pipe.config import Config
@@ -33,16 +32,14 @@ from km3pipe.io.daq import (DAQPreamble, DAQEvent)
 import km3pipe.style
 km3pipe.style.use('km3pipe')
 
-from km3pipe.logger import logging
-
-log = logging.getLogger("trigger_rate")
+log = kp.logger.get("trigger_rate")
 
 PLOTS_PATH = 'km3web/plots'
 
 xfmt = md.DateFormatter('%Y-%m-%d %H:%M')
 lock = threading.Lock()
 
-general_style = dict(markersize=6,  linestyle='None')
+general_style = dict(markersize=6, linestyle='None')
 styles = {
     "Overall": dict(marker='D',
                     markerfacecolor='None',
@@ -60,11 +57,14 @@ def trigger_rate_sampling_period():
     except (TypeError, ValueError):
         return 180
 
+
 def is_3dshower(trigger_mask):
     return bool(trigger_mask & 1)
 
+
 def is_mxshower(trigger_mask):
     return bool(trigger_mask & 2)
+
 
 def is_3dmuon(trigger_mask):
     return bool(trigger_mask & 16)
@@ -78,7 +78,8 @@ class TriggerRate(kp.Module):
         self.trigger_counts = defaultdict(int)
         self.trigger_rates = OrderedDict()
         for trigger in ["Overall", "3DMuon", "MXShower", "3DShower"]:
-            self.trigger_rates[trigger] = deque(maxlen=int(60*24/(self.interval/60)))
+            self.trigger_rates[trigger] = deque(
+                maxlen=int(60 * 24 / (self.interval / 60)))
         self.thread = threading.Thread(target=self.plot).start()
 
     def process(self, blob):
@@ -89,7 +90,7 @@ class TriggerRate(kp.Module):
 
         data = blob['CHData']
         data_io = BytesIO(data)
-        preamble = DAQPreamble(file_obj=data_io)
+        preamble = DAQPreamble(file_obj=data_io)  # noqa
         event = DAQEvent(file_obj=data_io)
         tm = event.trigger_mask
         with lock:
@@ -131,7 +132,8 @@ class TriggerRate(kp.Module):
         ax.set_xlabel("time")
         ax.set_ylabel("trigger rate [Hz]")
         ax.xaxis.set_major_formatter(xfmt)
-        ax.yaxis.set_major_locator(ticker.LogLocator(base=10.0, subs=(1.0, ), numticks=100))
+        ax.yaxis.set_major_locator(ticker.LogLocator(
+            base=10.0, subs=(1.0, ), numticks=100))
         ax.grid(True)
         ax.minorticks_on()
         plt.legend()
@@ -139,7 +141,8 @@ class TriggerRate(kp.Module):
         fig.tight_layout()
 
         filename = os.path.join(PLOTS_PATH, 'trigger_rates_lin_test.png')
-        filename_tmp = os.path.join(PLOTS_PATH, 'trigger_rates_lin_test_tmp.png')
+        filename_tmp = os.path.join(
+            PLOTS_PATH, 'trigger_rates_lin_test_tmp.png')
         plt.savefig(filename_tmp, dpi=120, bbox_inches="tight")
         shutil.move(filename_tmp, filename)
 
@@ -156,19 +159,17 @@ class TriggerRate(kp.Module):
         plt.close('all')
         print("Plot updated at '{}'.".format(filename))
 
-
     def finish(self):
         self.run = False
         if self.thread is not None:
             self.thread.stop()
 
 
-
 pipe = kp.Pipeline()
 pipe.attach(CHPump, host='127.0.0.1',
-                    port=5553,
-                    tags='IO_EVT',
-                    timeout=60*60*24*7,
-                    max_queue=200000)
+            port=5553,
+            tags='IO_EVT',
+            timeout=60 * 60 * 24 * 7,
+            max_queue=200000)
 pipe.attach(TriggerRate, interval=60)
 pipe.drain()

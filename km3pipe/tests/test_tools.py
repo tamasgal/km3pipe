@@ -8,7 +8,7 @@ import numpy as np
 from km3pipe.testing import TestCase, StringIO
 from km3pipe.tools import (
     unpack_nfirst, split, namedtuple_with_defaults, remain_file_pointer,
-    decamelise, camelise, bincenters, issorted, lstrip, chunks)
+    decamelise, camelise, bincenters, issorted, lstrip, chunks, is_coherent)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -165,6 +165,10 @@ class TestMisc(TestCase):
     def test_issorted(self):
         assert issorted([1, 2, 3])
         assert not issorted([2, 3, 1])
+
+    def test_is_coherent(self):
+        assert is_coherent([1, 2, 3, 4, 5])
+        assert not is_coherent([1, 3, 4, 5])
 
 
 class TestLstrip(TestCase):

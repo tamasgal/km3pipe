@@ -20,7 +20,7 @@ import km3pipe as kp
 from km3pipe.io.daq import TMCHData
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use('Agg')  # noqa
 import matplotlib.pyplot as plt
 import km3pipe.style as kpst
 kpst.use("km3pipe")
@@ -41,7 +41,7 @@ class PMTRates(kp.Module):
         self.max_x = 800
         self.index = 0
         self.rates = defaultdict(list)
-        self.rates_matrix = np.full((18*31, self.max_x), np.nan)
+        self.rates_matrix = np.full((18 * 31, self.max_x), np.nan)
         self.lock = threading.Lock()
         self.thread = threading.Thread(target=self.run, args=())
         self.thread.daemon = True
@@ -69,7 +69,7 @@ class PMTRates(kp.Module):
 
     def add_column(self):
         m = np.roll(self.rates_matrix, -1, 1)
-        y_range = 18*31
+        y_range = 18 * 31
         mean_rates = np.full(y_range, np.nan)
         for i in range(y_range):
             if i not in self.rates:
@@ -93,14 +93,15 @@ class PMTRates(kp.Module):
         m[m < 5000] = 5000
         fig, ax = plt.subplots(figsize=(10, 6))
         ax.imshow(m, origin='lower')
-        ax.set_title("Mean PMT Rates for DU-{} (colours from 5kHz to 15kHz)\n{}"
-                    .format(self.du, datetime.utcnow()))
+        ax.set_title("Mean PMT Rates for DU{} (colours from 5kHz to 15kHz)\n{}"
+                     .format(self.du, datetime.utcnow()))
         ax.set_xlabel("UTC time [{}s/px]".format(interval))
-        plt.yticks([i*31 for i in range(18)],
+        plt.yticks([i * 31 for i in range(18)],
                    ["Floor {}".format(f) for f in range(1, 19)])
-        xtics_int = range(0, max_x, int(max_x/10))
+        xtics_int = range(0, max_x, int(max_x / 10))
         plt.xticks([i for i in xtics_int],
-                   [xlabel_func(now - (max_x-i) * interval) for i in xtics_int])
+                   [xlabel_func(now - (max_x - i) * interval)
+                    for i in xtics_int])
         fig.tight_layout()
         plt.savefig(self.plot_path)
         plt.close('all')
@@ -134,7 +135,7 @@ def main():
                 host='192.168.0.110',
                 port=5553,
                 tags='IO_MONIT',
-                timeout=60*60*24*7,
+                timeout=60 * 60 * 24 * 7,
                 max_queue=1000)
     pipe.attach(PMTRates, detector=detector, du=2, interval=2)
     pipe.drain()

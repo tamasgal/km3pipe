@@ -43,6 +43,7 @@ class AHRSCalibrator(kp.Module):
         dict: key=dom_id, value=tuple: (timestamp, du, floor, yaw, pitch, roll)
 
     """
+
     def configure(self):
         det_id = self.require('det_id')
         self.interval = self.get('interval') or 10  # in sec
@@ -123,8 +124,8 @@ def fit_ahrs(A, H, Aoff, Arot, Hoff, Hrot):
     yaw, pitch, roll
 
     """
-    Acal = np.dot(A-Aoff, Arot)
-    Hcal = np.dot(H-Hoff, Hrot)
+    Acal = np.dot(A - Aoff, Arot)
+    Hcal = np.dot(H - Hoff, Hrot)
 
     # invert axis for DOM upside down
     for i in (1, 2):
@@ -132,11 +133,11 @@ def fit_ahrs(A, H, Aoff, Arot, Hoff, Hrot):
         Hcal[i] = -Hcal[i]
 
     roll = arctan2(-Acal[1], -Acal[2])
-    pitch = arctan2(Acal[0], np.sqrt(Acal[1]*Acal[1] + Acal[2]*Acal[2]))
-    yaw = arctan2(Hcal[2]*sin(roll) - Hcal[1]*cos(roll),
-                  sum((Hcal[0]*cos(pitch),
-                       Hcal[1]*sin(pitch)*sin(roll),
-                       Hcal[2]*sin(pitch)*cos(roll))))
+    pitch = arctan2(Acal[0], np.sqrt(Acal[1] * Acal[1] + Acal[2] * Acal[2]))
+    yaw = arctan2(Hcal[2] * sin(roll) - Hcal[1] * cos(roll),
+                  sum((Hcal[0] * cos(pitch),
+                       Hcal[1] * sin(pitch) * sin(roll),
+                       Hcal[2] * sin(pitch) * cos(roll))))
 
     yaw = np.degrees(yaw)
     while yaw < 0:

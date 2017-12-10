@@ -36,7 +36,9 @@ def hdf2root(infile, outfile, verbose=False):
         from rootpy import asrootpy
         from root_numpy import array2tree
     except ImportError:
-        raise ImportError("Please load ROOT into PYTHONPATH and install rootpy + root_numpy:   `pip install rootpy root_numpy`")
+        raise ImportError(
+            "Please load ROOT into PYTHONPATH and install rootpy+root_numpy:\n"
+            "   `pip install rootpy root_numpy`")
 
     from tables import open_file
 

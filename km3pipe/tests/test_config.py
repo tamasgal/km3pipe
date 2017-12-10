@@ -6,7 +6,7 @@ Test suite for configuration related functions and classes.
 """
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import TestCase, StringIO, patch
+from km3pipe.testing import TestCase, StringIO
 from km3pipe.config import Config
 
 __author__ = "Tamas Gal"
@@ -23,7 +23,7 @@ CONFIGURATION = StringIO("\n".join((
     "username=foo",
     "password=narf",
     "timeout=10",
-    )))
+)))
 
 
 class TestConfig(TestCase):

@@ -432,3 +432,16 @@ def chunks(l, n):
     """Yield successive n-sized chunks from l."""
     for i in range(0, len(l), n):
         yield l[i:i + n]
+
+
+def is_coherent(seq):
+    """Find out if list of subsequent integers is complete.
+
+    Adapted from https://stackoverflow.com/questions/18131741/python-find-out-whether-a-list-of-integers-is-coherent
+
+    ```
+    is_coherent([1, 2, 3, 4, 5]) -> True
+    is_coherent([1,    3, 4, 5]) -> False
+    ```
+    """
+    return np.array_equal(seq, range(seq[0], int(seq[-1] + 1)))

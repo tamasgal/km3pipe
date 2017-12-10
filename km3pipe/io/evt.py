@@ -63,6 +63,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
         cause parse errors)
 
     """
+
     def configure(self):
         self.filename = self.get('filename')
         self.cache_enabled = self.get('cache_enabled') or False
@@ -212,7 +213,8 @@ class EvtPump(Pump):  # pylint: disable:R0902
             return
         if tag in self.exclude_tags:
             return
-        if tag in ('track_in', 'track_fit', 'hit', 'hit_raw', 'track_seamuon', 'track_seaneutrino'):
+        if tag in ('track_in', 'track_fit', 'hit', 'hit_raw',
+                   'track_seamuon', 'track_seaneutrino'):
             values = [float(x) for x in value.split()]
             blob.setdefault(tag, []).append(values)
             if tag == 'hit':
@@ -293,6 +295,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
 class Track(object):
     """Bass class for particle or shower tracks"""
 #    def __init__(self, id, x, y, z, dx, dy, dz, E=None, t=0, *args):
+
     def __init__(self, data, zed_correction=405.93):
         id, x, y, z, dx, dy, dz, E, t, args = unpack_nfirst(data, 9)
         self.id = int(id)
@@ -316,6 +319,7 @@ class Track(object):
 
 class TrackIn(Track):
     """Representation of a track_in entry in an EVT file"""
+
     def __init__(self, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
         try:
@@ -340,8 +344,9 @@ class TrackIn(Track):
             text += " mother: {0} [Corsika]\n".format(self.mother)
             text += " grandmother: {0} [Corsika]\n".format(self.grandmother)
         except AttributeError:
-            text += " type: {0} '{1}' [PDG]\n".format(self.particle_type,
-                                                      pdg2name(self.particle_type))
+            text += " type: {0} '{1}' [PDG]\n"  \
+                    .format(self.particle_type,
+                            pdg2name(self.particle_type))
             pass
 
         return text
@@ -349,6 +354,7 @@ class TrackIn(Track):
 
 class TrackCorsika(Track):
     """Representation of a track in a corsika output file"""
+
     def __init__(self, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
         self.particle_type = int(self.args[0])
@@ -373,6 +379,7 @@ class TrackCorsika(Track):
 
 class TrackFit(Track):
     """Representation of a track_fit entry in an EVT file"""
+
     def __init__(self, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
         self.speed = self.args[0]
@@ -393,6 +400,7 @@ class TrackFit(Track):
 
 class Neutrino(object):  # pylint: disable:R0902
     """Representation of a neutrino entry in an EVT file"""
+
     def __init__(self, data, zed_correction=405.93):
         id, x, y, z, dx, dy, dz, E, t, Bx, By, \
             ichan, particle_type, channel, args = unpack_nfirst(data, 14)

@@ -28,10 +28,10 @@ def i3toroot(infile):
     tray.AddModule('I3Reader', 'i3reader', filename=infile)
     root = I3ROOTTableService(rootfile)
     tray.AddModule(
-            I3TableWriter,
-            'writer',
-            tableservice=root,
-            BookEverything=True,
+        I3TableWriter,
+        'writer',
+        tableservice=root,
+        BookEverything=True,
     )
     tray.AddModule('TrashCan', 'dustbin')
     tray.Execute()

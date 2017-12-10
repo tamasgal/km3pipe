@@ -104,4 +104,4 @@ def main():
            print_titles=do_titles,
            print_meta=do_meta,
            print_pretty=not(do_classic),
-          )
+           )

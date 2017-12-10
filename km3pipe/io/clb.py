@@ -75,7 +75,7 @@ class CLBPump(Pump):
         pmt_data = []
         pmt_raw_data = self.blob_file.read(remaining_length)
         pmt_raw_data_io = BytesIO(pmt_raw_data)
-        for _ in range(int(remaining_length/6)):
+        for _ in range(int(remaining_length / 6)):
             channel_id, time, tot = struct.unpack('>cic',
                                                   pmt_raw_data_io.read(6))
             pmt_data.append(PMTData(ord(channel_id), time, ord(tot)))

@@ -34,7 +34,6 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-
 def main():
     from docopt import docopt
     args = docopt(__doc__, version=version)
@@ -50,10 +49,10 @@ def main():
 
     conn = httplib.HTTPSConnection("api.pushover.net:443")
     conn.request("POST", "/1/messages.json",
-      urlencode({
-        "token": token,
-        "user": user_key,
-        "message": ' '.join(args["MESSAGE"]),
-      }), { "Content-type": "application/x-www-form-urlencoded" })
+                 urlencode({
+                     "token": token,
+                     "user": user_key,
+                     "message": ' '.join(args["MESSAGE"]),
+                 }), {"Content-type": "application/x-www-form-urlencoded"})
 
     conn.getresponse()

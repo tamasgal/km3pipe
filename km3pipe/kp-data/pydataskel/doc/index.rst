@@ -1,4 +1,4 @@
-.. pydata-skel documentation master file
+.. pydataskel documentation master file
 
 .. include:: version.txt
 

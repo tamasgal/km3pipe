@@ -8,6 +8,7 @@ from km3pipe.core import Pipeline, Module, Pump
 
 class DummyPump(Pump):
     """A pump demonstration with a dummy list as data."""
+
     def configure(self):
         self.data = [{'nr': 1}, {'nr': 2}]
         self.blobs = self.blob_generator()
@@ -23,6 +24,7 @@ class DummyPump(Pump):
 
 class Foo(Module):
     """A dummy module with optional and required parameters"""
+
     def configure(self):
         self.foo = self.get('foo') or 'default_foo'  # optional
         self.bar = self.get('bar') or 23             # optional

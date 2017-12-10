@@ -5,7 +5,7 @@
 from __future__ import division, absolute_import, print_function
 
 from km3pipe import Module
-from km3pipe.mc import pdg2name, name2pdg
+from km3pipe.mc import pdg2name
 from km3pipe.math import zenith, azimuth
 
 
@@ -19,8 +19,10 @@ class McTruth(Module):
     ----------
     most_energetic_primary: bool, default=True
     """
+
     def configure(self):
-        self.most_energetic_primary = bool(self.get('most_energetic_primary')) or True
+        self.most_energetic_primary = bool(
+            self.get('most_energetic_primary')) or True
 
     @classmethod
     def t2f(cls, row):

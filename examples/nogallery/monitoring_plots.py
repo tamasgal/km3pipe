@@ -6,7 +6,6 @@ from __future__ import division
 from datetime import datetime
 from collections import deque, defaultdict
 from functools import partial
-import math
 import os
 import shutil
 import time
@@ -17,27 +16,20 @@ import matplotlib.ticker as ticker
 import matplotlib.dates as md
 from matplotlib.colors import LogNorm
 from matplotlib import pylab
-import seaborn as sns
 import pandas as pd
 import numpy as np
 
 from km3pipe import Pipeline, Module, Calibration
 from km3pipe.dataclasses import HitSeries
 from km3pipe.common import StringIO, Queue, Empty
-from km3pipe.hardware import Detector
 from km3pipe.io import CHPump
 from km3pipe.io.daq import (DAQProcessor, DAQPreamble, DAQSummaryslice,
-                               DAQEvent)
+                            DAQEvent)
 from km3pipe.time import tai_timestamp
 import km3pipe.style
 
-from km3pipe.logger import logging
 
-# for logger_name, logger in logging.Logger.manager.loggerDict.iteritems():
-#     if logger_name.startswith('km3pipe.'):
-#         print("Setting log level to debug for '{0}'".format(logger_name))
-#         logger.setLevel("DEBUG")
-
+km3pipe.style.use('km3pipe')
 
 PLOTS_PATH = '/home/km3net/monitoring/www/plots'
 N_DOMS = 18
@@ -65,7 +57,7 @@ class DOMHits(Module):
 
         data = blob['CHData']
         data_io = StringIO(data)
-        preamble = DAQPreamble(file_obj=data_io)
+        preamble = DAQPreamble(file_obj=data_io)  # noqa
         event = DAQEvent(file_obj=data_io)
         with lock:
             hits = np.zeros(N_DOMS * N_DUS)
@@ -92,30 +84,30 @@ class DOMHits(Module):
             self.create_plot(self.hits, "Hits on DOMs", 'hits_on_doms')
         if len(self.triggered_hits) > 0:
             self.create_plot(self.triggered_hits, "Triggered Hits on DOMs",
-                        'triggered_hits_on_doms')
+                             'triggered_hits_on_doms')
 
     def create_plot(self, hits, title, filename):
-        fig, ax = plt.subplots(figsize=(16,8))
+        fig, ax = plt.subplots(figsize=(16, 8))
         ax.grid(True)
         ax.set_axisbelow(True)
         hit_matrix = np.array([np.array(x) for x in hits]).transpose()
         im = ax.matshow(hit_matrix,
-                  interpolation='nearest', filternorm=None, cmap='plasma',
-                  aspect='auto', origin='lower', zorder=3,
-                  norm=LogNorm(vmin=1, vmax=np.amax(hit_matrix)))
+                        interpolation='nearest', filternorm=None,
+                        cmap='plasma', aspect='auto', origin='lower', zorder=3,
+                        norm=LogNorm(vmin=1, vmax=np.amax(hit_matrix)))
         yticks = np.arange(N_DOMS * N_DUS)
         ytick_labels = ["DU{0:0.0f}-DOM{1:02d}"
-                        .format(np.ceil((y+1)/N_DOMS), y % (N_DOMS) + 1) \
+                        .format(np.ceil((y + 1) / N_DOMS), y % (N_DOMS) + 1)
                         for y in yticks]
-        ax.set_yticks(yticks);
-        ax.set_yticklabels(ytick_labels);
+        ax.set_yticks(yticks)
+        ax.set_yticklabels(ytick_labels)
         ax.tick_params(labelbottom=False)
         ax.tick_params(labeltop=False)
         ax.set_xlabel("event (latest on the right)")
         ax.set_title("{0} - via the last {1} Events\n{2}"
                      .format(title, self.max_events,
                              datetime.utcnow().strftime("%c")))
-        cb = fig.colorbar(im, pad = 0.05)
+        cb = fig.colorbar(im, pad=0.05)
         cb.set_label("number of hits")
 
         fig.tight_layout()
@@ -137,7 +129,7 @@ class TriggerRate(Module):
         self.run = True
         self.interval = 60
         self.event_times = deque(maxlen=4000)  # max events per interval
-        self.trigger_rates = deque(maxlen=60*48)  # minutes
+        self.trigger_rates = deque(maxlen=60 * 48)  # minutes
         self.thread = threading.Thread(target=self.plot).start()
         self.store = pd.HDFStore('data/trigger_rates.h5', 'r')
         self.restore_data()
@@ -157,7 +149,7 @@ class TriggerRate(Module):
 
         data = blob['CHData']
         data_io = StringIO(data)
-        preamble = DAQPreamble(file_obj=data_io)
+        preamble = DAQPreamble(file_obj=data_io)  # noqa
         event = DAQEvent(file_obj=data_io)
         timestamp = event.header.time_stamp
         with lock:
@@ -181,7 +173,8 @@ class TriggerRate(Module):
         self.trigger_rates.append((now, rate))
         try:
             self.store.append('trigger_rates',
-                              pd.DataFrame({'timestamp': [now], 'rate': [rate]}))
+                              pd.DataFrame({'timestamp': [now],
+                                            'rate': [rate]}))
         except pd.io.pytables.ClosedFileError:
             pass
         print("Number of rates recorded: {0} (last: {1}"
@@ -197,7 +190,7 @@ class TriggerRate(Module):
 #            plt.scatter(x, y)
         data.plot('dates', 'rates', grid=True, ax=ax, legend=False, style='.')
         ax.set_title("Trigger Rate - via Event Times\n{0}"
-                  .format(datetime.utcnow().strftime("%c")))
+                     .format(datetime.utcnow().strftime("%c")))
         ax.set_xlabel("time")
         ax.set_ylabel("trigger rate [Hz]")
 #        ax.set_ylim(-0.1)
@@ -214,14 +207,12 @@ class TriggerRate(Module):
         plt.close('all')
         shutil.move(filename_tmp, filename)
 
-
     def finish(self):
         self.run = False
         if self.thread is not None:
             self.thread.stop()
         if self.store.is_open:
             self.store.close()
-
 
 
 class DOMActivityPlotter(Module):
@@ -242,10 +233,9 @@ class DOMActivityPlotter(Module):
         if not tag == 'IO_SUM':
             return blob
 
-
         data = blob['CHData']
         data_io = StringIO(data)
-        preamble = DAQPreamble(file_obj=data_io)
+        preamble = DAQPreamble(file_obj=data_io)  # noqa
         summaryslice = DAQSummaryslice(file_obj=data_io)
         timestamp = summaryslice.header.time_stamp
         with lock:
@@ -269,7 +259,7 @@ class DOMActivityPlotter(Module):
         cmap.set_over('deeppink', 1.0)
         cmap.set_under('deepskyblue', 1.0)
 
-        vmax = 15*60
+        vmax = 15 * 60
 
         scatter_args = {
             'edgecolors': 'None',
@@ -283,7 +273,7 @@ class DOMActivityPlotter(Module):
 
         try:
             xa, ya = map(np.array, zip(*self.rates.keys()))
-            ts = np.array([now - max(zip(*d)[0]) \
+            ts = np.array([now - max(zip(*d)[0])
                            for d in self.rates.values()])
         except ValueError:
             print("Not enough data.")
@@ -294,9 +284,9 @@ class DOMActivityPlotter(Module):
             sc_active = ax.scatter(xa[active_idx], ya[active_idx],
                                    c=ts[active_idx], cmap=cmap,
                                    **scatter_args)
-            sc_idle = ax.scatter(xa[~active_idx], ya[~active_idx],
-                                 c='deeppink', label='> {0} s'.format(vmax),
-                                 **scatter_args)
+            ax.scatter(xa[~active_idx], ya[~active_idx],
+                       c='deeppink', label='> {0} s'.format(vmax),
+                       **scatter_args)
             cb = plt.colorbar(sc_active)
             cb.set_label("last activity [s]")
             # ts_series = pd.Series(ts)
@@ -307,12 +297,12 @@ class DOMActivityPlotter(Module):
         ax.set_xlabel("DU")
         ax.set_ylabel("DOM")
         ax.set_ylim(-2)
-        ax.set_yticks(range(1, N_DOMS+1))
+        ax.set_yticks(range(1, N_DOMS + 1))
         major_locator = pylab.MaxNLocator(integer=True)
         sc_inactive.axes.xaxis.set_major_locator(major_locator)
 
-        ax.legend(bbox_to_anchor=(0., -.16 , 1., .102), loc=1,
-                   ncol=2, mode="expand", borderaxespad=0.)
+        ax.legend(bbox_to_anchor=(0., -.16, 1., .102), loc=1,
+                  ncol=2, mode="expand", borderaxespad=0.)
 
         fig.tight_layout()
 
@@ -340,24 +330,24 @@ class ZTPlot(Module):
             return blob
 
         hits = blob['Hits']
-        event_info = blob['EventInfo']
+        e_info = blob['EventInfo']
 
         print("Event queue size: {0}".format(self.queue.qsize()))
         if self.queue.qsize() < self.max_queue:
-            self.queue.put((event_info, hits))
+            self.queue.put((e_info, hits))
 
         return blob
 
     def plot(self):
         while self.run:
             try:
-                event_info, hits = self.queue.get(timeout=50)
+                e_info, hits = self.queue.get(timeout=50)
             except Empty:
                 continue
             with lock:
-                self.create_plot(event_info, hits)
+                self.create_plot(e_info, hits)
 
-    def create_plot(self, event_info, hits):
+    def create_plot(self, e_info, hits):
         print(self.__class__.__name__ + ": updating plot.")
         cal.apply(hits)
         dus = set(detector.doms[h.dom_id][0] for h in hits)
@@ -367,8 +357,6 @@ class ZTPlot(Module):
         n_rows = int(n_plots / n_cols) + (n_plots % n_cols > 0)
         fig, axes = plt.subplots(ncols=n_cols, nrows=n_rows,
                                  sharex=True, sharey=True, figsize=(16, 8))
-
-        # [axes.flat[-1 - i].axis('off') for i in range(len(axes.flat) - n_plots)]
 
         for ax, du in zip(axes.flat, dus):
             _hits = [h for h in hits
@@ -390,9 +378,9 @@ class ZTPlot(Module):
                 label.set_rotation(45)
 
         plt.suptitle("Run {0}, FrameIndex {1}, TriggerCounter {2}\n{3}"
-                     .format(event_info.run_id, event_info.frame_index,
-                             event_info.trigger_counter,
-                             datetime.utcfromtimestamp(event_info.utc_seconds)),
+                     .format(e_info.run_id, e_info.frame_index,
+                             e_info.trigger_counter,
+                             datetime.utcfromtimestamp(e_info.utc_seconds)),
                      fontsize=16)
         fig.text(0.5, 0.01, 'time [ns]', ha='center')
         fig.text(0.08, 0.5, 'z [m]', va='center', rotation='vertical')
@@ -405,7 +393,6 @@ class ZTPlot(Module):
         plt.close('all')
         shutil.move(f_tmp, f)
 
-
     def finish(self):
         self.run = False
         if self.thread is not None:
@@ -414,10 +401,10 @@ class ZTPlot(Module):
 
 pipe = Pipeline()
 pipe.attach(CHPump, host='192.168.0.110',
-                    port=5553,
-                    tags='IO_EVT, IO_SUM',
-                    timeout=60*60*24*7,
-                    max_queue=2000)
+            port=5553,
+            tags='IO_EVT, IO_SUM',
+            timeout=60 * 60 * 24 * 7,
+            max_queue=2000)
 pipe.attach(DAQProcessor)
 pipe.attach(DOMActivityPlotter)
 pipe.attach(TriggerRate)

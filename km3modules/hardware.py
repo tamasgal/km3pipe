@@ -66,7 +66,8 @@ class PhidgetsController(kp.Module):
             self.log_offset()
             stepper_offset = round(self.offset / self.e * self.s)
             log.debug("Correcting stepper by {0}".format(stepper_offset))
-            log.debug("Stepper target pos: {0}".format(self.stepper_target_pos))
+            log.debug("Stepper target pos: {0}".format(
+                self.stepper_target_pos))
             log.debug("Stepper pos: {0}".format(self.stepper_pos))
             self.stepper_target_pos = self.stepper_pos + stepper_offset
             self.wait_for_stepper()
@@ -131,6 +132,7 @@ class PhidgetsController(kp.Module):
 
 class USBTMC(object):
     "USB TMC communicator"
+
     def __init__(self, path):
         self.device = os.open(path, os.O_RDWR)
 
@@ -151,6 +153,7 @@ class USBTMC(object):
 
 class Agilent33220A(object):
     """Controller for the Arbitrary Waveform Generator"""
+
     def __init__(self, path):
         self.tmc = USBTMC(path)
         self._output = False

@@ -13,7 +13,6 @@ from km3pipe.controlhost import Client
 from km3pipe.time import Cuckoo
 from km3pipe.logger import logging
 import threading
-import struct
 import socket
 import time
 import numpy as np
@@ -36,15 +35,16 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 class CHPump(Pump):
     """A pump for ControlHost data."""
+
     def configure(self):
         self.host = self.get('host') or '127.0.0.1'
         self.port = self.get('port') or 5553
         self.tags = self.get('tags') or "MSG"
-        self.timeout = self.get('timeout') or 60*60*24
+        self.timeout = self.get('timeout') or 60 * 60 * 24
         self.max_queue = self.get('max_queue') or 50
         self.key_for_data = self.get('key_for_data') or 'CHData'
         self.key_for_prefix = self.get('key_for_prefix') or 'CHPrefix'
-        self.cuckoo_warn = Cuckoo(60*5, log.warning)
+        self.cuckoo_warn = Cuckoo(60 * 5, log.warning)
         self.performance_warn = Cuckoo(10, self.show_performance_statistics)
 
         self.process_dt = deque(maxlen=100)

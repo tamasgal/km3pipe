@@ -9,13 +9,12 @@ Live Event Dumper
 Recieves triggered events from the detector and dumps them to a file.
 
 """
-# Author: Tamas Gal <tgal@km3net.de>
-# License: MIT
-"""Read & dump events through the CH Pump.
-"""
 from km3pipe import Pipeline, Module
 from km3pipe.io.ch import CHPump
 from km3pipe.io.daq import DAQProcessor
+
+
+__author__ = 'Tamas Gal <tgal@km3net.de>'
 
 
 class Dumper(Module):
@@ -39,7 +38,7 @@ pipe = Pipeline()
 pipe.attach(CHPump, host='xxx.xxx.xxx.xxx',
             port=5553,
             tags='IO_EVT',
-            timeout=60*60*24,
+            timeout=60 * 60 * 24,
             max_queue=42)
 pipe.attach(DAQProcessor)
 pipe.attach(Dumper)

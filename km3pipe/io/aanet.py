@@ -81,6 +81,7 @@ class AanetPump(Pump):
         Ignore run ID from header, take from event instead;
         often, the event.run_id is overwritten with the default (1).
     """
+
     def configure(self):
 
         self.filename = self.get('filename')
@@ -97,7 +98,7 @@ class AanetPump(Pump):
         self.correct_mc_times = self.get('correct_mc_times', default=False)
         self.ignore_hits = bool(self.get('ignore_hits'))
         self.ignore_run_id_from_header = bool(
-                self.get('ignore_run_id_from_header'))
+            self.get('ignore_run_id_from_header'))
 
         if self.additional:
             self.id = self.get('id')
@@ -115,13 +116,13 @@ class AanetPump(Pump):
             else:
                 self.filenames.append(self.filename)
 
-        import ROOT # noqa
+        import ROOT  # noqa
         self.aalib = self.get('aa_lib')
         if self.aalib:
-            ROOT.gSystem.Load(self.aalib) # noqa
+            ROOT.gSystem.Load(self.aalib)  # noqa
         elif self.use_aart_sps_lib:
             aapath = '/sps/km3net/users/heijboer/aanet/libaa.so'
-            ROOT.gSystem.Load(aapath) # noqa
+            ROOT.gSystem.Load(aapath)  # noqa
         else:
             import aa  # noqa
 
@@ -314,20 +315,20 @@ class AanetPump(Pump):
             blob['EventInfo'] = EventInfo(ei_data)
         except AttributeError:
             ei_data = np.array((0,   # det_id
-                               event.frame_index,
-                               self.livetime,   # livetime_sec
-                               mc_id,   # mc_id
-                               0,   # mc_t
-                               self.ngen,   # n_events_gen
-                               self.nfilgen,   # n_files_gen
-                               0,   # overlays
-                               0,   # trigger_counter
-                               0,   # trigger_mask
-                               0,   # nanose
-                               0,   # sec
-                               w1, w2, w3,
-                               run_id,
-                               event_id), dtype=EventInfo.dtype)
+                                event.frame_index,
+                                self.livetime,   # livetime_sec
+                                mc_id,   # mc_id
+                                0,   # mc_t
+                                self.ngen,   # n_events_gen
+                                self.nfilgen,   # n_files_gen
+                                0,   # overlays
+                                0,   # trigger_counter
+                                0,   # trigger_mask
+                                0,   # nanose
+                                0,   # sec
+                                w1, w2, w3,
+                                run_id,
+                                event_id), dtype=EventInfo.dtype)
             blob['EventInfo'] = EventInfo(ei_data)
 
         if len(event.trks) > 0:
@@ -337,25 +338,25 @@ class AanetPump(Pump):
                     blob[recname] = reco
             if self.format in ('jevt_jgandalf', 'gandalf', 'jgandalf'):
                 track, dtype = parse_jevt_jgandalf(
-                        event, event_id, self.missing)
+                    event, event_id, self.missing)
                 if track:
                     blob['Gandalf'] = KM3Array.from_dict(
                         track, dtype, h5loc='/reco')
             if self.format in ('gandalf_new', 'jgandalf_new'):
                 track, dtype = parse_jgandalf_new(
-                        event, event_id, self.missing)
+                    event, event_id, self.missing)
                 if track:
                     blob['Gandalf'] = KM3Array.from_dict(
                         track, dtype, h5loc='/reco')
             if self.format == 'generic_track':
                 track, dtype = parse_generic_event(
-                        event, event_id, self.missing)
+                    event, event_id, self.missing)
                 if track:
                     blob['Track'] = KM3Array.from_dict(
                         track, dtype, h5loc='/reco')
             if self.format in ('ancient_recolns', 'orca_recolns'):
                 track, dtype = parse_ancient_recolns(
-                        event, event_id, self.missing)
+                    event, event_id, self.missing)
                 if track:
                     blob['OrcaRecoLns'] = KM3Array.from_dict(
                         track, dtype, h5loc='/reco')
@@ -545,13 +546,13 @@ def parse_jgandalf_new(aanet_event, event_id, missing=0):
     posdir = ['pos_x', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z', ]
     metrics = ['std', 'mean', 'median', 'mad', 'iqr']
     spread_keys = [
-            'spread_{}_{}'.format(var, metric)
-            for var in posdir + FITINF_ENUM[:6]
-            for metric in metrics
+        'spread_{}_{}'.format(var, metric)
+        for var in posdir + FITINF_ENUM[:6]
+        for metric in metrics
     ]
     spread_keys.append('upgoing_vs_downgoing')
     all_keys = posdir + spread_keys + FITINF_ENUM + posdir + [
-            'time', 'type', 'rec_type', 'rec_stage']
+        'time', 'type', 'rec_type', 'rec_stage']
     try:
         track = aanet_event.trks[0]
         outmap = {}
@@ -587,13 +588,13 @@ def upgoing_vs_downgoing(tracks):
     upvsdown = (lik_upgoing - lik_downgoing)/(lik_upgoing + lik_downgoing)
     """
     upgoing = [
-            track.fitinf[2]/track.fitinf[3] for track in tracks
-            if track.dir.z >= 0
-            ]
+        track.fitinf[2] / track.fitinf[3] for track in tracks
+        if track.dir.z >= 0
+    ]
     downgoing = [
-            track.fitinf[2]/track.fitinf[3] for track in tracks
-            if track.dir.z < 0
-            ]
+        track.fitinf[2] / track.fitinf[3] for track in tracks
+        if track.dir.z < 0
+    ]
     if not upgoing:
         return -np.inf
     if not downgoing:

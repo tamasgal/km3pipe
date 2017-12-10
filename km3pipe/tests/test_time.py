@@ -52,28 +52,24 @@ class TestCuckoo(TestCase):
 
     def test_msg_calls_callback_with_empty_args(self):
         callback = MagicMock()
-        message = 'a'
         cuckoo = Cuckoo(callback=callback)
         cuckoo.msg()
         callback.assert_called_with()
 
     def test_msg_calls_callback_with_multiple_args(self):
         callback = MagicMock()
-        message = 'a'
         cuckoo = Cuckoo(callback=callback)
         cuckoo.msg(1, 2, 3)
         callback.assert_called_with(1, 2, 3)
 
     def test_msg_calls_callback_with_multiple_kwargs(self):
         callback = MagicMock()
-        message = 'a'
         cuckoo = Cuckoo(callback=callback)
         cuckoo.msg(a=1, b=2)
         callback.assert_called_with(a=1, b=2)
 
     def test_msg_calls_callback_with_mixed_args_and_kwargs(self):
         callback = MagicMock()
-        message = 'a'
         cuckoo = Cuckoo(callback=callback)
         cuckoo.msg(1, 2, c=3, d=4)
         callback.assert_called_with(1, 2, c=3, d=4)
@@ -140,17 +136,14 @@ class TestCuckoo(TestCase):
 
 
 class TestTimer(TestCase):
-    def test_init(self):
-        t = Timer()
-
     def test_context_manager(self):
         mock = MagicMock()
-        with Timer(callback=mock) as t:
+        with Timer(callback=mock) as t:  # noqa
             pass
         mock.assert_called_once()
 
     def test_context_manager_calls_with_standard_text(self):
         mock = MagicMock()
-        with Timer(callback=mock) as t:
+        with Timer(callback=mock) as t:  # noqa
             pass
         self.assertTrue(mock.call_args[0][0].startswith("It "))

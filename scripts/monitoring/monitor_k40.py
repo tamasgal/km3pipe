@@ -3,10 +3,7 @@
 # vim: ts=4 sw=4 et
 from __future__ import division
 
-from collections import deque, defaultdict
 from itertools import combinations
-from functools import partial
-from io import BytesIO
 import os
 
 import numpy as np
@@ -16,13 +13,8 @@ from km3modules.plot import plot_dom_parameters
 from km3modules.fit import fit_delta_ts
 import km3pipe.style
 
-from km3pipe.logger import logging
 
-# for logger_name, logger in logging.Logger.manager.loggerDict.iteritems():
-#     if logger_name.startswith('km3pipe.'):
-#         print("Setting log level to debug for '{0}'".format(logger_name))
-#         logger.setLevel("DEBUG")
-
+km3pipe.style.use('km3pipe')
 
 PLOTS_PATH = 'www/plots'
 cal = kp.core.Calibration(det_id=14)
@@ -37,8 +29,8 @@ def mongincidence(times, tdcs, tmax=20, offset=0):
         cur_t = t
         diff = cur_t - las_t
         if offset < diff <= offset + tmax \
-               and t_idx > 0 \
-               and tdcs[t_idx - 1] != tdcs[t_idx]:
+                and t_idx > 0 \
+                and tdcs[t_idx - 1] != tdcs[t_idx]:
             coincidences.append(((tdcs[t_idx - 1], tdcs[t_idx]), diff))
         las_t = cur_t
     return coincidences
@@ -65,15 +57,15 @@ class MonitorK40(kp.Module):
             if omkey not in self.rates:
                 self.rates[omkey] = np.zeros(shape=(465, 41))
             hits.sort(key=lambda x: x[1])
-            times = [t for (_,t,_) in hits]
-            tdcs = [t for (t,_,_) in hits]
+            times = [t for (_, t, _) in hits]
+            tdcs = [t for (t, _, _) in hits]
             coinces = mongincidence(times, tdcs)
             combs = list(combinations(range(31), 2))
             for pmt_pair, t in coinces:
                 if pmt_pair[0] > pmt_pair[1]:
                     pmt_pair = (pmt_pair[1], pmt_pair[0])
                     t = -t
-                self.rates[omkey][combs.index(pmt_pair), t+20] += 1
+                self.rates[omkey][combs.index(pmt_pair), t + 20] += 1
 
         self.cuckoo.msg()
 
@@ -107,7 +99,7 @@ pipe = kp.Pipeline()
 pipe.attach(kp.io.ch.CHPump, host='127.0.0.1',
             port=5553,
             tags='IO_TSL',
-            timeout=60*60*24*7,
+            timeout=60 * 60 * 24 * 7,
             max_queue=2000)
 pipe.attach(kp.io.daq.TimesliceParser)
 pipe.attach(MonitorK40)

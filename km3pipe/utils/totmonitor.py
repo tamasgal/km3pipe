@@ -42,22 +42,23 @@ GMM = mixture.GaussianMixture(n_components=1)
 
 class TimesliceCreator(kp.core.Module):
     """Create `TimesliceHitSeries` from raw timeslice hits."""
+
     def configure(self):
         self.dom_id = self.require("dom_id")
 
     def process(self, blob):
-        hits =  blob['TimesliceFrames'][self.dom_id]
+        hits = blob['TimesliceFrames'][self.dom_id]
         n_hits = len(hits)
         if n_hits == 0:
             return blob
         channel_ids, times, tots = zip(*hits)
         ts_hits = kp.dataclasses.TimesliceHitSeries.from_arrays(
-                  np.array(channel_ids),
-                  np.full(n_hits, self.dom_id),
-                  np.array(times),
-                  np.array(tots),
-                  0,
-                  0)
+            np.array(channel_ids),
+            np.full(n_hits, self.dom_id),
+            np.array(times),
+            np.array(tots),
+            0,
+            0)
         blob['TimesliceHits'] = ts_hits
         blob['DOM_ID'] = self.dom_id
         return blob
@@ -132,7 +133,7 @@ def main():
                 port=int(args['-p']),
                 tags='IO_TSL',
                 max_queue=100,
-                timeout=60*60*24)
+                timeout=60 * 60 * 24)
     pipe.attach(kp.io.daq.TimesliceParser)
     pipe.attach(TimesliceCreator, dom_id=int(args['DOM_ID']))
     pipe.attach(MeanTotDisplay,

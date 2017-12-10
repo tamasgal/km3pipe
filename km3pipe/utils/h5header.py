@@ -31,10 +31,10 @@ __status__ = "Development"
 def h5header(h5name, raw=False):
     with tables.open_file(h5name) as h5:
         header_loc = "/header"
-        if not header_loc in h5:
+        if not header_loc in h5:  # noqa
             print("Sorry, no header.")
             return
-        header = h5.get_node(header_loc )
+        header = h5.get_node(header_loc)
         att_list = header._v_attrs._f_list()
         if raw:
             print(header._v_attrs.__repr__())

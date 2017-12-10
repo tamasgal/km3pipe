@@ -20,7 +20,8 @@ import numpy as np
 import tables as tb
 
 
-FILTERS = tb.Filters(complevel=5, shuffle=True, fletcher32=True, complib='zlib')
+FILTERS = tb.Filters(complevel=5, shuffle=True,
+                     fletcher32=True, complib='zlib')
 
 
 def calibrate_hits(f, cal):
@@ -50,11 +51,12 @@ def calibrate_mc_hits(f, cal):
 def apply_calibration(calib, f, n, loc):
     f4_atom = tb.Float32Atom()
     u1_atom = tb.UInt8Atom()
-    for i, node in enumerate([p+'_'+s for p in ['pos', 'dir'] for s in 'xyz']):
+    for i, node in enumerate([p + '_' + s for p in ['pos', 'dir']
+                              for s in 'xyz']):
         print("  ...creating " + node)
         ca = f.create_carray(loc, node, f4_atom, (n,), filters=FILTERS)
         ca[:] = calib[:, i]
-    
+
     print("  ...creating du")
     du = f.create_carray(loc, 'du', u1_atom, (n,), filters=FILTERS)
     du[:] = calib[:, 7].astype('u1')

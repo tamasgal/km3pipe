@@ -13,12 +13,12 @@ except ImportError:
     try:
         from StringIO import StringIO
     except ImportError:
-        from io import StringIO
+        from io import StringIO  # noqa
 
 try:
-    from Queue import Queue, Empty
+    from Queue import Queue, Empty  # noqa
 except ImportError:
-    from queue import Queue, Empty
+    from queue import Queue, Empty  # noqa
 
 
 __author__ = "Tamas Gal"

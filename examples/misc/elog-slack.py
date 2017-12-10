@@ -17,23 +17,23 @@ wm = pyinotify.WatchManager()
 mask = pyinotify.IN_CLOSE_WRITE
 
 URL = 'http://elog.km3net.de'
-#LOGBOOK_PATH = '/home/elog/elog'
+# LOGBOOK_PATH = '/home/elog/elog'
 LOGBOOK_PATH = '/usr/local/elog/logbooks'
 BOTNAME = 'ELOG'
 DEFAULT_DESTINATION = '#elog'
 DESTINATIONS = {
     'Operations_IT': '#operations_it',
     'Operations_FR': '#operations_fr',
-#    'Qualification': '#elog',
-#    'DOM_Integration': '#elog',
-#    'DU_Integration': '#elog',
-#    'DAQ_Readout': '#elog',
-#    'Electronics': '#elog',
-#    'Analysis': '#elog',
+    #    'Qualification': '#elog',
+    #    'DOM_Integration': '#elog',
+    #    'DU_Integration': '#elog',
+    #    'DAQ_Readout': '#elog',
+    #    'Electronics': '#elog',
+    #    'Analysis': '#elog',
     'Computing and Software': '#software',
-    }
+}
 
-slack = SlackClient(YOUR_SLACK_API_TOKEN_HERE)
+slack = SlackClient("YOUR_SLACK_API_TOKEN_HERE")
 
 
 class ElogEntry(object):
@@ -92,7 +92,7 @@ class ElogEntryBundle(object):
 
         entry = ElogEntry(self.logbook, msg_id)
         for line in input_file:
-            if line.startswith(40*'='):
+            if line.startswith(40 * '='):
                 break
             parameter, value = re.findall(r'([^:.]*): (.*)', line)[0]
             entry.header[parameter] = value
@@ -129,23 +129,23 @@ class EventHandler(pyinotify.ProcessEvent):
             destination = None
         finally:
             if elog_entry.id in self.logged_ids:
-                return # For now skip, since it often duplicates!
+                return  # For now skip, since it often duplicates!
                 pre = 'Updated '
             else:
                 pre = ''
                 self.logged_ids.append(elog_entry.id)
             message = pre + str(elog_entry)
-            print(42*"#")
+            print(42 * "#")
             print("Filename: " + event.name)
             print("Elog Entry ID: " + str(elog_entry.id))
-            print(42*"-")
+            print(42 * "-")
             print(message)
-            print(42*"/")
+            print(42 * "/")
             if destination:
                 slack.chat_post_message(destination,
                                         message,
                                         username=BOTNAME)
-            #else:
+            # else:
             slack.chat_post_message(DEFAULT_DESTINATION,
                                     message,
                                     username=BOTNAME)

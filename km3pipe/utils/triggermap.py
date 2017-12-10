@@ -30,11 +30,9 @@ __status__ = "Development"
 from docopt import docopt
 import matplotlib
 # Force matplotlib to not use any Xwindows backend.
-matplotlib.use('Agg')
+matplotlib.use('Agg')  # noqa
 import matplotlib.pyplot as plt
-import matplotlib.dates as md
 from matplotlib.colors import LogNorm
-from matplotlib import pylab
 import numpy as np
 
 import km3pipe as kp
@@ -44,6 +42,7 @@ km3pipe.style.use('km3pipe')
 
 class TriggerMap(kp.Module):
     """Creates a plot to show the number of triggered hits for each DOM."""
+
     def configure(self):
         self.det = self.require('detector')
         self.plot_filename = self.require('plot_filename')
@@ -84,13 +83,14 @@ class TriggerMap(kp.Module):
         ax.set_axisbelow(True)
         hit_mat = np.array([np.array(x) for x in self.hit_counts]).transpose()
         im = ax.matshow(hit_mat,
-                        interpolation='nearest', filternorm=None, cmap='plasma',
-                        aspect='auto', origin='lower', zorder=3,
+                        interpolation='nearest', filternorm=None,
+                        cmap='plasma', aspect='auto', origin='lower', zorder=3,
                         norm=LogNorm(vmin=1, vmax=np.amax(hit_mat)))
         yticks = np.arange(self.n_doms * self.n_dus)
         ytick_label_templ = "DOM{1:02d}" if self.du else "DU{0:.0f}-DOM{1:02d}"
         ytick_labels = [ytick_label_templ
-                        .format(np.ceil((y+1)/self.n_doms), y % (self.n_doms) + 1)  \
+                        .format(np.ceil((y + 1) / self.n_doms),
+                                y % (self.n_doms) + 1)
                         for y in yticks]
         ax.set_yticks(yticks)
         ax.set_yticklabels(ytick_labels)

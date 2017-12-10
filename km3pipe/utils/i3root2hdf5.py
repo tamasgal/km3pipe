@@ -37,10 +37,10 @@ def i3root2hdf5(infile, force=False):
         arr = tree2array(tree)
         try:
             h5.create_dataset(
-                    key, data=arr,
-                    compression='gzip', compression_opts=9,
-                    shuffle=True, fletcher32=True,
-                    )
+                key, data=arr,
+                compression='gzip', compression_opts=9,
+                shuffle=True, fletcher32=True,
+            )
         except TypeError:
             continue
         h5.flush()

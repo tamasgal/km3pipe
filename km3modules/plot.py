@@ -61,7 +61,7 @@ def plot_dom_parameters(data, detector, filename, label, title,
         'vmax': vmax,
     }
     sc_inactive = ax.scatter(x, y, c=missing, label='missing',
-                             s=m_size*0.9,
+                             s=m_size * 0.9,
                              **scatter_args)
 
     xa, ya = map(np.array, zip(*data.keys()))
@@ -74,12 +74,12 @@ def plot_dom_parameters(data, detector, filename, label, title,
         under_idx = zs < vmin
         ax.scatter(xa[under_idx], ya[under_idx],
                    c=under, label='< {0}'.format(vmin),
-                   s=m_size*underfactor,
+                   s=m_size * underfactor,
                    **scatter_args)
         over_idx = zs > vmax
         ax.scatter(xa[over_idx], ya[over_idx],
                    c=over, label='> {0}'.format(vmax),
-                   s=m_size*overfactor,
+                   s=m_size * overfactor,
                    **scatter_args)
 
     cb = plt.colorbar(sc)
@@ -90,7 +90,7 @@ def plot_dom_parameters(data, detector, filename, label, title,
     ax.set_xlabel("DU")
     ax.set_ylabel("DOM")
     ax.set_ylim(-2)
-    ax.set_yticks(range(1, 18+1))
+    ax.set_yticks(range(1, 18 + 1))
     major_locator = pylab.MaxNLocator(integer=True)
     sc_inactive.axes.xaxis.set_major_locator(major_locator)
 
@@ -178,6 +178,6 @@ class IntraDOMCalibrationPlotter(kp.Module):
                 'dom_id': dom_ids,
                 'tdc_channel': tdc_channels,
                 't0s': t0s
-                })
+            })
             store.append('t0s', df, format='table', data_columns=True)
         store.close()

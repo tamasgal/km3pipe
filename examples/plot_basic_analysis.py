@@ -13,7 +13,8 @@ Basic Analysis Example
 #####################################################
 # Preparation
 # -----------
-# The very first thing we do is importing our libraries and setting up the Jupyter Notebook environment.
+# The very first thing we do is importing our libraries and setting up
+# the Jupyter Notebook environment.
 
 import matplotlib.pyplot as plt   # our plotting module
 import pandas as pd               # the main HDF5 reader
@@ -36,7 +37,8 @@ km3pipe.style.use("km3pipe")
 # from ROOT to HDF5 using the ``tohdf5`` command line tool provided by
 # ``KM3Pipe``.
 #
-# You can find the documentation here: http://km3pipe.readthedocs.io/en/latest/cmd.html#tohdf
+# You can find the documentation here:
+# http://km3pipe.readthedocs.io/en/latest/cmd.html#tohdf
 
 #####################################################
 # Note for Lyon Users
@@ -77,7 +79,8 @@ filepath = "data/basic_analysis_sample.h5"
 
 
 #####################################################
-# We can have a quick look at the file with the ``ptdump`` command in the terminal::
+# We can have a quick look at the file with the ``ptdump`` command
+# in the terminal::
 #
 #     ptdump filename.h5
 #
@@ -131,7 +134,7 @@ print(primaries.head(5))
 primaries.energy.hist(bins=100, log=True)
 plt.xlabel('energy [GeV]')
 plt.ylabel('number of events')
-plt.title('Energy Distribution');
+plt.title('Energy Distribution')
 
 
 #####################################################
@@ -139,7 +142,7 @@ plt.title('Energy Distribution');
 primaries.bjorkeny.hist(bins=100)
 plt.xlabel('bjorken-y')
 plt.ylabel('number of events')
-plt.title('bjorken-y Distribution');
+plt.title('bjorken-y Distribution')
 
 
 #####################################################
@@ -150,32 +153,32 @@ primaries['zenith'] = zeniths
 plt.hist(np.cos(primaries.zenith), bins=21, histtype='step', linewidth=2)
 plt.xlabel(r'cos($\theta$)')
 plt.ylabel('number of events')
-plt.title('Zenith Distribution');
+plt.title('Zenith Distribution')
 
 
 #####################################################
 #
 # Starting positions of primaries
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-plt.hist2d(primaries.pos_x, primaries.pos_y, bins=100, cmap='viridis');
+plt.hist2d(primaries.pos_x, primaries.pos_y, bins=100, cmap='viridis')
 plt.xlabel('x [m]')
 plt.ylabel('y [m]')
 plt.title('2D Plane')
-plt.colorbar();
+plt.colorbar()
 
 #####################################################
 #
 # If you have seaborn installed (`pip install seaborn`), you can easily create
 # nice jointplots:
 try:
-    import seaborn as sns
+    import seaborn as sns  # noqa
     km3pipe.style.use("km3pipe")  # reset matplotlib style
 except:
     print("No seaborn found, skipping example.")
 else:
     g = sns.jointplot('pos_x', 'pos_y', data=primaries, kind='hex')
     g.set_axis_labels("x [m]", "y[m]")
-    plt.subplots_adjust(right=0.90) # make room for the colorbar
+    plt.subplots_adjust(right=0.90)  # make room for the colorbar
     plt.title("2D Plane")
     plt.colorbar()
     plt.legend()
@@ -183,14 +186,14 @@ else:
 
 #####################################################
 #
-from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d import Axes3D  # noqa
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 ax.scatter3D(primaries.pos_x, primaries.pos_y, primaries.pos_z, s=3)
 ax.set_xlabel('x [m]', labelpad=10)
 ax.set_ylabel('y [m]', labelpad=10)
 ax.set_zlabel('z [m]', labelpad=10)
-ax.set_title('3D Plane');
+ax.set_title('3D Plane')
 
 
 #####################################################
@@ -206,10 +209,10 @@ gandalfs.columns
 
 #####################################################
 #
-plt.hist(gandalfs['lambda'], bins=50, log=True);
+plt.hist(gandalfs['lambda'], bins=50, log=True)
 plt.xlabel('lambda parameter')
 plt.ylabel('count')
-plt.title('Lambda Distribution of Reconstructed Events');
+plt.title('Lambda Distribution of Reconstructed Events')
 
 
 #####################################################
@@ -219,7 +222,7 @@ gandalfs['zenith'] = kp.math.zenith(gandalfs.filter(regex='^dir_.?$'))
 plt.hist((gandalfs.zenith - primaries.zenith).dropna(), bins=100)
 plt.xlabel(r'true zenith - reconstructed zenith [rad]')
 plt.ylabel('count')
-plt.title('Zenith Reconstruction Difference');
+plt.title('Zenith Reconstruction Difference')
 
 
 #####################################################
@@ -229,7 +232,7 @@ lambda_cut = gandalfs['lambda'] < l
 plt.hist((gandalfs.zenith - primaries.zenith)[lambda_cut].dropna(), bins=100)
 plt.xlabel(r'true zenith - reconstructed zenith [rad]')
 plt.ylabel('count')
-plt.title('Zenith Reconstruction Difference for lambda < {}'.format(l));
+plt.title('Zenith Reconstruction Difference for lambda < {}'.format(l))
 
 
 #####################################################
@@ -244,7 +247,7 @@ for l in [100, 5, 2, 1, 0.1]:
 plt.xlabel(r'true zenith - reconstructed zenith [rad]')
 plt.ylabel('count')
 plt.legend()
-plt.title('Zenith Reconstruction Difference for some Lambda Cuts');
+plt.title('Zenith Reconstruction Difference for some Lambda Cuts')
 
 #####################################################
 # Fitting Angular resolutions
@@ -257,7 +260,7 @@ plt.title('Zenith Reconstruction Difference for some Lambda Cuts');
 # Conversely, the Cauchy (lorentz) distribution is a near perfect fit
 # (note that ``2 gamma = FWHM``).
 
-from scipy.stats import cauchy, norm
+from scipy.stats import cauchy, norm  # noqa
 
 residuals = gandalfs.zenith - primaries.zenith
 cut = (gandalfs['lambda'] < l) & (np.abs(residuals) < 2 * np.pi)

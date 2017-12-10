@@ -1,11 +1,12 @@
 import curses
 
+
 class PipeInspector(object):
     def __init__(self, stdscr):
         print("Initialising PipeInspector")
         self.stdscr = stdscr
         self.max_row = None
-        self.max_col = None 
+        self.max_col = None
         self.origin = (0, 0)
 
         self._update_dimensions()
@@ -15,7 +16,7 @@ class PipeInspector(object):
 
         self._setup_curses()
         self._create_windows()
-        #self._create_pads()
+        # self._create_pads()
         self.refresh()
 
     def test(self):
@@ -33,7 +34,7 @@ class PipeInspector(object):
 
     def refresh(self):
         #resize = curses.is_term_resized(self.max_row, self.max_col)
-        #if resize:
+        # if resize:
         #    self._update_dimensions()
         #    self.stdscr.clear()
         #    curses.resizeterm(self.max_row, self.max_col)
@@ -43,7 +44,6 @@ class PipeInspector(object):
             window.box()
             window.refresh()
         self.stdscr.refresh()
-
 
     def _setup_curses(self):
         curses.noecho()
@@ -75,16 +75,17 @@ class PipeInspector(object):
         for y in range(0, 100):
             for x in range(0, 100):
                 try:
-                    pad.addch(y,x, ord('a') + (x*x+y*y) % 26)
+                    pad.addch(y, x, ord('a') + (x * x + y * y) % 26)
                 except curses.error:
                     pass
         self._pads.append(pad)
-        
+
 
 def main(stdscr):
     stdscr.clear()
     pipe_inspector = PipeInspector(stdscr)
     pipe_inspector.run()
+
 
 if __name__ == '__main__':
     curses.wrapper(main)

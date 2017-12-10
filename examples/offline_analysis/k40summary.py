@@ -3,17 +3,9 @@
 # vim: ts=4 sw=4 et
 """
 =======================
-K40 Calibration Summary 
+K40 Calibration Summary
 =======================
 
-Combine k40calib results into a single CSV file.
-
-"""
-#!/usr/bin/env python
-# coding=utf-8
-# Filename: k40summary.py
-# Author: Tamas Gal <tgal@km3net.de>
-"""
 Combine k40calib results into a single CSV file.
 
 Usage:
@@ -52,7 +44,7 @@ def main():
 
         for fn in files:
             det_id, run_id = [int(x) for x
-                              in re.search("_(\\d{8})"*2, fn).groups()]
+                              in re.search("_(\\d{8})" * 2, fn).groups()]
             with open(fn, 'rb') as f:
                 data = pickle.load(f)
             if not data:

@@ -8,7 +8,7 @@ from km3pipe.io import CHPump
 class CHPrinter(Module):
     def process(self, blob):
         print("New blob:")
-        print blob['CHPrefix']
+        print(blob['CHPrefix'])
         return blob
 
 
@@ -32,13 +32,12 @@ class Dumper(Module):
             f.write(data)
 
 
-
 pipe = Pipeline()
 pipe.attach(CHPump, host='127.0.0.1',
-                    port=5553,
-                    tags='IO_EVT',
-                    timeout=60*60*24,
-                    max_queue=10)
+            port=5553,
+            tags='IO_EVT',
+            timeout=60 * 60 * 24,
+            max_queue=10)
 pipe.attach(CHPrinter)
 pipe.attach(Dumper)
 pipe.drain()

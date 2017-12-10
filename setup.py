@@ -140,6 +140,7 @@ setup(name='km3pipe',
               'i3shower2hdf5=km3pipe.utils.i3shower2hdf5:main',
               'streamds=km3pipe.utils.streamds:main',
               'triggermap=km3pipe.utils.triggermap:main',
+              'nb2sphx=km3pipe.utils.nb2sphx:main',
           ],
       },
       classifiers=[

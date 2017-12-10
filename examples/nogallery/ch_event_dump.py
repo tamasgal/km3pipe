@@ -32,7 +32,7 @@ pipe = Pipeline()
 pipe.attach(CHPump, host='127.0.0.1',
             port=5553,
             tags='IO_EVT, IO_TSL, IO_SUM, TRG_PARS',
-            timeout=60*60*24,
+            timeout=60 * 60 * 24,
             max_queue=42)
 pipe.attach(CHPrinter)
 pipe.attach(Dumper)

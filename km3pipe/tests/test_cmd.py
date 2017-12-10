@@ -3,10 +3,8 @@
 # pylint: disable=C0111,E1003,R0904,C0103,R0201,C0102
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import TestCase, MagicMock, patch
+from km3pipe.testing import TestCase, patch
 from km3pipe.cmd import detx, update_km3pipe
-
-#from mock import PropertyMock
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

@@ -25,6 +25,7 @@ log = kp.logger.get(__name__)
 class Wrap(Module):
     """Wrap a key-val dictionary as a Serialisable.
     """
+
     def configure(self):
         self.keys = self.get('keys') or None
         key = self.get('key') or None
@@ -53,6 +54,7 @@ class Dump(Module):
     full: bool, default=False
         Print blob values too, not just the keys?
     """
+
     def configure(self):
         self.keys = self.get('keys') or None
         self.full = self.get('full') or False
@@ -79,6 +81,7 @@ class Delete(Module):
     keys: collection(string), optional
         Keys to remove.
     """
+
     def configure(self):
         self.keys = self.get('keys') or set()
         key = self.get('key') or None
@@ -99,6 +102,7 @@ class Keep(Module):
     keys: collection(string), optional
         Keys to keep. Everything else is removed.
     """
+
     def configure(self):
         self.keys = self.get('keys') or set()
         key = self.get('key') or None
@@ -115,6 +119,7 @@ class Keep(Module):
 
 class HitCounter(Module):
     """Prints the number of hits"""
+
     def process(self, blob):
         try:
             print("Number of hits: {0}".format(len(blob['Hit'])))
@@ -125,6 +130,7 @@ class HitCounter(Module):
 
 class BlobIndexer(Module):
     """Puts an incremented index in each blob for the key 'blob_index'"""
+
     def configure(self):
         self.blob_index = 0
 
@@ -136,6 +142,7 @@ class BlobIndexer(Module):
 
 class StatusBar(Module):
     """Displays the current blob number."""
+
     def configure(self):
         self.iteration = 1
 
@@ -156,11 +163,12 @@ class TickTock(Module):
     every: int, optional [default=1]
         Number of iterations between printout.
     """
+
     def configure(self):
         self.t0 = time()
 
     def process(self, blob):
-        t1 = (time() - self.t0)/60
+        t1 = (time() - self.t0) / 60
         prettyln("Time/min: {0:.3f}".format(t1))
         return blob
 
@@ -173,6 +181,7 @@ class MemoryObserver(Module):
     every: int, optional [default=1]
         Number of iterations between printout.
     """
+
     def process(self, blob):
         memory = peak_memory_usage()
         prettyln("Memory peak: {0:.3f} MB".format(memory))
@@ -191,6 +200,7 @@ class Cut(Module):
     verbose: bool, optional (default=False)
         Print extra info?
     """
+
     def configure(self):
         self.key = self.require('key')
         self.cond = self.require('condition')
@@ -209,6 +219,7 @@ class Cut(Module):
 
 class GetAngle(Module):
     """Convert pos(x, y, z) to zenith, azimuth."""
+
     def configure(self):
         self.key = self.require('key')
 
@@ -234,6 +245,7 @@ class MergeDF(Module):
     drop: bool, default=True
         Discard input tables?
     """
+
     def configure(self):
         self.keys = self.require('keys')
         self.out = self.require('out')
@@ -266,6 +278,7 @@ class Siphon(Module):
       discard blobs after accumulation
 
     """
+
     def configure(self):
         self.volume = self.require('volume')  # [blobs]
         self.flush = self.get('flush', default=False)

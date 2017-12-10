@@ -24,6 +24,7 @@ class PrintPositions(Module):
 pipe = Pipeline()
 pipe.attach(EvtPump, filename=os.path.join(PATH, DATA))
 pipe.attach(StatusBar)
-pipe.attach(Calibration, timeit=True, apply=True, filename=os.path.join(PATH, DETX))
+pipe.attach(Calibration, timeit=True, apply=True,
+            filename=os.path.join(PATH, DETX))
 pipe.attach(PrintPositions, timeit=True)
 pipe.drain(3)

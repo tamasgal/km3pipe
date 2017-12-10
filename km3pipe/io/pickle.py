@@ -26,6 +26,7 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 class PicklePump(Pump):
     """A pump for Python pickles."""
+
     def configure(self):
 
         self.filename = self.get('filename')

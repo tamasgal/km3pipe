@@ -27,9 +27,10 @@ def fit_delta_ts(data, time_s):
     data = data / time_s
 
     xs = np.arange(-20, 21)
+
     def gaussian(x, mean, sigma, rate, offset):
         return rate / np.sqrt(2 * np.pi) /  \
-               sigma * np.exp(-(x-mean)**2 / sigma**2) + offset
+            sigma * np.exp(-(x - mean)**2 / sigma**2) + offset
     rates = []
     means = []
     for combination in data:
