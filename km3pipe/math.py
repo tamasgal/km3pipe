@@ -172,7 +172,7 @@ def lpnorm(x, p=2):
 
 
 def dist(x1, x2):
-    return lpnorm(x2 - x1, p=2)
+    np.linalg.norm(x2 - x1, axis=1)
 
 
 def com(points, masses=None):
