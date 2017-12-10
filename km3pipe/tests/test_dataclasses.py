@@ -17,13 +17,11 @@ import struct
 from km3pipe.testing import TestCase
 from km3pipe.testing.mocks import FakeAanetHit
 from km3pipe.io.evt import EvtRawHit
-from km3pipe.dataclasses import (RawHit, Hit, Track, Position,
-                                 RawHitSeries, HitSeries, McHitSeries,
-                                 TimesliceHitSeries,
-                                 EventInfo, SummarysliceInfo, TimesliceInfo,
-                                 Serialisable, TrackSeries, SummaryframeSeries,
-                                 KM3Array, KM3DataFrame, BinaryStruct,
-                                 BinaryComposite, DTypeAttr)
+from km3pipe.dataclasses import (
+    RawHit, Hit, Track, Position, RawHitSeries, HitSeries, McHitSeries,
+    TimesliceHitSeries, EventInfo, SummarysliceInfo, TimesliceInfo,
+    Serialisable, TrackSeries, SummaryframeSeries, KM3Array, KM3DataFrame,
+    BinaryStruct, BinaryComposite, DTypeAttr, McTrackSeries, McTrack, McHit)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -456,6 +454,24 @@ class TestMcHitSeries(TestCase):
             tuple(hit_series.a))
 
 
+class TestMcHit(TestCase):
+
+    def setUp(self):
+        self.mchit = McHit(1, 2, 3, 4)
+
+    def test_attributes(self):
+        mchit = self.mchit
+        self.assertAlmostEqual(1, mchit.a)
+        self.assertAlmostEqual(2, mchit.origin)
+        self.assertAlmostEqual(3, mchit.pmt_id)
+        self.assertAlmostEqual(4, mchit.time)
+
+    def test_string_representation(self):
+        mchit = self.mchit
+        representation = "McHit: a(1.0), origin(2), pmt_id(3), time(4.0)"
+        self.assertEqual(representation, str(mchit))
+
+
 class TestHit(TestCase):
 
     def setUp(self):
@@ -618,6 +634,79 @@ class TestTrackSeries(TestCase):
         # self.assertAlmostEqual(exp, ts.serialise())
 
 
+class TestMcTrack(TestCase):
+
+    def setUp(self):
+        self.mctrack = McTrack(0, np.array((1, 2, 3)), 4, 5, 6, True, 8,
+                               np.array((9, 10, 11)), 12, 13)
+
+    def test_attributes(self):
+        mctrack = self.mctrack
+        self.assertAlmostEqual(1, mctrack.dir[0])
+        self.assertAlmostEqual(2, mctrack.dir[1])
+        self.assertAlmostEqual(3, mctrack.dir[2])
+        self.assertAlmostEqual(4, mctrack.energy)
+        self.assertAlmostEqual(5, mctrack.id)
+        self.assertAlmostEqual(6, mctrack.interaction_channel)
+        self.assertTrue(mctrack.is_cc)
+        self.assertAlmostEqual(8, mctrack.length)
+        self.assertAlmostEqual(9, mctrack.pos[0])
+        self.assertAlmostEqual(10, mctrack.pos[1])
+        self.assertAlmostEqual(11, mctrack.pos[2])
+        self.assertAlmostEqual(12, mctrack.time)
+        self.assertAlmostEqual(13, mctrack.type)
+
+    def test_string_representation(self):
+        mctrack = McTrack(0, np.array((1, 2, 3)), 4, 5, 6, True, 8,
+                          np.array((9, 10, 11)), 12, 13)
+        representation = "McTrack: pos([ 9 10 11]), dir([1 2 3]), t=12, " \
+                         "E=4.0, type=13 (mu-)"
+        self.assertEqual(representation, str(mctrack))
+
+    def test_mutable_dir(self):
+        mctrack = self.mctrack
+
+        mctrack.dir = np.array((100, 101, 102))
+
+        self.assertAlmostEqual(100, mctrack.dir[0])
+        self.assertAlmostEqual(101, mctrack.dir[1])
+        self.assertAlmostEqual(102, mctrack.dir[2])
+
+    def test_mutable_pos(self):
+        mctrack = self.mctrack
+
+        mctrack.pos = np.array((100, 101, 102))
+
+        self.assertAlmostEqual(100, mctrack.pos[0])
+        self.assertAlmostEqual(101, mctrack.pos[1])
+        self.assertAlmostEqual(102, mctrack.pos[2])
+
+
+class TestMcTrackSeries(TestCase):
+    def test_array(self):
+        ts = McTrackSeries.from_table([{
+            'bjorkeny': 0.0,
+            'dir_x': 1.0,
+            'dir_y': 2.0,
+            'dir_z': 3.0,
+            'energy': 4.0,
+            'id': 5,
+            'interaction_channel': 7,
+            'is_cc': True,
+            'length': 9.0,
+            'pos_x': 10.0,
+            'pos_y': 11.0,
+            'pos_z': 12.0,
+            'time': 13,
+            'type': 14,
+        }], event_id=0)
+        exp = [(0.0, 1.0, 2.0, 3, 4.0, 0, 6, 7, True, 9.0, 10.0, 12.0, 12.0,
+                13, 14), ]
+        exp = np.array(exp, dtype=ts.dtype)
+        self.assertEqual(1, len(ts))
+        # self.assertAlmostEqual(exp, ts.serialise())
+
+
 class TestSummaryframeSeries(TestCase):
 
     def test_from_arrays(self):
@@ -754,27 +843,8 @@ class TestEventInfo(TestCase):
         del fields['run_id']
         sparse_dt = np.dtype([(k, v) for k, v in fields.items()])
         e = np.ones(1, dtype=sparse_dt)
-        print(e)
-        print(e.dtype)
-        print('run_id' in e.dtype.fields)
-        ei = EventInfo(e)
-        self.assertAlmostEqual(1, ei.det_id)
-        self.assertAlmostEqual(1, ei.frame_index)
-        self.assertAlmostEqual(1, ei.mc_id)
-        self.assertAlmostEqual(1, ei.mc_t)
-        self.assertAlmostEqual(1, ei.overlays)
-        self.assertAlmostEqual(1, ei.trigger_counter)
-        self.assertAlmostEqual(1, ei.trigger_mask)
-        self.assertAlmostEqual(1, ei.utc_nanoseconds)
-        self.assertAlmostEqual(1, ei.utc_seconds)
-        self.assertAlmostEqual(1, ei.weight_w1)
-        self.assertAlmostEqual(1, ei.weight_w2)
-        self.assertAlmostEqual(1, ei.weight_w3)
-        self.assertAlmostEqual(1, ei.event_id)
-        self.assertAlmostEqual(1, ei.livetime_sec)
-        self.assertAlmostEqual(1, ei.n_events_gen)
-        self.assertAlmostEqual(1, ei.n_files_gen)
-        self.assertAlmostEqual(0, ei.run_id)
+        with self.assertRaises(AssertionError):
+            ei = EventInfo(e)       # noqa
 
 
 class TestKM3Array(TestCase):
