@@ -4,7 +4,7 @@ Unreleased changes
 Version 7
 ---------
 
-7.13.1 / 2017-12-10
+7.13.2 / 2017-12-10
 ~~~~~~~~~~~~~~~~~~~
 * add a makefile
 * flake8 all the things
