@@ -4,11 +4,13 @@
 from __future__ import division, absolute_import, print_function
 
 import numpy as np
+import pytest
 
 from km3pipe.testing import TestCase
 from km3pipe.math import (
     angle_between, pld3, com, zenith, azimuth, Polygon, IrregularPrism,
-    rotation_matrix, SparseCone, space_angle, hsin, phi, theta
+    rotation_matrix, SparseCone, space_angle, hsin, phi, theta,
+    unit_vector
 )
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
@@ -102,6 +104,14 @@ class TestMath(TestCase):
                                               0.64052231, 1.00685369,
                                               1.3328552])))
 
+    def test_unit_vector(self):
+        v1 = (1, 0, 0)
+        v2 = (1, 1, 0)
+        v3 = (-1, 2, 0)
+        assert np.allclose(v1, unit_vector(v1))
+        assert np.allclose(np.array(v2) / np.sqrt(2), unit_vector(v2))
+        assert np.allclose(np.array(v3) / np.sqrt(5), unit_vector(v3))
+
     def test_angle_between(self):
         v1 = (1, 0, 0)
         v2 = (0, 1, 0)
@@ -126,7 +136,8 @@ class TestMath(TestCase):
     def test_angle_between_returns_nan_for_zero_length_vectors(self):
         v1 = (0, 0, 0)
         v2 = (1, 0, 0)
-        self.assertTrue(np.isnan(angle_between(v1, v2)))
+        with pytest.warns(RuntimeWarning):
+            self.assertTrue(np.isnan(angle_between(v1, v2)))
 
     def test_space_angle(self):
         p1 = (np.pi / 2, np.pi)
