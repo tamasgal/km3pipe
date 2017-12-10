@@ -3,7 +3,7 @@ PKGNAME=km3pipe
 all: install
 
 build: 
-	python setup.py build_ext --inplace
+	python setup.py build_ext --inplace -j 4
 
 install: 
 	pip install -e ".[full]"
