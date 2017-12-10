@@ -1,6 +1,9 @@
 Unreleased changes
 ------------------
 
+* add a makefile
+* flake8 all the things
+* make compatible for upcoming numpy 1.14
 
 Version 7
 ---------
