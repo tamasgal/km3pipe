@@ -135,11 +135,6 @@ def get_flavor(pdg_types):
     return pd.Series(pdg_types).apply(pdg2name)
 
 
-def _f_eq_nu(flavor):
-    return flavor in {'nu_e', 'anu_e',
-                      'nu_mu', 'anu_mu', 'nu_tau', 'anu_tau'}  # noqa
-
-
 def _p_eq_nu(pdg_type):
     return np.abs(pdg_type) in {12, 14, 16}
 
@@ -148,16 +143,11 @@ def _p_eq_mu(pdg_type):
     return pdg_type == -13
 
 
-def flavor_is_nu(flavors):
-    """flavor string -> is_neutrino"""
-    return pd.Series(flavors).apply(_f_eq_nu)
-
-
-def pdg_is_nu(pdg_types):
+def is_neutrino(pdg_types):
     """flavor string -> is_neutrino"""
     return pd.Series(pdg_types).apply(_p_eq_nu)
 
 
-def pdg_is_mu(pdg_types):
+def is_muon(pdg_types):
     """flavor string -> is_neutrino"""
     return pd.Series(pdg_types).apply(_p_eq_mu)
