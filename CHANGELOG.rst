@@ -4,6 +4,12 @@ Unreleased changes
 Version 7
 ---------
 
+7.13.2 / 2017-12-11
+~~~~~~~~~~~~~~~~~~~
+* makefile tuning
+* linalg tuning (innerprod_1d etc)
+* pandas mc utils simplification (`is_neutrino` takes Series, not DataFrame, etc)
+
 7.13.2 / 2017-12-10
 ~~~~~~~~~~~~~~~~~~~
 * add a makefile
