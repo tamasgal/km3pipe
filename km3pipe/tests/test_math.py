@@ -10,7 +10,7 @@ from km3pipe.testing import TestCase
 from km3pipe.math import (
     angle_between, pld3, com, zenith, azimuth, Polygon, IrregularPrism,
     rotation_matrix, SparseCone, space_angle, hsin, phi, theta,
-    unit_vector
+    unit_vector, innerprod_1d
 )
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
@@ -111,6 +111,11 @@ class TestMath(TestCase):
         assert np.allclose(v1, unit_vector(v1))
         assert np.allclose(np.array(v2) / np.sqrt(2), unit_vector(v2))
         assert np.allclose(np.array(v3) / np.sqrt(5), unit_vector(v3))
+
+    def test_innerprod_1d(self):
+        v1 = [[1, 2, 3], [4, 5, 6]]
+        v2 = [[11, 22, 33], [44, 55, 66]]
+        assert np.allclose([14, 77], innerprod_1d(v1, v2))
 
     def test_angle_between(self):
         v1 = (1, 0, 0)
