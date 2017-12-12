@@ -1,5 +1,7 @@
 PKGNAME=km3pipe
 
+default: build
+
 all: install
 
 build: 
