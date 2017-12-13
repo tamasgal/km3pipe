@@ -148,6 +148,20 @@ def angle_between(v1, v2):
     return angle
 
 
+def innerprod_1d(v1, v2):
+    """1d Inner product for vector-of-vectors.
+
+    Example:
+    ========
+    ```
+    v1 = np.array([dir_x, dir_y, dir_z]).T
+    v2 = ... # dito
+    angle_between_v1_v1 = innerprod_1d(v1, v2)
+    ```
+    """
+    return np.einsum('ij,ij->i', v1, v1)
+
+
 def unit_vector(vector, **kwargs):
     """Returns the unit vector of the vector."""
     # This also works for a dataframe with columns ['x', 'y', 'z']
@@ -172,7 +186,7 @@ def lpnorm(x, p=2):
 
 
 def dist(x1, x2):
-    return lpnorm(x2 - x1, p=2)
+    np.linalg.norm(x2 - x1, axis=1)
 
 
 def com(points, masses=None):

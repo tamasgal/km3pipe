@@ -9,6 +9,9 @@ Monte Carlo related things.
 """
 from __future__ import division, absolute_import, print_function
 
+import numpy as np
+import pandas as pd
+
 
 from .logger import logging
 
@@ -127,25 +130,24 @@ def leading_particle(df):
     return leading
 
 
-def t2f(row):
-    """Convert the pdg types to human-readable, in a dataframe row."""
-    assert 'type' in row
-    return pdg2name(row['type'])
-
-
-def is_nu(flavor):
-    return flavor in {'nu_e', 'anu_e',
-                      'nu_mu', 'anu_mu', 'nu_tau', 'anu_tau'}  # noqa
-
-
-def get_flavor(df):
+def get_flavor(pdg_types):
     """Build a 'flavor' from the 'type' column."""
-    assert 'type' in df.columns
-    return df.apply(t2f, axis=1)
+    return pd.Series(pdg_types).apply(pdg2name)
 
 
-def is_neutrino(df):
-    """Add is_neutrino column to mc data frame."""
-    flavor = get_flavor(df)
-    df['is_neutrino'] = flavor.apply(is_nu)
-    return df
+def _p_eq_nu(pdg_type):
+    return np.abs(pdg_type) in {12, 14, 16}
+
+
+def _p_eq_mu(pdg_type):
+    return pdg_type == -13
+
+
+def is_neutrino(pdg_types):
+    """flavor string -> is_neutrino"""
+    return pd.Series(pdg_types).apply(_p_eq_nu)
+
+
+def is_muon(pdg_types):
+    """flavor string -> is_neutrino"""
+    return pd.Series(pdg_types).apply(_p_eq_mu)

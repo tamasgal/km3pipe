@@ -30,15 +30,15 @@ test-loop: build
 	py.test
 	ptw --ext=.py,.pyx --beforerun "make build"
 
-docs:
-	cd docs
-	make clean
-	make html
-
 flake8: 
 	py.test --flake8
+	py.test --flake8 km3modules
 
 pep8: flake8
+
+lint: 
+	py.test --pylint
+	py.test --pylint km3modules
 
 dependencies:
 	pip install -Ur requirements.txt

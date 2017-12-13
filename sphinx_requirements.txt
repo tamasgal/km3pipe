@@ -2,7 +2,7 @@ pillow
 ipython
 scikit-learn
 seaborn
-sphinx==1.6.3
+sphinx>=1.6.3
 sphinx-gallery==0.1.12
 sphinx-rtd-theme==0.2.4
 sphinxcontrib-napoleon==0.6.1
