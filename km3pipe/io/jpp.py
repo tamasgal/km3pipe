@@ -11,72 +11,63 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 
 from km3pipe.core import Pump, Blob
-from km3pipe.dataclasses import (EventInfo, TimesliceFrameInfo,
-                                 SummaryframeInfo, HitSeries,
-                                 TimesliceHitSeries)
+from km3pipe.dataclasses import (EventInfo, TimesliceInfo, SummarysliceInfo,
+                                 RawHitSeries, KM3DataFrame)
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
-__credits__ = ["Thomas Heid"]
+__credits__ = ["Thomas Heid", "Giuliano Maggi", "Moritz Lotze"]
 __license__ = "MIT"
 __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-class JPPPump(Pump):
-    """A pump for JPP ROOT files."""
+class EventPump(Pump):
+    """A pump for DAQEvents in JPP files.
 
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    Parameters
+    ----------
+    filename: str
+        Name of the file to open.
+
+    """
+
+    def configure(self):
 
         try:
             import jppy  # noqa
         except ImportError:
-            raise ImportError("\nPlease install the jppy package:\n\n"
-                              "    pip install jppy\n")
+            raise ImportError("\nEither Jpp or jppy could not be found."
+                              "\nMake sure you source the JPP environmanet "
+                              "and have jppy installed")
 
         self.event_index = self.get('index') or 0
-        self.with_summaryslices = self.get('with_summaryslices') or False
-        self.with_timeslice_hits = self.get('with_timeslice_hits') or False
-        self.timeslice_index = 0
-        self.timeslice_frame_index = 0
-        self.summaryslice_index = 0
-        self.summaryslice_frame_index = 0
-        self.filename = self.get('filename')
+        self.filename = self.require('filename')
+
+        self.buf_size = 5000
+        self._channel_ids = np.zeros(self.buf_size, dtype='i')
+        self._dom_ids = np.zeros(self.buf_size, dtype='i')
+        self._times = np.zeros(self.buf_size, dtype='i')
+        self._tots = np.zeros(self.buf_size, dtype='i')
+        self._triggereds = np.zeros(self.buf_size, dtype='i')
 
         self.event_reader = jppy.PyJDAQEventReader(self.filename)
-        self.timeslice_reader = jppy.PyJDAQTimesliceReader(self.filename)
-        self.summaryslice_reader = jppy.PyJDAQSummarysliceReader(self.filename)
         self.blobs = self.blob_generator()
 
+    def _resize_buffers(self, buf_size):
+        log.info("Resizing hit buffers to {}.".format(buf_size))
+        self.buf_size = buf_size
+        self._channel_ids.resize(buf_size)
+        self._dom_ids.resize(buf_size)
+        self._times.resize(buf_size)
+        self._tots.resize(buf_size)
+        self._triggereds.resize(buf_size)
+
     def blob_generator(self):
-        while self.with_timeslice_hits and self.timeslice_reader.has_next:
-            self.timeslice_frame_index = 0
-            self.timeslice_reader.retrieve_next_timeslice()
-            while self.timeslice_reader.has_next_superframe:
-                try:
-                    yield self.extract_timeslice_frame()
-                except IndexError:
-                    log.warning("Skipping broken frame.")
-                else:
-                    self.timeslice_frame_index += 1
-                finally:
-                    self.timeslice_reader.retrieve_next_superframe()
-            self.timeslice_index += 1
-
-        while self.with_summaryslices and self.summaryslice_reader.has_next:
-            self.summaryslice_frame_index = 0
-            self.summaryslice_reader.retrieve_next_summaryslice()
-            while self.summaryslice_reader.has_next_frame:
-                yield self.extract_summaryslice_frame()
-                self.summaryslice_reader.retrieve_next_frame()
-                self.summaryslice_frame_index += 1
-            self.summaryslice_index += 1
-
         while self.event_reader.has_next:
             try:
                 yield self.extract_event()
@@ -91,18 +82,23 @@ class JPPPump(Pump):
         r.retrieve_next_event()  # do it at the beginning!
 
         n = r.number_of_snapshot_hits
-        channel_ids = np.zeros(n, dtype='i')
-        dom_ids = np.zeros(n, dtype='i')
-        times = np.zeros(n, dtype='i')
-        tots = np.zeros(n, dtype='i')
-        triggereds = np.zeros(n, dtype='i')
 
-        r.get_hits(channel_ids, dom_ids, times, tots, triggereds)
+        if n > self.buf_size:
+            self._resize_buffers(int(n * 3 / 2))
 
-        nans = np.full(n, np.nan, dtype='<f8')
-        hit_series = HitSeries.from_arrays(
-            channel_ids, nans, nans, nans, dom_ids, np.arange(n), np.zeros(n),
-            nans, nans, nans, nans, times, tots, triggereds, self.event_index
+        r.get_hits(self._channel_ids,
+                   self._dom_ids,
+                   self._times,
+                   self._tots,
+                   self._triggereds)
+
+        hit_series = RawHitSeries.from_arrays(
+            self._channel_ids[:n],
+            self._dom_ids[:n],
+            self._times[:n],
+            self._tots[:n],
+            self._triggereds[:n],
+            self.event_index
         )
 
         event_info = EventInfo(np.array((
@@ -117,68 +113,322 @@ class JPPPump(Pump):
             np.nan, np.nan, np.nan,   # w1-w3
             0,  # run
             self.event_index,
-            ), dtype=EventInfo.dtype))
+        ), dtype=EventInfo.dtype))
 
         self.event_index += 1
         blob['EventInfo'] = event_info
         blob['Hits'] = hit_series
         return blob
 
-    def extract_timeslice_frame(self):
-        blob = Blob()
-        r = self.timeslice_reader
-        n = r.number_of_hits
-        channel_ids = np.zeros(n, dtype='i')
-        dom_ids = np.zeros(n, dtype='i')
-        times = np.zeros(n, dtype='i')
-        tots = np.zeros(n, dtype='i')
-        r.get_hits(channel_ids, dom_ids, times, tots)
-        hit_series = TimesliceHitSeries.from_arrays(
-            channel_ids, dom_ids, times, tots,
-            self.timeslice_index, self.timeslice_frame_index
-        )
-        timesliceframe_info = TimesliceFrameInfo(
-                r.dom_id,
-                r.fifo_status,
-                self.timeslice_frame_index,
-                r.frame_index,
-                r.has_udp_trailer,
-                r.high_rate_veto,
-                r.max_sequence_number,
-                r.number_of_received_packets,
-                self.timeslice_index,
-                r.utc_nanoseconds,
-                r.utc_seconds,
-                r.white_rabbit_status,
-                )
+    def process(self, blob):
+        return next(self.blobs)
 
-        blob['TimesliceHits'] = hit_series
-        blob['TimesliceFrameInfo'] = timesliceframe_info
-        return blob
+    def __iter__(self):
+        return self
 
-    def extract_summaryslice_frame(self):
-        blob = Blob()
-        r = self.summaryslice_reader
-        summaryframe_info = SummaryframeInfo(
-                r.dom_id,
-                r.fifo_status,
-                self.summaryslice_frame_index,
-                r.frame_index,
-                r.has_udp_trailer,
-                r.high_rate_veto,
-                r.max_sequence_number,
-                r.number_of_received_packets,
-                self.summaryslice_index,
-                r.utc_nanoseconds,
-                r.utc_seconds,
-                r.white_rabbit_status,
-                )
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
 
-        blob['SummaryframeInfo'] = summaryframe_info
-        return blob
+    def __next__(self):
+        return next(self.blobs)
+
+
+class TimeslicePump(Pump):
+    """A pump to read and extract timeslices. Currently only hits are read.
+
+    Required Parameters
+    -------------------
+    filename: str
+
+    """
+
+    def configure(self):
+        filename = self.require('filename')
+        self.blobs = self.timeslice_generator()
+        try:
+            import jppy  # noqa
+        except ImportError:
+            raise ImportError("\nEither Jpp or jppy could not be found."
+                              "\nMake sure you source the JPP environmanet "
+                              "and have jppy installed")
+        self.r = jppy.daqtimeslicereader.PyJDAQTimesliceReader(filename)
+        self._scanner_initialised = False
+
+        self.buf_size = 5000
+        self._channel_ids = np.zeros(self.buf_size, dtype='i')
+        self._dom_ids = np.zeros(self.buf_size, dtype='i')
+        self._times = np.zeros(self.buf_size, dtype='i')
+        self._tots = np.zeros(self.buf_size, dtype='i')
+        self._triggereds = np.zeros(self.buf_size, dtype=bool)
 
     def process(self, blob):
         return next(self.blobs)
+
+    def timeslice_generator(self):
+        slice_id = 0
+        while self.r.has_next:
+            blob = Blob()
+            self.r.retrieve_next_timeslice()
+            timeslice_info = TimesliceInfo(
+                frame_index=self.r.frame_index,
+                slice_id=slice_id,
+                timestamp=self.r.utc_seconds,
+                nanoseconds=self.r.utc_nanoseconds,
+                n_frames=self.r.n_frames,
+            )
+            hits = self._extract_hits()
+            hits.slice_id = slice_id
+            blob['TimesliceInfo'] = timeslice_info
+            blob['TSHits'] = hits
+            yield blob
+            slice_id += 1
+
+    def _extract_hits(self):
+        n_frames = 0
+        total_hits = 0
+        while self.r.has_next_superframe:
+            n_frames += 1
+            n = self.r.number_of_hits
+            if n != 0:
+                start_index = total_hits
+                total_hits += n
+                if total_hits > self.buf_size:
+                    buf_size = int(total_hits * 3 / 2)
+                    self._resize_buffers(buf_size)
+                self.r.get_hits(self._channel_ids,
+                                self._dom_ids,
+                                self._times,
+                                self._tots,
+                                start_index)
+            self.r.retrieve_next_superframe()
+
+        hits = RawHitSeries.from_arrays(self._channel_ids[:total_hits],
+                                        self._dom_ids[:total_hits],
+                                        self._times[:total_hits],
+                                        self._tots[:total_hits],
+                                        self._triggereds[:total_hits],
+                                        0)
+        return hits
+
+    def _resize_buffers(self, buf_size):
+        log.info("Resizing hit buffers to {}.".format(buf_size))
+        self.buf_size = buf_size
+        self._channel_ids.resize(buf_size)
+        self._dom_ids.resize(buf_size)
+        self._times.resize(buf_size)
+        self._tots.resize(buf_size)
+        self._triggereds.resize(buf_size)
+
+    def get_by_frame_index(self, frame_index):
+        if not self._scanner_initialised:
+            self.r.init_tree_scanner()
+            self._scanner_initialised = True
+        blob = Blob()
+        self.r.retrieve_timeslice_at_frame_index(frame_index)
+        hits = self._extract_hits()
+        blob['TSHits'] = hits
+        return blob
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        return next(self.blobs)
+
+
+class SummaryslicePump(Pump):
+    """Preliminary Summaryslice reader"""
+
+    def configure(self):
+        filename = self.require('filename')
+        self.blobs = self.summaryslice_generator()
+        try:
+            import jppy  # noqa
+        except ImportError:
+            raise ImportError("\nEither Jpp or jppy could not be found."
+                              "\nMake sure you source the JPP environmanet "
+                              "and have jppy installed")
+        self.r = jppy.daqsummaryslicereader.PyJDAQSummarysliceReader(filename)
+
+    def process(self, blob):
+        return next(self.blobs)
+
+    def summaryslice_generator(self):
+        slice_id = 0
+        while self.r.has_next:
+            summary_slice = {}
+            self.r.retrieve_next_summaryslice()
+            blob = Blob()
+            summaryslice_info = SummarysliceInfo(
+                frame_index=self.r.frame_index,
+                slice_id=slice_id,
+                timestamp=self.r.utc_seconds,
+                nanoseconds=self.r.utc_nanoseconds,
+                n_frames=self.r.n_frames,
+            )
+            blob['SummarysliceInfo'] = summaryslice_info
+            while self.r.has_next_frame:
+                rates = np.zeros(31, dtype='f8')
+                hrvs = np.zeros(31, dtype='i4')
+                fifos = np.zeros(31, dtype='i4')
+                self.r.get_rates(rates)
+                self.r.get_hrvs(hrvs)
+                self.r.get_fifos(fifos)
+                summary_slice[self.r.dom_id] = {
+                    'rates': rates,
+                    'hrvs': hrvs.astype(bool),
+                    'fifos': fifos.astype(bool),
+                    'n_udp_packets': self.r.number_of_received_packets,
+                    'max_sequence_number': self.r.max_sequence_number,
+                    'has_udp_trailer': self.r.has_udp_trailer,
+                    'high_rate_veto': self.r.high_rate_veto,
+                    'fifo_status': self.r.fifo_status,
+                }
+                self.r.retrieve_next_frame()
+            blob['Summaryslice'] = summary_slice
+            slice_id += 1
+            yield blob
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        return next(self.blobs)
+
+
+class FitPump(Pump):
+    """A pump for JFit objects in JPP files.
+
+    Parameters
+    ----------
+    filename: str
+        Name of the file to open.
+    """
+
+    def configure(self):
+
+        try:
+            import jppy  # noqa
+        except ImportError:
+            raise ImportError("\nEither Jpp or jppy could not be found."
+                              "\nMake sure you source the JPP environmanet "
+                              "and have jppy installed")
+
+        self.event_index = self.get('index') or 0
+        self.filename = self.require('filename')
+
+        self.buf_size = 50000
+        self._pos_xs = np.zeros(self.buf_size, dtype='d')
+        self._pos_ys = np.zeros(self.buf_size, dtype='d')
+        self._pos_zs = np.zeros(self.buf_size, dtype='d')
+        self._dir_xs = np.zeros(self.buf_size, dtype='d')
+        self._dir_ys = np.zeros(self.buf_size, dtype='d')
+        self._dir_zs = np.zeros(self.buf_size, dtype='d')
+        self._ndfs = np.zeros(self.buf_size, dtype='i')
+        self._times = np.zeros(self.buf_size, dtype='d')
+        self._qualities = np.zeros(self.buf_size, dtype='d')
+        self._energies = np.zeros(self.buf_size, dtype='d')
+
+        self.event_reader = jppy.PyJFitReader(self.filename)
+        self.blobs = self.blob_generator()
+
+    def _resize_buffers(self, buf_size):
+        log.info("Resizing hit buffers to {}.".format(buf_size))
+        self.buf_size = buf_size
+        self._pos_xs.resize(buf_size)
+        self._pos_ys.resize(buf_size)
+        self._pos_zs.resize(buf_size)
+        self._dir_xs.resize(buf_size)
+        self._dir_ys.resize(buf_size)
+        self._dir_zs.resize(buf_size)
+        self._ndfs_zs.resize(buf_size)
+        self._times_zs.resize(buf_size)
+        self._qualities_zs.resize(buf_size)
+        self._energies_zs.resize(buf_size)
+
+    def blob_generator(self):
+        while self.event_reader.has_next:
+            try:
+                yield self.extract_event()
+            except IndexError:
+                pass
+
+        raise StopIteration
+
+    def extract_event(self):
+        blob = Blob()
+        r = self.event_reader
+        r.retrieve_next_event()  # do it at the beginning!
+
+        n = r.n_fits
+
+        if n > self.buf_size:
+            self._resize_buffers(int(n * 3 / 2))
+
+        r.get_fits(
+            self._pos_xs,
+            self._pos_ys,
+            self._pos_zs,
+            self._dir_xs,
+            self._dir_ys,
+            self._dir_zs,
+            self._ndfs,
+            self._times,
+            self._qualities,
+            self._energies,
+        )
+        fit_collection = KM3DataFrame({
+            'pos_x': self._pos_xs[:n],
+            'pos_y': self._pos_ys[:n],
+            'pos_z': self._pos_zs[:n],
+            'dir_x': self._dir_xs[:n],
+            'dir_y': self._dir_ys[:n],
+            'dir_z': self._dir_zs[:n],
+            'ndf': self._ndfs[:n],
+            'time': self._times[:n],
+            'quality': self._qualities[:n],
+            'energy': self._energies[:n],
+        })
+        fit_collection['event_id'] = self.event_index
+
+        # TODO make this into a datastructure
+
+        event_info = EventInfo(np.array((
+            0,  # det_id,
+            0,  # frame_index,
+            0,  # livetime_sec
+            0,  # MC ID
+            0,  # MC time
+            0,  # n_events_gen
+            0,  # n_files_gen
+            0,  # overlays,
+            0,  # trigger_counter,
+            0,  # trigger_mask,
+            0,  # utc_nanoseconds,
+            0,  # utc_seconds,
+            np.nan, np.nan, np.nan,   # w1-w3
+            0,  # run
+            self.event_index,
+        ), dtype=EventInfo.dtype))
+
+        self.event_index += 1
+        blob['EventInfo'] = event_info
+        blob['JFit'] = fit_collection
+        return blob
+
+    def process(self, blob):
+        nextblob = next(self.blobs)
+        blob.update(nextblob)
+        return blob
 
     def __iter__(self):
         return self

@@ -22,9 +22,9 @@ from km3pipe import version
 import pandas as pd
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use('Agg')  # noqa
 import matplotlib.pyplot as plt
-import km3pipe.style  # noqa
+import km3pipe.style
 from sklearn.mixture import GaussianMixture
 
 from km3modules.common import StatusBar
@@ -37,9 +37,12 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
+km3pipe.style.use('km3pipe')
+
 
 class MeanToTPlotter(kp.Module):
     """Create a plot of mean ToTs for each PMT."""
+
     def configure(self):
         self.tot_data = defaultdict(list)
         self.plotfilename = self.get("plotfilename") or "meantots.pdf"
@@ -57,7 +60,7 @@ class MeanToTPlotter(kp.Module):
             dom = self.db.doms.via_dom_id(dom_id)
             gmm.fit(np.array(tots)[:, np.newaxis]).means_[0][0]
             mean_tot = gmm.means_[0][0]
-            xs.append(31*(dom.floor - 1) + channel_id + 600*(dom.du-1))
+            xs.append(31 * (dom.floor - 1) + channel_id + 600 * (dom.du - 1))
             ys.append(mean_tot)
 
         fig, ax = plt.subplots()
@@ -73,6 +76,7 @@ class FastMeanToTPlotter(kp.Module):
 
     This module is under development.
     """
+
     def configure(self):
         self.tot_data = defaultdict(list)
         self.plotfilename = self.get("plotfilename") or "meantots.pdf"
@@ -94,7 +98,7 @@ class FastMeanToTPlotter(kp.Module):
             dom = self.db.doms.via_dom_id(dom_id)
             gmm.fit(tots[:, np.newaxis]).means_[0][0]
             mean_tot = gmm.means_[0][0]
-            xs.append(31*(dom.floor - 1) + channel_id + 600*(dom.du-1))
+            xs.append(31 * (dom.floor - 1) + channel_id + 600 * (dom.du - 1))
             ys.append(mean_tot)
 
         fig, ax = plt.subplots()
@@ -107,7 +111,7 @@ class FastMeanToTPlotter(kp.Module):
 
 def meantots(filename, plotfilename):
     pipe = kp.Pipeline()
-    pipe.attach(kp.io.JPPPump, filename=filename, with_timeslice_hits=True)
+    pipe.attach(kp.io.EventPump, filename=filename, with_timeslice_hits=True)
     pipe.attach(StatusBar, every=5000)
     pipe.attach(MeanToTPlotter, plotfilename=plotfilename,
                 only_if="TimesliceHits")

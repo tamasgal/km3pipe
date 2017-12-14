@@ -17,9 +17,6 @@ import socket
 
 from km3pipe import Pipeline, Module
 from km3pipe.io import CHPump
-import controlhost as ch
-
-from km3pipe.logger import logging
 
 
 class LigierSender(Module):
@@ -38,9 +35,9 @@ class LigierSender(Module):
 
 pipe = Pipeline()
 pipe.attach(CHPump, host='192.168.0.121',
-                    port=5553,
-                    tags='IO_EVT, IO_SUM, IO_TSL',
-                    timeout=60*60*24*7,
-                    max_queue=2000)
+            port=5553,
+            tags='IO_EVT, IO_SUM, IO_TSL',
+            timeout=60 * 60 * 24 * 7,
+            max_queue=2000)
 pipe.attach(LigierSender)
 pipe.drain()

@@ -10,7 +10,8 @@ from functools import reduce
 import km3pipe as kp
 from km3pipe.testing import TestCase, StringIO
 from km3pipe.io import EvtPump
-from km3pipe.io.evt import Track, TrackIn, Neutrino, EvtHit, EvtRawHit, TrackFit
+from km3pipe.io.evt import (Track, TrackIn, Neutrino,
+                            EvtHit, EvtRawHit, TrackFit)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

@@ -7,7 +7,7 @@ Read and write KM3NeT-formatted HDF5 files.
 """
 from __future__ import division, absolute_import, print_function
 
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict
 import os.path
 from six import itervalues, iteritems
 import warnings
@@ -21,7 +21,7 @@ from km3pipe.dataclasses import (KM3Array, KM3DataFrame,
                                  RawHitSeries, CRawHitSeries,
                                  McHitSeries, CMcHitSeries, deserialise_map)
 from km3pipe.logger import logging
-from km3pipe.dev import camelise, decamelise, split
+from km3pipe.tools import camelise, decamelise, split
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -33,7 +33,7 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-FORMAT_VERSION = np.string_('4.1')
+FORMAT_VERSION = np.string_('4.4')
 MINIMUM_FORMAT_VERSION = np.string_('4.1')
 
 
@@ -74,12 +74,18 @@ class HDF5Sink(Module):
         Where to store the events.
     h5file: pytables.File instance, optional (default: None)
         Opened file to write to. This is mutually exclusive with filename.
+    pytab_file_args: dict [optional]
+        pass more arguments to the pytables File init
+    n_rows_expected = int, optional [default: 10000]
+    append: bool, optional [default: False]
+
     """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+
+    def configure(self):
         self.filename = self.get('filename') or 'dump.h5'
         self.ext_h5file = self.get('h5file') or None
         self.pytab_file_args = self.get('pytab_file_args') or dict()
+        self.file_mode = 'a' if self.get('append') else 'w'
         self.indices = {}
         self._header_written = False
         # magic 10000: this is the default of the "expectedrows" arg
@@ -94,7 +100,8 @@ class HDF5Sink(Module):
         elif self.filename == 'dump.h5' and self.ext_h5file is not None:
             self.h5file = self.ext_h5file
         else:
-            self.h5file = tb.open_file(self.filename, mode="w", title="KM3NeT",
+            self.h5file = tb.open_file(self.filename, mode=self.file_mode,
+                                       title="KM3NeT",
                                        **self.pytab_file_args)
         self.filters = tb.Filters(complevel=5, shuffle=True, fletcher32=True,
                                   complib='zlib')
@@ -102,17 +109,22 @@ class HDF5Sink(Module):
 
     def _to_array(self, data):
         if np.isscalar(data):
+            log.debug('toarray: is a scalar')
             return np.asarray(data).reshape((1,))
         if len(data) <= 0:
+            log.debug('toarray: data has no length')
             return
         try:
+            log.debug('trying pandas-style `to_records()')
             return data.to_records(index=False)
         except AttributeError:
             pass
         try:
+            log.debug('trying dataclass-style `serialise()')
             return data.serialise()
         except AttributeError:
             pass
+        data = np.asarray(data)
         return data
 
     def _write_array(self, where, arr, datatype, title=''):
@@ -173,7 +185,6 @@ class HDF5Sink(Module):
         d["index"] += n_items
 
     def process(self, blob):
-
         if not self._header_written and "Header" in blob \
                 and blob["Header"] is not None:
             header = self.h5file.create_group('/', 'header', 'Header')
@@ -189,22 +200,30 @@ class HDF5Sink(Module):
 
         for key, entry in sorted(blob.items()):
             serialisable_attributes = ('dtype', 'serialise', 'to_records')
+            log.debug("Serialising {}...".format(key))
             if any(hasattr(entry, a) for a in serialisable_attributes):
                 try:
+                    log.debug("Looking for h5loc...")
                     h5loc = entry.h5loc
                 except AttributeError:
-                    h5loc = '/'
+                    log.debug("h5loc not found. setting to '/misc'...")
+                    h5loc = '/misc'
                 try:
+                    log.debug("Looking for `tabname` attribute...")
                     tabname = entry.tabname
                 except AttributeError:
+                    log.debug("`tabname` not found, using blob key...")
                     tabname = decamelise(key)
+                log.debug("Converting to numpy array...")
                 data = self._to_array(entry)
                 if data is None:
+                    log.debug("Conversion failed. moving on...")
                     continue
                 if data.dtype.names is None:
+                    log.debug("Array has no named dtype. "
+                              "using blob key as h5 column name")
                     dt = np.dtype((data.dtype, [(key, data.dtype)]))
                     data = data.view(dt)
-                    h5loc = '/misc'
                 where = os.path.join(h5loc, tabname)
                 datatype = entry.__class__.__name__
 
@@ -215,10 +234,12 @@ class HDF5Sink(Module):
                         self._write_array(where, data, datatype, title=key)
                 except AttributeError:  # backwards compatibility
                     self._write_array(where, data, datatype, title=key)
-
-
+            else:
+                log.debug('{} appears not to be serialisable '
+                          'to numpy. Skipping.'.format(key))
 
         if not self.index % 1000:
+            log.info('Flushing tables to disk...')
             for tab in self._tables.values():
                 tab.flush()
 
@@ -229,17 +250,18 @@ class HDF5Sink(Module):
         self.h5file.root._v_attrs.km3pipe = np.string_(kp.__version__)
         self.h5file.root._v_attrs.pytables = np.string_(tb.__version__)
         self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
-        print("Adding index tables.")
+        log.info("Adding index tables.")
         for where, data in self.indices.items():
             h5loc = where + "/_indices"
-            print("  -> {0}".format(h5loc))
+            log.info("  -> {0}".format(h5loc))
             indices = KM3DataFrame({"index": data["indices"],
                                     "n_items": data["n_items"]}, h5loc=h5loc)
             self._write_array(h5loc,
                               self._to_array(indices),
                               'Indices',
                               title="Indices")
-        print("Creating pytables index tables. This may take a few minutes...")
+        log.info("Creating pytables index tables. "
+                 "This may take a few minutes...")
         for tab in itervalues(self._tables):
             if 'frame_id' in tab.colnames:
                 tab.cols.frame_id.create_index()
@@ -250,7 +272,15 @@ class HDF5Sink(Module):
             if 'event_id' in tab.colnames:
                 tab.cols.event_id.create_index()
             tab.flush()
+
+        if "HDF5MetaData" in self.services:
+            log.info("Writing HDF5 meta data.")
+            metadata = self.services["HDF5MetaData"]
+            for name, value in metadata.items():
+                self.h5file.set_node_attr("/", name, value)
+
         self.h5file.close()
+        log.info("HDF5 file written to: {}".format(self.filename))
 
 
 class HDF5Pump(Pump):
@@ -261,12 +291,13 @@ class HDF5Pump(Pump):
     filename: str
         From where to read events.
         """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+
+    def configure(self):
         self.filename = self.get('filename') or None
         self.filenames = self.get('filenames') or []
         self.skip_version_check = bool(self.get('skip_version_check')) or False
         self.verbose = bool(self.get('verbose'))
+        self.ignore_hits = bool(self.get('ignore_hits'))
         self.indices = {}
         if not self.filename and not self.filenames:
             raise ValueError("No filename(s) defined")
@@ -309,7 +340,6 @@ class HDF5Pump(Pump):
             self.minmax[fn] = (min, max)
         self.index = None
         self._reset_index()
-
 
     def process(self, blob):
         try:
@@ -356,7 +386,7 @@ class HDF5Pump(Pump):
         for tab in h5file.walk_nodes(classname="Table"):
             loc, tabname = os.path.split(tab._v_pathname)
             if loc in skipped_locs:
-                continue;
+                continue
             if tabname == "_indices":
                 skipped_locs.append(loc)
                 self.indices[loc] = h5file.get_node(loc + '/' + '_indices')
@@ -366,7 +396,13 @@ class HDF5Pump(Pump):
                 dc = deserialise_map[tabname]
             except KeyError:
                 dc = KM3Array
-            arr = tab.read_where('event_id == %d' % event_id)
+            try:
+                arr = tab.read_where('event_id == %d' % event_id)
+            except NotImplementedError:
+                # 64-bit unsigned integer columns like ``event_id``
+                # are not yet supported in conditions
+                arr = tab.read()
+                arr = arr[arr['event_id'] == event_id]
             blob[tabname] = dc.deserialise(arr, event_id=index, h5loc=loc)
 
         # skipped locs are now column wise datasets (usually hits)
@@ -375,7 +411,7 @@ class HDF5Pump(Pump):
         for loc in skipped_locs:
             idx, n_items = self.indices[loc][event_id]
             end = idx + n_items
-            if loc == '/hits':
+            if loc == '/hits' and not self.ignore_hits:
                 channel_id = h5file.get_node("/hits/channel_id")[idx:end]
                 dom_id = h5file.get_node("/hits/dom_id")[idx:end]
                 time = h5file.get_node("/hits/time")[idx:end]
@@ -384,9 +420,6 @@ class HDF5Pump(Pump):
 
                 datatype = h5file.get_node("/hits")._v_attrs.datatype
 
-                if datatype == np.string_("RawHitSeries"):
-                    blob["Hits"] = RawHitSeries.from_arrays(
-                        channel_id, dom_id, time, tot, triggered, event_id)
                 if datatype == np.string_("CRawHitSeries"):
                     pos_x = h5file.get_node("/hits/pos_x")[idx:end]
                     pos_y = h5file.get_node("/hits/pos_y")[idx:end]
@@ -402,8 +435,11 @@ class HDF5Pump(Pump):
                         channel_id, dir_x, dir_y, dir_z, dom_id, du,
                         floor, pos_x, pos_y, pos_z, t0s, time, tot, triggered,
                         event_id)
+                else:
+                    blob["Hits"] = RawHitSeries.from_arrays(
+                        channel_id, dom_id, time, tot, triggered, event_id)
 
-            if loc == '/mc_hits':
+            if loc == '/mc_hits' and not self.ignore_hits:
                 a = h5file.get_node("/mc_hits/a")[idx:end]
                 origin = h5file.get_node("/mc_hits/origin")[idx:end]
                 pmt_id = h5file.get_node("/mc_hits/pmt_id")[idx:end]
@@ -411,9 +447,6 @@ class HDF5Pump(Pump):
 
                 datatype = h5file.get_node("/mc_hits")._v_attrs.datatype
 
-                if datatype == np.string_("McHitSeries"):
-                    blob["McHits"] = McHitSeries.from_arrays(
-                        a, origin, pmt_id, time, event_id)
                 if datatype == np.string_("CMcHitSeries"):
                     pos_x = h5file.get_node("/mc_hits/pos_x")[idx:end]
                     pos_y = h5file.get_node("/mc_hits/pos_y")[idx:end]
@@ -424,6 +457,9 @@ class HDF5Pump(Pump):
                     blob["McHits"] = CMcHitSeries.from_arrays(
                         a, dir_x, dir_y, dir_z, origin, pmt_id,
                         pos_x, pos_y, pos_z, time, event_id)
+                else:
+                    blob["McHits"] = McHitSeries.from_arrays(
+                        a, origin, pmt_id, time, event_id)
 
         return blob
 
@@ -469,3 +505,17 @@ class HDF5Pump(Pump):
             yield self.get_blob(i)
 
         self.current_file = None
+
+
+class HDF5MetaData(Module):
+    """Metadata to attach to the HDF5 file.
+
+    Parameters
+    ----------
+    data: dict
+
+    """
+
+    def configure(self):
+        self.data = self.require("data")
+        self.expose(self.data, "HDF5MetaData")

@@ -19,7 +19,7 @@ axes.labelsize: 11
 axes.labelcolor: .15
 axes.axisbelow: true
 axes.grid: true
-axes.edgecolor: .9
+axes.edgecolor: .7
 axes.linewidth: 1
 axes.titlesize: 14
 

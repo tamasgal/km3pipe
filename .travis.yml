@@ -3,6 +3,7 @@ python:
     - "2.7"
     - "3.5"
     - "3.6"
+    - "3.7-dev"
 #    - "3.6.0b2"
 #   - "nightly"
 #
@@ -25,8 +26,10 @@ before_install:
     - pip install -U pytest mock
     - pip install -U statsmodels==0.8.0rc1
     - pip install -U tables
+    - pip install -U numexpr
     - pip install -U h5py
     - pip install -U tornado
+    - pip install -U requests
     - pip install matplotlib==2.0.0
     - ls -al
 

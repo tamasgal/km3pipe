@@ -22,6 +22,7 @@ class FakeVec(object):
         self.y = y
         self.z = z
 
+
 class FakeAanetHit(object):
     def __init__(self, channel_id, dir_x, dir_y, dir_z, dom_id, id, pmt_id,
                  pos_x, pos_y, pos_z, t0, t, tot, trig, a, origin):

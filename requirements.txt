@@ -1,4 +1,8 @@
+pip>=9.0.1 
+setuptools>=24.3
+six==1.10
 numpy>=1.12
+numexpr
 cython
 docopt
 matplotlib>=2.0.0
@@ -11,7 +15,9 @@ websocket-client
 sphinx
 numpydoc
 sphinx_gallery
+seaborn
 sklearn
 patsy
 h5py
 statsmodels>=0.8
+requests

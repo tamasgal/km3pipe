@@ -1,5 +1,5 @@
-# Filename: aanet.py
-# pylint: disable=locally-disabled
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Pump for the Aanet data format.
 
@@ -8,25 +8,45 @@ If you have a way to read aanet files via the Jpp interface,
 your pull request is more than welcome!
 """
 from __future__ import division, absolute_import, print_function
+
+from collections import defaultdict
 import os.path
 
 import numpy as np
+from scipy.stats import iqr
 
 from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import (RawHitSeries, McHitSeries,
                                  TrackSeries, EventInfo,
                                  KM3Array)
 from km3pipe.logger import logging
+from km3pipe.math import mad
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 __author__ = "Tamas Gal, Thomas Heid and Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
-__credits__ = ["Liam Quin & Javier Barrios Marti"]
+__credits__ = ["Liam Quinn & Javier Barrios Martí"]
 __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
+
+FITINF_ENUM = [
+    'beta0',
+    'beta1',
+    'chi2',
+    'n_hits',
+    'jenergy_energy',
+    'jenergy_chi2',
+    'lambda',
+    'n_iter',
+    'jstart_npe_mip',
+    'jstart_npe_mip_total',
+    'jstart_length',
+    # 'jveto_npe',
+    # 'jveto_nhits'
+]
 
 
 class AanetPump(Pump):
@@ -39,7 +59,7 @@ class AanetPump(Pump):
         needs to be specified instead.
     filenames: list(str), optional
         List of files to open.
-    aa_fmt: string, optional
+    aa_fmt: string, optional (default: 'gandalf_new')
         Subformat of aanet in the file. Possible values:
         ``'minidst', 'jevt_jgandalf', 'gandalf_new', 'generic_track',
         'ancient_recolns'``
@@ -52,21 +72,34 @@ class AanetPump(Pump):
         processings have `mc_id = evt.frame_index - 1` instead.
     missing: numeric, optional [default: 0]
         Filler for missing values.
+    skip_header: bool, optional [default=False]
+    correct_mc_times: bool, optional [default=False]
+        convert hit times from JTE to MC time
+    ignore_hits: bool, optional [default=False]
+        If true, don't read our the hits/mchits.
+    ignore_run_id_from_header: bool, optional [default=False]
+        Ignore run ID from header, take from event instead;
+        often, the event.run_id is overwritten with the default (1).
     """
 
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
 
         self.filename = self.get('filename')
         self.filenames = self.get('filenames') or []
         self.indices = self.get('indices')
         self.additional = self.get('additional')
-        self.format = self.get('aa_fmt')
+        self.format = self.get('aa_fmt') or 'gandalf_new'
         self.use_id = self.get('use_id') or False
         self.use_aart_sps_lib = self.get('use_aart_sps_lib') or False
         self.old_mc_id = self.get('old_mc_id') or False
         self.apply_zed_correction = self.get('apply_zed_correction') or False
+        self.skip_header = self.get('skip_header') or False
         self.missing = self.get('missing') or 0
+        self.correct_mc_times = self.get('correct_mc_times', default=False)
+        self.ignore_hits = bool(self.get('ignore_hits'))
+        self.ignore_run_id_from_header = bool(
+            self.get('ignore_run_id_from_header'))
+
         if self.additional:
             self.id = self.get('id')
             self.return_without_match = self.get("return_without_match")
@@ -83,13 +116,13 @@ class AanetPump(Pump):
             else:
                 self.filenames.append(self.filename)
 
-        import ROOT # noqa
+        import ROOT  # noqa
         self.aalib = self.get('aa_lib')
         if self.aalib:
-            ROOT.gSystem.Load(self.aalib) # noqa
+            ROOT.gSystem.Load(self.aalib)  # noqa
         elif self.use_aart_sps_lib:
             aapath = '/sps/km3net/users/heijboer/aanet/libaa.so'
-            ROOT.gSystem.Load(aapath) # noqa
+            ROOT.gSystem.Load(aapath)  # noqa
         else:
             import aa  # noqa
 
@@ -117,9 +150,9 @@ class AanetPump(Pump):
 
         found_any_files = False
         for filename in self.filenames:
-            print("Reading from file: {0}".format(filename))
+            log.info("Reading from file: {0}".format(filename))
             if not os.path.exists(filename):
-                log.warn(filename + " not available: continue without it")
+                log.warning(filename + " not available: continue without it")
                 continue
 
             if not found_any_files:
@@ -138,10 +171,12 @@ class AanetPump(Pump):
             nfilgen = 0
 
             try:
+                log.info("Reading header...")
                 self.header = event_file.rootfile().Get("Head")
             except (ValueError, UnicodeEncodeError, TypeError):
-                log.warn(filename + ": can't read header.")
+                log.warning(filename + ": can't read header.")
             try:
+                log.info("Reading livetime...")
                 lt_line = self.header.get_line('livetime')
                 if len(lt_line) > 0:
                     livetime, livetime_err = lt_line.split()
@@ -150,32 +185,44 @@ class AanetPump(Pump):
                 self.livetime_err = float(livetime_err)
                 self.livetime = float(livetime)
             except (ValueError, UnicodeEncodeError, AttributeError):
-                log.warn(filename + ": can't read livetime.")
+                log.warning(filename + ": can't read livetime.")
                 self.livetime = 0
             try:
+                log.info("Reading genvol...")
                 ngen = self.header.get_field('genvol', 4)
                 self.ngen = float(ngen)
             except (ValueError, UnicodeEncodeError, AttributeError):
-                log.warn(filename + ": can't read ngen.")
+                log.warning(filename + ": can't read ngen.")
                 self.ngen = 0
             try:
+                log.info("Reading number of generated files...")
+                # nfligen = ?????
                 self.nfilgen = float(nfilgen)
             except (ValueError, UnicodeEncodeError):
-                log.warn(filename + ": can't read nfilgen.")
+                log.warning(filename + ": can't read nfilgen.")
                 self.nfilgen = 0
+            try:
+                log.info("Reading run id...")
+                self.header_run_id = self.header.get_field('start_run', 0)
+            except (ValueError, UnicodeEncodeError, AttributeError):
+                log.warning(filename + ": can't read ngen.")
+                self.header_run_id = None
             # END OF OLD HEADER CRAZINESS
 
             # NEW HEADER CRAZINESS
-            if self.format != 'ancient_recolns':
+            if not self.skip_header and (self.format != 'ancient_recolns'):
+                log.info("Retrieving aanet header...")
                 self.aanet_header = get_aanet_header(event_file)
 
             if self.format == 'ancient_recolns':
+                log.info("Generating blobs through old aanet API...")
                 while event_file.next():
                     event = event_file.evt
                     blob = self._read_event(event, filename)
                     blob["Header"] = self.aanet_header
                     yield blob
             else:
+                log.info("Generating blobs through new aanet API...")
                 for event in event_file:
                     blob = self._read_event(event, filename)
                     blob["Header"] = self.aanet_header
@@ -200,6 +247,9 @@ class AanetPump(Pump):
 
         if len(event.w) == 3:
             w1, w2, w3 = event.w
+        elif len(event.w) == 4:
+            # what the hell is w4?
+            w1, w2, w3, w4 = event.w
         else:
             w1 = w2 = w3 = np.nan
 
@@ -210,16 +260,23 @@ class AanetPump(Pump):
         else:
             event_id = self.i
         self.i += 1
-        if self.format != 'ancient_recolns':
+        if self.format != 'ancient_recolns' and not self.ignore_hits:
             try:
-                blob['Hits'] = RawHitSeries.from_aanet(event.hits, event_id)
+                hits = RawHitSeries.from_aanet(event.hits, event_id)
+                if self.correct_mc_times:
+                    def converter(t):
+                        ns = event.t.GetSec() * 1e9 + event.t.GetNanoSec()
+                        return t + ns - event.mc_t
+                    uconverter = np.frompyfunc(converter, 1, 1)
+                    hits._arr["time"] = uconverter(hits.time)
+                blob['Hits'] = hits
             except AttributeError:
-                log.warn("No hits found.")
+                log.warning("No hits found.")
             try:
                 mc_hits = McHitSeries.from_aanet(event.mc_hits, event_id)
                 blob['McHits'] = mc_hits
             except AttributeError:
-                log.warn("No MC hits found.")
+                log.warning("No MC hits found.")
 
         blob['McTracks'] = TrackSeries.from_aanet(event.mc_trks, event_id)
 
@@ -231,12 +288,18 @@ class AanetPump(Pump):
                 mc_id = event.frame_index - 1
         except AttributeError:
             mc_id = 0
+
+        if not self.ignore_run_id_from_header \
+                and self.header_run_id is not None:
+            run_id = self.header_run_id
+        else:
+            run_id = event.run_id
         try:
             ei_data = np.array((
                 event.det_id,
                 event.frame_index,
                 self.livetime,      # livetime_sec
-                mc_id,
+                mc_id,       # mc_id,
                 event.mc_t,
                 self.ngen,      # n_events_gen
                 self.nfilgen,   # n_files_gen
@@ -247,50 +310,58 @@ class AanetPump(Pump):
                 event.t.GetNanoSec(),
                 event.t.GetSec(),
                 w1, w2, w3,
-                event.run_id,
+                run_id,
                 event_id), dtype=EventInfo.dtype)
             blob['EventInfo'] = EventInfo(ei_data)
         except AttributeError:
             ei_data = np.array((0,   # det_id
-                               event.frame_index,
-                               self.livetime,   # livetime_sec
-                               mc_id,   # mc_id
-                               0,   # mc_t
-                               self.ngen,   # n_events_gen
-                               self.nfilgen,   # n_files_gen
-                               0,   # overlays
-                               0,   # trigger_counter
-                               0,   # trigger_mask
-                               0,   # nanose
-                               0,   # sec
-                               w1, w2, w3,
-                               event.run_id,
-                               event_id), dtype=EventInfo.dtype)
+                                event.frame_index,
+                                self.livetime,   # livetime_sec
+                                mc_id,   # mc_id
+                                0,   # mc_t
+                                self.ngen,   # n_events_gen
+                                self.nfilgen,   # n_files_gen
+                                0,   # overlays
+                                0,   # trigger_counter
+                                0,   # trigger_mask
+                                0,   # nanose
+                                0,   # sec
+                                w1, w2, w3,
+                                run_id,
+                                event_id), dtype=EventInfo.dtype)
             blob['EventInfo'] = EventInfo(ei_data)
-        if self.format == 'minidst':
-            recos = read_mini_dst(event, event_id)
-            for recname, reco in recos.items():
-                blob[recname] = reco
-        if self.format in ('jevt_jgandalf', 'gandalf', 'jgandalf'):
-            track, dtype = parse_jevt_jgandalf(event, event_id, self.missing)
-            if track:
-                blob['Gandalf'] = KM3Array.from_dict(
-                    track, dtype, h5loc='/reco')
-        if self.format in ('gandalf_new', 'jgandalf_new'):
-            track, dtype = parse_jgandalf_new(event, event_id, self.missing)
-            if track:
-                blob['Gandalf'] = KM3Array.from_dict(
-                    track, dtype, h5loc='/reco')
-        if self.format == 'generic_track':
-            track, dtype = parse_generic_event(event, event_id, self.missing)
-            if track:
-                blob['Track'] = KM3Array.from_dict(
-                    track, dtype, h5loc='/reco')
-        if self.format in ('ancient_recolns', 'orca_recolns'):
-            track, dtype = parse_ancient_recolns(event, event_id, self.missing)
-            if track:
-                blob['OrcaRecoLns'] = KM3Array.from_dict(
-                    track, dtype, h5loc='/reco')
+
+        if len(event.trks) > 0:
+            if self.format == 'minidst':
+                recos = read_mini_dst(event, event_id)
+                for recname, reco in recos.items():
+                    blob[recname] = reco
+            if self.format in ('jevt_jgandalf', 'gandalf', 'jgandalf'):
+                track, dtype = parse_jevt_jgandalf(
+                    event, event_id, self.missing)
+                if track:
+                    blob['Gandalf'] = KM3Array.from_dict(
+                        track, dtype, h5loc='/reco')
+            if self.format in ('gandalf_new', 'jgandalf_new'):
+                track, dtype = parse_jgandalf_new(
+                    event, event_id, self.missing)
+                if track:
+                    blob['Gandalf'] = KM3Array.from_dict(
+                        track, dtype, h5loc='/reco')
+            if self.format == 'generic_track':
+                track, dtype = parse_generic_event(
+                    event, event_id, self.missing)
+                if track:
+                    blob['Track'] = KM3Array.from_dict(
+                        track, dtype, h5loc='/reco')
+            if self.format in ('ancient_recolns', 'orca_recolns'):
+                track, dtype = parse_ancient_recolns(
+                    event, event_id, self.missing)
+                if track:
+                    blob['OrcaRecoLns'] = KM3Array.from_dict(
+                        track, dtype, h5loc='/reco')
+        else:
+            log.debug("Event #{} does not have any tracks!".format(event_id))
         return blob
 
     def event_index(self, blob):
@@ -447,47 +518,92 @@ def parse_jevt_jgandalf(aanet_event, event_id, missing=0):
 
 
 def parse_jgandalf_new(aanet_event, event_id, missing=0):
-    fitinv_enum = [
-        'beta0',
-        'beta1',
-        'chi2',
-        'n_hits',
-        'jenergy_energy'
-        'jenergy_chi2',
-        'lambda',
-        'n_iter',
-        'jstart_npe_mip',
-        'jstart_npe_mip_total',
-        'jstart_length',
-        # 'jveto_npe',
-        # 'jveto_nhits'
-        ]
-    all_keys = [
-        'pos_x', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z',
-        'time', 'type', 'rec_type', 'rec_stage',
-    ] + fitinv_enum
+    """Read JGandalf (ORCA at least) files from MXtrigger on."""
+
+    def get_track_spread(tracks):
+        """Grab metrics from all tracks which pass muon length fit."""
+        variates = defaultdict(list)
+        out = {}
+        for track in tracks:
+            if track.fitinf[10] < 0:
+                continue
+            variates['dir_x'].append(track.dir.x)
+            variates['dir_y'].append(track.dir.y)
+            variates['dir_z'].append(track.dir.z)
+            variates['pos_x'].append(track.pos.x)
+            variates['pos_y'].append(track.pos.y)
+            variates['pos_z'].append(track.pos.z)
+            for k in range(6):
+                variates[FITINF_ENUM[k]].append(track.fitinf[k])
+        for k, v in variates.items():
+            out['spread_' + k + '_std'] = np.std(v)
+            out['spread_' + k + '_mean'] = np.mean(v)
+            out['spread_' + k + '_median'] = np.median(v)
+            out['spread_' + k + '_mad'] = mad(v)
+            out['spread_' + k + '_iqr'] = iqr(v)
+        return out
+
+    posdir = ['pos_x', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z', ]
+    metrics = ['std', 'mean', 'median', 'mad', 'iqr']
+    spread_keys = [
+        'spread_{}_{}'.format(var, metric)
+        for var in posdir + FITINF_ENUM[:6]
+        for metric in metrics
+    ]
+    spread_keys.append('upgoing_vs_downgoing')
+    all_keys = posdir + spread_keys + FITINF_ENUM + posdir + [
+        'time', 'type', 'rec_type', 'rec_stage']
     try:
         track = aanet_event.trks[0]
-        map = {}
-        map['pos_x'] = track.pos.x
-        map['pos_y'] = track.pos.y
-        map['pos_z'] = track.pos.z
-        map['dir_x'] = track.dir.x
-        map['dir_y'] = track.dir.y
-        map['dir_z'] = track.dir.z
-        map['time'] = track.t
-        map['type'] = track.type
-        map['rec_type'] = track.rec_type
-        map['rec_stage'] = track.rec_stage
-        for i, key in enumerate(fitinv_enum):
-            map[key] = track.fitinf[i]
+        outmap = {}
+        outmap['pos_x'] = track.pos.x
+        outmap['pos_y'] = track.pos.y
+        outmap['pos_z'] = track.pos.z
+        outmap['dir_x'] = track.dir.x
+        outmap['dir_y'] = track.dir.y
+        outmap['dir_z'] = track.dir.z
+        outmap['time'] = track.t
+        outmap['type'] = track.type
+        outmap['rec_type'] = track.rec_type
+        outmap['rec_stage'] = track.rec_stage
+        for i, key in enumerate(FITINF_ENUM):
+            outmap[key] = track.fitinf[i]
+
+        spread_tracks = get_track_spread(aanet_event.trks)
+        outmap.update(spread_tracks)
+        outmap['upgoing_vs_downgoing'] = upgoing_vs_downgoing(aanet_event.trks)
     except IndexError:
-        map = {key: missing for key in all_keys}
-    dt = [(key, float) for key in sorted(map.keys())]
-    map['event_id'] = event_id
+        log.warn("Could not read Gandalf track. Zeroing row...")
+        outmap = {key: missing for key in all_keys}
+    dt = [(key, float) for key in sorted(outmap.keys())]
+    outmap['event_id'] = event_id
     dt.append(('event_id', '<u4'))
     dt = np.dtype(dt)
-    return map, dt
+    return outmap, dt
+
+
+def upgoing_vs_downgoing(tracks):
+    """Compare upgoing vs downgoing hypothesis.
+
+    upvsdown = (lik_upgoing - lik_downgoing)/(lik_upgoing + lik_downgoing)
+    """
+    upgoing = [
+        track.fitinf[2] / track.fitinf[3] for track in tracks
+        if track.dir.z >= 0
+    ]
+    downgoing = [
+        track.fitinf[2] / track.fitinf[3] for track in tracks
+        if track.dir.z < 0
+    ]
+    if not upgoing:
+        return -np.inf
+    if not downgoing:
+        return np.inf
+
+    upgoing_chi2 = np.nanmin(upgoing)
+    downgoing_chi2 = np.nanmin(downgoing)
+    out = (upgoing_chi2 - downgoing_chi2) / (upgoing_chi2 + downgoing_chi2)
+    return out
 
 
 def parse_generic_event(aanet_event, event_id):

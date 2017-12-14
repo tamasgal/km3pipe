@@ -12,7 +12,6 @@ A module to send live log messages to a log.io server.
 # Author: Tamas Gal <tgal@km3net.de>
 # License: MIT
 import socket
-import time
 
 from km3pipe import Pipeline, Module
 from km3pipe.pumps import CHPump
@@ -27,7 +26,6 @@ class LogIO(Module):
         self.sock.connect((url, port))
 
     def process(self, blob):
-        tag = str(blob['CHPrefix'].tag)
         data = blob['CHData']
         log_level = 'info'
         if "ERROR" in data:
@@ -51,9 +49,9 @@ class LogIO(Module):
 
 pipe = Pipeline()
 pipe.attach(CHPump, host='127.0.0.1',
-                    port=5553,
-                    tags='MSG',
-                    timeout=60*60*24,
-                    max_queue=500)
+            port=5553,
+            tags='MSG',
+            timeout=60 * 60 * 24,
+            max_queue=500)
 pipe.attach(LogIO)
 pipe.drain()

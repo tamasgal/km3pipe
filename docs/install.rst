@@ -30,10 +30,23 @@ To install km3pipe, you need:
 
 - HDF5 (the hdf5lib C library, e.g. `apt-get install hdf5`)
 
-(Recommended) Virtual Environments
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Recommended) PyEnv or Virtual Environments
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you're not using a virtual environment (https://virtualenvwrapper.readthedocs.io), you can install it in your own home directory: ``pip install --user ...```, however I recommend using virtual environments for any Python related stuff.
+A very clean and simple way to install any version of Python (we recommend 3.6.1+) is PyEnv (https://github.com/pyenv/pyenv).
+It is easily set up and gives you a fresh installation without messing around with your systems Python environment::
+
+    git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+    echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+    echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+    echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.bashrc
+
+After that, log out and in (or close the terminal window and open a new one). To install and activate a Python version::
+
+    pyenv install 3.6.1  # obviously installs Python 3.6.1
+    pyenv global 3.6.1   # sets the global python version to 3.6.1
+
+You can also use virtual environments (https://virtualenvwrapper.readthedocs.io) to isolate your Python projects.
 
 
 Install
@@ -42,7 +55,12 @@ Install
 
 To install the latest stable version:::
 
-    $ pip install km3pipe
+    $ pip install km3pipe[full]
+
+If you encounter any errors complaining about `pyx` files, install `Cython`
+first. At this point you might also install `numpy`::
+
+    $ pip install cython numpy
 
 To get the development version, use:::
 

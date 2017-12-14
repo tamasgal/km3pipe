@@ -22,10 +22,9 @@ class CHParser(Module):
     parse_map = {
         'IO_SUM': ['DAQSummaryslice', DAQSummaryslice],
         'IO_EVT': ['DAQEvent', DAQEvent],
-        }
+    }
 
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.tags = self.get('tags') or []
 
     def process(self, blob):

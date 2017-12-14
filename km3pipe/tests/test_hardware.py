@@ -16,7 +16,7 @@ dom_id line_id floor_id npmts
 """
 from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import TestCase, StringIO, skipIf
+from km3pipe.testing import TestCase, StringIO
 from km3pipe.hardware import Detector, PMT
 
 __author__ = "Tamas Gal"
@@ -168,6 +168,11 @@ class TestDetector(TestCase):
         self.assertEqual((9, 18, 0), tuple(pmtid2omkey(4465.0)))
         self.assertEqual((95, 7, 16), tuple(pmtid2omkey(52810.0)))
         self.assertEqual((95, 4, 13), tuple(pmtid2omkey(52900.0)))
+
+    def test_xy_pos(self):
+        self.det._parse_doms()
+        xy = self.det.xy_positions
+        assert xy is not None
 
 
 class TestPMT(TestCase):

@@ -40,19 +40,20 @@ class RBAPrompt(Cmd):
         Cmd.__init__(self)
         self.filename = filename
         self.pump = kp.io.GenericPump(filename)
-        self.geo = kp.Geometry(filename=detx)
+        self.cal = kp.Calibration(filename=detx)
         self.prompt = "> "
         self.current_idx = 0
         self.token = None
 
-    ## Override methods in Cmd object ##
+    # Override methods in Cmd object
     def preloop(self):
         """Initialization before prompting user for commands.
-           Despite the claims in the Cmd documentaion, Cmd.preloop() is not a stub.
+
+        Despite the claims in the Cmd documentaion, Cmd.preloop() is not a stub
         """
-        Cmd.preloop(self)   ## sets up command completion
-        self._hist    = []      ## No history yet
-        self._locals  = {}      ## Initialize execution namespace for user
+        Cmd.preloop(self)  # sets up command completion
+        self._hist = []  # No history yet
+        self._locals = {}  # Initialize execution namespace for user
         self._globals = {}
 
     def default(self, line):
@@ -60,9 +61,9 @@ class RBAPrompt(Cmd):
            In that case we execute the line as Python code.
         """
         pass
-        #try:
+        # try:
         #    exec(line) in self._locals, self._globals
-        #except Exception as e:
+        # except Exception as e:
         #    print(e.__class__, ":", e)
 
     def do_show(self, args):
@@ -85,8 +86,8 @@ class RBAPrompt(Cmd):
 
     def srv_event(self, event):
         print("Serving event #{0}".format(event))
-        hits = self.geo.apply(self.pump[event]["Hits"].triggered_hits)
-        srv_event(self.token, hits) 
+        hits = self.cal.apply(self.pump[event]["Hits"].triggered_hits)
+        srv_event(self.token, hits)
         self.current_idx = event
 
     def do_file(self, args):

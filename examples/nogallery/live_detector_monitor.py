@@ -14,13 +14,12 @@ from km3pipe.common import StringIO
 class CHPrinter(Module):
     def process(self, blob):
         print("New blob:")
-        print blob['CHPrefix']
+        print(blob['CHPrefix'])
         return blob
 
 
 class ROySender(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.packet_handler = PacketHandler('131.188.161.241', 9999)
 
     def process(self, blob):
@@ -62,21 +61,20 @@ class ROySender(Module):
         else:
             roy.send("evt_length", length, 'ns', '')
 
-        #if event.n_snapshot_hits < 30:
+        # if event.n_snapshot_hits < 30:
         #    tots = [tot for (_, _, _, tot) in event.snapshot_hits]
         #    for tot in tots[::3]:
         #        roy.send("tot", tot, 'ns', '')
-
 
         return blob
 
 
 pipe = Pipeline()
 pipe.attach(CHPump, host='localhost',
-                    port=5553,
-                    tags='IO_EVT',
-                    timeout=60*60*24,
-                    max_queue=50)
+            port=5553,
+            tags='IO_EVT',
+            timeout=60 * 60 * 24,
+            max_queue=50)
 pipe.attach(ROySender)
 pipe.attach(CHPrinter)
 

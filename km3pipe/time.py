@@ -33,12 +33,14 @@ def total_seconds(td):
     try:
         s = td.total_seconds()
     except AttributeError:
-        s = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6
+        s = (td.microseconds +
+             (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6
     return s
 
 
 class Timer(object):
     """A very simple, accurate and easy to use timer context"""
+
     def __init__(self, message='It', precision=3, callback=print):
         self.message = message
         self.precision = precision
@@ -78,6 +80,7 @@ class Timer(object):
 
 class Cuckoo(object):
     "A timed callback caller, which only executes once in a given interval."
+
     def __init__(self, interval=0, callback=print):
         "Setup with interval in seconds and a callback function"
         self.interval = interval
@@ -131,5 +134,6 @@ def tai_timestamp():
 def np_to_datetime(intime):
     """Convert numpy/pandas datetime64 to list[datetime]."""
     nptime = np.atleast_1d(intime)
-    np_corr = (nptime - np.datetime64('1970-01-01T00:00:00')) / np.timedelta64(1, 's')
+    np_corr = (nptime - np.datetime64('1970-01-01T00:00:00')) / \
+        np.timedelta64(1, 's')
     return [datetime.utcfromtimestamp(t) for t in np_corr]

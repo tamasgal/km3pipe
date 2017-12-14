@@ -8,7 +8,6 @@ __author__ = "Tamas Gal"
 from datetime import datetime
 from collections import deque, defaultdict
 from functools import partial
-import math
 import os
 import shutil
 import time
@@ -18,7 +17,6 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as md
 from matplotlib.colors import LogNorm
 from matplotlib import pylab
-import seaborn as sns
 import pandas as pd
 import numpy as np
 
@@ -30,8 +28,8 @@ from km3pipe.io.daq import DAQPreamble, DAQSummaryslice, DAQEvent
 from km3pipe.time import tai_timestamp
 import km3pipe.style
 
-from km3pipe.logger import logging
 
+km3pipe.style.use('km3pipe')
 
 PLOTS_PATH = '/home/km3net/monitoring/www/plots'
 N_DOMS = 18
@@ -43,8 +41,7 @@ lock = threading.Lock()
 
 
 class DOMHits(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.run = True
         self.max_events = 1000
         self.hits = deque(maxlen=1000)
@@ -59,7 +56,7 @@ class DOMHits(Module):
 
         data = blob['CHData']
         data_io = StringIO(data)
-        preamble = DAQPreamble(file_obj=data_io)
+        preamble = DAQPreamble(file_obj=data_io)  # noqa
         event = DAQEvent(file_obj=data_io)
         with lock:
             hits = np.zeros(N_DOMS * N_DUS)
@@ -86,29 +83,29 @@ class DOMHits(Module):
             self.create_plot(self.hits, "Hits on DOMs", 'hits_on_doms')
         if len(self.triggered_hits) > 0:
             self.create_plot(self.triggered_hits, "Triggered Hits on DOMs",
-                        'triggered_hits_on_doms')
+                             'triggered_hits_on_doms')
 
     def create_plot(self, hits, title, filename):
-        fig, ax = plt.subplots(figsize=(16,8))
+        fig, ax = plt.subplots(figsize=(16, 8))
         ax.grid(True)
         ax.set_axisbelow(True)
         hit_matrix = np.array([np.array(x) for x in hits]).transpose()
         im = ax.matshow(hit_matrix,
-                  interpolation='nearest', filternorm=None, cmap='plasma',
-                  aspect='auto', origin='lower', zorder=3,
-                  norm=LogNorm(vmin=1, vmax=np.amax(hit_matrix)))
+                        interpolation='nearest', filternorm=None,
+                        cmap='plasma', aspect='auto', origin='lower', zorder=3,
+                        norm=LogNorm(vmin=1, vmax=np.amax(hit_matrix)))
         yticks = np.arange(N_DOMS * N_DUS)
         ytick_labels = ["DU{0:0.0f}-DOM{1:02d}"
-                        .format(np.ceil((y+1)/N_DOMS), y % (N_DOMS) + 1) \
+                        .format(np.ceil((y + 1) / N_DOMS), y % (N_DOMS) + 1)
                         for y in yticks]
-        ax.set_yticks(yticks);
-        ax.set_yticklabels(ytick_labels);
+        ax.set_yticks(yticks)
+        ax.set_yticklabels(ytick_labels)
         ax.tick_params(labelbottom=False)
         ax.tick_params(labeltop=False)
         ax.set_xlabel("event (latest on the right)")
         ax.set_title("{0} - via the last {1} Events\n{2}"
                      .format(title, self.max_events, time.strftime("%c")))
-        cb = fig.colorbar(im, pad = 0.05)
+        cb = fig.colorbar(im, pad=0.05)
         cb.set_label("number of hits")
 
         fig.tight_layout()
@@ -124,9 +121,9 @@ class DOMHits(Module):
         if self.thread is not None:
             self.thread.stop()
 
+
 class TriggerRate(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.run = True
         self.event_times = deque(maxlen=4000)
         self.trigger_rates = deque(maxlen=4000)
@@ -149,7 +146,7 @@ class TriggerRate(Module):
 
         data = blob['CHData']
         data_io = StringIO(data)
-        preamble = DAQPreamble(file_obj=data_io)
+        preamble = DAQPreamble(file_obj=data_io)  # noqa
         event = DAQEvent(file_obj=data_io)
         timestamp = event.header.time_stamp
         with lock:
@@ -184,7 +181,7 @@ class TriggerRate(Module):
         data = pd.DataFrame({'dates': x, 'rates': y})
         data.plot('dates', 'rates', grid=True, ax=ax, legend=False, style='.')
         ax.set_title("Trigger Rate - via Event Times\n{0}"
-                  .format(time.strftime("%c")))
+                     .format(time.strftime("%c")))
         ax.set_xlabel("time")
         ax.set_ylabel("trigger rate [Hz]")
         try:
@@ -200,7 +197,6 @@ class TriggerRate(Module):
         plt.close('all')
         shutil.move(filename_tmp, filename)
 
-
     def finish(self):
         self.run = False
         self.store.close()
@@ -208,10 +204,8 @@ class TriggerRate(Module):
             self.thread.stop()
 
 
-
 class DOMActivityPlotter(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.index = 0
         self.rates = defaultdict(partial(deque, maxlen=4000))
         self.run = True
@@ -228,10 +222,9 @@ class DOMActivityPlotter(Module):
         if not tag == 'IO_SUM':
             return blob
 
-
         data = blob['CHData']
         data_io = StringIO(data)
-        preamble = DAQPreamble(file_obj=data_io)
+        preamble = DAQPreamble(file_obj=data_io)  # noqa
         summaryslice = DAQSummaryslice(file_obj=data_io)
         timestamp = summaryslice.header.time_stamp
         with lock:
@@ -254,7 +247,7 @@ class DOMActivityPlotter(Module):
         cmap.set_over('deeppink', 1.0)
         cmap.set_under('deepskyblue', 1.0)
 
-        vmax = 15*60
+        vmax = 15 * 60
 
         scatter_args = {
             'edgecolors': 'None',
@@ -268,7 +261,7 @@ class DOMActivityPlotter(Module):
 
         try:
             xa, ya = map(np.array, zip(*self.rates.keys()))
-            ts = np.array([now - max(zip(*d)[0]) \
+            ts = np.array([now - max(zip(*d)[0])
                            for d in self.rates.values()])
         except ValueError:
             print("Not enough data.")
@@ -278,9 +271,9 @@ class DOMActivityPlotter(Module):
             sc_active = ax.scatter(xa[active_idx], ya[active_idx],
                                    c=ts[active_idx], cmap=cmap,
                                    **scatter_args)
-            sc_idle = ax.scatter(xa[~active_idx], ya[~active_idx],
-                                 c='deeppink', label='> {0} s'.format(vmax),
-                                 **scatter_args)
+            ax.scatter(xa[~active_idx], ya[~active_idx],
+                       c='deeppink', label='> {0} s'.format(vmax),
+                       **scatter_args)
             cb = plt.colorbar(sc_active)
             cb.set_label("last activity [s]")
 
@@ -289,12 +282,12 @@ class DOMActivityPlotter(Module):
         ax.set_xlabel("DU")
         ax.set_ylabel("DOM")
         ax.set_ylim(-2)
-        ax.set_yticks(range(1, N_DOMS+1))
+        ax.set_yticks(range(1, N_DOMS + 1))
         major_locator = pylab.MaxNLocator(integer=True)
         sc_inactive.axes.xaxis.set_major_locator(major_locator)
 
-        ax.legend(bbox_to_anchor=(0., -.16 , 1., .102), loc=1,
-                   ncol=2, mode="expand", borderaxespad=0.)
+        ax.legend(bbox_to_anchor=(0., -.16, 1., .102), loc=1,
+                  ncol=2, mode="expand", borderaxespad=0.)
 
         fig.tight_layout()
 
@@ -312,10 +305,10 @@ class DOMActivityPlotter(Module):
 
 pipe = Pipeline()
 pipe.attach(CHPump, host='192.168.0.110',
-                    port=5553,
-                    tags='IO_EVT, IO_SUM',
-                    timeout=60*60*24*7,
-                    max_queue=2000)
+            port=5553,
+            tags='IO_EVT, IO_SUM',
+            timeout=60 * 60 * 24 * 7,
+            max_queue=2000)
 pipe.attach(DOMActivityPlotter)
 pipe.attach(TriggerRate)
 pipe.attach(DOMHits)

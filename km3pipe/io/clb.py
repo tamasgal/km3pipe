@@ -6,9 +6,9 @@ Pumps for the CLB data formats.
 """
 from __future__ import division, absolute_import, print_function
 
+from io import BytesIO
 import struct
 from struct import unpack
-from binascii import hexlify
 from collections import namedtuple
 import datetime
 import pytz
@@ -34,8 +34,7 @@ UTC_TZ = pytz.timezone('UTC')
 class CLBPump(Pump):
     """A pump for binary CLB files."""
 
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.filename = self.get('filename')
         self.cache_enabled = self.get('cache_enabled') or False
         self.packet_positions = []
@@ -74,11 +73,14 @@ class CLBPump(Pump):
         blob = {'CLBHeader': header}
         remaining_length = length - header.size
         pmt_data = []
-        for _ in range(int(remaining_length/6)):
-            channel_id, timestamp, tot = struct.unpack('>cic',
-                                                       self.blob_file.read(6))
-            pmt_data.append(PMTData(ord(channel_id), timestamp, ord(tot)))
+        pmt_raw_data = self.blob_file.read(remaining_length)
+        pmt_raw_data_io = BytesIO(pmt_raw_data)
+        for _ in range(int(remaining_length / 6)):
+            channel_id, time, tot = struct.unpack('>cic',
+                                                  pmt_raw_data_io.read(6))
+            pmt_data.append(PMTData(ord(channel_id), time, ord(tot)))
         blob['PMTData'] = pmt_data
+        blob['PMTRawData'] = pmt_raw_data
         return blob
 
     def get_blob(self, index):
@@ -116,11 +118,11 @@ class CLBHeader(object):
       size (int): The size of the original DAQ byte representation.
 
     """
-    size = 28
+    size = 40
 
     def __init__(self, byte_data=None, file_obj=None):
         self.data_type = None
-        self.run_number = None
+        self.run = None
         self.udp_sequence = None
         self.timestamp = None
         self.ns_ticks = None
@@ -128,6 +130,7 @@ class CLBHeader(object):
         self.dom_id = None
         self.dom_status = None
         self.time_valid = None
+        self.byte_data = byte_data
         if byte_data:
             self._parse_byte_data(byte_data)
         if file_obj:
@@ -137,7 +140,7 @@ class CLBHeader(object):
         # pylint: disable=E1124
         description = ("CLBHeader\n"
                        "    Data type:    {self.data_type}\n"
-                       "    Run number:   {self.run_number}\n"
+                       "    Run number:   {self.run}\n"
                        "    UDP sequence: {self.udp_sequence}\n"
                        "    Time stamp:   {self.timestamp}\n"
                        "                  {self.human_readable_timestamp}\n"
@@ -153,16 +156,14 @@ class CLBHeader(object):
     def _parse_byte_data(self, byte_data):
         """Extract the values from byte string."""
         self.data_type = b''.join(unpack('cccc', byte_data[:4])).decode()
-        self.run_number = unpack('>i', byte_data[4:8])[0]
+        self.run = unpack('>i', byte_data[4:8])[0]
         self.udp_sequence = unpack('>i', byte_data[8:12])[0]
         self.timestamp, self.ns_ticks = unpack('>II', byte_data[12:20])
-        self.dom_id = hexlify(b''.join(unpack('cccc',
-                                              byte_data[20:24]))).decode()
+        self.dom_id = unpack('>i', byte_data[20:24])[0]
 
         dom_status_bits = unpack('>I', byte_data[24:28])[0]
         self.dom_status = "{0:032b}".format(dom_status_bits)
 
-        print("Timestamp: {0}".format(self.timestamp))
         self.human_readable_timestamp = datetime.datetime.fromtimestamp(
             int(self.timestamp), UTC_TZ).strftime('%Y-%m-%d %H:%M:%S')
 
@@ -174,6 +175,8 @@ class CLBHeader(object):
 
         """
         byte_data = file_obj.read(self.size)
+        self.byte_data = byte_data
         self._parse_byte_data(byte_data)
 
-PMTData = namedtuple('PMTData', 'channel_id timestamp tot')
+
+PMTData = namedtuple('PMTData', 'channel_id time tot')

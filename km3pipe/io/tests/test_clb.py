@@ -172,22 +172,22 @@ class TestCLBPump(TestCase):
     def test_get_blob(self):
         self.pump.determine_packet_positions()
         blob = self.pump.get_blob(0)
-        self.assertEqual(0, blob['CLBHeader'].run_number)
+        self.assertEqual(0, blob['CLBHeader'].run)
         self.assertEqual('TTDC', blob['CLBHeader'].data_type)
-        self.assertEqual(229, len(blob['PMTData']))
+        self.assertEqual(227, len(blob['PMTData']))
         a_pmt_data = blob['PMTData'][0]
-        self.assertEqual(0, a_pmt_data.channel_id)
-        self.assertEqual(66254747, a_pmt_data.timestamp)
-        self.assertEqual(12, a_pmt_data.tot)
+        self.assertEqual(15, a_pmt_data.channel_id)
+        self.assertEqual(66541067, a_pmt_data.time)
+        self.assertEqual(28, a_pmt_data.tot)
 
     def test_next_blob(self):
         self.pump.determine_packet_positions()
         blob = self.pump.next_blob()
-        self.assertEqual(229, len(blob['PMTData']))
+        self.assertEqual(227, len(blob['PMTData']))
         blob = self.pump.next_blob()
-        self.assertEqual(141, len(blob['PMTData']))
+        self.assertEqual(139, len(blob['PMTData']))
         blob = self.pump.next_blob()
-        self.assertEqual(229, len(blob['PMTData']))
+        self.assertEqual(227, len(blob['PMTData']))
 
     def test_next_blob_raises_stop_iteration_on_eof(self):
         self.pump.determine_packet_positions()
@@ -204,10 +204,10 @@ class TestCLBHeader(TestCase):
         byte_data = binascii.unhexlify(raw_data.encode())
         header = CLBHeader(byte_data=byte_data)
         self.assertEqual('TTDC', header.data_type)
-        self.assertEqual(0, header.run_number)
+        self.assertEqual(0, header.run)
         self.assertEqual(3, header.udp_sequence)
         self.assertEqual(26690, header.timestamp)
-        self.assertEqual('30beaf00', header.dom_id)
+        self.assertEqual(817803008, header.dom_id)
         self.assertEqual('10000000000000000000000000000000', header.dom_status)
 
     def test_str_representation(self):
@@ -221,7 +221,7 @@ class TestCLBHeader(TestCase):
                       "    Time stamp:   26690\n" \
                       "                  1970-01-01 07:24:50\n" \
                       "    Ticks [16ns]: 12500000\n" \
-                      "    DOM ID:       30beaf00\n" \
+                      "    DOM ID:       817803008\n" \
                       "    DOM status:   10000000000000000000000000000000\n"
         self.assertEqual(description, str(header))
 
@@ -231,5 +231,5 @@ class TestPMTData(TestCase):
     def test_init(self):
         pmt_data = PMTData(1, 2, 3)
         self.assertEqual(1, pmt_data.channel_id)
-        self.assertEqual(2, pmt_data.timestamp)
+        self.assertEqual(2, pmt_data.time)
         self.assertEqual(3, pmt_data.tot)

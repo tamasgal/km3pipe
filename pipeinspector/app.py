@@ -37,6 +37,7 @@ def handle_input(input):
     if input in UI.keys['escape']:
         raise urwid.ExitMainLoop
 
+
 def filter_input(keys, raw):
     """Adds fancy mouse wheel functionality and VI navigation to ListBox"""
     if len(keys) == 1:
@@ -77,8 +78,8 @@ def main():
     main_frame = MainFrame(pump)
     #main_frame.header.set_text("Inspecting {0}".format(input_file))
     loop = urwid.MainLoop(main_frame, UI.palette,
-                      input_filter=filter_input,
-                      unhandled_input=handle_input)
+                          input_filter=filter_input,
+                          unhandled_input=handle_input)
     loop.run()
 
 

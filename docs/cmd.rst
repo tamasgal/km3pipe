@@ -56,6 +56,31 @@ An example output is::
     857	3620	1465542060119	Y	A01466427	PHYS.1606v1-TMP.HV-SFP.Power-XTRA.700ns		2016-06-10 07:01:00.119000+00:00
 
 
+DataBase
+--------
+
+``streamds``
+~~~~~~~~~~~~
+The utility ``streamds`` can be used to
+interact with the database directly from the shell::
+
+    $ streamds --help
+    Access the KM3NeT StreamDS DataBase service.
+
+    Usage:
+        streamds
+        streamds list
+        streamds info STREAM
+        streamds STREAM [PARAMETERS...]
+        streamds (-h | --help)
+        streamds --version
+
+    Options:
+        STREAM      Name of the stream.
+        PARAMETERS  List of parameters separated by space (e.g. detid=29).
+        -h --help   Show this screen.
+
+
 PipeInspector
 -------------
 
@@ -91,47 +116,58 @@ Example::
 
     tohdf5 --aa-fmt=jevt_jgandalf some_jgandalf_file.aa.root
 
+Help output::
+
     $ tohdf5 --help
     Convert ROOT and EVT files to HDF5.
 
     Usage:
-        tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [--correct-zed] [--aa-format=<fmt>] [--aa-lib=<lib.so>] FILE...
-        tohdf5 [-o OUTFILE] [-n EVENTS] [-e NROWS] [-j] [-s] [-l] FILE...
-        tohdf5 (-h | --help)
-        tohdf5 --version
+	tohdf5 [options] FILE...
+	tohdf5 (-h | --help)
+	tohdf5 --version
 
     Options:
-        --aa-format=<fmt>          tohdf5: Which aanet subformat ('minidst',
-                                   'orca_recolns', 'gandalf',
-                                   'generic_track') [default: None]
-        --aa-lib-<lib.so>          tohdf5: path to aanet binary (for old versions which
-                                   must be loaded via `ROOT.gSystem.Load()` instead
-                                   of `import aa`)
-        -h --help                  Show this screen.
-        -j --jppy                  tohdf5: Use jppy (not aanet) for Jpp readout
-        -l --with-timeslice-hits   Include timeslice-hits [default: False]
-        -n EVENTS/RUNS             Number of events/runs.
-        -o OUTFILE                 Output file.
-        -s --with-summaryslices    Include summary slices [default: False]
-        --correct-zed              Correc toffset in mc tracks (aanet) [default: False]
-        -e --expected-rows NROWS   Approximate number of events.  Providing a
-                                   rough estimate for this (100, 10000000, ...)
-                                   will greatly improve reading/writing speed and
-                                   memory usage. Strongly recommended if the
-                                   table/array size is >= 100 MB. [default: 10000]
-
+	-h --help                       Show this screen.
+	-n EVENTS                       Number of events/runs.
+	-o OUTFILE                      Output file.
+	-j --jppy                       (Jpp): Use jppy (not aanet) for Jpp readout
+	-l --with-timeslice-hits        (Jpp) Include timeslice-hits [default: False]
+	-s --with-summaryslices         (Jpp) Include summary slices [default: False]
+	--aa-format=<fmt>               (Aanet): Which aanet subformat ('minidst',
+					'orca_recolns', 'gandalf', 'gandalf_new',
+					'generic_track') [default: None]
+	--aa-lib=<lib.so>               (Aanet): path to aanet binary (for old
+					versions which must be loaded via
+					`ROOT.gSystem.Load()` instead of `import aa`)
+	--aa-old-mc-id                  (aanet): read mc id as `evt.mc_id`, instead
+					of the newer `mc_id = evt.frame_index - 1`
+  --aa-run-id-from-header         (Aanet) read run id from header, not event.
+	--correct-zed                   (Aanet) Correct offset in mc tracks (aanet)
+					[default: False]
+	--do-not-correct-mc-times       (Aanet) Don't correct MC times.
+	--skip-header                   (Aanet) don't read the full header.
+					Entries like `genvol` and `neventgen` will
+					still be retrived. This switch enables
+					skipping the `get_aanet_header` function only.
+					[default: False]
+	--ignore-hits                   Don't read the hits, please [default: False].
+	-e --expected-rows NROWS        Approximate number of events.  Providing a
+					rough estimate for this (100, 10000000, ...)
+					will greatly improve reading/writing speed and
+					memory usage. Strongly recommended if the
+					table/array size is >= 100 MB. [default: 10000]
 
 ``calibrate``
 ~~~~~~~~~~~~~
 
-Apply geometry and time calibration to an HDF5 file.
+Apply calibration and time calibration to an HDF5 file.
 
 Example::
 
     calibrate km3net_jul13_90m_r1494.detx km3net_jul13_90m_muatm10T23.h5
 
     $ calibrate -h
-    Apply geometry and time calibration from a DETX to an HDF5 file.
+    Apply calibration and time calibration from a DETX to an HDF5 file.
 
     Usage:
         calibrate DETXFILE HDF5FILE
@@ -162,31 +198,6 @@ Example::
       -h --help           Show this screen.
 
 
-``ptdump`` (from PyTables)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Inspect the contents of a HDF5 file, walking through all the subgroups.
-
-Read the `PyTables docs <http://www.pytables.org/usersguide/utilities.html#id1>`_ for more details.
-
-Example output::
-
-    ┌─[moritz@averroes ~/km3net/data ]
-    └─╼ ptdump nueCC.h5
-    / (RootGroup) ''
-    /event_info (Table(121226,), shuffle, zlib(5)) ''
-    /hits (Table(0,), shuffle, zlib(5)) ''
-    /mc_hits (Table(0,), shuffle, zlib(5)) ''
-    /mc_tracks (Table(242452,), shuffle, zlib(5)) ''
-    /reco (Group) ''
-    /reco/aa_shower_fit (Table(121226,), shuffle, zlib(5)) ''
-    /reco/dusj (Table(121226,), shuffle, zlib(5)) ''
-    /reco/j_gandalf (Table(121226,), shuffle, zlib(5)) ''
-    /reco/q_strategy (Table(121226,), shuffle, zlib(5)) ''
-    /reco/reco_lns (Table(121226,), shuffle, zlib(5)) ''
-    /reco/thomas_features (Table(121226,), shuffle, zlib(5)) ''
-
-
 ``h5info``
 ~~~~~~~~~~
 
@@ -213,3 +224,66 @@ Example::
       FILE        Input file.
       -r --raw    Dump raw metadata.
       -h --help   Show this screen.
+
+``h5tree``
+~~~~~~~~~~
+
+Print header info (TODO)
+
+``h5tree``
+~~~~~~~~~~
+
+Print the structure of a H5 file + minimal metadata.
+
+For a less pretty, more verbose output, use the ``ptdump`` util instead.
+
+Example::
+
+  $ h5tree elec.h5
+  KM3HDF5 v4.2
+  Number of Events: 169163
+  ├── hits
+  │  ├── _indices
+  │  ├── channel_id
+  │  ├── dom_id
+  │  ├── event_id
+  │  ├── time
+  │  ├── tot
+  │  └── triggered
+  ├── mc_hits
+  │  ├── _indices
+  │  ├── a
+  │  ├── event_id
+  │  ├── origin
+  │  ├── pmt_id
+  │  └── time
+  ├── reco
+  │  └── gandalf
+  ├── talala
+
+
+``ptdump`` (from PyTables)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Inspect the contents of a HDF5 file, walking through all the subgroups.
+
+Read the `PyTables docs <http://www.pytables.org/usersguide/utilities.html#id1>`_ for more details.
+
+Example output::
+
+    ┌─[moritz@averroes ~/km3net/data ]
+    └─╼ ptdump nueCC.h5
+    / (RootGroup) ''
+    /event_info (Table(121226,), shuffle, zlib(5)) ''
+    /hits (Table(0,), shuffle, zlib(5)) ''
+    /mc_hits (Table(0,), shuffle, zlib(5)) ''
+    /mc_tracks (Table(242452,), shuffle, zlib(5)) ''
+    /reco (Group) ''
+    /reco/aa_shower_fit (Table(121226,), shuffle, zlib(5)) ''
+    /reco/dusj (Table(121226,), shuffle, zlib(5)) ''
+    /reco/j_gandalf (Table(121226,), shuffle, zlib(5)) ''
+    /reco/q_strategy (Table(121226,), shuffle, zlib(5)) ''
+    /reco/reco_lns (Table(121226,), shuffle, zlib(5)) ''
+    /reco/thomas_features (Table(121226,), shuffle, zlib(5)) ''
+
+

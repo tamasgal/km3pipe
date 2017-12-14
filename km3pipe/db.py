@@ -10,13 +10,16 @@ from __future__ import division, absolute_import, print_function
 from datetime import datetime
 import ssl
 import sys
+import io
 import json
 import re
 import pytz
 import socket
+import xml.etree.ElementTree as ET
+
 from collections import OrderedDict
 try:
-    from inspect import Signature, Parameter 
+    from inspect import Signature, Parameter
 except ImportError:
     with_signatures = False
 else:
@@ -27,7 +30,7 @@ try:
 except ImportError:
     print("The database utilities needs pandas: pip install pandas")
 
-from .dev import colored, cprint
+from .tools import cprint
 from .time import Timer
 from .config import Config
 from .logger import logging
@@ -89,7 +92,9 @@ def we_are_in_lyon():
 
 class DBManager(object):
     """A wrapper for the KM3NeT Web DB"""
-    def __init__(self, username=None, password=None, url=None, temporary=False):
+
+    def __init__(self, username=None, password=None, url=None,
+                 temporary=False):
         "Create database connection"
         self._cookies = []
         self._parameters = None
@@ -154,8 +159,8 @@ class DBManager(object):
             try:
                 self._add_converted_units(dataframe, parameter)
             except KeyError:
-                log.warn("Could not add converted units for {0}"
-                         .format(parameter))
+                log.warning("Could not add converted units for {0}"
+                            .format(parameter))
             return dataframe
 
     def run_table(self, det_id='D_ARCA001'):
@@ -182,7 +187,7 @@ class DBManager(object):
             converted = dataframe[timestamp_key].apply(convert_data)
             dataframe['DATETIME'] = converted
         except KeyError:
-            log.warn("Could not add DATETIME column")
+            log.warning("Could not add DATETIME column")
 
     def _add_converted_units(self, dataframe, parameter, key='VALUE'):
         """Add an additional DATA_VALUE column with converted VALUEs"""
@@ -191,7 +196,7 @@ class DBManager(object):
             log.debug("Adding unit converted DATA_VALUE to the data")
             dataframe[key] = dataframe['DATA_VALUE'].apply(convert_unit)
         except KeyError:
-            log.warn("Missing 'VALUE': no unit conversion.")
+            log.warning("Missing 'VALUE': no unit conversion.")
         else:
             dataframe.unit = self.parameters.unit(parameter)
 
@@ -298,7 +303,7 @@ class DBManager(object):
         except AttributeError:
             json_content = json.loads(content)
         if json_content['Comment']:
-            log.warn(json_content['Comment'])
+            log.warning(json_content['Comment'])
         if json_content['Result'] != 'OK':
             raise ValueError('Error while retrieving the parameter list.')
         return json_content['Data']
@@ -355,7 +360,7 @@ class DBManager(object):
 
     def restore_session(self, cookie):
         """Establish databse connection using permanent session cookie"""
-        log.debug("Restoring session from cookie")
+        log.debug("Restoring session from cookie: {}".format(cookie))
         opener = build_opener()
         opener.addheaders.append(('Cookie', cookie))
         self._opener = opener
@@ -374,6 +379,7 @@ class DBManager(object):
         log.debug("Session cookie: {0}".format(cookie_str))
         log.debug("Storing cookie in configuration file")
         config.set('DB', 'session_cookie', cookie_str)
+        # self._cookies = [cookie]
         self.restore_session(cookie)
 
     def login(self, username, password):
@@ -397,6 +403,7 @@ class DBManager(object):
         return True
 
     def _build_opener(self):
+        log.debug("Building opener.")
         cj = CookieJar()
         self._cookies = cj
         opener = build_opener(HTTPCookieProcessor(cj), HTTPHandler())
@@ -406,10 +413,15 @@ class DBManager(object):
         data = urlencode(values)
         return Request(url, data.encode('utf-8'))
 
+    def _post(self, url, data):
+        pass
+
 
 class StreamDS(object):
     """Access to the streamds data stored in the KM3NeT database."""
-    def __init__(self, username=None, password=None, url=None, temporary=False):
+
+    def __init__(self, username=None, password=None, url=None,
+                 temporary=False):
         self._db = DBManager(username, password, url, temporary)
         self._stream_df = None
         self._streams = None
@@ -419,7 +431,8 @@ class StreamDS(object):
     def _update_streams(self):
         """Update the list of available straems"""
         c = self._db._get_content("streamds")
-        self._stream_df = pd.read_csv(StringIO(c), sep='\t')
+        self._stream_df = pd.read_csv(StringIO(c), sep='\t')  \
+            .sort_values("STREAM")
         self._streams = None
         for stream in self.streams:
             setattr(self, stream, self.__getattr__(stream))
@@ -430,7 +443,7 @@ class StreamDS(object):
             stream = attr
         else:
             raise AttributeError
-        
+
         def func(**kwargs):
             return self.get(stream, **kwargs)
 
@@ -441,7 +454,8 @@ class StreamDS(object):
             for sel in self.mandatory_selectors(stream):
                 if sel == '-':
                     continue
-                sig_dict[Parameter(sel, Parameter.POSITIONAL_OR_KEYWORD)] = None
+                sig_dict[Parameter(
+                    sel, Parameter.POSITIONAL_OR_KEYWORD)] = None
             for sel in self.optional_selectors(stream):
                 if sel == '-':
                     continue
@@ -472,29 +486,48 @@ class StreamDS(object):
         """A list of optional selectors for a given stream"""
         return self._stream_parameter(stream, 'OPTIONAL_SELECTORS')
 
+    def help(self, stream):
+        """Show the help for a given stream."""
+        if stream not in self.streams:
+            log.error("Stream '{}' not found in the database."
+                      .format(stream))
+        params = self._stream_df[self._stream_df['STREAM'] == stream].values[0]
+        self._print_stream_parameters(params)
+
     def print_streams(self):
         """Print a coloured list of streams and its parameters"""
         for row in self._stream_df.itertuples():
-            cprint("{1}".format(*row), "magenta", attrs=["bold"])
-            print("{5}".format(*row))
-            cprint("  available formats:   {2}".format(*row), "blue")
-            cprint("  mandatory selectors: {3}".format(*row), "red")
-            cprint("  optional selectors:  {4}".format(*row), "green")
-            print()
+            self._print_stream_parameters(row[1:])
+
+    def _print_stream_parameters(self, values):
+        """Print a coloured help for a given tuple of stream parameters."""
+        cprint("{0}".format(*values), "magenta", attrs=["bold"])
+        print("{4}".format(*values))
+        cprint("  available formats:   {1}".format(*values), "blue")
+        cprint("  mandatory selectors: {2}".format(*values), "red")
+        cprint("  optional selectors:  {3}".format(*values), "green")
+        print()
 
     def get(self, stream, fmt='txt', **kwargs):
         """Get the data for a given stream manually"""
         sel = ''.join(["&{0}={1}".format(k, v) for (k, v) in kwargs.items()])
         url = "streamds/{0}.{1}?{2}".format(stream, fmt, sel[1:])
         data = self._db._get_content(url)
-        if fmt=="txt":
-            return pd.read_csv(StringIO(data), sep='\t')
+        if(data.startswith("ERROR")):
+            log.error(data)
+            return
+        if fmt == "txt":
+            try:
+                return pd.read_csv(StringIO(data), sep='\t')
+            except pd.errors.EmptyDataError:
+                log.error("No data found.")
+                return None
         return data
-
 
 
 class ParametersContainer(object):
     """Provides easy access to parameters"""
+
     def __init__(self, parameters):
         self._parameters = parameters
         self._converters = {}
@@ -553,6 +586,7 @@ class ParametersContainer(object):
 
 class DOMContainer(object):
     """Provides easy access to DOM parameters stored in the DB."""
+
     def __init__(self, doms):
         self._json = doms
         self._ids = []
@@ -606,13 +640,14 @@ class DOMContainer(object):
                   dom[from_key] == value and
                   dom['DetOID'] == det_id]
         if len(lookup) > 1:
-            log.warn("Multiple entries found: {0}".format(lookup) + "\n" +
-                     "Returning the first one.")
+            log.warning("Multiple entries found: {0}".format(lookup) + "\n" +
+                        "Returning the first one.")
         return lookup[0]
 
 
 class DOM(object):
     """Represents a DOM"""
+
     def __init__(self, clb_upi, dom_id, dom_upi, du, det_oid, floor):
         self.clb_upi = clb_upi
         self.dom_id = dom_id
@@ -636,3 +671,30 @@ class DOM(object):
                 "   DET OID: {4}\n"
                 .format(self.__str__(), self.dom_id, self.dom_upi,
                         self.clb_upi, self.det_oid))
+
+
+def clbupi2ahrsupi(clb_upi):
+    """Generate AHRS UPI from CLB UPI."""
+    return re.sub('.*/.*/2\.', '3.4.3.4/AHRS/1.', clb_upi)
+
+
+def show_ahrs_calibration(clb_upi, version='3'):
+    """Show AHRS calibration data for given `clb_upi`."""
+    db = DBManager()
+    ahrs_upi = clbupi2ahrsupi(clb_upi)
+    print("AHRS UPI: {}".format(ahrs_upi))
+    content = db._get_content("show_product_test.htm?upi={0}&"
+                              "testtype=AHRS-CALIBRATION-v{1}&n=1&out=xml"
+                              .format(ahrs_upi, version)) \
+        .replace('\n', '')
+    try:
+        root = ET.parse(io.StringIO(content)).getroot()
+    except ET.ParseError:
+        print("No calibration data found")
+    else:
+        for child in root:
+            print("{}: {}".format(child.tag, child.text))
+        names = [c.text for c in root.findall(".//Name")]
+        values = [[i.text for i in c] for c in root.findall(".//Values")]
+        for name, value in zip(names, values):
+            print("{}: {}".format(name, value))

@@ -19,7 +19,7 @@ KM3Pipe: Main Framework
   :toctree: api
 
   Blob
-  Geometry
+  Calibration
   Module
   Pipeline
   Pump
@@ -28,10 +28,6 @@ KM3Pipe: Main Framework
 
 ``km3pipe.cmd``: Command Line Tools
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. automodule:: km3pipe.cmd
-  :no-members:
-  :no-inherited-members:
 
 .. currentmodule:: km3pipe.cmd
 
@@ -128,7 +124,7 @@ KM3Pipe: Main Framework
   H5Chain
   HDF5Pump
   HDF5Sink
-  JPPPump
+  EventPump
   PicklePump
   df_to_h5
   read_hdf5
@@ -181,20 +177,6 @@ KM3Pipe: Main Framework
   token_urlsafe
   prettyln
   irods_filepath
-
-
-``km3pipe.dev``
-~~~~~~~~~~~~~~~
-
-.. automodule:: km3pipe.dev
-  :no-members:
-  :no-inherited-members:
-
-.. currentmodule:: km3pipe.dev
-
-.. autosummary::
-  :toctree: api
-
   unpack_nfirst
   split
   decamelise

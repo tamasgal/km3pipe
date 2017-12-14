@@ -31,12 +31,11 @@ from pyslack import SlackClient
 __author__ = 'tamasgal'
 
 log = logging.getLogger(__name__)
-RUN_NUMBER_URL='http://192.168.0.120:1301/mon/controlunit/runnumber'
+RUN_NUMBER_URL = 'http://192.168.0.120:1301/mon/controlunit/runnumber'
 
 
 class MessageDumper(km3.Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.write_interval = self.get('write_interval') or 1
         self.path = self.get('path') or '.'
         self.det_sn = self.get('det_sn')
@@ -67,7 +66,8 @@ class MessageDumper(km3.Module):
         return blob
 
     def send_message(self, message):
-        self.slack.chat_post_message("#live-arca-it", message, username="ligier")
+        self.slack.chat_post_message(
+            "#live-arca-it", message, username="ligier")
 
     def _start_thread(self):
         self.thread = threading.Thread(target=self._run, args=())
@@ -97,7 +97,7 @@ def main(det_sn, target_path, write_interval):
     pipe.attach(km3.io.CHPump, host='localhost',
                 port=5553,
                 tags='MSG',
-                timeout=60*60*24*7,
+                timeout=60 * 60 * 24 * 7,
                 max_queue=2000)
     pipe.attach(MessageDumper,
                 write_interval=write_interval, det_sn=det_sn, path=target_path)

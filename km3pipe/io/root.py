@@ -7,23 +7,15 @@ Read and write Vanilla ROOT files.
 """
 from __future__ import division, absolute_import, print_function
 
-from collections import defaultdict
 from six import string_types
+from six.moves import range
 
 import numpy as np
-import rootpy as rp
 import root_numpy as rnp
-import rootpy.ROOT as ROOT
 from rootpy.io import root_open
-from rootpy.plotting import Hist, Hist2D, Hist3D
-from rootpy.tree import Tree, TreeModel, FloatCol, IntCol
+from rootpy import ROOTError
 
-import km3pipe as kp
-from km3pipe.core import Pump, Module
-from km3pipe.dataclasses import KM3Array, deserialise_map
 from km3pipe.logger import logging
-from km3pipe.dev import camelise, decamelise, split
-from km3pipe.tools import insert_prefix_to_dtype
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -73,3 +65,25 @@ def get_hist3d(rfile, histname, get_overflow=False):
     bin_values = rnp.hist2array(hist, include_overflow=get_overflow)
     rfile.close()
     return bin_values, xlims, ylims, zlims
+
+
+def interpol_hist2d(h2d, oversamp_factor=10):
+    """Sample the interpolator of a root 2d hist.
+
+    Root's hist2d has a weird internal interpolation routine,
+    also using neighbouring bins.
+    """
+    xlim = h2d.bins(axis=0)
+    ylim = h2d.bins(axis=1)
+    xn = h2d.nbins(0)
+    yn = h2d.nbins(1)
+    x = np.linspace(xlim[0], xlim[1], xn * oversamp_factor)
+    y = np.linspace(ylim[0], ylim[1], yn * oversamp_factor)
+    mat = np.zeros((xn, yn))
+    for xi in range(xn):
+        for yi in range(yn):
+            try:
+                mat[xi, yi] = h2d.interpolate(x[xi], y[yi])
+            except ROOTError:
+                continue
+    return mat, x, y

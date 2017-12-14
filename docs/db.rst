@@ -391,3 +391,27 @@ Let's retrieve some data::
       5        1        1         1       4944                -930
 
 That's it. You always get a Pandas ``DataFrame`` back. Have fun!
+
+
+The ``streamds`` CLI
+~~~~~~~~~~~~~~~~~~~~
+There is also a command line utility called ``streamds``, which can be used to
+interact with the database directly from the shell::
+
+    $ streamds --help
+    Access the KM3NeT StreamDS DataBase service.
+
+    Usage:
+        streamds
+        streamds list
+        streamds upload CSV_FILE
+        streamds info STREAM
+        streamds get STREAM [PARAMETERS...]
+        streamds (-h | --help)
+        streamds --version
+
+    Options:
+        STREAM      Name of the stream.
+        CSV_FILE    Tab separated data for the runsummary tables.
+        PARAMETERS  List of parameters separated by space (e.g. detid=29).
+        -h --help   Show this screen.

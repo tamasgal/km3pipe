@@ -71,3 +71,13 @@ class LogIO(object):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((self.url, self.port))
 
+
+def get(name):
+    """Helper function to get a logger"""
+    return logging.getLogger(name)
+
+
+def set_level(name, level):
+    """Set the log level for given logger"""
+    logger = get(name)
+    logger.setLevel(level)

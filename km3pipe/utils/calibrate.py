@@ -20,10 +20,11 @@ import numpy as np
 import tables as tb
 
 
-FILTERS = tb.Filters(complevel=5, shuffle=True, fletcher32=True, complib='zlib')
+FILTERS = tb.Filters(complevel=5, shuffle=True,
+                     fletcher32=True, complib='zlib')
 
 
-def calibrate_hits(f, geo):
+def calibrate_hits(f, cal):
     dom_ids = f.get_node("/hits/dom_id")[:]
     channel_ids = f.get_node("/hits/channel_id")[:]
     n = len(dom_ids)
@@ -31,18 +32,18 @@ def calibrate_hits(f, geo):
     for i in range(n):
         dom_id = dom_ids[i]
         channel_id = channel_ids[i]
-        calib[i] = geo._calib_by_dom_and_channel[dom_id][channel_id]
+        calib[i] = cal._calib_by_dom_and_channel[dom_id][channel_id]
     apply_calibration(calib, f, n, "/hits")
     f.get_node("/hits")._v_attrs.datatype = "CRawHitSeries"
 
 
-def calibrate_mc_hits(f, geo):
+def calibrate_mc_hits(f, cal):
     pmt_ids = f.get_node("/mc_hits/pmt_id")[:]
     n = len(pmt_ids)
     calib = np.empty((n, 9), dtype='f4')
     for i in range(n):
         pmt_id = pmt_ids[i]
-        calib[i] = geo._calib_by_pmt_id[pmt_id]
+        calib[i] = cal._calib_by_pmt_id[pmt_id]
     apply_calibration(calib, f, n, "/mc_hits")
     f.get_node("/mc_hits")._v_attrs.datatype = "CMcHitSeries"
 
@@ -50,11 +51,12 @@ def calibrate_mc_hits(f, geo):
 def apply_calibration(calib, f, n, loc):
     f4_atom = tb.Float32Atom()
     u1_atom = tb.UInt8Atom()
-    for i, node in enumerate([p+'_'+s for p in ['pos', 'dir'] for s in 'xyz']):
+    for i, node in enumerate([p + '_' + s for p in ['pos', 'dir']
+                              for s in 'xyz']):
         print("  ...creating " + node)
         ca = f.create_carray(loc, node, f4_atom, (n,), filters=FILTERS)
         ca[:] = calib[:, i]
-    
+
     print("  ...creating du")
     du = f.create_carray(loc, 'du', u1_atom, (n,), filters=FILTERS)
     du[:] = calib[:, 7].astype('u1')
@@ -86,15 +88,15 @@ def main():
             print("The file seems to be calibrated, please check.")
             raise SystemExit
 
-        print("Reading geometry information")
-        geo = kp.Geometry(filename=args['DETXFILE'])
+        print("Reading calbration information")
+        cal = kp.Calibration(filename=args['DETXFILE'])
 
         if '/hits' in f:
             print("Calibrating hits")
-            calibrate_hits(f, geo)
+            calibrate_hits(f, cal)
         if '/mc_hits' in f:
             print("Calibrate MC hits")
-            calibrate_mc_hits(f, geo)
+            calibrate_mc_hits(f, cal)
 
         print("Done.")
 

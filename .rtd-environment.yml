@@ -17,15 +17,19 @@ dependencies:
   - pytables
   - h5py
   - scikit-learn
+  - numexpr
   - patsy
   - statsmodels
   - tornado
   - websocket-client
   - urwid
   - pip:
+    - sphinx==1.6.3
+    - sphinx-gallery==0.1.12
+    - sphinx-rtd-theme==0.2.4
     - sphinxcontrib-napoleon==0.6.1
-    - sphinx==1.5.3
-    - sphinx-gallery==0.1.8
+    - sphinxcontrib-programoutput==0.11
+    - sphinxcontrib-websupport==1.0.1
+    - numpydoc==0.7.0
     - docopt
-    - numpydoc
     - controlhost

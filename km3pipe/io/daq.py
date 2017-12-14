@@ -7,7 +7,6 @@ Pumps for the DAQ data formats.
 """
 from __future__ import division, absolute_import, print_function
 
-from collections import defaultdict
 from io import BytesIO
 import math
 import struct
@@ -17,7 +16,8 @@ import pprint
 import numpy as np
 
 from km3pipe.core import Pump, Module, Blob
-from km3pipe.dataclasses import EventInfo, HitSeries
+from km3pipe.dataclasses import (EventInfo, HitSeries, RawHitSeries,
+                                 TimesliceInfo, TimesliceFrameInfo)
 from km3pipe.sys import ignored
 from km3pipe.logger import logging
 
@@ -42,32 +42,63 @@ MINIMAL_RATE_HZ = 2.0e3
 MAXIMAL_RATE_HZ = 2.0e6
 
 
-
 class TimesliceParser(Module):
     """Preliminary parser for DAQTimeslice"""
-    def process(self, blob):
-        if str(blob['CHPrefix'].tag) != 'IO_TSL':
-            log.error("Not an IO_TSL blob")
-            return
 
+    def _get_raw_data(self, blob):
+        if 'CHPrefix' in blob:
+            if not str(blob['CHPrefix'].tag).startswith('IO_TS'):
+                log.info("Not an IO_TS* blob")
+                return blob
+            return BytesIO(blob['CHData'])
+        if 'FileIO' in blob:
+            return blob['FileIO']
+
+    def process(self, blob):
+        data = self._get_raw_data(blob)
+        if data is None:
+            return blob
         try:
-            data = BytesIO(blob['CHData'])
             tsl_size, datatype = unpack('<ii', data.read(8))
             det_id, run, sqnr = unpack('<iii', data.read(12))
             timestamp, ns_ticks, n_frames = unpack('<iii', data.read(12))
 
-            ts_frames = blob['TimesliceFrames'] = defaultdict(list)
+            ts_info = TimesliceInfo(
+                sqnr, 0, timestamp, ns_ticks * 16, n_frames)
+            ts_frameinfos = {}
 
+            _dom_ids = []
+            _channel_ids = []
+            _times = []
+            _tots = []
             for i in range(n_frames):
                 frame_size, datatype = unpack('<ii', data.read(8))
                 det_id, run, sqnr = unpack('<iii', data.read(12))
                 timestamp, ns_ticks, dom_id = unpack('<iii', data.read(12))
-                dom_status = unpack('<iiiii', data.read(5*4))
+                dom_status = unpack('<iiiii', data.read(5 * 4))
                 n_hits = unpack('<i', data.read(4))[0]
-                hits = []
+                ts_frameinfos[dom_id] = TimesliceFrameInfo(
+                    det_id, run, sqnr, timestamp, ns_ticks * 16, dom_id,
+                    dom_status, n_hits
+                )
                 for j in range(n_hits):
                     hit = unpack('!BlB', data.read(6))
-                    ts_frames[dom_id].append(hit)
+                    _dom_ids.append(dom_id)
+                    _channel_ids.append(hit[0])
+                    _times.append(hit[1])
+                    _tots.append(hit[2])
+
+            tshits = RawHitSeries.from_arrays(
+                np.array(_channel_ids),
+                np.array(_dom_ids),
+                np.array(_times),
+                np.array(_tots),
+                np.zeros(len(_tots)),  # triggered
+                0  # event_id
+            )
+            blob['TimesliceInfo'] = ts_info
+            blob['TimesliceFrameInfos'] = ts_frameinfos
+            blob['TSHits'] = tshits
         except struct.error:
             log.error("Could not parse Timeslice")
             log.error(blob.keys())
@@ -78,8 +109,7 @@ class TimesliceParser(Module):
 class DAQPump(Pump):
     """A pump for binary DAQ files."""
 
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.filename = self.get('filename')
         self.frame_positions = []
         self.index = 0
@@ -88,7 +118,8 @@ class DAQPump(Pump):
             self.open_file(self.filename)
             self.determine_frame_positions()
         else:
-            log.warn("No filename specified. Take care of the file handling!")
+            log.warning("No filename specified. "
+                        "Take care of the file handling!")
 
     def next_blob(self):
         """Get the next frame from file"""
@@ -190,8 +221,7 @@ class DAQPump(Pump):
 
 
 class DAQProcessor(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.index = 0
 
     def process(self, blob):
@@ -245,26 +275,26 @@ class DAQProcessor(Module):
 
         blob['Hits'] = hit_series
 
-        event_info = EventInfo((
-            header.det_id,
-            self.index,
-            # header.time_slice,
-            0,  # livetime_sec
-            0, 0,  # MC ID and time
-            0, 0,  # n evts/files gen
-            event.overlays,
-            # header.run,
-            event.trigger_counter, event.trigger_mask,
-            header.ticks * 16, header.time_stamp,
-            0, 0, 0,  # MC weights
-            0))
+        event_info = EventInfo(np.array(
+            (header.det_id,
+             self.index,  # header.time_slice,
+             0,  # livetime_sec
+             0, 0,  # MC ID and time
+             0, 0,  # n evts/files gen
+             event.overlays,
+             # header.run,
+             event.trigger_counter, event.trigger_mask,
+             header.ticks * 16, header.time_stamp,
+             0, 0, 0,  # MC weights
+             0,  # run id
+             0), dtype=EventInfo.dtype))
         blob['EventInfo'] = event_info
 
         self.index += 1
 
     def process_summaryslice(self, data, blob):
         data_io = BytesIO(data)
-        preamble = DAQPreamble(file_obj=data_io)
+        preamble = DAQPreamble(file_obj=data_io)  # noqa
         summaryslice = DAQSummaryslice(file_obj=data_io)
         blob["RawSummaryslice"] = summaryslice
 
@@ -381,6 +411,7 @@ class DAQSummaryslice(object):
       dom_rates (dict): The overall DOM rate for each DOM.
 
     """
+
     def __init__(self, file_obj):
         self.header = DAQHeader(file_obj=file_obj)
         self.n_summary_frames = unpack('<i', file_obj.read(4))[0]
@@ -397,7 +428,7 @@ class DAQSummaryslice(object):
             dom_id = unpack('<i', file_obj.read(4))[0]
             dq_status = file_obj.read(4)  # probably dom status? # noqa
             dom_status = unpack('<iiii', file_obj.read(16))
-            raw_rates = unpack('b'*31, file_obj.read(31))
+            raw_rates = unpack('b' * 31, file_obj.read(31))
             pmt_rates = [self._get_rate(value) for value in raw_rates]
             self.summary_frames[dom_id] = pmt_rates
             self.dq_status[dom_id] = dq_status
@@ -433,6 +464,7 @@ class DAQEvent(object):
         (dom_id, pmt_id, tdc_time, tot)
 
     """
+
     def __init__(self, file_obj):
         self.header = DAQHeader(file_obj=file_obj)
         self.trigger_counter = unpack('<Q', file_obj.read(8))[0]
@@ -455,7 +487,7 @@ class DAQEvent(object):
             tot = unpack('<b', file_obj.read(1))[0]
             trigger_mask = unpack('<Q', file_obj.read(8))
             self.triggered_hits.append((dom_id, pmt_id, tdc_time, tot,
-                                       trigger_mask))
+                                        trigger_mask))
 
     def _parse_snapshot_hits(self, file_obj):
         """Parse and store snapshot hits."""
@@ -479,6 +511,7 @@ class DAQEvent(object):
 
 class TMCHData(object):
     """Monitoring Channel data."""
+
     def __init__(self, file_obj):
         f = file_obj
 
@@ -487,27 +520,28 @@ class TMCHData(object):
             raise ValueError("Invalid datatype: {0}".format(data_type))
 
         self.run = unpack('>I', f.read(4))[0]
-        self.udp_sequence_number = unpack('>I', f.read(4))[0]  
+        self.udp_sequence_number = unpack('>I', f.read(4))[0]
         self.utc_seconds = unpack('>I', f.read(4))[0]
         self.nanoseconds = unpack('>I', f.read(4))[0] * 16
         self.dom_id = unpack('>I', f.read(4))[0]
-        self.dom_status_0 = unpack('>I', f.read(4))[0]  
-        self.dom_status_1 = unpack('>I', f.read(4))[0]  
-        self.dom_status_2 = unpack('>I', f.read(4))[0]  
-        self.dom_status_3 = unpack('>I', f.read(4))[0]  
-        self.pmt_rates = [r*10.0 for r in unpack('>' + 31*'I', f.read(31*4))]
+        self.dom_status_0 = unpack('>I', f.read(4))[0]
+        self.dom_status_1 = unpack('>I', f.read(4))[0]
+        self.dom_status_2 = unpack('>I', f.read(4))[0]
+        self.dom_status_3 = unpack('>I', f.read(4))[0]
+        self.pmt_rates = [
+            r * 10.0 for r in unpack('>' + 31 * 'I', f.read(31 * 4))]
         self.hrvbmp = unpack('>I', f.read(4))[0]
         self.flags = unpack('>I', f.read(4))[0]
         self.yaw, self.pitch, self.roll = unpack('>fff', f.read(12))
-        self.ax, self.ay, self.az = unpack('>fff', f.read(12))
-        self.gx, self.gy, self.gz = unpack('>fff', f.read(12))
-        self.hx, self.hy, self.hz = unpack('>fff', f.read(12))
+        self.A = unpack('>fff', f.read(12))  # AHRS: Ax, Ay, Az
+        self.G = unpack('>fff', f.read(12))  # AHRS: Gx, Gy, Gz
+        self.H = unpack('>fff', f.read(12))  # AHRS: Hx, Hy, Hz
         self.temp = unpack('>H', f.read(2))[0] / 100.0
         self.humidity = unpack('>H', f.read(2))[0] / 100.0
         self.tdcfull = unpack('>I', f.read(4))[0]
         self.aesfull = unpack('>I', f.read(4))[0]
         self.flushc = unpack('>I', f.read(4))[0]
-     #   self.ts_duration_microseconds = unpack('>I', f.read(4))[0]
+        # self.ts_duration_microseconds = unpack('>I', f.read(4))[0]
 
     def __str__(self):
         return str(vars(self))
@@ -518,20 +552,35 @@ class TMCHData(object):
 
 class TMCHRepump(Pump):
     """Takes a IO_MONIT raw dump and replays it."""
+
     def configure(self):
         filename = self.require("filename")
         self.fobj = open(filename, "rb")
-    
+        self.blobs = self.blob_generator()
+
     def process(self, blob):
-        try:
-            while True:
-                datatype = self.fobj.read(4)
-                if datatype == b'TMCH':
-                    self.fobj.seek(-4, 1)
-                    blob['TMCHData'] = TMCHData(self.fobj)
-                    return blob
-        except struct.error:
-            raise StopIteration
+        return next(self.blobs)
+
+    def blob_generator(self):
+        while True:
+            blob = Blob()
+            datatype = self.fobj.read(4)
+            if len(datatype) == 0:
+                raise StopIteration
+            if datatype == b'TMCH':
+                self.fobj.seek(-4, 1)
+                blob['TMCHData'] = TMCHData(self.fobj)
+                yield blob
 
     def finish(self):
         self.fobj.close()
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        """Python 2/3 compatibility for iterators"""
+        return self.__next__()
+
+    def __next__(self):
+        return next(self.blobs)

@@ -13,30 +13,22 @@ import threading
 
 import matplotlib
 # Force matplotlib to not use any Xwindows backend.
-matplotlib.use('Agg')
+matplotlib.use('Agg')  # noqa
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 import pandas as pd
-import numpy as np
 
-import km3pipe as kp
 from km3pipe import Pipeline, Module
 from km3pipe.common import StringIO
 from km3pipe.config import Config
-from km3pipe.hardware import Detector
 from km3pipe.io import CHPump
 from km3pipe.io.daq import (DAQPreamble, DAQEvent)
+from km3pipe.logger import logging
 import km3pipe.style
 
-from km3pipe.logger import logging
 
+km3pipe.style.use('km3pipe')
 log = logging.getLogger("trigger_rate")
-
-# for logger_name, logger in logging.Logger.manager.loggerDict.iteritems():
-#     if logger_name.startswith('km3pipe.'):
-#         print("Setting log level to debug for '{0}'".format(logger_name))
-#         logger.setLevel("DEBUG")
-
 
 PLOTS_PATH = 'www/plots'
 
@@ -47,17 +39,17 @@ lock = threading.Lock()
 def trigger_rate_sampling_period():
     try:
         return int(Config().get("Monitoring", "trigger_rate_sampling_period"))
-    except TypeError, ValueError:
+    except (TypeError, ValueError):
         return 180
 
 
 class TriggerRate(Module):
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
+    def configure(self):
         self.run = True
         self.interval = self.get("interval") or trigger_rate_sampling_period()
         self.event_times = deque(maxlen=4000)  # max events per interval
-        self.trigger_rates = deque(maxlen=60*24//(self.interval//60)) # minutes to monitor
+        # minutes to monitor
+        self.trigger_rates = deque(maxlen=60 * 24 // (self.interval // 60))
         self.thread = threading.Thread(target=self.plot).start()
         self.store = pd.HDFStore('data/trigger_rates.h5')
         self.restore_data()
@@ -68,7 +60,8 @@ class TriggerRate(Module):
                 data = zip(self.store.trigger_rates.timestamp,
                            self.store.trigger_rates.rate)
                 self.trigger_rates.extend(data)
-                print("\n{0} data points restored.".format(len(self.trigger_rates)))
+                print("\n{0} data points restored."
+                      .format(len(self.trigger_rates)))
             except AttributeError:
                 pass
 
@@ -80,7 +73,7 @@ class TriggerRate(Module):
 
         data = blob['CHData']
         data_io = StringIO(data)
-        preamble = DAQPreamble(file_obj=data_io)
+        preamble = DAQPreamble(file_obj=data_io)  # noqa
         event = DAQEvent(file_obj=data_io)
         timestamp = event.header.time_stamp
         with lock:
@@ -105,7 +98,8 @@ class TriggerRate(Module):
         self.trigger_rates.append((now, rate))
         try:
             self.store.append('trigger_rates',
-                              pd.DataFrame({'timestamp': [now], 'rate': [rate]}))
+                              pd.DataFrame({'timestamp': [now],
+                                            'rate': [rate]}))
         except pd.io.pytables.ClosedFileError:
             pass
 
@@ -117,7 +111,7 @@ class TriggerRate(Module):
         data = pd.DataFrame({'dates': x, 'rates': y})
         data.plot('dates', 'rates', grid=True, ax=ax, legend=False, style='.')
         ax.set_title("Trigger Rate - via Event Times\n{0} UTC"
-                  .format(datetime.utcnow().strftime("%c")))
+                     .format(datetime.utcnow().strftime("%c")))
         ax.set_xlabel("time")
         ax.set_ylabel("trigger rate [Hz]")
         try:
@@ -134,7 +128,6 @@ class TriggerRate(Module):
         shutil.move(filename_tmp, filename)
         print("Plot updated.")
 
-
     def finish(self):
         self.run = False
         if self.thread is not None:
@@ -143,12 +136,7 @@ class TriggerRate(Module):
             self.store.close()
 
 
-
 pipe = Pipeline()
-pipe.attach(CHPump, host='127.0.0.1',
-                    port=5553,
-                    tags='IO_EVT',
-                    timeout=60*60*24*7,
-                    max_queue=2000)
+pipe.attach(CHPump, tags='IO_EVT', timeout=60 * 60 * 24 * 7, max_queue=2000)
 pipe.attach(TriggerRate)
 pipe.drain()

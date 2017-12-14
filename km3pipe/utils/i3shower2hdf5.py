@@ -41,6 +41,7 @@ __status__ = "Development"
 
 class WriteScalars(I3Module):
     """DUmp all Scalars to disk."""
+
     def __init__(self, context):
         I3Module.__init__(self, context)
         self.AddParameter("Filename",
@@ -69,13 +70,14 @@ class WriteScalars(I3Module):
         arr = pd.DataFrame(self.store).to_records(index=False)
         with h5py.File(self.filename, 'w') as h5:
             h5.create_dataset(
-                    self.tablename, data=arr,
-                    compression="gzip", compression_opts=5,
-                    shuffle=True, fletcher32=True)
+                self.tablename, data=arr,
+                compression="gzip", compression_opts=5,
+                shuffle=True, fletcher32=True)
 
 
 class KeepReconstructed(I3Module):
     """Discard all events which don't have the full fit."""
+
     def __init__(self, context):
         I3Module.__init__(self, context)
         self.AddOutBox("OutBox")
@@ -90,6 +92,7 @@ class KeepReconstructed(I3Module):
 
 class ReadEventMeta(I3Module):
     """Read Metadata (Event ID) for bookkeeping."""
+
     def __init__(self, context):
         I3Module.__init__(self, context)
         self.AddOutBox("OutBox")
@@ -105,6 +108,7 @@ class ReadEventMeta(I3Module):
 
 class ReadLLHValues(I3Module):
     """Read the LLH values of a final fit."""
+
     def __init__(self, context):
         I3Module.__init__(self, context)
         self.AddParameter("LLHParamContainer",
@@ -129,6 +133,7 @@ class ReadLLHValues(I3Module):
 
 class ReadRecoParticle(I3Module):
     """Read the position, energy, ... of a fit."""
+
     def __init__(self, context):
         I3Module.__init__(self, context)
         self.AddParameter("ParticleName",
@@ -164,6 +169,7 @@ class ReadRecoParticle(I3Module):
 
 class Readrlogl(I3Module):
     """Read the Logl of the final fits."""
+
     def __init__(self, context):
         I3Module.__init__(self, context)
         self.AddOutBox("OutBox")
@@ -194,6 +200,7 @@ class Readrlogl(I3Module):
 
 class Compare(I3Module):
     """Compare prefit + final fit."""
+
     def __init__(self, context):
         I3Module.__init__(self, context)
         self.AddParameter("particle_1", "Name of first particle", "")
@@ -231,6 +238,7 @@ class Compare(I3Module):
 
 class Distance(Compare):
     """Spatial Distance between 2 vertices (prefit + final)."""
+
     def __init__(self, context):
         Compare.__init__(self, context)
         self.AddOutBox("OutBox")
@@ -264,6 +272,7 @@ class Distance(Compare):
 
 class TimeDistance(Compare):
     """Time Distance between 2 vertices (prefit + final)."""
+
     def __init__(self, context):
         Compare.__init__(self, context)
         self.AddOutBox("OutBox")

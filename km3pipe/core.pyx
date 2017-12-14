@@ -24,6 +24,7 @@ from .sys import peak_memory_usage, ignored
 from .hardware import Detector
 from .dataclasses import (CRawHitSeries, HitSeries, RawHitSeries,
                           CMcHitSeries, McHitSeries)
+from .tools import deprecated
 from .logger import logging
 from .time import Timer
 
@@ -59,7 +60,8 @@ class Pipeline(object):
         self.init_timer.start()
 
         self.modules = []
-        self.geometry = None
+        self.services = {}
+        self.calibration = None
         self.blob = blob or Blob()
         self.timeit = timeit
         self._timeit = {'init': timer(), 'init_cpu': time.clock(),
@@ -82,6 +84,10 @@ class Pipeline(object):
                 name == 'GenericPump':
             log.debug("Attaching as regular module")
             module = fac(name=name, **kwargs)
+            if hasattr(module, "services"):
+                for service_name, obj in module.services.items():
+                    self.services[service_name] = obj
+            module.services = self.services
         else:
             if isinstance(fac, types.FunctionType):
                 log.debug("Attaching as function module")
@@ -108,16 +114,12 @@ class Pipeline(object):
                                 'finish': 0,
                                 'finish_cpu': 0}
 
-        try:
-            module.get_detector()
-            self.geometry = module
+        if hasattr(module, 'get_detector'):  # Calibration-like module
+            self.calibration = module
             if module._should_apply:
                 self.modules.append(module)
-        except AttributeError:
-            if len(self.modules) < 1 and not isinstance(module, Pump):
-                log.error("The first module to attach to the pipeline should "
-                          "be a Pump!")
-            module.geometry = self.geometry
+        else:  # normal module
+            module.calibration = self.calibration
             self.modules.append(module)
 
     def attach_bundle(self, modules):
@@ -138,10 +140,10 @@ class Pipeline(object):
         if not cycles:
             log.info("No cycle count, the pipeline may be drained forever.")
 
-        if self.geometry:
-            log.info("Setting up the detector geometry.")
+        if self.calibration:
+            log.info("Setting up the detector calibration.")
             for module in self.modules:
-                module.detector = self.geometry.get_detector()
+                module.detector = self.calibration.get_detector()
 
         try:
             while not self._stop:
@@ -184,7 +186,7 @@ class Pipeline(object):
                     raise StopIteration
         except StopIteration:
             log.info("Nothing left to pump through.")
-        self.finish()
+        return self.finish()
 
     def drain(self, cycles=None):
         """Execute _drain while trapping KeyboardInterrupt"""
@@ -192,25 +194,27 @@ class Pipeline(object):
         log.info("Trapping CTRL+C and starting to drain.")
         signal.signal(signal.SIGINT, self._handle_ctrl_c)
         with ignored(KeyboardInterrupt):
-            self._drain(cycles)
+            return self._drain(cycles)
 
     def finish(self):
         """Call finish() on each attached module"""
+        finish_blob = Blob()
         for module in self.modules:
-            try:
+            if hasattr(module, 'pre_finish'):
                 log.info("Finishing {0}".format(module.name))
                 start_time = timer()
                 start_time_cpu = time.clock()
-                module.pre_finish()
+                finish_blob[module.name] = module.pre_finish()
                 self._timeit[module]['finish'] = timer() - start_time
                 self._timeit[module]['finish_cpu'] = \
                     time.clock() - start_time_cpu
-            except AttributeError:
+            else:
                 log.info("Skipping function module {0}".format(module.name))
         self._timeit['finish'] = timer()
         self._timeit['finish_cpu'] = time.clock()
         self._print_timeit_statistics()
         self._finished = True
+        return finish_blob
 
     def _handle_ctrl_c(self, *args):
         """Handle the keyboard interrupts."""
@@ -295,16 +299,27 @@ class Module(object):
         self.only_if = None
         self.every = 1
         self.detector = None
+        if self.__module__ == '__main__':
+            self.logger_name = self.__class__.__name__
+        else:
+            self.logger_name = self.__module__ + '.' + self.__class__.__name__
+        log.debug("Setting up logger '{}'".format(self.logger_name))
+        self.log = logging.getLogger(self.logger_name)
         self.timeit = self.get('timeit') or False
         self._timeit = {'process': deque(maxlen=STAT_LIMIT),
                         'process_cpu': deque(maxlen=STAT_LIMIT),
                         'finish': 0,
                         'finish_cpu': 0}
+        self.services = {}
         self.configure()
 
     def configure(self):
         """Configure module, like instance variables etc."""
         pass
+
+    def expose(self, obj, name):
+        """Expose an object as a service to the Pipeline"""
+        self.services[name] = obj
 
     @property
     def name(self):
@@ -315,9 +330,12 @@ class Module(object):
         """Add the parameter with the desired value to the dict"""
         self.parameters[name] = value
 
-    def get(self, name):
-        """Return the value of the requested parameter"""
-        return self.parameters.get(name)
+    def get(self, name, default=None):
+        """Return the value of the requested parameter or `default` if None."""
+        value = self.parameters.get(name)
+        if value is None:
+            return default
+        return value
 
     def require(self, name):
         """Return the value of the requested parameter or raise an error."""
@@ -348,9 +366,16 @@ class Module(object):
 class Pump(Module):
     """The pump with basic file or socket handling."""
 
-    def __init__(self, **context):
-        Module.__init__(self, **context)
+    def __init__(self, *args, **kwargs):
         self.blob_file = None
+        if args:
+            log.warning("Non-keywords argument passed. Please use keyword "
+                        "arguments to supress this warning. I will assume the "
+                        "first argument to be the `filename`.")
+            Module.__init__(self, filename=args[0], **kwargs)
+        else:
+            Module.__init__(self, **kwargs)
+
 
     def open_file(self, filename):
         """Open the file with filename"""
@@ -393,214 +418,13 @@ class Blob(OrderedDict):
     pass
 
 
-class Geometry(Module):
-    """A very simple, preliminary Module which gives access to the geometry.
-
-    Parameters
-    ----------
-    apply: bool, optional [default=False]
-        Apply the geometry to the hits (add position/direction/t0)?
-    filename: str, optional [default=None]
-        DetX file with detector description.
-    det_id: int, optional
-        .detx ID of detector (when retrieving from database).
-    t0set: optional
-        t0set (when retrieving from database).
-    calibration: optional
-        calibration (when retrieving from database).
-    """
-    def __init__(self, **context):
-        super(self.__class__, self).__init__(**context)
-        self._should_apply = self.get('apply') or False
-        self.filename = self.get('filename') or None
-        self.det_id = self.get('det_id') or None
-        self.t0set = self.get('t0set') or None
-        self.calibration = self.get('calibration') or None
-        self.detector = self.get('detector') or None
-        self._pos_dom_channel = None
-        self._dir_dom_channel = None
-        self._t0_dom_channel = None
-        self._pos_pmt_id = None
-        self._dir_pmt_id = None
-        self._t0_pmt_id = None
-
-        if self.filename or self.det_id:
-            if self.filename is not None:
-                self.detector = Detector(filename=self.filename)
-            if self.det_id:
-                self.detector = Detector(det_id=self.det_id,
-                                         t0set=self.t0set,
-                                         calibration=self.calibration)
-
-        if self.detector is not None:
-            self._create_dom_channel_lookup()
-            self._create_pmt_id_lookup()
-
-    def process(self, blob, key='Hits'):
-        if self._should_apply:
-            self.apply(blob[key])
-        return blob
-
-    def get_detector(self):
-        """Return the detector"""
-        return self.detector
-
-    def apply(self, hits):
-        """Add x, y, z, t0 (and du, floor if DataFrame) columns to hit.
-
-        When applying to ``RawHitSeries`` or ``McHitSeries``, a ``HitSeries``
-        will be returned with the geometry information added.
-        
-        """
-        if isinstance(hits, (HitSeries, list)):
-            self._apply_to_hitseries(hits)
-        elif isinstance(hits, pd.DataFrame):
-            self._apply_to_table(hits)
-        elif isinstance(hits, RawHitSeries):
-            return self._apply_to_rawhitseries(hits)
-        elif isinstance(hits, McHitSeries):
-            return self._apply_to_mchitseries(hits)
-        else:
-            raise TypeError("Don't know how to apply geometry to '{0}'."
-                            .format(hits.__class__.__name__))
-
-    def _apply_to_hitseries(self, hits):
-        """Add x, y, z and t0 offset to hit series"""
-        for idx, hit in enumerate(hits):
-            try:
-                pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
-            except (KeyError, AttributeError):
-                pmt = self.detector.pmt_with_id(hit.pmt_id)
-            hits.pos_x[idx] = pmt.pos[0]
-            hits.pos_y[idx] = pmt.pos[1]
-            hits.pos_z[idx] = pmt.pos[2]
-            hits.dir_x[idx] = pmt.dir[0]
-            hits.dir_y[idx] = pmt.dir[1]
-            hits.dir_z[idx] = pmt.dir[2]
-            hits._arr['t0'][idx] = pmt.t0
-            hits._arr['time'][idx] += pmt.t0
-            # hit.a = hit.tot
-
-    def _apply_to_rawhitseries(self, hits):
-        """Create a HitSeries from RawHitSeries and add pos, dir and t0.
-        
-        Note that existing arrays like tot, dom_id, channel_id etc. will be
-        copied by reference for better performance.
-        
-        """
-        n = len(hits)
-        cal = np.empty((n, 9))
-        for i in range(n):
-            lookup = self._calib_by_dom_and_channel
-            calib = lookup[hits._arr['dom_id'][i]][hits._arr['channel_id'][i]]
-            cal[i] = calib
-        h = np.empty(n, CRawHitSeries.dtype)
-        h['channel_id'] = hits.channel_id
-        h['dir_x'] = cal[:, 3]
-        h['dir_y'] = cal[:, 4]
-        h['dir_z'] = cal[:, 5]
-        h['dom_id'] = hits.dom_id
-        h['du'] = cal[:, 7]
-        h['floor'] = cal[:, 8]
-        h['pos_x'] = cal[:, 0]
-        h['pos_y'] = cal[:, 1]
-        h['pos_z'] = cal[:, 2]
-        h['t0'] = cal[:, 6]
-        h['time'] = hits.time + cal[:, 6]
-        h['tot'] = hits.tot
-        h['triggered'] = hits.triggered
-        h['event_id'] = hits._arr['event_id']
-        return CRawHitSeries(h, hits.event_id)
-
-    def _apply_to_mchitseries(self, hits):
-        """Create a HitSeries from McHitSeries and add pos, dir and t0.
-        
-        Note that existing arrays like a, origin, pmt_id will be copied by
-        reference for better performance.
-
-        The attributes ``a`` and ``origin`` are not implemented yet.
-        
-        """
-        n = len(hits)
-        cal = np.empty((n, 9))
-        for i in range(n):
-            lookup = self._calib_by_pmt_id
-            calib = lookup[hits._arr['pmt_id'][i]]
-        h = np.empty(n, CMcHitSeries.dtype)
-        h['channel_id'] = np.zeros(n, dtype=int)
-        h['dir_x'] = cal[:, 3]
-        h['dir_y'] = cal[:, 4]
-        h['dir_z'] = cal[:, 5]
-        h['du'] = cal[:, 7]
-        h['floor'] = cal[:, 8]
-        h['pmt_id'] = hits._arr['pmt_id']
-        h['pos_x'] = cal[:, 0]
-        h['pos_y'] = cal[:, 1]
-        h['pos_z'] = cal[:, 2]
-        h['t0'] = cal[:, 6]
-        h['time'] = hits.time + cal[:, 6]
-        h['tot'] = np.zeros(n, dtype=int)
-        h['triggered'] = np.zeros(n, dtype=bool)
-        h['event_id'] = hits._arr['event_id']
-        return CMcHitSeries(h, hits.event_id)
-
-    def _apply_to_table(self, table):
-        """Add x, y, z and du, floor columns to hit table"""
-        def get_pmt(hit):
-            return self.detector.get_pmt(hit['dom_id'], hit['channel_id'])
-
-        table['pos_x'] = table.apply(lambda h: get_pmt(h).pos.x, axis=1)
-        table['pos_y'] = table.apply(lambda h: get_pmt(h).pos.y, axis=1)
-        table['pos_z'] = table.apply(lambda h: get_pmt(h).pos.z, axis=1)
-        table['dir_x'] = table.apply(lambda h: get_pmt(h).dir.x, axis=1)
-        table['dir_y'] = table.apply(lambda h: get_pmt(h).dir.y, axis=1)
-        table['dir_z'] = table.apply(lambda h: get_pmt(h).dir.z, axis=1)
-        table['time'] += table.apply(lambda h: get_pmt(h).t0, axis=1)
-        table['t0'] = table.apply(lambda h: get_pmt(h).t0, axis=1)
-        table['du'] = table.apply(lambda h: get_pmt(h).omkey[0], axis=1)
-        table['floor'] = table.apply(lambda h: get_pmt(h).omkey[1], axis=1)
-
-    def _create_dom_channel_lookup(self):
-        data = {}
-        for dom_id, pmts in self.detector._pmts_by_dom_id.items():
-            for pmt in pmts:
-                if dom_id not in data:
-                    data[dom_id] = {}
-                data[dom_id][pmt.channel_id] = np.array((pmt.pos[0],
-                                                        pmt.pos[1],
-                                                        pmt.pos[2],
-                                                        pmt.dir[0],
-                                                        pmt.dir[1],
-                                                        pmt.dir[2],
-                                                        pmt.t0,
-                                                        pmt.omkey[0],
-                                                        pmt.omkey[1]))
-        self._calib_by_dom_and_channel = data
-
-    def _create_pmt_id_lookup(self):
-        data = {}
-        for pmt_id, pmt in self.detector._pmts_by_id.items():
-            data[pmt_id] = np.array((pmt.pos[0],
-                                     pmt.pos[1],
-                                     pmt.pos[2],
-                                     pmt.dir[0],
-                                     pmt.dir[1],
-                                     pmt.dir[2],
-                                     pmt.t0,
-                                     pmt.omkey[0],
-                                     pmt.omkey[1],
-                                     ))
-        self._calib_by_pmt_id = data
-
-    def __repr__(self):
-        return self.__str__()
-
-    def __str__(self):
-        return "Geometry: det_id({0})".format(self.det_id)
+class Geometry(object):
+    def __init__(self, *args, **kwargs):
+        log.error("The 'Geometry' class has been renamed to 'Calibration'!")
 
 
 class Run(object):
-    """A simple container for event info, hits, tracks and geometry.
+    """A simple container for event info, hits, tracks and calibration.
     """
     def __init__(self, **tables):
         for key, val in tables.items():

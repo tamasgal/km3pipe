@@ -52,6 +52,7 @@ class H5Chain(object):
     >>>     reco = h5['/reco']
 
     """
+
     def __init__(self, filenames, verbose=False):
         self.filenames = filenames
         self.verbose = verbose
@@ -123,14 +124,35 @@ def read_group(group, max_id=None, **kwargs):
     return df
 
 
-def merge_event_ids(df):
+def drop_duplicate_columns(df):
+    """If a column name appears more than once, drop it."""
+    # _, i = np.unique(df.columns, return_index=True)
+    # return df.iloc[:, i]
+    return df.T.drop_duplicates().T
+
+
+def merge_event_ids(df, drop_duplicates=False):
     cols = list(df.columns)
+    if drop_duplicates:
+        # that function some times reaches max recursion depth, whyever
+        cols = drop_duplicate_columns(df)
     ids = list(c for c in cols if 'event_id' in c)
+    log.debug(ids)
     if not ids:
         return df
+    ids = list(set(ids))
+    log.debug(ids)
     # non_id = list(c for c in cols if c not in ids)
     event_ids = df[ids[0]]
+    try:
+        log.debug(event_ids.shape)
+        if event_ids.shape[1] > 1:
+            event_ids = event_ids.ix[:, 0]
+        log.debug(event_ids.shape)
+    except IndexError:
+        pass
     df.drop(ids, axis=1, inplace=True)
+    log.debug(event_ids.shape)
     df['event_id'] = event_ids
     return df
 
