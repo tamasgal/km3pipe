@@ -875,16 +875,7 @@ class RawHitSeries(DTypeAttr):
         if isinstance(index, int):
             hit = RawHit(*self._arr[index])
             return hit
-        elif isinstance(index, slice):
-            return self._slice_generator(index)
-        else:
-            raise TypeError("index must be int or slice")
-
-    def _slice_generator(self, index):
-        """A simple slice generator for iterations"""
-        start, stop, step = index.indices(len(self))
-        for i in range(start, stop, step):
-            yield RawHit(*self._arr[i])
+        return self.__class__(self._arr[index], self.event_id)
 
     def __iter__(self):
         return self
@@ -1186,18 +1177,8 @@ class McHitSeries(DTypeAttr):
 
     def __getitem__(self, index):
         if isinstance(index, int):
-            hit = McHit(*self._arr[index])
-            return hit
-        elif isinstance(index, slice):
-            return self._slice_generator(index)
-        else:
-            raise TypeError("index must be int or slice")
-
-    def _slice_generator(self, index):
-        """A simple slice generator for iterations"""
-        start, stop, step = index.indices(len(self))
-        for i in range(start, stop, step):
-            yield McHit(*self._arr[i])
+            return McHit(*self._arr[index])
+        return self.__class__(self._arr[index], self.event_id)
 
     def __str__(self):
         n_hits = len(self)
@@ -1509,18 +1490,8 @@ class HitSeries(DTypeAttr):
 
     def __getitem__(self, index):
         if isinstance(index, int):
-            hit = Hit(*self._arr[index])
-            return hit
-        elif isinstance(index, slice):
-            return self._slice_generator(index)
-        else:
-            raise TypeError("index must be int or slice")
-
-    def _slice_generator(self, index):
-        """A simple slice generator for iterations"""
-        start, stop, step = index.indices(len(self))
-        for i in range(start, stop, step):
-            yield Hit(*self._arr[i])
+            return Hit(*self._arr[index])
+        return self.__class__(self._arr[index])
 
     def __str__(self):
         n_hits = len(self)
@@ -1634,16 +1605,7 @@ class TimesliceHitSeries(DTypeAttr):
     def __getitem__(self, index):
         if isinstance(index, int):
             return TimesliceHit(*self._arr[index])
-        elif isinstance(index, slice):
-            return self._slice_generator(index)
-        else:
-            raise TypeError("index must be int or slice")
-
-    def _slice_generator(self, index):
-        """A simple slice generator for iterations"""
-        start, stop, step = index.indices(len(self))
-        for i in range(start, stop, step):
-            yield TimesliceHit(*self._arr[i])
+        return self.__class__(self._arr[index], self.slice_id, self.frame_id)
 
     def __str__(self):
         n_hits = len(self)

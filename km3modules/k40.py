@@ -99,7 +99,22 @@ class CoincidenceFinder(kp.Module):
 
 
 def calibrate_dom(dom_id, data, detector, livetime=None, fixed_ang_dist=None, auto_scale=False):
-    """Calibrate intra DOM PMT time offsets and efficiencies"""#
+    """Calibrate intra DOM PMT time offsets, efficiencies and sigmas
+
+        Parameters
+        ----------
+        dom_id: DOM ID
+        data: dict of coincidences or root or hdf5 file
+        detector: instance of detector class
+        livetime: data-taking duration [s]
+        fixed_ang_dist: fixing angular distribution e.g. for data mc comparison
+        auto_scale: auto scales the fixed angular distribution to the data
+
+        Returns
+        -------
+        return_data: dictionary with fit results
+    """
+
     if isinstance(data, str):
         filename = data
         loaders = {'.h5': load_k40_coincidences_from_hdf5,
@@ -161,7 +176,19 @@ def calibrate_dom(dom_id, data, detector, livetime=None, fixed_ang_dist=None, au
 
 
 def load_k40_coincidences_from_hdf5(filename, dom_id):
-    """Load k40 coincidences from hdf5 file"""
+    """Load k40 coincidences from hdf5 file
+
+    Parameters
+    ----------
+    filename: filename of hdf5 file
+    dom_id: DOM ID
+
+    Returns
+    -------
+    data: numpy array of coincidences
+    livetime: duration of data-taking
+    """
+
     with h5py.File(filename, 'r') as h5f:
         data = h5f['/k40counts/{0}'.format(dom_id)]
         livetime = data.attrs['livetime']
@@ -171,7 +198,19 @@ def load_k40_coincidences_from_hdf5(filename, dom_id):
 
 
 def load_k40_coincidences_from_rootfile(filename, dom_id):
-    """Load k40 coincidences from JMonitorK40 ROOT file"""
+    """Load k40 coincidences from JMonitorK40 ROOT file
+
+    Parameters
+    ----------
+    filename: root file produced by JMonitorK40
+    dom_id: DOM ID
+
+    Returns
+    -------
+    data: numpy array of coincidences
+    dom_weight: weight to apply to coincidences to get rate in Hz
+    """
+
     from ROOT import TFile
     root_file_monitor = TFile( filename, "READ" )
     dom_name = str(dom_id) + ".2S"
