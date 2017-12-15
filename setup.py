@@ -48,10 +48,6 @@ directives = {
 from km3pipe import version  # noqa
 
 
-core = Extension('km3pipe.core', sources=['km3pipe/core.pyx'],
-                 extra_compile_args=['-O3', '-march=native', '-w'],
-                 define_macros=[('CYTHON_TRACE', str(CYTHON_TRACE))])
-
 dataclasses = Extension('km3pipe.dataclasses',
                         sources=['km3pipe/dataclasses.pyx'],
                         extra_compile_args=['-O3', '-march=native', '-w'],
@@ -59,10 +55,10 @@ dataclasses = Extension('km3pipe.dataclasses',
 
 if CYTHON_TRACE and cythonize:
     print("Building KM3Pipe with line tracing and profiling extensions.")
-    ext_modules = cythonize([core, dataclasses],
+    ext_modules = cythonize([dataclasses],
                             compiler_directives=directives)
 else:
-    ext_modules = [core, dataclasses]
+    ext_modules = [dataclasses]
 
 
 require_groups = {
