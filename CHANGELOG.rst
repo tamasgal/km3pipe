@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* ``core.pyx`` and ``tools.pyx`` have been "depyxed"
 
 Version 7
 ---------
