@@ -1,7 +1,5 @@
 # coding=utf-8
-# cython: profile=True
-# Filename: core.pyx
-# cython: embedsignature=True
+# Filename: core.py
 # pylint: disable=locally-disabled
 """
 The core of the KM3Pipe framework.

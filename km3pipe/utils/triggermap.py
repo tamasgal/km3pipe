@@ -36,6 +36,7 @@ from matplotlib.colors import LogNorm
 import numpy as np
 
 import km3pipe as kp
+from km3modules.common import StatusBar
 import km3pipe.style
 km3pipe.style.use('km3pipe')
 
@@ -113,6 +114,7 @@ def main():
     det = kp.hardware.Detector(det_id=det_id)
     pipe = kp.Pipeline()
     pipe.attach(kp.io.jpp.EventPump, filename=args['FILENAME'])
+    pipe.attach(StatusBar, every=2500)
     pipe.attach(TriggerMap,
                 detector=det,
                 du=du,

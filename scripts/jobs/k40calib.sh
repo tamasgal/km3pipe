@@ -24,7 +24,7 @@ DET_ID=14
 
 echo "Task id = $SGE_TASK_ID"
 
-source /afs/in2p3.fr/throng/km3net/src/python/pyenv.sh
+source $KM3NET_THRONG_DIR/src/python/pyenv.sh
 source ${JPP_PATH}/setenv.sh ${JPP_PATH}
 
 PWD_=$(pwd)
