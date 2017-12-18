@@ -176,7 +176,8 @@ class TestPipeline(TestCase):
         self.assertEqual(1, pl.modules[2].call_count)
 
     def test_finish(self):
-        self.pl.finish()
+        out = self.pl.finish()
+        assert out is not None
 
     def test_drain_calls_finish_on_each_attached_module(self):
         self.pl.attach(Module, 'module1')
