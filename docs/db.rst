@@ -56,7 +56,7 @@ You can also add your username and DB password to the ``~/.km3net`` config
 file like this::
 
     [DB]
-    session_cookie = [......]
+    session_cookie = sid=...
     username = MYNAME
     password = INTERNALPASS
 
