@@ -403,6 +403,13 @@ class HDF5Pump(Pump):
                 # are not yet supported in conditions
                 arr = tab.read()
                 arr = arr[arr['event_id'] == event_id]
+            except ValueError:
+                # "there are no columns taking part
+                # in condition ``event_id == 0``"
+                self.log.info(
+                    "get_blob: no `event_id` column found in '{}'! "
+                    "skipping... ".format(loc))
+                continue
             blob[tabname] = dc.deserialise(arr, event_id=index, h5loc=loc)
 
         # skipped locs are now column wise datasets (usually hits)
