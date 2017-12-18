@@ -27,6 +27,11 @@ To set a desired logging level, use the keywords ``DEBUG``, ``INFO``, ``WARNING`
 
     log.setLevel("DEBUG")
 
+There exists also a shorthand function to directly set the loglevel of a 
+py module::
+  
+    kp.logger.set_level('kp.io.hdf5', 'DEBUG')
+
 Creating your own Logger
 ------------------------
 
@@ -46,6 +51,23 @@ After that, you can use it to log anywhere::
 and set its debug level::
 
     log.setLevel("WARN")
+
+Logging inside ``kp.Module``
+----------------------------
+
+Inside a ``Module``, use ``self.log.debug`` instead of ``log.debug``::
+
+    class MyModule(kp.Module):
+        def process(self, blob):
+            self.log.info("Processing...")    
+
+A nice feature is, if you set the loglevel of a py module, it also sets
+the loglevel of all the Modules inside.
+E.g.::
+
+    kp.logger.set_level('kp.io.hdf5', 'DEBUG')
+
+will also set the loglevel of ``kp.io.hdf5.HDF5Pump`` to ``"DEBUG"`` :D .
 
 
 Modifying log levels of existing modules
