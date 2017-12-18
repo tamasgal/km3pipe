@@ -6,7 +6,7 @@ KM3Pipe command line utility.
 Usage:
     km3pipe test
     km3pipe update [GIT_BRANCH]
-    km3pipe createconf [--overwrite]
+    km3pipe createconf [--overwrite] [--dump]
     km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID] [-o OUTFILE]
     km3pipe detectors [-s REGEX] [--temporary]
     km3pipe runtable [-n RUNS] [-s REGEX] [--temporary] DET_ID
@@ -43,6 +43,10 @@ from .tools import irods_filepath
 from .db import DBManager
 from .hardware import Detector
 
+from km3pipe.logger import logging
+
+log = logging.getLogger(__name__)  # pylint: disable=C0103
+
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
@@ -78,7 +82,7 @@ def runinfo(run_id, det_id, temporary=False):
     df = db.run_table(det_id)
     row = df[df['RUN'] == run_id]
     if len(row) == 0:
-        print("No database entry for run {0} found.".format(run_id))
+        log.error("No database entry for run {0} found.".format(run_id))
         return
     next_row = df[df['RUN'] == (run_id + 1)]
     if len(next_row) != 0:
@@ -153,14 +157,16 @@ def rundetsn(run_id, detector="ARCA", temporary=False):
             return
 
 
-def createconf(overwrite=False):
+def createconf(overwrite=False, dump=False):
     import os.path
     from os import environ
+    defaultconf = '[General]\ncheck_for_updates=yes'
+    if dump:
+        print("--------------\n" + defaultconf + "\n--------------")
     fname = environ['HOME'] + '/.km3net'
     if not overwrite and os.path.exists(fname):
-        print('Config exists, not overwriting')
+        log.warn('Config exists, not overwriting')
         return
-    defaultconf = '[General]\ncheck_for_updates=yes'
     with open(fname, 'w') as f:
         f.write(defaultconf)
     print('Wrote default config to ', fname)
@@ -184,7 +190,8 @@ def main():
 
     if args['createconf']:
         overwrite_conf = bool(args['--overwrite'])
-        createconf(overwrite_conf)
+        dump = bool(args['--dump'])
+        createconf(overwrite_conf, dump)
 
     if args['runtable']:
         runtable(args['DET_ID'], n, regex=args['-s'],
