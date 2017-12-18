@@ -24,8 +24,6 @@ from .pickle import PicklePump  # noqa
 from .pandas import (H5Chain, df_to_h5, map2df,  # noqa
                      read_group, write_table,)  # noqa
 
-from km3pipe.tools import insert_prefix_to_dtype  # noqa
-from km3pipe.core import Run
 from km3pipe.logger import logging
 
 __author__ = "Tamas Gal"
@@ -110,6 +108,7 @@ def read_hdf5(filename, detx=None, det_id=None, det_from_file=False):
     the detector id from the event info in the file.
     """
     import pandas as pd
+    from km3pipe.core import Run
 
     h5 = pd.HDFStore(filename, mode='r')
     opts = {}
