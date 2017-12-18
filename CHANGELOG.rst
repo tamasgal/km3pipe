@@ -1,6 +1,7 @@
 Unreleased changes
 ------------------
 * ``core.pyx`` and ``tools.pyx`` have been "depyxed"
+* ``Calibration.apply**`` (should) always returns the hits
 
 Version 7
 ---------
