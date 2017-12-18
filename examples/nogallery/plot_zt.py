@@ -18,7 +18,7 @@ km3pipe.style.use("km3pipe")
 DU = 26
 EVENT_ID = 23
 filename = "data/km3net_jul13_90m_muatm50T655.km3_v5r1.JTE_r2356.root.0-499.h5"
-cal = kp.Calibration(filename="data/km3net_jul13_90m_r1494_corrected.detx")
+cal = kp.calib.Calibration(filename="data/km3net_jul13_90m_r1494_corrected.detx")
 pump = kp.io.hdf5.HDF5Pump(filename=filename)
 
 raw_hits = pump[EVENT_ID]["Hits"]

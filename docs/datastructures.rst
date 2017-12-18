@@ -87,7 +87,7 @@ for you.
 
 To create a calibration from a detector file::
 
-    cal = kp.Calibration(filename="path/to/detector.detx")
+    cal = kp.calib.Calibration(filename="path/to/detector.detx")
 
 
 To apply the calibration to a set of hits::
