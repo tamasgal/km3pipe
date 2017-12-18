@@ -384,15 +384,16 @@ class HDF5Pump(Pump):
         # this should be solved using hdf5 attributes in near future
         skipped_locs = []
         for tab in h5file.walk_nodes(classname="Table"):
-            self.log.debug('get_blob: parsing h5 node name...')
-            loc, tabname = os.path.split(tab._v_pathname)
+            pathname = tab._v_pathname
+            loc, tabname = os.path.split(pathname)
             if loc in skipped_locs:
                 self.log.info(
-                    "get_blob: '{}' is blacklisted, skipping...".format(loc))
+                    "get_blob: '{}' is blacklisted, skipping...".format(
+                        pathname))
                 continue
             if tabname == "_indices":
                 self.log.debug(
-                    "get_blob: found index table '{}'...".format(loc))
+                    "get_blob: found index table '{}'...".format(pathname))
                 skipped_locs.append(loc)
                 self.indices[loc] = h5file.get_node(loc + '/' + '_indices')
                 continue
@@ -407,7 +408,8 @@ class HDF5Pump(Pump):
                 # 64-bit unsigned integer columns like ``event_id``
                 # are not yet supported in conditions
                 self.log.debug(
-                    "get_blob: found uint64 column at '{}'...".format(loc))
+                    "get_blob: found uint64 column at '{}'...".format(
+                        pathname))
                 arr = tab.read()
                 arr = arr[arr['event_id'] == event_id]
             except ValueError:
@@ -415,7 +417,7 @@ class HDF5Pump(Pump):
                 # in condition ``event_id == 0``"
                 self.log.info(
                     "get_blob: no `event_id` column found in '{}'! "
-                    "skipping... ".format(loc))
+                    "skipping... ".format(pathname))
                 continue
             blob[tabname] = dc.deserialise(arr, event_id=index, h5loc=loc)
 
