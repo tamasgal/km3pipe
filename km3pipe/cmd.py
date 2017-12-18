@@ -82,7 +82,7 @@ def runinfo(run_id, det_id, temporary=False):
     df = db.run_table(det_id)
     row = df[df['RUN'] == run_id]
     if len(row) == 0:
-        print("No database entry for run {0} found.".format(run_id))
+        log.error("No database entry for run {0} found.".format(run_id))
         return
     next_row = df[df['RUN'] == (run_id + 1)]
     if len(next_row) != 0:

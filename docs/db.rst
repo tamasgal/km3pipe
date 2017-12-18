@@ -52,6 +52,14 @@ If you ever encounter any issues with the database communication, try deleting
 the ``session_cookie`` line in the configuration file and request a new one
 as described above.
 
+You can also add your username and DB password to the ``~/.km3net`` config 
+file like this::
+
+    [DB]
+    session_cookie = [......]
+    username = MYNAME
+    password = INTERNALPASS
+
 Important note: due to security reasons, the ``~/.km3net`` configuration file
 should not be readable to others. KM3Pipe will warn you and will also display
 the command to set the appropriate permission::
