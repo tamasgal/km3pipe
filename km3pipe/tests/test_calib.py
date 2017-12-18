@@ -42,8 +42,10 @@ class TestCalibration(TestCase):
         cal = Calibration()
         hits = [1, 2, 3]
         cal._apply_to_hitseries = MagicMock()
-        cal.apply(hits)
-        cal._apply_to_hitseries.assert_called_with(hits)
+        hits = cal.apply(hits)
+        assert hits is not None
+        hits = cal._apply_to_hitseries.assert_called_with(hits)
+        assert hits is not None
 
     def test_apply_to_hitseries(self):
 
@@ -98,7 +100,8 @@ class TestCalibration(TestCase):
         self.assertEqual(4, hits[4].time)
         self.assertFalse(np.isnan(hits[2].pos_y))
 
-        cal._apply_to_hitseries(hits)
+        hits = cal._apply_to_hitseries(hits)
+        assert hits is not None
 
         self.assertAlmostEqual(303, hits[3].pos_x)
         self.assertAlmostEqual(304, hits[3].pos_y)
