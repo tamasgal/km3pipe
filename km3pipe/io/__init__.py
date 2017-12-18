@@ -26,7 +26,6 @@ from .pandas import (H5Chain, df_to_h5, map2df,  # noqa
 
 from km3pipe.tools import insert_prefix_to_dtype  # noqa
 from km3pipe.core import Run
-from km3pipe.calib import Calibration
 from km3pipe.logger import logging
 
 __author__ = "Tamas Gal"
@@ -80,6 +79,8 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
 def read_calibration(detx=None, det_id=None, from_file=False,
                      det_id_table=None):
     """Retrive calibration from file, the DB."""
+    from km3pipe.calib import Calibration  # noqa
+
     if not detx or det_id or from_file:
         return None
     if detx is not None:
