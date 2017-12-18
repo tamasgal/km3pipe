@@ -109,18 +109,18 @@ class HDF5Sink(Module):
 
     def _to_array(self, data):
         if np.isscalar(data):
-            log.debug('toarray: is a scalar')
+            self.log.debug('toarray: is a scalar')
             return np.asarray(data).reshape((1,))
         if len(data) <= 0:
-            log.debug('toarray: data has no length')
+            self.log.debug('toarray: data has no length')
             return
         try:
-            log.debug('trying pandas-style `to_records()')
+            self.log.debug('trying pandas-style `to_records()')
             return data.to_records(index=False)
         except AttributeError:
             pass
         try:
-            log.debug('trying dataclass-style `serialise()')
+            self.log.debug('trying dataclass-style `serialise()')
             return data.serialise()
         except AttributeError:
             pass
@@ -200,28 +200,28 @@ class HDF5Sink(Module):
 
         for key, entry in sorted(blob.items()):
             serialisable_attributes = ('dtype', 'serialise', 'to_records')
-            log.debug("Serialising {}...".format(key))
+            self.log.debug("Serialising {}...".format(key))
             if any(hasattr(entry, a) for a in serialisable_attributes):
                 try:
-                    log.debug("Looking for h5loc...")
+                    self.log.debug("Looking for h5loc...")
                     h5loc = entry.h5loc
                 except AttributeError:
-                    log.debug("h5loc not found. setting to '/misc'...")
+                    self.log.debug("h5loc not found. setting to '/misc'...")
                     h5loc = '/misc'
                 try:
-                    log.debug("Looking for `tabname` attribute...")
+                    self.log.debug("Looking for `tabname` attribute...")
                     tabname = entry.tabname
                 except AttributeError:
-                    log.debug("`tabname` not found, using blob key...")
+                    self.log.debug("`tabname` not found, using blob key...")
                     tabname = decamelise(key)
-                log.debug("Converting to numpy array...")
+                self.log.debug("Converting to numpy array...")
                 data = self._to_array(entry)
                 if data is None:
-                    log.debug("Conversion failed. moving on...")
+                    self.log.debug("Conversion failed. moving on...")
                     continue
                 if data.dtype.names is None:
-                    log.debug("Array has no named dtype. "
-                              "using blob key as h5 column name")
+                    self.log.debug("Array has no named dtype. "
+                                   "using blob key as h5 column name")
                     dt = np.dtype((data.dtype, [(key, data.dtype)]))
                     data = data.view(dt)
                 where = os.path.join(h5loc, tabname)
@@ -235,11 +235,11 @@ class HDF5Sink(Module):
                 except AttributeError:  # backwards compatibility
                     self._write_array(where, data, datatype, title=key)
             else:
-                log.debug('{} appears not to be serialisable '
-                          'to numpy. Skipping.'.format(key))
+                self.log.debug('{} appears not to be serialisable '
+                               'to numpy. Skipping.'.format(key))
 
         if not self.index % 1000:
-            log.info('Flushing tables to disk...')
+            self.log.info('Flushing tables to disk...')
             for tab in self._tables.values():
                 tab.flush()
 
@@ -250,18 +250,18 @@ class HDF5Sink(Module):
         self.h5file.root._v_attrs.km3pipe = np.string_(kp.__version__)
         self.h5file.root._v_attrs.pytables = np.string_(tb.__version__)
         self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
-        log.info("Adding index tables.")
+        self.log.info("Adding index tables.")
         for where, data in self.indices.items():
             h5loc = where + "/_indices"
-            log.info("  -> {0}".format(h5loc))
+            self.log.info("  -> {0}".format(h5loc))
             indices = KM3DataFrame({"index": data["indices"],
                                     "n_items": data["n_items"]}, h5loc=h5loc)
             self._write_array(h5loc,
                               self._to_array(indices),
                               'Indices',
                               title="Indices")
-        log.info("Creating pytables index tables. "
-                 "This may take a few minutes...")
+        self.log.info("Creating pytables index tables. "
+                      "This may take a few minutes...")
         for tab in itervalues(self._tables):
             if 'frame_id' in tab.colnames:
                 tab.cols.frame_id.create_index()
@@ -274,13 +274,13 @@ class HDF5Sink(Module):
             tab.flush()
 
         if "HDF5MetaData" in self.services:
-            log.info("Writing HDF5 meta data.")
+            self.log.info("Writing HDF5 meta data.")
             metadata = self.services["HDF5MetaData"]
             for name, value in metadata.items():
                 self.h5file.set_node_attr("/", name, value)
 
         self.h5file.close()
-        log.info("HDF5 file written to: {}".format(self.filename))
+        self.log.info("HDF5 file written to: {}".format(self.filename))
 
 
 class HDF5Pump(Pump):
@@ -326,8 +326,8 @@ class HDF5Pump(Pump):
                 self.event_ids[fn] = event_info.cols.event_id[:]
                 self._n_each[fn] = len(self.event_ids[fn])
             except tb.NoSuchNodeError:
-                log.critical("No /event_info table found: '{0}'"
-                             .format(fn))
+                self.log.critical("No /event_info table found: '{0}'"
+                                  .format(fn))
                 raise SystemExit
             self.h5files[fn] = h5file
         self._n_events = np.sum((v for k, v in self._n_each.items()))
@@ -384,10 +384,16 @@ class HDF5Pump(Pump):
         # this should be solved using hdf5 attributes in near future
         skipped_locs = []
         for tab in h5file.walk_nodes(classname="Table"):
-            loc, tabname = os.path.split(tab._v_pathname)
+            pathname = tab._v_pathname
+            loc, tabname = os.path.split(pathname)
             if loc in skipped_locs:
+                self.log.info(
+                    "get_blob: '{}' is blacklisted, skipping...".format(
+                        pathname))
                 continue
             if tabname == "_indices":
+                self.log.debug(
+                    "get_blob: found index table '{}'...".format(pathname))
                 skipped_locs.append(loc)
                 self.indices[loc] = h5file.get_node(loc + '/' + '_indices')
                 continue
@@ -401,8 +407,18 @@ class HDF5Pump(Pump):
             except NotImplementedError:
                 # 64-bit unsigned integer columns like ``event_id``
                 # are not yet supported in conditions
+                self.log.debug(
+                    "get_blob: found uint64 column at '{}'...".format(
+                        pathname))
                 arr = tab.read()
                 arr = arr[arr['event_id'] == event_id]
+            except ValueError:
+                # "there are no columns taking part
+                # in condition ``event_id == 0``"
+                self.log.info(
+                    "get_blob: no `event_id` column found in '{}'! "
+                    "skipping... ".format(pathname))
+                continue
             blob[tabname] = dc.deserialise(arr, event_id=index, h5loc=loc)
 
         # skipped locs are now column wise datasets (usually hits)
