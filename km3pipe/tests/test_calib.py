@@ -42,10 +42,9 @@ class TestCalibration(TestCase):
         cal = Calibration()
         hits = [1, 2, 3]
         cal._apply_to_hitseries = MagicMock()
-        hits = cal.apply(hits)
-        assert hits is not None
-        hits = cal._apply_to_hitseries.assert_called_with(hits)
-        assert hits is not None
+        chits = cal.apply(hits)
+        assert chits is not None
+        chits = cal._apply_to_hitseries.assert_called_with(hits)
 
     def test_apply_to_hitseries(self):
 
