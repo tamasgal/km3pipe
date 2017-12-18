@@ -16,13 +16,8 @@ from timeit import default_timer as timer
 import types
 
 import numpy as np
-import pandas as pd
 
 from .sys import peak_memory_usage, ignored
-from .hardware import Detector
-from .dataclasses import (CRawHitSeries, HitSeries, RawHitSeries,
-                          CMcHitSeries, McHitSeries)
-from .tools import deprecated
 from .logger import logging
 from .time import Timer
 
@@ -220,7 +215,7 @@ class Pipeline(object):
             print("\nForced shutdown...")
             raise SystemExit
         if not self._stop:
-            hline = 42*'='
+            hline = 42 * '='
             print('\n' + hline + "\nGot CTRL+C, waiting for current cycle...\n"
                   "Press CTRL+C again if you're in hurry!\n" + hline)
             self._stop = True
@@ -257,7 +252,7 @@ class Pipeline(object):
         overall_cpu = self._timeit['finish_cpu'] - self._timeit['init_cpu']
         memory = peak_memory_usage()
 
-        print(60*'=')
+        print(60 * '=')
         print("{0} cycles drained in {1} (CPU {2}). Memory peak: {3:.2f} MB"
               .format(self._cycle_count,
                       timef(overall), timef(overall_cpu), memory))
@@ -349,11 +344,11 @@ class Module(object):
 
     def finish(self):
         """Clean everything up."""
-        pass
+        return
 
     def pre_finish(self):
         """Do the last few things before calling finish()"""
-        self.finish()
+        return self.finish()
 
     def __call__(self, *args, **kwargs):
         """Run process if directly called."""
@@ -373,7 +368,6 @@ class Pump(Module):
             Module.__init__(self, filename=args[0], **kwargs)
         else:
             Module.__init__(self, **kwargs)
-
 
     def open_file(self, filename):
         """Open the file with filename"""
@@ -407,8 +401,9 @@ class Pump(Module):
 
     def pre_finish(self):
         """Clean up open file or socket-handlers."""
-        self.finish()
+        out = self.finish()
         self.close_file()
+        return out
 
 
 class Blob(OrderedDict):
