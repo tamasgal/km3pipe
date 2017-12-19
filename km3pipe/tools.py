@@ -1,7 +1,5 @@
 # coding=utf-8
-# cython: profile=True
-# Filename: tools.pyx
-# cython: embedsignature=True
+# Filename: tools.py
 # pylint: disable=C0103
 """
 Some unsorted, frequently used logic.

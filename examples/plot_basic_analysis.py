@@ -47,7 +47,7 @@ km3pipe.style.use("km3pipe")
 # with the following command (put it in your ``~/.bashrc`` to load it
 # automatically in each shell session)::
 #
-#     source /afs/in2p3.fr/throng/km3net/src/python/pyenv.sh
+#     source $KM3NET_THRONG_DIR/src/python/pyenv.sh
 
 #####################################################
 # Converting from ROOT to HDF5 (if needed)

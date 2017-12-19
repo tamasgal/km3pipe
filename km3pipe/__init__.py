@@ -16,7 +16,6 @@ from .__version__ import version, VERSION_INFO  # noqa
 
 if not __KM3PIPE_SETUP__:
     from .core import (Pipeline, Module, Pump, Blob, Run, Geometry)  # noqa
-    from .io import Calibration  # noqa
     import km3pipe.io  # noqa
 
 

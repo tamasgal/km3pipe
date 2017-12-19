@@ -89,7 +89,7 @@ def main():
             raise SystemExit
 
         print("Reading calbration information")
-        cal = kp.Calibration(filename=args['DETXFILE'])
+        cal = kp.calib.Calibration(filename=args['DETXFILE'])
 
         if '/hits' in f:
             print("Calibrating hits")

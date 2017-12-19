@@ -19,7 +19,8 @@ from matplotlib import pylab
 import pandas as pd
 import numpy as np
 
-from km3pipe import Pipeline, Module, Calibration
+from km3pipe import Pipeline, Module
+from km3pipe.calib import Calibration
 from km3pipe.dataclasses import HitSeries
 from km3pipe.common import StringIO, Queue, Empty
 from km3pipe.io import CHPump

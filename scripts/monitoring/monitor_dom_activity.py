@@ -15,7 +15,7 @@ import km3pipe.style
 km3pipe.style.use('km3pipe')
 
 PLOTS_PATH = 'km3web/plots'
-cal = kp.Calibration(det_id=29)
+cal = kp.calib.Calibration(det_id=29)
 detector = cal.detector
 
 

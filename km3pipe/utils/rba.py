@@ -40,7 +40,7 @@ class RBAPrompt(Cmd):
         Cmd.__init__(self)
         self.filename = filename
         self.pump = kp.io.GenericPump(filename)
-        self.cal = kp.Calibration(filename=detx)
+        self.cal = kp.calib.Calibration(filename=detx)
         self.prompt = "> "
         self.current_idx = 0
         self.token = None
