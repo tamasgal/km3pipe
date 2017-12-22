@@ -270,7 +270,11 @@ class HDF5Sink(Module):
             if 'dom_id' in tab.colnames:
                 tab.cols.dom_id.create_index()
             if 'event_id' in tab.colnames:
-                tab.cols.event_id.create_index()
+                try:
+                    tab.cols.event_id.create_index()
+                except NotImplementedError:
+                    log.warn("Table {} has an uint64 column, "
+                             "not indexing...".format(tab._v_name))
             tab.flush()
 
         if "HDF5MetaData" in self.services:
@@ -347,7 +351,8 @@ class HDF5Pump(Pump):
                     self.cut_mask_node = '/' + self.cut_mask_node
                 self.cut_masks[fn] = h5file.get_node(self.cut_mask_node)[:]
                 self.log.debug(self.cut_masks[fn])
-                if not self.cut_masks[fn].shape[0] == self.event_ids[fn].shape[0]:
+                mask = self.cut_masks[fn]
+                if not mask.shape[0] == self.event_ids[fn].shape[0]:
                     raise ValueError("Cut mask length differs from event ids!")
             else:
                 self.cut_masks = None
