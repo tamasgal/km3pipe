@@ -65,9 +65,9 @@ A nice feature is, if you set the loglevel of a py module, it also sets
 the loglevel of all the Modules inside.
 E.g.::
 
-    kp.logger.set_level('kp.io.hdf5', 'DEBUG')
+    kp.logger.set_level('km3pipe.io.hdf5', 'DEBUG')
 
-will also set the loglevel of ``kp.io.hdf5.HDF5Pump`` to ``"DEBUG"`` :D .
+will also set the loglevel of ``km3pipe.io.hdf5.HDF5Pump`` to ``"DEBUG"`` :D .
 
 
 Modifying log levels of existing modules
