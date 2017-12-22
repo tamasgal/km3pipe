@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-from km3pipe import Pipeline, Calibration, Module
+from km3pipe import Pipeline, Module
+from km3pipe.calib import Calibration
 from km3pipe.io import EvtPump
 from km3modules.common import StatusBar
 import os

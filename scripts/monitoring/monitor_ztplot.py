@@ -16,7 +16,8 @@ import matplotlib.ticker as ticker
 import matplotlib.dates as md
 import numpy as np
 
-from km3pipe import Pipeline, Module, Calibration
+from km3pipe import Pipeline, Module
+from km3pipe.calib import Calibration
 from km3pipe.common import Queue, Empty
 from km3pipe.io import CHPump
 from km3pipe.io.daq import DAQProcessor

@@ -4,6 +4,19 @@ Unreleased changes
 Version 7
 ---------
 
+7.14.0 / 2017-12-22
+~~~~~~~~~~~~~~~~~~~
+* ``core.pyx`` and ``tools.pyx`` have been "depyxed"
+* ``Calibration.apply**`` (should) always returns the hits
+* ``Module.finish`` (and thus the pipeline!) actually return something now!
+* ``Calibration`` shortcut removed from ``km3pipe``, so now  you have to use
+  ``from km3pipe.calib import Calibration`` or just ``kp.calib.Calibration``
+  if you ``importe km3pipe as kp``.
+  This change was needed to be able to import __km3pipe__ in Julia.
+* ``kp.io.hdf5.HDF5Pump`` now accepts the path of a boolean cut mask,
+  e.g. ``cut_mask='/pid/survives_precut'``. If the bool mask is false, the 
+  event is skipped.
+
 7.13.2 / 2017-12-11
 ~~~~~~~~~~~~~~~~~~~
 * makefile tuning

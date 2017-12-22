@@ -11,11 +11,15 @@ Important Note for Users of the CC-IN3P3 in Lyon
 KM3Pipe is preinstalled on the Lyon computing centre. Put this into your
 `~/.bashrc` or `~/.zshenv` (or whatever login script you prefer):::
 
-    source /afs/in2p3.fr/throng/km3net/src/python/pyenv.sh
+    source $KM3NET_THRONG_DIR/src/python/pyenv.sh
 
-And you are ready to go!
-The Python environment also contains all important and commonly used scientific
-packages like scipy, numpy, scikit-learn, pandas etc.
+And you are ready to go! This will work on both Scientific Linux 6 and Cent OS
+machines as the ``$KM3NET_THRONG_DIR``, set by your group environment, is
+pointing to different directories.
+The Python environment also contains the latest versions of all important and
+commonly used scientific packages like scipy, numpy, scikit-learn, pandas etc.
+
+If you are missing any packages, contact us and we will install them.
 
 Requirements
 ------------

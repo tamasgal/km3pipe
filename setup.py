@@ -48,14 +48,6 @@ directives = {
 from km3pipe import version  # noqa
 
 
-tools = Extension('km3pipe.tools', sources=['km3pipe/tools.pyx'],
-                  extra_compile_args=['-O3', '-march=native', '-w'],
-                  define_macros=[('CYTHON_TRACE', str(CYTHON_TRACE))])
-
-core = Extension('km3pipe.core', sources=['km3pipe/core.pyx'],
-                 extra_compile_args=['-O3', '-march=native', '-w'],
-                 define_macros=[('CYTHON_TRACE', str(CYTHON_TRACE))])
-
 dataclasses = Extension('km3pipe.dataclasses',
                         sources=['km3pipe/dataclasses.pyx'],
                         extra_compile_args=['-O3', '-march=native', '-w'],
@@ -63,10 +55,10 @@ dataclasses = Extension('km3pipe.dataclasses',
 
 if CYTHON_TRACE and cythonize:
     print("Building KM3Pipe with line tracing and profiling extensions.")
-    ext_modules = cythonize([tools, core, dataclasses],
+    ext_modules = cythonize([dataclasses],
                             compiler_directives=directives)
 else:
-    ext_modules = [tools, core, dataclasses]
+    ext_modules = [dataclasses]
 
 
 require_groups = {
@@ -86,7 +78,7 @@ require_groups = {
     'analysis': ['matplotlib>=2.0.0', 'sklearn', 'statsmodels>=0.8',
                  'scipy>=0.19', 'seaborn', 'ipython', 'patsy', ],
     'daq': ['controlhost', ],
-    'io': ['tables==3.4.0', 'h5py', ],
+    'io': ['tables==3.4.2', 'h5py', ],
     'jpp': ['jppy>=1.3.1', ],
     'web': ['tornado', 'websocket-client', 'requests'],
     'testing': ['pytest', 'mock', ],

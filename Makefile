@@ -1,9 +1,11 @@
 PKGNAME=km3pipe
 
+default: build
+
 all: install
 
 build: 
-	python setup.py build_ext --inplace -j 4
+	python setup.py build_ext --inplace
 
 install: 
 	pip install -e ".[full]"
@@ -24,7 +26,7 @@ test-nocov: build
 	py.test km3modules
 
 test-loop: build
-	pip install -U pytest-watch
+	# pip install -U pytest-watch
 	py.test
 	ptw --ext=.py,.pyx --beforerun "make build"
 

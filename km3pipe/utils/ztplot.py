@@ -52,9 +52,9 @@ def main():
         event_info = blob['EventInfo']
         hits = blob['Hits']
         if(arguments['-d']):
-            cal = kp.core.Calibration(filename=arguments['-d'])
+            cal = kp.calib.Calibration(filename=arguments['-d'])
         else:
-            cal = kp.core.Calibration(det_id=event_info.det_id)
+            cal = kp.calib.Calibration(det_id=event_info.det_id)
         hits = cal.apply(hits)
         # triggered_dus = set(cal.detector.doms[h.dom_id][0] for h in hits)
         det = cal.detector

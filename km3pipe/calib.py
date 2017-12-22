@@ -84,9 +84,9 @@ class Calibration(Module):
         else:
             log.critical("No detector information loaded.")
 
-    def process(self, blob, key='Hits'):
+    def process(self, blob, key='Hits', outkey='CalibHits'):
         if self._should_apply:
-            self.apply(blob[key])
+            blob[outkey] = self.apply(blob[key])
         return blob
 
     def get_detector(self):
@@ -107,6 +107,7 @@ class Calibration(Module):
                                [i]][hits._arr['channel_id'][i]]
                 cal[i] = calib[6]
             hits.time += cal
+        return hits
 
     def apply(self, hits):
         """Add x, y, z, t0 (and du, floor if DataFrame) columns to hit.
@@ -118,9 +119,9 @@ class Calibration(Module):
         if isinstance(hits, RawHitSeries):
             return self._apply_to_rawhitseries(hits)
         elif isinstance(hits, (HitSeries, list)):
-            self._apply_to_hitseries(hits)
+            return self._apply_to_hitseries(hits)
         elif isinstance(hits, pd.DataFrame):
-            self._apply_to_table(hits)
+            return self._apply_to_table(hits)
         elif isinstance(hits, McHitSeries):
             return self._apply_to_mchitseries(hits)
         else:
@@ -143,6 +144,7 @@ class Calibration(Module):
             hits._arr['t0'][idx] = pmt.t0
             hits._arr['time'][idx] += pmt.t0
             # hit.a = hit.tot
+        return hits
 
     def _apply_to_rawhitseries(self, hits):
         """Create a HitSeries from RawHitSeries and add pos, dir and t0.
@@ -222,6 +224,7 @@ class Calibration(Module):
         table['t0'] = table.apply(lambda h: get_pmt(h).t0, axis=1)
         table['du'] = table.apply(lambda h: get_pmt(h).omkey[0], axis=1)
         table['floor'] = table.apply(lambda h: get_pmt(h).omkey[1], axis=1)
+        return table
 
     def _create_dom_channel_lookup(self):
         data = {}
