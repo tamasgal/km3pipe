@@ -1,5 +1,11 @@
 Unreleased changes
 ------------------
+
+Version 7
+---------
+
+7.14.0 / 2017-12-22
+~~~~~~~~~~~~~~~~~~~
 * ``core.pyx`` and ``tools.pyx`` have been "depyxed"
 * ``Calibration.apply**`` (should) always returns the hits
 * ``Module.finish`` (and thus the pipeline!) actually return something now!
@@ -10,9 +16,6 @@ Unreleased changes
 * ``kp.io.hdf5.HDF5Pump`` now accepts the path of a boolean cut mask,
   e.g. ``cut_mask='/pid/survives_precut'``. If the bool mask is false, the 
   event is skipped.
-
-Version 7
----------
 
 7.13.2 / 2017-12-11
 ~~~~~~~~~~~~~~~~~~~
