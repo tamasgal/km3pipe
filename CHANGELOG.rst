@@ -7,6 +7,9 @@ Unreleased changes
   ``from km3pipe.calib import Calibration`` or just ``kp.calib.Calibration``
   if you ``importe km3pipe as kp``.
   This change was needed to be able to import __km3pipe__ in Julia.
+* ``kp.io.hdf5.HDF5Pump`` now accepts the path of a boolean cut mask,
+  e.g. ``cut_mask='/pid/survives_precut'``. If the bool mask is false, the 
+  event is skipped.
 
 Version 7
 ---------
