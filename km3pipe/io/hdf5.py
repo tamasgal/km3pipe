@@ -289,8 +289,19 @@ class HDF5Pump(Pump):
     Parameters
     ----------
     filename: str
-        From where to read events.
-        """
+        From where to read events. Either this OR ``filenames`` needs to be
+        defined.
+    filenames: list_like(str)
+        Multiple filenames. Either this OR ``filename`` needs to be defined.
+    skip_version_check: bool [default: False]
+        Don't check the H5 version. Might lead to unintended consequences.
+    ignore_hits: bool [default: False]
+        If True, do not read any hit information.
+    cut_mask: str
+        H5 Node path to a boolean cut mask. If specified, use the boolean array
+        found at this node as a mask. ``False`` means "skip this event".
+        Example: ``cut_mask="/pid/survives_precut"``
+    """
 
     def configure(self):
         self.filename = self.get('filename') or None
@@ -298,6 +309,7 @@ class HDF5Pump(Pump):
         self.skip_version_check = bool(self.get('skip_version_check')) or False
         self.verbose = bool(self.get('verbose'))
         self.ignore_hits = bool(self.get('ignore_hits'))
+        selt.cut_mask_node = self.get('cut_mask') or None
         self.indices = {}
         if not self.filename and not self.filenames:
             raise ValueError("No filename(s) defined")
@@ -329,6 +341,14 @@ class HDF5Pump(Pump):
                 self.log.critical("No /event_info table found: '{0}'"
                                   .format(fn))
                 raise SystemExit
+            if self.cut_mask_node is not None:
+                if not self.cut_mask_node.startswith('/'):
+                    self.cut_mask_node = '/' + self.cut_mask_node
+                self.cut_mask = h5file.get_node(self.cut_mask_node)[:]
+                if not self.cut_mask.shape[0] == self.event_ids.shape[0]:
+                    raise ValueError("Cut mask length differs from event ids!")
+            else:
+                self.cut_mask = None
             self.h5files[fn] = h5file
         self._n_events = np.sum((v for k, v in self._n_each.items()))
         self.minmax = OrderedDict()
@@ -378,6 +398,9 @@ class HDF5Pump(Pump):
         evt_ids = self.event_ids[fname]
         local_index = self._translate_index(fname, index)
         event_id = evt_ids[local_index]
+        if self.cut_mask is not None:
+            if not self.cut_mask[local_index]:
+                return blob
 
         # skip groups with separate columns
         # and deal with them later
