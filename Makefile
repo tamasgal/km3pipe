@@ -5,7 +5,7 @@ default: build
 all: install
 
 build: 
-	python setup.py build_ext --inplace -j 4
+	python setup.py build_ext --inplace
 
 install: 
 	pip install -e ".[full]"
