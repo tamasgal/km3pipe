@@ -7,7 +7,7 @@ Read and write KM3NeT-formatted HDF5 files.
 """
 from __future__ import division, absolute_import, print_function
 
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 import os.path
 from six import itervalues, iteritems
 import warnings
@@ -309,7 +309,8 @@ class HDF5Pump(Pump):
         self.skip_version_check = bool(self.get('skip_version_check')) or False
         self.verbose = bool(self.get('verbose'))
         self.ignore_hits = bool(self.get('ignore_hits'))
-        selt.cut_mask_node = self.get('cut_mask') or None
+        self.cut_mask_node = self.get('cut_mask') or None
+        self.cut_masks = defaultdict(list)
         self.indices = {}
         if not self.filename and not self.filenames:
             raise ValueError("No filename(s) defined")
@@ -344,11 +345,12 @@ class HDF5Pump(Pump):
             if self.cut_mask_node is not None:
                 if not self.cut_mask_node.startswith('/'):
                     self.cut_mask_node = '/' + self.cut_mask_node
-                self.cut_mask = h5file.get_node(self.cut_mask_node)[:]
-                if not self.cut_mask.shape[0] == self.event_ids.shape[0]:
+                self.cut_masks[fn] = h5file.get_node(self.cut_mask_node)[:]
+                self.log.debug(self.cut_masks[fn])
+                if not self.cut_masks[fn].shape[0] == self.event_ids[fn].shape[0]:
                     raise ValueError("Cut mask length differs from event ids!")
             else:
-                self.cut_mask = None
+                self.cut_masks = None
             self.h5files[fn] = h5file
         self._n_events = np.sum((v for k, v in self._n_each.items()))
         self.minmax = OrderedDict()
@@ -398,9 +400,12 @@ class HDF5Pump(Pump):
         evt_ids = self.event_ids[fname]
         local_index = self._translate_index(fname, index)
         event_id = evt_ids[local_index]
-        if self.cut_mask is not None:
-            if not self.cut_mask[local_index]:
-                return blob
+        if self.cut_masks is not None:
+            self.log.debug('Cut masks found, applying...')
+            mask = self.cut_masks[fname]
+            if not mask[local_index]:
+                self.log.info('Cut mask blacklists this event, skipping...')
+                return
 
         # skip groups with separate columns
         # and deal with them later
