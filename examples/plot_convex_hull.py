@@ -13,7 +13,7 @@ from scipy.spatial import ConvexHull
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D     # noqa
 
-from km3pipe.core import Detector
+from km3pipe.hardware import Detector
 from km3pipe.math import Polygon
 import km3pipe.style
 km3pipe.style.use("km3pipe")
