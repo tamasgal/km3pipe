@@ -75,6 +75,7 @@ require_groups = {
     ],
     'base': ['cython', 'docopt', 'numpy>=1.12', 'pandas', 'pytz',
              'six==1.10', 'numexpr'],
+    'setup': ['setuptools>=24.3', 'pip>=9.0.1', 'cython', 'numpy'],
     'analysis': ['matplotlib>=2.0.0', 'sklearn', 'statsmodels>=0.8',
                  'scipy>=0.19', 'seaborn', 'ipython', 'patsy', ],
     'daq': ['controlhost', ],
@@ -85,10 +86,10 @@ require_groups = {
     'utils': ['urwid', ],
 }
 require_groups['most'] = list(chain.from_iterable(
-    [require_groups[k] for k in ('base', 'io', 'web', 'utils')],
+    [require_groups[k] for k in ('setup', 'base', 'io', 'web', 'utils')],
 ))
 require_groups['full'] = list(chain.from_iterable(
-    [require_groups[k] for k in ('base', 'io', 'web', 'utils', 'analysis',
+    [require_groups[k] for k in ('setup', 'base', 'io', 'web', 'utils', 'analysis',
                                  'testing', 'daq', 'docs')],
 ))
 
@@ -104,9 +105,8 @@ setup(name='km3pipe',
       cmdclass={'build_ext': build_ext},
       include_package_data=True,
       platforms='any',
-      setup_requires=['setuptools>=24.3', 'pip>=9.0.1', 'cython', 'numpy'],
-      install_requires=['cython', 'docopt', 'numpy>=1.12', 'pandas', 'pytz',
-                        'six==1.10', ],
+      setup_requires=require_groups['setup'],
+      install_requires=require_groups['base'],
       extras_require=require_groups,
       entry_points={
           'console_scripts': [
