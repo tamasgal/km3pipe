@@ -133,6 +133,7 @@ setup(name='km3pipe',
               'streamds=km3pipe.utils.streamds:main',
               'triggermap=km3pipe.utils.triggermap:main',
               'nb2sphx=km3pipe.utils.nb2sphx:main',
+              'km3h5concat=km3pipe.utils.km3h5concat:main',
           ],
       },
       classifiers=[
