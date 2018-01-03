@@ -54,6 +54,7 @@ class H5Chain(object):
 
     def __init__(self, filenames):
         self.filenames = filenames
+        self.log = logging.getLogger(self.__class__.__name__)
 
     def close(self):
         pass
@@ -79,7 +80,7 @@ class H5Chain(object):
                     self.log.error('{} does not exist in {}!'.format(
                         key, fname))
                     raise ne
-            self.debug("Table shape: {}".format(tab.shape))
+            self.log.debug("Table shape: {}".format(tab.shape))
             df = pd.DataFrame(tab)
             dfs.append(df)
         dfs = pd.concat(dfs, axis=0, ignore_index=True)
