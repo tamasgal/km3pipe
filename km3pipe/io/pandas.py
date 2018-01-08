@@ -37,7 +37,6 @@ class H5Chain(object):
     Parameters
     ----------
     filenames: list(str), or dict(fname -> h5file)
-    verbose: bool [default: False]
 
     Examples
     --------
@@ -49,13 +48,13 @@ class H5Chain(object):
     A context manager is also available:
 
     >>> with H5Chain(filenames) as h5:
-    >>>     reco = h5['/reco']
+    >>>     reco = h5['/reco/foo']
 
     """
 
-    def __init__(self, filenames, verbose=False):
+    def __init__(self, filenames):
         self.filenames = filenames
-        self.verbose = verbose
+        self.log = logging.getLogger(self.__class__.__name__)
 
     def close(self):
         pass
@@ -69,19 +68,19 @@ class H5Chain(object):
     def __getitem__(self, key):
         dfs = []
         for fname in self.filenames:
-            if self.verbose:
-                print('opening ', fname)
+            self.log.info('opening ', fname)
             with tb.File(fname, 'r') as h5:
                 try:
                     tab = h5.get_node(key)[:]
                 except KeyError as ke:
-                    log.error('{} does not exist in {}!'.format(key, fname))
+                    self.log.error('{} does not exist in {}!'.format(
+                        key, fname))
                     raise ke
                 except tb.exceptions.NodeError as ne:
-                    log.error('{} does not exist in {}!'.format(key, fname))
+                    self.log.error('{} does not exist in {}!'.format(
+                        key, fname))
                     raise ne
-            if self.verbose:
-                print(tab.shape)
+            self.log.debug("Table shape: {}".format(tab.shape))
             df = pd.DataFrame(tab)
             dfs.append(df)
         dfs = pd.concat(dfs, axis=0, ignore_index=True)
@@ -185,11 +184,3 @@ def write_table(array, h5file, where, force=False):
         h5file.get_node(where)[:] = array
     if own_h5:
         h5file.close()
-
-
-def first_mc_tracks(mc_tracks, mupage=False):
-    mc_tracks = pd.DataFrame(mc_tracks)
-    if mupage:
-        mc_tracks = mc_tracks[mc_tracks.type != 0]
-        mc_tracks = mc_tracks[mc_tracks.id == 1]
-    return mc_tracks.drop_duplicates(subset='event_id')
