@@ -11,7 +11,7 @@ Pep 386 compliant version info.
 
 """
 
-VERSION_INFO = (7, 14, 0, 'final', 0)
+VERSION_INFO = (7, 14, 1, 'final', 0)
 
 import json
 try:

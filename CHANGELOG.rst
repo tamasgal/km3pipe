@@ -4,6 +4,11 @@ Unreleased changes
 Version 7
 ---------
 
+7.14.1 / 2018-01-09
+~~~~~~~~~~~~~~~~~~~
+* Windows compatible version of `sys.peak_memory`. KM3Pipe should now compile
+  and work under windows...
+
 7.14.0 / 2017-12-22
 ~~~~~~~~~~~~~~~~~~~
 * ``core.pyx`` and ``tools.pyx`` have been "depyxed"

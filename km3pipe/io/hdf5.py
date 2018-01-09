@@ -273,7 +273,7 @@ class HDF5Sink(Module):
                 try:
                     tab.cols.event_id.create_index()
                 except NotImplementedError:
-                    log.warn("Table {} has an uint64 column, "
+                    log.warn("Table '{}' has an uint64 column, "
                              "not indexing...".format(tab._v_name))
             tab.flush()
 
@@ -329,6 +329,7 @@ class HDF5Pump(Pump):
         self._n_each = OrderedDict()
         self.h5files = OrderedDict()
         for fn in self.filenames:
+            self.log.debug(fn)
             # Open all files before reading any events
             # So we can raise version mismatches etc before reading anything
             if os.path.isfile(fn):
@@ -458,7 +459,10 @@ class HDF5Pump(Pump):
         # currently hardcoded, in future using hdf5 attributes
         # to get the right constructor
         for loc in skipped_locs:
-            idx, n_items = self.indices[loc][event_id]
+            # if some events are missing (event_id not continuous),
+            # this does not work as intended
+            # idx, n_items = self.indices[loc][event_id]
+            idx, n_items = self.indices[loc][local_index]
             end = idx + n_items
             if loc == '/hits' and not self.ignore_hits:
                 channel_id = h5file.get_node("/hits/channel_id")[idx:end]
