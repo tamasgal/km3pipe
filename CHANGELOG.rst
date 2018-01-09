@@ -1,9 +1,13 @@
 Unreleased changes
 ------------------
-* Windows compatible version of `sys.peak_memory`
 
 Version 7
 ---------
+
+7.14.1 / 2018-01-09
+~~~~~~~~~~~~~~~~~~~
+* Windows compatible version of `sys.peak_memory`. KM3Pipe should now compile
+  and work under windows...
 
 7.14.0 / 2017-12-22
 ~~~~~~~~~~~~~~~~~~~
