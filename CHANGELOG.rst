@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* Windows compatible version of `sys.peak_memory`
 
 Version 7
 ---------
