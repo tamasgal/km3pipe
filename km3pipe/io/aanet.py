@@ -294,6 +294,8 @@ class AanetPump(Pump):
             run_id = self.header_run_id
         else:
             run_id = event.run_id
+        if run_id == '':
+            run_id = -1
         try:
             ei_data = np.array((
                 event.det_id,

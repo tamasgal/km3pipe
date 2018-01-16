@@ -70,16 +70,18 @@ interact with the database directly from the shell::
     Usage:
         streamds
         streamds list
+        streamds upload [-q] CSV_FILE
         streamds info STREAM
-        streamds STREAM [PARAMETERS...]
+        streamds get STREAM [PARAMETERS...]
         streamds (-h | --help)
         streamds --version
 
     Options:
         STREAM      Name of the stream.
+        CSV_FILE    Tab separated data for the runsummary tables.
         PARAMETERS  List of parameters separated by space (e.g. detid=29).
+        -q          Dryrun! This will upload the parameters with a TEST_ prefix.
         -h --help   Show this screen.
-
 
 PipeInspector
 -------------

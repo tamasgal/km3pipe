@@ -273,7 +273,7 @@ class HDF5Sink(Module):
                 try:
                     tab.cols.event_id.create_index()
                 except NotImplementedError:
-                    log.warn("Table {} has an uint64 column, "
+                    log.warn("Table '{}' has an uint64 column, "
                              "not indexing...".format(tab._v_name))
             tab.flush()
 
