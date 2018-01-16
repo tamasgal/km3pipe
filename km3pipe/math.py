@@ -11,6 +11,7 @@ from __future__ import division, absolute_import, print_function
 from matplotlib.path import Path
 import numpy as np
 import scipy.linalg
+import scipy.stats
 
 
 from .logger import logging
@@ -405,3 +406,16 @@ def mad(v):
     """MAD -- Median absolute deviation. More robust than standard deviation.
     """
     return np.median(np.abs(v - np.median(v)))
+
+
+class loguniform(scipy.stats.rv_continuous):
+    "Loguniform Distributon"
+    def __init__(self, low=0.1, high=1, base=10, *args, **kwargs):
+        super(self.__class__, self).__init__(*args, **kwargs)
+        self.low = low
+        self.high = high
+
+    def _rvs(self, *args, **kwargs):
+        # `rvs(size=foo, *args)` does argcheck etc, and sets `self._size`
+        return np.power(self.base, np.random.uniform(
+            self.low, self.high, self._size))
