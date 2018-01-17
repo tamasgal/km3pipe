@@ -11,6 +11,9 @@ build-trace:
 	python setup.py build_ext --inplace --define CYTHON_TRACE
 
 install: 
+	pip install ".[full]"
+
+install-dev: 
 	pip install -e ".[full]"
 
 clean:
