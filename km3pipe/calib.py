@@ -29,7 +29,7 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 try:
     import numba as nb
-except ImportError:
+except ImportError, OSError:
     log.debug("No Numba support")
     HAVE_NUMBA = False
 else:
