@@ -4,10 +4,17 @@ Unreleased changes
 Version 7
 ---------
 
+7.14.2 / 2018-01-17
+~~~~~~~~~~~~~~~~~~~
+* add loguniform distribution (``kp.math``)
+* add contextmanager for pumps (``with HDF5Pump(fname) as h5: print(h5[0])``)
+* clean up makefile / installer docs
+
 7.14.1 / 2018-01-09
 ~~~~~~~~~~~~~~~~~~~
 * Windows compatible version of `sys.peak_memory`. KM3Pipe should now compile
   and work under windows...
+* fix issues with hit indexing when merging multiple h5 files
 
 7.14.0 / 2017-12-22
 ~~~~~~~~~~~~~~~~~~~

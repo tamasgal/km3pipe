@@ -405,6 +405,16 @@ class Pump(Module):
         self.close_file()
         return out
 
+    def close(self):
+        self.finish()
+
+    def __enter__(self, *args, **kwargs):
+        self.configure(*args, **kwargs)
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        self.finish()
+
 
 class Blob(OrderedDict):
     """A simple (ordered) dict with a fancy name. This should hold the data."""

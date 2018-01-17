@@ -68,6 +68,16 @@ class TestH5Pump(TestCase):
     def test_init_sets_filename_if_no_keyword_arg_is_passed(self):
         p = HDF5Pump(self.fname)
         self.assertEqual(self.fname, p.filename)
+        p.finish()
+
+    def test_context(self):
+        with HDF5Pump(self.fname) as h5:
+            self.assertEqual(self.fname, h5.filename)
+            assert h5[0] is not None
+            for blob in h5:
+                print(blob)
+                assert blob is not None
+                break
 
     def test_standalone(self):
         pump = HDF5Pump(filename=self.fname)

@@ -7,22 +7,29 @@ all: install
 build: 
 	python setup.py build_ext --inplace
 
+build-trace:
+	python setup.py build_ext --inplace --define CYTHON_TRACE
+
 install: 
+	pip install ".[full]"
+
+install-dev: 
 	pip install -e ".[full]"
 
 clean:
 	python setup.py clean --all
 	rm -f $(PKGNAME)/*.cpp
+	rm -f $(PKGNAME)/*.c
 	rm -f -r build/
 	rm -f $(PKGNAME)/*.so
 
 test: build
-	py.test --junitxml=./junit.xml \
-		--cov ./ --cov-report term-missing --cov-report xml || true
+	py.test --junitxml=./junit.xml || true
 	py.test km3modules || true
 
-test-nocov: build
-	py.test --junitxml=./junit.xml || true
+test-cov: build
+	py.test --junitxml=./junit.xml \
+		--cov ./ --cov-report term-missing --cov-report xml || true
 	py.test km3modules || true
 
 test-loop: build

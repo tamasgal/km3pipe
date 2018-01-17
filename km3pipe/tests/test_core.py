@@ -299,6 +299,10 @@ class TestPump(TestCase):
         pump.rewind_file()
         self.assertEqual(0, pump.blob_file.tell())
 
+    def test_context(self):
+        with Pump() as p:
+            print(p)
+
 
 class TestBlob(TestCase):
     """Tests for the blob holding the data"""

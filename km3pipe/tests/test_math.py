@@ -4,13 +4,14 @@
 from __future__ import division, absolute_import, print_function
 
 import numpy as np
+from numpy.testing import (assert_almost_equal, assert_allclose)
 import pytest
 
 from km3pipe.testing import TestCase
 from km3pipe.math import (
     angle_between, pld3, com, zenith, azimuth, Polygon, IrregularPrism,
     rotation_matrix, SparseCone, space_angle, hsin, phi, theta,
-    unit_vector, innerprod_1d
+    unit_vector, innerprod_1d, loguniform, log_b
 )
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
@@ -39,30 +40,30 @@ class TestMath(TestCase):
 
     def test_phi(self):
         print(phi((1, 0, 0)))
-        self.assertTrue(np.allclose(0, phi((1, 0, 0))))
-        self.assertTrue(np.allclose(np.pi, phi((-1, 0, 0))))
-        self.assertTrue(np.allclose(np.pi / 2, phi((0, 1, 0))))
-        self.assertTrue(np.allclose(np.pi / 2 * 3, phi((0, -1, 0))))
-        self.assertTrue(np.allclose(np.pi / 2 * 3, phi((0, -1, 0))))
-        self.assertTrue(np.allclose(0, phi((0, 0, 0))))
-        self.assertTrue(np.allclose(phi(self.v), 1.10714872))
-        self.assertTrue(np.allclose(phi(self.vecs),
-                                    np.array([1.57079633, 0.78539816,
-                                              0.46364761, 0.32175055,
-                                              0.24497866])))
+        assert_almost_equal(0, phi((1, 0, 0)))
+        assert_almost_equal(np.pi, phi((-1, 0, 0)))
+        assert_almost_equal(np.pi / 2, phi((0, 1, 0)))
+        assert_almost_equal(np.pi / 2 * 3, phi((0, -1, 0)))
+        assert_almost_equal(np.pi / 2 * 3, phi((0, -1, 0)))
+        assert_almost_equal(0, phi((0, 0, 0)))
+        assert_almost_equal(phi(self.v), 1.10714872)
+        assert_almost_equal(phi(self.vecs),
+                            np.array([1.57079633, 0.78539816,
+                                      0.46364761, 0.32175055,
+                                      0.24497866]))
 
     def test_zenith(self):
-        self.assertTrue(np.allclose(np.pi, zenith((0, 0, 1))))
-        self.assertTrue(np.allclose(0, zenith((0, 0, -1))))
-        self.assertTrue(np.allclose(np.pi / 2, zenith((0, 1, 0))))
-        self.assertTrue(np.allclose(np.pi / 2, zenith((0, -1, 0))))
-        self.assertTrue(np.allclose(np.pi / 4 * 3, zenith((0, 1, 1))))
-        self.assertTrue(np.allclose(np.pi / 4 * 3, zenith((0, -1, 1))))
-        self.assertAlmostEqual(zenith(self.v), 2.5010703409103687)
-        self.assertTrue(np.allclose(zenith(self.vecs),
-                                    np.array([2.94419709, 2.80175574,
-                                              2.50107034, 2.13473897,
-                                              1.80873745])))
+        assert_allclose(np.pi, zenith((0, 0, 1)))
+        assert_allclose(0, zenith((0, 0, -1)))
+        assert_allclose(np.pi / 2, zenith((0, 1, 0)))
+        assert_allclose(np.pi / 2, zenith((0, -1, 0)))
+        assert_allclose(np.pi / 4 * 3, zenith((0, 1, 1)))
+        assert_allclose(np.pi / 4 * 3, zenith((0, -1, 1)))
+        assert_almost_equal(zenith(self.v), 2.5010703409103687)
+        assert_allclose(zenith(self.vecs),
+                        np.array([2.94419709, 2.80175574,
+                                  2.50107034, 2.13473897,
+                                  1.80873745]))
 
     def test_azimuth(self):
         self.assertTrue(np.allclose(np.pi, azimuth((1, 0, 0))))
@@ -266,3 +267,28 @@ class TestRotation(TestCase):
         assert len(circ_samp) == n_angles
         assert len(axis_samp) == 2
         assert len(samp) == len(circ_samp) + 2
+
+
+class TestLog(TestCase):
+    def test_val(self):
+        assert_allclose(log_b(5, 2), np.log2(5))
+        assert_allclose(log_b(5, 10), np.log10(5))
+        assert_allclose(log_b(5, np.e), np.log(5))
+
+
+class TestLogUniform(TestCase):
+    def setUp(self):
+        np.random.seed(1234)
+
+    def test_rvs(self):
+        lo, hi = 0.1, 10
+        dist = loguniform(low=lo, high=hi, base=10)
+        r = dist.rvs(size=100)
+        assert r.shape == (100,)
+        assert np.all(r <= hi)
+        assert np.all(r >= lo)
+        dist = loguniform(low=lo, high=hi, base=2)
+        r2 = dist.rvs(size=500)
+        assert r2.shape == (500,)
+        assert np.all(r2 <= hi)
+        assert np.all(r2 >= lo)

@@ -516,11 +516,6 @@ class HDF5Pump(Pump):
 
         return blob
 
-    def finish(self):
-        """Clean everything up"""
-        for h5 in itervalues(self.h5files):
-            h5.close()
-
     def _reset_index(self):
         """Reset index to default value"""
         self.index = 0
