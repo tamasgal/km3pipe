@@ -2,6 +2,7 @@ Unreleased changes
 ------------------
 
 * add loguniform distribution (``kp.math``)
+* add contextmanager for hdf5pump
 
 Version 7
 ---------
