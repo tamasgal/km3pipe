@@ -1,6 +1,8 @@
 Unreleased changes
 ------------------
 
+* add loguniform distribution (``kp.math``)
+
 Version 7
 ---------
 
@@ -8,6 +10,7 @@ Version 7
 ~~~~~~~~~~~~~~~~~~~
 * Windows compatible version of `sys.peak_memory`. KM3Pipe should now compile
   and work under windows...
+* fix issues with hit indexing when merging multiple h5 files
 
 7.14.0 / 2017-12-22
 ~~~~~~~~~~~~~~~~~~~
