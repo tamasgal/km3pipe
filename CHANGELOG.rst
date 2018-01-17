@@ -3,6 +3,7 @@ Unreleased changes
 
 * add loguniform distribution (``kp.math``)
 * add contextmanager for pumps (``with HDF5Pump(fname) as h5: print(h5[0])``)
+* clean up makefile / installer docs
 
 Version 7
 ---------
