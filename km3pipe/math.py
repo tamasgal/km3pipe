@@ -408,14 +408,20 @@ def mad(v):
     return np.median(np.abs(v - np.median(v)))
 
 
+def log_b(arg, base):
+    """Logarithm to any base"""
+    return np.log(arg) / np.log(base)
+
+
 class loguniform(scipy.stats.rv_continuous):
     "Loguniform Distributon"
-    def __init__(self, low=0.1, high=1, *args, **kwargs):
+    def __init__(self, low=0.1, high=1, base=10, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
-        self._log_low = np.log10(low)
-        self._log_high = np.log10(high)
+        self._log_low = log_b(low, base=base)
+        self._log_high = log_b(high, base=base)
+        self._base_of_log = base
 
     def _rvs(self, *args, **kwargs):
         # `rvs(size=foo, *args)` does argcheck etc, and sets `self._size`
-        return np.power(10, np.random.uniform(
+        return np.power(self._base_of_log, np.random.uniform(
             self._log_low, self._log_high, self._size))
