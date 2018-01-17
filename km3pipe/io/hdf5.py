@@ -521,6 +521,13 @@ class HDF5Pump(Pump):
         for h5 in itervalues(self.h5files):
             h5.close()
 
+    def __enter__(self, *args, **kwargs):
+        self.configure(*args, **kwargs)
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        self.finish()
+
     def _reset_index(self):
         """Reset index to default value"""
         self.index = 0
