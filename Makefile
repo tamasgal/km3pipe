@@ -13,7 +13,7 @@ build-trace:
 install: 
 	pip install ".[full]"
 
-install-dev: 
+install-dev: dev-dependencies
 	pip install -e ".[full]"
 
 clean:
