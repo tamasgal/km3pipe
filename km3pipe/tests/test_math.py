@@ -4,6 +4,7 @@
 from __future__ import division, absolute_import, print_function
 
 import numpy as np
+from numpy.testing import (assert_almost_equal, assert_allclose)
 import pytest
 
 from km3pipe.testing import TestCase
@@ -39,30 +40,30 @@ class TestMath(TestCase):
 
     def test_phi(self):
         print(phi((1, 0, 0)))
-        self.assertTrue(np.allclose(0, phi((1, 0, 0))))
-        self.assertTrue(np.allclose(np.pi, phi((-1, 0, 0))))
-        self.assertTrue(np.allclose(np.pi / 2, phi((0, 1, 0))))
-        self.assertTrue(np.allclose(np.pi / 2 * 3, phi((0, -1, 0))))
-        self.assertTrue(np.allclose(np.pi / 2 * 3, phi((0, -1, 0))))
-        self.assertTrue(np.allclose(0, phi((0, 0, 0))))
-        self.assertTrue(np.allclose(phi(self.v), 1.10714872))
-        self.assertTrue(np.allclose(phi(self.vecs),
-                                    np.array([1.57079633, 0.78539816,
-                                              0.46364761, 0.32175055,
-                                              0.24497866])))
+        assert_almost_equal(0, phi((1, 0, 0)))
+        assert_almost_equal(np.pi, phi((-1, 0, 0)))
+        assert_almost_equal(np.pi / 2, phi((0, 1, 0)))
+        assert_almost_equal(np.pi / 2 * 3, phi((0, -1, 0)))
+        assert_almost_equal(np.pi / 2 * 3, phi((0, -1, 0)))
+        assert_almost_equal(0, phi((0, 0, 0)))
+        assert_almost_equal(phi(self.v), 1.10714872)
+        assert_almost_equal(phi(self.vecs),
+                            np.array([1.57079633, 0.78539816,
+                                      0.46364761, 0.32175055,
+                                      0.24497866]))
 
     def test_zenith(self):
-        self.assertTrue(np.allclose(np.pi, zenith((0, 0, 1))))
-        self.assertTrue(np.allclose(0, zenith((0, 0, -1))))
-        self.assertTrue(np.allclose(np.pi / 2, zenith((0, 1, 0))))
-        self.assertTrue(np.allclose(np.pi / 2, zenith((0, -1, 0))))
-        self.assertTrue(np.allclose(np.pi / 4 * 3, zenith((0, 1, 1))))
-        self.assertTrue(np.allclose(np.pi / 4 * 3, zenith((0, -1, 1))))
-        self.assertAlmostEqual(zenith(self.v), 2.5010703409103687)
-        self.assertTrue(np.allclose(zenith(self.vecs),
-                                    np.array([2.94419709, 2.80175574,
-                                              2.50107034, 2.13473897,
-                                              1.80873745])))
+        assert_allclose(np.pi, zenith((0, 0, 1)))
+        assert_allclose(0, zenith((0, 0, -1)))
+        assert_allclose(np.pi / 2, zenith((0, 1, 0)))
+        assert_allclose(np.pi / 2, zenith((0, -1, 0)))
+        assert_allclose(np.pi / 4 * 3, zenith((0, 1, 1)))
+        assert_allclose(np.pi / 4 * 3, zenith((0, -1, 1)))
+        assert_almost_equal(zenith(self.v), 2.5010703409103687)
+        assert_allclose(zenith(self.vecs),
+                        np.array([2.94419709, 2.80175574,
+                                  2.50107034, 2.13473897,
+                                  1.80873745]))
 
     def test_azimuth(self):
         self.assertTrue(np.allclose(np.pi, azimuth((1, 0, 0))))
@@ -270,16 +271,16 @@ class TestRotation(TestCase):
 
 class TestLog(TestCase):
     def test_val(self):
-        assert np.allclose(log_b(5, 2), np.log2(5))
-        assert np.allclose(log_b(5, 10), np.log10(5))
-        assert np.allclose(log_b(5, np.e), np.log(5))
+        assert_allclose(log_b(5, 2), np.log2(5))
+        assert_allclose(log_b(5, 10), np.log10(5))
+        assert_allclose(log_b(5, np.e), np.log(5))
 
 
 class TestLogUniform(TestCase):
     def setUp(self):
         np.random.seed(1234)
 
-    def test_shape(self):
+    def test_rvs(self):
         lo, hi = 0.1, 10
         dist = loguniform(low=lo, high=hi, base=10)
         r = dist.rvs(size=100)
