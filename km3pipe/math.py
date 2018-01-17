@@ -414,7 +414,7 @@ def log_b(arg, base):
 
 
 class loguniform(scipy.stats.rv_continuous):
-    "Loguniform Distributon"
+    """Loguniform Distributon"""
     def __init__(self, low=0.1, high=1, base=10, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
         self._log_low = log_b(low, base=base)
