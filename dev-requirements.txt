@@ -5,3 +5,4 @@ pytest-flake8
 pytest-pylint
 twine
 six==1.10
+numba
