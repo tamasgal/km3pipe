@@ -27,18 +27,6 @@ Refrain from importing ROOT utils in an init file
 Seriously, don't. ROOT is a very optional requirement, and even if you have 
 it installed, you get very weird crashes in unexpected places.
 
-Install in Developer Mode
--------------------------
-
-Setup a Virtualenv for your New Version
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-TODO.
-
-Enter the virtualenv::
-
-    workon km3pipe
-
 
 Make a Fork of KM3Pipe
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -47,38 +35,47 @@ Go to ``http://git.km3net.de/km3py/km3pipe`` and click on "Fork".
 
 
 Install in Developer Mode
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 
-Fetch the develop branch from git repository (replace YOURUSER with you
-git user name)::
+KM3Pipe can be install in `dev-mode`, which means, it links itself to your
+site-packages and you can edit the sources and test them without the need
+to reinstall KM3Pipe all the time.
 
-    git clone git+http://git.km3net.de/YOURUSER/km3pipe.git@develop
-    cd km3pipe
+Clone the git repository and run::
 
-Install in editable mode::
+    $ git clone git+http://git.km3net.de/YOURUSER/km3pipe.git
+    $ cd km3pipe
+    $ git checkout develop  # our main development branch (should be always stable)
+    $ make install-dev
+
+Make sure to run the test suite after you made changes to see if you broke
+anything::
+
+    $ make test
     
-    pip install -e ./ 
+You can also start a script which will watch for file changes and retrigger
+a test suite run every time for you. It's a nice practice to have a terminal
+open running this script to check your test results continuously::
+
+    $ make test-loop
+
+
+
+We develop new features and fix bugs on separate branches and merge them
+back to ``develop`` when they are stable.
 
 *While on the ``develop`` branch*, create a feature branch::
 
-    git co -b feature/my_cool_new_class
+    $ git co -b feature/my_cool_new_class
 
 
 When Editing ``.pyx`` files, recompile
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Run the build script to recompile them::
 
-Make Sure all Tests pass
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-Install & run the ``pytest`` suite::
-
-    pip install pytest
-
-    cd /path/to/km3pipe
-    py.test
+    $ make
 
 
 Create a Merge Request (aka Pull Request)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
+TODO
