@@ -48,6 +48,9 @@ help:
 	@echo "  linkcheck  to check all external links for integrity"
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
 
+doc-dependencies:
+	pip install -Ur ../sphinx_requirements.txt
+
 clean:
 	rm -rf $(BUILDDIR)/*
 	rm -rf auto_examples/
