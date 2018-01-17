@@ -32,7 +32,7 @@ To install km3pipe, you need:
 
 - C compiler, e.g. ``gcc``.
 
-- HDF5 (the hdf5lib C library, e.g. `apt-get install hdf5`)
+- HDF5 (the hdf5lib C library, e.g. `apt-get install hdf5` or `yum install hdf5`)
 
 (Recommended) PyEnv or Virtual Environments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -56,19 +56,58 @@ You can also use virtual environments (https://virtualenvwrapper.readthedocs.io)
 Install
 -------
 
-
-To install the latest stable version:::
-
-    $ pip install km3pipe[full]
-
-If you encounter any errors complaining about `pyx` files, install `Cython`
-first. At this point you might also install `numpy`::
+First install `numpy` and `Cython`::
 
     $ pip install cython numpy
+
+To install the latest stable version fromm the PyPI repository:::
+
+    $ pip install "km3pipe[full]"
 
 To get the development version, use:::
 
     $ pip install git+http://git.km3net.de/km3py/km3pipe.git@develop
+
+
+Install from Source
+-------------------
+
+To install KM3Pipe from source, clone the git repository::
+
+    $ git clone http://git.km3net.de/km3py/km3pipe.git
+
+check out your desired branch::
+
+    $ git checkout master  # or develop for the latest development version 
+
+and run::
+
+    $ make install
+
+To install it in development-mode, which will just link the folder to your
+Python site-packages, so you will be able to modify KM3Pipe and use it immediately
+without the need to reinstall it::
+
+    $ make install-dev
+
+Just keep in mind, if you change `.pyx` files, you have to recompile them::
+
+    $ make
+
+Run the Test Suite
+------------------
+
+To run the unit test suite, you can either run::
+
+    $ km3pipe test
+
+or if you have checked out the sources::
+
+    $ make test
+
+If you are missing any test plugins, install them via::
+
+    $ make dev-dependencies
 
 
 Updating
@@ -86,6 +125,13 @@ To get the latest developer version::
 Or you can of course use `pip`::
 
     $ pip install --upgrade km3pipe
+
+If you installed KM3Pipe from source via `make install-dev`,
+you simply pull the changes from git and rebuild it::
+
+    $ cd /path/to/km3pipe_repo
+    $ git pull
+    $ make
 
 
 Configuration
