@@ -10,7 +10,7 @@ from km3pipe.testing import TestCase
 from km3pipe.math import (
     angle_between, pld3, com, zenith, azimuth, Polygon, IrregularPrism,
     rotation_matrix, SparseCone, space_angle, hsin, phi, theta,
-    unit_vector, innerprod_1d
+    unit_vector, innerprod_1d, loguniform
 )
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
@@ -266,3 +266,16 @@ class TestRotation(TestCase):
         assert len(circ_samp) == n_angles
         assert len(axis_samp) == 2
         assert len(samp) == len(circ_samp) + 2
+
+
+class TestLogUniform(TestCase):
+    def setUp(self):
+        np.random.seed(1234)
+
+    def test_shape(self):
+        lo, hi = 0.1, 10
+        dist = loguniform(low=lo, high=hi)
+        r = dist.rvs(size=3)
+        assert r.shape == (3,)
+        assert np.all(r <= hi)
+        assert np.all(r >= lo)

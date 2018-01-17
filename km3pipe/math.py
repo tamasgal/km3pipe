@@ -410,12 +410,12 @@ def mad(v):
 
 class loguniform(scipy.stats.rv_continuous):
     "Loguniform Distributon"
-    def __init__(self, low=0.1, high=1, base=10, *args, **kwargs):
+    def __init__(self, low=0.1, high=1, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
-        self.low = low
-        self.high = high
+        self._log_low = np.log10(low)
+        self._log_high = np.log10(high)
 
     def _rvs(self, *args, **kwargs):
         # `rvs(size=foo, *args)` does argcheck etc, and sets `self._size`
-        return np.power(self.base, np.random.uniform(
-            self.low, self.high, self._size))
+        return np.power(10, np.random.uniform(
+            self._log_low, self._log_high, self._size))
