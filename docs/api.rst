@@ -19,7 +19,6 @@ KM3Pipe: Main Framework
   :toctree: api
 
   Blob
-  Calibration
   Module
   Pipeline
   Pump
@@ -85,6 +84,7 @@ KM3Pipe: Main Framework
   :toctree: api
 
   DBManager
+  StreamDS
 
 
 ``km3pipe.hardware``
@@ -256,8 +256,13 @@ KM3Modules: Pipeline Segments
 .. autosummary::
   :toctree: api
 
-  CoincidenceFinder
+  K40BackgroundSubtractor
   IntraDOMCalibrator
+  TwofoldCounter
+  HRVFIFOTimesliceFilter
+  SummaryMedianPMTRateService
+  MedianPMTRatesService
+  ResetTwofoldCounts
   calculate_angles
   calculate_rms_means
   calculate_rms_rates
