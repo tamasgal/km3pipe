@@ -638,7 +638,7 @@ def fit_angular_distribution(angles, rates, rate_errors, shape='pexp'):
 
     Returns
     -------
-    fitted_rates: numpy array of fitted rates (fit_function(angles, *popt))
+    fitted_rates: numpy array of fitted rates (fit_function(angles, popt...))
 
     """
     if shape == 'exp':
