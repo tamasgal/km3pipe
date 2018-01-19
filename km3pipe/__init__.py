@@ -32,7 +32,7 @@ if not __KM3PIPE_SETUP__:
     import km3pipe.mc  # noqa
     import km3pipe.shell  # noqa
     # import km3pipe.srv  # noqa
-    import km3pipe.style  # noqa
+    # import km3pipe.style  # noqa
     import km3pipe.sys  # noqa
     import km3pipe.testing  # noqa
     import km3pipe.time  # noqa
