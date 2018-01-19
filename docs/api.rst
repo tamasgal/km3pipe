@@ -85,6 +85,12 @@ KM3Pipe: Main Framework
 
   DBManager
   StreamDS
+  ParametersContainer
+  DOMContainer
+  DOM
+  we_are_in_lyon
+  clbupi2ahrsupi
+  show_ahrs_calibration
 
 
 ``km3pipe.hardware``
@@ -144,6 +150,8 @@ KM3Pipe: Main Framework
   :toctree: api
 
   LogIO
+  get
+  set_level
 
 
 ``km3pipe.srv``
