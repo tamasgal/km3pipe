@@ -140,6 +140,7 @@ class TimeslicePump(Pump):
     Required Parameters
     -------------------
     filename: str
+    stream: str ('L0', 'L1', 'L2', 'SN') default: 'L1'
 
     """
 
@@ -153,6 +154,7 @@ class TimeslicePump(Pump):
             raise ImportError("\nEither Jpp or jppy could not be found."
                               "\nMake sure you source the JPP environmanet "
                               "and have jppy installed")
+        stream = 'JDAQTimeslice' + stream
         self.r = jppy.daqtimeslicereader.PyJDAQTimesliceReader(fname, stream)
         self.n_timeslices = self.r.n_timeslices
 
