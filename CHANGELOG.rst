@@ -4,6 +4,11 @@ Unreleased changes
 Version 7
 ---------
 
+7.15.0 / 2018-01-19
+~~~~~~~~~~~~~~~~~~~
+* ``TimeslicePump`` now supports the readout of any stream ("L0", "L1", "SN"...)
+* Minor bugfixes (km3pipe has no attribute named hardware...)
+
 7.14.3 / 2018-01-17
 ~~~~~~~~~~~~~~~~~~~
 * add loguniform distribution (``kp.math``)
