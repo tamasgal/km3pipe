@@ -19,7 +19,6 @@ KM3Pipe: Main Framework
   :toctree: api
 
   Blob
-  Calibration
   Module
   Pipeline
   Pump
@@ -85,6 +84,13 @@ KM3Pipe: Main Framework
   :toctree: api
 
   DBManager
+  StreamDS
+  ParametersContainer
+  DOMContainer
+  DOM
+  we_are_in_lyon
+  clbupi2ahrsupi
+  show_ahrs_calibration
 
 
 ``km3pipe.hardware``
@@ -144,6 +150,8 @@ KM3Pipe: Main Framework
   :toctree: api
 
   LogIO
+  get
+  set_level
 
 
 ``km3pipe.srv``
@@ -256,8 +264,13 @@ KM3Modules: Pipeline Segments
 .. autosummary::
   :toctree: api
 
-  CoincidenceFinder
+  K40BackgroundSubtractor
   IntraDOMCalibrator
+  TwofoldCounter
+  HRVFIFOTimesliceFilter
+  SummaryMedianPMTRateService
+  MedianPMTRatesService
+  ResetTwofoldCounts
   calculate_angles
   calculate_rms_means
   calculate_rms_rates

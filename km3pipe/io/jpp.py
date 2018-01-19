@@ -140,11 +140,13 @@ class TimeslicePump(Pump):
     Required Parameters
     -------------------
     filename: str
+    stream: str ('L0', 'L1', 'L2', 'SN') default: 'L1'
 
     """
 
     def configure(self):
-        filename = self.require('filename')
+        fname = self.require('filename')
+        stream = self.get('stream', default='L1')
         self.blobs = self.timeslice_generator()
         try:
             import jppy  # noqa
@@ -152,24 +154,25 @@ class TimeslicePump(Pump):
             raise ImportError("\nEither Jpp or jppy could not be found."
                               "\nMake sure you source the JPP environmanet "
                               "and have jppy installed")
-        self.r = jppy.daqtimeslicereader.PyJDAQTimesliceReader(filename)
-        self._scanner_initialised = False
+        stream = 'JDAQTimeslice' + stream
+        self.r = jppy.daqtimeslicereader.PyJDAQTimesliceReader(fname, stream)
+        self.n_timeslices = self.r.n_timeslices
 
         self.buf_size = 5000
         self._channel_ids = np.zeros(self.buf_size, dtype='i')
         self._dom_ids = np.zeros(self.buf_size, dtype='i')
         self._times = np.zeros(self.buf_size, dtype='i')
         self._tots = np.zeros(self.buf_size, dtype='i')
-        self._triggereds = np.zeros(self.buf_size, dtype=bool)
+        self._triggereds = np.zeros(self.buf_size, dtype=bool)  # dummy
 
     def process(self, blob):
         return next(self.blobs)
 
     def timeslice_generator(self):
         slice_id = 0
-        while self.r.has_next:
+        while slice_id < self.n_timeslices:
             blob = Blob()
-            self.r.retrieve_next_timeslice()
+            self.r.retrieve_timeslice(slice_id)
             timeslice_info = TimesliceInfo(
                 frame_index=self.r.frame_index,
                 slice_id=slice_id,
@@ -185,30 +188,23 @@ class TimeslicePump(Pump):
             slice_id += 1
 
     def _extract_hits(self):
-        n_frames = 0
-        total_hits = 0
-        while self.r.has_next_superframe:
-            n_frames += 1
-            n = self.r.number_of_hits
-            if n != 0:
-                start_index = total_hits
-                total_hits += n
-                if total_hits > self.buf_size:
-                    buf_size = int(total_hits * 3 / 2)
-                    self._resize_buffers(buf_size)
-                self.r.get_hits(self._channel_ids,
-                                self._dom_ids,
-                                self._times,
-                                self._tots,
-                                start_index)
-            self.r.retrieve_next_superframe()
+        total_hits = self.r.number_of_hits
+
+        if total_hits > self.buf_size:
+            buf_size = int(total_hits * 3 / 2)
+            self._resize_buffers(buf_size)
+
+        self.r.get_hits(self._channel_ids,
+                        self._dom_ids,
+                        self._times,
+                        self._tots)
 
         hits = RawHitSeries.from_arrays(self._channel_ids[:total_hits],
                                         self._dom_ids[:total_hits],
                                         self._times[:total_hits],
                                         self._tots[:total_hits],
-                                        self._triggereds[:total_hits],
-                                        0)
+                                        self._triggereds[:total_hits],  # dummy
+                                        0)  # slice_id will be set afterwards
         return hits
 
     def _resize_buffers(self, buf_size):
@@ -218,12 +214,9 @@ class TimeslicePump(Pump):
         self._dom_ids.resize(buf_size)
         self._times.resize(buf_size)
         self._tots.resize(buf_size)
-        self._triggereds.resize(buf_size)
+        self._triggereds.resize(buf_size)  # dummy
 
     def get_by_frame_index(self, frame_index):
-        if not self._scanner_initialised:
-            self.r.init_tree_scanner()
-            self._scanner_initialised = True
         blob = Blob()
         self.r.retrieve_timeslice_at_frame_index(frame_index)
         hits = self._extract_hits()

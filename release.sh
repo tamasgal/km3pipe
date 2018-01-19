@@ -49,11 +49,11 @@ git checkout develop
 git push
 git push --tags
 
-set +e
-git checkout svn
-git merge master
-git svn dcommit
-
-svn copy "${KP_SVN}/git" "${SVN}/tag/v${VERSION}" -m "KM3Pipe Release ${VERSION}"
+#set +e
+#git checkout svn
+#git merge master
+#git svn dcommit
 #
-git checkout develop
+#svn copy "${KP_SVN}/git" "${SVN}/tag/v${VERSION}" -m "KM3Pipe Release ${VERSION}"
+#
+#git checkout develop
