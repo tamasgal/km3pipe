@@ -155,6 +155,34 @@ class Script(object):
         """Add a new line"""
         self.lines.append(line)
 
+    def echo(self, text):
+        """Add an echo command. The given text will be double qouted."""
+        self.lines.append('echo "{}"'.format(text))
+
+    def separator(self, character='=', length=42):
+        """Add a visual separator."""
+        self.echo(character*length)
+
+    def cp(self, source, target):
+        """Add a new copy instruction"""
+        self._add_two_argument_command('cp', source, target)
+
+    def mv(self, source, target):
+        """Add a new move instruction"""
+        self._add_two_argument_command('mv', source, target)
+
+    def mkdir(self, folder_path):
+        """Add a new 'mkdir -p' instruction"""
+        self.add('mkdir -p "{}"'.format(folder_path))
+
+    def iget(self, irods_path):
+        """Add an iget command to retrieve a file from iRODS."""
+        self.add('iget -v "{}"'.format(irods_path))
+
+    def _add_two_argument_command(self, command, arg1, arg2):
+        """Helper function for two-argument commands"""
+        self.lines.append("{} {} {}".format(command, arg1, arg2))
+
     def clear(self):
         self.lines = []
 
