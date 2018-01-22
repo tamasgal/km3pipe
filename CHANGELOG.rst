@@ -1,7 +1,7 @@
 Unreleased changes
 ------------------
 
-* ``km3pipe.plot.hexbin`` (seaborn ``*Grid`` compatible)
+* ``km3pipe.plot``: Common plotting helpers
 
 Version 7
 ---------
