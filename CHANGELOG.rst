@@ -1,6 +1,8 @@
 Unreleased changes
 ------------------
 
+* ``km3pipe.plot.hexbin`` (seaborn ``*Grid`` compatible)
+
 Version 7
 ---------
 
