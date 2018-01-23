@@ -12,7 +12,7 @@ figure.edgecolor: white
 
 figure.figsize: 6.0, 4.0
 savefig.dpi: 300
-figure.dpi: 200
+figure.dpi: 120
 
 font.family: serif
 font.sans-serif: Lato, sans-serif
