@@ -2,6 +2,8 @@ Unreleased changes
 ------------------
 
 * ``km3pipe.plot``: Common plotting helpers
+* A handful utility functions for ``km3pipe.shell.Script``, like ``cp``,
+  ``iget``...
 
 Version 7
 ---------
