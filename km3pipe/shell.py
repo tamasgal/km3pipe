@@ -68,14 +68,18 @@ JOB_TEMPLATE = lstrip("""
 
 
 def qsub(script, job_name, log_path='qlogs', group='km3net', platform='cl7',
-         walltime='00:10:00', vmem='8G', fsize='8G', shell=os.environ['SHELL'],
-         email=os.environ['USER'] + '@km3net.de', send_mail='n',
+         walltime='00:10:00', vmem='8G', fsize='8G', shell=None, email=None,
+         send_mail='n',
          job_array_start=1, job_array_stop=None, job_array_step=1,
          irods=False, sps=True, hpss=False, xrootd=False,
          dcache=False, oracle=False,
          dryrun=False):
     """Submit a job via qsub."""
     print("Preparing job script...")
+    if shell is None:
+        shell = os.environ['SHELL']
+    if email is None:
+        email = os.environ['USER'] + '@km3net.de'
     if isinstance(script, Script):
         script = str(script)
     log_path = os.path.join(os.getcwd(), log_path)
