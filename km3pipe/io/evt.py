@@ -72,7 +72,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
         self.basename = self.get('basename') or None
         self.index_start = self.get('index_start', default=1)
         self.index_stop = self.get('index_stop', default=1)
-        self.n_digits = self.get('index_stop', default=3)
+        self.n_digits = self.get('n_digits', default=3)
         self.exclude_tags = self.get('exclude_tags')
         if self.exclude_tags is None:
             self.exclude_tags = []
@@ -88,6 +88,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
             self.filename = self.basename  \
                           + str(self.index_start).zfill(self.n_digits)  \
                           + '.evt'
+            print(self.filename)
 
         if self.filename:
             print("Opening {0}".format(self.filename))
