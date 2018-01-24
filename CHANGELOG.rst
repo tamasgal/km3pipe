@@ -7,6 +7,8 @@ Unreleased changes
 * ``kp.tools.bincenters`` now lives in ``kp.plot``. 
 * ``kp.db.DBManager.trigger_setup`` can now retrieve trigger setups for a given
   OID
+* Add ``n_digits`` option in ``kp.io.evt.EvtPump`` for file number index
+  when iterating over multiple files.
 
 Version 7
 ---------
