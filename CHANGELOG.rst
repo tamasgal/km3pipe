@@ -5,6 +5,8 @@ Unreleased changes
 * A handful utility functions for ``km3pipe.shell.Script``, like ``cp``,
   ``iget``...
 * ``kp.tools.bincenters`` now lives in ``kp.plot``. 
+* ``kp.db.DBManager.trigger_setup`` can now retrieve trigger setups for a given
+  OID
 
 Version 7
 ---------

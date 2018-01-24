@@ -17,7 +17,7 @@ import pytz
 import socket
 import xml.etree.ElementTree as ET
 
-from collections import OrderedDict
+from collections import defaultdict, OrderedDict
 try:
     from inspect import Signature, Parameter
 except ImportError:
@@ -241,6 +241,34 @@ class DBManager(object):
         for parameter in parameters:  # There is a case-chaos in the DB
             data[parameter['Name'].lower()] = parameter
         self._parameters = ParametersContainer(data)
+
+    def trigger_setup(self, runsetup_oid):
+        "Retrieve the trigger setup for a given runsetup OID"
+        r = self._get_content("jsonds/rslite/s?rs_oid={}&upifilter=1.1.2.2.3/*"
+                              .format(runsetup_oid))
+        data = json.loads(r)['Data']
+        if not data:
+            log.error("Empty dataset.")
+            return
+        raw_setup = data[0]
+        det_id = raw_setup['DetID']
+        name = raw_setup['Name']
+        description = raw_setup['Desc']
+
+        _optical_df = raw_setup['ConfGroups'][0]
+        optical_df = {'Name': _optical_df['Name'],
+                      'Desc': _optical_df['Desc']}
+        for param in _optical_df['Params']:
+            optical_df[self.parameters.oid2name(param['OID'])] = param['Val']
+
+        _acoustic_df = raw_setup['ConfGroups'][1]
+        acoustic_df = {'Name': _acoustic_df['Name'],
+                       'Desc': _acoustic_df['Desc']}
+        for param in _acoustic_df['Params']:
+            acoustic_df[self.parameters.oid2name(param['OID'])] = param['Val']
+
+        return TriggerSetup(runsetup_oid, name, det_id, description,
+                            optical_df, acoustic_df)
 
     @property
     def doms(self):
@@ -531,6 +559,7 @@ class ParametersContainer(object):
     def __init__(self, parameters):
         self._parameters = parameters
         self._converters = {}
+        self._oid_lookup = defaultdict(lambda: None)
 
     @property
     def names(self):
@@ -562,6 +591,13 @@ class ParametersContainer(object):
         "Get the unit for given parameter"
         parameter = self._get_parameter_name(parameter).lower()
         return self._parameters[parameter]['Unit']
+
+    def oid2name(self, oid):
+        "Look up the parameter name for a given OID"
+        if not self._oid_lookup:
+            for name, data in self._parameters.items():
+                self._oid_lookup[data['OID']] = data['Name']
+        return self._oid_lookup[oid]
 
     def _get_parameter_name(self, name):
         if name in self.names:
@@ -671,6 +707,35 @@ class DOM(object):
                 "   DET OID: {4}\n"
                 .format(self.__str__(), self.dom_id, self.dom_upi,
                         self.clb_upi, self.det_oid))
+
+
+class TriggerSetup(object):
+    def __init__(self, runsetup_oid, name, det_id, description,
+                 optical_df, acoustic_df):
+        self.runsetup_oid = runsetup_oid
+        self.name = name
+        self.det_id = det_id
+        self.description = description
+        self.optical_df = optical_df
+        self.acoustic_df = acoustic_df
+
+    def __str__(self):
+        text = ("Runsetup OID: {}\n"
+                "Name: {}\n"
+                "Detector ID: {}\n"
+                "Description:\n    {}\n\n"
+                .format(self.runsetup_oid, self.name, self.det_id,
+                        self.description))
+        for df, parameters in zip(["Optical", "Acoustic"],
+                                  [self.optical_df, self.acoustic_df]):
+            text += "{} Datafilter:\n".format(df)
+            for parameter, value in parameters.items():
+                text += "  {}: {}\n".format(parameter, value)
+            text += "\n"
+        return text
+
+    def __repr__(self):
+        return str(self)
 
 
 def clbupi2ahrsupi(clb_upi):
