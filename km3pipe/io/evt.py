@@ -58,6 +58,8 @@ class EvtPump(Pump):  # pylint: disable:R0902
         The starting index if you process multiple files at once. [default: 1]
     index_stop: int
         The last index if you process multiple files at once. [default: 1]
+    n_digits: int
+        The number of digits for indexing multiple files. [default: 3]
     exclude_tags: list of strings
         The tags in the EVT file, which should be ignored (e.g. if they
         cause parse errors)
@@ -68,8 +70,9 @@ class EvtPump(Pump):  # pylint: disable:R0902
         self.filename = self.get('filename')
         self.cache_enabled = self.get('cache_enabled') or False
         self.basename = self.get('basename') or None
-        self.index_start = self.get('index_start') or 1
-        self.index_stop = self.get('index_stop') or 1
+        self.index_start = self.get('index_start', default=1)
+        self.index_stop = self.get('index_stop', default=1)
+        self.n_digits = self.get('index_stop', default=3)
         self.exclude_tags = self.get('exclude_tags')
         if self.exclude_tags is None:
             self.exclude_tags = []
@@ -82,7 +85,9 @@ class EvtPump(Pump):  # pylint: disable:R0902
         self.file_index = int(self.index_start)
 
         if self.basename:
-            self.filename = self.basename + str(self.index_start) + '.evt'
+            self.filename = self.basename  \
+                          + str(self.index_start).zfill(self.n_digits)  \
+                          + '.evt'
 
         if self.filename:
             print("Opening {0}".format(self.filename))
@@ -144,7 +149,9 @@ class EvtPump(Pump):  # pylint: disable:R0902
                 self._reset()
                 self.blob_file.close()
                 self.index = 0
-                self.filename = self.basename + str(self.file_index) + '.evt'
+                self.filename = self.basename  \
+                              + str(self.file_index).zfill(self.n_digits)  \
+                              + '.evt'
                 print("Opening {0}".format(self.filename))
                 self.open_file(self.filename)
                 self.prepare_blobs()
