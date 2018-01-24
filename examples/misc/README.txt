@@ -1,6 +1,6 @@
-.. _misc_examples:
+.. _unsorted_examples:
 
-Misc
-----------------
+Unsorted
+--------
 
 Unsorted stuff.
