@@ -7,6 +7,9 @@ K40 Calibration Summary
 =======================
 
 Combine k40calib results into a single CSV file.
+"""
+
+docopt_str = __doc__ + """
 
 Usage:
     k40summary.py CALIB_FOLDER
@@ -34,7 +37,7 @@ def write_header(fobj):
 
 def main():
     from docopt import docopt
-    args = docopt(__doc__)
+    args = docopt(docopt_str)
 
     file_pattern = os.path.join(args['CALIB_FOLDER'], '*.p')
     files = glob(file_pattern)

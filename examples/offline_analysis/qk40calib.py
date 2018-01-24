@@ -8,6 +8,9 @@ K40 Calibration Batch Processing
 
 Standalone job submitter for K40 offline calibrations with KM3Pipe.
 
+"""
+
+docopt_str = __doc__ + """
 Usage:
     qk40calib.py OUTPUT_PATH [options]
     qk40calib.py (-h | --help)
@@ -36,12 +39,12 @@ from docopt import docopt
 
 
 def main():
-    args = docopt(__doc__)
+    args = docopt(docopt_str)
 
     DET_ID = int(args['-d'])
     TMAX = int(args['-t'])
     ET_PER_RUN = int(args['-e']) * 60  # [s]
-    RUNS_PER_JOB = int(args['-n'])  # runs per job
+    RUNS_PER_JOB = int(args['-n'])
     VMEM = args['-m']
     CWD = os.getcwd()
     LOG_PATH = args['-l']

@@ -8,6 +8,11 @@ Trigger Map
 
 This script creates a histogram to show the trigger contribution for events.
 
+"""
+from __future__ import division
+
+docopt_str = __doc__ + """
+
 Usage:
     trigger_map.py [-d DU -p PLOT_FILENAME] FILENAME
     trigger_map.py --version
@@ -19,8 +24,6 @@ Option:
     -h --help         Show this screen.
 
 """
-from __future__ import division
-
 from docopt import docopt
 import matplotlib
 # Force matplotlib to not use any Xwindows backend.
@@ -100,7 +103,7 @@ class TriggerMap(kp.Module):
 
 
 if __name__ == '__main__':
-    args = docopt(__doc__, version='1.0')
+    args = docopt(docopt_str, version='1.0')
     print(args)
     du = int(args['-d']) if args['-d'] else None
     det = kp.hardware.Detector(det_id=29)
