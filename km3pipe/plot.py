@@ -9,6 +9,7 @@ from __future__ import division, absolute_import, print_function
 
 import matplotlib as mpl    # noqa
 import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
 
 __author__ = "Moritz Lotze"
@@ -18,6 +19,12 @@ __license__ = "BSD-3"
 __maintainer__ = "Moritz Lotze"
 __email__ = "mlotze@km3net.de"
 __status__ = "Development"
+
+
+def bincenters(bins):
+    """Bincenters, assuming they are all equally spaced."""
+    bins = np.atleast_1d(bins)
+    return 0.5 * (bins[1:] + bins[:-1])
 
 
 def hexbin(x, y, color, **kwargs):
@@ -76,3 +83,19 @@ def meshgrid(x_min, x_max, x_step, y_min=None, y_max=None, y_step=None):
     xx, yy = np.meshgrid(np.arange(x_min, x_max, x_step),
                          np.arange(y_min, y_max, y_step))
     return xx, yy
+
+
+def prebinned_hist(counts, binlims, ax=None, *args, **kwargs):
+    """Plot a histogram with counts, binlims already given.
+
+    Example
+    =======
+    >>> gaus = np.random.normal(size=100)
+    >>> counts, binlims = np.histogram(gaus, bins='auto')
+    >>> prebinned_hist(countsl binlims)
+    """
+    ax = get_ax(ax)
+    x = bincenters(binlims)
+    weights = counts
+    return ax.hist(x, bins=binlims, weights=weights,
+                   *args, **kwargs)
