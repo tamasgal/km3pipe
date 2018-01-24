@@ -88,7 +88,6 @@ class EvtPump(Pump):  # pylint: disable:R0902
             self.filename = self.basename  \
                           + str(self.index_start).zfill(self.n_digits)  \
                           + '.evt'
-            print(self.filename)
 
         if self.filename:
             print("Opening {0}".format(self.filename))
