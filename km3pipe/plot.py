@@ -10,7 +10,11 @@ from __future__ import division, absolute_import, print_function
 import matplotlib as mpl    # noqa
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
+try:
+    import seaborn as sns
+    HAS_SEABORN = True
+except ImportError:
+    HAS_SEABORN = False
 
 __author__ = "Moritz Lotze"
 __copyright__ = "Copyright 2018, Tamas Gal and the KM3NeT collaboration."
@@ -32,7 +36,10 @@ def hexbin(x, y, color, **kwargs):
 
     See also: http://seaborn.pydata.org/tutorial/axis_grids.html#mapping-custom-functions-onto-the-grid
     """
-    cmap = sns.light_palette(color, as_cmap=True)
+    if HAS_SEABORN:
+        cmap = sns.light_palette(color, as_cmap=True)
+    else:
+        cmap = 'Blues'
     plt.hexbin(x, y, cmap=cmap,
                extent=[min(x), max(x), min(y), max(y)],
                **kwargs)
