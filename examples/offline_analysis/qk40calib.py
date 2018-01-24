@@ -41,7 +41,7 @@ def main():
     DET_ID = int(args['-d'])
     TMAX = int(args['-t'])
     ET_PER_RUN = int(args['-e']) * 60  # [s]
-    RUNS_PER_JOB = int(args['-n'])  # runs per job
+    RUNS_PER_JOB = int(args['-n'])
     VMEM = args['-m']
     CWD = os.getcwd()
     LOG_PATH = args['-l']
