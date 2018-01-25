@@ -10,18 +10,17 @@ This script picks a monitoring channel packet with no HRV flags for any PMT
 and tries to match one of the following 50 summaryslices using the PMT rates.
 The index of the summaryslice, the rates-diff and the time offsets are logged
 in a CSV file.
-"""
 
-docopt_str = __doc__ + """
+.. code-block:: bash
 
-Usage:
-    tmch_sum_offsets.py DOM_ID [-n N_TIMESLICES]
-    tmch_sum_offsets.py (-h | --help)
+    Usage:
+        tmch_sum_offsets.py DOM_ID [-n N_TIMESLICES]
+        tmch_sum_offsets.py (-h | --help)
 
-Options:
-    DOM_ID           The DOM ID.
-    -n N_TIMESLICES  The number of timeslices to investigate [default: 50].
-    -h --help        Show this screen.
+    Options:
+        DOM_ID           The DOM ID.
+        -n N_TIMESLICES  The number of timeslices to investigate [default: 50].
+        -h --help        Show this screen.
 
 """
 import io
@@ -147,7 +146,7 @@ class SummarysliceMatcher(kp.Module):
 
 def main():
     from docopt import docopt
-    args = docopt(docopt_str)
+    args = docopt(__doc__)
 
     dom_id = int(args['DOM_ID'])
 

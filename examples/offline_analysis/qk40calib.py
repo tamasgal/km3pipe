@@ -8,25 +8,24 @@ K40 Calibration Batch Processing
 
 Standalone job submitter for K40 offline calibrations with KM3Pipe.
 
-"""
+.. code-block:: bash
 
-docopt_str = __doc__ + """
-Usage:
-    qk40calib.py OUTPUT_PATH [options]
-    qk40calib.py (-h | --help)
+    Usage:
+        qk40calib.py OUTPUT_PATH [options]
+        qk40calib.py (-h | --help)
 
-Options:
-    OUTPUT_PATH  Folder to store the calibration data.
-    -d DET_ID    Detector ID [default: 29].
-    -t TMAX      Coincidence time window [default: 10].
-    -n N_RUNS    Number of runs to process per job [default: 10].
-    -e ET        Estimated walltime per run in minutes [default: 8].
-    -m VMEM      Estimated vmem for a job [default: 8G].
-    -s RUNSETUP  Match [default: PHYS.1710v5-TUNED.HRV19.3D_T_S_MX.NBMODULE].
-    -j JOBNAME   The name of the submitted jobs [default: k40calib].
-    -l LOG_PATH  Path of the job log files [default: qlogs].
-    -q           Dryrun: don't submit jobs, just print the first job script.
-    -h --help    Show this screen.
+    Options:
+        OUTPUT_PATH  Folder to store the calibration data.
+        -d DET_ID    Detector ID [default: 29].
+        -t TMAX      Coincidence time window [default: 10].
+        -n N_RUNS    Number of runs to process per job [default: 10].
+        -e ET        Estimated walltime per run in minutes [default: 8].
+        -m VMEM      Estimated vmem for a job [default: 8G].
+        -s RUNSETUP  Match [default: PHYS.1710v5-TUNED.HRV19.3D_T_S_MX.NBMODULE].
+        -j JOBNAME   The name of the submitted jobs [default: k40calib].
+        -l LOG_PATH  Path of the job log files [default: qlogs].
+        -q           Dryrun: don't submit jobs, just print the first job script.
+        -h --help    Show this screen.
 
 """
 import os
@@ -39,7 +38,7 @@ from docopt import docopt
 
 
 def main():
-    args = docopt(docopt_str)
+    args = docopt(__doc__)
 
     DET_ID = int(args['-d'])
     TMAX = int(args['-t'])
