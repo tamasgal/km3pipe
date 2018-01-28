@@ -498,8 +498,6 @@ def bootstrap_fit(rv_cont, data, n_iter=10, quant=95, print_params=True):
     """
     fit_params = bootstrap_params(rv_cont, data, n_iter)
     par, lo, up = param_describe(fit_params, quant=quant)
-    if not print_params:
-        return par, lo, up
     names = param_names(rv_cont)
     maxlen = max([len(s) for s in names])
     print("--------------")
@@ -508,4 +506,9 @@ def bootstrap_fit(rv_cont, data, n_iter=10, quant=95, print_params=True):
     for i, name in enumerate(names):
         print("{nam:>{fill}}: {mean:+.3f} ∈ [{lo:+.3f}, {up:+.3f}] ({q}%)".format(
             nam=name, fill=maxlen, mean=par[i], lo=lo[i], up=up[i], q=quant))
-    return par, lo, up
+    out = {
+        'mean': par,
+        'lower limit': lo,
+        'upper limit': up,
+    }
+    return out
