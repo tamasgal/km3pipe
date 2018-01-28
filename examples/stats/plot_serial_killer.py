@@ -4,7 +4,7 @@
 Serial Killings -- Powerlaw or not?
 ===================================
 
-Try to reproduce the analysis in `Cosma Shalizi’s
+Try to reproduce the analysis in `Cosma Shalizi's
 blogpost <http://bactra.org/weblog/857.html>`__ with scipy.
 
 First, import things
@@ -22,7 +22,7 @@ import km3pipe.style.moritz     # noqa
 
 
 ######################################################################
-# The data (times of killings) are in a text file, let’s write a small
+# The data (times of killings) are in a text file, let's write a small
 # function to read them. We are interested in the time differences between
 # the murders.
 #
@@ -54,7 +54,7 @@ plt.ylabel('Cumulative probability')
 
 
 ######################################################################
-# Let’s fit a powerlaw
+# Let's fit a powerlaw
 #
 
 pareto_idx, pareto_loc, pareto_scale = stats.pareto.fit(diffs)

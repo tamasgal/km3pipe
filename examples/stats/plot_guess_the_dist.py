@@ -65,16 +65,19 @@ x = np.linspace(min(resid), max(resid), 2000)
 # Fit a Landau distribution with ROOT
 
 if HAS_ROOT:
-
     root_hist = rootpy.plotting.Hist(100, 0, np.pi)
     root_hist.fill_array(resid)
     root_hist /= root_hist.Integral()
 
     land_f = ROOT.TF1('land_f', "TMath::Landau(x, [0], [1], 0)")
     fr = root_hist.fit('land_f', "S").Get()
-    p = fr.GetParams()
-    land = np.array([ROOT.TMath.Landau(xi, p[0], p[1], True) for xi in x])
-    land_cdf = np.array([ROOT.ROOT.Math.landau_cdf(k, p[0], p[1]) for k in ex])
+    try:
+        p = fr.GetParams()
+        land = np.array([ROOT.TMath.Landau(xi, p[0], p[1], True) for xi in x])
+        land_cdf = np.array([ROOT.ROOT.Math.landau_cdf(k, p[0], p[1]) for k in ex])
+    except AttributeError:
+        # wtf this fails sometimes, idk, works on root6
+        HAS_ROOT = False
 
 ##################################################################
 # ... and plot everything.
