@@ -68,14 +68,18 @@ JOB_TEMPLATE = lstrip("""
 
 
 def qsub(script, job_name, log_path='qlogs', group='km3net', platform='cl7',
-         walltime='00:10:00', vmem='8G', fsize='8G', shell=os.environ['SHELL'],
-         email=os.environ['USER'] + '@km3net.de', send_mail='n',
+         walltime='00:10:00', vmem='8G', fsize='8G', shell=None, email=None,
+         send_mail='n',
          job_array_start=1, job_array_stop=None, job_array_step=1,
          irods=False, sps=True, hpss=False, xrootd=False,
          dcache=False, oracle=False,
          dryrun=False):
     """Submit a job via qsub."""
     print("Preparing job script...")
+    if shell is None:
+        shell = os.environ['SHELL']
+    if email is None:
+        email = os.environ['USER'] + '@km3net.de'
     if isinstance(script, Script):
         script = str(script)
     log_path = os.path.join(os.getcwd(), log_path)
@@ -154,6 +158,34 @@ class Script(object):
     def add(self, line):
         """Add a new line"""
         self.lines.append(line)
+
+    def echo(self, text):
+        """Add an echo command. The given text will be double qouted."""
+        self.lines.append('echo "{}"'.format(text))
+
+    def separator(self, character='=', length=42):
+        """Add a visual separator."""
+        self.echo(character*length)
+
+    def cp(self, source, target):
+        """Add a new copy instruction"""
+        self._add_two_argument_command('cp', source, target)
+
+    def mv(self, source, target):
+        """Add a new move instruction"""
+        self._add_two_argument_command('mv', source, target)
+
+    def mkdir(self, folder_path):
+        """Add a new 'mkdir -p' instruction"""
+        self.add('mkdir -p "{}"'.format(folder_path))
+
+    def iget(self, irods_path):
+        """Add an iget command to retrieve a file from iRODS."""
+        self.add('iget -v "{}"'.format(irods_path))
+
+    def _add_two_argument_command(self, command, arg1, arg2):
+        """Helper function for two-argument commands"""
+        self.lines.append("{} {} {}".format(command, arg1, arg2))
 
     def clear(self):
         self.lines = []

@@ -8,12 +8,14 @@ K40 Calibration Summary
 
 Combine k40calib results into a single CSV file.
 
-Usage:
-    k40summary.py CALIB_FOLDER
-    k40summary.py (-h | --help)
+.. code-block:: bash
 
-Options:
-    -h --help   Show this screen.
+    Usage:
+        k40summary.py CALIB_FOLDER
+        k40summary.py (-h | --help)
+
+    Options:
+        -h --help   Show this screen.
 
 """
 from glob import glob

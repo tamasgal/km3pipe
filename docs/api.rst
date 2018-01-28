@@ -227,6 +227,17 @@ KM3Pipe: Main Framework
   name2pdg
 
 
+``km3pipe.plot``: Plotting tools
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. currentmodule:: km3pipe.plot
+
+.. autosummary::
+  :toctree: api
+
+  hexbin
+
+
 KM3Modules: Pipeline Segments
 -----------------------------
 

@@ -10,9 +10,13 @@ axes.spines.right  : False
 figure.facecolor: white
 figure.edgecolor: white
 
+figure.figsize: 6.0, 4.0
+savefig.dpi: 300
+figure.dpi: 120
+
 font.family: serif
 font.sans-serif: Lato, sans-serif
-font.serif: Andada, serif
+font.serif: Museo Slab, Andada, serif
 font.monospace: Roboto Mono, monospace
 
 grid.color: .8
