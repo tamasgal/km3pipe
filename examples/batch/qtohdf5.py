@@ -9,6 +9,13 @@ Convert ROOT to HDF5 on the Batch Farm
 
 Convert ROOT files to HDF5 on the SGE.
 
+The ``IRODS_PATH`` will be scanned recursively and if ``-s`` is specified, a
+substring will be used to filter the files. You can for example convert
+all numu CC files in ``/in2p3/km3net/mc/prod/v4/JTE_r2356`` if you call
+the script with ``-s numuCC``.
+
+The before constructing the job scripts, the ``OUTPUT_PATH`` will be traversed
+to find files which have already been converted to avoid multiple conversions.
 
 .. code-block:: bash
 
