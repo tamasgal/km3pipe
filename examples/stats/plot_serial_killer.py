@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Serial Killings -- Powerlaw or not?
 ===================================
