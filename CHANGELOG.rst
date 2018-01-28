@@ -1,6 +1,12 @@
 Unreleased changes
 ------------------
 
+Version 7
+---------
+
+7.16.0 / 2018-01-28
+~~~~~~~~~~~~~~~~~~~
+
 * ``km3pipe.plot``: Common plotting helpers
 * A handful utility functions for ``km3pipe.shell.Script``, like ``cp``,
   ``iget``...
@@ -12,9 +18,6 @@ Unreleased changes
 * ``kp.math`` has some helpers for bootstrapping confidence intervals
   when fitting probability distributions via max LLH (in scipy.stats)
 * Docs: move statistics examples to own section, show some distribution fits
-
-Version 7
----------
 
 7.15.0 / 2018-01-19
 ~~~~~~~~~~~~~~~~~~~
