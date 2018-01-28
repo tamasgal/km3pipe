@@ -11,6 +11,7 @@ Unreleased changes
   when iterating over multiple files.
 * ``kp.math`` has some helpers for bootstrapping confidence intervals
   when fitting probability distributions via max LLH (in scipy.stats)
+* Docs: move statistics examples to own section, show some distribution fits
 
 Version 7
 ---------
