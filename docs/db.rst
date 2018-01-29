@@ -431,4 +431,11 @@ Uploading "runsummarynumbers"
 You can use the ``streamds upload CSV_FILE`` command to upload data to
 the "runsummarynumbers" meta table of the KM3NeT database.
 
-The required columns are ``run``, ``det_id`` and ``source``. The ``source`` column is a free string-type column. It is recommended to use the DOM ID if you have parameters which refer to DOMs. If you have a column which refers to the whole run, use the string ``"run"`` in the source column e.g. for a parameter which refers to a DU, you can set it to ``"du"`` etc.
+The required columns are ``run``, ``det_id`` and ``source``. The ``source`` 
+column is a free string-type column. It is recommended to use the DOM ID if 
+you have parameters which refer to DOMs. If you have a column which refers to 
+the whole run, use the string ``"run"`` in the source column e.g. for a 
+parameter which refers to a DU, you can set it to ``"du1"`` etc.
+
+Please note that the whole file will be rejected if there is
+even a single row of data which is already present in the database.
