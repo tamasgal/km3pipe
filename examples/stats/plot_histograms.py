@@ -21,7 +21,7 @@ import km3pipe.style.moritz         # noqa
 # Load the histogram from a file.
 # a histogram is just bincounts + binlimits.
 
-filename = "data/hist_example.h5"
+filename = "../data/hist_example.h5"
 
 with h5py.File(filename, 'r') as f:
     counts = f['/hist/counts'][:]

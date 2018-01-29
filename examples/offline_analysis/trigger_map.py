@@ -8,19 +8,20 @@ Trigger Map
 
 This script creates a histogram to show the trigger contribution for events.
 
-Usage:
-    trigger_map.py [-d DU -p PLOT_FILENAME] FILENAME
-    trigger_map.py --version
+.. code-block:: bash
 
-Option:
-    FILENAME          Name of the input file.
-    -d DU             Only plot for the given DU.
-    -p PLOT_FILENAME  The filename of the plot [default: trigger_map.png].
-    -h --help         Show this screen.
+    Usage:
+        trigger_map.py [-d DU -p PLOT_FILENAME] FILENAME
+        trigger_map.py --version
+
+    Option:
+        FILENAME          Name of the input file.
+        -d DU             Only plot for the given DU.
+        -p PLOT_FILENAME  The filename of the plot [default: trigger_map.png].
+        -h --help         Show this screen.
 
 """
 from __future__ import division
-
 from docopt import docopt
 import matplotlib
 # Force matplotlib to not use any Xwindows backend.
@@ -31,7 +32,6 @@ import numpy as np
 
 import km3pipe as kp
 import km3pipe.style
-km3pipe.style.use('km3pipe')
 
 
 class TriggerMap(kp.Module):
@@ -70,6 +70,8 @@ class TriggerMap(kp.Module):
         self.create_plot()
 
     def create_plot(self):
+        km3pipe.style.use("km3pipe")
+
         title = "Trigger Map\n{}".format(self.subtitle)
         fig, ax = plt.subplots(figsize=(16, 8))
         ax.grid(True)

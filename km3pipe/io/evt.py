@@ -54,10 +54,15 @@ class EvtPump(Pump):  # pylint: disable:R0902
         the files will be concatenated behind the scenes.
         You need to specify the `index_stop` and `index_start`
         (1 and 3 for the example).
+    suffix: str
+        A string to append to each filename (before ".evt"), when basename
+        is given. [default: '']
     index_start: int
         The starting index if you process multiple files at once. [default: 1]
     index_stop: int
         The last index if you process multiple files at once. [default: 1]
+    n_digits: int
+        The number of digits for indexing multiple files. [default: 3]
     exclude_tags: list of strings
         The tags in the EVT file, which should be ignored (e.g. if they
         cause parse errors)
@@ -68,8 +73,10 @@ class EvtPump(Pump):  # pylint: disable:R0902
         self.filename = self.get('filename')
         self.cache_enabled = self.get('cache_enabled') or False
         self.basename = self.get('basename') or None
-        self.index_start = self.get('index_start') or 1
-        self.index_stop = self.get('index_stop') or 1
+        self.suffix = self.get('suffix', default='')
+        self.index_start = self.get('index_start', default=1)
+        self.index_stop = self.get('index_stop', default=1)
+        self.n_digits = self.get('n_digits', default=3)
         self.exclude_tags = self.get('exclude_tags')
         if self.exclude_tags is None:
             self.exclude_tags = []
@@ -82,7 +89,13 @@ class EvtPump(Pump):  # pylint: disable:R0902
         self.file_index = int(self.index_start)
 
         if self.basename:
-            self.filename = self.basename + str(self.index_start) + '.evt'
+            self.log.info("Got a basename ({}), constructing the first "
+                          "filename.".format(self.basename))
+            self.filename = self.basename  \
+                          + str(self.index_start).zfill(self.n_digits)  \
+                          + self.suffix \
+                          + '.evt'
+            self.log.info("Constructed filename: {}".format(self.filename))
 
         if self.filename:
             print("Opening {0}".format(self.filename))
@@ -91,6 +104,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
 
     def _reset(self):
         """Clear the cache."""
+        self.log.info("Clearing the cache, resetting event offsets")
         self.raw_header = None
         self.event_offsets = []
         self.index = 0
@@ -103,12 +117,13 @@ class EvtPump(Pump):  # pylint: disable:R0902
 
     def extract_header(self):
         """Create a dictionary with the EVT header information"""
+        self.log.info("Extracting the header")
         raw_header = self.raw_header = {}
         first_line = self.blob_file.readline()
         first_line = try_decode_string(first_line)
         self.blob_file.seek(0, 0)
         if not first_line.startswith(str('start_run')):
-            log.warning("No header found.")
+            self.log.warning("No header found.")
             return raw_header
         for line in iter(self.blob_file.readline, ''):
             line = try_decode_string(line)
@@ -125,13 +140,17 @@ class EvtPump(Pump):  # pylint: disable:R0902
 
     def get_blob(self, index):
         """Return a blob with the event at the given index"""
+        self.log.info("Retrieving blob #{}".format(index))
         if index > len(self.event_offsets) - 1:
+            self.log.info("Index not in cache, caching offsets")
             self._cache_offsets(index, verbose=False)
         self.blob_file.seek(self.event_offsets[index], 0)
         blob = self._create_blob()
         if blob is None:
+            self.log.info("Empty blob created...")
             raise IndexError
         else:
+            self.log.debug("Returning the blob")
             return blob
 
     def process(self, blob=None):
@@ -139,17 +158,26 @@ class EvtPump(Pump):  # pylint: disable:R0902
         try:
             blob = self.get_blob(self.index)
         except IndexError:
+            self.log.info("Got an IndexError, trying the next file")
             if self.basename and self.file_index < self.index_stop:
                 self.file_index += 1
+                self.log.info("Now at file_index={}".format(self.file_index))
                 self._reset()
                 self.blob_file.close()
+                self.log.info("Resetting blob index to 0") 
                 self.index = 0
-                self.filename = self.basename + str(self.file_index) + '.evt'
+                self.filename = self.basename  \
+                              + str(self.file_index).zfill(self.n_digits)  \
+                              + self.suffix  \
+                              + '.evt'
+                self.log.info("Next filename: {}".format(self.filename))
                 print("Opening {0}".format(self.filename))
                 self.open_file(self.filename)
                 self.prepare_blobs()
                 return blob
+            self.log.info("No files left, terminating the pipeline")
             raise StopIteration
+
         self.index += 1
         return blob
 
@@ -209,7 +237,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
         try:
             tag, value = line.split(':')
         except ValueError:
-            log.warning("Corrupt line in EVT file:\n{0}".format(line))
+            self.log.warning("Corrupt line in EVT file:\n{0}".format(line))
             return
         if tag in self.exclude_tags:
             return

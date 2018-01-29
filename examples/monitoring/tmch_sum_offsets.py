@@ -11,14 +11,16 @@ and tries to match one of the following 50 summaryslices using the PMT rates.
 The index of the summaryslice, the rates-diff and the time offsets are logged
 in a CSV file.
 
-Usage:
-    tmch_sum_offsets.py DOM_ID [-n N_TIMESLICES]
-    tmch_sum_offsets.py (-h | --help)
+.. code-block:: bash
 
-Options:
-    DOM_ID           The DOM ID.
-    -n N_TIMESLICES  The number of timeslices to investigate [default: 50].
-    -h --help        Show this screen.
+    Usage:
+        tmch_sum_offsets.py DOM_ID [-n N_TIMESLICES]
+        tmch_sum_offsets.py (-h | --help)
+
+    Options:
+        DOM_ID           The DOM ID.
+        -n N_TIMESLICES  The number of timeslices to investigate [default: 50].
+        -h --help        Show this screen.
 
 """
 import io
