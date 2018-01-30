@@ -1,6 +1,9 @@
 Unreleased changes
 ------------------
 
+* ``triggersetup`` command line utility added, which allows easy access to
+  the trigger setup of a given run setup
+
 Version 7
 ---------
 
