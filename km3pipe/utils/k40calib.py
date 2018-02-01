@@ -11,7 +11,7 @@ The following script calculates the PMT time offsets using K40 coincidences
 
 
 Usage:
-    k40calib FILE DET_ID [-t TMAX -c CTMIN -r -o CALIB_FILE]
+    k40calib FILE DET_ID [-t TMAX -c CTMIN -r -o CALIB_FILE -s STREAM]
     k40calib (-h | --help)
     k40calib --version
 
@@ -20,6 +20,7 @@ Options:
     DET_ID          Detector ID (e.g. 29).
     -r              Skip frames with with at least one PMT in HRV.
     -t TMAX         Coincidence time window [default: 10].
+    -s STREAM       JDAQTimeslice stream (L1, L2, SN, ...) [default: ].
     -c CTMIN        Minimum cos(angle) between PMTs for L2 [default: -1.0].
     -o CALIB_FILE   Filename for the calibration output [default: k40_cal.p].
     -h --help       Show this screen.
@@ -43,7 +44,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-def k40calib(filename, tmax, ctmin, filter_hrv, det_id, calib_filename):
+def k40calib(filename, tmax, ctmin, stream, filter_hrv, det_id, calib_filename):
     pipe = kp.Pipeline()
     pipe.attach(kp.io.jpp.TimeslicePump, filename=filename)
     pipe.attach(StatusBar, every=5000)
@@ -68,6 +69,7 @@ def main():
     k40calib(args['FILE'],
              int(args['-t']),
              float(args['-c']),
+             args['-s'],
              args['-r'],
              int(args['DET_ID']),
              args['-o'])
