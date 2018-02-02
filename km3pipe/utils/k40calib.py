@@ -46,7 +46,7 @@ __status__ = "Development"
 
 def k40calib(filename, tmax, ctmin, stream, filter_hrv, det_id, calib_filename):
     pipe = kp.Pipeline()
-    pipe.attach(kp.io.jpp.TimeslicePump, filename=filename)
+    pipe.attach(kp.io.jpp.TimeslicePump, filename=filename, stream=stream)
     pipe.attach(StatusBar, every=5000)
     pipe.attach(MemoryObserver, every=10000)
     pipe.attach(k40.HRVFIFOTimesliceFilter,
