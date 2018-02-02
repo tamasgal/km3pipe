@@ -6,6 +6,8 @@ Unreleased changes
 * ``k40calib`` now accepts ``-s`` to select a ``JDAQTimeslice`` stream.
   an empty string will use the original stream and 'L1', 'L2' and 'SN' will 
   select the new streams introduced in Jpp v9
+* ``kp.tools.AnyBar`` added to control the AnyBar macOS app, including a
+  pipeline integration: ``kp.Pipeline(anybar=True)``
 
 
 Version 7
