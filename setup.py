@@ -74,7 +74,7 @@ require_groups = {
         'numpydoc==0.7.0',
     ],
     'base': ['cython', 'docopt', 'numpy>=1.12', 'pandas', 'pytz',
-             'six==1.10', 'numexpr'],
+             'six==1.11', 'numexpr'],
     'setup': ['setuptools>=24.3', 'pip>=9.0.1', 'cython', 'numpy'],
     'analysis': ['matplotlib>=2.0.0', 'sklearn', 'statsmodels>=0.8',
                  'scipy>=0.19', 'seaborn', 'ipython', 'patsy', ],
