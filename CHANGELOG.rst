@@ -8,6 +8,7 @@ Unreleased changes
   select the new streams introduced in Jpp v9
 * ``kp.tools.AnyBar`` added to control the AnyBar macOS app, including a
   pipeline integration: ``kp.Pipeline(anybar=True)``
+* ``km3pipe runtable`` is now a standalone command line tool: ``runtable``
 
 
 Version 7

@@ -135,6 +135,7 @@ setup(name='km3pipe',
               'nb2sphx=km3pipe.utils.nb2sphx:main',
               'km3h5concat=km3pipe.utils.km3h5concat:main',
               'triggersetup=km3pipe.utils.triggersetup:main',
+              'runtable=km3pipe.utils.runtable:main',
           ],
       },
       classifiers=[
