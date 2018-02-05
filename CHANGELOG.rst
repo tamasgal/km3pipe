@@ -1,6 +1,16 @@
 Unreleased changes
 ------------------
 
+* ``triggersetup`` command line utility added, which allows easy access to
+  the trigger setup of a given run setup
+* ``k40calib`` now accepts ``-s`` to select a ``JDAQTimeslice`` stream.
+  an empty string will use the original stream and 'L1', 'L2' and 'SN' will 
+  select the new streams introduced in Jpp v9
+* ``kp.tools.AnyBar`` added to control the AnyBar macOS app, including a
+  pipeline integration: ``kp.Pipeline(anybar=True)``
+* ``km3pipe runtable`` is now a standalone command line tool: ``runtable``
+
+
 Version 7
 ---------
 

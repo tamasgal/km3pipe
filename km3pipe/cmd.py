@@ -39,7 +39,7 @@ import os
 from datetime import datetime
 
 from . import version
-from .tools import irods_filepath
+from .tools import irods_filepath, deprecated
 from .db import DBManager
 from .hardware import Detector
 
@@ -62,19 +62,14 @@ def run_tests():
     pytest.main([os.path.dirname(km3pipe.__file__)])
 
 
+@deprecated(extra="This command line tool is now standalone, "
+            "please use `runtable OPTIONS` instead "
+            "(without the km3pipe prefix).")
 def runtable(det_id, n=5, sep='\t', regex=None, temporary=False):
     """Print the run table of the last `n` runs for given detector"""
-    db = DBManager(temporary=temporary)
-    df = db.run_table(det_id)
-
-    if regex is not None:
-        df = df[df['RUNSETUPNAME'].str.match(regex) |
-                df['RUNSETUPID'].str.match(regex)]
-
-    if n is not None:
-        df = df.tail(n)
-
-    df.to_csv(sys.stdout, sep=sep)
+    log.error("This command line tool is now standalone, "
+              "please use `runtable OPTIONS` instead "
+              "(without the km3pipe prefix).")
 
 
 def runinfo(run_id, det_id, temporary=False):

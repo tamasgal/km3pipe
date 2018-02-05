@@ -20,6 +20,7 @@ import numpy as np
 from .sys import peak_memory_usage, ignored
 from .logger import logging
 from .time import Timer
+from .tools import AnyBar
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -48,7 +49,13 @@ class Pipeline(object):
         Display time profiling statistics for the pipeline?
     """
 
-    def __init__(self, blob=None, timeit=False):
+    def __init__(self, blob=None, timeit=False, anybar=False):
+        if anybar:
+            self.anybar = AnyBar()
+            self.anybar.change("blue")
+        else:
+            self.anybar = None
+
         self.init_timer = Timer("Pipeline and module initialisation")
         self.init_timer.start()
 
@@ -66,6 +73,8 @@ class Pipeline(object):
 
     def attach(self, module_factory, name=None, **kwargs):
         """Attach a module to the pipeline system"""
+        if self.anybar: self.anybar.change("yellow")
+
         fac = module_factory
 
         if name is None:
@@ -183,6 +192,8 @@ class Pipeline(object):
 
     def drain(self, cycles=None):
         """Execute _drain while trapping KeyboardInterrupt"""
+        if self.anybar: self.anybar.change("orange")
+
         self.init_timer.stop()
         log.info("Trapping CTRL+C and starting to drain.")
         signal.signal(signal.SIGINT, self._handle_ctrl_c)
@@ -191,6 +202,8 @@ class Pipeline(object):
 
     def finish(self):
         """Call finish() on each attached module"""
+        if self.anybar: self.anybar.change("purple")
+
         finish_blob = Blob()
         for module in self.modules:
             if hasattr(module, 'pre_finish'):
@@ -207,10 +220,14 @@ class Pipeline(object):
         self._timeit['finish_cpu'] = time.clock()
         self._print_timeit_statistics()
         self._finished = True
+
+        if self.anybar: self.anybar.change("green")
         return finish_blob
 
     def _handle_ctrl_c(self, *args):
         """Handle the keyboard interrupts."""
+        if self.anybar: self.anybar.change("exclamation")
+
         if self._stop:
             print("\nForced shutdown...")
             raise SystemExit

@@ -55,6 +55,42 @@ An example output is::
     856	3619	1465542000119	Y	A01466427	PHYS.1606v1-TMP.HV-SFP.Power-XTRA.700ns		2016-06-10 07:00:00.119000+00:00
     857	3620	1465542060119	Y	A01466427	PHYS.1606v1-TMP.HV-SFP.Power-XTRA.700ns		2016-06-10 07:01:00.119000+00:00
 
+``triggersetup``
+~~~~~~~~~~~~~~~~
+Get the trigger setup (description and optical/acoustic DataFilter settings)
+for a given runsetup ID::
+
+    $ triggersetup -h
+    Prints the trigger information of a given run setup.
+
+    Usage:
+	triggersetup RUNSETUP_OID
+	triggersetup (-h | --help)
+	triggersetup --version
+
+    Options:
+	RUNSETUP_OID   The run setup identifier (e.g. A02004580)
+	-h --help      Show this screen.
+
+``triggermap``
+~~~~~~~~~~~~~~
+Shows a histogram (similar to the one on the online monitoring pages) of
+the trigger contribution for events::
+
+    $ triggermap -h
+    This script creates histogram which shows the trigger contribution for events.
+
+    Usage:
+	triggermap [-d DET_ID -p PLOT_FILENAME -u DU] FILENAME
+	triggermap --version
+
+    Option:
+	FILENAME          Name of the input file.
+	-u DU             Only plot for the given DU.
+	-d DET_ID         Detector ID [default: 29].
+	-p PLOT_FILENAME  The filename of the plot [default: trigger_map.png].
+	-h --help         Show this screen.
+
 
 DataBase
 --------
@@ -289,3 +325,21 @@ Example output::
     /reco/thomas_features (Table(121226,), shuffle, zlib(5)) ''
 
 
+``km3h5concat``
+~~~~~~~~~~~~~~~
+
+This tool can be used to merge HDF5 files::
+
+    $ km3h5concat -h
+    Concatenate KM3HDF5 files via pipeline.
+
+    Usage:
+	km3h5concat [options] OUTFILE FILE...
+	km3h5concat (-h | --help)
+	km3h5concat --version
+
+    Options:
+	-h --help                       Show this screen.
+	--verbose                       Print more output.
+	--debug                         Print everything.
+	-n=NEVENTS                      Number of events; if not given, use all.
