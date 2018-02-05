@@ -136,6 +136,7 @@ setup(name='km3pipe',
               'km3h5concat=km3pipe.utils.km3h5concat:main',
               'triggersetup=km3pipe.utils.triggersetup:main',
               'runtable=km3pipe.utils.runtable:main',
+              'runinfo=km3pipe.utils.runinfo:main',
           ],
       },
       classifiers=[
