@@ -217,14 +217,18 @@ class AanetPump(Pump):
             if self.format == 'ancient_recolns':
                 log.info("Generating blobs through old aanet API...")
                 while event_file.next():
+                    log.debug('Reading event...')
                     event = event_file.evt
                     blob = self._read_event(event, filename)
+                    log.debug('Reading header...')
                     blob["Header"] = self.aanet_header
                     yield blob
             else:
                 log.info("Generating blobs through new aanet API...")
                 for event in event_file:
+                    log.debug('Reading event...')
                     blob = self._read_event(event, filename)
+                    log.debug('Reading header...')
                     blob["Header"] = self.aanet_header
                     yield blob
             del event_file
@@ -278,7 +282,8 @@ class AanetPump(Pump):
             except AttributeError:
                 log.warning("No MC hits found.")
 
-        blob['McTracks'] = TrackSeries.from_aanet(event.mc_trks, event_id)
+        if hasattr(event, 'mc_trks'):
+            blob['McTracks'] = TrackSeries.from_aanet(event.mc_trks, event_id)
 
         blob['filename'] = filename
         try:
