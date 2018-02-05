@@ -166,20 +166,23 @@ def df_to_h5(df, h5file, where, **kwargs):
     write_table(df.to_records(index=False), h5file, where, **kwargs)
 
 
-def write_table(array, h5file, where, force=False):
+def write_table(array, h5file, where, force=False,
+                filters=None, createparents=True, **kwargs):
     """Write a structured numpy array into a H5 table.
     """
     own_h5 = False
     if isinstance(h5file, string_types):
         own_h5 = True
         h5file = tb.open_file(h5file, 'a')
-    filt = tb.Filters(complevel=5, shuffle=True, fletcher32=True)
+    if filters is None:
+        filters = tb.Filters(complevel=5, shuffle=True, fletcher32=True)
     loc, tabname = os.path.split(where)
     if loc == '':
         loc = '/'
     try:
-        h5file.create_table(loc, tabname, obj=array, createparents=True,
-                            filters=filt)
+        h5file.create_table(loc, tabname, obj=array,
+                            createparents=createparents, filters=filters,
+                            **kwargs)
     except tb.exceptions.NodeError:
         h5file.get_node(where)[:] = array
     if own_h5:
