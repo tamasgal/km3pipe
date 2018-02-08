@@ -174,7 +174,7 @@ class AanetPump(Pump):
                 log.info("Reading header...")
                 self.header = event_file.rootfile().Get("Head")
             except (ValueError, UnicodeEncodeError, TypeError):
-                log.warning(filename + ": can't read header.")
+                log.info(filename + ": can't read header.")
             try:
                 log.info("Reading livetime...")
                 lt_line = self.header.get_line('livetime')
@@ -185,27 +185,27 @@ class AanetPump(Pump):
                 self.livetime_err = float(livetime_err)
                 self.livetime = float(livetime)
             except (ValueError, UnicodeEncodeError, AttributeError):
-                log.warning(filename + ": can't read livetime.")
+                log.info(filename + ": can't read livetime.")
                 self.livetime = 0
             try:
                 log.info("Reading genvol...")
                 ngen = self.header.get_field('genvol', 4)
                 self.ngen = float(ngen)
             except (ValueError, UnicodeEncodeError, AttributeError):
-                log.warning(filename + ": can't read ngen.")
+                log.info(filename + ": can't read ngen.")
                 self.ngen = 0
             try:
                 log.info("Reading number of generated files...")
                 # nfligen = ?????
                 self.nfilgen = float(nfilgen)
             except (ValueError, UnicodeEncodeError):
-                log.warning(filename + ": can't read nfilgen.")
+                log.info(filename + ": can't read nfilgen.")
                 self.nfilgen = 0
             try:
                 log.info("Reading run id...")
                 self.header_run_id = self.header.get_field('start_run', 0)
             except (ValueError, UnicodeEncodeError, AttributeError):
-                log.warning(filename + ": can't read ngen.")
+                log.info(filename + ": can't read ngen.")
                 self.header_run_id = None
             # END OF OLD HEADER CRAZINESS
 
@@ -275,12 +275,12 @@ class AanetPump(Pump):
                     hits._arr["time"] = uconverter(hits.time)
                 blob['Hits'] = hits
             except AttributeError:
-                log.warning("No hits found.")
+                log.info("No hits found.")
             try:
                 mc_hits = McHitSeries.from_aanet(event.mc_hits, event_id)
                 blob['McHits'] = mc_hits
             except AttributeError:
-                log.warning("No MC hits found.")
+                log.info("No MC hits found.")
 
         if hasattr(event, 'mc_trks'):
             blob['McTracks'] = TrackSeries.from_aanet(event.mc_trks, event_id)
@@ -580,7 +580,7 @@ def parse_jgandalf_new(aanet_event, event_id, missing=0):
         outmap.update(spread_tracks)
         outmap['upgoing_vs_downgoing'] = upgoing_vs_downgoing(aanet_event.trks)
     except IndexError:
-        log.warn("Could not read Gandalf track. Zeroing row...")
+        log.info("Could not read Gandalf track. Zeroing row...")
         outmap = {key: missing for key in all_keys}
     dt = [(key, float) for key in sorted(outmap.keys())]
     outmap['event_id'] = event_id
