@@ -179,11 +179,15 @@ def write_table(array, h5file, where, force=False,
     loc, tabname = os.path.split(where)
     if loc == '':
         loc = '/'
-    try:
-        h5file.create_table(loc, tabname, obj=array,
-                            createparents=createparents, filters=filters,
-                            **kwargs)
-    except tb.exceptions.NodeError:
-        h5file.get_node(where)[:] = array
+    if force:
+        try:
+            h5file.remove_node(loc, tabname, recursive=True)
+        except tb.NoSuchNodeError:
+            log.warn(
+                    'Force -> Trying to remove+rewrite of table at {}, {}, '
+                    'but it did not previously exists.'.format(loc, tabname))
+    h5file.create_table(loc, tabname, obj=array,
+                        createparents=createparents, filters=filters,
+                        **kwargs)
     if own_h5:
         h5file.close()
