@@ -325,6 +325,36 @@ Example output::
     /reco/thomas_features (Table(121226,), shuffle, zlib(5)) ''
 
 
+``pttree`` (from PyTables)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Show the memory consumption of a HDF5 file. As you can see below, the 
+overwhelming majority of space is used by the hits, as expected.
+
+Example output::
+    ┌─[moritz@ceres ~/pkg/km3pipe/examples/data ]
+    └─╼ pttree km3net_jul13_90m_muatm50T655.km3_v5r1.JTE_r2356.root.0-499.h5
+
+    ------------------------------------------------------------
+
+    / (RootGroup)
+    +--hits (Group)
+    |     ... 7 leaves, mem=35.0MiB, disk=8.1MiB [66.3%]
+    +--mc_hits (Group)
+    |     ... 6 leaves, mem=15.2MiB, disk=3.8MiB [31.6%]
+    +--mc_tracks (Table)
+    |     mem=858.4KiB, disk=251.6KiB [ 2.0%]
+    `--event_info (Table)
+          mem=56.6KiB, disk=6.3KiB [ 0.1%]
+
+    ------------------------------------------------------------
+    Total branch leaves:    15
+    Total branch size:      51.2MiB in memory, 12.2MiB on disk
+    Mean compression ratio: 0.24
+    HDF5 file size:         12.5MiB
+    ------------------------------------------------------------
+
+
 ``km3h5concat``
 ~~~~~~~~~~~~~~~
 
