@@ -7,7 +7,7 @@ Classes representing KM3NeT hardware.
 """
 from __future__ import division, absolute_import, print_function
 
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict, defaultdict, namedtuple
 import os
 import sys
 from six import iteritems
@@ -117,7 +117,8 @@ class Detector(object):
             self.det_id = int(det_id)
             validity = self._det_file.readline()
             self.valid_from, self.valid_until = split(validity, float)
-            self.utm_info = self._det_file.readline()
+            self.utm_info = UTMInfo(*self._det_file.readline()
+                                    .strip().split(' ')[1:])
             n_doms = self._det_file.readline()
             self.n_doms = int(n_doms)
 
@@ -213,7 +214,7 @@ class Detector(object):
         else:
             header = "{det.det_id} {det.version}".format(det=self)
             header += "\n{0} {1}".format(self.valid_from, self.valid_until)
-            header += "\n" + self.utm_info
+            header += "\n" + str(self.utm_info) + "\n"
             header += str(self.n_doms)
 
         doms = ""
@@ -273,6 +274,24 @@ class Detector(object):
 
     def __repr__(self):
         return self.__str__()
+
+
+class UTMInfo(object):
+    """The UTM information"""
+    def __init__(self, ellipsoid, grid, easting, northing, z):
+        self.ellipsoid = ellipsoid
+        self.grid = grid
+        self.easting = int(easting)
+        self.northing = int(northing)
+        self.z = int(z)
+
+    def __str__(self):
+        return "UTM {} {} {} {} {}"  \
+               .format(self.ellipsoid, self.grid,
+                       self.easting, self.northing, self.z)
+
+    def __repr__(self):
+        return "UTMInfo: {}".format(self)
 
 
 class PMT(object):
