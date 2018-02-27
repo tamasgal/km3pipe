@@ -7,6 +7,8 @@ Ligier Mirror
 =============
 
 Subscribes to given tag(s) and sends them to another Ligier.
+This script is also available as a command line utility in km3pipe, which can
+be accessed by the command ``ligiermirror``.
 
 """
 # Author: Tamas Gal <tgal@km3net.de>
