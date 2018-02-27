@@ -1,6 +1,11 @@
 Unreleased changes
 ------------------
 
+Version 7
+---------
+
+7.17.0 / 2018-02-27
+~~~~~~~~~~~~~~~~~~~
 * ``triggersetup`` command line utility added, which allows easy access to
   the trigger setup of a given run setup
 * ``k40calib`` now accepts ``-s`` to select a ``JDAQTimeslice`` stream.
@@ -14,9 +19,6 @@ Unreleased changes
   in detector files ``Detector().utm_info``...
 * ``ligiermirror`` command line utility added
 
-
-Version 7
----------
 
 7.16.0 / 2018-01-28
 ~~~~~~~~~~~~~~~~~~~
