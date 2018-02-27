@@ -12,6 +12,7 @@ Unreleased changes
 * ``km3pipe runinfo`` is now a standalone command line tool: ``runinfo``
 * ``UTMInfo`` added in ``kp.hardware`` to make access to UTM information easier
   in detector files ``Detector().utm_info``...
+* ``ligiermirror`` command line utility added
 
 
 Version 7
