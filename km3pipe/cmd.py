@@ -39,7 +39,7 @@ import os
 from datetime import datetime
 
 from . import version
-from .tools import irods_filepath
+from .tools import irods_filepath, deprecated
 from .db import DBManager
 from .hardware import Detector
 
@@ -62,51 +62,23 @@ def run_tests():
     pytest.main([os.path.dirname(km3pipe.__file__)])
 
 
+@deprecated(extra="This command line tool is now standalone, "
+            "please use `runtable OPTIONS` instead "
+            "(without the km3pipe prefix).")
 def runtable(det_id, n=5, sep='\t', regex=None, temporary=False):
     """Print the run table of the last `n` runs for given detector"""
-    db = DBManager(temporary=temporary)
-    df = db.run_table(det_id)
-
-    if regex is not None:
-        df = df[df['RUNSETUPNAME'].str.match(regex) |
-                df['RUNSETUPID'].str.match(regex)]
-
-    if n is not None:
-        df = df.tail(n)
-
-    df.to_csv(sys.stdout, sep=sep)
+    log.error("This command line tool is now standalone, "
+              "please use `runtable OPTIONS` instead "
+              "(without the km3pipe prefix).")
 
 
+@deprecated(extra="This command line tool is now standalone, "
+            "please use `runtable OPTIONS` instead "
+            "(without the km3pipe prefix).")
 def runinfo(run_id, det_id, temporary=False):
-    db = DBManager(temporary=temporary)
-    df = db.run_table(det_id)
-    row = df[df['RUN'] == run_id]
-    if len(row) == 0:
-        log.error("No database entry for run {0} found.".format(run_id))
-        return
-    next_row = df[df['RUN'] == (run_id + 1)]
-    if len(next_row) != 0:
-        end_time = next_row['DATETIME'].values[0]
-        duration = (next_row['UNIXSTARTTIME'].values[0] -
-                    row['UNIXSTARTTIME'].values[0]) / 1000 / 60
-    else:
-        end_time = duration = float('NaN')
-    print("Run {0} - detector ID: {1}".format(run_id, det_id))
-    print('-' * 42)
-    print("  Start time:         {0}\n"
-          "  End time:           {1}\n"
-          "  Duration [min]:     {2:.2f}\n"
-          "  Start time defined: {3}\n"
-          "  Runsetup ID:        {4}\n"
-          "  Runsetup name:      {5}\n"
-          "  T0 Calibration ID:  {6}\n"
-          .format(row['DATETIME'].values[0],
-                  end_time,
-                  duration,
-                  bool(row['STARTTIME_DEFINED'].values[0]),
-                  row['RUNSETUPID'].values[0],
-                  row['RUNSETUPNAME'].values[0],
-                  row['T0_CALIBSETID'].values[0]))
+    log.error("This command line tool is now standalone, "
+              "please use `runtable OPTIONS` instead "
+              "(without the km3pipe prefix).")
 
 
 def update_km3pipe(git_branch=''):

@@ -55,6 +55,42 @@ An example output is::
     856	3619	1465542000119	Y	A01466427	PHYS.1606v1-TMP.HV-SFP.Power-XTRA.700ns		2016-06-10 07:00:00.119000+00:00
     857	3620	1465542060119	Y	A01466427	PHYS.1606v1-TMP.HV-SFP.Power-XTRA.700ns		2016-06-10 07:01:00.119000+00:00
 
+``triggersetup``
+~~~~~~~~~~~~~~~~
+Get the trigger setup (description and optical/acoustic DataFilter settings)
+for a given runsetup ID::
+
+    $ triggersetup -h
+    Prints the trigger information of a given run setup.
+
+    Usage:
+	triggersetup RUNSETUP_OID
+	triggersetup (-h | --help)
+	triggersetup --version
+
+    Options:
+	RUNSETUP_OID   The run setup identifier (e.g. A02004580)
+	-h --help      Show this screen.
+
+``triggermap``
+~~~~~~~~~~~~~~
+Shows a histogram (similar to the one on the online monitoring pages) of
+the trigger contribution for events::
+
+    $ triggermap -h
+    This script creates histogram which shows the trigger contribution for events.
+
+    Usage:
+	triggermap [-d DET_ID -p PLOT_FILENAME -u DU] FILENAME
+	triggermap --version
+
+    Option:
+	FILENAME          Name of the input file.
+	-u DU             Only plot for the given DU.
+	-d DET_ID         Detector ID [default: 29].
+	-p PLOT_FILENAME  The filename of the plot [default: trigger_map.png].
+	-h --help         Show this screen.
+
 
 DataBase
 --------
@@ -289,3 +325,51 @@ Example output::
     /reco/thomas_features (Table(121226,), shuffle, zlib(5)) ''
 
 
+``pttree`` (from PyTables)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Show the memory consumption of a HDF5 file. As you can see below, the 
+overwhelming majority of space is used by the hits, as expected.
+
+Example output::
+    ┌─[moritz@ceres ~/pkg/km3pipe/examples/data ]
+    └─╼ pttree km3net_jul13_90m_muatm50T655.km3_v5r1.JTE_r2356.root.0-499.h5
+
+    ------------------------------------------------------------
+
+    / (RootGroup)
+    +--hits (Group)
+    |     ... 7 leaves, mem=35.0MiB, disk=8.1MiB [66.3%]
+    +--mc_hits (Group)
+    |     ... 6 leaves, mem=15.2MiB, disk=3.8MiB [31.6%]
+    +--mc_tracks (Table)
+    |     mem=858.4KiB, disk=251.6KiB [ 2.0%]
+    `--event_info (Table)
+          mem=56.6KiB, disk=6.3KiB [ 0.1%]
+
+    ------------------------------------------------------------
+    Total branch leaves:    15
+    Total branch size:      51.2MiB in memory, 12.2MiB on disk
+    Mean compression ratio: 0.24
+    HDF5 file size:         12.5MiB
+    ------------------------------------------------------------
+
+
+``km3h5concat``
+~~~~~~~~~~~~~~~
+
+This tool can be used to merge HDF5 files::
+
+    $ km3h5concat -h
+    Concatenate KM3HDF5 files via pipeline.
+
+    Usage:
+	km3h5concat [options] OUTFILE FILE...
+	km3h5concat (-h | --help)
+	km3h5concat --version
+
+    Options:
+	-h --help                       Show this screen.
+	--verbose                       Print more output.
+	--debug                         Print everything.
+	-n=NEVENTS                      Number of events; if not given, use all.

@@ -259,13 +259,25 @@ class DBManager(object):
         optical_df = {'Name': _optical_df['Name'],
                       'Desc': _optical_df['Desc']}
         for param in _optical_df['Params']:
-            optical_df[self.parameters.oid2name(param['OID'])] = param['Val']
+            pname = self.parameters.oid2name(param['OID']).replace('DAQ_', '')
+            try:
+                dtype = float if '.' in param['Val'] else int
+                val = dtype(param['Val'])
+            except ValueError:
+                val = param['Val']
+            optical_df[pname] = val
 
         _acoustic_df = raw_setup['ConfGroups'][1]
         acoustic_df = {'Name': _acoustic_df['Name'],
                        'Desc': _acoustic_df['Desc']}
         for param in _acoustic_df['Params']:
-            acoustic_df[self.parameters.oid2name(param['OID'])] = param['Val']
+            pname = self.parameters.oid2name(param['OID']).replace('DAQ_', '')
+            try:
+                dtype = float if '.' in param['Val'] else int
+                val = dtype(param['Val'])
+            except ValueError:
+                val = param['Val']
+            acoustic_df[pname] = val
 
         return TriggerSetup(runsetup_oid, name, det_id, description,
                             optical_df, acoustic_df)

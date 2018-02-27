@@ -4,6 +4,22 @@ Unreleased changes
 Version 7
 ---------
 
+7.17.0 / 2018-02-27
+~~~~~~~~~~~~~~~~~~~
+* ``triggersetup`` command line utility added, which allows easy access to
+  the trigger setup of a given run setup
+* ``k40calib`` now accepts ``-s`` to select a ``JDAQTimeslice`` stream.
+  an empty string will use the original stream and 'L1', 'L2' and 'SN' will 
+  select the new streams introduced in Jpp v9
+* ``kp.tools.AnyBar`` added to control the AnyBar macOS app, including a
+  pipeline integration: ``kp.Pipeline(anybar=True)``
+* ``km3pipe runtable`` is now a standalone command line tool: ``runtable``
+* ``km3pipe runinfo`` is now a standalone command line tool: ``runinfo``
+* ``UTMInfo`` added in ``kp.hardware`` to make access to UTM information easier
+  in detector files ``Detector().utm_info``...
+* ``ligiermirror`` command line utility added
+
+
 7.16.0 / 2018-01-28
 ~~~~~~~~~~~~~~~~~~~
 

@@ -15,9 +15,9 @@ savefig.dpi: 300
 figure.dpi: 120
 
 font.family: serif
-font.sans-serif: Lato, sans-serif
-font.serif: Museo Slab, Andada, serif
-font.monospace: Roboto Mono, monospace
+font.sans-serif: Lato, Noto Sans, sans-serif
+font.serif: Museo Slab, Andada, Noto Serif, serif
+font.monospace: Roboto Mono, Noto Sans Mono, monospace
 
 grid.color: .8
 
@@ -26,7 +26,7 @@ hist.bins: auto
 image.cmap: viridis
 
 savefig.bbox: tight
-savefig.format: pdf
+savefig.format: svg
 savefig.transparent: false
 
 svg.fonttype: none
