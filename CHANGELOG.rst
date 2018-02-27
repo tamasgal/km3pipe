@@ -10,6 +10,8 @@ Unreleased changes
   pipeline integration: ``kp.Pipeline(anybar=True)``
 * ``km3pipe runtable`` is now a standalone command line tool: ``runtable``
 * ``km3pipe runinfo`` is now a standalone command line tool: ``runinfo``
+* ``UTMInfo`` added in ``kp.hardware`` to make access to UTM information easier
+  in detector files ``Detector().utm_info``...
 
 
 Version 7
