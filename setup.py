@@ -137,7 +137,7 @@ setup(name='km3pipe',
               'triggersetup=km3pipe.utils.triggersetup:main',
               'runtable=km3pipe.utils.runtable:main',
               'runinfo=km3pipe.utils.runinfo:main',
-              'ligiermirro=km3pipe.utils.ligiermirror:main',
+              'ligiermirror=km3pipe.utils.ligiermirror:main',
           ],
       },
       classifiers=[
