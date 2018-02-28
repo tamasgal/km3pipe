@@ -4,6 +4,11 @@ Unreleased changes
 Version 7
 ---------
 
+7.17.1 / 2018-02-28
+~~~~~~~~~~~~~~~~~~~
+* Fixed typo ``ligiermirro`` -> ``ligiermirror``
+
+
 7.17.0 / 2018-02-27
 ~~~~~~~~~~~~~~~~~~~
 * ``triggersetup`` command line utility added, which allows easy access to
