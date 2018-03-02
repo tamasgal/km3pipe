@@ -11,7 +11,7 @@
 """
 from __future__ import division, absolute_import, print_function
 
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 import ctypes
 from libcpp cimport bool as c_bool  # noqa
 from six import with_metaclass
@@ -1739,17 +1739,16 @@ class McTrackSeries(object):
 
     @classmethod
     def from_aanet(cls, tracks, event_id):
-        try:  # TODO: this should be investigated
-            is_cc = IS_CC[cls.get_usr_name(t, str('cc'), 0)]
-        except KeyError:
-            is_cc = 0
+        # TODO: this should be investigated, since user var "cc" in aanet
+        #       can return something else then defined in the IS_CC dict
+        is_cc = defaultdict(int, IS_CC)  # defaults to 0 on KeyError
 
         return cls([McTrack(cls.get_usr_name(t, str('by'), 1),  # bjorkeny
                           Direction((t.dir.x, t.dir.y, t.dir.z)),
                           t.E,
                           t.id,
                           cls.get_usr_name(t, str('ichan'), 2),
-                          is_cc,
+                          is_cc[cls.get_usr_name(t, str('cc'), 0)],
                           cls.get_len(t),
                           Position((t.pos.x, t.pos.y, t.pos.z)),
                           t.t,
