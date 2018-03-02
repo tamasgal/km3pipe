@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* Fixes ``KeyError`` when accessing McTracks via the aanet API
 
 Version 7
 ---------
