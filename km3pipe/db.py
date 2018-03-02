@@ -667,19 +667,21 @@ class DOMContainer(object):
             log.critical("No DOM found for OMKey '{0}' and DetOID '{1}'."
                          .format(omkey, det_id))
 
-    def via_dom_id(self, dom_id):
+    def via_dom_id(self, dom_id, det_id):
         """Return DOM for given dom_id"""
         try:
             return DOM.from_json([d for d in self._json
-                                  if d["DOMId"] == dom_id][0])
+                                  if d["DOMId"] == dom_id and
+                                  d["DetOID"] == det_id][0])
         except IndexError:
             log.critical("No DOM found for DOM ID '{0}'".format(dom_id))
 
-    def via_clb_upi(self, clb_upi):
+    def via_clb_upi(self, clb_upi, det_id):
         """return DOM for given CLB UPI"""
         try:
             return DOM.from_json([d for d in self._json
-                                  if d["CLBUPI"] == clb_upi][0])
+                                  if d["CLBUPI"] == clb_upi and
+                                  d["DetOID"] == det_id][0])
         except IndexError:
             log.critical("No DOM found for CLB UPI '{0}'".format(clb_upi))
 
