@@ -17,7 +17,7 @@ from scipy.stats import iqr
 
 from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import (RawHitSeries, McHitSeries,
-                                 McTrackSeries, EventInfo,
+                                 TrackSeries, McTrackSeries, EventInfo,
                                  KM3Array)
 from km3pipe.logger import logging
 from km3pipe.math import mad
@@ -283,7 +283,7 @@ class AanetPump(Pump):
                 log.info("No MC hits found.")
 
         if hasattr(event, 'mc_trks'):
-            blob['McTracks'] = McTrackSeries.from_aanet(event.mc_trks, event_id)
+            blob['McTracks'] = TrackSeries.from_aanet(event.mc_trks, event_id)
 
         blob['filename'] = filename
         try:
