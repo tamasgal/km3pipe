@@ -79,17 +79,16 @@ require_groups = {
     'analysis': ['matplotlib>=2.0.0', 'sklearn', 'statsmodels>=0.8',
                  'scipy>=0.19', 'seaborn', 'ipython', 'patsy', ],
     'daq': ['controlhost', ],
-    'io': ['tables==3.4.2', 'h5py', ],
+    'io': ['tables==3.4.2', 'h5py', 'requests'],
     'jpp': ['jppy>=1.3.1', ],
-    'web': ['tornado', 'websocket-client', 'requests'],
     'testing': ['pytest', 'mock', ],
     'utils': ['urwid', ],
 }
 require_groups['most'] = list(chain.from_iterable(
-    [require_groups[k] for k in ('setup', 'base', 'io', 'web', 'utils')],
+    [require_groups[k] for k in ('setup', 'base', 'io', 'utils')],
 ))
 require_groups['full'] = list(chain.from_iterable(
-    [require_groups[k] for k in ('setup', 'base', 'io', 'web', 'utils', 'analysis',
+    [require_groups[k] for k in ('setup', 'base', 'io', 'utils', 'analysis',
                                  'testing', 'daq', 'docs')],
 ))
 
