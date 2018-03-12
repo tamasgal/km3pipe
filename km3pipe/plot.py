@@ -31,7 +31,7 @@ def bincenters(bins):
     return 0.5 * (bins[1:] + bins[:-1])
 
 
-def hexbin(x, y, color, **kwargs):
+def hexbin(x, y, color="purple", **kwargs):
     """Seaborn-compatible hexbin plot.
 
     See also: http://seaborn.pydata.org/tutorial/axis_grids.html#mapping-custom-functions-onto-the-grid
@@ -39,7 +39,7 @@ def hexbin(x, y, color, **kwargs):
     if HAS_SEABORN:
         cmap = sns.light_palette(color, as_cmap=True)
     else:
-        cmap = 'Blues'
+        cmap = "Purples"
     plt.hexbin(x, y, cmap=cmap,
                extent=[min(x), max(x), min(y), max(y)],
                **kwargs)
