@@ -7,6 +7,12 @@ from __future__ import print_function, absolute_import
 The KM3srv tornado webserver.
 
 """
+try:
+    import tornado
+except ImportError:
+    print("Please 'pip install tornado websocket-client' "
+          "to use the km3srv package")
+    exit(1)
 
 import tornado.ioloop
 import tornado.web
