@@ -108,9 +108,5 @@ def prebinned_hist(counts, binlims, ax=None, *args, **kwargs):
 
 def joint_hex(x, y, **kwargs):
     """Seaborn Joint Hexplot with marginal KDE + hists."""
-    return sns.jointplot(
-        x, y,
-        kind='hex', stat_func=None,
-        marginal_kws=dict(kde=True),
-        **kwargs,
-    )
+    return sns.jointplot(x, y, kind='hex', stat_func=None,
+            marginal_kws={'kde' :True}, **kwargs)
