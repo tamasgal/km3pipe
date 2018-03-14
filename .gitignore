@@ -80,3 +80,4 @@ junit.xml
 *~
 *.dqd
 *.dat
+.DS_Store
