@@ -20,8 +20,6 @@ dependencies:
   - numexpr
   - patsy
   - statsmodels
-  - tornado
-  - websocket-client
   - urwid
   - pip:
     - sphinx==1.6.3

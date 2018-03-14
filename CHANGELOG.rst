@@ -5,7 +5,7 @@ Unreleased changes
 Version 7
 ---------
 
-7.17.2 / 2018-03-02
+7.17.3 / 2018-03-02
 ~~~~~~~~~~~~~~~~~~~
 
 * Fixes ``KeyError`` when accessing McTracks via the aanet API
@@ -13,6 +13,7 @@ Version 7
   ``DBManager().via_dom_id()``, since DOMs are not unique. The same DOM can
   have the very same DOM ID and DOM UPI in a different detector, so now you
   need to provide a DET ID too.
+* Fixes aanet crashing on mc_tracks (introduced in 7.17.XXX)
 
 
 7.17.1 / 2018-02-28

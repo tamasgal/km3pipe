@@ -82,3 +82,4 @@ junit.xml
 *.dat
 
 .pytest_cache/
+.DS_Store
