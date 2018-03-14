@@ -80,3 +80,5 @@ junit.xml
 *~
 *.dqd
 *.dat
+
+.pytest_cache/
