@@ -17,6 +17,7 @@ Options:
 """
 from __future__ import division, absolute_import, print_function
 
+import re
 import sys
 import km3pipe as kp
 
@@ -29,14 +30,23 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
+log = kp.logger.get(__name__)
+
+
 def runtable(det_id, n=5, sep='\t', regex=None):
     """Print the run table of the last `n` runs for given detector"""
     db = kp.db.DBManager()
     df = db.run_table(det_id)
 
     if regex is not None:
-        df = df[df['RUNSETUPNAME'].str.match(regex) |
-                df['RUNSETUPID'].str.match(regex)]
+        try:
+            re.compile(regex)
+        except re.error:
+            log.error("Invalid regex!")
+            return
+
+        df = df[df['RUNSETUPNAME'].str.contains(regex) |
+                df['RUNSETUPID'].str.contains(regex)]
 
     if n is not None:
         df = df.tail(n)

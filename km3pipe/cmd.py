@@ -34,6 +34,7 @@ Options:
 
 from __future__ import division, absolute_import, print_function
 
+import re
 import sys
 import os
 from datetime import datetime
@@ -115,7 +116,12 @@ def detectors(regex=None, sep='\t', temporary=False):
     db = DBManager(temporary=temporary)
     dt = db.detectors
     if regex is not None:
-        dt = dt[dt['OID'].str.match(regex) | dt['CITY'].str.match(regex)]
+        try:
+            re.compile(regex)
+        except re.error:
+            log.error("Invalid regex!")
+            return
+        dt = dt[dt['OID'].str.contains(regex) | dt['CITY'].str.contains(regex)]
     dt.to_csv(sys.stdout, sep=sep)
 
 
