@@ -6,3 +6,5 @@ pytest-pylint
 pytest-watch
 twine
 six==1.10
+pydocstyle
+pytest-pydocstyle

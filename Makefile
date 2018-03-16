@@ -27,6 +27,7 @@ test: build
 	py.test --junitxml=./junit.xml || true
 	py.test km3modules || true
 
+
 test-cov: build
 	py.test --junitxml=./junit.xml \
 		--cov ./ --cov-report term-missing --cov-report xml || true
@@ -43,6 +44,10 @@ flake8:
 
 pep8: flake8
 
+docstyle: 
+	py.test --docstyle  || true
+	py.test --docstyle km3modules || true
+
 lint: 
 	py.test --pylint || true
 	py.test --pylint km3modules || true
@@ -56,4 +61,4 @@ dev-dependencies:
 doc-dependencies:
 	pip install -Ur sphinx_requirements.txt
 
-.PHONY: all clean build install test test-nocov flake8 pep8 dependencies dev-dependencies doc-dependencies
+.PHONY: all clean build install test test-nocov flake8 pep8 dependencies dev-dependencies doc-dependencies docstyle
