@@ -31,7 +31,7 @@ def bincenters(bins):
     return 0.5 * (bins[1:] + bins[:-1])
 
 
-def hexbin(x, y, color, **kwargs):
+def hexbin(x, y, color="purple", **kwargs):
     """Seaborn-compatible hexbin plot.
 
     See also: http://seaborn.pydata.org/tutorial/axis_grids.html#mapping-custom-functions-onto-the-grid
@@ -39,10 +39,8 @@ def hexbin(x, y, color, **kwargs):
     if HAS_SEABORN:
         cmap = sns.light_palette(color, as_cmap=True)
     else:
-        cmap = 'Blues'
-    plt.hexbin(x, y, cmap=cmap,
-               extent=[min(x), max(x), min(y), max(y)],
-               **kwargs)
+        cmap = "Purples"
+    plt.hexbin(x, y, cmap=cmap, **kwargs)
 
 
 def get_ax(ax=None):
@@ -106,3 +104,9 @@ def prebinned_hist(counts, binlims, ax=None, *args, **kwargs):
     weights = counts
     return ax.hist(x, bins=binlims, weights=weights,
                    *args, **kwargs)
+
+
+def joint_hex(x, y, **kwargs):
+    """Seaborn Joint Hexplot with marginal KDE + hists."""
+    return sns.jointplot(x, y, kind='hex', stat_func=None,
+            marginal_kws={'kde' :True}, **kwargs)

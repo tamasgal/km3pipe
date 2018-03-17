@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* ``-s REGEX`` in ``runtable`` and ``km3pipe detectors`` now uses a not so
+  strict regex - re.search instead re.match.
 
 
 Version 7
