@@ -115,7 +115,7 @@ class Detector(object):
         except ValueError:
             det_id, self.version = first_line.split()
             self.det_id = int(det_id)
-            validity = self._det_file.readline()
+            validity = self._det_file.readline().strip()
             self.valid_from, self.valid_until = split(validity, float)
             self.utm_info = UTMInfo(*self._det_file.readline()
                                     .strip().split(' ')[1:])
@@ -281,9 +281,9 @@ class UTMInfo(object):
     def __init__(self, ellipsoid, grid, easting, northing, z):
         self.ellipsoid = ellipsoid
         self.grid = grid
-        self.easting = int(easting)
-        self.northing = int(northing)
-        self.z = int(z)
+        self.easting = float(easting)
+        self.northing = float(northing)
+        self.z = float(z)
 
     def __str__(self):
         return "UTM {} {} {} {} {}"  \
