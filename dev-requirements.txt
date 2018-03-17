@@ -1,3 +1,5 @@
+pip
+setuptools
 mock
 pytest
 pytest-cov
@@ -7,4 +9,3 @@ pytest-watch
 twine
 six==1.10
 pydocstyle
-pytest-pydocstyle
