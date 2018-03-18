@@ -584,3 +584,15 @@ class TMCHRepump(Pump):
 
     def __next__(self):
         return next(self.blobs)
+
+
+def is_3dshower(trigger_mask):
+    return bool(trigger_mask & 2)
+
+
+def is_mxshower(trigger_mask):
+    return bool(trigger_mask & 4)
+
+
+def is_3dmuon(trigger_mask):
+    return bool(trigger_mask & 16)
