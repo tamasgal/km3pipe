@@ -27,7 +27,6 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 JOB_TEMPLATE = lstrip("""
-    ########################################################
     #$ -N {job_name}
     #$ -M {email}
     ## Send mail at: start (b), completion (e), never (n)
@@ -53,7 +52,6 @@ JOB_TEMPLATE = lstrip("""
     #$ -l xrootd={xrootd:d}
     #$ -l dcache={dcache:d}
     #$ -l oracle={oracle:d}
-    ########################################################
 
     echo "========================================================"
     echo "Job started on" $(date)
@@ -67,15 +65,28 @@ JOB_TEMPLATE = lstrip("""
 """)
 
 
-def qsub(script, job_name, log_path='qlogs', group='km3net', platform='cl7',
-         walltime='00:10:00', vmem='8G', fsize='8G', shell=None, email=None,
-         send_mail='n',
-         job_array_start=1, job_array_stop=None, job_array_step=1,
-         irods=False, sps=True, hpss=False, xrootd=False,
-         dcache=False, oracle=False,
-         dryrun=False):
+def qsub(script, job_name, dryrun=False, *args, **kwargs):
     """Submit a job via qsub."""
     print("Preparing job script...")
+    job_string = gen_job(script=script, job_name=job_name, *args, **kwargs)
+    env = os.environ.copy()
+    if dryrun:
+        print("This is a dry run! Here is the generated job file, which will "
+              "not be submitted:")
+        print(job_string)
+    else:
+        print("Calling qsub with the generated job script.")
+        p = subprocess.Popen('qsub -V', stdin=subprocess.PIPE, env=env,
+                             shell=True)
+        p.communicate(input=bytes(job_string.encode('ascii')))
+
+
+def gen_job(script, job_name, log_path='qlogs', group='km3net', platform='cl7',
+            walltime='00:10:00', vmem='8G', fsize='8G', shell=None, email=None,
+            send_mail='n', job_array_start=1, job_array_stop=None, job_array_step=1,
+            irods=False, sps=True, hpss=False, xrootd=False,
+            dcache=False, oracle=False):
+    """Generate a job script."""
     if shell is None:
         shell = os.environ['SHELL']
     if email is None:
@@ -95,16 +106,7 @@ def qsub(script, job_name, log_path='qlogs', group='km3net', platform='cl7',
         fsize=fsize, irods=irods, sps=sps, hpss=hpss, xrootd=xrootd,
         dcache=dcache, oracle=oracle, shell=shell, platform=platform,
         job_array_option=job_array_option)
-    env = os.environ.copy()
-    if dryrun:
-        print("This is a dry run! Here is the generated job file, which will "
-              "not be submitted:")
-        print(job_string)
-    else:
-        print("Calling qsub with the generated job script.")
-        p = subprocess.Popen('qsub -V', stdin=subprocess.PIPE, env=env,
-                             shell=True)
-        p.communicate(input=bytes(job_string.encode('ascii')))
+    return job_string
 
 
 def hppsgrab(irod_path, method='irods'):
@@ -165,7 +167,7 @@ class Script(object):
 
     def separator(self, character='=', length=42):
         """Add a visual separator."""
-        self.echo(character*length)
+        self.echo(character * length)
 
     def cp(self, source, target):
         """Add a new copy instruction"""
