@@ -32,7 +32,7 @@ JOB_TEMPLATE = lstrip("""
     ## Send mail at: start (b), completion (e), never (n)
     #$ -m {send_mail}
     #$ -j y
-    #$ -o {log_path}/{job_name}.log
+    #$ -o {log_path}/{job_name}{task_name}.log
     #$ -l os={platform}
     #$ -P P_{group}
     #$ -S {shell}
@@ -85,7 +85,7 @@ def gen_job(script, job_name, log_path='qlogs', group='km3net', platform='cl7',
             walltime='00:10:00', vmem='8G', fsize='8G', shell=None, email=None,
             send_mail='n', job_array_start=1, job_array_stop=None, job_array_step=1,
             irods=False, sps=True, hpss=False, xrootd=False,
-            dcache=False, oracle=False):
+            dcache=False, oracle=False, split_array_logs=False):
     """Generate a job script."""
     if shell is None:
         shell = os.environ['SHELL']
@@ -100,12 +100,16 @@ def gen_job(script, job_name, log_path='qlogs', group='km3net', platform='cl7',
                                    job_array_step)
     else:
         job_array_option = "#"
+    if split_array_logs:
+        task_name = '_$TASK_ID'
+    else:
+        task_name = ''
     job_string = JOB_TEMPLATE.format(
         script=script, email=email, send_mail=send_mail, log_path=log_path,
         job_name=job_name, group=group, walltime=walltime, vmem=vmem,
         fsize=fsize, irods=irods, sps=sps, hpss=hpss, xrootd=xrootd,
         dcache=dcache, oracle=oracle, shell=shell, platform=platform,
-        job_array_option=job_array_option)
+        job_array_option=job_array_option, task_name=task_name)
     return job_string
 
 
