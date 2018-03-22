@@ -321,3 +321,8 @@ class PMT(object):
     def __str__(self):
         return "PMT id:{0}, pos: {1}, dir: dir{2}, t0: {3}, DAQ channel: {4}"\
                .format(self.id, self.pos, self.dir, self.t0, self.channel_id)
+
+
+# PMT DAQ channel IDs ordered from top to bottom
+ORDERED_PMT_IDS = [28, 23, 22, 21, 27, 29, 20, 30, 26, 25, 19, 24, 13, 7, 1,
+                   14, 18, 12, 6, 2, 11, 8, 0, 15, 4, 3, 5, 17, 10, 9, 16]
