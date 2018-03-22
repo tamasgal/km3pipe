@@ -117,8 +117,11 @@ class Detector(object):
             self.det_id = int(det_id)
             validity = self._det_file.readline().strip()
             self.valid_from, self.valid_until = split(validity, float)
-            self.utm_info = UTMInfo(*self._det_file.readline()
-                                    .strip().split(' ')[1:])
+            raw_utm_info = self._det_file.readline().strip().split(' ')
+            try:
+                self.utm_info = UTMInfo(*raw_utm_info[1:])
+            except TypeError:
+                log.warning("Missing UTM information.")
             n_doms = self._det_file.readline()
             self.n_doms = int(n_doms)
 
