@@ -2,6 +2,8 @@ Unreleased changes
 ------------------
 * ``-s REGEX`` in ``runtable`` and ``km3pipe detectors`` now uses a not so
   strict regex - re.search instead re.match.
+* ``kp.hardware.Detector`` now allows missing UTM information in detector
+  descriptions (for example det id 36 in the database)
 
 
 Version 7
