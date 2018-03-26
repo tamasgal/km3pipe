@@ -8,7 +8,6 @@ Tools for global configuration.
 from __future__ import division, absolute_import, print_function
 
 import os
-import stat
 import pytz
 try:
     from configparser import ConfigParser, Error, NoOptionError, NoSectionError
@@ -51,20 +50,12 @@ class Config(object):
         if not os.path.exists(path):
             log.info("No configuration found at '{0}'".format(path))
             return
-        self._check_config_file_permissions(path)
         self._read_from_path(path)
 
     def _read_from_path(self, path):
         """Read configuration from file path"""
         with open(path) as config_file:
             self._read_from_file(config_file)
-
-    def _check_config_file_permissions(self, path):
-        """Make sure that the configuration file is 0600"""
-        allowed_modes = ['0600', '0o600']
-        if oct(stat.S_IMODE(os.lstat(path).st_mode)) not in allowed_modes:
-            log.critical("Your config file is readable to others!\n" +
-                         "Execute `chmod 0600 {0}`".format(path))
 
     def _read_from_file(self, file_obj):
         self.config.readfp(file_obj)
