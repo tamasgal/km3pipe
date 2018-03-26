@@ -76,7 +76,7 @@ class Config(object):
         with open(self._config_path, 'w') as f:
             self.config.write(f)
 
-    def get(self, section, key):
+    def get(self, section, key, default=None):
         try:
             value = self.config.get(section, key)
             try:
@@ -84,7 +84,7 @@ class Config(object):
             except ValueError:
                 return value
         except (NoOptionError, NoSectionError):
-            return None
+            return default
 
     def create_irods_session(self):
         try:
