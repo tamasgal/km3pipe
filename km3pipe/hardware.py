@@ -93,8 +93,7 @@ class Detector(object):
 
     def _init_from_file(self, filename):
         """Create detector from detx file."""
-        file_ext = os.path.splitext(filename)[1][1:]
-        if not file_ext == 'detx':
+        if not filename.endswith("detx"):
             raise NotImplementedError('Only the detx format is supported.')
         self._open_file(filename)
         self._parse_header()
