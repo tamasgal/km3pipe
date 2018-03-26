@@ -229,9 +229,16 @@ class DAQProcessor(Module):
         data = blob['CHData']
 
         if tag == 'IO_EVT':
-            self.process_event(data, blob)
+            try:
+                self.process_event(data, blob)
+            except struct.error:
+                self.log.error("Corrupt event data received. Skipping...")
         if tag == 'IO_SUM':
-            self.process_summaryslice(data, blob)
+            try:
+                self.process_summaryslice(data, blob)
+            except struct.error:
+                self.log.error("Corrupt summary slice data received. "
+                               "Skipping...")
 
         return blob
 
