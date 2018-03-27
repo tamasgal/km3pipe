@@ -54,6 +54,14 @@ def neutrino_to_source_direction(phi, theta, radian=True):
 
 
 def source_to_neutrino_direction(azimuth, zenith, radian=True):
+    """Flip the direction.
+
+    Parameters
+    ==========
+    zenith, azimuth: neutrino origin
+    radian: bool [default=True]
+        receive + return angles in radian? (if false, use degree)
+    """
     azimuth = np.atleast_1d(azimuth).copy()
     zenith = np.atleast_1d(zenith).copy()
     if not radian:
@@ -443,10 +451,21 @@ def perc(p=95):
     return offset, 100 - offset
 
 
-def resample_1d(arr):
-    """Resample a 1d array, with replacement."""
+def resample_1d(arr, n_out=None):
+    """Resample an array, with replacement.
+
+    Parameters
+    ==========
+    arr: np.ndarray
+        The array is resampled along the first axis.
+    n_out: int, optional
+        Number of samples to return. If not specified,
+        return ``len(arr)`` samples.
+    """
     arr = np.atleast_1d(arr)
     n = len(arr)
+    if n_out is None:
+        n_out = n
     idx = np.random.randint(0, n, size=n)
     return arr[idx]
 
