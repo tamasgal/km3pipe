@@ -1,14 +1,18 @@
 Unreleased changes
 ------------------
+
+Version 7
+---------
+
+7.17.4 / 2018-03-27
+~~~~~~~~~~~~~~~~~~~
+
 * ``-s REGEX`` in ``runtable`` and ``km3pipe detectors`` now uses a not so
   strict regex - re.search instead re.match.
 * ``kp.hardware.Detector`` now allows missing UTM information in detector
   descriptions (for example det id 36 in the database)
 * Fixes Python 2.7 compatibility with detector - ``AttributeError`` (``rfind``)
 
-
-Version 7
----------
 
 7.17.3 / 2018-03-02
 ~~~~~~~~~~~~~~~~~~~
