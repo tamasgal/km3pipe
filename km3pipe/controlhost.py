@@ -81,11 +81,19 @@ class Client(object):
                 log.error("Failed to construct Prefix, reconnecting.")
                 self._reconnect()
                 continue
-            if str(prefix.tag) not in self.valid_tags:
+
+            try:
+                prefix_tag = str(prefix.tag)
+            except UnicodeDecodeError:
+                log.error("The tag could not be decoded. Reconnecting.")
+                self._reconnect()
+                continue
+
+            if prefix_tag not in self.valid_tags:
                 log.error("Invalid tag '{0}' received, ignoring the message \n"
                           "and reconnecting.\n"
                           "  -> valid tags are: {0}"
-                          .format(prefix.tag, self.valid_tags))
+                          .format(prefix_tag, self.valid_tags))
                 self._reconnect()
                 continue
             else:

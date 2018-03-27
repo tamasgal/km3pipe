@@ -55,6 +55,9 @@ class TestConfig(TestCase):
     def test_get_returns_none_if_option_not_found(self):
         self.assertTrue(self.config.get("DB", "a") is None)
 
+    def test_get_returns_default_if_option_not_found(self):
+        self.assertEqual('b', self.config.get("DB", "a", default='b'))
+
     def test_get_returns_float_if_option_is_numberlike(self):
         self.assertTrue(isinstance(self.config.get("DB", "timeout"), float))
 

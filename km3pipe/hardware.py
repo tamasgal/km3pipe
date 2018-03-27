@@ -93,8 +93,7 @@ class Detector(object):
 
     def _init_from_file(self, filename):
         """Create detector from detx file."""
-        file_ext = os.path.splitext(filename)[1][1:]
-        if not file_ext == 'detx':
+        if not filename.endswith("detx"):
             raise NotImplementedError('Only the detx format is supported.')
         self._open_file(filename)
         self._parse_header()
@@ -115,10 +114,13 @@ class Detector(object):
         except ValueError:
             det_id, self.version = first_line.split()
             self.det_id = int(det_id)
-            validity = self._det_file.readline()
+            validity = self._det_file.readline().strip()
             self.valid_from, self.valid_until = split(validity, float)
-            self.utm_info = UTMInfo(*self._det_file.readline()
-                                    .strip().split(' ')[1:])
+            raw_utm_info = self._det_file.readline().strip().split(' ')
+            try:
+                self.utm_info = UTMInfo(*raw_utm_info[1:])
+            except TypeError:
+                log.warning("Missing UTM information.")
             n_doms = self._det_file.readline()
             self.n_doms = int(n_doms)
 
@@ -281,9 +283,9 @@ class UTMInfo(object):
     def __init__(self, ellipsoid, grid, easting, northing, z):
         self.ellipsoid = ellipsoid
         self.grid = grid
-        self.easting = int(easting)
-        self.northing = int(northing)
-        self.z = int(z)
+        self.easting = float(easting)
+        self.northing = float(northing)
+        self.z = float(z)
 
     def __str__(self):
         return "UTM {} {} {} {} {}"  \
@@ -318,3 +320,8 @@ class PMT(object):
     def __str__(self):
         return "PMT id:{0}, pos: {1}, dir: dir{2}, t0: {3}, DAQ channel: {4}"\
                .format(self.id, self.pos, self.dir, self.t0, self.channel_id)
+
+
+# PMT DAQ channel IDs ordered from top to bottom
+ORDERED_PMT_IDS = [28, 23, 22, 21, 27, 29, 20, 30, 26, 25, 19, 24, 13, 7, 1,
+                   14, 18, 12, 6, 2, 11, 8, 0, 15, 4, 3, 5, 17, 10, 9, 16]

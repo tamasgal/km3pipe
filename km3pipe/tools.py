@@ -449,3 +449,8 @@ class AnyBar():
 
     def change(self, color):
         self.sock.sendto(color.encode('utf-8'), (self.address, self.port))
+
+
+def zero_pad(m, n=1):
+    """Pad a matrix with zeros, on all sides."""
+    return np.pad(m, (n, n), mode='constant', constant_values=[0])

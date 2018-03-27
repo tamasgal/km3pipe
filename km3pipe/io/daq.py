@@ -229,9 +229,16 @@ class DAQProcessor(Module):
         data = blob['CHData']
 
         if tag == 'IO_EVT':
-            self.process_event(data, blob)
+            try:
+                self.process_event(data, blob)
+            except struct.error:
+                self.log.error("Corrupt event data received. Skipping...")
         if tag == 'IO_SUM':
-            self.process_summaryslice(data, blob)
+            try:
+                self.process_summaryslice(data, blob)
+            except struct.error:
+                self.log.error("Corrupt summary slice data received. "
+                               "Skipping...")
 
         return blob
 
@@ -584,3 +591,15 @@ class TMCHRepump(Pump):
 
     def __next__(self):
         return next(self.blobs)
+
+
+def is_3dshower(trigger_mask):
+    return bool(trigger_mask & 2)
+
+
+def is_mxshower(trigger_mask):
+    return bool(trigger_mask & 4)
+
+
+def is_3dmuon(trigger_mask):
+    return bool(trigger_mask & 16)
