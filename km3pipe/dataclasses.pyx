@@ -156,66 +156,6 @@ class Convertible(object):
             return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
 
 
-class SummarysliceInfo(with_metaclass(Serialisable)):
-    """JDAQSummaryslice Metadata.
-    """
-    h5loc = '/summary_slice'
-    dtype = np.dtype([
-        ('det_id', '<i4'),
-        ('frame_index', '<u4'),
-        ('run_id', '<i4'),
-        ('slice_id', '<u4'),
-    ])
-
-    @classmethod
-    def from_table(cls, row):
-        args = []
-        for col in cls.dtype.names:
-            try:
-                args.append(row[col])
-            except KeyError:
-                args.append(np.nan)
-        return cls(*args)
-
-    @classmethod
-    def deserialise(cls, *args, **kwargs):
-        return cls.conv_from(*args, **kwargs)
-
-    def serialise(self, *args, **kwargs):
-        return self.conv_to(*args, **kwargs)
-
-    @classmethod
-    def conv_from(cls, data, fmt='numpy', h5loc='/'):
-        if fmt == 'numpy':
-            return cls.from_table(data[0])
-
-    def conv_to(self, to='numpy'):
-        if to == 'numpy':
-            return self.__array__()
-        if to == 'pandas':
-            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
-
-    def __array__(self):
-        return np.array([(
-            self.det_id, self.frame_index, self.run_id, self.slice_id,
-        ), ], dtype=self.dtype)
-
-    def __str__(self):
-        return "Summaryslice #{0}:\n" \
-               "    detector id:     {1}\n" \
-               "    frame index:     {2}\n" \
-               "    run id:          {3}\n" \
-               .format(self.slice_id,
-                       self.det_id, self.frame_index, self.run_id,
-                       )
-
-    def __insp__(self):
-        return self.__str__()
-
-    def __len__(self):
-        return 1
-
-
 TimesliceInfo = namedtuple('TimesliceInfo',
                            ['frame_index',
                             'slice_id',
@@ -241,78 +181,6 @@ SummarysliceInfo = namedtuple('SummarysliceInfo',
                                'timestamp',
                                'nanoseconds',
                                'n_frames'])
-
-
-class TimesliceFrameInfo_(with_metaclass(Serialisable)):
-    """JDAQTimeslice frame metadata.
-    """
-    h5loc = '/time_slice_frame_info'
-    dtype = np.dtype([
-        ('dom_id', '<u4'),
-        ('fifo_status', '<u4'),
-        ('frame_id', '<u4'),
-        ('frame_index', '<u4'),
-        ('has_udp_trailer', '<u4'),
-        ('high_rate_veto', '<u4'),
-        ('max_sequence_number', '<u4'),
-        ('n_packets', '<u4'),
-        ('slice_id', '<u4'),
-        ('utc_nanoseconds', '<u4'),
-        ('utc_seconds', '<u4'),
-        ('white_rabbit_status', '<u4'),
-    ])
-
-    @classmethod
-    def from_table(cls, row):
-        args = []
-        for col in cls.dtype.names:
-            try:
-                args.append(row[col])
-            except KeyError:
-                args.append(np.nan)
-        return cls(*args)
-
-    @classmethod
-    def deserialise(cls, *args, **kwargs):
-        return cls.conv_from(*args, **kwargs)
-
-    def serialise(self, *args, **kwargs):
-        return self.conv_to(*args, **kwargs)
-
-    @classmethod
-    def conv_from(cls, data, frame_id, fmt='numpy', h5loc='/'):
-        if fmt == 'numpy':
-            return cls.from_table(data[0])
-
-    def conv_to(self, to='numpy'):
-        if to == 'numpy':
-            return self.__array__()
-        if to == 'pandas':
-            return KM3DataFrame(self.conv_to(to='numpy'), h5loc=self.h5loc)
-
-    def __array__(self):
-        return np.array([(
-            self.dom_id, self.fifo_status, self.frame_id, self.frame_index,
-            self.has_udp_trailer, self.high_rate_veto,
-            self.max_sequence_number, self.n_packets, self.slice_id,
-            self.utc_nanoseconds, self.utc_seconds, self.white_rabbit_status
-        ), ], dtype=self.dtype)
-
-    def __str__(self):
-        return "Timeslice frame:\n" \
-               "    slice id: {0}\n" \
-               "    frame id: {1}\n" \
-               "    DOM id:   {2}\n" \
-               "    UDP packets: {3}/{4}\n" \
-               .format(self.slice_id, self.frame_id, self.dom_id,
-                       self.n_packets,
-                       self.max_sequence_number)
-
-    def __insp__(self):
-        return self.__str__()
-
-    def __len__(self):
-        return 1
 
 
 class SummaryframeInfo(with_metaclass(Serialisable)):
@@ -506,192 +374,6 @@ class Point(np.ndarray):
 
 
 Position = Direction = Point  # Backwards compatibility
-
-
-cdef class Hit:
-    """Hit on a PMT.
-
-    Parameters
-    ----------
-    channel_id : int
-    dir_x : float
-    dir_y : float
-    dir_z : float
-    dom_id : int
-    id : int
-    pmt_id : int
-    pos_x : float
-    pos_y : float
-    pos_z : float
-    t0 : int
-    time : int
-    tot : int
-    triggered : int
-
-    """
-    cdef public int id, dom_id, time, tot, channel_id, pmt_id
-    cdef public unsigned short int triggered
-    cdef public float pos_x, pos_y, pos_z, dir_x, dir_y, dir_z, t0
-
-    def __cinit__(self,
-                  int channel_id,
-                  float dir_x,
-                  float dir_y,
-                  float dir_z,
-                  int dom_id,
-                  int id,
-                  int pmt_id,
-                  float pos_x,
-                  float pos_y,
-                  float pos_z,
-                  int t0,
-                  int time,
-                  int tot,
-                  unsigned short int triggered,
-                  int event_id=0        # ignore this!
-                  ):
-        self.channel_id = channel_id
-        self.dir_x = dir_x
-        self.dir_y = dir_y
-        self.dir_z = dir_z
-        self.dom_id = dom_id
-        self.id = id
-        self.pmt_id = pmt_id
-        self.pos_x = pos_x
-        self.pos_y = pos_y
-        self.pos_z = pos_z
-        self.t0 = t0
-        self.time = time
-        self.tot = tot
-        self.triggered = triggered
-
-    @property
-    def dir(self):
-        return np.array((self.dir_x, self.dir_y, self.dir_z))
-
-    @property
-    def pos(self):
-        return np.array((self.pos_x, self.pos_y, self.pos_z))
-
-    def __str__(self):
-        return "Hit: channel_id({0}), dom_id({1}), pmt_id({2}), tot({3}), " \
-               "time({4}), triggered({5})" \
-               .format(self.channel_id, self.dom_id, self.pmt_id, self.tot,
-                       self.time, self.triggered)
-
-    def __repr__(self):
-        return self.__str__()
-
-    def __insp__(self):
-        return self.__str__()
-
-
-cdef class RawHit:
-    """RawHit on a PMT.
-
-    Parameters
-    ----------
-    channel_id : int
-    dom_id : int
-    time : float64
-    tot : int
-    triggered : int
-
-    """
-    cdef public int dom_id, tot, channel_id
-    cdef public double time
-    cdef public unsigned short int triggered
-
-    def __cinit__(self,
-                  int channel_id,
-                  int dom_id,
-                  double time,
-                  int tot,
-                  unsigned short int triggered,
-                  int event_id=0        # ignore this! just for init * magic
-                  ):
-        self.channel_id = channel_id
-        self.dom_id = dom_id
-        self.time = time
-        self.tot = tot
-        self.triggered = triggered
-
-    def __str__(self):
-        return "RawHit: channel_id({0}), dom_id({1}), tot({2}), " \
-               "time({3}), triggered({4})" \
-               .format(self.channel_id, self.dom_id, self.tot, self.time,
-                       self.triggered)
-
-    def __repr__(self):
-        return self.__str__()
-
-    def __insp__(self):
-        return self.__str__()
-
-
-cdef class CRawHit:
-    """RawHit on a PMT.
-
-    Parameters
-    ----------
-    channel_id : int
-    dir_x, dir_y, dir_z: float
-    dom_id : int
-    du: int
-    floor: int
-    pos_x, pos_y, pos_z: float
-    t0 : float
-    time : double
-    tot : int
-    triggered : int
-
-    """
-    cdef public int dom_id, tot, channel_id, du, floor
-    cdef public float dir_x, dir_y, dir_z, pos_x, pos_y, pos_z, t0
-    cdef public double time
-    cdef public unsigned short int triggered
-
-    def __cinit__(self,
-                  int channel_id,
-                  float dir_x,
-                  float dir_y,
-                  float dir_z,
-                  int dom_id,
-                  int du,
-                  int floor,
-                  float pos_x,
-                  float pos_y,
-                  float pos_z,
-                  float t0,
-                  double time,
-                  int tot,
-                  unsigned short int triggered,
-                  int event_id=0        # ignore this! just for init * magic
-                  ):
-        self.channel_id = channel_id
-        self.dir_x, self.dir_y, self.dir_z = dir_x, dir_y, dir_z
-        self.dom_id = dom_id
-        self.du = du
-        self.floor = floor
-        self.pos_x, self.pos_y, self.pos_z = pos_x, pos_y, pos_z
-        self.t0 = t0
-        self.time = time
-        self.tot = tot
-        self.triggered = triggered
-
-    def __str__(self):
-        return "CRawHit: channel_id({0}), dom_id({1}), tot({2}), " \
-               "time({3}), triggered({4}), " \
-               "pos({5}, {6}, {7}), dir({8}, {9}, {10})" \
-               .format(self.channel_id, self.dom_id, self.tot, self.time,
-                       self.triggered, self.pos_x, self.pos_y, self.pos_z,
-                       self.dir_x, self.dir_y, self.dir_z)
-
-    def __repr__(self):
-        return self.__str__()
-
-    def __insp__(self):
-        return self.__str__()
 
 
 cdef class TimesliceHit:
@@ -930,9 +612,7 @@ class RawHitSeries(DTypeAttr):
 
     def __getitem__(self, index):
         if isinstance(index, int):
-            # element = AttrVoid(self._arr[index])  # TODO: MemoryLeak
-            hit = RawHit(*self._arr[index])
-            return hit
+            raise ValueError("Single element iteration is not supported yet")
         new = self.__class__(self._arr[index], self.event_id)
         new.dtype = self.dtype
         return new
@@ -1057,8 +737,7 @@ class CRawHitSeries(DTypeAttr):
 
     def __getitem__(self, index):
         if isinstance(index, int):
-            hit = CRawHit(*self._arr[index])
-            return hit
+            raise ValueError("Single element iteration is not supported yet")
         return self.__class__(self._arr[index], self.event_id)
 
     def __iter__(self):
@@ -1255,7 +934,7 @@ class McHitSeries(DTypeAttr):
 
     def __getitem__(self, index):
         if isinstance(index, int):
-            return McHit(*self._arr[index])
+            raise ValueError("Single element iteration is not supported yet")
         return self.__class__(self._arr[index], self.event_id)
 
     def __str__(self):
@@ -1566,7 +1245,7 @@ class HitSeries(DTypeAttr):
 
     def __getitem__(self, index):
         if isinstance(index, int):
-            return Hit(*self._arr[index])
+            raise ValueError("Single element iteration is not supported yet")
         return self.__class__(self._arr[index])
 
     def __str__(self):
@@ -1659,27 +1338,12 @@ class TimesliceHitSeries(DTypeAttr):
     def __array__(self):
         return self._arr
 
-    def __iter__(self):
-        return self
-
-    def next(self):
-        """Python 2/3 compatibility for iterators"""
-        return self.__next__()
-
-    def __next__(self):
-        if self._index >= len(self):
-            self._index = 0
-            raise StopIteration
-        hits = TimesliceHit(*self._arr[self._index])
-        self._index += 1
-        return hits
-
     def __len__(self):
         return self._arr.shape[0]
 
     def __getitem__(self, index):
         if isinstance(index, int):
-            return TimesliceHit(*self._arr[index])
+            raise ValueError("Single element iteration is not supported yet")
         return self.__class__(self._arr[index], self.slice_id, self.frame_id)
 
     def __str__(self):
