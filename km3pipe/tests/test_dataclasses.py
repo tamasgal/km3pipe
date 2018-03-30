@@ -10,9 +10,9 @@ from __future__ import division, absolute_import, print_function
 from six import with_metaclass
 
 import numpy as np
-from numpy import nan
 from io import BytesIO
 import struct
+from numpy.testing import (assert_array_equal, assert_allclose)
 
 from km3pipe.testing import TestCase, skip
 from km3pipe.testing.mocks import FakeAanetHit
@@ -21,13 +21,15 @@ from km3pipe.dataclasses import (
     Track, Position, RawHitSeries, HitSeries, McHitSeries,
     TimesliceHitSeries, EventInfo, SummarysliceInfo, TimesliceInfo,
     Serialisable, TrackSeries, SummaryframeSeries, KM3Array, KM3DataFrame,
-    BinaryStruct, BinaryComposite, DTypeAttr, McTrackSeries, McTrack)
+    BinaryStruct, BinaryComposite, DTypeAttr, McTrackSeries, McTrack,
+    Table
+)
 
-__author__ = "Tamas Gal"
+__author__ = "Tamas Gal, Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
 __license__ = "MIT"
-__maintainer__ = "Tamas Gal"
+__maintainer__ = "Tamas Gal, Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
@@ -932,3 +934,63 @@ class TestDTypeAttr(TestCase):
         self.assertAlmostEqual(5, foo.new[0])
         sliced_foo = foo[1:]
         self.assertAlmostEqual(6, sliced_foo.new[0])
+
+
+class TestTable(TestCase):
+    def setUp(self):
+        self.dt = np.dtype([('a', int), ('b', float), ('group_id', int)])
+        self.arr = np.array([
+            (0, 1.0, 2),
+            (3, 4.0, 5),
+            (6, 7.0, 8),
+        ], dtype=self.dt)
+
+    def test_h5loc(self):
+        tab = self.arr.view(Table)
+        assert tab.h5loc == '/misc'
+        tab = Table.conv_from(self.arr)
+        assert tab.h5loc == '/misc'
+        tab = Table.conv_from(self.arr, h5loc='/foo')
+        assert tab.h5loc is '/foo'
+
+    def test_view(self):
+        tab = self.arr.view(Table)
+        assert tab.dtype == self.dt
+        assert tab.h5loc == '/misc'
+        assert_array_equal(tab.a, np.array([0, 3, 6]))
+        assert tab[0]['group_id'] == 2
+        assert tab[0].group_id == 2
+        assert tab['group_id'][0] == 2
+        assert tab.group_id[0] == 2
+        assert isinstance(tab[0], np.record)
+        for row in tab:
+            assert isinstance(row, np.record)
+            assert row['a'] == 0
+            assert row.a == 0
+            for c in row:
+                assert c == 0
+                break
+            assert_allclose([0, 1., 2], [c for c in row])
+            break
+
+    def test_init(self):
+        tab = Table.conv_from(self.arr)
+        assert tab.h5loc == '/misc'
+        tab = Table.conv_from(self.arr, h5loc='/bla')
+        assert tab.dtype == self.dt
+        assert tab.h5loc == '/bla'
+        assert_array_equal(tab.a, np.array([0, 3, 6]))
+        assert tab[0]['group_id'] == 2
+        assert tab[0].group_id == 2
+        assert tab['group_id'][0] == 2
+        assert tab.group_id[0] == 2
+        assert isinstance(tab[0], np.record)
+        for row in tab:
+            assert isinstance(row, np.record)
+            assert row['a'] == 0
+            assert row.a == 0
+            for c in row:
+                assert c == 0
+                break
+            assert_allclose([0, 1., 2], [c for c in row])
+            break

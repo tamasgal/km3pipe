@@ -48,6 +48,8 @@ IS_CC = {
     0: 1,         # True,
 }
 
+DEFAULT_H5LOC = '/misc'
+
 
 class Serialisable(type):
     """A metaclass for serialisable classes.
@@ -2236,3 +2238,52 @@ class BinaryComposite(object):
 #    @property
 #    def _size(self):
 #        return sum(s._size for s in self._structure
+
+
+
+class Table(np.recarray):
+    """2D generic Table with grouping index.
+
+    This class adds the following to ``np.recarray``:
+
+    Attributes
+    ----------
+    h5loc: str, default='{}'
+        HDF5 group where to write into.
+    """.format(DEFAULT_H5LOC)
+
+    def __new__(cls, arr, h5loc=DEFAULT_H5LOC):
+        obj = np.array(arr).view(cls)
+        obj.h5loc = h5loc
+        return obj
+
+    def __array_finalize__(self, obj):
+        if obj is None:
+            # called from explicit contructor
+            return obj
+        # views or slices
+        self.h5loc = getattr(obj, 'h5loc', DEFAULT_H5LOC)
+        # attribute access returns void instances on slicing/iteration
+        # kudos to https://github.com/numpy/numpy/issues/3581#issuecomment-108957200
+        if obj is not None and type(obj) is not type(self):
+            self.dtype = np.dtype((np.record, obj.dtype))
+
+    @classmethod
+    def conv_from(cls, data, h5loc=DEFAULT_H5LOC,
+                  fmt='numpy', **kwargs):
+        if fmt == 'numpy':
+            arr = cls(data, h5loc=h5loc)
+            return arr
+
+    def conv_to(self, to='numpy', **kwargs):
+        if to == 'numpy':
+            return self
+        if to == 'pandas':
+            return KM3DataFrame.conv_from(self, fmt='numpy', **kwargs)
+
+    @classmethod
+    def from_dict(cls, map, dtype=None, **kwargs):
+        if dtype is None:
+            dtype = np.dtype([(key, float) for key in sorted(map.keys())])
+        return cls(np.array([tuple((map[key] for key in dtype.names))],
+                            dtype=dtype), **kwargs)
