@@ -202,8 +202,19 @@ class Table(np.recarray):
 
     Attributes
     ----------
-    h5loc: str, default='{}'
-        HDF5 group where to write into.
+    h5loc: str
+        HDF5 group where to write into. (default='{}')
+
+    Methods
+    -------
+    from_dict(arr_dict, dtype=None, **kwargs)
+        Create an Table from a dict of arrays (similar to pandas).
+    from_template(data, template, **kwargs)
+        Create an array from a dict of arrays with a predefined dtype.
+    sorted(by)
+        Sort the table by one of its columns.
+    append_columns(colnames, values)
+        Append new columns to the table.
     """.format(DEFAULT_H5LOC)
 
     def __new__(cls, data, h5loc=DEFAULT_H5LOC, dtype=None, **kwargs):
@@ -226,55 +237,77 @@ class Table(np.recarray):
             self.dtype = np.dtype((np.record, obj.dtype))
 
     @staticmethod
-    def _expand_scalars(map):
+    def _expand_scalars(arr_dict):
         scalars = []
         maxlen = 0
-        for k, v in map.items():
+        for k, v in arr_dict.items():
             if np.isscalar(v):
                 scalars.append(k)
             elif len(v) > maxlen:
                 maxlen = len(v)
         for s in scalars:
-            map[s] = np.full(maxlen, map[s])
-        return map
+            arr_dict[s] = np.full(maxlen, arr_dict[s])
+        return arr_dict
 
     @classmethod
-    def from_dict(cls, map, dtype=None, **kwargs):
-        print('from dict')
+    def from_dict(cls, arr_dict, dtype=None, **kwargs):
+        """Generate a table from a dictionary of arrays.
+
+
+        """
         # i hope order of keys == order or values
         if dtype is None:
-            names = list(map.keys())
+            names = list(arr_dict.keys())
         else:
             dtype = np.dtype(dtype)
             dt_names = [f for f in dtype.names]
-            map_names = [k for k in map.keys()]
-            if not set(dt_names) == set(map_names):
+            dict_names = [k for k in arr_dict.keys()]
+            if not set(dt_names) == set(dict_names):
                 raise KeyError('Dictionary keys and dtype fields do not match!')
             names = list(dtype.names)
 
-        map = cls._expand_scalars(map)
-        return cls(np.rec.fromarrays(map.values(), names=names,
+        arr_dict = cls._expand_scalars(arr_dict)
+        return cls(np.rec.fromarrays(arr_dict.values(), names=names,
                                      dtype=dtype), **kwargs)
+
+    @property
+    def templates_avail(self):
+        return sorted(list(TEMPLATE_DTYPES.keys()))
 
     @classmethod
     def from_template(cls, data, template):
+        """Create a table from a predefined datatype.
+
+        See the ``templates_avail`` property for available names.
+
+        Parameters
+        ----------
+        data
+            Data in a format that the ``__init__`` understands.
+        template: str
+            Name of the dtype template to use.
+        """
         dt = TEMPLATE_DTYPES[template]
         loc = TEMPLATE_H5LOCS[template]
         return cls(data, h5loc=loc, dtype=dt)
 
-    def append_fields(self, fields, values, **kwargs):
-        """Uses `numpy.lib.recfunctions.append_fields` to append new fields."""
-        new_arr = rfn.append_fields(self, fields, values,
+    def append_columns(self, colnames, values, **kwargs):
+        """Append new columns to the table.
+
+        See the docs for ``numpy.lib.recfunctions.append_fields`` for an
+        explanation of the options.
+        """
+        new_arr = rfn.append_fields(self, colnames, values,
                                     usemask=False, **kwargs)
         return self.__class__(new_arr, h5loc=self.h5loc)
 
-    def sorted(self, by):
+    def sorted(self, by, **kwargs):
         """Sort array by a column.
 
         Parameters
         ==========
         by: str
-            Name of the columns (e.g. 'time').
+            Name of the columns to sort by(e.g. 'time').
         """
-        sort_idc = np.argsort(self[by])
-        return self.__class__(self[sort_idc])
+        sort_idc = np.argsort(self[by], **kwargs)
+        return self.__class__(self[sort_idc], h5loc=self.h5loc)
