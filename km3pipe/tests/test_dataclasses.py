@@ -13,7 +13,7 @@ import pytest
 
 from km3pipe.testing import TestCase, skip   # noqa
 from km3pipe.dataclasses import (
-    Table, dtypes
+    Table
 )
 
 __author__ = "Tamas Gal, Moritz Lotze"
@@ -23,69 +23,6 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal, Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
-
-
-class TestRawHitSeries(TestCase):
-    def setUp(self):
-        n = 10
-        channel_ids = np.arange(n)
-        dom_ids = np.arange(n)
-        times = np.arange(n)
-        tots = np.arange(n)
-        triggereds = np.ones(n)
-
-        self.hits = Table.from_dict(
-            {
-                'channel_id': channel_ids,
-                'dom_id': dom_ids,
-                'time': times,
-                'tot': tots,
-                'triggered': triggereds,
-                'group_id': 0,      # event_id
-            }, dtype=dtypes['RawHitSeries'],
-        )
-
-    def test_from_arrays(self):
-        hits = self.hits
-        self.assertAlmostEqual(1, hits[1].channel_id)
-        self.assertAlmostEqual(9, hits[9].dom_id)
-        self.assertAlmostEqual(9, hits[9].time)
-        self.assertAlmostEqual(9, hits[9].tot)
-        self.assertAlmostEqual(1, hits[9].triggered)
-        self.assertEqual(10, len(hits))
-
-    def test_single_element_attr_access(self):
-        hits = self.hits
-        a_hit = hits[2]
-        self.assertAlmostEqual(2, a_hit.channel_id)
-        self.assertAlmostEqual(2, a_hit.dom_id)
-        self.assertAlmostEqual(2, a_hit.time)
-        self.assertAlmostEqual(2, a_hit.tot)
-        self.assertAlmostEqual(1, a_hit.triggered)
-
-    def test_slicing(self):
-        shits = self.hits[4:6]
-        self.assertTrue(isinstance(shits, Table))
-        self.assertEqual(2, len(shits))
-        self.assertAlmostEqual(4, shits.time[0])
-
-    def test_slicing_then_single_element_access(self):
-        shits = self.hits[4:6]
-        a_hit = shits[1]
-        self.assertAlmostEqual(5, a_hit.time)
-
-    def test_appending_fields(self):
-        hits = self.hits
-        hits = hits.append_fields('new', [1, 2, 3, 4])
-        self.assertEqual(1, hits.new[0])
-
-    @skip
-    def test_appending_fields_survives_slicing(self):
-        hits = self.hits
-        hits = hits.append_fields('new', [1, 2, 3, 4])
-        shits = hits[2:4]
-        self.assertTrue(isinstance(shits, Table))
-        self.assertEqual(3, shits.new[0])
 
 
 class TestTable(TestCase):
@@ -190,3 +127,28 @@ class TestTable(TestCase):
         tab = Table(self.arr)
         tab = tab.append_fields('new', [1, 2, 3, 4])
         self.assertEqual(1, tab.new[0])
+
+    def test_template(self):
+        n = 10
+        channel_ids = np.arange(n)
+        dom_ids = np.arange(n)
+        times = np.arange(n)
+        tots = np.arange(n)
+        triggereds = np.ones(n)
+        d_hits = {
+            'channel_id': channel_ids,
+            'dom_id': dom_ids,
+            'time': times,
+            'tot': tots,
+            'triggered': triggereds,
+            'group_id': 0,      # event_id
+        }
+        tab = Table.from_template(d_hits, 'RawHitSeries')
+        assert isinstance(tab, Table)
+        ar_hits = np.array([
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+        ], dtype=float)
+        tab = Table.from_template(ar_hits, 'RawHitSeries')
+        assert isinstance(tab, Table)
