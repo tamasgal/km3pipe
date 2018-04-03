@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 
+Version 8
+~~~~~~~~~
+* replace all dataclasses with the ``Table`` class (subclass of ``np.recarray``)
+
 Version 7
 ---------
 
