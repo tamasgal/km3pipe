@@ -36,7 +36,7 @@ __all__ = (
 
 DEFAULT_H5LOC = '/misc'
 
-H5LOCS = {
+TEMPLATE_H5LOCS = {
     'EventInfo': '/event_info',
     'HitSeries': '/hits',
     'CMcHitSeries': '/mc_hits',
@@ -49,8 +49,7 @@ H5LOCS = {
     'TimesliceHitSeries': '/time_slice_hits',
 }
 
-
-dtypes = {
+TEMPLATE_DTYPES = {
     'SummaryFrameInfo': np.dtype([
         ('dom_id', '<u4'),
         ('fifo_status', '<u4'),
@@ -207,10 +206,11 @@ class Table(np.recarray):
         HDF5 group where to write into.
     """.format(DEFAULT_H5LOC)
 
-    def __new__(cls, data, h5loc=DEFAULT_H5LOC, **kwargs):
+    def __new__(cls, data, h5loc=DEFAULT_H5LOC, dtype=None, **kwargs):
         if isinstance(data, dict):
-            return cls.from_dict(data, h5loc=h5loc, **kwargs)
-        obj = np.array(data).view(cls)
+            return cls.from_dict(data, h5loc=h5loc, dtype=dtype, **kwargs)
+        print('from array')
+        obj = np.asanyarray(data, dtype=dtype).view(cls)
         obj.h5loc = h5loc
         return obj
 
@@ -240,6 +240,7 @@ class Table(np.recarray):
 
     @classmethod
     def from_dict(cls, map, dtype=None, **kwargs):
+        print('from dict')
         # i hope order of keys == order or values
         if dtype is None:
             names = list(map.keys())
@@ -254,6 +255,12 @@ class Table(np.recarray):
         map = cls._expand_scalars(map)
         return cls(np.rec.fromarrays(map.values(), names=names,
                                      dtype=dtype), **kwargs)
+
+    @classmethod
+    def from_template(cls, data, template):
+        dt = TEMPLATE_DTYPES[template]
+        loc = TEMPLATE_H5LOCS[template]
+        return cls(data, h5loc=loc, dtype=dt)
 
     def append_fields(self, fields, values, **kwargs):
         """Uses `numpy.lib.recfunctions.append_fields` to append new fields."""
