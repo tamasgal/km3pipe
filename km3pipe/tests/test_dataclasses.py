@@ -30,8 +30,8 @@ class TestTable(TestCase):
         self.dt = np.dtype([('a', int), ('b', float), ('group_id', int)])
         self.arr = np.array([
             (0, 1.0, 2),
-            (3, 4.0, 5),
-            (6, 7.0, 8),
+            (3, 7.0, 5),
+            (6, 4.0, 8),
         ], dtype=self.dt)
 
     def test_h5loc(self):
@@ -152,3 +152,14 @@ class TestTable(TestCase):
         ], dtype=float)
         tab = Table.from_template(ar_hits, 'RawHitSeries')
         assert isinstance(tab, Table)
+
+    def test_sort(self):
+        dt = np.dtype([('a', int), ('b', float), ('c', int)])
+        arr = np.array([
+            (0, 1.0, 2),
+            (3, 7.0, 5),
+            (6, 4.0, 8),
+        ], dtype=dt)
+        tab = Table(arr)
+        tab_sort = tab.sorted('b')
+        assert_array_equal(tab_sort['a'], np.array([0, 6, 3]))
