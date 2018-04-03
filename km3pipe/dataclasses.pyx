@@ -277,4 +277,4 @@ class Table(np.recarray):
             Name of the columns (e.g. 'time').
         """
         sort_idc = np.argsort(self[by])
-        return self.__class__(self[sort_idc], self.group_id)
+        return self.__class__(self[sort_idc])
