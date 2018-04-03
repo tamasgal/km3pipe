@@ -123,9 +123,9 @@ class TestTable(TestCase):
         with pytest.raises(KeyError):
             tab = Table(dmap, dtype=bad_dt)
 
-    def test_append_fields(self):
+    def test_append_columns(self):
         tab = Table(self.arr)
-        tab = tab.append_fields('new', [1, 2, 3, 4])
+        tab = tab.append_columns('new', [1, 2, 3, 4])
         self.assertEqual(1, tab.new[0])
 
     def test_template(self):
