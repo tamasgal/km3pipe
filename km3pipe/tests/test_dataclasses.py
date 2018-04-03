@@ -97,10 +97,10 @@ class TestTable(TestCase):
         dt = [('a', float), ('b', float), ('c', float)]
         tab = Table.from_dict(dmap, dtype=dt)
         assert tab.h5loc == '/misc'
-        self.assertTrue(isinstance(tab, Table))
+        assert isinstance(tab, Table)
         tab = Table.from_dict(dmap, dtype=dt, h5loc='/foo')
         assert tab.h5loc == '/foo'
-        self.assertTrue(isinstance(tab, Table))
+        assert isinstance(tab, Table)
         bad_dt = [('a', float), ('b', float), ('c', float), ('d', int)]
         with pytest.raises(KeyError):
             tab = Table.from_dict(dmap, dtype=bad_dt)
