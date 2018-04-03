@@ -57,18 +57,7 @@ KM3Pipe: Main Framework
 .. autosummary::
   :toctree: api
 
-  EventInfo
-  Hit
-  HitSeries
-  McHit
-  McHitSeries
-  RawHitSeries
-  Track
-  TrackSeries
-  McTrack
-  McTrackSeries
-  KM3Array
-  KM3DataFrame
+  Table
 
 
 ``km3pipe.db``: Database Tools
