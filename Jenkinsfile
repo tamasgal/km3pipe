@@ -11,7 +11,7 @@ pipeline {
         stage('Build') {
             steps {
                 sh """
-                    source venv/bin/activate
+                    . venv/bin/activate
                     make install-dev
                 """
             }
@@ -19,7 +19,7 @@ pipeline {
         stage('Test') {
             steps {
                 sh """
-                    source venv/bin/activate
+                    . venv/bin/activate
                     make test
                 """
             }
