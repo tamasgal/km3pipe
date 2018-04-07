@@ -24,5 +24,15 @@ pipeline {
                 """
             }
         }
+        stage('Docs') {
+            steps {
+                sh """
+                    . venv/bin/activate
+                    make doc-dependencies
+                    cd docs
+                    make html
+                """
+            }
+        }
     }
 }
