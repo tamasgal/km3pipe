@@ -3,14 +3,25 @@ pipeline {
         docker { image 'python:3.6.5' }
     }
     stages {
+        stage('Prepare') {
+            steps {
+                sh 'python -m venv venv'
+            }
+        }
         stage('Build') {
             steps {
-                sh 'make install-dev'
+                sh """
+                    source venv/bin/activate
+                    make install-dev
+                """
             }
         }
         stage('Test') {
             steps {
-                sh 'make test'
+                sh """
+                    source venv/bin/activate
+                    make test
+                """
             }
         }
     }
