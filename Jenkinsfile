@@ -5,8 +5,7 @@ pipeline {
     stages {
         stage('Test') {
             steps {
-                sh 'apk add git'
-                sh 'pip install git+http://git.km3net.de/km3py/km3pipe@develop'
+                sh 'ls -al'
             }
         }
     }
