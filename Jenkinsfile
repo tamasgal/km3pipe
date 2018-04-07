@@ -5,7 +5,7 @@ pipeline {
     stages {
         stage('Test') {
             steps {
-                sh 'python --version'
+                sh 'pip install git+http://git.km3net.de/km3py/km3pipe@develop'
             }
         }
     }
