@@ -14,7 +14,6 @@ pipeline {
                     . venv/bin/activate
                     make install-dev
                 """
-                rocketSend channel: 'km3pipe', message: 'bohooo'
             }
         }
         stage('Test') {
