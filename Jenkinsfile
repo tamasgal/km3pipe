@@ -10,7 +10,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                rocketSend "Build Started - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+                rocketSend channel: '#km3pipe', message: "Build Started - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
                 sh """
                     . venv/bin/activate
                     make install-dev
