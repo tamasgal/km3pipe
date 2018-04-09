@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker { image 'python:3.6.5' }
     }
-    stages {
+    node {
         stage('Prepare') {
             steps {
                 sh 'python -m venv venv'
