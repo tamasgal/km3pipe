@@ -10,11 +10,15 @@ pipeline {
         }
         stage('Build') {
             steps {
-                rocketSend channel: '#km3pipe', message: "Build Started - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
-                sh """
-                    . venv/bin/activate
-                    make install-dev
-                """
+                try { 
+                    sh """
+                        . venv/bin/activate
+                        make install-dev
+                    """
+                } catch (e) { 
+                    rocketSend channel: '#km3pipe', message: "Build Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+                    throw e
+                }
             }
         }
         stage('Test') {
