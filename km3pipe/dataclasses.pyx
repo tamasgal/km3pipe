@@ -38,32 +38,18 @@ DEFAULT_H5LOC = '/misc'
 
 TEMPLATE_H5LOCS = {
     'EventInfo': '/event_info',
-    'HitSeries': '/hits',
-    'CMcHitSeries': '/mc_hits',
-    'McHitSeries': '/mc_hits',
-    'McTrackSeries': '/mc_tracks',
-    'RawHitSeries': '/raw_hits',
-    'CRawHitSeries': '/hits',
+    'TimesliceHits': '/time_slice_hits',
+    'Hits': '/hits',
+    'CalibHits': '/hits',
+    'McHits': '/mc_hits',
+    'CalibMcHits': '/mc_hits',
+    'Tracks': '/tracks',
+    'McTracks': '/mc_tracks',
     'SummaryFrameSeries': '/summary_frame_series',
     'SummaryFrameInfo': '/summary_slice_info',
-    'TimesliceHitSeries': '/time_slice_hits',
 }
 
 TEMPLATE_DTYPES = {
-    'SummaryFrameInfo': np.dtype([
-        ('dom_id', '<u4'),
-        ('fifo_status', '<u4'),
-        ('frame_id', '<u4'),
-        ('frame_index', '<u4'),
-        ('has_udp_trailer', '<u4'),
-        ('high_rate_veto', '<u4'),
-        ('max_sequence_number', '<u4'),
-        ('n_packets', '<u4'),
-        ('slice_id', '<u4'),
-        ('utc_nanoseconds', '<u4'),
-        ('utc_seconds', '<u4'),
-        ('white_rabbit_status', '<u4'),
-    ]),
     'EventInfo': np.dtype([
         ('det_id', '<i4'),
         ('frame_index', '<u4'),
@@ -84,7 +70,13 @@ TEMPLATE_DTYPES = {
         ('event_id', '<u8'),
         ('group_id', '<u4'),
     ]),
-    'RawHitSeries': np.dtype([
+    'TimesliceHits': np.dtype([
+        ('channel_id', 'u1'),
+        ('dom_id', '<u4'),
+        ('time', '<i4'),
+        ('tot', 'u1'),
+    ]),
+    'Hits': np.dtype([
         ('channel_id', 'u1'),
         ('dom_id', '<u4'),
         ('time', '<f8'),
@@ -92,7 +84,7 @@ TEMPLATE_DTYPES = {
         ('triggered', 'u1'),
         ('group_id', '<u4')
     ]),
-    'CRawHitSeries': np.dtype([
+    'CalibHits': np.dtype([
         ('channel_id', 'u1'),
         ('dir_x', '<f4'),
         ('dir_y', '<f4'),
@@ -109,14 +101,14 @@ TEMPLATE_DTYPES = {
         ('triggered', 'u1'),
         ('group_id', '<u4'),
     ]),
-    'McHitSeries': np.dtype([
+    'McHits': np.dtype([
         ('a', 'f4'),
         ('origin', '<u4'),
         ('pmt_id', '<u4'),
         ('time', 'f8'),
         ('group_id', '<u4'),
     ]),
-    'CMcHitSeries': np.dtype([
+    'CalibMcHits': np.dtype([
         ('a', 'f4'),
         ('dir_x', '<f4'),
         ('dir_y', '<f4'),
@@ -129,30 +121,7 @@ TEMPLATE_DTYPES = {
         ('time', 'f8'),
         ('group_id', '<u4'),
     ]),
-    'HitSeries': np.dtype([
-        ('channel_id', 'u1'),
-        ('dir_x', '<f8'),
-        ('dir_y', '<f8'),
-        ('dir_z', '<f8'),
-        ('dom_id', '<u4'),
-        ('id', '<u4'),
-        ('pmt_id', '<u4'),
-        ('pos_x', '<f8'),
-        ('pos_y', '<f8'),
-        ('pos_z', '<f8'),
-        ('t0', '<i4'),
-        ('time', '<i4'),
-        ('tot', 'u1'),
-        ('triggered', 'u1'),
-        ('group_id', '<u4'),
-    ]),
-    'TimesliceHitSeries': np.dtype([
-        ('channel_id', 'u1'),
-        ('dom_id', '<u4'),
-        ('time', '<i4'),
-        ('tot', 'u1'),
-    ]),
-    'McTrackSeries': np.dtype([
+    'Tracks': np.dtype([
         ('bjorkeny', '<f8'),
         ('dir_x', '<f8'),
         ('dir_y', '<f8'),
@@ -169,7 +138,7 @@ TEMPLATE_DTYPES = {
         ('type', '<i4'),
         ('group_id', '<u4'),
     ]),
-    'TrackSeries': np.dtype([
+    'McTracks': np.dtype([
         ('bjorkeny', '<f8'),
         ('dir_x', '<f8'),
         ('dir_y', '<f8'),
@@ -185,6 +154,20 @@ TEMPLATE_DTYPES = {
         ('time', '<i4'),
         ('type', '<i4'),
         ('group_id', '<u4'),
+    ]),
+    'SummaryFrameInfo': np.dtype([
+        ('dom_id', '<u4'),
+        ('fifo_status', '<u4'),
+        ('frame_id', '<u4'),
+        ('frame_index', '<u4'),
+        ('has_udp_trailer', '<u4'),
+        ('high_rate_veto', '<u4'),
+        ('max_sequence_number', '<u4'),
+        ('n_packets', '<u4'),
+        ('slice_id', '<u4'),
+        ('utc_nanoseconds', '<u4'),
+        ('utc_seconds', '<u4'),
+        ('white_rabbit_status', '<u4'),
     ]),
     'SummaryframeSeries': np.dtype([
         ('dom_id', '<u4'),
@@ -217,10 +200,23 @@ class Table(np.recarray):
 
     This class adds the following to ``np.recarray``:
 
+    Parameters
+    ----------
+    data: array-like or dict(array-like)
+        numpy array with structured/flat dtype, or dict of arrays.
+    h5loc: str
+    Location in HDF5 file where to store the data. [default: '{h5l}'
+    dtype: numpy dtype
+        Datatype over array. If not specified and data is an unstructured
+        array, ``names`` needs to be specified. [default: None]
+    names: list(str)
+        Names to use when generating a dtype from unstructured arrays.
+        [default: None]
+
     Attributes
     ----------
     h5loc: str
-        HDF5 group where to write into. (default='{}')
+        HDF5 group where to write into. (default='{h5l}')
 
     Methods
     -------
@@ -232,7 +228,7 @@ class Table(np.recarray):
         Sort the table by one of its columns.
     append_columns(colnames, values)
         Append new columns to the table.
-    """.format(DEFAULT_H5LOC)
+    """.format(h5l=DEFAULT_H5LOC)
 
     def __new__(cls, data, h5loc=DEFAULT_H5LOC, dtype=None,
                 names=None, **kwargs):
