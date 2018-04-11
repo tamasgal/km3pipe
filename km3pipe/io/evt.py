@@ -250,9 +250,9 @@ class EvtPump(Pump):  # pylint: disable:R0902
         self.event_offsets.append(offset)
 
     @staticmethod
-    def _create_table(rawhits, group_id):
+    def _create_table(hits, group_id):
         dct = defaultdict(list)
-        for h in rawhits:
+        for h in hits:
             dct['a'].append(h.a)
             dct['origin'].append(h.origin)
             dct['pmt_id'].append(h.pmt_id)
