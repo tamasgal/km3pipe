@@ -241,15 +241,23 @@ class Table(np.recarray):
         if isinstance(data, dict):
             return cls.from_dict(data, h5loc=h5loc, dtype=dtype, **kwargs)
         if not has_structured_dt(data):
+            # flat (nonstructured) dtypes fail miserably!
+            # default to `|V8` whyever
             if dtype is None or not is_structured(dtype):
+                # infer structured dtype from array data + column names
                 if colnames is None:
                     raise ValueError(
-                        "Need to specify column names when passing "
-                        "unstructured arrays without specifying a "
-                        "structured dtype!")
+                        "Need to either specify column names or a "
+                        "structured dtype when passing unstructured arrays!"
+                        )
                 dtype = inflate_dtype(data, colnames)
+            # this *should* have been checked above, but do this
+            # just to be sure in case I screwed up the logic above;
+            # users will never see this, this should only show in tests
+            assert is_structured(dtype)
             data = np.asanyarray(data).view(dtype)
             dtype = data.dtype
+
         obj = np.asanyarray(data, dtype=dtype).view(cls)
         obj.h5loc = h5loc
         return obj
