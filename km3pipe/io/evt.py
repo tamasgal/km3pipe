@@ -11,6 +11,8 @@ import sys
 
 from collections import namedtuple, defaultdict
 
+import numpy as np
+
 from km3pipe.core import Pump, Blob
 from km3pipe.logger import logging
 
@@ -25,7 +27,7 @@ __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
 __license__ = "MIT"
-__maintainer__ = "Tamas Gal"
+__maintainer__ = "Tamas Gal, Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
