@@ -16,7 +16,7 @@ import pprint
 import numpy as np
 
 from km3pipe.core import Pump, Module, Blob
-from km3pipe.dataclasses import (EventInfo, HitSeries, RawHitSeries,
+from km3pipe.dataclasses import (Table, EventInfo,
                                  TimesliceInfo, TimesliceFrameInfo)
 from km3pipe.sys import ignored
 from km3pipe.logger import logging
@@ -88,14 +88,14 @@ class TimesliceParser(Module):
                     _times.append(hit[1])
                     _tots.append(hit[2])
 
-            tshits = RawHitSeries.from_arrays(
-                np.array(_channel_ids),
-                np.array(_dom_ids),
-                np.array(_times),
-                np.array(_tots),
-                np.zeros(len(_tots)),  # triggered
-                0  # event_id
-            )
+            tshits = Table.from_template({
+                'channel_id': np.array(_channel_ids),
+                'dom_id': np.array(_dom_ids),
+                'time': np.array(_times),
+                'tot': np.array(_tots),
+                'triggered': np.zeros(len(_tots)),  # triggered
+                'group_id': 0  # event_id
+            }, 'Hits')
             blob['TimesliceInfo'] = ts_info
             blob['TimesliceFrameInfos'] = ts_frameinfos
             blob['TSHits'] = tshits
@@ -263,38 +263,46 @@ class DAQProcessor(Module):
         for idx, hit in enumerate(hits):
             triggereds[idx] = hit in triggered_map
 
-        hit_series = HitSeries.from_arrays(
-            channel_ids,
-            nans,  # dir_x
-            nans,  # dir_y
-            nans,  # dir_z
-            dom_ids,
-            range(n_hits),  # id
-            zeros,  # pmt_id
-            nans,  # pos_x
-            nans,  # pos_y
-            nans,  # pos_z
-            zeros,  # t0
-            times,
-            tots,
-            triggereds,
-            self.index)
+        hit_series = Table.from_template({
+            'channel_id': channel_ids,
+            'dir_x': nans,
+            'dir_y': nans,
+            'dir_z': nans,
+            'dom_id': dom_ids,
+            'id': range(n_hits),
+            'pmt_id': zeros,
+            'pos_x': nans,
+            'pos_y': nans,
+            'pos_z': nans,
+            't0': zeros,
+            'time': times,
+            'tot': tots,
+            'triggered': triggereds,
+            'group_id': self.index,
+        }, 'CalibHits')
 
-        blob['Hits'] = hit_series
+        blob['CalibHits'] = hit_series
 
-        event_info = EventInfo(np.array(
-            (header.det_id,
-             self.index,  # header.time_slice,
-             0,  # livetime_sec
-             0, 0,  # MC ID and time
-             0, 0,  # n evts/files gen
-             event.overlays,
-             # header.run,
-             event.trigger_counter, event.trigger_mask,
-             header.ticks * 16, header.time_stamp,
-             0, 0, 0,  # MC weights
-             0,  # run id
-             0), dtype=EventInfo.dtype))
+        event_info = Table.from_template({
+            'det_id': header.det_id,
+            'frame_index': self.index,  # header.time_slice,
+            'livetime_sec': 0,  # livetime_sec
+            'mc_id': 0,
+            'mc_t': 0,
+            'def_id': 0,
+            'def_id': 0,  # n evts/files gen
+            'def_id': event.overlays,
+            'def_id': # header.run,
+            'def_id': event.trigger_counter,
+            'def_id': event.trigger_mask,
+            'def_id': header.ticks * 16,
+            'def_id': header.time_stamp,
+            'def_id': 0,
+            'def_id': 0,
+            'def_id': 0,  # MC weights
+            'def_id': 0,  # run id
+            'def_id': 0,
+        }, 'EventInfo')
         blob['EventInfo'] = event_info
 
         self.index += 1
