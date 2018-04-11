@@ -5,6 +5,7 @@
 # cython: profile=True
 # distutils: define_macros=CYTHON_TRACE=1
 # pylint: disable=W0232,C0103,C0111
+# vim:set ts=4 sts=4 sw=4 et syntax=python:
 """
 Dataclasses for internal use. Heavily based on Numpy arrays.
 """
@@ -13,7 +14,7 @@ from __future__ import division, absolute_import, print_function
 from collections import namedtuple, defaultdict
 import ctypes
 from libcpp cimport bool as c_bool  # noqa
-from six import with_metaclass
+from six import string_types
 from struct import Struct, calcsize
 
 import numpy as np
@@ -276,7 +277,7 @@ class Table(np.recarray):
                     raise ValueError(
                         "Need to either specify column names or a "
                         "structured dtype when passing unstructured arrays!"
-                        )
+                    )
                 dtype = inflate_dtype(data, colnames)
             # this *should* have been checked above, but do this
             # just to be sure in case I screwed up the logic above;
@@ -356,9 +357,42 @@ class Table(np.recarray):
     def append_columns(self, colnames, values, **kwargs):
         """Append new columns to the table.
 
+        When appending a single column, ``values`` can be a scalar or an
+        array of either length 1 or the same length as this array (the one
+        it's appended to). In case of multiple columns, values must have
+        the shape ``list(arrays)``, and the dimension of each array
+        has to match the length of this array.
+
         See the docs for ``numpy.lib.recfunctions.append_fields`` for an
-        explanation of the options.
+        explanation of the remaining options.
         """
+        n = len(self)
+        if np.isscalar(values):
+            values = np.full(n, values)
+
+        values = np.atleast_1d(values)
+        if not isinstance(colnames, string_types) and len(colnames) > 1:
+            values = np.atleast_2d(values)
+            for i in range(len(values)):
+                v = values[i]
+                if len(v) == n:
+                    continue
+                else:
+                    if len(values[i]) != n:
+                        raise ValueError(
+                            "Trying to append more than one column, but "
+                            "some arrays mismatch in length!")
+
+        if values.ndim == 1:
+            if len(values) > n:
+                raise ValueError(
+                    "New Column is longer than existing table!")
+            elif len(values) > 1 and len(values) < n:
+                raise ValueError(
+                    "New Column is shorter than existing table, "
+                    "but not just one element!")
+            elif len(values) == 1:
+                values = np.full(n, values[0])
         new_arr = rfn.append_fields(self, colnames, values,
                                     usemask=False, **kwargs)
         return self.__class__(new_arr, h5loc=self.h5loc)
