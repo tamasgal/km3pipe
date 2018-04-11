@@ -13,7 +13,7 @@ import pytest
 
 from km3pipe.testing import TestCase, skip   # noqa
 from km3pipe.dataclasses import (
-    Table, inflate_dtype, is_structured
+    Table, inflate_dtype, has_structured_dt, is_structured
 )
 
 __author__ = "Tamas Gal, Moritz Lotze"
@@ -111,10 +111,24 @@ class TestTable(TestCase):
         dta = inflate_dtype(l2d, names)
         with pytest.raises(ValueError):
             t = Table(l2d)
-        t = Table(l2d, names=names)
+        t = Table(l2d, colnames=names)
         t = Table(l2d, dtype=dta)
-        t = Table(l2d, dtype=dta, names=['a', 'b', 'c', 'd'])
+        t = Table(l2d, dtype=dta, colnames=['a', 'b', 'c', 'd'])
         assert t.dtype.names[1] == 'origin'
+
+    def test_flat_raises(self):
+        with pytest.raises(ValueError):
+            t = Table([1, 2, 3], dtype=int).dtype
+        with pytest.raises(ValueError):
+            t = Table([1, 2, 3], dtype=float).dtype
+        with pytest.raises(ValueError):
+            t = Table([1, 2, 3], dtype=None).dtype
+        with pytest.raises(ValueError):
+            t = Table([1, 2, 3]).dtype
+        t = Table([1, 2, 3], colnames=['a', 'b', 'c'])
+        assert t is not None
+        assert t.dtype is not None
+        assert t.dtype.fields is not None
 
     def test_fromdict_init(self):
         n = 5
@@ -186,20 +200,26 @@ class TestDtypes(TestCase):
                               ('group_id', '<u4')])
 
     def test_is_structured(self):
-        assert is_structured(np.ones(2, dtype=self.c_dt))
-        assert not is_structured(np.ones(2, dtype=float))
-        assert not is_structured(np.ones(2, dtype=int))
-        assert not is_structured([1, 2, 3])
-        assert not is_structured([1.0, 2.0, 3.0])
-        assert not is_structured([1.0, 2, 3.0])
+        assert is_structured(self.c_dt)
+        assert not is_structured(np.dtype('int64'))
+        assert not is_structured(np.dtype(int))
+        assert not is_structured(np.dtype(float))
+
+    def test_has_structured_dt(self):
+        assert has_structured_dt(np.ones(2, dtype=self.c_dt))
+        assert not has_structured_dt(np.ones(2, dtype=float))
+        assert not has_structured_dt(np.ones(2, dtype=int))
+        assert not has_structured_dt([1, 2, 3])
+        assert not has_structured_dt([1.0, 2.0, 3.0])
+        assert not has_structured_dt([1.0, 2, 3.0])
 
     def test_inflate(self):
         arr = np.ones(3, dtype=self.c_dt)
         names = ['a', 'b', 'c']
         print(arr.dtype)
-        assert is_structured(arr)
+        assert has_structured_dt(arr)
         dt_a = inflate_dtype(arr, names=names)
         assert dt_a == self.c_dt
-        assert not is_structured([1, 2, 3])
+        assert not has_structured_dt([1, 2, 3])
         dt_l = inflate_dtype([1, 2, 3], names=names)
         assert dt_l == np.dtype([('a', '<i8'), ('b', '<i8'), ('c', '<i8')])
