@@ -164,6 +164,10 @@ class TestTable(TestCase):
         tab_sort = tab.sorted('b')
         assert_array_equal(tab_sort['a'], np.array([0, 6, 3]))
 
+    def test_from_2d(self):
+        l2d = [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9]]
+        names = ['a', 'origin', 'pmt_id', 'time', 'group_id']
+        dta = inflate_dtype(l2d, names)
 
 class TestDtypes(TestCase):
     def setUp(self):
