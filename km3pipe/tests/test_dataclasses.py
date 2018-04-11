@@ -25,6 +25,39 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
+class TestDtypes(TestCase):
+    def setUp(self):
+        self.c_dt = np.dtype([('a', '<f4'), ('origin', '<u4'),
+                              ('pmt_id', '<u4'), ('time', '<f8'),
+                              ('group_id', '<u4')])
+
+    def test_is_structured(self):
+        assert is_structured(self.c_dt)
+        assert not is_structured(np.dtype('int64'))
+        assert not is_structured(np.dtype(int))
+        assert not is_structured(np.dtype(float))
+
+    def test_has_structured_dt(self):
+        assert has_structured_dt(np.ones(2, dtype=self.c_dt))
+        assert not has_structured_dt(np.ones(2, dtype=float))
+        assert not has_structured_dt(np.ones(2, dtype=int))
+        assert not has_structured_dt([1, 2, 3])
+        assert not has_structured_dt([1.0, 2.0, 3.0])
+        assert not has_structured_dt([1.0, 2, 3.0])
+        assert not has_structured_dt([])
+
+    def test_inflate(self):
+        arr = np.ones(3, dtype=self.c_dt)
+        names = ['a', 'b', 'c']
+        print(arr.dtype)
+        assert has_structured_dt(arr)
+        dt_a = inflate_dtype(arr, names=names)
+        assert dt_a == self.c_dt
+        assert not has_structured_dt([1, 2, 3])
+        dt_l = inflate_dtype([1, 2, 3], names=names)
+        assert dt_l == np.dtype([('a', '<i8'), ('b', '<i8'), ('c', '<i8')])
+
+
 class TestTable(TestCase):
     def setUp(self):
         self.dt = np.dtype([('a', int), ('b', float), ('group_id', int)])
@@ -191,35 +224,3 @@ class TestTable(TestCase):
         tab = Table(arr)
         tab_sort = tab.sorted('b')
         assert_array_equal(tab_sort['a'], np.array([0, 6, 3]))
-
-
-class TestDtypes(TestCase):
-    def setUp(self):
-        self.c_dt = np.dtype([('a', '<f4'), ('origin', '<u4'),
-                              ('pmt_id', '<u4'), ('time', '<f8'),
-                              ('group_id', '<u4')])
-
-    def test_is_structured(self):
-        assert is_structured(self.c_dt)
-        assert not is_structured(np.dtype('int64'))
-        assert not is_structured(np.dtype(int))
-        assert not is_structured(np.dtype(float))
-
-    def test_has_structured_dt(self):
-        assert has_structured_dt(np.ones(2, dtype=self.c_dt))
-        assert not has_structured_dt(np.ones(2, dtype=float))
-        assert not has_structured_dt(np.ones(2, dtype=int))
-        assert not has_structured_dt([1, 2, 3])
-        assert not has_structured_dt([1.0, 2.0, 3.0])
-        assert not has_structured_dt([1.0, 2, 3.0])
-
-    def test_inflate(self):
-        arr = np.ones(3, dtype=self.c_dt)
-        names = ['a', 'b', 'c']
-        print(arr.dtype)
-        assert has_structured_dt(arr)
-        dt_a = inflate_dtype(arr, names=names)
-        assert dt_a == self.c_dt
-        assert not has_structured_dt([1, 2, 3])
-        dt_l = inflate_dtype([1, 2, 3], names=names)
-        assert dt_l == np.dtype([('a', '<i8'), ('b', '<i8'), ('c', '<i8')])
