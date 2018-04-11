@@ -6,8 +6,7 @@
 # distutils: define_macros=CYTHON_TRACE=1
 # pylint: disable=W0232,C0103,C0111
 """
-...
-
+Dataclasses for internal use. Heavily based on Numpy arrays.
 """
 from __future__ import division, absolute_import, print_function
 

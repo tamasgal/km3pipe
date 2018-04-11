@@ -58,6 +58,8 @@ KM3Pipe: Main Framework
   :toctree: api
 
   Table
+  is_structured
+  inflate_dtype
 
 
 ``km3pipe.db``: Database Tools
