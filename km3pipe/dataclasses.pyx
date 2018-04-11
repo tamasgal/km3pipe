@@ -234,9 +234,18 @@ class Table(np.recarray):
         Append new columns to the table.
     """.format(DEFAULT_H5LOC)
 
-    def __new__(cls, data, h5loc=DEFAULT_H5LOC, dtype=None, **kwargs):
+    def __new__(cls, data, h5loc=DEFAULT_H5LOC, dtype=None,
+                names=None, **kwargs):
         if isinstance(data, dict):
             return cls.from_dict(data, h5loc=h5loc, dtype=dtype, **kwargs)
+        if not is_structured(data):
+            if dtype is None:
+                if names is None:
+                    raise ValueError(
+                        "Need to specify column names when passing "
+                        "unstructured arrays without specifying a dtype!")
+                dtype = inflate_dtype(data, names)
+            data = np.asanyarray(data).view(dtype)
         obj = np.asanyarray(data, dtype=dtype).view(cls)
         obj.h5loc = h5loc
         return obj
