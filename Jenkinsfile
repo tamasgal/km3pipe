@@ -43,10 +43,10 @@ pipeline {
                 script {
                     try { 
                         sh """
-                            . venv/bin/activate
-                            make doc-dependencies
-                            cd docs
-                            make html
+                            # . venv/bin/activate
+                            # make doc-dependencies
+                            # cd docs
+                            # make html
                         """
                     } catch (e) { 
                         rocketSend channel: '#km3pipe', message: "Building the Docs Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
