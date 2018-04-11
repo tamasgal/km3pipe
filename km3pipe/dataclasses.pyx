@@ -195,8 +195,8 @@ TEMPLATE_DTYPES = {
         ('timestamp', '<u4'),       # TODO
         ('nanoseconds', '<u4'),     # TODO
         ('dom_id', '<u4'),
-        ('dom_stats', '<u4'),       # TODO
-        ('n_hits', '<u4'),       # TODO
+        ('dom_status', '<u4'),      # TODO
+        ('n_hits', '<u4'),          # TODO
     ]),
 }
 
