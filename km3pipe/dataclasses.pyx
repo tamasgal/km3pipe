@@ -195,6 +195,23 @@ TEMPLATE_DTYPES = {
 }
 
 
+def is_structured(arr):
+    """Check if the array has a structured dtype."""
+    arr = np.asanyarray(arr)
+    return not (arr.dtype.fields is None)
+
+
+def inflate_dtype(arr, names):
+    """Create structured dtype from a 2d ndarray with unstructured dtype."""
+    arr = np.asanyarray(arr)
+    if is_structured(arr):
+        return arr.dtype
+    s_dt = arr.dtype
+    dt = [(n, s_dt) for n in names]
+    dt = np.dtype(dt)
+    return dt
+
+
 class Table(np.recarray):
     """2D generic Table with grouping index.
 
@@ -220,7 +237,6 @@ class Table(np.recarray):
     def __new__(cls, data, h5loc=DEFAULT_H5LOC, dtype=None, **kwargs):
         if isinstance(data, dict):
             return cls.from_dict(data, h5loc=h5loc, dtype=dtype, **kwargs)
-        print('from array')
         obj = np.asanyarray(data, dtype=dtype).view(cls)
         obj.h5loc = h5loc
         return obj
