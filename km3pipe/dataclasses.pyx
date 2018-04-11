@@ -74,6 +74,7 @@ TEMPLATE_DTYPES = {
         ('dom_id', '<u4'),
         ('time', '<i4'),
         ('tot', 'u1'),
+        ('group_id', '<u4')
     ]),
     'Hits': np.dtype([
         ('channel_id', 'u1'),
@@ -289,8 +290,6 @@ class Table(np.recarray):
     @classmethod
     def from_dict(cls, arr_dict, dtype=None, **kwargs):
         """Generate a table from a dictionary of arrays.
-
-
         """
         # i hope order of keys == order or values
         if dtype is None:

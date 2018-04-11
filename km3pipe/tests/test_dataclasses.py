@@ -138,6 +138,26 @@ class TestTable(TestCase):
         with pytest.raises(KeyError):
             tab = Table.from_dict(dmap, dtype=bad_dt)
 
+    def test_from_flat_dict(self):
+        dmap = {
+            'a': 1,
+            'b': 0.,
+            'c': 0,
+        }
+        # tab = Table.from_dict(dmap)
+        # self.assertTrue(isinstance(tab, Table))
+        # assert tab.h5loc == '/misc'
+        dt = [('a', float), ('b', float), ('c', float)]
+        tab = Table.from_dict(dmap, dtype=dt)
+        assert tab.h5loc == '/misc'
+        assert isinstance(tab, Table)
+        tab = Table.from_dict(dmap, dtype=dt, h5loc='/foo')
+        assert tab.h5loc == '/foo'
+        assert isinstance(tab, Table)
+        bad_dt = [('a', float), ('b', float), ('c', float), ('d', int)]
+        with pytest.raises(KeyError):
+            tab = Table.from_dict(dmap, dtype=bad_dt)
+
     def test_from_2d(self):
         l2d = [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9]]
         names = ['a', 'origin', 'pmt_id', 'time', 'group_id']
