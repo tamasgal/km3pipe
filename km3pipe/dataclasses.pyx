@@ -277,7 +277,7 @@ class Table(np.recarray):
     @staticmethod
     def _expand_scalars(arr_dict):
         scalars = []
-        maxlen = 0
+        maxlen = 1      # have at least 1-elem arrays
         for k, v in arr_dict.items():
             if np.isscalar(v):
                 scalars.append(k)
