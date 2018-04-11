@@ -17,7 +17,7 @@ import tables as tb
 
 import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
-from km3pipe.dataclasses import (KM3Array, KM3DataFrame,
+from km3pipe.dataclasses import (Table,
                                  RawHitSeries, CRawHitSeries,
                                  McHitSeries, CMcHitSeries, deserialise_map)
 from km3pipe.logger import logging
@@ -254,8 +254,8 @@ class HDF5Sink(Module):
         for where, data in self.indices.items():
             h5loc = where + "/_indices"
             self.log.info("  -> {0}".format(h5loc))
-            indices = KM3DataFrame({"index": data["indices"],
-                                    "n_items": data["n_items"]}, h5loc=h5loc)
+            indices = Table({"index": data["indices"],
+                             "n_items": data["n_items"]}, h5loc=h5loc)
             self._write_array(h5loc,
                               self._to_array(indices),
                               'Indices',
@@ -435,7 +435,7 @@ class HDF5Pump(Pump):
             try:
                 dc = deserialise_map[tabname]
             except KeyError:
-                dc = KM3Array
+                dc = Table
             try:
                 arr = tab.read_where('event_id == %d' % event_id)
             except NotImplementedError:

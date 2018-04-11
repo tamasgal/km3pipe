@@ -9,15 +9,13 @@ from __future__ import division, absolute_import, print_function
 from time import time
 
 import numpy as np
-import pandas as pd
 
 import km3pipe as kp
 from km3pipe import Module, Blob
 from km3pipe.tools import prettyln
 from km3pipe.sys import peak_memory_usage
 from km3pipe.math import zenith, azimuth
-from km3pipe.dataclasses import KM3DataFrame, KM3Array     # noqa
-from km3pipe.io.pandas import merge_event_ids
+from km3pipe.dataclasses import Table
 
 log = kp.logger.get(__name__)
 
@@ -39,7 +37,7 @@ class Wrap(Module):
             if dat is None:
                 continue
             dt = np.dtype([(f, float) for f in sorted(dat.keys())])
-            arr = KM3Array.from_dict(dat, dt)
+            arr = Table(dat, dtype=dt)
             blob[key] = arr
         return blob
 
@@ -228,42 +226,6 @@ class GetAngle(Module):
         df['zenith'] = zenith(df[['dir_x', 'dir_y', 'dir_z']])
         df['azimuth'] = azimuth(df[['dir_x', 'dir_y', 'dir_z']])
         blob[self.key] = df
-        return blob
-
-
-class MergeDF(Module):
-    """Merge Dataframes.
-
-    Parameters
-    ----------
-    keys: collection(string)
-        Keys to merge.
-    out: string
-        Where to store the merged DF.
-    merge_ids: bool, default=True
-        Replace individual event ids (e.g. gandalf_event_id, dusj_event_id)?
-    drop: bool, default=True
-        Discard input tables?
-    """
-
-    def configure(self):
-        self.keys = self.require('keys')
-        self.out = self.require('out')
-        self.merge_ids = bool(self.get('merge_ids')) or True
-        self.drop = bool(self.get('drop')) or True
-
-    def process(self, blob):
-        cat = []
-        for key in self.keys:
-            df = KM3DataFrame(blob[key])
-            df = df.add_prefix(key.lower() + '_')
-            cat.append(df)
-            if self.drop:
-                del blob[key]
-        cat = pd.concat(cat, axis=1)
-        if self.merge_ids:
-            cat = merge_event_ids(cat)
-        blob[self.out] = cat
         return blob
 
 
