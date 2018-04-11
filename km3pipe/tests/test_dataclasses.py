@@ -105,6 +105,17 @@ class TestTable(TestCase):
         with pytest.raises(KeyError):
             tab = Table.from_dict(dmap, dtype=bad_dt)
 
+    def test_from_2d(self):
+        l2d = [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9]]
+        names = ['a', 'origin', 'pmt_id', 'time', 'group_id']
+        dta = inflate_dtype(l2d, names)
+        with pytest.raises(ValueError):
+            t = Table(l2d)
+        t = Table(l2d, names=names)
+        t = Table(l2d, dtype=dta)
+        t = Table(l2d, dtype=dta, names=['a', 'b', 'c', 'd'])
+        assert t.dtype.names[1] == 'origin'
+
     def test_fromdict_init(self):
         n = 5
         dmap = {
@@ -143,14 +154,17 @@ class TestTable(TestCase):
             'triggered': triggereds,
             'group_id': 0,      # event_id
         }
-        tab = Table.from_template(d_hits, 'RawHitSeries')
+        tab = Table.from_template(d_hits, 'Hits')
         assert isinstance(tab, Table)
-        ar_hits = np.array([
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-        ], dtype=float)
-        tab = Table.from_template(ar_hits, 'RawHitSeries')
+        ar_hits = {
+            'channel_id': np.ones(n, dtype=int),
+            'dom_id': np.ones(n, dtype=int),
+            'time': np.ones(n, dtype=float),
+            'tot': np.ones(n, dtype=float),
+            'triggered': np.ones(n, dtype=bool),
+            'group_id': np.ones(n, dtype=int),
+        }
+        tab = Table.from_template(ar_hits, 'Hits')
         assert isinstance(tab, Table)
 
     def test_sort(self):
@@ -164,10 +178,6 @@ class TestTable(TestCase):
         tab_sort = tab.sorted('b')
         assert_array_equal(tab_sort['a'], np.array([0, 6, 3]))
 
-    def test_from_2d(self):
-        l2d = [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9]]
-        names = ['a', 'origin', 'pmt_id', 'time', 'group_id']
-        dta = inflate_dtype(l2d, names)
 
 class TestDtypes(TestCase):
     def setUp(self):
