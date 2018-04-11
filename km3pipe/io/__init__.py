@@ -12,15 +12,15 @@ from six import string_types
 import numpy as np
 
 from .evt import EvtPump  # noqa
-from .daq import DAQPump  # noqa
-from .clb import CLBPump  # noqa
-from .aanet import AanetPump  # noqa
-from .jpp import EventPump  # noqa
-from .ch import CHPump  # noqa
-from .hdf5 import HDF5Pump  # noqa
-from .hdf5 import HDF5Sink  # noqa
-from .hdf5 import HDF5MetaData  # noqa
-from .pickle import PicklePump  # noqa
+#from .daq import DAQPump  # noqa
+#from .clb import CLBPump  # noqa
+#from .aanet import AanetPump  # noqa
+#from .jpp import EventPump  # noqa
+#from .ch import CHPump  # noqa
+#from .hdf5 import HDF5Pump  # noqa
+#from .hdf5 import HDF5Sink  # noqa
+#from .hdf5 import HDF5MetaData  # noqa
+#from .pickle import PicklePump  # noqa
 from .pandas import (H5Chain, df_to_h5, map2df,  # noqa
                      read_group, write_table,)  # noqa
 
@@ -57,10 +57,10 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
 
     io = {
         '.evt': EvtPump,
-        '.h5': HDF5Pump,
-        '.root': EventPump if use_jppy else AanetPump,
-        '.dat': DAQPump,
-        '.dqd': CLBPump,
+        # '.h5': HDF5Pump,
+        # '.root': EventPump if use_jppy else AanetPump,
+        # '.dat': DAQPump,
+        # '.dqd': CLBPump,
     }
 
     if extension not in io:
