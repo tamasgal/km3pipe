@@ -46,6 +46,9 @@ TEMPLATE_H5LOCS = {
     'McTracks': '/mc_tracks',
     'SummaryFrameSeries': '/summary_frame_series',
     'SummaryFrameInfo': '/summary_slice_info',
+    'TimesliceFrameInfo': '/todo',  # TODO
+    'TimesliceInfo': '/todo',       # TODO
+    'SummarysliceInfo': '/todo',    # TODO
 }
 
 TEMPLATE_DTYPES = {
