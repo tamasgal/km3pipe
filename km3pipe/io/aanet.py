@@ -17,8 +17,8 @@ from scipy.stats import iqr
 
 from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import (RawHitSeries, McHitSeries,
-                                 TrackSeries, McTrackSeries, EventInfo,
-                                 KM3Array)
+                                 TrackSeries, EventInfo,
+                                 Table)
 from km3pipe.logger import logging
 from km3pipe.math import mad
 
@@ -347,26 +347,26 @@ class AanetPump(Pump):
                 track, dtype = parse_jevt_jgandalf(
                     event, event_id, self.missing)
                 if track:
-                    blob['Gandalf'] = KM3Array.from_dict(
-                        track, dtype, h5loc='/reco')
+                    blob['Gandalf'] = Table(
+                        track, dtype=dtype, h5loc='/reco')
             if self.format in ('gandalf_new', 'jgandalf_new'):
                 track, dtype = parse_jgandalf_new(
                     event, event_id, self.missing)
                 if track:
-                    blob['Gandalf'] = KM3Array.from_dict(
-                        track, dtype, h5loc='/reco')
+                    blob['Gandalf'] = Table(
+                        track, dtype=dtype, h5loc='/reco')
             if self.format == 'generic_track':
                 track, dtype = parse_generic_event(
                     event, event_id, self.missing)
                 if track:
-                    blob['Track'] = KM3Array.from_dict(
-                        track, dtype, h5loc='/reco')
+                    blob['Track'] = Table(
+                        track, dtype=dtype, h5loc='/reco')
             if self.format in ('ancient_recolns', 'orca_recolns'):
                 track, dtype = parse_ancient_recolns(
                     event, event_id, self.missing)
                 if track:
-                    blob['OrcaRecoLns'] = KM3Array.from_dict(
-                        track, dtype, h5loc='/reco')
+                    blob['OrcaRecoLns'] = Table(
+                        track, dtype=dtype, h5loc='/reco')
         else:
             log.debug("Event #{} does not have any tracks!".format(event_id))
         return blob
@@ -667,13 +667,13 @@ def read_mini_dst(aanet_event, event_id):
         reader = recname_to_reader[recname]
 
         reco_map, dtype = reader(trk)
-        minidst[recname] = KM3Array.from_dict(
-            reco_map, dtype, h5loc='/reco')
+        minidst[recname] = Table(
+            reco_map, dtype=dtype, h5loc='/reco')
 
     thomas_map, dtype = parse_thomasfeatures(
         aanet_event.usr, aanet_event.usr_names)
-    minidst['ThomasFeatures'] = KM3Array.from_dict(
-        thomas_map, dtype, h5loc='/reco')
+    minidst['ThomasFeatures'] = Table(
+        thomas_map, dtype=dtype, h5loc='/reco')
     return minidst
 
 

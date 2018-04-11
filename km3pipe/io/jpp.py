@@ -12,7 +12,7 @@ import numpy as np
 
 from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import (EventInfo, TimesliceInfo, SummarysliceInfo,
-                                 RawHitSeries, KM3DataFrame)
+                                 RawHitSeries, Table)
 from km3pipe.logger import logging
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -379,7 +379,7 @@ class FitPump(Pump):
             self._qualities,
             self._energies,
         )
-        fit_collection = KM3DataFrame({
+        fit_collection = Table({
             'pos_x': self._pos_xs[:n],
             'pos_y': self._pos_ys[:n],
             'pos_z': self._pos_zs[:n],
@@ -391,7 +391,8 @@ class FitPump(Pump):
             'quality': self._qualities[:n],
             'energy': self._energies[:n],
         })
-        fit_collection['event_id'] = self.event_index
+        fit_collection = fit_collection.append_columns(
+            ['event_id'], [self.event_index])
 
         # TODO make this into a datastructure
 
