@@ -7,8 +7,7 @@ Classes representing KM3NeT hardware.
 """
 from __future__ import division, absolute_import, print_function
 
-from collections import OrderedDict, defaultdict, namedtuple
-import os
+from collections import OrderedDict, defaultdict
 import sys
 from six import iteritems
 from six.moves import xrange
@@ -17,7 +16,7 @@ import numpy as np
 
 from .tools import unpack_nfirst, split
 from .math import com  # , ignored
-from .dataclasses import Point, Direction
+from .io.evt import Point, Direction
 from .db import DBManager
 
 from .logger import logging
