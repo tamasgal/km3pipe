@@ -177,16 +177,23 @@ TEMPLATE_DTYPES = {
 }
 
 
-def is_structured(arr):
-    """Check if the array has a structured dtype."""
+def has_structured_dt(arr):
+    """Check if the array representation has a structured dtype."""
     arr = np.asanyarray(arr)
-    return not (arr.dtype.fields is None)
+    return is_structured(arr.dtype)
+
+
+def is_structured(dt):
+    """Check if the dtype is structured."""
+    if not hasattr(dt, 'fields'):
+        return False
+    return not (dt.fields is None)
 
 
 def inflate_dtype(arr, names):
     """Create structured dtype from a 2d ndarray with unstructured dtype."""
     arr = np.asanyarray(arr)
-    if is_structured(arr):
+    if has_structured_dt(arr):
         return arr.dtype
     s_dt = arr.dtype
     dt = [(n, s_dt) for n in names]
@@ -208,8 +215,8 @@ class Table(np.recarray):
     dtype: numpy dtype
         Datatype over array. If not specified and data is an unstructured
         array, ``names`` needs to be specified. [default: None]
-    names: list(str)
-        Names to use when generating a dtype from unstructured arrays.
+    colnames: list(str)
+        Column names to use when generating a dtype from unstructured arrays.
         [default: None]
 
     Attributes
@@ -230,17 +237,19 @@ class Table(np.recarray):
     """.format(h5l=DEFAULT_H5LOC)
 
     def __new__(cls, data, h5loc=DEFAULT_H5LOC, dtype=None,
-                names=None, **kwargs):
+                colnames=None, **kwargs):
         if isinstance(data, dict):
             return cls.from_dict(data, h5loc=h5loc, dtype=dtype, **kwargs)
-        if not is_structured(data):
-            if dtype is None:
-                if names is None:
+        if not has_structured_dt(data):
+            if dtype is None or not is_structured(dtype):
+                if colnames is None:
                     raise ValueError(
                         "Need to specify column names when passing "
-                        "unstructured arrays without specifying a dtype!")
-                dtype = inflate_dtype(data, names)
+                        "unstructured arrays without specifying a "
+                        "structured dtype!")
+                dtype = inflate_dtype(data, colnames)
             data = np.asanyarray(data).view(dtype)
+            dtype = data.dtype
         obj = np.asanyarray(data, dtype=dtype).view(cls)
         obj.h5loc = h5loc
         return obj
