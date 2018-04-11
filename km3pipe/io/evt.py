@@ -9,12 +9,12 @@ from __future__ import division, absolute_import, print_function
 
 import sys
 
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 
 from km3pipe.core import Pump, Blob
 from km3pipe.logger import logging
 
-from km3pipe.dataclasses import Point, Direction, HitSeries
+from km3pipe.dataclasses import Table, Point, Direction
 from km3pipe.tools import unpack_nfirst
 from km3pipe.mc import pdg2name, geant2pdg
 from km3pipe.sys import ignored
@@ -92,9 +92,9 @@ class EvtPump(Pump):  # pylint: disable:R0902
             self.log.info("Got a basename ({}), constructing the first "
                           "filename.".format(self.basename))
             self.filename = self.basename  \
-                          + str(self.index_start).zfill(self.n_digits)  \
-                          + self.suffix \
-                          + '.evt'
+                + str(self.index_start).zfill(self.n_digits)  \
+                + self.suffix \
+                + '.evt'
             self.log.info("Constructed filename: {}".format(self.filename))
 
         if self.filename:
@@ -164,12 +164,12 @@ class EvtPump(Pump):  # pylint: disable:R0902
                 self.log.info("Now at file_index={}".format(self.file_index))
                 self._reset()
                 self.blob_file.close()
-                self.log.info("Resetting blob index to 0") 
+                self.log.info("Resetting blob index to 0")
                 self.index = 0
                 self.filename = self.basename  \
-                              + str(self.file_index).zfill(self.n_digits)  \
-                              + self.suffix  \
-                              + '.evt'
+                    + str(self.file_index).zfill(self.n_digits)  \
+                    + self.suffix  \
+                    + '.evt'
                 self.log.info("Next filename: {}".format(self.filename))
                 print("Opening {0}".format(self.filename))
                 self.open_file(self.filename)
@@ -212,6 +212,17 @@ class EvtPump(Pump):  # pylint: disable:R0902
         offset = self.blob_file.tell()
         self.event_offsets.append(offset)
 
+    @staticmethod
+    def _create_table(rawhits, group_id):
+        dct = defaultdict(list)
+        for h in rawhits:
+            dct['a'].append(h.a)
+            dct['origin'].append(h.origin)
+            dct['pmt_id'].append(h.pmt_id)
+            dct['time'].append(h.time)
+            dct['group_id'].append(group_id)
+        return dct
+
     def _create_blob(self):
         """Parse the next event from the current file position"""
         blob = None
@@ -221,8 +232,8 @@ class EvtPump(Pump):  # pylint: disable:R0902
             if line.startswith('end_event:') and blob:
                 blob['raw_header'] = self.raw_header
                 with ignored(KeyError):
-                    blob['Hits'] = HitSeries.from_evt(blob['EvtRawHits'],
-                                                      self.index)
+                    blob['Hits'] = Table(self._create_table(blob['EvtRawHits'],
+                                                            self.index))
                 return blob
             if line.startswith('start_event:'):
                 blob = Blob()
