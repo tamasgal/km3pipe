@@ -1,6 +1,7 @@
 # coding=utf-8
 # Filename: test_dataclasses.py
 # pylint: disable=C0111,R0904,C0103
+# vim:set ts=4 sts=4 sw=4 et:
 """
 ...
 
@@ -239,8 +240,31 @@ class TestTable(TestCase):
 
     def test_append_columns(self):
         tab = Table(self.arr)
-        tab = tab.append_columns('new', [1, 2, 3, 4])
-        self.assertEqual(1, tab.new[0])
+        print(tab)
+        with pytest.raises(ValueError):
+            tab = tab.append_columns('new', [1, 2, 3, 4])
+        tab = tab.append_columns('new', [1, 2, 3])
+        print(tab)
+        assert tab.new[0] == 1
+        assert tab.new[-1] == 3
+        tab = tab.append_columns('bar', 0)
+        print(tab)
+        assert tab.bar[0] == 0
+        assert tab.bar[-1] == 0
+        tab = tab.append_columns('lala', [1])
+        print(tab)
+        assert tab.lala[0] == 1
+        assert tab.lala[-1] == 1
+        with pytest.raises(ValueError):
+            tab = tab.append_columns(['m', 'n'], [1, 2])
+        with pytest.raises(ValueError):
+            tab = tab.append_columns(['m', 'n'], [[1], [2]])
+        tab = tab.append_columns(['m', 'n'], [[1, 1, 2], [2, 4, 5]])
+        print(tab)
+        assert tab.m[0] == 1
+        assert tab.m[-1] == 2
+        assert tab.n[0] == 2
+        assert tab.n[-1] == 5
 
     def test_template(self):
         n = 10
