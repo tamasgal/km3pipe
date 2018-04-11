@@ -22,9 +22,10 @@ from __future__ import division
 import os
 from collections import defaultdict
 
+from km3pipe.dataclasses import Table
 from km3pipe.dev import cprint
+from km3pipe.core import Module
 
-import km3pipe as kp
 import numpy as np
 from sklearn import mixture
 
@@ -40,7 +41,7 @@ __status__ = "Development"
 GMM = mixture.GaussianMixture(n_components=1)
 
 
-class TimesliceCreator(kp.core.Module):
+class TimesliceCreator(Module):
     """Create `TimesliceHitSeries` from raw timeslice hits."""
 
     def configure(self):
@@ -52,19 +53,19 @@ class TimesliceCreator(kp.core.Module):
         if n_hits == 0:
             return blob
         channel_ids, times, tots = zip(*hits)
-        ts_hits = kp.dataclasses.TimesliceHitSeries.from_arrays(
-            np.array(channel_ids),
-            np.full(n_hits, self.dom_id),
-            np.array(times),
-            np.array(tots),
-            0,
-            0)
+        ts_hits = Table({
+            'channel_id': np.array(channel_ids),
+            'dom_id': np.full(n_hits, self.dom_id),
+            'time': np.array(times),
+            'tot': np.array(tots),
+            'group_id': 0
+        })
         blob['TimesliceHits'] = ts_hits
         blob['DOM_ID'] = self.dom_id
         return blob
 
 
-class MeanTotDisplay(kp.core.Module):
+class MeanTotDisplay(Module):
     def configure(self):
         self.optimal_tot = self.get("optimal_tot") or 26.4
         self.tolerance = self.get("tolerance") or 0.3
@@ -96,7 +97,7 @@ class MeanTotDisplay(kp.core.Module):
                 self.print_scale()
             GMM.fit(np.array(tots)[:, np.newaxis])
             mean_tot = GMM.means_[np.argmin(GMM.covariances_)][0]
-            #mean_tot = np.median(tots)
+            # mean_tot = np.median(tots)
             if np.isnan(mean_tot):
                 mean_tot = 0
             color = 'green'
@@ -126,6 +127,7 @@ class MeanTotDisplay(kp.core.Module):
 
 def main():
     from docopt import docopt
+    import km3pipe as kp
     args = docopt(__doc__)
     pipe = kp.Pipeline()
     pipe.attach(kp.io.ch.CHPump,

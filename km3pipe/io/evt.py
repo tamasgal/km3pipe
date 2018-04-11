@@ -270,8 +270,8 @@ class EvtPump(Pump):  # pylint: disable:R0902
                 blob['raw_header'] = self.raw_header
                 with ignored(KeyError):
                     blob['Hits'] = Table.from_template(
-                        self._create_table(blob['EvtRawHits'], self.index),
-                        'McHitSeries'
+                        self._create_table(blob['Hits'], self.index),
+                        'Hits'
                     )
                 return blob
             if line.startswith('start_event:'):
