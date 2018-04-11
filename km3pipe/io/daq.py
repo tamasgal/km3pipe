@@ -16,8 +16,7 @@ import pprint
 import numpy as np
 
 from km3pipe.core import Pump, Module, Blob
-from km3pipe.dataclasses import (Table, EventInfo,
-                                 TimesliceInfo, TimesliceFrameInfo)
+from km3pipe.dataclasses import Table
 from km3pipe.sys import ignored
 from km3pipe.logger import logging
 
@@ -63,8 +62,13 @@ class TimesliceParser(Module):
             det_id, run, sqnr = unpack('<iii', data.read(12))
             timestamp, ns_ticks, n_frames = unpack('<iii', data.read(12))
 
-            ts_info = TimesliceInfo(
-                sqnr, 0, timestamp, ns_ticks * 16, n_frames)
+            ts_info = Table.from_template({
+                'frame_index': sqnr,
+                'slice_id': 0,
+                'timestamp': timestamp,
+                'nanoseconds': ns_ticks * 16,
+                'n_frames': n_frames
+            }, 'TimesliceInfo')
             ts_frameinfos = {}
 
             _dom_ids = []
@@ -77,10 +81,16 @@ class TimesliceParser(Module):
                 timestamp, ns_ticks, dom_id = unpack('<iii', data.read(12))
                 dom_status = unpack('<iiiii', data.read(5 * 4))
                 n_hits = unpack('<i', data.read(4))[0]
-                ts_frameinfos[dom_id] = TimesliceFrameInfo(
-                    det_id, run, sqnr, timestamp, ns_ticks * 16, dom_id,
-                    dom_status, n_hits
-                )
+                ts_frameinfos[dom_id] = Table.from_template({
+                    'det_id': det_id,
+                    'run_id': run,
+                    'sqnr': sqnr,
+                    'timestamp': timestamp,
+                    'nanoseconds': ns_ticks * 16,
+                    'dom_id': dom_id,
+                    'dom_status': dom_status,
+                    'n_hits': n_hits,
+                }, 'TimesliceFrameInfo')
                 for j in range(n_hits):
                     hit = unpack('!BlB', data.read(6))
                     _dom_ids.append(dom_id)
@@ -286,22 +296,21 @@ class DAQProcessor(Module):
         event_info = Table.from_template({
             'det_id': header.det_id,
             'frame_index': self.index,  # header.time_slice,
-            'livetime_sec': 0,  # livetime_sec
+            'livetime_sec': 0,
             'mc_id': 0,
             'mc_t': 0,
-            'def_id': 0,
-            'def_id': 0,  # n evts/files gen
-            'def_id': event.overlays,
-            'def_id': # header.run,
-            'def_id': event.trigger_counter,
-            'def_id': event.trigger_mask,
-            'def_id': header.ticks * 16,
-            'def_id': header.time_stamp,
-            'def_id': 0,
-            'def_id': 0,
-            'def_id': 0,  # MC weights
-            'def_id': 0,  # run id
-            'def_id': 0,
+            'n_events_gen': 0,
+            'n_files_gen': 0,
+            'overlays': event.overlays,
+            'trigger_counter': event.trigger_counter,
+            'trigger_mask': event.trigger_mask,
+            'uts_nanoseconds': header.ticks * 16,
+            'uts_seconds': header.time_stamp,
+            'weight_w1': 0,
+            'weight_w2': 0,
+            'weight_w3': 0,  # MC weights
+            'run_id': 0,  # run id
+            'group_id': 0,
         }, 'EventInfo')
         blob['EventInfo'] = event_info
 
