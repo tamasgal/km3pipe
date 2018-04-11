@@ -66,8 +66,7 @@ TEMPLATE_DTYPES = {
         ('weight_w2', '<f8'),
         ('weight_w3', '<f8'),
         ('run_id', '<u8'),
-        ('event_id', '<u8'),
-        ('group_id', '<u4'),
+        ('group_id', '<u8'),
     ]),
     'TimesliceHits': np.dtype([
         ('channel_id', 'u1'),
@@ -169,11 +168,35 @@ TEMPLATE_DTYPES = {
         ('utc_seconds', '<u4'),
         ('white_rabbit_status', '<u4'),
     ]),
+    'SummarysliceInfo': np.dtype([
+        ('frame_index', '<u4'),
+        ('slice_id', '<u4'),
+        ('timestamp', '<u4'),       # TODO
+        ('nanoseconds', '<u4'),     # TODO
+        ('n_frames', '<u4'),        # TODO
+    ]),
+    'TimesliceInfo': np.dtype([
+        ('frame_index', '<u4'),
+        ('slice_id', '<u4'),
+        ('timestamp', '<u4'),       # TODO
+        ('nanoseconds', '<u4'),     # TODO
+        ('n_frames', '<u4'),        # TODO
+    ]),
     'SummaryframeSeries': np.dtype([
         ('dom_id', '<u4'),
         ('max_sequence_number', '<u4'),
         ('n_received_packets', '<u4'),
         ('group_id', '<u4'),
+    ]),
+    'TimesliceFrameInfo': np.dtype([
+        ('det_id', '<i4'),
+        ('run_id', '<u8'),
+        ('sqnr', '<u8'),            # TODO
+        ('timestamp', '<u4'),       # TODO
+        ('nanoseconds', '<u4'),     # TODO
+        ('dom_id', '<u4'),
+        ('dom_stats', '<u4'),       # TODO
+        ('n_hits', '<u4'),       # TODO
     ]),
 }
 
