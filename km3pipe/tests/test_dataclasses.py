@@ -13,7 +13,7 @@ import pytest
 
 from km3pipe.testing import TestCase, skip   # noqa
 from km3pipe.dataclasses import (
-    Table, inflate_dtype, has_structured_dt, is_structured
+    Table, inflate_dtype, has_structured_dt, is_structured,
 )
 
 __author__ = "Tamas Gal, Moritz Lotze"
@@ -138,11 +138,47 @@ class TestTable(TestCase):
         with pytest.raises(KeyError):
             tab = Table.from_dict(dmap, dtype=bad_dt)
 
+    def test_expand_scalars(self):
+        dmap = {
+            'a': 1,
+            'b': 0.,
+            'c': 0,
+        }
+        t1 = Table._expand_scalars(dmap)
+        assert len(t1) > 0
+        dmap2 = {
+            'a': [1, 2, 1],
+            'b': 0.,
+            'c': [0, 1],
+        }
+        t2 = Table._expand_scalars(dmap2)
+        assert len(t2) > 0
+
     def test_from_flat_dict(self):
         dmap = {
             'a': 1,
             'b': 0.,
             'c': 0,
+        }
+        # tab = Table.from_dict(dmap)
+        # self.assertTrue(isinstance(tab, Table))
+        # assert tab.h5loc == '/misc'
+        dt = [('a', float), ('b', float), ('c', float)]
+        tab = Table.from_dict(dmap, dtype=dt)
+        assert tab.h5loc == '/misc'
+        assert isinstance(tab, Table)
+        tab = Table.from_dict(dmap, dtype=dt, h5loc='/foo')
+        assert tab.h5loc == '/foo'
+        assert isinstance(tab, Table)
+        bad_dt = [('a', float), ('b', float), ('c', float), ('d', int)]
+        with pytest.raises(KeyError):
+            tab = Table.from_dict(dmap, dtype=bad_dt)
+
+    def test_from_mixed_dict(self):
+        dmap = {
+            'a': 1,
+            'b': 0.,
+            'c': np.zeros(4),
         }
         # tab = Table.from_dict(dmap)
         # self.assertTrue(isinstance(tab, Table))
