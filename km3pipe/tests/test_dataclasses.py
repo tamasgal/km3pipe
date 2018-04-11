@@ -294,6 +294,36 @@ class TestTable(TestCase):
         tab = Table.from_template(ar_hits, 'Hits')
         assert isinstance(tab, Table)
 
+    def test_incomplete_template(self):
+        n = 10
+        channel_ids = np.arange(n)
+        dom_ids = np.arange(n)
+        # times = np.arange(n)
+        tots = np.arange(n)
+        triggereds = np.ones(n)
+        d_hits = {
+            'channel_id': channel_ids,
+            'dom_id': dom_ids,
+            # 'time': times,
+            'tot': tots,
+            'triggered': triggereds,
+            'group_id': 0,      # event_id
+        }
+        with pytest.raises(KeyError):
+            tab = Table.from_template(d_hits, 'Hits')
+            assert tab is not None
+        ar_hits = {
+            'channel_id': np.ones(n, dtype=int),
+            'dom_id': np.ones(n, dtype=int),
+            # 'time': np.ones(n, dtype=float),
+            'tot': np.ones(n, dtype=float),
+            'triggered': np.ones(n, dtype=bool),
+            'group_id': np.ones(n, dtype=int),
+        }
+        with pytest.raises(KeyError):
+            tab = Table.from_template(ar_hits, 'Hits')
+            assert tab is not None
+
     def test_sort(self):
         dt = np.dtype([('a', int), ('b', float), ('c', int)])
         arr = np.array([
