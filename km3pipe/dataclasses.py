@@ -7,7 +7,6 @@ Dataclasses for internal use. Heavily based on Numpy arrays.
 """
 from __future__ import division, absolute_import, print_function
 
-from collections import namedtuple, defaultdict
 from six import string_types
 
 import numpy as np
@@ -252,6 +251,10 @@ class Table(np.recarray):
         Sort the table by one of its columns.
     append_columns(colnames, values)
         Append new columns to the table.
+    to_dataframe()
+        Return as pandas dataframe.
+    from_dataframe(df, h5loc)
+        Instantiate from a dataframe.
     """.format(h5l=DEFAULT_H5LOC)
 
     def __new__(cls, data, h5loc=DEFAULT_H5LOC, dtype=None,
@@ -397,3 +400,12 @@ class Table(np.recarray):
         """
         sort_idc = np.argsort(self[by], **kwargs)
         return self.__class__(self[sort_idc], h5loc=self.h5loc)
+
+    def to_dataframe(self):
+        from pandas import DataFrame
+        return DataFrame(self)
+
+    @classmethod
+    def from_dataframe(cls, df, h5loc=DEFAULT_H5LOC):
+        rec = df.to_records(index=False)
+        return cls(rec, h5loc=h5loc)
