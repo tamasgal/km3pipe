@@ -8,28 +8,34 @@ from __future__ import division, absolute_import, print_function
 
 from .__version__ import version, VERSION_INFO  # noqa
 
-from .core import (Pipeline, Module, Pump, Blob, Run, Geometry)  # noqa
-import km3pipe.core  # noqa
-import km3pipe.dataclasses  # noqa
-# import km3pipe.calib  # noqa
-import km3pipe.cmd  # noqa
-import km3pipe.common  # noqa
-import km3pipe.config  # noqa
-import km3pipe.constants  # noqa
-import km3pipe.controlhost  # noqa
-import km3pipe.db  # noqa
-import km3pipe.hardware  # noqa
-import km3pipe.io  # noqa
-import km3pipe.logger  # noqa
-import km3pipe.math  # noqa
-import km3pipe.mc  # noqa
-import km3pipe.shell  # noqa
-# import km3pipe.srv  # noqa
-import km3pipe.style  # noqa
-import km3pipe.sys  # noqa
-# import km3pipe.testing  # noqa
-import km3pipe.time  # noqa
-import km3pipe.tools  # noqa
+try:
+    __KM3PIPE_SETUP__
+except NameError:
+    __KM3PIPE_SETUP__ = False
+
+if not __KM3PIPE_SETUP__:
+    from .core import (Pipeline, Module, Pump, Blob, Run, Geometry)  # noqa
+    from . import core
+    from . import dataclasses
+    # from . import calib
+    from . import cmd
+    from . import common
+    from . import config
+    from . import constants
+    from . import controlhost
+    from . import db
+    from . import hardware
+    from . import io
+    from . import logger
+    from . import math
+    from . import mc
+    from . import shell
+    # from . import srv
+    from . import style
+    from . import sys
+    # from . import testing
+    from . import time
+    from . import tools
 
 
 __author__ = "Tamas Gal and Moritz Lotze"

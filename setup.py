@@ -11,8 +11,15 @@ from itertools import chain
 import sys
 import os
 
-from km3pipe import version  # noqa
+if sys.version_info[0] >= 3:
+    import builtins
+else:
+    import __builtin__ as builtins
+finally:
+    # so we can detect in __init__.py that it's called from setup.py
+    builtins.__KM3PIPE_SETUP__ = True
 
+from km3pipe import version  # noqa
 
 
 require_groups = {
