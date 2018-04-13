@@ -35,6 +35,7 @@ def get_stages(docker_image) {
                 try { 
                     sh """
                         . venv/bin/activate
+                        make clean
                         make test
                     """
                     junit 'junit.xml'
@@ -49,6 +50,7 @@ def get_stages(docker_image) {
                         . venv/bin/activate
                         make doc-dependencies
                         cd docs
+                        export MPLBACKEND="agg"
                         make html
                     """
                 } catch (e) { 
