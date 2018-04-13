@@ -1,4 +1,4 @@
-def docker_images = ["python:2.7.14", "python:3.5.4", "python:3.6.2"]
+def docker_images = ["python:3.5.4", "python:3.6.2"]
 
 def get_stages(docker_image) {
     stages = {
@@ -7,22 +7,27 @@ def get_stages(docker_image) {
                 echo 'Running in ${docker_image}'
             }
             stage("Prepare") {
-                switch (docker_image) {
-                    case "python:2.7.14":
-                        sh 'exit 1'
-                        break
-                    default:
-                        sh 'python -m venv venv'
-                }
+                sh 'python -m venv venv'
             }
             stage("Build") {
                 try { 
                     sh """
                         . venv/bin/activate
-                        make install-dev
+                        make
                     """
                 } catch (e) { 
                     rocketSend channel: '#km3pipe', message: "Build Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+                    throw e
+                }
+            }
+            stage("Install") {
+                try { 
+                    sh """
+                        . venv/bin/activate
+                        make install
+                    """
+                } catch (e) { 
+                    rocketSend channel: '#km3pipe', message: "Install Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
                     throw e
                 }
             }
