@@ -1,4 +1,4 @@
-def docker_images = ["python:3.6.2"]
+def docker_images = ["python:2.7.14", "python:3.6.2"]
 
 def get_stages(docker_image) {
     stages = {
@@ -7,7 +7,14 @@ def get_stages(docker_image) {
                 echo 'Running in ${docker_image}'
             }
             stage("Prepare") {
-                sh 'python -m venv venv'
+                if(docker_image == "python:2.7.14") {
+                    sh """
+                        pip install --user virtualenv
+                        virtualenv venv
+                    """
+                } else {
+                    sh 'python -m venv venv'
+                }
             }
             stage("Build") {
                 try { 
