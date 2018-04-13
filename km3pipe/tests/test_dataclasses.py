@@ -14,7 +14,7 @@ import pytest
 
 from km3pipe.testing import TestCase, skip   # noqa
 from km3pipe.dataclasses import (
-    Table, inflate_dtype, has_structured_dt, is_structured,
+    Table, inflate_dtype, has_structured_dt, is_structured, DEFAULT_H5LOC
 )
 
 __author__ = "Tamas Gal, Moritz Lotze"
@@ -70,16 +70,16 @@ class TestTable(TestCase):
 
     def test_h5loc(self):
         tab = self.arr.view(Table)
-        assert tab.h5loc == '/misc'
+        assert tab.h5loc == DEFAULT_H5LOC
         tab = Table(self.arr)
-        assert tab.h5loc == '/misc'
+        assert tab.h5loc == DEFAULT_H5LOC
         tab = Table(self.arr, h5loc='/foo')
         assert tab.h5loc is '/foo'
 
     def test_view(self):
         tab = self.arr.view(Table)
         assert tab.dtype == self.dt
-        assert tab.h5loc == '/misc'
+        assert tab.h5loc == DEFAULT_H5LOC
         assert_array_equal(tab.a, np.array([0, 3, 6]))
         assert tab[0]['group_id'] == 2
         assert tab[0].group_id == 2
@@ -98,7 +98,7 @@ class TestTable(TestCase):
 
     def test_init(self):
         tab = Table(self.arr)
-        assert tab.h5loc == '/misc'
+        assert tab.h5loc == DEFAULT_H5LOC
         tab = Table(self.arr, h5loc='/bla')
         assert tab.dtype == self.dt
         assert tab.h5loc == '/bla'
@@ -127,10 +127,10 @@ class TestTable(TestCase):
         }
         # tab = Table.from_dict(dmap)
         # self.assertTrue(isinstance(tab, Table))
-        # assert tab.h5loc == '/misc'
+        # assert tab.h5loc == DEFAULT_H5LOC
         dt = [('a', float), ('b', float), ('c', float)]
         tab = Table.from_dict(dmap, dtype=dt)
-        assert tab.h5loc == '/misc'
+        assert tab.h5loc == DEFAULT_H5LOC
         assert isinstance(tab, Table)
         tab = Table.from_dict(dmap, dtype=dt, h5loc='/foo')
         assert tab.h5loc == '/foo'
@@ -163,10 +163,10 @@ class TestTable(TestCase):
         }
         # tab = Table.from_dict(dmap)
         # self.assertTrue(isinstance(tab, Table))
-        # assert tab.h5loc == '/misc'
+        # assert tab.h5loc == DEFAULT_H5LOC
         dt = [('a', float), ('b', float), ('c', float)]
         tab = Table.from_dict(dmap, dtype=dt)
-        assert tab.h5loc == '/misc'
+        assert tab.h5loc == DEFAULT_H5LOC
         assert isinstance(tab, Table)
         tab = Table.from_dict(dmap, dtype=dt, h5loc='/foo')
         assert tab.h5loc == '/foo'
@@ -183,10 +183,10 @@ class TestTable(TestCase):
         }
         # tab = Table.from_dict(dmap)
         # self.assertTrue(isinstance(tab, Table))
-        # assert tab.h5loc == '/misc'
+        # assert tab.h5loc == DEFAULT_H5LOC
         dt = [('a', float), ('b', float), ('c', float)]
         tab = Table.from_dict(dmap, dtype=dt)
-        assert tab.h5loc == '/misc'
+        assert tab.h5loc == DEFAULT_H5LOC
         assert isinstance(tab, Table)
         tab = Table.from_dict(dmap, dtype=dt, h5loc='/foo')
         assert tab.h5loc == '/foo'
@@ -229,7 +229,7 @@ class TestTable(TestCase):
         }
         dt = [('a', float), ('b', float), ('c', float)]
         tab = Table(dmap, dtype=dt)
-        assert tab.h5loc == '/misc'
+        assert tab.h5loc == DEFAULT_H5LOC
         self.assertTrue(isinstance(tab, Table))
         tab = Table(dmap, dtype=dt, h5loc='/foo')
         assert tab.h5loc == '/foo'
