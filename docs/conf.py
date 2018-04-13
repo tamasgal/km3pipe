@@ -43,7 +43,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'numpydoc',
     'sphinx_gallery.gen_gallery',
-    #'nbsphinx',
+    # 'nbsphinx',
 ]
 
 autosummary_generate = True
@@ -117,8 +117,7 @@ pygments_style = 'sphinx'
 
 html_theme = 'sphinx_rtd_theme'
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-# html_theme_options = {
-#}
+# html_theme_options = {}
 
 
 # The name for this set of Sphinx documents.  If None, it defaults to
@@ -285,7 +284,9 @@ sphinx_gallery_conf = {
     'gallery_dirs': ['auto_examples'],
     'reference_url': {
         'km3pipe': None,
-    }
+    },
+    'expected_failing_examples': ['../examples/plot_dom_hits.py'],
+    'abort_on_example_effor': False,
 }
 
 autosummary_generate = ["api.rst"]
