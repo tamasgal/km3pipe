@@ -9,7 +9,6 @@ def get_stages(docker_image) {
             stage("Prepare") {
                 if(docker_image == "python:2.7.14") {
                     sh """
-                        pip install --user virtualenv
                         virtualenv venv
                     """
                 } else {
