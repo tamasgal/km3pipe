@@ -30,6 +30,7 @@ def get_stages(docker_image) {
                 try { 
                     sh """
                         . venv/bin/activate
+                        make clean
                         make test
                     """
                     junit 'junit.xml'
