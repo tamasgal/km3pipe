@@ -228,7 +228,7 @@ class Table(np.recarray):
     data: array-like or dict(array-like)
         numpy array with structured/flat dtype, or dict of arrays.
     h5loc: str
-    Location in HDF5 file where to store the data. [default: '{h5l}'
+    Location in HDF5 file where to store the data. [default: '/misc'
     dtype: numpy dtype
         Datatype over array. If not specified and data is an unstructured
         array, ``names`` needs to be specified. [default: None]
@@ -239,7 +239,7 @@ class Table(np.recarray):
     Attributes
     ----------
     h5loc: str
-        HDF5 group where to write into. (default='{h5l}')
+        HDF5 group where to write into. (default='/misc')
 
     Methods
     -------
@@ -255,7 +255,7 @@ class Table(np.recarray):
         Return as pandas dataframe.
     from_dataframe(df, h5loc)
         Instantiate from a dataframe.
-    """.format(h5l=DEFAULT_H5LOC)
+    """
 
     def __new__(cls, data, h5loc=DEFAULT_H5LOC, dtype=None,
                 colnames=None, **kwargs):
