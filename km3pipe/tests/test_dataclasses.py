@@ -334,3 +334,18 @@ class TestTable(TestCase):
         tab = Table(arr)
         tab_sort = tab.sorted('b')
         assert_array_equal(tab_sort['a'], np.array([0, 6, 3]))
+
+    def test_df(self):
+        from pandas.util.testing import assert_frame_equal
+        import pandas as pd
+        dt = np.dtype([('a', int), ('b', float), ('c', int)])
+        arr = np.array([
+            (0, 1.0, 2),
+            (3, 7.0, 5),
+            (6, 4.0, 8),
+        ], dtype=dt)
+        print(dir(Table))
+        df = pd.DataFrame(arr)
+        tab = Table.from_dataframe(df, h5loc='/bla')
+        df2 = tab.to_dataframe()
+        assert_frame_equal(df, df2)
