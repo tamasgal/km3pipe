@@ -13,7 +13,7 @@ legend.numpoints: 1
 legend.scatterpoints: 1
 legend.fontsize: 10
 
-axes.prop_cycle: cycler('color', ["ff7869", "4babe1", "96ad3e", "e4823d", "5d72b2", "e2a3c2", "fd9844", "e480e7"])
+# axes.prop_cycle: cycler('color', ["ff7869", "4babe1", "96ad3e", "e4823d", "5d72b2", "e2a3c2", "fd9844", "e480e7"])
 axes.facecolor: ffffff
 axes.labelsize: 11
 axes.labelcolor: .15
@@ -24,7 +24,7 @@ axes.linewidth: 1
 axes.titlesize: 14
 
 patch.edgecolor: ffffff
-patch.facecolor: 4C72B0
+# patch.facecolor: 4C72B0
 patch.linewidth: .3
 
 svg.fonttype: path
@@ -64,3 +64,8 @@ figure.facecolor: ffffff
 figure.subplot.wspace: 0.3
 figure.subplot.hspace: 0.4
 figure.figsize: 8.0, 5.5
+
+# Tableau colorblind 10 palette
+axes.prop_cycle: cycler('color', ['006BA4', 'FF800E', 'ABABAB', '595959', '5F9ED1', 'C85200', '898989', 'A2C8EC', 'FFBC79', 'CFCFCF'])
+patch.facecolor: 006BA4
+image.cmap: cividis
