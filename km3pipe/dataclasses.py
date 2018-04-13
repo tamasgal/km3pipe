@@ -1,9 +1,5 @@
 # coding=utf-8
 # Filename: dataclasses.py
-# cython: embedsignature=True
-# cython: linetrace=True
-# cython: profile=True
-# distutils: define_macros=CYTHON_TRACE=1
 # pylint: disable=W0232,C0103,C0111
 # vim:set ts=4 sts=4 sw=4 et syntax=python:
 """
@@ -12,17 +8,11 @@ Dataclasses for internal use. Heavily based on Numpy arrays.
 from __future__ import division, absolute_import, print_function
 
 from collections import namedtuple, defaultdict
-import ctypes
-from libcpp cimport bool as c_bool  # noqa
 from six import string_types
-from struct import Struct, calcsize
 
 import numpy as np
 from numpy.lib import recfunctions as rfn
-cimport numpy as np
-cimport cython
 
-np.import_array()
 
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

@@ -56,10 +56,6 @@ You can also use virtual environments (https://virtualenvwrapper.readthedocs.io)
 Install
 -------
 
-First install `numpy` and `Cython`::
-
-    $ pip install cython numpy
-
 To install the latest stable version fromm the PyPI repository:::
 
     $ pip install "km3pipe[full]"
@@ -94,9 +90,6 @@ without the need to reinstall it::
 
     $ make install-dev
 
-Just keep in mind, if you change `.pyx` files, you have to recompile them::
-
-    $ make
 
 Run the Test Suite
 ------------------

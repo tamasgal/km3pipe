@@ -5,10 +5,7 @@ default: build
 all: install
 
 build: 
-	python setup.py build_ext --inplace
-
-build-trace:
-	python setup.py build_ext --inplace --define CYTHON_TRACE
+	@echo "No need to build anymore :)"
 
 install: 
 	pip install ".[full]"
@@ -23,20 +20,20 @@ clean:
 	rm -f -r build/
 	rm -f $(PKGNAME)/*.so
 
-test: build
+test: 
 	py.test --junitxml=./junit.xml || true
 	py.test km3modules || true
 
 
-test-cov: build
+test-cov:
 	py.test --junitxml=./junit.xml \
 		--cov ./ --cov-report term-missing --cov-report xml || true
 	py.test km3modules || true
 
-test-loop: build
+test-loop: 
 	# pip install -U pytest-watch
 	py.test || true
-	ptw --ext=.py,.pyx --beforerun "make build"
+	ptw --ext=.py,.pyx
 
 flake8: 
 	py.test --flake8 || true

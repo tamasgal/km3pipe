@@ -1,9 +1,7 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
 # coding=utf-8
-# cython: profile=True
-# Filename: math.pyx
-# cython: embedsignature=True
+# Filename: math.py
 # pylint: disable=C0103
 """
 Maths, Geometry, coordinates.
