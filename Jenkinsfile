@@ -45,6 +45,7 @@ def get_stages(docker_image) {
                         . venv/bin/activate
                         make doc-dependencies
                         cd docs
+                        export MPL_BACKEND="agg"
                         make html
                     """
                 } catch (e) { 
