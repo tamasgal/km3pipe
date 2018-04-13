@@ -17,7 +17,6 @@ setup(
     install_requires=[
         'astropy',
         'numpy',
-        'cython',
         'pandas',
         'km3pipe',
     ]

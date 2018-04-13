@@ -3,7 +3,6 @@ setuptools>=24.3
 six
 numpy>=1.12
 numexpr
-cython
 docopt
 matplotlib>=2.2.0
 pandas

@@ -1,7 +1,5 @@
 # coding=utf-8
-# cython: profile=True
 # Filename: time.py
-# cython: embedsignature=True
 # pylint: disable=C0103
 """
 Manipulating time and so...

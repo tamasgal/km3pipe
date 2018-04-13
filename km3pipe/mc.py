@@ -1,7 +1,5 @@
 # coding=utf-8
-# cython: profile=True
 # Filename: mc.py
-# cython: embedsignature=True
 # pylint: disable=C0103
 """
 Monte Carlo related things.

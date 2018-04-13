@@ -69,13 +69,6 @@ back to ``develop`` when they are stable.
     $ git co -b feature/my_cool_new_class
 
 
-When Editing ``.pyx`` files, recompile
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Run the build script to recompile them::
-
-    $ make
-
-
 Create a Merge Request (aka Pull Request)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 TODO
