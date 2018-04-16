@@ -8,12 +8,12 @@ Calibration.
 from __future__ import division, absolute_import, print_function
 
 import numpy as np
-import pandas as pd
+from pandas import DataFrame
 
 from .core import Module
 from .hardware import Detector
-from .dataclasses import (CRawHitSeries, HitSeries, RawHitSeries,
-                          CMcHitSeries, McHitSeries)
+from .dataclasses import Table
+from .dataclass_templates import TEMPLATES
 from .logger import logging
 
 __author__ = "Tamas Gal"
@@ -116,37 +116,18 @@ class Calibration(Module):
         will be returned with the calibration information added.
 
         """
-        if isinstance(hits, RawHitSeries):
-            return self._apply_to_rawhitseries(hits)
-        elif isinstance(hits, (HitSeries, list)):
-            return self._apply_to_hitseries(hits)
-        elif isinstance(hits, pd.DataFrame):
-            return self._apply_to_table(hits)
-        elif isinstance(hits, McHitSeries):
-            return self._apply_to_mchitseries(hits)
+        if isinstance(hits, DataFrame):
+            # do we ever see McHits here?
+            hits = Table.from_template(hits, 'Hits')
+        if hits.name == 'Hits':
+            return self._apply_to_hits(hits)
+        elif hits.name == 'McHits':
+            return self._apply_to_mchits(hits)
         else:
             raise TypeError("Don't know how to apply calibration to '{0}'."
-                            .format(hits.__class__.__name__))
+                            .format(hits.name))
 
-    def _apply_to_hitseries(self, hits):
-        """Add x, y, z and t0 offset to hit series"""
-        for idx, hit in enumerate(hits):
-            try:
-                pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
-            except (KeyError, AttributeError):
-                pmt = self.detector.pmt_with_id(hit.pmt_id)
-            hits.pos_x[idx] = pmt.pos[0]
-            hits.pos_y[idx] = pmt.pos[1]
-            hits.pos_z[idx] = pmt.pos[2]
-            hits.dir_x[idx] = pmt.dir[0]
-            hits.dir_y[idx] = pmt.dir[1]
-            hits.dir_z[idx] = pmt.dir[2]
-            hits._arr['t0'][idx] = pmt.t0
-            hits._arr['time'][idx] += pmt.t0
-            # hit.a = hit.tot
-        return hits
-
-    def _apply_to_rawhitseries(self, hits):
+    def _apply_to_hits(self, hits):
         """Create a HitSeries from RawHitSeries and add pos, dir and t0.
 
         Note that existing arrays like tot, dom_id, channel_id etc. will be
@@ -159,7 +140,7 @@ class Calibration(Module):
         for i in range(n):
             calib = lookup[hits._arr['dom_id'][i]][hits._arr['channel_id'][i]]
             cal[i] = calib
-        h = np.empty(n, CRawHitSeries.dtype)
+        h = np.empty(n, TEMPLATES['CalibHits']['dtype'])
         h['channel_id'] = hits.channel_id
         h['dir_x'] = cal[:, 3]
         h['dir_y'] = cal[:, 4]
@@ -175,9 +156,9 @@ class Calibration(Module):
         h['tot'] = hits.tot
         h['triggered'] = hits.triggered
         h['event_id'] = hits._arr['event_id']
-        return CRawHitSeries(h, hits.event_id)
+        return Table.from_template(h, 'CalibHits')
 
-    def _apply_to_mchitseries(self, hits):
+    def _apply_to_mchits(self, hits):
         """Create a HitSeries from McHitSeries and add pos, dir and t0.
 
         Note that existing arrays like a, origin, pmt_id will be copied by
@@ -191,7 +172,7 @@ class Calibration(Module):
         for i in range(n):
             lookup = self._calib_by_pmt_id
             cal[i] = lookup[hits._arr['pmt_id'][i]]
-        h = np.empty(n, CMcHitSeries.dtype)
+        h = np.empty(n, TEMPLATES['CalibMcHits']['dtype'])
         h['channel_id'] = np.zeros(n, dtype=int)
         h['dir_x'] = cal[:, 3]
         h['dir_y'] = cal[:, 4]
@@ -207,24 +188,7 @@ class Calibration(Module):
         h['tot'] = np.zeros(n, dtype=int)
         h['triggered'] = np.zeros(n, dtype=bool)
         h['event_id'] = hits._arr['event_id']
-        return CMcHitSeries(h, hits.event_id)
-
-    def _apply_to_table(self, table):
-        """Add x, y, z and du, floor columns to hit table"""
-        def get_pmt(hit):
-            return self.detector.get_pmt(hit['dom_id'], hit['channel_id'])
-
-        table['pos_x'] = table.apply(lambda h: get_pmt(h).pos.x, axis=1)
-        table['pos_y'] = table.apply(lambda h: get_pmt(h).pos.y, axis=1)
-        table['pos_z'] = table.apply(lambda h: get_pmt(h).pos.z, axis=1)
-        table['dir_x'] = table.apply(lambda h: get_pmt(h).dir.x, axis=1)
-        table['dir_y'] = table.apply(lambda h: get_pmt(h).dir.y, axis=1)
-        table['dir_z'] = table.apply(lambda h: get_pmt(h).dir.z, axis=1)
-        table['time'] += table.apply(lambda h: get_pmt(h).t0, axis=1)
-        table['t0'] = table.apply(lambda h: get_pmt(h).t0, axis=1)
-        table['du'] = table.apply(lambda h: get_pmt(h).omkey[0], axis=1)
-        table['floor'] = table.apply(lambda h: get_pmt(h).omkey[1], axis=1)
-        return table
+        return Table.from_template(h, 'CalibMcHits')
 
     def _create_dom_channel_lookup(self):
         data = {}

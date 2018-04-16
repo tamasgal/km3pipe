@@ -17,7 +17,7 @@ if not __KM3PIPE_SETUP__:
     from .core import (Pipeline, Module, Pump, Blob, Run, Geometry)  # noqa
     from . import core
     from . import dataclasses
-    # from . import calib
+    from . import calib
     from . import cmd
     from . import common
     from . import config
@@ -30,7 +30,7 @@ if not __KM3PIPE_SETUP__:
     from . import math
     from . import mc
     from . import shell
-    # from . import srv
+    from . import srv
     from . import style
     from . import sys
     # from . import testing
