@@ -76,6 +76,14 @@ class TestTable(TestCase):
         tab = Table(self.arr, h5loc='/foo')
         assert tab.h5loc is '/foo'
 
+    def test_split(self):
+        tab = self.arr.view(Table)
+        assert tab.split_h5 is False
+        tab = Table(self.arr)
+        assert tab.split_h5 is False
+        tab = Table(self.arr, split_h5=True)
+        assert tab.split_h5 is True
+
     def test_view(self):
         tab = self.arr.view(Table)
         assert tab.dtype == self.dt
