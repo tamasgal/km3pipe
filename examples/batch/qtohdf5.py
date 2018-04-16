@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # Filename: qtohdf5.py
 # Author: Tamas Gal <tgal@km3net.de>
 """

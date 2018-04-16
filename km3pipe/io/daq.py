@@ -1,12 +1,9 @@
-# coding=utf-8
 # Filename: daq.py
 # pylint: disable=R0903
 """
 Pumps for the DAQ data formats.
 
 """
-from __future__ import division, absolute_import, print_function
-
 from io import BytesIO
 import math
 import struct
@@ -201,10 +198,6 @@ class DAQPump(Pump):
 
     def __iter__(self):
         return self
-
-    def next(self):
-        """Python 2/3 compatibility for iterators"""
-        return self.__next__()
 
     def __next__(self):
         try:

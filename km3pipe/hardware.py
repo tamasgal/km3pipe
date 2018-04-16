@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: hardware.py
 # pylint: disable=locally-disabled
 """
 Classes representing KM3NeT hardware.
 
 """
-from __future__ import division, absolute_import, print_function
 
 from collections import OrderedDict, defaultdict
 import sys

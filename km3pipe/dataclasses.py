@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: dataclasses.py
 # pylint: disable=W0232,C0103,C0111
 # vim:set ts=4 sts=4 sw=4 et syntax=python:
 """
 Dataclasses for internal use. Heavily based on Numpy arrays.
 """
-from __future__ import division, absolute_import, print_function
 
 from six import string_types
 

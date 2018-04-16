@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # vim: ts=4 sw=4 et
 """
 =============
@@ -13,7 +12,6 @@ be accessed by the command ``ligiermirror``.
 """
 # Author: Tamas Gal <tgal@km3net.de>
 # License: MIT
-from __future__ import division
 
 import socket
 

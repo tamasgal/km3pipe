@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: root.py
 # pylint: disable=C0103,R0903
 # vim:set ts=4 sts=4 sw=4 et:
 """
 Read and write Vanilla ROOT files.
 """
-from __future__ import division, absolute_import, print_function
 
 from six import string_types
 from six.moves import range

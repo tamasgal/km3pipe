@@ -1,4 +1,3 @@
-# coding=utf-8
 # Filename: ztplot.py
 """
 Create a zt-Plot.
@@ -19,7 +18,6 @@ Options:
     -h --help     Show this screen.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import matplotlib.ticker as ticker
 import matplotlib.pyplot as plt

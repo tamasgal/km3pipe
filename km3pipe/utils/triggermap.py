@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # Filename: triggermap.py
 # vim: ts=4 sw=4 et
 """
@@ -17,7 +16,6 @@ Option:
     -h --help         Show this screen.
 
 """
-from __future__ import division
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

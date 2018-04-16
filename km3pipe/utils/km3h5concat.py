@@ -1,4 +1,3 @@
-# coding=utf-8
 # Filename: km3h5concat.py
 """
 Concatenate KM3HDF5 files via pipeline.
@@ -15,7 +14,6 @@ Options:
     -n=NEVENTS                      Number of events; if not given, use all.
 """
 
-from __future__ import division, absolute_import, print_function
 
 from km3modules.common import StatusBar
 from km3pipe import version

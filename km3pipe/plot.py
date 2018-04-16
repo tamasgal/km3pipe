@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: plot.py
 # pylint: disable=C0103
 # pragma: no cover
 """
 Common Plotting utils.
 """
-from __future__ import division, absolute_import, print_function
 
 import matplotlib as mpl    # noqa
 import matplotlib.pyplot as plt

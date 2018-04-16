@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # Filename: totmonitor.py
 """
 Display the mean ToT for each TDC channel for given DOM.
@@ -17,7 +16,6 @@ Options:
     -u UPDATE       Update frequency in seconds [default: 10].
     -h --help       Show this screen.
 """
-from __future__ import division
 
 import os
 from collections import defaultdict

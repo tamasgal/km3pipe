@@ -1,7 +1,5 @@
-# coding=utf-8
 # Filename: test_plot.py
 # pylint: disable=locally-disabled,C0111,R0904,C0103
-from __future__ import division, absolute_import, print_function
 
 import numpy as np
 

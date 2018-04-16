@@ -1,12 +1,9 @@
-# coding=utf-8
 # Filename: evt.py
 # pylint: disable=C0103,R0903
 """
 Pumps for the EVT simulation dataformat.
 
 """
-from __future__ import division, absolute_import, print_function
-
 import sys
 
 from collections import namedtuple, defaultdict
@@ -352,10 +349,6 @@ class EvtPump(Pump):  # pylint: disable:R0902
 
     def __iter__(self):
         return self
-
-    def next(self):
-        """Python 2/3 compatibility for iterators"""
-        return self.__next__()
 
     def __next__(self):
         try:

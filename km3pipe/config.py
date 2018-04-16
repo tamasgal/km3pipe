@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: config.py
 # pylint: disable=locally-disabled
 """
 Tools for global configuration.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import os
 import pytz

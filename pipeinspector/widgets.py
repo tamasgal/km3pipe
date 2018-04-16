@@ -1,10 +1,8 @@
-# coding=utf-8
 # Filename: widgets.py
 """
 GUI elements for the pipeinspector.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import urwid
 import pprint

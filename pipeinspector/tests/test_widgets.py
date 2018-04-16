@@ -1,10 +1,8 @@
-# coding=utf-8
 # Filename: test_widgets.py
 """
 ...
 
 """
-from __future__ import division, absolute_import, print_function
 
 from km3pipe.testing import TestCase
 

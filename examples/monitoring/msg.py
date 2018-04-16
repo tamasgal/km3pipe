@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # vim: ts=4 sw=4 et
 # Author: Tamas Gal <tgal@km3net.de>
 # License: MIT
@@ -11,7 +10,6 @@ MSG reader
 This application demonstrates how to access MSGs from Ligier.
 
 """
-from __future__ import print_function
 import io
 import km3pipe as kp
 

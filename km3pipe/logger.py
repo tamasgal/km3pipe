@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: logger.py
 # pylint: disable=locally-disabled,C0103
 """
 The logging facility.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import socket
 import logging

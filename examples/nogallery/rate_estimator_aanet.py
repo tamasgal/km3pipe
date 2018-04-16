@@ -1,7 +1,6 @@
 """Open a file with real data and estimate the DOM rates.
 """
 
-from __future__ import division
 
 from km3pipe import Module, Pipeline
 from km3pipe.io.aanet import AanetPump

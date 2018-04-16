@@ -1,4 +1,3 @@
-# coding=utf-8
 # Filename: rba.py
 """
 RainbowAlga online display.
@@ -14,7 +13,6 @@ Options:
     -h --help  Show this screen.
 
 """
-from __future__ import division, absolute_import, print_function
 
 from cmd import Cmd
 

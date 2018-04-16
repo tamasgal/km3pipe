@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # Filename: k40calib.py
 # vim: ts=4 sw=4 et
 """
@@ -28,7 +27,6 @@ Options:
 # Author: Jonas Reubelt <jreubelt@km3net.de> and Tamas Gal <tgal@km3net.de>
 # License: MIT
 
-from __future__ import division, absolute_import, print_function
 
 from km3pipe import version
 import km3pipe as kp

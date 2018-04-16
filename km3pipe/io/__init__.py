@@ -1,10 +1,8 @@
-# coding=utf-8
 # Filename: __init__.py
 """
 A collection of io for different kinds of data formats.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import os.path
 from six import string_types

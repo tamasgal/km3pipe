@@ -1,7 +1,5 @@
-# coding=utf-8
 # Filename: test_calib.py
 # pylint: disable=C0111,E1003,R0904,C0103,R0201,C0102
-from __future__ import division, absolute_import, print_function
 
 from km3pipe.dataclasses import Table
 from km3pipe.testing import TestCase, MagicMock, patch, skip

@@ -7,7 +7,6 @@ Usage:
     nb2sphx NOTEBOOK
 
 """
-from __future__ import division, absolute_import, print_function
 
 import json
 import pypandoc as pdoc

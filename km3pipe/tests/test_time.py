@@ -1,7 +1,5 @@
-# coding=utf-8
 # Filename: test_time.py
 # pylint: disable=locally-disabled,C0111,R0904,C0103
-from __future__ import division, absolute_import, print_function
 
 from datetime import datetime, timedelta
 from time import sleep

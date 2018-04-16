@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: style.py
 # pylint: disable=locally-disabled
 """
 The KM3Pipe style definitions.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import os
 from itertools import cycle

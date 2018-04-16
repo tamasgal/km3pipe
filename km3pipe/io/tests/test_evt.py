@@ -1,7 +1,5 @@
-# coding=utf-8
 # Filename: test_evt.py
 # pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
-from __future__ import division, absolute_import, print_function
 
 import os.path
 import operator
@@ -428,7 +426,7 @@ class TestEvtFilePump(TestCase):
 
     def test_pipe(self):
         pump = EvtPump(filename=self.fname)
-        pump.next()
+        next(pump)
         pump.finish()
 
     def test_context(self):
@@ -448,5 +446,5 @@ class TestCorsika(TestCase):
 
     def test_pipe(self):
         pump = EvtPump(filename=self.fname)
-        pump.next()
+        next(pump)
         pump.finish()

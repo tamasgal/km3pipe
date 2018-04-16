@@ -1,4 +1,3 @@
-# coding=utf-8
 # Filename: test_hardware.py
 # pylint: disable=C0111,C0103,R0904
 """
@@ -14,7 +13,6 @@ dom_id line_id floor_id npmts
  ...
 
 """
-from __future__ import division, absolute_import, print_function
 
 from km3pipe.testing import TestCase, StringIO
 from km3pipe.hardware import Detector, PMT

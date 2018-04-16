@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: parser.py
 # pylint: disable=locally-disabled
 """
 A collection of parsers.
 
 """
-from __future__ import division, absolute_import, print_function
 
 from km3pipe import Module
 from km3pipe.io.daq import DAQPreamble, DAQSummaryslice, DAQEvent

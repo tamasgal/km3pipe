@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: common.py
 # pylint: disable=locally-disabled
 """
 Commonly used imports.
 
 """
-from __future__ import division, absolute_import, print_function
 
 try:
     from cStringIO import StringIO

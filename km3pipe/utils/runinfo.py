@@ -1,4 +1,3 @@
-# coding=utf-8
 # Filename: runinfo.py
 """
 Prints the run table for a given detector ID.
@@ -14,7 +13,6 @@ Options:
     RUN                 Run number.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import km3pipe as kp
 

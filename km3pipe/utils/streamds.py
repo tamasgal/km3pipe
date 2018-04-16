@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 Access the KM3NeT StreamDS DataBase service.
 
@@ -19,7 +18,6 @@ Options:
     -h --help   Show this screen.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import getpass
 import os

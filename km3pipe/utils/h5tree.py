@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 Print the structure of a hdf5 file.
 
@@ -20,7 +19,6 @@ Options:
     --classic   Print like ptdump.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import numpy as np
 import tables

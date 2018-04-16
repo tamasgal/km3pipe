@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # vim: ts=4 sw=4 et
 """
 ===========
@@ -21,7 +20,6 @@ This script creates a histogram to show the trigger contribution for events.
         -h --help         Show this screen.
 
 """
-from __future__ import division
 from docopt import docopt
 import matplotlib
 # Force matplotlib to not use any Xwindows backend.

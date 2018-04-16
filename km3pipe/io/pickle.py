@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: pickle.py
 # pylint: disable=locally-disabled
 """
 Pump for the pickle data format.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import pickle
 from collections import namedtuple

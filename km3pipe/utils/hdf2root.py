@@ -1,4 +1,3 @@
-# coding=utf-8
 # Filename: cmd.py
 """
 Convert HDF5 to vanilla ROOT.
@@ -15,7 +14,6 @@ Options:
     --verbose           Print more info [default: False]
 """
 
-from __future__ import division, absolute_import, print_function
 
 import numpy as np
 

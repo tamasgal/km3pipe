@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # Filename: tots.py
 """
 Convert ROOT and EVT files to HDF5.
@@ -13,7 +12,6 @@ Options:
     -p PLOT     Filename including extension [default: meantots.png].
 
 """
-from __future__ import division, absolute_import, print_function
 
 from collections import defaultdict
 

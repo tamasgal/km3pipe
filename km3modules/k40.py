@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: k40.py
 # pylint: disable=locally-disabled
 """
 A collection of k40 related functions and modules.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import os
 from itertools import combinations

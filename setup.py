@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # Filename: setup.py
 """
 KM3Pipe setup script.
@@ -11,10 +10,7 @@ from itertools import chain
 import sys
 import os
 
-if sys.version_info[0] >= 3:
-    import builtins
-else:
-    import __builtin__ as builtins
+import builtins
 
 # so we can detect in __init__.py that it's called from setup.py
 builtins.__KM3PIPE_SETUP__ = True
@@ -64,6 +60,7 @@ setup(name='km3pipe',
       platforms='any',
       setup_requires=require_groups['setup'],
       install_requires=require_groups['base'],
+      python_requires='>=3.5',
       extras_require=require_groups,
       entry_points={
           'console_scripts': [

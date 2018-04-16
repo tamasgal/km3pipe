@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# coding=utf-8
 # Filename: srv.py
-from __future__ import print_function, absolute_import
 
 """
 The KM3srv tornado webserver.

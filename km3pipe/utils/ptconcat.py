@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # Filename: ptconcat.py
 """
 Concatenate HDF5 Files.
@@ -16,7 +15,6 @@ Options:
     --overwrite             Overwrite output file [default: False].
 """
 
-from __future__ import division, absolute_import, print_function
 import os.path
 from six import iteritems
 

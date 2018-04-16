@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: mc.py
 # pylint: disable=C0103
 """
 Monte Carlo related things.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import numpy as np
 import pandas as pd

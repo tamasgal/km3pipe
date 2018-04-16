@@ -1,12 +1,10 @@
 #!/usr/bin/env python
-# coding=utf-8
 # Filename: jpp.py
 # pylint: disable=
 """
 Pump for the jpp file read through aanet interface.
 
 """
-from __future__ import division, absolute_import, print_function
 
 from km3pipe.core import Pump
 from km3pipe.controlhost import Client

@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: calib.py
 # pylint: disable=locally-disabled
 """
 Calibration.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import numpy as np
 from pandas import DataFrame
