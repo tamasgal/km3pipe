@@ -16,9 +16,8 @@ import numpy as np
 from scipy.stats import iqr
 
 from km3pipe.core import Pump, Blob
-from km3pipe.dataclasses import (RawHitSeries, McHitSeries,
-                                 TrackSeries, EventInfo,
-                                 Table)
+from km3pipe.dataclasses import Table
+from km3pipe.dataclass_templates import TEMPLATES
 from km3pipe.logger import logging
 from km3pipe.math import mad
 
