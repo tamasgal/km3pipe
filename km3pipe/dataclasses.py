@@ -179,10 +179,6 @@ class Table(np.recarray):
                 )
             dtype = inflate_dtype(arr_list, colnames)
             colnames = dtype.names
-        print(dtype)
-        print(dtype.names)
-        print(colnames)
-        print(arr_list)
         if len(arr_list) != len(dtype.names):
             raise ValueError(
                 "Number of columns mismatch between data and dtype!")
