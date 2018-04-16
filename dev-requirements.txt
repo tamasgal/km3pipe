@@ -9,3 +9,6 @@ pytest-watch
 twine
 six
 pydocstyle
+cython
+numba
+requests
