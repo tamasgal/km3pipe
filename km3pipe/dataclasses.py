@@ -98,6 +98,9 @@ class Table(np.recarray):
         if isinstance(data, dict):
             return cls.from_dict(data, h5loc=h5loc, dtype=dtype,
                                  split_h5=split_h5, colnames=colnames, **kwargs)
+        if isinstance(data, list) or isinstance(data, tuple):
+            return cls.from_list(data, h5loc=h5loc, dtype=dtype,
+                                 split_h5=split_h5, colnames=colnames, **kwargs)
         if not has_structured_dt(data):
             # flat (nonstructured) dtypes fail miserably!
             # default to `|V8` whyever
@@ -166,16 +169,26 @@ class Table(np.recarray):
                                      dtype=dtype), **kwargs)
 
     @classmethod
-    def from_list(cls, arr_list, dtype, **kwargs):
-        dtype = np.dtype(dtype)
-        if not is_structured(dtype):
-            raise ValueError('Required structured dtype!')
-        if not len(arr_list) == len(dtype.names):
+    def from_list(cls, arr_list, dtype=None, colnames=None, **kwargs):
+        if dtype is None or not is_structured(dtype):
+            # infer structured dtype from array data + column names
+            if colnames is None:
+                raise ValueError(
+                    "Need to either specify column names or a "
+                    "structured dtype when passing unstructured arrays!"
+                )
+            dtype = inflate_dtype(arr_list, colnames)
+            colnames = dtype.names
+        print(dtype)
+        print(dtype.names)
+        print(colnames)
+        print(arr_list)
+        if len(arr_list) != len(dtype.names):
             raise ValueError(
-                'Length of data and length of dtype do not match!')
+                "Number of columns mismatch between data and dtype!")
         return cls(
             {k: arr_list[i] for i, k in enumerate(dtype.names)},
-            dtype=dtype, **kwargs)
+            dtype=dtype, colnames=colnames, **kwargs)
 
     @property
     def templates_avail(self):
