@@ -282,3 +282,10 @@ class Table(np.recarray):
     def from_dataframe(cls, df, h5loc=DEFAULT_H5LOC, split_h5=False):
         rec = df.to_records(index=False)
         return cls(rec, h5loc=h5loc, split_h5=split_h5)
+
+    def __str__(self):
+        s = "HDF5 location: {}\n".format(self.h5loc)
+        s += "\n".join(map(lambda d: "{} (dtype: {}) = {}"
+                                     .format(*d, self[d[0]]),
+                           self.dtype.descr))
+        return s
