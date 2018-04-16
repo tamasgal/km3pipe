@@ -126,7 +126,7 @@ class Table(np.recarray):
         obj.h5loc = h5loc
         obj.split_h5 = split_h5
         if name is None:
-            name = 'Table'
+            name = 'Generic Table'
         obj.name = name
         return obj
 
@@ -137,7 +137,7 @@ class Table(np.recarray):
         # views or slices
         self.h5loc = getattr(obj, 'h5loc', DEFAULT_H5LOC)
         self.split_h5 = getattr(obj, 'split_h5', False)
-        self.name = getattr(obj, 'name', 'Table')
+        self.name = getattr(obj, 'name', 'Generic Table')
         # attribute access returns void instances on slicing/iteration
         # kudos to https://github.com/numpy/numpy/issues/3581#issuecomment-108957200
         if obj is not None and type(obj) is not type(self):
@@ -288,9 +288,10 @@ class Table(np.recarray):
         return cls(rec, **kwargs)
 
     def __str__(self):
-        name = "Generic Table" if self.name is None else self.name
+        name = self.name
+        spl = 'split' if self.split_h5 else 'no split'
         s = "{} {}\n".format(name, type(self))
-        s += "HDF5 location: {}\n".format(self.h5loc)
+        s += "HDF5 location: {} ({})\n".format(self.h5loc, spl)
         s += "\n".join(map(lambda d: "{} (dtype: {}) = {}"
                                      .format(*d, self[d[0]]),
                            self.dtype.descr))
