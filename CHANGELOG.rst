@@ -1,5 +1,10 @@
 Unreleased changes
 ------------------
+* Fixed ``kp.io.evt.EvtPump``, where the first blob was empty for every file
+  while iterating through many files.
+* The ``n_digits`` parameter of ``kp.io.evt.EvtPump`` can now be ``None``,
+  indicating that no leading zeros should be generated. This is actually
+  the default setting now.
 
 Version 7
 ---------
