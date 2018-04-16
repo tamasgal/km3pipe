@@ -155,7 +155,11 @@ class Table(np.recarray):
         for k, v in arr_dict.items():
             if np.isscalar(v):
                 scalars.append(k)
-            elif len(v) > maxlen:
+                continue
+            if hasattr(v, 'ndim') and v.ndim == 0:
+                v = v.item()
+                continue
+            if len(v) > maxlen:
                 maxlen = len(v)
         for s in scalars:
             arr_dict[s] = np.full(maxlen, arr_dict[s])
@@ -304,3 +308,17 @@ class Table(np.recarray):
 
     def __repr__(self):
         return str(self)
+
+    @property
+    def dir(self):
+        return np.array([self.dir_x, self.dir_y, self.dir_z])
+        # return self.__class__.from_template(
+        #     {'dir_x': self.dir_x, 'dir_y': self.dir_y, 'dir_z': self.dir_z},
+        #     'Direction')
+
+    @property
+    def pos(self):
+        return np.array([self.pos_x, self.pos_y, self.pos_z])
+        # return self.__class__.from_template(
+        #     {'pos_x': self.pos_x, 'pos_y': self.pos_y, 'pos_z': self.pos_z},
+        #     'Position')

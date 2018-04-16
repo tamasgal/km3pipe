@@ -20,6 +20,24 @@ __all__ = ('TEMPLATES',)
 
 
 TEMPLATES = {
+    'Direction': {
+        'dtype': np.dtype([
+            ('dir_x', '<f4'),
+            ('dir_y', '<f4'),
+            ('dir_z', '<f4'),
+        ]),
+        'h5loc': None,
+        'split_h5': False,
+    },
+    'Position': {
+        'dtype': np.dtype([
+            ('pos_x', '<f4'),
+            ('pos_y', '<f4'),
+            ('pos_z', '<f4'),
+        ]),
+        'h5loc': None,
+        'split_h5': False,
+    },
     'EventInfo': {
         'dtype': np.dtype([
             ('det_id', '<i4'),
