@@ -327,7 +327,6 @@ class HDF5Pump(Pump):
 
         self.event_ids = OrderedDict()
         self._n_each = OrderedDict()
-        self.h5files = OrderedDict()
         for fn in self.filenames:
             self.log.debug(fn)
             # Open all files before reading any events
@@ -357,7 +356,6 @@ class HDF5Pump(Pump):
                     raise ValueError("Cut mask length differs from event ids!")
             else:
                 self.cut_masks = None
-            self.h5files[fn] = h5file
         self._n_events = np.sum((v for k, v in self._n_each.items()))
         self.minmax = OrderedDict()
         n_read = 0
@@ -402,7 +400,7 @@ class HDF5Pump(Pump):
         if self._need_next(index):
             self._set_next_file()
         fname = self.current_file
-        h5file = self.h5files[fname]
+        h5file = tb.open_file(fname, 'r')
         evt_ids = self.event_ids[fname]
         local_index = self._translate_index(fname, index)
         event_id = evt_ids[local_index]
