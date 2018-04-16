@@ -21,7 +21,7 @@ from km3pipe.core import Pump, Module, Blob
 from km3pipe.dataclasses import Table, DEFAULT_H5LOC
 from km3pipe.dataclass_templates import TEMPLATES
 from km3pipe.logger import logging
-from km3pipe.tools import camelise, decamelise, split
+from km3pipe.tools import camelise, split
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -177,61 +177,60 @@ class HDF5Sink(Module):
         d["n_items"].append(n_items)
         d["index"] += n_items
 
+    def _write_header(self, header):
+        header = self.h5file.create_group('/', 'header', 'Header')
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', tb.NaturalNameWarning)
+            for field, value in header.items():
+                try:
+                    value = float(value)
+                except ValueError:
+                    pass
+                header._v_attrs[field] = value
+        self._header_written = True
+
+    def _process_entry(self, key, entry):
+        self.log.debug("Inspecting {}".format(key))
+        self.log.debug("Converting to numpy array...")
+        data = self._to_array(entry)
+        if data is None or not hasattr(data, 'dtype'):
+            self.log.debug("Conversion failed. moving on...")
+            return
+        try:
+            self.log.debug("Looking for h5loc...")
+            h5loc = entry.h5loc
+        except AttributeError:
+            self.log.debug(
+                "h5loc not found. setting to '{}'...".format(
+                    DEFAULT_H5LOC))
+            h5loc = DEFAULT_H5LOC
+        if data.dtype.names is None:
+            self.log.debug("Array has no named dtype. "
+                           "using blob key as h5 column name")
+            dt = np.dtype((data.dtype, [(key, data.dtype)]))
+            data = data.view(dt)
+        # where = os.path.join(h5loc, tabname)
+        try:
+            title = entry.name
+        except AttributeError:
+            title = key
+
+        self.log.debug("h5l: '{}', title '{}'".format(h5loc, title))
+
+        if hasattr(entry, 'split_h5') and entry.split_h5:
+            self.log.debug("Writing into separate columns...")
+            self._write_separate_columns(h5loc, entry, title=title)
+        else:
+            self.log.debug("Writing into single Table...")
+            self._write_array(h5loc, data, title=title)
+
     def process(self, blob):
         if not self._header_written and "Header" in blob \
                 and blob["Header"] is not None:
-            header = self.h5file.create_group('/', 'header', 'Header')
-            with warnings.catch_warnings():
-                warnings.simplefilter('ignore', tb.NaturalNameWarning)
-                for field, value in blob["Header"].items():
-                    try:
-                        value = float(value)
-                    except ValueError:
-                        pass
-                    header._v_attrs[field] = value
-            self._header_written = True
+            self._write_header(blob['Header'])
 
         for key, entry in sorted(blob.items()):
-            self.log.debug("Inspecting {}".format(key))
-            self.log.debug("Converting to numpy array...")
-            data = self._to_array(entry)
-            if data is None or not hasattr(data, 'dtype'):
-                self.log.debug("Conversion failed. moving on...")
-                continue
-            try:
-                self.log.debug("Looking for h5loc...")
-                h5loc = entry.h5loc
-            except AttributeError:
-                self.log.debug(
-                    "h5loc not found. setting to '{}'...".format(
-                        DEFAULT_H5LOC))
-                h5loc = DEFAULT_H5LOC
-            if data.dtype.names is None:
-                self.log.debug("Array has no named dtype. "
-                               "using blob key as h5 column name")
-                dt = np.dtype((data.dtype, [(key, data.dtype)]))
-                data = data.view(dt)
-            # where = os.path.join(h5loc, tabname)
-            try:
-                title = entry.name
-            except AttributeError:
-                title = key
-
-            self.log.debug("h5l: '{}', title '{}'".format(h5loc, title))
-
-            try:
-                if entry.split_h5:
-                    self.log.debug("Writing into separate columns...")
-                    self._write_separate_columns(h5loc, entry, title=title)
-                else:
-                    self.log.debug("Writing into single Table...")
-                    self._write_array(h5loc, data, title=title)
-            except AttributeError:  # backwards compatibility
-                self.log.debug("Writing into single Table...")
-                self._write_array(h5loc, data, title=key)
-            else:
-                self.log.debug('{} appears not to be serialisable '
-                               'to numpy. Skipping.'.format(key))
+            self._process_entry(key, entry)
 
         if not self.index % 1000:
             self.log.info('Flushing tables to disk...')
@@ -329,38 +328,7 @@ class HDF5Pump(Pump):
         self.group_ids = OrderedDict()
         self._n_each = OrderedDict()
         for fn in self.filenames:
-            self.log.debug(fn)
-            # Open all files before reading any events
-            # So we can raise version mismatches etc before reading anything
-            if os.path.isfile(fn):
-                h5file = tb.open_file(fn, 'r')
-                if not self.skip_version_check:
-                    check_version(h5file, fn)
-            else:
-                raise IOError("No such file or directory: '{0}'"
-                              .format(fn))
-            try:
-                event_info = h5file.get_node('/', 'event_info')
-                try:
-                    self.group_ids[fn] = event_info.cols.group_id[:]
-                except AttributeError:
-                    self.group_ids[fn] = event_info.cols.event_id[:]
-                self._n_each[fn] = len(self.group_ids[fn])
-            except tb.NoSuchNodeError:
-                self.log.critical("No /event_info table found: '{0}'"
-                                  .format(fn))
-                raise SystemExit
-            if self.cut_mask_node is not None:
-                if not self.cut_mask_node.startswith('/'):
-                    self.cut_mask_node = '/' + self.cut_mask_node
-                self.cut_masks[fn] = h5file.get_node(self.cut_mask_node)[:]
-                self.log.debug(self.cut_masks[fn])
-                mask = self.cut_masks[fn]
-                if not mask.shape[0] == self.group_ids[fn].shape[0]:
-                    raise ValueError("Cut mask length differs from event ids!")
-            else:
-                self.cut_masks = None
-            h5file.close()
+            self._inspect_infile(fn)
         self._n_events = np.sum((v for k, v in self._n_each.items()))
         self.minmax = OrderedDict()
         n_read = 0
@@ -371,6 +339,40 @@ class HDF5Pump(Pump):
             self.minmax[fn] = (min, max)
         self.index = None
         self._reset_index()
+
+    def _inspect_infile(self, fn):
+        # Open all files before reading any events
+        # So we can raise version mismatches etc before reading anything
+        self.log.debug(fn)
+        if os.path.isfile(fn):
+            h5file = tb.open_file(fn, 'r')
+            if not self.skip_version_check:
+                check_version(h5file, fn)
+        else:
+            raise IOError("No such file or directory: '{0}'"
+                          .format(fn))
+        try:
+            event_info = h5file.get_node('/', 'event_info')
+            try:
+                self.group_ids[fn] = event_info.cols.group_id[:]
+            except AttributeError:
+                self.group_ids[fn] = event_info.cols.event_id[:]
+            self._n_each[fn] = len(self.group_ids[fn])
+        except tb.NoSuchNodeError:
+            self.log.critical("No /event_info table found: '{0}'"
+                              .format(fn))
+            raise SystemExit
+        if self.cut_mask_node is not None:
+            if not self.cut_mask_node.startswith('/'):
+                self.cut_mask_node = '/' + self.cut_mask_node
+            self.cut_masks[fn] = h5file.get_node(self.cut_mask_node)[:]
+            self.log.debug(self.cut_masks[fn])
+            mask = self.cut_masks[fn]
+            if not mask.shape[0] == self.group_ids[fn].shape[0]:
+                raise ValueError("Cut mask length differs from event ids!")
+        else:
+            self.cut_masks = None
+        h5file.close()
 
     def process(self, blob):
         try:
