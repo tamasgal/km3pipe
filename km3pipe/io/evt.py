@@ -174,7 +174,13 @@ class EvtPump(Pump):  # pylint: disable:R0902
                 print("Opening {0}".format(self.filename))
                 self.open_file(self.filename)
                 self.prepare_blobs()
-                return blob
+                try:
+                    blob = self.get_blob(self.index)
+                except IndexError:
+                    self.log.warning("No blob found in file {}"
+                                     .format(self.filename))
+                else:
+                    return blob
             self.log.info("No files left, terminating the pipeline")
             raise StopIteration
 
