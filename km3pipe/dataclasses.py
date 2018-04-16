@@ -76,6 +76,8 @@ class Table(np.recarray):
     split_h5: bool
         Split the array into separate arrays, column-wise, when saving
         to hdf5? (default=False)
+    name: str
+        Human-readable name, e.g. 'Hits'
 
     Methods
     -------
@@ -92,15 +94,16 @@ class Table(np.recarray):
     from_dataframe(df, h5loc)
         Instantiate from a dataframe.
     """
-
     def __new__(cls, data, h5loc=DEFAULT_H5LOC, dtype=None,
-                colnames=None, split_h5=False, **kwargs):
+                colnames=None, split_h5=False, name=None, **kwargs):
         if isinstance(data, dict):
             return cls.from_dict(data, h5loc=h5loc, dtype=dtype,
-                                 split_h5=split_h5, colnames=colnames, **kwargs)
+                                 split_h5=split_h5, colnames=colnames,
+                                 name=name, **kwargs)
         if isinstance(data, list) or isinstance(data, tuple):
             return cls.from_list(data, h5loc=h5loc, dtype=dtype,
-                                 split_h5=split_h5, colnames=colnames, **kwargs)
+                                 split_h5=split_h5, colnames=colnames,
+                                 name=name, **kwargs)
         if not has_structured_dt(data):
             # flat (nonstructured) dtypes fail miserably!
             # default to `|V8` whyever
@@ -122,6 +125,9 @@ class Table(np.recarray):
         obj = np.asanyarray(data, dtype=dtype).view(cls)
         obj.h5loc = h5loc
         obj.split_h5 = split_h5
+        if name is None:
+            name = 'Table'
+        obj.name = name
         return obj
 
     def __array_finalize__(self, obj):
@@ -131,6 +137,7 @@ class Table(np.recarray):
         # views or slices
         self.h5loc = getattr(obj, 'h5loc', DEFAULT_H5LOC)
         self.split_h5 = getattr(obj, 'split_h5', False)
+        self.name = getattr(obj, 'name', 'Table')
         # attribute access returns void instances on slicing/iteration
         # kudos to https://github.com/numpy/numpy/issues/3581#issuecomment-108957200
         if obj is not None and type(obj) is not type(self):
@@ -207,7 +214,8 @@ class Table(np.recarray):
         dt = template['dtype']
         loc = template['h5loc']
         split = template['split_h5']
-        return cls(data, h5loc=loc, dtype=dt, split_h5=split)
+        name = template_name
+        return cls(data, h5loc=loc, dtype=dt, split_h5=split, name=name)
 
     @staticmethod
     def _check_column_length(colnames, values, n):
@@ -256,7 +264,7 @@ class Table(np.recarray):
         new_arr = rfn.append_fields(self, colnames, values,
                                     usemask=False, **kwargs)
         return self.__class__(new_arr, h5loc=self.h5loc,
-                              split_h5=self.split_h5)
+                              split_h5=self.split_h5, name=self.name)
 
     def sorted(self, by, **kwargs):
         """Sort array by a column.
@@ -268,13 +276,13 @@ class Table(np.recarray):
         """
         sort_idc = np.argsort(self[by], **kwargs)
         return self.__class__(self[sort_idc], h5loc=self.h5loc,
-                              split_h5=self.split_h5)
+                              split_h5=self.split_h5, name=self.name)
 
     def to_dataframe(self):
         from pandas import DataFrame
         return DataFrame(self)
 
     @classmethod
-    def from_dataframe(cls, df, h5loc=DEFAULT_H5LOC, split_h5=False):
+    def from_dataframe(cls, df, **kwargs):
         rec = df.to_records(index=False)
-        return cls(rec, h5loc=h5loc, split_h5=split_h5)
+        return cls(rec, **kwargs)

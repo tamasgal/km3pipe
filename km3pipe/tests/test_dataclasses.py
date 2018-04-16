@@ -84,6 +84,14 @@ class TestTable(TestCase):
         tab = Table(self.arr, split_h5=True)
         assert tab.split_h5 is True
 
+    def test_name(self):
+        tab = self.arr.view(Table)
+        assert tab.name == 'Table'
+        tab = Table(self.arr)
+        assert tab.name == 'Table'
+        tab = Table(self.arr, name='foo')
+        assert tab.name is 'foo'
+
     def test_view(self):
         tab = self.arr.view(Table)
         assert tab.dtype == self.dt
