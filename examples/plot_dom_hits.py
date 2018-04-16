@@ -11,14 +11,16 @@ Estimate track/DOM distances using the number of hits per DOM.
 
 from collections import defaultdict, Counter
 
-import km3pipe as kp
+import numpy as np
 import pandas as pd
 
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 
-from km3modules.common import StatusBar
+import km3pipe as kp
+from km3pipe.dataclasses import Table
 from km3pipe.math import pld3
+from km3modules.common import StatusBar
 import km3pipe.style
 km3pipe.style.use("km3pipe")
 
@@ -30,8 +32,8 @@ cal = kp.calib.Calibration(filename="data/km3net_jul13_90m_r1494_corrected.detx"
 def filter_muons(blob):
     """Write all muons from McTracks to Muons."""
     tracks = blob['McTracks']
-    muons = [t for t in tracks if t.type == 5]
-    blob["Muons"] = kp.dataclasses.McTrackSeries(muons, tracks.event_id)
+    muons = tracks[tracks.type == 5]
+    blob["Muons"] = Table(muons)
     return blob
 
 
@@ -45,10 +47,11 @@ class DOMHits(kp.Module):
         hits = blob['Hits']
         muons = blob['Muons']
 
-        highest_energetic_muon = max(muons, key=lambda x: x.energy)
+        highest_energetic_muon = Table(muons[np.argmax(muons.energy)])
         muon = highest_energetic_muon
 
-        triggered_hits = hits.triggered_hits
+        triggered_hits = hits[hits.triggered]
+
         dom_hits = Counter(triggered_hits.dom_id)
         for dom_id, n_hits in dom_hits.items():
             distance = pld3(cal.detector.dom_positions[dom_id],
@@ -60,9 +63,13 @@ class DOMHits(kp.Module):
 
     def finish(self):
         df = pd.DataFrame(self.hit_statistics)
+        print(df.describe())
+        rdf = df[(df['distance'] < 200)]
+        print(rdf.describe())
         sdf = df[(df['distance'] < 200) & (df['n_hits'] < 50)]
-        plt.hist2d(sdf['distance'], sdf['n_hits'], cmap='plasma',
-                   bins=(max(sdf['distance']) - 1, max(sdf['n_hits']) - 1),
+        print(sdf.describe())
+        bins = (max(sdf['distance']) - 1, max(sdf['n_hits']) - 1)
+        plt.hist2d(sdf['distance'], sdf['n_hits'], cmap='plasma', bins=bins,
                    norm=LogNorm())
         plt.xlabel('Distance between hit and muon track [m]')
         plt.ylabel('Number of hits on DOM')
