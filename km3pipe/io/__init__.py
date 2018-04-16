@@ -17,9 +17,9 @@ from .evt import EvtPump  # noqa
 #from .aanet import AanetPump  # noqa
 #from .jpp import EventPump  # noqa
 #from .ch import CHPump  # noqa
-#from .hdf5 import HDF5Pump  # noqa
-#from .hdf5 import HDF5Sink  # noqa
-#from .hdf5 import HDF5MetaData  # noqa
+from .hdf5 import HDF5Pump  # noqa
+from .hdf5 import HDF5Sink  # noqa
+from .hdf5 import HDF5MetaData  # noqa
 #from .pickle import PicklePump  # noqa
 from .pandas import (H5Chain, df_to_h5, map2df,  # noqa
                      read_group, write_table,)  # noqa
