@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: sys.py
 # pylint: disable=C0103
 """
 Some unsorted, frequently used logic.
 
 """
-from __future__ import division, absolute_import, print_function
 
 try:
     import resource  # linux/macos

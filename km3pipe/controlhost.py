@@ -1,10 +1,8 @@
-# coding=utf-8
 # Filename: controlhost.py
 """
 A set of classes and tools wich uses the ControlHost protocol.
 
 """
-from __future__ import absolute_import
 
 import socket
 import struct

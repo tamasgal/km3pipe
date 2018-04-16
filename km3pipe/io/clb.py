@@ -1,11 +1,8 @@
-# coding=utf-8
 # Filename: clb.py
 """
 Pumps for the CLB data formats.
 
 """
-from __future__ import division, absolute_import, print_function
-
 from io import BytesIO
 import struct
 from struct import unpack
@@ -94,10 +91,6 @@ class CLBPump(Pump):
 
     def __iter__(self):
         return self
-
-    def next(self):
-        """Python 2/3 compatibility for iterators"""
-        return self.__next__()
 
     def __next__(self):
         return self.next_blob()

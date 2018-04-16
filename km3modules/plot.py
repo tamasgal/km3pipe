@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: plot.py
 # pylint: disable=locally-disabled
 """
 A collection of plotting functions and modules.
 
 """
-from __future__ import division, absolute_import, print_function
 
 from datetime import datetime
 import os

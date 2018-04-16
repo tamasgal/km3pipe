@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # vim: ts=4 sw=4 et
 """
 =====================
@@ -11,7 +10,6 @@ This script can be used to easily identify DOMs in a run, which are out
 of sync.
 
 """
-from __future__ import division, print_function
 from collections import defaultdict
 import sys
 import numpy as np

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 Pump for the Aanet data format.
 
@@ -7,8 +6,6 @@ This is undoubtedly the ugliest module in the entire framework.
 If you have a way to read aanet files via the Jpp interface,
 your pull request is more than welcome!
 """
-from __future__ import division, absolute_import, print_function
-
 from collections import defaultdict
 import os.path
 
@@ -233,12 +230,8 @@ class AanetPump(Pump):
             del event_file
 
         if not found_any_files:
-            msg = "None of the input files available. Exiting."
-            try:
-                raise FileNotFoundError(msg)
-            except NameError:
-                # python2
-                raise IOError(msg)
+            raise FileNotFoundError(
+                "None of the input files available. Exiting.")
 
     def _read_event(self, event, filename):
         try:
@@ -402,10 +395,6 @@ class AanetPump(Pump):
 
     def __iter__(self):
         return self
-
-    def next(self):
-        """Python 2/3 compatibility for iterators"""
-        return self.__next__()
 
     def __next__(self):
         return next(self.blobs)

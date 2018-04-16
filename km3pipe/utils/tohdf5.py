@@ -1,4 +1,3 @@
-# coding=utf-8
 # Filename: tohdf5.py
 """
 Convert ROOT and EVT files to HDF5.
@@ -40,7 +39,6 @@ Options:
                                     size is >= 100 MB. [default: 10000]
 """
 
-from __future__ import division, absolute_import, print_function
 
 from km3modules.common import StatusBar
 from km3pipe import version

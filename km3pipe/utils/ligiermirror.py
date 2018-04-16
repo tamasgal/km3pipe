@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # Filename: ligiermirror.py
 # Author: Tamas Gal <tgal@km3net.de>
 # vim: ts=4 sw=4 et

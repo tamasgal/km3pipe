@@ -9,7 +9,6 @@ Options:
     -h --help     Show this screen.
 """
 
-from __future__ import division, absolute_import, print_function
 
 from math import isnan, fabs        # todo: replace with numpy?
 from six import iteritems

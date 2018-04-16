@@ -1,4 +1,3 @@
-# coding=utf-8
 # Filename: cmd.py
 """
 KM3Pipe command line utility.
@@ -32,7 +31,6 @@ Options:
     RUN                 Run number.
 """
 
-from __future__ import division, absolute_import, print_function
 
 import re
 import sys

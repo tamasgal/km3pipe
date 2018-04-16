@@ -1,4 +1,3 @@
-# coding=utf-8
 # Filename: triggersetup.py
 """
 Prints the trigger information of a given run setup.
@@ -13,7 +12,6 @@ Options:
     -h --help      Show this screen.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import km3pipe as kp
 

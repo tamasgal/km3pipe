@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: db.py
 # pylint: disable=locally-disabled
 """
 Database utilities.
 
 """
-from __future__ import division, absolute_import, print_function
 
 from datetime import datetime
 import ssl

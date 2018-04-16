@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: core.py
 # pylint: disable=locally-disabled
 """
 The core of the KM3Pipe framework.
 
 """
-from __future__ import division, absolute_import, print_function
 
 from collections import deque, OrderedDict
 import inspect

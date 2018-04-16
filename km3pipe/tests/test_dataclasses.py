@@ -1,4 +1,3 @@
-# coding=utf-8
 # Filename: test_dataclasses.py
 # pylint: disable=C0111,R0904,C0103
 # vim:set ts=4 sts=4 sw=4 et:
@@ -6,7 +5,6 @@
 ...
 
 """
-from __future__ import division, absolute_import, print_function
 
 import numpy as np
 from numpy.testing import (assert_array_equal, assert_allclose)

@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: no_test_daq.py
 # pylint: disable=C0111,R0904,C0103
 """
 ...
 
 """
-from __future__ import division, absolute_import, print_function
 
 from km3pipe.testing import TestCase, StringIO, skipIf
 from km3pipe.io.daq import (DAQPreamble, DAQHeader, DAQSummaryslice)

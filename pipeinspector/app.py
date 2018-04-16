@@ -1,4 +1,3 @@
-# coding=utf-8
 # Filename: app.py
 """
 PipeInspector
@@ -12,7 +11,6 @@ Options:
     -h --help       Show this screen.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import os
 

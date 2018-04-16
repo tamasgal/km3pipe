@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: time.py
 # pylint: disable=C0103
 """
 Manipulating time and so...
 
 """
-from __future__ import division, absolute_import, print_function
 
 from datetime import datetime
 import numpy as np
@@ -27,13 +25,8 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 def total_seconds(td):
-    """Convert the timedelta to seconds. (Python 2.6 backward compatibility)"""
-    try:
-        s = td.total_seconds()
-    except AttributeError:
-        s = (td.microseconds +
-             (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6
-    return s
+    """Convert the timedelta to seconds."""
+    return td.total_seconds()
 
 
 class Timer(object):

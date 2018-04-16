@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: pandas.py
 # pylint: disable=C0103,R0903
 # vim:set ts=4 sts=4 sw=4 et:
 """
 Pandas Helpers.
 """
-from __future__ import division, absolute_import, print_function
 
 import os.path
 from six import string_types

@@ -1,4 +1,3 @@
-# coding=utf-8
 # Filename: pushover.py
 """
 Send a push message to a device using Pushover.net API.
@@ -13,7 +12,6 @@ Options:
     -h --help   Show this screen.
 
 """
-from __future__ import division, absolute_import, print_function
 
 from km3pipe.config import Config
 from km3pipe import version

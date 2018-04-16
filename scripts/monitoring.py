@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# coding=utf-8
 # vim: ts=4 sw=4 et
-from __future__ import division
 
 __author__ = "Tamas Gal"
 

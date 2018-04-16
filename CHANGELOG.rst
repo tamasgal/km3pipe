@@ -7,6 +7,7 @@ Version 8
 * KM3HDF5 Version 5.0: ``group_id`` replaces ``event_id`` in every table,
   and generalizes from it
 * no more cython!
+* python3 required!
 
 Version 7
 ---------

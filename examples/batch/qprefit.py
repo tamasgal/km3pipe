@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # Filename: qprefit.py
 # Author: Tamas Gal <tgal@km3net.de>
 """

@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 Print the ROOT file structure.
 
@@ -12,7 +11,6 @@ Options:
     -h --help  Show this screen.
 
 """
-from __future__ import division, absolute_import, print_function
 from km3pipe.io.root import open_rfile
 
 __author__ = "Moritz Lotze"

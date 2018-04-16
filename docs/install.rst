@@ -26,7 +26,7 @@ Requirements
 
 To install km3pipe, you need:
 
-- Python >= 2.7 or >= 3.4
+- Python >= 3.5
 
 - pip (via ``$ easy_install pip``)
 

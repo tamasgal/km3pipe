@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 Show the km3pipe etc. version used to write a H5 file.
 
@@ -13,7 +12,6 @@ Options:
     -h --help   Show this screen.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import tables
 

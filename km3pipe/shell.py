@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: shell.py
 # pylint: disable=C0103
 """
 Some shell helpers
 
 """
-from __future__ import division, absolute_import, print_function
 
 import os
 import subprocess

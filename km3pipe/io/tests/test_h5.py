@@ -81,7 +81,7 @@ class TestH5Pump(TestCase):
 
     def test_standalone(self):
         pump = HDF5Pump(filename=self.fname)
-        pump.next()
+        next(pump)
         pump.finish()
 
     def test_pipe(self):

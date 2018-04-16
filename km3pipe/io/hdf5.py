@@ -1,12 +1,9 @@
-# coding=utf-8
 # Filename: hdf5.py
 # pylint: disable=C0103,R0903,C901
 # vim:set ts=4 sts=4 sw=4 et:
 """
 Read and write KM3NeT-formatted HDF5 files.
 """
-from __future__ import division, absolute_import, print_function
-
 from collections import OrderedDict, defaultdict
 import os.path
 from six import itervalues, iteritems
@@ -560,10 +557,6 @@ class HDF5Pump(Pump):
 
     def __iter__(self):
         return self
-
-    def next(self):
-        """Python 2/3 compatibility for iterators"""
-        return self.__next__()
 
     def __next__(self):
         if self.index >= self._n_events:

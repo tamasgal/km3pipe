@@ -1,10 +1,8 @@
-# coding=utf-8
 # Filename: mocks.py
 """
 Mocks, fakes and dummies of external libraries.
 
 """
-from __future__ import division, absolute_import, print_function
 
 
 __author__ = "Tamas Gal and Moritz Lotze"
