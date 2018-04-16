@@ -231,11 +231,15 @@ class TestTable(TestCase):
             tab = Table.from_dict(dmap, dtype=bad_dt)
 
     def test_from_2d(self):
-        l2d = [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9]]
+        l2d = [
+            [0, 1], [2, 3], [4, 5], [6, 7], [8, 9]
+        ]
         names = ['a', 'origin', 'pmt_id', 'time', 'group_id']
         dta = inflate_dtype(l2d, names)
         with pytest.raises(ValueError):
             t = Table(l2d)
+        with pytest.raises(ValueError):
+            t = Table(l2d, dtype=None)
         t = Table(l2d, colnames=names)
         t = Table(l2d, dtype=dta)
         t = Table(l2d, dtype=dta, colnames=['a', 'b', 'c', 'd'])
