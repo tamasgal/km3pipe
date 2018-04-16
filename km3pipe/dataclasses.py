@@ -12,6 +12,8 @@ from six import string_types
 import numpy as np
 from numpy.lib import recfunctions as rfn
 
+from .dataclass_templates import TEMPLATES
+
 
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -20,194 +22,9 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
-__all__ = (
-    'Table',)
+__all__ = ('Table', 'is_structured', 'has_structured_dt', 'inflate_dtype')
 
 DEFAULT_H5LOC = '/misc'
-
-TEMPLATE_H5LOCS = {
-    'EventInfo': '/event_info',
-    'TimesliceHits': '/time_slice_hits',
-    'Hits': '/hits',
-    'CalibHits': '/hits',
-    'McHits': '/mc_hits',
-    'CalibMcHits': '/mc_hits',
-    'Tracks': '/tracks',
-    'McTracks': '/mc_tracks',
-    'SummaryFrameSeries': '/summary_frame_series',
-    'SummaryFrameInfo': '/summary_slice_info',
-    'TimesliceFrameInfo': '/todo',  # TODO
-    'TimesliceInfo': '/todo',       # TODO
-    'SummarysliceInfo': '/todo',    # TODO
-}
-
-TEMPLATE_SPLIT_H5 = {
-    'EventInfo': False,
-    'TimesliceHits': True,
-    'Hits': True,
-    'CalibHits': True,
-    'McHits': True,
-    'CalibMcHits': True,
-    'Tracks': False,
-    'McTracks': False,
-    'SummaryFrameSeries': False,
-    'SummaryFrameInfo': False,
-    'TimesliceFrameInfo': False,
-    'TimesliceInfo': False,
-    'SummarysliceInfo': False,
-}
-
-TEMPLATE_DTYPES = {
-    'EventInfo': np.dtype([
-        ('det_id', '<i4'),
-        ('frame_index', '<u4'),
-        ('livetime_sec', '<u8'),
-        ('mc_id', '<i4'),
-        ('mc_t', '<f8'),
-        ('n_events_gen', '<u8'),
-        ('n_files_gen', '<u8'),
-        ('overlays', '<u4'),
-        ('trigger_counter', '<u8'),
-        ('trigger_mask', '<u8'),
-        ('utc_nanoseconds', '<u8'),
-        ('utc_seconds', '<u8'),
-        ('weight_w1', '<f8'),
-        ('weight_w2', '<f8'),
-        ('weight_w3', '<f8'),
-        ('run_id', '<u8'),
-        ('group_id', '<u8'),
-    ]),
-    'TimesliceHits': np.dtype([
-        ('channel_id', 'u1'),
-        ('dom_id', '<u4'),
-        ('time', '<i4'),
-        ('tot', 'u1'),
-        ('group_id', '<u4')
-    ]),
-    'Hits': np.dtype([
-        ('channel_id', 'u1'),
-        ('dom_id', '<u4'),
-        ('time', '<f8'),
-        ('tot', 'u1'),
-        ('triggered', 'u1'),
-        ('group_id', '<u4')
-    ]),
-    'CalibHits': np.dtype([
-        ('channel_id', 'u1'),
-        ('dir_x', '<f4'),
-        ('dir_y', '<f4'),
-        ('dir_z', '<f4'),
-        ('dom_id', '<u4'),
-        ('du', 'u1'),
-        ('floor', 'u1'),
-        ('pos_x', '<f4'),
-        ('pos_y', '<f4'),
-        ('pos_z', '<f4'),
-        ('t0', '<f4'),
-        ('time', '<f8'),
-        ('tot', 'u1'),
-        ('triggered', 'u1'),
-        ('group_id', '<u4'),
-    ]),
-    'McHits': np.dtype([
-        ('a', 'f4'),
-        ('origin', '<u4'),
-        ('pmt_id', '<u4'),
-        ('time', 'f8'),
-        ('group_id', '<u4'),
-    ]),
-    'CalibMcHits': np.dtype([
-        ('a', 'f4'),
-        ('dir_x', '<f4'),
-        ('dir_y', '<f4'),
-        ('dir_z', '<f4'),
-        ('origin', '<u4'),
-        ('pmt_id', '<u4'),
-        ('pos_x', '<f4'),
-        ('pos_y', '<f4'),
-        ('pos_z', '<f4'),
-        ('time', 'f8'),
-        ('group_id', '<u4'),
-    ]),
-    'Tracks': np.dtype([
-        ('bjorkeny', '<f8'),
-        ('dir_x', '<f8'),
-        ('dir_y', '<f8'),
-        ('dir_z', '<f8'),
-        ('energy', '<f8'),
-        ('id', '<u4'),
-        ('interaction_channel', '<u4'),
-        ('is_cc', '<u4'),
-        ('length', '<f8'),
-        ('pos_x', '<f8'),
-        ('pos_y', '<f8'),
-        ('pos_z', '<f8'),
-        ('time', '<i4'),
-        ('type', '<i4'),
-        ('group_id', '<u4'),
-    ]),
-    'McTracks': np.dtype([
-        ('bjorkeny', '<f8'),
-        ('dir_x', '<f8'),
-        ('dir_y', '<f8'),
-        ('dir_z', '<f8'),
-        ('energy', '<f8'),
-        ('id', '<u4'),
-        ('interaction_channel', '<u4'),
-        ('is_cc', '<u4'),
-        ('length', '<f8'),
-        ('pos_x', '<f8'),
-        ('pos_y', '<f8'),
-        ('pos_z', '<f8'),
-        ('time', '<i4'),
-        ('type', '<i4'),
-        ('group_id', '<u4'),
-    ]),
-    'SummaryFrameInfo': np.dtype([
-        ('dom_id', '<u4'),
-        ('fifo_status', '<u4'),
-        ('frame_id', '<u4'),
-        ('frame_index', '<u4'),
-        ('has_udp_trailer', '<u4'),
-        ('high_rate_veto', '<u4'),
-        ('max_sequence_number', '<u4'),
-        ('n_packets', '<u4'),
-        ('slice_id', '<u4'),
-        ('utc_nanoseconds', '<u4'),
-        ('utc_seconds', '<u4'),
-        ('white_rabbit_status', '<u4'),
-    ]),
-    'SummarysliceInfo': np.dtype([
-        ('frame_index', '<u4'),
-        ('slice_id', '<u4'),
-        ('timestamp', '<u4'),       # TODO
-        ('nanoseconds', '<u4'),     # TODO
-        ('n_frames', '<u4'),        # TODO
-    ]),
-    'TimesliceInfo': np.dtype([
-        ('frame_index', '<u4'),
-        ('slice_id', '<u4'),
-        ('timestamp', '<u4'),       # TODO
-        ('nanoseconds', '<u4'),     # TODO
-        ('n_frames', '<u4'),        # TODO
-    ]),
-    'SummaryframeSeries': np.dtype([
-        ('dom_id', '<u4'),
-        ('max_sequence_number', '<u4'),
-        ('n_received_packets', '<u4'),
-        ('group_id', '<u4'),
-    ]),
-    'TimesliceFrameInfo': np.dtype([
-        ('det_id', '<i4'),
-        ('run_id', '<u8'),
-        ('sqnr', '<u8'),            # TODO
-        ('timestamp', '<u4'),       # TODO
-        ('nanoseconds', '<u4'),     # TODO
-        ('dom_id', '<u4'),
-        ('dom_status', '<u4'),      # TODO
-        ('n_hits', '<u4'),          # TODO
-    ]),
-}
 
 
 def has_structured_dt(arr):
@@ -350,10 +167,10 @@ class Table(np.recarray):
 
     @property
     def templates_avail(self):
-        return sorted(list(TEMPLATE_DTYPES.keys()))
+        return sorted(list(TEMPLATES.keys()))
 
     @classmethod
-    def from_template(cls, data, template):
+    def from_template(cls, data, template_name):
         """Create a table from a predefined datatype.
 
         See the ``templates_avail`` property for available names.
@@ -365,9 +182,10 @@ class Table(np.recarray):
         template: str
             Name of the dtype template to use.
         """
-        dt = TEMPLATE_DTYPES[template]
-        loc = TEMPLATE_H5LOCS[template]
-        split = TEMPLATE_SPLIT_H5[template]
+        template = TEMPLATES[template_name]
+        dt = template['dtype']
+        loc = template['h5loc']
+        split = template['split_h5']
         return cls(data, h5loc=loc, dtype=dt, split_h5=split)
 
     @staticmethod
