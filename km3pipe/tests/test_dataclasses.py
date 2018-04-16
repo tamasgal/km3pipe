@@ -86,9 +86,9 @@ class TestTable(TestCase):
 
     def test_name(self):
         tab = self.arr.view(Table)
-        assert tab.name == 'Table'
+        assert tab.name == 'Generic Table'
         tab = Table(self.arr)
-        assert tab.name == 'Table'
+        assert tab.name == 'Generic Table'
         tab = Table(self.arr, name='foo')
         assert tab.name is 'foo'
 
@@ -329,6 +329,8 @@ class TestTable(TestCase):
             'group_id': 0,      # event_id
         }
         tab = Table.from_template(d_hits, 'Hits')
+        assert tab.name == 'Hits'
+        assert tab.split_h5 is True
         assert isinstance(tab, Table)
         ar_hits = {
             'channel_id': np.ones(n, dtype=int),
@@ -339,6 +341,8 @@ class TestTable(TestCase):
             'group_id': np.ones(n, dtype=int),
         }
         tab = Table.from_template(ar_hits, 'Hits')
+        assert tab.name == 'Hits'
+        assert tab.split_h5 is True
         assert isinstance(tab, Table)
 
     def test_incomplete_template(self):
