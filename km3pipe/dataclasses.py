@@ -11,6 +11,7 @@ from six import string_types
 
 import numpy as np
 from numpy.lib import recfunctions as rfn
+from pandas import DataFrame
 
 from .dataclass_templates import TEMPLATES
 
@@ -104,6 +105,10 @@ class Table(np.recarray):
             return cls.from_list(data, h5loc=h5loc, dtype=dtype,
                                  split_h5=split_h5, colnames=colnames,
                                  name=name, **kwargs)
+        if isinstance(data, DataFrame):
+            return cls.from_dataframe(data, h5loc=h5loc, dtype=dtype,
+                                      split_h5=split_h5, colnames=colnames,
+                                      name=name, **kwargs)
         if not has_structured_dt(data):
             # flat (nonstructured) dtypes fail miserably!
             # default to `|V8` whyever

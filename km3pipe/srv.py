@@ -33,7 +33,7 @@ import websocket
 
 from .calib import Calibration
 from .config import Config
-from .dataclasses import HitSeries, CRawHitSeries
+from .dataclasses import Table
 from .tools import token_urlsafe
 from .logger import logging
 
@@ -281,7 +281,7 @@ def srv_event(token, hits, url=RBA_URL):
         pos = [tuple(x) for x in hits[['x', 'y', 'z']].values]
         time = list(hits['time'])
         tot = list(hits['tot'])
-    elif isinstance(hits, (CRawHitSeries, HitSeries)):
+    elif isinstance(hits, Table):
         pos = list(zip(hits.pos_x, hits.pos_y, hits.pos_z))
         time = list(hits.time)
         tot = list(hits.tot)
