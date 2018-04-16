@@ -97,7 +97,7 @@ class Table(np.recarray):
                 colnames=None, split_h5=False, **kwargs):
         if isinstance(data, dict):
             return cls.from_dict(data, h5loc=h5loc, dtype=dtype,
-                                 split_h5=split_h5, **kwargs)
+                                 split_h5=split_h5, colnames=colnames, **kwargs)
         if not has_structured_dt(data):
             # flat (nonstructured) dtypes fail miserably!
             # default to `|V8` whyever
@@ -164,6 +164,18 @@ class Table(np.recarray):
         arr_dict = cls._expand_scalars(arr_dict)
         return cls(np.rec.fromarrays(arr_dict.values(), names=names,
                                      dtype=dtype), **kwargs)
+
+    @classmethod
+    def from_list(cls, arr_list, dtype, **kwargs):
+        dtype = np.dtype(dtype)
+        if not is_structured(dtype):
+            raise ValueError('Required structured dtype!')
+        if not len(arr_list) == len(dtype.names):
+            raise ValueError(
+                'Length of data and length of dtype do not match!')
+        return cls(
+            {k: arr_list[i] for i, k in enumerate(dtype.names)},
+            dtype=dtype, **kwargs)
 
     @property
     def templates_avail(self):

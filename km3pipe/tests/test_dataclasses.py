@@ -147,6 +147,33 @@ class TestTable(TestCase):
         with pytest.raises(KeyError):
             tab = Table.from_dict(dmap, dtype=bad_dt)
 
+    def test_fromlist(self):
+        n = 5
+        dlist = [
+            np.ones(n, dtype=int),
+            np.zeros(n, dtype=float),
+            0,
+        ]
+        dt = np.dtype([('a', float), ('b', float), ('c', float)])
+        tab = Table.from_list(dlist, dtype=dt)
+        print(tab.dtype)
+        print(tab.shape)
+        print(tab)
+        assert tab.h5loc == DEFAULT_H5LOC
+        assert isinstance(tab, Table)
+        tab = Table.from_list(dlist, dtype=dt, h5loc='/foo')
+        print(tab.dtype)
+        print(tab.shape)
+        print(tab)
+        assert tab.h5loc == '/foo'
+        assert isinstance(tab, Table)
+        bad_dt = [('a', float), ('b', float), ('c', float), ('d', int)]
+        with pytest.raises(ValueError):
+            tab = Table.from_list(dlist, dtype=bad_dt)
+            print(tab.dtype)
+            print(tab.shape)
+            print(tab)
+
     def test_expand_scalars(self):
         dmap = {
             'a': 1,
