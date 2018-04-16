@@ -6,7 +6,7 @@ numexpr
 docopt
 matplotlib>=2.2.0
 pandas
-tables==3.4.2
+tables>=3.4.2
 scipy>=0.19
 urwid
 sphinx
@@ -18,3 +18,4 @@ patsy
 h5py
 statsmodels>=0.8
 requests
+websocket
