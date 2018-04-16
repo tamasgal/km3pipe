@@ -9,6 +9,8 @@ Unreleased changes
 Version 8
 ~~~~~~~~~
 * replace all dataclasses with the ``Table`` class (subclass of ``np.recarray``)
+* KM3HDF5 Version 5.0: ``group_id`` replaces ``event_id`` in every table,
+  and generalizes from it
 * no more cython!
 
 Version 7
