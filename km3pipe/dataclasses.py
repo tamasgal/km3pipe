@@ -41,6 +41,22 @@ TEMPLATE_H5LOCS = {
     'SummarysliceInfo': '/todo',    # TODO
 }
 
+TEMPLATE_SPLIT_H5 = {
+    'EventInfo': False,
+    'TimesliceHits': True,
+    'Hits': True,
+    'CalibHits': True,
+    'McHits': True,
+    'CalibMcHits': True,
+    'Tracks': False,
+    'McTracks': False,
+    'SummaryFrameSeries': False,
+    'SummaryFrameInfo': False,
+    'TimesliceFrameInfo': False,
+    'TimesliceInfo': False,
+    'SummarysliceInfo': False,
+}
+
 TEMPLATE_DTYPES = {
     'EventInfo': np.dtype([
         ('det_id', '<i4'),
@@ -240,6 +256,9 @@ class Table(np.recarray):
     ----------
     h5loc: str
         HDF5 group where to write into. (default='/misc')
+    split_h5: bool
+        Split the array into separate arrays, column-wise, when saving
+        to hdf5? (default=False)
 
     Methods
     -------
@@ -258,9 +277,10 @@ class Table(np.recarray):
     """
 
     def __new__(cls, data, h5loc=DEFAULT_H5LOC, dtype=None,
-                colnames=None, **kwargs):
+                colnames=None, split_h5=False, **kwargs):
         if isinstance(data, dict):
-            return cls.from_dict(data, h5loc=h5loc, dtype=dtype, **kwargs)
+            return cls.from_dict(data, h5loc=h5loc, dtype=dtype,
+                                 split_h5=split_h5, **kwargs)
         if not has_structured_dt(data):
             # flat (nonstructured) dtypes fail miserably!
             # default to `|V8` whyever
@@ -281,6 +301,7 @@ class Table(np.recarray):
 
         obj = np.asanyarray(data, dtype=dtype).view(cls)
         obj.h5loc = h5loc
+        obj.split_h5 = split_h5
         return obj
 
     def __array_finalize__(self, obj):
@@ -289,6 +310,7 @@ class Table(np.recarray):
             return obj
         # views or slices
         self.h5loc = getattr(obj, 'h5loc', DEFAULT_H5LOC)
+        self.split_h5 = getattr(obj, 'split_h5', False)
         # attribute access returns void instances on slicing/iteration
         # kudos to https://github.com/numpy/numpy/issues/3581#issuecomment-108957200
         if obj is not None and type(obj) is not type(self):
@@ -345,7 +367,21 @@ class Table(np.recarray):
         """
         dt = TEMPLATE_DTYPES[template]
         loc = TEMPLATE_H5LOCS[template]
-        return cls(data, h5loc=loc, dtype=dt)
+        split = TEMPLATE_SPLIT_H5[template]
+        return cls(data, h5loc=loc, dtype=dt, split_h5=split)
+
+    @staticmethod
+    def _check_column_length(colnames, values, n):
+        values = np.atleast_2d(values)
+        for i in range(len(values)):
+            v = values[i]
+            if len(v) == n:
+                continue
+            else:
+                if len(values[i]) != n:
+                    raise ValueError(
+                        "Trying to append more than one column, but "
+                        "some arrays mismatch in length!")
 
     def append_columns(self, colnames, values, **kwargs):
         """Append new columns to the table.
@@ -366,15 +402,7 @@ class Table(np.recarray):
         values = np.atleast_1d(values)
         if not isinstance(colnames, string_types) and len(colnames) > 1:
             values = np.atleast_2d(values)
-            for i in range(len(values)):
-                v = values[i]
-                if len(v) == n:
-                    continue
-                else:
-                    if len(values[i]) != n:
-                        raise ValueError(
-                            "Trying to append more than one column, but "
-                            "some arrays mismatch in length!")
+            self._check_column_length(colnames, values, n)
 
         if values.ndim == 1:
             if len(values) > n:
@@ -388,7 +416,8 @@ class Table(np.recarray):
                 values = np.full(n, values[0])
         new_arr = rfn.append_fields(self, colnames, values,
                                     usemask=False, **kwargs)
-        return self.__class__(new_arr, h5loc=self.h5loc)
+        return self.__class__(new_arr, h5loc=self.h5loc,
+                              split_h5=self.split_h5)
 
     def sorted(self, by, **kwargs):
         """Sort array by a column.
@@ -399,13 +428,14 @@ class Table(np.recarray):
             Name of the columns to sort by(e.g. 'time').
         """
         sort_idc = np.argsort(self[by], **kwargs)
-        return self.__class__(self[sort_idc], h5loc=self.h5loc)
+        return self.__class__(self[sort_idc], h5loc=self.h5loc,
+                              split_h5=self.split_h5)
 
     def to_dataframe(self):
         from pandas import DataFrame
         return DataFrame(self)
 
     @classmethod
-    def from_dataframe(cls, df, h5loc=DEFAULT_H5LOC):
+    def from_dataframe(cls, df, h5loc=DEFAULT_H5LOC, split_h5=False):
         rec = df.to_records(index=False)
-        return cls(rec, h5loc=h5loc)
+        return cls(rec, h5loc=h5loc, split_h5=split_h5)
