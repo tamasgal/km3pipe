@@ -146,6 +146,11 @@ class Table(np.recarray):
         if obj is not None and type(obj) is not type(self):
             self.dtype = np.dtype((np.record, obj.dtype))
 
+    def __array_wrap__(self, out_arr, context=None):
+        # then just call the parent
+        out = Table(np.recarray.__array_wrap__(self, out_arr, context),
+                    h5loc=self.h5loc, split_h5=self.split_h5, name=self.name)
+
     @staticmethod
     def _expand_scalars(arr_dict):
         scalars = []
