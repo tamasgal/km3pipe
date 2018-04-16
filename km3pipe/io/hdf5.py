@@ -14,6 +14,7 @@ import warnings
 
 import numpy as np
 import tables as tb
+from pandas import DataFrame
 
 import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
@@ -33,7 +34,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 FORMAT_VERSION = np.string_('5.0')
-MINIMUM_FORMAT_VERSION = np.string_('5.0')
+MINIMUM_FORMAT_VERSION = np.string_('4.1')
 
 
 class H5VersionError(Exception):
@@ -60,8 +61,8 @@ def check_version(h5file, filename):
 class HDF5Sink(Module):
     """Write KM3NeT-formatted HDF5 files, event-by-event.
 
-    The data can be a numpy structured array, a pandas DataFrame,
-    or a km3pipe dataclass object with a `serialise()` method.
+    The data can be a ``kp.Table``, a numpy structured array,
+    a pandas DataFrame, or a simple scalar.
 
     The name of the corresponding H5 table is the decamelised
     blob-key, so values which are stored in the blob under `FooBar`
@@ -113,17 +114,9 @@ class HDF5Sink(Module):
         if len(data) <= 0:
             self.log.debug('toarray: data has no length')
             return
-        try:
-            self.log.debug('trying pandas-style `to_records()')
-            return data.to_records(index=False)
-        except AttributeError:
-            pass
-        try:
-            self.log.debug('trying dataclass-style `serialise()')
-            return data.serialise()
-        except AttributeError:
-            pass
-        data = np.asarray(data)
+        if isinstance(data, DataFrame):
+            self.log.debug('toarray: pandas dataframe')
+            data = Table.from_dataframe(data)
         return data
 
     def _write_array(self, where, arr, datatype, title=''):
@@ -227,7 +220,7 @@ class HDF5Sink(Module):
                 datatype = entry.__class__.__name__
 
                 try:
-                    if entry.write_separate_columns:
+                    if entry.split_h5:
                         self._write_separate_columns(where, entry, title=key)
                     else:
                         self._write_array(where, data, datatype, title=key)
@@ -268,6 +261,12 @@ class HDF5Sink(Module):
                 tab.cols.slice_id.create_index()
             if 'dom_id' in tab.colnames:
                 tab.cols.dom_id.create_index()
+            if 'event_id' in tab.colnames:
+                try:
+                    tab.cols.event_id.create_index()
+                except NotImplementedError:
+                    log.warn("Table '{}' has an uint64 column, "
+                             "not indexing...".format(tab._v_name))
             if 'group_id' in tab.colnames:
                 try:
                     tab.cols.group_id.create_index()
@@ -339,7 +338,10 @@ class HDF5Pump(Pump):
                               .format(fn))
             try:
                 event_info = h5file.get_node('/', 'event_info')
-                self.group_ids[fn] = event_info.cols.group_id[:]
+                try:
+                    self.group_ids[fn] = event_info.cols.group_id[:]
+                except AttributeError:
+                    self.group_ids[fn] = event_info.cols.event_id[:]
                 self._n_each[fn] = len(self.group_ids[fn])
             except tb.NoSuchNodeError:
                 self.log.critical("No /event_info table found: '{0}'"
@@ -433,23 +435,42 @@ class HDF5Pump(Pump):
                 split_h5 = TEMPLATES[tabname]['split_h5']
             except KeyError:
                 split_h5 = False
-            try:
-                arr = tab.read_where('group_id == %d' % group_id)
-            except NotImplementedError:
-                # 64-bit unsigned integer columns like ``group_id``
-                # are not yet supported in conditions
-                self.log.debug(
-                    "get_blob: found uint64 column at '{}'...".format(
-                        pathname))
-                arr = tab.read()
-                arr = arr[arr['group_id'] == group_id]
-            except ValueError:
-                # "there are no columns taking part
-                # in condition ``group_id == 0``"
-                self.log.info(
-                    "get_blob: no `group_id` column found in '{}'! "
-                    "skipping... ".format(pathname))
-                continue
+            if 'group_id' in tab.dtype.names:
+                try:
+                    arr = tab.read_where('group_id == %d' % group_id)
+                except NotImplementedError:
+                    # 64-bit unsigned integer columns like ``group_id``
+                    # are not yet supported in conditions
+                    self.log.debug(
+                        "get_blob: found uint64 column at '{}'...".format(
+                            pathname))
+                    arr = tab.read()
+                    arr = arr[arr['group_id'] == group_id]
+                except ValueError:
+                    # "there are no columns taking part
+                    # in condition ``group_id == 0``"
+                    self.log.info(
+                        "get_blob: no `group_id` column found in '{}'! "
+                        "skipping... ".format(pathname))
+                    continue
+            if 'event_id' in tab.dtype.names:
+                try:
+                    arr = tab.read_where('event_id == %d' % group_id)
+                except NotImplementedError:
+                    # 64-bit unsigned integer columns like ``event_id``
+                    # are not yet supported in conditions
+                    self.log.debug(
+                        "get_blob: found uint64 column at '{}'...".format(
+                            pathname))
+                    arr = tab.read()
+                    arr = arr[arr['event_id'] == group_id]
+                except ValueError:
+                    # "there are no columns taking part
+                    # in condition ``event_id == 0``"
+                    self.log.info(
+                        "get_blob: no `event_id` column found in '{}'! "
+                        "skipping... ".format(pathname))
+                    continue
             blob[tabname] = Table(arr, h5loc=loc, split_h5=split_h5)
 
         # skipped locs are now column wise datasets (usually hits)
@@ -461,6 +482,7 @@ class HDF5Pump(Pump):
             # idx, n_items = self.indices[loc][group_id]
             idx, n_items = self.indices[loc][local_index]
             end = idx + n_items
+            tabargs = {'h5loc': loc, 'split_h5': True}
             if loc == '/hits' and not self.ignore_hits:
                 channel_id = h5file.get_node("/hits/channel_id")[idx:end]
                 dom_id = h5file.get_node("/hits/dom_id")[idx:end]
@@ -470,8 +492,8 @@ class HDF5Pump(Pump):
 
                 datatype = h5file.get_node("/hits")._v_attrs.datatype
 
-                if (datatype == np.string_("CRawHitSeries")) or \
-                   (datatype == np.string_("CalibHits")):
+                if datatype in {np.string_("CRawHitSeries"),
+                                np.string_("CalibHits")}:
                     pos_x = h5file.get_node("/hits/pos_x")[idx:end]
                     pos_y = h5file.get_node("/hits/pos_y")[idx:end]
                     pos_z = h5file.get_node("/hits/pos_z")[idx:end]
@@ -482,14 +504,15 @@ class HDF5Pump(Pump):
                     floor = h5file.get_node("/hits/floor")[idx:end]
                     t0s = h5file.get_node("/hits/t0")[idx:end]
                     time += t0s
-                    blob["Hits"] = Table.from_template(
-                        channel_id, dir_x, dir_y, dir_z, dom_id, du,
-                        floor, pos_x, pos_y, pos_z, t0s, time, tot, triggered,
-                        group_id,
-                    'CalibHits')
+                    blob["CalibHits"] = Table.from_template(
+                        [channel_id, dir_x, dir_y, dir_z, dom_id, du,
+                         floor, pos_x, pos_y, pos_z, t0s, time, tot, triggered,
+                         group_id, ],
+                        'CalibHits', **tabargs)
                 else:
-                    blob["Hits"] = RawHitSeries.from_arrays(
-                        channel_id, dom_id, time, tot, triggered, group_id)
+                    blob["Hits"] = Table.from_template(
+                        [channel_id, dom_id, time, tot, triggered, group_id],
+                        'Hits', **tabargs)
 
             if loc == '/mc_hits' and not self.ignore_hits:
                 a = h5file.get_node("/mc_hits/a")[idx:end]
@@ -499,19 +522,22 @@ class HDF5Pump(Pump):
 
                 datatype = h5file.get_node("/mc_hits")._v_attrs.datatype
 
-                if datatype == np.string_("CMcHitSeries"):
+                if datatype in {np.string_("CMcHitSeries"),
+                                np.string_("CalibMcHits")}:
                     pos_x = h5file.get_node("/mc_hits/pos_x")[idx:end]
                     pos_y = h5file.get_node("/mc_hits/pos_y")[idx:end]
                     pos_z = h5file.get_node("/mc_hits/pos_z")[idx:end]
                     dir_x = h5file.get_node("/mc_hits/dir_x")[idx:end]
                     dir_y = h5file.get_node("/mc_hits/dir_y")[idx:end]
                     dir_z = h5file.get_node("/mc_hits/dir_z")[idx:end]
-                    blob["McHits"] = CMcHitSeries.from_arrays(
-                        a, dir_x, dir_y, dir_z, origin, pmt_id,
-                        pos_x, pos_y, pos_z, time, group_id)
+                    blob["CalibMcHits"] = Table.from_template(
+                        [a, dir_x, dir_y, dir_z, origin, pmt_id,
+                         pos_x, pos_y, pos_z, time, group_id],
+                        'CalibMcHits', **tabargs)
                 else:
-                    blob["McHits"] = McHitSeries.from_arrays(
-                        a, origin, pmt_id, time, group_id)
+                    blob["McHits"] = Table.from_template(
+                        [a, origin, pmt_id, time, group_id],
+                        'McHits', **tabargs)
 
         return blob
 
