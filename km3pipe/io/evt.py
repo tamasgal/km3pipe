@@ -61,8 +61,9 @@ class EvtPump(Pump):  # pylint: disable:R0902
         The starting index if you process multiple files at once. [default: 1]
     index_stop: int
         The last index if you process multiple files at once. [default: 1]
-    n_digits: int
-        The number of digits for indexing multiple files. [default: 3]
+    n_digits: int or None
+        The number of digits for indexing multiple files. [default: None]
+        `None` means no leading zeros.
     exclude_tags: list of strings
         The tags in the EVT file, which should be ignored (e.g. if they
         cause parse errors)
@@ -76,7 +77,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
         self.suffix = self.get('suffix', default='')
         self.index_start = self.get('index_start', default=1)
         self.index_stop = self.get('index_stop', default=1)
-        self.n_digits = self.get('n_digits', default=3)
+        self.n_digits = self.get('n_digits', default=None)
         self.exclude_tags = self.get('exclude_tags')
         if self.exclude_tags is None:
             self.exclude_tags = []
@@ -91,10 +92,10 @@ class EvtPump(Pump):  # pylint: disable:R0902
         if self.basename:
             self.log.info("Got a basename ({}), constructing the first "
                           "filename.".format(self.basename))
-            self.filename = self.basename  \
-                          + str(self.index_start).zfill(self.n_digits)  \
-                          + self.suffix \
-                          + '.evt'
+            file_index = self._get_file_index_str()
+
+            self.filename = "{}{}{}.evt"  \
+                            .format(self.basename, file_index, self.suffix)
             self.log.info("Constructed filename: {}".format(self.filename))
 
         if self.filename:
@@ -108,6 +109,14 @@ class EvtPump(Pump):  # pylint: disable:R0902
         self.raw_header = None
         self.event_offsets = []
         self.index = 0
+
+    def _get_file_index_str(self):
+        """Create a string out of the current file_index"""
+        file_index = str(self.file_index)
+        if self.n_digits is not None:
+            file_index = file_index.zfill(self.n_digits)
+        return file_index
+
 
     def prepare_blobs(self):
         """Populate the blobs"""
@@ -164,17 +173,23 @@ class EvtPump(Pump):  # pylint: disable:R0902
                 self.log.info("Now at file_index={}".format(self.file_index))
                 self._reset()
                 self.blob_file.close()
-                self.log.info("Resetting blob index to 0") 
+                self.log.info("Resetting blob index to 0")
                 self.index = 0
-                self.filename = self.basename  \
-                              + str(self.file_index).zfill(self.n_digits)  \
-                              + self.suffix  \
-                              + '.evt'
+                file_index = self._get_file_index_str()
+
+                self.filename = "{}{}{}.evt"  \
+                                .format(self.basename, file_index, self.suffix)
                 self.log.info("Next filename: {}".format(self.filename))
                 print("Opening {0}".format(self.filename))
                 self.open_file(self.filename)
                 self.prepare_blobs()
-                return blob
+                try:
+                    blob = self.get_blob(self.index)
+                except IndexError:
+                    self.log.warning("No blob found in file {}"
+                                     .format(self.filename))
+                else:
+                    return blob
             self.log.info("No files left, terminating the pipeline")
             raise StopIteration
 
