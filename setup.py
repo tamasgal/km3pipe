@@ -34,7 +34,6 @@ require_groups = {
     'analysis': ['matplotlib>=2.2.0', 'sklearn', 'statsmodels>=0.8',
                  'scipy>=0.19', 'seaborn', 'ipython', 'patsy', ],
     'io': ['tables>=3.4.2', 'h5py', 'requests', 'websocket-client'],
-    'jpp': ['jppy>=1.3.1', ],
     'testing': ['pytest', 'mock', ],
     'utils': ['urwid', ],
 }
