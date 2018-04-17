@@ -7,8 +7,6 @@ KM3Pipe setup script.
 from setuptools import setup
 
 from itertools import chain
-import sys
-import os
 
 import builtins
 
