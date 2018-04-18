@@ -9,6 +9,7 @@ as your Python, km3pipe, pandas, numpy, and scipy versions. This
 information can be found by running the following code snippet:
 
 .. code-block:: python
+
   import platform; print(platform.platform())
   import sys; print("Python", sys.version)
   import numpy; print("NumPy", numpy.__version__)

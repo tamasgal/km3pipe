@@ -23,7 +23,7 @@ module in the pipeline.
 
 .. literalinclude:: ../examples/nogallery/module_workflow.py
    :language: python
-      :linenos:
+   :linenos:
 
 Modules
 -------
