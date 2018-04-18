@@ -23,6 +23,7 @@ before_install:
     - echo $TRAVIS_PYTHON_VERSION
     - pip install -U pip setuptools
     - pip install -Ur requirements.txt
+    - pip install -Ur dev-requirements.txt
     - ls -al
 
 install:
