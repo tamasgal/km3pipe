@@ -314,14 +314,14 @@ class Table(np.recarray):
 
     @property
     def dir(self):
-        return np.array([self.dir_x, self.dir_y, self.dir_z])
+        return np.array([self.dir_x, self.dir_y, self.dir_z]).T
         # return self.__class__.from_template(
         #     {'dir_x': self.dir_x, 'dir_y': self.dir_y, 'dir_z': self.dir_z},
         #     'Direction')
 
     @property
     def pos(self):
-        return np.array([self.pos_x, self.pos_y, self.pos_z])
+        return np.array([self.pos_x, self.pos_y, self.pos_z]).T
         # return self.__class__.from_template(
         #     {'pos_x': self.pos_x, 'pos_y': self.pos_y, 'pos_z': self.pos_z},
         #     'Position')
