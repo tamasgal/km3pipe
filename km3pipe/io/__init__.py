@@ -55,10 +55,10 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
 
     io = {
         '.evt': EvtPump,
-        # '.h5': HDF5Pump,
-        # '.root': EventPump if use_jppy else AanetPump,
-        # '.dat': DAQPump,
-        # '.dqd': CLBPump,
+         '.h5': HDF5Pump,
+         '.root': EventPump if use_jppy else AanetPump,
+         '.dat': DAQPump,
+         '.dqd': CLBPump,
     }
 
     if extension not in io:
