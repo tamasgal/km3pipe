@@ -8,12 +8,7 @@ Tools for global configuration.
 import os
 import pytz
 from configparser import ConfigParser, Error, NoOptionError, NoSectionError
-
 import getpass
-try:
-    input = raw_input
-except NameError:
-    pass
 
 from .logger import logging
 
