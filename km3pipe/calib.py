@@ -51,6 +51,8 @@ class Calibration(Module):
     calibration: optional
         calibration (when retrieving from database).
     """
+    __name__ = 'Calibration'
+    name = 'Calibration'
 
     def configure(self):
         self._should_apply = self.get('apply') or False
@@ -101,8 +103,8 @@ class Calibration(Module):
             cal = np.empty(n)
             lookup = self._calib_by_dom_and_channel
             for i in range(n):
-                calib = lookup[hits._arr['dom_id']
-                               [i]][hits._arr['channel_id'][i]]
+                calib = lookup[hits['dom_id']
+                               [i]][hits['channel_id'][i]]
                 cal[i] = calib[6]
             hits.time += cal
         return hits
@@ -136,7 +138,7 @@ class Calibration(Module):
         cal = np.empty((n, 9))
         lookup = self._calib_by_dom_and_channel
         for i in range(n):
-            calib = lookup[hits._arr['dom_id'][i]][hits._arr['channel_id'][i]]
+            calib = lookup[hits['dom_id'][i]][hits['channel_id'][i]]
             cal[i] = calib
         h = np.empty(n, TEMPLATES['CalibHits']['dtype'])
         h['channel_id'] = hits.channel_id
@@ -153,7 +155,7 @@ class Calibration(Module):
         h['time'] = hits.time + cal[:, 6]
         h['tot'] = hits.tot
         h['triggered'] = hits.triggered
-        h['event_id'] = hits._arr['event_id']
+        h['group_id'] = hits['group_id']
         return Table.from_template(h, 'CalibHits')
 
     def _apply_to_mchits(self, hits):
@@ -169,7 +171,7 @@ class Calibration(Module):
         cal = np.empty((n, 9))
         for i in range(n):
             lookup = self._calib_by_pmt_id
-            cal[i] = lookup[hits._arr['pmt_id'][i]]
+            cal[i] = lookup[hits['pmt_id'][i]]
         h = np.empty(n, TEMPLATES['CalibMcHits']['dtype'])
         h['channel_id'] = np.zeros(n, dtype=int)
         h['dir_x'] = cal[:, 3]
@@ -177,7 +179,7 @@ class Calibration(Module):
         h['dir_z'] = cal[:, 5]
         h['du'] = cal[:, 7]
         h['floor'] = cal[:, 8]
-        h['pmt_id'] = hits._arr['pmt_id']
+        h['pmt_id'] = hits['pmt_id']
         h['pos_x'] = cal[:, 0]
         h['pos_y'] = cal[:, 1]
         h['pos_z'] = cal[:, 2]
@@ -185,7 +187,7 @@ class Calibration(Module):
         h['time'] = hits.time + cal[:, 6]
         h['tot'] = np.zeros(n, dtype=int)
         h['triggered'] = np.zeros(n, dtype=bool)
-        h['event_id'] = hits._arr['event_id']
+        h['group_id'] = hits['group_id']
         return Table.from_template(h, 'CalibMcHits')
 
     def _create_dom_channel_lookup(self):
