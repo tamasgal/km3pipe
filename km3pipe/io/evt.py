@@ -8,6 +8,7 @@ import sys
 
 from km3pipe.core import Pump, Blob
 from km3pipe.logger import logging
+from km3pipe.tools import split
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -226,11 +227,22 @@ class EvtPump(Pump):  # pylint: disable:R0902
             if line.startswith('end_event:') and blob:
                 blob['raw_header'] = self.raw_header
                 return blob
+            try:
+                tag, values = line.split(':')
+            except ValueError:
+                self.log.warning("Ignoring corrupt line: {}".format(line))
+                continue
+            try:
+                values = split(values.strip(), callback=float)
+            except ValueError:
+                self.log.info("Empty value: {}".format(values))
             if line.startswith('start_event:'):
                 blob = Blob()
-                tag, value = line.split(':')
-                blob[tag] = value.split()
+                blob[tag] = [int(v) for v in values]
                 continue
+            if tag not in blob:
+                blob[tag] = []
+            blob[tag].append(values)
 
     def __len__(self):
         if not self.whole_file_cached:
