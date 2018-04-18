@@ -144,7 +144,7 @@ class TestEvtPump(TestCase):
         self.pump.prepare_blobs()
         self.assertEqual(1, len(self.pump.event_offsets))
         blob = self.pump.get_blob(2)
-        self.assertListEqual(['14', '1'], blob['start_event'])
+        self.assertListEqual([14, 1], blob['start_event'])
         self.assertEqual(3, len(self.pump.event_offsets))
 
     def test_get_blob_raises_index_error_for_wrong_index(self):
@@ -157,29 +157,36 @@ class TestEvtPump(TestCase):
         blob = self.pump.get_blob(0)
         self.assertTrue('raw_header' in blob)
         self.assertEqual(['1'], blob['raw_header']['start_run'])
-        self.assertListEqual(['12', '1'], blob['start_event'])
+        self.assertListEqual([12, 1], blob['start_event'])
         # TODO: all the other stuff like hit, track etc.
-        # self.assertListEqual([[1.0, 44675.0, 1.0, 1170.59,
-        #                        5.0, 2.0, 1.0, 1170.59]],
-        #                      blob['hit'])
+        assert 'hit' in blob
+        assert 'track_in' in blob
+        self.assertListEqual([[1.0, 44675.0, 1.0, 1170.59,
+                               5.0, 2.0, 1.0, 1170.59]],
+                             blob['hit'])
+        blob = self.pump.get_blob(1)
+        assert 5 == len(blob['hit'])
+        self.assertListEqual([3.0, 20164.0, 1.0, 1178.19, 5.0,
+                              1.0, 1.0, 1178.19],
+                             blob['hit'][2])
 
     def test_get_blob_returns_correct_events(self):
         self.pump.prepare_blobs()
         blob = self.pump.get_blob(0)
-        self.assertListEqual(['12', '1'], blob['start_event'])
+        self.assertListEqual([12, 1], blob['start_event'])
         blob = self.pump.get_blob(2)
-        self.assertListEqual(['14', '1'], blob['start_event'])
+        self.assertListEqual([14, 1], blob['start_event'])
         blob = self.pump.get_blob(1)
-        self.assertListEqual(['13', '1'], blob['start_event'])
+        self.assertListEqual([13, 1], blob['start_event'])
 
     def test_process_returns_correct_blobs(self):
         self.pump.prepare_blobs()
         blob = self.pump.process()
-        self.assertListEqual(['12', '1'], blob['start_event'])
+        self.assertListEqual([12, 1], blob['start_event'])
         blob = self.pump.process()
-        self.assertListEqual(['13', '1'], blob['start_event'])
+        self.assertListEqual([13, 1], blob['start_event'])
         blob = self.pump.process()
-        self.assertListEqual(['14', '1'], blob['start_event'])
+        self.assertListEqual([14, 1], blob['start_event'])
 
     def test_process_raises_stop_iteration_if_eof_reached(self):
         self.pump.prepare_blobs()
@@ -194,7 +201,7 @@ class TestEvtPump(TestCase):
         event_numbers = []
         for blob in self.pump:
             event_numbers.append(blob['start_event'][0])
-        self.assertListEqual(['12', '13', '14'], event_numbers)
+        self.assertListEqual([12, 13, 14], event_numbers)
 
     def test_pump_has_len(self):
         self.pump.prepare_blobs()
@@ -203,19 +210,19 @@ class TestEvtPump(TestCase):
     def test_pump_get_item_returns_first_for_index_zero(self):
         self.pump.prepare_blobs()
         first_blob = self.pump[0]
-        self.assertEqual('12', first_blob['start_event'][0])
+        self.assertEqual(12, first_blob['start_event'][0])
 
     def test_pump_get_item_returns_correct_blob_for_index(self):
         self.pump.prepare_blobs()
         blob = self.pump[1]
-        self.assertEqual('13', blob['start_event'][0])
+        self.assertEqual(13, blob['start_event'][0])
 
     def test_pump_slice_generator(self):
         self.pump.prepare_blobs()
         blobs = self.pump[:]
         blobs = list(self.pump[1:3])
         self.assertEqual(2, len(blobs))
-        self.assertEqual(['13', '1'], blobs[0]['start_event'])
+        self.assertEqual([13, 1], blobs[0]['start_event'])
 
     def test_create_blob_entry_for_line_ignores_corrupt_line(self):
         self.pump.blob_file = StringIO(self.corrupt_line)
