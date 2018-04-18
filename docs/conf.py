@@ -285,7 +285,7 @@ sphinx_gallery_conf = {
     'reference_url': {
         'km3pipe': None,
     },
-    'expected_failing_examples': ['../examples/plot_dom_hits.py'],
+    'expected_failing_examples': [],
     'abort_on_example_effor': False,
 }
 
