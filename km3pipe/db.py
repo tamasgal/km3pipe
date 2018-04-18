@@ -14,14 +14,8 @@ import re
 import pytz
 import socket
 import xml.etree.ElementTree as ET
-
 from collections import defaultdict, OrderedDict
-try:
-    from inspect import Signature, Parameter
-except ImportError:
-    with_signatures = False
-else:
-    with_signatures = True
+from inspect import Signature, Parameter
 
 try:
     import pandas as pd
@@ -33,10 +27,6 @@ from .time import Timer
 from .config import Config
 from .logger import logging
 
-try:
-    input = raw_input
-except NameError:
-    pass
 
 if sys.version_info[0] > 2:
     from urllib.parse import urlencode, unquote
@@ -487,18 +477,17 @@ class StreamDS(object):
 
         func.__doc__ = self._stream_parameter(stream, "DESCRIPTION")
 
-        if with_signatures:
-            sig_dict = OrderedDict()
-            for sel in self.mandatory_selectors(stream):
-                if sel == '-':
-                    continue
-                sig_dict[Parameter(
-                    sel, Parameter.POSITIONAL_OR_KEYWORD)] = None
-            for sel in self.optional_selectors(stream):
-                if sel == '-':
-                    continue
-                sig_dict[Parameter(sel, Parameter.KEYWORD_ONLY)] = None
-            func.__signature__ = Signature(parameters=sig_dict)
+        sig_dict = OrderedDict()
+        for sel in self.mandatory_selectors(stream):
+            if sel == '-':
+                continue
+            sig_dict[Parameter(
+                sel, Parameter.POSITIONAL_OR_KEYWORD)] = None
+        for sel in self.optional_selectors(stream):
+            if sel == '-':
+                continue
+            sig_dict[Parameter(sel, Parameter.KEYWORD_ONLY)] = None
+        func.__signature__ = Signature(parameters=sig_dict)
 
         return func
 
