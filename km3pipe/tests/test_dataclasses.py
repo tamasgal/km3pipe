@@ -373,6 +373,35 @@ class TestTable(TestCase):
             tab = Table.from_template(ar_hits, 'Hits')
             assert tab is not None
 
+    def test_adhoc_template(self):
+        a_template = {
+            'dtype': np.dtype([
+                 ('a', '<u4'),
+                 ('b', 'f4')
+                 ]),
+            'h5loc': '/yat',
+            'split_h5': True,
+            'name': "YetAnotherTemplate"
+            }
+        tab = Table.from_template([[1, 2], [3, 4]], a_template)
+        self.assertListEqual([1, 2], list(tab.a))
+        self.assertListEqual([3.0, 4.0], list(tab.b))
+        assert "YetAnotherTemplate" == tab.name
+
+    def test_adhoc_noname_template(self):
+        a_template = {
+            'dtype': np.dtype([
+                 ('a', '<u4'),
+                 ('b', 'f4')
+                 ]),
+            'h5loc': '/yat',
+            'split_h5': True,
+            }
+        tab = Table.from_template([[1, 2], [3, 4]], a_template)
+        self.assertListEqual([1, 2], list(tab.a))
+        self.assertListEqual([3.0, 4.0], list(tab.b))
+        assert "Generic Table" == tab.name
+
     def test_sort(self):
         dt = np.dtype([('a', int), ('b', float), ('c', int)])
         arr = np.array([
