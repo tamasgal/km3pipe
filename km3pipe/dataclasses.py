@@ -5,8 +5,6 @@
 Dataclasses for internal use. Heavily based on Numpy arrays.
 """
 
-from six import string_types
-
 import numpy as np
 from numpy.lib import recfunctions as rfn
 from pandas import DataFrame
@@ -259,7 +257,7 @@ class Table(np.recarray):
             values = np.full(n, values)
 
         values = np.atleast_1d(values)
-        if not isinstance(colnames, string_types) and len(colnames) > 1:
+        if not isinstance(colnames, str) and len(colnames) > 1:
             values = np.atleast_2d(values)
             self._check_column_length(colnames, values, n)
 
