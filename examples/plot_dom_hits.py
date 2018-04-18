@@ -63,11 +63,7 @@ class DOMHits(kp.Module):
 
     def finish(self):
         df = pd.DataFrame(self.hit_statistics)
-        print(df.describe())
-        rdf = df[(df['distance'] < 200)]
-        print(rdf.describe())
         sdf = df[(df['distance'] < 200) & (df['n_hits'] < 50)]
-        print(sdf.describe())
         bins = (max(sdf['distance']) - 1, max(sdf['n_hits']) - 1)
         plt.hist2d(sdf['distance'], sdf['n_hits'], cmap='plasma', bins=bins,
                    norm=LogNorm())
