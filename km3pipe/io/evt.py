@@ -36,41 +36,6 @@ def try_decode_string(foo):
         return foo
 
 
-class Point(np.ndarray):
-    """Represents a point in a 3D space"""
-    def __new__(cls, input_array=(np.nan, np.nan, np.nan)):
-        """Add x, y and z to the ndarray"""
-        obj = np.asarray(input_array).view(cls)
-        return obj
-
-    @property
-    def x(self):
-        return self[0]
-
-    @x.setter
-    def x(self, value):
-        self[0] = value
-
-    @property
-    def y(self):
-        return self[1]
-
-    @y.setter
-    def y(self, value):
-        self[1] = value
-
-    @property
-    def z(self):
-        return self[2]
-
-    @z.setter
-    def z(self, value):
-        self[2] = value
-
-
-Position = Direction = Point  # Backwards compatibility
-
-
 class EvtPump(Pump):  # pylint: disable:R0902
     """Provides a pump for EVT-files.
 
@@ -261,17 +226,6 @@ class EvtPump(Pump):  # pylint: disable:R0902
         offset = self.blob_file.tell()
         self.event_offsets.append(offset)
 
-    @staticmethod
-    def _create_table(hits, group_id):
-        dct = defaultdict(list)
-        for h in hits:
-            dct['a'].append(h.a)
-            dct['origin'].append(h.origin)
-            dct['pmt_id'].append(h.pmt_id)
-            dct['time'].append(h.time)
-            dct['group_id'].append(group_id)
-        return dct
-
     def _create_blob(self):
         """Parse the next event from the current file position"""
         blob = None
@@ -280,67 +234,12 @@ class EvtPump(Pump):  # pylint: disable:R0902
             line = line.strip()
             if line.startswith('end_event:') and blob:
                 blob['raw_header'] = self.raw_header
-                with ignored(KeyError):
-                    blob['Hits'] = Table.from_template(
-                        self._create_table(blob['Hits'], self.index),
-                        'Hits'
-                    )
                 return blob
             if line.startswith('start_event:'):
                 blob = Blob()
                 tag, value = line.split(':')
                 blob[tag] = value.split()
                 continue
-            if blob:
-                self._create_blob_entry_for_line(line, blob)
-
-    def _create_blob_entry_for_line(self, line, blob):
-        """Create the actual blob entry from the given line."""
-        try:
-            tag, value = line.split(':')
-        except ValueError:
-            self.log.warning("Corrupt line in EVT file:\n{0}".format(line))
-            return
-        if tag in self.exclude_tags:
-            return
-        if tag in ('track_in', 'track_fit', 'hit', 'hit_raw',
-                   'track_seamuon', 'track_seaneutrino'):
-            values = [float(x) for x in value.split()]
-            blob.setdefault(tag, []).append(values)
-            if tag == 'hit':
-                hit = EvtHit(*values)
-                blob.setdefault("EvtHits", []).append(hit)
-                blob.setdefault("MCHits", []).append(hit)
-            if tag == "hit_raw":
-                raw_hit = EvtRawHit(*values)
-                blob.setdefault("EvtRawHits", []).append(raw_hit)
-            if tag == "track_in":
-                blob.setdefault("TrackIns", []).append(TrackIn(values))
-            if tag == "track_neutrinos":
-                blob.setdefault("TrackInNeutrinos", []).append(TrackIn(values))
-            if tag == "track_fit":
-                blob.setdefault("TrackFits", []).append(TrackFit(values))
-            if tag == "track_seamuon":
-                blob.setdefault("TrackSeamuon", []).append(TrackIn(values))
-            if tag == "track_seaneutrino":
-                blob.setdefault("TrackSeaneutrino", []).append(TrackIn(values))
-
-        else:
-            if tag == 'neutrino':
-                values = [float(x) for x in value.split()]
-                blob['Neutrino'] = Neutrino(values)
-            elif tag == 'center_on_can':
-                values = [float(x) for x in value.split()]
-                blob['CenterOnCan'] = TrackCorsika(values)
-            elif tag == 'track_primary':
-                values = [float(x) for x in value.split()]
-                blob['Primary'] = TrackCorsika(values, zed_correction=0)
-            elif tag == "track_bundle":
-                values = [float(x) for x in value.split()]
-                values.append(0)
-                blob["CenterOnCan"] = Track(values)
-            else:
-                blob[tag] = value.split()
 
     def __len__(self):
         if not self.whole_file_cached:
@@ -382,13 +281,11 @@ class Track(object):
     """Bass class for particle or shower tracks"""
 #    def __init__(self, id, x, y, z, dx, dy, dz, E=None, t=0, *args):
 
-    def __init__(self, data, zed_correction=405.93):
+    def __init__(self, data):
         id, x, y, z, dx, dy, dz, E, t, args = unpack_nfirst(data, 9)
         self.id = int(id)
-        # z correctio due to gen/km3 (ZED -> sea level shift)
-        # http://wiki.km3net.physik.uni-erlangen.de/index.php/Simulations
-        self.pos = Point((x, y, z + zed_correction))
-        self.dir = Direction((dx, dy, dz))
+        self.pos = (x, y, z)
+        self.dir = (dx, dy, dz)
         self.E = E
         self.time = t
         self.args = args
@@ -487,14 +384,14 @@ class TrackFit(Track):
 class Neutrino(object):  # pylint: disable:R0902
     """Representation of a neutrino entry in an EVT file"""
 
-    def __init__(self, data, zed_correction=405.93):
+    def __init__(self, data):
         id, x, y, z, dx, dy, dz, E, t, Bx, By, \
             ichan, particle_type, channel, args = unpack_nfirst(data, 14)
         self.id = id
         # z correctio due to gen/km3 (ZED -> sea level shift)
         # http://wiki.km3net.physik.uni-erlangen.de/index.php/Simulations
-        self.pos = Point((x, y, z + zed_correction))
-        self.dir = Direction((dx, dy, dz))
+        self.pos = (x, y, z)
+        self.dir = (dx, dy, dz)
         self.E = E
         self.time = t
         self.Bx = Bx

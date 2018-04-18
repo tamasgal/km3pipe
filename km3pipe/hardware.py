@@ -14,7 +14,6 @@ import numpy as np
 
 from .tools import unpack_nfirst, split
 from .math import com  # , ignored
-from .io.evt import Point, Direction
 from .db import DBManager
 
 from .logger import logging
@@ -308,8 +307,8 @@ class PMT(object):
 
     def __init__(self, id, pos, dir, t0, channel_id, omkey):
         self.id = id
-        self.pos = Point(pos)
-        self.dir = Direction(dir)
+        self.pos = pos
+        self.dir = dir
         self.t0 = t0
         self.channel_id = channel_id
         self.omkey = omkey
