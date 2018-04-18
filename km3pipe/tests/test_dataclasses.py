@@ -398,3 +398,14 @@ class TestTable(TestCase):
         tab = Table.from_dataframe(df, h5loc='/bla')
         df2 = tab.to_dataframe()
         assert_frame_equal(df, df2)
+
+    def test_slicing(self):
+        dt = np.dtype([('a', int), ('b', float), ('c', bool)])
+        arr = np.array([
+            (0, 1.0, True),
+            (2, 3.0, False),
+            (4, 5.0, True),
+        ], dtype=dt)
+        tab = Table(arr)
+        assert 2 == len(tab[tab.c])
+        assert 1 == len(tab[tab.b > 3.0])
