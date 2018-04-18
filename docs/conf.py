@@ -43,7 +43,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'numpydoc',
     'sphinx_gallery.gen_gallery',
-    # 'nbsphinx',
+    'sphinxcontrib.programoutput',
 ]
 
 autosummary_generate = True
