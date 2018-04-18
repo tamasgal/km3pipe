@@ -7,11 +7,7 @@ Tools for global configuration.
 
 import os
 import pytz
-try:
-    from configparser import ConfigParser, Error, NoOptionError, NoSectionError
-except ImportError:
-    from six.moves.configparser import (ConfigParser, Error, NoOptionError,
-                                        NoSectionError)
+from configparser import ConfigParser, Error, NoOptionError, NoSectionError
 
 import getpass
 try:

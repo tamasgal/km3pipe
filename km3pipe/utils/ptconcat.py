@@ -16,7 +16,6 @@ Options:
 """
 
 import os.path
-from six import iteritems
 
 import tables as tb
 
@@ -60,7 +59,7 @@ def ptconcat(output_file, input_files, overwrite=False):
     for fname in input_files:
         log.info('Reading %s...' % fname)
         h5 = tb.open_file(fname)
-        for path, out in iteritems(out_tabs):
+        for path, out in out_tabs.items():
             tab = h5.get_node(path)
             out.append(tab[:])
         h5.close()
