@@ -208,7 +208,7 @@ class Table(np.recarray):
         return sorted(list(TEMPLATES.keys()))
 
     @classmethod
-    def from_template(cls, data, template_name):
+    def from_template(cls, data, template):
         """Create a table from a predefined datatype.
 
         See the ``templates_avail`` property for available names.
@@ -217,14 +217,23 @@ class Table(np.recarray):
         ----------
         data
             Data in a format that the ``__init__`` understands.
-        template: str
-            Name of the dtype template to use.
+        template: str or dict
+            Name of the dtype template to use from ``kp.dataclasses_templates``
+            or a ``dict`` containing the required attributes (see the other
+            templates for reference).
         """
-        template = TEMPLATES[template_name]
-        dt = template['dtype']
-        loc = template['h5loc']
-        split = template['split_h5']
-        name = template_name
+        name = None
+        if isinstance(template, str):
+            name = template
+            table_info = TEMPLATES[name]
+        else:
+            table_info = template
+        if 'name' in table_info:
+            name = table_info['name']
+        dt = table_info['dtype']
+        loc = table_info['h5loc']
+        split = table_info['split_h5']
+
         return cls(data, h5loc=loc, dtype=dt, split_h5=split, name=name)
 
     @staticmethod
