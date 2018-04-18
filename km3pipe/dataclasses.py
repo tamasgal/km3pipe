@@ -148,8 +148,8 @@ class Table(np.recarray):
 
     def __array_wrap__(self, out_arr, context=None):
         # then just call the parent
-        out = Table(np.recarray.__array_wrap__(self, out_arr, context),
-                    h5loc=self.h5loc, split_h5=self.split_h5, name=self.name)
+        return Table(np.recarray.__array_wrap__(self, out_arr, context),
+                     h5loc=self.h5loc, split_h5=self.split_h5, name=self.name)
 
     @staticmethod
     def _expand_scalars(arr_dict):
@@ -314,14 +314,14 @@ class Table(np.recarray):
 
     @property
     def dir(self):
-        return np.array([self.dir_x, self.dir_y, self.dir_z])
+        return np.array([self.dir_x, self.dir_y, self.dir_z]).T
         # return self.__class__.from_template(
         #     {'dir_x': self.dir_x, 'dir_y': self.dir_y, 'dir_z': self.dir_z},
         #     'Direction')
 
     @property
     def pos(self):
-        return np.array([self.pos_x, self.pos_y, self.pos_z])
+        return np.array([self.pos_x, self.pos_y, self.pos_z]).T
         # return self.__class__.from_template(
         #     {'pos_x': self.pos_x, 'pos_y': self.pos_y, 'pos_z': self.pos_z},
         #     'Position')

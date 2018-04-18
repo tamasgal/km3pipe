@@ -1,5 +1,4 @@
 #!usr/bin/env python
-# -*- coding: utf-8 -*-
 # Filename: math.py
 # pylint: disable=C0103
 """
@@ -185,7 +184,10 @@ def unit_vector(vector, **kwargs):
 
 def pld3(p1, p2, d2):
     """Calculate the point-line-distance for given point and line."""
-    return scipy.linalg.norm(np.cross(d2, p2 - p1)) / scipy.linalg.norm(d2)
+    c = np.cross(d2, p2 - p1)
+    n1 = scipy.linalg.norm(c)
+    n2 = scipy.linalg.norm(d2)
+    return n1 / n2
 
 
 def lpnorm(x, p=2):

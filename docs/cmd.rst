@@ -332,6 +332,7 @@ Show the memory consumption of a HDF5 file. As you can see below, the
 overwhelming majority of space is used by the hits, as expected.
 
 Example output::
+
     ┌─[moritz@ceres ~/pkg/km3pipe/examples/data ]
     └─╼ pttree km3net_jul13_90m_muatm50T655.km3_v5r1.JTE_r2356.root.0-499.h5
 

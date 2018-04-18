@@ -77,8 +77,8 @@ The following script shows how to access the logger of the ``km3pipe.core``
 module and set its log level individually.
 
 .. literalinclude:: ../examples/nogallery/logging_example.py
-   :language: python
-      :linenos:
+    :language: python
+    :linenos:
 
 This is the output if you change the log level of ``km3pipe.core`` to ``DEBUG``::
 
