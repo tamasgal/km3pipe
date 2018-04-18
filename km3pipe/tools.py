@@ -98,7 +98,7 @@ def unpack_nfirst(seq, nfirst):
     yield tuple(iterator)
 
 
-def split(string, callback=None, sep=' '):
+def split(string, callback=None, sep=None):
     """Split the string and execute the callback function on each part.
 
     >>> string = "1 2 3 4"
