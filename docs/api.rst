@@ -25,6 +25,23 @@ KM3Pipe: Main Framework
   Run
 
 
+``km3pipe.calib``
+~~~~~~~~~~~~~~~~~
+
+.. automodule:: km3pipe.calib
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3pipe.calib
+
+.. autosummary::
+  :toctree: api
+
+  Calibration
+
+
+
+
 ``km3pipe.cmd``: Command Line Tools
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -59,6 +76,7 @@ KM3Pipe: Main Framework
 
   Table
   is_structured
+  has_structured_dt
   inflate_dtype
 
 
@@ -145,6 +163,34 @@ KM3Pipe: Main Framework
   set_level
 
 
+``km3pipe.mc``
+~~~~~~~~~~~~~~
+
+.. automodule:: km3pipe.mc
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3pipe.mc
+
+.. autosummary::
+  :toctree: api
+
+  geant2pdg
+  pdg2name
+  name2pdg
+
+
+``km3pipe.plot``: Plotting tools
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. currentmodule:: km3pipe.plot
+
+.. autosummary::
+  :toctree: api
+
+  hexbin
+
+
 ``km3pipe.srv``
 ~~~~~~~~~~~~~~~
 
@@ -158,6 +204,25 @@ KM3Pipe: Main Framework
   :toctree: api
 
   ClientManager
+
+
+``km3pipe.shell``
+~~~~~~~~~~~~~~~~~
+
+.. automodule:: km3pipe.shell
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3pipe.shell
+
+.. autosummary::
+  :toctree: api
+
+  Script
+  qsub
+  gen_job
+  hppsgrab
+  get_jpp_env
 
 
 ``km3pipe.tools``
@@ -199,34 +264,6 @@ KM3Pipe: Main Framework
   Cuckoo
   total_seconds
   tai_timestamp
-
-
-``km3pipe.mc``
-~~~~~~~~~~~~~~
-
-.. automodule:: km3pipe.mc
-  :no-members:
-  :no-inherited-members:
-
-.. currentmodule:: km3pipe.mc
-
-.. autosummary::
-  :toctree: api
-
-  geant2pdg
-  pdg2name
-  name2pdg
-
-
-``km3pipe.plot``: Plotting tools
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. currentmodule:: km3pipe.plot
-
-.. autosummary::
-  :toctree: api
-
-  hexbin
 
 
 KM3Modules: Pipeline Segments
