@@ -76,7 +76,7 @@ TEMPLATES = {
             ('dom_id', '<u4'),
             ('time', '<f8'),
             ('tot', 'u1'),
-            ('triggered', 'u1'),
+            ('triggered', '?'),
             ('group_id', '<u4')
         ]),
         'h5loc': '/hits',
@@ -97,7 +97,7 @@ TEMPLATES = {
             ('t0', '<f4'),
             ('time', '<f8'),
             ('tot', 'u1'),
-            ('triggered', 'u1'),
+            ('triggered', '?'),
             ('group_id', '<u4')
         ]),
         'h5loc': '/hits',
@@ -140,7 +140,7 @@ TEMPLATES = {
             ('energy', '<f8'),
             ('id', '<u4'),
             ('interaction_channel', '<u4'),
-            ('is_cc', '<u4'),
+            ('is_cc', '<u4'),  # TODO: consider bool ('?') for slicing
             ('length', '<f8'),
             ('pos_x', '<f8'),
             ('pos_y', '<f8'),
@@ -161,7 +161,7 @@ TEMPLATES = {
             ('energy', '<f8'),
             ('id', '<u4'),
             ('interaction_channel', '<u4'),
-            ('is_cc', '<u4'),
+            ('is_cc', '<u4'),  # TODO: consider bool ('?') for slicing
             ('length', '<f8'),
             ('pos_x', '<f8'),
             ('pos_y', '<f8'),
