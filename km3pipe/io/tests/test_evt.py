@@ -2,14 +2,10 @@
 # pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
 
 import os.path
-import operator
-from functools import reduce
 
 import km3pipe as kp
 from km3pipe.testing import TestCase, StringIO
-from km3pipe.io import EvtPump
-from km3pipe.io.evt import (Track, TrackIn, Neutrino,
-                            EvtHit, EvtRawHit, TrackFit)
+from km3pipe.io.evt import EvtPump
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -20,7 +16,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-class TestEvtParser(TestCase):
+class TestEvtPump(TestCase):
 
     def setUp(self):
         self.valid_evt_header = "\n".join((
@@ -162,9 +158,10 @@ class TestEvtParser(TestCase):
         self.assertTrue('raw_header' in blob)
         self.assertEqual(['1'], blob['raw_header']['start_run'])
         self.assertListEqual(['12', '1'], blob['start_event'])
-        self.assertListEqual([[1.0, 44675.0, 1.0, 1170.59,
-                               5.0, 2.0, 1.0, 1170.59]],
-                             blob['hit'])
+        # TODO: all the other stuff like hit, track etc.
+        # self.assertListEqual([[1.0, 44675.0, 1.0, 1170.59,
+        #                        5.0, 2.0, 1.0, 1170.59]],
+        #                      blob['hit'])
 
     def test_get_blob_returns_correct_events(self):
         self.pump.prepare_blobs()
@@ -225,198 +222,6 @@ class TestEvtParser(TestCase):
         self.pump.extract_header()
         self.pump.prepare_blobs()
         self.pump.get_blob(0)
-
-
-class TestTrack(TestCase):
-    def setUp(self):
-        self.track = Track((1., 2., 3., 4., 0., 0., 1., 8., 9., 'a', 'b', 'c'),
-                           zed_correction=0.)
-
-    def test_track_init(self):
-        track = self.track
-        self.assertAlmostEqual(1, track.id)
-        self.assertAlmostEqual(2, track.pos.x)
-        self.assertAlmostEqual(3, track.pos.y)
-        self.assertAlmostEqual(4, track.pos.z)
-        self.assertAlmostEqual(0, track.dir.x)
-        self.assertAlmostEqual(0, track.dir.y)
-        self.assertAlmostEqual(1, track.dir.z)
-        self.assertAlmostEqual(8, track.E)
-        self.assertAlmostEqual(9, track.time)
-        self.assertTupleEqual(('a', 'b', 'c'), track.args)
-
-
-class TestTrackIn(TestCase):
-
-    def setUp(self):
-        self.track_in = TrackIn((1, 2., 3., 4., 0., 0., 1., 8, 9, 10, 11),
-                                zed_correction=0)
-
-    def test_trackin_init(self):
-        track_in = self.track_in
-        self.assertEqual(1, track_in.id)
-        self.assertAlmostEqual(2, track_in.pos.x)
-        self.assertAlmostEqual(3, track_in.pos.y)
-        self.assertAlmostEqual(4, track_in.pos.z)
-        self.assertAlmostEqual(0, track_in.dir.x)
-        self.assertAlmostEqual(0, track_in.dir.y)
-        self.assertAlmostEqual(1, track_in.dir.z)
-        self.assertEqual(8, track_in.E)
-        self.assertEqual(9, track_in.time)
-        self.assertEqual(130, track_in.particle_type)  # this should be PDG!
-        self.assertEqual(11, track_in.length)
-
-
-class TestTrackFit(TestCase):
-
-    def setUp(self):
-        data = (1, 2., 3., 4., 0., 0., 1., 8, 9, 10, 11, 12, 13, 14)
-        self.track_fit = TrackFit(data, zed_correction=0)
-
-    def test_trackfit_init(self):
-        track_fit = self.track_fit
-        self.assertEqual(1, track_fit.id)
-        self.assertAlmostEqual(2, track_fit.pos.x)
-        self.assertAlmostEqual(3, track_fit.pos.y)
-        self.assertAlmostEqual(4, track_fit.pos.z)
-        self.assertAlmostEqual(0, track_fit.dir.x)
-        self.assertAlmostEqual(0, track_fit.dir.y)
-        self.assertAlmostEqual(1, track_fit.dir.z)
-        self.assertEqual(8, track_fit.E)
-        self.assertEqual(9, track_fit.time)
-        self.assertEqual(10, track_fit.speed)
-        self.assertEqual(11, track_fit.ts)
-        self.assertEqual(12, track_fit.te)
-        self.assertEqual(13, track_fit.con1)
-        self.assertEqual(14, track_fit.con2)
-
-
-class TestNeutrino(TestCase):
-
-    def setUp(self):
-        data = (1, 2., 3., 4., 0., 0., 1., 8, 9, 10, 11, 12, 13, 14)
-        self.neutrino = Neutrino(data, zed_correction=0)
-
-    def test_neutrino_init(self):
-        neutrino = self.neutrino
-        self.assertEqual(1, neutrino.id)
-        self.assertAlmostEqual(2, neutrino.pos.x)
-        self.assertAlmostEqual(3, neutrino.pos.y)
-        self.assertAlmostEqual(4, neutrino.pos.z)
-        self.assertAlmostEqual(0, neutrino.dir.x)
-        self.assertAlmostEqual(0, neutrino.dir.y)
-        self.assertAlmostEqual(1, neutrino.dir.z)
-        self.assertEqual(8, neutrino.E)
-        self.assertEqual(9, neutrino.time)
-        self.assertEqual(10, neutrino.Bx)
-        self.assertEqual(11, neutrino.By)
-        self.assertEqual(12, neutrino.ichan)
-        self.assertEqual(13, neutrino.particle_type)
-        self.assertEqual(14, neutrino.channel)
-
-    def test_neutrino_str(self):
-        neutrino = self.neutrino
-        repr_str = "Neutrino: mu-, 8.0 GeV, NC"
-        self.assertEqual(repr_str, str(neutrino))
-        neutrino.E = 2000
-        repr_str = "Neutrino: mu-, 2.0 TeV, NC"
-        self.assertEqual(repr_str, str(neutrino))
-        neutrino.E = 3000000
-        repr_str = "Neutrino: mu-, 3.0 PeV, NC"
-        self.assertEqual(repr_str, str(neutrino))
-
-
-class TestEvtHit(TestCase):
-
-    def test_hit_init(self):
-        hit = EvtHit(1, 2, 3, 4, 5, 6, 7, 8)
-        self.assertEqual(1, hit.id)
-        self.assertEqual(2, hit.pmt_id)
-        self.assertEqual(3, hit.pe)
-        self.assertEqual(4, hit.time)
-        self.assertEqual(5, hit.type)
-        self.assertEqual(6, hit.n_photons)
-        self.assertEqual(7, hit.track_in)
-        self.assertEqual(8, hit.c_time)
-
-    def test_hit_default_values(self):
-        hit = EvtHit()
-        self.assertIsNone(hit.id)
-        self.assertIsNone(hit.pmt_id)
-        self.assertIsNone(hit.time)
-
-    def test_hit_default_values_are_set_if_others_are_given(self):
-        hit = EvtHit(track_in=1)
-        self.assertIsNone(hit.id)
-        self.assertIsNone(hit.time)
-
-    def test_hit_attributes_are_immutable(self):
-        hit = EvtHit(1, True)
-        with self.assertRaises(AttributeError):
-            hit.time = 10
-
-
-class TestEvtRawHit(TestCase):
-
-    def test_rawhit_init(self):
-        raw_hit = EvtRawHit(1, 2, 3, 4)
-        self.assertEqual(1, raw_hit.id)
-        self.assertEqual(2, raw_hit.pmt_id)
-        self.assertEqual(3, raw_hit.tot)
-        self.assertEqual(4, raw_hit.time)
-
-    def test_hit_default_values(self):
-        raw_hit = EvtRawHit()
-        self.assertIsNone(raw_hit.id)
-        self.assertIsNone(raw_hit.pmt_id)
-        self.assertIsNone(raw_hit.time)
-
-    def test_hit_default_values_are_set_if_others_are_given(self):
-        raw_hit = EvtRawHit(pmt_id=1)
-        self.assertIsNone(raw_hit.id)
-        self.assertIsNone(raw_hit.time)
-
-    def test_hit_attributes_are_immutable(self):
-        raw_hit = EvtRawHit(1, True)
-        with self.assertRaises(AttributeError):
-            raw_hit.time = 10
-
-    def test_hit_addition_remains_time_id_and_pmt_id_and_adds_tot(self):
-        hit1 = EvtRawHit(id=1, time=1, pmt_id=1, tot=10)
-        hit2 = EvtRawHit(id=2, time=2, pmt_id=2, tot=20)
-        merged_hit = hit1 + hit2
-        self.assertEqual(1, merged_hit.id)
-        self.assertEqual(1, merged_hit.time)
-        self.assertEqual(1, merged_hit.pmt_id)
-        self.assertEqual(30, merged_hit.tot)
-
-    def test_hit_addition_picks_correct_time_if_second_hit_is_earlier(self):
-        hit1 = EvtRawHit(id=1, time=2, pmt_id=1, tot=10)
-        hit2 = EvtRawHit(id=2, time=1, pmt_id=2, tot=20)
-        merged_hit = hit1 + hit2
-        self.assertEqual(2, merged_hit.id)
-        self.assertEqual(2, merged_hit.pmt_id)
-
-    def test_hit_additions_works_with_multiple_hits(self):
-        hit1 = EvtRawHit(id=1, time=2, pmt_id=1, tot=10)
-        hit2 = EvtRawHit(id=2, time=1, pmt_id=2, tot=20)
-        hit3 = EvtRawHit(id=3, time=1, pmt_id=3, tot=30)
-        merged_hit = hit1 + hit2 + hit3
-        self.assertEqual(2, merged_hit.pmt_id)
-        self.assertEqual(60, merged_hit.tot)
-        self.assertEqual(1, merged_hit.time)
-        self.assertEqual(2, merged_hit.id)
-
-    def test_hit_addition_works_with_sum(self):
-        hit1 = EvtRawHit(id=1, time=2, pmt_id=1, tot=10)
-        hit2 = EvtRawHit(id=2, time=1, pmt_id=2, tot=20)
-        hit3 = EvtRawHit(id=3, time=1, pmt_id=3, tot=30)
-        hits = [hit1, hit2, hit3]
-        merged_hit = reduce(operator.add, hits)
-        self.assertEqual(2, merged_hit.id)
-        self.assertEqual(1, merged_hit.time)
-        self.assertEqual(60, merged_hit.tot)
-        self.assertEqual(2, merged_hit.pmt_id)
 
 
 class TestEvtFilePump(TestCase):
