@@ -224,6 +224,9 @@ class EvtPump(Pump):  # pylint: disable:R0902
         for line in self.blob_file:
             line = try_decode_string(line)
             line = line.strip()
+            if line == '':
+                self.log.info("Ignoring empty line...")
+                continue
             if line.startswith('end_event:') and blob:
                 blob['raw_header'] = self.raw_header
                 return blob
