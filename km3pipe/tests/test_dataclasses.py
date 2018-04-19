@@ -403,10 +403,21 @@ class TestTable(TestCase):
         assert "Generic Table" == tab.name
 
     def test_element_list_with_dtype(self):
-        elist = [[1, 2.1], [3, 4.2], [5, 6.3]]
+        bad_elist = [
+            [1, 2.1],
+            [3, 4.2],
+            [5, 6.3]]
         dt = np.dtype([('a', int), ('b', float)])
-        tab = Table.from_elements(elist, dtype=dt)
-        assert 10 == tuple(tab.a[0])
+        print('list(list)')
+        arr_bad = np.array(bad_elist, dtype=dt)
+        print(arr_bad)
+        elist = [tuple(el) for el in bad_elist]
+        arr= np.array(elist, dtype=dt)
+        print('list(tuple)')
+        print(arr)
+        tab = Table(arr)
+        print(tab)
+        assert tab.a[0] == 1
 
     def test_sort(self):
         dt = np.dtype([('a', int), ('b', float), ('c', int)])
