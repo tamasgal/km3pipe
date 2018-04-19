@@ -402,6 +402,12 @@ class TestTable(TestCase):
         self.assertListEqual([3.0, 4.0], list(tab.b))
         assert "Generic Table" == tab.name
 
+    def test_element_list_with_dtype(self):
+        elist = [[1, 2.1], [3, 4.2], [5, 6.3]]
+        dt = np.dtype([('a', int), ('b', float)])
+        tab = Table.from_elements(elist, dtype=dt)
+        assert 10 == tuple(tab.a[0])
+
     def test_sort(self):
         dt = np.dtype([('a', int), ('b', float), ('c', int)])
         arr = np.array([
