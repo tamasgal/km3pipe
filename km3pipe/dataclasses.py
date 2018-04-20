@@ -98,9 +98,10 @@ class Table(np.recarray):
                                  split_h5=split_h5, colnames=colnames,
                                  name=name, **kwargs)
         if isinstance(data, list) or isinstance(data, tuple):
-            return cls.from_list(data, h5loc=h5loc, dtype=dtype,
-                                 split_h5=split_h5, colnames=colnames,
-                                 name=name, **kwargs)
+            raise ValueError(
+                "Lists/tuples are not supported! Please provide either "
+                "a dict(array), a pandas dataframe, an ndarray "
+                "with a structured dtype, or a 2d ndarray plus colnames!")
         if isinstance(data, DataFrame):
             return cls.from_dataframe(data, h5loc=h5loc, dtype=dtype,
                                       split_h5=split_h5, colnames=colnames,
@@ -186,7 +187,7 @@ class Table(np.recarray):
                                      dtype=dtype), **kwargs)
 
     @classmethod
-    def from_list(cls, arr_list, dtype=None, colnames=None, **kwargs):
+    def from_columns(cls, arr_list, dtype=None, colnames=None, **kwargs):
         if dtype is None or not is_structured(dtype):
             # infer structured dtype from array data + column names
             if colnames is None:
@@ -202,6 +203,10 @@ class Table(np.recarray):
         return cls(
             {k: arr_list[i] for i, k in enumerate(dtype.names)},
             dtype=dtype, colnames=colnames, **kwargs)
+
+    @classmethod
+    def from_rows(cls, arr_list, dtype=None, colnames=None, **kwargs):
+        raise NotImplementedError
 
     @property
     def templates_avail(self):
