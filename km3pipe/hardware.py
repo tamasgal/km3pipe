@@ -7,14 +7,11 @@ Classes representing KM3NeT hardware.
 
 from collections import OrderedDict, defaultdict
 import sys
-from six import iteritems
-from six.moves import xrange
 
 import numpy as np
 
 from .tools import unpack_nfirst, split
 from .math import com  # , ignored
-from .io.evt import Point, Direction
 from .db import DBManager
 
 from .logger import logging
@@ -217,9 +214,9 @@ class Detector(object):
             header += str(self.n_doms)
 
         doms = ""
-        for dom_id, (line, floor, n_pmts) in iteritems(self.doms):
+        for dom_id, (line, floor, n_pmts) in self.doms.items():
             doms += "{0} {1} {2} {3}\n".format(dom_id, line, floor, n_pmts)
-            for i in xrange(n_pmts):
+            for i in range(n_pmts):
                 pmt = self._pmts_by_omkey[(line, floor, i)]
                 doms += "{0} {1} {2} {3} {4} {5} {6} {7}\n".format(
                         pmt.id, pmt.pos[0], pmt.pos[1], pmt.pos[2],
@@ -308,8 +305,8 @@ class PMT(object):
 
     def __init__(self, id, pos, dir, t0, channel_id, omkey):
         self.id = id
-        self.pos = Point(pos)
-        self.dir = Direction(dir)
+        self.pos = pos
+        self.dir = dir
         self.t0 = t0
         self.channel_id = channel_id
         self.omkey = omkey

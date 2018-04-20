@@ -5,7 +5,6 @@ A collection of io for different kinds of data formats.
 """
 
 import os.path
-from six import string_types
 
 import numpy as np
 
@@ -38,7 +37,7 @@ log = logging.getLogger(__name__)
 
 def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
     """A generic pump which utilises the appropriate pump."""
-    if not isinstance(filenames, string_types):
+    if not isinstance(filenames, str):
         fn = filenames[0]
     else:
         fn = filenames
@@ -64,7 +63,7 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
     if extension not in io:
         log.critical("No pump found for '{0}'".format(extension))
 
-    if isinstance(filenames, string_types):
+    if isinstance(filenames, str):
         return io[extension](filename=filenames, name=name, **kwargs)
     else:
         if len(filenames) == 1:

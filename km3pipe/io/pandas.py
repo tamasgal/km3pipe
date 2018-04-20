@@ -6,7 +6,6 @@ Pandas Helpers.
 """
 
 import os.path
-from six import string_types
 
 import numpy as np
 import pandas as pd
@@ -169,7 +168,7 @@ def write_table(array, h5file, where, force=False,
     """Write a structured numpy array into a H5 table.
     """
     own_h5 = False
-    if isinstance(h5file, string_types):
+    if isinstance(h5file, str):
         own_h5 = True
         h5file = tb.open_file(h5file, 'a')
     if filters is None:

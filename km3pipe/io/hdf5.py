@@ -6,7 +6,6 @@ Read and write KM3NeT-formatted HDF5 files.
 """
 from collections import OrderedDict, defaultdict
 import os.path
-from six import itervalues, iteritems
 import warnings
 
 import numpy as np
@@ -252,7 +251,7 @@ class HDF5Sink(Module):
                               title='Indices',)
         self.log.info("Creating pytables index tables. "
                       "This may take a few minutes...")
-        for tab in itervalues(self._tables):
+        for tab in self._tables.values():
             if 'frame_id' in tab.colnames:
                 tab.cols.frame_id.create_index()
             if 'slice_id' in tab.colnames:
@@ -329,7 +328,7 @@ class HDF5Pump(Pump):
         self._n_events = np.sum((v for k, v in self._n_each.items()))
         self.minmax = OrderedDict()
         n_read = 0
-        for fn, n in iteritems(self._n_each):
+        for fn, n in self._n_each.items():
             min = n_read
             max = n_read + n - 1
             n_read += n

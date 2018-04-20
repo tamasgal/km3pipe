@@ -5,8 +5,6 @@
 Dataclasses for internal use. Heavily based on Numpy arrays.
 """
 
-from six import string_types
-
 import numpy as np
 from numpy.lib import recfunctions as rfn
 from pandas import DataFrame
@@ -100,9 +98,10 @@ class Table(np.recarray):
                                  split_h5=split_h5, colnames=colnames,
                                  name=name, **kwargs)
         if isinstance(data, list) or isinstance(data, tuple):
-            return cls.from_list(data, h5loc=h5loc, dtype=dtype,
-                                 split_h5=split_h5, colnames=colnames,
-                                 name=name, **kwargs)
+            raise ValueError(
+                "Lists/tuples are not supported! Please provide either "
+                "a dict(array), a pandas dataframe, an ndarray "
+                "with a structured dtype, or a 2d ndarray plus colnames!")
         if isinstance(data, DataFrame):
             return cls.from_dataframe(data, h5loc=h5loc, dtype=dtype,
                                       split_h5=split_h5, colnames=colnames,
@@ -188,7 +187,7 @@ class Table(np.recarray):
                                      dtype=dtype), **kwargs)
 
     @classmethod
-    def from_list(cls, arr_list, dtype=None, colnames=None, **kwargs):
+    def from_columns(cls, arr_list, dtype=None, colnames=None, **kwargs):
         if dtype is None or not is_structured(dtype):
             # infer structured dtype from array data + column names
             if colnames is None:
@@ -205,12 +204,16 @@ class Table(np.recarray):
             {k: arr_list[i] for i, k in enumerate(dtype.names)},
             dtype=dtype, colnames=colnames, **kwargs)
 
+    @classmethod
+    def from_rows(cls, arr_list, dtype=None, colnames=None, **kwargs):
+        raise NotImplementedError
+
     @property
     def templates_avail(self):
         return sorted(list(TEMPLATES.keys()))
 
     @classmethod
-    def from_template(cls, data, template_name):
+    def from_template(cls, data, template):
         """Create a table from a predefined datatype.
 
         See the ``templates_avail`` property for available names.
@@ -219,14 +222,23 @@ class Table(np.recarray):
         ----------
         data
             Data in a format that the ``__init__`` understands.
-        template: str
-            Name of the dtype template to use.
+        template: str or dict
+            Name of the dtype template to use from ``kp.dataclasses_templates``
+            or a ``dict`` containing the required attributes (see the other
+            templates for reference).
         """
-        template = TEMPLATES[template_name]
-        dt = template['dtype']
-        loc = template['h5loc']
-        split = template['split_h5']
-        name = template_name
+        name = None
+        if isinstance(template, str):
+            name = template
+            table_info = TEMPLATES[name]
+        else:
+            table_info = template
+        if 'name' in table_info:
+            name = table_info['name']
+        dt = table_info['dtype']
+        loc = table_info['h5loc']
+        split = table_info['split_h5']
+
         return cls(data, h5loc=loc, dtype=dt, split_h5=split, name=name)
 
     @staticmethod
@@ -259,7 +271,7 @@ class Table(np.recarray):
             values = np.full(n, values)
 
         values = np.atleast_1d(values)
-        if not isinstance(colnames, string_types) and len(colnames) > 1:
+        if not isinstance(colnames, str) and len(colnames) > 1:
             values = np.atleast_2d(values)
             self._check_column_length(colnames, values, n)
 

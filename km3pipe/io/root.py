@@ -5,9 +5,6 @@
 Read and write Vanilla ROOT files.
 """
 
-from six import string_types
-from six.moves import range
-
 import numpy as np
 import root_numpy as rnp
 from rootpy.io import root_open
@@ -27,7 +24,7 @@ __status__ = "Development"
 
 
 def open_rfile(rfile, fmode='r'):
-    if isinstance(rfile, string_types):
+    if isinstance(rfile, str):
         return root_open(rfile, mode=fmode)
     return rfile
 
