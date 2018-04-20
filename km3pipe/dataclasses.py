@@ -241,11 +241,6 @@ class Table(np.recarray):
 
         return cls(data, h5loc=loc, dtype=dt, split_h5=split, name=name)
 
-    @classmethod
-    def from_elements(cls, data, dtype):
-        arr = np.array(data, dtype=dtype)
-        return cls(arr)
-
     @staticmethod
     def _check_column_length(colnames, values, n):
         values = np.atleast_2d(values)
