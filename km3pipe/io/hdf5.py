@@ -342,14 +342,15 @@ class HDF5Pump(Pump):
         # So we can raise version mismatches etc before reading anything
         self.log.debug(fn)
         if os.path.isfile(fn):
-            h5file = tb.open_file(fn, 'r')
             if not self.skip_version_check:
-                check_version(h5file, fn)
+                with tb.open_file(fn, 'r') as h5file:
+                    check_version(h5file, fn)
         else:
             raise IOError("No such file or directory: '{0}'"
                           .format(fn))
         try:
-            event_info = h5file.get_node('/', 'event_info')
+            with tb.open_file(fn, 'r') as h5file:
+                event_info = h5file.get_node('/', 'event_info')
             try:
                 self.group_ids[fn] = event_info.cols.group_id[:]
             except AttributeError:
@@ -362,14 +363,14 @@ class HDF5Pump(Pump):
         if self.cut_mask_node is not None:
             if not self.cut_mask_node.startswith('/'):
                 self.cut_mask_node = '/' + self.cut_mask_node
-            self.cut_masks[fn] = h5file.get_node(self.cut_mask_node)[:]
+            with tb.open_file(fn, 'r') as h5file:
+                self.cut_masks[fn] = h5file.get_node(self.cut_mask_node)[:]
             self.log.debug(self.cut_masks[fn])
             mask = self.cut_masks[fn]
             if not mask.shape[0] == self.group_ids[fn].shape[0]:
                 raise ValueError("Cut mask length differs from event ids!")
         else:
             self.cut_masks = None
-        h5file.close()
 
     def process(self, blob):
         try:
@@ -581,6 +582,9 @@ class HDF5Pump(Pump):
             yield self.get_blob(i)
 
         self.current_file = None
+
+    def finish(self):
+        self.h5file.close()
 
 
 class HDF5MetaData(Module):
