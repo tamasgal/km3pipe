@@ -161,13 +161,15 @@ class TestTable(TestCase):
             0,
         ]
         dt = np.dtype([('a', float), ('b', float), ('c', float)])
-        tab = Table.from_list(dlist, dtype=dt)
+        with pytest.raises(ValueError):
+            tab = Table(dlist, dtype=dt)
+        tab = Table.from_columns(dlist, dtype=dt)
         print(tab.dtype)
         print(tab.shape)
         print(tab)
         assert tab.h5loc == DEFAULT_H5LOC
         assert isinstance(tab, Table)
-        tab = Table.from_list(dlist, dtype=dt, h5loc='/foo')
+        tab = Table.from_columns(dlist, dtype=dt, h5loc='/foo')
         print(tab.dtype)
         print(tab.shape)
         print(tab)
@@ -175,7 +177,7 @@ class TestTable(TestCase):
         assert isinstance(tab, Table)
         bad_dt = [('a', float), ('b', float), ('c', float), ('d', int)]
         with pytest.raises(ValueError):
-            tab = Table.from_list(dlist, dtype=bad_dt)
+            tab = Table.from_columns(dlist, dtype=bad_dt)
             print(tab.dtype)
             print(tab.shape)
             print(tab)
@@ -238,7 +240,7 @@ class TestTable(TestCase):
 
     def test_from_2d(self):
         l2d = [
-            [0, 1], [2, 3], [4, 5], [6, 7], [8, 9]
+            (0, 1), (2, 3), (4, 5), (6, 7), (8, 9)
         ]
         names = ['a', 'origin', 'pmt_id', 'time', 'group_id']
         dta = inflate_dtype(l2d, names)
@@ -246,10 +248,12 @@ class TestTable(TestCase):
             t = Table(l2d)
         with pytest.raises(ValueError):
             t = Table(l2d, dtype=None)
-        t = Table(l2d, colnames=names)
-        t = Table(l2d, dtype=dta)
-        t = Table(l2d, dtype=dta, colnames=['a', 'b', 'c', 'd'])
-        assert t.dtype.names[1] == 'origin'
+        with pytest.raises(ValueError):
+            t = Table(l2d, colnames=names)
+        with pytest.raises(ValueError):
+            t = Table(l2d, dtype=dta)
+        with pytest.raises(ValueError):
+            t = Table(l2d, dtype=dta, colnames=['a', 'b', 'c', 'd'])  # noqa
 
     def test_flat_raises(self):
         with pytest.raises(ValueError):
@@ -260,10 +264,8 @@ class TestTable(TestCase):
             t = Table([1, 2, 3], dtype=None).dtype
         with pytest.raises(ValueError):
             t = Table([1, 2, 3]).dtype
-        t = Table([1, 2, 3], colnames=['a', 'b', 'c'])
-        assert t is not None
-        assert t.dtype is not None
-        assert t.dtype.fields is not None
+        with pytest.raises(ValueError):
+            t = Table([1, 2, 3], colnames=['a', 'b', 'c'])      # noqa
 
     def test_fromdict_init(self):
         n = 5
@@ -376,14 +378,15 @@ class TestTable(TestCase):
     def test_adhoc_template(self):
         a_template = {
             'dtype': np.dtype([
-                 ('a', '<u4'),
-                 ('b', 'f4')
-                 ]),
+                ('a', '<u4'),
+                ('b', 'f4')
+            ]),
             'h5loc': '/yat',
             'split_h5': True,
-            'name': "YetAnotherTemplate"
-            }
-        tab = Table.from_template([[1, 2], [3, 4]], a_template)
+            'name': "YetAnotherTemplate",
+        }
+        arr = np.array([(1, 3), (2, 4)], dtype=a_template['dtype'])
+        tab = Table.from_template(arr, a_template)
         self.assertListEqual([1, 2], list(tab.a))
         self.assertListEqual([3.0, 4.0], list(tab.b))
         assert "YetAnotherTemplate" == tab.name
@@ -391,22 +394,35 @@ class TestTable(TestCase):
     def test_adhoc_noname_template(self):
         a_template = {
             'dtype': np.dtype([
-                 ('a', '<u4'),
-                 ('b', 'f4')
-                 ]),
+                ('a', '<u4'),
+                ('b', 'f4')
+            ]),
             'h5loc': '/yat',
             'split_h5': True,
-            }
-        tab = Table.from_template([[1, 2], [3, 4]], a_template)
+        }
+        arr = np.array([(1, 3), (2, 4)], dtype=a_template['dtype'])
+        tab = Table.from_template(arr, a_template)
         self.assertListEqual([1, 2], list(tab.a))
         self.assertListEqual([3.0, 4.0], list(tab.b))
         assert "Generic Table" == tab.name
 
     def test_element_list_with_dtype(self):
-        elist = [[1, 2.1], [3, 4.2], [5, 6.3]]
+        bad_elist = [
+            [1, 2.1],
+            [3, 4.2],
+            [5, 6.3],
+        ]
         dt = np.dtype([('a', int), ('b', float)])
-        tab = Table.from_elements(elist, dtype=dt)
-        assert 10 == tuple(tab.a[0])
+        print('list(list)')
+        arr_bad = np.array(bad_elist, dtype=dt)
+        print(arr_bad)
+        elist = [tuple(el) for el in bad_elist]
+        arr = np.array(elist, dtype=dt)
+        print('list(tuple)')
+        print(arr)
+        tab = Table(arr)
+        print(tab)
+        assert tab.a[0] == 1
 
     def test_sort(self):
         dt = np.dtype([('a', int), ('b', float), ('c', int)])
