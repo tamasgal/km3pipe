@@ -8,8 +8,6 @@ Usage:
     km3pipe createconf [--overwrite] [--dump]
     km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID] [-o OUTFILE]
     km3pipe detectors [-s REGEX] [--temporary]
-    km3pipe runtable [-n RUNS] [-s REGEX] [--temporary] DET_ID
-    km3pipe runinfo [--temporary] DET_ID RUN
     km3pipe rundetsn [--temporary] RUN DETECTOR
     km3pipe retrieve DET_ID RUN [-o OUTFILE]
     km3pipe (-h | --help)
@@ -21,7 +19,6 @@ Options:
     -c CALIBR_ID        Geometrical calibration ID (eg. A01466417)
     -o OUTFILE          Output filename.
     -t T0_SET           Time calibration ID (eg. A01466431)
-    -n EVENTS/RUNS      Number of events/runs.
     -s REGEX            Regular expression to filter the runsetup name/id.
     --temporary         Use a temporary session. [default: False]
     --overwrite         Overwrite existing config [default: False]
