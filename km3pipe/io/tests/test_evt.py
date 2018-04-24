@@ -1,7 +1,8 @@
 # Filename: test_evt.py
 # pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
 
-import os.path
+import os
+from os.path import join
 
 import km3pipe as kp
 from km3pipe.testing import TestCase, StringIO
@@ -14,6 +15,9 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
+
+
+TEST_DATA_DIR = os.path.dirname(kp.__file__) + '/kp-data/test_data/'
 
 
 class TestEvtPump(TestCase):
@@ -233,8 +237,7 @@ class TestEvtPump(TestCase):
 
 class TestEvtFilePump(TestCase):
     def setUp(self):
-        data_dir = os.path.dirname(kp.__file__) + '/kp-data/test_data/'
-        self.fname = data_dir + 'example_numuNC.evt'
+        self.fname = join(TEST_DATA_DIR, 'example_numuNC.evt')
 
     def test_pipe(self):
         pump = EvtPump(filename=self.fname)
@@ -253,8 +256,7 @@ class TestEvtFilePump(TestCase):
 
 class TestCorsika(TestCase):
     def setUp(self):
-        data_dir = os.path.dirname(kp.__file__) + '/kp-data/test_data/'
-        self.fname = data_dir + 'example_corant_propa.evt'
+        self.fname = join(TEST_DATA_DIR, 'example_corant_propa.evt')
 
     def test_pipe(self):
         pump = EvtPump(filename=self.fname)
