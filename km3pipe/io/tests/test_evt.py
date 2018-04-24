@@ -4,8 +4,10 @@
 import os
 from os.path import join
 
+import numpy as np
+
 import km3pipe as kp
-from km3pipe.testing import TestCase, StringIO
+from km3pipe.testing import TestCase, StringIO, skip
 from km3pipe.io.evt import EvtPump
 
 __author__ = "Tamas Gal"
@@ -148,7 +150,7 @@ class TestEvtPump(TestCase):
         self.pump.prepare_blobs()
         self.assertEqual(1, len(self.pump.event_offsets))
         blob = self.pump.get_blob(2)
-        self.assertListEqual([14, 1], blob['start_event'])
+        self.assertTupleEqual((14, 1), blob['start_event'])
         self.assertEqual(3, len(self.pump.event_offsets))
 
     def test_get_blob_raises_index_error_for_wrong_index(self):
@@ -161,36 +163,36 @@ class TestEvtPump(TestCase):
         blob = self.pump.get_blob(0)
         self.assertTrue('raw_header' in blob)
         self.assertEqual(['1'], blob['raw_header']['start_run'])
-        self.assertListEqual([12, 1], blob['start_event'])
+        self.assertTupleEqual((12, 1), blob['start_event'])
         # TODO: all the other stuff like hit, track etc.
         assert 'hit' in blob
         assert 'track_in' in blob
-        self.assertListEqual([[1.0, 44675.0, 1.0, 1170.59,
-                               5.0, 2.0, 1.0, 1170.59]],
-                             blob['hit'])
+        assert np.allclose([[1.0, 44675.0, 1.0, 1170.59,
+                             5.0, 2.0, 1.0, 1170.59]],
+                            blob['hit'])
         blob = self.pump.get_blob(1)
         assert 5 == len(blob['hit'])
-        self.assertListEqual([3.0, 20164.0, 1.0, 1178.19, 5.0,
-                              1.0, 1.0, 1178.19],
-                             blob['hit'][2])
+        assert np.allclose([3.0, 20164.0, 1.0, 1178.19, 5.0,
+                            1.0, 1.0, 1178.19],
+                           blob['hit'][2])
 
     def test_get_blob_returns_correct_events(self):
         self.pump.prepare_blobs()
         blob = self.pump.get_blob(0)
-        self.assertListEqual([12, 1], blob['start_event'])
+        self.assertTupleEqual((12, 1), blob['start_event'])
         blob = self.pump.get_blob(2)
-        self.assertListEqual([14, 1], blob['start_event'])
+        self.assertTupleEqual((14, 1), blob['start_event'])
         blob = self.pump.get_blob(1)
-        self.assertListEqual([13, 1], blob['start_event'])
+        self.assertTupleEqual((13, 1), blob['start_event'])
 
     def test_process_returns_correct_blobs(self):
         self.pump.prepare_blobs()
         blob = self.pump.process()
-        self.assertListEqual([12, 1], blob['start_event'])
+        self.assertTupleEqual((12, 1), blob['start_event'])
         blob = self.pump.process()
-        self.assertListEqual([13, 1], blob['start_event'])
+        self.assertTupleEqual((13, 1), blob['start_event'])
         blob = self.pump.process()
-        self.assertListEqual([14, 1], blob['start_event'])
+        self.assertTupleEqual((14, 1), blob['start_event'])
 
     def test_process_raises_stop_iteration_if_eof_reached(self):
         self.pump.prepare_blobs()
@@ -226,7 +228,7 @@ class TestEvtPump(TestCase):
         blobs = self.pump[:]
         blobs = list(self.pump[1:3])
         self.assertEqual(2, len(blobs))
-        self.assertEqual([13, 1], blobs[0]['start_event'])
+        self.assertEqual((13, 1), blobs[0]['start_event'])
 
     def test_create_blob_entry_for_line_ignores_corrupt_line(self):
         self.pump.blob_file = StringIO(self.corrupt_line)
@@ -262,3 +264,21 @@ class TestCorsika(TestCase):
         pump = EvtPump(filename=self.fname)
         next(pump)
         pump.finish()
+
+
+@skip
+class TestKM3Sim(TestCase):
+    def setUp(self):
+        self.fname = join(TEST_DATA_DIR, 'KM3Sim.evt')
+
+    def test_pipe(self):
+        pump = EvtPump(filename=self.fname)
+        next(pump)
+        pump.finish()
+
+    def test_hits(self):
+        pump = EvtPump(filename=self.fname)
+        blob = pump[0]
+        parse_km3sim(blob)
+        print(list(blob.keys()))
+        assert 1 == len(blob['KM3SimHits'])
