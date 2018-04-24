@@ -236,12 +236,12 @@ class EvtPump(Pump):  # pylint: disable:R0902
                 self.log.warning("Ignoring corrupt line: {}".format(line))
                 continue
             try:
-                values = split(values.strip(), callback=float)
+                values = tuple(split(values.strip(), callback=float))
             except ValueError:
                 self.log.info("Empty value: {}".format(values))
             if line.startswith('start_event:'):
                 blob = Blob()
-                blob[tag] = [int(v) for v in values]
+                blob[tag] = tuple(int(v) for v in values)
                 continue
             if tag not in blob:
                 blob[tag] = []
