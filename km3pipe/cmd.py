@@ -35,7 +35,7 @@ import os
 from datetime import datetime
 
 from . import version
-from .tools import irods_filepath, deprecated
+from .tools import irods_filepath
 from .db import DBManager
 from .hardware import Detector
 
@@ -56,25 +56,6 @@ def run_tests():
     import pytest
     import km3pipe
     pytest.main([os.path.dirname(km3pipe.__file__)])
-
-
-@deprecated(extra="This command line tool is now standalone, "
-            "please use `runtable OPTIONS` instead "
-            "(without the km3pipe prefix).")
-def runtable(det_id, n=5, sep='\t', regex=None, temporary=False):
-    """Print the run table of the last `n` runs for given detector"""
-    log.error("This command line tool is now standalone, "
-              "please use `runtable OPTIONS` instead "
-              "(without the km3pipe prefix).")
-
-
-@deprecated(extra="This command line tool is now standalone, "
-            "please use `runtable OPTIONS` instead "
-            "(without the km3pipe prefix).")
-def runinfo(run_id, det_id, temporary=False):
-    log.error("This command line tool is now standalone, "
-              "please use `runtable OPTIONS` instead "
-              "(without the km3pipe prefix).")
 
 
 def update_km3pipe(git_branch=''):
@@ -150,11 +131,6 @@ def main():
     from docopt import docopt
     args = docopt(__doc__, version=version)
 
-    try:
-        n = int(args['-n'])
-    except TypeError:
-        n = None
-
     if args['test']:
         run_tests()
 
@@ -165,14 +141,6 @@ def main():
         overwrite_conf = bool(args['--overwrite'])
         dump = bool(args['--dump'])
         createconf(overwrite_conf, dump)
-
-    if args['runtable']:
-        runtable(args['DET_ID'], n, regex=args['-s'],
-                 temporary=args["--temporary"])
-
-    if args['runinfo']:
-        runinfo(int(args['RUN']), args['DET_ID'],
-                temporary=args["--temporary"])
 
     if args['rundetsn']:
         rundetsn(int(args['RUN']), args['DETECTOR'],
