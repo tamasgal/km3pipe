@@ -318,6 +318,15 @@ def parse_km3sim(blob):
             [('id', 'f4'), ('pmt_id', '<i4'), ('pe', 'f4'), ('time', 'f4'),
              ('type', 'f4'), ('n_photons', 'f4'), ('track_in', 'f4'),
              ('c_time', 'f4'), ('unknown', 'f4')],
+        ],
+        'neutrino': [
+            'Neutrino',
+            [('id', '<i4'),
+             ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
+             ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
+             ('energy', 'f4'), ('time', 'f4'),
+             ('bjorken_x', 'f4'), ('bjorken_y', 'f4'), ('ichan', '<i4'),
+             ('particle_type', '<i4'), ('channel', '<i4')]
         ]
     }
     for key in list(blob.keys()):

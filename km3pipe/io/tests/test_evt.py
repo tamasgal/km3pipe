@@ -7,7 +7,7 @@ from os.path import join
 import numpy as np
 
 import km3pipe as kp
-from km3pipe.testing import TestCase, StringIO, skip
+from km3pipe.testing import TestCase, StringIO
 from km3pipe.io.evt import EvtPump, parse_km3sim, EVT_PARSERS
 
 __author__ = "Tamas Gal"
@@ -300,9 +300,15 @@ class TestKM3Sim(TestCase):
         pump.finish()
 
     def test_hits(self):
-        pump = EvtPump(filename=self.fname)
+        pump = EvtPump(filename=self.fname, parsers=['km3sim'])
         blob = pump[0]
-        parse_km3sim(blob)
         hits = blob['KM3SimHits']
         assert 4 == len(hits)
         assert 195749 == hits[0].pmt_id
+
+    def test_neutrino(self):
+        pump = EvtPump(filename=self.fname, parsers=['km3sim'])
+        blob = pump[0]
+        parse_km3sim(blob)
+        neutrino = blob['Neutrino'][0]
+        self.assertAlmostEqual(0.10066, neutrino.energy)
