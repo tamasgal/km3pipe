@@ -8,7 +8,7 @@ import numpy as np
 
 import km3pipe as kp
 from km3pipe.testing import TestCase, StringIO, skip
-from km3pipe.io.evt import EvtPump
+from km3pipe.io.evt import EvtPump, parse_km3sim
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -236,6 +236,17 @@ class TestEvtPump(TestCase):
         self.pump.prepare_blobs()
         self.pump.get_blob(0)
 
+    def test_parsers_are_ignored_if_not_valid(self):
+        self.pump = EvtPump(parsers=['a', 'b'])
+        self.pump.blob_file = StringIO(self.valid_evt_header)
+        assert 'a' not in self.pump.parsers
+        assert 'b' not in self.pump.parsers
+
+    def test_parsers_are_added(self):
+        self.pump = EvtPump(parsers=['km3sim'])
+        self.pump.blob_file = StringIO(self.valid_evt_header)
+        assert 'km3sim' in self.pump.parsers
+
 
 class TestEvtFilePump(TestCase):
     def setUp(self):
@@ -266,13 +277,13 @@ class TestCorsika(TestCase):
         pump.finish()
 
 
-@skip
 class TestKM3Sim(TestCase):
     def setUp(self):
         self.fname = join(TEST_DATA_DIR, 'KM3Sim.evt')
 
     def test_pipe(self):
-        pump = EvtPump(filename=self.fname)
+        pump = EvtPump(filename=self.fname, parsers=['km3sim'])
+        assert 'km3sim' in pump.parsers
         next(pump)
         pump.finish()
 
@@ -280,5 +291,5 @@ class TestKM3Sim(TestCase):
         pump = EvtPump(filename=self.fname)
         blob = pump[0]
         parse_km3sim(blob)
-        print(list(blob.keys()))
-        assert 1 == len(blob['KM3SimHits'])
+        assert 1 == blob['KM3SimHits'].shape[0]
+        assert 4 == blob['KM3SimHits'].shape[1]
