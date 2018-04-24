@@ -279,7 +279,7 @@ class HDF5Sink(Module):
                 self.h5file.set_node_attr("/", name, value)
 
         self.h5file.close()
-        self.log.info("HDF5 file written to: {}".format(self.filename))
+        print("HDF5 file written to: {}".format(self.filename))
 
 
 class HDF5Pump(Pump):
