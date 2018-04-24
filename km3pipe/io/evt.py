@@ -302,23 +302,21 @@ class EvtPump(Pump):  # pylint: disable:R0902
 
 
 def parse_km3sim(blob):
+    """Creates new blob entries for the given blob keys"""
     tags = {
         'hit': [
             'KM3SimHits',
-            # TODO: need to fix table to accept this dtype
-            # [('id', 'f4'), ('pmt_id', 'f4'), ('pe', 'f4'), ('time', 'f4'),
-            #  ('type', 'f4'), ('n_photons', 'f4'), ('track_in', 'f4'),
-            #  ('c_time', 'f4'), ('unknown', 'f4')],
-            ('id', 'pmt_id', 'pe', 'time', 'type', 'n_photons', 'track_in',
-             'c_time', 'unknown'),
+            [('id', 'f4'), ('pmt_id', 'f4'), ('pe', 'f4'), ('time', 'f4'),
+             ('type', 'f4'), ('n_photons', 'f4'), ('track_in', 'f4'),
+             ('c_time', 'f4'), ('unknown', 'f4')],
         ]
     }
     for key in list(blob.keys()):
         if key in tags.keys():
             data = blob[key]
-            out_key, colnames = tags[key]
-            arr = np.array(data).T
-            tab = Table(arr, colnames=colnames, name=out_key)
+            out_key, dtype = tags[key]
+            arr = np.array(data, dtype)
+            tab = Table(arr, name=out_key)
             blob[out_key] = tab
 
 

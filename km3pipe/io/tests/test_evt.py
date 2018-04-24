@@ -291,5 +291,4 @@ class TestKM3Sim(TestCase):
         pump = EvtPump(filename=self.fname)
         blob = pump[0]
         parse_km3sim(blob)
-        assert 1 == blob['KM3SimHits'].shape[0]
-        assert 4 == blob['KM3SimHits'].shape[1]
+        assert 4 == len(blob['KM3SimHits'])
