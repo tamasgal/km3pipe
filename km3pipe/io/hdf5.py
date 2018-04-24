@@ -350,10 +350,10 @@ class HDF5Pump(Pump):
         try:
             with tb.open_file(fn, 'r') as h5file:
                 event_info = h5file.get_node('/', 'event_info')
-            try:
-                self.group_ids[fn] = event_info.cols.group_id[:]
-            except AttributeError:
-                self.group_ids[fn] = event_info.cols.event_id[:]
+                try:
+                    self.group_ids[fn] = event_info.cols.group_id[:]
+                except AttributeError:
+                    self.group_ids[fn] = event_info.cols.event_id[:]
             self._n_each[fn] = len(self.group_ids[fn])
         except tb.NoSuchNodeError:
             self.log.critical("No /event_info table found: '{0}'"
