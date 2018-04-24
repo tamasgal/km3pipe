@@ -306,7 +306,7 @@ def parse_km3sim(blob):
     tags = {
         'hit': [
             'KM3SimHits',
-            [('id', 'f4'), ('pmt_id', 'f4'), ('pe', 'f4'), ('time', 'f4'),
+            [('id', 'f4'), ('pmt_id', '<i4'), ('pe', 'f4'), ('time', 'f4'),
              ('type', 'f4'), ('n_photons', 'f4'), ('track_in', 'f4'),
              ('c_time', 'f4'), ('unknown', 'f4')],
         ]
