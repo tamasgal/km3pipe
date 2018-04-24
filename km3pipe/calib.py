@@ -169,28 +169,28 @@ class Calibration(Module):
         The attributes ``a`` and ``origin`` are not implemented yet.
 
         """
-        n = len(hits)
-        cal = np.empty((n, 9))
-        for i in range(n):
+        n_hits = len(hits)
+        cal = np.empty((n_hits, 9))
+        for i in range(n_hits):
             lookup = self._calib_by_pmt_id
             cal[i] = lookup[hits['pmt_id'][i]]
-        h = np.empty(n, TEMPLATES['CalibMcHits']['dtype'])
-        h['channel_id'] = np.zeros(n, dtype=int)
-        h['dir_x'] = cal[:, 3]
-        h['dir_y'] = cal[:, 4]
-        h['dir_z'] = cal[:, 5]
-        h['du'] = cal[:, 7]
-        h['floor'] = cal[:, 8]
-        h['pmt_id'] = hits['pmt_id']
-        h['pos_x'] = cal[:, 0]
-        h['pos_y'] = cal[:, 1]
-        h['pos_z'] = cal[:, 2]
-        h['t0'] = cal[:, 6]
-        h['time'] = hits.time + cal[:, 6]
-        h['tot'] = np.zeros(n, dtype=int)
-        h['triggered'] = np.zeros(n, dtype=bool)
-        h['group_id'] = hits['group_id']
-        return Table.from_template(h, 'CalibMcHits')
+        dir_x = cal[:, 3]
+        dir_y = cal[:, 4]
+        dir_z = cal[:, 5]
+        du = cal[:, 7]
+        floor = cal[:, 8]
+        pos_x = cal[:, 0]
+        pos_y = cal[:, 1]
+        pos_z = cal[:, 2]
+        t0 = cal[:, 6]
+
+        hits.time += t0
+
+        return hits.append_columns(
+            ['dir_x', 'dir_y', 'dir_z', 'du', 'floor',
+             'pos_x', 'pos_y', 'pos_z', 't0'],
+            [dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0]
+        )
 
     def _create_dom_channel_lookup(self):
         data = {}
