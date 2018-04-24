@@ -320,7 +320,7 @@ def parse_km3sim(blob):
              ('c_time', 'f4'), ('unknown', 'f4')],
         ],
         'neutrino': [
-            'Neutrino',
+            'Neutrinos',
             [('id', '<i4'),
              ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
              ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
