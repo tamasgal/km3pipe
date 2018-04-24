@@ -6,7 +6,10 @@ Pumps for the EVT simulation dataformat.
 """
 import sys
 
+import numpy as np
+
 from km3pipe.core import Pump, Blob
+from km3pipe.dataclasses import Table
 from km3pipe.logger import logging
 from km3pipe.tools import split
 
@@ -36,6 +39,8 @@ class EvtPump(Pump):  # pylint: disable:R0902
     ----------
     filename: str
         The file to read the events from.
+    parsers: list of str
+        The parsers to apply for each blob (e.g. parsers=['km3sim', 'corsika'])
     cache_enabled: bool
         If enabled, a cache of the event indices is created when loading
         the file. Enable it if you want to jump around and inspect the
@@ -64,6 +69,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
 
     def configure(self):
         self.filename = self.get('filename')
+        parsers = self.get('parsers', default=[])
         self.cache_enabled = self.get('cache_enabled') or False
         self.basename = self.get('basename') or None
         self.suffix = self.get('suffix', default='')
@@ -78,6 +84,14 @@ class EvtPump(Pump):  # pylint: disable:R0902
         self.event_offsets = []
         self.index = 0
         self.whole_file_cached = False
+        self.parsers = []
+
+        for parser in parsers:
+            if parser not in EVT_PARSERS.keys():
+                self.log.warning("Parser '{}' not found, ignoring..."
+                                 .format(parsers))
+            else:
+                self.parsers.append(parser)
 
         self.file_index = int(self.index_start)
 
@@ -150,6 +164,10 @@ class EvtPump(Pump):  # pylint: disable:R0902
             self.log.info("Empty blob created...")
             raise IndexError
         else:
+            self.log.debug("Applying parsers...")
+            for parser in self.parsers:
+                print(parser)
+                EVT_PARSERS[parser](blob)
             self.log.debug("Returning the blob")
             return blob
 
@@ -281,3 +299,29 @@ class EvtPump(Pump):  # pylint: disable:R0902
     def finish(self):
         """Clean everything up"""
         self.blob_file.close()
+
+
+def parse_km3sim(blob):
+    tags = {
+        'hit': [
+            'KM3SimHits',
+            # TODO: need to fix table to accept this dtype
+            # [('id', 'f4'), ('pmt_id', 'f4'), ('pe', 'f4'), ('time', 'f4'),
+            #  ('type', 'f4'), ('n_photons', 'f4'), ('track_in', 'f4'),
+            #  ('c_time', 'f4'), ('unknown', 'f4')],
+            ('id', 'pmt_id', 'pe', 'time', 'type', 'n_photons', 'track_in',
+             'c_time', 'unknown'),
+        ]
+    }
+    for key in list(blob.keys()):
+        if key in tags.keys():
+            data = blob[key]
+            out_key, colnames = tags[key]
+            arr = np.array(data).T
+            tab = Table(arr, colnames=colnames, name=out_key)
+            blob[out_key] = tab
+
+
+EVT_PARSERS = {
+    'km3sim': parse_km3sim
+}
