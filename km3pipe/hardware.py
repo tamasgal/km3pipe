@@ -123,46 +123,42 @@ class Detector(object):
         """Extract dom information from detector file"""
         self._det_file.seek(0, 0)
         self._det_file.readline()
-        lines = self._det_file.readlines()
-        try:
-            while True:
-                line = lines.pop(0)
-                if not line:
-                    continue
-                try:
-                    dom_id, du, floor, n_pmts = split(line, int)
-                except ValueError:
-                    continue
-                self.dus.add(du)
-                self.n_pmts_per_dom = n_pmts
-                for i in range(n_pmts):
-                    raw_pmt_info = lines.pop(0)
-                    pmt_info = raw_pmt_info.split()
-                    pmt_id, x, y, z, rest = unpack_nfirst(pmt_info, 4)
-                    dx, dy, dz, t0, rest = unpack_nfirst(rest, 4)
-                    if rest:
-                        log.warning("Unexpected PMT values: {0}".format(rest))
-                    pmt_id = int(pmt_id)
-                    pmt_pos = [float(n) for n in (x, y, z)]
-                    pmt_dir = [float(n) for n in (dx, dy, dz)]
-                    t0 = float(t0)
-                    if floor < 0:
-                        _, new_floor, _ = self._pmtid2omkey_old(pmt_id)
-                        log.debug("Floor ID is negative for PMT {0}.\n"
-                                  "Guessing correct id: {1}"
-                                  .format(pmt_id, new_floor))
-                        floor = new_floor
-                    # TODO: following line is here bc of the bad MC floor IDs
-                    #      put it outside the for loop in future
-                    self.doms[dom_id] = (du, floor, n_pmts)
-                    omkey = (du, floor, i)
-                    pmt = PMT(pmt_id, pmt_pos, pmt_dir, t0, i, omkey)
-                    self.pmts.append(pmt)
-                    self._pmts_by_omkey[(du, floor, i)] = pmt
-                    self._pmts_by_id[pmt_id] = pmt
-                    self._pmts_by_dom_id[dom_id].append(pmt)
-        except IndexError:
-            pass
+        while True:
+            line = self._det_file.readline()
+            if line == '':
+                break
+            try:
+                dom_id, du, floor, n_pmts = split(line, int)
+            except ValueError:
+                continue
+            self.dus.add(du)
+            self.n_pmts_per_dom = n_pmts
+            for i in range(n_pmts):
+                raw_pmt_info = self._det_file.readline()
+                pmt_info = raw_pmt_info.split()
+                pmt_id, x, y, z, rest = unpack_nfirst(pmt_info, 4)
+                dx, dy, dz, t0, rest = unpack_nfirst(rest, 4)
+                if rest:
+                    log.warning("Unexpected PMT values: {0}".format(rest))
+                pmt_id = int(pmt_id)
+                pmt_pos = [float(n) for n in (x, y, z)]
+                pmt_dir = [float(n) for n in (dx, dy, dz)]
+                t0 = float(t0)
+                if floor < 0:
+                    _, new_floor, _ = self._pmtid2omkey_old(pmt_id)
+                    log.debug("Floor ID is negative for PMT {0}.\n"
+                              "Guessing correct id: {1}"
+                              .format(pmt_id, new_floor))
+                    floor = new_floor
+                # TODO: following line is here bc of the bad MC floor IDs
+                #      put it outside the for loop in future
+                self.doms[dom_id] = (du, floor, n_pmts)
+                omkey = (du, floor, i)
+                pmt = PMT(pmt_id, pmt_pos, pmt_dir, t0, i, omkey)
+                self.pmts.append(pmt)
+                self._pmts_by_omkey[(du, floor, i)] = pmt
+                self._pmts_by_id[pmt_id] = pmt
+                self._pmts_by_dom_id[dom_id].append(pmt)
 
     @property
     def dom_ids(self):
