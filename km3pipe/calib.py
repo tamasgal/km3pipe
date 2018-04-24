@@ -119,12 +119,14 @@ class Calibration(Module):
         if isinstance(hits, DataFrame):
             # do we ever see McHits here?
             hits = Table.from_template(hits, 'Hits')
-        if hits.name == 'Hits':
+        if hasattr(hits, 'dom_id'):
             return self._apply_to_hits(hits)
-        elif hits.name == 'McHits':
+        elif hasattr(hits, 'pmt_id'):
             return self._apply_to_mchits(hits)
         else:
-            raise TypeError("Don't know how to apply calibration to '{0}'."
+            raise TypeError("Don't know how to apply calibration to '{0}'. "
+                            "We need at least 'dom_id' and 'channel_id', or "
+                            "'pmt_id'."
                             .format(hits.name))
 
     def _apply_to_hits(self, hits):
