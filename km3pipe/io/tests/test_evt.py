@@ -310,5 +310,5 @@ class TestKM3Sim(TestCase):
         pump = EvtPump(filename=self.fname, parsers=['km3sim'])
         blob = pump[0]
         parse_km3sim(blob)
-        neutrino = blob['Neutrino'][0]
+        neutrino = blob['Neutrinos'][0]
         self.assertAlmostEqual(0.10066, neutrino.energy)
