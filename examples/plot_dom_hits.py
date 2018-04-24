@@ -54,9 +54,12 @@ class DOMHits(kp.Module):
 
         dom_hits = Counter(triggered_hits.dom_id)
         for dom_id, n_hits in dom_hits.items():
-            distance = pld3(cal.detector.dom_positions[dom_id],
-                            muon.pos,
-                            muon.dir)
+            try:
+                distance = pld3(cal.detector.dom_positions[dom_id],
+                                muon.pos,
+                                muon.dir)
+            except KeyError:
+                continue
             self.hit_statistics['n_hits'].append(n_hits)
             self.hit_statistics['distance'].append(distance)
         return blob
