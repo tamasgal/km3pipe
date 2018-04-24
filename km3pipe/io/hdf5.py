@@ -512,13 +512,32 @@ class HDF5Pump(Pump):
                     t0s = h5file.get_node("/hits/t0")[idx:end]
                     time += t0s
                     blob["CalibHits"] = Table.from_template(
-                        [channel_id, dir_x, dir_y, dir_z, dom_id, du,
-                         floor, pos_x, pos_y, pos_z, t0s, time, tot, triggered,
-                         group_id, ],
+                        {
+                            'channel_id': channel_id,
+                            'dir_x': dir_x,
+                            'dir_y': dir_y,
+                            'dir_z': dir_z,
+                            'dom_id': dom_id,
+                            'du': du,
+                            'floor': floor,
+                            'pos_x': pos_x,
+                            'pos_y': pos_y,
+                            'pos_z': pos_z,
+                            't0': t0s,
+                            'time': time,
+                            'tot': tot,
+                            'triggered': triggered,
+                            'group_id': group_id,
+                        },
                         'CalibHits')
                 else:
                     blob["Hits"] = Table.from_template(
-                        [channel_id, dom_id, time, tot, triggered, group_id],
+                        {'channel_id': channel_id,
+                         'dom_id': dom_id,
+                         'time': time,
+                         'tot': tot,
+                         'triggered': triggered,
+                         'group_id': group_id},
                         'Hits')
 
             if loc == '/mc_hits' and not self.ignore_hits:
@@ -537,13 +556,29 @@ class HDF5Pump(Pump):
                     dir_x = h5file.get_node("/mc_hits/dir_x")[idx:end]
                     dir_y = h5file.get_node("/mc_hits/dir_y")[idx:end]
                     dir_z = h5file.get_node("/mc_hits/dir_z")[idx:end]
-                    blob["CalibMcHits"] = Table.from_template(
-                        [a, dir_x, dir_y, dir_z, origin, pmt_id,
-                         pos_x, pos_y, pos_z, time, group_id],
+                    blob["CalibMcHits"] = Table.from_template({
+                        'a': a,
+                        'dir_x': dir_x,
+                        'dir_y': dir_y,
+                        'dir_z': dir_z,
+                        'origin': origin,
+                        'pmt_id': pmt_id,
+                        'pos_x': pos_x,
+                        'pos_y': pos_y,
+                        'pos_z': pos_z,
+                        'time': time,
+                        'group_id': group_id
+                    },
                         'CalibMcHits')
                 else:
                     blob["McHits"] = Table.from_template(
-                        [a, origin, pmt_id, time, group_id],
+                        {
+                            'a': a,
+                            'origin': origin,
+                            'pmt_id': pmt_id,
+                            'time': time,
+                            'group_id': group_id
+                        },
                         'McHits')
 
         return blob
