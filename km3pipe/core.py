@@ -16,7 +16,7 @@ import types
 import numpy as np
 
 from .sys import peak_memory_usage, ignored
-from .logger import logging
+from .logger import logging, get_printer
 from .time import Timer
 from .tools import AnyBar
 
@@ -313,6 +313,7 @@ class Module(object):
             self.logger_name = self.__module__ + '.' + self.__class__.__name__
         log.debug("Setting up logger '{}'".format(self.logger_name))
         self.log = logging.getLogger(self.logger_name)
+        self.print = get_printer(self.logger_name)
         self.timeit = self.get('timeit') or False
         self._timeit = {'process': deque(maxlen=STAT_LIMIT),
                         'process_cpu': deque(maxlen=STAT_LIMIT),

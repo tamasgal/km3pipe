@@ -9,6 +9,8 @@ import socket
 import logging
 import logging.config
 
+from .tools import colored
+
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
@@ -79,3 +81,10 @@ def set_level(name, level):
     """Set the log level for given logger"""
     logger = get(name)
     logger.setLevel(level)
+
+
+def get_printer(name, color='red'):
+    """Return a function which prints a message with a coloured name prefix"""
+    def printer(text):
+        print(colored(name, color) + ': ' + text)
+    return printer
