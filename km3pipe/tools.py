@@ -237,7 +237,7 @@ RESET = '\033[0m'
 RESET_RE = '\033\[0m'
 
 
-def colored(text, color=None, on_color=None, attrs=None):
+def colored(text, color=None, on_color=None, attrs=None, ansi_code=None):
     """Colorize text, while stripping nested ANSI color sequences.
 
     Author:  Konstantin Lepa <konstantin.lepa@gmail.com> / termcolor
@@ -253,6 +253,8 @@ def colored(text, color=None, on_color=None, attrs=None):
         colored('Hello, World!', 'green')
     """
     if os.getenv('ANSI_COLORS_DISABLED') is None:
+        if ansi_code is not None:
+            return "\033[38;5;{}m{}\033[0m".format(ansi_code, text)
         fmt_str = '\033[%dm%s'
         if color is not None:
             text = re.sub(COLORS_RE + '(.*?)' + RESET_RE, r'\1', text)
