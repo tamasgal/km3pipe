@@ -4,8 +4,7 @@
 The logging facility.
 
 """
-
-from itertools import cycle
+from hashlib import sha256
 import socket
 import logging
 import logging.config
@@ -19,8 +18,6 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
-
-PRINTER_SYMBOLS = cycle('-*&$#@%:~,<>=+&§')
 
 try:
     logging.config.fileConfig('logging.conf')
@@ -86,11 +83,14 @@ def set_level(name, level):
     logger.setLevel(level)
 
 
-def get_printer(name, color='cyan'):
+def get_printer(name, color=None, ansi_code=None):
     """Return a function which prints a message with a coloured name prefix"""
-    symbol = next(PRINTER_SYMBOLS)
+    if color is None and ansi_code is None:
+        ansi_code = int(sha256(name.encode('utf-8')).hexdigest(), 16) % 230
+
+    prefix = colored(name + ': ', color=color, ansi_code=ansi_code)
 
     def printer(text):
-        print(colored('[' + symbol + '] ' + name, color) + ': ' + text)
+        print(prefix + text)
 
     return printer
