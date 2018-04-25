@@ -76,8 +76,10 @@ node('master') {
     def stages = [:]
     for (int i = 0; i < docker_images.size(); i++) {
         def docker_image = docker_images[i]
-        /* stages[docker_image] = get_stages(docker_image) */
-        get_stages(docker_image)
+        stages[docker_image] = get_stages(docker_image)
+        /* get_stages(docker_image) */
     }
+
+    parallel stages
 
 }
