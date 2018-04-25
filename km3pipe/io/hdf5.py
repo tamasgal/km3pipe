@@ -323,6 +323,7 @@ class HDF5Pump(Pump):
             self.filenames.append(self.filename)
 
         self.filequeue = list(self.filenames)
+        self.h5file = None
         self._set_next_file()
 
         self.event_ids = OrderedDict()
@@ -332,15 +333,16 @@ class HDF5Pump(Pump):
             # Open all files before reading any events
             # So we can raise version mismatches etc before reading anything
             if os.path.isfile(fn):
-                h5file = tb.open_file(fn, 'r')
                 if not self.skip_version_check:
-                    check_version(h5file, fn)
+                    with tb.open_file(fn, 'r') as h5file:
+                        check_version(h5file, fn)
             else:
                 raise IOError("No such file or directory: '{0}'"
                               .format(fn))
             try:
-                event_info = h5file.get_node('/', 'event_info')
-                self.event_ids[fn] = event_info.cols.event_id[:]
+                with tb.open_file(fn, 'r') as h5file:
+                    event_info = h5file.get_node('/', 'event_info')
+                    self.event_ids[fn] = event_info.cols.event_id[:]
                 self._n_each[fn] = len(self.event_ids[fn])
             except tb.NoSuchNodeError:
                 self.log.critical("No /event_info table found: '{0}'"
@@ -349,7 +351,8 @@ class HDF5Pump(Pump):
             if self.cut_mask_node is not None:
                 if not self.cut_mask_node.startswith('/'):
                     self.cut_mask_node = '/' + self.cut_mask_node
-                self.cut_masks[fn] = h5file.get_node(self.cut_mask_node)[:]
+                with tb.open_file(fn, 'r') as h5file:
+                    self.cut_masks[fn] = h5file.get_node(self.cut_mask_node)[:]
                 self.log.debug(self.cut_masks[fn])
                 mask = self.cut_masks[fn]
                 if not mask.shape[0] == self.event_ids[fn].shape[0]:
@@ -384,7 +387,10 @@ class HDF5Pump(Pump):
     def _set_next_file(self):
         if not self.filequeue:
             raise IndexError('No more files available!')
+        if self.h5file:
+            self.h5file.close()
         self.current_file = self.filequeue.pop(0)
+        self.h5file = tb.open_file(self.current_file, 'r')
         if self.verbose:
             ("Reading %s..." % self.current_file)
 
@@ -400,7 +406,7 @@ class HDF5Pump(Pump):
         if self._need_next(index):
             self._set_next_file()
         fname = self.current_file
-        h5file = tb.open_file(fname, 'r')
+        h5file = self.h5file
         evt_ids = self.event_ids[fname]
         local_index = self._translate_index(fname, index)
         event_id = evt_ids[local_index]
