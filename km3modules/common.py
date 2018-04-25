@@ -131,6 +131,9 @@ class HitCalibrator(Module):
         self.output_key = self.get('output_key', default='CalibHits')
 
     def process(self, blob):
+        if self.input_key not in blob:
+            self.log.warn("No hits found in key '{}'.".format(self.input_key))
+            return blob
         hits = blob[self.input_key]
         chits = self.calibration.apply(hits)
         blob[self.output_key] = chits
