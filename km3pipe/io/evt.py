@@ -310,28 +310,6 @@ class EvtPump(Pump):  # pylint: disable:R0902
         self.blob_file.close()
 
 
-def parse_standard(blob):
-    """Creates blob entries from standard EVT entries."""
-    tags = {
-        'neutrino': [
-            'Neutrinos',
-            [('id', '<i4'),
-             ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
-             ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
-             ('energy', 'f4'), ('time', 'f4'),
-             ('bjorken_x', 'f4'), ('bjorken_y', 'f4'), ('ichan', '<i4'),
-             ('particle_type', '<i4'), ('channel', '<i4')]
-        ]
-    }
-    for key in list(blob.keys()):
-        if key in tags.keys():
-            data = blob[key]
-            out_key, dtype = tags[key]
-            arr = np.array(data, dtype)
-            tab = Table(arr, name=out_key)
-            blob[out_key] = tab
-
-
 def parse_km3sim(blob):
     """Creates new blob entries for the given blob keys"""
     tags = {
@@ -341,15 +319,6 @@ def parse_km3sim(blob):
              ('type', 'f4'), ('n_photons', 'f4'), ('track_in', 'f4'),
              ('c_time', 'f4'), ('unknown', 'f4')],
         ],
-        'neutrino': [
-            'Neutrinos',
-            [('id', '<i4'),
-             ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
-             ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
-             ('energy', 'f4'), ('time', 'f4'),
-             ('bjorken_x', 'f4'), ('bjorken_y', 'f4'), ('ichan', '<i4'),
-             ('particle_type', '<i4'), ('channel', '<i4')]
-        ]
     }
     for key in list(blob.keys()):
         if key in tags.keys():
@@ -402,5 +371,4 @@ def parse_gseagen(blob):
 EVT_PARSERS = {
     'km3sim': parse_km3sim,
     'gseageon': parse_gseagen,
-    'standard': parse_standard,
 }
