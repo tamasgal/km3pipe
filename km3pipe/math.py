@@ -9,7 +9,8 @@ from matplotlib.path import Path
 import numpy as np
 from scipy import linalg, stats
 from sklearn.neighbors import KernelDensity
-
+from sklearn.utils import check_array
+from statsmodels.nonparametric.kernel_density import KDEMultivariate
 
 from .logger import logging
 
@@ -535,27 +536,46 @@ class rv_kde(stats.rv_continuous):
     """Create a `scipy.stats.rv_continuous` instance from a (gaussian) KDE.
 
     Uses the KDE implementation from sklearn.
+
+    Automatic bandwidth,  either from the statsmodels or scipy implementation.
     """
-    def __init__(self, data, bw=None, **fitargs):
-        data = np.atleast_1d(data)
+    def __init__(self, data, bw=None, bw_method=None, bw_statsmodels=False,
+                 **kde_args):
+        data = check_array(data, order='C')
         if bw is None:
-            bw = self._bandwidth(data, **fitargs)
-        data = data.reshape(-1, 1)
-        self.kde = KernelDensity(bandwidth=bw).fit(data)
+            if bw_statsmodels:
+                bw = self._bandwidth_statsmodels(data, bw_method)
+            else:
+                bw = self._bandwidth_scipy(data, bw_method)
+        self._bw = bw
+        self._kde = KernelDensity(bandwidth=bw, **kde_args).fit(data)
         super(rv_kde, self).__init__(name='KDE')
 
-    def _bandwidth(cls, sample, **fitargs):
-        gkde = stats.gaussian_kde(sample, **fitargs)
+    def _bandwidth_statsmodels(cls, sample, bw_method=None):
+        # all continuous
+        vt = sample.ndim * 'c'
+        skde = KDEMultivariate(sample, var_type=vt)
+        bw = skde.bw
+        return bw
+
+    def _bandwidth_scipy(cls, sample, bw_method=None):
+        # sklearn expects switched shape versus scipy
+        sample = sample.T
+        gkde = stats.gaussian_kde(sample, bw_method=None)
         f = gkde.covariance_factor()
         bw = f * sample.std()
         return bw
 
-    def _pdf(self, x):
-        x = np.atleast_1d(x).reshape(-1, 1)
-        log_pdf = self.kde.score_samples(x)
+    def pdf(self, x):
+        # we implement `pdf` instead of `_pdf`, since
+        # otherwise scipy performs reshaping of `x` which messes
+        # things up for sklearn -- we wanna reshape ourselves!
+        x = check_array(x, order='C')
+        log_pdf = self._kde.score_samples(x)
         pdf = np.exp(log_pdf)
         return pdf
 
-    def _rvs(self, *args, **kwargs):
+    def _rvs(self, *args, random_state=None, **kwargs):
         # don't ask me why it uses `self._size`
-        return self.kde.sample(n_samples=self._size)
+        return self._kde.sample(n_samples=self._size,
+                                random_state=random_state)
