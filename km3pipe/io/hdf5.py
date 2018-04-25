@@ -211,10 +211,9 @@ class HDF5Sink(Module):
         except AttributeError:
             title = key
 
-        # TODO: this is currently breaking
-        # if isinstance(data, Table):
-        #     if 'group_id' not in data:
-        #         data.append_column('group_id', self.index)
+        if isinstance(data, Table):
+            if 'group_id' not in data:
+                data.append_columns('group_id', self.index)
 
         self.log.debug("h5l: '{}', title '{}'".format(h5loc, title))
 
