@@ -118,7 +118,7 @@ class HitCounter(Module):
 
     def process(self, blob):
         try:
-            print("Number of hits: {0}".format(len(blob['Hit'])))
+            self.print("Number of hits: {0}".format(len(blob['Hit'])))
         except KeyError:
             pass
         return blob
@@ -223,7 +223,7 @@ class Cut(Module):
         ok = df.eval(self.cond).all()
         if not ok:
             if self.verbose:
-                print('Condition "%s" not met, dropping...' % self.cond)
+                self.print('Condition "%s" not met, dropping...' % self.cond)
             return
         blob[self.key] = df
         return blob
