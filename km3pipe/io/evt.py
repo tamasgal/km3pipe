@@ -370,5 +370,5 @@ def parse_gseagen(blob):
 
 EVT_PARSERS = {
     'km3sim': parse_km3sim,
-    'gseageon': parse_gseagen,
+    'gseagen': parse_gseagen,
 }
