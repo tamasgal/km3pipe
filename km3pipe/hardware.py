@@ -14,7 +14,7 @@ from .tools import unpack_nfirst, split
 from .math import com  # , ignored
 from .db import DBManager
 
-from .logger import logging
+from .logger import logging, get_printer
 
 if sys.version_info[0] > 2:
     from io import StringIO
@@ -71,12 +71,15 @@ class Detector(object):
         self._pmt_angles = []
         self._xy_pos = []
 
+        self.print = get_printer(self.__class__.__name__)
+
         if filename:
             self._init_from_file(filename)
 
         if det_id is not None:
-            print("Retrieving DETX with detector ID {0} from the database..."
-                  .format(det_id))
+            self.print("Retrieving DETX with detector ID {0} "
+                       "from the database..."
+                       .format(det_id))
             db = DBManager()
             detx = db.detx(det_id, t0set=t0set, calibration=calibration)
             self._det_file = StringIO(detx)
@@ -100,7 +103,7 @@ class Detector(object):
 
     def _parse_header(self):
         """Extract information from the header of the detector file"""
-        print("Parsing the DETX header")
+        self.print("Parsing the DETX header")
         self._det_file.seek(0, 0)
         first_line = self._det_file.readline()
         try:
@@ -122,7 +125,7 @@ class Detector(object):
     # pylint: disable=C0103
     def _parse_doms(self):
         """Extract dom information from detector file"""
-        print("Reading PMT information...")
+        self.print("Reading PMT information...")
         self._det_file.seek(0, 0)
         self._det_file.readline()
         while True:
@@ -227,7 +230,7 @@ class Detector(object):
         """Save detx file."""
         with open(filename, 'w') as f:
             f.write(self.ascii)
-        print("Detector file saved as '{0}'".format(filename))
+        self.print("Detector file saved as '{0}'".format(filename))
 
     def pmt_with_id(self, pmt_id):
         """Get PMT with global pmt_id"""
