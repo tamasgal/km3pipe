@@ -10,4 +10,5 @@ twine
 pydocstyle
 cython
 numba
+llvmlite
 requests
