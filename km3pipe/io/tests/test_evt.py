@@ -307,7 +307,7 @@ class TestKM3Sim(TestCase):
         assert 195749 == hits[0].pmt_id
 
     def test_neutrino(self):
-        pump = EvtPump(filename=self.fname, parsers=['km3sim'])
+        pump = EvtPump(filename=self.fname, parsers=['gseagen', 'km3sim'])
         blob = pump[0]
         parse_km3sim(blob)
         neutrino = blob['Neutrinos'][0]
