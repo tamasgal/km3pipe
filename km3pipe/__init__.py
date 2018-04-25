@@ -13,27 +13,28 @@ except NameError:
 
 if not __KM3PIPE_SETUP__:
     from .core import (Pipeline, Module, Pump, Blob, Run, Geometry)  # noqa
-    from . import core
-    from . import dataclasses
-    from . import calib
-    from . import cmd
-    from . import common
-    from . import config
-    from . import constants
-    from . import controlhost
-    from . import db
-    from . import hardware
-    from . import io
-    from . import logger
-    from . import math
-    from . import mc
-    from . import shell
-    from . import srv
-    from . import style
-    from . import sys
-    # from . import testing
-    from . import time
-    from . import tools
+    from . import core      # noqa
+    from .dataclasses import Table      # noqa
+    from . import dataclasses       # noqa
+    from . import calib     # noqa
+    from . import cmd       # noqa
+    from . import common        # noqa
+    from . import config        # noqa
+    from . import constants     # noqa
+    from . import controlhost       # noqa
+    from . import db        # noqa
+    from . import hardware      # noqa
+    from . import io        # noqa
+    from . import logger        # noqa
+    from . import math      # noqa
+    from . import mc        # noqa
+    from . import shell     # noqa
+    from . import srv       # noqa
+    from . import style     # noqa
+    from . import sys       # noqa
+    # from . import testing     # noqa
+    from . import time      # noqa
+    from . import tools     # noqa
 
 
 __author__ = "Tamas Gal and Moritz Lotze"
