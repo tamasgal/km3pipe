@@ -100,6 +100,7 @@ class Detector(object):
 
     def _parse_header(self):
         """Extract information from the header of the detector file"""
+        print("Parsing the DETX header")
         self._det_file.seek(0, 0)
         first_line = self._det_file.readline()
         try:
@@ -121,6 +122,7 @@ class Detector(object):
     # pylint: disable=C0103
     def _parse_doms(self):
         """Extract dom information from detector file"""
+        print("Reading PMT information...")
         self._det_file.seek(0, 0)
         self._det_file.readline()
         while True:

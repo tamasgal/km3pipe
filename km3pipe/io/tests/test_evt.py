@@ -7,8 +7,8 @@ from os.path import join
 import numpy as np
 
 import km3pipe as kp
-from km3pipe.testing import TestCase, StringIO, skip
-from km3pipe.io.evt import EvtPump, parse_km3sim
+from km3pipe.testing import TestCase, StringIO
+from km3pipe.io.evt import EvtPump, parse_km3sim, EVT_PARSERS
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -245,7 +245,19 @@ class TestEvtPump(TestCase):
     def test_parsers_are_added(self):
         self.pump = EvtPump(parsers=['km3sim'])
         self.pump.blob_file = StringIO(self.valid_evt_header)
-        assert 'km3sim' in self.pump.parsers
+        assert EVT_PARSERS['km3sim'] in self.pump.parsers
+
+    def test_custom_parser(self):
+        def a_parser(blob):
+            blob['foo'] = 23
+
+        self.pump = EvtPump(parsers=[a_parser])
+        self.pump.blob_file = StringIO(self.valid_evt_header)
+        self.pump.extract_header()
+        self.pump.prepare_blobs()
+        blob = self.pump[0]
+
+        assert 23 == blob['foo']
 
 
 class TestEvtFilePump(TestCase):
@@ -283,12 +295,20 @@ class TestKM3Sim(TestCase):
 
     def test_pipe(self):
         pump = EvtPump(filename=self.fname, parsers=['km3sim'])
-        assert 'km3sim' in pump.parsers
+        assert EVT_PARSERS['km3sim'] in pump.parsers
         next(pump)
         pump.finish()
 
     def test_hits(self):
-        pump = EvtPump(filename=self.fname)
+        pump = EvtPump(filename=self.fname, parsers=['km3sim'])
+        blob = pump[0]
+        hits = blob['KM3SimHits']
+        assert 4 == len(hits)
+        assert 195749 == hits[0].pmt_id
+
+    def test_neutrino(self):
+        pump = EvtPump(filename=self.fname, parsers=['km3sim'])
         blob = pump[0]
         parse_km3sim(blob)
-        assert 4 == len(blob['KM3SimHits'])
+        neutrino = blob['Neutrinos'][0]
+        self.assertAlmostEqual(0.10066, neutrino.energy)

@@ -55,12 +55,12 @@ class Calibration(Module):
     name = 'Calibration'
 
     def configure(self):
-        self._should_apply = self.get('apply') or False
-        self.filename = self.get('filename') or None
-        self.det_id = self.get('det_id') or None
-        self.t0set = self.get('t0set') or None
-        self.calibration = self.get('calibration') or None
-        self.detector = self.get('detector') or None
+        self._should_apply = self.get('apply', default=False)
+        self.filename = self.get('filename')
+        self.det_id = self.get('det_id')
+        self.t0set = self.get('t0set')
+        self.calibration = self.get('calibration')
+        self.detector = self.get('detector')
         self._pos_dom_channel = None
         self._dir_dom_channel = None
         self._t0_dom_channel = None

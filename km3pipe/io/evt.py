@@ -39,8 +39,11 @@ class EvtPump(Pump):  # pylint: disable:R0902
     ----------
     filename: str
         The file to read the events from.
-    parsers: list of str
-        The parsers to apply for each blob (e.g. parsers=['km3sim', 'corsika'])
+    parsers: list of str or callables
+        The parsers to apply for each blob (e.g. parsers=['km3sim', a_parser])
+        You can also pass your own function, which takes a single argument
+        `blob` and mutates it. `str` values will be looked up in the
+        `kp.io.evt.EVT_PARSERS` dictionary and ignored if not found.
     cache_enabled: bool
         If enabled, a cache of the event indices is created when loading
         the file. Enable it if you want to jump around and inspect the
@@ -86,12 +89,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
         self.whole_file_cached = False
         self.parsers = []
 
-        for parser in parsers:
-            if parser not in EVT_PARSERS.keys():
-                self.log.warning("Parser '{}' not found, ignoring..."
-                                 .format(parsers))
-            else:
-                self.parsers.append(parser)
+        self._register_parsers(parsers)
 
         self.file_index = int(self.index_start)
 
@@ -108,6 +106,18 @@ class EvtPump(Pump):  # pylint: disable:R0902
             print("Opening {0}".format(self.filename))
             self.open_file(self.filename)
             self.prepare_blobs()
+
+    def _register_parsers(self, parsers):
+        for parser in parsers:
+            if callable(parser):
+                self.parsers.append(parser)
+                continue
+
+            if parser in EVT_PARSERS.keys():
+                self.parsers.append(EVT_PARSERS[parser])
+            else:
+                self.log.warning("Parser '{}' not found, ignoring..."
+                                 .format(parsers))
 
     def _reset(self):
         """Clear the cache."""
@@ -166,8 +176,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
         else:
             self.log.debug("Applying parsers...")
             for parser in self.parsers:
-                print(parser)
-                EVT_PARSERS[parser](blob)
+                parser(blob)
             self.log.debug("Returning the blob")
             return blob
 
@@ -309,6 +318,15 @@ def parse_km3sim(blob):
             [('id', 'f4'), ('pmt_id', '<i4'), ('pe', 'f4'), ('time', 'f4'),
              ('type', 'f4'), ('n_photons', 'f4'), ('track_in', 'f4'),
              ('c_time', 'f4'), ('unknown', 'f4')],
+        ],
+        'neutrino': [
+            'Neutrinos',
+            [('id', '<i4'),
+             ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
+             ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
+             ('energy', 'f4'), ('time', 'f4'),
+             ('bjorken_x', 'f4'), ('bjorken_y', 'f4'), ('ichan', '<i4'),
+             ('particle_type', '<i4'), ('channel', '<i4')]
         ]
     }
     for key in list(blob.keys()):

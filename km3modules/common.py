@@ -124,6 +124,19 @@ class HitCounter(Module):
         return blob
 
 
+class HitCalibrator(Module):
+    """A very basic hit calibrator, which requires a `Calibration` module."""
+    def configure(self):
+        self.input_key = self.get('input_key', default='Hits')
+        self.output_key = self.get('output_key', default='CalibHits')
+
+    def process(self, blob):
+        hits = blob[self.input_key]
+        chits = self.calibration.apply(hits)
+        blob[self.output_key] = chits
+        return blob
+
+
 class BlobIndexer(Module):
     """Puts an incremented index in each blob for the key 'blob_index'"""
 
