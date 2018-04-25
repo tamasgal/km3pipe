@@ -8,7 +8,4 @@ pytest-pylint
 pytest-watch
 twine
 pydocstyle
-cython
-numba
-llvmlite
 requests
