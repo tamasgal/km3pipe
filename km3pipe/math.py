@@ -560,4 +560,4 @@ class rv_kde(stats.rv_continuous):
 
     def _rvs(self, *args, **kwargs):
         # don't ask me why it uses `self._size`
-        return self.kde.sample(n_samples=self._size)
+        return np.exp(self.kde.sample(n_samples=self._size))
