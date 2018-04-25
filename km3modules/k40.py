@@ -54,7 +54,7 @@ class K40BackgroundSubtractor(kp.Module):
     def process(self, blob):
         if self.mode != 'online':
             return blob
-        print('Subtracting random background calculated from single rates')
+        self.print('Subtracting random background calculated from single rates')
         corrected_counts = self.subtract_background()
         blob['CorrectedTwofoldCounts'] = corrected_counts
 
@@ -88,7 +88,7 @@ class K40BackgroundSubtractor(kp.Module):
 
     def finish(self):
         if self.mode == 'offline':
-            print('Subtracting background calculated from summaryslices.')
+            self.print('Subtracting background calculated from summaryslices.')
             self.corrected_counts = self.subtract_background()
 
     def dump(self, mean_rates, corrected_counts, livetime):
@@ -148,11 +148,11 @@ class IntraDOMCalibrator(kp.Module):
         return blob
 
     def calibrate(self, twofold_counts, fit_background=False):
-        print("Starting calibration:")
+        self.print("Starting calibration:")
         calibration = {}
 
         for dom_id, data in twofold_counts.items():
-            print(" calibrating DOM '{0}'".format(dom_id))
+            self.print(" calibrating DOM '{0}'".format(dom_id))
             try:
                 livetime = self.services['GetLivetime']()[dom_id]
                 calib = calibrate_dom(dom_id, data,
@@ -169,18 +169,19 @@ class IntraDOMCalibrator(kp.Module):
 
     def finish(self):
         if self.mode == 'offline':
-            print("Starting offline calibration")
+            self.print("Starting offline calibration")
             if 'GetCorrectedTwofoldCounts' in self.services:
-                print("Using corrected twofold counts")
+                self.print("Using corrected twofold counts")
                 twofold_counts = self.services['GetCorrectedTwofoldCounts']()
                 fit_background = False
             else:
-                print("Using uncorrected twofold counts")
+                self.print("Using uncorrected twofold counts")
                 twofold_counts = self.services['TwofoldCounts']
                 fit_background = True
             calibration = self.calibrate(twofold_counts,
                                          fit_background=fit_background)
-            print("Dumping calibration to '{}'.".format(self.calib_filename))
+            self.print("Dumping calibration to '{}'."
+                       .format(self.calib_filename))
             with open(self.calib_filename, 'wb') as f:
                 pickle.dump(calibration, f)
 
@@ -262,7 +263,7 @@ class TwofoldCounter(kp.Module):
 
     def dump(self):
         """Write coincidence counts into a Python pickle"""
-        print("Dumping data to {}".format(self.dump_filename))
+        self.print("Dumping data to {}".format(self.dump_filename))
         pickle.dump({'data': self.counts,
                      'livetime': self.get_livetime()},
                     open(self.dump_filename, "wb"))
@@ -333,7 +334,7 @@ class MedianPMTRatesService(kp.Module):
             self.rates[dom_id][channel_id].append(rate)
 
     def get_median_rates(self):
-        print("Calculating median PMT rates.")
+        self.print("Calculating median PMT rates.")
         median_rates = {}
         for dom_id in self.rates.keys():
             median_rates[dom_id] = [np.median(self.rates[dom_id][c])
@@ -345,9 +346,9 @@ class MedianPMTRatesService(kp.Module):
 class ResetTwofoldCounts(kp.Module):
     def process(self, blob):
         if 'DumpTwofoldCounts' in self.services:
-            print("Request twofold dump...")
+            self.print("Request twofold dump...")
             self.services['DumpTwofoldCounts']()
-        print("Resetting twofold counts")
+        self.print("Resetting twofold counts")
         self.services['ResetTwofoldCounts']()
         return blob
 
