@@ -103,7 +103,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
             self.log.info("Constructed filename: {}".format(self.filename))
 
         if self.filename:
-            print("Opening {0}".format(self.filename))
+            self.print("Opening {0}".format(self.filename))
             self.open_file(self.filename)
             self.prepare_blobs()
 
@@ -198,7 +198,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
                 self.filename = "{}{}{}.evt"  \
                                 .format(self.basename, file_index, self.suffix)
                 self.log.info("Next filename: {}".format(self.filename))
-                print("Opening {0}".format(self.filename))
+                self.print("Opening {0}".format(self.filename))
                 self.open_file(self.filename)
                 self.prepare_blobs()
                 try:
@@ -218,7 +218,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
         """Cache all event offsets."""
         if not up_to_index:
             if verbose:
-                print("Caching event file offsets, this may take a minute.")
+                self.print("Caching event file offsets, this may take a bit.")
             self.blob_file.seek(0, 0)
             self.event_offsets = []
             if not self.raw_header:
@@ -238,7 +238,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
         self.event_offsets.pop()  # get rid of the last entry
         if not up_to_index:
             self.whole_file_cached = True
-        print("\n{0} events indexed.".format(len(self.event_offsets)))
+        self.print("\n{0} events indexed.".format(len(self.event_offsets)))
 
     def _record_offset(self):
         """Stores the current file pointer position"""
