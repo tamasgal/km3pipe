@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* Fixed a bug, where ``kp.io.hdf5.HDF5Pump`` opened an HDF5 file multiple times
 
 Version 7
 ---------
