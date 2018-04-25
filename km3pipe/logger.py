@@ -83,7 +83,7 @@ def set_level(name, level):
     logger.setLevel(level)
 
 
-def get_printer(name, color='red'):
+def get_printer(name, color='cyan'):
     """Return a function which prints a message with a coloured name prefix"""
     def printer(text):
         print(colored(name, color) + ': ' + text)
