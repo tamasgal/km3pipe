@@ -286,7 +286,18 @@ class Table(np.recarray):
             elif len(values) == 1:
                 values = np.full(n, values[0])
         new_arr = rfn.append_fields(self, colnames, values,
-                                    usemask=False, **kwargs)
+                                    usemask=False, asrecarray=True, **kwargs)
+        return self.__class__(new_arr, h5loc=self.h5loc,
+                              split_h5=self.split_h5, name=self.name)
+
+    def drop_columns(self, colnames, **kwargs):
+        """Drop  columns from the table.
+
+        See the docs for ``numpy.lib.recfunctions.drop_fields`` for an
+        explanation of the remaining options.
+        """
+        new_arr = rfn.drop_fields(self, colnames,
+                                  usemask=False, asrecarray=True, **kwargs)
         return self.__class__(new_arr, h5loc=self.h5loc,
                               split_h5=self.split_h5, name=self.name)
 
