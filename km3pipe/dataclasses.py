@@ -324,6 +324,9 @@ class Table(np.recarray):
     def __repr__(self):
         return str(self)
 
+    def __contains__(self, elem):
+        return elem in self.dtype.names
+
     @property
     def dir(self):
         return np.array([self.dir_x, self.dir_y, self.dir_z]).T

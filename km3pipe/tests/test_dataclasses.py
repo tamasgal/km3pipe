@@ -460,3 +460,17 @@ class TestTable(TestCase):
         tab = Table(arr)
         assert 2 == len(tab[tab.c])
         assert 1 == len(tab[tab.b > 3.0])
+
+    def test_contains(self):
+        dt = np.dtype([('a', int), ('b', float), ('c', bool)])
+        arr = np.array([
+            (0, 1.0, True),
+            (2, 3.0, False),
+            (4, 5.0, True),
+        ], dtype=dt)
+        tab = Table(arr)
+        assert 'a' in tab
+        assert 'b' in tab
+        assert 'c' in tab
+        assert 'd' not in tab
+
