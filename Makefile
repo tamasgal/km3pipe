@@ -21,9 +21,10 @@ clean:
 	rm -f $(PKGNAME)/*.so
 
 test: 
-	py.test --junitxml=./junit.xml || true
-	py.test km3modules || true
+	py.test --junitxml=./junit.xml km3pipe || true
 
+test-km3modules: 
+	py.test --junitxml=./junit_km3modules.xml km3modules || true
 
 test-cov:
 	py.test --junitxml=./junit.xml \
@@ -58,4 +59,4 @@ dev-dependencies:
 doc-dependencies:
 	pip install -Ur sphinx_requirements.txt
 
-.PHONY: all clean build install test test-nocov flake8 pep8 dependencies dev-dependencies doc-dependencies docstyle
+.PHONY: all clean build install test test-km3modules test-nocov flake8 pep8 dependencies dev-dependencies doc-dependencies docstyle
