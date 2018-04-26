@@ -16,7 +16,8 @@ def get_stages(docker_image) {
                 sh "python -m venv ${PYTHON_VENV}"
                 sh """
                     . ${PYTHON_VENV}/bin/activate
-                    pip install -U pip setuptools wheel
+                    which -a pip
+                    which -a python
                 """
             }
             stage("Build") {
