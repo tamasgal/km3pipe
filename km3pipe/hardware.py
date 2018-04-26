@@ -140,15 +140,15 @@ class Detector(object):
                 dom_id, du, floor, n_pmts = split(line, int)
             except ValueError:
                 continue
-            if du == 1 and floor == -1:
-                log.warning("Floor ID is -1 (Jpp conversion bug), "
-                            "using our own floor ID!")
 
             if du != self._current_du:
                 log.debug("Next DU, resetting floor to 1.")
                 self._current_du = du
                 self.dus.append(du)
                 self._current_floor = 1
+                if du == 1 and floor == -1:
+                    log.warning("Floor ID is -1 (Jpp conversion bug), "
+                                "using our own floor ID!")
             else:
                 self._current_floor += 1
 
