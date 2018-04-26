@@ -1,9 +1,17 @@
 Unreleased changes
 ------------------
-* Fixed a bug, where ``kp.io.hdf5.HDF5Pump`` opened an HDF5 file multiple times
 
 Version 7
 ---------
+
+7.18.1 / 2018-04-26
+~~~~~~~~~~~~~~~~~~~
+* IMPORTANT NOTE: This is probably the last release of v7, which means
+  that this is also the last patch for Python 2.7 users. Please switch
+  to Python 3 NOW!
+* Fixed a bug, where ``kp.io.hdf5.HDF5Pump`` opened an HDF5 file multiple times
+* ``Detector`` is now super fast when parsing DETX files and also guesses
+  the right floor IDs for non-standard (and faulty) DETX formats.
 
 7.18 / 2018-04-17
 ~~~~~~~~~~~~~~~~~~~
