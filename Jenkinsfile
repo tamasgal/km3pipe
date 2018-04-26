@@ -13,7 +13,10 @@ def get_stages(docker_image) {
                     """
                 } else {
                     sh 'python -m venv venv'
-                    sh 'pip install -U pip setuptools wheel'
+                    sh """
+                        . venv/bin/activate
+                        pip install -U pip setuptools wheel
+                    """
                 }
             }
             stage("Build") {
