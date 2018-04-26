@@ -88,6 +88,18 @@ def get_stages(docker_image) {
                     throw e
                 }
             }
+            stage('Test KM3Modules') {
+                try { 
+                    sh """
+                        . venv/bin/activate
+                        make test-km3modules
+                    """
+                    junit 'junit.xml'
+                } catch (e) { 
+                    rocketSend channel: '#km3pipe', message: "KM3Modules Test Suite Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+                    throw e
+                }
+            }
             stage('Docs') {
                 try { 
                     sh """
