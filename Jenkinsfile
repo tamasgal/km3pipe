@@ -3,7 +3,7 @@ def docker_images = ["python:3.5.5", "python:3.6.4", "python:3.6.5"]
 def get_stages(docker_image) {
     stages = {
         docker.image(docker_image).inside {
-            def python_venv = docker_image + '_' + 'venv'
+            def python_venv = "${docker_image}_venv"
 
             stage("${docker_image}") {
                 echo 'Running in ${docker_image}'
