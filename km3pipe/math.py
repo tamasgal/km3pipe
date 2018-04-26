@@ -12,8 +12,8 @@ from __future__ import division, absolute_import, print_function
 
 from matplotlib.path import Path
 import numpy as np
-import scipy.linalg
-import scipy.stats
+from scipy import linalg, stats
+from sklearn.neighbors import KernelDensity
 
 
 from .logger import logging
@@ -183,13 +183,13 @@ def unit_vector(vector, **kwargs):
     vector = np.array(vector)
     out_shape = vector.shape
     vector = np.atleast_2d(vector)
-    unit = vector / scipy.linalg.norm(vector, axis=1, **kwargs)[:, None]
+    unit = vector / linalg.norm(vector, axis=1, **kwargs)[:, None]
     return unit.reshape(out_shape)
 
 
 def pld3(p1, p2, d2):
     """Calculate the point-line-distance for given point and line."""
-    return scipy.linalg.norm(np.cross(d2, p2 - p1)) / scipy.linalg.norm(d2)
+    return linalg.norm(np.cross(d2, p2 - p1)) / linalg.norm(d2)
 
 
 def lpnorm(x, p=2):
@@ -423,7 +423,7 @@ def log_b(arg, base):
     return np.log(arg) / np.log(base)
 
 
-class loguniform(scipy.stats.rv_continuous):
+class loguniform(stats.rv_continuous):
     """Loguniform Distributon"""
     def __init__(self, low=0.1, high=1, base=10, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
@@ -531,3 +531,33 @@ def bootstrap_fit(rv_cont, data, n_iter=10, quant=95, print_params=True):
         'upper limit': up,
     }
     return out
+
+
+class rv_kde(stats.rv_continuous):
+    """Create a `scipy.stats.rv_continuous` instance from a (gaussian) KDE.
+
+    Uses the KDE implementation from sklearn.
+    """
+    def __init__(self, data, bw=None, **fitargs):
+        data = np.atleast_1d(data)
+        if bw is None:
+            bw = self._bandwidth(data, **fitargs)
+        data = data.reshape(-1, 1)
+        self.kde = KernelDensity(bandwidth=bw).fit(data)
+        super(rv_kde, self).__init__(name='KDE')
+
+    def _bandwidth(cls, sample, **fitargs):
+        gkde = stats.gaussian_kde(sample, **fitargs)
+        f = gkde.covariance_factor()
+        bw = f * sample.std()
+        return bw
+
+    def _pdf(self, x):
+        x = np.atleast_1d(x).reshape(-1, 1)
+        log_pdf = self.kde.score_samples(x)
+        pdf = np.exp(log_pdf)
+        return pdf
+
+    def _rvs(self, *args, **kwargs):
+        # don't ask me why it uses `self._size`
+        return np.exp(self.kde.sample(n_samples=self._size))
