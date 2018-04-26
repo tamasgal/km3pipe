@@ -55,7 +55,7 @@ class Detector(object):
         self._det_file = None
         self.det_id = None
         self.n_doms = None
-        self.dus = set()
+        self.dus = []
         self.n_pmts_per_dom = None
         self.doms = OrderedDict()
         self.pmts = []
@@ -70,6 +70,7 @@ class Detector(object):
         self._pmts_by_dom_id = defaultdict(list)
         self._pmt_angles = []
         self._xy_pos = []
+        self._current_du = None
 
         self.print = get_printer(self.__class__.__name__)
 
@@ -130,14 +131,41 @@ class Detector(object):
         self._det_file.readline()
         while True:
             line = self._det_file.readline()
+
             if line == '':
+                self.print("Done.")
                 break
+
             try:
                 dom_id, du, floor, n_pmts = split(line, int)
             except ValueError:
                 continue
-            self.dus.add(du)
-            self.n_pmts_per_dom = n_pmts
+            if du == 1 and floor == -1:
+                log.warning("Floor ID is -1 (Jpp conversion bug), "
+                            "using our own floor ID!")
+
+            if du != self._current_du:
+                log.debug("Next DU, resetting floor to 1.")
+                self._current_du = du
+                self.dus.append(du)
+                self._current_floor = 1
+            else:
+                self._current_floor += 1
+
+            if floor == -1:
+                log.debug("Setting floor ID to our own ID")
+                floor = self._current_floor
+
+            self.doms[dom_id] = (du, floor, n_pmts)
+
+            if self.n_pmts_per_dom is None:
+                self.n_pmts_per_dom = n_pmts
+
+            if self.n_pmts_per_dom != n_pmts:
+                log.warning("DOMs with different number of PMTs are "
+                            "detected, this can cause some unexpected "
+                            "behaviour.")
+
             for i in range(n_pmts):
                 raw_pmt_info = self._det_file.readline()
                 pmt_info = raw_pmt_info.split()
@@ -149,15 +177,6 @@ class Detector(object):
                 pmt_pos = [float(n) for n in (x, y, z)]
                 pmt_dir = [float(n) for n in (dx, dy, dz)]
                 t0 = float(t0)
-                if floor < 0:
-                    _, new_floor, _ = self._pmtid2omkey_old(pmt_id)
-                    log.debug("Floor ID is negative for PMT {0}.\n"
-                              "Guessing correct id: {1}"
-                              .format(pmt_id, new_floor))
-                    floor = new_floor
-                # TODO: following line is here bc of the bad MC floor IDs
-                #      put it outside the for loop in future
-                self.doms[dom_id] = (du, floor, n_pmts)
                 omkey = (du, floor, i)
                 pmt = PMT(pmt_id, pmt_pos, pmt_dir, t0, i, omkey)
                 self.pmts.append(pmt)
@@ -247,15 +266,6 @@ class Detector(object):
 
     def pmtid2omkey(self, pmt_id):
         return self._pmts_by_id[int(pmt_id)].omkey
-
-    def _pmtid2omkey_old(self, pmt_id,
-                         first_pmt_id=1, oms_per_du=18, pmts_per_om=31):
-        """Convert (consecutive) raw PMT IDs to Multi-OMKeys."""
-        pmts_du = oms_per_du * pmts_per_om
-        du = ((pmt_id - first_pmt_id) // pmts_du) + 1
-        om = oms_per_du - (pmt_id - first_pmt_id) % pmts_du // pmts_per_om
-        pmt = (pmt_id - first_pmt_id) % pmts_per_om
-        return int(du), int(om), int(pmt)
 
     def domid2floor(self, dom_id):
         _, floor, _ = self.doms[dom_id]

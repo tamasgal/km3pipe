@@ -147,26 +147,6 @@ class TestDetector(TestCase):
         pmt = self.det.get_pmt(7, 2)
         self.assertEqual((1, 2, 2), pmt.omkey)
 
-    def test_pmtid2omkey_old(self):
-        pmtid2omkey = self.det._pmtid2omkey_old
-        self.assertEqual((1, 13, 12), tuple(pmtid2omkey(168)))
-        self.assertEqual((1, 12, 18), tuple(pmtid2omkey(205)))
-        self.assertEqual((1, 11, 22), tuple(pmtid2omkey(240)))
-        self.assertEqual((4, 11, 2), tuple(pmtid2omkey(1894)))
-        self.assertEqual((9, 18, 0), tuple(pmtid2omkey(4465)))
-        self.assertEqual((95, 7, 16), tuple(pmtid2omkey(52810)))
-        self.assertEqual((95, 4, 13), tuple(pmtid2omkey(52900)))
-
-    def test_pmtid2omkey_old_handles_floats(self):
-        pmtid2omkey = self.det._pmtid2omkey_old
-        self.assertEqual((1, 13, 12), tuple(pmtid2omkey(168.0)))
-        self.assertEqual((1, 12, 18), tuple(pmtid2omkey(205.0)))
-        self.assertEqual((1, 11, 22), tuple(pmtid2omkey(240.0)))
-        self.assertEqual((4, 11, 2), tuple(pmtid2omkey(1894.0)))
-        self.assertEqual((9, 18, 0), tuple(pmtid2omkey(4465.0)))
-        self.assertEqual((95, 7, 16), tuple(pmtid2omkey(52810.0)))
-        self.assertEqual((95, 4, 13), tuple(pmtid2omkey(52900.0)))
-
     def test_xy_pos(self):
         self.det._parse_doms()
         xy = self.det.xy_positions
