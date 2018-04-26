@@ -8,6 +8,8 @@ Version 8
   and generalizes from it
 * no more cython!
 * python3 required!
+* new fancy ``self.print`` function for ``kp.Modules``
+* ``Detector`` is now super fast when parsing DETX (hello SuperORCA!)
 
 Version 7
 ---------
