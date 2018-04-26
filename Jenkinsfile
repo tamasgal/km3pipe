@@ -5,6 +5,7 @@ def get_stages(docker_image) {
     stages = {
         docker.image(docker_image).inside {
             def PYTHON_VENV = docker_image.replaceAll(':', '_') + '_venv'
+
             stage("${docker_image}") {
                 echo 'Running in ${docker_image}'
             }
@@ -14,10 +15,10 @@ def get_stages(docker_image) {
                         virtualenv venv
                     """
                 } else {
-                    sh 'rm -rf venv'
-                    sh 'python -m venv venv'
+                    sh "rm -rf ${PYTHON_VENV}"
+                    sh "python -m venv ${PYTHON_VENV}"
                     sh """
-                        . venv/bin/activate
+                        . ${PYTHON_VENV}/bin/activate
                         pip install -U pip setuptools wheel
                     """
                 }
