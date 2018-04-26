@@ -12,12 +12,14 @@ def get_stages(docker_image) {
                 echo "Running in ${docker_image}"
             }
             stage("Prepare") {
-                sh "rm -rf ${PYTHON_VENV}"
-                sh "python -m venv ${PYTHON_VENV}"
+                sh "rm -rf venv"
+                sh "python -m venv venv"
                 sh """
-                    . ${PYTHON_VENV}/bin/activate
+                    . venv/bin/activate
                     which -a pip
                     which -a python
+                    pip list
+                    pip install -U pip setuptools wheel
                 """
             }
             stage("Build") {
