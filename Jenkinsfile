@@ -12,6 +12,7 @@ def get_stages(docker_image) {
                         virtualenv venv
                     """
                 } else {
+                    sh 'rm -rf venv'
                     sh 'python -m venv venv'
                     sh """
                         . venv/bin/activate
@@ -30,14 +31,36 @@ def get_stages(docker_image) {
                     throw e
                 }
             }
-            stage("Install") {
+            stage("Install Dependencies") {
                 try { 
                     sh """
                         . venv/bin/activate
-                        make install
+                        make dependencies
                     """
                 } catch (e) { 
-                    rocketSend channel: '#km3pipe', message: "Install Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+                    rocketSend channel: '#km3pipe', message: "Install Dependencies Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+                    throw e
+                }
+            }
+            stage("Install Doc Dependencies") {
+                try { 
+                    sh """
+                        . venv/bin/activate
+                        make doc-dependencies
+                    """
+                } catch (e) { 
+                    rocketSend channel: '#km3pipe', message: "Install Doc Dependencies Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+                    throw e
+                }
+            }
+            stage("Install Dev Dependencies") {
+                try { 
+                    sh """
+                        . venv/bin/activate
+                        make dev-dependencies
+                    """
+                } catch (e) { 
+                    rocketSend channel: '#km3pipe', message: "Install Dev Dependencies Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
                     throw e
                 }
             }
@@ -51,6 +74,17 @@ def get_stages(docker_image) {
                     junit 'junit.xml'
                 } catch (e) { 
                     rocketSend channel: '#km3pipe', message: "Test Suite Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+                    throw e
+                }
+            }
+            stage("Install") {
+                try { 
+                    sh """
+                        . venv/bin/activate
+                        make install
+                    """
+                } catch (e) { 
+                    rocketSend channel: '#km3pipe', message: "Install Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
                     throw e
                 }
             }
