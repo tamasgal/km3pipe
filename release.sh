@@ -41,6 +41,7 @@ git flow release finish "${VERSION}"
 
 rm -rf dist
 python setup.py sdist
+pip install -U twine
 twine upload dist/*
 
 git checkout master
