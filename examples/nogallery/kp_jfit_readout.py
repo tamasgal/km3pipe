@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Usage:
-    test_kp_jfit.py FILENAME
+    kp_jfit_readout.py FILENAME
 """
 
 from docopt import docopt
