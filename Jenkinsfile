@@ -1,16 +1,18 @@
+#!groovy
 def docker_images = ["python:3.5.5", "python:3.6.4", "python:3.6.5"]
 
 def get_stages(docker_image) {
     stages = {
         docker.image(docker_image).inside {
-            def PYTHON_VENV = "${docker_image + '_venv'}"
+            def PYTHON_VENV = docker_image + '_venv'
+            def CHAT_CHANNEL = '#km3pipe'
 
             stage("${docker_image}") {
-                echo 'Running in ${docker_image}'
+                echo "Running in ${docker_image}"
             }
             stage("Prepare") {
-                sh 'rm -rf venv'
-                sh 'python -m venv ${PYTHON_VENV}'
+                sh "rm -rf venv"
+                sh "python -m venv ${PYTHON_VENV}"
                 sh """
                     . ${PYTHON_VENV}/bin/activate
                     pip install -U pip setuptools wheel
@@ -23,7 +25,7 @@ def get_stages(docker_image) {
                         make
                     """
                 } catch (e) { 
-                    rocketSend channel: '#km3pipe', message: "Build Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+                    rocketSend channel: CHAT_CHANNEL, message: "Build Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
                     throw e
                 }
             }
@@ -34,7 +36,7 @@ def get_stages(docker_image) {
                         make dependencies
                     """
                 } catch (e) { 
-                    rocketSend channel: '#km3pipe', message: "Install Dependencies Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+                    rocketSend channel: CHAT_CHANNEL, message: "Install Dependencies Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
                     throw e
                 }
             }
@@ -45,7 +47,7 @@ def get_stages(docker_image) {
                         make doc-dependencies
                     """
                 } catch (e) { 
-                    rocketSend channel: '#km3pipe', message: "Install Doc Dependencies Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+                    rocketSend channel: CHAT_CHANNEL, message: "Install Doc Dependencies Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
                     throw e
                 }
             }
@@ -56,7 +58,7 @@ def get_stages(docker_image) {
                         make dev-dependencies
                     """
                 } catch (e) { 
-                    rocketSend channel: '#km3pipe', message: "Install Dev Dependencies Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+                    rocketSend channel: CHAT_CHANNEL, message: "Install Dev Dependencies Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
                     throw e
                 }
             }
@@ -69,7 +71,7 @@ def get_stages(docker_image) {
                     """
                     junit 'junit.xml'
                 } catch (e) { 
-                    rocketSend channel: '#km3pipe', message: "Test Suite Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+                    rocketSend channel: CHAT_CHANNEL, message: "Test Suite Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
                     throw e
                 }
             }
@@ -80,7 +82,7 @@ def get_stages(docker_image) {
                         make install
                     """
                 } catch (e) { 
-                    rocketSend channel: '#km3pipe', message: "Install Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+                    rocketSend channel: CHAT_CHANNEL, message: "Install Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
                     throw e
                 }
             }
@@ -92,7 +94,7 @@ def get_stages(docker_image) {
                     """
                     junit 'junit.xml'
                 } catch (e) { 
-                    rocketSend channel: '#km3pipe', message: "KM3Modules Test Suite Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+                    rocketSend channel: CHAT_CHANNEL, message: "KM3Modules Test Suite Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
                     throw e
                 }
             }
@@ -106,7 +108,7 @@ def get_stages(docker_image) {
                         make html
                     """
                 } catch (e) { 
-                    rocketSend channel: '#km3pipe', message: "Building the Docs Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+                    rocketSend channel: CHAT_CHANNEL, message: "Building the Docs Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
                     throw e
                 }
             }
