@@ -3,23 +3,23 @@ def docker_images = ["python:3.5.5", "python:3.6.4", "python:3.6.5"]
 def get_stages(docker_image) {
     stages = {
         docker.image(docker_image).inside {
-            def python_venv = "${docker_image}_venv"
+            def PYTHON_VENV = "${docker_image + '_venv'}"
 
             stage("${docker_image}") {
                 echo 'Running in ${docker_image}'
             }
             stage("Prepare") {
                 sh 'rm -rf venv'
-                sh 'python -m venv ${python_venv}'
+                sh 'python -m venv ${PYTHON_VENV}'
                 sh """
-                    . ${python_vent}/bin/activate
+                    . ${PYTHON_VENV}/bin/activate
                     pip install -U pip setuptools wheel
                 """
             }
             stage("Build") {
                 try { 
                     sh """
-                        . ${python_vent}/bin/activate
+                        . ${PYTHON_VENV}/bin/activate
                         make
                     """
                 } catch (e) { 
@@ -30,7 +30,7 @@ def get_stages(docker_image) {
             stage("Install Dependencies") {
                 try { 
                     sh """
-                        . ${python_vent}/bin/activate
+                        . ${PYTHON_VENV}/bin/activate
                         make dependencies
                     """
                 } catch (e) { 
@@ -41,7 +41,7 @@ def get_stages(docker_image) {
             stage("Install Doc Dependencies") {
                 try { 
                     sh """
-                        . ${python_vent}/bin/activate
+                        . ${PYTHON_VENV}/bin/activate
                         make doc-dependencies
                     """
                 } catch (e) { 
@@ -52,7 +52,7 @@ def get_stages(docker_image) {
             stage("Install Dev Dependencies") {
                 try { 
                     sh """
-                        . ${python_vent}/bin/activate
+                        . ${PYTHON_VENV}/bin/activate
                         make dev-dependencies
                     """
                 } catch (e) { 
@@ -63,7 +63,7 @@ def get_stages(docker_image) {
             stage('Test') {
                 try { 
                     sh """
-                        . ${python_vent}/bin/activate
+                        . ${PYTHON_VENV}/bin/activate
                         make clean
                         make test
                     """
@@ -76,7 +76,7 @@ def get_stages(docker_image) {
             stage("Install") {
                 try { 
                     sh """
-                        . ${python_vent}/bin/activate
+                        . ${PYTHON_VENV}/bin/activate
                         make install
                     """
                 } catch (e) { 
@@ -87,7 +87,7 @@ def get_stages(docker_image) {
             stage('Test KM3Modules') {
                 try { 
                     sh """
-                        . ${python_vent}/bin/activate
+                        . ${PYTHON_VENV}/bin/activate
                         make test-km3modules
                     """
                     junit 'junit.xml'
@@ -99,7 +99,7 @@ def get_stages(docker_image) {
             stage('Docs') {
                 try { 
                     sh """
-                        . ${python_vent}/bin/activate
+                        . ${PYTHON_VENV}/bin/activate
                         make doc-dependencies
                         cd docs
                         export MPLBACKEND="agg"
