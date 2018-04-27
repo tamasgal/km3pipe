@@ -4,6 +4,9 @@ def docker_images = ["python:3.5.5", "python:3.6.4", "python:3.6.5"]
 def get_stages(docker_image) {
     stages = {
         docker.image(docker_image).inside {
+
+            checkout scm
+
             // def PYTHON_VENV = docker_image.replaceAll('[:.]', '') + 'venv'
             def PYTHON_VENV = 'venv'
             def CHAT_CHANNEL = '#km3pipe'
@@ -120,7 +123,6 @@ def get_stages(docker_image) {
 }
 
 node('master') {
-    checkout scm
 
     def stages = [:]
     for (int i = 0; i < docker_images.size(); i++) {
