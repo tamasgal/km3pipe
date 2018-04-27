@@ -1,5 +1,6 @@
 #!groovy
-def docker_images = ["python:3.5.5", "python:3.6.4", "python:3.6.5"]
+// def docker_images = ["python:3.5.5", "python:3.6.4", "python:3.6.5"]
+def docker_images = ["python:3.6.5"]
 
 def get_stages(docker_image) {
     stages = {
