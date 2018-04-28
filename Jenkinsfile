@@ -120,7 +120,7 @@ def get_stages(docker_image) {
                    allowMissing: false,
                    alwaysLinkToLastBuild: false,
                    keepAll: true,
-                   reportDir: 'doc/_build/html',
+                   reportDir: 'docs/_build/html',
                    reportFiles: 'index.html',
                    reportName: 'Documentation'
                ]
