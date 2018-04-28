@@ -9,3 +9,4 @@ pytest-watch
 twine
 pydocstyle
 requests
+cython
