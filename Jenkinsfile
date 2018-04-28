@@ -71,6 +71,7 @@ def get_stages(docker_image) {
                         . ${PYTHON_VENV}/bin/activate
                         make clean
                         make test
+                        make test-cov
                     """
                     junit 'junit.xml'
                     archive 'junit.xml'
