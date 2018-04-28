@@ -70,11 +70,21 @@ def get_stages(docker_image) {
                     sh """
                         . ${PYTHON_VENV}/bin/activate
                         make clean
-                        make test
                         make test-cov
                     """
                     junit 'junit.xml'
                     archive 'junit.xml'
+                    step([$class: 'CoberturaPublisher',
+                            autoUpdateHealth: false,
+                            autoUpdateStability: false,
+                            coberturaReportFile: 'coverage.xml',
+                            failNoReports: false,
+                            failUnhealthy: false,
+                            failUnstable: false,
+                            maxNumberOfBuilds: 0,
+                            onlyStable: false,
+                            sourceEncoding: 'ASCII',
+                            zoomCoverageChart: false])
                 } catch (e) { 
                     rocketSend channel: CHAT_CHANNEL, message: "Test Suite Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
                     throw e
