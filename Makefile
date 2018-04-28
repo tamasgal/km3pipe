@@ -29,7 +29,6 @@ test-km3modules:
 test-cov:
 	py.test --junitxml=./junit.xml \
 		--cov ./ --cov-report term-missing --cov-report xml || true
-	py.test km3modules || true
 
 test-loop: 
 	# pip install -U pytest-watch
