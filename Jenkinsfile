@@ -73,6 +73,7 @@ def get_stages(docker_image) {
                         make test
                     """
                     junit 'junit.xml'
+                    archive 'junit.xml'
                 } catch (e) { 
                     rocketSend channel: CHAT_CHANNEL, message: "Test Suite Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
                     throw e
@@ -95,7 +96,8 @@ def get_stages(docker_image) {
                         . ${PYTHON_VENV}/bin/activate
                         make test-km3modules
                     """
-                    junit 'junit.xml'
+                    junit 'junit_km3modules.xml'
+                    archive 'junit_km3modules.xml'
                 } catch (e) { 
                     rocketSend channel: CHAT_CHANNEL, message: "KM3Modules Test Suite Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
                     throw e
