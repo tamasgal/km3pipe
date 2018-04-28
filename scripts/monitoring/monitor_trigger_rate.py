@@ -4,6 +4,7 @@
 from datetime import datetime
 from collections import deque
 import sys
+from io import StringIO
 import os
 import shutil
 import time
@@ -17,7 +18,6 @@ import matplotlib.dates as md
 import pandas as pd
 
 from km3pipe import Pipeline, Module
-from km3pipe.common import StringIO
 from km3pipe.config import Config
 from km3pipe.io import CHPump
 from km3pipe.io.daq import (DAQPreamble, DAQEvent)
