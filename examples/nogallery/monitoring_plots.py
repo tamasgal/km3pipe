@@ -4,6 +4,8 @@
 from datetime import datetime
 from collections import deque, defaultdict
 from functools import partial
+from io import StringIO
+from queue import Queue, Empty
 import os
 import shutil
 import time
@@ -20,7 +22,6 @@ import numpy as np
 from km3pipe import Pipeline, Module
 from km3pipe.calib import Calibration
 from km3pipe.dataclasses import HitSeries
-from km3pipe.common import StringIO, Queue, Empty
 from km3pipe.io import CHPump
 from km3pipe.io.daq import (DAQProcessor, DAQPreamble, DAQSummaryslice,
                             DAQEvent)

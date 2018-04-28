@@ -4,24 +4,18 @@ Common unit testing support for km3pipe.
 
 """
 
-from km3pipe.common import StringIO  # noqa
-from io import BytesIO  # noqa
+from io import BytesIO, StringIO  # noqa
 
-try:
-    from unittest2 import TestCase, skip, skipIf
-except ImportError:
-    from unittest import TestCase, skip, skipIf  # noqa
+from unittest import TestCase  # noqa
+from mock import MagicMock  # noqa
+from mock import Mock  # noqa
+from mock import patch  # noqa
 
-try:
-    from mock import MagicMock
-    from mock import Mock
-    from mock import patch
-except ImportError:
-    from unittest.mock import MagicMock  # noqa
-    from unittest.mock import Mock  # noqa
-    from unittest.mock import patch  # noqa
+from numpy.testing import assert_allclose  # noqa
+import pytest  # noqa
 
-from numpy.testing import assert_allclose       # noqa
+skip = pytest.mark.skip
+skipif = pytest.mark.skipif
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

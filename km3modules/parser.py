@@ -7,7 +7,7 @@ A collection of parsers.
 
 from km3pipe import Module
 from km3pipe.io.daq import DAQPreamble, DAQSummaryslice, DAQEvent
-from km3pipe.common import StringIO
+from io import StringIO
 
 
 class CHParser(Module):
