@@ -32,7 +32,7 @@ def get_stages(docker_image) {
                     throw e
                 }
             }
-            stage("Install Dependencies") {
+            stage("Deps") {
                 try { 
                     sh """
                         . ${PYTHON_VENV}/bin/activate
@@ -43,7 +43,7 @@ def get_stages(docker_image) {
                     throw e
                 }
             }
-            stage("Install Doc Dependencies") {
+            stage("Doc Deps") {
                 try { 
                     sh """
                         . ${PYTHON_VENV}/bin/activate
@@ -54,7 +54,7 @@ def get_stages(docker_image) {
                     throw e
                 }
             }
-            stage("Install Dev Dependencies") {
+            stage("Dev Deps") {
                 try { 
                     sh """
                         . ${PYTHON_VENV}/bin/activate
