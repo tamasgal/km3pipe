@@ -2,7 +2,7 @@
 # pylint: disable=locally-disabled,C0111,R0904,C0103
 
 import km3pipe as kp
-from km3modules.common import Siphon
+from km3modules.common import Siphon, Delete, Keep
 from km3pipe.testing import TestCase, MagicMock
 
 __author__ = "Tamas Gal"
@@ -12,6 +12,56 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
+
+
+class TestKeep(TestCase):
+    def test_delete(self):
+        class APump(kp.Pump):
+            def process(self, blob):
+                blob['a'] = 'a'
+                blob['b'] = 'b'
+                blob['c'] = 'c'
+                blob['d'] = 'd'
+                return blob
+
+        class Observer(kp.Module):
+
+            def process(self, blob):
+                assert 'a' not in blob
+                assert 'b' == blob['b']
+                assert 'c' not in blob
+                assert 'd' == blob['d']
+                return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(APump)
+        pipe.attach(Keep, keys=['b', 'd'])
+        pipe.attach(Observer)
+        pipe.drain(5)
+
+
+class TestDelete(TestCase):
+    def test_delete(self):
+        class APump(kp.Pump):
+            def process(self, blob):
+                blob['a'] = 'a'
+                blob['b'] = 'b'
+                blob['c'] = 'c'
+                return blob
+
+        class Observer(kp.Module):
+
+            def process(self, blob):
+                assert 'a' not in blob
+                assert 'b' not in blob
+                assert 'c' == blob['c']
+                return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(APump)
+        pipe.attach(Delete, keys=['a', 'b'])
+        pipe.attach(Observer)
+        pipe.drain(5)
 
 
 class TestSiphon(TestCase):
