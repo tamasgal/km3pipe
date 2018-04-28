@@ -115,6 +115,17 @@ def get_stages(docker_image) {
                     throw e
                 }
             }
+            stage('Publishing Docs') {
+               publishHTML target: [
+                   allowMissing: false,
+                   alwaysLinkToLastBuild: false,
+                   keepAll: true,
+                   reportDir: 'doc/_build/html',
+                   reportFiles: 'index.html',
+                   reportName: 'Documentation'
+               ]
+            }
+
 
         }
     }
