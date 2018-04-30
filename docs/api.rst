@@ -56,8 +56,6 @@ KM3Pipe: Main Framework
   retrieve
   run_tests
   rundetsn
-  runinfo
-  runtable
   update_km3pipe
 
 
