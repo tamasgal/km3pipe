@@ -4,7 +4,7 @@ scikit-learn
 seaborn
 sphinx>=1.6.3
 sphinx-gallery>=0.1.12
-sphinx-rtd-theme>=0.2.4
+sphinx-rtd-theme>=0.3
 sphinxcontrib-napoleon>=0.6.1
 sphinxcontrib-programoutput>=0.11
 sphinxcontrib-websupport>=1.0.1
