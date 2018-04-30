@@ -3,7 +3,7 @@ How to Write Documentation
 
 Build docs locally::
   
-  cd km3pipe/docs
+  cd km3pipe/doc
   make html
 
 

@@ -140,7 +140,7 @@ def get_stages(docker_image) {
                     sh """
                         . ${PYTHON_VENV}/bin/activate
                         make doc-dependencies
-                        cd docs
+                        cd doc
                         export MPLBACKEND="agg"
                         make html
                     """
@@ -155,7 +155,7 @@ def get_stages(docker_image) {
                        allowMissing: false,
                        alwaysLinkToLastBuild: false,
                        keepAll: true,
-                       reportDir: 'docs/_build/html',
+                       reportDir: 'doc/_build/html',
                        reportFiles: 'index.html',
                        reportName: 'Documentation'
                    ]
