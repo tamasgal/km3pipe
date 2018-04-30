@@ -175,5 +175,5 @@ node('master') {
 
 
 def sendChatMessage(channel, message) {
-    rocketSend channel: channel, message: "${message} - ${env.JOB_NAME} [Build ${env.BUILD_NUMBER}](${env.BUILD_URL})"
+    rocketSend channel: channel, message: "${message} - [Build #${env.BUILD_NUMBER}](${env.BUILD_URL})"
 }
