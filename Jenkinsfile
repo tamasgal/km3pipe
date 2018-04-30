@@ -30,7 +30,7 @@ def get_stages(docker_image) {
                 """
             }
             stage("Build") {
-                sendMail("Build Started", "halleluja")
+                // sendMail("Build Started", "halleluja")
                 try { 
                     sh """
                         . ${PYTHON_VENV}/bin/activate
