@@ -25,9 +25,9 @@ class Foo(Module):
     """A dummy module with optional and required parameters"""
 
     def configure(self):
-        self.foo = self.get('foo') or 'default_foo'  # optional
-        self.bar = self.get('bar') or 23             # optional
-        self.baz = self.require('baz')               # required
+        self.foo = self.get('foo', default='default_foo')       # optional
+        self.bar = self.get('bar', default=23)                  # optional
+        self.baz = self.require('baz')                          # required
         self.i = 0
 
     def process(self, blob):
