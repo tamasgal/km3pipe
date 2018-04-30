@@ -25,6 +25,22 @@ module in the pipeline.
    :language: python
    :linenos:
 
+
+
+Which will print the following:::
+
+    Pipeline and module initialisation took 0.000s (CPU 0.000s).
+    This is the current blob: {'nr': 1}
+    {'nr': 1, 'foo_entry': 'default_foo', 'moo_entry': 42}
+    This is the current blob: {'nr': 2}
+    {'nr': 2, 'foo_entry': 'default_foo', 'moo_entry': 42}
+    My process() method was called 2 times.
+    ============================================================
+    2 cycles drained in 0.000553s (CPU 0.000525s). Memory peak: 154.08 MB
+      wall  mean: 0.000058s  medi: 0.000058s  min: 0.000055s  max: 0.000062s  std: 0.000004s
+      CPU   mean: 0.000059s  medi: 0.000059s  min: 0.000056s  max: 0.000062s  std: 0.000003s
+
+
 Modules
 -------
 
