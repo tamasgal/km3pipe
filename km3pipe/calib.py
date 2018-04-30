@@ -110,16 +110,13 @@ class Calibration(Module):
         return hits
 
     def apply(self, hits):
-        """Add x, y, z, t0 (and du, floor if DataFrame) columns to hit.
-
-        When applying to ``RawHitSeries`` or ``McHitSeries``, a ``HitSeries``
-        will be returned with the calibration information added.
+        """Add x, y, z, t0 (and du, floor if DataFrame) columns to the hits.
 
         """
         if isinstance(hits, DataFrame):
             # do we ever see McHits here?
             hits = Table.from_template(hits, 'Hits')
-        if hasattr(hits, 'dom_id'):
+        if hasattr(hits, 'dom_id') and hasattr(hits, 'channel_id'):
             return self._apply_to_hits(hits)
         elif hasattr(hits, 'pmt_id'):
             return self._apply_to_mchits(hits)
@@ -130,12 +127,7 @@ class Calibration(Module):
                             .format(hits.name))
 
     def _apply_to_hits(self, hits):
-        """Create a HitSeries from RawHitSeries and add pos, dir and t0.
-
-        Note that existing arrays like tot, dom_id, channel_id etc. will be
-        copied by reference for better performance.
-
-        """
+        """Append the position, direction and t0 columns and add t0 to time"""
         n = len(hits)
         cal = np.empty((n, 9))
         lookup = self._calib_by_dom_and_channel
@@ -161,14 +153,7 @@ class Calibration(Module):
         return Table.from_template(h, 'CalibHits')
 
     def _apply_to_mchits(self, hits):
-        """Create a HitSeries from McHitSeries and add pos, dir and t0.
-
-        Note that existing arrays like a, origin, pmt_id will be copied by
-        reference for better performance.
-
-        The attributes ``a`` and ``origin`` are not implemented yet.
-
-        """
+        """Append the position, direction and t0 columns and add t0 to time"""
         n_hits = len(hits)
         cal = np.empty((n_hits, 9))
         for i in range(n_hits):
