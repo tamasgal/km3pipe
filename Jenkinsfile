@@ -158,6 +158,7 @@ def get_stages(docker_image) {
     return stages
 }
 
+
 node('master') {
 
     checkout scm
@@ -176,5 +177,5 @@ node('master') {
 
 
 def sendChatMessage(channel, message) {
-    rocketSend channel: channel, message: "${message} - [Build #${env.BUILD_NUMBER}](${env.BUILD_URL})"
+    rocketSend channel: channel, message: "${message} - [Build ${env.BUILD_NUMBER}](${env.BUILD_URL})"
 }
