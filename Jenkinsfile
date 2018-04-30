@@ -26,14 +26,14 @@ def get_stages(docker_image) {
                 """
             }
             stage("Build") {
-                sendChatMessage("Build Started")
+                sendChatMessage(CHAT_CHANNEL, "Build Started")
                 try { 
                     sh """
                         . ${PYTHON_VENV}/bin/activate
                         make
                     """
                 } catch (e) { 
-                    sendChatMessage("Build Failed")
+                    sendChatMessage(CHAT_CHANNEL, "Build Failed")
                     throw e
                 }
             }
@@ -44,7 +44,7 @@ def get_stages(docker_image) {
                         make dependencies
                     """
                 } catch (e) { 
-                    sendChatMessage("Install Dependencies Failed")
+                    sendChatMessage(CHAT_CHANNEL, "Install Dependencies Failed")
                     throw e
                 }
             }
@@ -55,7 +55,7 @@ def get_stages(docker_image) {
                         make doc-dependencies
                     """
                 } catch (e) { 
-                    sendChatMessage("Install Doc Dependencies Failed")
+                    sendChatMessage(CHAT_CHANNEL, "Install Doc Dependencies Failed")
                     throw e
                 }
             }
@@ -66,7 +66,7 @@ def get_stages(docker_image) {
                         make dev-dependencies
                     """
                 } catch (e) { 
-                    sendChatMessage("Install Dev Dependencies Failed")
+                    sendChatMessage(CHAT_CHANNEL, "Install Dev Dependencies Failed")
                     throw e
                 }
             }
@@ -80,7 +80,7 @@ def get_stages(docker_image) {
                     junit 'junit.xml'
                     archive 'junit.xml'
                 } catch (e) { 
-                    sendChatMessage("Test Suite Failed")
+                    sendChatMessage(CHAT_CHANNEL, "Test Suite Failed")
                     throw e
                 }
             }
@@ -91,7 +91,7 @@ def get_stages(docker_image) {
                         make install
                     """
                 } catch (e) { 
-                    sendChatMessage("Install Failed")
+                    sendChatMessage(CHAT_CHANNEL, "Install Failed")
                     throw e
                 }
             }
@@ -104,7 +104,7 @@ def get_stages(docker_image) {
                     junit 'junit_km3modules.xml'
                     archive 'junit_km3modules.xml'
                 } catch (e) { 
-                    sendChatMessage("KM3Modules Test Suite Failed")
+                    sendChatMessage(CHAT_CHANNEL, "KM3Modules Test Suite Failed")
                     throw e
                 }
             }
@@ -127,7 +127,7 @@ def get_stages(docker_image) {
                             sourceEncoding: 'ASCII',
                             zoomCoverageChart: false])
                 } catch (e) { 
-                    sendChatMessage("Coverage Failed")
+                    sendChatMessage(CHAT_CHANNEL, "Coverage Failed")
                     throw e
                 }
             }
@@ -141,7 +141,7 @@ def get_stages(docker_image) {
                         make html
                     """
                 } catch (e) { 
-                    sendChatMessage("Building Docs Failed")
+                    sendChatMessage(CHAT_CHANNEL, "Building Docs Failed")
                     throw e
                 }
             }
@@ -156,7 +156,7 @@ def get_stages(docker_image) {
                        reportName: 'Documentation'
                    ]
                 } catch (e) {
-                    sendChatMessage("Publishing Docs Failed")
+                    sendChatMessage(CHAT_CHANNEL, "Publishing Docs Failed")
                 }
             }
 
@@ -181,9 +181,6 @@ node('master') {
 }
 
 
-def sendChatMessage(message, channel='') {
-    if (channel == '') {
-        channel = CHAT_CHANNEL
-    }
+def sendChatMessage(channel, message) {
     rocketSend channel: channel, message: "${message} - [Build ${env.BUILD_NUMBER} ](${env.BUILD_URL})"
 }
