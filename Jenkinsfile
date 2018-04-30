@@ -2,6 +2,7 @@
 // def DOCKER_IMAGES = ["python:3.5.5", "python:3.6.4", "python:3.6.5"]
 DOCKER_IMAGES = ["python:3.6.5"]
 CHAT_CHANNEL = '#km3pipe'
+DEVELOPERS = ['tgal@km3net.de']
 
 
 def get_stages(docker_image) {
@@ -29,6 +30,7 @@ def get_stages(docker_image) {
                 """
             }
             stage("Build") {
+                sendMail("Build Started", "halleluja")
                 try { 
                     sh """
                         . ${PYTHON_VENV}/bin/activate
@@ -196,7 +198,7 @@ def sendMail(subject, message, developers=DEVELOPERS) {
                 <p>message</p>
                 <p><a href ='${env.BUILD_URL}'>${env.BUILD_URL}</a></p>
             """,
-            to: "tgal@km3net.de"
+            to: developer
         )    
     }
 }
