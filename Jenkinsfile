@@ -181,6 +181,9 @@ node('master') {
 }
 
 
-def sendChatMessage(message, channel=CHAT_CHANNEL) {
+def sendChatMessage(message, channel='') {
+    if (channel == '') {
+        channel = CHAT_CHANNEL
+    }
     rocketSend channel: channel, message: "${message} - [Build ${env.BUILD_NUMBER} ](${env.BUILD_URL})"
 }
