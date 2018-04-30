@@ -1,7 +1,6 @@
 #!groovy
-// def docker_images = ["python:3.5.5", "python:3.6.4", "python:3.6.5"]
-def docker_images = ["python:3.6.5"]
-
+// def DOCKER_IMAGES = ["python:3.5.5", "python:3.6.4", "python:3.6.5"]
+DOCKER_IMAGES = ["python:3.6.5"]
 CHAT_CHANNEL = '#km3pipe'
 
 
@@ -30,7 +29,6 @@ def get_stages(docker_image) {
                 """
             }
             stage("Build") {
-                sendChatMessage("Build Started")
                 try { 
                     sh """
                         . ${PYTHON_VENV}/bin/activate
@@ -176,8 +174,8 @@ node('master') {
     checkout scm
 
     def stages = [:]
-    for (int i = 0; i < docker_images.size(); i++) {
-        def docker_image = docker_images[i]
+    for (int i = 0; i < DOCKER_IMAGES.size(); i++) {
+        def docker_image = DOCKER_IMAGES[i]
         stages[docker_image] = get_stages(docker_image)
     }
 
@@ -187,4 +185,18 @@ node('master') {
 
 def sendChatMessage(message, channel=CHAT_CHANNEL) {
     rocketSend channel: channel, message: "${message} - [Build ${env.BUILD_NUMBER} ](${env.BUILD_URL})"
+}
+
+def sendMail(subject, message, developers=DEVELOPERS) {
+    for (int i = 0; i < developers.size(); i++) {
+        def developer = DEVELOPERS[i]
+        emailext (
+            subject: "$subject - Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+            body: """
+                <p>message</p>
+                <p><a href ='${env.BUILD_URL}'>${env.BUILD_URL}</a></p>
+            """,
+            to: "tgal@km3net.de"
+        )    
+    }
 }
