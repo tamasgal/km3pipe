@@ -1,17 +1,21 @@
 #!groovy
 // def docker_images = ["python:3.5.5", "python:3.6.4", "python:3.6.5"]
 def docker_images = ["python:3.6.5"]
-def CHAT_CHANNEL = '#km3pipe'
+
+CHAT_CHANNEL = '#km3pipe'
 
 
 def get_stages(docker_image) {
     stages = {
         docker.image(docker_image).inside {
 
-            // The following causes a weird issue, where pip tries to 
+            // The following line causes a weird issue, where pip tries to 
             // install into /usr/local/... instead of the virtual env.
             // Any help figuring out what's happening is appreciated.
+            //
             // def PYTHON_VENV = docker_image.replaceAll('[:.]', '') + 'venv'
+            //
+            // So we set it to 'venv' for all parallel builds now
             def PYTHON_VENV = 'venv'
 
             stage("${docker_image}") {
@@ -26,14 +30,14 @@ def get_stages(docker_image) {
                 """
             }
             stage("Build") {
-                sendChatMessage(CHAT_CHANNEL, "Build Started")
+                sendChatMessage("Build Started")
                 try { 
                     sh """
                         . ${PYTHON_VENV}/bin/activate
                         make
                     """
                 } catch (e) { 
-                    sendChatMessage(CHAT_CHANNEL, "Build Failed")
+                    sendChatMessage("Build Failed")
                     throw e
                 }
             }
@@ -44,7 +48,7 @@ def get_stages(docker_image) {
                         make dependencies
                     """
                 } catch (e) { 
-                    sendChatMessage(CHAT_CHANNEL, "Install Dependencies Failed")
+                    sendChatMessage("Install Dependencies Failed")
                     throw e
                 }
             }
@@ -55,7 +59,7 @@ def get_stages(docker_image) {
                         make doc-dependencies
                     """
                 } catch (e) { 
-                    sendChatMessage(CHAT_CHANNEL, "Install Doc Dependencies Failed")
+                    sendChatMessage("Install Doc Dependencies Failed")
                     throw e
                 }
             }
@@ -66,7 +70,7 @@ def get_stages(docker_image) {
                         make dev-dependencies
                     """
                 } catch (e) { 
-                    sendChatMessage(CHAT_CHANNEL, "Install Dev Dependencies Failed")
+                    sendChatMessage("Install Dev Dependencies Failed")
                     throw e
                 }
             }
@@ -80,7 +84,7 @@ def get_stages(docker_image) {
                     junit 'junit.xml'
                     archive 'junit.xml'
                 } catch (e) { 
-                    sendChatMessage(CHAT_CHANNEL, "Test Suite Failed")
+                    sendChatMessage("Test Suite Failed")
                     throw e
                 }
             }
@@ -91,7 +95,7 @@ def get_stages(docker_image) {
                         make install
                     """
                 } catch (e) { 
-                    sendChatMessage(CHAT_CHANNEL, "Install Failed")
+                    sendChatMessage("Install Failed")
                     throw e
                 }
             }
@@ -104,7 +108,7 @@ def get_stages(docker_image) {
                     junit 'junit_km3modules.xml'
                     archive 'junit_km3modules.xml'
                 } catch (e) { 
-                    sendChatMessage(CHAT_CHANNEL, "KM3Modules Test Suite Failed")
+                    sendChatMessage("KM3Modules Test Suite Failed")
                     throw e
                 }
             }
@@ -127,7 +131,7 @@ def get_stages(docker_image) {
                             sourceEncoding: 'ASCII',
                             zoomCoverageChart: false])
                 } catch (e) { 
-                    sendChatMessage(CHAT_CHANNEL, "Coverage Failed")
+                    sendChatMessage("Coverage Failed")
                     throw e
                 }
             }
@@ -141,7 +145,7 @@ def get_stages(docker_image) {
                         make html
                     """
                 } catch (e) { 
-                    sendChatMessage(CHAT_CHANNEL, "Building Docs Failed")
+                    sendChatMessage("Building Docs Failed")
                     throw e
                 }
             }
@@ -156,7 +160,7 @@ def get_stages(docker_image) {
                        reportName: 'Documentation'
                    ]
                 } catch (e) {
-                    sendChatMessage(CHAT_CHANNEL, "Publishing Docs Failed")
+                    sendChatMessage("Publishing Docs Failed")
                 }
             }
 
@@ -181,6 +185,6 @@ node('master') {
 }
 
 
-def sendChatMessage(channel, message) {
+def sendChatMessage(message, channel=CHAT_CHANNEL) {
     rocketSend channel: channel, message: "${message} - [Build ${env.BUILD_NUMBER} ](${env.BUILD_URL})"
 }
