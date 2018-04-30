@@ -22,6 +22,7 @@ def get_stages(docker_image) {
                 """
             }
             stage("Build") {
+                sendChatMessage(CHAT_CHANNEL, "Build Started")
                 try { 
                     sh """
                         . ${PYTHON_VENV}/bin/activate
@@ -170,4 +171,9 @@ node('master') {
 
     parallel stages
 
+}
+
+
+def sendChatMessage(channel, message) {
+    rocketSend channel: channel, message: "${message} - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
 }
