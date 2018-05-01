@@ -24,16 +24,12 @@ from io import StringIO
 from http.cookiejar import CookieJar
 from http.client import IncompleteRead
 
-try:
-    import pandas as pd
-except ImportError:
-    print("The database utilities needs pandas: pip install pandas")
+import pandas as pd
 
 from .tools import cprint
 from .time import Timer
 from .config import Config
 from .logger import logging
-
 
 
 __author__ = "Tamas Gal"
