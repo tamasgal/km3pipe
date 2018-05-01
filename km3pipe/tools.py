@@ -19,8 +19,6 @@ import warnings
 import numpy as np
 
 
-from .logger import logging
-
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = ["Konstantin Lepa <konstantin.lepa@gmail.com> for termcolor"]
@@ -28,8 +26,6 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
-
-log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 def ifiles(irods_path):
