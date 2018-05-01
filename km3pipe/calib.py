@@ -12,7 +12,6 @@ from .core import Module
 from .hardware import Detector
 from .dataclasses import Table
 from .dataclass_templates import TEMPLATES
-from .logger import logging
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -22,16 +21,12 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
-# log.setLevel(logging.DEBUG)
 
 try:
     import numba as nb
 except (ImportError, OSError):
-    log.debug("No Numba support")
     HAVE_NUMBA = False
 else:
-    log.debug("Running with Numba support")
     HAVE_NUMBA = True
 
 
@@ -78,11 +73,11 @@ class Calibration(Module):
                                          calibration=self.calibration)
 
         if self.detector is not None:
-            log.debug("Creating lookup tables")
+            self.log.debug("Creating lookup tables")
             self._create_dom_channel_lookup()
             self._create_pmt_id_lookup()
         else:
-            log.critical("No detector information loaded.")
+            self.log.critical("No detector information loaded.")
 
     def process(self, blob, key='Hits', outkey='CalibHits'):
         if self._should_apply:
@@ -219,8 +214,6 @@ class Calibration(Module):
 
 
 if HAVE_NUMBA:
-    log.info("Initialising Numba JIT functions")
-
     @nb.jit
     def apply_t0_nb(times, dom_ids, channel_ids, lookup_tables):
         """Apply t0s using a lookup table of tuples (dom_id, calib)"""
