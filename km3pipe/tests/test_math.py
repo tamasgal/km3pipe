@@ -9,7 +9,7 @@ from km3pipe.testing import TestCase
 from km3pipe.math import (
     angle_between, pld3, com, zenith, azimuth, Polygon, IrregularPrism,
     rotation_matrix, SparseCone, space_angle, hsin, phi, theta,
-    unit_vector, innerprod_1d, loguniform, log_b
+    unit_vector, innerprod_1d, log_b
 )
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
@@ -272,21 +272,3 @@ class TestLog(TestCase):
         assert_allclose(log_b(5, 2), np.log2(5))
         assert_allclose(log_b(5, 10), np.log10(5))
         assert_allclose(log_b(5, np.e), np.log(5))
-
-
-class TestLogUniform(TestCase):
-    def setUp(self):
-        np.random.seed(1234)
-
-    def test_rvs(self):
-        lo, hi = 0.1, 10
-        dist = loguniform(low=lo, high=hi, base=10)
-        r = dist.rvs(size=100)
-        assert r.shape == (100,)
-        assert np.all(r <= hi)
-        assert np.all(r >= lo)
-        dist = loguniform(low=lo, high=hi, base=2)
-        r2 = dist.rvs(size=500)
-        assert r2.shape == (500,)
-        assert np.all(r2 <= hi)
-        assert np.all(r2 >= lo)
