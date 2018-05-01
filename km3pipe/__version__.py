@@ -12,17 +12,8 @@ Pep 386 compliant version info.
 
 VERSION_INFO = (8, 0, 0, 'alpha', 0)
 
-import json
-try:
-    from urllib import urlopen
-except ImportError:
-    from urllib.request import urlopen
-
-from km3pipe.logger import logging
 
 __author__ = 'tamasgal'
-
-log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 def _get_version(version_info):
@@ -44,6 +35,9 @@ def _get_version(version_info):
 
 
 def _get_latest_version():
+    from urllib import urlopen
+    import json
+
     response = urlopen('https://pypi.python.org/pypi/km3pipe/json')
     content = response.read()
     latest_version = json.loads(content.decode())['info']['version']
@@ -58,10 +52,10 @@ def check_for_update():
     else:
         version = _get_version(VERSION_INFO)
         if latest_version != version:
-            log.warning("There is an update for km3pipe available.\n" +
-                        "    Installed: {0}\n"
-                        "    Latest: {1}\n".format(version, latest_version) +
-                        "Please run `pip install --upgrade km3pipe`.")
+            print("There is an update for km3pipe available.\n" +
+                  "    Installed: {0}\n"
+                  "    Latest: {1}\n".format(version, latest_version) +
+                  "Please run `pip install --upgrade km3pipe`.")
 
 
 version = _get_version(VERSION_INFO)
