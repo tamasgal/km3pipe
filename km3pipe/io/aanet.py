@@ -14,7 +14,7 @@ import numpy as np
 from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import Table
 from km3pipe.logger import logging
-from km3pipe.stats import mad
+from km3pipe.math import mad
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
