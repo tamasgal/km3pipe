@@ -58,10 +58,10 @@ coverage.xml
 *.pot
 
 # Sphinx documentation
-docs/_build/
-docs/auto_examples/
-docs/modules/
-docs/api
+doc/_build/
+doc/auto_examples/
+doc/modules/
+doc/api
 
 # VI swap files
 *.swp
