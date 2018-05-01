@@ -5,10 +5,7 @@
 Statistics.
 """
 import numpy as np
-from scipy import stats
-from sklearn.neighbors import KernelDensity
-from sklearn.utils import check_array
-from statsmodels.nonparametric.kernel_density import KDEMultivariate
+from scipy.stats import rv_continuous
 
 from .math import log_b
 from .logger import logging
@@ -24,7 +21,7 @@ __status__ = "Development"
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
-class loguniform(stats.rv_continuous):
+class loguniform(rv_continuous):
     """Loguniform Distributon"""
     def __init__(self, low=0.1, high=1, base=10, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
@@ -38,7 +35,7 @@ class loguniform(stats.rv_continuous):
             self._log_low, self._log_high, self._size))
 
 
-class rv_kde(stats.rv_continuous):
+class rv_kde(rv_continuous):
     """Create a `scipy.stats.rv_continuous` instance from a (gaussian) KDE.
 
     Uses the KDE implementation from sklearn.
@@ -47,6 +44,8 @@ class rv_kde(stats.rv_continuous):
     """
     def __init__(self, data, bw=None, bw_method=None, bw_statsmodels=False,
                  **kde_args):
+        from sklearn.neighbors import KernelDensity
+        from sklearn.utils import check_array
         data = check_array(data, order='C')
         if bw is None:
             if bw_statsmodels:
@@ -58,6 +57,7 @@ class rv_kde(stats.rv_continuous):
         super(rv_kde, self).__init__(name='KDE')
 
     def _bandwidth_statsmodels(cls, sample, bw_method=None):
+        from statsmodels.nonparametric.kernel_density import KDEMultivariate
         # all continuous
         vt = sample.ndim * 'c'
         skde = KDEMultivariate(sample, var_type=vt)
@@ -65,9 +65,10 @@ class rv_kde(stats.rv_continuous):
         return bw
 
     def _bandwidth_scipy(cls, sample, bw_method=None):
+        from scipy.stats import gaussian_kde
         # sklearn expects switched shape versus scipy
         sample = sample.T
-        gkde = stats.gaussian_kde(sample, bw_method=None)
+        gkde = gaussian_kde(sample, bw_method=None)
         f = gkde.covariance_factor()
         bw = f * sample.std()
         return bw
