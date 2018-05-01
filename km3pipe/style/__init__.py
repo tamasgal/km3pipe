@@ -18,11 +18,11 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-style_dir = join(dirname(dirname(__file__)), 'kp-data/stylelib')
+STYLE_DIR = join(dirname(dirname(__file__)), 'kp-data/stylelib')
 
 
 def get_style_path(style):
-    return style_dir + '/' + style + '.mplstyle'
+    return STYLE_DIR + '/' + style + '.mplstyle'
 
 
 def use(style='km3pipe'):
