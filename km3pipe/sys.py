@@ -13,8 +13,6 @@ except ImportError:
 import sys
 from contextlib import contextmanager
 
-from .logger import logging
-
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
@@ -22,8 +20,6 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
-
-log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 @contextmanager
