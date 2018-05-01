@@ -6,7 +6,8 @@ import numpy as np
 from km3pipe.testing import TestCase, StringIO
 from km3pipe.tools import (
     unpack_nfirst, split, namedtuple_with_defaults, remain_file_pointer,
-    decamelise, camelise, issorted, lstrip, chunks, is_coherent)
+    decamelise, camelise, issorted, lstrip, chunks, is_coherent,
+    istype)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -188,3 +189,13 @@ class TestChunks(TestCase):
                          list(chunks(l, 3)))
         self.assertEqual([[1, 2, 3, 4], [5, 6, 7, 8], [9]],
                          list(chunks(l, 4)))
+
+
+class TestIstype(TestCase):
+    def test_a_type(self):
+        a = [1]
+        assert istype(a, 'list')
+
+    def test_another_type(self):
+        b = 'string'
+        assert istype(b, 'str')
