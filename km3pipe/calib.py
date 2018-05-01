@@ -4,14 +4,13 @@
 Calibration.
 
 """
-
 import numpy as np
-import pandas as pd
 
 from .core import Module
 from .hardware import Detector
 from .dataclasses import Table
 from .dataclass_templates import TEMPLATES
+from .tools import istype
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -108,7 +107,7 @@ class Calibration(Module):
         """Add x, y, z, t0 (and du, floor if DataFrame) columns to the hits.
 
         """
-        if isinstance(hits, pd.DataFrame):
+        if istype(hits, 'DataFrame'):
             # do we ever see McHits here?
             hits = Table.from_template(hits, 'Hits')
         if hasattr(hits, 'dom_id') and hasattr(hits, 'channel_id'):
