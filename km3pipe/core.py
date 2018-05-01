@@ -437,11 +437,6 @@ class Blob(OrderedDict):
     pass
 
 
-class Geometry(object):
-    def __init__(self, *args, **kwargs):
-        log.error("The 'Geometry' class has been renamed to 'Calibration'!")
-
-
 class Run(object):
     """A simple container for event info, hits, tracks and calibration.
     """
