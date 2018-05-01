@@ -25,7 +25,7 @@ try:
 except ImportError:
     HAS_ROOT = False
 
-from km3pipe.math import bootstrap_fit
+from km3pipe.stats import bootstrap_fit
 import km3pipe.style.moritz      # noqa
 
 ##################################################################
