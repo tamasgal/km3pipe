@@ -6,12 +6,10 @@ Database utilities.
 """
 from datetime import datetime
 import ssl
-import sys
 import io
 import json
 import re
 import pytz
-import socket
 from collections import defaultdict, OrderedDict
 from inspect import Signature, Parameter
 from urllib.parse import urlencode, unquote
@@ -23,7 +21,6 @@ from http.client import IncompleteRead
 
 from .tools import cprint
 from .time import Timer
-from .config import Config
 from .logger import logging
 
 
@@ -52,6 +49,7 @@ BASE_URL = 'https://km3netdbweb.in2p3.fr'
 
 def we_are_in_lyon():
     """Check if we are on a Lyon machine"""
+    import socket
     try:
         hostname = socket.gethostname()
         ip = socket.gethostbyname(hostname)
@@ -85,6 +83,7 @@ class DBManager(object):
         self._opener = None
         self._temporary = temporary
 
+        from .config import Config
         config = Config()
 
         if url is not None:
@@ -389,7 +388,10 @@ class DBManager(object):
 
     def request_permanent_session(self, username=None, password=None):
         log.debug("Requesting permanent session")
+
+        from .config import Config
         config = Config()
+
         if username is None and password is None:
             log.debug("Checking configuration file for DB credentials")
             username, password = config.db_credentials
