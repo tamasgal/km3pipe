@@ -4,7 +4,6 @@
 Database utilities.
 
 """
-
 from datetime import datetime
 import ssl
 import sys
@@ -13,7 +12,6 @@ import json
 import re
 import pytz
 import socket
-import xml.etree.ElementTree as ET
 from collections import defaultdict, OrderedDict
 from inspect import Signature, Parameter
 from urllib.parse import urlencode, unquote
@@ -21,10 +19,7 @@ from urllib.request import (Request, build_opener, urlopen,
                             HTTPCookieProcessor, HTTPHandler)
 from urllib.error import URLError, HTTPError
 from io import StringIO
-from http.cookiejar import CookieJar
 from http.client import IncompleteRead
-
-import pandas as pd
 
 from .tools import cprint
 from .time import Timer
@@ -63,6 +58,18 @@ def we_are_in_lyon():
     except socket.gaierror:
         return False
     return ip.startswith("134.158.")
+
+
+def read_csv(text, sep="\t"):
+    """Create a DataFrame from CSV text"""
+    import pandas as pd  # no top level load to make a faster import of db
+    return pd.read_csv(StringIO(text), sep="\t")
+
+
+def make_empty_dataset():
+    """Create an empty dataset"""
+    import pandas as pd  # no top level load to make a faster import of db
+    return pd.DataFrame()
 
 
 class DBManager(object):
@@ -125,10 +132,10 @@ class DBManager(object):
             log.error(content)
             return None
         try:
-            dataframe = pd.read_csv(StringIO(content), sep="\t")
+            dataframe = read_csv(content)
         except ValueError:
             log.warning("Empty dataset")  # ...probably. Waiting for more info
-            return pd.DataFrame()
+            return make_empty_dataset()
         else:
             self._add_datetime(dataframe)
             try:
@@ -142,7 +149,7 @@ class DBManager(object):
         url = 'streamds/runs.txt?detid={0}'.format(det_id)
         content = self._get_content(url)
         try:
-            dataframe = pd.read_csv(StringIO(content), sep="\t")
+            dataframe = read_csv(content)
         except ValueError:
             log.warning("Empty dataset")
             return None
@@ -184,10 +191,10 @@ class DBManager(object):
     def _get_detectors(self):
         content = self._get_content('streamds/detectors.txt')
         try:
-            dataframe = pd.read_csv(StringIO(content), sep="\t")
+            dataframe = read_csv(content)
         except ValueError:
             log.warning("Empty dataset")
-            return pd.DataFrame()
+            return make_empty_dataset()
         else:
             return dataframe
 
@@ -195,10 +202,10 @@ class DBManager(object):
         content = self._get_content('streamds/t0sets.txt?detid={0}'
                                     .format(det_id))
         try:
-            dataframe = pd.read_csv(StringIO(content), sep="\t")
+            dataframe = read_csv(content)
         except ValueError:
             log.warning("Empty dataset")
-            return pd.DataFrame()
+            return make_empty_dataset()
         else:
             return dataframe
 
@@ -302,10 +309,10 @@ class DBManager(object):
             log.error(content)
             return None
         try:
-            dataframe = pd.read_csv(StringIO(content), sep="\t")
+            dataframe = read_csv(content)
         except ValueError:
             log.warning("Empty dataset")  # ...probably. Waiting for more info
-            return pd.DataFrame()
+            return make_empty_dataset()
         else:
             self._add_datetime(dataframe)
             return dataframe
@@ -419,6 +426,7 @@ class DBManager(object):
 
     def _build_opener(self):
         log.debug("Building opener.")
+        from http.cookiejar import CookieJar
         cj = CookieJar()
         self._cookies = cj
         opener = build_opener(HTTPCookieProcessor(cj), HTTPHandler())
@@ -445,9 +453,8 @@ class StreamDS(object):
 
     def _update_streams(self):
         """Update the list of available straems"""
-        c = self._db._get_content("streamds")
-        self._stream_df = pd.read_csv(StringIO(c), sep='\t')  \
-            .sort_values("STREAM")
+        content = self._db._get_content("streamds")
+        self._stream_df = read_csv(content).sort_values("STREAM")
         self._streams = None
         for stream in self.streams:
             setattr(self, stream, self.__getattr__(stream))
@@ -527,15 +534,14 @@ class StreamDS(object):
         sel = ''.join(["&{0}={1}".format(k, v) for (k, v) in kwargs.items()])
         url = "streamds/{0}.{1}?{2}".format(stream, fmt, sel[1:])
         data = self._db._get_content(url)
+        if not data:
+            log.error("No data found.")
+            return
         if(data.startswith("ERROR")):
             log.error(data)
             return
         if fmt == "txt":
-            try:
-                return pd.read_csv(StringIO(data), sep='\t')
-            except pd.errors.EmptyDataError:
-                log.error("No data found.")
-                return None
+            return read_csv(data)
         return data
 
 
@@ -740,6 +746,9 @@ def show_ahrs_calibration(clb_upi, version='3'):
                               "testtype=AHRS-CALIBRATION-v{1}&n=1&out=xml"
                               .format(ahrs_upi, version)) \
         .replace('\n', '')
+
+    import xml.etree.ElementTree as ET
+
     try:
         root = ET.parse(io.StringIO(content)).getroot()
     except ET.ParseError:
