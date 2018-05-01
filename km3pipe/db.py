@@ -16,6 +16,16 @@ import socket
 import xml.etree.ElementTree as ET
 from collections import defaultdict, OrderedDict
 from inspect import Signature, Parameter
+from urllib.parse import urlencode, unquote
+from urllib.request import (Request, build_opener, urlopen,
+                            HTTPCookieProcessor, HTTPHandler)
+from urllib.error import URLError, HTTPError
+from io import StringIO
+from http.cookiejar import CookieJar
+from http.client import IncompleteRead
+
+import lazy_import
+
 
 try:
     import pandas as pd
@@ -28,13 +38,6 @@ from .config import Config
 from .logger import logging
 
 
-from urllib.parse import urlencode, unquote
-from urllib.request import (Request, build_opener, urlopen,
-                            HTTPCookieProcessor, HTTPHandler)
-from urllib.error import URLError, HTTPError
-from io import StringIO
-from http.cookiejar import CookieJar
-from http.client import IncompleteRead
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
