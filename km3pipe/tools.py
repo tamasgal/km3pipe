@@ -7,10 +7,8 @@ Some unsorted, frequently used logic.
 
 import base64
 import collections
-import json
 import os
 import re
-import requests
 import socket
 import subprocess
 import sys
@@ -376,23 +374,6 @@ def _is_deprecated(func):
                                               for c in closures
                      if isinstance(c.cell_contents, str)]))
     return is_deprecated
-
-
-def slack_msg(text, webhook_url):
-    """Send text to Slack for a given webhook_url"""
-    slack_data = {'text': text}
-    response = requests.post(
-        webhook_url,
-        data=json.dumps(slack_data),
-        headers={'Content-Type': 'application/json'}
-        )
-    if response.status_code != 200:
-        raise ValueError(
-            'Request to slack returned an error %s, the response is:\n%s'
-            % (response.status_code, response.text)
-        )
-    else:
-        return True
 
 
 def issorted(arr):
