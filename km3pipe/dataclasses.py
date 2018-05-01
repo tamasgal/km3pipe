@@ -4,12 +4,11 @@
 """
 Dataclasses for internal use. Heavily based on Numpy arrays.
 """
-
 import numpy as np
 from numpy.lib import recfunctions as rfn
-from pandas import DataFrame
 
 from .dataclass_templates import TEMPLATES
+from .tools import istype
 
 
 __author__ = "Tamas Gal and Moritz Lotze"
@@ -102,7 +101,7 @@ class Table(np.recarray):
                 "Lists/tuples are not supported! Please provide either "
                 "a dict(array), a pandas dataframe, an ndarray "
                 "with a structured dtype, or a 2d ndarray plus colnames!")
-        if isinstance(data, DataFrame):
+        if istype(data, 'DataFrame'):
             return cls.from_dataframe(data, h5loc=h5loc, dtype=dtype,
                                       split_h5=split_h5, colnames=colnames,
                                       name=name, **kwargs)
