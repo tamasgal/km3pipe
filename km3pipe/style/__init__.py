@@ -5,14 +5,13 @@ The KM3Pipe style definitions.
 
 """
 
-import os
+from os.path import dirname, join
 from itertools import cycle
 
 try:
     import matplotlib.pyplot as plt
 except ImportError:
     raise ImportError("Please install matplotlib: `pip install matplotlib`")
-import km3pipe as kp
 
 
 __author__ = "Tamas Gal"
@@ -24,7 +23,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-style_dir = os.path.dirname(kp.__file__) + '/kp-data/stylelib'
+style_dir = join(dirname(dirname(__file__)), 'kp-data/stylelib')
 
 
 try:
