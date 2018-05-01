@@ -8,11 +8,6 @@ The KM3Pipe style definitions.
 from os.path import dirname, join
 from itertools import cycle
 
-try:
-    import matplotlib.pyplot as plt
-except ImportError:
-    raise ImportError("Please install matplotlib: `pip install matplotlib`")
-
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -67,6 +62,8 @@ def get_style_path(style):
 
 
 def use(style='km3pipe'):
+    import matplotlib.pyplot as plt
+
     for s in (get_style_path('km3pipe-' + style),
               get_style_path(style),
               style):
@@ -102,6 +99,8 @@ class ColourCycler(object):
 
     def refresh_styles(self):
         """Load all available styles"""
+        import matplotlib.pyplot as plt
+
         self.colours = {}
         for style in plt.style.available:
             try:
