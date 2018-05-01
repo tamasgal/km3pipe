@@ -10,14 +10,13 @@ import warnings
 
 import numpy as np
 import tables as tb
-from pandas import DataFrame
 
 import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
 from km3pipe.dataclasses import Table, DEFAULT_H5LOC
 from km3pipe.dataclass_templates import TEMPLATES
 from km3pipe.logger import logging
-from km3pipe.tools import camelise, split
+from km3pipe.tools import camelise, split, istype
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -110,7 +109,7 @@ class HDF5Sink(Module):
         if len(data) <= 0:
             self.log.debug('toarray: data has no length')
             return
-        if isinstance(data, DataFrame):
+        if istype(data, 'DataFrame'):
             self.log.debug('toarray: pandas dataframe')
             data = Table.from_dataframe(data)
         return data
