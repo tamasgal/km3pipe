@@ -404,9 +404,3 @@ def gold_parameter(time_residual):
 def log_b(arg, base):
     """Logarithm to any base"""
     return np.log(arg) / np.log(base)
-
-
-def mad(v):
-    """MAD -- Median absolute deviation. More robust than standard deviation.
-    """
-    return np.median(np.abs(v - np.median(v)))

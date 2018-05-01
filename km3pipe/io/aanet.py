@@ -14,7 +14,6 @@ import numpy as np
 from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import Table
 from km3pipe.logger import logging
-from km3pipe.math import mad
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -512,10 +511,11 @@ def parse_jevt_jgandalf(aanet_event, event_id, missing=0):
 
 def parse_jgandalf_new(aanet_event, event_id, missing=0):
     """Read JGandalf (ORCA at least) files from MXtrigger on."""
-    from scipy.stats import iqr
 
     def get_track_spread(tracks):
         """Grab metrics from all tracks which pass muon length fit."""
+        from scipy.stats import iqr
+        from km3pipe.stats import mad
 
         variates = defaultdict(list)
         out = {}
