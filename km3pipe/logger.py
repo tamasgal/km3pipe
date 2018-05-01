@@ -7,7 +7,6 @@ The logging facility.
 from hashlib import sha256
 import socket
 import logging
-import logging.config
 
 from .tools import colored
 
@@ -19,10 +18,6 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-try:
-    logging.config.fileConfig('logging.conf')
-except Exception:
-    logging.basicConfig()
 
 logging.addLevelName(logging.INFO, "\033[1;32m%s\033[1;0m" %
                      logging.getLevelName(logging.INFO))
