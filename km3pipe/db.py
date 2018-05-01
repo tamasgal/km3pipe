@@ -24,9 +24,6 @@ from io import StringIO
 from http.cookiejar import CookieJar
 from http.client import IncompleteRead
 
-import lazy_import
-
-
 try:
     import pandas as pd
 except ImportError:
