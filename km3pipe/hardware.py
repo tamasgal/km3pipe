@@ -6,7 +6,7 @@ Classes representing KM3NeT hardware.
 """
 
 from collections import OrderedDict, defaultdict
-import sys
+from io import StringIO
 
 import numpy as np
 
@@ -15,11 +15,6 @@ from .math import com  # , ignored
 from .db import DBManager
 
 from .logger import logging, get_printer
-
-if sys.version_info[0] > 2:
-    from io import StringIO
-else:
-    from StringIO import StringIO
 
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
