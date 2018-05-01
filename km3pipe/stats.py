@@ -10,6 +10,7 @@ from sklearn.neighbors import KernelDensity
 from sklearn.utils import check_array
 from statsmodels.nonparametric.kernel_density import KDEMultivariate
 
+from .math import log_b
 from .logger import logging
 
 __author__ = "Moritz Lotze"
