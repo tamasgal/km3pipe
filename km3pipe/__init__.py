@@ -12,7 +12,7 @@ except NameError:
     __KM3PIPE_SETUP__ = False
 
 if not __KM3PIPE_SETUP__:
-    from .core import (Pipeline, Module, Pump, Blob, Run, Geometry)  # noqa
+    from .core import (Pipeline, Module, Pump, Blob, Run)  # noqa
     from . import core      # noqa
     from .dataclasses import Table      # noqa
     from . import dataclasses       # noqa
@@ -28,7 +28,6 @@ if not __KM3PIPE_SETUP__:
     from . import math      # noqa
     from . import mc        # noqa
     from . import shell     # noqa
-    from . import srv       # noqa
     from . import style     # noqa
     from . import sys       # noqa
     # from . import testing     # noqa
