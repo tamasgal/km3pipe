@@ -29,6 +29,8 @@ class TestEvtPump(TestCase):
             "start_run: 1",
             "cut_nu: 0.100E+03 0.100E+09-0.100E+01 0.100E+01",
             "spectrum: -1.40",
+            "physics: gSeaGen 4.1 180126  165142",
+            "physics: GENIE 2.10.2 180126  165142",
             "end_event:",
             "start_event: 12 1",
             "track_in: 1 -389.951 213.427 516 -0.204562 -0.60399 -0.770293" +
@@ -98,9 +100,16 @@ class TestEvtPump(TestCase):
 
     def test_parse_header(self):
         raw_header = self.pump.extract_header()
-        self.assertEqual(['1'], raw_header['start_run'])
-        self.assertAlmostEqual(-1.4, float(raw_header['spectrum'][0]))
-        self.assertAlmostEqual(1, float(raw_header['cut_nu'][2]))
+        self.assertEqual([['1']], raw_header['start_run'])
+        self.assertAlmostEqual(-1.4, float(raw_header['spectrum'][0][0]))
+        self.assertAlmostEqual(1, float(raw_header['cut_nu'][0][2]))
+
+    def test_header_entries_with_same_tag_are_put_in_lists(self):
+        raw_header = self.pump.extract_header()
+        self.assertAlmostEqual(2, len(raw_header['physics']))
+        self.assertAlmostEqual(1, len(raw_header['spectrum']))
+        assert 'gSeaGen' == raw_header['physics'][0][0]
+        assert 'GENIE' == raw_header['physics'][1][0]
 
 #    def test_incomplete_header_raises_value_error(self):
 #        temp_file = StringIO(self.corrupt_evt_header)
@@ -121,12 +130,12 @@ class TestEvtPump(TestCase):
 
     def test_event_offset_is_at_first_event_after_parsing_header(self):
         self.pump.extract_header()
-        self.assertEqual(88, self.pump.event_offsets[0])
+        self.assertEqual(161, self.pump.event_offsets[0])
 
     def test_rebuild_offsets(self):
         self.pump.extract_header()
         self.pump._cache_offsets()
-        self.assertListEqual([88, 233, 700], self.pump.event_offsets)
+        self.assertListEqual([161, 306, 773], self.pump.event_offsets)
 
     def test_rebuild_offsets_without_header(self):
         self.pump.blob_file = StringIO(self.no_evt_header)
@@ -162,7 +171,7 @@ class TestEvtPump(TestCase):
         self.pump.prepare_blobs()
         blob = self.pump.get_blob(0)
         self.assertTrue('raw_header' in blob)
-        self.assertEqual(['1'], blob['raw_header']['start_run'])
+        self.assertEqual([['1']], blob['raw_header']['start_run'])
         self.assertTupleEqual((12, 1), blob['start_event'])
         # TODO: all the other stuff like hit, track etc.
         assert 'hit' in blob
@@ -259,6 +268,12 @@ class TestEvtPump(TestCase):
 
         assert 23 == blob['foo']
 
+    def test_auto_parser_finds_all_physics_parsers(self):
+        self.pump = EvtPump(parsers='auto')
+        self.pump.blob_file = StringIO(self.valid_evt_header)
+        self.pump.extract_header()
+        assert EVT_PARSERS['gseagen'] in self.pump.parsers
+
 
 class TestEvtFilePump(TestCase):
     def setUp(self):
@@ -312,3 +327,8 @@ class TestKM3Sim(TestCase):
         parse_km3sim(blob)
         neutrino = blob['Neutrinos'][0]
         self.assertAlmostEqual(0.10066, neutrino.energy)
+
+
+class TestParserDetection(TestCase):
+    def test_parsers_are_automatically_detected(self):
+        pass

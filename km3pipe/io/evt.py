@@ -4,6 +4,7 @@
 Pumps for the EVT simulation dataformat.
 
 """
+from collections import defaultdict
 import sys
 
 import numpy as np
@@ -88,8 +89,14 @@ class EvtPump(Pump):  # pylint: disable:R0902
         self.index = 0
         self.whole_file_cached = False
         self.parsers = []
+        self._auto_parse = False
 
-        self._register_parsers(parsers)
+        if parsers:
+            if parsers == 'auto':
+                self.print("Automatic tag parsing enabled.")
+                self._auto_parse = True
+            else:
+                self._register_parsers(parsers)
 
         self.file_index = int(self.index_start)
 
@@ -117,7 +124,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
                 self.parsers.append(EVT_PARSERS[parser])
             else:
                 self.log.warning("Parser '{}' not found, ignoring..."
-                                 .format(parsers))
+                                 .format(parser))
 
     def _reset(self):
         """Clear the cache."""
@@ -142,7 +149,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
     def extract_header(self):
         """Create a dictionary with the EVT header information"""
         self.log.info("Extracting the header")
-        raw_header = self.raw_header = {}
+        raw_header = self.raw_header = defaultdict(list)
         first_line = self.blob_file.readline()
         first_line = try_decode_string(first_line)
         self.blob_file.seek(0, 0)
@@ -156,9 +163,12 @@ class EvtPump(Pump):  # pylint: disable:R0902
                 tag, value = str(line).split(':')
             except ValueError:
                 continue
-            raw_header[tag] = str(value).split()
+            raw_header[tag].append(str(value).split())
             if line.startswith(str('end_event:')):
                 self._record_offset()
+                if self._auto_parse and 'physics' in raw_header:
+                    parsers = [p[0].lower() for p in raw_header['physics']]
+                    self._register_parsers(parsers)
                 return raw_header
         raise ValueError("Incomplete header, no 'end_event' tag found!")
 
