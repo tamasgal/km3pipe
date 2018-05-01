@@ -19,6 +19,8 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
+logging.basicConfig()
+
 logging.addLevelName(logging.INFO, "\033[1;32m%s\033[1;0m" %
                      logging.getLevelName(logging.INFO))
 logging.addLevelName(logging.DEBUG, "\033[1;34m%s\033[1;0m" %
@@ -30,12 +32,10 @@ logging.addLevelName(logging.ERROR, "\033[1;31m%s\033[1;0m" %
 logging.addLevelName(logging.CRITICAL, "\033[1;101m%s\033[1;0m" %
                      logging.getLevelName(logging.CRITICAL))
 
-ch = logging.StreamHandler()
-
-# pylint: disable=C0103
+CONSOLE_HANDLER = logging.StreamHandler()
 formatter = logging.Formatter('[%(levelname)s] %(name)s: %(message)s')
-# ch.setFormatter(formatter)
-# logger.addHandler(ch)
+CONSOLE_HANDLER.setFormatter(formatter)
+# logging.getLogger('').addHandler(CONSOLE_HANDLER)
 
 
 class LogIO(object):
@@ -69,7 +69,9 @@ class LogIO(object):
 
 def get(name):
     """Helper function to get a logger"""
-    return logging.getLogger(name)
+    logger = logging.getLogger(name)
+    logger.addHandler(CONSOLE_HANDLER)
+    return logger
 
 
 def set_level(name, level):
