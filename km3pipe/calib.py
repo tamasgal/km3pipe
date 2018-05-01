@@ -6,7 +6,7 @@ Calibration.
 """
 
 import numpy as np
-from pandas import DataFrame
+import pandas as pd
 
 from .core import Module
 from .hardware import Detector
@@ -108,7 +108,7 @@ class Calibration(Module):
         """Add x, y, z, t0 (and du, floor if DataFrame) columns to the hits.
 
         """
-        if isinstance(hits, DataFrame):
+        if isinstance(hits, pd.DataFrame):
             # do we ever see McHits here?
             hits = Table.from_template(hits, 'Hits')
         if hasattr(hits, 'dom_id') and hasattr(hits, 'channel_id'):
