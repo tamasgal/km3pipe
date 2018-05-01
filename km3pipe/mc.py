@@ -6,8 +6,6 @@ Monte Carlo related things.
 """
 
 import numpy as np
-import pandas as pd
-
 
 from .logger import logging
 
@@ -128,6 +126,7 @@ def leading_particle(df):
 
 def get_flavor(pdg_types):
     """Build a 'flavor' from the 'type' column."""
+    import pandas as pd
     return pd.Series(pdg_types).apply(pdg2name)
 
 
@@ -141,9 +140,11 @@ def _p_eq_mu(pdg_type):
 
 def is_neutrino(pdg_types):
     """flavor string -> is_neutrino"""
+    import pandas as pd
     return pd.Series(pdg_types).apply(_p_eq_nu)
 
 
 def is_muon(pdg_types):
     """flavor string -> is_neutrino"""
+    import pandas as pd
     return pd.Series(pdg_types).apply(_p_eq_mu)
