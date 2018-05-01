@@ -4,13 +4,7 @@
 """
 Maths, Geometry, coordinates.
 """
-
-from matplotlib.path import Path
 import numpy as np
-from scipy import linalg, stats
-from sklearn.neighbors import KernelDensity
-from sklearn.utils import check_array
-from statsmodels.nonparametric.kernel_density import KDEMultivariate
 
 from .logger import logging
 
@@ -179,15 +173,15 @@ def unit_vector(vector, **kwargs):
     vector = np.array(vector)
     out_shape = vector.shape
     vector = np.atleast_2d(vector)
-    unit = vector / linalg.norm(vector, axis=1, **kwargs)[:, None]
+    unit = vector / np.linalg.norm(vector, axis=1, **kwargs)[:, None]
     return unit.reshape(out_shape)
 
 
 def pld3(p1, p2, d2):
     """Calculate the point-line-distance for given point and line."""
     c = np.cross(d2, p2 - p1)
-    n1 = linalg.norm(c)
-    n2 = linalg.norm(d2)
+    n1 = np.linalg.norm(c)
+    n2 = np.linalg.norm(d2)
     return n1 / n2
 
 
@@ -270,6 +264,7 @@ class Polygon(object):
     """A polygon, to implement containment conditions."""
 
     def __init__(self, vertices):
+        from matplotlib.path import Path
         self.poly = Path(vertices)
 
     def contains(self, points):
@@ -422,20 +417,6 @@ def log_b(arg, base):
     return np.log(arg) / np.log(base)
 
 
-class loguniform(stats.rv_continuous):
-    """Loguniform Distributon"""
-    def __init__(self, low=0.1, high=1, base=10, *args, **kwargs):
-        super(self.__class__, self).__init__(*args, **kwargs)
-        self._log_low = log_b(low, base=base)
-        self._log_high = log_b(high, base=base)
-        self._base_of_log = base
-
-    def _rvs(self, *args, **kwargs):
-        # `rvs(size=foo, *args)` does argcheck etc, and sets `self._size`
-        return np.power(self._base_of_log, np.random.uniform(
-            self._log_low, self._log_high, self._size))
-
-
 def param_names(scipy_dist):
     """Get names of fit parameters from a ``scipy.rv_*`` distribution."""
     names = ['loc', 'scale']
@@ -530,52 +511,3 @@ def bootstrap_fit(rv_cont, data, n_iter=10, quant=95, print_params=True):
         'upper limit': up,
     }
     return out
-
-
-class rv_kde(stats.rv_continuous):
-    """Create a `scipy.stats.rv_continuous` instance from a (gaussian) KDE.
-
-    Uses the KDE implementation from sklearn.
-
-    Automatic bandwidth,  either from the statsmodels or scipy implementation.
-    """
-    def __init__(self, data, bw=None, bw_method=None, bw_statsmodels=False,
-                 **kde_args):
-        data = check_array(data, order='C')
-        if bw is None:
-            if bw_statsmodels:
-                bw = self._bandwidth_statsmodels(data, bw_method)
-            else:
-                bw = self._bandwidth_scipy(data, bw_method)
-        self._bw = bw
-        self._kde = KernelDensity(bandwidth=bw, **kde_args).fit(data)
-        super(rv_kde, self).__init__(name='KDE')
-
-    def _bandwidth_statsmodels(cls, sample, bw_method=None):
-        # all continuous
-        vt = sample.ndim * 'c'
-        skde = KDEMultivariate(sample, var_type=vt)
-        bw = skde.bw
-        return bw
-
-    def _bandwidth_scipy(cls, sample, bw_method=None):
-        # sklearn expects switched shape versus scipy
-        sample = sample.T
-        gkde = stats.gaussian_kde(sample, bw_method=None)
-        f = gkde.covariance_factor()
-        bw = f * sample.std()
-        return bw
-
-    def pdf(self, x):
-        # we implement `pdf` instead of `_pdf`, since
-        # otherwise scipy performs reshaping of `x` which messes
-        # things up for sklearn -- we wanna reshape ourselves!
-        x = check_array(x, order='C')
-        log_pdf = self._kde.score_samples(x)
-        pdf = np.exp(log_pdf)
-        return pdf
-
-    def _rvs(self, *args, random_state=None, **kwargs):
-        # don't ask me why it uses `self._size`
-        return np.exp(self._kde.sample(n_samples=self._size,
-                                       random_state=random_state))
