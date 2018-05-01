@@ -419,3 +419,8 @@ class AnyBar():
 def zero_pad(m, n=1):
     """Pad a matrix with zeros, on all sides."""
     return np.pad(m, (n, n), mode='constant', constant_values=[0])
+
+
+def istype(obj, typename):
+    """Drop-in replacement for `isinstance` to avoid imports"""
+    return type(obj).__name__ == typename
