@@ -11,6 +11,7 @@ try:
 except NameError:
     __KM3PIPE_SETUP__ = False
 
+
 if not __KM3PIPE_SETUP__:
     from .core import (Pipeline, Module, Pump, Blob, Run)  # noqa
     from . import core      # noqa
