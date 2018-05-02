@@ -95,7 +95,7 @@ def get_printer(name, color=None, ansi_code=None):
     prefix = name + ': '
 
     def printer(text):
-        print(prefix + text)
+        print(prefix + str(text))
 
     return printer
 
