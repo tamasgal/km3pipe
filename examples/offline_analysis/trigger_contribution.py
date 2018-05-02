@@ -22,7 +22,7 @@ else:
     raise SystemExit("Usage: trigger_contribution.py FILENAME")
 
 det = kp.hardware.Detector(det_id=29)
-log = kp.logger.get('TriggerContribution')
+log = kp.logger.get_logger('TriggerContribution')
 
 
 class TriggerContributionCalculator(kp.Module):

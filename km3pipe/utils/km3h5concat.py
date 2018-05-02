@@ -27,7 +27,7 @@ __maintainer__ = "Moritz Lotze"
 __email__ = "mlotze@km3net.de"
 __status__ = "Development"
 
-log = logger.get('km3pipe.io')
+log = logger.get_logger('km3pipe.io')
 
 
 def km3h5concat(input_files, output_file, n_events=None, **kwargs):

@@ -11,10 +11,10 @@ import numpy as np
 
 from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import Table
-from km3pipe.logger import logging
+from km3pipe.logger import get_logger
 from km3pipe.tools import split
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

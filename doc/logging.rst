@@ -18,7 +18,7 @@ Accessing a Logger
 To access a modules logger, you need to::
 
     import km3pipe as kp
-    log = kp.logger.get("module.path")
+    log = kp.logger.get_logger("module.path")
 
 where ``module.path`` is the Python import path of the module, like ``km3pipe.core``.
 
@@ -38,7 +38,7 @@ Creating your own Logger
 To create your own logger, use the same procedure as described above::
 
     import km3pipe as kp
-    log = kp.logger.get("your.desired.logger.name")
+    log = kp.logger.get_logger("your.desired.logger.name")
 
 After that, you can use it to log anywhere::
 

@@ -12,7 +12,7 @@ import pytz
 
 from km3pipe.core import Pump
 from km3pipe.sys import ignored
-from km3pipe.logger import logging
+from km3pipe.logger import get_logger
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -22,7 +22,7 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 
 UTC_TZ = pytz.timezone('UTC')

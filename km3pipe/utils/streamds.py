@@ -34,7 +34,7 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = kp.logger.get("streamds")
+log = kp.logger.get_logger("streamds")
 
 RUNSUMMARY_URL = "https://km3netdbweb.in2p3.fr/jsonds/runsummarynumbers/i"
 

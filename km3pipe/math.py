@@ -6,7 +6,7 @@ Maths, Geometry, coordinates.
 """
 import numpy as np
 
-from .logger import logging
+from .logger import get_logger
 
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2017, Tamas Gal and the KM3NeT collaboration."
@@ -16,7 +16,7 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 
 def neutrino_to_source_direction(phi, theta, radian=True):

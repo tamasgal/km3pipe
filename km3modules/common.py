@@ -15,7 +15,7 @@ from km3pipe.sys import peak_memory_usage
 from km3pipe.math import zenith, azimuth
 from km3pipe.dataclasses import Table
 
-log = kp.logger.get(__name__)
+log = kp.logger.get_logger(__name__)
 
 
 class Wrap(Module):

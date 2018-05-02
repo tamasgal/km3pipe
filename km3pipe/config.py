@@ -10,7 +10,7 @@ import pytz
 from configparser import ConfigParser, Error, NoOptionError, NoSectionError
 import getpass
 
-from .logger import logging
+from .logger import get_logger
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -20,7 +20,7 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 CONFIG_PATH = os.path.expanduser('~/.km3net')
 

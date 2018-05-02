@@ -14,7 +14,7 @@ __author__ = "Jonas Reubelt and Tamas Gal"
 __email__ = "jreubelt@km3net.de"
 __status__ = "Development"
 
-log = kp.logger.logging.getLogger(__name__)  # pylint: disable=C0103
+log = kp.logger.get_logger(__name__)  # pylint: disable=C0103
 
 
 class PhidgetsController(kp.Module):

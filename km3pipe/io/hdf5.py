@@ -15,10 +15,10 @@ import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
 from km3pipe.dataclasses import Table, DEFAULT_H5LOC
 from km3pipe.dataclass_templates import TEMPLATES
-from km3pipe.logger import logging
+from km3pipe.logger import get_logger
 from km3pipe.tools import camelise, split, istype
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
