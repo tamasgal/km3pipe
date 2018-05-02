@@ -31,7 +31,7 @@ from km3pipe.io.daq import (DAQPreamble, DAQEvent)
 import km3pipe.style
 km3pipe.style.use('km3pipe')
 
-log = kp.logger.get("trigger_rate")
+log = kp.logger.get_logger("trigger_rate")
 
 PLOTS_PATH = 'km3web/plots'
 

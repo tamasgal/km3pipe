@@ -8,7 +8,7 @@ import numpy as np
 from scipy.stats import rv_continuous
 
 from .math import log_b
-from .logger import logging
+from .logger import get_logger
 
 __author__ = "Moritz Lotze"
 __copyright__ = "Copyright 2017, Tamas Gal and the KM3NeT collaboration."
@@ -18,7 +18,7 @@ __maintainer__ = "Moritz Lotze"
 __email__ = "mlotze@km3net.de"
 __status__ = "Development"
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 
 class loguniform(rv_continuous):

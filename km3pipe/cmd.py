@@ -39,9 +39,9 @@ from .tools import irods_filepath
 from .db import DBManager
 from .hardware import Detector
 
-from km3pipe.logger import logging
+from km3pipe.logger import get_logger
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

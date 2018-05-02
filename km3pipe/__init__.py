@@ -13,6 +13,7 @@ except NameError:
 
 
 if not __KM3PIPE_SETUP__:
+    from . import logger        # noqa
     from .core import (Pipeline, Module, Pump, Blob, Run)  # noqa
     from . import core      # noqa
     from .dataclasses import Table      # noqa
@@ -25,7 +26,6 @@ if not __KM3PIPE_SETUP__:
     from . import db        # noqa
     from . import hardware      # noqa
     from . import io        # noqa
-    from . import logger        # noqa
     from . import math      # noqa
     from . import mc        # noqa
     from . import shell     # noqa

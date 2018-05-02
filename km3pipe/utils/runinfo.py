@@ -24,7 +24,7 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = kp.logger.get(__name__)
+log = kp.logger.get_logger(__name__)
 
 
 def runinfo(run_id, det_id):

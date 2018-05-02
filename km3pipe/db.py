@@ -21,7 +21,7 @@ from http.client import IncompleteRead
 
 from .tools import cprint
 from .time import Timer
-from .logger import logging
+from .logger import get_logger
 
 
 __author__ = "Tamas Gal"
@@ -32,7 +32,7 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 UTC_TZ = pytz.timezone('UTC')
 

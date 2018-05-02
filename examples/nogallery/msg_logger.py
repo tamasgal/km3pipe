@@ -22,13 +22,13 @@ import urllib2
 import json
 
 import km3pipe as km3
-from km3pipe.logger import logging
+from km3pipe.logger import get_logger
 
 from pyslack import SlackClient
 
 __author__ = 'tamasgal'
 
-log = logging.getLogger(__name__)
+log = get_logger(__name__)
 RUN_NUMBER_URL = 'http://192.168.0.120:1301/mon/controlunit/runnumber'
 
 

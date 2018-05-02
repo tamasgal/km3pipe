@@ -19,7 +19,8 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-logging.basicConfig()
+loggers = {}  # this holds all the registered loggers
+# logging.basicConfig()
 
 logging.addLevelName(logging.INFO, "\033[1;32m%s\033[1;0m" %
                      logging.getLevelName(logging.INFO))
@@ -31,11 +32,6 @@ logging.addLevelName(logging.ERROR, "\033[1;31m%s\033[1;0m" %
                      logging.getLevelName(logging.ERROR))
 logging.addLevelName(logging.CRITICAL, "\033[1;101m%s\033[1;0m" %
                      logging.getLevelName(logging.CRITICAL))
-
-CONSOLE_HANDLER = logging.StreamHandler()
-formatter = logging.Formatter('[%(levelname)s] %(name)s: %(message)s')
-CONSOLE_HANDLER.setFormatter(formatter)
-# logging.getLogger('').addHandler(CONSOLE_HANDLER)
 
 
 class LogIO(object):
@@ -67,27 +63,51 @@ class LogIO(object):
         self.sock.connect((self.url, self.port))
 
 
-def get(name):
+def get_logger(name):
     """Helper function to get a logger"""
+    if name in loggers:
+        return loggers[name]
     logger = logging.getLogger(name)
-    logger.addHandler(CONSOLE_HANDLER)
+    logger.propagate = False
+    colour_prefix, colour_suffix = hash_coloured_escapes(name)
+    formatter = logging.Formatter('%(levelname)s->{}%(name)s:{} %(message)s'
+                                  .format(colour_prefix, colour_suffix))
+    ch = logging.StreamHandler()
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+    loggers[name] = logger
     return logger
 
 
 def set_level(name, level):
     """Set the log level for given logger"""
-    logger = get(name)
-    logger.setLevel(level)
+    get_logger(name).setLevel(level)
 
 
 def get_printer(name, color=None, ansi_code=None):
     """Return a function which prints a message with a coloured name prefix"""
-    if color is None and ansi_code is None:
-        ansi_code = int(sha256(name.encode('utf-8')).hexdigest(), 16) % 230
 
-    prefix = colored(name + ': ', color=color, ansi_code=ansi_code)
+    if color is None and ansi_code is None:
+        name = hash_coloured(name)
+    else:
+        name = colored(name, color=color, ansi_code=ansi_code)
+
+    prefix = name + ': '
 
     def printer(text):
         print(prefix + text)
 
     return printer
+
+
+def hash_coloured(text):
+    """Return a ANSI coloured text based on its hash"""
+    ansi_code = int(sha256(text.encode('utf-8')).hexdigest(), 16) % 230
+    return colored(text, ansi_code=ansi_code)
+
+
+def hash_coloured_escapes(text):
+    """Return the ANSI hash colour prefix and suffix for a given text"""
+    ansi_code = int(sha256(text.encode('utf-8')).hexdigest(), 16) % 230
+    prefix, suffix = colored('SPLIT', ansi_code=ansi_code).split('SPLIT')
+    return prefix, suffix

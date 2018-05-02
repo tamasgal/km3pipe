@@ -4,7 +4,7 @@
 from km3pipe.testing import TestCase, MagicMock
 
 from km3pipe.db import DBManager, DOMContainer
-from km3pipe.logger import logging
+from km3pipe.logger import get_logger
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -20,7 +20,7 @@ JSON_DOMS = [{'DOMId': 1, 'Floor': 10, 'CLBUPI': '100', 'DetOID': DET_ID},
              {'DOMId': 3, 'Floor': 30, 'CLBUPI': '300', 'DetOID': DET_ID},
              {'DOMId': 4, 'Floor': 40, 'CLBUPI': '400', 'DetOID': 'det_id2'}]
 
-log = logging.getLogger('db')
+log = get_logger('db')
 
 
 class TestDBManager(TestCase):

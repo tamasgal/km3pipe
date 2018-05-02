@@ -11,10 +11,10 @@ import numpy as np
 import pandas as pd
 import tables as tb
 
-from km3pipe.logger import logging
+from km3pipe.logger import get_logger
 from km3pipe.tools import insert_prefix_to_dtype
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 __author__ = "Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -51,7 +51,7 @@ class H5Chain(object):
 
     def __init__(self, filenames):
         self.filenames = filenames
-        self.log = logging.getLogger(self.__class__.__name__)
+        self.log = get_logger(self.__class__.__name__)
 
     def close(self):
         pass

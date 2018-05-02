@@ -18,7 +18,7 @@ from .hdf5 import HDF5Sink  # noqa
 from .hdf5 import HDF5MetaData  # noqa
 from .pickle import PicklePump  # noqa
 
-from km3pipe.logger import logging
+from km3pipe.logger import get_logger
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -29,7 +29,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-log = logging.getLogger(__name__)
+log = get_logger(__name__)
 
 
 def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):

@@ -28,7 +28,7 @@ __author__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 VERSION = "1.0"
 
-log = kp.logger.logging.getLogger("PMTrates")
+log = kp.logger.get_logger("PMTrates")
 
 
 class PMTRates(kp.Module):

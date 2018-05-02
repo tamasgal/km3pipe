@@ -25,7 +25,7 @@ __author__ = "Jonas Reubelt"
 __email__ = "jreubelt@km3net.de"
 __status__ = "Development"
 
-log = kp.logger.logging.getLogger(__name__)  # pylint: disable=C0103
+log = kp.logger.get_logger(__name__)  # pylint: disable=C0103
 # log.setLevel(logging.DEBUG)
 
 TIMESLICE_LENGTH = 0.1  # [s]

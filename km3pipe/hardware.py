@@ -14,10 +14,10 @@ from .tools import unpack_nfirst, split
 from .math import com  # , ignored
 from .db import DBManager
 
-from .logger import logging, get_printer
+from .logger import get_logger, get_printer
 
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

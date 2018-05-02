@@ -28,7 +28,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-log = kp.logger.get(__name__)
+log = kp.logger.get_logger(__name__)
 
 
 def runtable(det_id, n=5, sep='\t', regex=None):

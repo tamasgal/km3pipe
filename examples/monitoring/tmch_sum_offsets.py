@@ -32,7 +32,7 @@ __author__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 VERSION = "1.0"
 
-log = kp.logger.logging.getLogger("tmch_sum_offsets")
+log = kp.logger.get_logger("tmch_sum_offsets")
 
 
 class MonitoringChannelPicker(kp.Module):

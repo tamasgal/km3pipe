@@ -21,8 +21,8 @@ import tables as tb
 
 from km3pipe import version
 
-from km3pipe.logger import logging
-log = logging.getLogger(__name__)
+from km3pipe.logger import get_logger
+log = get_logger(__name__)
 
 __author__ = "Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

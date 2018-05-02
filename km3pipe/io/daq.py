@@ -15,7 +15,7 @@ import numpy as np
 from km3pipe.core import Pump, Module, Blob
 from km3pipe.dataclasses import Table
 from km3pipe.sys import ignored
-from km3pipe.logger import logging
+from km3pipe.logger import get_logger
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -25,7 +25,7 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 DATA_TYPES = {
     101: 'DAQSuperFrame',
