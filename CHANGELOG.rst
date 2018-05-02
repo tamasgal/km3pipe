@@ -13,6 +13,7 @@ Version 8
 * ``EvtPump`` now reads any EVT file and supports additional parsers to
   create convenient datatypes. By default it tries to automatically
   apply known parsers but also supports user defined ones.
+* unified colourful logging/printing to increase the rainbow unicorn factor
 
 Version 7
 ---------
