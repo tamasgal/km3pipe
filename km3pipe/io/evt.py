@@ -45,6 +45,8 @@ class EvtPump(Pump):  # pylint: disable:R0902
         You can also pass your own function, which takes a single argument
         `blob` and mutates it. `str` values will be looked up in the
         `kp.io.evt.EVT_PARSERS` dictionary and ignored if not found.
+        If `parsers='auto'`, the `EvtPump` will try to find the appropriate
+        parsers, which is the default behaviour. [default: 'auto']
     cache_enabled: bool
         If enabled, a cache of the event indices is created when loading
         the file. Enable it if you want to jump around and inspect the
@@ -73,7 +75,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
 
     def configure(self):
         self.filename = self.get('filename')
-        parsers = self.get('parsers', default=[])
+        parsers = self.get('parsers', default='auto')
         self.cache_enabled = self.get('cache_enabled') or False
         self.basename = self.get('basename') or None
         self.suffix = self.get('suffix', default='')
