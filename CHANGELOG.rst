@@ -10,6 +10,9 @@ Version 8
 * python3 required!
 * new fancy ``self.print`` function for ``kp.Modules``
 * ``Detector`` is now super fast when parsing DETX (hello SuperORCA!)
+* ``EvtPump`` now reads any EVT file and supports additional parsers to
+  create convenient datatypes. By default it tries to automatically
+  apply known parsers but also supports user defined ones.
 
 Version 7
 ---------
