@@ -332,7 +332,8 @@ class Table(np.recarray):
         return s
 
     def __repr__(self):
-        return str(self)
+        s = "{} {} (rows: {})".format(self.name, type(self), len(self))
+        return s
 
     def __contains__(self, elem):
         return elem in self.dtype.names
