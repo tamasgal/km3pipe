@@ -2,7 +2,7 @@
 // def DOCKER_IMAGES = ["python:3.5.5", "python:3.6.4", "python:3.6.5"]
 DOCKER_IMAGES = ["python:3.6.5"]
 CHAT_CHANNEL = '#km3pipe'
-DEVELOPERS = ['tgal@km3net.de']
+DEVELOPERS = ['tgal@km3net.de', 'mlotze@km3net.de']
 
 
 def get_stages(docker_image) {
@@ -30,7 +30,6 @@ def get_stages(docker_image) {
                 """
             }
             stage("Build") {
-                sendMail("Build Started", "halleluja")
                 try { 
                     sh """
                         . ${PYTHON_VENV}/bin/activate
@@ -38,6 +37,7 @@ def get_stages(docker_image) {
                     """
                 } catch (e) { 
                     sendChatMessage("Build Failed")
+                    sendMail("Build Failed")
                     throw e
                 }
             }
@@ -49,6 +49,7 @@ def get_stages(docker_image) {
                     """
                 } catch (e) { 
                     sendChatMessage("Install Dependencies Failed")
+                    sendMail("Install Dependencies Failed")
                     throw e
                 }
             }
@@ -60,6 +61,7 @@ def get_stages(docker_image) {
                     """
                 } catch (e) { 
                     sendChatMessage("Install Doc Dependencies Failed")
+                    sendMail("Install Doc Dependencies Failed")
                     throw e
                 }
             }
@@ -71,6 +73,7 @@ def get_stages(docker_image) {
                     """
                 } catch (e) { 
                     sendChatMessage("Install Dev Dependencies Failed")
+                    sendMail("Install Dev Dependencies Failed")
                     throw e
                 }
             }
@@ -85,6 +88,7 @@ def get_stages(docker_image) {
                     archive 'junit.xml'
                 } catch (e) { 
                     sendChatMessage("Test Suite Failed")
+                    sendMail("Test Suite Failed")
                     throw e
                 }
             }
@@ -96,6 +100,7 @@ def get_stages(docker_image) {
                     """
                 } catch (e) { 
                     sendChatMessage("Install Failed")
+                    sendMail("Install Failed")
                     throw e
                 }
             }
@@ -109,6 +114,7 @@ def get_stages(docker_image) {
                     archive 'junit_km3modules.xml'
                 } catch (e) { 
                     sendChatMessage("KM3Modules Test Suite Failed")
+                    sendMail("KM3Modules Test Suite Failed")
                     throw e
                 }
             }
@@ -132,6 +138,7 @@ def get_stages(docker_image) {
                             zoomCoverageChart: false])
                 } catch (e) { 
                     sendChatMessage("Coverage Failed")
+                    sendMail("Coverage Failed")
                     throw e
                 }
             }
@@ -146,6 +153,7 @@ def get_stages(docker_image) {
                     """
                 } catch (e) { 
                     sendChatMessage("Building Docs Failed")
+                    sendMail("Building Docs Failed")
                     throw e
                 }
             }
@@ -161,6 +169,7 @@ def get_stages(docker_image) {
                    ]
                 } catch (e) {
                     sendChatMessage("Publishing Docs Failed")
+                    sendMail("Publishing Docs Failed")
                 }
             }
 
@@ -189,14 +198,15 @@ def sendChatMessage(message, channel=CHAT_CHANNEL) {
     rocketSend channel: channel, message: "${message} - [Build ${env.BUILD_NUMBER} ](${env.BUILD_URL})"
 }
 
-def sendMail(subject, message, developers=DEVELOPERS) {
+
+def sendMail(subject, message='', developers=DEVELOPERS) {
     for (int i = 0; i < developers.size(); i++) {
         def developer = DEVELOPERS[i]
         emailext (
             subject: "$subject - Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
             body: """
-                <p>message</p>
-                <p><a href ='${env.BUILD_URL}'>${env.BUILD_URL}</a></p>
+                <p>$message</p>
+                <p>Check console output at <a href ='${env.BUILD_URL}'>${env.BUILD_URL}</a> to view the results.</p>
             """,
             to: developer
         )    
