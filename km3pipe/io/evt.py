@@ -105,10 +105,10 @@ class EvtPump(Pump):  # pylint: disable:R0902
         if self.basename:
             self.log.info("Got a basename ({}), constructing the first "
                           "filename.".format(self.basename))
-            self.filename = self.basename  \
-                + str(self.index_start).zfill(self.n_digits)  \
-                + self.suffix \
-                + '.evt'
+            file_index = self._get_file_index_str()
+
+            self.filename = "{}{}{}.evt"  \
+                            .format(self.basename, file_index, self.suffix)
             self.log.info("Constructed filename: {}".format(self.filename))
 
         if self.filename:
@@ -205,10 +205,10 @@ class EvtPump(Pump):  # pylint: disable:R0902
                 self.blob_file.close()
                 self.log.info("Resetting blob index to 0")
                 self.index = 0
-                self.filename = self.basename  \
-                    + str(self.file_index).zfill(self.n_digits)  \
-                    + self.suffix  \
-                    + '.evt'
+                file_index = self._get_file_index_str()
+
+                self.filename = "{}{}{}.evt"  \
+                                .format(self.basename, file_index, self.suffix)
                 self.log.info("Next filename: {}".format(self.filename))
                 self.print("Opening {0}".format(self.filename))
                 self.open_file(self.filename)

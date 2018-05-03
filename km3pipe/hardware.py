@@ -179,29 +179,6 @@ class Detector(object):
                 self._pmts_by_id[pmt_id] = pmt
                 self._pmts_by_dom_id[dom_id].append(pmt)
 
-            if self.n_pmts_per_dom != n_pmts:
-                log.warning("DOMs with different number of PMTs are "
-                            "detected, this can cause some unexpected "
-                            "behaviour.")
-
-            for i in range(n_pmts):
-                raw_pmt_info = self._det_file.readline()
-                pmt_info = raw_pmt_info.split()
-                pmt_id, x, y, z, rest = unpack_nfirst(pmt_info, 4)
-                dx, dy, dz, t0, rest = unpack_nfirst(rest, 4)
-                if rest:
-                    log.warning("Unexpected PMT values: {0}".format(rest))
-                pmt_id = int(pmt_id)
-                pmt_pos = [float(n) for n in (x, y, z)]
-                pmt_dir = [float(n) for n in (dx, dy, dz)]
-                t0 = float(t0)
-                omkey = (du, floor, i)
-                pmt = PMT(pmt_id, pmt_pos, pmt_dir, t0, i, omkey)
-                self.pmts.append(pmt)
-                self._pmts_by_omkey[(du, floor, i)] = pmt
-                self._pmts_by_id[pmt_id] = pmt
-                self._pmts_by_dom_id[dom_id].append(pmt)
-
     @property
     def dom_ids(self):
         if not self._dom_ids:
