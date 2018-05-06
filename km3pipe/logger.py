@@ -8,7 +8,7 @@ from hashlib import sha256
 import socket
 import logging
 
-from .tools import colored
+from .tools import colored, supports_color
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -22,16 +22,17 @@ __status__ = "Development"
 loggers = {}  # this holds all the registered loggers
 # logging.basicConfig()
 
-logging.addLevelName(logging.INFO, "\033[1;32m%s\033[1;0m" %
-                     logging.getLevelName(logging.INFO))
-logging.addLevelName(logging.DEBUG, "\033[1;34m%s\033[1;0m" %
-                     logging.getLevelName(logging.DEBUG))
-logging.addLevelName(logging.WARNING, "\033[1;33m%s\033[1;0m" %
-                     logging.getLevelName(logging.WARNING))
-logging.addLevelName(logging.ERROR, "\033[1;31m%s\033[1;0m" %
-                     logging.getLevelName(logging.ERROR))
-logging.addLevelName(logging.CRITICAL, "\033[1;101m%s\033[1;0m" %
-                     logging.getLevelName(logging.CRITICAL))
+if supports_color():
+    logging.addLevelName(logging.INFO, "\033[1;32m%s\033[1;0m" %
+                         logging.getLevelName(logging.INFO))
+    logging.addLevelName(logging.DEBUG, "\033[1;34m%s\033[1;0m" %
+                         logging.getLevelName(logging.DEBUG))
+    logging.addLevelName(logging.WARNING, "\033[1;33m%s\033[1;0m" %
+                         logging.getLevelName(logging.WARNING))
+    logging.addLevelName(logging.ERROR, "\033[1;31m%s\033[1;0m" %
+                         logging.getLevelName(logging.ERROR))
+    logging.addLevelName(logging.CRITICAL, "\033[1;101m%s\033[1;0m" %
+                         logging.getLevelName(logging.CRITICAL))
 
 
 class LogIO(object):
@@ -69,9 +70,9 @@ def get_logger(name):
         return loggers[name]
     logger = logging.getLogger(name)
     logger.propagate = False
-    colour_prefix, colour_suffix = hash_coloured_escapes(name)
+    pre, suf = hash_coloured_escapes(name) if supports_color() else ('', '')
     formatter = logging.Formatter('%(levelname)s->{}%(name)s:{} %(message)s'
-                                  .format(colour_prefix, colour_suffix))
+                                  .format(pre, suf))
     ch = logging.StreamHandler()
     ch.setFormatter(formatter)
     logger.addHandler(ch)
@@ -87,10 +88,11 @@ def set_level(name, level):
 def get_printer(name, color=None, ansi_code=None):
     """Return a function which prints a message with a coloured name prefix"""
 
-    if color is None and ansi_code is None:
-        name = hash_coloured(name)
-    else:
-        name = colored(name, color=color, ansi_code=ansi_code)
+    if supports_color():
+        if color is None and ansi_code is None:
+            name = hash_coloured(name)
+        else:
+            name = colored(name, color=color, ansi_code=ansi_code)
 
     prefix = name + ': '
 
