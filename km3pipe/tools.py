@@ -424,3 +424,14 @@ def zero_pad(m, n=1):
 def istype(obj, typename):
     """Drop-in replacement for `isinstance` to avoid imports"""
     return type(obj).__name__ == typename
+
+
+def supports_color():
+    """Checks if the terminal supports color."""
+    supported_platform = sys.platform != 'win32' or 'ANSICON' in os.environ
+    is_a_tty = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
+
+    if not supported_platform or not is_a_tty:
+        return False
+
+    return True
