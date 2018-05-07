@@ -108,3 +108,14 @@ def joint_hex(x, y, **kwargs):
     """Seaborn Joint Hexplot with marginal KDE + hists."""
     return sns.jointplot(x, y, kind='hex', stat_func=None,
             marginal_kws={'kde' :True}, **kwargs)
+
+
+def plot_convexhull(xy, ax=None, plot_points=True):
+    from scipy.spatial import ConvexHull
+    ch = ConvexHull(xy)
+    ax = get_ax(ax)
+    if plot_points:
+        ax.plot(xy[:, 0], xy[:, 1], 'o')
+    for simplex in ch.simplices:
+        ax.plot(xy[simplex, 0], xy[simplex, 1], 'k-')
+    return ax
