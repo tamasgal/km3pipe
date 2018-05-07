@@ -326,105 +326,97 @@ class EvtPump(Pump):  # pylint: disable:R0902
         self.blob_file.close()
 
 
-def parse_km3sim(blob):
-    """Creates new blob entries for the given blob keys"""
-    tags = {
-        'hit': [
-            'KM3SimHits',
-            [('id', 'f4'), ('pmt_id', '<i4'), ('pe', 'f4'), ('time', 'f4'),
-             ('type', 'f4'), ('n_photons', 'f4'), ('track_in', 'f4'),
-             ('c_time', 'f4'), ('unknown', 'f4')],
-        ],
-    }
-    for key in list(blob.keys()):
-        if key in tags.keys():
-            data = blob[key]
-            out_key, dtype = tags[key]
-            arr = np.array(data, dtype)
-            tab = Table(arr, name=out_key)
-            blob[out_key] = tab
+class Parser(object):
+    """Standard parser to create numpy times from EVT raw data.
+
+    The `tag_description` is a dict of tuples. The key is the target blob-key,
+    the value is tuple of "target blob-key" and "numpy dtype".
+
+    """
+    def __init__(self, tag_description):
+        self.tag_description = tag_description
+
+    def __call__(self, blob):
+        """Iterate through the blob-keys and add the parsed data to the blob"""
+        for key in list(blob.keys()):
+            if key in self.tag_description.keys():
+                data = blob[key]
+                out_key, dtype = self.tag_description[key]
+                arr = np.array(data, dtype)
+                tab = Table(arr, name=out_key)
+                blob[out_key] = tab
 
 
-def parse_gseagen(blob):
-    """Creates new blob entries for the given gSeaGen entries"""
-    tags = {
-        'neutrino': [
-            'Neutrinos',
-            [('id', '<i4'),
-             ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
-             ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
-             ('energy', 'f4'), ('time', 'f4'),
-             ('bjorken_x', 'f4'), ('bjorken_y', 'f4'),
-             ('scattering_type', '<i4'), ('pdg_id', '<i4'),
-             ('interaction_type', '<i4')]
-        ],
-        'track_in': [
-            'TrackIns',
-            [('id', '<i4'),
-             ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
-             ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
-             ('energy', 'f4'), ('time', 'f4'),
-             ('geant_id', 'f4')]
-        ],
-        'primary_lepton': [
-            'PrimaryLeptons',
-            [('id', '<i4'),
-             ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
-             ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
-             ('energy', 'f4'), ('time', 'f4'),
-             ('geant_id', 'f4')]
-        ]
-    }
-    for key in list(blob.keys()):
-        if key in tags.keys():
-            data = blob[key]
-            out_key, dtype = tags[key]
-            arr = np.array(data, dtype)
-            tab = Table(arr, name=out_key)
-            blob[out_key] = tab
+KM3SIM_TAGS = {
+    'hit': [
+        'KM3SimHits',
+        [('id', 'f4'), ('pmt_id', '<i4'), ('pe', 'f4'), ('time', 'f4'),
+         ('type', 'f4'), ('n_photons', 'f4'), ('track_in', 'f4'),
+         ('c_time', 'f4'), ('unknown', 'f4')],
+    ],
+}
+
+GSEAGEN_TAGS = {
+    'neutrino': [
+        'Neutrinos',
+        [('id', '<i4'),
+         ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
+         ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
+         ('energy', 'f4'), ('time', 'f4'),
+         ('bjorken_x', 'f4'), ('bjorken_y', 'f4'),
+         ('scattering_type', '<i4'), ('pdg_id', '<i4'),
+         ('interaction_type', '<i4')]
+    ],
+    'track_in': [
+        'TrackIns',
+        [('id', '<i4'),
+         ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
+         ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
+         ('energy', 'f4'), ('time', 'f4'),
+         ('geant_id', 'f4')]
+    ],
+    'primary_lepton': [
+        'PrimaryLeptons',
+        [('id', '<i4'),
+         ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
+         ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
+         ('energy', 'f4'), ('time', 'f4'),
+         ('geant_id', 'f4')]
+    ]
+}
 
 
-def parse_km3(blob):
-    """Creates new blob entries for the given KM3 entries"""
-    tags = {
-        'neutrino': [
-            'Neutrinos',
-            [('id', '<i4'),
-             ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
-             ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
-             ('energy', 'f4'), ('time', 'f4'),
-             ('bjorken_x', 'f4'), ('bjorken_y', 'f4'),
-             ('scattering_type', '<i4'), ('pdg_id', '<i4'),
-             ('interaction_type', '<i4')]
-        ],
-        'track_in': [
-            'TrackIns',
-            [('id', '<i4'),
-             ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
-             ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
-             ('energy', 'f4'), ('time', 'f4'),
-             ('type', 'f4'), ('something', '<i4')]
-        ],
-        'hit_raw': [
-            'Hits',
-            [('id', '<i4'),
-             ('pmt_id', '<i4'),
-             ('npe', '<i4'),
-             ('time', 'f4'),
-            ]
-        ],
-    }
-    for key in list(blob.keys()):
-        if key in tags.keys():
-            data = blob[key]
-            out_key, dtype = tags[key]
-            arr = np.array(data, dtype)
-            tab = Table(arr, name=out_key)
-            blob[out_key] = tab
+KM3_TAGS = {
+    'neutrino': [
+        'Neutrinos',
+        [('id', '<i4'),
+         ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
+         ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
+         ('energy', 'f4'), ('time', 'f4'),
+         ('bjorken_x', 'f4'), ('bjorken_y', 'f4'),
+         ('scattering_type', '<i4'), ('pdg_id', '<i4'),
+         ('interaction_type', '<i4')]
+    ],
+    'track_in': [
+        'TrackIns',
+        [('id', '<i4'),
+         ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
+         ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
+         ('energy', 'f4'), ('time', 'f4'),
+         ('type', 'f4'), ('something', '<i4')]
+    ],
+    'hit_raw': [
+        'Hits',
+        [('id', '<i4'),
+         ('pmt_id', '<i4'),
+         ('npe', '<i4'),
+         ('time', 'f4')]
+    ],
+}
 
 
 EVT_PARSERS = {
-    'km3sim': parse_km3sim,
-    'gseagen': parse_gseagen,
-    'km3': parse_km3,
+    'km3sim': Parser(KM3SIM_TAGS),
+    'gseagen': Parser(GSEAGEN_TAGS),
+    'km3': Parser(KM3_TAGS),
 }
