@@ -185,7 +185,10 @@ def pld3(pos, line_vertex, line_dir):
     c = np.cross(line_dir, line_vertex - pos)
     n1 = np.linalg.norm(c, axis=1)
     n2 = np.linalg.norm(line_dir)
-    return n1 / n2
+    out = n1 / n2
+    if out.ndim == 1 and len(out) == 1:
+        return out[0]
+    return out
 
 
 def lpnorm(x, p=2):
