@@ -177,11 +177,14 @@ def unit_vector(vector, **kwargs):
     return unit.reshape(out_shape)
 
 
-def pld3(p1, p2, d2):
+def pld3(pos, line_vertex, line_dir):
     """Calculate the point-line-distance for given point and line."""
-    c = np.cross(d2, p2 - p1)
-    n1 = np.linalg.norm(c)
-    n2 = np.linalg.norm(d2)
+    pos = np.atleast_2d(pos)
+    line_vertex = np.atleast_1d(line_vertex)
+    line_dir = np.atleast_1d(line_dir)
+    c = np.cross(line_dir, line_vertex - pos)
+    n1 = np.linalg.norm(c, axis=1)
+    n2 = np.linalg.norm(line_dir)
     return n1 / n2
 
 
