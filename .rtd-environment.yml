@@ -20,7 +20,7 @@ dependencies:
   - scikit-learn
   - numexpr
   - patsy
-  - statsmodels>=.9
+  - statsmodels>=0.9
   - urwid
   - pip:
     - sphinx>=1.6.3
