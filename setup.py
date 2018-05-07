@@ -29,7 +29,7 @@ require_groups = {
         'numpydoc>=0.7.0',
     ],
     'base': ['docopt', 'numpy>=1.12', 'pandas', 'pytz', 'numexpr'],
-    'setup': ['setuptools>=24.3', 'pip>=9.0.1', 'numpy'],
+    'setup': ['setuptools>=39.0', 'pip>=10.0.1', 'numpy'],
     'analysis': ['matplotlib>=2.2.0', 'sklearn', 'statsmodels>=0.8',
                  'scipy>=0.19', 'seaborn', 'ipython', 'patsy', ],
     'io': ['tables>=3.4.2', 'h5py', 'requests', 'websocket-client', 'tornado'],

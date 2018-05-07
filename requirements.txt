@@ -1,5 +1,5 @@
-pip>=9.0.1 
-setuptools>=24.3
+pip>=10.0.1 
+setuptools>=39.0
 numpy>=1.12
 numexpr
 docopt
