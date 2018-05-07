@@ -120,6 +120,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
             self.prepare_blobs()
 
     def _register_parsers(self, parsers):
+        self.log.info("Found parsers {}".format(parsers))
         for parser in parsers:
             if callable(parser):
                 self.parsers.append(parser)
@@ -383,7 +384,47 @@ def parse_gseagen(blob):
             blob[out_key] = tab
 
 
+def parse_km3(blob):
+    """Creates new blob entries for the given KM3 entries"""
+    tags = {
+        'neutrino': [
+            'Neutrinos',
+            [('id', '<i4'),
+             ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
+             ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
+             ('energy', 'f4'), ('time', 'f4'),
+             ('bjorken_x', 'f4'), ('bjorken_y', 'f4'),
+             ('scattering_type', '<i4'), ('pdg_id', '<i4'),
+             ('interaction_type', '<i4')]
+        ],
+        'track_in': [
+            'TrackIns',
+            [('id', '<i4'),
+             ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
+             ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
+             ('energy', 'f4'), ('time', 'f4'),
+             ('type', 'f4'), ('something', '<i4')]
+        ],
+        'hit_raw': [
+            'Hits',
+            [('id', '<i4'),
+             ('pmt_id', '<i4'),
+             ('npe', '<i4'),
+             ('time', 'f4'),
+            ]
+        ],
+    }
+    for key in list(blob.keys()):
+        if key in tags.keys():
+            data = blob[key]
+            out_key, dtype = tags[key]
+            arr = np.array(data, dtype)
+            tab = Table(arr, name=out_key)
+            blob[out_key] = tab
+
+
 EVT_PARSERS = {
     'km3sim': parse_km3sim,
     'gseagen': parse_gseagen,
+    'km3': parse_km3,
 }
