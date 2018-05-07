@@ -98,6 +98,9 @@ class EvtPump(Pump):  # pylint: disable:R0902
                 self.print("Automatic tag parsing enabled.")
                 self._auto_parse = True
             else:
+                if isinstance(parsers, str):
+                    # expects a list(str)
+                    parsers = [parsers]
                 self._register_parsers(parsers)
 
         self.file_index = int(self.index_start)
