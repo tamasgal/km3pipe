@@ -182,6 +182,7 @@ def get_stages(docker_image) {
 
 node('master') {
 
+    cleanWs()
     checkout scm
 
     def stages = [:]
