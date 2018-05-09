@@ -88,10 +88,8 @@ class TestH5Pump(TestCase):
         pump.finish()
 
     def test_pipe(self):
-        from km3modules.common import Dump      # noqa
         p = Pipeline()
         p.attach(HDF5Pump, filename=self.fname)
-        p.attach(Dump)
         p.drain()
 
 
@@ -111,9 +109,7 @@ class TestH5Sink(TestCase):
     #         HDF5Sink(self.out)
 
     def test_pipe(self):
-        from km3modules.common import Dump      # noqa
         p = Pipeline()
         p.attach(HDF5Pump, filename=self.fname)
-        p.attach(Dump)
         p.attach(HDF5Sink, h5file=self.out)
         p.drain()
