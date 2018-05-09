@@ -32,7 +32,7 @@ test-cov:
 test-loop: 
 	# pip install -U pytest-watch
 	py.test || true
-	ptw --ext=.py,.pyx
+	ptw --ext=.py,.pyx --ignore=doc
 
 flake8: 
 	py.test --flake8 || true
