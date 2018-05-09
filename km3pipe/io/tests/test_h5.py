@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import tempfile
-import os.path
+from os.path import join, dirname
 
 import numpy as np
 import tables as tb
@@ -13,6 +13,8 @@ from km3pipe.io import HDF5Pump, HDF5Sink   # noqa
 from km3pipe.io.pandas import H5Chain   # noqa
 from km3pipe.tools import insert_prefix_to_dtype
 from km3pipe.testing import TestCase
+
+DATA_DIR = join(dirname(kp.__file__), 'kp-data/test_data/')
 
 
 class TestMultiTable(TestCase):
@@ -65,8 +67,7 @@ class TestMultiTable(TestCase):
 
 class TestH5Pump(TestCase):
     def setUp(self):
-        data_dir = os.path.dirname(kp.__file__) + '/kp-data/test_data/'
-        self.fname = data_dir + 'numu_cc_test.h5'
+        self.fname = join(DATA_DIR,  'numu_cc_test.h5')
 
     def test_init_sets_filename_if_no_keyword_arg_is_passed(self):
         p = HDF5Pump(self.fname)
@@ -96,8 +97,7 @@ class TestH5Pump(TestCase):
 
 class TestH5Sink(TestCase):
     def setUp(self):
-        data_dir = os.path.dirname(kp.__file__) + '/kp-data/test_data/'
-        self.fname = data_dir + 'numu_cc_test.h5'
+        self.fname = join(DATA_DIR, 'numu_cc_test.h5')
         self.out = tb.open_file("out_test.h5", "w", driver="H5FD_CORE",
                                 driver_core_backing_store=0)
 
