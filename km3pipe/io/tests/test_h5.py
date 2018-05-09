@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import tempfile
 import os.path
 
 import numpy as np
@@ -26,7 +27,8 @@ class TestMultiTable(TestCase):
         ], dtype=[('aa', '<f8'), ('bb', '<f8'), ('cc', '<f8'), ])
         self.tabs = {'foo': self.foo, 'bar': self.bar}
         self.where = '/lala'
-        self.h5name = './test.h5'
+        self.fobj = tempfile.NamedTemporaryFile(delete=True)
+        self.h5name = self.fobj.name
         self.h5file = tb.open_file(
             # create the file in memory only
             self.h5name, 'w', driver="H5FD_CORE", driver_core_backing_store=0)
@@ -36,6 +38,7 @@ class TestMultiTable(TestCase):
 
     def tearDown(self):
         self.h5file.close()
+        self.fobj.close()
 
     def test_name_insert(self):
         exp_foo = ('foo_a', 'foo_b', 'foo_c')
