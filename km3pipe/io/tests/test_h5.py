@@ -98,11 +98,13 @@ class TestH5Pump(TestCase):
 class TestH5Sink(TestCase):
     def setUp(self):
         self.fname = join(DATA_DIR, 'numu_cc_test.h5')
-        self.out = tb.open_file("out_test.h5", "w", driver="H5FD_CORE",
+        self.fobj = tempfile.NamedTemporaryFile(delete=True)
+        self.out = tb.open_file(self.fobj.name, "w", driver="H5FD_CORE",
                                 driver_core_backing_store=0)
 
     def tearDown(self):
         self.out.close()
+        self.fobj.close()
 
     # def test_init_has_to_be_explicit(self):
     #     with self.assertRaises(TypeError):
