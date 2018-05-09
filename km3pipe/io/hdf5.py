@@ -212,7 +212,9 @@ class HDF5Sink(Module):
 
         if isinstance(data, Table):
             if 'group_id' not in data:
-                data.append_columns('group_id', self.index)
+                data = data.append_columns('group_id', self.index)
+
+        assert 'group_id' in data.dtype.names
 
         self.log.debug("h5l: '{}', title '{}'".format(h5loc, title))
 
