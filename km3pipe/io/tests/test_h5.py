@@ -78,7 +78,6 @@ class TestH5Pump(TestCase):
             self.assertEqual(self.fname, h5.filename)
             assert h5[0] is not None
             for blob in h5:
-                print(blob)
                 assert blob is not None
                 break
 
