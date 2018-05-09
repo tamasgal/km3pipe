@@ -6,7 +6,8 @@ from os.path import join, dirname
 import numpy as np
 import tables as tb
 
-from km3pipe import Pipeline
+from km3pipe import Blob, Pipeline, Pump
+from km3pipe.dataclasses import Table
 from km3pipe.io import HDF5Pump, HDF5Sink   # noqa
 from km3pipe.tools import insert_prefix_to_dtype
 from km3pipe.testing import TestCase
@@ -110,3 +111,29 @@ class TestH5Sink(TestCase):
         p.attach(HDF5Pump, filename=self.fname)
         p.attach(HDF5Sink, h5file=self.out)
         p.drain()
+
+
+class TestH5Consistency(TestCase):
+    def test_h5_consistency_for_tables(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.count = 0
+
+            def process(self, blob):
+                self.count += 1
+                tab = Table({'a': self.count}, h5loc='tab')
+                return Blob({'tab': tab})
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        with tb.File(fname) as f:
+            a = f.get_node("/tab")[:]
+        # self.assertEqual(1, a)
+
+        fobj.close()
