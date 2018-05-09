@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+"""Tests for HDF5 stuff"""
 import tempfile
 from os.path import join, dirname
 
@@ -7,9 +7,7 @@ import numpy as np
 import tables as tb
 
 from km3pipe import Pipeline
-from km3pipe.io.pandas import read_group   # noqa
 from km3pipe.io import HDF5Pump, HDF5Sink   # noqa
-from km3pipe.io.pandas import H5Chain   # noqa
 from km3pipe.tools import insert_prefix_to_dtype
 from km3pipe.testing import TestCase
 
