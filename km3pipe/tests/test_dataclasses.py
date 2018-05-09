@@ -313,6 +313,22 @@ class TestTable(TestCase):
         assert tab.n[0] == 2
         assert tab.n[-1] == 5
 
+    def test_append_columns_with_single_value(self):
+        tab = Table({'a': 1})
+        tab = tab.append_columns('group_id', 0)
+        assert 0 == tab.group_id[0]
+
+    def test_append_columns_with_multiple_values(self):
+        tab = Table({'a': [1, 2]})
+        tab = tab.append_columns('group_id', [0, 1])
+        assert 0 == tab.group_id[0]
+        assert 1 == tab.group_id[1]
+
+    def test_append_columns_modifies_dtype(self):
+        tab = Table({'a': [1, 2]})
+        tab = tab.append_columns('group_id', [0, 1])
+        assert 'group_id' in tab.dtype.names
+
     def test_template(self):
         n = 10
         channel_ids = np.arange(n)
