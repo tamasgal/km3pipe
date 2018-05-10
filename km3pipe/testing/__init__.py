@@ -3,9 +3,6 @@
 Common unit testing support for km3pipe.
 
 """
-
-from io import BytesIO, StringIO  # noqa
-
 from unittest import TestCase  # noqa
 from mock import MagicMock  # noqa
 from mock import Mock  # noqa

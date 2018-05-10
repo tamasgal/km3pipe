@@ -3,8 +3,9 @@
 Test suite for configuration related functions and classes.
 
 """
+from io import StringIO
 
-from km3pipe.testing import TestCase, StringIO
+from km3pipe.testing import TestCase
 from km3pipe.config import Config
 
 __author__ = "Tamas Gal"

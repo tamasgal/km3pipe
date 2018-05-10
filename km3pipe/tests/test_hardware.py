@@ -13,8 +13,9 @@ dom_id line_id floor_id npmts
  ...
 
 """
+from io import StringIO
 
-from km3pipe.testing import TestCase, StringIO
+from km3pipe.testing import TestCase
 from km3pipe.hardware import Detector, PMT
 
 __author__ = "Tamas Gal"

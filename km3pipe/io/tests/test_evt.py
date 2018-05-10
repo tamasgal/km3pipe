@@ -1,13 +1,13 @@
 # Filename: test_evt.py
 # pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
-
+from io import StringIO
 import os
 from os.path import join
 
 import numpy as np
 
 import km3pipe as kp
-from km3pipe.testing import TestCase, StringIO
+from km3pipe.testing import TestCase
 from km3pipe.io.evt import EvtPump, EVT_PARSERS
 
 __author__ = "Tamas Gal"
