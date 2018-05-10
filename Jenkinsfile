@@ -4,6 +4,8 @@ DOCKER_IMAGES = ["python:3.6.5"]
 CHAT_CHANNEL = '#km3pipe'
 DEVELOPERS = ['tgal@km3net.de', 'mlotze@km3net.de']
 
+properties([gitLabConnection('KM3NeT GitLab')])
+
 
 def get_stages(docker_image) {
     stages = {
