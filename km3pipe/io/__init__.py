@@ -34,20 +34,22 @@ log = get_logger(__name__)
 
 def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
     """A generic pump which utilises the appropriate pump."""
-    if not isinstance(filenames, str):
-        fn = filenames[0]
-    else:
-        fn = filenames
-    extension = os.path.splitext(fn)[1]
+    if isinstance(filenames, str):
+        filenames = [filenames]
 
-    n_nonexist = 0
-    for fn in filenames:
-        if not os.path.exists(fn):
-            n_nonexist += 1
-            log.warning("File '{}' not found, skipping...".format(fn))
-    if n_nonexist == len(filenames):
-        log.critical("No pump found for '{0}'".format(extension))
-        raise IOError("None of the input files exist! Exiting.")
+    try:
+        iter(filenames)
+    except TypeError:
+        log.critical("Don't know how to iterate through filenames.")
+        raise TypeError("Invalid filenames.")
+
+    extensions = set(os.path.splitext(fn)[1] for fn in filenames)
+
+    if len(extensions) > 1:
+        log.critical("Mixed filetypes, please use only files of the same type")
+        raise IOError("Mixed filetypes.")
+
+    extension = list(extensions)[0]
 
     io = {
         '.evt': EvtPump,
@@ -58,13 +60,24 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
     }
 
     if extension not in io:
-        log.critical("No pump found for '{0}'".format(extension))
+        log.critical("No pump found for file extension '{0}'".format(extension))
+        raise ValueError("Unknown filetype")
 
-    if isinstance(filenames, str):
-        return io[extension](filename=filenames, name=name, **kwargs)
+    missing_files = [fn for fn in filenames if not os.path.exists(fn)]
+    if missing_files:
+        if len(missing_files) == len(filenames):
+            message = "None of the given files could be found."
+            log.critical(message)
+            FileNotFoundError(message)
+        else:
+            log.warning("The following files are missing and ignored: {}"
+                        .format(', '.join(missing_files)))
+
+    input_files = set(filenames) - set(missing_files)
+
+    if len(input_files) == 1:
+        return io[extension](filename=filenames[0], name=name, **kwargs)
     else:
-        if len(filenames) == 1:
-            return io[extension](filename=filenames[0], name=name, **kwargs)
         return io[extension](filenames=filenames, name=name, **kwargs)
 
 
