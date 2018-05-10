@@ -1,8 +1,8 @@
 # Filename: test_style.py
 # pylint: disable=C0111,E1003,R0904,C0103,R0201,C0102
 
-from km3pipe.testing import TestCase
-from km3pipe.style import get_style_path, ColourCycler
+from km3pipe.testing import TestCase, patch
+from km3pipe.style import get_style_path, ColourCycler, use
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -46,3 +46,70 @@ class TestColourCycler(TestCase):
     def test_raise_keyerror_if_style_not_available(self):
         with self.assertRaises(KeyError):
             cc = ColourCycler("foo")  # noqa
+
+
+class TestStyles(TestCase):
+    @patch('matplotlib.pyplot')
+    def test_non_existent_style(self, plt_mock):
+       use('non-existent')
+       assert not plt_mock.style.use.called
+
+    @patch('matplotlib.pyplot')
+    def test_km3pipe(self, plt_mock):
+       use('km3pipe')
+       args, kwargs = plt_mock.style.use.call_args_list[0]
+       assert args[0].endswith('km3pipe.mplstyle')
+
+    @patch('matplotlib.pyplot')
+    def test_noargs_load_km3pipe_style(self, plt_mock):
+       use()
+       args, kwargs = plt_mock.style.use.call_args_list[0]
+       assert args[0].endswith('km3pipe.mplstyle')
+
+    @patch('matplotlib.pyplot')
+    def test_poster_style(self, plt_mock):
+       use('poster')
+       args, kwargs = plt_mock.style.use.call_args_list[0]
+       assert args[0].endswith('km3pipe-poster.mplstyle')
+
+    @patch('matplotlib.pyplot')
+    def test_notebook_style(self, plt_mock):
+       use('notebook')
+       args, kwargs = plt_mock.style.use.call_args_list[0]
+       assert args[0].endswith('km3pipe-notebook.mplstyle')
+
+    @patch('matplotlib.pyplot')
+    def test_talk_style(self, plt_mock):
+       use('talk')
+       args, kwargs = plt_mock.style.use.call_args_list[0]
+       assert args[0].endswith('km3pipe-talk.mplstyle')
+
+    @patch('matplotlib.pyplot')
+    def test_alba_style(self, plt_mock):
+       use('alba')
+       args, kwargs = plt_mock.style.use.call_args_list[0]
+       assert args[0].endswith('alba.mplstyle')
+
+    @patch('matplotlib.pyplot')
+    def test_jonas_style(self, plt_mock):
+       use('jonas-phd')
+       args, kwargs = plt_mock.style.use.call_args_list[0]
+       assert args[0].endswith('jonas-phd.mplstyle')
+
+    @patch('matplotlib.pyplot')
+    def test_jvs_style(self, plt_mock):
+       use('jvs')
+       args, kwargs = plt_mock.style.use.call_args_list[0]
+       assert args[0].endswith('jvs.mplstyle')
+
+    @patch('matplotlib.pyplot')
+    def test_moritz_style(self, plt_mock):
+       use('moritz')
+       args, kwargs = plt_mock.style.use.call_args_list[0]
+       assert args[0].endswith('moritz.mplstyle')
+
+    @patch('matplotlib.pyplot')
+    def test_serifs_style(self, plt_mock):
+       use('serifs')
+       args, kwargs = plt_mock.style.use.call_args_list[0]
+       assert args[0].endswith('serifs.mplstyle')
