@@ -1,9 +1,10 @@
 # Filename: test_tools.py
 # pylint: disable=locally-disabled,C0111,R0904,C0103
+from io import StringIO
 
 import numpy as np
 
-from km3pipe.testing import TestCase, StringIO
+from km3pipe.testing import TestCase
 from km3pipe.tools import (
     unpack_nfirst, split, namedtuple_with_defaults, remain_file_pointer,
     decamelise, camelise, issorted, lstrip, chunks, is_coherent,

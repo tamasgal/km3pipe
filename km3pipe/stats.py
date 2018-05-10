@@ -84,8 +84,8 @@ class rv_kde(rv_continuous):
 
     def _rvs(self, *args, random_state=None, **kwargs):
         # don't ask me why it uses `self._size`
-        return np.exp(self._kde.sample(n_samples=self._size,
-                                       random_state=random_state))
+        return self._kde.sample(n_samples=self._size,
+                                random_state=random_state)
 
 
 def mad(v):

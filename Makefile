@@ -27,12 +27,12 @@ test-km3modules:
 	py.test --junitxml=./junit_km3modules.xml km3modules || true
 
 test-cov:
-	py.test --cov ./ --cov-report term-missing --cov-report xml km3pipe || true
+	py.test --cov ./ --cov-report term-missing --cov-report xml km3pipe km3modules pipeinspector || true
 
 test-loop: 
 	# pip install -U pytest-watch
 	py.test || true
-	ptw --ext=.py,.pyx
+	ptw --ext=.py,.pyx --ignore=doc
 
 flake8: 
 	py.test --flake8 || true
