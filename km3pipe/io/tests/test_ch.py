@@ -13,5 +13,9 @@ __status__ = "Development"
 
 
 class TestCHPump(TestCase):
-    def test_init(self):
-        pass
+    @patch("km3pipe.io.ch.CHPump._init_controlhost")
+    @patch("km3pipe.io.ch.CHPump._start_thread")
+    def test_init(self, init_controlhost_mock, start_thread_mock):
+        CHPump()
+        init_controlhost_mock.assert_called_once()
+        start_thread_mock.assert_called_once()
