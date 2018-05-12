@@ -21,13 +21,13 @@ clean:
 	rm -f $(PKGNAME)/*.so
 
 test: 
-	py.test --junitxml=./junit.xml km3pipe || true
+	py.test --junitxml=./reports/junit.xml km3pipe || true
 
 test-km3modules: 
-	py.test --junitxml=./junit_km3modules.xml km3modules || true
+	py.test --junitxml=./reports/junit_km3modules.xml km3modules || true
 
 test-cov:
-	py.test --cov ./ --cov-report term-missing --cov-report xml km3pipe km3modules pipeinspector || true
+	py.test --cov ./ --cov-report term-missing --cov-report xml:reports/coverage.xml --cov-report html:reports/coverage km3pipe km3modules pipeinspector || true
 
 test-loop: 
 	# pip install -U pytest-watch
