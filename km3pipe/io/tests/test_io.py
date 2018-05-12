@@ -79,6 +79,23 @@ class TestReadCalibration(TestCase):
     def test_call(self):
         read_calibration()
 
+    @patch('km3pipe.calib.Calibration')
+    def test_call_with_detx(self, mock_calibration):
+        read_calibration(detx='a')
+        mock_calibration.assert_called_with(filename='a')
+
+    @patch('km3pipe.calib.Calibration')
+    def test_call_with_det_id(self, mock_calibration):
+        det_id = 1
+        read_calibration(det_id=det_id)
+        mock_calibration.assert_called_with(det_id=det_id)
+
+    @patch('km3pipe.calib.Calibration')
+    def test_call_with_negative_det_id(self, mock_calibration):
+        det_id = -1
+        read_calibration(det_id=det_id)
+        mock_calibration.assert_not_called()
+
 
 class TestReadHDF5(TestCase):
     @patch('pandas.HDFStore')
