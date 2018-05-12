@@ -21,32 +21,32 @@ clean:
 	rm -f $(PKGNAME)/*.so
 
 test: 
-	py.test --junitxml=./reports/junit.xml km3pipe || true
+	py.test --junitxml=./reports/junit.xml km3pipe
 
 test-km3modules: 
-	py.test --junitxml=./reports/junit_km3modules.xml km3modules || true
+	py.test --junitxml=./reports/junit_km3modules.xml km3modules
 
 test-cov:
-	py.test --cov ./ --cov-report term-missing --cov-report xml:reports/coverage.xml --cov-report html:reports/coverage km3pipe km3modules pipeinspector || true
+	py.test --cov ./ --cov-report term-missing --cov-report xml:reports/coverage.xml --cov-report html:reports/coverage km3pipe km3modules pipeinspector
 
 test-loop: 
 	# pip install -U pytest-watch
-	py.test || true
+	py.test
 	ptw --ext=.py,.pyx --ignore=doc
 
 flake8: 
-	py.test --flake8 || true
-	py.test --flake8 km3modules || true
+	py.test --flake8
+	py.test --flake8 km3modules
 
 pep8: flake8
 
 docstyle: 
-	py.test --docstyle  || true
-	py.test --docstyle km3modules || true
+	py.test --docstyle
+	py.test --docstyle km3modules
 
 lint: 
-	py.test --pylint || true
-	py.test --pylint km3modules || true
+	py.test --pylint
+	py.test --pylint km3modules
 
 dependencies:
 	pip install -Ur requirements.txt
