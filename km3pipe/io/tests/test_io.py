@@ -6,7 +6,7 @@ import tables
 
 from km3pipe.tools import istype
 from km3pipe.testing import TestCase, patch, Mock
-from km3pipe.io import GenericPump
+from km3pipe.io import GenericPump, read_calibration, read_hdf5
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2018, Tamas Gal and the KM3NeT collaboration."
@@ -21,6 +21,14 @@ class TestGenericPump(TestCase):
     def test_init_raies_filenotfounderror_for_nonexistinent_file(self):
         with self.assertRaises(ValueError):
             GenericPump("unsupport-file")
+
+    def test_filenames_should_be_valid_iterable(self):
+        with self.assertRaises(TypeError):
+            GenericPump(None)
+
+    def test_init_raises_ioerror_for_mixed_filetypes(self):
+        with self.assertRaises(IOError):
+            GenericPump(['a.a', 'b.b'])
 
     def test_init_evt_with_one_file(self):
         fobj = tempfile.NamedTemporaryFile(delete=True, suffix='.evt')
@@ -65,3 +73,14 @@ class TestGenericPump(TestCase):
         fnames = ["nonexistent-file{}.h5".format(i) for i in range(3)]
         with self.assertRaises(FileNotFoundError):
             GenericPump(fnames)
+
+
+class TestReadCalibration(TestCase):
+    def test_call(self):
+        read_calibration()
+
+
+class TestReadHDF5(TestCase):
+    @patch('pandas.HDFStore')
+    def test_call(self, mock_hdfstore):
+        read_hdf5('foo')
