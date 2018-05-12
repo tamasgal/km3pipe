@@ -33,6 +33,35 @@ class TestGenericPump(TestCase):
     def test_init_h5_with_one_file(self):
         fobj = tempfile.NamedTemporaryFile(delete=True, suffix='.h5')
         fname = str(fobj.name)
+        # We expect just an HDF5ExtError if "everything" goes well
         with self.assertRaises(tables.HDF5ExtError):
-            p = GenericPump(fname)
+            GenericPump(fname)
         fobj.close()
+
+    def test_init_h5_with_multiple_files(self):
+        fobj1 = tempfile.NamedTemporaryFile(delete=True, suffix='.h5')
+        fobj2 = tempfile.NamedTemporaryFile(delete=True, suffix='.h5')
+        fname1 = str(fobj1.name)
+        fname2 = str(fobj2.name)
+        # We expect just an HDF5ExtError if "everything" goes well
+        with self.assertRaises(tables.HDF5ExtError):
+            GenericPump([fname1, fname2])
+        fobj1.close()
+        fobj2.close()
+
+    def test_init_h5_with_multiple_files_where_one_nonexistent(self):
+        fobj1 = tempfile.NamedTemporaryFile(delete=True, suffix='.h5')
+        fobj2 = tempfile.NamedTemporaryFile(delete=True, suffix='.h5')
+        fname1 = str(fobj1.name)
+        fname2 = str(fobj2.name)
+        fname3 = "nonexistent-file.h5"
+        # We expect just an HDF5ExtError if "everything" goes well
+        with self.assertRaises(tables.HDF5ExtError):
+            GenericPump([fname1, fname2, fname3])
+        fobj1.close()
+        fobj2.close()
+
+    def test_init_h5_with_nonexistent_files(self):
+        fnames = ["nonexistent-file{}.h5".format(i) for i in range(3)]
+        with self.assertRaises(FileNotFoundError):
+            GenericPump(fnames)
