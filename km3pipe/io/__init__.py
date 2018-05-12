@@ -116,6 +116,7 @@ def read_hdf5(filename, detx=None, det_id=None, det_from_file=False):
     """
     import pandas as pd
     from km3pipe.core import Run
+    from km3pipe.io.pandas import read_group
 
     h5 = pd.HDFStore(filename, mode='r')
     opts = {}
