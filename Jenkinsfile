@@ -116,12 +116,12 @@ def get_stages(docker_image) {
                                 . ${PYTHON_VENV}/bin/activate
                                 make test-km3modules
                             """
-                            // step([$class: 'XUnitBuilder',
-                            //     thresholds: [
-                            //         [$class: 'SkippedThreshold', failureThreshold: '0'],
-                            //         [$class: 'FailedThreshold', failureThreshold: '0']],
-                            //     // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
-                            //     tools: [[$class: 'JUnitType', pattern: 'reports/junit_km3modules..xml']]])
+                            step([$class: 'XUnitBuilder',
+                                thresholds: [
+                                    [$class: 'SkippedThreshold', failureThreshold: '0'],
+                                    [$class: 'FailedThreshold', failureThreshold: '0']],
+                                // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
+                                tools: [[$class: 'JUnitType', pattern: 'reports/junit_km3modules..xml']]])
                         } catch (e) { 
                             sendChatMessage("KM3Modules Test Suite Failed")
                             sendMail("KM3Modules Test Suite Failed")
