@@ -26,7 +26,6 @@ class TestPipeline(TestCase):
         print([m.name for m in self.pl.modules])
         self.assertEqual('module1', self.pl.modules[0].name)
         self.assertEqual('module2', self.pl.modules[1].name)
-        assert False
 
     def test_attach_bundle(self):
         modules = [Module, Module]
