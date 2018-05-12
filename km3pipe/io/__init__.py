@@ -68,7 +68,7 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
         if len(missing_files) == len(filenames):
             message = "None of the given files could be found."
             log.critical(message)
-            FileNotFoundError(message)
+            raise FileNotFoundError(message)
         else:
             log.warning("The following files are missing and ignored: {}"
                         .format(', '.join(missing_files)))
