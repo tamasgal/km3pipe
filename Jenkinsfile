@@ -121,7 +121,7 @@ def get_stages(docker_image) {
                                     [$class: 'SkippedThreshold', failureThreshold: '0'],
                                     [$class: 'FailedThreshold', failureThreshold: '0']],
                                 // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
-                                tools: [[$class: 'JUnitType', pattern: 'reports/junit_km3modules..xml']]])
+                                tools: [[$class: 'JUnitType', pattern: 'reports/junit_km3modules.xml']]])
                         } catch (e) { 
                             sendChatMessage("KM3Modules Test Suite Failed")
                             sendMail("KM3Modules Test Suite Failed")
