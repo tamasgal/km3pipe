@@ -82,8 +82,12 @@ def get_stages(docker_image) {
                                 make clean
                                 make test
                             """
-                            junit 'junit.xml'
-                            archive 'junit.xml'
+                            step([$class: 'XUnitBuilder',
+                                thresholds: [
+                                    [$class: 'SkippedThreshold', failureThreshold: '0'],
+                                    [$class: 'FailedThreshold', failureThreshold: '0']],
+                                // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
+                                tools: [[$class: 'JUnitType', pattern: 'reports/junit.xml']]])
                         } catch (e) { 
                             sendChatMessage("Test Suite Failed")
                             sendMail("Test Suite Failed")
@@ -112,8 +116,12 @@ def get_stages(docker_image) {
                                 . ${PYTHON_VENV}/bin/activate
                                 make test-km3modules
                             """
-                            junit 'junit_km3modules.xml'
-                            archive 'junit_km3modules.xml'
+                            step([$class: 'XUnitBuilder',
+                                thresholds: [
+                                    [$class: 'SkippedThreshold', failureThreshold: '0'],
+                                    [$class: 'FailedThreshold', failureThreshold: '0']],
+                                // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
+                                tools: [[$class: 'JUnitType', pattern: 'reports/junit_km3modules.xml']]])
                         } catch (e) { 
                             sendChatMessage("KM3Modules Test Suite Failed")
                             sendMail("KM3Modules Test Suite Failed")
@@ -132,7 +140,7 @@ def get_stages(docker_image) {
                             step([$class: 'CoberturaPublisher',
                                     autoUpdateHealth: false,
                                     autoUpdateStability: false,
-                                    coberturaReportFile: 'coverage.xml',
+                                    coberturaReportFile: 'reports/coverage.xml',
                                     failNoReports: false,
                                     failUnhealthy: false,
                                     failUnstable: false,
@@ -140,6 +148,14 @@ def get_stages(docker_image) {
                                     onlyStable: false,
                                     sourceEncoding: 'ASCII',
                                     zoomCoverageChart: false])
+                            publishHTML target: [
+                               allowMissing: false,
+                               alwaysLinkToLastBuild: false,
+                               keepAll: true,
+                               reportDir: 'reports/coverage',
+                               reportFiles: 'index.html',
+                               reportName: 'Coverage'
+                            ]
                         } catch (e) { 
                             sendChatMessage("Coverage Failed")
                             sendMail("Coverage Failed")
