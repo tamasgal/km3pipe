@@ -32,7 +32,7 @@ def ifiles(irods_path):
                                          "    | grep 'Bundle file:'"
                                          "    | awk '{{print $3}}'"
                                          .format(irods_path), shell=True)
-    filenames = raw_output.strip().split("\n")
+    filenames = raw_output.decode('ascii').strip().split("\n")
     return filenames
 
 

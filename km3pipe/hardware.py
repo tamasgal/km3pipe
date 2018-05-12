@@ -10,6 +10,7 @@ from io import StringIO
 
 import numpy as np
 
+from .dataclasses import Table
 from .tools import unpack_nfirst, split
 from .math import com  # , ignored
 from .db import DBManager
@@ -60,9 +61,8 @@ class Detector(object):
         self.utm_info = None
         self._dom_ids = []
         self._dom_positions = OrderedDict()
-        self._pmts_by_omkey = OrderedDict()
-        self._pmts_by_id = OrderedDict()
-        self._pmts_by_dom_id = defaultdict(list)
+        self._pmt_index_by_omkey = OrderedDict()
+        self._pmt_index_by_pmt_id = OrderedDict()
         self._pmt_angles = []
         self._xy_pos = []
         self._current_du = None
@@ -124,6 +124,8 @@ class Detector(object):
         self.print("Reading PMT information...")
         self._det_file.seek(0, 0)
         self._det_file.readline()
+        pmts = defaultdict(list)
+        pmt_index = 0
         while True:
             line = self._det_file.readline()
 
@@ -169,15 +171,24 @@ class Detector(object):
                 if rest:
                     log.warning("Unexpected PMT values: {0}".format(rest))
                 pmt_id = int(pmt_id)
-                pmt_pos = [float(n) for n in (x, y, z)]
-                pmt_dir = [float(n) for n in (dx, dy, dz)]
-                t0 = float(t0)
                 omkey = (du, floor, i)
-                pmt = PMT(pmt_id, pmt_pos, pmt_dir, t0, i, omkey)
-                self.pmts.append(pmt)
-                self._pmts_by_omkey[(du, floor, i)] = pmt
-                self._pmts_by_id[pmt_id] = pmt
-                self._pmts_by_dom_id[dom_id].append(pmt)
+                pmts['pmt_id'].append(int(pmt_id))
+                pmts['pos_x'].append(float(x))
+                pmts['pos_y'].append(float(y))
+                pmts['pos_z'].append(float(z))
+                pmts['dir_x'].append(float(dx))
+                pmts['dir_y'].append(float(dy))
+                pmts['dir_z'].append(float(dz))
+                pmts['t0'].append(float(t0))
+                pmts['du'].append(int(du))
+                pmts['floor'].append(int(floor))
+                pmts['channel_id'].append(int(i))
+                pmts['dom_id'].append(int(dom_id))
+                self._pmt_index_by_omkey[omkey] = pmt_index
+                self._pmt_index_by_pmt_id[pmt_id] = pmt_index
+                pmt_index += 1
+
+        self.pmts = Table(pmts, name='PMT')
 
     @property
     def dom_ids(self):
@@ -190,7 +201,8 @@ class Detector(object):
         """The positions of the DOMs, calculated as COM from PMTs."""
         if not self._dom_positions:
             for dom_id in self.dom_ids:
-                pmt_positions = [p.pos for p in self._pmts_by_dom_id[dom_id]]
+                mask = self.pmts.dom_id == dom_id
+                pmt_positions = self.pmts[mask].pos
                 self._dom_positions[dom_id] = com(pmt_positions)
         return self._dom_positions
 
@@ -249,14 +261,14 @@ class Detector(object):
     def pmt_with_id(self, pmt_id):
         """Get PMT with global pmt_id"""
         try:
-            return self._pmts_by_id[pmt_id]
+            return self.pmts[self._pmt_index_by_pmt_id[pmt_id]]
         except KeyError:
             raise KeyError("No PMT found for ID: {0}".format(pmt_id))
 
     def get_pmt(self, dom_id, channel_id):
         """Return PMT with DOM ID and DAQ channel ID"""
         du, floor, _ = self.doms[dom_id]
-        pmt = self._pmts_by_omkey[(du, floor, channel_id)]
+        pmt = self.pmts[self._pmt_index_by_omkey[(du, floor, channel_id)]]
         return pmt
 
     def pmtid2omkey(self, pmt_id):

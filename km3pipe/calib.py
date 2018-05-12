@@ -128,23 +128,23 @@ class Calibration(Module):
         for i in range(n):
             calib = lookup[hits['dom_id'][i]][hits['channel_id'][i]]
             cal[i] = calib
-        h = np.empty(n, TEMPLATES['CalibHits']['dtype'])
-        h['channel_id'] = hits.channel_id
-        h['dir_x'] = cal[:, 3]
-        h['dir_y'] = cal[:, 4]
-        h['dir_z'] = cal[:, 5]
-        h['dom_id'] = hits.dom_id
-        h['du'] = cal[:, 7]
-        h['floor'] = cal[:, 8]
-        h['pos_x'] = cal[:, 0]
-        h['pos_y'] = cal[:, 1]
-        h['pos_z'] = cal[:, 2]
-        h['t0'] = cal[:, 6]
-        h['time'] = hits.time + cal[:, 6]
-        h['tot'] = hits.tot
-        h['triggered'] = hits.triggered
-        h['group_id'] = hits['group_id']
-        return Table.from_template(h, 'CalibHits')
+        dir_x = cal[:, 3]
+        dir_y = cal[:, 4]
+        dir_z = cal[:, 5]
+        du = cal[:, 7]
+        floor = cal[:, 8]
+        pos_x = cal[:, 0]
+        pos_y = cal[:, 1]
+        pos_z = cal[:, 2]
+        t0 = cal[:, 6]
+
+        hits.time += t0
+
+        return hits.append_columns(
+            ['dir_x', 'dir_y', 'dir_z', 'du', 'floor',
+             'pos_x', 'pos_y', 'pos_z', 't0'],
+            [dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0]
+        )
 
     def _apply_to_mchits(self, hits):
         """Append the position, direction and t0 columns and add t0 to time"""
@@ -173,36 +173,35 @@ class Calibration(Module):
 
     def _create_dom_channel_lookup(self):
         data = {}
-        for dom_id, pmts in self.detector._pmts_by_dom_id.items():
-            for pmt in pmts:
-                if dom_id not in data:
-                    data[dom_id] = np.zeros((31, 9))
-                data[dom_id][pmt.channel_id] = [pmt.pos[0],
-                                                pmt.pos[1],
-                                                pmt.pos[2],
-                                                pmt.dir[0],
-                                                pmt.dir[1],
-                                                pmt.dir[2],
+        for pmt in self.detector.pmts:
+            if pmt.dom_id not in data:
+                data[pmt.dom_id] = np.zeros((31, 9))
+            data[pmt.dom_id][pmt.channel_id] = [pmt.pos_x,
+                                                pmt.pos_y,
+                                                pmt.pos_z,
+                                                pmt.dir_x,
+                                                pmt.dir_y,
+                                                pmt.dir_z,
                                                 pmt.t0,
-                                                pmt.omkey[0],
-                                                pmt.omkey[1]]
+                                                pmt.du,
+                                                pmt.floor]
         self._calib_by_dom_and_channel = data
         if HAVE_NUMBA:
             self._lookup_tables = [(dom, cal) for dom, cal in data.items()]
 
     def _create_pmt_id_lookup(self):
         data = {}
-        for pmt_id, pmt in self.detector._pmts_by_id.items():
-            data[pmt_id] = np.array((pmt.pos[0],
-                                     pmt.pos[1],
-                                     pmt.pos[2],
-                                     pmt.dir[0],
-                                     pmt.dir[1],
-                                     pmt.dir[2],
-                                     pmt.t0,
-                                     pmt.omkey[0],
-                                     pmt.omkey[1],
-                                     ))
+        for pmt in self.detector.pmts:
+            data[pmt.pmt_id] = np.array((pmt.pos_x,
+                                         pmt.pos_y,
+                                         pmt.pos_z,
+                                         pmt.dir_x,
+                                         pmt.dir_y,
+                                         pmt.dir_z,
+                                         pmt.t0,
+                                         pmt.du,
+                                         pmt.floor,
+                                         ))
         self._calib_by_pmt_id = data
 
     def __repr__(self):

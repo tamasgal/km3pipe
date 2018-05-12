@@ -15,6 +15,8 @@ dom_id line_id floor_id npmts
 """
 from io import StringIO
 
+import numpy as np
+
 from km3pipe.testing import TestCase
 from km3pipe.hardware import Detector, PMT
 
@@ -126,16 +128,43 @@ class TestDetector(TestCase):
         self.assertAlmostEqual(2.5, self.det.dom_positions[2][1])
         self.assertAlmostEqual(2.6, self.det.dom_positions[2][2])
 
+    def test_correct_number_of_pmts(self):
+        self.det._parse_doms()
+        assert 9 == len(self.det.pmts)
+
+    def test_pmt_attributes(self):
+        self.det._parse_doms()
+        assert (1, 2, 3, 4, 5, 6, 7, 8, 9) == tuple(self.det.pmts.pmt_id)
+        assert np.allclose([1.1, 1.4, 1.7, 2.1, 2.4, 2.7, 3.1, 3.4, 3.7],
+                           self.det.pmts.pos_x)
+        assert np.allclose((1.7, 1.8, 1.9), self.det.pmts.pos[2])
+        assert np.allclose((0.1, 0.2, -1.3), self.det.pmts.dir[8])
+
+    def test_pmt_index_by_omkey(self):
+        self.det._parse_doms()
+        assert 5 == self.det._pmt_index_by_omkey[(1, 2, 2)]
+        assert 0 == self.det._pmt_index_by_omkey[(1, 1, 0)]
+        assert 4 == self.det._pmt_index_by_omkey[(1, 2, 1)]
+        assert 1 == self.det._pmt_index_by_omkey[(1, 1, 1)]
+
+    def test_pmt_index_by_pmt_id(self):
+        self.det._parse_doms()
+        assert 0 == self.det._pmt_index_by_pmt_id[1]
+
     def test_pmt_with_id_returns_correct_omkeys(self):
         self.det._parse_doms()
-        self.assertEqual((1, 1, 0), self.det.pmt_with_id(1).omkey)
-        self.assertEqual((1, 2, 1), self.det.pmt_with_id(5).omkey)
+        pmt = self.det.pmt_with_id(1)
+        assert (1, 1, 0) == (pmt.du, pmt.floor, pmt.channel_id)
+        pmt = self.det.pmt_with_id(5)
+        assert (1, 2, 1) == (pmt.du, pmt.floor, pmt.channel_id)
 
     def test_pmt_with_id_returns_correct_omkeys_with_mixed_pmt_ids(self):
         self.det._det_file = EXAMPLE_DETX_MIXED_IDS
         self.det._parse_doms()
-        self.assertEqual((1, 2, 1), self.det.pmt_with_id(73).omkey)
-        self.assertEqual((1, 1, 1), self.det.pmt_with_id(81).omkey)
+        pmt = self.det.pmt_with_id(73)
+        assert (1, 2, 1) == (pmt.du, pmt.floor, pmt.channel_id)
+        pmt = self.det.pmt_with_id(81)
+        assert (1, 1, 1) == (pmt.du, pmt.floor, pmt.channel_id)
 
     def test_pmt_with_id_raises_exception_for_invalid_id(self):
         self.det._parse_doms()
@@ -146,7 +175,7 @@ class TestDetector(TestCase):
         self.det._det_file = EXAMPLE_DETX_MIXED_IDS
         self.det._parse_doms()
         pmt = self.det.get_pmt(7, 2)
-        self.assertEqual((1, 2, 2), pmt.omkey)
+        assert (1, 2, 2) == (pmt.du, pmt.floor, pmt.channel_id)
 
     def test_xy_pos(self):
         self.det._parse_doms()
