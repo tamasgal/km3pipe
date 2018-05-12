@@ -86,7 +86,7 @@ def read_calibration(detx=None, det_id=None, from_file=False,
     """Retrive calibration from file, the DB."""
     from km3pipe.calib import Calibration  # noqa
 
-    if not detx or det_id or from_file:
+    if not (detx or det_id or from_file):
         return None
     if detx is not None:
         return Calibration(filename=detx)
@@ -97,13 +97,11 @@ def read_calibration(detx=None, det_id=None, from_file=False,
         det_id = det_ids[0]
     if det_id is not None:
         if det_id < 0:
-            log.warning("Negative detector ID found ({0}), skipping..."
+            log.warning("Negative detector ID found ({0}). This is a MC "
+                        "detector and cannot be retrieved from the DB."
                         .format(det_id))
             return None
-        try:
-            return Calibration(det_id=det_id)
-        except ValueError:
-            log.warning("Could not retrieve the calibration information.")
+        return Calibration(det_id=det_id)
     return None
 
 
