@@ -115,6 +115,7 @@ def get_stages(docker_image) {
                             sh """
                                 . ${PYTHON_VENV}/bin/activate
                                 make test-km3modules
+                                exit 123
                             """
                             step([$class: 'XUnitBuilder',
                                 thresholds: [
