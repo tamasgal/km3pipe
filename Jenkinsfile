@@ -82,7 +82,9 @@ def get_stages(docker_image) {
                                 make clean
                                 make test
                             """
-                            junit 'reports/junit.xml'
+                            step([$class: 'XUnitBuilder',
+                                thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
+                                tools: [[$class: 'JUnitType', pattern: 'reports/junit.xml']]])
                         } catch (e) { 
                             sendChatMessage("Test Suite Failed")
                             sendMail("Test Suite Failed")
