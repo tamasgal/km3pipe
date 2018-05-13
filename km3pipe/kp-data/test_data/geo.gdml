@@ -1,0 +1,1194 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<gdml xmlns:gdml="http://cern.ch/2001/Schemas/GDML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="/afs/cern.ch/sw/geant4/releases/share/geant4.9.5/source/persistency/gdml/schema/gdml.xsd" >
+<!-- OM is a multi-pmt OM containing 31 small pmts.
+     a detector for neutrino oscillations. 120 strings with 18 OMs each
+     OMs at a vertical distance of 9m (alternating)
+     String positions are from Patrick Lamare:
+       Footprint_ORCA_20m_average scaled by 1.1x and 1.2y 
+       in addition: 2 strings shifted to satisfy min20m
+       then they are centred around 0,0
+     The lowest OM is 36 meters above sea bed
+-->
+<define>    
+  <rotation name="identity"/>
+  <position name="zero"/>
+
+<!-- The Cathods positions and rotations in Multi-PMT OM  -->
+  <position name="CathodPosition1" unit="m" x="0.000000" y="0.000000" z="-0.200000"/>
+  <rotation name="CathodRotation1"  unit="deg" x="180.000000" y="0.000000" z="0.0"/>
+  <position name="CathodPosition2" unit="m" x="0.092000" y="0.053000" z="-0.169000"/>
+  <rotation name="CathodRotation2"  unit="deg" x="162.565125" y="-27.390596" z="0.0"/>
+  <position name="CathodPosition3" unit="m" x="0.000000" y="0.106000" z="-0.169000"/>
+  <rotation name="CathodRotation3"  unit="deg" x="147.915638" y="0.000000" z="0.0"/>
+  <position name="CathodPosition4" unit="m" x="-0.092000" y="0.053000" z="-0.169000"/>
+  <rotation name="CathodRotation4"  unit="deg" x="162.565125" y="27.390596" z="0.0"/>
+  <position name="CathodPosition5" unit="m" x="-0.092000" y="-0.053000" z="-0.169000"/>
+  <rotation name="CathodRotation5"  unit="deg" x="197.434875" y="27.390596" z="0.0"/>
+  <position name="CathodPosition6" unit="m" x="0.000000" y="-0.106000" z="-0.169000"/>
+  <rotation name="CathodRotation6"  unit="deg" x="212.084362" y="0.000000" z="0.0"/>
+  <position name="CathodPosition7" unit="m" x="0.092000" y="-0.053000" z="-0.169000"/>
+  <rotation name="CathodRotation7"  unit="deg" x="197.434875" y="-27.390596" z="0.0"/>
+  <position name="CathodPosition8" unit="m" x="0.166000" y="0.000000" z="-0.111000"/>
+  <rotation name="CathodRotation8"  unit="deg" x="180.000000" y="-56.135057" z="0.0"/>
+  <position name="CathodPosition9" unit="m" x="0.083000" y="0.144000" z="-0.111000"/>
+  <rotation name="CathodRotation9"  unit="deg" x="127.764481" y="-24.526703" z="0.0"/>
+  <position name="CathodPosition10" unit="m" x="-0.083000" y="0.144000" z="-0.111000"/>
+  <rotation name="CathodRotation10"  unit="deg" x="127.764481" y="24.526703" z="0.0"/>
+  <position name="CathodPosition11" unit="m" x="-0.166000" y="0.000000" z="-0.111000"/>
+  <rotation name="CathodRotation11"  unit="deg" x="180.000000" y="56.135057" z="0.0"/>
+  <position name="CathodPosition12" unit="m" x="-0.083000" y="-0.144000" z="-0.111000"/>
+  <rotation name="CathodRotation12"  unit="deg" x="232.235519" y="24.526703" z="0.0"/>
+  <position name="CathodPosition13" unit="m" x="0.083000" y="-0.144000" z="-0.111000"/>
+  <rotation name="CathodRotation13"  unit="deg" x="232.235519" y="-24.526703" z="0.0"/>
+  <position name="CathodPosition14" unit="m" x="0.165000" y="0.096000" z="-0.059000"/>
+  <rotation name="CathodRotation14"  unit="deg" x="121.767732" y="-55.790566" z="0.0"/>
+  <position name="CathodPosition15" unit="m" x="0.000000" y="0.191000" z="-0.059000"/>
+  <rotation name="CathodRotation15"  unit="deg" x="107.220699" y="0.000000" z="0.0"/>
+  <position name="CathodPosition16" unit="m" x="-0.165000" y="0.096000" z="-0.059000"/>
+  <rotation name="CathodRotation16"  unit="deg" x="121.767732" y="55.790566" z="0.0"/>
+  <position name="CathodPosition17" unit="m" x="-0.165000" y="-0.096000" z="-0.059000"/>
+  <rotation name="CathodRotation17"  unit="deg" x="238.232268" y="55.790566" z="0.0"/>
+  <position name="CathodPosition18" unit="m" x="0.000000" y="-0.191000" z="-0.059000"/>
+  <rotation name="CathodRotation18"  unit="deg" x="252.779301" y="0.000000" z="0.0"/>
+  <position name="CathodPosition19" unit="m" x="0.165000" y="-0.096000" z="-0.059000"/>
+  <rotation name="CathodRotation19"  unit="deg" x="238.232268" y="-55.790566" z="0.0"/>
+  <position name="CathodPosition20" unit="m" x="0.191000" y="0.000000" z="0.059000"/>
+  <rotation name="CathodRotation20"  unit="deg" x="0.000000" y="-72.779301" z="0.0"/>
+  <position name="CathodPosition21" unit="m" x="0.096000" y="0.165000" z="0.059000"/>
+  <rotation name="CathodRotation21"  unit="deg" x="70.306686" y="-28.554408" z="0.0"/>
+  <position name="CathodPosition22" unit="m" x="-0.096000" y="0.165000" z="0.059000"/>
+  <rotation name="CathodRotation22"  unit="deg" x="70.306686" y="28.554408" z="0.0"/>
+  <position name="CathodPosition23" unit="m" x="-0.191000" y="0.000000" z="0.059000"/>
+  <rotation name="CathodRotation23"  unit="deg" x="0.000000" y="72.779301" z="0.0"/>
+  <position name="CathodPosition24" unit="m" x="-0.096000" y="-0.165000" z="0.059000"/>
+  <rotation name="CathodRotation24"  unit="deg" x="289.693314" y="28.554408" z="0.0"/>
+  <position name="CathodPosition25" unit="m" x="0.096000" y="-0.165000" z="0.059000"/>
+  <rotation name="CathodRotation25"  unit="deg" x="289.693314" y="-28.554408" z="0.0"/>
+  <position name="CathodPosition26" unit="m" x="0.144000" y="0.083000" z="0.111000"/>
+  <rotation name="CathodRotation26"  unit="deg" x="36.688426" y="-45.988735" z="0.0"/>
+  <position name="CathodPosition27" unit="m" x="0.000000" y="0.166000" z="0.111000"/>
+  <rotation name="CathodRotation27"  unit="deg" x="56.135057" y="0.000000" z="0.0"/>
+  <position name="CathodPosition28" unit="m" x="-0.144000" y="0.083000" z="0.111000"/>
+  <rotation name="CathodRotation28"  unit="deg" x="36.688426" y="45.988735" z="0.0"/>
+  <position name="CathodPosition29" unit="m" x="-0.144000" y="-0.083000" z="0.111000"/>
+  <rotation name="CathodRotation29"  unit="deg" x="323.311574" y="45.988735" z="0.0"/>
+  <position name="CathodPosition30" unit="m" x="0.000000" y="-0.166000" z="0.111000"/>
+  <rotation name="CathodRotation30"  unit="deg" x="303.864943" y="0.000000" z="0.0"/>
+  <position name="CathodPosition31" unit="m" x="0.144000" y="-0.083000" z="0.111000"/>
+  <rotation name="CathodRotation31"  unit="deg" x="323.311574" y="-45.988735" z="0.0"/>
+
+<!-- a shift so that the mean cathode positions to be at zero-->
+  <position name="OMShift" unit="m" x="0" y="0" z="0.0392"/>
+
+<!-- The Floor Positions -->
+  <position name="OMPosition1" unit="m" x="0" y="0" z="79.3"/>
+  <position name="OMPosition2" unit="m" x="0" y="0" z="69.9"/>
+  <position name="OMPosition3" unit="m" x="0" y="0" z="61.2"/>
+  <position name="OMPosition4" unit="m" x="0" y="0" z="51.8"/>
+  <position name="OMPosition5" unit="m" x="0" y="0" z="43.1"/>
+  <position name="OMPosition6" unit="m" x="0" y="0" z="33.7"/>
+  <position name="OMPosition7" unit="m" x="0" y="0" z="22.8"/>
+  <position name="OMPosition8" unit="m" x="0" y="0" z="13.4"/>
+  <position name="OMPosition9" unit="m" x="0" y="0" z="4.7"/>
+  <position name="OMPosition10" unit="m" x="0" y="0" z="-4.7"/>
+  <position name="OMPosition11" unit="m" x="0" y="0" z="-13.4"/>
+  <position name="OMPosition12" unit="m" x="0" y="0" z="-22.8"/>
+  <position name="OMPosition13" unit="m" x="0" y="0" z="-33.7"/>
+  <position name="OMPosition14" unit="m" x="0" y="0" z="-43.1"/>
+  <position name="OMPosition15" unit="m" x="0" y="0" z="-51.8"/>
+  <position name="OMPosition16" unit="m" x="0" y="0" z="-61.2"/>
+  <position name="OMPosition17" unit="m" x="0" y="0" z="-69.9"/>
+  <position name="OMPosition18" unit="m" x="0" y="0" z="-79.3"/>
+
+<!-- The foot print of the inner detector-->
+  <position name="PosString1" unit="m" x="-90.963" y="118.195" z="0"/>
+  <position name="PosString2" unit="m" x="-79.437" y="100.404" z="0"/>
+  <position name="PosString3" unit="m" x="-68.963" y="118.195" z="0"/>
+  <position name="PosString4" unit="m" x="-58.663" y="100.081" z="0"/>
+  <position name="PosString5" unit="m" x="-46.472" y="118.688" z="0"/>
+  <position name="PosString6" unit="m" x="-35.088" y="101.002" z="0"/>
+  <position name="PosString7" unit="m" x="-25.321" y="121.873" z="0"/>
+  <position name="PosString8" unit="m" x="-14.190" y="101.327" z="0"/>
+  <position name="PosString9" unit="m" x="-66.973" y="78.689" z="0"/>
+  <position name="PosString10" unit="m" x="-56.750" y="56.062" z="0"/>
+  <position name="PosString11" unit="m" x="-90.947" y="76.361" z="0"/>
+  <position name="PosString12" unit="m" x="-102.757" y="56.395" z="0"/>
+  <position name="PosString13" unit="m" x="-79.645" y="59.542" z="0"/>
+  <position name="PosString14" unit="m" x="-69.496" y="35.257" z="0"/>
+  <position name="PosString15" unit="m" x="-48.432" y="36.815" z="0"/>
+  <position name="PosString16" unit="m" x="-46.821" y="78.390" z="0"/>
+  <position name="PosString17" unit="m" x="-35.539" y="56.971" z="0"/>
+  <position name="PosString18" unit="m" x="-24.996" y="38.458" z="0"/>
+  <position name="PosString19" unit="m" x="-23.966" y="79.555" z="0"/>
+  <position name="PosString20" unit="m" x="-15.384" y="56.568" z="0"/>
+  <position name="PosString21" unit="m" x="-3.287" y="39.348" z="0"/>
+  <position name="PosString22" unit="m" x="-3.863" y="77.773" z="0"/>
+  <position name="PosString23" unit="m" x="9.551" y="56.927" z="0"/>
+  <position name="PosString24" unit="m" x="19.559" y="37.657" z="0"/>
+  <position name="PosString25" unit="m" x="-59.760" y="15.745" z="0"/>
+  <position name="PosString26" unit="m" x="-79.894" y="14.186" z="0"/>
+  <position name="PosString27" unit="m" x="-89.205" y="36.210" z="0"/>
+  <position name="PosString28" unit="m" x="-100.769" y="15.844" z="0"/>
+  <position name="PosString29" unit="m" x="-112.834" y="35.366" z="0"/>
+  <position name="PosString30" unit="m" x="-70.702" y="-4.732" z="0"/>
+  <position name="PosString31" unit="m" x="-47.123" y="-4.304" z="0"/>
+  <position name="PosString32" unit="m" x="-35.901" y="15.439" z="0"/>
+  <position name="PosString33" unit="m" x="-25.530" y="-3.832" z="0"/>
+  <position name="PosString34" unit="m" x="-14.753" y="16.842" z="0"/>
+  <position name="PosString35" unit="m" x="8.908" y="16.955" z="0"/>
+  <position name="PosString36" unit="m" x="-1.813" y="-6.155" z="0"/>
+  <position name="PosString37" unit="m" x="-56.184" y="-24.131" z="0"/>
+  <position name="PosString38" unit="m" x="-91.848" y="-6.517" z="0"/>
+  <position name="PosString39" unit="m" x="-113.393" y="-5.713" z="0"/>
+  <position name="PosString40" unit="m" x="-78.154" y="-25.895" z="0"/>
+  <position name="PosString41" unit="m" x="-100.979" y="-23.956" z="0"/>
+  <position name="PosString42" unit="m" x="-35.763" y="-23.788" z="0"/>
+  <position name="PosString43" unit="m" x="-14.471" y="-23.912" z="0"/>
+  <position name="PosString44" unit="m" x="7.464" y="-27.382" z="0"/>
+  <position name="PosString45" unit="m" x="-91.852" y="-46.369" z="0"/>
+  <position name="PosString46" unit="m" x="-70.064" y="-46.175" z="0"/>
+  <position name="PosString47" unit="m" x="-47.409" y="-47.366" z="0"/>
+  <position name="PosString48" unit="m" x="-24.317" y="-44.860" z="0"/>
+  <position name="PosString49" unit="m" x="-79.963" y="-109.805" z="0"/>
+  <position name="PosString50" unit="m" x="-89.824" y="-89.266" z="0"/>
+  <position name="PosString51" unit="m" x="-80.069" y="-67.406" z="0"/>
+  <position name="PosString52" unit="m" x="-103.148" y="-67.388" z="0"/>
+  <position name="PosString53" unit="m" x="-56.753" y="-108.064" z="0"/>
+  <position name="PosString54" unit="m" x="-67.288" y="-88.867" z="0"/>
+  <position name="PosString55" unit="m" x="-47.131" y="-88.276" z="0"/>
+  <position name="PosString56" unit="m" x="-57.970" y="-66.482" z="0"/>
+  <position name="PosString57" unit="m" x="-35.277" y="-107.863" z="0"/>
+  <position name="PosString58" unit="m" x="-35.862" y="-68.316" z="0"/>
+  <position name="PosString59" unit="m" x="-23.265" y="-86.993" z="0"/>
+  <position name="PosString60" unit="m" x="-12.870" y="-65.324" z="0"/>
+  <position name="PosString61" unit="m" x="-14.027" y="-106.180" z="0"/>
+  <position name="PosString62" unit="m" x="-3.922" y="-88.668" z="0"/>
+  <position name="PosString63" unit="m" x="-3.048" y="-46.368" z="0"/>
+  <position name="PosString64" unit="m" x="8.437" y="-65.134" z="0"/>
+  <position name="PosString65" unit="m" x="-23.995" y="-128.664" z="0"/>
+  <position name="PosString66" unit="m" x="-1.027" y="-128.870" z="0"/>
+  <position name="PosString67" unit="m" x="7.999" y="-106.760" z="0"/>
+  <position name="PosString68" unit="m" x="18.978" y="-86.454" z="0"/>
+  <position name="PosString69" unit="m" x="21.237" y="-129.605" z="0"/>
+  <position name="PosString70" unit="m" x="27.945" y="-107.946" z="0"/>
+  <position name="PosString71" unit="m" x="41.037" y="-131.405" z="0"/>
+  <position name="PosString72" unit="m" x="53.890" y="-108.203" z="0"/>
+  <position name="PosString73" unit="m" x="96.926" y="15.563" z="0"/>
+  <position name="PosString74" unit="m" x="75.025" y="15.173" z="0"/>
+  <position name="PosString75" unit="m" x="52.853" y="15.133" z="0"/>
+  <position name="PosString76" unit="m" x="30.817" y="16.146" z="0"/>
+  <position name="PosString77" unit="m" x="105.668" y="38.350" z="0"/>
+  <position name="PosString78" unit="m" x="82.986" y="37.350" z="0"/>
+  <position name="PosString79" unit="m" x="63.237" y="37.945" z="0"/>
+  <position name="PosString80" unit="m" x="42.106" y="35.287" z="0"/>
+  <position name="PosString81" unit="m" x="96.514" y="60.041" z="0"/>
+  <position name="PosString82" unit="m" x="74.843" y="57.178" z="0"/>
+  <position name="PosString83" unit="m" x="51.918" y="56.500" z="0"/>
+  <position name="PosString84" unit="m" x="30.479" y="58.423" z="0"/>
+  <position name="PosString85" unit="m" x="83.138" y="78.516" z="0"/>
+  <position name="PosString86" unit="m" x="63.098" y="77.412" z="0"/>
+  <position name="PosString87" unit="m" x="41.822" y="78.680" z="0"/>
+  <position name="PosString88" unit="m" x="20.401" y="78.896" z="0"/>
+  <position name="PosString89" unit="m" x="73.447" y="98.845" z="0"/>
+  <position name="PosString90" unit="m" x="51.816" y="100.778" z="0"/>
+  <position name="PosString91" unit="m" x="30.910" y="100.530" z="0"/>
+  <position name="PosString92" unit="m" x="8.762" y="99.600" z="0"/>
+  <position name="PosString93" unit="m" x="66.337" y="118.195" z="0"/>
+  <position name="PosString94" unit="m" x="40.775" y="120.109" z="0"/>
+  <position name="PosString95" unit="m" x="18.804" y="118.625" z="0"/>
+  <position name="PosString96" unit="m" x="-1.881" y="121.279" z="0"/>
+  <position name="PosString97" unit="m" x="20.912" y="-4.976" z="0"/>
+  <position name="PosString98" unit="m" x="41.538" y="-2.516" z="0"/>
+  <position name="PosString99" unit="m" x="60.958" y="-3.497" z="0"/>
+  <position name="PosString100" unit="m" x="86.327" y="-5.681" z="0"/>
+  <position name="PosString101" unit="m" x="28.034" y="-24.157" z="0"/>
+  <position name="PosString102" unit="m" x="50.660" y="-26.498" z="0"/>
+  <position name="PosString103" unit="m" x="72.152" y="-24.614" z="0"/>
+  <position name="PosString104" unit="m" x="97.012" y="-27.084" z="0"/>
+  <position name="PosString105" unit="m" x="18.076" y="-47.986" z="0"/>
+  <position name="PosString106" unit="m" x="40.266" y="-47.864" z="0"/>
+  <position name="PosString107" unit="m" x="63.318" y="-48.120" z="0"/>
+  <position name="PosString108" unit="m" x="84.894" y="-44.636" z="0"/>
+  <position name="PosString109" unit="m" x="106.352" y="-48.208" z="0"/>
+  <position name="PosString110" unit="m" x="117.768" y="-27.288" z="0"/>
+  <position name="PosString111" unit="m" x="105.537" y="-3.548" z="0"/>
+  <position name="PosString112" unit="m" x="117.645" y="16.054" z="0"/>
+  <position name="PosString113" unit="m" x="30.740" y="-66.707" z="0"/>
+  <position name="PosString114" unit="m" x="52.827" y="-66.888" z="0"/>
+  <position name="PosString115" unit="m" x="75.885" y="-67.476" z="0"/>
+  <position name="PosString116" unit="m" x="96.740" y="-67.798" z="0"/>
+  <position name="PosString117" unit="m" x="41.513" y="-87.353" z="0"/>
+  <position name="PosString118" unit="m" x="63.942" y="-85.852" z="0"/>
+  <position name="PosString119" unit="m" x="83.469" y="-87.373" z="0"/>
+  <position name="PosString120" unit="m" x="103.737" y="-88.205" z="0"/>
+
+<!-- end of DU position definitions -->
+  <position name="CrustPosition"   unit="m" x="0" y="0" z="-607.65"/>
+
+</define>
+<materials>
+</materials>
+<solids>
+  <box name="WorldBox" lunit="m" x="2200" y="2200" z="2200"/>
+  <box name="CrustBox" lunit="m" x="2200" y="2200" z="984.7"/>
+
+  <box name="TowerBox" lunit="m" x="1" y="1" z="170.0"/>
+
+  <box name="StoreyBox" lunit="m" x="0.6" y="0.6" z="0.6"/>
+
+  <sphere name="OMSphere" lunit="cm" aunit="deg" rmin="0.0" rmax="21.6" startphi="0.0" deltaphi="360.0" starttheta="0.0" deltatheta="180.0"/>
+  <tube name="CathodTube" lunit="cm" aunit="deg" rmin="0.0" rmax="4.7462" z="0.5" startphi="0.0" deltaphi="360.0"/>
+
+</solids>
+
+<structure>
+  <volume name="CathodVolume">
+    <materialref ref="Cathod"/>
+    <solidref ref="CathodTube"/>
+  </volume>
+
+<!-- OMVolume construction -->
+  <volume name="OMVolume">
+    <materialref ref="Water"/>
+    <solidref ref="OMSphere"/>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition1"/>
+      <rotationref ref="CathodRotation1"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition2"/>
+      <rotationref ref="CathodRotation2"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition3"/>
+      <rotationref ref="CathodRotation3"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition4"/>
+      <rotationref ref="CathodRotation4"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition5"/>
+      <rotationref ref="CathodRotation5"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition6"/>
+      <rotationref ref="CathodRotation6"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition7"/>
+      <rotationref ref="CathodRotation7"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition8"/>
+      <rotationref ref="CathodRotation8"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition9"/>
+      <rotationref ref="CathodRotation9"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition10"/>
+      <rotationref ref="CathodRotation10"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition11"/>
+      <rotationref ref="CathodRotation11"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition12"/>
+      <rotationref ref="CathodRotation12"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition13"/>
+      <rotationref ref="CathodRotation13"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition14"/>
+      <rotationref ref="CathodRotation14"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition15"/>
+      <rotationref ref="CathodRotation15"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition16"/>
+      <rotationref ref="CathodRotation16"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition17"/>
+      <rotationref ref="CathodRotation17"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition18"/>
+      <rotationref ref="CathodRotation18"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition19"/>
+      <rotationref ref="CathodRotation19"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition20"/>
+      <rotationref ref="CathodRotation20"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition21"/>
+      <rotationref ref="CathodRotation21"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition22"/>
+      <rotationref ref="CathodRotation22"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition23"/>
+      <rotationref ref="CathodRotation23"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition24"/>
+      <rotationref ref="CathodRotation24"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition25"/>
+      <rotationref ref="CathodRotation25"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition26"/>
+      <rotationref ref="CathodRotation26"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition27"/>
+      <rotationref ref="CathodRotation27"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition28"/>
+      <rotationref ref="CathodRotation28"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition29"/>
+      <rotationref ref="CathodRotation29"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition30"/>
+      <rotationref ref="CathodRotation30"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="CathodVolume"/>
+      <positionref ref="CathodPosition31"/>
+      <rotationref ref="CathodRotation31"/>
+    </physvol>
+
+  </volume>
+
+<!-- StoreyVolume construction -->
+  <volume name="StoreyVolume">
+    <materialref ref="Water"/>
+    <solidref ref="StoreyBox"/>
+    <physvol>
+      <volumeref ref="OMVolume"/>
+      <positionref ref="OMShift"/>
+      <rotationref ref="identity"/>
+    </physvol>
+  </volume>
+
+<!-- TowerVolume construction -->
+  <volume name="TowerVolume">
+    <materialref ref="Water"/>
+    <solidref ref="TowerBox"/>
+
+    <physvol>
+      <volumeref ref="StoreyVolume"/>
+      <positionref ref="OMPosition1"/>
+      <rotationref ref="identity"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="StoreyVolume"/>
+      <positionref ref="OMPosition2"/>
+      <rotationref ref="identity"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="StoreyVolume"/>
+      <positionref ref="OMPosition3"/>
+      <rotationref ref="identity"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="StoreyVolume"/>
+      <positionref ref="OMPosition4"/>
+      <rotationref ref="identity"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="StoreyVolume"/>
+      <positionref ref="OMPosition5"/>
+      <rotationref ref="identity"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="StoreyVolume"/>
+      <positionref ref="OMPosition6"/>
+      <rotationref ref="identity"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="StoreyVolume"/>
+      <positionref ref="OMPosition7"/>
+      <rotationref ref="identity"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="StoreyVolume"/>
+      <positionref ref="OMPosition8"/>
+      <rotationref ref="identity"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="StoreyVolume"/>
+      <positionref ref="OMPosition9"/>
+      <rotationref ref="identity"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="StoreyVolume"/>
+      <positionref ref="OMPosition10"/>
+      <rotationref ref="identity"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="StoreyVolume"/>
+      <positionref ref="OMPosition11"/>
+      <rotationref ref="identity"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="StoreyVolume"/>
+      <positionref ref="OMPosition12"/>
+      <rotationref ref="identity"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="StoreyVolume"/>
+      <positionref ref="OMPosition13"/>
+      <rotationref ref="identity"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="StoreyVolume"/>
+      <positionref ref="OMPosition14"/>
+      <rotationref ref="identity"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="StoreyVolume"/>
+      <positionref ref="OMPosition15"/>
+      <rotationref ref="identity"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="StoreyVolume"/>
+      <positionref ref="OMPosition16"/>
+      <rotationref ref="identity"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="StoreyVolume"/>
+      <positionref ref="OMPosition17"/>
+      <rotationref ref="identity"/>
+    </physvol>
+
+    <physvol>
+      <volumeref ref="StoreyVolume"/>
+      <positionref ref="OMPosition18"/>
+      <rotationref ref="identity"/>
+    </physvol>
+
+  </volume>
+
+<!-- Crust Volume construction-->
+  <volume name="CrustVolume">
+    <materialref ref="Crust"/>
+    <solidref ref="CrustBox"/>
+  </volume>
+
+<!-- World Volume construction-->
+  <volume name="WorldVolume">
+    <materialref ref="Water"/>
+    <solidref ref="WorldBox"/>
+
+    <physvol>
+      <volumeref ref="CrustVolume"/>
+      <positionref ref="CrustPosition"/>
+      <rotationref ref="identity"/>
+    </physvol>
+
+    <!-- here goes the positioning of the strings (towers) -->
+
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString1"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString2"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString3"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString4"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString5"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString6"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString7"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString8"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString9"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString10"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString11"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString12"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString13"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString14"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString15"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString16"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString17"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString18"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString19"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString20"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString21"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString22"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString23"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString24"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString25"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString26"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString27"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString28"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString29"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString30"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString31"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString32"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString33"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString34"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString35"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString36"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString37"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString38"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString39"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString40"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString41"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString42"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString43"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString44"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString45"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString46"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString47"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString48"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString49"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString50"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString51"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString52"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString53"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString54"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString55"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString56"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString57"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString58"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString59"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString60"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString61"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString62"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString63"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString64"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString65"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString66"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString67"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString68"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString69"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString70"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString71"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString72"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString73"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString74"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString75"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString76"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString77"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString78"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString79"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString80"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString81"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString82"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString83"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString84"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString85"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString86"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString87"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString88"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString89"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString90"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString91"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString92"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString93"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString94"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString95"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString96"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString97"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString98"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString99"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString100"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString101"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString102"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString103"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString104"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString105"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString106"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString107"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString108"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString109"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString110"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString111"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString112"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString113"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString114"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString115"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString116"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString117"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString118"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString119"/>
+      <rotationref ref="identity"/>
+    </physvol>
+    <physvol>
+      <volumeref ref="TowerVolume"/>
+      <positionref ref="PosString120"/>
+      <rotationref ref="identity"/>
+    </physvol>
+  </volume>
+
+</structure>
+<setup name="Default" version="1.0">
+  <world ref="WorldVolume"/>
+</setup>
+</gdml>
