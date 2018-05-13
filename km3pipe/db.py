@@ -36,13 +36,8 @@ log = get_logger(__name__)  # pylint: disable=C0103
 
 UTC_TZ = pytz.timezone('UTC')
 
-
 # Ignore invalid certificate error
-try:
-    ssl._create_default_https_context = ssl._create_unverified_context
-except AttributeError:
-    log.debug("Your SSL support is outdated.\n"
-              "Please update your Python installation!")
+ssl._create_default_https_context = ssl._create_unverified_context
 
 BASE_URL = 'https://km3netdbweb.in2p3.fr'
 
