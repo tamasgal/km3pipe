@@ -8,6 +8,7 @@ include =
 omit =
     */tests/*
     */*/tests/*
+    km3pipe/io/aanet.py
     km3pipe/utils/*
     km3modules/ahrs.py
     km3modules/dummy.py
