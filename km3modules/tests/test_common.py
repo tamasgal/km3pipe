@@ -28,7 +28,31 @@ class InfinitePump(kp.Pump):
 
 
 class TestKeep(TestCase):
-    def test_delete(self):
+    def test_keep_a_single_key(self):
+        class APump(kp.Pump):
+            def process(self, blob):
+                blob['a'] = 'a'
+                blob['b'] = 'b'
+                blob['c'] = 'c'
+                blob['d'] = 'd'
+                return blob
+
+        class Observer(kp.Module):
+
+            def process(self, blob):
+                assert 'a' not in blob
+                assert 'b' not in blob
+                assert 'c' not in blob
+                assert 'd' == blob['d']
+                return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(APump)
+        pipe.attach(Keep, keys='d')
+        pipe.attach(Observer)
+        pipe.drain(5)
+
+    def test_keep_multiple_keys(self):
         class APump(kp.Pump):
             def process(self, blob):
                 blob['a'] = 'a'
@@ -54,7 +78,29 @@ class TestKeep(TestCase):
 
 
 class TestDelete(TestCase):
-    def test_delete(self):
+    def test_delete_a_single_key(self):
+        class APump(kp.Pump):
+            def process(self, blob):
+                blob['a'] = 'a'
+                blob['b'] = 'b'
+                blob['c'] = 'c'
+                return blob
+
+        class Observer(kp.Module):
+
+            def process(self, blob):
+                assert 'a' == blob['a']
+                assert 'b' not in blob
+                assert 'c' == blob['c']
+                return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(APump)
+        pipe.attach(Delete, key='b')
+        pipe.attach(Observer)
+        pipe.drain(5)
+
+    def test_delete_multiple_keys(self):
         class APump(kp.Pump):
             def process(self, blob):
                 blob['a'] = 'a'
@@ -153,6 +199,22 @@ class TestWrap(TestCase):
         pipe.attach(check_wrapped_key)
         pipe.drain(3)
 
+    def test_wrapping_none_is_skipped(self):
+        def add_a_keyval_none(blob):
+            blob['a'] = None
+            return blob
+
+        def check_wrapped_key(blob):
+            assert blob['a'] is None
+            return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(InfinitePump)
+        pipe.attach(add_a_keyval_none)
+        pipe.attach(Wrap, key='a')
+        pipe.attach(check_wrapped_key)
+        pipe.drain(3)
+
     def test_wrap_multiple_values(self):
         def add_a_keyval_dict(blob):
             blob['a'] = {'b': 1, 'c': 2.3}
@@ -188,6 +250,41 @@ class TestDump(TestCase):
         pipe.attach(InfinitePump)
         pipe.attach(add_something)
         pipe.attach(Dump)
+        pipe.drain(3)
+
+    def test_dump_a_key(self):
+        def add_something(blob):
+            blob['a'] = 1
+            return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(InfinitePump)
+        pipe.attach(add_something)
+        pipe.attach(Dump, key='a')
+        pipe.drain(3)
+
+    def test_dump_multiple_keys(self):
+        def add_something(blob):
+            blob['a'] = 1
+            blob['b'] = 2
+            return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(InfinitePump)
+        pipe.attach(add_something)
+        pipe.attach(Dump, keys=['a', 'b'])
+        pipe.drain(3)
+
+    def test_dump_full(self):
+        def add_something(blob):
+            blob['a'] = 1
+            blob['b'] = 2
+            return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(InfinitePump)
+        pipe.attach(add_something)
+        pipe.attach(Dump, full=True)
         pipe.drain(3)
 
 
