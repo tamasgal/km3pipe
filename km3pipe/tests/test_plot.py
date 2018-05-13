@@ -39,8 +39,3 @@ class TestMeshStuff(TestCase):
         assert np.allclose([[-10, -10, -10],
                             [-2, -2, -2],
                             [6, 6, 6]], yy)
-
-
-class TestDiag(TestCase):
-    def test_call(self):
-        diag()
