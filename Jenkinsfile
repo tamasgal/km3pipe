@@ -31,7 +31,7 @@ def get_stages(docker_image) {
                     pip install -U pip setuptools wheel
                 """
             }
-            gitlabBuilds(builds: ['Deps', 'Doc Deps', 'Dev Deps', 'Test', 'Install', 'Test KM3Modules', 'Coverage', 'Docs']) {
+            gitlabBuilds(builds: ['Deps', 'Doc Deps', 'Dev Deps', 'Test', 'Install', 'Test KM3Modules', 'Test Reports', 'Coverage', 'Docs']) {
                 stage("Deps") {
                     gitlabCommitStatus("Deps") {
                         try { 
@@ -82,12 +82,6 @@ def get_stages(docker_image) {
                                 make clean
                                 make test
                             """
-                            step([$class: 'XUnitBuilder',
-                                thresholds: [
-                                    [$class: 'SkippedThreshold', failureThreshold: '0'],
-                                    [$class: 'FailedThreshold', failureThreshold: '0']],
-                                // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
-                                tools: [[$class: 'JUnitType', pattern: 'reports/junit.xml']]])
                         } catch (e) { 
                             sendChatMessage("Test Suite Failed")
                             sendMail("Test Suite Failed")
@@ -116,15 +110,25 @@ def get_stages(docker_image) {
                                 . ${PYTHON_VENV}/bin/activate
                                 make test-km3modules
                             """
+                        } catch (e) { 
+                            sendChatMessage("KM3Modules Test Suite Failed")
+                            sendMail("KM3Modules Test Suite Failed")
+                            throw e
+                        }
+                    }
+                }
+                stage('Test Reports') {
+                    gitlabCommitStatus("Test Reports") {
+                        try { 
                             step([$class: 'XUnitBuilder',
                                 thresholds: [
                                     [$class: 'SkippedThreshold', failureThreshold: '0'],
                                     [$class: 'FailedThreshold', failureThreshold: '0']],
                                 // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
-                                tools: [[$class: 'JUnitType', pattern: 'reports/junit_km3modules.xml']]])
+                                tools: [[$class: 'JUnitType', pattern: 'reports/*.xml']]])
                         } catch (e) { 
-                            sendChatMessage("KM3Modules Test Suite Failed")
-                            sendMail("KM3Modules Test Suite Failed")
+                            sendChatMessage("Failed to create test reports.")
+                            sendMail("Failed to create test reports.")
                             throw e
                         }
                     }
