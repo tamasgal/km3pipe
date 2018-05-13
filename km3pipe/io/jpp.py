@@ -344,10 +344,10 @@ class FitPump(Pump):
         self._dir_xs.resize(buf_size)
         self._dir_ys.resize(buf_size)
         self._dir_zs.resize(buf_size)
-        self._ndfs_zs.resize(buf_size)
-        self._times_zs.resize(buf_size)
-        self._qualities_zs.resize(buf_size)
-        self._energies_zs.resize(buf_size)
+        self._ndfs.resize(buf_size)
+        self._times.resize(buf_size)
+        self._qualities.resize(buf_size)
+        self._energies.resize(buf_size)
 
     def blob_generator(self):
         while self.event_reader.has_next:
