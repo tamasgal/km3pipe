@@ -227,10 +227,6 @@ class TimeslicePump(Pump):
     def __iter__(self):
         return self
 
-    def next(self):
-        """Python 2/3 compatibility for iterators"""
-        return self.__next__()
-
     def __next__(self):
         return next(self.blobs)
 
@@ -290,10 +286,6 @@ class SummaryslicePump(Pump):
 
     def __iter__(self):
         return self
-
-    def next(self):
-        """Python 2/3 compatibility for iterators"""
-        return self.__next__()
 
     def __next__(self):
         return next(self.blobs)
@@ -429,10 +421,6 @@ class FitPump(Pump):
 
     def __iter__(self):
         return self
-
-    def next(self):
-        """Python 2/3 compatibility for iterators"""
-        return self.__next__()
 
     def __next__(self):
         return next(self.blobs)
