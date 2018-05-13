@@ -25,8 +25,8 @@ class TestOpenRfile(TestCase):
 
 class TestGetHist(TestCase):
     @surrogate('root_numpy.hist2array')
-    @patch('root_numpy.hist2array')
     @patch('km3pipe.io.root.open_rfile')
+    @patch('root_numpy.hist2array')
     def test_call(self, hist2array_mock, open_rfile_mock):
         get_hist('a.root', 'histname')
         hist2array_mock.assert_called_once()
@@ -34,8 +34,8 @@ class TestGetHist(TestCase):
 
 class TestGetHist2d(TestCase):
     @surrogate('root_numpy.hist2array')
-    @patch('root_numpy.hist2array')
     @patch('km3pipe.io.root.open_rfile')
+    @patch('root_numpy.hist2array')
     def test_call(self, hist2array_mock, open_rfile_mock):
         get_hist2d('a.root', 'histname')
         hist2array_mock.assert_called_once()
@@ -43,8 +43,8 @@ class TestGetHist2d(TestCase):
 
 class TestGetHist3d(TestCase):
     @surrogate('root_numpy.hist2array')
-    @patch('root_numpy.hist2array')
     @patch('km3pipe.io.root.open_rfile')
+    @patch('root_numpy.hist2array')
     def test_call(self, hist2array_mock, open_rfile_mock):
         get_hist3d('a.root', 'histname')
         hist2array_mock.assert_called_once()
