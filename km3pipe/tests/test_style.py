@@ -31,15 +31,15 @@ class TestColourCycler(TestCase):
 
     def test_next(self):
         cc = ColourCycler()
-        first = cc.next
-        second = cc.next
+        first = next(cc)
+        second = next(cc)
         self.assertTrue(first != second)
 
     def test_next_a_few_times(self):
         cc = ColourCycler()
         last_colour = ""
         for i in range(100):
-            current_colour = cc.next
+            current_colour = next(cc)
             self.assertTrue(last_colour != current_colour)
             last_colour = current_colour
 

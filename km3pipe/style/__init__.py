@@ -79,7 +79,6 @@ class ColourCycler(object):
         """Return a list of available styles"""
         return list(self.colours.keys())
 
-    @property
-    def next(self):
+    def __next__(self):
         """Return the next colour in current palette"""
         return next(self._cycler)
