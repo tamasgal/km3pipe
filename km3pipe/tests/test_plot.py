@@ -3,8 +3,8 @@
 
 import numpy as np
 
-from km3pipe.testing import TestCase
-from km3pipe.plot import bincenters
+from km3pipe.testing import TestCase, patch
+from km3pipe.plot import bincenters, meshgrid, automeshgrid, diag
 
 __author__ = "Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -19,3 +19,28 @@ class TestBins(TestCase):
     def test_binlims(self):
         bins = np.linspace(0, 20, 21)
         assert bincenters(bins).shape[0] == bins.shape[0] - 1
+
+
+class TestMeshStuff(TestCase):
+    def test_meshgrid(self):
+        xx, yy = meshgrid(-1, 1, 0.8)
+        assert np.allclose([[-1.0, -0.2,  0.6],
+                            [-1.0, -0.2,  0.6],
+                            [-1.0, -0.2,  0.6]], xx)
+        assert np.allclose([[-1.0, -1.0, -1.0],
+                            [-0.2, -0.2, -0.2],
+                            [0.6, 0.6, 0.6]], yy)
+
+    def test_meshgrid_with_y_specs(self):
+        xx, yy = meshgrid(-1, 1, 0.8, -10, 10, 8)
+        assert np.allclose([[-1.0, -0.2,  0.6],
+                            [-1.0, -0.2,  0.6],
+                            [-1.0, -0.2,  0.6]], xx)
+        assert np.allclose([[-10, -10, -10],
+                            [-2, -2, -2],
+                            [6, 6, 6]], yy)
+
+
+class TestDiag(TestCase):
+    def test_call(self):
+        diag()
