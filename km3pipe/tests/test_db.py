@@ -1,9 +1,9 @@
 # Filename: test_db.py
 # pylint: disable=C0111,E1003,R0904,C0103,R0201,C0102
 
-from km3pipe.testing import TestCase, MagicMock
+from km3pipe.testing import TestCase, MagicMock, patch
 
-from km3pipe.db import DBManager, DOMContainer
+from km3pipe.db import DBManager, DOMContainer, we_are_in_lyon
 from km3pipe.logger import get_logger
 
 __author__ = "Tamas Gal"
@@ -72,3 +72,17 @@ class TestDOMContainer(TestCase):
         self.assertEqual(1, self.dc.clbupi2domid('100', DET_ID))
         self.assertEqual(2, self.dc.clbupi2domid('200', DET_ID))
         self.assertEqual(3, self.dc.clbupi2domid('300', DET_ID))
+
+
+class TestWeAreInLyon(TestCase):
+    @patch('socket.gethostbyname')
+    @patch('socket.gethostname')
+    def test_call_in_lyon(self, gethostname_mock, gethostbyname_mock):
+        gethostbyname_mock.return_value = '134.158.'
+        assert we_are_in_lyon()
+
+    @patch('socket.gethostbyname')
+    @patch('socket.gethostname')
+    def test_call_not_in_lyon(self, gethostname_mock, gethostbyname_mock):
+        gethostbyname_mock.return_value = '1.2.'
+        assert not we_are_in_lyon()
