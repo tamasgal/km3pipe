@@ -2,8 +2,9 @@
 # pylint: disable=locally-disabled,C0111,R0904,C0103
 
 import km3pipe as kp
+from km3pipe.dataclasses import Table
 from km3modules.common import (Siphon, Delete, Keep, Wrap, Dump, StatusBar,
-                               TickTock, MemoryObserver)
+                               TickTock, MemoryObserver, BlobIndexer, Cut)
 from km3pipe.testing import TestCase, MagicMock
 from km3pipe.tools import istype
 
@@ -310,3 +311,44 @@ class TestMemoryObserver(TestCase):
         pipe.attach(InfinitePump)
         pipe.attach(MemoryObserver)
         pipe.drain(5)
+
+
+class TestBlobIndexer(TestCase):
+    def test_blob_indexer(self):
+        class Observer(kp.Module):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                assert blob['blob_index'] == self.index
+                self.index += 1
+                return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(InfinitePump)
+        pipe.attach(BlobIndexer)
+        pipe.attach(Observer)
+        pipe.drain(4)
+
+
+# TODO: The Cut module should probably be reviewed, not sure if it is needed
+# I just realised during the unit test design phase that I did not understand
+# what Cut actually was meant to do...
+# 
+# class TestCut(TestCase):
+#     def test_cut(self):
+#         def add_table(blob):
+#             blob['tab'] = Table({'a': [1, 2, 3, 4], 'b': [6, 5, 4, 8]})
+#             return blob
+#
+#         class Observer(kp.Module):
+#             def process(self, blob):
+#                 assert max(blob['tab'].b) < 8
+#                 return blob
+#
+#         pipe = kp.Pipeline()
+#         pipe.attach(InfinitePump)
+#         pipe.attach(add_table)
+#         pipe.attach(Cut, key='tab', condition='b < 6')
+#         pipe.attach(Observer)
+#         pipe.drain(4)
