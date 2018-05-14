@@ -243,8 +243,9 @@ class Detector(object):
         doms = ""
         for dom_id, (line, floor, n_pmts) in self.doms.items():
             doms += "{0} {1} {2} {3}\n".format(dom_id, line, floor, n_pmts)
-            for i in range(n_pmts):
-                pmt = self._pmts_by_omkey[(line, floor, i)]
+            for channel_id in range(n_pmts):
+                pmt_idx = self._pmt_index_by_omkey[(line, floor, channel_id)]
+                pmt = self.pmts[pmt_idx]
                 doms += "{0} {1} {2} {3} {4} {5} {6} {7}\n".format(
                         pmt.id, pmt.pos[0], pmt.pos[1], pmt.pos[2],
                         pmt.dir[0], pmt.dir[1], pmt.dir[2],
