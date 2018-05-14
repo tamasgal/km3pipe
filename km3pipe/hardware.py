@@ -246,9 +246,9 @@ class Detector(object):
             for channel_id in range(n_pmts):
                 pmt_idx = self._pmt_index_by_omkey[(line, floor, channel_id)]
                 pmt = self.pmts[pmt_idx]
-                doms += "{0} {1} {2} {3} {4} {5} {6} {7}\n".format(
-                        pmt.pmt_id, pmt.pos[0], pmt.pos[1], pmt.pos[2],
-                        pmt.dir[0], pmt.dir[1], pmt.dir[2],
+                doms += " {0} {1} {2} {3} {4} {5} {6} {7}\n".format(
+                        pmt.pmt_id, pmt.pos_x, pmt.pos_y, pmt.pos_z,
+                        pmt.dir_x, pmt.dir_y, pmt.dir_z,
                         pmt.t0
                 )
         return header + "\n" + doms

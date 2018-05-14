@@ -59,20 +59,6 @@ EXAMPLE_DETX_MIXED_IDS = StringIO("\n".join((
     " 63 3.4 3.5 3.6  0.1 -1.2  0.3 80",
     " 61 3.7 3.8 3.9  0.1  0.2 -1.3 90",)))
 
-EXAMPLE_DETX_WRITE = StringIO("\n".join((
-    "1 3",
-    "1 1 1 3",
-    " 1 1.1 1.2 1.3 1.0 0.0 0.0 10.0",
-    " 2 1.4 1.5 1.6 0.0 1.0 0.0 20.0",
-    " 3 1.7 1.8 1.9 0.0 0.0 1.0 30.0",
-    "2 1 2 3",
-    " 4 2.1 2.2 2.3 0.0 1.0 0.0 40.0",
-    " 5 2.4 2.5 2.6 0.0 0.0 1.0 50.0",
-    " 6 2.7 2.8 2.9 1.0 0.0 0.0 60.0",
-    "3 1 3 3",
-    " 7 3.1 3.2 3.3 0.0 0.0 1.0 70.0",
-    " 8 3.4 3.5 3.6 0.0 1.0 0.0 80.0",
-    " 9 3.7 3.8 3.9 1.0 0.0 0.0 90.0\n",)))
 
 EXAMPLE_MC_DETX_WRITE_MIXED_IDS = StringIO("\n".join((
     "-1 3",
@@ -181,6 +167,29 @@ class TestDetector(TestCase):
         self.det._parse_doms()
         xy = self.det.xy_positions
         assert xy is not None
+
+    def test_ascii(self):
+        EXAMPLE_DETX_STRING = "\n".join((
+            "1 3",
+            "1 1 1 3",
+            " 1 1.1 1.2 1.3 1.0 0.0 0.0 10.0",
+            " 2 1.4 1.5 1.6 0.0 1.0 0.0 20.0",
+            " 3 1.7 1.8 1.9 0.0 0.0 1.0 30.0",
+            "2 1 2 3",
+            " 4 2.1 2.2 2.3 0.0 1.0 0.0 40.0",
+            " 5 2.4 2.5 2.6 0.0 0.0 1.0 50.0",
+            " 6 2.7 2.8 2.9 1.0 0.0 0.0 60.0",
+            "3 1 3 3",
+            " 7 3.1 3.2 3.3 0.0 0.0 1.0 70.0",
+            " 8 3.4 3.5 3.6 0.0 1.0 0.0 80.0",
+            " 9 3.7 3.8 3.9 1.0 0.0 0.0 90.0\n",))
+        EXAMPLE_DETX_WRITE = StringIO(EXAMPLE_DETX_STRING)
+
+        self.det = Detector()
+        self.det._det_file = EXAMPLE_DETX_WRITE
+        self.det._parse_header()
+        self.det._parse_doms()
+        assert EXAMPLE_DETX_STRING == self.det.ascii
 
 
 class TestPMT(TestCase):
