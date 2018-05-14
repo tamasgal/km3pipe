@@ -1,6 +1,6 @@
 """
 ==================
-PMT Positions.
+PMT Directions
 ==================
 
 Plot the PMT directions for a given DOM.
