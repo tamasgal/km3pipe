@@ -60,22 +60,6 @@ EXAMPLE_DETX_MIXED_IDS = StringIO("\n".join((
     " 61 3.7 3.8 3.9  0.1  0.2 -1.3 90",)))
 
 
-EXAMPLE_MC_DETX_WRITE_MIXED_IDS = StringIO("\n".join((
-    "-1 3",
-    "6 1 1 3",
-    " 31 1.1 1.2 1.3 1.0 0.0 0.0 10.0",
-    " 22 1.4 1.5 1.6 0.0 1.0 0.0 20.0",
-    " 13 1.7 1.8 1.9 0.0 0.0 1.0 30.0",
-    "3 1 2 3",
-    " 34 2.1 2.2 2.3 1.0 0.0 0.0 40.0",
-    " 45 2.4 2.5 2.6 0.0 1.0 0.0 50.0",
-    " 16 2.7 2.8 2.9 0.0 0.0 1.0 60.0",
-    "9 1 3 3",
-    " 17 3.1 3.2 3.3 1.0 0.0 0.0 70.0",
-    " 48 3.4 3.5 3.6 0.0 1.0 0.0 80.0",
-    " 39 3.7 3.8 3.9 0.0 0.0 1.0 90.0\n",)))
-
-
 class TestDetector(TestCase):
 
     def setUp(self):
@@ -169,7 +153,7 @@ class TestDetector(TestCase):
         assert xy is not None
 
     def test_ascii(self):
-        EXAMPLE_DETX_STRING = "\n".join((
+        detx_string = "\n".join((
             "1 3",
             "1 1 1 3",
             " 1 1.1 1.2 1.3 1.0 0.0 0.0 10.0",
@@ -183,26 +167,33 @@ class TestDetector(TestCase):
             " 7 3.1 3.2 3.3 0.0 0.0 1.0 70.0",
             " 8 3.4 3.5 3.6 0.0 1.0 0.0 80.0",
             " 9 3.7 3.8 3.9 1.0 0.0 0.0 90.0\n",))
-        EXAMPLE_DETX_WRITE = StringIO(EXAMPLE_DETX_STRING)
+        detx_fob = StringIO(detx_string)
 
         self.det = Detector()
-        self.det._det_file = EXAMPLE_DETX_WRITE
+        self.det._det_file = detx_fob
         self.det._parse_header()
         self.det._parse_doms()
-        assert EXAMPLE_DETX_STRING == self.det.ascii
+        assert detx_string == self.det.ascii
 
+    def test_ascii_with_mixed_dom_ids(self):
+        detx_string = "\n".join((
+            "-1 3",
+            "6 1 1 3",
+            " 31 1.1 1.2 1.3 1.0 0.0 0.0 10.0",
+            " 22 1.4 1.5 1.6 0.0 1.0 0.0 20.0",
+            " 13 1.7 1.8 1.9 0.0 0.0 1.0 30.0",
+            "3 1 2 3",
+            " 34 2.1 2.2 2.3 1.0 0.0 0.0 40.0",
+            " 45 2.4 2.5 2.6 0.0 1.0 0.0 50.0",
+            " 16 2.7 2.8 2.9 0.0 0.0 1.0 60.0",
+            "9 1 3 3",
+            " 17 3.1 3.2 3.3 1.0 0.0 0.0 70.0",
+            " 48 3.4 3.5 3.6 0.0 1.0 0.0 80.0",
+            " 39 3.7 3.8 3.9 0.0 0.0 1.0 90.0\n",))
+        detx_fobj = StringIO(detx_string)
 
-class TestPMT(TestCase):
-
-    def test_init(self):
-        pmt = PMT(1, (1., 2, 3), (4., 5, 6), 7, 8, (9, 10, 11))
-        self.assertAlmostEqual(1, pmt.id)
-        self.assertAlmostEqual(1, pmt.pos[0])
-        self.assertAlmostEqual(2, pmt.pos[1])
-        self.assertAlmostEqual(3, pmt.pos[2])
-        self.assertAlmostEqual(4, pmt.dir[0], 6)
-        self.assertAlmostEqual(5, pmt.dir[1], 6)
-        self.assertAlmostEqual(6, pmt.dir[2], 6)
-        self.assertAlmostEqual(7, pmt.t0)
-        self.assertAlmostEqual(8, pmt.channel_id)
-        self.assertEqual((9, 10, 11), pmt.omkey)
+        self.det = Detector()
+        self.det._det_file = detx_fobj
+        self.det._parse_header()
+        self.det._parse_doms()
+        assert detx_string == self.det.ascii
