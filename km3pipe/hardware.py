@@ -82,7 +82,7 @@ class Detector(object):
             self._parse_header()
             self._parse_doms()
             if self.n_doms < 1:
-                log.error("No data found for detector ID {0}.".format(det_id))
+                log.error("No data found for detector ID %s." % det_id)
 
     def _init_from_file(self, filename):
         """Create detector from detx file."""
@@ -193,7 +193,7 @@ class Detector(object):
     @property
     def dom_ids(self):
         if not self._dom_ids:
-            self._dom_ids = self.doms.keys()
+            self._dom_ids = list(self.doms.keys())
         return self._dom_ids
 
     @property
