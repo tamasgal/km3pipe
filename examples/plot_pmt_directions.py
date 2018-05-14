@@ -10,7 +10,6 @@ Plot the PMT directions for a given DOM.
 # License: BSD-3
 from mpl_toolkits.mplot3d import axes3d
 import matplotlib.pyplot as plt
-from matplotlib import rcParams
 
 import km3pipe as kp
 import km3pipe.style
@@ -34,11 +33,6 @@ dom_id = det.dom_ids[0]
 # ...and get the table of the PMTs in the chosen DOM:
 
 pmts = det.pmts[det.pmts.dom_id == dom_id]
-
-#####################################################
-# Some cosmetics for the plot...
-rcParams['axes.titlepad'] = 25
-rcParams['axes.labelpad'] = 20
 
 #####################################################
 # The `quiver` function can directly plot the PMT data, since those are
