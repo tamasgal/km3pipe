@@ -218,8 +218,9 @@ class Detector(object):
 
     def translate_detector(self, vector):
         vector = np.array(vector, dtype=float)
-        for pmt in self.pmts:
-            pmt.pos = pmt.pos + vector
+        self.pmts.pos_x += vector[0]
+        self.pmts.pos_y += vector[1]
+        self.pmts.pos_z += vector[2]
 
     @property
     def pmt_angles(self):
