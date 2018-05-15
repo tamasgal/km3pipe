@@ -217,6 +217,7 @@ class Detector(object):
         return self._xy_pos
 
     def translate_detector(self, vector):
+        """Translate the detector by a given vector"""
         vector = np.array(vector, dtype=float)
         self.pmts.pos_x += vector[0]
         self.pmts.pos_y += vector[1]
