@@ -10,7 +10,7 @@ from .logger import get_logger
 
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2017, Tamas Gal and the KM3NeT collaboration."
-__credits__ = []
+__credits__ = ['Vladimir Kulikovskiy']
 __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
@@ -410,3 +410,38 @@ def gold_parameter(time_residual):
 def log_b(arg, base):
     """Logarithm to any base"""
     return np.log(arg) / np.log(base)
+
+
+def yaw_rot(vector, heading):
+    """Rotate vectors using quaternion algebra.
+    
+    Implemented by Vladimir Kulikovskiy. 
+
+    Parameters
+    ----------
+    vector: np.array or list-like (3 elements)
+    heading: the heading to rotate to [deg]
+
+    Returns
+    -------
+    vector: np.array
+
+    """
+    yaw = np.radians(heading)
+    pitch = 0
+    roll = 0
+    cy = np.cos(yaw * 0.5)
+    sy = np.sin(yaw * 0.5)
+    cr = np.cos(roll * 0.5)
+    sr = np.sin(roll * 0.5)
+    cp = np.cos(pitch * 0.5)
+    sp = np.sin(pitch * 0.5)
+
+    q = np.zeros(3)
+    q0 = cy * cr * cp + sy * sr * sp
+    q[0] = cy * sr * cp - sy * cr * sp
+    q[1] = cy * cr * sp + sy * sr * cp
+    q[2] = sy * cr * cp - cy * sr * sp
+    t = 2 * np.cross(q, vector)
+    v_rot = vector + q0 * t + np.cross(q, t)
+    return v_rot

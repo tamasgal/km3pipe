@@ -9,7 +9,7 @@ from km3pipe.testing import TestCase
 from km3pipe.math import (
     angle_between, pld3, com, zenith, azimuth, Polygon, IrregularPrism,
     rotation_matrix, SparseCone, space_angle, hsin, phi, theta,
-    unit_vector, innerprod_1d, log_b
+    unit_vector, innerprod_1d, log_b, yaw_rot
 )
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
@@ -272,3 +272,34 @@ class TestLog(TestCase):
         assert_allclose(log_b(5, 2), np.log2(5))
         assert_allclose(log_b(5, 10), np.log10(5))
         assert_allclose(log_b(5, np.e), np.log(5))
+
+
+class TestYawRot(TestCase):
+    def test_call_with_list(self):
+        yaw_rot([1, 2, 3], 1)
+
+    def test_no_rotation(self):
+        vec = (1, 0, 0)
+        vec_rot = yaw_rot(vec, 0)
+        assert np.allclose([1, 0, 0], vec_rot)
+
+    def test_a_rotation_of_90(self):
+        vec = (1, 0, 0)
+        vec_rot = yaw_rot(vec, 90)
+        assert np.allclose([0, 1, 0], vec_rot)
+
+    def test_a_rotation_of_180(self):
+        vec = (1, 0, 0)
+        vec_rot = yaw_rot(vec, 180)
+        assert np.allclose([-1, 0, 0], vec_rot)
+
+    def test_a_full_rotation(self):
+        vec = (1, 0, 0)
+        vec_rot = yaw_rot(vec, 360)
+        assert np.allclose([1, 0, 0], vec_rot)
+
+    def test_a_rotation_of_45(self):
+        vec = (1, 0, 0)
+        vec_rot = yaw_rot(vec, 45)
+        assert np.allclose([0.7071, 0.7071, 0], vec_rot)
+
