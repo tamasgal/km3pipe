@@ -490,3 +490,26 @@ class TestTable(TestCase):
         assert 'c' in tab
         assert 'd' not in tab
 
+    def test_pos_getter(self):
+        tab = Table({'pos_x': [1, 2, 3],
+                     'pos_y': [4, 5, 6],
+                     'pos_z': [7, 8, 9]})
+        assert np.allclose([[1, 4, 7], [2, 5, 8], [3, 6, 9]], tab.pos)
+
+    def test_pos_getter_for_single_entry(self):
+        tab = Table({'pos_x': [1, 2, 3],
+                     'pos_y': [4, 5, 6],
+                     'pos_z': [7, 8, 9]})
+        assert np.allclose([[2, 5, 8]], tab.pos[1])
+
+    def test_dir_getter(self):
+        tab = Table({'dir_x': [1, 2, 3],
+                     'dir_y': [4, 5, 6],
+                     'dir_z': [7, 8, 9]})
+        assert np.allclose([[1, 4, 7], [2, 5, 8], [3, 6, 9]], tab.dir)
+
+    def test_dir_getter_for_single_entry(self):
+        tab = Table({'dir_x': [1, 2, 3],
+                     'dir_y': [4, 5, 6],
+                     'dir_z': [7, 8, 9]})
+        assert np.allclose([[2, 5, 8]], tab.dir[1])
