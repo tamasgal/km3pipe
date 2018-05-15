@@ -8,9 +8,11 @@ build:
 	@echo "No need to build anymore :)"
 
 install: 
+	pip install -U numpy
 	pip install ".[full]"
 
 install-dev: dev-dependencies
+	pip install -U numpy
 	pip install -e ".[full]"
 
 clean:
@@ -49,6 +51,7 @@ lint:
 	py.test --pylint km3modules
 
 dependencies:
+	pip install -U numpy
 	pip install -Ur requirements.txt
 
 dev-dependencies:
