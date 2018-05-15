@@ -15,6 +15,6 @@ seaborn
 sklearn
 patsy
 h5py
-statsmodels=0.8
+statsmodels==0.8
 websocket-client
 tornado
