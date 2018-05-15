@@ -6,7 +6,7 @@ Usage:
     streamds list
     streamds upload [-q] CSV_FILE
     streamds info STREAM
-    streamds get STREAM [PARAMETERS...]
+    streamds get [-f FORMAT] STREAM [PARAMETERS...]
     streamds (-h | --help)
     streamds --version
 
@@ -14,6 +14,7 @@ Options:
     STREAM      Name of the stream.
     CSV_FILE    Tab separated data for the runsummary tables.
     PARAMETERS  List of parameters separated by space (e.g. detid=29).
+    -f FORMAT   Usually 'txt' for ASCII or 'text' for UTF-8 [default: txt].
     -q          Dryrun! This will upload the parameters with a TEST_ prefix.
     -h --help   Show this screen.
 
@@ -51,13 +52,12 @@ def print_info(stream):
     sds.help(stream)
 
 
-def get_data(stream, parameters):
+def get_data(stream, parameters, fmt):
     """Retrieve data for given stream and parameters, or None if not found"""
     sds = kp.db.StreamDS()
     if stream not in sds.streams:
         log.error("Stream '{}' not found in the database.".format(stream))
         return
-    fun = getattr(sds, stream)
     params = {}
     if parameters:
         for parameter in parameters:
@@ -68,7 +68,7 @@ def get_data(stream, parameters):
                 continue
             key, value = parameter.split('=')
             params[key] = value
-    data = fun(**params)
+    data = sds.get(stream, fmt, **params)
     if data is not None:
         print(data)
     else:
@@ -193,6 +193,6 @@ def main():
     elif args['upload']:
         upload_runsummary(args['CSV_FILE'], args['-q'])
     elif args['get']:
-        get_data(args['STREAM'], args['PARAMETERS'])
+        get_data(args['STREAM'], args['PARAMETERS'], fmt=args['-f'])
     else:
         available_streams()
