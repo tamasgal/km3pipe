@@ -42,7 +42,7 @@ class ColourCycler(object):
     """Basic colour cycler.
 
     Instantiate with `cc = ColourCycler()` and use it in plots
-    like `plt.plot(xs, ys, c=cs.next)`.
+    like `plt.plot(xs, ys, c=next(cc))`.
     """
 
     def __init__(self, palette='km3pipe'):
