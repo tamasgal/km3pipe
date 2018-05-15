@@ -23,7 +23,7 @@ axes.edgecolor: .7
 axes.linewidth: 1
 axes.titlesize: 14
 axes.titlepad: 23 
-axes.labelpad: 13 
+axes.labelpad: 18 
 
 patch.edgecolor: ffffff
 # patch.facecolor: 4C72B0
@@ -66,6 +66,7 @@ figure.facecolor: ffffff
 figure.subplot.wspace: 0.3
 figure.subplot.hspace: 0.4
 figure.figsize: 8.0, 5.5
+figure.autolayout: True
 
 # Tableau colorblind 10 palette
 axes.prop_cycle: cycler('color', ['006BA4', 'FF800E', 'ABABAB', '595959', '5F9ED1', 'C85200', '898989', 'A2C8EC', 'FFBC79', 'CFCFCF'])
