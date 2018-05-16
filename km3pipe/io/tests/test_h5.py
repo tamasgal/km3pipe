@@ -141,6 +141,40 @@ class TestH5SinkConsistency(TestCase):
         assert np.allclose([0, 1, 2, 3, 4], group_id)
         fobj.close()
 
+    def test_h5_consistency_for_tables_without_group_id_and_multiple_keys(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.count = 0
+
+            def process(self, blob):
+                self.count += 10
+                tab1 = Table({'a': self.count, 'b': 1}, h5loc='tab1')
+                tab2 = Table({'c': self.count + 1, 'd': 2}, h5loc='tab2')
+                return Blob({'tab1': tab1, 'tab2': tab2})
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        with tb.File(fname) as f:
+            a = f.get_node("/tab1")[:]['a']
+            b = f.get_node("/tab1")[:]['b']
+            c = f.get_node("/tab2")[:]['c']
+            d = f.get_node("/tab2")[:]['d']
+            group_id_1 = f.get_node("/tab1")[:]['group_id']
+            group_id_2 = f.get_node("/tab1")[:]['group_id']
+        assert np.allclose([10, 20, 30, 40, 50], a)
+        assert np.allclose([1, 1, 1, 1, 1], b)
+        assert np.allclose([0, 1, 2, 3, 4], group_id_1)
+        assert np.allclose([11, 21, 31, 41, 51], c)
+        assert np.allclose([2, 2, 2, 2, 2], d)
+        assert np.allclose([0, 1, 2, 3, 4], group_id_2)
+        fobj.close()
+
     def test_h5_consistency_for_tables_with_custom_group_id(self):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = fobj.name
