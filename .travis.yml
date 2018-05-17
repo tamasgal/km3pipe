@@ -23,7 +23,6 @@ before_install:
     - pip install -U pip setuptools
     - pip install -U numpy
     - pip install -Ur requirements.txt
-    - pip install -Ur dev-requirements.txt
     - ls -al
 
 install:
