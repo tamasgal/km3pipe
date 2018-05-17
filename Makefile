@@ -9,11 +9,11 @@ build:
 
 install: 
 	pip install -U numpy
-	pip install ".[full]"
+	pip install .
 
-install-dev: dev-dependencies
+install-dev:
 	pip install -U numpy
-	pip install -e ".[full]"
+	pip install -e .
 
 clean:
 	python setup.py clean --all
@@ -54,10 +54,4 @@ dependencies:
 	pip install -U numpy
 	pip install -Ur requirements.txt
 
-dev-dependencies:
-	pip install -Ur dev-requirements.txt
-
-doc-dependencies:
-	pip install -Ur sphinx_requirements.txt
-
-.PHONY: all clean build install test test-km3modules test-nocov flake8 pep8 dependencies dev-dependencies doc-dependencies docstyle
+.PHONY: all clean build install install-dev test test-km3modules test-nocov flake8 pep8 dependencies docstyle

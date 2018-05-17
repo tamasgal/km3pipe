@@ -49,7 +49,7 @@ help:
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
 
 doc-dependencies:
-	pip install -Ur ../sphinx_requirements.txt
+	pip install -Ur ../requirements.txt
 
 clean:
 	rm -rf $(BUILDDIR)/*
