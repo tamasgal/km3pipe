@@ -13,6 +13,9 @@ from km3pipe import version     # noqa
 # so we can detect in __init__.py that it's called from setup.py
 builtins.__KM3PIPE_SETUP__ = True
 
+with open('requirements.txt') as fobj:
+    requirements = [l.strip() for l in fobj.readlines()]
+
 
 setup(
     name='km3pipe',
@@ -26,13 +29,7 @@ setup(
     include_package_data=True,
     platforms='any',
     setup_requires=['pip>=10.0.1', 'setuptools>=39.0', 'numpy>=1.12', ],
-    install_requires=[
-        'docopt', 'h5py', 'ipython', 'matplotlib>=2.2.0', 'mock', 'numexpr',
-        'numpy', 'numpy>=1.12', 'pandas', 'patsy', 'pip>=10.0.1', 'pytest',
-        'pytz', 'requests', 'scipy>=0.19', 'seaborn', 'setuptools>=39.0',
-        'sklearn', 'statsmodels>=0.8', 'tables>=3.4.2', 'tornado', 'urwid',
-        'websocket-client',
-    ],
+    install_requires=requirements,
     python_requires='>=3.5',
     entry_points={
         'console_scripts': [
