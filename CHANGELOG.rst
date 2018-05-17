@@ -14,6 +14,7 @@ Version 8
   create convenient datatypes. By default it tries to automatically
   apply known parsers but also supports user defined ones.
 * unified colourful logging/printing to increase the rainbow unicorn factor
+* huge increase in code coverage by adding >100 new unit tests
 
 Version 7
 ---------
