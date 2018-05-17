@@ -17,6 +17,8 @@ Version 8
 * consolidated requirements: now everything is managed in ``requirements.txt``
   there is also no more ``pip install km3pipe[full]``, only ``pip install km3pipe``,
   so you always get the full load ;)
+* huge increase in code coverage by adding >100 new unit tests
+
 
 Version 7
 ---------
