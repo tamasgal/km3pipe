@@ -412,10 +412,61 @@ def log_b(arg, base):
     return np.log(arg) / np.log(base)
 
 
-def yaw_rot(vector, heading):
+def qrot(vector, quaternion):
+    """Rotate a 3D vector using quaternion algebra.
+
+    Implemented by Vladimir Kulikovskiy. 
+
+    Parameters
+    ----------
+    vector: np.array
+    quaternion: np.array
+
+    Returns
+    -------
+    np.array
+
+    """
+    t = 2 * np.cross(quaternion[1:], vector)
+    v_rot = vector + quaternion[0] * t + np.cross(quaternion[1:], t)
+    return v_rot
+
+
+def qeuler(yaw, pitch, roll):
+    """Convert Euler angle to quaternion.
+
+    Parameters
+    ----------
+    yaw: number
+    pitch: number
+    roll: number
+
+    Returns
+    -------
+    np.array
+
+    """
+    yaw = np.radians(yaw)
+    pitch = np.radians(pitch)
+    roll = np.radians(roll)
+
+    cy = np.cos(yaw * 0.5)
+    sy = np.sin(yaw * 0.5)
+    cr = np.cos(roll * 0.5)
+    sr = np.sin(roll * 0.5)
+    cp = np.cos(pitch * 0.5)
+    sp = np.sin(pitch * 0.5)
+
+    q = np.array((cy * cr * cp + sy * sr * sp,
+                  cy * sr * cp - sy * cr * sp,
+                  cy * cr * sp + sy * sr * cp,
+                  sy * cr * cp - cy * sr * sp))
+    return q
+
+
+def qrot_yaw(vector, heading):
     """Rotate vectors using quaternion algebra.
     
-    Implemented by Vladimir Kulikovskiy. 
 
     Parameters
     ----------
@@ -424,24 +475,7 @@ def yaw_rot(vector, heading):
 
     Returns
     -------
-    vector: np.array
+    np.array
 
     """
-    yaw = np.radians(heading)
-    pitch = 0
-    roll = 0
-    cy = np.cos(yaw * 0.5)
-    sy = np.sin(yaw * 0.5)
-    cr = np.cos(roll * 0.5)
-    sr = np.sin(roll * 0.5)
-    cp = np.cos(pitch * 0.5)
-    sp = np.sin(pitch * 0.5)
-
-    q = np.zeros(3)
-    q0 = cy * cr * cp + sy * sr * sp
-    q[0] = cy * sr * cp - sy * cr * sp
-    q[1] = cy * cr * sp + sy * sr * cp
-    q[2] = sy * cr * cp - cy * sr * sp
-    t = 2 * np.cross(q, vector)
-    v_rot = vector + q0 * t + np.cross(q, t)
-    return v_rot
+    return qrot(vector, qeuler(heading, 0, 0))
