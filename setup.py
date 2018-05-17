@@ -4,14 +4,14 @@
 KM3Pipe setup script.
 
 """
-import builtins
 
 from setuptools import setup
 
-from km3pipe import version     # noqa
-
+import builtins
 # so we can detect in __init__.py that it's called from setup.py
 builtins.__KM3PIPE_SETUP__ = True
+
+from km3pipe import version     # noqa
 
 with open('requirements.txt') as fobj:
     requirements = [l.strip() for l in fobj.readlines()]
