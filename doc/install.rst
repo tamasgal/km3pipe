@@ -58,11 +58,11 @@ Install
 
 To install the latest stable version fromm the PyPI repository:::
 
-    $ pip install "km3pipe[full]"
+    $ pip install km3pipe
     
 It might be advisable to use:::
 
-    $ easy_install km3pipe[full]
+    $ easy_install km3pipe
 
 on Windows.
 
