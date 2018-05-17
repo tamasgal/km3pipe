@@ -144,7 +144,6 @@ def get_stages(docker_image) {
                         try { 
                             sh """
                                 . ${PYTHON_VENV}/bin/activate
-                                make doc-dependencies
                                 cd doc
                                 export MPLBACKEND="agg"
                                 make html
