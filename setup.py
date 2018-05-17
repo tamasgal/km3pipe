@@ -16,31 +16,6 @@ builtins.__KM3PIPE_SETUP__ = True
 from km3pipe import version  # noqa
 
 
-require_groups = {
-    'docs': [
-        'pillow',
-        'scikit-learn',
-        'sphinx>=1.6.3',
-        'sphinx-gallery>=0.1.12',
-        'sphinx-rtd-theme>=0.2.4',
-        'sphinxcontrib-napoleon>=0.6.1',
-        'sphinxcontrib-programoutput>=0.11',
-        'sphinxcontrib-websupport>=1.0.1',
-        'numpydoc>=0.7.0',
-    ],
-    'base': ['docopt', 'numpy>=1.12', 'pandas', 'pytz', 'numexpr'],
-    'setup': ['setuptools>=39.0', 'pip>=10.0.1', 'numpy'],
-    'analysis': ['matplotlib>=2.2.0', 'sklearn', 'statsmodels>=0.8',
-                 'scipy>=0.19', 'seaborn', 'ipython', 'patsy', ],
-    'io': ['tables>=3.4.2', 'h5py', 'requests', 'websocket-client', 'tornado'],
-    'testing': ['pytest', 'mock', ],
-    'utils': ['urwid', ],
-}
-require_groups['most'] = list(chain.from_iterable(
-    [require_groups[k] for k in ('setup', 'base', 'io', 'utils')],
-))
-require_groups['full'] = list(chain.from_iterable(require_groups.values()))
-
 setup(name='km3pipe',
       version=version,
       url='http://github.com/tamasgal/km3pipe/',
@@ -54,7 +29,12 @@ setup(name='km3pipe',
       setup_requires=require_groups['setup'],
       install_requires=require_groups['base'],
       python_requires='>=3.5',
-      extras_require=require_groups,
+      extras_require=[
+          'docopt', 'numpy>=1.12', 'pandas', 'pytz', 'numexpr',
+          'setuptools>=39.0', 'pip>=10.0.1', 'numpy', 'matplotlib>=2.2.0',
+          'sklearn', 'statsmodels>=0.8', 'scipy>=0.19', 'seaborn', 'ipython',
+          'patsy', 'tables>=3.4.2', 'h5py', 'requests', 'websocket-client',
+          'tornado', 'pytest', 'mock', 'urwid'],
       entry_points={
           'console_scripts': [
               'km3pipe=km3pipe.cmd:main',
