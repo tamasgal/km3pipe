@@ -10,4 +10,4 @@ dependencies:
   - pip=9.0.3 
   - numpy>=1.12
   - pip:
-    - "-r requirements.txt"
+    - "-r ./requirements.txt"
