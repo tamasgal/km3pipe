@@ -25,15 +25,15 @@ setup(
               'km3modules', 'pipeinspector'],
     include_package_data=True,
     platforms='any',
-    setup_requires=['numpy>=1.12', 'setuptools>=39.0', 'pip>=10.0.1'],
-    install_requires=['numpy>=1.12', 'setuptools>=39.0', 'pip>=10.0.1'],
+    setup_requires=['pip>=10.0.1', 'setuptools>=39.0', 'numpy>=1.12', ],
+    install_requires=[
+        'docopt', 'h5py', 'ipython', 'matplotlib>=2.2.0', 'mock', 'numexpr',
+        'numpy', 'numpy>=1.12', 'pandas', 'patsy', 'pip>=10.0.1', 'pytest',
+        'pytz', 'requests', 'scipy>=0.19', 'seaborn', 'setuptools>=39.0',
+        'sklearn', 'statsmodels>=0.8', 'tables>=3.4.2', 'tornado', 'urwid',
+        'websocket-client',
+    ],
     python_requires='>=3.5',
-    extras_require=[
-        'docopt', 'numpy>=1.12', 'pandas', 'pytz', 'numexpr',
-        'setuptools>=39.0', 'pip>=10.0.1', 'numpy', 'matplotlib>=2.2.0',
-        'sklearn', 'statsmodels>=0.8', 'scipy>=0.19', 'seaborn', 'ipython',
-        'patsy', 'tables>=3.4.2', 'h5py', 'requests', 'websocket-client',
-        'tornado', 'pytest', 'mock', 'urwid'],
     entry_points={
         'console_scripts': [
             'km3pipe=km3pipe.cmd:main',
