@@ -8,4 +8,4 @@ dependencies:
   - python=3.5*
   - hdf5=1.8.17=1
   - pip:
-    - "-Ur requirements.txt"
+    - "-r requirements.txt"
