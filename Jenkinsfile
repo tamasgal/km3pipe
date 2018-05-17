@@ -31,7 +31,7 @@ def get_stages(docker_image) {
                     pip install -U pip setuptools wheel
                 """
             }
-            gitlabBuilds(builds: ['Deps', 'Doc Deps', 'Dev Deps', 'Test', 'Install', 'Test KM3Modules', 'Test Reports', 'Coverage', 'Docs']) {
+            gitlabBuilds(builds: ['Deps', 'Test', 'Install', 'Test KM3Modules', 'Test Reports', 'Coverage', 'Docs']) {
                 stage("Deps") {
                     gitlabCommitStatus("Deps") {
                         try { 
@@ -42,34 +42,6 @@ def get_stages(docker_image) {
                         } catch (e) { 
                             sendChatMessage("Install Dependencies Failed")
                             sendMail("Install Dependencies Failed")
-                            throw e
-                        }
-                    }
-                }
-                stage("Doc Deps") {
-                    gitlabCommitStatus("Doc Deps") {
-                        try { 
-                            sh """
-                                . ${PYTHON_VENV}/bin/activate
-                                make doc-dependencies
-                            """
-                        } catch (e) { 
-                            sendChatMessage("Install Doc Dependencies Failed")
-                            sendMail("Install Doc Dependencies Failed")
-                            throw e
-                        }
-                    }
-                }
-                stage("Dev Deps") {
-                    gitlabCommitStatus("Dev Deps") {
-                        try { 
-                            sh """
-                                . ${PYTHON_VENV}/bin/activate
-                                make dev-dependencies
-                            """
-                        } catch (e) { 
-                            sendChatMessage("Install Dev Dependencies Failed")
-                            sendMail("Install Dev Dependencies Failed")
                             throw e
                         }
                     }
@@ -172,7 +144,6 @@ def get_stages(docker_image) {
                         try { 
                             sh """
                                 . ${PYTHON_VENV}/bin/activate
-                                make doc-dependencies
                                 cd doc
                                 export MPLBACKEND="agg"
                                 make html
