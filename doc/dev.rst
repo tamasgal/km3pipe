@@ -22,18 +22,30 @@ information can be found by running the following code snippet:
 Improve KM3Pipe
 ---------------
 
+Check out our KanBan board http://git.km3net.de/km3py/km3pipe/boards,
+which shows all the open issues in three columns:
+
+- *Backlog*: The issues which are yet to be discussed (e.g. not clear how to proceed)
+- *ToDo*: Issues tagged with this label are ready to be tackled
+- *In Progress*: These issues are currently "work in progress". They can however be
+  put tossed back to *ToDo* column at any time if the development is suspended.
+
 Here is the recommended workflow if you want to improve KM3Pipe. This is a
-standard procedure, nothing exotic! You create a fork (your full own copy of the
-repository), change the code and when you are happy with the changes, you create
-a merge request, so we can review, discuss and add your contribution.
-Merge requests are automatically tested on our CI server, which is running
-Jenkins: ``http://pi1155.physik.uni-erlangen.de:8080/job/KM3Pipe/`` and reports
-any error back to the Gitlab web interface.
+standard procedure for collaborative software development, nothing exotic!
+
+Feel free to contribute ;)
 
 Make a Fork of KM3Pipe
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Go to ``http://git.km3net.de/km3py/km3pipe`` and click on "Fork".
+You create a fork (your full own copy of the
+repository), change the code and when you are happy with the changes, you create
+a merge request, so we can review, discuss and add your contribution.
+Merge requests are automatically tested on our CI server, which is running
+Jenkins: http://pi1155.physik.uni-erlangen.de:8080/job/KM3Pipe and reports
+any error back to the Gitlab web interface.
+
+Go to http://git.km3net.de/km3py/km3pipe and click on "Fork".
 
 After that, you will have a full copy of KM3Pipe with write access under an URL
 like this: ``http://git.km3net.de/your_git_username/km3pipe``
