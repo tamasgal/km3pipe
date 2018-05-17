@@ -104,10 +104,6 @@ or if you have checked out the sources::
 
     $ make test
 
-If you are missing any test plugins, install them via::
-
-    $ make dev-dependencies
-
 
 Updating
 --------
@@ -147,6 +143,3 @@ Here is an example configuration::
 
     [DB]
     cookie=sid_fooman_123.34.56.78_
-
-    [Slack]
-    token=xoxp-2355837568-2397897846-8945924372-395f023485
