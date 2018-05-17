@@ -9,7 +9,7 @@ from km3pipe.testing import TestCase
 from km3pipe.math import (
     angle_between, pld3, com, zenith, azimuth, Polygon, IrregularPrism,
     rotation_matrix, SparseCone, space_angle, hsin, phi, theta,
-    unit_vector, innerprod_1d, log_b, yaw_rot
+    unit_vector, innerprod_1d, log_b, qeuler, qrot, qrot_yaw
 )
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
@@ -274,32 +274,95 @@ class TestLog(TestCase):
         assert_allclose(log_b(5, np.e), np.log(5))
 
 
-class TestYawRot(TestCase):
+class TestQeuler(TestCase):
+    def test_conversion_of_yaw(self):
+        assert np.allclose([1, 0, 0, 0], qeuler(0, 0, 0))
+        assert np.allclose([0.7071, 0, 0, 0.7071], qeuler(90, 0, 0))
+        assert np.allclose([0, 0, 0, 1], qeuler(180, 0, 0))
+        assert np.allclose([-0.7071, 0, 0, 0.7071], qeuler(270, 0, 0))
+        assert np.allclose([-1, 0, 0, 0], qeuler(360, 0, 0))
+
+    def test_conversion_of_pitch(self):
+        assert np.allclose([0.92388, 0, 0.38268, 0], qeuler(0, 45, 0))
+        assert np.allclose([0.92388, 0, -0.38268, 0], qeuler(0, -45, 0))
+        assert np.allclose([0.7071, 0, 0.7071, 0], qeuler(0, 90, 0))
+        assert np.allclose([0.8660254, 0, 0.5, 0], qeuler(0, 60, 0))
+        assert np.allclose([-0.96592583, 0, -0.25881905, 0], qeuler(0, 390, 0))
+
+    def test_conversion_of_roll(self):
+        assert np.allclose([0.92388, 0.38268, 0, 0], qeuler(0, 0, 45))
+        assert np.allclose([0.92388, -0.38268, 0, 0], qeuler(0, 0, -45))
+        assert np.allclose([0.70710, 0.70710, 0, 0], qeuler(0, 0, 90))
+        assert np.allclose([0.86602, 0.5, 0, 0], qeuler(0, 0, 60))
+        assert np.allclose([-0.96592583, -0.25881905, 0, 0], qeuler(0, 0, 390))
+
+    def test_mixed_conversion(self):
+        assert np.allclose([0.999471, 0.02601972, 0.01767416, 0.00826538],
+                           qeuler(1, 2, 3))
+        assert np.allclose([ 0.94371436, 0.26853582, -0.14487813, 0.12767944],
+                           qeuler(10, -20, 30))
+        assert np.allclose([-0.16575384, -0.69624819, 0.05479592, -0.69624819],
+                           qeuler(-999, 999, -999))
+
+
+class TestQrot(TestCase):
+    def test_rotation_of_x_vector(self):
+        assert np.allclose([0, 1, 0], qrot([1, 0, 0], qeuler(90, 0, 0))) 
+        assert np.allclose([-1, 0, 0], qrot([1, 0, 0], qeuler(180, 0, 0))) 
+        assert np.allclose([-1, 0, 0], qrot([1, 0, 0], qeuler(180, 0, -45))) 
+        assert np.allclose([0, 0, -1], qrot([1, 0, 0], qeuler(180, 90, 45))) 
+
+    def test_rotation_of_y_vector(self):
+        assert np.allclose([-1, 0, 0], qrot([0, 1, 0], qeuler(90, 0, 0))) 
+        assert np.allclose([0, -1, 0], qrot([0, 1, 0], qeuler(180, 0, 0))) 
+        assert np.allclose([0, -0.70710, -0.70710],
+                           qrot([0, 1, 0], qeuler(180, 0, -45))) 
+        assert np.allclose([-0.70710, -0.70710, 0],
+                           qrot([0, 1, 0], qeuler(180, 90, 45))) 
+
+    def test_rotation_of_z_vector(self):
+        assert np.allclose([0, 0, 1], qrot([0, 0, 1], qeuler(90, 0, 0))) 
+        assert np.allclose([0, 0, 1], qrot([0, 0, 1], qeuler(180, 0, 0))) 
+        assert np.allclose([0, -0.70710, 0.70710],
+                           qrot([0, 0, 1], qeuler(180, 0, -45))) 
+        assert np.allclose([-0.70710, 0.70710, 0],
+                           qrot([0, 0, 1], qeuler(180, 90, 45))) 
+
+    def test_mixed_rotation(self):
+        assert np.allclose([1, 2, 3], qrot([1, 2, 3], qeuler(0, 0, 0))) 
+        assert np.allclose([0, -1.414213, 0],
+                           qrot([0, 1, -1], qeuler(180, 90, 45))) 
+        assert np.allclose([-1.41421356,  0, -1],
+                           qrot([1, 1, 1], qeuler(180, 90, 45))) 
+        assert np.allclose([-14.1421356,  0, -10],
+                           qrot([10, 10, 10], qeuler(180, 90, 45))) 
+
+
+class TestQrotYaw(TestCase):
     def test_call_with_list(self):
-        yaw_rot([1, 2, 3], 1)
+        qrot_yaw([1, 2, 3], 1)
 
     def test_no_rotation(self):
         vec = (1, 0, 0)
-        vec_rot = yaw_rot(vec, 0)
+        vec_rot = qrot_yaw(vec, 0)
         assert np.allclose([1, 0, 0], vec_rot)
 
     def test_a_rotation_of_90(self):
         vec = (1, 0, 0)
-        vec_rot = yaw_rot(vec, 90)
+        vec_rot = qrot_yaw(vec, 90)
         assert np.allclose([0, 1, 0], vec_rot)
 
     def test_a_rotation_of_180(self):
         vec = (1, 0, 0)
-        vec_rot = yaw_rot(vec, 180)
+        vec_rot = qrot_yaw(vec, 180)
         assert np.allclose([-1, 0, 0], vec_rot)
 
     def test_a_full_rotation(self):
         vec = (1, 0, 0)
-        vec_rot = yaw_rot(vec, 360)
+        vec_rot = qrot_yaw(vec, 360)
         assert np.allclose([1, 0, 0], vec_rot)
 
     def test_a_rotation_of_45(self):
         vec = (1, 0, 0)
-        vec_rot = yaw_rot(vec, 45)
+        vec_rot = qrot_yaw(vec, 45)
         assert np.allclose([0.7071, 0.7071, 0], vec_rot)
-
