@@ -20,6 +20,7 @@ import numpy as np
 
 from km3pipe.testing import TestCase
 from km3pipe.hardware import Detector, PMT
+from km3pipe.math import qrot_yaw
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -241,3 +242,27 @@ class TestDetector(TestCase):
         self.det.translate_detector(t_vec)
         for dom_id, pos in self.det.dom_positions.items():
             assert np.allclose(orig_dom_pos[dom_id] + t_vec, pos)
+
+    def test_rotate_dom_by_yaw(self):
+        dom_id = 1
+        heading = 23
+        self.det._parse_doms()
+        pmt_dir = self.det.pmts[self.det.pmts.dom_id == dom_id].dir[0].copy()
+        pmt_dir_rot = qrot_yaw(pmt_dir, heading)
+        self.det.rotate_dom_by_yaw(dom_id, heading)
+        assert np.allclose(pmt_dir_rot,
+                           self.det.pmts[self.det.pmts.dom_id == dom_id].dir[0])
+        assert np.allclose([1.10493588, 0.96340793, 1.3],
+                           self.det.pmts[self.det.pmts.dom_id == dom_id].pos[0])
+
+    def test_rotate_dom_by_yaw_2(self):
+        dom_id = 2
+        heading = -42 
+        self.det._parse_doms()
+        pmt_dir = self.det.pmts[self.det.pmts.dom_id == dom_id].dir[2].copy()
+        pmt_dir_rot = qrot_yaw(pmt_dir, heading)
+        self.det.rotate_dom_by_yaw(dom_id, heading)
+        assert np.allclose(pmt_dir_rot,
+                           self.det.pmts[self.det.pmts.dom_id == dom_id].dir[2])
+        assert np.allclose([2.76202094, 2.73216155, 2.9],
+                           self.det.pmts[self.det.pmts.dom_id == dom_id].pos[2])

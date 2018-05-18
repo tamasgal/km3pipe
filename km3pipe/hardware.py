@@ -12,7 +12,7 @@ import numpy as np
 
 from .dataclasses import Table
 from .tools import unpack_nfirst, split
-from .math import intersect_3d  # , ignored
+from .math import intersect_3d, qrot_yaw  # , ignored
 from .db import DBManager
 
 from .logger import get_logger, get_printer
@@ -234,6 +234,29 @@ class Detector(object):
         self.pmts.pos_x += vector[0]
         self.pmts.pos_y += vector[1]
         self.pmts.pos_z += vector[2]
+        self.reset_caches()
+
+    def rotate_dom_by_yaw(self, dom_id, heading):
+        """Rotate a DOM by a given (yaw) heading."""
+        pmts = self.pmts[self.pmts.dom_id == dom_id]
+        dom_centre = self.dom_positions[dom_id]
+
+        for pmt in pmts:
+            pmt_pos = np.array([pmt.pos_x, pmt.pos_y, pmt.pos_z])
+            pmt_dir = np.array([pmt.dir_x, pmt.dir_y, pmt.dir_z])
+            pmt_radius = np.linalg.norm(dom_centre - pmt_pos)
+            index = self._pmt_index_by_pmt_id[pmt.pmt_id]
+            pmt_ref = self.pmts[index]
+
+            dir_rot = qrot_yaw([pmt.dir_x, pmt.dir_y, pmt.dir_z], heading)
+            pos_rot = pmt_pos - pmt_dir * pmt_radius + dir_rot * pmt_radius
+
+            pmt_ref.dir_x = dir_rot[0]
+            pmt_ref.dir_y = dir_rot[1]
+            pmt_ref.dir_z = dir_rot[2]
+            pmt_ref.pos_x = pos_rot[0]
+            pmt_ref.pos_y = pos_rot[1]
+            pmt_ref.pos_z = pos_rot[2]
         self.reset_caches()
 
     @property
