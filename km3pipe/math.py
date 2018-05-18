@@ -503,7 +503,7 @@ def intersect_3d(p1, p2):
 
     """
     v = p2 - p1
-    normed_v = v / np.sqrt(np.sum(v*v, axis=1))[:, np.newaxis]
+    normed_v = unit_vector(v)
     nx = normed_v[:, 0]
     ny = normed_v[:, 1]
     nz = normed_v[:, 2]
