@@ -221,16 +221,7 @@ class TestDetector(TestCase):
 
     def test_translate_detector(self):
         self.det._parse_doms()
-        assert np.allclose([1.1, 1.4, 1.7, 2.1, 2.4, 2.7, 3.1, 3.4, 3.7],
-                           self.det.pmts.pos_x)
-        assert np.allclose([1.2, 1.5, 1.8, 2.2, 2.5, 2.8, 3.2, 3.5, 3.8],
-                           self.det.pmts.pos_y)
-        assert np.allclose([1.3, 1.6, 1.9, 2.3, 2.6, 2.9, 3.3, 3.6, 3.9],
-                           self.det.pmts.pos_z)
-        self.det.translate_detector([1, 2, 3])
-        assert np.allclose([2.1, 2.4, 2.7, 3.1, 3.4, 3.7, 4.1, 4.4, 4.7],
-                           self.det.pmts.pos_x)
-        assert np.allclose([3.2, 3.5, 3.8, 4.2, 4.5, 4.8, 5.2, 5.5, 5.8],
-                           self.det.pmts.pos_y)
-        assert np.allclose([4.3, 4.6, 4.9, 5.3, 5.6, 5.9, 6.3, 6.6, 6.9],
-                           self.det.pmts.pos_z)
+        t_vec = np.array([1, 2, 3])
+        orig_pos = self.det.pmts.pos.copy()
+        self.det.translate_detector(t_vec)
+        assert np.allclose(orig_pos + t_vec, self.det.pmts.pos)
