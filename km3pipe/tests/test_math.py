@@ -9,7 +9,7 @@ from km3pipe.testing import TestCase
 from km3pipe.math import (
     angle_between, pld3, com, zenith, azimuth, Polygon, IrregularPrism,
     rotation_matrix, SparseCone, space_angle, hsin, phi, theta,
-    unit_vector, innerprod_1d, log_b, qeuler, qrot, qrot_yaw
+    unit_vector, innerprod_1d, log_b, qeuler, qrot, qrot_yaw, intersect_3d
 )
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
@@ -366,3 +366,33 @@ class TestQrotYaw(TestCase):
         vec = (1, 0, 0)
         vec_rot = qrot_yaw(vec, 45)
         assert np.allclose([0.7071, 0.7071, 0], vec_rot)
+
+
+class TestIntersect3D(TestCase):
+    def test_intersection_at_zero(self):
+        p1 = np.array([(1, 0, 0), (0, 0, 1)])
+        p2 = -p1
+        intersection = intersect_3d(p1, p2)
+        assert np.allclose([0, 0, 0], intersection)
+
+    def test_intersection_of_multiple_lines_with_same_endpoints(self):
+        p1 = np.array([(1, 2, 3), (4, 5, 6), (7, 8, 9)])
+        p2 = np.array([(4, 4, 4), (4, 4, 4), (4, 4, 4)])
+        intersection = intersect_3d(p1, p2)
+        assert np.allclose([4, 4, 4], intersection)
+
+    def test_intersection_of_multiple_lines_with_target(self):
+        p1 = np.array([(1, 2, 3), (4, 5, 6), (7, 8, 9)])
+        target = np.array([23, 5, 42])
+        p2 = 2 * target - p1
+        intersection = intersect_3d(p1, p2)
+        assert np.allclose(target, intersection)
+
+    def test_another_intersection(self):
+        p1 = np.array([(1, 10, 0), (0, 10, 1)])
+        p2 = np.array([(-1, 10, 0), (0, 10, -1)])
+        intersection = intersect_3d(p1, p2)
+        assert np.allclose([0, 10, 0], intersection)
+
+
+ 

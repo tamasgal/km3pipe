@@ -479,3 +479,42 @@ def qrot_yaw(vector, heading):
 
     """
     return qrot(vector, qeuler(heading, 0, 0))
+
+
+def intersect_3d(p1, p2):
+    """Find the closes point for a given set of lines in 3D.
+    
+    Parameters
+    ----------
+    p1 : (M, N) array_like
+        Starting points
+    p2 : (M, N) array_like
+        End points.
+
+    Returns
+    -------
+    x : (N,) ndarray
+        Least-squares solution - the closest point of the intersections.
+
+    Raises
+    ------
+    numpy.linalg.LinAlgError
+        If computation does not converge.
+
+    """
+    v = p2 - p1
+    normed_v = v / np.sqrt(np.sum(v*v, axis=1))[:, np.newaxis]
+    nx = normed_v[:, 0]
+    ny = normed_v[:, 1]
+    nz = normed_v[:, 2]
+    xx = np.sum(nx**2 - 1)
+    yy = np.sum(ny**2 - 1)
+    zz = np.sum(nz**2 - 1)
+    xy = np.sum(nx*ny)
+    xz = np.sum(nx*nz)
+    yz = np.sum(ny*nz)
+    M = np.array([(xx, xy, xz), (xy, yy, yz), (xz, yz, zz)])
+    x = np.sum(p1[:, 0]*(nx**2-1) + p1[:,1]*(nx*ny)  + p1[:, 2]*(nx*nz))
+    y = np.sum(p1[:, 0]*(nx*ny) + p1[:, 1]*(ny*ny - 1) + p1[:, 2]*(ny*nz))
+    z = np.sum(p1[:, 0]*(nx*nz) + p1[:, 1]*(ny*nz) + p1[:, 2]*(nz**2 - 1))
+    return np.linalg.lstsq(M, np.array((x, y, z)), rcond=None)[0]
