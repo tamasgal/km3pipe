@@ -12,7 +12,7 @@ import numpy as np
 
 from .dataclasses import Table
 from .tools import unpack_nfirst, split
-from .math import com  # , ignored
+from .math import intersect_3d  # , ignored
 from .db import DBManager
 
 from .logger import get_logger, get_printer
@@ -60,12 +60,14 @@ class Detector(object):
         self.valid_until = None
         self.utm_info = None
         self._dom_ids = []
-        self._dom_positions = OrderedDict()
         self._pmt_index_by_omkey = OrderedDict()
         self._pmt_index_by_pmt_id = OrderedDict()
-        self._pmt_angles = []
-        self._xy_pos = []
         self._current_du = None
+
+        self._dom_positions = None
+        self._pmt_angles = None
+        self._xy_positions = None 
+        self.reset_caches()
 
         self.print = get_printer(self.__class__.__name__)
 
@@ -190,6 +192,13 @@ class Detector(object):
 
         self.pmts = Table(pmts, name='PMT')
 
+
+    def reset_caches(self):
+        log.debug('Resetting caches.')
+        self._dom_positions = OrderedDict()
+        self._xy_positions = []
+        self._pmt_angles = []
+
     @property
     def dom_ids(self):
         if not self._dom_ids:
@@ -198,23 +207,26 @@ class Detector(object):
 
     @property
     def dom_positions(self):
-        """The positions of the DOMs, calculated as COM from PMTs."""
+        """The positions of the DOMs, calculated from PMT directions."""
         if not self._dom_positions:
             for dom_id in self.dom_ids:
                 mask = self.pmts.dom_id == dom_id
-                pmt_positions = self.pmts[mask].pos
-                self._dom_positions[dom_id] = com(pmt_positions)
+                pmt_pos = self.pmts[mask].pos
+                pmt_dir = self.pmts[mask].dir
+                centre = intersect_3d(pmt_pos, pmt_pos- pmt_dir * 10)
+                self._dom_positions[dom_id] = centre
         return self._dom_positions
 
     @property
     def xy_positions(self):
-        """XY positions of all doms."""
-        if not self._xy_pos:
-            dom_pos = self.dom_positions
-            xy = np.unique([(pos[0], pos[1]) for pos in dom_pos.values()],
-                           axis=0)
-            self._xy_pos = xy
-        return self._xy_pos
+        """XY positions of the DUs, given by the DOMs on floor 1."""
+        if self._xy_positions == []:
+            xy_pos = []
+            for dom_id, pos in self.dom_positions.items():
+                if self.domid2floor(dom_id) == 1:
+                    xy_pos.append(np.array([pos[0], pos[1]]))
+            self._xy_positions = np.array(xy_pos)
+        return self._xy_positions
 
     def translate_detector(self, vector):
         """Translate the detector by a given vector"""
@@ -222,13 +234,14 @@ class Detector(object):
         self.pmts.pos_x += vector[0]
         self.pmts.pos_y += vector[1]
         self.pmts.pos_z += vector[2]
+        self.reset_caches()
 
     @property
     def pmt_angles(self):
-        """A list of PMT directions sorted by PMT channel"""
-        if not self._pmt_angles:
-            pmts = self.pmts[:self.n_pmts_per_dom]
-            self._pmt_angles = [pmt.dir for pmt in pmts]
+        """A list of PMT directions sorted by PMT channel, on DU-1, floor-1"""
+        if self._pmt_angles == []:
+            mask = (self.pmts.du == 1) & (self.pmts.floor == 1)
+            self._pmt_angles = self.pmts.dir[mask]
         return self._pmt_angles
 
     @property

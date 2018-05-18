@@ -83,6 +83,22 @@ class TestDetector(TestCase):
         self.det._parse_doms()
         self.assertEqual((1, 2, 3), tuple(self.det.dom_ids))
 
+    def test_parse_reset_cache(self):
+        self.det._parse_doms()
+        assert not self.det._dom_positions
+        assert not self.det._pmt_angles
+        assert not self.det._xy_positions
+        self.det.dom_positions
+        self.det.pmt_angles
+        self.det.xy_positions
+        assert self.det._dom_positions
+        assert len(self.det._pmt_angles) == 3
+        assert len(self.det._xy_positions) == 1
+        self.det.reset_caches()
+        assert not self.det._dom_positions
+        assert not self.det._pmt_angles
+        assert not self.det._xy_positions
+
     def test_parse_doms_maps_each_dom_correctly_for_mixed_pmt_ids(self):
         self.det._det_file = EXAMPLE_DETX_MIXED_IDS
         self.det._parse_doms()
@@ -91,12 +107,17 @@ class TestDetector(TestCase):
 
     def test_dom_positions(self):
         self.det._parse_doms()
-        self.assertAlmostEqual(1.4, self.det.dom_positions[1][0])
-        self.assertAlmostEqual(1.5, self.det.dom_positions[1][1])
-        self.assertAlmostEqual(1.6, self.det.dom_positions[1][2])
-        self.assertAlmostEqual(2.4, self.det.dom_positions[2][0])
-        self.assertAlmostEqual(2.5, self.det.dom_positions[2][1])
-        self.assertAlmostEqual(2.6, self.det.dom_positions[2][2])
+        assert np.allclose([1.49992331, 1.51893187, 1.44185513],
+                           self.det.dom_positions[1])
+        assert np.allclose([2.49992331, 2.51893187, 2.44185513],
+                           self.det.dom_positions[2])
+        assert np.allclose([3.49992331, 3.51893187, 3.44185513],
+                           self.det.dom_positions[3])
+
+    def test_xy_positions(self):
+        self.det._parse_doms()
+        assert len(self.det.xy_positions) == 1
+        assert np.allclose([1.49992331, 1.51893187], self.det.xy_positions[0])
 
     def test_correct_number_of_pmts(self):
         self.det._parse_doms()
