@@ -13,6 +13,7 @@ dom_id line_id floor_id npmts
  ...
 
 """
+from copy import deepcopy
 from io import StringIO
 
 import numpy as np
@@ -225,3 +226,18 @@ class TestDetector(TestCase):
         orig_pos = self.det.pmts.pos.copy()
         self.det.translate_detector(t_vec)
         assert np.allclose(orig_pos + t_vec, self.det.pmts.pos)
+
+    def test_translate_detector_updates_xy_positions(self):
+        self.det._parse_doms()
+        t_vec = np.array([1, 2, 3])
+        orig_xy_pos = self.det.xy_positions.copy()
+        self.det.translate_detector(t_vec)
+        assert np.allclose(orig_xy_pos + t_vec[:2], self.det.xy_positions)
+
+    def test_translate_detector_updates_dom_positions(self):
+        self.det._parse_doms()
+        t_vec = np.array([1, 2, 3])
+        orig_dom_pos = deepcopy(self.det.dom_positions)
+        self.det.translate_detector(t_vec)
+        for dom_id, pos in self.det.dom_positions.items():
+            assert np.allclose(orig_dom_pos[dom_id] + t_vec, pos)
