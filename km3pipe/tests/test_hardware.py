@@ -288,3 +288,18 @@ class TestDetector(TestCase):
         assert np.allclose(pmt_dir, pmt_dir_rot)
         pmt_pos_rot = det.pmts[det.pmts.dom_id == dom_id].pos[channel_id]
         assert np.allclose(pmt_pos, pmt_pos_rot)
+
+    def test_rotate_du_by_yaw_step_by_step_360_degrees(self):
+        det = Detector()
+        det._det_file = EXAMPLE_DETX_RADIAL
+        det._parse_doms()
+        du = 1
+        pmt_dir = det.pmts[det.pmts.du == du].dir.copy()
+        pmt_pos = det.pmts[det.pmts.du == du].pos.copy()
+        for i in range(360):
+            det.rotate_du_by_yaw(du, 1)
+        pmt_dir_rot = det.pmts[det.pmts.du == du].dir
+        pmt_pos_rot = det.pmts[det.pmts.du == du].pos
+        assert np.allclose(pmt_dir, pmt_dir_rot)
+        assert np.allclose(pmt_pos, pmt_pos_rot)
+

@@ -261,6 +261,13 @@ class Detector(object):
             pmt_ref.pos_z = pos_rot[2]
         self.reset_caches()
 
+    def rotate_du_by_yaw(self, du, heading):
+        """Rotate all DOMs on DU by a given (yaw) heading."""
+        dom_ids = np.unique(self.pmts.du)
+        for dom_id in dom_ids:
+            self.rotate_dom_by_yaw(dom_id, heading)
+        self.reset_caches()
+
     @property
     def pmt_angles(self):
         """A list of PMT directions sorted by PMT channel, on DU-1, floor-1"""
