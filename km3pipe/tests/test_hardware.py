@@ -282,8 +282,8 @@ class TestDetector(TestCase):
         channel_id = 0
         pmt_dir = det.pmts[det.pmts.dom_id == dom_id].dir[channel_id].copy()
         pmt_pos = det.pmts[det.pmts.dom_id == dom_id].pos[channel_id].copy()
-        for i in range(360):
-            det.rotate_dom_by_yaw(dom_id, 1)
+        for i in range(36):
+            det.rotate_dom_by_yaw(dom_id, 10)
         pmt_dir_rot = det.pmts[det.pmts.dom_id == dom_id].dir[channel_id]
         assert np.allclose(pmt_dir, pmt_dir_rot)
         pmt_pos_rot = det.pmts[det.pmts.dom_id == dom_id].pos[channel_id]
@@ -296,8 +296,8 @@ class TestDetector(TestCase):
         du = 1
         pmt_dir = det.pmts[det.pmts.du == du].dir.copy()
         pmt_pos = det.pmts[det.pmts.du == du].pos.copy()
-        for i in range(360):
-            det.rotate_du_by_yaw(du, 1)
+        for i in range(36):
+            det.rotate_du_by_yaw(du, 10)
         pmt_dir_rot = det.pmts[det.pmts.du == du].dir
         pmt_pos_rot = det.pmts[det.pmts.du == du].pos
         assert np.allclose(pmt_dir, pmt_dir_rot)
