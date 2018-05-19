@@ -4,12 +4,9 @@ ipython
 ipywidgets
 matplotlib>=2.2.0
 mock
-numexpr
 numpy>=1.12
 numpydoc>=0.7.0
 pandas
-patsy
-pillow
 pydocstyle
 pytest
 pytest-cov
@@ -17,7 +14,6 @@ pytest-flake8
 pytest-pylint
 pytest-watch
 requests
-scikit-learn
 scipy>=0.19
 seaborn
 sklearn
