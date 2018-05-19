@@ -303,3 +303,10 @@ class TestDetector(TestCase):
         assert np.allclose(pmt_dir, pmt_dir_rot)
         assert np.allclose(pmt_pos, pmt_pos_rot)
 
+    def test_rescale_detector(self):
+        self.det._parse_doms()
+        dom_positions = deepcopy(self.det.dom_positions)
+        scale_factor = 2 
+        self.det.rescale(scale_factor)
+        for dom_id, dom_pos in self.det.dom_positions.items():
+            assert np.allclose(dom_pos, dom_positions[dom_id] * scale_factor)

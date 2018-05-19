@@ -268,6 +268,19 @@ class Detector(object):
             self.rotate_dom_by_yaw(dom_id, heading)
         self.reset_caches()
 
+    def rescale(self, factor, origin=[0, 0, 0]):
+        """Stretch or shrink detector (DOM positions) by a given factor."""
+        pmts = self.pmts
+        for dom_id in self.dom_ids:
+            mask = pmts.dom_id == dom_id
+            pos_x = pmts[mask].pos_x
+            pos_y = pmts[mask].pos_y
+            pos_z = pmts[mask].pos_z
+            pmts.pos_x[mask] = (pos_x - origin[0]) * factor
+            pmts.pos_y[mask] = (pos_y - origin[1]) * factor
+            pmts.pos_z[mask] = (pos_z - origin[2]) * factor
+        self.reset_caches()
+
     @property
     def pmt_angles(self):
         """A list of PMT directions sorted by PMT channel, on DU-1, floor-1"""
