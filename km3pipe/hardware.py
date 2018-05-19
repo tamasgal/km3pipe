@@ -12,7 +12,7 @@ import numpy as np
 
 from .dataclasses import Table
 from .tools import unpack_nfirst, split
-from .math import intersect_3d  # , ignored
+from .math import intersect_3d, qrot_yaw  # , ignored
 from .db import DBManager
 
 from .logger import get_logger, get_printer
@@ -234,6 +234,51 @@ class Detector(object):
         self.pmts.pos_x += vector[0]
         self.pmts.pos_y += vector[1]
         self.pmts.pos_z += vector[2]
+        self.reset_caches()
+
+    def rotate_dom_by_yaw(self, dom_id, heading, centre_point=None):
+        """Rotate a DOM by a given (yaw) heading."""
+        pmts = self.pmts[self.pmts.dom_id == dom_id]
+        if centre_point is None:
+            centre_point = self.dom_positions[dom_id]
+            
+
+        for pmt in pmts:
+            pmt_pos = np.array([pmt.pos_x, pmt.pos_y, pmt.pos_z])
+            pmt_dir = np.array([pmt.dir_x, pmt.dir_y, pmt.dir_z])
+            pmt_radius = np.linalg.norm(centre_point - pmt_pos)
+            index = self._pmt_index_by_pmt_id[pmt.pmt_id]
+            pmt_ref = self.pmts[index]
+
+            dir_rot = qrot_yaw([pmt.dir_x, pmt.dir_y, pmt.dir_z], heading)
+            pos_rot = pmt_pos - pmt_dir * pmt_radius + dir_rot * pmt_radius
+
+            pmt_ref.dir_x = dir_rot[0]
+            pmt_ref.dir_y = dir_rot[1]
+            pmt_ref.dir_z = dir_rot[2]
+            pmt_ref.pos_x = pos_rot[0]
+            pmt_ref.pos_y = pos_rot[1]
+            pmt_ref.pos_z = pos_rot[2]
+        self.reset_caches()
+
+    def rotate_du_by_yaw(self, du, heading):
+        """Rotate all DOMs on DU by a given (yaw) heading."""
+        dom_ids = np.unique(self.pmts.du)
+        for dom_id in dom_ids:
+            self.rotate_dom_by_yaw(dom_id, heading)
+        self.reset_caches()
+
+    def rescale(self, factor, origin=[0, 0, 0]):
+        """Stretch or shrink detector (DOM positions) by a given factor."""
+        pmts = self.pmts
+        for dom_id in self.dom_ids:
+            mask = pmts.dom_id == dom_id
+            pos_x = pmts[mask].pos_x
+            pos_y = pmts[mask].pos_y
+            pos_z = pmts[mask].pos_z
+            pmts.pos_x[mask] = (pos_x - origin[0]) * factor
+            pmts.pos_y[mask] = (pos_y - origin[1]) * factor
+            pmts.pos_z[mask] = (pos_z - origin[2]) * factor
         self.reset_caches()
 
     @property

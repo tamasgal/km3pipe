@@ -13,12 +13,14 @@ dom_id line_id floor_id npmts
  ...
 
 """
+from copy import deepcopy
 from io import StringIO
 
 import numpy as np
 
 from km3pipe.testing import TestCase
 from km3pipe.hardware import Detector, PMT
+from km3pipe.math import qrot_yaw
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -58,6 +60,21 @@ EXAMPLE_DETX_MIXED_IDS = StringIO("\n".join((
     " 62 3.1 3.2 3.3 -1.1  0.2  0.3 70",
     " 63 3.4 3.5 3.6  0.1 -1.2  0.3 80",
     " 61 3.7 3.8 3.9  0.1  0.2 -1.3 90",)))
+
+EXAMPLE_DETX_RADIAL = StringIO("\n".join((
+    "1 3",
+    "1 1 1 4",
+    " 1 1 0 0 1 0 0 10",
+    " 2 0 1 0 0 1 0 20",
+    " 3 -1 0 0 -1 0 0 30",
+    " 4 0 -1 0 0 -1 0 40",
+    "2 1 2 2",
+    " 5 0 0 1 0 0 1 50",
+    " 6 0 0 -1 0 0 -1 60",
+    "3 1 3 2",
+    " 7 1 2 3 1 2 3 70",
+    " 8 -3 -2 -1 -3 -2 -1 80",
+    )))
 
 
 class TestDetector(TestCase):
@@ -221,16 +238,75 @@ class TestDetector(TestCase):
 
     def test_translate_detector(self):
         self.det._parse_doms()
-        assert np.allclose([1.1, 1.4, 1.7, 2.1, 2.4, 2.7, 3.1, 3.4, 3.7],
-                           self.det.pmts.pos_x)
-        assert np.allclose([1.2, 1.5, 1.8, 2.2, 2.5, 2.8, 3.2, 3.5, 3.8],
-                           self.det.pmts.pos_y)
-        assert np.allclose([1.3, 1.6, 1.9, 2.3, 2.6, 2.9, 3.3, 3.6, 3.9],
-                           self.det.pmts.pos_z)
-        self.det.translate_detector([1, 2, 3])
-        assert np.allclose([2.1, 2.4, 2.7, 3.1, 3.4, 3.7, 4.1, 4.4, 4.7],
-                           self.det.pmts.pos_x)
-        assert np.allclose([3.2, 3.5, 3.8, 4.2, 4.5, 4.8, 5.2, 5.5, 5.8],
-                           self.det.pmts.pos_y)
-        assert np.allclose([4.3, 4.6, 4.9, 5.3, 5.6, 5.9, 6.3, 6.6, 6.9],
-                           self.det.pmts.pos_z)
+        t_vec = np.array([1, 2, 3])
+        orig_pos = self.det.pmts.pos.copy()
+        self.det.translate_detector(t_vec)
+        assert np.allclose(orig_pos + t_vec, self.det.pmts.pos)
+
+    def test_translate_detector_updates_xy_positions(self):
+        self.det._parse_doms()
+        t_vec = np.array([1, 2, 3])
+        orig_xy_pos = self.det.xy_positions.copy()
+        self.det.translate_detector(t_vec)
+        assert np.allclose(orig_xy_pos + t_vec[:2], self.det.xy_positions)
+
+    def test_translate_detector_updates_dom_positions(self):
+        self.det._parse_doms()
+        t_vec = np.array([1, 2, 3])
+        orig_dom_pos = deepcopy(self.det.dom_positions)
+        self.det.translate_detector(t_vec)
+        for dom_id, pos in self.det.dom_positions.items():
+            assert np.allclose(orig_dom_pos[dom_id] + t_vec, pos)
+
+    def test_rotate_dom_by_yaw(self):
+        det = Detector()
+        det._det_file = EXAMPLE_DETX_RADIAL
+        det._parse_doms()
+        # here, only one PMT is checked
+        dom_id = 1
+        heading = 23
+        channel_id = 0
+        pmt_dir = det.pmts[det.pmts.dom_id == dom_id].dir[channel_id].copy()
+        pmt_dir_rot = qrot_yaw(pmt_dir, heading)
+        det.rotate_dom_by_yaw(dom_id, heading)
+        assert np.allclose(pmt_dir_rot,
+                           det.pmts[det.pmts.dom_id == dom_id].dir[channel_id])
+        assert np.allclose([0.92050485, 0.39073113, 0],
+                           det.pmts[det.pmts.dom_id == dom_id].pos[channel_id])
+
+    def test_rotate_dom_set_by_step_by_360_degrees(self):
+        det = Detector()
+        det._det_file = EXAMPLE_DETX_RADIAL
+        det._parse_doms()
+        dom_id = 1
+        channel_id = 0
+        pmt_dir = det.pmts[det.pmts.dom_id == dom_id].dir[channel_id].copy()
+        pmt_pos = det.pmts[det.pmts.dom_id == dom_id].pos[channel_id].copy()
+        for i in range(36):
+            det.rotate_dom_by_yaw(dom_id, 10)
+        pmt_dir_rot = det.pmts[det.pmts.dom_id == dom_id].dir[channel_id]
+        assert np.allclose(pmt_dir, pmt_dir_rot)
+        pmt_pos_rot = det.pmts[det.pmts.dom_id == dom_id].pos[channel_id]
+        assert np.allclose(pmt_pos, pmt_pos_rot)
+
+    def test_rotate_du_by_yaw_step_by_step_360_degrees(self):
+        det = Detector()
+        det._det_file = EXAMPLE_DETX_RADIAL
+        det._parse_doms()
+        du = 1
+        pmt_dir = det.pmts[det.pmts.du == du].dir.copy()
+        pmt_pos = det.pmts[det.pmts.du == du].pos.copy()
+        for i in range(36):
+            det.rotate_du_by_yaw(du, 10)
+        pmt_dir_rot = det.pmts[det.pmts.du == du].dir
+        pmt_pos_rot = det.pmts[det.pmts.du == du].pos
+        assert np.allclose(pmt_dir, pmt_dir_rot)
+        assert np.allclose(pmt_pos, pmt_pos_rot)
+
+    def test_rescale_detector(self):
+        self.det._parse_doms()
+        dom_positions = deepcopy(self.det.dom_positions)
+        scale_factor = 2 
+        self.det.rescale(scale_factor)
+        for dom_id, dom_pos in self.det.dom_positions.items():
+            assert np.allclose(dom_pos, dom_positions[dom_id] * scale_factor)
