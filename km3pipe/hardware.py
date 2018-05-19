@@ -236,15 +236,17 @@ class Detector(object):
         self.pmts.pos_z += vector[2]
         self.reset_caches()
 
-    def rotate_dom_by_yaw(self, dom_id, heading):
+    def rotate_dom_by_yaw(self, dom_id, heading, centre_point=None):
         """Rotate a DOM by a given (yaw) heading."""
         pmts = self.pmts[self.pmts.dom_id == dom_id]
-        dom_centre = self.dom_positions[dom_id]
+        if centre_point is None:
+            centre_point = self.dom_positions[dom_id]
+            
 
         for pmt in pmts:
             pmt_pos = np.array([pmt.pos_x, pmt.pos_y, pmt.pos_z])
             pmt_dir = np.array([pmt.dir_x, pmt.dir_y, pmt.dir_z])
-            pmt_radius = np.linalg.norm(dom_centre - pmt_pos)
+            pmt_radius = np.linalg.norm(centre_point - pmt_pos)
             index = self._pmt_index_by_pmt_id[pmt.pmt_id]
             pmt_ref = self.pmts[index]
 

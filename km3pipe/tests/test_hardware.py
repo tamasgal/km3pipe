@@ -61,6 +61,21 @@ EXAMPLE_DETX_MIXED_IDS = StringIO("\n".join((
     " 63 3.4 3.5 3.6  0.1 -1.2  0.3 80",
     " 61 3.7 3.8 3.9  0.1  0.2 -1.3 90",)))
 
+EXAMPLE_DETX_RADIAL = StringIO("\n".join((
+    "1 3",
+    "1 1 1 4",
+    " 1 1 0 0 1 0 0 10",
+    " 2 0 1 0 0 1 0 20",
+    " 3 -1 0 0 -1 0 0 30",
+    " 4 0 -1 0 0 -1 0 40",
+    "2 1 2 2",
+    " 5 0 0 1 0 0 1 50",
+    " 6 0 0 -1 0 0 -1 60",
+    "3 1 3 2",
+    " 7 1 2 3 1 2 3 70",
+    " 8 -3 -2 -1 -3 -2 -1 80",
+    )))
+
 
 class TestDetector(TestCase):
 
@@ -244,38 +259,27 @@ class TestDetector(TestCase):
             assert np.allclose(orig_dom_pos[dom_id] + t_vec, pos)
 
     def test_rotate_dom_by_yaw(self):
+        det = Detector()
+        det._det_file = EXAMPLE_DETX_RADIAL
+        det._parse_doms()
+        # here, only one PMT is checked
         dom_id = 1
         heading = 23
         channel_id = 0
-        det = self.det
-        det._parse_doms()
         pmt_dir = det.pmts[det.pmts.dom_id == dom_id].dir[channel_id].copy()
         pmt_dir_rot = qrot_yaw(pmt_dir, heading)
         det.rotate_dom_by_yaw(dom_id, heading)
         assert np.allclose(pmt_dir_rot,
                            det.pmts[det.pmts.dom_id == dom_id].dir[channel_id])
-        assert np.allclose([1.10493588, 0.96340793, 1.3],
-                           det.pmts[det.pmts.dom_id == dom_id].pos[channel_id])
-
-    def test_rotate_dom_by_yaw_2(self):
-        dom_id = 2
-        heading = -42 
-        channel_id = 2
-        det = self.det
-        det._parse_doms()
-        pmt_dir = det.pmts[det.pmts.dom_id == dom_id].dir[channel_id].copy()
-        pmt_dir_rot = qrot_yaw(pmt_dir, heading)
-        det.rotate_dom_by_yaw(dom_id, heading)
-        assert np.allclose(pmt_dir_rot,
-                           det.pmts[det.pmts.dom_id == dom_id].dir[channel_id])
-        assert np.allclose([2.76202094, 2.73216155, 2.9],
+        assert np.allclose([0.92050485, 0.39073113, 0],
                            det.pmts[det.pmts.dom_id == dom_id].pos[channel_id])
 
     def test_rotate_dom_set_by_step_by_360_degrees(self):
+        det = Detector()
+        det._det_file = EXAMPLE_DETX_RADIAL
+        det._parse_doms()
         dom_id = 1
         channel_id = 0
-        det = self.det
-        det._parse_doms()
         pmt_dir = det.pmts[det.pmts.dom_id == dom_id].dir[channel_id].copy()
         pmt_pos = det.pmts[det.pmts.dom_id == dom_id].pos[channel_id].copy()
         for i in range(360):
