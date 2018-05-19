@@ -246,23 +246,38 @@ class TestDetector(TestCase):
     def test_rotate_dom_by_yaw(self):
         dom_id = 1
         heading = 23
-        self.det._parse_doms()
-        pmt_dir = self.det.pmts[self.det.pmts.dom_id == dom_id].dir[0].copy()
+        channel_id = 0
+        det = self.det
+        det._parse_doms()
+        pmt_dir = det.pmts[det.pmts.dom_id == dom_id].dir[channel_id].copy()
         pmt_dir_rot = qrot_yaw(pmt_dir, heading)
-        self.det.rotate_dom_by_yaw(dom_id, heading)
+        det.rotate_dom_by_yaw(dom_id, heading)
         assert np.allclose(pmt_dir_rot,
-                           self.det.pmts[self.det.pmts.dom_id == dom_id].dir[0])
+                           det.pmts[det.pmts.dom_id == dom_id].dir[channel_id])
         assert np.allclose([1.10493588, 0.96340793, 1.3],
-                           self.det.pmts[self.det.pmts.dom_id == dom_id].pos[0])
+                           det.pmts[det.pmts.dom_id == dom_id].pos[channel_id])
 
     def test_rotate_dom_by_yaw_2(self):
         dom_id = 2
         heading = -42 
-        self.det._parse_doms()
-        pmt_dir = self.det.pmts[self.det.pmts.dom_id == dom_id].dir[2].copy()
+        channel_id = 2
+        det = self.det
+        det._parse_doms()
+        pmt_dir = det.pmts[det.pmts.dom_id == dom_id].dir[channel_id].copy()
         pmt_dir_rot = qrot_yaw(pmt_dir, heading)
-        self.det.rotate_dom_by_yaw(dom_id, heading)
+        det.rotate_dom_by_yaw(dom_id, heading)
         assert np.allclose(pmt_dir_rot,
-                           self.det.pmts[self.det.pmts.dom_id == dom_id].dir[2])
+                           det.pmts[det.pmts.dom_id == dom_id].dir[channel_id])
         assert np.allclose([2.76202094, 2.73216155, 2.9],
-                           self.det.pmts[self.det.pmts.dom_id == dom_id].pos[2])
+                           det.pmts[det.pmts.dom_id == dom_id].pos[channel_id])
+
+    def test_rotate_dom_set_by_step_by_360_degrees(self):
+        dom_id = 1
+        channel_id = 0
+        det = self.det
+        det._parse_doms()
+        pmt_dir = det.pmts[det.pmts.dom_id == dom_id].dir[channel_id].copy()
+        for i in range(360):
+            det.rotate_dom_by_yaw(dom_id, 1)
+        pmt_dir_rot = det.pmts[det.pmts.dom_id == dom_id].dir[channel_id]
+        assert np.allclose(pmt_dir, pmt_dir_rot)
