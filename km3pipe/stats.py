@@ -77,14 +77,15 @@ class rv_kde(rv_continuous):
         # we implement `pdf` instead of `_pdf`, since
         # otherwise scipy performs reshaping of `x` which messes
         # things up for sklearn -- we wanna reshape ourselves!
+        from sklearn.utils import check_array
         x = check_array(x, order='C')
         log_pdf = self._kde.score_samples(x)
         pdf = np.exp(log_pdf)
         return pdf
 
-    def _rvs(self, *args, random_state=None, **kwargs):
+    def rvs(self, size=1, *args, random_state=None, **kwargs):
         # don't ask me why it uses `self._size`
-        return self._kde.sample(n_samples=self._size,
+        return self._kde.sample(n_samples=size,
                                 random_state=random_state)
 
 
