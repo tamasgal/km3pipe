@@ -376,7 +376,7 @@ class TestTable(TestCase):
         }
         tab = Table.from_template(d_hits, 'Hits')
         assert tab.name == 'Hits'
-        assert tab.split_h5 is DEFAULT_SPLIT
+        assert tab.split_h5 is True
         assert isinstance(tab, Table)
         ar_hits = {
             'channel_id': np.ones(n, dtype=int),
@@ -388,7 +388,7 @@ class TestTable(TestCase):
         }
         tab = Table.from_template(ar_hits, 'Hits')
         assert tab.name == 'Hits'
-        assert tab.split_h5 is DEFAULT_SPLIT
+        assert tab.split_h5 is True
         assert isinstance(tab, Table)
 
     def test_incomplete_template(self):
