@@ -451,6 +451,14 @@ class TestTable(TestCase):
         tab_sort = tab.sorted('b')
         assert_array_equal(tab_sort['a'], np.array([0, 6, 3]))
 
+    def test_init_directly_with_df(self):
+        import pandas as pd
+        df = pd.DataFrame({'a': [1, 2, 3], 'b': [4, 5, 6]})
+        tab = Table(df, h5loc='/foo')
+        assert np.allclose(df.a, tab.a)
+        assert np.allclose(df.b, tab.b)
+        assert tab.h5loc == '/foo'
+
     def test_df(self):
         from pandas.util.testing import assert_frame_equal
         import pandas as pd
