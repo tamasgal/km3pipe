@@ -213,7 +213,7 @@ class Detector(object):
                 mask = self.pmts.dom_id == dom_id
                 pmt_pos = self.pmts[mask].pos
                 pmt_dir = self.pmts[mask].dir
-                centre = intersect_3d(pmt_pos, pmt_pos- pmt_dir * 10)
+                centre = intersect_3d(pmt_pos, pmt_pos - pmt_dir * 10)
                 self._dom_positions[dom_id] = centre
         return self._dom_positions
 
@@ -242,7 +242,6 @@ class Detector(object):
         if centre_point is None:
             centre_point = self.dom_positions[dom_id]
             
-
         for pmt in pmts:
             pmt_pos = np.array([pmt.pos_x, pmt.pos_y, pmt.pos_z])
             pmt_dir = np.array([pmt.dir_x, pmt.dir_y, pmt.dir_z])
@@ -268,7 +267,7 @@ class Detector(object):
             self.rotate_dom_by_yaw(dom_id, heading)
         self.reset_caches()
 
-    def rescale(self, factor, origin=[0, 0, 0]):
+    def rescale(self, factor, origin=(0, 0, 0)):
         """Stretch or shrink detector (DOM positions) by a given factor."""
         pmts = self.pmts
         for dom_id in self.dom_ids:
