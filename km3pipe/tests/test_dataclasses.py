@@ -12,7 +12,8 @@ import pytest
 
 from km3pipe.testing import TestCase, skip   # noqa
 from km3pipe.dataclasses import (
-    Table, inflate_dtype, has_structured_dt, is_structured, DEFAULT_H5LOC
+    Table, inflate_dtype, has_structured_dt, is_structured, DEFAULT_H5LOC,
+    DEFAULT_NAME, DEFAULT_SPLIT
 )
 
 __author__ = "Tamas Gal, Moritz Lotze"
@@ -72,7 +73,7 @@ class TestTable(TestCase):
         tab = Table(self.arr)
         assert tab.h5loc == DEFAULT_H5LOC
         tab = Table(self.arr, h5loc='/foo')
-        assert tab.h5loc is '/foo'
+        assert tab.h5loc == '/foo'
 
     def test_split(self):
         tab = self.arr.view(Table)
@@ -80,15 +81,15 @@ class TestTable(TestCase):
         tab = Table(self.arr)
         assert tab.split_h5 is False
         tab = Table(self.arr, split_h5=True)
-        assert tab.split_h5 is True
+        assert tab.split_h5
 
     def test_name(self):
         tab = self.arr.view(Table)
-        assert tab.name == 'Generic Table'
+        assert tab.name == DEFAULT_NAME
         tab = Table(self.arr)
-        assert tab.name == 'Generic Table'
+        assert tab.name == DEFAULT_NAME
         tab = Table(self.arr, name='foo')
-        assert tab.name is 'foo'
+        assert tab.name == 'foo'
 
     def test_view(self):
         tab = self.arr.view(Table)
@@ -183,7 +184,6 @@ class TestTable(TestCase):
             print(tab)
 
     def test_fromrows(self):
-        n = 5
         dlist = [
             [1, 2, 3],
             [4, 5, 6],
@@ -376,7 +376,7 @@ class TestTable(TestCase):
         }
         tab = Table.from_template(d_hits, 'Hits')
         assert tab.name == 'Hits'
-        assert tab.split_h5 is True
+        assert tab.split_h5 is DEFAULT_SPLIT
         assert isinstance(tab, Table)
         ar_hits = {
             'channel_id': np.ones(n, dtype=int),
@@ -388,7 +388,7 @@ class TestTable(TestCase):
         }
         tab = Table.from_template(ar_hits, 'Hits')
         assert tab.name == 'Hits'
-        assert tab.split_h5 is True
+        assert tab.split_h5 is DEFAULT_SPLIT
         assert isinstance(tab, Table)
 
     def test_incomplete_template(self):
@@ -450,7 +450,7 @@ class TestTable(TestCase):
         tab = Table.from_template(arr, a_template)
         self.assertListEqual([1, 2], list(tab.a))
         self.assertListEqual([3.0, 4.0], list(tab.b))
-        assert "Generic Table" == tab.name
+        assert DEFAULT_NAME == tab.name
 
     def test_element_list_with_dtype(self):
         bad_elist = [
@@ -611,4 +611,3 @@ class TestTable(TestCase):
         assert tab[im].h5loc == '/lala'
         assert tab[im].name == 'bla'
         assert tab[im].split_h5
-
