@@ -74,6 +74,9 @@ EXAMPLE_DETX_RADIAL = StringIO("\n".join((
     "3 1 3 2",
     " 7 1 2 3 1 2 3 70",
     " 8 -3 -2 -1 -3 -2 -1 80",
+    "4 2 1 2",
+    " 9 0 0 1 0 0 1 90",
+    " 10 0 0 -1 0 0 -1 100",
     )))
 
 
@@ -293,15 +296,19 @@ class TestDetector(TestCase):
         det = Detector()
         det._det_file = EXAMPLE_DETX_RADIAL
         det._parse_doms()
-        du = 1
+        du = 2
         pmt_dir = det.pmts[det.pmts.du == du].dir.copy()
         pmt_pos = det.pmts[det.pmts.du == du].pos.copy()
+        pmt_dir_other_dus = det.pmts[det.pmts.du != du].dir.copy()
+        pmt_pos_other_dus = det.pmts[det.pmts.du != du].pos.copy()
         for i in range(36):
             det.rotate_du_by_yaw(du, 10)
         pmt_dir_rot = det.pmts[det.pmts.du == du].dir
         pmt_pos_rot = det.pmts[det.pmts.du == du].pos
         assert np.allclose(pmt_dir, pmt_dir_rot)
         assert np.allclose(pmt_pos, pmt_pos_rot)
+        assert np.allclose(pmt_dir_other_dus, det.pmts[det.pmts.du != du].dir)
+        assert np.allclose(pmt_pos_other_dus, det.pmts[det.pmts.du != du].pos)
 
     def test_rescale_detector(self):
         self.det._parse_doms()
