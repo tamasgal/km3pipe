@@ -36,13 +36,8 @@ log = get_logger(__name__)  # pylint: disable=C0103
 
 UTC_TZ = pytz.timezone('UTC')
 
-
 # Ignore invalid certificate error
-try:
-    ssl._create_default_https_context = ssl._create_unverified_context
-except AttributeError:
-    log.debug("Your SSL support is outdated.\n"
-              "Please update your Python installation!")
+ssl._create_default_https_context = ssl._create_unverified_context
 
 BASE_URL = 'https://km3netdbweb.in2p3.fr'
 
@@ -136,7 +131,7 @@ class DBManager(object):
             log.warning("Empty dataset")  # ...probably. Waiting for more info
             return make_empty_dataset()
         else:
-            self._add_datetime(dataframe)
+            add_datetime(dataframe)
             try:
                 self._add_converted_units(dataframe, parameter)
             except KeyError:
@@ -153,22 +148,8 @@ class DBManager(object):
             log.warning("Empty dataset")
             return None
         else:
-            self._add_datetime(dataframe, 'UNIXSTARTTIME')
+            add_datetime(dataframe, 'UNIXSTARTTIME')
             return dataframe
-
-    def _add_datetime(self, dataframe, timestamp_key='UNIXTIME'):
-        """Add an additional DATETIME column with standar datetime format.
-
-        This currently manipulates the incoming DataFrame!
-        """
-        def convert_data(timestamp):
-            return datetime.fromtimestamp(float(timestamp) / 1e3, UTC_TZ)
-        try:
-            log.debug("Adding DATETIME column to the data")
-            converted = dataframe[timestamp_key].apply(convert_data)
-            dataframe['DATETIME'] = converted
-        except KeyError:
-            log.warning("Could not add DATETIME column")
 
     def _add_converted_units(self, dataframe, parameter, key='VALUE'):
         """Add an additional DATA_VALUE column with converted VALUEs"""
@@ -189,17 +170,6 @@ class DBManager(object):
 
     def _get_detectors(self):
         content = self._get_content('streamds/detectors.txt')
-        try:
-            dataframe = read_csv(content)
-        except ValueError:
-            log.warning("Empty dataset")
-            return make_empty_dataset()
-        else:
-            return dataframe
-
-    def t0sets(self, det_id):
-        content = self._get_content('streamds/t0sets.txt?detid={0}'
-                                    .format(det_id))
         try:
             dataframe = read_csv(content)
         except ValueError:
@@ -313,7 +283,7 @@ class DBManager(object):
             log.warning("Empty dataset")  # ...probably. Waiting for more info
             return make_empty_dataset()
         else:
-            self._add_datetime(dataframe)
+            add_datetime(dataframe)
             return dataframe
 
     def _get_json(self, url):
@@ -440,6 +410,21 @@ class DBManager(object):
 
     def _post(self, url, data):
         pass
+
+
+def add_datetime(dataframe, timestamp_key='UNIXTIME'):
+    """Add an additional DATETIME column with standar datetime format.
+
+    This currently manipulates the incoming DataFrame!
+    """
+    def convert_data(timestamp):
+        return datetime.fromtimestamp(float(timestamp) / 1e3, UTC_TZ)
+    try:
+        log.debug("Adding DATETIME column to the data")
+        converted = dataframe[timestamp_key].apply(convert_data)
+        dataframe['DATETIME'] = converted
+    except KeyError:
+        log.warning("Could not add DATETIME column")
 
 
 class StreamDS(object):

@@ -287,6 +287,7 @@ sphinx_gallery_conf = {
     },
     'expected_failing_examples': [],
     'abort_on_example_effor': False,
+    'show_memory': True,
 }
 
 autosummary_generate = ["api.rst"]

@@ -1,9 +1,10 @@
 # Filename: test_db.py
 # pylint: disable=C0111,E1003,R0904,C0103,R0201,C0102
+from os.path import dirname, join
+from km3pipe.testing import TestCase, MagicMock, patch
 
-from km3pipe.testing import TestCase, MagicMock
-
-from km3pipe.db import DBManager, DOMContainer
+from km3pipe.db import (DBManager, DOMContainer, we_are_in_lyon, read_csv,
+                        make_empty_dataset, StreamDS)
 from km3pipe.logger import get_logger
 
 __author__ = "Tamas Gal"
@@ -21,6 +22,10 @@ JSON_DOMS = [{'DOMId': 1, 'Floor': 10, 'CLBUPI': '100', 'DetOID': DET_ID},
              {'DOMId': 4, 'Floor': 40, 'CLBUPI': '400', 'DetOID': 'det_id2'}]
 
 log = get_logger('db')
+
+
+STREAMDS_META = join(dirname(__file__),
+                     "../kp-data/test_data/streamds_output.txt")
 
 
 class TestDBManager(TestCase):
@@ -72,3 +77,75 @@ class TestDOMContainer(TestCase):
         self.assertEqual(1, self.dc.clbupi2domid('100', DET_ID))
         self.assertEqual(2, self.dc.clbupi2domid('200', DET_ID))
         self.assertEqual(3, self.dc.clbupi2domid('300', DET_ID))
+
+
+class TestWeAreInLyon(TestCase):
+    @patch('socket.gethostbyname')
+    @patch('socket.gethostname')
+    def test_call_in_lyon(self, gethostname_mock, gethostbyname_mock):
+        gethostbyname_mock.return_value = '134.158.'
+        assert we_are_in_lyon()
+
+    @patch('socket.gethostbyname')
+    @patch('socket.gethostname')
+    def test_call_not_in_lyon(self, gethostname_mock, gethostbyname_mock):
+        gethostbyname_mock.return_value = '1.2.'
+        assert not we_are_in_lyon()
+
+
+class TestDataSetFunctions(TestCase):
+    def test_read_csv(self):
+        raw = "a\tb\n1\t2\n3\t4"
+        df = read_csv(raw)
+        assert len(df) == 2
+        self.assertListEqual([1, 3], list(df.a))
+        self.assertListEqual([2, 4], list(df.b))
+
+    def test_make_empty_dataset(self):
+        df = make_empty_dataset()
+        assert len(df) == 0
+
+
+class TestStreamDS(TestCase):
+    @patch('km3pipe.db.DBManager._get_content')
+    @patch('km3pipe.db.DBManager')
+    def setUp(self, db_manager_mock, get_content_mock):
+        with open(STREAMDS_META, 'r') as fobj:
+            streamds_meta = fobj.read()
+        db_manager_mock_obj = db_manager_mock.return_value
+        db_manager_mock_obj._get_content.return_value = streamds_meta
+        self.sds = StreamDS()
+
+    def test_streams(self):
+        assert len(self.sds.streams) == 30
+        assert 'ahrs' in self.sds.streams
+        assert 'clbmap' in self.sds.streams
+        assert 'datalogevents' in self.sds.streams
+        assert 'datalognumbers' in self.sds.streams
+
+    def test_getattr(self):
+        assert hasattr(self.sds, 't0sets')
+        assert hasattr(self.sds, 'vendorhv')
+
+    def test_attr_are_callable(self):
+        self.sds.runs()
+        self.sds.runsetupparams()
+        self.sds.upi()
+
+    def test_mandatory_selectors(self):
+        self.assertListEqual(['-'], self.sds.mandatory_selectors('productloc'))
+        self.assertListEqual(['detid'], self.sds.mandatory_selectors('runs'))
+        self.assertListEqual(['detid', 'minrun', 'maxrun'],
+                             self.sds.mandatory_selectors('datalognumbers'))
+
+    def test_optional_selectors(self):
+        self.assertListEqual(['upi', 'city', 'locationid', 'operation',
+                              'operationid'],
+                              self.sds.optional_selectors('productloc'))
+        self.assertListEqual(['run', 'runjobid', 'jobtarget', 'jobpriority'],
+                             self.sds.optional_selectors('runs'))
+        self.assertListEqual(['source_name', 'parameter_name'],
+                             self.sds.optional_selectors('datalognumbers'))
+
+    def test_print_streams(self):
+        self.sds.print_streams()

@@ -10,7 +10,7 @@ from .logger import get_logger
 
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2017, Tamas Gal and the KM3NeT collaboration."
-__credits__ = []
+__credits__ = ['Vladimir Kulikovskiy']
 __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
@@ -410,3 +410,111 @@ def gold_parameter(time_residual):
 def log_b(arg, base):
     """Logarithm to any base"""
     return np.log(arg) / np.log(base)
+
+
+def qrot(vector, quaternion):
+    """Rotate a 3D vector using quaternion algebra.
+
+    Implemented by Vladimir Kulikovskiy. 
+
+    Parameters
+    ----------
+    vector: np.array
+    quaternion: np.array
+
+    Returns
+    -------
+    np.array
+
+    """
+    t = 2 * np.cross(quaternion[1:], vector)
+    v_rot = vector + quaternion[0] * t + np.cross(quaternion[1:], t)
+    return v_rot
+
+
+def qeuler(yaw, pitch, roll):
+    """Convert Euler angle to quaternion.
+
+    Parameters
+    ----------
+    yaw: number
+    pitch: number
+    roll: number
+
+    Returns
+    -------
+    np.array
+
+    """
+    yaw = np.radians(yaw)
+    pitch = np.radians(pitch)
+    roll = np.radians(roll)
+
+    cy = np.cos(yaw * 0.5)
+    sy = np.sin(yaw * 0.5)
+    cr = np.cos(roll * 0.5)
+    sr = np.sin(roll * 0.5)
+    cp = np.cos(pitch * 0.5)
+    sp = np.sin(pitch * 0.5)
+
+    q = np.array((cy * cr * cp + sy * sr * sp,
+                  cy * sr * cp - sy * cr * sp,
+                  cy * cr * sp + sy * sr * cp,
+                  sy * cr * cp - cy * sr * sp))
+    return q
+
+
+def qrot_yaw(vector, heading):
+    """Rotate vectors using quaternion algebra.
+    
+
+    Parameters
+    ----------
+    vector: np.array or list-like (3 elements)
+    heading: the heading to rotate to [deg]
+
+    Returns
+    -------
+    np.array
+
+    """
+    return qrot(vector, qeuler(heading, 0, 0))
+
+
+def intersect_3d(p1, p2):
+    """Find the closes point for a given set of lines in 3D.
+    
+    Parameters
+    ----------
+    p1 : (M, N) array_like
+        Starting points
+    p2 : (M, N) array_like
+        End points.
+
+    Returns
+    -------
+    x : (N,) ndarray
+        Least-squares solution - the closest point of the intersections.
+
+    Raises
+    ------
+    numpy.linalg.LinAlgError
+        If computation does not converge.
+
+    """
+    v = p2 - p1
+    normed_v = unit_vector(v)
+    nx = normed_v[:, 0]
+    ny = normed_v[:, 1]
+    nz = normed_v[:, 2]
+    xx = np.sum(nx**2 - 1)
+    yy = np.sum(ny**2 - 1)
+    zz = np.sum(nz**2 - 1)
+    xy = np.sum(nx*ny)
+    xz = np.sum(nx*nz)
+    yz = np.sum(ny*nz)
+    M = np.array([(xx, xy, xz), (xy, yy, yz), (xz, yz, zz)])
+    x = np.sum(p1[:, 0]*(nx**2-1) + p1[:,1]*(nx*ny)  + p1[:, 2]*(nx*nz))
+    y = np.sum(p1[:, 0]*(nx*ny) + p1[:, 1]*(ny*ny - 1) + p1[:, 2]*(ny*nz))
+    z = np.sum(p1[:, 0]*(nx*nz) + p1[:, 1]*(ny*nz) + p1[:, 2]*(nz**2 - 1))
+    return np.linalg.lstsq(M, np.array((x, y, z)), rcond=None)[0]

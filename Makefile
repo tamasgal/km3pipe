@@ -8,10 +8,12 @@ build:
 	@echo "No need to build anymore :)"
 
 install: 
-	pip install ".[full]"
+	pip install -U numpy
+	pip install .
 
-install-dev: dev-dependencies
-	pip install -e ".[full]"
+install-dev:
+	pip install -U numpy
+	pip install -e .
 
 clean:
 	python setup.py clean --all
@@ -21,40 +23,35 @@ clean:
 	rm -f $(PKGNAME)/*.so
 
 test: 
-	py.test --junitxml=./junit.xml km3pipe || true
+	py.test --junitxml=./reports/junit.xml km3pipe
 
 test-km3modules: 
-	py.test --junitxml=./junit_km3modules.xml km3modules || true
+	py.test --junitxml=./reports/junit_km3modules.xml km3modules
 
 test-cov:
-	py.test --cov ./ --cov-report term-missing --cov-report xml km3pipe || true
+	py.test --cov ./ --cov-report term-missing --cov-report xml:reports/coverage.xml --cov-report html:reports/coverage km3pipe km3modules pipeinspector
 
 test-loop: 
 	# pip install -U pytest-watch
-	py.test || true
-	ptw --ext=.py,.pyx
+	py.test
+	ptw --ext=.py,.pyx --ignore=doc
 
 flake8: 
-	py.test --flake8 || true
-	py.test --flake8 km3modules || true
+	py.test --flake8
+	py.test --flake8 km3modules
 
 pep8: flake8
 
 docstyle: 
-	py.test --docstyle  || true
-	py.test --docstyle km3modules || true
+	py.test --docstyle
+	py.test --docstyle km3modules
 
 lint: 
-	py.test --pylint || true
-	py.test --pylint km3modules || true
+	py.test --pylint
+	py.test --pylint km3modules
 
 dependencies:
+	pip install -U numpy
 	pip install -Ur requirements.txt
 
-dev-dependencies:
-	pip install -Ur dev-requirements.txt
-
-doc-dependencies:
-	pip install -Ur sphinx_requirements.txt
-
-.PHONY: all clean build install test test-km3modules test-nocov flake8 pep8 dependencies dev-dependencies doc-dependencies docstyle
+.PHONY: all clean build install install-dev test test-km3modules test-nocov flake8 pep8 dependencies docstyle

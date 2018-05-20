@@ -63,6 +63,9 @@ doc/auto_examples/
 doc/modules/
 doc/api
 
+# examples
+examples/*/*.pdf
+
 # VI swap files
 *.swp
 *.swo
@@ -75,6 +78,7 @@ doc/api
 
 # 
 junit*.xml
+reports
 
 # misc
 *~

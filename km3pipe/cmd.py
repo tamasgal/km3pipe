@@ -26,9 +26,8 @@ Options:
     DETECTOR            Detector (eg. ARCA).
     GIT_BRANCH          Git branch to pull (eg. develop).
     RUN                 Run number.
+
 """
-
-
 import re
 import sys
 import os

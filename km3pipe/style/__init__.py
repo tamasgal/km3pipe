@@ -5,7 +5,7 @@ The KM3Pipe style definitions.
 
 """
 
-from os.path import dirname, join
+from os.path import dirname, join, exists
 from itertools import cycle
 
 
@@ -31,11 +31,8 @@ def use(style='km3pipe'):
     for s in (get_style_path('km3pipe-' + style),
               get_style_path(style),
               style):
-        try:
+        if exists(s):
             plt.style.use(s)
-        except (OSError, IOError):
-            pass
-        else:
             print("Loading style definitions from '{0}'".format(s))
             return
     print("Could not find style: '{0}'".format(style))
@@ -45,7 +42,7 @@ class ColourCycler(object):
     """Basic colour cycler.
 
     Instantiate with `cc = ColourCycler()` and use it in plots
-    like `plt.plot(xs, ys, c=cs.next)`.
+    like `plt.plot(xs, ys, c=next(cc))`.
     """
 
     def __init__(self, palette='km3pipe'):
@@ -82,7 +79,6 @@ class ColourCycler(object):
         """Return a list of available styles"""
         return list(self.colours.keys())
 
-    @property
-    def next(self):
+    def __next__(self):
         """Return the next colour in current palette"""
         return next(self._cycler)

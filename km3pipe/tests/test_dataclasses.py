@@ -12,7 +12,8 @@ import pytest
 
 from km3pipe.testing import TestCase, skip   # noqa
 from km3pipe.dataclasses import (
-    Table, inflate_dtype, has_structured_dt, is_structured, DEFAULT_H5LOC
+    Table, inflate_dtype, has_structured_dt, is_structured, DEFAULT_H5LOC,
+    DEFAULT_NAME, DEFAULT_SPLIT
 )
 
 __author__ = "Tamas Gal, Moritz Lotze"
@@ -72,7 +73,7 @@ class TestTable(TestCase):
         tab = Table(self.arr)
         assert tab.h5loc == DEFAULT_H5LOC
         tab = Table(self.arr, h5loc='/foo')
-        assert tab.h5loc is '/foo'
+        assert tab.h5loc == '/foo'
 
     def test_split(self):
         tab = self.arr.view(Table)
@@ -80,15 +81,15 @@ class TestTable(TestCase):
         tab = Table(self.arr)
         assert tab.split_h5 is False
         tab = Table(self.arr, split_h5=True)
-        assert tab.split_h5 is True
+        assert tab.split_h5
 
     def test_name(self):
         tab = self.arr.view(Table)
-        assert tab.name == 'Generic Table'
+        assert tab.name == DEFAULT_NAME
         tab = Table(self.arr)
-        assert tab.name == 'Generic Table'
+        assert tab.name == DEFAULT_NAME
         tab = Table(self.arr, name='foo')
-        assert tab.name is 'foo'
+        assert tab.name == 'foo'
 
     def test_view(self):
         tab = self.arr.view(Table)
@@ -153,7 +154,7 @@ class TestTable(TestCase):
         with pytest.raises(KeyError):
             tab = Table.from_dict(dmap, dtype=bad_dt)
 
-    def test_fromlist(self):
+    def test_fromcolumns(self):
         n = 5
         dlist = [
             np.ones(n, dtype=int),
@@ -178,6 +179,31 @@ class TestTable(TestCase):
         bad_dt = [('a', float), ('b', float), ('c', float), ('d', int)]
         with pytest.raises(ValueError):
             tab = Table.from_columns(dlist, dtype=bad_dt)
+            print(tab.dtype)
+            print(tab.shape)
+            print(tab)
+
+    def test_fromrows(self):
+        dlist = [
+            [1, 2, 3],
+            [4, 5, 6],
+        ]
+        dt = np.dtype([('a', float), ('b', float), ('c', float)])
+        tab = Table.from_rows(dlist, dtype=dt)
+        print(tab.dtype)
+        print(tab.shape)
+        print(tab)
+        assert tab.h5loc == DEFAULT_H5LOC
+        assert isinstance(tab, Table)
+        tab = Table.from_rows(dlist, dtype=dt, h5loc='/foo')
+        print(tab.dtype)
+        print(tab.shape)
+        print(tab)
+        assert tab.h5loc == '/foo'
+        assert isinstance(tab, Table)
+        bad_dt = [('a', float), ('b', float), ('c', float), ('d', int)]
+        with pytest.raises(ValueError):
+            tab = Table.from_rows(dlist, dtype=bad_dt)
             print(tab.dtype)
             print(tab.shape)
             print(tab)
@@ -267,6 +293,10 @@ class TestTable(TestCase):
         with pytest.raises(ValueError):
             t = Table([1, 2, 3], colnames=['a', 'b', 'c'])      # noqa
 
+    def test_init_with_unstructured_raises_valueerror(self):
+        with pytest.raises(ValueError):
+            Table(np.array([[1, 2, 3], [4, 5, 6]]))
+
     def test_fromdict_init(self):
         n = 5
         dmap = {
@@ -312,6 +342,22 @@ class TestTable(TestCase):
         assert tab.m[-1] == 2
         assert tab.n[0] == 2
         assert tab.n[-1] == 5
+
+    def test_append_columns_with_single_value(self):
+        tab = Table({'a': 1})
+        tab = tab.append_columns('group_id', 0)
+        assert 0 == tab.group_id[0]
+
+    def test_append_columns_with_multiple_values(self):
+        tab = Table({'a': [1, 2]})
+        tab = tab.append_columns('group_id', [0, 1])
+        assert 0 == tab.group_id[0]
+        assert 1 == tab.group_id[1]
+
+    def test_append_columns_modifies_dtype(self):
+        tab = Table({'a': [1, 2]})
+        tab = tab.append_columns('group_id', [0, 1])
+        assert 'group_id' in tab.dtype.names
 
     def test_template(self):
         n = 10
@@ -404,7 +450,7 @@ class TestTable(TestCase):
         tab = Table.from_template(arr, a_template)
         self.assertListEqual([1, 2], list(tab.a))
         self.assertListEqual([3.0, 4.0], list(tab.b))
-        assert "Generic Table" == tab.name
+        assert DEFAULT_NAME == tab.name
 
     def test_element_list_with_dtype(self):
         bad_elist = [
@@ -434,6 +480,14 @@ class TestTable(TestCase):
         tab = Table(arr)
         tab_sort = tab.sorted('b')
         assert_array_equal(tab_sort['a'], np.array([0, 6, 3]))
+
+    def test_init_directly_with_df(self):
+        import pandas as pd
+        df = pd.DataFrame({'a': [1, 2, 3], 'b': [4, 5, 6]})
+        tab = Table(df, h5loc='/foo')
+        assert np.allclose(df.a, tab.a)
+        assert np.allclose(df.b, tab.b)
+        assert tab.h5loc == '/foo'
 
     def test_df(self):
         from pandas.util.testing import assert_frame_equal
@@ -474,3 +528,86 @@ class TestTable(TestCase):
         assert 'c' in tab
         assert 'd' not in tab
 
+    def test_pos_getter(self):
+        tab = Table({'pos_x': [1, 2, 3],
+                     'pos_y': [4, 5, 6],
+                     'pos_z': [7, 8, 9]})
+        assert np.allclose([[1, 4, 7], [2, 5, 8], [3, 6, 9]], tab.pos)
+
+    def test_pos_getter_for_single_entry(self):
+        tab = Table({'pos_x': [1, 2, 3],
+                     'pos_y': [4, 5, 6],
+                     'pos_z': [7, 8, 9]})
+        assert np.allclose([[2, 5, 8]], tab.pos[1])
+
+    def test_dir_getter(self):
+        tab = Table({'dir_x': [1, 2, 3],
+                     'dir_y': [4, 5, 6],
+                     'dir_z': [7, 8, 9]})
+        assert np.allclose([[1, 4, 7], [2, 5, 8], [3, 6, 9]], tab.dir)
+
+    def test_dir_getter_for_single_entry(self):
+        tab = Table({'dir_x': [1, 2, 3],
+                     'dir_y': [4, 5, 6],
+                     'dir_z': [7, 8, 9]})
+        assert np.allclose([[2, 5, 8]], tab.dir[1])
+
+    def test_index_returns_reference(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab[1].a = 4
+        assert np.allclose(tab.a, [1, 4, 3])
+
+    def test_index_of_attribute_returns_reference(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab.a[1] = 4
+        assert np.allclose(tab.a, [1, 4, 3])
+
+    def test_mask_returns_copy(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab[[True, False, True]].a = [4, 5]
+        assert np.allclose(tab.a, [1, 2, 3])
+
+    def test_mask_on_attribute_returns_reference(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab.a[[True, False, True]] = [4, 5]
+        assert np.allclose(tab.a, [4, 2, 5])
+
+    def test_index_mask_returns_copy(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab[[1, 2]].a = [4, 5]
+        assert np.allclose(tab.a, [1, 2, 3])
+
+    def test_index_mask_of_attribute_returns_reference(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab.a[[1, 2]] = [4, 5]
+        assert np.allclose(tab.a, [1, 4, 5])
+
+    def test_slice_returns_reference(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab[:2].a = [4, 5]
+        assert np.allclose(tab.a, [4, 5, 3])
+
+    def test_slice_of_attribute_returns_reference(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab.a[:2] = [4, 5]
+        assert np.allclose(tab.a, [4, 5, 3])
+
+    def test_slice_keeps_metadata(self):
+        tab = Table({'a': [1, 2, 3]}, h5loc='/lala', split_h5=True, name='bla')
+        assert tab[:2].h5loc == '/lala'
+        assert tab[:2].name == 'bla'
+        assert tab[:2].split_h5
+
+    def test_mask_keeps_metadata(self):
+        tab = Table({'a': [1, 2, 3]}, h5loc='/lala', split_h5=True, name='bla')
+        m = np.ones(len(tab), dtype=bool)
+        assert tab[m].h5loc == '/lala'
+        assert tab[m].name == 'bla'
+        assert tab[m].split_h5
+
+    def test_indexing_keeps_metadata(self):
+        tab = Table({'a': [1, 2, 3]}, h5loc='/lala', split_h5=True, name='bla')
+        im = [1, 1, 0]
+        assert tab[im].h5loc == '/lala'
+        assert tab[im].name == 'bla'
+        assert tab[im].split_h5

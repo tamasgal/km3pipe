@@ -1,0 +1,31 @@
+STREAM	FORMATS	MANDATORY_SELECTORS	OPTIONAL_SELECTORS	DESCRIPTION
+detectors	txt	-	locationid,city	Shows all the detectors, optionally selecting by site oid or city.
+runs	txt	detid	run,runjobid,jobtarget,jobpriority	Shows all runs for a detector (mandatory selection by detid or serialnumber). Optionally, a single run may be specified.
+jobs	txt	detid,unixmintime,unixmaxtime	priority,runsetupid,oid,localid	Shows all detector run jobs for a detector within a minimum and maximum Unix time (all mandatory selections). Optionally, selections may consider priority, runsetupid, oid.
+datalognumbers	txt	detid,minrun,maxrun	source_name,parameter_name	Shows all datalog numerical values for a range of runs in a detector (all mandatory selections). Optionally, a single source/parameter may be specified.
+datalogstrings	txt	detid,minrun,maxrun	source_name,parameter_name	Shows all datalog string values for a range of runs in a detector (all mandatory selections). Optionally, a single source/parameter may be specified.
+datalogevents	txt	detid,minrun,maxrun	severity,source_name,eventcode	Shows all datalog events for a range of runs in a detector (all mandatory selections). Optionally, a single severity/source/eventcode may be specified.
+vendorhv	txt	detid	pmtserial	Shows vendor-suggested HV for a detector (mandatory selection by detid or serialnumber). Optionally, a single PMT may be specified.
+vendorhvrunsetup	txt	detid	pmtserial	Shows vendor-suggested HV used in runsetups for a detector (mandatory selection by detid or serialnumber). Optionally, a single PMT may be specified.
+t0sets	txt	detid	run_number,calibsetid	Shows calibration sets for PMT T0's. Optionally, a single set or a last calibration run may be specified.
+t0	txt	detid,calsetid	-	Shows PMT T0's.
+ahrs	txt	detid,minrun,maxrun	clbupi,domid,duid,floorid	Shows AHRS values for a range of runs in a detector (all mandatory selections). Optionally, a single clb/domid or du and/or floor may be specified. Notice that at the same timestamp one may find different combinations of AHRS values because of SRP message buffering.
+upi	txt	pbs	variant,version,serialnumber,producer_serial	Shows the mapping between UPIs and producer serial numbers.
+pmtdarkbox	txt	-	serialnumber,producer_serial,DarkBox_Quality	Compares the vendor PMT parameters and the results of the DarkBox tests.
+dmvars	txt	-	subsystemid	Lists the CLB variables controlled by the DM.
+allparams	txt	-	subsystemid	Lists all parameters for detector and TriDAS control.
+detcalibrations	txt	-	detectorid,operationid,login	Lists the calibrations available for detectors.
+pmt_hv_settings	txt	detoid	duid,floorid,pmtintid,cablepos,duupi,domupi,pmtupi,cg_oid,cg_name	Shows the HV settings of PMTs in a detector.
+pmt_hv_tuning_settings	txt	detoid	duid,floorid,pmtintid,cablepos,duupi,domupi,pmtupi,pmtserial,cg_oid,cg_name,testname,operationid	Shows the HV settings of PMTs in a detector with possibly correlated outputs of testing procedures.
+pmt_hv_run_settings	txt	detoid,run	duid,floorid,pmtintid,cablepos,pmtserial,cg_oid,cg_name	Shows the HV settings of PMTs in a run.
+pmt_best_hv_settings	txt	detoid	serialnumber	Shows the current best choice of HV settings for PMTs.
+pmt_available_hvtuned_sets	txt	detoid	name	Shows the available sets of tuned values for HV of PMTs.
+integration	txt	-	operationid,userid,locationid,city,container_upi,content_upi,position	Shows integration information.
+clbmap	txt	detoid	duid,floorid,serialnumber,domid	Shows the correspondence between DU/floor, UPI and DOM Id
+locations	txt	-	oid,city,address,country,zipcode	Shows all locations.
+persons	txt	-	login,oid,locationid,surname,name,city	Shows all persons with optional search by location.
+productloc	txt	-	upi,city,locationid,operation,operationid	Shows all products by location as documented by QA/QC reports and integration/disintegrations.
+toa	bin,txt	detid,minrun,maxrun	filename,runnumber,sequencenumber,resolution,samplingrate,channel,domid,emitterid	Shows Time-Of-Arrival acoustic data in long text format or in binary format.
+toashort	txt	detid,minrun,maxrun	runnumber,domid,emitterid	Shows Time-Of-Arrival acoustic data in short format.
+runsummarynumbers	txt	detid,minrun,maxrun	parameter_name,source_name	Shows all numerical run summary data for a range of runs in a detector (all mandatory selections). Optionally, a single source/parameter may be specified.
+runsetupparams	txt	detid,rs_oid	upifilter,cg_oid,par_oid	Shows runsetup parameters.

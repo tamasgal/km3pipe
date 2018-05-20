@@ -14,6 +14,11 @@ Version 8
   create convenient datatypes. By default it tries to automatically
   apply known parsers but also supports user defined ones.
 * unified colourful logging/printing to increase the rainbow unicorn factor
+* consolidated requirements: now everything is managed in ``requirements.txt``
+  there is also no more ``pip install km3pipe[full]``, only ``pip install km3pipe``,
+  so you always get the full load ;)
+* huge increase in code coverage by adding >100 new unit tests
+
 
 Version 7
 ---------
