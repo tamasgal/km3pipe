@@ -513,3 +513,43 @@ class TestTable(TestCase):
                      'dir_y': [4, 5, 6],
                      'dir_z': [7, 8, 9]})
         assert np.allclose([[2, 5, 8]], tab.dir[1])
+
+    def test_index_returns_reference(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab[1].a = 4
+        assert np.allclose(tab.a, [1, 4, 3])
+
+    def test_index_of_attribute_returns_reference(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab.a[1] = 4
+        assert np.allclose(tab.a, [1, 4, 3])
+
+    def test_mask_returns_copy(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab[[True, False, True]].a = [4, 5]
+        assert np.allclose(tab.a, [1, 2, 3])
+
+    def test_mask_on_attribute_returns_reference(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab.a[[True, False, True]] = [4, 5]
+        assert np.allclose(tab.a, [4, 2, 5])
+
+    def test_index_mask_returns_copy(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab[[1, 2]].a = [4, 5]
+        assert np.allclose(tab.a, [1, 2, 3])
+
+    def test_index_mask_of_attribute_returns_reference(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab.a[[1, 2]] = [4, 5]
+        assert np.allclose(tab.a, [1, 4, 5])
+
+    def test_slice_returns_reference(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab[:2].a = [4, 5]
+        assert np.allclose(tab.a, [4, 5, 3])
+
+    def test_slice_of_attribute_returns_reference(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab.a[:2] = [4, 5]
+        assert np.allclose(tab.a, [4, 5, 3])
