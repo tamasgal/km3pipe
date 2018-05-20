@@ -24,7 +24,7 @@ log = get_logger(__name__)  # pylint: disable=C0103
 class loguniform(rv_continuous):
     """Loguniform Distributon"""
     def __init__(self, low=0.1, high=1, base=10, *args, **kwargs):
-        super(self.__class__, self).__init__(*args, **kwargs)
+        super(loguniform, self).__init__(*args, **kwargs)
         self._log_low = log_b(low, base=base)
         self._log_high = log_b(high, base=base)
         self._base_of_log = base
@@ -56,7 +56,8 @@ class rv_kde(rv_continuous):
         self._kde = KernelDensity(bandwidth=bw, **kde_args).fit(data)
         super(rv_kde, self).__init__(name='KDE')
 
-    def _bandwidth_statsmodels(cls, sample, bw_method=None):
+    @staticmethod
+    def _bandwidth_statsmodels(sample, bw_method=None):
         from statsmodels.nonparametric.kernel_density import KDEMultivariate
         # all continuous
         vt = sample.ndim * 'c'
@@ -64,7 +65,8 @@ class rv_kde(rv_continuous):
         bw = skde.bw
         return bw
 
-    def _bandwidth_scipy(cls, sample, bw_method=None):
+    @staticmethod
+    def _bandwidth_scipy(sample, bw_method=None):
         from scipy.stats import gaussian_kde
         # sklearn expects switched shape versus scipy
         sample = sample.T

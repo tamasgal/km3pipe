@@ -4,7 +4,7 @@
 import numpy as np
 
 from km3pipe.testing import TestCase
-from km3pipe.stats import loguniform
+from km3pipe.stats import loguniform, rv_kde
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
 __copyright__ = "Copyright 2016, KM3Pipe devs and the KM3NeT collaboration."
@@ -31,3 +31,8 @@ class TestLogUniform(TestCase):
         assert r2.shape == (500,)
         assert np.all(r2 <= hi)
         assert np.all(r2 >= lo)
+
+
+class TestRvKde(TestCase):
+    def test_init(self):
+        rv = rv_kde(np.random.normal(size=20))
