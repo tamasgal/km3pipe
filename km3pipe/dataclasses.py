@@ -101,7 +101,7 @@ class Table(np.recarray):
                 "Lists/tuples are not supported! Please provide either "
                 "a dict(array), a pandas dataframe, an ndarray "
                 "with a structured dtype, or a 2d ndarray plus colnames!")
-        if istype(data, 'DataFrame'):
+        if isinstance(data, 'DataFrame'):
             return cls.from_dataframe(data, h5loc=h5loc, dtype=dtype,
                                       split_h5=split_h5, colnames=colnames,
                                       name=name, **kwargs)
