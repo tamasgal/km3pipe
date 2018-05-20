@@ -267,6 +267,13 @@ class TestTable(TestCase):
         with pytest.raises(ValueError):
             t = Table([1, 2, 3], colnames=['a', 'b', 'c'])      # noqa
 
+    def test_init_with_unstructured_raises_valueerror_without_colnames(self):
+        with pytest.raises(ValueError):
+            Table(np.array([[1, 2, 3], [4, 5, 6]]))
+
+    def test_init_with_unstructured(self):
+        Table(np.array([[1, 2, 3], [4, 5, 6]]), colnames=['a', 'b'])
+
     def test_fromdict_init(self):
         n = 5
         dmap = {
