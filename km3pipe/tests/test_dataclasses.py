@@ -561,3 +561,24 @@ class TestTable(TestCase):
         tab = Table({'a': [1, 2, 3]})
         tab.a[:2] = [4, 5]
         assert np.allclose(tab.a, [4, 5, 3])
+
+    def test_slice_keeps_metadata(self):
+        tab = Table({'a': [1, 2, 3]}, h5loc='/lala', split_h5=True, name='bla')
+        assert tab[:2].h5loc == '/lala'
+        assert tab[:2].name == 'bla'
+        assert tab[:2].split_h5
+
+    def test_mask_keeps_metadata(self):
+        tab = Table({'a': [1, 2, 3]}, h5loc='/lala', split_h5=True, name='bla')
+        m = np.ones(len(tab), dtype=bool)
+        assert tab[m].h5loc == '/lala'
+        assert tab[m].name == 'bla'
+        assert tab[m].split_h5
+
+    def test_indexing_keeps_metadata(self):
+        tab = Table({'a': [1, 2, 3]}, h5loc='/lala', split_h5=True, name='bla')
+        im = [1, 1, 0]
+        assert tab[im].h5loc == '/lala'
+        assert tab[im].name == 'bla'
+        assert tab[im].split_h5
+
