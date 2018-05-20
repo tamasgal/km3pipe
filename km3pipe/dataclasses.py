@@ -96,7 +96,7 @@ class Table(np.recarray):
         Instantiate from a dataframe.
     from_rows(list_of_rows, **kwargs)
         Instantiate from an array-like with shape (n_rows, n_columns).
-    from_rows(list_of_rows, **kwargs)
+    from_columns(list_of_columns, **kwargs)
         Instantiate from an array-like with shape (n_columns, n_rows).
     """
     def __new__(cls, data, h5loc=DEFAULT_H5LOC, dtype=None,
@@ -137,7 +137,8 @@ class Table(np.recarray):
         self.split_h5 = getattr(obj, 'split_h5', DEFAULT_SPLIT)
         self.name = getattr(obj, 'name', DEFAULT_NAME)
         # attribute access returns void instances on slicing/iteration
-        # kudos to https://github.com/numpy/numpy/issues/3581#issuecomment-108957200
+        # kudos to
+        # https://github.com/numpy/numpy/issues/3581#issuecomment-108957200
         if obj is not None and type(obj) is not type(self):
             self.dtype = np.dtype((np.record, obj.dtype))
 
@@ -237,7 +238,7 @@ class Table(np.recarray):
             or a ``dict`` containing the required attributes (see the other
             templates for reference).
         """
-        name = None
+        name = DEFAULT_NAME
         if isinstance(template, str):
             name = template
             table_info = TEMPLATES[name]
