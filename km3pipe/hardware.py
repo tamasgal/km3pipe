@@ -262,7 +262,8 @@ class Detector(object):
 
     def rotate_du_by_yaw(self, du, heading):
         """Rotate all DOMs on DU by a given (yaw) heading."""
-        dom_ids = np.unique(self.pmts.du)
+        mask = (self.pmts.du == du)
+        dom_ids = np.unique(self.pmts.dom_id[mask])
         for dom_id in dom_ids:
             self.rotate_dom_by_yaw(dom_id, heading)
         self.reset_caches()
