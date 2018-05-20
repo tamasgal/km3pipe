@@ -35,7 +35,7 @@ def is_structured(dt):
     """Check if the dtype is structured."""
     if not hasattr(dt, 'fields'):
         return False
-    return not (dt.fields is None)
+    return dt.fields is not None
 
 
 def inflate_dtype(arr, names):
@@ -253,17 +253,15 @@ class Table(np.recarray):
         return cls(data, h5loc=loc, dtype=dt, split_h5=split, name=name)
 
     @staticmethod
-    def _check_column_length(colnames, values, n):
+    def _check_column_length(values, n):
         values = np.atleast_2d(values)
-        for i in range(len(values)):
-            v = values[i]
+        for v in values:
             if len(v) == n:
                 continue
             else:
-                if len(values[i]) != n:
-                    raise ValueError(
-                        "Trying to append more than one column, but "
-                        "some arrays mismatch in length!")
+                raise ValueError(
+                    "Trying to append more than one column, but "
+                    "some arrays mismatch in length!")
 
     def append_columns(self, colnames, values, **kwargs):
         """Append new columns to the table.
@@ -284,7 +282,7 @@ class Table(np.recarray):
         values = np.atleast_1d(values)
         if not isinstance(colnames, str) and len(colnames) > 1:
             values = np.atleast_2d(values)
-            self._check_column_length(colnames, values, n)
+            self._check_column_length(values, n)
 
         if values.ndim == 1:
             if len(values) > n:
@@ -339,7 +337,7 @@ class Table(np.recarray):
         s = "{} {}\n".format(name, type(self))
         s += "HDF5 location: {} ({})\n".format(self.h5loc, spl)
         s += "\n".join(map(lambda d: "{} (dtype: {}) = {}"
-                                     .format(*d, self[d[0]]),
+                           .format(*d, self[d[0]]),
                            self.dtype.descr))
         return s
 
