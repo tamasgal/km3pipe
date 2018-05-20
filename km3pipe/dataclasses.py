@@ -21,6 +21,8 @@ __status__ = "Development"
 __all__ = ('Table', 'is_structured', 'has_structured_dt', 'inflate_dtype')
 
 DEFAULT_H5LOC = '/misc'
+DEFAULT_NAME = 'Generic Table'
+DEFAULT_SPLIT = False
 
 
 def has_structured_dt(arr):
@@ -33,7 +35,7 @@ def is_structured(dt):
     """Check if the dtype is structured."""
     if not hasattr(dt, 'fields'):
         return False
-    return not (dt.fields is None)
+    return dt.fields is not None
 
 
 def inflate_dtype(arr, names):
@@ -50,6 +52,12 @@ def inflate_dtype(arr, names):
 class Table(np.recarray):
     """2D generic Table with grouping index.
 
+    This is a `np.recarray` subclass with some metadata and helper methods.
+
+    You can initialize it directly from a structured numpy array,
+    a pandas DataFrame, a dictionary of (columnar) arrays; or, initialize it
+    from a list of rows/list of columns using the appropriate factory.
+
     This class adds the following to ``np.recarray``:
 
     Parameters
@@ -61,9 +69,6 @@ class Table(np.recarray):
     dtype: numpy dtype
         Datatype over array. If not specified and data is an unstructured
         array, ``names`` needs to be specified. [default: None]
-    colnames: list(str)
-        Column names to use when generating a dtype from unstructured arrays.
-        [default: None]
 
     Attributes
     ----------
@@ -87,47 +92,39 @@ class Table(np.recarray):
         Append new columns to the table.
     to_dataframe()
         Return as pandas dataframe.
-    from_dataframe(df, h5loc)
+    from_dataframe(df, **kwargs)
         Instantiate from a dataframe.
+    from_rows(list_of_rows, **kwargs)
+        Instantiate from an array-like with shape (n_rows, n_columns).
+    from_columns(list_of_columns, **kwargs)
+        Instantiate from an array-like with shape (n_columns, n_rows).
     """
     def __new__(cls, data, h5loc=DEFAULT_H5LOC, dtype=None,
-                colnames=None, split_h5=False, name=None, **kwargs):
+                split_h5=DEFAULT_SPLIT, name=DEFAULT_NAME, **kwargs):
         if isinstance(data, dict):
             return cls.from_dict(data, h5loc=h5loc, dtype=dtype,
-                                 split_h5=split_h5, colnames=colnames,
-                                 name=name, **kwargs)
-        if isinstance(data, list) or isinstance(data, tuple):
-            raise ValueError(
-                "Lists/tuples are not supported! Please provide either "
-                "a dict(array), a pandas dataframe, an ndarray "
-                "with a structured dtype, or a 2d ndarray plus colnames!")
-        if isinstance(data, 'DataFrame'):
+                                 split_h5=split_h5, name=name, **kwargs)
+        if istype(data, 'DataFrame'):
             return cls.from_dataframe(data, h5loc=h5loc, dtype=dtype,
-                                      split_h5=split_h5, colnames=colnames,
-                                      name=name, **kwargs)
+                                      split_h5=split_h5, name=name, **kwargs)
+        if isinstance(data, (list, tuple)):
+            raise ValueError(
+                "Lists/tuples are not supported! "
+                "Please use the `from_rows` or `from_columns` method instead!")
         if not has_structured_dt(data):
             # flat (nonstructured) dtypes fail miserably!
             # default to `|V8` whyever
-            if dtype is None or not is_structured(dtype):
-                # infer structured dtype from array data + column names
-                if colnames is None:
-                    raise ValueError(
-                        "Need to either specify column names or a "
-                        "structured dtype when passing unstructured arrays!"
-                    )
-                dtype = inflate_dtype(data, colnames)
-            # this *should* have been checked above, but do this
-            # just to be sure in case I screwed up the logic above;
-            # users will never see this, this should only show in tests
-            assert is_structured(dtype)
-            data = np.asanyarray(data).view(dtype)
+            raise ValueError(
+                "Arrays without structured dtype are not supported! "
+                "Please use the `from_rows` or `from_columns` method instead!")
+
+        if dtype is None:
             dtype = data.dtype
 
+        assert is_structured(dtype)
         obj = np.asanyarray(data, dtype=dtype).view(cls)
         obj.h5loc = h5loc
         obj.split_h5 = split_h5
-        if name is None:
-            name = 'Generic Table'
         obj.name = name
         return obj
 
@@ -137,10 +134,11 @@ class Table(np.recarray):
             return obj
         # views or slices
         self.h5loc = getattr(obj, 'h5loc', DEFAULT_H5LOC)
-        self.split_h5 = getattr(obj, 'split_h5', False)
-        self.name = getattr(obj, 'name', 'Generic Table')
+        self.split_h5 = getattr(obj, 'split_h5', DEFAULT_SPLIT)
+        self.name = getattr(obj, 'name', DEFAULT_NAME)
         # attribute access returns void instances on slicing/iteration
-        # kudos to https://github.com/numpy/numpy/issues/3581#issuecomment-108957200
+        # kudos to
+        # https://github.com/numpy/numpy/issues/3581#issuecomment-108957200
         if obj is not None and type(obj) is not type(self):
             self.dtype = np.dtype((np.record, obj.dtype))
 
@@ -178,7 +176,8 @@ class Table(np.recarray):
             dt_names = [f for f in dtype.names]
             dict_names = [k for k in arr_dict.keys()]
             if not set(dt_names) == set(dict_names):
-                raise KeyError('Dictionary keys and dtype fields do not match!')
+                raise KeyError(
+                    'Dictionary keys and dtype fields do not match!')
             names = list(dtype.names)
 
         arr_dict = cls._expand_scalars(arr_dict)
@@ -186,7 +185,7 @@ class Table(np.recarray):
                                      dtype=dtype), **kwargs)
 
     @classmethod
-    def from_columns(cls, arr_list, dtype=None, colnames=None, **kwargs):
+    def from_columns(cls, column_list, dtype=None, colnames=None, **kwargs):
         if dtype is None or not is_structured(dtype):
             # infer structured dtype from array data + column names
             if colnames is None:
@@ -194,18 +193,31 @@ class Table(np.recarray):
                     "Need to either specify column names or a "
                     "structured dtype when passing unstructured arrays!"
                 )
-            dtype = inflate_dtype(arr_list, colnames)
+            dtype = inflate_dtype(column_list, colnames)
             colnames = dtype.names
-        if len(arr_list) != len(dtype.names):
+        if len(column_list) != len(dtype.names):
             raise ValueError(
                 "Number of columns mismatch between data and dtype!")
         return cls(
-            {k: arr_list[i] for i, k in enumerate(dtype.names)},
+            {k: column_list[i] for i, k in enumerate(dtype.names)},
             dtype=dtype, colnames=colnames, **kwargs)
 
     @classmethod
-    def from_rows(cls, arr_list, dtype=None, colnames=None, **kwargs):
-        raise NotImplementedError
+    def from_rows(cls, row_list, dtype=None, colnames=None, **kwargs):
+        if dtype is None or not is_structured(dtype):
+            # infer structured dtype from array data + column names
+            if colnames is None:
+                raise ValueError(
+                    "Need to either specify column names or a "
+                    "structured dtype when passing unstructured arrays!"
+                )
+            dtype = inflate_dtype(row_list, colnames)
+        # this *should* have been checked above, but do this
+        # just to be sure in case I screwed up the logic above;
+        # users will never see this, this should only show in tests
+        assert is_structured(dtype)
+        data = np.asanyarray(row_list).view(dtype)
+        return cls(data, **kwargs)
 
     @property
     def templates_avail(self):
@@ -226,7 +238,7 @@ class Table(np.recarray):
             or a ``dict`` containing the required attributes (see the other
             templates for reference).
         """
-        name = None
+        name = DEFAULT_NAME
         if isinstance(template, str):
             name = template
             table_info = TEMPLATES[name]
@@ -241,17 +253,15 @@ class Table(np.recarray):
         return cls(data, h5loc=loc, dtype=dt, split_h5=split, name=name)
 
     @staticmethod
-    def _check_column_length(colnames, values, n):
+    def _check_column_length(values, n):
         values = np.atleast_2d(values)
-        for i in range(len(values)):
-            v = values[i]
+        for v in values:
             if len(v) == n:
                 continue
             else:
-                if len(values[i]) != n:
-                    raise ValueError(
-                        "Trying to append more than one column, but "
-                        "some arrays mismatch in length!")
+                raise ValueError(
+                    "Trying to append more than one column, but "
+                    "some arrays mismatch in length!")
 
     def append_columns(self, colnames, values, **kwargs):
         """Append new columns to the table.
@@ -272,7 +282,7 @@ class Table(np.recarray):
         values = np.atleast_1d(values)
         if not isinstance(colnames, str) and len(colnames) > 1:
             values = np.atleast_2d(values)
-            self._check_column_length(colnames, values, n)
+            self._check_column_length(values, n)
 
         if values.ndim == 1:
             if len(values) > n:
@@ -327,7 +337,7 @@ class Table(np.recarray):
         s = "{} {}\n".format(name, type(self))
         s += "HDF5 location: {} ({})\n".format(self.h5loc, spl)
         s += "\n".join(map(lambda d: "{} (dtype: {}) = {}"
-                                     .format(*d, self[d[0]]),
+                           .format(*d, self[d[0]]),
                            self.dtype.descr))
         return s
 

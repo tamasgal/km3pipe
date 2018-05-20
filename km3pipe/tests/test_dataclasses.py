@@ -153,7 +153,7 @@ class TestTable(TestCase):
         with pytest.raises(KeyError):
             tab = Table.from_dict(dmap, dtype=bad_dt)
 
-    def test_fromlist(self):
+    def test_fromcolumns(self):
         n = 5
         dlist = [
             np.ones(n, dtype=int),
@@ -178,6 +178,32 @@ class TestTable(TestCase):
         bad_dt = [('a', float), ('b', float), ('c', float), ('d', int)]
         with pytest.raises(ValueError):
             tab = Table.from_columns(dlist, dtype=bad_dt)
+            print(tab.dtype)
+            print(tab.shape)
+            print(tab)
+
+    def test_fromrows(self):
+        n = 5
+        dlist = [
+            [1, 2, 3],
+            [4, 5, 6],
+        ]
+        dt = np.dtype([('a', float), ('b', float), ('c', float)])
+        tab = Table.from_rows(dlist, dtype=dt)
+        print(tab.dtype)
+        print(tab.shape)
+        print(tab)
+        assert tab.h5loc == DEFAULT_H5LOC
+        assert isinstance(tab, Table)
+        tab = Table.from_rows(dlist, dtype=dt, h5loc='/foo')
+        print(tab.dtype)
+        print(tab.shape)
+        print(tab)
+        assert tab.h5loc == '/foo'
+        assert isinstance(tab, Table)
+        bad_dt = [('a', float), ('b', float), ('c', float), ('d', int)]
+        with pytest.raises(ValueError):
+            tab = Table.from_rows(dlist, dtype=bad_dt)
             print(tab.dtype)
             print(tab.shape)
             print(tab)
@@ -266,6 +292,10 @@ class TestTable(TestCase):
             t = Table([1, 2, 3]).dtype
         with pytest.raises(ValueError):
             t = Table([1, 2, 3], colnames=['a', 'b', 'c'])      # noqa
+
+    def test_init_with_unstructured_raises_valueerror(self):
+        with pytest.raises(ValueError):
+            Table(np.array([[1, 2, 3], [4, 5, 6]]))
 
     def test_fromdict_init(self):
         n = 5
