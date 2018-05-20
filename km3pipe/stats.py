@@ -49,18 +49,19 @@ class rv_kde(rv_continuous):
         data = check_array(data, order='C')
         if bw is None:
             if bw_statsmodels:
-                bw = self._bandwidth_statsmodels(data, bw_method)
+                bw = self._bandwidth_statsmodels(data)
             else:
                 bw = self._bandwidth_scipy(data, bw_method)
-        self._bw = bw
         self._kde = KernelDensity(bandwidth=bw, **kde_args).fit(data)
+        self.bandwidth = bw
+        self.kernel = self._kde.get_params()['kernel']
         super(rv_kde, self).__init__(name='KDE')
 
     @staticmethod
-    def _bandwidth_statsmodels(sample, bw_method=None):
+    def _bandwidth_statsmodels(sample):
         from statsmodels.nonparametric.kernel_density import KDEMultivariate
         # all continuous
-        vt = sample.ndim * 'c'
+        vt = sample.shape[1] * 'c'
         skde = KDEMultivariate(sample, var_type=vt)
         bw = skde.bw
         return bw
@@ -70,7 +71,7 @@ class rv_kde(rv_continuous):
         from scipy.stats import gaussian_kde
         # sklearn expects switched shape versus scipy
         sample = sample.T
-        gkde = gaussian_kde(sample, bw_method=None)
+        gkde = gaussian_kde(sample, bw_method=bw_method)
         f = gkde.covariance_factor()
         bw = f * sample.std()
         return bw
@@ -79,6 +80,7 @@ class rv_kde(rv_continuous):
         # we implement `pdf` instead of `_pdf`, since
         # otherwise scipy performs reshaping of `x` which messes
         # things up for sklearn -- we wanna reshape ourselves!
+        from sklearn.utils import check_array
         x = check_array(x, order='C')
         log_pdf = self._kde.score_samples(x)
         pdf = np.exp(log_pdf)
@@ -103,19 +105,21 @@ def drop_zero_variance(df):
 
 def param_names(scipy_dist):
     """Get names of fit parameters from a ``scipy.rv_*`` distribution."""
+    if not isinstance(scipy_dist, rv_continuous):
+        raise TypeError
     names = ['loc', 'scale']
     if scipy_dist.shapes is not None:
         names += scipy_dist.shapes.split()
     return names
 
 
-def perc(p=95):
+def perc(arr, p=95, **kwargs):
     """Create symmetric percentiles, with ``p`` coverage."""
     offset = (100 - p) / 2
-    return offset, 100 - offset
+    return np.percentile(arr, (offset, 100 - offset), **kwargs)
 
 
-def resample_1d(arr, n_out=None):
+def resample_1d(arr, n_out=None, random_state=None):
     """Resample an array, with replacement.
 
     Parameters
@@ -126,15 +130,17 @@ def resample_1d(arr, n_out=None):
         Number of samples to return. If not specified,
         return ``len(arr)`` samples.
     """
+    if random_state is None:
+        random_state = np.random.RandomState()
     arr = np.atleast_1d(arr)
     n = len(arr)
     if n_out is None:
         n_out = n
-    idx = np.random.randint(0, n, size=n)
+    idx = random_state.randint(0, n, size=n)
     return arr[idx]
 
 
-def bootstrap_params(rv_cont, data, n_iter=5):
+def bootstrap_params(rv_cont, data, n_iter=5, **kwargs):
     """Bootstrap the fit params of a distribution.
 
     Parameters
@@ -148,7 +154,7 @@ def bootstrap_params(rv_cont, data, n_iter=5):
     """
     fit_res = []
     for i in range(n_iter):
-        params = rv_cont.fit(resample_1d(data))
+        params = rv_cont.fit(resample_1d(data, **kwargs))
         fit_res.append(params)
     fit_res = np.array(fit_res)
     return fit_res
@@ -163,7 +169,8 @@ def param_describe(params, quant=95, axis=0):
     return par, p_lo, p_up
 
 
-def bootstrap_fit(rv_cont, data, n_iter=10, quant=95, print_params=True):
+def bootstrap_fit(rv_cont, data, n_iter=10, quant=95, print_params=True,
+                  **kwargs):
     """Bootstrap a distribution fit + get confidence intervals for the params.
 
     Parameters
@@ -187,8 +194,12 @@ def bootstrap_fit(rv_cont, data, n_iter=10, quant=95, print_params=True):
     print(rv_cont.name)
     print("--------------")
     for i, name in enumerate(names):
-        print("{nam:>{fill}}: {mean:+.3f} ∈ [{lo:+.3f}, {up:+.3f}] ({q}%)".format(
-            nam=name, fill=maxlen, mean=par[i], lo=lo[i], up=up[i], q=quant))
+        print(
+            "{nam:>{fill}}: {mean:+.3f} ∈ "
+            "[{lo:+.3f}, {up:+.3f}] ({q}%)".format(
+                nam=name, fill=maxlen, mean=par[i],
+                lo=lo[i], up=up[i], q=quant)
+        )
     out = {
         'mean': par,
         'lower limit': lo,
