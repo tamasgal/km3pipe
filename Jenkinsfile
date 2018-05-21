@@ -22,8 +22,7 @@ def get_stages(docker_image) {
             def PYTHON_VENV = DOCKER_HOME + '/venv'
             withEnv(["HOME=${env.WORKSPACE}"]){
                 stage("${docker_image}") {
-                    echo "Running in ${docker_image} with HOME set to
-${DOCKER_HOME}"
+                    echo "Running in ${docker_image} with HOME set to ${DOCKER_HOME}"
                 }
                 stage("Prepare") {
                     sh "rm -rf ${PYTHON_VENV}"
