@@ -60,6 +60,7 @@ def get_stages(docker_image) {
                         gitlabCommitStatus("Test") {
                             try { 
                                 sh """
+                                    export MPLBACKEND="agg"
                                     make clean
                                     make test
                                 """
@@ -74,6 +75,7 @@ def get_stages(docker_image) {
                         gitlabCommitStatus("Test KM3Modules") {
                             try { 
                                 sh """
+                                    export MPLBACKEND="agg"
                                     make test-km3modules
                                 """
                             } catch (e) { 
@@ -103,6 +105,7 @@ def get_stages(docker_image) {
                         gitlabCommitStatus("Coverage") {
                             try { 
                                 sh """
+                                    export MPLBACKEND="agg"
                                     make clean
                                     make test-cov
                                 """
