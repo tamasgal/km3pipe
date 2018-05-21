@@ -18,28 +18,6 @@ from km3pipe.dataclasses import Table
 log = kp.logger.get_logger(__name__)
 
 
-class Wrap(Module):
-    """Wrap a key-val dictionary as a Serialisable.
-    """
-
-    def configure(self):
-        self.keys = self.get('keys') or None
-        key = self.get('key') or None
-        if key and not self.keys:
-            self.keys = [key]
-
-    def process(self, blob):
-        keys = sorted(blob.keys()) if self.keys is None else self.keys
-        for key in keys:
-            dat = blob[key]
-            if dat is None:
-                continue
-            dt = np.dtype([(f, float) for f in sorted(dat.keys())])
-            arr = Table(dat, dtype=dt)
-            blob[key] = arr
-        return blob
-
-
 class Dump(Module):
     """Print the content of the blob.
 
@@ -197,49 +175,6 @@ class MemoryObserver(Module):
     def process(self, blob):
         memory = peak_memory_usage()
         prettyln("Memory peak: {0:.3f} MB".format(memory))
-        return blob
-
-
-class Cut(Module):
-    """Drop an event from the pipe, depending on some condition.
-
-    Parameters
-    ----------
-    key: string
-        Blob content to cut on (must have `.conv_to(to='pandas')` method)
-    condition: string
-        Condition to eval on the dataframe, e.g. "zenith >= 1.4".
-    verbose: bool, optional (default=False)
-        Print extra info?
-    """
-
-    def configure(self):
-        self.key = self.require('key')
-        self.cond = self.require('condition')
-        self.verbose = self.get('verbose') or False
-
-    def process(self, blob):
-        df = blob[self.key].conv_to(to='pandas')
-        ok = df.eval(self.cond).all()
-        if not ok:
-            if self.verbose:
-                self.print('Condition "%s" not met, dropping...' % self.cond)
-            return
-        blob[self.key] = df
-        return blob
-
-
-class GetAngle(Module):
-    """Convert pos(x, y, z) to zenith, azimuth."""
-
-    def configure(self):
-        self.key = self.require('key')
-
-    def process(self, blob):
-        df = blob[self.key].conv_to(to='pandas')
-        df['zenith'] = zenith(df[['dir_x', 'dir_y', 'dir_z']])
-        df['azimuth'] = azimuth(df[['dir_x', 'dir_y', 'dir_z']])
-        blob[self.key] = df
         return blob
 
 
