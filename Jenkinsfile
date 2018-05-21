@@ -28,6 +28,8 @@ def get_stages(docker_image) {
                     sh "rm -rf ${PYTHON_VENV}"
                     sh "python -m venv ${PYTHON_VENV}"
                     sh """
+                        whoami
+                        echo ${HOME}
                         . ${PYTHON_VENV}/bin/activate
                         pip install -U pip setuptools wheel
                     """
