@@ -18,7 +18,7 @@ def get_stages(docker_image) {
             //
             // So we set it to 'venv' for all parallel builds now
             def DOCKER_HOME = env.WORKSPACE + '/' + docker_image.replaceAll('[:.]', '') + '_home'
-            withEnv(["HOME=${env.WORKSPACE}"]){
+            withEnv(["HOME=${env.WORKSPACE}", "MPLBACKEND=agg"]){
                 stage("${docker_image}") {
                     echo "Running in ${docker_image} with HOME set to ${DOCKER_HOME}"
                 }
@@ -60,7 +60,6 @@ def get_stages(docker_image) {
                         gitlabCommitStatus("Test") {
                             try { 
                                 sh """
-                                    export MPLBACKEND="agg"
                                     make clean
                                     make test
                                 """
@@ -75,7 +74,6 @@ def get_stages(docker_image) {
                         gitlabCommitStatus("Test KM3Modules") {
                             try { 
                                 sh """
-                                    export MPLBACKEND="agg"
                                     make test-km3modules
                                 """
                             } catch (e) { 
@@ -105,7 +103,6 @@ def get_stages(docker_image) {
                         gitlabCommitStatus("Coverage") {
                             try { 
                                 sh """
-                                    export MPLBACKEND="agg"
                                     make clean
                                     make test-cov
                                 """
@@ -140,7 +137,6 @@ def get_stages(docker_image) {
                             try { 
                                 sh """
                                     cd doc
-                                    export MPLBACKEND="agg"
                                     make html
                                 """
                             } catch (e) { 
