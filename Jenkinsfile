@@ -1,6 +1,5 @@
 #!groovy
-// def DOCKER_IMAGES = ["python:3.5.5", "python:3.6.4", "python:3.6.5"]
-DOCKER_IMAGES = ["python:3.6.5"]
+DOCKER_IMAGES = ["python:3.5.0", "python:3.5.5", "python:3.6.4", "python:3.6.5"]
 CHAT_CHANNEL = '#km3pipe'
 DEVELOPERS = ['tgal@km3net.de', 'mlotze@km3net.de']
 
