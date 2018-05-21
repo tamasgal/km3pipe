@@ -30,7 +30,7 @@ def get_stages(docker_image) {
                         pip install -U pip setuptools wheel
                     """
                 }
-                gitlabBuilds(builds: ['Deps', 'Test', 'Install', 'Test KM3Modules', 'Test Reports', 'Coverage', 'Docs']) {
+                gitlabBuilds(builds: ['Deps', 'Install', 'Test', 'Test KM3Modules', 'Test Reports', 'Coverage', 'Docs']) {
                     stage("Deps") {
                         gitlabCommitStatus("Deps") {
                             try { 
@@ -40,6 +40,19 @@ def get_stages(docker_image) {
                             } catch (e) { 
                                 sendChatMessage("Install Dependencies Failed")
                                 sendMail("Install Dependencies Failed")
+                                throw e
+                            }
+                        }
+                    }
+                    stage("Install") {
+                        gitlabCommitStatus("Install") {
+                            try { 
+                                sh """
+                                    make install
+                                """
+                            } catch (e) { 
+                                sendChatMessage("Install Failed")
+                                sendMail("Install Failed")
                                 throw e
                             }
                         }
@@ -54,19 +67,6 @@ def get_stages(docker_image) {
                             } catch (e) { 
                                 sendChatMessage("Test Suite Failed")
                                 sendMail("Test Suite Failed")
-                                throw e
-                            }
-                        }
-                    }
-                    stage("Install") {
-                        gitlabCommitStatus("Install") {
-                            try { 
-                                sh """
-                                    make install
-                                """
-                            } catch (e) { 
-                                sendChatMessage("Install Failed")
-                                sendMail("Install Failed")
                                 throw e
                             }
                         }
