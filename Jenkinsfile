@@ -9,7 +9,7 @@ properties([gitLabConnection('KM3NeT GitLab')])
 
 def get_stages(docker_image) {
     stages = {
-        docker.image(docker_image).inside {
+        docker.image(docker_image).inside("-u root:root") {
 
             // The following line causes a weird issue, where pip tries to 
             // install into /usr/local/... instead of the virtual env.
@@ -19,16 +19,12 @@ def get_stages(docker_image) {
             //
             // So we set it to 'venv' for all parallel builds now
             def DOCKER_HOME = env.WORKSPACE + '/' + docker_image.replaceAll('[:.]', '') + '_home'
-            def PYTHON_VENV = DOCKER_HOME + '/venv'
             withEnv(["HOME=${env.WORKSPACE}"]){
                 stage("${docker_image}") {
                     echo "Running in ${docker_image} with HOME set to ${DOCKER_HOME}"
                 }
                 stage("Prepare") {
-                    sh "rm -rf ${PYTHON_VENV}"
-                    sh "python -m venv ${PYTHON_VENV}"
                     sh """
-                        . ${PYTHON_VENV}/bin/activate
                         pip install -U pip setuptools wheel
                     """
                 }
@@ -37,7 +33,6 @@ def get_stages(docker_image) {
                         gitlabCommitStatus("Deps") {
                             try { 
                                 sh """
-                                    . ${PYTHON_VENV}/bin/activate
                                     make dependencies
                                 """
                             } catch (e) { 
@@ -51,7 +46,6 @@ def get_stages(docker_image) {
                         gitlabCommitStatus("Test") {
                             try { 
                                 sh """
-                                    . ${PYTHON_VENV}/bin/activate
                                     make clean
                                     make test
                                 """
@@ -66,7 +60,6 @@ def get_stages(docker_image) {
                         gitlabCommitStatus("Install") {
                             try { 
                                 sh """
-                                    . ${PYTHON_VENV}/bin/activate
                                     make install
                                 """
                             } catch (e) { 
@@ -80,7 +73,6 @@ def get_stages(docker_image) {
                         gitlabCommitStatus("Test KM3Modules") {
                             try { 
                                 sh """
-                                    . ${PYTHON_VENV}/bin/activate
                                     make test-km3modules
                                 """
                             } catch (e) { 
@@ -110,7 +102,6 @@ def get_stages(docker_image) {
                         gitlabCommitStatus("Coverage") {
                             try { 
                                 sh """
-                                    . ${PYTHON_VENV}/bin/activate
                                     make clean
                                     make test-cov
                                 """
@@ -144,7 +135,6 @@ def get_stages(docker_image) {
                         gitlabCommitStatus("Docs") {
                             try { 
                                 sh """
-                                    . ${PYTHON_VENV}/bin/activate
                                     cd doc
                                     export MPLBACKEND="agg"
                                     make html
