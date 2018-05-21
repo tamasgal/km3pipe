@@ -25,6 +25,8 @@ def get_stages(docker_image) {
                 }
                 stage("Prepare") {
                     sh """
+                        whoami
+                        echo ${HOME}
                         pip install -U pip setuptools wheel
                     """
                 }
