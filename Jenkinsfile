@@ -22,31 +22,13 @@ def get_stages(docker_image) {
                 stage("${docker_image}") {
                     echo "Running in ${docker_image} with HOME set to ${DOCKER_HOME}"
                 }
-                stage("Prepare") {
-                    sh """
-                        whoami
-                        echo ${HOME}
-                        pip install -U pip setuptools wheel
-                    """
-                }
-                gitlabBuilds(builds: ['Deps', 'Install', 'Test', 'Test KM3Modules', 'Test Reports', 'Coverage', 'Docs']) {
-                    stage("Deps") {
-                        gitlabCommitStatus("Deps") {
-                            try { 
-                                sh """
-                                    make dependencies
-                                """
-                            } catch (e) { 
-                                sendChatMessage("Install Dependencies Failed")
-                                sendMail("Install Dependencies Failed")
-                                throw e
-                            }
-                        }
-                    }
+                gitlabBuilds(builds: ['Install', 'Test', 'Docs']) {
                     stage("Install") {
                         gitlabCommitStatus("Install") {
                             try { 
                                 sh """
+                                    pip install -U pip setuptools wheel
+                                    make dependencies
                                     make install
                                 """
                             } catch (e) { 
@@ -68,10 +50,6 @@ def get_stages(docker_image) {
                                 sendMail("Test Suite Failed")
                                 throw e
                             }
-                        }
-                    }
-                    stage('Test KM3Modules') {
-                        gitlabCommitStatus("Test KM3Modules") {
                             try { 
                                 sh """
                                     make test-km3modules
@@ -81,10 +59,6 @@ def get_stages(docker_image) {
                                 sendMail("KM3Modules Test Suite Failed")
                                 throw e
                             }
-                        }
-                    }
-                    stage('Test Reports') {
-                        gitlabCommitStatus("Test Reports") {
                             try { 
                                 step([$class: 'XUnitBuilder',
                                     thresholds: [
@@ -97,10 +71,6 @@ def get_stages(docker_image) {
                                 sendMail("Failed to create test reports.")
                                 throw e
                             }
-                        }
-                    }
-                    stage('Coverage') {
-                        gitlabCommitStatus("Coverage") {
                             try { 
                                 sh """
                                     make clean
@@ -144,22 +114,20 @@ def get_stages(docker_image) {
                                 sendMail("Building Docs Failed")
                                 throw e
                             }
+                            try {
+                               publishHTML target: [
+                                   allowMissing: false,
+                                   alwaysLinkToLastBuild: false,
+                                   keepAll: true,
+                                   reportDir: 'doc/_build/html',
+                                   reportFiles: 'index.html',
+                                   reportName: 'Documentation'
+                               ]
+                            } catch (e) {
+                                sendChatMessage("Publishing Docs Failed")
+                                sendMail("Publishing Docs Failed")
+                            }
                         }
-                    }
-                }
-                stage('Publishing Docs') {
-                    try {
-                       publishHTML target: [
-                           allowMissing: false,
-                           alwaysLinkToLastBuild: false,
-                           keepAll: true,
-                           reportDir: 'doc/_build/html',
-                           reportFiles: 'index.html',
-                           reportName: 'Documentation'
-                       ]
-                    } catch (e) {
-                        sendChatMessage("Publishing Docs Failed")
-                        sendMail("Publishing Docs Failed")
                     }
                 }
             }
