@@ -17,7 +17,7 @@ def get_stages(docker_image) {
             // def PYTHON_VENV = docker_image.replaceAll('[:.]', '') + 'venv'
             //
             // So we set it to 'venv' for all parallel builds now
-            def DOCKER_NAME = = docker_image.replaceAll('[:.]', '')
+            def DOCKER_NAME = docker_image.replaceAll('[:.]', '')
             def DOCKER_HOME = env.WORKSPACE + '/' + DOCKER_NAME + '_home'
             withEnv(["HOME=${env.WORKSPACE}", "MPLBACKEND=agg", "DOCKER_NAME=${DOCKER_NAME}"]){
                 stage("${docker_image}") {
