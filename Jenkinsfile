@@ -20,9 +20,6 @@ def get_stages(docker_image) {
             def DOCKER_NAME = docker_image.replaceAll('[:.]', '')
             def DOCKER_HOME = env.WORKSPACE + '/' + DOCKER_NAME + '_home'
             withEnv(["HOME=${env.WORKSPACE}", "MPLBACKEND=agg", "DOCKER_NAME=${DOCKER_NAME}"]){
-                stage("${docker_image}") {
-                    echo "Running in ${docker_image} with HOME set to ${DOCKER_HOME}"
-                }
                 gitlabBuilds(builds: ["Install (${DOCKER_NAME})", "Test (${DOCKER_NAME})", "Docs (${DOCKER_NAME})"]) {
                     stage("Install (${DOCKER_NAME})") {
                         gitlabCommitStatus("Install (${DOCKER_NAME})") {
