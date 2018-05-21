@@ -18,28 +18,6 @@ from km3pipe.dataclasses import Table
 log = kp.logger.get_logger(__name__)
 
 
-class Wrap(Module):
-    """Wrap a key-val dictionary as a Serialisable.
-    """
-
-    def configure(self):
-        self.keys = self.get('keys') or None
-        key = self.get('key') or None
-        if key and not self.keys:
-            self.keys = [key]
-
-    def process(self, blob):
-        keys = sorted(blob.keys()) if self.keys is None else self.keys
-        for key in keys:
-            dat = blob[key]
-            if dat is None:
-                continue
-            dt = np.dtype([(f, float) for f in sorted(dat.keys())])
-            arr = Table(dat, dtype=dt)
-            blob[key] = arr
-        return blob
-
-
 class Dump(Module):
     """Print the content of the blob.
 
