@@ -17,14 +17,15 @@ def get_stages(docker_image) {
             // def PYTHON_VENV = docker_image.replaceAll('[:.]', '') + 'venv'
             //
             // So we set it to 'venv' for all parallel builds now
-            def DOCKER_HOME = env.WORKSPACE + '/' + docker_image.replaceAll('[:.]', '') + '_home'
-            withEnv(["HOME=${env.WORKSPACE}", "MPLBACKEND=agg"]){
+            def DOCKER_NAME = = docker_image.replaceAll('[:.]', '')
+            def DOCKER_HOME = env.WORKSPACE + '/' + DOCKER_NAME + '_home'
+            withEnv(["HOME=${env.WORKSPACE}", "MPLBACKEND=agg", "DOCKER_NAME=${DOCKER_NAME}"]){
                 stage("${docker_image}") {
                     echo "Running in ${docker_image} with HOME set to ${DOCKER_HOME}"
                 }
-                gitlabBuilds(builds: ['Install', 'Test', 'Docs']) {
-                    stage("Install") {
-                        gitlabCommitStatus("Install") {
+                gitlabBuilds(builds: ["Install (${DOCKER_NAME})", "Test (${DOCKER_NAME})", "Docs (${DOCKER_NAME})"]) {
+                    stage("Install (${DOCKER_NAME})") {
+                        gitlabCommitStatus("Install (${DOCKER_NAME})") {
                             try { 
                                 sh """
                                     pip install -U pip setuptools wheel
@@ -32,22 +33,22 @@ def get_stages(docker_image) {
                                     make install
                                 """
                             } catch (e) { 
-                                sendChatMessage("Install Failed")
-                                sendMail("Install Failed")
+                                sendChatMessage("Install (${DOCKER_NAME}) Failed")
+                                sendMail("Install (${DOCKER_NAME}) Failed")
                                 throw e
                             }
                         }
                     }
-                    stage('Test') {
-                        gitlabCommitStatus("Test") {
+                    stage("Test (${DOCKER_NAME})") {
+                        gitlabCommitStatus("Test (${DOCKER_NAME})") {
                             try { 
                                 sh """
                                     make clean
                                     make test
                                 """
                             } catch (e) { 
-                                sendChatMessage("Test Suite Failed")
-                                sendMail("Test Suite Failed")
+                                sendChatMessage("Test Suite (${DOCKER_NAME}) Failed")
+                                sendMail("Test Suite (${DOCKER_NAME}) Failed")
                                 throw e
                             }
                             try { 
@@ -55,8 +56,8 @@ def get_stages(docker_image) {
                                     make test-km3modules
                                 """
                             } catch (e) { 
-                                sendChatMessage("KM3Modules Test Suite Failed")
-                                sendMail("KM3Modules Test Suite Failed")
+                                sendChatMessage("KM3Modules Test Suite (${DOCKER_NAME}) Failed")
+                                sendMail("KM3Modules Test Suite (${DOCKER_NAME}) Failed")
                                 throw e
                             }
                             try { 
@@ -67,8 +68,8 @@ def get_stages(docker_image) {
                                     // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
                                     tools: [[$class: 'JUnitType', pattern: 'reports/*.xml']]])
                             } catch (e) { 
-                                sendChatMessage("Failed to create test reports.")
-                                sendMail("Failed to create test reports.")
+                                sendChatMessage("Failed to create test reports (${DOCKER_NAME}).")
+                                sendMail("Failed to create test reports (${DOCKER_NAME}).")
                                 throw e
                             }
                             try { 
@@ -79,7 +80,7 @@ def get_stages(docker_image) {
                                 step([$class: 'CoberturaPublisher',
                                         autoUpdateHealth: false,
                                         autoUpdateStability: false,
-                                        coberturaReportFile: 'reports/coverage.xml',
+                                        coberturaReportFile: "reports/coverage${DOCKER_NAME}.xml",
                                         failNoReports: false,
                                         failUnhealthy: false,
                                         failUnstable: false,
@@ -87,31 +88,23 @@ def get_stages(docker_image) {
                                         onlyStable: false,
                                         sourceEncoding: 'ASCII',
                                         zoomCoverageChart: false])
-                                publishHTML target: [
-                                   allowMissing: false,
-                                   alwaysLinkToLastBuild: false,
-                                   keepAll: true,
-                                   reportDir: 'reports/coverage',
-                                   reportFiles: 'index.html',
-                                   reportName: 'Coverage'
-                                ]
                             } catch (e) { 
-                                sendChatMessage("Coverage Failed")
-                                sendMail("Coverage Failed")
+                                sendChatMessage("Coverage (${DOCKER_NAME}) Failed")
+                                sendMail("Coverage  (${DOCKER_NAME}) Failed")
                                 throw e
                             }
                         }
                     }
-                    stage('Docs') {
-                        gitlabCommitStatus("Docs") {
+                    stage("Docs (${DOCKER_NAME})") {
+                        gitlabCommitStatus("Docs (${DOCKER_NAME})") {
                             try { 
                                 sh """
                                     cd doc
                                     make html
                                 """
                             } catch (e) { 
-                                sendChatMessage("Building Docs Failed")
-                                sendMail("Building Docs Failed")
+                                sendChatMessage("Building Docs (${DOCKER_NAME}) Failed")
+                                sendMail("Building Docs (${DOCKER_NAME}) Failed")
                                 throw e
                             }
                             try {
