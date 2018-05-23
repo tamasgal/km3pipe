@@ -87,3 +87,6 @@ reports
 
 .pytest_cache/
 .DS_Store
+
+# pyenv tmp
+.python-version
