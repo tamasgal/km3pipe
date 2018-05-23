@@ -90,3 +90,5 @@ reports
 
 # pyenv tmp
 .python-version
+
+.mypy_cache/
