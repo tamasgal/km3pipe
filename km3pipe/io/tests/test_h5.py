@@ -112,6 +112,23 @@ class TestH5Sink(TestCase):
         p.attach(HDF5Sink, h5file=self.out)
         p.drain()
 
+    def test_scalars(self):
+        out = tb.open_file('foobar_scalar', "a", driver="H5FD_CORE",
+                           driver_core_backing_store=0)
+
+        def pu(blob):
+            return {'foo': 42.0}
+
+        p = Pipeline()
+        p.attach(pu)
+        p.attach(HDF5Sink, h5file=out, keep_open=True)
+        p.drain(2)
+        node = out.root.misc
+        assert node is not None
+        assert node.cols is not None
+        assert 'foo' in set(node.cols._v_colnames)
+        out.close()
+
 
 class TestH5SinkConsistency(TestCase):
     def test_h5_consistency_for_tables_without_group_id(self):
@@ -235,7 +252,7 @@ class TestHDF5PumpConsistency(TestCase):
                 assert 'Tab' in blob
                 assert self.index == blob['EventInfo'].group_id
                 assert self.index * 10 == blob['Tab']['a']
-                assert 1 == blob['Tab']['b'] == 1 
+                assert 1 == blob['Tab']['b'] == 1
                 assert np.allclose(np.arange(self.index), blob['Tab2']['a'])
                 return blob
 

@@ -16,7 +16,7 @@ from km3pipe.core import Pump, Module, Blob
 from km3pipe.dataclasses import Table, DEFAULT_H5LOC
 from km3pipe.dataclass_templates import TEMPLATES
 from km3pipe.logger import get_logger
-from km3pipe.tools import camelise, split, istype
+from km3pipe.tools import decamelise, camelise, split, istype
 
 log = get_logger(__name__)  # pylint: disable=C0103
 
@@ -81,6 +81,7 @@ class HDF5Sink(Module):
         self.ext_h5file = self.get('h5file') or None
         self.pytab_file_args = self.get('pytab_file_args') or dict()
         self.file_mode = 'a' if self.get('append') else 'w'
+        self.keep_open = self.get('keep_open')
         self.indices = {}
         self._header_written = False
         # magic 10000: this is the default of the "expectedrows" arg
@@ -102,10 +103,13 @@ class HDF5Sink(Module):
                                   complib='zlib')
         self._tables = OrderedDict()
 
-    def _to_array(self, data):
+    def _to_array(self, data, name=None):
         if np.isscalar(data):
             self.log.debug('toarray: is a scalar')
-            return np.asarray(data).reshape((1,))
+            return Table({name: np.asarray(data).reshape((1,))},
+                         h5loc='/misc/{}'.format(decamelise(name)),
+                         name=name
+                    )
         if len(data) <= 0:
             self.log.debug('toarray: data has no length')
             return
@@ -187,7 +191,7 @@ class HDF5Sink(Module):
     def _process_entry(self, key, entry):
         self.log.debug("Inspecting {}".format(key))
         self.log.debug("Converting to numpy array...")
-        data = self._to_array(entry)
+        data = self._to_array(entry, name=key)
         if data is None or not hasattr(data, 'dtype'):
             self.log.debug("Conversion failed. moving on...")
             return
@@ -283,7 +287,8 @@ class HDF5Sink(Module):
             for name, value in metadata.items():
                 self.h5file.set_node_attr("/", name, value)
 
-        self.h5file.close()
+        if not self.keep_open:
+            self.h5file.close()
         self.print("HDF5 file written to: {}".format(self.filename))
 
 
