@@ -414,9 +414,84 @@ KM3_TAGS = {
     ],
 }
 
+def parse_propa(blob):
+    """Creates new blob entries for the given blob keys"""
+
+    if 'track_in' in blob.keys():
+        
+        muon = blob['track_in']
+        
+        blob['Muon'] = Table({'id': np.array(muon)[:,0].astype(int),
+                              'dir_x': np.array(muon)[:,1],
+                              'dir_y': np.array(muon)[:,2],
+                              'dir_z': np.array(muon)[:,3],
+                              'pos_x': np.array(muon)[:,4],
+                              'pos_y': np.array(muon)[:,5],
+                              'pos_z': np.array(muon)[:,6],
+                              'energy': np.array(muon)[:,7],
+                              'time': np.array(muon)[:,8],
+                              'particle_id': np.array(muon)[:,9].astype(int),
+                              'is_charm': np.array(muon)[:,10].astype(int),
+                              'mother_pid': np.array(muon)[:,11].astype(int),
+                              'grandmother_pid': np.array(muon)[:,11].astype(int),
+                              },h5loc='muon')
+                                  
+        blob['MuonMultiplicity'] = Table({'muon_multiplicity': len(np.array(muon)[:,6])
+                                          },h5loc='muon_multiplicity')
+
+    if 'neutrino' in blob.keys():
+        
+        nu = blob['neutrino']
+        
+        blob['Neutrino'] = Table({'id': np.array(nu)[:,0].astype(int),
+                                  'dir_x': np.array(nu)[:,1],
+                                  'dir_y': np.array(nu)[:,2],
+                                  'dir_z': np.array(nu)[:,3],
+                                  'pos_x': np.array(nu)[:,4],
+                                  'pos_y': np.array(nu)[:,5],
+                                  'pos_z': np.array(nu)[:,6],
+                                  'energy': np.array(nu)[:,7],
+                                  'time': np.array(nu)[:,8],
+                                  'particle_id': np.array(nu)[:,9].astype(int),
+                                  'is_charm': np.array(nu)[:,10].astype(int),
+                                  'mother_pid': np.array(nu)[:,11].astype(int),
+                                  'grandmother_pid': np.array(nu)[:,11].astype(int),
+                                  },h5loc='nu')
+        blob['NeutrinoMultiplicity'] = Table({'total': len(np.array(nu)[:,6]),
+                                              'nue': len(np.array(nu)[:,6][np.array(nu)[:,9]==12]),
+                                              'anue': len(np.array(nu)[:,6][np.array(nu)[:,9]==-12]),
+                                              'numu': len(np.array(nu)[:,6][np.array(nu)[:,9]==14]),
+                                              'anumu': len(np.array(nu)[:,6][np.array(nu)[:,9]==-14]),
+                                              },h5loc='nu_multiplicity')
+        
+    if ('track_in' or 'neutrino') in blob.keys():
+        
+        blob['Weights'] = Table({'w1': blob['weights'][0][0],
+                                 'w2': blob['weights'][0][1],
+                                 'w3': blob['weights'][0][2],
+                                 },h5loc='weights')
+        
+    if 'track_primary' in blob.keys():
+        
+        primary = blob['track_primary']
+        
+        blob['Primary'] = Table({'id': np.array(primary)[:,0].astype(int),
+                                 'dir_x': np.array(primary)[:,1],
+                                 'dir_y': np.array(primary)[:,2],
+                                 'dir_z': np.array(primary)[:,3],
+                                 'pos_x': np.array(primary)[:,4],
+                                 'pos_y': np.array(primary)[:,5],
+                                 'pos_z': np.array(primary)[:,6],
+                                 'energy': np.array(primary)[:,7],
+                                 'time': np.array(primary)[:,8],
+                                 'particle_id': np.array(primary)[:,9].astype(int)
+                                 },h5loc='primary')
+        
+    return blob
 
 EVT_PARSERS = {
     'km3sim': Parser(KM3SIM_TAGS),
     'gseagen': Parser(GSEAGEN_TAGS),
     'km3': Parser(KM3_TAGS),
+    'propa': parse_propa,
 }
