@@ -5,7 +5,7 @@ from os.path import join, dirname
 
 import numpy as np
 
-from km3pipe.testing import TestCase
+from km3pipe.testing import TestCase, skip
 from km3pipe.io.evt import EvtPump, EVT_PARSERS
 
 __author__ = "Tamas Gal"
@@ -298,6 +298,40 @@ class TestCorsika(TestCase):
     def test_pipe(self):
         pump = EvtPump(filename=self.fname)
         next(pump)
+        pump.finish()
+
+
+class TestPropa(TestCase):
+    def setUp(self):
+        self.fname = join(TEST_DATA_DIR, 'DAT000007_propa_1-4.evt')
+
+    def test_pipe(self):
+        pump = EvtPump(filename=self.fname, parsers=['propa'])
+        assert EVT_PARSERS['propa'] in pump.parsers
+        blob =  next(pump)
+        assert 'start_event' in blob
+        assert 'track_primary' in blob
+        assert 'Muon' in blob
+        assert 'MuonMultiplicity' in blob
+        assert 'Neutrino' in blob
+        assert 'NeutrinoMultiplicity' in blob
+        assert 'Weights' in blob
+        assert 'Primary' in blob
+        pump.finish()
+
+    @skip
+    def test_auto_parser(self):
+        pump = EvtPump(filename=self.fname)
+        assert EVT_PARSERS['propa'] in pump.parsers
+        blob =  next(pump)
+        assert 'start_event' in blob
+        assert 'track_primary' in blob
+        assert 'Muon' in blob
+        assert 'MuonMultiplicity' in blob
+        assert 'Neutrino' in blob
+        assert 'NeutrinoMultiplicity' in blob
+        assert 'Weights' in blob
+        assert 'Primary' in blob
         pump.finish()
 
 
