@@ -78,6 +78,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
         parsers = self.get('parsers', default='auto')
         self.cache_enabled = self.get('cache_enabled') or False
         self.basename = self.get('basename') or None
+        self.filenames = self.get('filenames') or None
         self.suffix = self.get('suffix', default='')
         self.index_start = self.get('index_start', default=1)
         self.index_stop = self.get('index_stop', default=1)
@@ -113,6 +114,9 @@ class EvtPump(Pump):  # pylint: disable:R0902
             self.filename = "{}{}{}.evt"  \
                             .format(self.basename, file_index, self.suffix)
             self.log.info("Constructed filename: {}".format(self.filename))
+
+        if self.filenames:
+            self.file_index = 0
 
         if self.filename:
             self.print("Opening {0}".format(self.filename))
@@ -202,6 +206,21 @@ class EvtPump(Pump):  # pylint: disable:R0902
             blob = self.get_blob(self.index)
         except IndexError:
             self.log.info("Got an IndexError, trying the next file")
+            if self.filenames and self.file_index < len(self.filenames):
+                self.filename = self.filenames[self.file_index]
+                self.file_index += 1
+                self.index = 0
+                self.print("Opening {0}".format(self.filename))
+                self.open_file(self.filename)
+                self.prepare_blobs()
+                try:
+                    blob = self.get_blob(self.index)
+                except IndexError:
+                    self.log.warning("No blob found in file {}"
+                                     .format(self.filename))
+                else:
+                    return blob
+
             if self.basename and self.file_index < self.index_stop:
                 self.file_index += 1
                 self.log.info("Now at file_index={}".format(self.file_index))

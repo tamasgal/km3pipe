@@ -281,6 +281,11 @@ class TestEvtFilePump(TestCase):
         next(pump)
         pump.finish()
 
+    def test_filenames(self):
+        pump = EvtPump(filenames=[self.fname, self.fname])
+        for e in pump:
+            assert e is not None
+
     def test_context(self):
         with EvtPump(self.fname) as ef:
             self.assertEqual(self.fname, ef.filename)
