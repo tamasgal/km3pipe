@@ -2,6 +2,7 @@ PKGNAME=km3pipe
 ALLNAMES = $(PKGNAME)
 ALLNAMES += km3modules 
 ALLNAMES += pipeinspector
+SUFFIX=${DOCKER_NAME}
 
 default: build
 
@@ -26,13 +27,13 @@ clean:
 	rm -f $(PKGNAME)/*.so
 
 test: 
-	py.test --junitxml=./reports/junit.xml $(PKGNAME)
+	py.test --junitxml=./reports/junit$(SUFFIX).xml $(PKGNAME)
 
 test-km3modules: 
-	py.test --junitxml=./reports/junit_km3modules.xml km3modules
+	py.test --junitxml=./reports/junit_km3modules$(SUFFIX).xml km3modules
 
 test-cov:
-	py.test --cov ./ --cov-report term-missing --cov-report xml:reports/coverage.xml --cov-report html:reports/coverage $(ALLNAMES)
+	py.test --cov ./ --cov-report term-missing --cov-report xml:reports/coverage$(SUFFIX).xml --cov-report html:reports/coverage $(ALLNAMES)
 
 test-loop: 
 	py.test

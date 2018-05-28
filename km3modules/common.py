@@ -178,49 +178,6 @@ class MemoryObserver(Module):
         return blob
 
 
-class Cut(Module):
-    """Drop an event from the pipe, depending on some condition.
-
-    Parameters
-    ----------
-    key: string
-        Blob content to cut on (must have `.conv_to(to='pandas')` method)
-    condition: string
-        Condition to eval on the dataframe, e.g. "zenith >= 1.4".
-    verbose: bool, optional (default=False)
-        Print extra info?
-    """
-
-    def configure(self):
-        self.key = self.require('key')
-        self.cond = self.require('condition')
-        self.verbose = self.get('verbose') or False
-
-    def process(self, blob):
-        df = blob[self.key].conv_to(to='pandas')
-        ok = df.eval(self.cond).all()
-        if not ok:
-            if self.verbose:
-                self.print('Condition "%s" not met, dropping...' % self.cond)
-            return
-        blob[self.key] = df
-        return blob
-
-
-class GetAngle(Module):
-    """Convert pos(x, y, z) to zenith, azimuth."""
-
-    def configure(self):
-        self.key = self.require('key')
-
-    def process(self, blob):
-        df = blob[self.key].conv_to(to='pandas')
-        df['zenith'] = zenith(df[['dir_x', 'dir_y', 'dir_z']])
-        df['azimuth'] = azimuth(df[['dir_x', 'dir_y', 'dir_z']])
-        blob[self.key] = df
-        return blob
-
-
 class Siphon(Module):
     """A siphon to accumulate a given volume of blobs.
 
