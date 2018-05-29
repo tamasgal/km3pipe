@@ -143,11 +143,10 @@ node('master') {
     cleanWs()
     checkout scm
 
-    def dockerfiles = [];
-    def dir = new File("${env.WORKSPACE}/${DOCKER_FILES_DIR}");
-    dir.traverse(type: FILES, maxDepth: 0) {
-        dockerfiles.add(it.getName())
-    }
+    def TMP_FILENAME = ".docker_files_list"
+    sh "ls ${DOCKER_FILES_DIR} > ${TMP_FILENAME}"
+    def dockerfiles = readFile(TMP_FILENAME).split( "\\r?\\n" );
+    sh "rm -f ${TMP_FILENAME}"
 
     def stages = [:]
     for (int i = 0; i < dockerfiles.size(); i++) {
