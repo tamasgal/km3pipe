@@ -1,7 +1,7 @@
 #!groovy
 import groovy.io.FileType
 
-DOCKER_FILES_DIR = 'dockerfiles'
+DOCKER_FILES_DIR = './dockerfiles'
 CHAT_CHANNEL = '#km3pipe'
 DEVELOPERS = ['tgal@km3net.de', 'mlotze@km3net.de']
 
@@ -10,7 +10,7 @@ properties([gitLabConnection('KM3NeT GitLab')])
 
 def get_stages(dockerfile) {
     stages = {
-        def customImage = docker.build("km3pipe:${env.BUILD_ID}", "-f ${dockerfile} ./dockerfiles") 
+        def customImage = docker.build("km3pipe:${env.BUILD_ID}", "-f ${dockerfile} ${DOCKER_FILES_DIR}") 
 
         customImage.inside("-u root:root") {
 
