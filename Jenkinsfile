@@ -10,7 +10,7 @@ properties([gitLabConnection('KM3NeT GitLab')])
 
 def get_stages(dockerfile) {
     stages = {
-        def customImage = docker.build("km3pipe:${env.BUILD_ID}", "-f ${DOCKER_FILES_DIR} + '/' + ${dockerfile}") 
+        def customImage = docker.build("km3pipe:${env.BUILD_ID}", "-f ${dockerfile} ${DOCKER_FILES_DIR}") 
 
         customImage.inside("-u root:root") {
 
