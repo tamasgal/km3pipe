@@ -1,15 +1,18 @@
 #!groovy
-// DOCKER_IMAGES = ["python:3.5.5", "python:3.6.5"]
-DOCKER_IMAGES = ["python:3.6.5"]
+import groovy.io.FileType
+
+DOCKER_FILES_DIR = './dockerfiles'
 CHAT_CHANNEL = '#km3pipe'
 DEVELOPERS = ['tgal@km3net.de', 'mlotze@km3net.de']
 
 properties([gitLabConnection('KM3NeT GitLab')])
 
 
-def get_stages(docker_image) {
+def get_stages(dockerfile) {
     stages = {
-        docker.image(docker_image).inside("-u root:root") {
+        def customImage = docker.build("km3pipe:${env.BUILD_ID}", "-f ${dockerfile} ./dockerfiles") 
+
+        customImage.inside("-u root:root") {
 
             // The following line causes a weird issue, where pip tries to 
             // install into /usr/local/... instead of the virtual env.
@@ -18,7 +21,7 @@ def get_stages(docker_image) {
             // def PYTHON_VENV = docker_image.replaceAll('[:.]', '') + 'venv'
             //
             // So we set it to 'venv' for all parallel builds now
-            def DOCKER_NAME = docker_image.replaceAll('[:.]', '')
+            def DOCKER_NAME = dockerfile
             def DOCKER_HOME = env.WORKSPACE + '/' + DOCKER_NAME + '_home'
             withEnv(["HOME=${env.WORKSPACE}", "MPLBACKEND=agg", "DOCKER_NAME=${DOCKER_NAME}"]){
                 gitlabBuilds(builds: ["Install (${DOCKER_NAME})", "Test (${DOCKER_NAME})", "Docs (${DOCKER_NAME})"]) {
@@ -133,10 +136,16 @@ node('master') {
     cleanWs()
     checkout scm
 
+    def dockerfiles = []
+    def dir = new File(DOCKER_FILES_DIR)
+    dir.eachFileRecurse (FileType.FILES) { file ->
+      dockerfiles << file
+    }
+
     def stages = [:]
-    for (int i = 0; i < DOCKER_IMAGES.size(); i++) {
-        def docker_image = DOCKER_IMAGES[i]
-        stages[docker_image] = get_stages(docker_image)
+    for (int i = 0; i < dockerfiles.size(); i++) {
+        def docker_image = dockerfiles[i]
+        stages[dockerfile] = get_stages(dockerfile)
     }
 
     parallel stages
