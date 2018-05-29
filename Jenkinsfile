@@ -1,7 +1,7 @@
 #!groovy
 import groovy.io.FileType
 
-DOCKER_FILES_DIR = './dockerfiles'
+DOCKER_FILES_DIR = 'dockerfiles'
 CHAT_CHANNEL = '#km3pipe'
 DEVELOPERS = ['tgal@km3net.de', 'mlotze@km3net.de']
 
