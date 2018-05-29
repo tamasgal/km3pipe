@@ -349,22 +349,65 @@ class Table(np.recarray):
         return elem in self.dtype.names
 
     @property
-    def dir(self):
-        return np.array([self.dir_x, self.dir_y, self.dir_z]).T
-        # return self.__class__.from_template(
-        #     {'dir_x': self.dir_x, 'dir_y': self.dir_y, 'dir_z': self.dir_z},
-        #     'Direction')
+    def pos(self):
+        return np.array([self.pos_x, self.pos_y, self.pos_z]).T
 
     @pos.setter
     def pos(self, arr):
+        try:
+            _ = self.pos_x
+        except AttributeError:
+            raise ValueError(
+                "Table has no existing 'pos_{x,y,z}' entries. If you'd like "
+                "to append positions to this table, please use the "
+                "`.append_columns(['dir_x', 'dir_y', 'dir_z'], "
+                "[pos_x, pos_y, pos_z])` method.")
         arr = np.atleast_2d(arr)
-        assert arr.shape[1] >= 3
-        for idx, ltr in enumerate(['x', 'y', 'z']):
-            self['pos_{}'.format(lrt)] = arr[:, idx]
+        assert arr.shape[1] == 3
+        assert len(arr) == len(self)
+        self.pos_x = arr[:, 0]
+        self.pos_y = arr[:, 1]
+        self.pos_z = arr[:, 2]
 
     @property
-    def pos(self):
-        return np.array([self.pos_x, self.pos_y, self.pos_z]).T
-        # return self.__class__.from_template(
-        #     {'pos_x': self.pos_x, 'pos_y': self.pos_y, 'pos_z': self.pos_z},
-        #     'Position')
+    def dir(self):
+        return np.array([self.dir_x, self.dir_y, self.dir_z]).T
+
+    @dir.setter
+    def dir(self, arr):
+        try:
+            _ = self.dir_x
+        except AttributeError:
+            raise ValueError(
+                "Table has no existing 'dir_{x,y,z}' entries. If you'd like "
+                "to append directions to this table, please use the "
+                "`.append_columns(['dir_x', 'dir_y', 'dir_z'], "
+                "[dir_x, dir_y, dir_z])` method.")
+        arr = np.atleast_2d(arr)
+        assert arr.shape[1] == 3
+        assert len(arr) == len(self)
+        self.dir_x = arr[:, 0]
+        self.dir_y = arr[:, 1]
+        self.dir_z = arr[:, 2]
+
+    @property
+    def phi(self):
+        from km3pipe.math import phi_separg
+        return phi_separg(self.dir_x, self.dir_y)
+
+    @property
+    def theta(self):
+        from km3pipe.math import theta_separg
+        return theta_separg(self.dir_z)
+
+    @property
+    def zenith(self):
+        from km3pipe.math import neutrino_to_source_direction
+        _, zen = neutrino_to_source_direction(self.phi, self.theta)
+        return zen
+
+    @property
+    def azimuth(self):
+        from km3pipe.math import neutrino_to_source_direction
+        azi, _ = neutrino_to_source_direction(self.phi, self.theta)
+        return azi

@@ -602,7 +602,9 @@ class TestTableFancyAttributes(TestCase):
             'pos_x': [10, 20, 30],
             'pos_y': [40, 50, 60],
             'pos_z': [70, 80, 90],
-            'pos_z': [70, 80, 90],
+            'dir_x': [10.0, 20.0, 30.0],
+            'dir_y': [40.0, 50.0, 60.0],
+            'dir_z': [70.0, 80.0, 90.0],
         })
 
     def test_pos_getter(self):
@@ -629,7 +631,51 @@ class TestTableFancyAttributes(TestCase):
                      'dir_z': [7, 8, 9]})
         assert np.allclose([[2, 5, 8]], tab.dir[1])
 
-    def test_nodup(self):
-        p = self.arr_bare.pos
-        print(p)
+    def test_same_shape_pos(self):
+        with pytest.raises(AttributeError):
+            p = self.arr_bare.pos
+        p = self.arr_wpos.pos
+        self.arr_wpos.pos = p
+        assert p is not None
+        # assert p.shape[1] == 3
+        with pytest.raises(ValueError):
+            self.arr_bare.dir = p
+
+    def test_same_shape_dir(self):
+        with pytest.raises(AttributeError):
+            p = self.arr_bare.dir
+        p = self.arr_wpos.dir
+        self.arr_wpos.dir = p
+        assert p is not None
+        # assert p.shape[1] == 3
+        a2 = self.arr_bare.copy()
+        with pytest.raises(ValueError):
+            self.arr_bare.dir = p
+
+    def test_phi(self):
+        tab = Table({'dir_x': [1, 0, 0],
+                     'dir_y': [0, 1, 0],
+                     'dir_z': [0, 0, 1]})
+        p = tab.phi
+        assert p is not None
+
+    def test_phi(self):
+        tab = Table({'dir_x': [1, 0, 0],
+                     'dir_y': [0, 1, 0],
+                     'dir_z': [0, 0, 1]})
+        p = tab.theta
+        assert p is not None
+
+    def test_zen(self):
+        tab = Table({'dir_x': [1, 0, 0],
+                     'dir_y': [0, 1, 0],
+                     'dir_z': [0, 0, 1]})
+        p = tab.zenith
+        assert p is not None
+
+    def test_azi(self):
+        tab = Table({'dir_x': [1, 0, 0],
+                     'dir_y': [0, 1, 0],
+                     'dir_z': [0, 0, 1]})
+        p = tab.azimuth
         assert p is not None
