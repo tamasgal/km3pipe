@@ -473,9 +473,16 @@ class HDF5Pump(Pump):
                 split_h5 = TEMPLATES[tabname]['split_h5']
             except KeyError:
                 split_h5 = False
+
+            index_column = None
             if 'group_id' in tab.dtype.names:
+                index_column = 'group_id'
+            if 'event_id' in tab.dtype.names:
+                index_column = 'event_id'
+
+            if index_column is not None:
                 try:
-                    arr = tab.read_where('group_id == %d' % group_id)
+                    arr = tab.read_where('%s == %d' % (index_column, group_id))
                 except NotImplementedError:
                     # 64-bit unsigned integer columns like ``group_id``
                     # are not yet supported in conditions
@@ -483,32 +490,15 @@ class HDF5Pump(Pump):
                         "get_blob: found uint64 column at '{}'...".format(
                             h5loc))
                     arr = tab.read()
-                    arr = arr[arr['group_id'] == group_id]
+                    arr = arr[arr[index_column] == group_id]
                 except ValueError:
                     # "there are no columns taking part
                     # in condition ``group_id == 0``"
                     self.log.info(
-                        "get_blob: no `group_id` column found in '{}'! "
-                        "skipping... ".format(h5loc))
+                        "get_blob: no `%s` column found in '%s'! "
+                        "skipping... " % (index_column, h5loc))
                     continue
-            if 'event_id' in tab.dtype.names:
-                try:
-                    arr = tab.read_where('event_id == %d' % group_id)
-                except NotImplementedError:
-                    # 64-bit unsigned integer columns like ``event_id``
-                    # are not yet supported in conditions
-                    self.log.debug(
-                        "get_blob: found uint64 column at '{}'...".format(
-                            h5loc))
-                    arr = tab.read()
-                    arr = arr[arr['event_id'] == group_id]
-                except ValueError:
-                    # "there are no columns taking part
-                    # in condition ``event_id == 0``"
-                    self.log.info(
-                        "get_blob: no `event_id` column found in '{}'! "
-                        "skipping... ".format(h5loc))
-                    continue
+
             self.log.debug("h5loc: '{}'".format(h5loc))
             blob[tabname] = Table(
                 arr, h5loc=h5loc, split_h5=split_h5, name=tabname)
