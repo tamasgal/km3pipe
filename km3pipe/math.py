@@ -76,6 +76,10 @@ def theta(v):
     """
     v = np.atleast_2d(v)
     dir_z = v[:, 2]
+    return theta_separg(dir_z)
+
+
+def theta_separg(dir_z):
     return np.arccos(dir_z)
 
 
@@ -89,10 +93,12 @@ def phi(v):
     v = np.atleast_2d(v)
     dir_x = v[:, 0]
     dir_y = v[:, 1]
+    return phi_separg(dir_x, dir_y)
+
+
+def phi_separg(dir_x, dir_y):
     p = np.arctan2(dir_y, dir_x)
     p[p < 0] += 2 * np.pi
-    # if len(p) == 1:
-    #     return p[0]
     return p
 
 
@@ -415,7 +421,7 @@ def log_b(arg, base):
 def qrot(vector, quaternion):
     """Rotate a 3D vector using quaternion algebra.
 
-    Implemented by Vladimir Kulikovskiy. 
+    Implemented by Vladimir Kulikovskiy.
 
     Parameters
     ----------
@@ -466,7 +472,7 @@ def qeuler(yaw, pitch, roll):
 
 def qrot_yaw(vector, heading):
     """Rotate vectors using quaternion algebra.
-    
+
 
     Parameters
     ----------
@@ -483,7 +489,7 @@ def qrot_yaw(vector, heading):
 
 def intersect_3d(p1, p2):
     """Find the closes point for a given set of lines in 3D.
-    
+
     Parameters
     ----------
     p1 : (M, N) array_like
