@@ -136,11 +136,12 @@ node('master') {
     cleanWs()
     checkout scm
 
-    def dockerfiles = []
-    def dir = new File(DOCKER_FILES_DIR)
-    dir.eachFileRecurse (FileType.FILES) { file ->
-      dockerfiles << file
-    }
+    def dockerfiles = ['py365']
+    // TODO: figure out how to get the files dynamically
+    // def dir = new File(DOCKER_FILES_DIR)
+    // dir.eachFileRecurse (FileType.FILES) { file ->
+    //   dockerfiles << file
+    // }
 
     def stages = [:]
     for (int i = 0; i < dockerfiles.size(); i++) {
