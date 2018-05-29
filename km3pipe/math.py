@@ -76,6 +76,10 @@ def theta(v):
     """
     v = np.atleast_2d(v)
     dir_z = v[:, 2]
+    return theta_separg(dir_z)
+
+
+def theta_separg(dir_z):
     return np.arccos(dir_z)
 
 
@@ -89,10 +93,12 @@ def phi(v):
     v = np.atleast_2d(v)
     dir_x = v[:, 0]
     dir_y = v[:, 1]
+    return phi_separg(dir_x, dir_y)
+
+
+def phi_separg(dir_x, dir_y):
     p = np.arctan2(dir_y, dir_x)
     p[p < 0] += 2 * np.pi
-    # if len(p) == 1:
-    #     return p[0]
     return p
 
 
@@ -415,7 +421,7 @@ def log_b(arg, base):
 def qrot(vector, quaternion):
     """Rotate a 3D vector using quaternion algebra.
 
-    Implemented by Vladimir Kulikovskiy. 
+    Implemented by Vladimir Kulikovskiy.
 
     Parameters
     ----------
@@ -466,7 +472,7 @@ def qeuler(yaw, pitch, roll):
 
 def qrot_yaw(vector, heading):
     """Rotate vectors using quaternion algebra.
-    
+
 
     Parameters
     ----------
@@ -483,7 +489,7 @@ def qrot_yaw(vector, heading):
 
 def intersect_3d(p1, p2):
     """Find the closes point for a given set of lines in 3D.
-    
+
     Parameters
     ----------
     p1 : (M, N) array_like
@@ -510,11 +516,14 @@ def intersect_3d(p1, p2):
     xx = np.sum(nx**2 - 1)
     yy = np.sum(ny**2 - 1)
     zz = np.sum(nz**2 - 1)
-    xy = np.sum(nx*ny)
-    xz = np.sum(nx*nz)
-    yz = np.sum(ny*nz)
+    xy = np.sum(nx * ny)
+    xz = np.sum(nx * nz)
+    yz = np.sum(ny * nz)
     M = np.array([(xx, xy, xz), (xy, yy, yz), (xz, yz, zz)])
-    x = np.sum(p1[:, 0]*(nx**2-1) + p1[:,1]*(nx*ny)  + p1[:, 2]*(nx*nz))
-    y = np.sum(p1[:, 0]*(nx*ny) + p1[:, 1]*(ny*ny - 1) + p1[:, 2]*(ny*nz))
-    z = np.sum(p1[:, 0]*(nx*nz) + p1[:, 1]*(ny*nz) + p1[:, 2]*(nz**2 - 1))
+    x = np.sum(p1[:, 0] * (nx**2 - 1) + p1[:, 1]
+               * (nx * ny) + p1[:, 2] * (nx * nz))
+    y = np.sum(p1[:, 0] * (nx * ny) + p1[:, 1] *
+               (ny * ny - 1) + p1[:, 2] * (ny * nz))
+    z = np.sum(p1[:, 0] * (nx * nz) + p1[:, 1] *
+               (ny * nz) + p1[:, 2] * (nz**2 - 1))
     return np.linalg.lstsq(M, np.array((x, y, z)), rcond=None)[0]
