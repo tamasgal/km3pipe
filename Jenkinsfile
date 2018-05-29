@@ -155,7 +155,7 @@ node('master') {
     def dockerfiles = [];
     def dir = new File("${env.WORKSPACE}/${DOCKER_FILES_DIR}");
     dir.traverse(type: FILES, maxDepth: 0) {
-        dockerfiles.add(it)
+        dockerfiles.add(it.getName())
     }
 
     def stages = [:]
