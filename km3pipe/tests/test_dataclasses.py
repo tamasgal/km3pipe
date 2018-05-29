@@ -530,30 +530,6 @@ class TestTable(TestCase):
         assert 'c' in tab
         assert 'd' not in tab
 
-    def test_pos_getter(self):
-        tab = Table({'pos_x': [1, 2, 3],
-                     'pos_y': [4, 5, 6],
-                     'pos_z': [7, 8, 9]})
-        assert np.allclose([[1, 4, 7], [2, 5, 8], [3, 6, 9]], tab.pos)
-
-    def test_pos_getter_for_single_entry(self):
-        tab = Table({'pos_x': [1, 2, 3],
-                     'pos_y': [4, 5, 6],
-                     'pos_z': [7, 8, 9]})
-        assert np.allclose([[2, 5, 8]], tab.pos[1])
-
-    def test_dir_getter(self):
-        tab = Table({'dir_x': [1, 2, 3],
-                     'dir_y': [4, 5, 6],
-                     'dir_z': [7, 8, 9]})
-        assert np.allclose([[1, 4, 7], [2, 5, 8], [3, 6, 9]], tab.dir)
-
-    def test_dir_getter_for_single_entry(self):
-        tab = Table({'dir_x': [1, 2, 3],
-                     'dir_y': [4, 5, 6],
-                     'dir_z': [7, 8, 9]})
-        assert np.allclose([[2, 5, 8]], tab.dir[1])
-
     def test_index_returns_reference(self):
         tab = Table({'a': [1, 2, 3]})
         tab[1].a = 4
@@ -613,3 +589,47 @@ class TestTable(TestCase):
         assert tab[im].h5loc == '/lala'
         assert tab[im].name == 'bla'
         assert tab[im].split_h5
+
+class TestTableFancyAttributes(TestCase):
+    def setUp(self):
+        self.arr_bare = Table({
+            'a': [1, 2, 3],
+            'b': [3, 4, 5],
+        })
+        self.arr_wpos = Table({
+            'a': [1, 2, 3],
+            'b': [3, 4, 5],
+            'pos_x': [10, 20, 30],
+            'pos_y': [40, 50, 60],
+            'pos_z': [70, 80, 90],
+            'pos_z': [70, 80, 90],
+        })
+
+    def test_pos_getter(self):
+        tab = Table({'pos_x': [1, 2, 3],
+                     'pos_y': [4, 5, 6],
+                     'pos_z': [7, 8, 9]})
+        assert np.allclose([[1, 4, 7], [2, 5, 8], [3, 6, 9]], tab.pos)
+
+    def test_pos_getter_for_single_entry(self):
+        tab = Table({'pos_x': [1, 2, 3],
+                     'pos_y': [4, 5, 6],
+                     'pos_z': [7, 8, 9]})
+        assert np.allclose([[2, 5, 8]], tab.pos[1])
+
+    def test_dir_getter(self):
+        tab = Table({'dir_x': [1, 2, 3],
+                     'dir_y': [4, 5, 6],
+                     'dir_z': [7, 8, 9]})
+        assert np.allclose([[1, 4, 7], [2, 5, 8], [3, 6, 9]], tab.dir)
+
+    def test_dir_getter_for_single_entry(self):
+        tab = Table({'dir_x': [1, 2, 3],
+                     'dir_y': [4, 5, 6],
+                     'dir_z': [7, 8, 9]})
+        assert np.allclose([[2, 5, 8]], tab.dir[1])
+
+    def test_nodup(self):
+        p = self.arr_bare.pos
+        print(p)
+        assert p is not None

@@ -355,6 +355,13 @@ class Table(np.recarray):
         #     {'dir_x': self.dir_x, 'dir_y': self.dir_y, 'dir_z': self.dir_z},
         #     'Direction')
 
+    @pos.setter
+    def pos(self, arr):
+        arr = np.atleast_2d(arr)
+        assert arr.shape[1] >= 3
+        for idx, ltr in enumerate(['x', 'y', 'z']):
+            self['pos_{}'.format(lrt)] = arr[:, idx]
+
     @property
     def pos(self):
         return np.array([self.pos_x, self.pos_y, self.pos_z]).T
