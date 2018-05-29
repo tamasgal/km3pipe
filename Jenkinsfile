@@ -10,7 +10,12 @@ properties([gitLabConnection('KM3NeT GitLab')])
 
 def get_stages(dockerfile) {
     stages = {
-        def customImage = docker.build("km3pipe:${env.BUILD_ID}", "-f ${dockerfile} ${DOCKER_FILES_DIR}") 
+
+        // Bug in Jenkins prevents using custom folder in docker.build
+        dir("${DOCKER_FILES_DIR}"){
+            def customImage = docker.build("km3pipe:${env.BUILD_ID}",
+                                           "-f ${dockerfile} .")
+        }
 
         customImage.inside("-u root:root") {
 
