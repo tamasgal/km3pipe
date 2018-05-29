@@ -70,7 +70,7 @@ def get_stages(dockerfile) {
                             try { 
                                 step([$class: 'XUnitBuilder',
                                     thresholds: [
-                                        [$class: 'SkippedThreshold', failureThreshold: '0'],
+                                        [$class: 'SkippedThreshold', failureThreshold: '5'],
                                         [$class: 'FailedThreshold', failureThreshold: '0']],
                                     // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
                                     tools: [[$class: 'JUnitType', pattern: 'reports/*.xml']]])
