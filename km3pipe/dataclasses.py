@@ -336,8 +336,8 @@ class Table(np.recarray):
         spl = 'split' if self.split_h5 else 'no split'
         s = "{} {}\n".format(name, type(self))
         s += "HDF5 location: {} ({})\n".format(self.h5loc, spl)
-        s += "\n".join(map(lambda d: "{} (dtype: {}) = {}"
-                           .format(*d, self[d[0]]),
+        s += "\n".join(map(lambda d: "{2} (dtype: {1}) = {0}"
+                           .format(self[d[0]], *d),
                            self.dtype.descr))
         return s
 
