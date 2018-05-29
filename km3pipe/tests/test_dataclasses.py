@@ -189,6 +189,8 @@ class TestTable(TestCase):
             [4, 5, 6],
         ]
         dt = np.dtype([('a', float), ('b', float), ('c', float)])
+        with pytest.raises(ValueError):
+            tab = Table(dlist, dtype=dt)
         tab = Table.from_rows(dlist, dtype=dt)
         print(tab.dtype)
         print(tab.shape)
