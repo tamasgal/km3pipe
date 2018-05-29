@@ -152,10 +152,13 @@ node('master') {
     // }
     // dockerfiles = findFiles(glob: "${DOCKER_FILES_DIR}#<{(|")
 
-    def dir = new File("${env.WORKSPACE}/${DOCKER_FILES_DIR}");
     def dockerfiles = [];
-    dir.traverse(type: FILES, maxDepth: 0) {
-        dockerfiles.add(it)
+    // def dir = new File("${env.WORKSPACE}/${DOCKER_FILES_DIR}");
+    dir("${env.WORKSPACE}"){
+        def dir = new File(DOCKER_FILES_DIR);
+        dir.traverse(type: FILES, maxDepth: 0) {
+            dockerfiles.add(it)
+        }
     }
 
     def stages = [:]
