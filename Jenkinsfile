@@ -12,9 +12,10 @@ def get_stages(dockerfile) {
     stages = {
 
         // Bug in Jenkins prevents using custom folder in docker.build
+        def customImage = ''
         dir("${DOCKER_FILES_DIR}"){
-            def customImage = docker.build("km3pipe:${env.BUILD_ID}",
-                                           "-f ${dockerfile} .")
+            customImage = docker.build("km3pipe:${env.BUILD_ID}",
+                                       "-f ${dockerfile} .")
         }
 
         customImage.inside("-u root:root") {
