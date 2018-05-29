@@ -1,5 +1,6 @@
 #!groovy
 import groovy.io.FileType
+import static groovy.io.FileType.FILES
 
 DOCKER_FILES_DIR = './dockerfiles'
 CHAT_CHANNEL = '#km3pipe'
@@ -149,7 +150,13 @@ node('master') {
     // dir.eachFileRecurse (FileType.FILES) { file ->
     //     dockerfiles << file
     // }
-    dockerfiles = findFiles(glob: "${DOCKER_FILES_DIR}/*")
+    // dockerfiles = findFiles(glob: "${DOCKER_FILES_DIR}#<{(|")
+
+    def dir = new File(DOCKER_FILES_DIR);
+    def dockerfiles = [];
+    dir.traverse(type: FILES, maxDepth: 0) {
+        dockerfiles.add(it)
+    }
 
     def stages = [:]
     for (int i = 0; i < dockerfiles.size(); i++) {
