@@ -143,15 +143,6 @@ node('master') {
     cleanWs()
     checkout scm
 
-    // def dockerfiles = ['py365']
-    // TODO: figure out how to get the files dynamically
-    // def dockerfiles = []
-    // def dir = new File(DOCKER_FILES_DIR)
-    // dir.eachFileRecurse (FileType.FILES) { file ->
-    //     dockerfiles << file
-    // }
-    // dockerfiles = findFiles(glob: "${DOCKER_FILES_DIR}#<{(|")
-
     def dockerfiles = [];
     def dir = new File("${env.WORKSPACE}/${DOCKER_FILES_DIR}");
     dir.traverse(type: FILES, maxDepth: 0) {
