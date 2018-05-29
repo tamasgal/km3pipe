@@ -225,15 +225,12 @@ class TestHDF5PumpConsistency(TestCase):
 
             def process(self, blob):
                 self.count += 1
-                ei = Table({'group_id': self.count}, h5loc='event_info')
-                tab = Table({'a': self.count * 10,
-                             'b': 1,
-                             'group_id': self.count},
+                tab = Table({'a': self.count * 10, 'b': 1},
                              h5loc='tab')
-                tab2 = Table({'a': np.arange(self.count),
-                              'group_id': self.count},
+                tab2 = Table({'a': np.arange(self.count)},
                              h5loc='tab2')
-                blob = Blob({'event_info': ei, 'tab': tab, 'tab2': tab2})
+                blob['Tab'] = tab
+                blob['Tab2'] = tab2
                 return blob
 
         pipe = Pipeline()
@@ -248,9 +245,9 @@ class TestHDF5PumpConsistency(TestCase):
 
             def process(self, blob):
                 self.index += 1
-                assert 'EventInfo' in blob
+                assert 'GroupInfo' in blob
                 assert 'Tab' in blob
-                assert self.index == blob['EventInfo'].group_id
+                assert self.index - 1 == blob['GroupInfo'].group_id
                 assert self.index * 10 == blob['Tab']['a']
                 assert 1 == blob['Tab']['b'] == 1
                 assert np.allclose(np.arange(self.index), blob['Tab2']['a'])
