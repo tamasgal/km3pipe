@@ -5,6 +5,7 @@
 Read and write KM3NeT-formatted HDF5 files.
 """
 from collections import OrderedDict, defaultdict
+from itertools import count
 import os.path
 import warnings
 
@@ -229,13 +230,23 @@ class HDF5Sink(Module):
             self.log.debug("Writing into single Table...")
             self._write_array(h5loc, data, title=title)
 
+        return data
+
     def process(self, blob):
         if not self._header_written and "Header" in blob \
                 and blob["Header"] is not None:
             self._write_header(blob['Header'])
 
+        written_blob = Blob()
         for key, entry in sorted(blob.items()):
-            self._process_entry(key, entry)
+            data = self._process_entry(key, entry)
+            if data is not None:
+                written_blob[key] = data
+
+        if 'GroupInfo' not in blob:
+            gi = Table({'group_id': self.index, 'n_blobs': len(written_blob)},
+                       h5loc='/group_info', name='Group Info')
+            self._process_entry('GroupInfo', gi)
 
         if not self.index % 1000:
             self.log.info('Flushing tables to disk...')
@@ -357,18 +368,9 @@ class HDF5Pump(Pump):
         else:
             raise IOError("No such file or directory: '{0}'"
                           .format(fn))
-        try:
-            with tb.open_file(fn, 'r') as h5file:
-                event_info = h5file.get_node('/', 'event_info')
-                try:
-                    self.group_ids[fn] = event_info.cols.group_id[:]
-                except AttributeError:
-                    self.group_ids[fn] = event_info.cols.event_id[:]
-            self._n_each[fn] = len(self.group_ids[fn])
-        except tb.NoSuchNodeError:
-            self.log.critical("No /event_info table found: '{0}'"
-                              .format(fn))
-            raise SystemExit
+
+        self._read_group_info(fn)
+
         if self.cut_mask_node is not None:
             if not self.cut_mask_node.startswith('/'):
                 self.cut_mask_node = '/' + self.cut_mask_node
@@ -380,6 +382,26 @@ class HDF5Pump(Pump):
                 raise ValueError("Cut mask length differs from event ids!")
         else:
             self.cut_masks = None
+
+    def _read_group_info(self, fn):
+        with tb.open_file(fn, 'r') as h5file:
+            if '/event_info' not in h5file and '/group_info' not in h5file:
+                self.log.critical("Missing /event_info or /group_info "
+                                  "in '%s', aborting..." % fn)
+                raise SystemExit
+            elif '/group_info' in h5file:
+                self.print("Reading group information from '/group_info'.")
+                group_info = h5file.get_node('/', 'group_info')
+                self.group_ids[fn] = group_info.cols.group_id[:]
+                self._n_each[fn] = len(self.group_ids[fn])
+            elif '/event_info' in h5file:
+                self.print("Reading group information from '/group_info'.")
+                event_info = h5file.get_node('/', 'event_info')
+                try:
+                    self.group_ids[fn] = event_info.cols.group_id[:]
+                except AttributeError:
+                    self.group_ids[fn] = event_info.cols.event_id[:]
+                self._n_each[fn] = len(self.group_ids[fn])
 
     def process(self, blob):
         try:
