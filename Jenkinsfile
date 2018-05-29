@@ -145,7 +145,7 @@ node('master') {
 
     def stages = [:]
     for (int i = 0; i < dockerfiles.size(); i++) {
-        def docker_image = dockerfiles[i]
+        def dockerfile = dockerfiles[i]
         stages[dockerfile] = get_stages(dockerfile)
     }
 
