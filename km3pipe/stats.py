@@ -99,6 +99,14 @@ def mad(v):
     return np.median(np.abs(v - np.median(v)))
 
 
+def mad_std(v):
+    """Robust estimate of standard deviation using the MAD.
+
+    Lifted from astropy.stats."""
+    MAD = mad(v)
+    return MAD * 1.482602218505602
+
+
 def drop_zero_variance(df):
     """Remove columns from dataframe with zero variance."""
     return df.copy().loc[:, df.var() != 0].copy()

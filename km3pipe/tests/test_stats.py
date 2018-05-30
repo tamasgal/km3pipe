@@ -9,7 +9,7 @@ from scipy import stats
 
 from km3pipe.testing import TestCase
 from km3pipe.stats import (
-    loguniform, rv_kde, mad, drop_zero_variance, param_names, perc,
+    loguniform, rv_kde, mad, mad_std, drop_zero_variance, param_names, perc,
     resample_1d, bootstrap_params, param_describe, bootstrap_fit,
     hist2d, bincenters
 )
@@ -92,6 +92,11 @@ class TestMAD(TestCase):
     def test_wiki(self):
         arr = np.array([1, 1, 2, 2, 4, 6, 9])
         assert np.allclose(mad(arr), 1)
+
+    def test_normal(self):
+        np.random.seed(42)
+        sample = np.random.normal(0, 1, 1000)
+        assert np.allclose(mad_std(sample), 1, atol=.1)
 
 
 class TestPerc(TestCase):
