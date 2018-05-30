@@ -69,14 +69,6 @@ def get_stages(dockerfile) {
                                 sendMail("KM3Modules Test Suite (${DOCKER_NAME}) Failed")
                                 throw e
                             }
-                            if(DOCKER_NAME == MAIN_DOCKER) {
-                                step([$class: 'XUnitBuilder',
-                                    thresholds: [
-                                        [$class: 'SkippedThreshold', failureThreshold: '5'],
-                                        [$class: 'FailedThreshold', failureThreshold: '0']],
-                                    // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
-                                    tools: [[$class: 'JUnitType', pattern: 'reports/*.xml']]])
-                            }
                             try { 
                                 sh """
                                     make clean
@@ -150,6 +142,15 @@ node('master') {
     }
 
     parallel stages
+
+    stage("Reports") {
+        step([$class: 'XUnitBuilder',
+            thresholds: [
+                [$class: 'SkippedThreshold', failureThreshold: '5'],
+                [$class: 'FailedThreshold', failureThreshold: '0']],
+            // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
+            tools: [[$class: 'JUnitType', pattern: 'reports/*.xml']]])
+    }
 }
 
 
