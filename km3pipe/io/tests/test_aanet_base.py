@@ -5,6 +5,12 @@ from os.path import join, dirname  # noqa
 
 from km3pipe.testing import TestCase
 
+import sys
+
+for mod in ['aa', 'ROOT']:
+    if mod in sys.modules:
+        del sys.modules[mod]
+
 import aa  # noqa
 from ROOT import Det, EventFile, TH2D
 
@@ -12,6 +18,9 @@ DATA_DIR = dirname(__file__) + '/'
 
 
 class TestDetector(TestCase):
+    def test_foo(self):
+        assert False
+
     def test_apply(self):
 
         det = Det(DATA_DIR + "KM3NeT_00000007_02122015_zest_DR_PMT.detx")
