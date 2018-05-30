@@ -10,7 +10,8 @@ from scipy import stats
 from km3pipe.testing import TestCase
 from km3pipe.stats import (
     loguniform, rv_kde, mad, drop_zero_variance, param_names, perc,
-    resample_1d, bootstrap_params, param_describe, bootstrap_fit
+    resample_1d, bootstrap_params, param_describe, bootstrap_fit,
+    hist2d
 )
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
@@ -162,3 +163,79 @@ class TestBootstrapFit(TestCase):
                              random_state=RandomState(self.seed))
         assert np.allclose(fits['mean'], [np.mean(arr), np.std(arr)],
                            atol=.5)
+
+
+class TestHist2D(TestCase):
+    def setUp(self):
+        np.random.seed(42)
+        self.sample = np.random.normal(0, 1, (100, 2))
+        self.bins = ([-2, 0, 2], [-2, 0, 2])
+
+    def test_pdf(self):
+        hist = np.histogram2d(self.sample[:, 0], self.sample[:, 1],
+                              normed=True, bins=self.bins)
+        h = hist2d(hist)
+        assert h.H.shape == (2, 2)
+        assert h.H_pad.shape == (4, 4)
+        f = h.pdf(0, 0)
+        assert f is not None
+
+    def test_norm(self):
+        hist1 = np.histogram2d(self.sample[:, 0], self.sample[:, 1],
+                               normed=True, bins=self.bins)
+        hist2 = np.histogram2d(self.sample[:, 0], self.sample[:, 1],
+                               normed=False, bins=self.bins)
+        h1 = hist2d(hist1)
+        h2 = hist2d(hist2)
+
+        print(h1.area)
+        print(h1.H)
+        print(h1.H / h1.area)
+        print((h1.H / h1.area).sum())
+        print(h1.H.sum())
+
+        h1s = h1.H.sum()
+        assert np.allclose(h1s, h1.H.sum())
+
+        assert np.allclose(h1.H.sum(), h2.H.sum())
+
+        assert np.allclose(h1.integral, 1)
+        assert np.allclose(h2.integral, 1)
+
+
+class TestHist2D(TestCase):
+    def setUp(self):
+        np.random.seed(42)
+        self.sample = np.random.normal(0, 1, (100, 2))
+        self.bins = ([-2, 0, 2], [-2, 0, 2])
+
+    def test_pdf(self):
+        hist = np.histogram2d(self.sample[:, 0], self.sample[:, 1],
+                              normed=True, bins=self.bins)
+        h = hist2d(hist)
+        assert h.H.shape == (2, 2)
+        assert h.H_pad.shape == (4, 4)
+        f = h.pdf(0, 0)
+        assert f is not None
+
+    def test_norm(self):
+        hist1 = np.histogram2d(self.sample[:, 0], self.sample[:, 1],
+                               normed=True, bins=self.bins)
+        hist2 = np.histogram2d(self.sample[:, 0], self.sample[:, 1],
+                               normed=False, bins=self.bins)
+        h1 = hist2d(hist1)
+        h2 = hist2d(hist2)
+
+        print(h1.area)
+        print(h1.H)
+        print(h1.H / h1.area)
+        print((h1.H / h1.area).sum())
+        print(h1.H.sum())
+
+        h1s = h1.H.sum()
+        assert np.allclose(h1s, h1.H.sum())
+
+        assert np.allclose(h1.H.sum(), h2.H.sum())
+
+        assert np.allclose(h1.integral, 1)
+        assert np.allclose(h2.integral, 1)

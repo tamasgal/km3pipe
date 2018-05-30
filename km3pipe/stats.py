@@ -206,3 +206,37 @@ def bootstrap_fit(rv_cont, data, n_iter=10, quant=95, print_params=True,
         'upper limit': up,
     }
     return out
+
+
+class hist2d(rv_continuous):
+    """Simple implementation of a 2d histogram."""
+    def __init__(self, H2D, *args, **kwargs):
+        H, xlims, ylims = H2D
+        self.H = H
+        self.xlims = xlims
+        self.ylims = ylims
+        self.H /= self.integral
+        self.xcenters = bincenters(xlims)
+        self.ycenters = bincenters(ylims)
+        super(hist2d, self).__init__(*args, **kwargs)
+
+    @property
+    def H_pad(self):
+        return zero_pad(self.H)
+
+    def _pdf(self, x, y):
+        return self.H_pad[
+            np.searchsorted(self.xlims, x, side='right'),
+            np.searchsorted(self.ylims, y, side='right'),
+        ]
+
+    @property
+    def integral(self):
+        return (self.H * self.area).sum()
+
+    @property
+    def area(self):
+        xwidths = np.diff(self.xlims)
+        ywidths = np.diff(self.ylims)
+        area = np.outer(xwidths, ywidths)
+        return area
