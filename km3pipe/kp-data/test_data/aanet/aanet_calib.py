@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
 
-from os.path import join, dirname  # noqa
-
 import sys
 
 for mod in ['aa', 'ROOT']:
@@ -12,11 +10,10 @@ for mod in ['aa', 'ROOT']:
 import aa  # noqa
 from ROOT import Det, EventFile, TH2D
 
-DATA_DIR = dirname(__file__) + '/'
 
-det = Det(DATA_DIR + "KM3NeT_00000007_02122015_zest_DR_PMT.detx")
+det = Det("KM3NeT_00000007_02122015_zest_DR_PMT.detx")
 EventFile.read_timeslices = True
-f = EventFile(DATA_DIR + 'small.root')
+f = EventFile('small.root')
 P = 50000       # 50 micro-seconds
 h2 = TH2D("h2", "h2", 200, 0, P, 60, 0, 800)
 for i, evt in enumerate(f):
