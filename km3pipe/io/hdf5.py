@@ -507,7 +507,8 @@ class HDF5Pump(Pump):
             # if some events are missing (group_id not continuous),
             # this does not work as intended
             # idx, n_items = self.indices[loc][group_id]
-            idx, n_items = self.indices[loc][local_index]
+            idx = self.indices[loc].col('index')[local_index]
+            n_items = self.indices[loc].col('n_items')[local_index]
             end = idx + n_items
             node = h5file.get_node(loc)
             columns = (c for c in node._v_children if c != '_indices')
