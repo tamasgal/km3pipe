@@ -515,7 +515,7 @@ class HDF5Pump(Pump):
             for column in columns:
                 data[column] = h5file.get_node(loc + '/' + column)[idx:end]
             tabname = camelise(loc.split('/')[-1])
-            blob[tabname] = Table(data, h5loc=loc, split_h5=True)
+            blob[tabname] = Table(data, h5loc=loc, split_h5=True, name=tabname)
 
         return blob
 
