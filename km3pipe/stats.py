@@ -9,6 +9,7 @@ from scipy.stats import rv_continuous
 
 from .math import log_b
 from .logger import get_logger
+from .tools import zero_pad
 
 __author__ = "Moritz Lotze"
 __copyright__ = "Copyright 2017, Tamas Gal and the KM3NeT collaboration."
@@ -240,3 +241,9 @@ class hist2d(rv_continuous):
         ywidths = np.diff(self.ylims)
         area = np.outer(xwidths, ywidths)
         return area
+
+
+def bincenters(bins):
+    """Bincenters, assuming they are all equally spaced."""
+    bins = np.atleast_1d(bins)
+    return 0.5 * (bins[1:] + bins[:-1])

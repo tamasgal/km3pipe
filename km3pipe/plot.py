@@ -14,6 +14,8 @@ try:
 except ImportError:
     HAS_SEABORN = False
 
+from km3pipe.stats import bincenters
+
 __author__ = "Moritz Lotze"
 __copyright__ = "Copyright 2018, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
@@ -21,12 +23,6 @@ __license__ = "BSD-3"
 __maintainer__ = "Moritz Lotze"
 __email__ = "mlotze@km3net.de"
 __status__ = "Development"
-
-
-def bincenters(bins):
-    """Bincenters, assuming they are all equally spaced."""
-    bins = np.atleast_1d(bins)
-    return 0.5 * (bins[1:] + bins[:-1])
 
 
 def hexbin(x, y, color="purple", **kwargs):

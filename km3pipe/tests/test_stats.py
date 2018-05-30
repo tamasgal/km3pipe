@@ -11,7 +11,7 @@ from km3pipe.testing import TestCase
 from km3pipe.stats import (
     loguniform, rv_kde, mad, drop_zero_variance, param_names, perc,
     resample_1d, bootstrap_params, param_describe, bootstrap_fit,
-    hist2d
+    hist2d, bincenters
 )
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
@@ -239,3 +239,9 @@ class TestHist2D(TestCase):
 
         assert np.allclose(h1.integral, 1)
         assert np.allclose(h2.integral, 1)
+
+
+class TestBins(TestCase):
+    def test_binlims(self):
+        bins = np.linspace(0, 20, 21)
+        assert bincenters(bins).shape[0] == bins.shape[0] - 1
