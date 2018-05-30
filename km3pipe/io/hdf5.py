@@ -466,10 +466,6 @@ class HDF5Pump(Pump):
                 self.indices[loc] = h5file.get_node(loc + '/' + '_indices')
                 continue
             tabname = camelise(tabname)
-            try:
-                split_h5 = TEMPLATES[tabname]['split_h5']
-            except KeyError:
-                split_h5 = False
 
             index_column = None
             if 'group_id' in tab.dtype.names:
@@ -498,7 +494,7 @@ class HDF5Pump(Pump):
 
             self.log.debug("h5loc: '{}'".format(h5loc))
             blob[tabname] = Table(
-                arr, h5loc=h5loc, split_h5=split_h5, name=tabname)
+                arr, h5loc=h5loc, split_h5=False, name=tabname)
 
         # skipped locs are now column wise datasets (usually hits)
         # currently hardcoded, in future using hdf5 attributes
