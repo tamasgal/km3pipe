@@ -106,7 +106,8 @@ def get_stages(dockerfile) {
                         gitlabCommitStatus("Docs (${DOCKER_NAME})") {
                             try { 
                                 sh """
-                                    cd doc
+                                    cp doc doc_${DOCKER_NAME}
+                                    cd doc_${DOCKER_NAME}
                                     make html
                                 """
                             } catch (e) { 
@@ -119,7 +120,7 @@ def get_stages(dockerfile) {
                                     allowMissing: false,
                                     alwaysLinkToLastBuild: false,
                                     keepAll: true,
-                                    reportDir: 'doc/_build/html',
+                                    reportDir: "doc_${DOCKER_NAME}/_build/html",
                                     reportFiles: 'index.html',
                                     reportName: 'Documentation'
                                 ]
