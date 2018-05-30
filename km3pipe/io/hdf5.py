@@ -453,16 +453,16 @@ class HDF5Pump(Pump):
         # skip groups with separate columns
         # and deal with them later
         # this should be solved using hdf5 attributes in near future
-        skipped_locs = []
+        split_locs = []
         for tab in h5file.walk_nodes(classname="Table"):
             h5loc = tab._v_pathname
             loc, tabname = os.path.split(h5loc)
-            if loc in skipped_locs:
-                self.log.info("get_blob: '%s' is blacklisted, skip..." % h5loc)
+            if loc in split_locs:
+                self.log.info("get_blob: '%s' is noted, skip..." % h5loc)
                 continue
             if tabname == "_indices":
-                self.log.debug("get_blob: found index table '%s'..." % h5loc)
-                skipped_locs.append(loc)
+                self.log.debug("get_blob: found index table '%s'" % h5loc)
+                split_locs.append(loc)
                 self.indices[loc] = h5file.get_node(loc + '/' + '_indices')
                 continue
             tabname = camelise(tabname)
@@ -503,7 +503,7 @@ class HDF5Pump(Pump):
         # skipped locs are now column wise datasets (usually hits)
         # currently hardcoded, in future using hdf5 attributes
         # to get the right constructor
-        for loc in skipped_locs:
+        for loc in split_locs:
             # if some events are missing (group_id not continuous),
             # this does not work as intended
             # idx, n_items = self.indices[loc][group_id]
