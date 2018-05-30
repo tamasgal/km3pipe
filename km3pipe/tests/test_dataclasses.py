@@ -590,6 +590,17 @@ class TestTable(TestCase):
         assert tab[im].name == 'bla'
         assert tab[im].split_h5
 
+    def test_crash_repr(self):
+        a = np.array('', dtype=[('a', '<U1')])
+        with pytest.raises(TypeError):
+            print(len(a))
+        tab = Table(a)
+        s = tab.__str__()
+        assert s is not None
+        r = tab.__repr__()
+        assert r is not None
+
+
 class TestTableFancyAttributes(TestCase):
     def setUp(self):
         self.arr_bare = Table({
