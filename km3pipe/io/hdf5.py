@@ -509,96 +509,13 @@ class HDF5Pump(Pump):
             # idx, n_items = self.indices[loc][group_id]
             idx, n_items = self.indices[loc][local_index]
             end = idx + n_items
-            if loc == '/hits' and not self.ignore_hits:
-                channel_id = h5file.get_node("/hits/channel_id")[idx:end]
-                dom_id = h5file.get_node("/hits/dom_id")[idx:end]
-                time = h5file.get_node("/hits/time")[idx:end]
-                tot = h5file.get_node("/hits/tot")[idx:end]
-                triggered = h5file.get_node("/hits/triggered")[idx:end]
-
-                datatype = h5file.get_node("/hits")._v_attrs.datatype
-
-                if datatype in {np.string_("CRawHitSeries"),
-                                np.string_("CalibHits")}:
-                    pos_x = h5file.get_node("/hits/pos_x")[idx:end]
-                    pos_y = h5file.get_node("/hits/pos_y")[idx:end]
-                    pos_z = h5file.get_node("/hits/pos_z")[idx:end]
-                    dir_x = h5file.get_node("/hits/dir_x")[idx:end]
-                    dir_y = h5file.get_node("/hits/dir_y")[idx:end]
-                    dir_z = h5file.get_node("/hits/dir_z")[idx:end]
-                    du = h5file.get_node("/hits/du")[idx:end]
-                    floor = h5file.get_node("/hits/floor")[idx:end]
-                    t0s = h5file.get_node("/hits/t0")[idx:end]
-                    time += t0s
-                    blob["CalibHits"] = Table.from_template(
-                        {
-                            'channel_id': channel_id,
-                            'dir_x': dir_x,
-                            'dir_y': dir_y,
-                            'dir_z': dir_z,
-                            'dom_id': dom_id,
-                            'du': du,
-                            'floor': floor,
-                            'pos_x': pos_x,
-                            'pos_y': pos_y,
-                            'pos_z': pos_z,
-                            't0': t0s,
-                            'time': time,
-                            'tot': tot,
-                            'triggered': triggered,
-                            'group_id': group_id,
-                        },
-                        'CalibHits')
-                else:
-                    blob["Hits"] = Table.from_template(
-                        {'channel_id': channel_id,
-                         'dom_id': dom_id,
-                         'time': time,
-                         'tot': tot,
-                         'triggered': triggered,
-                         'group_id': group_id},
-                        'Hits')
-
-            if loc == '/mc_hits' and not self.ignore_hits:
-                a = h5file.get_node("/mc_hits/a")[idx:end]
-                origin = h5file.get_node("/mc_hits/origin")[idx:end]
-                pmt_id = h5file.get_node("/mc_hits/pmt_id")[idx:end]
-                time = h5file.get_node("/mc_hits/time")[idx:end]
-
-                datatype = h5file.get_node("/mc_hits")._v_attrs.datatype
-
-                if datatype in {np.string_("CMcHitSeries"),
-                                np.string_("CalibMcHits")}:
-                    pos_x = h5file.get_node("/mc_hits/pos_x")[idx:end]
-                    pos_y = h5file.get_node("/mc_hits/pos_y")[idx:end]
-                    pos_z = h5file.get_node("/mc_hits/pos_z")[idx:end]
-                    dir_x = h5file.get_node("/mc_hits/dir_x")[idx:end]
-                    dir_y = h5file.get_node("/mc_hits/dir_y")[idx:end]
-                    dir_z = h5file.get_node("/mc_hits/dir_z")[idx:end]
-                    blob["CalibMcHits"] = Table.from_template({
-                        'a': a,
-                        'dir_x': dir_x,
-                        'dir_y': dir_y,
-                        'dir_z': dir_z,
-                        'origin': origin,
-                        'pmt_id': pmt_id,
-                        'pos_x': pos_x,
-                        'pos_y': pos_y,
-                        'pos_z': pos_z,
-                        'time': time,
-                        'group_id': group_id
-                    },
-                        'CalibMcHits')
-                else:
-                    blob["McHits"] = Table.from_template(
-                        {
-                            'a': a,
-                            'origin': origin,
-                            'pmt_id': pmt_id,
-                            'time': time,
-                            'group_id': group_id
-                        },
-                        'McHits')
+            node = h5file.get_node(loc)
+            columns = (c for c in node._v_children if c != '_indices')
+            data = {}
+            for column in columns:
+                data[column] = h5file.get_node(loc + '/' + column)[idx:end]
+            tabname = camelise(loc.split('/')[-1])
+            blob[tabname] = Table(data, h5loc=loc, split_h5=True)
 
         return blob
 
