@@ -245,6 +245,9 @@ class TestHDF5PumpConsistency(TestCase):
                 self.index += 1
                 assert 'GroupInfo' in blob
                 assert 'Tab' in blob
+                print(self.index)
+                print(blob['Tab'])
+                print(blob['Tab']['a'])
                 assert self.index - 1 == blob['GroupInfo'].group_id
                 assert self.index * 10 == blob['Tab']['a']
                 assert 1 == blob['Tab']['b'] == 1
