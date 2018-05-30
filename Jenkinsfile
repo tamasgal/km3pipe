@@ -106,7 +106,7 @@ def get_stages(dockerfile) {
                         gitlabCommitStatus("Docs (${DOCKER_NAME})") {
                             try { 
                                 sh """
-                                    cp doc doc_${DOCKER_NAME}
+                                    cp -R doc doc_${DOCKER_NAME}
                                     cd doc_${DOCKER_NAME}
                                     make html
                                 """
@@ -115,16 +115,14 @@ def get_stages(dockerfile) {
                                 sendMail("Building Docs (${DOCKER_NAME}) Failed")
                                 throw e
                             }
-                            if(DOCKER_NAME == MAIN_DOCKER) {
-                                publishHTML target: [
-                                    allowMissing: false,
-                                    alwaysLinkToLastBuild: false,
-                                    keepAll: true,
-                                    reportDir: "doc_${DOCKER_NAME}/_build/html",
-                                    reportFiles: 'index.html',
-                                    reportName: 'Documentation'
-                                ]
-                            }
+                            publishHTML target: [
+                                allowMissing: false,
+                                alwaysLinkToLastBuild: false,
+                                keepAll: true,
+                                reportDir: "doc_${DOCKER_NAME}/_build/html",
+                                reportFiles: 'index.html',
+                                reportName: "Documentation (${DOCKER_NAME})"
+                            ]
                         }
                     }
                 }
