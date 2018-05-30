@@ -50,7 +50,7 @@ class DOMHits(kp.Module):
         highest_energetic_muon = Table(muons[np.argmax(muons.energy)])
         muon = highest_energetic_muon
 
-        triggered_hits = hits[hits.triggered]
+        triggered_hits = hits[hits.triggered.astype(bool)]
 
         dom_hits = Counter(triggered_hits.dom_id)
         for dom_id, n_hits in dom_hits.items():
