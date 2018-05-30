@@ -257,3 +257,44 @@ class TestHDF5PumpConsistency(TestCase):
         pipe.drain()
 
         fobj.close()
+
+    def test_hdf5_readout_split_tables(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.count = 0
+
+            def process(self, blob):
+                self.count += 1
+                tab = Table({'a': self.count * 10, 'b': 1},
+                            h5loc='/tab', split_h5=True)
+                blob['Tab'] = tab
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        class BlobTester(Module):
+
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                self.index += 1
+                assert 'GroupInfo' in blob
+                assert 'Tab' in blob
+                assert self.index - 1 == blob['GroupInfo'].group_id
+                assert self.index * 10 == blob['Tab']['a']
+                assert 1 == blob['Tab']['b'] == 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(HDF5Pump, filename=fname)
+        pipe.attach(BlobTester)
+        pipe.drain()
+
+        fobj.close()
