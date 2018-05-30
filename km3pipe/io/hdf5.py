@@ -458,13 +458,10 @@ class HDF5Pump(Pump):
             h5loc = tab._v_pathname
             loc, tabname = os.path.split(h5loc)
             if loc in skipped_locs:
-                self.log.info(
-                    "get_blob: '{}' is blacklisted, skipping...".format(
-                        h5loc))
+                self.log.info("get_blob: '%s' is blacklisted, skip..." % h5loc)
                 continue
             if tabname == "_indices":
-                self.log.debug(
-                    "get_blob: found index table '{}'...".format(h5loc))
+                self.log.debug("get_blob: found index table '%s'..." % h5loc)
                 skipped_locs.append(loc)
                 self.indices[loc] = h5file.get_node(loc + '/' + '_indices')
                 continue
