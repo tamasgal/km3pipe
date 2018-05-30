@@ -225,10 +225,8 @@ class TestHDF5PumpConsistency(TestCase):
 
             def process(self, blob):
                 self.count += 1
-                tab = Table({'a': self.count * 10, 'b': 1},
-                             h5loc='tab')
-                tab2 = Table({'a': np.arange(self.count)},
-                             h5loc='tab2')
+                tab = Table({'a': self.count * 10, 'b': 1}, h5loc='tab')
+                tab2 = Table({'a': np.arange(self.count)}, h5loc='tab2')
                 blob['Tab'] = tab
                 blob['Tab2'] = tab2
                 return blob
