@@ -27,10 +27,10 @@ clean:
 	rm -f $(PKGNAME)/*.so
 
 test: 
-	py.test --junitxml=./reports/junit$(SUFFIX).xml $(PKGNAME)
+	py.test --junitxml=./reports/junit$(SUFFIX).xml -o junit_suite_name=$(PKGNAME)_$(SUFFIX) $(PKGNAME)
 
 test-km3modules: 
-	py.test --junitxml=./reports/junit_km3modules$(SUFFIX).xml km3modules
+	py.test --junitxml=./reports/junit_km3modules$(SUFFIX).xml -o junit_suite_name=km3modules_$(SUFFIX) km3modules
 
 test-cov:
 	py.test --cov ./ --cov-report term-missing --cov-report xml:reports/coverage$(SUFFIX).xml --cov-report html:reports/coverage $(ALLNAMES)
