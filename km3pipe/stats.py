@@ -225,7 +225,10 @@ class hist2d(rv_continuous):
     def H_pad(self):
         return zero_pad(self.H)
 
-    def _pdf(self, x, y):
+    def _pdf(self, X):
+        X = np.atleast_2d(X)
+        x = X[:, 0]
+        y = X[:, 1]
         return self.H_pad[
             np.searchsorted(self.xlims, x, side='right'),
             np.searchsorted(self.ylims, y, side='right'),
