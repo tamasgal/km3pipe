@@ -491,6 +491,10 @@ class HDF5Pump(Pump):
                         "get_blob: no `%s` column found in '%s'! "
                         "skipping... " % (index_column, h5loc))
                     continue
+            else:
+                self.log.warning("No group_id or event_id found for '%s', "
+                                 "skipping..." % h5loc)
+                continue
 
             self.log.debug("h5loc: '{}'".format(h5loc))
             blob[tabname] = Table(
