@@ -5,6 +5,7 @@ import static groovy.io.FileType.FILES
 DOCKER_FILES_DIR = './dockerfiles'
 CHAT_CHANNEL = '#km3pipe'
 DEVELOPERS = ['tgal@km3net.de', 'mlotze@km3net.de']
+MAIN_DOCKER = 'py365'
 
 properties([gitLabConnection('KM3NeT GitLab')])
 
@@ -68,11 +69,32 @@ def get_stages(dockerfile) {
                                 sendMail("KM3Modules Test Suite (${DOCKER_NAME}) Failed")
                                 throw e
                             }
+                            if(DOCKER_NAME == MAIN_DOCKER) {
+                                step([$class: 'XUnitBuilder',
+                                    thresholds: [
+                                        [$class: 'SkippedThreshold', failureThreshold: '5'],
+                                        [$class: 'FailedThreshold', failureThreshold: '0']],
+                                    // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
+                                    tools: [[$class: 'JUnitType', pattern: 'reports/*.xml']]])
+                            }
                             try { 
                                 sh """
                                     make clean
                                     make test-cov
                                 """
+                                if(DOCKER_NAME == MAIN_DOCKER) {
+                                    step([$class: 'CoberturaPublisher',
+                                            autoUpdateHealth: false,
+                                            autoUpdateStability: false,
+                                            coberturaReportFile: "reports/coverage${DOCKER_NAME}.xml",
+                                            failNoReports: false,
+                                            failUnhealthy: false,
+                                            failUnstable: false,
+                                            maxNumberOfBuilds: 0,
+                                            onlyStable: false,
+                                            sourceEncoding: 'ASCII',
+                                            zoomCoverageChart: false])
+                                }
                             } catch (e) { 
                                 sendChatMessage("Coverage (${DOCKER_NAME}) Failed")
                                 sendMail("Coverage  (${DOCKER_NAME}) Failed")
@@ -92,18 +114,15 @@ def get_stages(dockerfile) {
                                 sendMail("Building Docs (${DOCKER_NAME}) Failed")
                                 throw e
                             }
-                            try {
-                               publishHTML target: [
-                                   allowMissing: false,
-                                   alwaysLinkToLastBuild: false,
-                                   keepAll: true,
-                                   reportDir: 'doc/_build/html',
-                                   reportFiles: 'index.html',
-                                   reportName: "Documentation (${DOCKER_NAME})"
-                               ]
-                            } catch (e) {
-                                sendChatMessage("Publishing Docs Failed")
-                                sendMail("Publishing Docs Failed")
+                            if(DOCKER_NAME == MAIN_DOCKER) {
+                                publishHTML target: [
+                                    allowMissing: false,
+                                    alwaysLinkToLastBuild: false,
+                                    keepAll: true,
+                                    reportDir: 'doc/_build/html',
+                                    reportFiles: 'index.html',
+                                    reportName: 'Documentation'
+                                ]
                             }
                         }
                     }
@@ -132,27 +151,6 @@ node('master') {
     }
 
     parallel stages
-    
-    stage("Reports") {
-        step([$class: 'CoberturaPublisher',
-                autoUpdateHealth: false,
-                autoUpdateStability: false,
-                coberturaReportFile: "reports/*.xml",
-                failNoReports: false,
-                failUnhealthy: false,
-                failUnstable: false,
-                maxNumberOfBuilds: 0,
-                onlyStable: false,
-                sourceEncoding: 'ASCII',
-                zoomCoverageChart: false])
-
-        step([$class: 'XUnitBuilder',
-            thresholds: [
-                [$class: 'SkippedThreshold', failureThreshold: '5'],
-                [$class: 'FailedThreshold', failureThreshold: '0']],
-            // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
-            tools: [[$class: 'JUnitType', pattern: 'reports/*.xml']]])
-    }
 }
 
 
@@ -174,3 +172,4 @@ def sendMail(subject, message='', developers=DEVELOPERS) {
         )    
     }
 }
+
