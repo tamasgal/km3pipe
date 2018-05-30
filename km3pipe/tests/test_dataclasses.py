@@ -596,7 +596,10 @@ class TestTable(TestCase):
             print(len(a))
         tab = Table(a)
         s = tab.__str__()
+        assert s is not None
         r = tab.__repr__()
+        assert r is not None
+
 
 class TestTableFancyAttributes(TestCase):
     def setUp(self):
