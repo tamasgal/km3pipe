@@ -69,33 +69,10 @@ def get_stages(dockerfile) {
                                 throw e
                             }
                             try { 
-                                step([$class: 'XUnitBuilder',
-                                    thresholds: [
-                                        [$class: 'SkippedThreshold', failureThreshold: '5'],
-                                        [$class: 'FailedThreshold', failureThreshold: '0']],
-                                    // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
-                                    tools: [[$class: 'JUnitType', pattern: 'reports/*.xml']]])
-                            } catch (e) { 
-                                sendChatMessage("Failed to create test reports (${DOCKER_NAME}).")
-                                sendMail("Failed to create test reports (${DOCKER_NAME}).")
-                                throw e
-                            }
-                            try { 
                                 sh """
                                     make clean
                                     make test-cov
                                 """
-                                step([$class: 'CoberturaPublisher',
-                                        autoUpdateHealth: false,
-                                        autoUpdateStability: false,
-                                        coberturaReportFile: "reports/coverage${DOCKER_NAME}.xml",
-                                        failNoReports: false,
-                                        failUnhealthy: false,
-                                        failUnstable: false,
-                                        maxNumberOfBuilds: 0,
-                                        onlyStable: false,
-                                        sourceEncoding: 'ASCII',
-                                        zoomCoverageChart: false])
                             } catch (e) { 
                                 sendChatMessage("Coverage (${DOCKER_NAME}) Failed")
                                 sendMail("Coverage  (${DOCKER_NAME}) Failed")
@@ -122,7 +99,7 @@ def get_stages(dockerfile) {
                                    keepAll: true,
                                    reportDir: 'doc/_build/html',
                                    reportFiles: 'index.html',
-                                   reportName: 'Documentation'
+                                   reportName: "Documentation (${DOCKER_NAME})"
                                ]
                             } catch (e) {
                                 sendChatMessage("Publishing Docs Failed")
@@ -155,6 +132,27 @@ node('master') {
     }
 
     parallel stages
+    
+    stage("Reports") {
+        step([$class: 'CoberturaPublisher',
+                autoUpdateHealth: false,
+                autoUpdateStability: false,
+                coberturaReportFile: "reports/*.xml",
+                failNoReports: false,
+                failUnhealthy: false,
+                failUnstable: false,
+                maxNumberOfBuilds: 0,
+                onlyStable: false,
+                sourceEncoding: 'ASCII',
+                zoomCoverageChart: false])
+
+        step([$class: 'XUnitBuilder',
+            thresholds: [
+                [$class: 'SkippedThreshold', failureThreshold: '5'],
+                [$class: 'FailedThreshold', failureThreshold: '0']],
+            // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
+            tools: [[$class: 'JUnitType', pattern: 'reports/*.xml']]])
+    }
 }
 
 
