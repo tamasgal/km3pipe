@@ -361,6 +361,29 @@ class TestTable(TestCase):
         tab = tab.append_columns('group_id', [0, 1])
         assert 'group_id' in tab.dtype.names
 
+    def test_append_column_which_is_too_short_raises(self):
+        tab = Table({'a': [1, 2, 3]})
+        with pytest.raises(ValueError):
+            tab = tab.append_columns('b', [4, 5])
+
+    @pytest.mark.xfail
+    def test_drop_column(self):
+        tab = Table({'a': 1, 'b': 2})
+        tab.drop_columns('a')
+        with pytest.raises(AttributeError):
+            tab.a
+        tab.b
+
+    @pytest.mark.xfail
+    def test_drop_columns(self):
+        tab = Table({'a': 1, 'b': 2, 'c': 3})
+        tab.drop_columns(['a', 'b'])
+        with pytest.raises(AttributeError):
+            tab.a
+        with pytest.raises(AttributeError):
+            tab.b
+        tab.c
+
     def test_template(self):
         n = 10
         channel_ids = np.arange(n)
@@ -706,3 +729,13 @@ class TestTableFancyAttributes(TestCase):
                      'dir_z': [0, 0, 1]})
         p = tab.azimuth
         assert p is not None
+
+    def test_pos_setter_if_pos_x_y_z_are_not_present_raises(self):
+        tab = Table({'a': 1})
+        with pytest.raises(ValueError):
+            tab.pos = [[1], [2], [3]]
+
+    def test_dir_setter_if_dir_x_y_z_are_not_present_raises(self):
+        tab = Table({'a': 1})
+        with pytest.raises(ValueError):
+            tab.dir = [[1], [2], [3]]
