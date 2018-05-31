@@ -18,7 +18,7 @@ __status__ = "Development"
 
 class TestAanetPump(TestCase):
     def test_init_raises_valueerror_if_no_filename_given(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             AanetPump()
 
     @skip

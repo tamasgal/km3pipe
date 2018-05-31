@@ -15,9 +15,6 @@ from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import Table
 from km3pipe.logger import get_logger
 
-import ROOT
-import aa       # noqa
-
 log = get_logger(__name__)  # pylint: disable=C0103
 
 __author__ = "Tamas Gal, Thomas Heid and Moritz Lotze"
@@ -80,7 +77,6 @@ class HeaderParser():
     }
 
 
-
 class AanetPump(Pump):
     """A pump for binary Aanet files.
 
@@ -123,12 +119,13 @@ class AanetPump(Pump):
     def blob_generator(self):
         """Create a blob generator."""
         # pylint: disable:F0401,W0612
+        import aa
         from ROOT import EventFile
 
+        filename = self.filename
         log.info("Reading from file: {0}".format(filename))
         if not os.path.exists(filename):
             log.warning(filename + " not available: continue without it")
-            continue
 
         try:
             event_file = EventFile(filename)
@@ -186,7 +183,6 @@ class AanetPump(Pump):
         mc_id = event.frame_index - 1
         run_id = self._get_run_id()
         eventinfo = self._parse_eventinfo(evt)
-
         trks = self._parse_tracks(event)
 
     def event_index(self, blob):
