@@ -188,7 +188,6 @@ class TestTable(TestCase):
         assert np.allclose([1, 2, 3], t.a)
         assert np.allclose([4, 5, 6], t.b)
 
-    @pytest.mark.xfail
     def test_from_rows_with_colnames(self):
         t = Table.from_rows([[1, 2], [3, 4], [5, 6]], colnames=['a', 'b'])
         assert np.allclose([1, 3, 5], t.a)
