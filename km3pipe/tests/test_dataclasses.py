@@ -199,10 +199,27 @@ class TestTable(TestCase):
         assert np.allclose([1, 2, 3], t.a)
         assert np.allclose([4, 5, 6], t.b)
 
+    def test_from_columns_with_colnames_upcasts(self):
+        t = Table.from_columns([[1, 2, 3], [4, 5.0, 6]], colnames=['a', 'b'])
+        assert t.dtype == np.dtype([('a', float), ('b', float)])
+
     def test_from_rows_with_colnames(self):
         t = Table.from_rows([[1, 2], [3, 4], [5, 6]], colnames=['a', 'b'])
+        assert t.dtype == np.dtype([('a', int), ('b', int)])
         assert np.allclose([1, 3, 5], t.a)
         assert np.allclose([2, 4, 6], t.b)
+
+    def test_from_rows_with_colnames_upcasts(self):
+        t = Table.from_rows([[1, 2], [3.0, 4], [5, 6]], colnames=['a', 'b'])
+        assert t.dtype == np.dtype([('a', float), ('b', float)])
+
+    def test_from_rows_dim(self):
+        t = Table.from_rows([[1, 2], [3.0, 4], [5, 6]], colnames=['a', 'b'])
+        assert t.shape == (3, )
+
+    def test_from_columns_dim(self):
+        t = Table.from_columns([[1, 2, 3], [4, 5.0, 6]], colnames=['a', 'b'])
+        assert t.shape == (3, )
 
     def test_fromrows(self):
         dlist = [

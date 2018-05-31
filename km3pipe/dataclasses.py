@@ -217,6 +217,8 @@ class Table(np.recarray):
         # users will never see this, this should only show in tests
         assert is_structured(dtype)
         data = np.asanyarray(row_list).view(dtype)
+        # drop useless 2nd dim
+        data = data.reshape((data.shape[0], ))
         return cls(data, **kwargs)
 
     @property
