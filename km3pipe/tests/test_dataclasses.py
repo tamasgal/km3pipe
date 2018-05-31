@@ -183,6 +183,17 @@ class TestTable(TestCase):
             print(tab.shape)
             print(tab)
 
+    def test_from_columns_with_colnames(self):
+        t = Table.from_columns([[1, 2, 3], [4, 5, 6]], colnames=['a', 'b'])
+        assert np.allclose([1, 2, 3], t.a)
+        assert np.allclose([4, 5, 6], t.b)
+
+    @pytest.mark.xfail
+    def test_from_rows_with_colnames(self):
+        t = Table.from_rows([[1, 2], [3, 4], [5, 6]], colnames=['a', 'b'])
+        assert np.allclose([1, 3, 5], t.a)
+        assert np.allclose([2, 4, 6], t.b)
+
     def test_fromrows(self):
         dlist = [
             [1, 2, 3],
