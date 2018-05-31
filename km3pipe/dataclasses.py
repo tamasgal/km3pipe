@@ -18,7 +18,7 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
-__all__ = ('Table', 'is_structured', 'has_structured_dt', 'infer_dtype')
+__all__ = ('Table', 'is_structured', 'has_structured_dt', 'inflate_dtype')
 
 DEFAULT_H5LOC = '/misc'
 DEFAULT_NAME = 'Generic Table'
@@ -38,7 +38,7 @@ def is_structured(dt):
     return dt.fields is not None
 
 
-def infer_dtype(arr, names):
+def inflate_dtype(arr, names):
     """Create structured dtype from a 2d ndarray with unstructured dtype."""
     arr = np.asanyarray(arr)
     if has_structured_dt(arr):
@@ -193,7 +193,7 @@ class Table(np.recarray):
                     "Need to either specify column names or a "
                     "structured dtype when passing unstructured arrays!"
                 )
-            dtype = infer_dtype(column_list, colnames)
+            dtype = inflate_dtype(column_list, colnames)
             colnames = dtype.names
         if len(column_list) != len(dtype.names):
             raise ValueError(
@@ -211,7 +211,7 @@ class Table(np.recarray):
                     "Need to either specify column names or a "
                     "structured dtype when passing unstructured arrays!"
                 )
-            dtype = infer_dtype(row_list, colnames)
+            dtype = inflate_dtype(row_list, colnames)
         # this *should* have been checked above, but do this
         # just to be sure in case I screwed up the logic above;
         # users will never see this, this should only show in tests

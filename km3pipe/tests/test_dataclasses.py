@@ -12,7 +12,7 @@ import pytest
 
 from km3pipe.testing import TestCase, skip   # noqa
 from km3pipe.dataclasses import (
-    Table, infer_dtype, has_structured_dt, is_structured, DEFAULT_H5LOC,
+    Table, inflate_dtype, has_structured_dt, is_structured, DEFAULT_H5LOC,
     DEFAULT_NAME, DEFAULT_SPLIT
 )
 
@@ -46,22 +46,16 @@ class TestDtypes(TestCase):
         assert not has_structured_dt([1.0, 2, 3.0])
         assert not has_structured_dt([])
 
-    def test_infer_dtype(self):
+    def test_inflate(self):
         arr = np.ones(3, dtype=self.c_dt)
         names = ['a', 'b', 'c']
         print(arr.dtype)
         assert has_structured_dt(arr)
-        dt_a = infer_dtype(arr, names=names)
+        dt_a = inflate_dtype(arr, names=names)
         assert dt_a == self.c_dt
         assert not has_structured_dt([1, 2, 3])
-        dt_l = infer_dtype([1, 2, 3], names=names)
+        dt_l = inflate_dtype([1, 2, 3], names=names)
         assert dt_l == np.dtype([('a', '<i8'), ('b', '<i8'), ('c', '<i8')])
-
-    def test_infer_dtype_rows(self):
-        arr = [[1, 2.0], [3, 4.0], [5, 6.0]]
-        names = ['a', 'b']
-        dt = infer_dtype(arr, names)
-        assert dt == np.dtype([('a', '<i8'), ('b', '<f8')])
 
 
 class TestTable(TestCase):
@@ -160,7 +154,7 @@ class TestTable(TestCase):
         with pytest.raises(KeyError):
             tab = Table.from_dict(dmap, dtype=bad_dt)
 
-    def test_fromcolumns_attributes(self):
+    def test_fromcolumns(self):
         n = 5
         dlist = [
             np.ones(n, dtype=int),
@@ -191,19 +185,15 @@ class TestTable(TestCase):
 
     def test_from_columns_with_colnames(self):
         t = Table.from_columns([[1, 2, 3], [4, 5, 6]], colnames=['a', 'b'])
-        print(t.shape)
-        print(t.dtype)
         assert np.allclose([1, 2, 3], t.a)
-        assert np.allclose([4.0, 5, 6], t.b)
+        assert np.allclose([4, 5, 6], t.b)
 
     def test_from_rows_with_colnames(self):
         t = Table.from_rows([[1, 2], [3, 4], [5, 6]], colnames=['a', 'b'])
-        print(t.shape)
-        print(t.dtype)
         assert np.allclose([1, 3, 5], t.a)
-        assert np.allclose([2, 4.0, 6], t.b)
+        assert np.allclose([2, 4, 6], t.b)
 
-    def test_fromrows_attributes(self):
+    def test_fromrows(self):
         dlist = [
             [1, 2, 3],
             [4, 5, 6],
@@ -291,7 +281,7 @@ class TestTable(TestCase):
             (0, 1), (2, 3), (4, 5), (6, 7), (8, 9)
         ]
         names = ['a', 'origin', 'pmt_id', 'time', 'group_id']
-        dta = infer_dtype(l2d, names)
+        dta = inflate_dtype(l2d, names)
         with pytest.raises(ValueError):
             t = Table(l2d)
         with pytest.raises(ValueError):
