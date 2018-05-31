@@ -642,6 +642,22 @@ class TestTableFancyAttributes(TestCase):
                      'dir_z': [7, 8, 9]})
         assert np.allclose([[2, 5, 8]], tab.dir[1])
 
+    def test_dir_setter(self):
+        tab = Table({'dir_x': [1, 0, 0],
+                     'dir_y': [0, 1, 0],
+                     'dir_z': [0, 0, 1]})
+        new_dir = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        tab.dir = new_dir
+        assert np.allclose(new_dir, tab.dir)
+
+    def test_pos_setter(self):
+        tab = Table({'pos_x': [1, 0, 0],
+                     'pos_y': [0, 1, 0],
+                     'pos_z': [0, 0, 1]})
+        new_pos = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        tab.pos = new_pos
+        assert np.allclose(new_pos, tab.pos)
+
     def test_same_shape_pos(self):
         with pytest.raises(AttributeError):
             p = self.arr_bare.pos
