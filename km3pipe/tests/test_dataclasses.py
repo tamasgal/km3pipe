@@ -46,16 +46,27 @@ class TestDtypes(TestCase):
         assert not has_structured_dt([1.0, 2, 3.0])
         assert not has_structured_dt([])
 
-    def test_inflate(self):
+    def test_inflate_hasstructured(self):
         arr = np.ones(3, dtype=self.c_dt)
         names = ['a', 'b', 'c']
         print(arr.dtype)
         assert has_structured_dt(arr)
         dt_a = inflate_dtype(arr, names=names)
         assert dt_a == self.c_dt
-        assert not has_structured_dt([1, 2, 3])
-        dt_l = inflate_dtype([1, 2, 3], names=names)
+
+    def test_inflate_nostructured(self):
+        names = ['a', 'b', 'c']
+        arr = [1, 2, 3]
+        assert not has_structured_dt(arr)
+        dt_l = inflate_dtype(arr, names=names)
         assert dt_l == np.dtype([('a', '<i8'), ('b', '<i8'), ('c', '<i8')])
+
+    def test_inflate_mixed_casts_up(self):
+        arr = [1, 2, 3.0]
+        names = ['a', 'b', 'c']
+        assert not has_structured_dt(arr)
+        dt_a = inflate_dtype(arr, names=names)
+        assert dt_a == np.dtype([('a', '<f8'), ('b', '<f8'), ('c', '<f8')])
 
 
 class TestTable(TestCase):
