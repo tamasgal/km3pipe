@@ -366,23 +366,35 @@ class TestTable(TestCase):
         with pytest.raises(ValueError):
             tab = tab.append_columns('b', [4, 5])
 
-    @pytest.mark.xfail
+    def test_append_columns(self):
+        tab = Table({'a': 1 })
+        print(tab.dtype)
+        tab = tab.append_columns(['b'], np.array([[2]]))
+        print(tab.dtype)
+        print(tab.b)
+
+    def test_append_columns_duplicate(self):
+        tab = Table({'a': 1 })
+        with pytest.raises(ValueError):
+            tab = tab.append_columns(['a'], np.array([[2]]))
+
     def test_drop_column(self):
         tab = Table({'a': 1, 'b': 2})
-        tab.drop_columns('a')
+        tab = tab.drop_columns('a')
         with pytest.raises(AttributeError):
-            tab.a
-        tab.b
+            print(tab.a)
+        print(tab.b)
 
-    @pytest.mark.xfail
     def test_drop_columns(self):
         tab = Table({'a': 1, 'b': 2, 'c': 3})
-        tab.drop_columns(['a', 'b'])
+        print(tab.dtype)
+        tab = tab.drop_columns(['a', 'b'])
+        print(tab.dtype)
         with pytest.raises(AttributeError):
-            tab.a
+            print(tab.a)
         with pytest.raises(AttributeError):
-            tab.b
-        tab.c
+            print(tab.b)
+        print(tab.c)
 
     def test_template(self):
         n = 10
