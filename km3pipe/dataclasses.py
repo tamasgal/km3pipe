@@ -355,7 +355,9 @@ class Table(np.recarray):
     @pos.setter
     def pos(self, arr):
         try:
-            _ = self.pos_x
+            self.pos_x
+            self.pos_y
+            self.pos_z
         except AttributeError:
             raise ValueError(
                 "Table has no existing 'pos_{x,y,z}' entries. If you'd like "
@@ -376,7 +378,9 @@ class Table(np.recarray):
     @dir.setter
     def dir(self, arr):
         try:
-            _ = self.dir_x
+            self.dir_x
+            self.dir_y
+            self.dir_z
         except AttributeError:
             raise ValueError(
                 "Table has no existing 'dir_{x,y,z}' entries. If you'd like "
