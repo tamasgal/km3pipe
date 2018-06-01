@@ -165,6 +165,13 @@ class TestTable(TestCase):
         with pytest.raises(KeyError):
             tab = Table.from_dict(dmap, dtype=bad_dt)
 
+    def test_from_dict_without_dtype(self):
+        data = {'b': [1, 2], 'c': [3, 4], 'a': [5, 6]}
+        tab = Table.from_dict(data)
+        assert np.allclose([1, 2], tab.b)
+        assert np.allclose([3, 4], tab.c)
+        assert np.allclose([5, 6], tab.a)
+
     def test_from_dict_with_unordered_columns_wrt_to_dtype_fields(self):
         data = {'b': [1, 2], 'c': [3, 4], 'a': [5, 6]}
         dt = [('a', float), ('b', float), ('c', float)]
