@@ -434,6 +434,13 @@ class TestTable(TestCase):
         assert tab.n[0] == 2
         assert tab.n[-1] == 5
 
+    def test_append__single_column(self):
+        tab = Table({'a': 1 })
+        print(tab.dtype)
+        tab = tab.append_columns(['b'], np.array([[2]]))
+        print(tab.dtype)
+        print(tab.b)
+
     def test_append_columns_with_single_value(self):
         tab = Table({'a': 1})
         tab = tab.append_columns('group_id', 0)
@@ -455,17 +462,20 @@ class TestTable(TestCase):
         with pytest.raises(ValueError):
             tab = tab.append_columns('b', [4, 5])
 
-    def test_append_columns(self):
-        tab = Table({'a': 1 })
-        print(tab.dtype)
-        tab = tab.append_columns(['b'], np.array([[2]]))
-        print(tab.dtype)
-        print(tab.b)
-
     def test_append_columns_duplicate(self):
-        tab = Table({'a': 1 })
+        tab = Table({'a': 1})
         with pytest.raises(ValueError):
             tab = tab.append_columns(['a'], np.array([[2]]))
+
+    def test_append_columns_with_mismatching_lengths_raises(self):
+        tab = Table({'a': [1, 2, 3]})
+        with pytest.raises(ValueError):
+            tab.append_columns(colnames=['b', 'c'], values=[[4, 5, 6], [7, 8]])
+
+    def test_append_columns_which_is_too_long(self):
+        tab = Table({'a': [1, 2, 3]})
+        with pytest.raises(ValueError):
+            tab.append_columns('b', values=[4, 5, 6, 7])
 
     def test_drop_column(self):
         tab = Table({'a': 1, 'b': 2})
@@ -734,7 +744,8 @@ class TestTable(TestCase):
         assert wrapped.a[0] == 1
 
     def test_templates_avail(self):
-        templates = Table.templates_avail
+        t = Table({'a': 1})
+        templates = t.templates_avail
         assert templates
 
 
