@@ -155,8 +155,13 @@ class Table(np.recarray):
             if np.isscalar(v):
                 scalars.append(k)
                 continue
-            if hasattr(v, 'ndim') and v.ndim == 0:
-                v = v.item()
+            # TODO: this is not covered yet, don't know if we need this
+            # if hasattr(v, 'shape') and v.shape == (1,):  # np.array([1])
+            #     import pdb; pdb.set_trace()
+            #     arr_dict[k] = v[0]
+            #     continue
+            if hasattr(v, 'ndim') and v.ndim == 0:  # np.array(1)
+                arr_dict[k] = v.item()
                 continue
             if len(v) > maxlen:
                 maxlen = len(v)
