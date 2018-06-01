@@ -287,6 +287,28 @@ class TestTable(TestCase):
         }
         t2 = Table._expand_scalars(dmap2)
         assert len(t2) > 0
+        dmap3 = {
+            'a': [1, 2, 1],
+            'b': [0.],
+            'c': [0, 1],
+        }
+        t3 = Table._expand_scalars(dmap3)
+        assert len(t3) > 0
+        dmap4 = {
+            'a': [1, 2, 1],
+            'b': np.array(0.),
+            'c': [0, 1],
+        }
+        t4 = Table._expand_scalars(dmap4)
+        assert len(t4) > 0
+        dmap5 = {
+            'a': [1, 2, 1],
+            'b': np.array([1]),
+            'c': [0, 1],
+        }
+        t5 = Table._expand_scalars(dmap5)
+        assert len(t5) > 0
+
 
     def test_from_flat_dict(self):
         dmap = {
@@ -696,6 +718,16 @@ class TestTable(TestCase):
         assert s is not None
         r = tab.__repr__()
         assert r is not None
+
+    def test_array_finalize_with_obj_none(self):
+        tab = Table({'a': [1, 2, 3]})
+        assert tab.__array_finalize__(None) is None
+
+    def test_array_wrap(self):
+        t = Table({'a': [1, 2, 3], 'b': [4, 5, 6]})
+        wrapped = t.__array_wrap__(np.array((Table({'a': 1}))))
+        assert wrapped.a[0] == 1
+
 
 
 class TestTableFancyAttributes(TestCase):
