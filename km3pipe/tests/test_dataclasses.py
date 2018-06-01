@@ -733,6 +733,9 @@ class TestTable(TestCase):
         wrapped = t.__array_wrap__(np.array((Table({'a': 1}))))
         assert wrapped.a[0] == 1
 
+    def test_templates_avail(self):
+        templates = Table.templates_avail
+        assert templates
 
 
 class TestTableFancyAttributes(TestCase):
