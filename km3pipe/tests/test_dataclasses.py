@@ -196,7 +196,9 @@ class TestTable(TestCase):
 
     def test_from_columns_with_colnames(self):
         t = Table.from_columns([[1, 2, 3], [4, 5, 6]], colnames=['a', 'b'])
+        print("t.a: {}".format(t.a))
         assert np.allclose([1, 2, 3], t.a)
+        print("t.b: {}".format(t.b))
         assert np.allclose([4, 5, 6], t.b)
 
     def test_from_columns_with_colnames_upcasts(self):
