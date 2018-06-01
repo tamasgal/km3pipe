@@ -165,6 +165,21 @@ class TestTable(TestCase):
         with pytest.raises(KeyError):
             tab = Table.from_dict(dmap, dtype=bad_dt)
 
+    def test_from_dict_without_dtype(self):
+        data = {'b': [1, 2], 'c': [3, 4], 'a': [5, 6]}
+        tab = Table.from_dict(data)
+        assert np.allclose([1, 2], tab.b)
+        assert np.allclose([3, 4], tab.c)
+        assert np.allclose([5, 6], tab.a)
+
+    def test_from_dict_with_unordered_columns_wrt_to_dtype_fields(self):
+        data = {'b': [1, 2], 'c': [3, 4], 'a': [5, 6]}
+        dt = [('a', float), ('b', float), ('c', float)]
+        tab = Table.from_dict(data, dtype=dt)
+        assert np.allclose([1, 2], tab.b)
+        assert np.allclose([3, 4], tab.c)
+        assert np.allclose([5, 6], tab.a)
+
     def test_fromcolumns(self):
         n = 5
         dlist = [
@@ -195,7 +210,14 @@ class TestTable(TestCase):
             print(tab)
 
     def test_from_columns_with_colnames(self):
-        t = Table.from_columns([[1, 2, 3], [4, 5, 6]], colnames=['a', 'b'])
+        t = Table.from_columns([[1, 2, 3],
+                                [4, 5, 6],
+                                [7, 8, 9],
+                                [10, 11, 12],
+                                [13, 14, 15],
+                                [16, 17, 18],
+                                [19, 20, 21]],
+                               colnames=['a', 'b', 'c', 'd', 'e', 'f', 'g'])
         print("t.a: {}".format(t.a))
         assert np.allclose([1, 2, 3], t.a)
         print("t.b: {}".format(t.b))
@@ -204,6 +226,11 @@ class TestTable(TestCase):
     def test_from_columns_with_colnames_upcasts(self):
         t = Table.from_columns([[1, 2, 3], [4, 5.0, 6]], colnames=['a', 'b'])
         assert t.dtype == np.dtype([('a', float), ('b', float)])
+
+    def test_from_columns_with_mismatching_columns_and_dtypes_raises(self):
+        with pytest.raises(ValueError):
+            Table.from_columns([[1, 2, 3], [4, 5, 6]],
+                                dtype=np.dtype([('a', 'f4')]))
 
     def test_from_rows_with_colnames(self):
         t = Table.from_rows([[1, 2], [3, 4], [5, 6]], colnames=['a', 'b'])
@@ -265,6 +292,28 @@ class TestTable(TestCase):
         }
         t2 = Table._expand_scalars(dmap2)
         assert len(t2) > 0
+        dmap3 = {
+            'a': [1, 2, 1],
+            'b': [0.],
+            'c': [0, 1],
+        }
+        t3 = Table._expand_scalars(dmap3)
+        assert len(t3) > 0
+        dmap4 = {
+            'a': [1, 2, 1],
+            'b': np.array(0.),
+            'c': [0, 1],
+        }
+        t4 = Table._expand_scalars(dmap4)
+        assert len(t4) > 0
+        dmap5 = {
+            'a': [1, 2, 1],
+            'b': np.array([1]),
+            'c': [0, 1],
+        }
+        t5 = Table._expand_scalars(dmap5)
+        assert len(t5) > 0
+
 
     def test_from_flat_dict(self):
         dmap = {
@@ -385,6 +434,13 @@ class TestTable(TestCase):
         assert tab.n[0] == 2
         assert tab.n[-1] == 5
 
+    def test_append__single_column(self):
+        tab = Table({'a': 1 })
+        print(tab.dtype)
+        tab = tab.append_columns(['b'], np.array([[2]]))
+        print(tab.dtype)
+        print(tab.b)
+
     def test_append_columns_with_single_value(self):
         tab = Table({'a': 1})
         tab = tab.append_columns('group_id', 0)
@@ -406,17 +462,20 @@ class TestTable(TestCase):
         with pytest.raises(ValueError):
             tab = tab.append_columns('b', [4, 5])
 
-    def test_append_columns(self):
-        tab = Table({'a': 1 })
-        print(tab.dtype)
-        tab = tab.append_columns(['b'], np.array([[2]]))
-        print(tab.dtype)
-        print(tab.b)
-
     def test_append_columns_duplicate(self):
-        tab = Table({'a': 1 })
+        tab = Table({'a': 1})
         with pytest.raises(ValueError):
             tab = tab.append_columns(['a'], np.array([[2]]))
+
+    def test_append_columns_with_mismatching_lengths_raises(self):
+        tab = Table({'a': [1, 2, 3]})
+        with pytest.raises(ValueError):
+            tab.append_columns(colnames=['b', 'c'], values=[[4, 5, 6], [7, 8]])
+
+    def test_append_columns_which_is_too_long(self):
+        tab = Table({'a': [1, 2, 3]})
+        with pytest.raises(ValueError):
+            tab.append_columns('b', values=[4, 5, 6, 7])
 
     def test_drop_column(self):
         tab = Table({'a': 1, 'b': 2})
@@ -674,6 +733,20 @@ class TestTable(TestCase):
         assert s is not None
         r = tab.__repr__()
         assert r is not None
+
+    def test_array_finalize_with_obj_none(self):
+        tab = Table({'a': [1, 2, 3]})
+        assert tab.__array_finalize__(None) is None
+
+    def test_array_wrap(self):
+        t = Table({'a': [1, 2, 3], 'b': [4, 5, 6]})
+        wrapped = t.__array_wrap__(np.array((Table({'a': 1}))))
+        assert wrapped.a[0] == 1
+
+    def test_templates_avail(self):
+        t = Table({'a': 1})
+        templates = t.templates_avail
+        assert templates
 
 
 class TestTableFancyAttributes(TestCase):
