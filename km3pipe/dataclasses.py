@@ -181,8 +181,8 @@ class Table(np.recarray):
             names = list(dtype.names)
 
         arr_dict = cls._expand_scalars(arr_dict)
-        return cls(np.rec.fromarrays(arr_dict.values(), names=names,
-                                     dtype=dtype), **kwargs)
+        data = [arr_dict[key] for key in names]
+        return cls(np.rec.fromarrays(data, names=names, dtype=dtype), **kwargs)
 
     @classmethod
     def from_columns(cls, column_list, dtype=None, colnames=None, **kwargs):
