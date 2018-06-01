@@ -227,6 +227,11 @@ class TestTable(TestCase):
         t = Table.from_columns([[1, 2, 3], [4, 5.0, 6]], colnames=['a', 'b'])
         assert t.dtype == np.dtype([('a', float), ('b', float)])
 
+    def test_from_columns_with_mismatching_columns_and_dtypes_raises(self):
+        with pytest.raises(ValueError):
+            Table.from_columns([[1, 2, 3], [4, 5, 6]],
+                                dtype=np.dtype([('a', 'f4')]))
+
     def test_from_rows_with_colnames(self):
         t = Table.from_rows([[1, 2], [3, 4], [5, 6]], colnames=['a', 'b'])
         assert t.dtype == np.dtype([('a', int), ('b', int)])
