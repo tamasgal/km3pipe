@@ -198,9 +198,8 @@ class Table(np.recarray):
         if len(column_list) != len(dtype.names):
             raise ValueError(
                 "Number of columns mismatch between data and dtype!")
-        return cls(
-            {k: column_list[i] for i, k in enumerate(dtype.names)},
-            dtype=dtype, colnames=colnames, **kwargs)
+        data = {k: column_list[i] for i, k in enumerate(dtype.names)}
+        return cls(data, dtype=dtype, colnames=colnames, **kwargs)
 
     @classmethod
     def from_rows(cls, row_list, dtype=None, colnames=None, **kwargs):
