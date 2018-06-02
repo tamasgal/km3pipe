@@ -104,7 +104,6 @@ def main():
         walltime = time.strftime('%H:%M:%S', time.gmtime(ET_PER_FILE*n_files))
 
         kp.shell.qsub(s, '{}_{}'.format(JOB_NAME, job_id), walltime=walltime,
-                      platform='sl6',
                       vmem=VMEM, log_path=LOG_PATH, irods=True, dryrun=DRYRUN)
 
         if DRYRUN:
