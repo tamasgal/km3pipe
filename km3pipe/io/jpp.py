@@ -52,7 +52,7 @@ class EventPump(Pump):
         self._tots = np.zeros(self.buf_size, dtype='i')
         self._triggereds = np.zeros(self.buf_size, dtype='i')
 
-        self.event_reader = jppy.PyJDAQEventReader(self.filename)
+        self.event_reader = jppy.PyJDAQEventReader(self.filename.encode())
         self.blobs = self.blob_generator()
 
     def _resize_buffers(self, buf_size):
@@ -154,7 +154,8 @@ class TimeslicePump(Pump):
                               "\nMake sure you source the JPP environmanet "
                               "and have jppy installed")
         stream = 'JDAQTimeslice' + stream
-        self.r = jppy.daqtimeslicereader.PyJDAQTimesliceReader(fname, stream)
+        self.r = jppy.daqtimeslicereader.PyJDAQTimesliceReader(fname.encode(),
+                                                               stream.encode())
         self.n_timeslices = self.r.n_timeslices
 
         self.buf_size = 5000
@@ -238,12 +239,12 @@ class SummaryslicePump(Pump):
         filename = self.require('filename')
         self.blobs = self.summaryslice_generator()
         try:
-            import jppy  # noqa
+            from jppy.daqsummaryslicereader import PyJDAQSummarysliceReader
         except ImportError:
             raise ImportError("\nEither Jpp or jppy could not be found."
                               "\nMake sure you source the JPP environmanet "
                               "and have jppy installed")
-        self.r = jppy.daqsummaryslicereader.PyJDAQSummarysliceReader(filename)
+        self.r = PyJDAQSummarysliceReader(filename.encode())
 
     def process(self, blob):
         return next(self.blobs)
@@ -324,7 +325,7 @@ class FitPump(Pump):
         self._qualities = np.zeros(self.buf_size, dtype='d')
         self._energies = np.zeros(self.buf_size, dtype='d')
 
-        self.event_reader = jppy.PyJFitReader(self.filename)
+        self.event_reader = jppy.PyJFitReader(self.filename.encode())
         self.blobs = self.blob_generator()
 
     def _resize_buffers(self, buf_size):
