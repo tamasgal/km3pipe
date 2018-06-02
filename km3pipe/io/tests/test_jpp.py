@@ -1,8 +1,13 @@
 # Filename: test_jpp.py
 # pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
+import os
+import pathlib
+from tempfile import NamedTemporaryFile, gettempdir
+
 from km3pipe.testing import TestCase, surrogate, patch
 
-from km3pipe.io.jpp import EventPump, TimeslicePump, SummaryslicePump, FitPump
+from km3pipe.io.jpp import (EventPump, TimeslicePump, SummaryslicePump,
+                            FitPump, JppCMDWrapper)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2018, Tamas Gal and the KM3NeT collaboration."
@@ -89,3 +94,20 @@ class TestFitPump(TestCase):
         pump._resize_buffers(new_buf_size)
         assert pump.buf_size == new_buf_size
         assert len(pump._pos_xs) == new_buf_size
+
+
+class TestJppCMDWrapper(TestCase):
+    def test_init_without_dir(self):
+        JppCMDWrapper()
+
+    def test_init(self):
+        bin_dir = os.path.join(gettempdir(), 'jpp_bin')
+        os.environ['JPP_BIN'] = bin_dir
+        pathlib.Path(bin_dir).mkdir(parents=True, exist_ok=True) 
+        tools = [NamedTemporaryFile(prefix='J', dir=bin_dir) for f in range(5)]
+
+        jppw = JppCMDWrapper()
+        for tool in tools:
+            assert os.path.basename(tool.name) in jppw._tools.keys()
+            assert tool.name in jppw._tools.values()
+

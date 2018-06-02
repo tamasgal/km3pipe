@@ -5,6 +5,8 @@
 Pump for the jpp file read through aanet interface.
 
 """
+from glob import glob
+import os
 
 import numpy as np
 
@@ -425,3 +427,22 @@ class FitPump(Pump):
 
     def __next__(self):
         return next(self.blobs)
+
+
+class JppCMDWrapper(object):
+    def __init__(self):
+        self._tools = {}
+
+        self.log = get_logger(self.__class__.__name__)
+
+        bin_dir = os.environ.get('JPP_BIN')
+
+        if bin_dir is not None:
+            self.parse_cmd_tools(bin_dir)
+        else:
+            self.log.error("The Jpp environment is not loaded!")
+
+    def parse_cmd_tools(self, bin_dir):
+        tools = glob(os.path.join(bin_dir, '*'))
+        for tool in tools:
+            self._tools[os.path.basename(tool)] = tool
