@@ -1,61 +1,28 @@
-# coding=utf-8
 # Filename: db.py
 # pylint: disable=locally-disabled
 """
 Database utilities.
 
 """
-from __future__ import division, absolute_import, print_function
-
 from datetime import datetime
 import ssl
-import sys
 import io
 import json
 import re
 import pytz
-import socket
-import xml.etree.ElementTree as ET
-
 from collections import defaultdict, OrderedDict
-try:
-    from inspect import Signature, Parameter
-except ImportError:
-    with_signatures = False
-else:
-    with_signatures = True
-
-try:
-    import pandas as pd
-except ImportError:
-    print("The database utilities needs pandas: pip install pandas")
+from inspect import Signature, Parameter
+from urllib.parse import urlencode, unquote
+from urllib.request import (Request, build_opener, urlopen,
+                            HTTPCookieProcessor, HTTPHandler)
+from urllib.error import URLError, HTTPError
+from io import StringIO
+from http.client import IncompleteRead
 
 from .tools import cprint
 from .time import Timer
-from .config import Config
-from .logger import logging
+from .logger import get_logger
 
-try:
-    input = raw_input
-except NameError:
-    pass
-
-if sys.version_info[0] > 2:
-    from urllib.parse import urlencode, unquote
-    from urllib.request import (Request, build_opener, urlopen,
-                                HTTPCookieProcessor, HTTPHandler)
-    from urllib.error import URLError, HTTPError
-    from io import StringIO
-    from http.cookiejar import CookieJar
-    from http.client import IncompleteRead
-else:
-    from urllib import urlencode, unquote
-    from urllib2 import (Request, build_opener, urlopen,
-                         HTTPCookieProcessor, HTTPHandler,
-                         URLError, HTTPError)
-    from StringIO import StringIO
-    from cookielib import CookieJar
-    from httplib import IncompleteRead
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -65,29 +32,37 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 UTC_TZ = pytz.timezone('UTC')
 
-
 # Ignore invalid certificate error
-try:
-    ssl._create_default_https_context = ssl._create_unverified_context
-except AttributeError:
-    log.debug("Your SSL support is outdated.\n"
-              "Please update your Python installation!")
+ssl._create_default_https_context = ssl._create_unverified_context
 
 BASE_URL = 'https://km3netdbweb.in2p3.fr'
 
 
 def we_are_in_lyon():
     """Check if we are on a Lyon machine"""
+    import socket
     try:
         hostname = socket.gethostname()
         ip = socket.gethostbyname(hostname)
     except socket.gaierror:
         return False
     return ip.startswith("134.158.")
+
+
+def read_csv(text, sep="\t"):
+    """Create a DataFrame from CSV text"""
+    import pandas as pd  # no top level load to make a faster import of db
+    return pd.read_csv(StringIO(text), sep="\t")
+
+
+def make_empty_dataset():
+    """Create an empty dataset"""
+    import pandas as pd  # no top level load to make a faster import of db
+    return pd.DataFrame()
 
 
 class DBManager(object):
@@ -103,6 +78,7 @@ class DBManager(object):
         self._opener = None
         self._temporary = temporary
 
+        from .config import Config
         config = Config()
 
         if url is not None:
@@ -150,12 +126,12 @@ class DBManager(object):
             log.error(content)
             return None
         try:
-            dataframe = pd.read_csv(StringIO(content), sep="\t")
+            dataframe = read_csv(content)
         except ValueError:
             log.warning("Empty dataset")  # ...probably. Waiting for more info
-            return pd.DataFrame()
+            return make_empty_dataset()
         else:
-            self._add_datetime(dataframe)
+            add_datetime(dataframe)
             try:
                 self._add_converted_units(dataframe, parameter)
             except KeyError:
@@ -167,27 +143,13 @@ class DBManager(object):
         url = 'streamds/runs.txt?detid={0}'.format(det_id)
         content = self._get_content(url)
         try:
-            dataframe = pd.read_csv(StringIO(content), sep="\t")
+            dataframe = read_csv(content)
         except ValueError:
             log.warning("Empty dataset")
             return None
         else:
-            self._add_datetime(dataframe, 'UNIXSTARTTIME')
+            add_datetime(dataframe, 'UNIXSTARTTIME')
             return dataframe
-
-    def _add_datetime(self, dataframe, timestamp_key='UNIXTIME'):
-        """Add an additional DATETIME column with standar datetime format.
-
-        This currently manipulates the incoming DataFrame!
-        """
-        def convert_data(timestamp):
-            return datetime.fromtimestamp(float(timestamp) / 1e3, UTC_TZ)
-        try:
-            log.debug("Adding DATETIME column to the data")
-            converted = dataframe[timestamp_key].apply(convert_data)
-            dataframe['DATETIME'] = converted
-        except KeyError:
-            log.warning("Could not add DATETIME column")
 
     def _add_converted_units(self, dataframe, parameter, key='VALUE'):
         """Add an additional DATA_VALUE column with converted VALUEs"""
@@ -209,21 +171,10 @@ class DBManager(object):
     def _get_detectors(self):
         content = self._get_content('streamds/detectors.txt')
         try:
-            dataframe = pd.read_csv(StringIO(content), sep="\t")
+            dataframe = read_csv(content)
         except ValueError:
             log.warning("Empty dataset")
-            return pd.DataFrame()
-        else:
-            return dataframe
-
-    def t0sets(self, det_id):
-        content = self._get_content('streamds/t0sets.txt?detid={0}'
-                                    .format(det_id))
-        try:
-            dataframe = pd.read_csv(StringIO(content), sep="\t")
-        except ValueError:
-            log.warning("Empty dataset")
-            return pd.DataFrame()
+            return make_empty_dataset()
         else:
             return dataframe
 
@@ -327,12 +278,12 @@ class DBManager(object):
             log.error(content)
             return None
         try:
-            dataframe = pd.read_csv(StringIO(content), sep="\t")
+            dataframe = read_csv(content)
         except ValueError:
             log.warning("Empty dataset")  # ...probably. Waiting for more info
-            return pd.DataFrame()
+            return make_empty_dataset()
         else:
-            self._add_datetime(dataframe)
+            add_datetime(dataframe)
             return dataframe
 
     def _get_json(self, url):
@@ -407,7 +358,10 @@ class DBManager(object):
 
     def request_permanent_session(self, username=None, password=None):
         log.debug("Requesting permanent session")
+
+        from .config import Config
         config = Config()
+
         if username is None and password is None:
             log.debug("Checking configuration file for DB credentials")
             username, password = config.db_credentials
@@ -444,6 +398,7 @@ class DBManager(object):
 
     def _build_opener(self):
         log.debug("Building opener.")
+        from http.cookiejar import CookieJar
         cj = CookieJar()
         self._cookies = cj
         opener = build_opener(HTTPCookieProcessor(cj), HTTPHandler())
@@ -455,6 +410,21 @@ class DBManager(object):
 
     def _post(self, url, data):
         pass
+
+
+def add_datetime(dataframe, timestamp_key='UNIXTIME'):
+    """Add an additional DATETIME column with standar datetime format.
+
+    This currently manipulates the incoming DataFrame!
+    """
+    def convert_data(timestamp):
+        return datetime.fromtimestamp(float(timestamp) / 1e3, UTC_TZ)
+    try:
+        log.debug("Adding DATETIME column to the data")
+        converted = dataframe[timestamp_key].apply(convert_data)
+        dataframe['DATETIME'] = converted
+    except KeyError:
+        log.warning("Could not add DATETIME column")
 
 
 class StreamDS(object):
@@ -470,9 +440,8 @@ class StreamDS(object):
 
     def _update_streams(self):
         """Update the list of available straems"""
-        c = self._db._get_content("streamds")
-        self._stream_df = pd.read_csv(StringIO(c), sep='\t')  \
-            .sort_values("STREAM")
+        content = self._db._get_content("streamds")
+        self._stream_df = read_csv(content).sort_values("STREAM")
         self._streams = None
         for stream in self.streams:
             setattr(self, stream, self.__getattr__(stream))
@@ -489,18 +458,17 @@ class StreamDS(object):
 
         func.__doc__ = self._stream_parameter(stream, "DESCRIPTION")
 
-        if with_signatures:
-            sig_dict = OrderedDict()
-            for sel in self.mandatory_selectors(stream):
-                if sel == '-':
-                    continue
-                sig_dict[Parameter(
-                    sel, Parameter.POSITIONAL_OR_KEYWORD)] = None
-            for sel in self.optional_selectors(stream):
-                if sel == '-':
-                    continue
-                sig_dict[Parameter(sel, Parameter.KEYWORD_ONLY)] = None
-            func.__signature__ = Signature(parameters=sig_dict)
+        sig_dict = OrderedDict()
+        for sel in self.mandatory_selectors(stream):
+            if sel == '-':
+                continue
+            sig_dict[Parameter(
+                sel, Parameter.POSITIONAL_OR_KEYWORD)] = None
+        for sel in self.optional_selectors(stream):
+            if sel == '-':
+                continue
+            sig_dict[Parameter(sel, Parameter.KEYWORD_ONLY)] = None
+        func.__signature__ = Signature(parameters=sig_dict)
 
         return func
 
@@ -553,15 +521,14 @@ class StreamDS(object):
         sel = ''.join(["&{0}={1}".format(k, v) for (k, v) in kwargs.items()])
         url = "streamds/{0}.{1}?{2}".format(stream, fmt, sel[1:])
         data = self._db._get_content(url)
+        if not data:
+            log.error("No data found.")
+            return
         if(data.startswith("ERROR")):
             log.error(data)
             return
         if fmt == "txt":
-            try:
-                return pd.read_csv(StringIO(data), sep='\t')
-            except pd.errors.EmptyDataError:
-                log.error("No data found.")
-                return None
+            return read_csv(data)
         return data
 
 
@@ -766,6 +733,9 @@ def show_ahrs_calibration(clb_upi, version='3'):
                               "testtype=AHRS-CALIBRATION-v{1}&n=1&out=xml"
                               .format(ahrs_upi, version)) \
         .replace('\n', '')
+
+    import xml.etree.ElementTree as ET
+
     try:
         root = ET.parse(io.StringIO(content)).getroot()
     except ET.ParseError:

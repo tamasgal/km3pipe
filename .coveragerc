@@ -1,6 +1,5 @@
 [run]
 source = km3pipe
-plugins = Cython.Coverage
 
 [report]
 include =
@@ -9,7 +8,17 @@ include =
 omit =
     */tests/*
     */*/tests/*
+    km3pipe/io/aanet.py
     km3pipe/utils/*
+    km3modules/ahrs.py
+    km3modules/dummy.py
+    km3modules/fit.py
+    km3modules/hardware.py
+    km3modules/k40.py
+    km3modules/mc.py
+    km3modules/parser.py
+    km3modules/plot.py
+    km3modules/topology.py
 exclude_lines =
     pragma: no cover
     raise AssertionError

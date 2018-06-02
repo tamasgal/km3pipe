@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # vim: ts=4 sw=4 et
 """
 ================================
@@ -8,7 +7,7 @@ K40 Calibration Batch Processing
 
 Standalone job submitter for K40 offline calibrations with KM3Pipe.
 
-.. code-block:: bash
+.. code-block:: console
 
     Usage:
         qk40calib.py OUTPUT_PATH [options]

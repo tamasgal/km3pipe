@@ -1,12 +1,9 @@
-# coding=utf-8
 # Filename: daq.py
 # pylint: disable=R0903
 """
 Pumps for the DAQ data formats.
 
 """
-from __future__ import division, absolute_import, print_function
-
 from io import BytesIO
 import math
 import struct
@@ -16,10 +13,9 @@ import pprint
 import numpy as np
 
 from km3pipe.core import Pump, Module, Blob
-from km3pipe.dataclasses import (EventInfo, HitSeries, RawHitSeries,
-                                 TimesliceInfo, TimesliceFrameInfo)
+from km3pipe.dataclasses import Table
 from km3pipe.sys import ignored
-from km3pipe.logger import logging
+from km3pipe.logger import get_logger
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -29,7 +25,7 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 DATA_TYPES = {
     101: 'DAQSuperFrame',
@@ -63,8 +59,13 @@ class TimesliceParser(Module):
             det_id, run, sqnr = unpack('<iii', data.read(12))
             timestamp, ns_ticks, n_frames = unpack('<iii', data.read(12))
 
-            ts_info = TimesliceInfo(
-                sqnr, 0, timestamp, ns_ticks * 16, n_frames)
+            ts_info = Table.from_template({
+                'frame_index': sqnr,
+                'slice_id': 0,
+                'timestamp': timestamp,
+                'nanoseconds': ns_ticks * 16,
+                'n_frames': n_frames
+            }, 'TimesliceInfo')
             ts_frameinfos = {}
 
             _dom_ids = []
@@ -77,10 +78,16 @@ class TimesliceParser(Module):
                 timestamp, ns_ticks, dom_id = unpack('<iii', data.read(12))
                 dom_status = unpack('<iiiii', data.read(5 * 4))
                 n_hits = unpack('<i', data.read(4))[0]
-                ts_frameinfos[dom_id] = TimesliceFrameInfo(
-                    det_id, run, sqnr, timestamp, ns_ticks * 16, dom_id,
-                    dom_status, n_hits
-                )
+                ts_frameinfos[dom_id] = Table.from_template({
+                    'det_id': det_id,
+                    'run_id': run,
+                    'sqnr': sqnr,
+                    'timestamp': timestamp,
+                    'nanoseconds': ns_ticks * 16,
+                    'dom_id': dom_id,
+                    'dom_status': dom_status,
+                    'n_hits': n_hits,
+                }, 'TimesliceFrameInfo')
                 for j in range(n_hits):
                     hit = unpack('!BlB', data.read(6))
                     _dom_ids.append(dom_id)
@@ -88,14 +95,14 @@ class TimesliceParser(Module):
                     _times.append(hit[1])
                     _tots.append(hit[2])
 
-            tshits = RawHitSeries.from_arrays(
-                np.array(_channel_ids),
-                np.array(_dom_ids),
-                np.array(_times),
-                np.array(_tots),
-                np.zeros(len(_tots)),  # triggered
-                0  # event_id
-            )
+            tshits = Table.from_template({
+                'channel_id': np.array(_channel_ids),
+                'dom_id': np.array(_dom_ids),
+                'time': np.array(_times),
+                'tot': np.array(_tots),
+                'triggered': np.zeros(len(_tots)),  # triggered
+                'group_id': 0  # event_id
+            }, 'Hits')
             blob['TimesliceInfo'] = ts_info
             blob['TimesliceFrameInfos'] = ts_frameinfos
             blob['TSHits'] = tshits
@@ -192,10 +199,6 @@ class DAQPump(Pump):
     def __iter__(self):
         return self
 
-    def next(self):
-        """Python 2/3 compatibility for iterators"""
-        return self.__next__()
-
     def __next__(self):
         try:
             blob = self.get_blob(self.index)
@@ -263,38 +266,45 @@ class DAQProcessor(Module):
         for idx, hit in enumerate(hits):
             triggereds[idx] = hit in triggered_map
 
-        hit_series = HitSeries.from_arrays(
-            channel_ids,
-            nans,  # dir_x
-            nans,  # dir_y
-            nans,  # dir_z
-            dom_ids,
-            range(n_hits),  # id
-            zeros,  # pmt_id
-            nans,  # pos_x
-            nans,  # pos_y
-            nans,  # pos_z
-            zeros,  # t0
-            times,
-            tots,
-            triggereds,
-            self.index)
+        hit_series = Table.from_template({
+            'channel_id': channel_ids,
+            'dir_x': nans,
+            'dir_y': nans,
+            'dir_z': nans,
+            'dom_id': dom_ids,
+            'id': range(n_hits),
+            'pmt_id': zeros,
+            'pos_x': nans,
+            'pos_y': nans,
+            'pos_z': nans,
+            't0': zeros,
+            'time': times,
+            'tot': tots,
+            'triggered': triggereds,
+            'group_id': self.index,
+        }, 'CalibHits')
 
-        blob['Hits'] = hit_series
+        blob['CalibHits'] = hit_series
 
-        event_info = EventInfo(np.array(
-            (header.det_id,
-             self.index,  # header.time_slice,
-             0,  # livetime_sec
-             0, 0,  # MC ID and time
-             0, 0,  # n evts/files gen
-             event.overlays,
-             # header.run,
-             event.trigger_counter, event.trigger_mask,
-             header.ticks * 16, header.time_stamp,
-             0, 0, 0,  # MC weights
-             0,  # run id
-             0), dtype=EventInfo.dtype))
+        event_info = Table.from_template({
+            'det_id': header.det_id,
+            'frame_index': self.index,  # header.time_slice,
+            'livetime_sec': 0,
+            'mc_id': 0,
+            'mc_t': 0,
+            'n_events_gen': 0,
+            'n_files_gen': 0,
+            'overlays': event.overlays,
+            'trigger_counter': event.trigger_counter,
+            'trigger_mask': event.trigger_mask,
+            'uts_nanoseconds': header.ticks * 16,
+            'uts_seconds': header.time_stamp,
+            'weight_w1': 0,
+            'weight_w2': 0,
+            'weight_w3': 0,  # MC weights
+            'run_id': 0,  # run id
+            'group_id': 0,
+        }, 'EventInfo')
         blob['EventInfo'] = event_info
 
         self.index += 1
@@ -584,10 +594,6 @@ class TMCHRepump(Pump):
 
     def __iter__(self):
         return self
-
-    def next(self):
-        """Python 2/3 compatibility for iterators"""
-        return self.__next__()
 
     def __next__(self):
         return next(self.blobs)

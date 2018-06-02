@@ -1,19 +1,13 @@
-# coding=utf-8
-# cython: profile=True
 # Filename: mc.py
-# cython: embedsignature=True
 # pylint: disable=C0103
 """
 Monte Carlo related things.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import numpy as np
-import pandas as pd
 
-
-from .logger import logging
+from .logger import get_logger
 
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -23,7 +17,7 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 
 def geant2pdg(geant_code):
@@ -132,6 +126,7 @@ def leading_particle(df):
 
 def get_flavor(pdg_types):
     """Build a 'flavor' from the 'type' column."""
+    import pandas as pd
     return pd.Series(pdg_types).apply(pdg2name)
 
 
@@ -145,9 +140,11 @@ def _p_eq_mu(pdg_type):
 
 def is_neutrino(pdg_types):
     """flavor string -> is_neutrino"""
+    import pandas as pd
     return pd.Series(pdg_types).apply(_p_eq_nu)
 
 
 def is_muon(pdg_types):
     """flavor string -> is_neutrino"""
+    import pandas as pd
     return pd.Series(pdg_types).apply(_p_eq_mu)

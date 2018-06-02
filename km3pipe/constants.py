@@ -1,4 +1,3 @@
-# coding=utf-8
 # Filename: constants.py
 # pylint: disable=C0103
 # pragma: no cover
@@ -6,7 +5,6 @@
 The constants used in KM3Pipe.
 
 """
-from __future__ import division, absolute_import, print_function
 
 # TODO: this module should be refactored soon!
 

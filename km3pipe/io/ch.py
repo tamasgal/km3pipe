@@ -1,17 +1,15 @@
 #!/usr/bin/env python
-# coding=utf-8
 # Filename: jpp.py
 # pylint: disable=
 """
 Pump for the jpp file read through aanet interface.
 
 """
-from __future__ import division, absolute_import, print_function
 
 from km3pipe.core import Pump
 from km3pipe.controlhost import Client
 from km3pipe.time import Cuckoo
-from km3pipe.logger import logging
+from km3pipe.logger import get_logger
 import threading
 import socket
 import time
@@ -30,7 +28,7 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 
 class CHPump(Pump):

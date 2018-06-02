@@ -1,18 +1,14 @@
-# coding=utf-8
 # Filename: tools.py
 # pylint: disable=C0103
 """
 Some unsorted, frequently used logic.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import base64
 import collections
-import json
 import os
 import re
-import requests
 import socket
 import subprocess
 import sys
@@ -20,8 +16,6 @@ import warnings
 
 import numpy as np
 
-
-from .logger import logging
 
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -31,8 +25,6 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
-
 
 def ifiles(irods_path):
     """Return a list of filenames for given iRODS path (recursively)"""
@@ -40,7 +32,7 @@ def ifiles(irods_path):
                                          "    | grep 'Bundle file:'"
                                          "    | awk '{{print $3}}'"
                                          .format(irods_path), shell=True)
-    filenames = raw_output.strip().split("\n")
+    filenames = raw_output.decode('ascii').strip().split("\n")
     return filenames
 
 
@@ -100,7 +92,7 @@ def unpack_nfirst(seq, nfirst):
     yield tuple(iterator)
 
 
-def split(string, callback=None, sep=' '):
+def split(string, callback=None, sep=None):
     """Split the string and execute the callback function on each part.
 
     >>> string = "1 2 3 4"
@@ -156,23 +148,11 @@ def remain_file_pointer(function):
     return wrapper
 
 
-try:
-    dict.iteritems
-except AttributeError:
-    # for Python 3
+def itervalues(d):
+    return iter(d.values())
 
-    def itervalues(d):
-        return iter(d.values())
-
-    def iteritems(d):
-        return iter(d.items())
-else:
-    # for Python 2
-    def itervalues(d):
-        return d.itervalues()
-
-    def iteritems(d):
-        return d.iteritems()
+def iteritems(d):
+    return iter(d.items())
 
 
 def decamelise(text):
@@ -251,7 +231,7 @@ RESET = '\033[0m'
 RESET_RE = '\033\[0m'
 
 
-def colored(text, color=None, on_color=None, attrs=None):
+def colored(text, color=None, on_color=None, attrs=None, ansi_code=None):
     """Colorize text, while stripping nested ANSI color sequences.
 
     Author:  Konstantin Lepa <konstantin.lepa@gmail.com> / termcolor
@@ -267,6 +247,8 @@ def colored(text, color=None, on_color=None, attrs=None):
         colored('Hello, World!', 'green')
     """
     if os.getenv('ANSI_COLORS_DISABLED') is None:
+        if ansi_code is not None:
+            return "\033[38;5;{}m{}\033[0m".format(ansi_code, text)
         fmt_str = '\033[%dm%s'
         if color is not None:
             text = re.sub(COLORS_RE + '(.*?)' + RESET_RE, r'\1', text)
@@ -291,124 +273,6 @@ def cprint(text, color=None, on_color=None, attrs=None, **kwargs):
     It accepts arguments of print function.
     """
     print((colored(text, color, on_color, attrs)), **kwargs)
-
-
-# shamelessly stolen from sklearn
-class deprecated(object):
-    """Decorator to mark a function or class as deprecated.
-
-    Issue a warning when the function is called/the class is instantiated and
-    adds a warning to the docstring.
-
-    The optional extra argument will be appended to the deprecation message
-    and the docstring. Note: to use this with the default value for extra, put
-    in an empty of parentheses:
-
-    >>> from sklearn.utils import deprecated
-    >>> deprecated() # doctest: +ELLIPSIS
-    <sklearn.utils.deprecation.deprecated object at ...>
-
-    >>> @deprecated()
-    ... def some_function(): pass
-
-    Parameters
-    ----------
-    extra : string
-          to be added to the deprecation messages
-    """
-
-    # Adapted from http://wiki.python.org/moin/PythonDecoratorLibrary,
-    # but with many changes.
-
-    def __init__(self, extra=''):
-        self.extra = extra
-
-    def __call__(self, obj):
-        """Call method
-
-        Parameters
-        ----------
-        obj : object
-        """
-        if isinstance(obj, type):
-            return self._decorate_class(obj)
-        else:
-            return self._decorate_fun(obj)
-
-    def _decorate_class(self, cls):
-        msg = "Class %s is deprecated" % cls.__name__
-        if self.extra:
-            msg += "; %s" % self.extra
-
-        # FIXME: we should probably reset __new__ for full generality
-        init = cls.__init__
-
-        def wrapped(*args, **kwargs):
-            warnings.warn(msg, category=DeprecationWarning)
-            return init(*args, **kwargs)
-        cls.__init__ = wrapped
-
-        wrapped.__name__ = '__init__'
-        wrapped.__doc__ = self._update_doc(init.__doc__)
-        wrapped.deprecated_original = init
-
-        return cls
-
-    def _decorate_fun(self, fun):
-        """Decorate function fun"""
-
-        msg = "Function %s is deprecated" % fun.__name__
-        if self.extra:
-            msg += "; %s" % self.extra
-
-        def wrapped(*args, **kwargs):
-            warnings.warn(msg, category=DeprecationWarning)
-            return fun(*args, **kwargs)
-
-        wrapped.__name__ = fun.__name__
-        wrapped.__dict__ = fun.__dict__
-        wrapped.__doc__ = self._update_doc(fun.__doc__)
-
-        return wrapped
-
-    def _update_doc(self, olddoc):
-        newdoc = "DEPRECATED"
-        if self.extra:
-            newdoc = "%s: %s" % (newdoc, self.extra)
-        if olddoc:
-            newdoc = "%s\n\n%s" % (newdoc, olddoc)
-        return newdoc
-
-
-def _is_deprecated(func):
-    """Helper to check if func is wraped by our deprecated decorator"""
-    if sys.version_info < (3, 5):
-        raise NotImplementedError("This is only available for python3.5 "
-                                  "or above")
-    closures = getattr(func, '__closure__', [])
-    if closures is None:
-        closures = []
-    is_deprecated = ('deprecated' in ''.join([c.cell_contents
-                                              for c in closures
-                     if isinstance(c.cell_contents, str)]))
-    return is_deprecated
-
-
-def slack_msg(text, webhook_url):
-    """Send text to Slack for a given webhook_url"""
-    slack_data = {'text': text}
-    response = requests.post(
-        webhook_url,
-        data=json.dumps(slack_data),
-        headers={'Content-Type': 'application/json'}
-        )
-    if response.status_code != 200:
-        raise ValueError(
-            'Request to slack returned an error %s, the response is:\n%s'
-            % (response.status_code, response.text)
-        )
-    else:
-        return True
 
 
 def issorted(arr):
@@ -454,3 +318,19 @@ class AnyBar():
 def zero_pad(m, n=1):
     """Pad a matrix with zeros, on all sides."""
     return np.pad(m, (n, n), mode='constant', constant_values=[0])
+
+
+def istype(obj, typename):
+    """Drop-in replacement for `isinstance` to avoid imports"""
+    return type(obj).__name__ == typename
+
+
+def supports_color():
+    """Checks if the terminal supports color."""
+    supported_platform = sys.platform != 'win32' or 'ANSICON' in os.environ
+    is_a_tty = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
+
+    if not supported_platform or not is_a_tty:
+        return False
+
+    return True

@@ -1,12 +1,11 @@
-# coding=utf-8
 # Filename: test_config.py
 """
 Test suite for configuration related functions and classes.
 
 """
-from __future__ import division, absolute_import, print_function
+from io import StringIO
 
-from km3pipe.testing import TestCase, StringIO
+from km3pipe.testing import TestCase
 from km3pipe.config import Config
 
 __author__ = "Tamas Gal"

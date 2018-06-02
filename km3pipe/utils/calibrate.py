@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # Filename: calibrate.py
 """
 Apply geometry and time calibration from a DETX to an HDF5 file.
@@ -12,7 +11,6 @@ Usage:
 Options:
     -h --help       Show this screen.
 """
-from __future__ import division
 
 import km3pipe as kp
 

@@ -1,20 +1,16 @@
-# coding=utf-8
 # Filename: calib.py
 # pylint: disable=locally-disabled
 """
 Calibration.
 
 """
-from __future__ import division, absolute_import, print_function
-
 import numpy as np
-import pandas as pd
 
 from .core import Module
 from .hardware import Detector
-from .dataclasses import (CRawHitSeries, HitSeries, RawHitSeries,
-                          CMcHitSeries, McHitSeries)
-from .logger import logging
+from .dataclasses import Table
+from .dataclass_templates import TEMPLATES
+from .tools import istype
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -24,16 +20,12 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
-# log.setLevel(logging.DEBUG)
 
 try:
     import numba as nb
 except (ImportError, OSError):
-    log.debug("No Numba support")
     HAVE_NUMBA = False
 else:
-    log.debug("Running with Numba support")
     HAVE_NUMBA = True
 
 
@@ -53,14 +45,16 @@ class Calibration(Module):
     calibration: optional
         calibration (when retrieving from database).
     """
+    __name__ = 'Calibration'
+    name = 'Calibration'
 
     def configure(self):
-        self._should_apply = self.get('apply') or False
-        self.filename = self.get('filename') or None
-        self.det_id = self.get('det_id') or None
-        self.t0set = self.get('t0set') or None
-        self.calibration = self.get('calibration') or None
-        self.detector = self.get('detector') or None
+        self._should_apply = self.get('apply', default=False)
+        self.filename = self.get('filename')
+        self.det_id = self.get('det_id')
+        self.t0set = self.get('t0set')
+        self.calibration = self.get('calibration')
+        self.detector = self.get('detector')
         self._pos_dom_channel = None
         self._dir_dom_channel = None
         self._t0_dom_channel = None
@@ -78,11 +72,11 @@ class Calibration(Module):
                                          calibration=self.calibration)
 
         if self.detector is not None:
-            log.debug("Creating lookup tables")
+            self.log.debug("Creating lookup tables")
             self._create_dom_channel_lookup()
             self._create_pmt_id_lookup()
         else:
-            log.critical("No detector information loaded.")
+            self.log.critical("No detector information loaded.")
 
     def process(self, blob, key='Hits', outkey='CalibHits'):
         if self._should_apply:
@@ -103,161 +97,111 @@ class Calibration(Module):
             cal = np.empty(n)
             lookup = self._calib_by_dom_and_channel
             for i in range(n):
-                calib = lookup[hits._arr['dom_id']
-                               [i]][hits._arr['channel_id'][i]]
+                calib = lookup[hits['dom_id']
+                               [i]][hits['channel_id'][i]]
                 cal[i] = calib[6]
             hits.time += cal
         return hits
 
     def apply(self, hits):
-        """Add x, y, z, t0 (and du, floor if DataFrame) columns to hit.
-
-        When applying to ``RawHitSeries`` or ``McHitSeries``, a ``HitSeries``
-        will be returned with the calibration information added.
+        """Add x, y, z, t0 (and du, floor if DataFrame) columns to the hits.
 
         """
-        if isinstance(hits, RawHitSeries):
-            return self._apply_to_rawhitseries(hits)
-        elif isinstance(hits, (HitSeries, list)):
-            return self._apply_to_hitseries(hits)
-        elif isinstance(hits, pd.DataFrame):
-            return self._apply_to_table(hits)
-        elif isinstance(hits, McHitSeries):
-            return self._apply_to_mchitseries(hits)
+        if istype(hits, 'DataFrame'):
+            # do we ever see McHits here?
+            hits = Table.from_template(hits, 'Hits')
+        if hasattr(hits, 'dom_id') and hasattr(hits, 'channel_id'):
+            return self._apply_to_hits(hits)
+        elif hasattr(hits, 'pmt_id'):
+            return self._apply_to_mchits(hits)
         else:
-            raise TypeError("Don't know how to apply calibration to '{0}'."
-                            .format(hits.__class__.__name__))
+            raise TypeError("Don't know how to apply calibration to '{0}'. "
+                            "We need at least 'dom_id' and 'channel_id', or "
+                            "'pmt_id'."
+                            .format(hits.name))
 
-    def _apply_to_hitseries(self, hits):
-        """Add x, y, z and t0 offset to hit series"""
-        for idx, hit in enumerate(hits):
-            try:
-                pmt = self.detector.get_pmt(hit.dom_id, hit.channel_id)
-            except (KeyError, AttributeError):
-                pmt = self.detector.pmt_with_id(hit.pmt_id)
-            hits.pos_x[idx] = pmt.pos[0]
-            hits.pos_y[idx] = pmt.pos[1]
-            hits.pos_z[idx] = pmt.pos[2]
-            hits.dir_x[idx] = pmt.dir[0]
-            hits.dir_y[idx] = pmt.dir[1]
-            hits.dir_z[idx] = pmt.dir[2]
-            hits._arr['t0'][idx] = pmt.t0
-            hits._arr['time'][idx] += pmt.t0
-            # hit.a = hit.tot
-        return hits
-
-    def _apply_to_rawhitseries(self, hits):
-        """Create a HitSeries from RawHitSeries and add pos, dir and t0.
-
-        Note that existing arrays like tot, dom_id, channel_id etc. will be
-        copied by reference for better performance.
-
-        """
+    def _apply_to_hits(self, hits):
+        """Append the position, direction and t0 columns and add t0 to time"""
         n = len(hits)
         cal = np.empty((n, 9))
         lookup = self._calib_by_dom_and_channel
         for i in range(n):
-            calib = lookup[hits._arr['dom_id'][i]][hits._arr['channel_id'][i]]
+            calib = lookup[hits['dom_id'][i]][hits['channel_id'][i]]
             cal[i] = calib
-        h = np.empty(n, CRawHitSeries.dtype)
-        h['channel_id'] = hits.channel_id
-        h['dir_x'] = cal[:, 3]
-        h['dir_y'] = cal[:, 4]
-        h['dir_z'] = cal[:, 5]
-        h['dom_id'] = hits.dom_id
-        h['du'] = cal[:, 7]
-        h['floor'] = cal[:, 8]
-        h['pos_x'] = cal[:, 0]
-        h['pos_y'] = cal[:, 1]
-        h['pos_z'] = cal[:, 2]
-        h['t0'] = cal[:, 6]
-        h['time'] = hits.time + cal[:, 6]
-        h['tot'] = hits.tot
-        h['triggered'] = hits.triggered
-        h['event_id'] = hits._arr['event_id']
-        return CRawHitSeries(h, hits.event_id)
+        dir_x = cal[:, 3]
+        dir_y = cal[:, 4]
+        dir_z = cal[:, 5]
+        du = cal[:, 7]
+        floor = cal[:, 8]
+        pos_x = cal[:, 0]
+        pos_y = cal[:, 1]
+        pos_z = cal[:, 2]
+        t0 = cal[:, 6]
 
-    def _apply_to_mchitseries(self, hits):
-        """Create a HitSeries from McHitSeries and add pos, dir and t0.
+        hits.time += t0
 
-        Note that existing arrays like a, origin, pmt_id will be copied by
-        reference for better performance.
+        return hits.append_columns(
+            ['dir_x', 'dir_y', 'dir_z', 'du', 'floor',
+             'pos_x', 'pos_y', 'pos_z', 't0'],
+            [dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0]
+        )
 
-        The attributes ``a`` and ``origin`` are not implemented yet.
-
-        """
-        n = len(hits)
-        cal = np.empty((n, 9))
-        for i in range(n):
+    def _apply_to_mchits(self, hits):
+        """Append the position, direction and t0 columns and add t0 to time"""
+        n_hits = len(hits)
+        cal = np.empty((n_hits, 9))
+        for i in range(n_hits):
             lookup = self._calib_by_pmt_id
-            cal[i] = lookup[hits._arr['pmt_id'][i]]
-        h = np.empty(n, CMcHitSeries.dtype)
-        h['channel_id'] = np.zeros(n, dtype=int)
-        h['dir_x'] = cal[:, 3]
-        h['dir_y'] = cal[:, 4]
-        h['dir_z'] = cal[:, 5]
-        h['du'] = cal[:, 7]
-        h['floor'] = cal[:, 8]
-        h['pmt_id'] = hits._arr['pmt_id']
-        h['pos_x'] = cal[:, 0]
-        h['pos_y'] = cal[:, 1]
-        h['pos_z'] = cal[:, 2]
-        h['t0'] = cal[:, 6]
-        h['time'] = hits.time + cal[:, 6]
-        h['tot'] = np.zeros(n, dtype=int)
-        h['triggered'] = np.zeros(n, dtype=bool)
-        h['event_id'] = hits._arr['event_id']
-        return CMcHitSeries(h, hits.event_id)
+            cal[i] = lookup[hits['pmt_id'][i]]
+        dir_x = cal[:, 3]
+        dir_y = cal[:, 4]
+        dir_z = cal[:, 5]
+        du = cal[:, 7]
+        floor = cal[:, 8]
+        pos_x = cal[:, 0]
+        pos_y = cal[:, 1]
+        pos_z = cal[:, 2]
+        t0 = cal[:, 6]
 
-    def _apply_to_table(self, table):
-        """Add x, y, z and du, floor columns to hit table"""
-        def get_pmt(hit):
-            return self.detector.get_pmt(hit['dom_id'], hit['channel_id'])
+        hits.time += t0
 
-        table['pos_x'] = table.apply(lambda h: get_pmt(h).pos.x, axis=1)
-        table['pos_y'] = table.apply(lambda h: get_pmt(h).pos.y, axis=1)
-        table['pos_z'] = table.apply(lambda h: get_pmt(h).pos.z, axis=1)
-        table['dir_x'] = table.apply(lambda h: get_pmt(h).dir.x, axis=1)
-        table['dir_y'] = table.apply(lambda h: get_pmt(h).dir.y, axis=1)
-        table['dir_z'] = table.apply(lambda h: get_pmt(h).dir.z, axis=1)
-        table['time'] += table.apply(lambda h: get_pmt(h).t0, axis=1)
-        table['t0'] = table.apply(lambda h: get_pmt(h).t0, axis=1)
-        table['du'] = table.apply(lambda h: get_pmt(h).omkey[0], axis=1)
-        table['floor'] = table.apply(lambda h: get_pmt(h).omkey[1], axis=1)
-        return table
+        return hits.append_columns(
+            ['dir_x', 'dir_y', 'dir_z', 'du', 'floor',
+             'pos_x', 'pos_y', 'pos_z', 't0'],
+            [dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0]
+        )
 
     def _create_dom_channel_lookup(self):
         data = {}
-        for dom_id, pmts in self.detector._pmts_by_dom_id.items():
-            for pmt in pmts:
-                if dom_id not in data:
-                    data[dom_id] = np.zeros((31, 9))
-                data[dom_id][pmt.channel_id] = [pmt.pos[0],
-                                                pmt.pos[1],
-                                                pmt.pos[2],
-                                                pmt.dir[0],
-                                                pmt.dir[1],
-                                                pmt.dir[2],
+        for pmt in self.detector.pmts:
+            if pmt.dom_id not in data:
+                data[pmt.dom_id] = np.zeros((31, 9))
+            data[pmt.dom_id][pmt.channel_id] = [pmt.pos_x,
+                                                pmt.pos_y,
+                                                pmt.pos_z,
+                                                pmt.dir_x,
+                                                pmt.dir_y,
+                                                pmt.dir_z,
                                                 pmt.t0,
-                                                pmt.omkey[0],
-                                                pmt.omkey[1]]
+                                                pmt.du,
+                                                pmt.floor]
         self._calib_by_dom_and_channel = data
         if HAVE_NUMBA:
             self._lookup_tables = [(dom, cal) for dom, cal in data.items()]
 
     def _create_pmt_id_lookup(self):
         data = {}
-        for pmt_id, pmt in self.detector._pmts_by_id.items():
-            data[pmt_id] = np.array((pmt.pos[0],
-                                     pmt.pos[1],
-                                     pmt.pos[2],
-                                     pmt.dir[0],
-                                     pmt.dir[1],
-                                     pmt.dir[2],
-                                     pmt.t0,
-                                     pmt.omkey[0],
-                                     pmt.omkey[1],
-                                     ))
+        for pmt in self.detector.pmts:
+            data[pmt.pmt_id] = np.array((pmt.pos_x,
+                                         pmt.pos_y,
+                                         pmt.pos_z,
+                                         pmt.dir_x,
+                                         pmt.dir_y,
+                                         pmt.dir_z,
+                                         pmt.t0,
+                                         pmt.du,
+                                         pmt.floor,
+                                         ))
         self._calib_by_pmt_id = data
 
     def __repr__(self):
@@ -268,8 +212,6 @@ class Calibration(Module):
 
 
 if HAVE_NUMBA:
-    log.info("Initialising Numba JIT functions")
-
     @nb.jit
     def apply_t0_nb(times, dom_ids, channel_ids, lookup_tables):
         """Apply t0s using a lookup table of tuples (dom_id, calib)"""

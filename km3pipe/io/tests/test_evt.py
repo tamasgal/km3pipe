@@ -1,17 +1,12 @@
-# coding=utf-8
 # Filename: test_evt.py
 # pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
-from __future__ import division, absolute_import, print_function
+from io import StringIO
+from os.path import join, dirname
 
-import os.path
-import operator
-from functools import reduce
+import numpy as np
 
-import km3pipe as kp
-from km3pipe.testing import TestCase, StringIO
-from km3pipe.io import EvtPump
-from km3pipe.io.evt import (Track, TrackIn, Neutrino,
-                            EvtHit, EvtRawHit, TrackFit)
+from km3pipe.testing import TestCase, skip
+from km3pipe.io.evt import EvtPump, EVT_PARSERS
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -21,14 +16,18 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
+TEST_DATA_DIR = join(dirname(__file__), '../../kp-data/test_data/')
 
-class TestEvtParser(TestCase):
+
+class TestEvtPump(TestCase):
 
     def setUp(self):
         self.valid_evt_header = "\n".join((
             "start_run: 1",
             "cut_nu: 0.100E+03 0.100E+09-0.100E+01 0.100E+01",
             "spectrum: -1.40",
+            "physics: gSeaGen 4.1 180126  165142",
+            "physics: GENIE 2.10.2 180126  165142",
             "end_event:",
             "start_event: 12 1",
             "track_in: 1 -389.951 213.427 516 -0.204562 -0.60399 -0.770293" +
@@ -90,7 +89,7 @@ class TestEvtParser(TestCase):
             "end_event:"
         ))
 
-        self.pump = EvtPump()
+        self.pump = EvtPump(parsers=[])
         self.pump.blob_file = StringIO(self.valid_evt_header)
 
     def tearDown(self):
@@ -98,9 +97,16 @@ class TestEvtParser(TestCase):
 
     def test_parse_header(self):
         raw_header = self.pump.extract_header()
-        self.assertEqual(['1'], raw_header['start_run'])
-        self.assertAlmostEqual(-1.4, float(raw_header['spectrum'][0]))
-        self.assertAlmostEqual(1, float(raw_header['cut_nu'][2]))
+        self.assertEqual([['1']], raw_header['start_run'])
+        self.assertAlmostEqual(-1.4, float(raw_header['spectrum'][0][0]))
+        self.assertAlmostEqual(1, float(raw_header['cut_nu'][0][2]))
+
+    def test_header_entries_with_same_tag_are_put_in_lists(self):
+        raw_header = self.pump.extract_header()
+        self.assertAlmostEqual(2, len(raw_header['physics']))
+        self.assertAlmostEqual(1, len(raw_header['spectrum']))
+        assert 'gSeaGen' == raw_header['physics'][0][0]
+        assert 'GENIE' == raw_header['physics'][1][0]
 
 #    def test_incomplete_header_raises_value_error(self):
 #        temp_file = StringIO(self.corrupt_evt_header)
@@ -121,12 +127,12 @@ class TestEvtParser(TestCase):
 
     def test_event_offset_is_at_first_event_after_parsing_header(self):
         self.pump.extract_header()
-        self.assertEqual(88, self.pump.event_offsets[0])
+        self.assertEqual(161, self.pump.event_offsets[0])
 
     def test_rebuild_offsets(self):
         self.pump.extract_header()
         self.pump._cache_offsets()
-        self.assertListEqual([88, 233, 700], self.pump.event_offsets)
+        self.assertListEqual([161, 306, 773], self.pump.event_offsets)
 
     def test_rebuild_offsets_without_header(self):
         self.pump.blob_file = StringIO(self.no_evt_header)
@@ -150,7 +156,7 @@ class TestEvtParser(TestCase):
         self.pump.prepare_blobs()
         self.assertEqual(1, len(self.pump.event_offsets))
         blob = self.pump.get_blob(2)
-        self.assertListEqual(['14', '1'], blob['start_event'])
+        self.assertTupleEqual((14, 1), blob['start_event'])
         self.assertEqual(3, len(self.pump.event_offsets))
 
     def test_get_blob_raises_index_error_for_wrong_index(self):
@@ -162,29 +168,37 @@ class TestEvtParser(TestCase):
         self.pump.prepare_blobs()
         blob = self.pump.get_blob(0)
         self.assertTrue('raw_header' in blob)
-        self.assertEqual(['1'], blob['raw_header']['start_run'])
-        self.assertListEqual(['12', '1'], blob['start_event'])
-        self.assertListEqual([[1.0, 44675.0, 1.0, 1170.59,
-                               5.0, 2.0, 1.0, 1170.59]],
-                             blob['hit'])
+        self.assertEqual([['1']], blob['raw_header']['start_run'])
+        self.assertTupleEqual((12, 1), blob['start_event'])
+        # TODO: all the other stuff like hit, track etc.
+        assert 'hit' in blob
+        assert 'track_in' in blob
+        assert np.allclose([[1.0, 44675.0, 1.0, 1170.59,
+                             5.0, 2.0, 1.0, 1170.59]],
+                            blob['hit'])
+        blob = self.pump.get_blob(1)
+        assert 5 == len(blob['hit'])
+        assert np.allclose([3.0, 20164.0, 1.0, 1178.19, 5.0,
+                            1.0, 1.0, 1178.19],
+                           blob['hit'][2])
 
     def test_get_blob_returns_correct_events(self):
         self.pump.prepare_blobs()
         blob = self.pump.get_blob(0)
-        self.assertListEqual(['12', '1'], blob['start_event'])
+        self.assertTupleEqual((12, 1), blob['start_event'])
         blob = self.pump.get_blob(2)
-        self.assertListEqual(['14', '1'], blob['start_event'])
+        self.assertTupleEqual((14, 1), blob['start_event'])
         blob = self.pump.get_blob(1)
-        self.assertListEqual(['13', '1'], blob['start_event'])
+        self.assertTupleEqual((13, 1), blob['start_event'])
 
     def test_process_returns_correct_blobs(self):
         self.pump.prepare_blobs()
         blob = self.pump.process()
-        self.assertListEqual(['12', '1'], blob['start_event'])
+        self.assertTupleEqual((12, 1), blob['start_event'])
         blob = self.pump.process()
-        self.assertListEqual(['13', '1'], blob['start_event'])
+        self.assertTupleEqual((13, 1), blob['start_event'])
         blob = self.pump.process()
-        self.assertListEqual(['14', '1'], blob['start_event'])
+        self.assertTupleEqual((14, 1), blob['start_event'])
 
     def test_process_raises_stop_iteration_if_eof_reached(self):
         self.pump.prepare_blobs()
@@ -199,7 +213,7 @@ class TestEvtParser(TestCase):
         event_numbers = []
         for blob in self.pump:
             event_numbers.append(blob['start_event'][0])
-        self.assertListEqual(['12', '13', '14'], event_numbers)
+        self.assertListEqual([12, 13, 14], event_numbers)
 
     def test_pump_has_len(self):
         self.pump.prepare_blobs()
@@ -208,19 +222,19 @@ class TestEvtParser(TestCase):
     def test_pump_get_item_returns_first_for_index_zero(self):
         self.pump.prepare_blobs()
         first_blob = self.pump[0]
-        self.assertEqual('12', first_blob['start_event'][0])
+        self.assertEqual(12, first_blob['start_event'][0])
 
     def test_pump_get_item_returns_correct_blob_for_index(self):
         self.pump.prepare_blobs()
         blob = self.pump[1]
-        self.assertEqual('13', blob['start_event'][0])
+        self.assertEqual(13, blob['start_event'][0])
 
     def test_pump_slice_generator(self):
         self.pump.prepare_blobs()
         blobs = self.pump[:]
         blobs = list(self.pump[1:3])
         self.assertEqual(2, len(blobs))
-        self.assertEqual(['13', '1'], blobs[0]['start_event'])
+        self.assertEqual((13, 1), blobs[0]['start_event'])
 
     def test_create_blob_entry_for_line_ignores_corrupt_line(self):
         self.pump.blob_file = StringIO(self.corrupt_line)
@@ -228,207 +242,43 @@ class TestEvtParser(TestCase):
         self.pump.prepare_blobs()
         self.pump.get_blob(0)
 
+    def test_parsers_are_ignored_if_not_valid(self):
+        self.pump = EvtPump(parsers=['a', 'b'])
+        self.pump.blob_file = StringIO(self.valid_evt_header)
+        assert 'a' not in self.pump.parsers
+        assert 'b' not in self.pump.parsers
 
-class TestTrack(TestCase):
-    def setUp(self):
-        self.track = Track((1., 2., 3., 4., 0., 0., 1., 8., 9., 'a', 'b', 'c'),
-                           zed_correction=0.)
+    def test_parsers_are_added(self):
+        self.pump = EvtPump(parsers=['km3sim'])
+        self.pump.blob_file = StringIO(self.valid_evt_header)
+        assert EVT_PARSERS['km3sim'] in self.pump.parsers
 
-    def test_track_init(self):
-        track = self.track
-        self.assertAlmostEqual(1, track.id)
-        self.assertAlmostEqual(2, track.pos.x)
-        self.assertAlmostEqual(3, track.pos.y)
-        self.assertAlmostEqual(4, track.pos.z)
-        self.assertAlmostEqual(0, track.dir.x)
-        self.assertAlmostEqual(0, track.dir.y)
-        self.assertAlmostEqual(1, track.dir.z)
-        self.assertAlmostEqual(8, track.E)
-        self.assertAlmostEqual(9, track.time)
-        self.assertTupleEqual(('a', 'b', 'c'), track.args)
+    def test_custom_parser(self):
+        def a_parser(blob):
+            blob['foo'] = 23
 
+        self.pump = EvtPump(parsers=[a_parser])
+        self.pump.blob_file = StringIO(self.valid_evt_header)
+        self.pump.extract_header()
+        self.pump.prepare_blobs()
+        blob = self.pump[0]
 
-class TestTrackIn(TestCase):
+        assert 23 == blob['foo']
 
-    def setUp(self):
-        self.track_in = TrackIn((1, 2., 3., 4., 0., 0., 1., 8, 9, 10, 11),
-                                zed_correction=0)
-
-    def test_trackin_init(self):
-        track_in = self.track_in
-        self.assertEqual(1, track_in.id)
-        self.assertAlmostEqual(2, track_in.pos.x)
-        self.assertAlmostEqual(3, track_in.pos.y)
-        self.assertAlmostEqual(4, track_in.pos.z)
-        self.assertAlmostEqual(0, track_in.dir.x)
-        self.assertAlmostEqual(0, track_in.dir.y)
-        self.assertAlmostEqual(1, track_in.dir.z)
-        self.assertEqual(8, track_in.E)
-        self.assertEqual(9, track_in.time)
-        self.assertEqual(130, track_in.particle_type)  # this should be PDG!
-        self.assertEqual(11, track_in.length)
-
-
-class TestTrackFit(TestCase):
-
-    def setUp(self):
-        data = (1, 2., 3., 4., 0., 0., 1., 8, 9, 10, 11, 12, 13, 14)
-        self.track_fit = TrackFit(data, zed_correction=0)
-
-    def test_trackfit_init(self):
-        track_fit = self.track_fit
-        self.assertEqual(1, track_fit.id)
-        self.assertAlmostEqual(2, track_fit.pos.x)
-        self.assertAlmostEqual(3, track_fit.pos.y)
-        self.assertAlmostEqual(4, track_fit.pos.z)
-        self.assertAlmostEqual(0, track_fit.dir.x)
-        self.assertAlmostEqual(0, track_fit.dir.y)
-        self.assertAlmostEqual(1, track_fit.dir.z)
-        self.assertEqual(8, track_fit.E)
-        self.assertEqual(9, track_fit.time)
-        self.assertEqual(10, track_fit.speed)
-        self.assertEqual(11, track_fit.ts)
-        self.assertEqual(12, track_fit.te)
-        self.assertEqual(13, track_fit.con1)
-        self.assertEqual(14, track_fit.con2)
-
-
-class TestNeutrino(TestCase):
-
-    def setUp(self):
-        data = (1, 2., 3., 4., 0., 0., 1., 8, 9, 10, 11, 12, 13, 14)
-        self.neutrino = Neutrino(data, zed_correction=0)
-
-    def test_neutrino_init(self):
-        neutrino = self.neutrino
-        self.assertEqual(1, neutrino.id)
-        self.assertAlmostEqual(2, neutrino.pos.x)
-        self.assertAlmostEqual(3, neutrino.pos.y)
-        self.assertAlmostEqual(4, neutrino.pos.z)
-        self.assertAlmostEqual(0, neutrino.dir.x)
-        self.assertAlmostEqual(0, neutrino.dir.y)
-        self.assertAlmostEqual(1, neutrino.dir.z)
-        self.assertEqual(8, neutrino.E)
-        self.assertEqual(9, neutrino.time)
-        self.assertEqual(10, neutrino.Bx)
-        self.assertEqual(11, neutrino.By)
-        self.assertEqual(12, neutrino.ichan)
-        self.assertEqual(13, neutrino.particle_type)
-        self.assertEqual(14, neutrino.channel)
-
-    def test_neutrino_str(self):
-        neutrino = self.neutrino
-        repr_str = "Neutrino: mu-, 8.0 GeV, NC"
-        self.assertEqual(repr_str, str(neutrino))
-        neutrino.E = 2000
-        repr_str = "Neutrino: mu-, 2.0 TeV, NC"
-        self.assertEqual(repr_str, str(neutrino))
-        neutrino.E = 3000000
-        repr_str = "Neutrino: mu-, 3.0 PeV, NC"
-        self.assertEqual(repr_str, str(neutrino))
-
-
-class TestEvtHit(TestCase):
-
-    def test_hit_init(self):
-        hit = EvtHit(1, 2, 3, 4, 5, 6, 7, 8)
-        self.assertEqual(1, hit.id)
-        self.assertEqual(2, hit.pmt_id)
-        self.assertEqual(3, hit.pe)
-        self.assertEqual(4, hit.time)
-        self.assertEqual(5, hit.type)
-        self.assertEqual(6, hit.n_photons)
-        self.assertEqual(7, hit.track_in)
-        self.assertEqual(8, hit.c_time)
-
-    def test_hit_default_values(self):
-        hit = EvtHit()
-        self.assertIsNone(hit.id)
-        self.assertIsNone(hit.pmt_id)
-        self.assertIsNone(hit.time)
-
-    def test_hit_default_values_are_set_if_others_are_given(self):
-        hit = EvtHit(track_in=1)
-        self.assertIsNone(hit.id)
-        self.assertIsNone(hit.time)
-
-    def test_hit_attributes_are_immutable(self):
-        hit = EvtHit(1, True)
-        with self.assertRaises(AttributeError):
-            hit.time = 10
-
-
-class TestEvtRawHit(TestCase):
-
-    def test_rawhit_init(self):
-        raw_hit = EvtRawHit(1, 2, 3, 4)
-        self.assertEqual(1, raw_hit.id)
-        self.assertEqual(2, raw_hit.pmt_id)
-        self.assertEqual(3, raw_hit.tot)
-        self.assertEqual(4, raw_hit.time)
-
-    def test_hit_default_values(self):
-        raw_hit = EvtRawHit()
-        self.assertIsNone(raw_hit.id)
-        self.assertIsNone(raw_hit.pmt_id)
-        self.assertIsNone(raw_hit.time)
-
-    def test_hit_default_values_are_set_if_others_are_given(self):
-        raw_hit = EvtRawHit(pmt_id=1)
-        self.assertIsNone(raw_hit.id)
-        self.assertIsNone(raw_hit.time)
-
-    def test_hit_attributes_are_immutable(self):
-        raw_hit = EvtRawHit(1, True)
-        with self.assertRaises(AttributeError):
-            raw_hit.time = 10
-
-    def test_hit_addition_remains_time_id_and_pmt_id_and_adds_tot(self):
-        hit1 = EvtRawHit(id=1, time=1, pmt_id=1, tot=10)
-        hit2 = EvtRawHit(id=2, time=2, pmt_id=2, tot=20)
-        merged_hit = hit1 + hit2
-        self.assertEqual(1, merged_hit.id)
-        self.assertEqual(1, merged_hit.time)
-        self.assertEqual(1, merged_hit.pmt_id)
-        self.assertEqual(30, merged_hit.tot)
-
-    def test_hit_addition_picks_correct_time_if_second_hit_is_earlier(self):
-        hit1 = EvtRawHit(id=1, time=2, pmt_id=1, tot=10)
-        hit2 = EvtRawHit(id=2, time=1, pmt_id=2, tot=20)
-        merged_hit = hit1 + hit2
-        self.assertEqual(2, merged_hit.id)
-        self.assertEqual(2, merged_hit.pmt_id)
-
-    def test_hit_additions_works_with_multiple_hits(self):
-        hit1 = EvtRawHit(id=1, time=2, pmt_id=1, tot=10)
-        hit2 = EvtRawHit(id=2, time=1, pmt_id=2, tot=20)
-        hit3 = EvtRawHit(id=3, time=1, pmt_id=3, tot=30)
-        merged_hit = hit1 + hit2 + hit3
-        self.assertEqual(2, merged_hit.pmt_id)
-        self.assertEqual(60, merged_hit.tot)
-        self.assertEqual(1, merged_hit.time)
-        self.assertEqual(2, merged_hit.id)
-
-    def test_hit_addition_works_with_sum(self):
-        hit1 = EvtRawHit(id=1, time=2, pmt_id=1, tot=10)
-        hit2 = EvtRawHit(id=2, time=1, pmt_id=2, tot=20)
-        hit3 = EvtRawHit(id=3, time=1, pmt_id=3, tot=30)
-        hits = [hit1, hit2, hit3]
-        merged_hit = reduce(operator.add, hits)
-        self.assertEqual(2, merged_hit.id)
-        self.assertEqual(1, merged_hit.time)
-        self.assertEqual(60, merged_hit.tot)
-        self.assertEqual(2, merged_hit.pmt_id)
+    def test_auto_parser_finds_all_physics_parsers(self):
+        self.pump = EvtPump(parsers='auto')
+        self.pump.blob_file = StringIO(self.valid_evt_header)
+        self.pump.extract_header()
+        assert EVT_PARSERS['gseagen'] in self.pump.parsers
 
 
 class TestEvtFilePump(TestCase):
     def setUp(self):
-        data_dir = os.path.dirname(kp.__file__) + '/kp-data/test_data/'
-        self.fname = data_dir + 'example_numuNC.evt'
+        self.fname = join(TEST_DATA_DIR, 'example_numuNC.evt')
 
     def test_pipe(self):
         pump = EvtPump(filename=self.fname)
-        pump.next()
+        next(pump)
         pump.finish()
 
     def test_context(self):
@@ -443,10 +293,73 @@ class TestEvtFilePump(TestCase):
 
 class TestCorsika(TestCase):
     def setUp(self):
-        data_dir = os.path.dirname(kp.__file__) + '/kp-data/test_data/'
-        self.fname = data_dir + 'example_corant_propa.evt'
+        self.fname = join(TEST_DATA_DIR, 'example_corant_propa.evt')
 
     def test_pipe(self):
         pump = EvtPump(filename=self.fname)
-        pump.next()
+        next(pump)
         pump.finish()
+
+
+class TestPropa(TestCase):
+    def setUp(self):
+        self.fname = join(TEST_DATA_DIR, 'DAT000007_propa_1-4.evt')
+
+    def test_pipe(self):
+        pump = EvtPump(filename=self.fname, parsers=['propa'])
+        assert EVT_PARSERS['propa'] in pump.parsers
+        blob =  next(pump)
+        assert 'start_event' in blob
+        assert 'track_primary' in blob
+        assert 'Muon' in blob
+        assert 'MuonMultiplicity' in blob
+        assert 'Neutrino' in blob
+        assert 'NeutrinoMultiplicity' in blob
+        assert 'Weights' in blob
+        assert 'Primary' in blob
+        pump.finish()
+
+    @skip
+    def test_auto_parser(self):
+        pump = EvtPump(filename=self.fname)
+        assert EVT_PARSERS['propa'] in pump.parsers
+        blob =  next(pump)
+        assert 'start_event' in blob
+        assert 'track_primary' in blob
+        assert 'Muon' in blob
+        assert 'MuonMultiplicity' in blob
+        assert 'Neutrino' in blob
+        assert 'NeutrinoMultiplicity' in blob
+        assert 'Weights' in blob
+        assert 'Primary' in blob
+        pump.finish()
+
+
+class TestKM3Sim(TestCase):
+    def setUp(self):
+        self.fname = join(TEST_DATA_DIR, 'KM3Sim.evt')
+
+    def test_pipe(self):
+        pump = EvtPump(filename=self.fname, parsers=['km3sim'])
+        assert EVT_PARSERS['km3sim'] in pump.parsers
+        next(pump)
+        pump.finish()
+
+    def test_hits(self):
+        pump = EvtPump(filename=self.fname, parsers=['km3sim'])
+        blob = pump[0]
+        hits = blob['KM3SimHits']
+        assert 4 == len(hits)
+        assert 195749 == hits[0].pmt_id
+
+    def test_neutrino(self):
+        pump = EvtPump(filename=self.fname, parsers=['gseagen', 'km3sim'])
+        blob = pump[0]
+        EVT_PARSERS['gseagen'](blob)
+        neutrino = blob['Neutrinos'][0]
+        self.assertAlmostEqual(0.10066, neutrino.energy)
+
+
+class TestParserDetection(TestCase):
+    def test_parsers_are_automatically_detected(self):
+        pass

@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-# coding=utf-8
 # vim: ts=4 sw=4 et
-from __future__ import division
 
 from datetime import datetime
 import os
+from queue import Queue, Empty
 import shutil
 import threading
 
@@ -18,7 +17,6 @@ import numpy as np
 
 from km3pipe import Pipeline, Module
 from km3pipe.calib import Calibration
-from km3pipe.common import Queue, Empty
 from km3pipe.io import CHPump
 from km3pipe.io.daq import DAQProcessor
 import km3pipe.style

@@ -1,15 +1,12 @@
-# coding=utf-8
 # Filename: hdf5.py
-# pylint: disable=C0103,R0903
+# pylint: disable=C0103,R0903,C901
 # vim:set ts=4 sts=4 sw=4 et:
 """
 Read and write KM3NeT-formatted HDF5 files.
 """
-from __future__ import division, absolute_import, print_function
-
 from collections import OrderedDict, defaultdict
+from itertools import count
 import os.path
-from six import itervalues, iteritems
 import warnings
 
 import numpy as np
@@ -17,13 +14,12 @@ import tables as tb
 
 import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
-from km3pipe.dataclasses import (KM3Array, KM3DataFrame,
-                                 RawHitSeries, CRawHitSeries,
-                                 McHitSeries, CMcHitSeries, deserialise_map)
-from km3pipe.logger import logging
-from km3pipe.tools import camelise, decamelise, split
+from km3pipe.dataclasses import Table, DEFAULT_H5LOC
+from km3pipe.dataclass_templates import TEMPLATES
+from km3pipe.logger import get_logger
+from km3pipe.tools import decamelise, camelise, split, istype
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -33,7 +29,7 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-FORMAT_VERSION = np.string_('4.4')
+FORMAT_VERSION = np.string_('5.0')
 MINIMUM_FORMAT_VERSION = np.string_('4.1')
 
 
@@ -61,8 +57,8 @@ def check_version(h5file, filename):
 class HDF5Sink(Module):
     """Write KM3NeT-formatted HDF5 files, event-by-event.
 
-    The data can be a numpy structured array, a pandas DataFrame,
-    or a km3pipe dataclass object with a `serialise()` method.
+    The data can be a ``kp.Table``, a numpy structured array,
+    a pandas DataFrame, or a simple scalar.
 
     The name of the corresponding H5 table is the decamelised
     blob-key, so values which are stored in the blob under `FooBar`
@@ -86,6 +82,7 @@ class HDF5Sink(Module):
         self.ext_h5file = self.get('h5file') or None
         self.pytab_file_args = self.get('pytab_file_args') or dict()
         self.file_mode = 'a' if self.get('append') else 'w'
+        self.keep_open = self.get('keep_open')
         self.indices = {}
         self._header_written = False
         # magic 10000: this is the default of the "expectedrows" arg
@@ -107,32 +104,29 @@ class HDF5Sink(Module):
                                   complib='zlib')
         self._tables = OrderedDict()
 
-    def _to_array(self, data):
+    def _to_array(self, data, name=None):
         if np.isscalar(data):
             self.log.debug('toarray: is a scalar')
-            return np.asarray(data).reshape((1,))
+            return Table({name: np.asarray(data).reshape((1,))},
+                         h5loc='/misc/{}'.format(decamelise(name)),
+                         name=name
+                    )
         if len(data) <= 0:
             self.log.debug('toarray: data has no length')
             return
-        try:
-            self.log.debug('trying pandas-style `to_records()')
-            return data.to_records(index=False)
-        except AttributeError:
-            pass
-        try:
-            self.log.debug('trying dataclass-style `serialise()')
-            return data.serialise()
-        except AttributeError:
-            pass
-        data = np.asarray(data)
+        if istype(data, 'DataFrame'):
+            self.log.debug('toarray: pandas dataframe')
+            data = Table.from_dataframe(data)
         return data
 
-    def _write_array(self, where, arr, datatype, title=''):
-        level = len(where.split('/'))
+    def _write_array(self, h5loc, arr, title):
+        level = len(h5loc.split('/'))
 
-        if where not in self._tables:
+        if h5loc not in self._tables:
             dtype = arr.dtype
-            loc, tabname = os.path.split(where)
+            loc, tabname = os.path.split(h5loc)
+            self.log.debug("h5loc '{}', Loc '{}', tabname '{}'".format(
+                h5loc, loc, tabname))
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore', tb.NaturalNameWarning)
                 tab = self.h5file.create_table(
@@ -140,24 +134,23 @@ class HDF5Sink(Module):
                     filters=self.filters, createparents=True,
                     expectedrows=self.n_rows_expected,
                 )
-            tab._v_attrs.datatype = datatype
+            tab._v_attrs.datatype = title
             if(level < 5):
-                self._tables[where] = tab
+                self._tables[h5loc] = tab
         else:
-            tab = self._tables[where]
+            tab = self._tables[h5loc]
 
         tab.append(arr)
 
         if(level < 4):
             tab.flush()
 
-    def _write_separate_columns(self, where, obj, title=''):
+    def _write_separate_columns(self, where, obj, title):
         f = self.h5file
         loc, group_name = os.path.split(where)
         if where not in f:
-            datatype = obj.__class__.__name__
-            group = f.create_group(loc, group_name, datatype)
-            group._v_attrs.datatype = datatype
+            group = f.create_group(loc, group_name, title)
+            group._v_attrs.datatype = title
         else:
             group = f.get_node(where)
 
@@ -184,59 +177,76 @@ class HDF5Sink(Module):
         d["n_items"].append(n_items)
         d["index"] += n_items
 
+    def _write_header(self, header):
+        header = self.h5file.create_group('/', 'header', 'Header')
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', tb.NaturalNameWarning)
+            for field, value in header.items():
+                try:
+                    value = float(value)
+                except ValueError:
+                    pass
+                header._v_attrs[field] = value
+        self._header_written = True
+
+    def _process_entry(self, key, entry):
+        self.log.debug("Inspecting {}".format(key))
+        self.log.debug("Converting to numpy array...")
+        data = self._to_array(entry, name=key)
+        if data is None or not hasattr(data, 'dtype'):
+            self.log.debug("Conversion failed. moving on...")
+            return
+        try:
+            self.log.debug("Looking for h5loc...")
+            h5loc = entry.h5loc
+        except AttributeError:
+            self.log.debug(
+                "h5loc not found. setting to '{}'...".format(
+                    DEFAULT_H5LOC))
+            h5loc = DEFAULT_H5LOC
+        if data.dtype.names is None:
+            self.log.debug("Array has no named dtype. "
+                           "using blob key as h5 column name")
+            dt = np.dtype((data.dtype, [(key, data.dtype)]))
+            data = data.view(dt)
+        # where = os.path.join(h5loc, tabname)
+        try:
+            title = entry.name
+        except AttributeError:
+            title = key
+
+        if isinstance(data, Table):
+            if 'group_id' not in data:
+                data = data.append_columns('group_id', self.index)
+
+        assert 'group_id' in data.dtype.names
+
+        self.log.debug("h5l: '{}', title '{}'".format(h5loc, title))
+
+        if hasattr(entry, 'split_h5') and entry.split_h5:
+            self.log.debug("Writing into separate columns...")
+            self._write_separate_columns(h5loc, entry, title=title)
+        else:
+            self.log.debug("Writing into single Table...")
+            self._write_array(h5loc, data, title=title)
+
+        return data
+
     def process(self, blob):
         if not self._header_written and "Header" in blob \
                 and blob["Header"] is not None:
-            header = self.h5file.create_group('/', 'header', 'Header')
-            with warnings.catch_warnings():
-                warnings.simplefilter('ignore', tb.NaturalNameWarning)
-                for field, value in blob["Header"].items():
-                    try:
-                        value = float(value)
-                    except ValueError:
-                        pass
-                    header._v_attrs[field] = value
-            self._header_written = True
+            self._write_header(blob['Header'])
 
+        written_blob = Blob()
         for key, entry in sorted(blob.items()):
-            serialisable_attributes = ('dtype', 'serialise', 'to_records')
-            self.log.debug("Serialising {}...".format(key))
-            if any(hasattr(entry, a) for a in serialisable_attributes):
-                try:
-                    self.log.debug("Looking for h5loc...")
-                    h5loc = entry.h5loc
-                except AttributeError:
-                    self.log.debug("h5loc not found. setting to '/misc'...")
-                    h5loc = '/misc'
-                try:
-                    self.log.debug("Looking for `tabname` attribute...")
-                    tabname = entry.tabname
-                except AttributeError:
-                    self.log.debug("`tabname` not found, using blob key...")
-                    tabname = decamelise(key)
-                self.log.debug("Converting to numpy array...")
-                data = self._to_array(entry)
-                if data is None:
-                    self.log.debug("Conversion failed. moving on...")
-                    continue
-                if data.dtype.names is None:
-                    self.log.debug("Array has no named dtype. "
-                                   "using blob key as h5 column name")
-                    dt = np.dtype((data.dtype, [(key, data.dtype)]))
-                    data = data.view(dt)
-                where = os.path.join(h5loc, tabname)
-                datatype = entry.__class__.__name__
+            data = self._process_entry(key, entry)
+            if data is not None:
+                written_blob[key] = data
 
-                try:
-                    if entry.write_separate_columns:
-                        self._write_separate_columns(where, entry, title=key)
-                    else:
-                        self._write_array(where, data, datatype, title=key)
-                except AttributeError:  # backwards compatibility
-                    self._write_array(where, data, datatype, title=key)
-            else:
-                self.log.debug('{} appears not to be serialisable '
-                               'to numpy. Skipping.'.format(key))
+        if 'GroupInfo' not in blob:
+            gi = Table({'group_id': self.index, 'n_blobs': len(written_blob)},
+                       h5loc='/group_info', name='Group Info')
+            self._process_entry('GroupInfo', gi)
 
         if not self.index % 1000:
             self.log.info('Flushing tables to disk...')
@@ -254,15 +264,14 @@ class HDF5Sink(Module):
         for where, data in self.indices.items():
             h5loc = where + "/_indices"
             self.log.info("  -> {0}".format(h5loc))
-            indices = KM3DataFrame({"index": data["indices"],
-                                    "n_items": data["n_items"]}, h5loc=h5loc)
+            indices = Table({"index": data["indices"],
+                             "n_items": data["n_items"]}, h5loc=h5loc)
             self._write_array(h5loc,
                               self._to_array(indices),
-                              'Indices',
-                              title="Indices")
+                              title='Indices',)
         self.log.info("Creating pytables index tables. "
                       "This may take a few minutes...")
-        for tab in itervalues(self._tables):
+        for tab in self._tables.values():
             if 'frame_id' in tab.colnames:
                 tab.cols.frame_id.create_index()
             if 'slice_id' in tab.colnames:
@@ -275,6 +284,12 @@ class HDF5Sink(Module):
                 except NotImplementedError:
                     log.warn("Table '{}' has an uint64 column, "
                              "not indexing...".format(tab._v_name))
+            if 'group_id' in tab.colnames:
+                try:
+                    tab.cols.group_id.create_index()
+                except NotImplementedError:
+                    log.warn("Table '{}' has an uint64 column, "
+                             "not indexing...".format(tab._v_name))
             tab.flush()
 
         if "HDF5MetaData" in self.services:
@@ -283,8 +298,9 @@ class HDF5Sink(Module):
             for name, value in metadata.items():
                 self.h5file.set_node_attr("/", name, value)
 
-        self.h5file.close()
-        self.log.info("HDF5 file written to: {}".format(self.filename))
+        if not self.keep_open:
+            self.h5file.close()
+        self.print("HDF5 file written to: {}".format(self.filename))
 
 
 class HDF5Pump(Pump):
@@ -326,49 +342,66 @@ class HDF5Pump(Pump):
         self.h5file = None
         self._set_next_file()
 
-        self.event_ids = OrderedDict()
+        self.group_ids = OrderedDict()
         self._n_each = OrderedDict()
         for fn in self.filenames:
-            self.log.debug(fn)
-            # Open all files before reading any events
-            # So we can raise version mismatches etc before reading anything
-            if os.path.isfile(fn):
-                if not self.skip_version_check:
-                    with tb.open_file(fn, 'r') as h5file:
-                        check_version(h5file, fn)
-            else:
-                raise IOError("No such file or directory: '{0}'"
-                              .format(fn))
-            try:
-                with tb.open_file(fn, 'r') as h5file:
-                    event_info = h5file.get_node('/', 'event_info')
-                    self.event_ids[fn] = event_info.cols.event_id[:]
-                self._n_each[fn] = len(self.event_ids[fn])
-            except tb.NoSuchNodeError:
-                self.log.critical("No /event_info table found: '{0}'"
-                                  .format(fn))
-                raise SystemExit
-            if self.cut_mask_node is not None:
-                if not self.cut_mask_node.startswith('/'):
-                    self.cut_mask_node = '/' + self.cut_mask_node
-                with tb.open_file(fn, 'r') as h5file:
-                    self.cut_masks[fn] = h5file.get_node(self.cut_mask_node)[:]
-                self.log.debug(self.cut_masks[fn])
-                mask = self.cut_masks[fn]
-                if not mask.shape[0] == self.event_ids[fn].shape[0]:
-                    raise ValueError("Cut mask length differs from event ids!")
-            else:
-                self.cut_masks = None
+            self._inspect_infile(fn)
         self._n_events = np.sum((v for k, v in self._n_each.items()))
         self.minmax = OrderedDict()
         n_read = 0
-        for fn, n in iteritems(self._n_each):
+        for fn, n in self._n_each.items():
             min = n_read
             max = n_read + n - 1
             n_read += n
             self.minmax[fn] = (min, max)
         self.index = None
         self._reset_index()
+
+    def _inspect_infile(self, fn):
+        # Open all files before reading any events
+        # So we can raise version mismatches etc before reading anything
+        self.log.debug(fn)
+        if os.path.isfile(fn):
+            if not self.skip_version_check:
+                with tb.open_file(fn, 'r') as h5file:
+                    check_version(h5file, fn)
+        else:
+            raise IOError("No such file or directory: '{0}'"
+                          .format(fn))
+
+        self._read_group_info(fn)
+
+        if self.cut_mask_node is not None:
+            if not self.cut_mask_node.startswith('/'):
+                self.cut_mask_node = '/' + self.cut_mask_node
+            with tb.open_file(fn, 'r') as h5file:
+                self.cut_masks[fn] = h5file.get_node(self.cut_mask_node)[:]
+            self.log.debug(self.cut_masks[fn])
+            mask = self.cut_masks[fn]
+            if not mask.shape[0] == self.group_ids[fn].shape[0]:
+                raise ValueError("Cut mask length differs from event ids!")
+        else:
+            self.cut_masks = None
+
+    def _read_group_info(self, fn):
+        with tb.open_file(fn, 'r') as h5file:
+            if '/event_info' not in h5file and '/group_info' not in h5file:
+                self.log.critical("Missing /event_info or /group_info "
+                                  "in '%s', aborting..." % fn)
+                raise SystemExit
+            elif '/group_info' in h5file:
+                self.print("Reading group information from '/group_info'.")
+                group_info = h5file.get_node('/', 'group_info')
+                self.group_ids[fn] = group_info.cols.group_id[:]
+                self._n_each[fn] = len(self.group_ids[fn])
+            elif '/event_info' in h5file:
+                self.print("Reading group information from '/group_info'.")
+                event_info = h5file.get_node('/', 'event_info')
+                try:
+                    self.group_ids[fn] = event_info.cols.group_id[:]
+                except AttributeError:
+                    self.group_ids[fn] = event_info.cols.event_id[:]
+                self._n_each[fn] = len(self.group_ids[fn])
 
     def process(self, blob):
         try:
@@ -407,9 +440,9 @@ class HDF5Pump(Pump):
             self._set_next_file()
         fname = self.current_file
         h5file = self.h5file
-        evt_ids = self.event_ids[fname]
+        evt_ids = self.group_ids[fname]
         local_index = self._translate_index(fname, index)
-        event_id = evt_ids[local_index]
+        group_id = evt_ids[local_index]
         if self.cut_masks is not None:
             self.log.debug('Cut masks found, applying...')
             mask = self.cut_masks[fname]
@@ -420,103 +453,70 @@ class HDF5Pump(Pump):
         # skip groups with separate columns
         # and deal with them later
         # this should be solved using hdf5 attributes in near future
-        skipped_locs = []
+        split_locs = []
         for tab in h5file.walk_nodes(classname="Table"):
-            pathname = tab._v_pathname
-            loc, tabname = os.path.split(pathname)
-            if loc in skipped_locs:
-                self.log.info(
-                    "get_blob: '{}' is blacklisted, skipping...".format(
-                        pathname))
+            h5loc = tab._v_pathname
+            loc, tabname = os.path.split(h5loc)
+            if loc in split_locs:
+                self.log.info("get_blob: '%s' is noted, skip..." % h5loc)
                 continue
             if tabname == "_indices":
-                self.log.debug(
-                    "get_blob: found index table '{}'...".format(pathname))
-                skipped_locs.append(loc)
+                self.log.debug("get_blob: found index table '%s'" % h5loc)
+                split_locs.append(loc)
                 self.indices[loc] = h5file.get_node(loc + '/' + '_indices')
                 continue
             tabname = camelise(tabname)
-            try:
-                dc = deserialise_map[tabname]
-            except KeyError:
-                dc = KM3Array
-            try:
-                arr = tab.read_where('event_id == %d' % event_id)
-            except NotImplementedError:
-                # 64-bit unsigned integer columns like ``event_id``
-                # are not yet supported in conditions
-                self.log.debug(
-                    "get_blob: found uint64 column at '{}'...".format(
-                        pathname))
-                arr = tab.read()
-                arr = arr[arr['event_id'] == event_id]
-            except ValueError:
-                # "there are no columns taking part
-                # in condition ``event_id == 0``"
-                self.log.info(
-                    "get_blob: no `event_id` column found in '{}'! "
-                    "skipping... ".format(pathname))
+
+            index_column = None
+            if 'group_id' in tab.dtype.names:
+                index_column = 'group_id'
+            if 'event_id' in tab.dtype.names:
+                index_column = 'event_id'
+
+            if index_column is not None:
+                try:
+                    arr = tab.read_where('%s == %d' % (index_column, group_id))
+                except NotImplementedError:
+                    # 64-bit unsigned integer columns like ``group_id``
+                    # are not yet supported in conditions
+                    self.log.debug(
+                        "get_blob: found uint64 column at '{}'...".format(
+                            h5loc))
+                    arr = tab.read()
+                    arr = arr[arr[index_column] == group_id]
+                except ValueError:
+                    # "there are no columns taking part
+                    # in condition ``group_id == 0``"
+                    self.log.info(
+                        "get_blob: no `%s` column found in '%s'! "
+                        "skipping... " % (index_column, h5loc))
+                    continue
+            else:
+                self.log.warning("No group_id or event_id found for '%s', "
+                                 "skipping..." % h5loc)
                 continue
-            blob[tabname] = dc.deserialise(arr, event_id=index, h5loc=loc)
+
+            self.log.debug("h5loc: '{}'".format(h5loc))
+            blob[tabname] = Table(
+                arr, h5loc=h5loc, split_h5=False, name=tabname)
 
         # skipped locs are now column wise datasets (usually hits)
         # currently hardcoded, in future using hdf5 attributes
         # to get the right constructor
-        for loc in skipped_locs:
-            # if some events are missing (event_id not continuous),
+        for loc in split_locs:
+            # if some events are missing (group_id not continuous),
             # this does not work as intended
-            # idx, n_items = self.indices[loc][event_id]
-            idx, n_items = self.indices[loc][local_index]
+            # idx, n_items = self.indices[loc][group_id]
+            idx = self.indices[loc].col('index')[local_index]
+            n_items = self.indices[loc].col('n_items')[local_index]
             end = idx + n_items
-            if loc == '/hits' and not self.ignore_hits:
-                channel_id = h5file.get_node("/hits/channel_id")[idx:end]
-                dom_id = h5file.get_node("/hits/dom_id")[idx:end]
-                time = h5file.get_node("/hits/time")[idx:end]
-                tot = h5file.get_node("/hits/tot")[idx:end]
-                triggered = h5file.get_node("/hits/triggered")[idx:end]
-
-                datatype = h5file.get_node("/hits")._v_attrs.datatype
-
-                if datatype == np.string_("CRawHitSeries"):
-                    pos_x = h5file.get_node("/hits/pos_x")[idx:end]
-                    pos_y = h5file.get_node("/hits/pos_y")[idx:end]
-                    pos_z = h5file.get_node("/hits/pos_z")[idx:end]
-                    dir_x = h5file.get_node("/hits/dir_x")[idx:end]
-                    dir_y = h5file.get_node("/hits/dir_y")[idx:end]
-                    dir_z = h5file.get_node("/hits/dir_z")[idx:end]
-                    du = h5file.get_node("/hits/du")[idx:end]
-                    floor = h5file.get_node("/hits/floor")[idx:end]
-                    t0s = h5file.get_node("/hits/t0")[idx:end]
-                    time += t0s
-                    blob["Hits"] = CRawHitSeries.from_arrays(
-                        channel_id, dir_x, dir_y, dir_z, dom_id, du,
-                        floor, pos_x, pos_y, pos_z, t0s, time, tot, triggered,
-                        event_id)
-                else:
-                    blob["Hits"] = RawHitSeries.from_arrays(
-                        channel_id, dom_id, time, tot, triggered, event_id)
-
-            if loc == '/mc_hits' and not self.ignore_hits:
-                a = h5file.get_node("/mc_hits/a")[idx:end]
-                origin = h5file.get_node("/mc_hits/origin")[idx:end]
-                pmt_id = h5file.get_node("/mc_hits/pmt_id")[idx:end]
-                time = h5file.get_node("/mc_hits/time")[idx:end]
-
-                datatype = h5file.get_node("/mc_hits")._v_attrs.datatype
-
-                if datatype == np.string_("CMcHitSeries"):
-                    pos_x = h5file.get_node("/mc_hits/pos_x")[idx:end]
-                    pos_y = h5file.get_node("/mc_hits/pos_y")[idx:end]
-                    pos_z = h5file.get_node("/mc_hits/pos_z")[idx:end]
-                    dir_x = h5file.get_node("/mc_hits/dir_x")[idx:end]
-                    dir_y = h5file.get_node("/mc_hits/dir_y")[idx:end]
-                    dir_z = h5file.get_node("/mc_hits/dir_z")[idx:end]
-                    blob["McHits"] = CMcHitSeries.from_arrays(
-                        a, dir_x, dir_y, dir_z, origin, pmt_id,
-                        pos_x, pos_y, pos_z, time, event_id)
-                else:
-                    blob["McHits"] = McHitSeries.from_arrays(
-                        a, origin, pmt_id, time, event_id)
+            node = h5file.get_node(loc)
+            columns = (c for c in node._v_children if c != '_indices')
+            data = {}
+            for column in columns:
+                data[column] = h5file.get_node(loc + '/' + column)[idx:end]
+            tabname = camelise(loc.split('/')[-1])
+            blob[tabname] = Table(data, h5loc=loc, split_h5=True, name=tabname)
 
         return blob
 
@@ -529,10 +529,6 @@ class HDF5Pump(Pump):
 
     def __iter__(self):
         return self
-
-    def next(self):
-        """Python 2/3 compatibility for iterators"""
-        return self.__next__()
 
     def __next__(self):
         if self.index >= self._n_events:
@@ -557,6 +553,9 @@ class HDF5Pump(Pump):
             yield self.get_blob(i)
 
         self.current_file = None
+
+    def finish(self):
+        self.h5file.close()
 
 
 class HDF5MetaData(Module):

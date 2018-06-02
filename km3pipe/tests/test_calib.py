@@ -1,11 +1,12 @@
-# coding=utf-8
 # Filename: test_calib.py
 # pylint: disable=C0111,E1003,R0904,C0103,R0201,C0102
-from __future__ import division, absolute_import, print_function
 
-from km3pipe.testing import TestCase, MagicMock, patch
+from km3pipe.dataclasses import Table
+from km3pipe.hardware import Detector
+from km3pipe.testing import TestCase, MagicMock, patch, skip
 from km3pipe.calib import Calibration
-from km3pipe.dataclasses import HitSeries
+
+from .test_hardware import EXAMPLE_DETX
 
 import numpy as np
 
@@ -38,84 +39,60 @@ class TestCalibration(TestCase):
         Calibration(det_id=1, calibration=2, t0set=3)
         mock_detector.assert_called_with(t0set=3, calibration=2, det_id=1)
 
-    def test_apply_to_list(self):
-        cal = Calibration()
-        hits = [1, 2, 3]
-        cal._apply_to_hitseries = MagicMock()
-        chits = cal.apply(hits)
-        assert chits is not None
-        chits = cal._apply_to_hitseries.assert_called_with(hits)
+    def test_init_with_detector(self):
+        det = Detector()
+        det._det_file = EXAMPLE_DETX
+        det._parse_header()
+        Calibration(detector=det)
 
-    def test_apply_to_hitseries(self):
+    def test_apply_to_hits_with_pmt_id(self):
+        det = Detector()
+        det._det_file = EXAMPLE_DETX
+        det._parse_header()
+        det._parse_doms()
+        calib = Calibration(detector=det)
 
-        class FakeDetector(object):
-            def __init__(self):
-                self._pmts_by_dom_id = {}
-                self._pmts_by_id = {}
+        hits = Table({'pmt_id': [1, 2, 1], 'time': [10.1, 11.2, 12.3]})
 
-            def pmt_with_id(self, i):
-                dir_ = np.array((i * 10 + i, i * 10 + i + 1, i * 10 + i + 2))
-                pos = np.array((i * 100 + i, i * 100 + i + 1, i * 100 + i + 2))
-                pmt = MagicMock(dir=dir_, pos=pos, t0=1000 * i)
-                return pmt
+        chits = calib.apply(hits)
 
-        cal = Calibration(detector=FakeDetector())
+        assert len(hits) == len(chits)
 
-        n = 5
-        ids = np.arange(n)
-        dom_ids = np.arange(n)
-        dir_xs = np.arange(n)
-        dir_ys = np.arange(n)
-        dir_zs = np.arange(n)
-        times = np.arange(n)
-        tots = np.arange(n)
-        channel_ids = np.arange(n)
-        triggereds = np.ones(n)
-        pmt_ids = np.arange(n)
-        t0s = np.arange(n)
-        pos_xs = np.arange(n)
-        pos_ys = np.arange(n)
-        pos_zs = np.arange(n)
+        a_hit = chits[0]
+        self.assertAlmostEqual(1.1, a_hit.pos_x)
+        self.assertAlmostEqual(10, a_hit.t0)
+        t0 = a_hit.t0
+        self.assertAlmostEqual(10.1 + t0, a_hit.time)
 
-        hits = HitSeries.from_arrays(
-            channel_ids,
-            dir_xs,
-            dir_ys,
-            dir_zs,
-            dom_ids,
-            ids,
-            pmt_ids,
-            pos_xs,
-            pos_ys,
-            pos_zs,
-            t0s,
-            times,
-            tots,
-            triggereds,
-            0,      # event_id
-        )
+        a_hit = chits[1]
+        self.assertAlmostEqual(1.4, a_hit.pos_x)
+        self.assertAlmostEqual(20, a_hit.t0)
+        t0 = a_hit.t0
+        self.assertAlmostEqual(11.2 + t0, a_hit.time)
 
-        self.assertEqual(0, hits[0].time)
-        self.assertEqual(4, hits[4].time)
-        self.assertFalse(np.isnan(hits[2].pos_y))
+    def test_apply_to_hits_with_dom_id_and_channel_id(self):
+        det = Detector()
+        det._det_file = EXAMPLE_DETX
+        det._parse_header()
+        det._parse_doms()
+        calib = Calibration(detector=det)
 
-        hits = cal._apply_to_hitseries(hits)
-        assert hits is not None
+        hits = Table({'dom_id': [2, 3, 3],
+                      'channel_id': [0, 1, 2],
+                      'time': [10.1, 11.2, 12.3]})
 
-        self.assertAlmostEqual(303, hits[3].pos_x)
-        self.assertAlmostEqual(304, hits[3].pos_y)
-        self.assertAlmostEqual(305, hits[3].pos_z)
-        self.assertAlmostEqual(406, hits[4].pos_z)
-        self.assertAlmostEqual(2, hits[0].dir_z)
-        self.assertAlmostEqual(12, hits[1].dir_y)
-        self.assertAlmostEqual(22, hits[2].dir_x)
+        chits = calib.apply(hits)
 
-        self.assertEqual(1001, hits[1].time)
-        self.assertEqual(4004, hits[4].time)
+        assert len(hits) == len(chits)
 
-        for idx, hit in enumerate(hits):
-            h = hit
-            if idx == 3:
-                break
+        a_hit = chits[0]
+        self.assertAlmostEqual(2.1, a_hit.pos_x)
+        self.assertAlmostEqual(40, a_hit.t0)
+        t0 = a_hit.t0
+        self.assertAlmostEqual(10.1 + t0, a_hit.time)
 
-        self.assertAlmostEqual(303.0, h.pos_x)
+        a_hit = chits[1]
+        self.assertAlmostEqual(3.4, a_hit.pos_x)
+        self.assertAlmostEqual(80, a_hit.t0)
+        t0 = a_hit.t0
+        self.assertAlmostEqual(11.2 + t0, a_hit.time)

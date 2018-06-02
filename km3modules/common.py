@@ -1,47 +1,21 @@
-# coding=utf-8
 # Filename: common.py
 # pylint: disable=locally-disabled
 """
 A collection of commonly used modules.
 
 """
-from __future__ import division, absolute_import, print_function
 from time import time
 
 import numpy as np
-import pandas as pd
 
 import km3pipe as kp
 from km3pipe import Module, Blob
 from km3pipe.tools import prettyln
 from km3pipe.sys import peak_memory_usage
 from km3pipe.math import zenith, azimuth
-from km3pipe.dataclasses import KM3DataFrame, KM3Array     # noqa
-from km3pipe.io.pandas import merge_event_ids
+from km3pipe.dataclasses import Table
 
-log = kp.logger.get(__name__)
-
-
-class Wrap(Module):
-    """Wrap a key-val dictionary as a Serialisable.
-    """
-
-    def configure(self):
-        self.keys = self.get('keys') or None
-        key = self.get('key') or None
-        if key and not self.keys:
-            self.keys = [key]
-
-    def process(self, blob):
-        keys = sorted(blob.keys()) if self.keys is None else self.keys
-        for key in keys:
-            dat = blob[key]
-            if dat is None:
-                continue
-            dt = np.dtype([(f, float) for f in sorted(dat.keys())])
-            arr = KM3Array.from_dict(dat, dt)
-            blob[key] = arr
-        return blob
+log = kp.logger.get_logger(__name__)
 
 
 class Dump(Module):
@@ -122,9 +96,25 @@ class HitCounter(Module):
 
     def process(self, blob):
         try:
-            print("Number of hits: {0}".format(len(blob['Hit'])))
+            self.print("Number of hits: {0}".format(len(blob['Hit'])))
         except KeyError:
             pass
+        return blob
+
+
+class HitCalibrator(Module):
+    """A very basic hit calibrator, which requires a `Calibration` module."""
+    def configure(self):
+        self.input_key = self.get('input_key', default='Hits')
+        self.output_key = self.get('output_key', default='CalibHits')
+
+    def process(self, blob):
+        if self.input_key not in blob:
+            self.log.warn("No hits found in key '{}'.".format(self.input_key))
+            return blob
+        hits = blob[self.input_key]
+        chits = self.calibration.apply(hits)
+        blob[self.output_key] = chits
         return blob
 
 
@@ -185,85 +175,6 @@ class MemoryObserver(Module):
     def process(self, blob):
         memory = peak_memory_usage()
         prettyln("Memory peak: {0:.3f} MB".format(memory))
-        return blob
-
-
-class Cut(Module):
-    """Drop an event from the pipe, depending on some condition.
-
-    Parameters
-    ----------
-    key: string
-        Blob content to cut on (must have `.conv_to(to='pandas')` method)
-    condition: string
-        Condition to eval on the dataframe, e.g. "zenith >= 1.4".
-    verbose: bool, optional (default=False)
-        Print extra info?
-    """
-
-    def configure(self):
-        self.key = self.require('key')
-        self.cond = self.require('condition')
-        self.verbose = self.get('verbose') or False
-
-    def process(self, blob):
-        df = blob[self.key].conv_to(to='pandas')
-        ok = df.eval(self.cond).all()
-        if not ok:
-            if self.verbose:
-                print('Condition "%s" not met, dropping...' % self.cond)
-            return
-        blob[self.key] = df
-        return blob
-
-
-class GetAngle(Module):
-    """Convert pos(x, y, z) to zenith, azimuth."""
-
-    def configure(self):
-        self.key = self.require('key')
-
-    def process(self, blob):
-        df = blob[self.key].conv_to(to='pandas')
-        df['zenith'] = zenith(df[['dir_x', 'dir_y', 'dir_z']])
-        df['azimuth'] = azimuth(df[['dir_x', 'dir_y', 'dir_z']])
-        blob[self.key] = df
-        return blob
-
-
-class MergeDF(Module):
-    """Merge Dataframes.
-
-    Parameters
-    ----------
-    keys: collection(string)
-        Keys to merge.
-    out: string
-        Where to store the merged DF.
-    merge_ids: bool, default=True
-        Replace individual event ids (e.g. gandalf_event_id, dusj_event_id)?
-    drop: bool, default=True
-        Discard input tables?
-    """
-
-    def configure(self):
-        self.keys = self.require('keys')
-        self.out = self.require('out')
-        self.merge_ids = bool(self.get('merge_ids')) or True
-        self.drop = bool(self.get('drop')) or True
-
-    def process(self, blob):
-        cat = []
-        for key in self.keys:
-            df = KM3DataFrame(blob[key])
-            df = df.add_prefix(key.lower() + '_')
-            cat.append(df)
-            if self.drop:
-                del blob[key]
-        cat = pd.concat(cat, axis=1)
-        if self.merge_ids:
-            cat = merge_event_ids(cat)
-        blob[self.out] = cat
         return blob
 
 

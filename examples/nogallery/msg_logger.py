@@ -1,5 +1,4 @@
-#!/usr/bin/env python2.7
-# coding=utf-8
+#!/usr/bin/env python
 # vim: ts=4 sw=4 et
 # Author: Tamás Gál (tgal@km3net.de)
 """
@@ -15,7 +14,6 @@ Options:
     DET_SN          Detector serial number (eg. 14).
 
 """
-from __future__ import print_function
 
 import threading
 from time import sleep
@@ -24,13 +22,13 @@ import urllib2
 import json
 
 import km3pipe as km3
-from km3pipe.logger import logging
+from km3pipe.logger import get_logger
 
 from pyslack import SlackClient
 
 __author__ = 'tamasgal'
 
-log = logging.getLogger(__name__)
+log = get_logger(__name__)
 RUN_NUMBER_URL = 'http://192.168.0.120:1301/mon/controlunit/runnumber'
 
 

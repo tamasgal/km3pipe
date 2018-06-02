@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # vim: ts=4 sw=4 et
 """
 ==================
@@ -12,9 +11,7 @@ This application demonstrates how to access monitoring channel data.
 # Author: Tamas Gal <tgal@km3net.de>
 # License: MIT
 #!/usr/bin/env python
-# coding=utf-8
 # vim: ts=4 sw=4 et
-from __future__ import print_function
 import io
 import km3pipe as kp
 

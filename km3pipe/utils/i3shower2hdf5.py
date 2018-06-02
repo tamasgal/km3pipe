@@ -9,10 +9,8 @@ Options:
     -h --help     Show this screen.
 """
 
-from __future__ import division, absolute_import, print_function
 
 from math import isnan, fabs        # todo: replace with numpy?
-from six import iteritems
 
 import h5py
 import pandas as pd
@@ -150,7 +148,7 @@ class ReadRecoParticle(I3Module):
             self.PushFrame(frame)
             return
         particle_map = self._read_particle(particle)
-        for key, val in iteritems(particle_map):
+        for key, val in particle_map.items():
             name = self.particlename + '_' + key
             frame.Put(name, I3Double(val))
         self.PushFrame(frame)

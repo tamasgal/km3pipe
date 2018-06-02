@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: plot.py
 # pylint: disable=C0103
 # pragma: no cover
 """
 Common Plotting utils.
 """
-from __future__ import division, absolute_import, print_function
 
 import matplotlib as mpl    # noqa
 import matplotlib.pyplot as plt
@@ -16,6 +14,8 @@ try:
 except ImportError:
     HAS_SEABORN = False
 
+from km3pipe.stats import bincenters
+
 __author__ = "Moritz Lotze"
 __copyright__ = "Copyright 2018, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
@@ -23,12 +23,6 @@ __license__ = "BSD-3"
 __maintainer__ = "Moritz Lotze"
 __email__ = "mlotze@km3net.de"
 __status__ = "Development"
-
-
-def bincenters(bins):
-    """Bincenters, assuming they are all equally spaced."""
-    bins = np.atleast_1d(bins)
-    return 0.5 * (bins[1:] + bins[:-1])
 
 
 def hexbin(x, y, color="purple", **kwargs):
@@ -110,3 +104,14 @@ def joint_hex(x, y, **kwargs):
     """Seaborn Joint Hexplot with marginal KDE + hists."""
     return sns.jointplot(x, y, kind='hex', stat_func=None,
             marginal_kws={'kde' :True}, **kwargs)
+
+
+def plot_convexhull(xy, ax=None, plot_points=True):
+    from scipy.spatial import ConvexHull
+    ch = ConvexHull(xy)
+    ax = get_ax(ax)
+    if plot_points:
+        ax.plot(xy[:, 0], xy[:, 1], 'o')
+    for simplex in ch.simplices:
+        ax.plot(xy[simplex, 0], xy[simplex, 1], 'k-')
+    return ax

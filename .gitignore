@@ -58,10 +58,13 @@ coverage.xml
 *.pot
 
 # Sphinx documentation
-docs/_build/
-docs/auto_examples/
-docs/modules/
-docs/api
+doc/_build/
+doc/auto_examples/
+doc/modules/
+doc/api
+
+# examples
+examples/*/*.pdf
 
 # VI swap files
 *.swp
@@ -74,7 +77,8 @@ docs/api
 .ipynb_checkpoints/
 
 # 
-junit.xml
+junit*.xml
+reports
 
 # misc
 *~
@@ -83,3 +87,8 @@ junit.xml
 
 .pytest_cache/
 .DS_Store
+
+# pyenv tmp
+.python-version
+
+.mypy_cache/

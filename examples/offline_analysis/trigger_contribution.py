@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # vim: ts=4 sw=4 et
 """
 =====================
@@ -11,7 +10,6 @@ This script can be used to easily identify DOMs in a run, which are out
 of sync.
 
 """
-from __future__ import division, print_function
 from collections import defaultdict
 import sys
 import numpy as np
@@ -24,7 +22,7 @@ else:
     raise SystemExit("Usage: trigger_contribution.py FILENAME")
 
 det = kp.hardware.Detector(det_id=29)
-log = kp.logger.get('TriggerContribution')
+log = kp.logger.get_logger('TriggerContribution')
 
 
 class TriggerContributionCalculator(kp.Module):

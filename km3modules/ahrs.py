@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: ahrs.py
 # pylint: disable=locally-disabled
 """
 AHRS calibration.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import io
 from collections import defaultdict
@@ -22,7 +20,7 @@ __author__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = kp.logger.logging.getLogger(__name__)  # pylint: disable=C0103
+log = kp.logger.get_logger(__name__)  # pylint: disable=C0103
 # log.setLevel("DEBUG")
 
 

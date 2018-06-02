@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # Filename: ptconcat.py
 """
 Concatenate HDF5 Files.
@@ -16,16 +15,14 @@ Options:
     --overwrite             Overwrite output file [default: False].
 """
 
-from __future__ import division, absolute_import, print_function
 import os.path
-from six import iteritems
 
 import tables as tb
 
 from km3pipe import version
 
-from km3pipe.logger import logging
-log = logging.getLogger(__name__)
+from km3pipe.logger import get_logger
+log = get_logger(__name__)
 
 __author__ = "Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -62,7 +59,7 @@ def ptconcat(output_file, input_files, overwrite=False):
     for fname in input_files:
         log.info('Reading %s...' % fname)
         h5 = tb.open_file(fname)
-        for path, out in iteritems(out_tabs):
+        for path, out in out_tabs.items():
             tab = h5.get_node(path)
             out.append(tab[:])
         h5.close()

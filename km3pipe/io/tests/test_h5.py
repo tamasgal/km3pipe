@@ -1,17 +1,18 @@
 #!/usr/bin/env python
-
-import os.path
+"""Tests for HDF5 stuff"""
+import tempfile
+from os.path import join, dirname
 
 import numpy as np
 import tables as tb
 
-import km3pipe as kp
-from km3pipe import Pipeline
-from km3pipe.io import read_group   # noqa
+from km3pipe import Blob, Module, Pipeline, Pump
+from km3pipe.dataclasses import Table
 from km3pipe.io import HDF5Pump, HDF5Sink   # noqa
-from km3pipe.io.pandas import H5Chain   # noqa
 from km3pipe.tools import insert_prefix_to_dtype
 from km3pipe.testing import TestCase
+
+DATA_DIR = join(dirname(__file__), '../../kp-data/test_data/')
 
 
 class TestMultiTable(TestCase):
@@ -26,7 +27,8 @@ class TestMultiTable(TestCase):
         ], dtype=[('aa', '<f8'), ('bb', '<f8'), ('cc', '<f8'), ])
         self.tabs = {'foo': self.foo, 'bar': self.bar}
         self.where = '/lala'
-        self.h5name = './test.h5'
+        self.fobj = tempfile.NamedTemporaryFile(delete=True)
+        self.h5name = self.fobj.name
         self.h5file = tb.open_file(
             # create the file in memory only
             self.h5name, 'w', driver="H5FD_CORE", driver_core_backing_store=0)
@@ -36,6 +38,7 @@ class TestMultiTable(TestCase):
 
     def tearDown(self):
         self.h5file.close()
+        self.fobj.close()
 
     def test_name_insert(self):
         exp_foo = ('foo_a', 'foo_b', 'foo_c')
@@ -62,8 +65,7 @@ class TestMultiTable(TestCase):
 
 class TestH5Pump(TestCase):
     def setUp(self):
-        data_dir = os.path.dirname(kp.__file__) + '/kp-data/test_data/'
-        self.fname = data_dir + 'numu_cc_test.h5'
+        self.fname = join(DATA_DIR,  'numu_cc_test.h5')
 
     def test_init_sets_filename_if_no_keyword_arg_is_passed(self):
         p = HDF5Pump(self.fname)
@@ -75,41 +77,227 @@ class TestH5Pump(TestCase):
             self.assertEqual(self.fname, h5.filename)
             assert h5[0] is not None
             for blob in h5:
-                print(blob)
                 assert blob is not None
                 break
 
     def test_standalone(self):
         pump = HDF5Pump(filename=self.fname)
-        pump.next()
+        next(pump)
         pump.finish()
 
     def test_pipe(self):
-        from km3modules.common import Dump      # noqa
         p = Pipeline()
         p.attach(HDF5Pump, filename=self.fname)
-        p.attach(Dump)
         p.drain()
 
 
 class TestH5Sink(TestCase):
     def setUp(self):
-        data_dir = os.path.dirname(kp.__file__) + '/kp-data/test_data/'
-        self.fname = data_dir + 'numu_cc_test.h5'
-        self.out = tb.open_file("out_test.h5", "w", driver="H5FD_CORE",
+        self.fname = join(DATA_DIR, 'numu_cc_test.h5')
+        self.fobj = tempfile.NamedTemporaryFile(delete=True)
+        self.out = tb.open_file(self.fobj.name, "w", driver="H5FD_CORE",
                                 driver_core_backing_store=0)
 
     def tearDown(self):
         self.out.close()
+        self.fobj.close()
 
     # def test_init_has_to_be_explicit(self):
     #     with self.assertRaises(TypeError):
     #         HDF5Sink(self.out)
 
     def test_pipe(self):
-        from km3modules.common import Dump      # noqa
         p = Pipeline()
         p.attach(HDF5Pump, filename=self.fname)
-        p.attach(Dump)
         p.attach(HDF5Sink, h5file=self.out)
         p.drain()
+
+    def test_scalars(self):
+        out = tb.open_file('foobar_scalar', "a", driver="H5FD_CORE",
+                           driver_core_backing_store=0)
+
+        def pu(blob):
+            return {'foo': 42.0}
+
+        p = Pipeline()
+        p.attach(pu)
+        p.attach(HDF5Sink, h5file=out, keep_open=True)
+        p.drain(2)
+        node = out.root.misc
+        assert node is not None
+        assert node.cols is not None
+        assert 'foo' in set(node.cols._v_colnames)
+        out.close()
+
+
+class TestH5SinkConsistency(TestCase):
+    def test_h5_consistency_for_tables_without_group_id(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.count = 0
+
+            def process(self, blob):
+                self.count += 10
+                tab = Table({'a': self.count, 'b': 1}, h5loc='tab')
+                return Blob({'tab': tab})
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        with tb.File(fname) as f:
+            a = f.get_node("/tab")[:]['a']
+            b = f.get_node("/tab")[:]['b']
+            group_id = f.get_node("/tab")[:]['group_id']
+        assert np.allclose([10, 20, 30, 40, 50], a)
+        assert np.allclose([1, 1, 1, 1, 1], b)
+        assert np.allclose([0, 1, 2, 3, 4], group_id)
+        fobj.close()
+
+    def test_h5_consistency_for_tables_without_group_id_and_multiple_keys(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.count = 0
+
+            def process(self, blob):
+                self.count += 10
+                tab1 = Table({'a': self.count, 'b': 1}, h5loc='tab1')
+                tab2 = Table({'c': self.count + 1, 'd': 2}, h5loc='tab2')
+                return Blob({'tab1': tab1, 'tab2': tab2})
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        with tb.File(fname) as f:
+            a = f.get_node("/tab1")[:]['a']
+            b = f.get_node("/tab1")[:]['b']
+            c = f.get_node("/tab2")[:]['c']
+            d = f.get_node("/tab2")[:]['d']
+            group_id_1 = f.get_node("/tab1")[:]['group_id']
+            group_id_2 = f.get_node("/tab1")[:]['group_id']
+        assert np.allclose([10, 20, 30, 40, 50], a)
+        assert np.allclose([1, 1, 1, 1, 1], b)
+        assert np.allclose([0, 1, 2, 3, 4], group_id_1)
+        assert np.allclose([11, 21, 31, 41, 51], c)
+        assert np.allclose([2, 2, 2, 2, 2], d)
+        assert np.allclose([0, 1, 2, 3, 4], group_id_2)
+        fobj.close()
+
+    def test_h5_consistency_for_tables_with_custom_group_id(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Pump):
+            def process(self, blob):
+                tab = Table({'group_id': 2}, h5loc='tab')
+                return Blob({'tab': tab})
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        with tb.File(fname) as f:
+            group_id = f.get_node("/tab")[:]['group_id']
+
+        assert np.allclose([2, 2, 2, 2, 2], group_id)
+
+        fobj.close()
+
+
+class TestHDF5PumpConsistency(TestCase):
+    def test_hdf5_readout(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.count = 0
+
+            def process(self, blob):
+                self.count += 1
+                tab = Table({'a': self.count * 10, 'b': 1}, h5loc='tab')
+                tab2 = Table({'a': np.arange(self.count)}, h5loc='tab2')
+                blob['Tab'] = tab
+                blob['Tab2'] = tab2
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        class BlobTester(Module):
+
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                self.index += 1
+                assert 'GroupInfo' in blob
+                assert 'Tab' in blob
+                print(self.index)
+                print(blob['Tab'])
+                print(blob['Tab']['a'])
+                assert self.index - 1 == blob['GroupInfo'].group_id
+                assert self.index * 10 == blob['Tab']['a']
+                assert 1 == blob['Tab']['b'] == 1
+                assert np.allclose(np.arange(self.index), blob['Tab2']['a'])
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(HDF5Pump, filename=fname)
+        pipe.attach(BlobTester)
+        pipe.drain()
+
+        fobj.close()
+
+    def test_hdf5_readout_split_tables(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.count = 0
+
+            def process(self, blob):
+                self.count += 1
+                tab = Table({'a': self.count * 10, 'b': 1},
+                            h5loc='/tab', split_h5=True)
+                blob['Tab'] = tab
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        class BlobTester(Module):
+
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                self.index += 1
+                assert 'GroupInfo' in blob
+                assert 'Tab' in blob
+                assert self.index - 1 == blob['GroupInfo'].group_id
+                assert self.index * 10 == blob['Tab']['a']
+                assert 1 == blob['Tab']['b'] == 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(HDF5Pump, filename=fname)
+        pipe.attach(BlobTester)
+        pipe.drain()
+
+        fobj.close()

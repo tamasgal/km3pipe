@@ -1,40 +1,36 @@
-# coding=utf-8
 # Filename: evt.py
 # pylint: disable=C0103,R0903
 """
 Pumps for the EVT simulation dataformat.
 
 """
-from __future__ import division, absolute_import, print_function
-
+from collections import defaultdict
 import sys
 
-from collections import namedtuple
+import numpy as np
 
 from km3pipe.core import Pump, Blob
-from km3pipe.logger import logging
+from km3pipe.dataclasses import Table
+from km3pipe.logger import get_logger
+from km3pipe.tools import split
 
-from km3pipe.dataclasses import Point, Direction, HitSeries
-from km3pipe.tools import unpack_nfirst
-from km3pipe.mc import pdg2name, geant2pdg
-from km3pipe.sys import ignored
-
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
 __license__ = "MIT"
-__maintainer__ = "Tamas Gal"
+__maintainer__ = "Tamas Gal, Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-def try_decode_string(foo):
+def try_decode_string(text):
+    """Decode string to ASCII if possible"""
     try:
-        return foo.decode('ascii')
+        return text.decode('ascii')
     except AttributeError:
-        return foo
+        return text
 
 
 class EvtPump(Pump):  # pylint: disable:R0902
@@ -44,6 +40,13 @@ class EvtPump(Pump):  # pylint: disable:R0902
     ----------
     filename: str
         The file to read the events from.
+    parsers: list of str or callables
+        The parsers to apply for each blob (e.g. parsers=['km3sim', a_parser])
+        You can also pass your own function, which takes a single argument
+        `blob` and mutates it. `str` values will be looked up in the
+        `kp.io.evt.EVT_PARSERS` dictionary and ignored if not found.
+        If `parsers='auto'`, the `EvtPump` will try to find the appropriate
+        parsers, which is the default behaviour. [default: 'auto']
     cache_enabled: bool
         If enabled, a cache of the event indices is created when loading
         the file. Enable it if you want to jump around and inspect the
@@ -72,6 +75,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
 
     def configure(self):
         self.filename = self.get('filename')
+        parsers = self.get('parsers', default='auto')
         self.cache_enabled = self.get('cache_enabled') or False
         self.basename = self.get('basename') or None
         self.suffix = self.get('suffix', default='')
@@ -86,6 +90,18 @@ class EvtPump(Pump):  # pylint: disable:R0902
         self.event_offsets = []
         self.index = 0
         self.whole_file_cached = False
+        self.parsers = []
+        self._auto_parse = False
+
+        if parsers:
+            if parsers == 'auto':
+                self.print("Automatic tag parsing enabled.")
+                self._auto_parse = True
+            else:
+                if isinstance(parsers, str):
+                    # expects a list(str)
+                    parsers = [parsers]
+                self._register_parsers(parsers)
 
         self.file_index = int(self.index_start)
 
@@ -99,9 +115,22 @@ class EvtPump(Pump):  # pylint: disable:R0902
             self.log.info("Constructed filename: {}".format(self.filename))
 
         if self.filename:
-            print("Opening {0}".format(self.filename))
+            self.print("Opening {0}".format(self.filename))
             self.open_file(self.filename)
             self.prepare_blobs()
+
+    def _register_parsers(self, parsers):
+        self.log.info("Found parsers {}".format(parsers))
+        for parser in parsers:
+            if callable(parser):
+                self.parsers.append(parser)
+                continue
+
+            if parser in EVT_PARSERS.keys():
+                self.parsers.append(EVT_PARSERS[parser])
+            else:
+                self.log.warning("Parser '{}' not found, ignoring..."
+                                 .format(parser))
 
     def _reset(self):
         """Clear the cache."""
@@ -117,7 +146,6 @@ class EvtPump(Pump):  # pylint: disable:R0902
             file_index = file_index.zfill(self.n_digits)
         return file_index
 
-
     def prepare_blobs(self):
         """Populate the blobs"""
         self.raw_header = self.extract_header()
@@ -127,7 +155,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
     def extract_header(self):
         """Create a dictionary with the EVT header information"""
         self.log.info("Extracting the header")
-        raw_header = self.raw_header = {}
+        raw_header = self.raw_header = defaultdict(list)
         first_line = self.blob_file.readline()
         first_line = try_decode_string(first_line)
         self.blob_file.seek(0, 0)
@@ -141,9 +169,12 @@ class EvtPump(Pump):  # pylint: disable:R0902
                 tag, value = str(line).split(':')
             except ValueError:
                 continue
-            raw_header[tag] = str(value).split()
+            raw_header[tag].append(str(value).split())
             if line.startswith(str('end_event:')):
                 self._record_offset()
+                if self._auto_parse and 'physics' in raw_header:
+                    parsers = [p[0].lower() for p in raw_header['physics']]
+                    self._register_parsers(parsers)
                 return raw_header
         raise ValueError("Incomplete header, no 'end_event' tag found!")
 
@@ -159,6 +190,9 @@ class EvtPump(Pump):  # pylint: disable:R0902
             self.log.info("Empty blob created...")
             raise IndexError
         else:
+            self.log.debug("Applying parsers...")
+            for parser in self.parsers:
+                parser(blob)
             self.log.debug("Returning the blob")
             return blob
 
@@ -180,7 +214,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
                 self.filename = "{}{}{}.evt"  \
                                 .format(self.basename, file_index, self.suffix)
                 self.log.info("Next filename: {}".format(self.filename))
-                print("Opening {0}".format(self.filename))
+                self.print("Opening {0}".format(self.filename))
                 self.open_file(self.filename)
                 self.prepare_blobs()
                 try:
@@ -200,7 +234,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
         """Cache all event offsets."""
         if not up_to_index:
             if verbose:
-                print("Caching event file offsets, this may take a minute.")
+                self.print("Caching event file offsets, this may take a bit.")
             self.blob_file.seek(0, 0)
             self.event_offsets = []
             if not self.raw_header:
@@ -220,7 +254,7 @@ class EvtPump(Pump):  # pylint: disable:R0902
         self.event_offsets.pop()  # get rid of the last entry
         if not up_to_index:
             self.whole_file_cached = True
-        print("\n{0} events indexed.".format(len(self.event_offsets)))
+        self.print("\n{0} events indexed.".format(len(self.event_offsets)))
 
     def _record_offset(self):
         """Stores the current file pointer position"""
@@ -233,67 +267,28 @@ class EvtPump(Pump):  # pylint: disable:R0902
         for line in self.blob_file:
             line = try_decode_string(line)
             line = line.strip()
+            if line == '':
+                self.log.info("Ignoring empty line...")
+                continue
             if line.startswith('end_event:') and blob:
                 blob['raw_header'] = self.raw_header
-                with ignored(KeyError):
-                    blob['Hits'] = HitSeries.from_evt(blob['EvtRawHits'],
-                                                      self.index)
                 return blob
+            try:
+                tag, values = line.split(':')
+            except ValueError:
+                self.log.warning("Ignoring corrupt line: {}".format(line))
+                continue
+            try:
+                values = tuple(split(values.strip(), callback=float))
+            except ValueError:
+                self.log.info("Empty value: {}".format(values))
             if line.startswith('start_event:'):
                 blob = Blob()
-                tag, value = line.split(':')
-                blob[tag] = value.split()
+                blob[tag] = tuple(int(v) for v in values)
                 continue
-            if blob:
-                self._create_blob_entry_for_line(line, blob)
-
-    def _create_blob_entry_for_line(self, line, blob):
-        """Create the actual blob entry from the given line."""
-        try:
-            tag, value = line.split(':')
-        except ValueError:
-            self.log.warning("Corrupt line in EVT file:\n{0}".format(line))
-            return
-        if tag in self.exclude_tags:
-            return
-        if tag in ('track_in', 'track_fit', 'hit', 'hit_raw',
-                   'track_seamuon', 'track_seaneutrino'):
-            values = [float(x) for x in value.split()]
-            blob.setdefault(tag, []).append(values)
-            if tag == 'hit':
-                hit = EvtHit(*values)
-                blob.setdefault("EvtHits", []).append(hit)
-                blob.setdefault("MCHits", []).append(hit)
-            if tag == "hit_raw":
-                raw_hit = EvtRawHit(*values)
-                blob.setdefault("EvtRawHits", []).append(raw_hit)
-            if tag == "track_in":
-                blob.setdefault("TrackIns", []).append(TrackIn(values))
-            if tag == "track_neutrinos":
-                blob.setdefault("TrackInNeutrinos", []).append(TrackIn(values))
-            if tag == "track_fit":
-                blob.setdefault("TrackFits", []).append(TrackFit(values))
-            if tag == "track_seamuon":
-                blob.setdefault("TrackSeamuon", []).append(TrackIn(values))
-            if tag == "track_seaneutrino":
-                blob.setdefault("TrackSeaneutrino", []).append(TrackIn(values))
-
-        else:
-            if tag == 'neutrino':
-                values = [float(x) for x in value.split()]
-                blob['Neutrino'] = Neutrino(values)
-            elif tag == 'center_on_can':
-                values = [float(x) for x in value.split()]
-                blob['CenterOnCan'] = TrackCorsika(values)
-            elif tag == 'track_primary':
-                values = [float(x) for x in value.split()]
-                blob['Primary'] = TrackCorsika(values, zed_correction=0)
-            elif tag == "track_bundle":
-                values = [float(x) for x in value.split()]
-                values.append(0)
-                blob["CenterOnCan"] = Track(values)
-            else:
-                blob[tag] = value.split()
+            if tag not in blob:
+                blob[tag] = []
+            blob[tag].append(values)
 
     def __len__(self):
         if not self.whole_file_cached:
@@ -302,10 +297,6 @@ class EvtPump(Pump):  # pylint: disable:R0902
 
     def __iter__(self):
         return self
-
-    def next(self):
-        """Python 2/3 compatibility for iterators"""
-        return self.__next__()
 
     def __next__(self):
         try:
@@ -335,158 +326,250 @@ class EvtPump(Pump):  # pylint: disable:R0902
         self.blob_file.close()
 
 
-class Track(object):
-    """Bass class for particle or shower tracks"""
-#    def __init__(self, id, x, y, z, dx, dy, dz, E=None, t=0, *args):
+class Parser(object):
+    """Standard parser to create numpy times from EVT raw data.
 
-    def __init__(self, data, zed_correction=405.93):
-        id, x, y, z, dx, dy, dz, E, t, args = unpack_nfirst(data, 9)
-        self.id = int(id)
-        # z correctio due to gen/km3 (ZED -> sea level shift)
-        # http://wiki.km3net.physik.uni-erlangen.de/index.php/Simulations
-        self.pos = Point((x, y, z + zed_correction))
-        self.dir = Direction((dx, dy, dz))
-        self.E = E
-        self.time = t
-        self.args = args
+    The `tag_description` is a dict of tuples. The key is the target blob-key,
+    the value is tuple of "target blob-key" and "numpy dtype".
 
-    def __repr__(self):
-        text = "Track:\n"
-        text += " id: {0}\n".format(self.id)
-        text += " pos: {0}\n".format(self.pos)
-        text += " dir: {0}\n".format(self.dir)
-        text += " energy: {0} GeV\n".format(self.E)
-        text += " time: {0} ns\n".format(self.time)
-        return text
+    """
+
+    def __init__(self, tag_description):
+        self.tag_description = tag_description
+
+    def __call__(self, blob):
+        """Iterate through the blob-keys and add the parsed data to the blob"""
+        for key in list(blob.keys()):
+            if key in self.tag_description.keys():
+                data = blob[key]
+                out_key, dtype = self.tag_description[key]
+                arr = np.array(data, dtype)
+                tab = Table(arr, name=out_key)
+                blob[out_key] = tab
 
 
-class TrackIn(Track):
-    """Representation of a track_in entry in an EVT file"""
+KM3SIM_TAGS = {
+    'hit': [
+        'KM3SimHits',
+        [('id', 'f4'), ('pmt_id', '<i4'), ('pe', 'f4'), ('time', 'f4'),
+         ('type', 'f4'), ('n_photons', 'f4'), ('track_in', 'f4'),
+         ('c_time', 'f4'), ('unknown', 'f4')],
+    ],
+}
 
-    def __init__(self, *args, **kwargs):
-        super(self.__class__, self).__init__(*args, **kwargs)
-        try:
-            self.particle_type = int(self.args[0])
-            self.charmed = bool(self.args[1])
-            self.mother = int(self.args[2])
-            self.grandmother = int(self.args[3])
-            self.length = 0
-        except IndexError:
-            self.particle_type = geant2pdg(int(self.args[0]))
-            try:
-                self.length = self.args[1]
-            except IndexError:
-                self.length = 0
-
-    def __repr__(self):
-        text = super(self.__class__, self).__repr__()
-        text += " length: {0} [m]\n".format(self.length)
-        try:
-            text += " type: {0} [Corsika]\n".format(self.particle_type)
-            text += " charmed: {0}\n".format(self.charmed)
-            text += " mother: {0} [Corsika]\n".format(self.mother)
-            text += " grandmother: {0} [Corsika]\n".format(self.grandmother)
-        except AttributeError:
-            text += " type: {0} '{1}' [PDG]\n"  \
-                    .format(self.particle_type,
-                            pdg2name(self.particle_type))
-            pass
-
-        return text
-
-
-class TrackCorsika(Track):
-    """Representation of a track in a corsika output file"""
-
-    def __init__(self, *args, **kwargs):
-        super(self.__class__, self).__init__(*args, **kwargs)
-        self.particle_type = int(self.args[0])
-        try:
-            self.charmed = bool(self.args[1])
-            self.mother = int(self.args[2])
-            self.grandmother = int(self.args[3])
-        except IndexError:
-            pass
-
-    def __repr__(self):
-        text = super(self.__class__, self).__repr__()
-        text += " type: {0} [Corsika]\n".format(self.particle_type)
-        try:
-            text += " charmed: {0}\n".format(self.charmed)
-            text += " mother: {0} [Corsika]\n".format(self.mother)
-            text += " grandmother: {0} [Corsika]\n".format(self.grandmother)
-        except AttributeError:
-            pass
-        return text
+GSEAGEN_TAGS = {
+    'neutrino': [
+        'Neutrinos',
+        [('id', '<i4'),
+         ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
+         ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
+         ('energy', 'f4'), ('time', 'f4'),
+         ('bjorken_x', 'f4'), ('bjorken_y', 'f4'),
+         ('scattering_type', '<i4'), ('pdg_id', '<i4'),
+         ('interaction_type', '<i4')]
+    ],
+    'track_in': [
+        'TrackIns',
+        [('id', '<i4'),
+         ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
+         ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
+         ('energy', 'f4'), ('time', 'f4'),
+         ('geant_id', 'f4')]
+    ],
+    'primary_lepton': [
+        'PrimaryLeptons',
+        [('id', '<i4'),
+         ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
+         ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
+         ('energy', 'f4'), ('time', 'f4'),
+         ('geant_id', 'f4')]
+    ]
+}
 
 
-class TrackFit(Track):
-    """Representation of a track_fit entry in an EVT file"""
+KM3_TAGS = {
+    'neutrino': [
+        'Neutrinos',
+        [('id', '<i4'),
+         ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
+         ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
+         ('energy', 'f4'), ('time', 'f4'),
+         ('bjorken_x', 'f4'), ('bjorken_y', 'f4'),
+         ('scattering_type', '<i4'), ('pdg_id', '<i4'),
+         ('interaction_type', '<i4')]
+    ],
+    'track_in': [
+        'TrackIns',
+        [('id', '<i4'),
+         ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
+         ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'),
+         ('energy', 'f4'), ('time', 'f4'),
+         ('type', 'f4'), ('something', '<i4')]
+    ],
+    'hit_raw': [
+        'Hits',
+        [('id', '<i4'),
+         ('pmt_id', '<i4'),
+         ('npe', '<i4'),
+         ('time', 'f4')]
+    ],
+}
 
-    def __init__(self, *args, **kwargs):
-        super(self.__class__, self).__init__(*args, **kwargs)
-        self.speed = self.args[0]
-        self.ts = self.args[1]
-        self.te = self.args[2]
-        self.con1 = self.args[3]
-        self.con2 = self.args[4]
+def parse_corant(blob):
+    """Creates new blob entries for the given blob keys"""
 
-    def __repr__(self):
-        text = super(self.__class__, self).__repr__()
-        text += " speed: {0} [m/ns]\n".format(self.speed)
-        text += " ts: {0} [ns]\n".format(self.ts)
-        text += " te: {0} [ns]\n".format(self.te)
-        text += " con1: {0}\n".format(self.con1)
-        text += " con2: {0}\n".format(self.con2)
-        return text
+    if 'track_seamuon' in blob.keys():
+        
+        muon = blob['track_seamuon']
+        
+        blob['Muon'] = Table({'id': np.array(muon)[:,0].astype(int),
+                              'pos_x': np.array(muon)[:,1],
+                              'pos_y': np.array(muon)[:,2],
+                              'pos_z': np.array(muon)[:,3],
+                              'dir_x': np.array(muon)[:,4],
+                              'dir_y': np.array(muon)[:,5],
+                              'dir_z': np.array(muon)[:,6],
+                              'energy': np.array(muon)[:,7],
+                              'time': np.array(muon)[:,8],
+                              'particle_id': np.array(muon)[:,9].astype(int),
+                              'is_charm': np.array(muon)[:,10].astype(int),
+                              'mother_pid': np.array(muon)[:,11].astype(int),
+                              'grandmother_pid': np.array(muon)[:,11].astype(int),
+                              },h5loc='muon')
+                                  
+        blob['MuonMultiplicity'] = Table({'muon_multiplicity': len(np.array(muon)[:,6])
+                                          },h5loc='muon_multiplicity')
+
+    if 'track_seaneutrino' in blob.keys():
+        
+        nu = blob['track_seaneutrino']
+        
+        blob['Neutrino'] = Table({'id': np.array(nu)[:,0].astype(int),
+                                  'pos_x': np.array(nu)[:,1],
+                                  'pos_y': np.array(nu)[:,2],
+                                  'pos_z': np.array(nu)[:,3],
+                                  'dir_x': np.array(nu)[:,4],
+                                  'dir_y': np.array(nu)[:,5],
+                                  'dir_z': np.array(nu)[:,6],
+                                  'energy': np.array(nu)[:,7],
+                                  'time': np.array(nu)[:,8],
+                                  'particle_id': np.array(nu)[:,9].astype(int),
+                                  'is_charm': np.array(nu)[:,10].astype(int),
+                                  'mother_pid': np.array(nu)[:,11].astype(int),
+                                  'grandmother_pid': np.array(nu)[:,11].astype(int),
+                                  },h5loc='nu')
+        blob['NeutrinoMultiplicity'] = Table({'total': len(np.array(nu)[:,6]),
+                                              'nue': len(np.array(nu)[:,6][np.array(nu)[:,9]==66]),
+                                              'anue': len(np.array(nu)[:,6][np.array(nu)[:,9]==67]),
+                                              'numu': len(np.array(nu)[:,6][np.array(nu)[:,9]==68]),
+                                              'anumu': len(np.array(nu)[:,6][np.array(nu)[:,9]==69]),
+                                              },h5loc='nu_multiplicity')
+        
+    if ('track_seamuon' or 'track_seaneutrino') in blob.keys():
+        
+        blob['Weights'] = Table({'w1': blob['weights'][0][0],
+                                 'w2': blob['weights'][0][1],
+                                 'w3': blob['weights'][0][2],
+                                 },h5loc='weights')
+        
+    if 'track_primary' in blob.keys():
+        
+        primary = blob['track_primary']
+        
+        blob['Primary'] = Table({'id': np.array(primary)[:,0].astype(int),
+                                 'pos_x': np.array(primary)[:,1],
+                                 'pos_y': np.array(primary)[:,2],
+                                 'pos_z': np.array(primary)[:,3],
+                                 'dir_x': np.array(primary)[:,4],
+                                 'dir_y': np.array(primary)[:,5],
+                                 'dir_z': np.array(primary)[:,6],
+                                 'energy': np.array(primary)[:,7],
+                                 'time': np.array(primary)[:,8],
+                                 'particle_id': np.array(primary)[:,9].astype(int)
+                                 },h5loc='primary')
+        
+    return blob
+
+def parse_propa(blob):
+    """Creates new blob entries for the given blob keys"""
+
+    if 'track_in' in blob.keys():
+
+        muon = blob['track_in']
+
+        blob['Muon'] = Table({'id': np.array(muon)[:, 0].astype(int),
+                              'pos_x': np.array(muon)[:, 1],
+                              'pos_y': np.array(muon)[:, 2],
+                              'pos_z': np.array(muon)[:, 3],
+                              'dir_x': np.array(muon)[:, 4],
+                              'dir_y': np.array(muon)[:, 5],
+                              'dir_z': np.array(muon)[:, 6],
+                              'energy': np.array(muon)[:, 7],
+                              'time': np.array(muon)[:, 8],
+                              'particle_id': np.array(muon)[:, 9].astype(int),
+                              'is_charm': np.array(muon)[:, 10].astype(int),
+                              'mother_pid': np.array(muon)[:, 11].astype(int),
+                              'grandmother_pid': np.array(muon)[:, 11].astype(int),
+                              }, h5loc='muon')
+
+        blob['MuonMultiplicity'] = Table({'muon_multiplicity': len(np.array(muon)[:, 6])
+                                          }, h5loc='muon_multiplicity')
+
+    if 'neutrino' in blob.keys():
+
+        nu = blob['neutrino']
+
+        blob['Neutrino'] = Table({'id': np.array(nu)[:, 0].astype(int),
+                                  'pos_x': np.array(nu)[:, 1],
+                                  'pos_y': np.array(nu)[:, 2],
+                                  'pos_z': np.array(nu)[:, 3],
+                                  'dir_x': np.array(nu)[:, 4],
+                                  'dir_y': np.array(nu)[:, 5],
+                                  'dir_z': np.array(nu)[:, 6],
+                                  'energy': np.array(nu)[:, 7],
+                                  'time': np.array(nu)[:, 8],
+                                  'particle_id': np.array(nu)[:, 9].astype(int),
+                                  'is_charm': np.array(nu)[:, 10].astype(int),
+                                  'mother_pid': np.array(nu)[:, 11].astype(int),
+                                  'grandmother_pid': np.array(nu)[:, 11].astype(int),
+                                  }, h5loc='nu')
+        blob['NeutrinoMultiplicity'] = Table({'total': len(np.array(nu)[:, 6]),
+                                              'nue': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 12]),
+                                              'anue': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == -12]),
+                                              'numu': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 14]),
+                                              'anumu': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == -14]),
+                                              }, h5loc='nu_multiplicity')
+
+    if ('track_in' or 'neutrino') in blob.keys():
+
+        blob['Weights'] = Table({'w1': blob['weights'][0][0],
+                                 'w2': blob['weights'][0][1],
+                                 'w3': blob['weights'][0][2],
+                                 }, h5loc='weights')
+
+    if 'track_primary' in blob.keys():
+
+        primary = blob['track_primary']
+
+        blob['Primary'] = Table({'id': np.array(primary)[:, 0].astype(int),
+                                 'pos_x': np.array(primary)[:, 1],
+                                 'pos_y': np.array(primary)[:, 2],
+                                 'pos_z': np.array(primary)[:, 3],
+                                 'dir_x': np.array(primary)[:, 4],
+                                 'dir_y': np.array(primary)[:, 5],
+                                 'dir_z': np.array(primary)[:, 6],
+                                 'energy': np.array(primary)[:, 7],
+                                 'time': np.array(primary)[:, 8],
+                                 'particle_id': np.array(primary)[:, 9].astype(int)
+                                 }, h5loc='primary')
+
+    return blob
 
 
-class Neutrino(object):  # pylint: disable:R0902
-    """Representation of a neutrino entry in an EVT file"""
-
-    def __init__(self, data, zed_correction=405.93):
-        id, x, y, z, dx, dy, dz, E, t, Bx, By, \
-            ichan, particle_type, channel, args = unpack_nfirst(data, 14)
-        self.id = id
-        # z correctio due to gen/km3 (ZED -> sea level shift)
-        # http://wiki.km3net.physik.uni-erlangen.de/index.php/Simulations
-        self.pos = Point((x, y, z + zed_correction))
-        self.dir = Direction((dx, dy, dz))
-        self.E = E
-        self.time = t
-        self.Bx = Bx
-        self.By = By
-        self.ichan = ichan
-        self.particle_type = particle_type
-        self.channel = channel
-
-    def __str__(self):
-        text = "Neutrino: "
-        text += pdg2name(self.particle_type)
-        if self.E >= 1000000:
-            text += ", {0:.3} PeV".format(self.E / 1000000)
-        elif self.E >= 1000:
-            text += ", {0:.3} TeV".format(self.E / 1000)
-        else:
-            text += ", {0:.3} GeV".format(float(self.E))
-        text += ', CC' if int(self.channel) == 2 else ', NC'
-        return text
-
-
-# The hit entry in an EVT file
-EvtHit = namedtuple('EvtHit',
-                    'id pmt_id pe time type n_photons track_in c_time')
-EvtHit.__new__.__defaults__ = (None, None, None, None, None, None, None, None)
-
-
-# The hit_raw entry in an EVT file
-def __add_raw_hit__(self, other):
-    """Add two hits by adding the ToT and preserve time and pmt_id
-    of the earlier one."""
-    first = self if self.time <= other.time else other
-    return EvtRawHit(first.id, first.pmt_id, self.tot + other.tot, first.time)
-
-
-EvtRawHit = namedtuple('EvtRawHit', 'id pmt_id tot time')
-EvtRawHit.__new__.__defaults__ = (None, None, None, None)
-EvtRawHit.__add__ = __add_raw_hit__
+EVT_PARSERS = {
+    'km3sim': Parser(KM3SIM_TAGS),
+    'gseagen': Parser(GSEAGEN_TAGS),
+    'km3': Parser(KM3_TAGS),
+    'propa': parse_propa,
+    'corant': parse_corant,
+}

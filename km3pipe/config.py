@@ -1,27 +1,16 @@
-# coding=utf-8
 # Filename: config.py
 # pylint: disable=locally-disabled
 """
 Tools for global configuration.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import os
 import pytz
-try:
-    from configparser import ConfigParser, Error, NoOptionError, NoSectionError
-except ImportError:
-    from six.moves.configparser import (ConfigParser, Error, NoOptionError,
-                                        NoSectionError)
-
+from configparser import ConfigParser, Error, NoOptionError, NoSectionError
 import getpass
-try:
-    input = raw_input
-except NameError:
-    pass
 
-from .logger import logging
+from .logger import get_logger
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -31,7 +20,7 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 CONFIG_PATH = os.path.expanduser('~/.km3net')
 

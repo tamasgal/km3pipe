@@ -1,13 +1,12 @@
 #!/usr/bin/env python
-# coding=utf-8
 # vim: ts=4 sw=4 et
-from __future__ import division
 
 __author__ = "Tamas Gal"
 
 from datetime import datetime
 from collections import deque, defaultdict
 from functools import partial
+from io import StringIO
 import os
 import shutil
 import time
@@ -20,7 +19,6 @@ from matplotlib import pylab
 import pandas as pd
 import numpy as np
 
-from km3pipe.common import StringIO
 from km3pipe import Pipeline, Module
 from km3pipe.hardware import Detector
 from km3pipe.io import CHPump

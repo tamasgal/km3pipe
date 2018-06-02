@@ -1,21 +1,18 @@
 #!/usr/bin/env python
-# coding=utf-8
 # Filename: jpp.py
 # pylint: disable=
 """
 Pump for the jpp file read through aanet interface.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import numpy as np
 
 from km3pipe.core import Pump, Blob
-from km3pipe.dataclasses import (EventInfo, TimesliceInfo, SummarysliceInfo,
-                                 RawHitSeries, KM3DataFrame)
-from km3pipe.logger import logging
+from km3pipe.dataclasses import Table
+from km3pipe.logger import get_logger
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -55,7 +52,7 @@ class EventPump(Pump):
         self._tots = np.zeros(self.buf_size, dtype='i')
         self._triggereds = np.zeros(self.buf_size, dtype='i')
 
-        self.event_reader = jppy.PyJDAQEventReader(self.filename)
+        self.event_reader = jppy.PyJDAQEventReader(self.filename.encode())
         self.blobs = self.blob_generator()
 
     def _resize_buffers(self, buf_size):
@@ -92,28 +89,34 @@ class EventPump(Pump):
                    self._tots,
                    self._triggereds)
 
-        hit_series = RawHitSeries.from_arrays(
-            self._channel_ids[:n],
-            self._dom_ids[:n],
-            self._times[:n],
-            self._tots[:n],
-            self._triggereds[:n],
-            self.event_index
-        )
+        hit_series = Table.from_template({
+            'channel_id': self._channel_ids[:n],
+            'dom_id': self._dom_ids[:n],
+            'time': self._times[:n],
+            'tot': self._tots[:n],
+            'triggered': self._triggereds[:n],
+            'group_id': self.event_index,
+        }, 'Hits')
 
-        event_info = EventInfo(np.array((
-            r.det_id, r.frame_index,
-            0,  # livetime_sec
-            0, 0,  # MC ID and time
-            0,  # n_events_gen
-            0,  # n_files_gen
-            r.overlays,
-            r.trigger_counter, r.trigger_mask,
-            r.utc_nanoseconds, r.utc_seconds,
-            np.nan, np.nan, np.nan,   # w1-w3
-            0,  # run
-            self.event_index,
-        ), dtype=EventInfo.dtype))
+        event_info = Table.from_template({
+            'det_id': r.det_id,
+            'frame_index': r.frame_index,
+            'livetime_sec': 0,
+            'mc_id': 0,
+            'mc_t': 0,
+            'n_events_gen': 0,
+            'n_files_gen': 0,
+            'overlays': r.overlays,
+            'trigger_counter': r.trigger_counter,
+            'trigger_mask': r.trigger_mask,
+            'utc_nanoseconds': r.utc_nanoseconds,
+            'utc_seconds': r.utc_seconds,
+            'weight_w1': np.nan,
+            'weight_w2': np.nan,
+            'weight_w3': np.nan,
+            'run_id': 0,
+            'group_id': self.event_index,
+        }, 'EventInfo')
 
         self.event_index += 1
         blob['EventInfo'] = event_info
@@ -125,10 +128,6 @@ class EventPump(Pump):
 
     def __iter__(self):
         return self
-
-    def next(self):
-        """Python 2/3 compatibility for iterators"""
-        return self.__next__()
 
     def __next__(self):
         return next(self.blobs)
@@ -155,7 +154,8 @@ class TimeslicePump(Pump):
                               "\nMake sure you source the JPP environmanet "
                               "and have jppy installed")
         stream = 'JDAQTimeslice' + stream
-        self.r = jppy.daqtimeslicereader.PyJDAQTimesliceReader(fname, stream)
+        self.r = jppy.daqtimeslicereader.PyJDAQTimesliceReader(fname.encode(),
+                                                               stream.encode())
         self.n_timeslices = self.r.n_timeslices
 
         self.buf_size = 5000
@@ -173,13 +173,13 @@ class TimeslicePump(Pump):
         while slice_id < self.n_timeslices:
             blob = Blob()
             self.r.retrieve_timeslice(slice_id)
-            timeslice_info = TimesliceInfo(
-                frame_index=self.r.frame_index,
-                slice_id=slice_id,
-                timestamp=self.r.utc_seconds,
-                nanoseconds=self.r.utc_nanoseconds,
-                n_frames=self.r.n_frames,
-            )
+            timeslice_info = Table.from_template({
+                'frame_index': self.r.frame_index,
+                'slice_id': slice_id,
+                'timestamp': self.r.utc_seconds,
+                'nanoseconds': self.r.utc_nanoseconds,
+                'n_frames': self.r.n_frames,
+            }, 'TimesliceInfo')
             hits = self._extract_hits()
             hits.slice_id = slice_id
             blob['TimesliceInfo'] = timeslice_info
@@ -199,12 +199,14 @@ class TimeslicePump(Pump):
                         self._times,
                         self._tots)
 
-        hits = RawHitSeries.from_arrays(self._channel_ids[:total_hits],
-                                        self._dom_ids[:total_hits],
-                                        self._times[:total_hits],
-                                        self._tots[:total_hits],
-                                        self._triggereds[:total_hits],  # dummy
-                                        0)  # slice_id will be set afterwards
+        hits = Table.from_template({
+            'channel_id': self._channel_ids[:total_hits],
+            'dom_id': self._dom_ids[:total_hits],
+            'time': self._times[:total_hits],
+            'tot': self._tots[:total_hits],
+            # 'triggered': self._triggereds[:total_hits],  # dummy
+            'group_id': 0,      # slice_id will be set afterwards
+        }, 'TimesliceHits')
         return hits
 
     def _resize_buffers(self, buf_size):
@@ -226,10 +228,6 @@ class TimeslicePump(Pump):
     def __iter__(self):
         return self
 
-    def next(self):
-        """Python 2/3 compatibility for iterators"""
-        return self.__next__()
-
     def __next__(self):
         return next(self.blobs)
 
@@ -241,12 +239,12 @@ class SummaryslicePump(Pump):
         filename = self.require('filename')
         self.blobs = self.summaryslice_generator()
         try:
-            import jppy  # noqa
+            from jppy.daqsummaryslicereader import PyJDAQSummarysliceReader
         except ImportError:
             raise ImportError("\nEither Jpp or jppy could not be found."
                               "\nMake sure you source the JPP environmanet "
                               "and have jppy installed")
-        self.r = jppy.daqsummaryslicereader.PyJDAQSummarysliceReader(filename)
+        self.r = PyJDAQSummarysliceReader(filename.encode())
 
     def process(self, blob):
         return next(self.blobs)
@@ -257,13 +255,13 @@ class SummaryslicePump(Pump):
             summary_slice = {}
             self.r.retrieve_next_summaryslice()
             blob = Blob()
-            summaryslice_info = SummarysliceInfo(
-                frame_index=self.r.frame_index,
-                slice_id=slice_id,
-                timestamp=self.r.utc_seconds,
-                nanoseconds=self.r.utc_nanoseconds,
-                n_frames=self.r.n_frames,
-            )
+            summaryslice_info = Table.from_template({
+                'frame_index': self.r.frame_index,
+                'slice_id': slice_id,
+                'timestamp': self.r.utc_seconds,
+                'nanoseconds': self.r.utc_nanoseconds,
+                'n_frames': self.r.n_frames,
+            }, 'SummarysliceInfo')
             blob['SummarysliceInfo'] = summaryslice_info
             while self.r.has_next_frame:
                 rates = np.zeros(31, dtype='f8')
@@ -289,10 +287,6 @@ class SummaryslicePump(Pump):
 
     def __iter__(self):
         return self
-
-    def next(self):
-        """Python 2/3 compatibility for iterators"""
-        return self.__next__()
 
     def __next__(self):
         return next(self.blobs)
@@ -331,7 +325,7 @@ class FitPump(Pump):
         self._qualities = np.zeros(self.buf_size, dtype='d')
         self._energies = np.zeros(self.buf_size, dtype='d')
 
-        self.event_reader = jppy.PyJFitReader(self.filename)
+        self.event_reader = jppy.PyJFitReader(self.filename.encode())
         self.blobs = self.blob_generator()
 
     def _resize_buffers(self, buf_size):
@@ -343,10 +337,10 @@ class FitPump(Pump):
         self._dir_xs.resize(buf_size)
         self._dir_ys.resize(buf_size)
         self._dir_zs.resize(buf_size)
-        self._ndfs_zs.resize(buf_size)
-        self._times_zs.resize(buf_size)
-        self._qualities_zs.resize(buf_size)
-        self._energies_zs.resize(buf_size)
+        self._ndfs.resize(buf_size)
+        self._times.resize(buf_size)
+        self._qualities.resize(buf_size)
+        self._energies.resize(buf_size)
 
     def blob_generator(self):
         while self.event_reader.has_next:
@@ -379,7 +373,7 @@ class FitPump(Pump):
             self._qualities,
             self._energies,
         )
-        fit_collection = KM3DataFrame({
+        fit_collection = Table({
             'pos_x': self._pos_xs[:n],
             'pos_y': self._pos_ys[:n],
             'pos_z': self._pos_zs[:n],
@@ -390,28 +384,31 @@ class FitPump(Pump):
             'time': self._times[:n],
             'quality': self._qualities[:n],
             'energy': self._energies[:n],
-        })
-        fit_collection['event_id'] = self.event_index
+        }, h5loc='/jfit')
+        fit_collection = fit_collection.append_columns(
+            ['event_id'], [self.event_index])
 
         # TODO make this into a datastructure
 
-        event_info = EventInfo(np.array((
-            0,  # det_id,
-            0,  # frame_index,
-            0,  # livetime_sec
-            0,  # MC ID
-            0,  # MC time
-            0,  # n_events_gen
-            0,  # n_files_gen
-            0,  # overlays,
-            0,  # trigger_counter,
-            0,  # trigger_mask,
-            0,  # utc_nanoseconds,
-            0,  # utc_seconds,
-            np.nan, np.nan, np.nan,   # w1-w3
-            0,  # run
-            self.event_index,
-        ), dtype=EventInfo.dtype))
+        event_info = Table.from_template({
+            'det_id': 0,
+            'frame_index': 0,
+            'livetime_sec': 0,
+            'MC ID': 0,
+            'MC time': 0,
+            'n_events_gen': 0,
+            'n_files_gen': 0,
+            'overlays': 0,
+            'trigger_counter': 0,
+            'trigger_mask': 0,
+            'utc_nanoseconds': 0,
+            'utc_seconds': 0,
+            'weight_w1': np.nan,
+            'weight_w2': np.nan,
+            'weight_w3': np.nan,
+            'run_id': 0,
+            'group_id': self.event_index,
+        }, 'EventInfo')
 
         self.event_index += 1
         blob['EventInfo'] = event_info
@@ -425,10 +422,6 @@ class FitPump(Pump):
 
     def __iter__(self):
         return self
-
-    def next(self):
-        """Python 2/3 compatibility for iterators"""
-        return self.__next__()
 
     def __next__(self):
         return next(self.blobs)

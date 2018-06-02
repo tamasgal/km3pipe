@@ -7,27 +7,7 @@ channels:
 dependencies:
   - python=3.5*
   - hdf5=1.8.17=1
-  - pip
-  - numpy
-  - pandas
-  - matplotlib
-  - scipy>=0.19
-  - cython
-  - pillow
-  - pytables
-  - h5py
-  - scikit-learn
-  - numexpr
-  - patsy
-  - statsmodels
-  - urwid
+  - pip=9.0.3 
+  - numpy>=1.12
   - pip:
-    - sphinx==1.6.3
-    - sphinx-gallery==0.1.12
-    - sphinx-rtd-theme==0.2.4
-    - sphinxcontrib-napoleon==0.6.1
-    - sphinxcontrib-programoutput==0.11
-    - sphinxcontrib-websupport==1.0.1
-    - numpydoc==0.7.0
-    - docopt
-    - controlhost
+    - "-r ./requirements.txt"

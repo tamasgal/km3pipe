@@ -1,991 +1,866 @@
-# coding=utf-8
 # Filename: test_dataclasses.py
 # pylint: disable=C0111,R0904,C0103
+# vim:set ts=4 sts=4 sw=4 et:
 """
 ...
 
 """
-from __future__ import division, absolute_import, print_function
-
-from six import with_metaclass
 
 import numpy as np
-from numpy import nan
-from io import BytesIO
-import struct
+from numpy.testing import (assert_array_equal, assert_allclose)
+import pytest
 
-from km3pipe.testing import TestCase
-from km3pipe.testing.mocks import FakeAanetHit
-from km3pipe.io.evt import EvtRawHit
+from km3pipe.testing import TestCase, skip   # noqa
 from km3pipe.dataclasses import (
-    RawHit, Hit, Track, Position, RawHitSeries, HitSeries, McHitSeries,
-    TimesliceHitSeries, EventInfo, SummarysliceInfo, TimesliceInfo,
-    Serialisable, TrackSeries, SummaryframeSeries, KM3Array, KM3DataFrame,
-    BinaryStruct, BinaryComposite, DTypeAttr, McTrackSeries, McTrack, McHit)
+    Table, inflate_dtype, has_structured_dt, is_structured, DEFAULT_H5LOC,
+    DEFAULT_NAME, DEFAULT_SPLIT
+)
 
-__author__ = "Tamas Gal"
+__author__ = "Tamas Gal, Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
 __license__ = "MIT"
-__maintainer__ = "Tamas Gal"
+__maintainer__ = "Tamas Gal, Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-class TestSerialisableABC(TestCase):
-
-    def test_dtype_can_be_set(self):
-        class TestClass(with_metaclass(Serialisable)):
-            dtype = [('a', '<i4'), ('b', '>i8')]
-
-        self.assertTupleEqual(('a', 'b'), TestClass.dtype.names)
-
-    def test_dtype_raises_type_error_for_invalid_dtype(self):
-        with self.assertRaises(TypeError):
-            class TestClass(with_metaclass(Serialisable)):
-                dtype = 1
-
-    def test_arguments_are_set_correctly_as_attributes(self):
-        class TestClass(with_metaclass(Serialisable)):
-            dtype = [('a', '<i4'), ('b', '>i8')]
-
-        t = TestClass(1, 2)
-        self.assertEqual(1, t.a)
-        self.assertEqual(2, t.b)
-
-    def test_keyword_arguments_are_set_correctly_as_attributes(self):
-        class TestClass(with_metaclass(Serialisable)):
-            dtype = [('a', '<i4'), ('b', '>i8')]
-
-        t = TestClass(b=1, a=2)
-        self.assertEqual(2, t.a)
-        self.assertEqual(1, t.b)
-
-    def test_mixed_arguments_are_set_correctly_as_attributes(self):
-        class TestClass(with_metaclass(Serialisable)):
-            dtype = [('a', '<i4'), ('b', '>i8'), ('c', '<i4'), ('d', '<i4')]
-
-        t = TestClass(1, 2, d=3, c=4)
-        self.assertEqual(1, t.a)
-        self.assertEqual(2, t.b)
-        self.assertEqual(4, t.c)
-        self.assertEqual(3, t.d)
-
-    def test_setting_undefined_attribute(self):
-        # TODO: discuss what should happen, currently it passes silently
-
-        class TestClass(with_metaclass(Serialisable)):
-            dtype = [('a', '<i4')]
-
-        t = TestClass(b=3)
-        self.assertEqual(3, t.b)
-
-
-class TestPosition(TestCase):
-
-    def test_position(self):
-        position = Position((1., 2, 3))
-        self.assertAlmostEqual(1, position.x)
-        self.assertAlmostEqual(2, position.y)
-        self.assertAlmostEqual(3, position.z)
-
-    def test_attributes_can_be_changed(self):
-        position = Position((4., 5, 6))
-        position.x = 1.
-        position.y = 2.
-        position.z = 3.
-        self.assertAlmostEqual(1, position.x)
-        # self.assertAlmostEqual(1, position[0])
-        self.assertAlmostEqual(2, position.y)
-        # self.assertAlmostEqual(2, position[1])
-        self.assertAlmostEqual(3, position.z)
-        # self.assertAlmostEqual(3, position[2])
-
-#   def test_position_is_ndarray_like(self):
-#       pos = Position((1., 2, 3))
-#       pos *= 2
-#       self.assertAlmostEqual(4, pos[1])
-#       self.assertAlmostEqual(3, pos.size)
-#       self.assertTupleEqual((3,), pos.shape)
-
-
-class TestTimesliceHitSeries(TestCase):
-
-    def test_from_arrays(self):
-        n = 10
-        dom_ids = np.arange(n)
-        times = np.arange(n)
-        tots = np.arange(n)
-        channel_ids = np.arange(n)
-
-        hits = TimesliceHitSeries.from_arrays(
-            channel_ids,
-            dom_ids,
-            times,
-            tots,
-            42,      # slice_id
-            23,      # frame_id
-        )
-
-        self.assertAlmostEqual(1, hits[1].channel_id)
-        self.assertAlmostEqual(9, hits[9].tot)
-        self.assertEqual(10, len(hits))
-        self.assertEqual(42, hits.slice_id)
-        self.assertEqual(23, hits.frame_id)
-
-
-class TestHitSeries(TestCase):
+class TestDtypes(TestCase):
     def setUp(self):
-        n = 10
-        ids = np.arange(n)
-        dom_ids = np.arange(n)
-        dir_xs = np.arange(n)
-        dir_ys = np.arange(n)
-        dir_zs = np.arange(n)
-        pos_xs = np.arange(n)
-        pos_ys = np.arange(n)
-        pos_zs = np.arange(n)
-        t0s = np.arange(n)
-        times = np.arange(n)
-        tots = np.arange(n)
-        channel_ids = np.arange(n)
-        triggereds = np.ones(n)
-        pmt_ids = np.arange(n)
+        self.c_dt = np.dtype([('a', '<f4'), ('origin', '<u4'),
+                              ('pmt_id', '<u4'), ('time', '<f8'),
+                              ('group_id', '<u4')])
 
-        self.hits = HitSeries.from_arrays(
-            channel_ids,
-            dir_xs,
-            dir_ys,
-            dir_zs,
-            dom_ids,
-            ids,
-            pos_xs,
-            pos_ys,
-            pos_zs,
-            pmt_ids,
-            t0s,
-            times,
-            tots,
-            triggereds,
-            0,      # event_id
-        )
+    def test_is_structured(self):
+        assert is_structured(self.c_dt)
+        assert not is_structured(np.dtype('int64'))
+        assert not is_structured(np.dtype(int))
+        assert not is_structured(np.dtype(float))
 
-    def test_from_arrays(self):
-        hits = self.hits
-        self.assertAlmostEqual(1, hits[1].id)
-        self.assertAlmostEqual(9, hits[9].pmt_id)
-        self.assertEqual(10, len(hits))
+    def test_has_structured_dt(self):
+        assert has_structured_dt(np.ones(2, dtype=self.c_dt))
+        assert not has_structured_dt(np.ones(2, dtype=float))
+        assert not has_structured_dt(np.ones(2, dtype=int))
+        assert not has_structured_dt([1, 2, 3])
+        assert not has_structured_dt([1.0, 2.0, 3.0])
+        assert not has_structured_dt([1.0, 2, 3.0])
+        assert not has_structured_dt([])
 
-    def test_uncalib_hits_dont_have_pmt_info(self):
-        n = 10
-        nans = np.full(n, np.nan, dtype='<f8')
-        ids = np.arange(n)
-        dom_ids = np.arange(n)
-        times = np.arange(n)
-        tots = np.arange(n)
-        channel_ids = np.arange(n)
-        triggereds = np.ones(n)
-        pmt_ids = np.arange(n)
+    def test_inflate_hasstructured(self):
+        arr = np.ones(3, dtype=self.c_dt)
+        names = ['a', 'b', 'c']
+        print(arr.dtype)
+        assert has_structured_dt(arr)
+        dt_a = inflate_dtype(arr, names=names)
+        assert dt_a == self.c_dt
 
-        hits = HitSeries.from_arrays(
-            channel_ids,
-            nans, nans, nans,
-            dom_ids,
-            ids,
-            pmt_ids,
-            nans, nans, nans, 0,
-            times,
-            tots,
-            triggereds,
-            0,      # event_id
-        )
+    def test_inflate_nostructured(self):
+        names = ['a', 'b', 'c']
+        arr = [1, 2, 3]
+        assert not has_structured_dt(arr)
+        dt_l = inflate_dtype(arr, names=names)
+        assert dt_l == np.dtype([('a', '<i8'), ('b', '<i8'), ('c', '<i8')])
 
-        self.assertAlmostEqual(1, hits[1].id)
-        self.assertAlmostEqual(9, hits[9].pmt_id)
-        self.assertEqual(10, len(hits))
-
-    def test_from_aanet(self):
-        n_params = 16
-        n_hits = 10
-        hits = [FakeAanetHit(*p) for p in
-                np.arange(n_hits * n_params).reshape(n_hits, n_params)]
-        hit_series = HitSeries.from_aanet(hits, 0)
-
-        self.assertAlmostEqual(6, hit_series.pmt_id[0])
-        self.assertAlmostEqual(6, hit_series[0].pmt_id)
-        self.assertAlmostEqual(16, hit_series[1].channel_id)
-        self.assertAlmostEqual(53, hit_series[3].id)
-        self.assertAlmostEqual(92, hit_series[5].tot)
-        self.assertTrue(hit_series[9].triggered)
-        self.assertAlmostEqual(116, hit_series[7].dom_id)
-        self.assertAlmostEqual(155, hit_series[9].time)
-        self.assertEqual(n_hits, len(hit_series))
-
-    def test_attributes_via_from_aanet(self):
-        n_params = 16
-        n_hits = 10
-        hits = [FakeAanetHit(*p) for p in
-                np.arange(n_hits * n_params).reshape(n_hits, n_params)]
-        hit_series = HitSeries.from_aanet(hits, 0)
-
-        self.assertTupleEqual((5, 21, 37, 53, 69, 85, 101, 117, 133, 149),
-                              tuple(hit_series.id))
-        self.assertTupleEqual(
-            (4, 20, 36, 52, 68, 84, 100, 116, 132, 148),
-            tuple(hit_series.dom_id))
-        self.assertTupleEqual(
-            (6, 22, 38, 54, 70, 86, 102, 118, 134, 150),
-            tuple(hit_series.pmt_id))
-        self.assertTupleEqual(
-            (0, 16, 32, 48, 64, 80, 96, 112, 128, 144),
-            tuple(hit_series.channel_id))
-        self.assertTupleEqual(
-            (11, 27, 43, 59, 75, 91, 107, 123, 139, 155),
-            tuple(hit_series.time))
-        self.assertTupleEqual(
-            # triggered is an unsigned short integer
-            (13, 29, 45, 61, 77, 93, 109, 125, 141, 157),
-            tuple(hit_series.triggered))
-        self.assertTupleEqual(
-            (12, 28, 44, 60, 76, 92, 108, 124, 140, 156),
-            tuple(hit_series.tot))
-
-    def test_from_evt(self):
-        n_params = 4
-        n_hits = 10
-        hits = [EvtRawHit(*p) for p in
-                np.arange(n_hits * n_params).reshape(n_hits, n_params)]
-        print(len(hits))
-        print(len(hits[0]))
-        hit_series = HitSeries.from_evt(hits, 0)
-
-        self.assertAlmostEqual(1, hit_series[0].pmt_id)
-        self.assertAlmostEqual(0, hit_series[1].channel_id)  # always 0 for MC
-        self.assertAlmostEqual(12, hit_series[3].id)
-        self.assertAlmostEqual(22, hit_series[5].tot)
-        self.assertFalse(hit_series[2].triggered)  # always False for MC
-        self.assertAlmostEqual(0, hit_series[7].dom_id)  # always 0 for MC
-        self.assertAlmostEqual(39, hit_series[9].time)
-        self.assertEqual(n_hits, len(hit_series))
-
-    def test_attributes_via_from_evt(self):
-        n_params = 4
-        n_hits = 10
-        hits = [EvtRawHit(*p) for p in
-                np.arange(n_hits * n_params).reshape(n_hits, n_params)]
-        hit_series = HitSeries.from_evt(hits, 0)
-
-        self.assertTupleEqual((0, 4, 8, 12, 16, 20, 24, 28, 32, 36),
-                              tuple(hit_series.id))
-        self.assertTupleEqual((0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                              tuple(hit_series.dom_id))
-        self.assertTupleEqual((1, 5, 9, 13, 17, 21, 25, 29, 33, 37),
-                              tuple(hit_series.pmt_id))
-        self.assertTupleEqual((0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                              tuple(hit_series.channel_id))
-        self.assertTupleEqual((3, 7, 11, 15, 19, 23, 27, 31, 35, 39),
-                              tuple(hit_series.time))
-        self.assertTupleEqual((False, False, False, False, False, False, False,
-                               False, False, False),
-                              tuple(hit_series.triggered))
-        self.assertTupleEqual((2, 6, 10, 14, 18, 22, 26, 30, 34, 38),
-                              tuple(hit_series.tot))
-
-    def test_first_hits_unique(self):
-        n_fh = len(self.hits.first_hits)
-        n_unique = len(np.unique(self.hits.dom_id))
-        self.assertEqual(n_fh, n_unique)
+    def test_inflate_mixed_casts_up(self):
+        arr = [1, 2, 3.0]
+        names = ['a', 'b', 'c']
+        assert not has_structured_dt(arr)
+        dt_a = inflate_dtype(arr, names=names)
+        assert dt_a == np.dtype([('a', '<f8'), ('b', '<f8'), ('c', '<f8')])
 
 
-class TestRawHitSeries(TestCase):
+class TestTable(TestCase):
     def setUp(self):
+        self.dt = np.dtype([('a', int), ('b', float), ('group_id', int)])
+        self.arr = np.array([
+            (0, 1.0, 2),
+            (3, 7.0, 5),
+            (6, 4.0, 8),
+        ], dtype=self.dt)
+
+    def test_h5loc(self):
+        tab = self.arr.view(Table)
+        assert tab.h5loc == DEFAULT_H5LOC
+        tab = Table(self.arr)
+        assert tab.h5loc == DEFAULT_H5LOC
+        tab = Table(self.arr, h5loc='/foo')
+        assert tab.h5loc == '/foo'
+
+    def test_split(self):
+        tab = self.arr.view(Table)
+        assert tab.split_h5 is False
+        tab = Table(self.arr)
+        assert tab.split_h5 is False
+        tab = Table(self.arr, split_h5=True)
+        assert tab.split_h5
+
+    def test_name(self):
+        tab = self.arr.view(Table)
+        assert tab.name == DEFAULT_NAME
+        tab = Table(self.arr)
+        assert tab.name == DEFAULT_NAME
+        tab = Table(self.arr, name='foo')
+        assert tab.name == 'foo'
+
+    def test_view(self):
+        tab = self.arr.view(Table)
+        assert tab.dtype == self.dt
+        assert tab.h5loc == DEFAULT_H5LOC
+        assert_array_equal(tab.a, np.array([0, 3, 6]))
+        assert tab[0]['group_id'] == 2
+        assert tab[0].group_id == 2
+        assert tab['group_id'][0] == 2
+        assert tab.group_id[0] == 2
+        assert isinstance(tab[0], np.record)
+        for row in tab:
+            assert isinstance(row, np.record)
+            assert row['a'] == 0
+            assert row.a == 0
+            for c in row:
+                assert c == 0
+                break
+            assert_allclose([0, 1., 2], [c for c in row])
+            break
+
+    def test_init(self):
+        tab = Table(self.arr)
+        assert tab.h5loc == DEFAULT_H5LOC
+        tab = Table(self.arr, h5loc='/bla')
+        assert tab.dtype == self.dt
+        assert tab.h5loc == '/bla'
+        assert_array_equal(tab.a, np.array([0, 3, 6]))
+        assert tab[0]['group_id'] == 2
+        assert tab[0].group_id == 2
+        assert tab['group_id'][0] == 2
+        assert tab.group_id[0] == 2
+        assert isinstance(tab[0], np.record)
+        for row in tab:
+            assert isinstance(row, np.record)
+            assert row['a'] == 0
+            assert row.a == 0
+            for c in row:
+                assert c == 0
+                break
+            assert_allclose([0, 1., 2], [c for c in row])
+            break
+
+    def test_fromdict(self):
+        n = 5
+        dmap = {
+            'a': np.ones(n, dtype=int),
+            'b': np.zeros(n, dtype=float),
+            'c': 0,
+        }
+        # tab = Table.from_dict(dmap)
+        # self.assertTrue(isinstance(tab, Table))
+        # assert tab.h5loc == DEFAULT_H5LOC
+        dt = [('a', float), ('b', float), ('c', float)]
+        tab = Table.from_dict(dmap, dtype=dt)
+        assert tab.h5loc == DEFAULT_H5LOC
+        assert isinstance(tab, Table)
+        tab = Table.from_dict(dmap, dtype=dt, h5loc='/foo')
+        assert tab.h5loc == '/foo'
+        assert isinstance(tab, Table)
+        bad_dt = [('a', float), ('b', float), ('c', float), ('d', int)]
+        with pytest.raises(KeyError):
+            tab = Table.from_dict(dmap, dtype=bad_dt)
+
+    def test_from_dict_without_dtype(self):
+        data = {'b': [1, 2], 'c': [3, 4], 'a': [5, 6]}
+        tab = Table.from_dict(data)
+        assert np.allclose([1, 2], tab.b)
+        assert np.allclose([3, 4], tab.c)
+        assert np.allclose([5, 6], tab.a)
+
+    def test_from_dict_with_unordered_columns_wrt_to_dtype_fields(self):
+        data = {'b': [1, 2], 'c': [3, 4], 'a': [5, 6]}
+        dt = [('a', float), ('b', float), ('c', float)]
+        tab = Table.from_dict(data, dtype=dt)
+        assert np.allclose([1, 2], tab.b)
+        assert np.allclose([3, 4], tab.c)
+        assert np.allclose([5, 6], tab.a)
+
+    def test_fromcolumns(self):
+        n = 5
+        dlist = [
+            np.ones(n, dtype=int),
+            np.zeros(n, dtype=float),
+            0,
+        ]
+        dt = np.dtype([('a', float), ('b', float), ('c', float)])
+        with pytest.raises(ValueError):
+            tab = Table(dlist, dtype=dt)
+        tab = Table.from_columns(dlist, dtype=dt)
+        print(tab.dtype)
+        print(tab.shape)
+        print(tab)
+        assert tab.h5loc == DEFAULT_H5LOC
+        assert isinstance(tab, Table)
+        tab = Table.from_columns(dlist, dtype=dt, h5loc='/foo')
+        print(tab.dtype)
+        print(tab.shape)
+        print(tab)
+        assert tab.h5loc == '/foo'
+        assert isinstance(tab, Table)
+        bad_dt = [('a', float), ('b', float), ('c', float), ('d', int)]
+        with pytest.raises(ValueError):
+            tab = Table.from_columns(dlist, dtype=bad_dt)
+            print(tab.dtype)
+            print(tab.shape)
+            print(tab)
+
+    def test_from_columns_with_colnames(self):
+        t = Table.from_columns([[1, 2, 3],
+                                [4, 5, 6],
+                                [7, 8, 9],
+                                [10, 11, 12],
+                                [13, 14, 15],
+                                [16, 17, 18],
+                                [19, 20, 21]],
+                               colnames=['a', 'b', 'c', 'd', 'e', 'f', 'g'])
+        print("t.a: {}".format(t.a))
+        assert np.allclose([1, 2, 3], t.a)
+        print("t.b: {}".format(t.b))
+        assert np.allclose([4, 5, 6], t.b)
+
+    def test_from_columns_with_colnames_upcasts(self):
+        t = Table.from_columns([[1, 2, 3], [4, 5.0, 6]], colnames=['a', 'b'])
+        assert t.dtype == np.dtype([('a', float), ('b', float)])
+
+    def test_from_columns_with_mismatching_columns_and_dtypes_raises(self):
+        with pytest.raises(ValueError):
+            Table.from_columns([[1, 2, 3], [4, 5, 6]],
+                                dtype=np.dtype([('a', 'f4')]))
+
+    def test_from_rows_with_colnames(self):
+        t = Table.from_rows([[1, 2], [3, 4], [5, 6]], colnames=['a', 'b'])
+        assert t.dtype == np.dtype([('a', int), ('b', int)])
+        assert np.allclose([1, 3, 5], t.a)
+        assert np.allclose([2, 4, 6], t.b)
+
+    def test_from_rows_with_colnames_upcasts(self):
+        t = Table.from_rows([[1, 2], [3.0, 4], [5, 6]], colnames=['a', 'b'])
+        assert t.dtype == np.dtype([('a', float), ('b', float)])
+
+    def test_from_rows_dim(self):
+        t = Table.from_rows([[1, 2], [3.0, 4], [5, 6]], colnames=['a', 'b'])
+        assert t.shape == (3, )
+
+    def test_from_columns_dim(self):
+        t = Table.from_columns([[1, 2, 3], [4, 5.0, 6]], colnames=['a', 'b'])
+        assert t.shape == (3, )
+
+    def test_fromrows(self):
+        dlist = [
+            [1, 2, 3],
+            [4, 5, 6],
+        ]
+        dt = np.dtype([('a', float), ('b', float), ('c', float)])
+        with pytest.raises(ValueError):
+            tab = Table(dlist, dtype=dt)
+        tab = Table.from_rows(dlist, dtype=dt)
+        print(tab.dtype)
+        print(tab.shape)
+        print(tab)
+        assert tab.h5loc == DEFAULT_H5LOC
+        assert isinstance(tab, Table)
+        tab = Table.from_rows(dlist, dtype=dt, h5loc='/foo')
+        print(tab.dtype)
+        print(tab.shape)
+        print(tab)
+        assert tab.h5loc == '/foo'
+        assert isinstance(tab, Table)
+        bad_dt = [('a', float), ('b', float), ('c', float), ('d', int)]
+        with pytest.raises(ValueError):
+            tab = Table.from_rows(dlist, dtype=bad_dt)
+            print(tab.dtype)
+            print(tab.shape)
+            print(tab)
+
+    def test_expand_scalars(self):
+        dmap = {
+            'a': 1,
+            'b': 0.,
+            'c': 0,
+        }
+        t1 = Table._expand_scalars(dmap)
+        assert len(t1) > 0
+        dmap2 = {
+            'a': [1, 2, 1],
+            'b': 0.,
+            'c': [0, 1],
+        }
+        t2 = Table._expand_scalars(dmap2)
+        assert len(t2) > 0
+        dmap3 = {
+            'a': [1, 2, 1],
+            'b': [0.],
+            'c': [0, 1],
+        }
+        t3 = Table._expand_scalars(dmap3)
+        assert len(t3) > 0
+        dmap4 = {
+            'a': [1, 2, 1],
+            'b': np.array(0.),
+            'c': [0, 1],
+        }
+        t4 = Table._expand_scalars(dmap4)
+        assert len(t4) > 0
+        dmap5 = {
+            'a': [1, 2, 1],
+            'b': np.array([1]),
+            'c': [0, 1],
+        }
+        t5 = Table._expand_scalars(dmap5)
+        assert len(t5) > 0
+
+
+    def test_from_flat_dict(self):
+        dmap = {
+            'a': 1,
+            'b': 0.,
+            'c': 0,
+        }
+        # tab = Table.from_dict(dmap)
+        # self.assertTrue(isinstance(tab, Table))
+        # assert tab.h5loc == DEFAULT_H5LOC
+        dt = [('a', float), ('b', float), ('c', float)]
+        tab = Table.from_dict(dmap, dtype=dt)
+        assert tab.h5loc == DEFAULT_H5LOC
+        assert isinstance(tab, Table)
+        tab = Table.from_dict(dmap, dtype=dt, h5loc='/foo')
+        assert tab.h5loc == '/foo'
+        assert isinstance(tab, Table)
+        bad_dt = [('a', float), ('b', float), ('c', float), ('d', int)]
+        with pytest.raises(KeyError):
+            tab = Table.from_dict(dmap, dtype=bad_dt)
+
+    def test_from_mixed_dict(self):
+        dmap = {
+            'a': 1,
+            'b': 0.,
+            'c': np.zeros(4),
+        }
+        # tab = Table.from_dict(dmap)
+        # self.assertTrue(isinstance(tab, Table))
+        # assert tab.h5loc == DEFAULT_H5LOC
+        dt = [('a', float), ('b', float), ('c', float)]
+        tab = Table.from_dict(dmap, dtype=dt)
+        assert tab.h5loc == DEFAULT_H5LOC
+        assert isinstance(tab, Table)
+        tab = Table.from_dict(dmap, dtype=dt, h5loc='/foo')
+        assert tab.h5loc == '/foo'
+        assert isinstance(tab, Table)
+        bad_dt = [('a', float), ('b', float), ('c', float), ('d', int)]
+        with pytest.raises(KeyError):
+            tab = Table.from_dict(dmap, dtype=bad_dt)
+
+    def test_from_2d(self):
+        l2d = [
+            (0, 1), (2, 3), (4, 5), (6, 7), (8, 9)
+        ]
+        names = ['a', 'origin', 'pmt_id', 'time', 'group_id']
+        dta = inflate_dtype(l2d, names)
+        with pytest.raises(ValueError):
+            t = Table(l2d)
+        with pytest.raises(ValueError):
+            t = Table(l2d, dtype=None)
+        with pytest.raises(ValueError):
+            t = Table(l2d, colnames=names)
+        with pytest.raises(ValueError):
+            t = Table(l2d, dtype=dta)
+        with pytest.raises(ValueError):
+            t = Table(l2d, dtype=dta, colnames=['a', 'b', 'c', 'd'])  # noqa
+
+    def test_flat_raises(self):
+        with pytest.raises(ValueError):
+            t = Table([1, 2, 3], dtype=int).dtype
+        with pytest.raises(ValueError):
+            t = Table([1, 2, 3], dtype=float).dtype
+        with pytest.raises(ValueError):
+            t = Table([1, 2, 3], dtype=None).dtype
+        with pytest.raises(ValueError):
+            t = Table([1, 2, 3]).dtype
+        with pytest.raises(ValueError):
+            t = Table([1, 2, 3], colnames=['a', 'b', 'c'])      # noqa
+
+    def test_init_with_unstructured_raises_valueerror(self):
+        with pytest.raises(ValueError):
+            Table(np.array([[1, 2, 3], [4, 5, 6]]))
+
+    def test_fromdict_init(self):
+        n = 5
+        dmap = {
+            'a': np.ones(n, dtype=int),
+            'b': np.zeros(n, dtype=float),
+            'c': 0,
+        }
+        dt = [('a', float), ('b', float), ('c', float)]
+        tab = Table(dmap, dtype=dt)
+        assert tab.h5loc == DEFAULT_H5LOC
+        self.assertTrue(isinstance(tab, Table))
+        tab = Table(dmap, dtype=dt, h5loc='/foo')
+        assert tab.h5loc == '/foo'
+        self.assertTrue(isinstance(tab, Table))
+        bad_dt = [('a', float), ('b', float), ('c', float), ('d', int)]
+        with pytest.raises(KeyError):
+            tab = Table(dmap, dtype=bad_dt)
+
+    def test_append_columns(self):
+        tab = Table(self.arr)
+        print(tab)
+        with pytest.raises(ValueError):
+            tab = tab.append_columns('new', [1, 2, 3, 4])
+        tab = tab.append_columns('new', [1, 2, 3])
+        print(tab)
+        assert tab.new[0] == 1
+        assert tab.new[-1] == 3
+        tab = tab.append_columns('bar', 0)
+        print(tab)
+        assert tab.bar[0] == 0
+        assert tab.bar[-1] == 0
+        tab = tab.append_columns('lala', [1])
+        print(tab)
+        assert tab.lala[0] == 1
+        assert tab.lala[-1] == 1
+        with pytest.raises(ValueError):
+            tab = tab.append_columns(['m', 'n'], [1, 2])
+        with pytest.raises(ValueError):
+            tab = tab.append_columns(['m', 'n'], [[1], [2]])
+        tab = tab.append_columns(['m', 'n'], [[1, 1, 2], [2, 4, 5]])
+        print(tab)
+        assert tab.m[0] == 1
+        assert tab.m[-1] == 2
+        assert tab.n[0] == 2
+        assert tab.n[-1] == 5
+
+    def test_append__single_column(self):
+        tab = Table({'a': 1 })
+        print(tab.dtype)
+        tab = tab.append_columns(['b'], np.array([[2]]))
+        print(tab.dtype)
+        print(tab.b)
+
+    def test_append_columns_with_single_value(self):
+        tab = Table({'a': 1})
+        tab = tab.append_columns('group_id', 0)
+        assert 0 == tab.group_id[0]
+
+    def test_append_columns_with_multiple_values(self):
+        tab = Table({'a': [1, 2]})
+        tab = tab.append_columns('group_id', [0, 1])
+        assert 0 == tab.group_id[0]
+        assert 1 == tab.group_id[1]
+
+    def test_append_columns_modifies_dtype(self):
+        tab = Table({'a': [1, 2]})
+        tab = tab.append_columns('group_id', [0, 1])
+        assert 'group_id' in tab.dtype.names
+
+    def test_append_column_which_is_too_short_raises(self):
+        tab = Table({'a': [1, 2, 3]})
+        with pytest.raises(ValueError):
+            tab = tab.append_columns('b', [4, 5])
+
+    def test_append_columns_duplicate(self):
+        tab = Table({'a': 1})
+        with pytest.raises(ValueError):
+            tab = tab.append_columns(['a'], np.array([[2]]))
+
+    def test_append_columns_with_mismatching_lengths_raises(self):
+        tab = Table({'a': [1, 2, 3]})
+        with pytest.raises(ValueError):
+            tab.append_columns(colnames=['b', 'c'], values=[[4, 5, 6], [7, 8]])
+
+    def test_append_columns_which_is_too_long(self):
+        tab = Table({'a': [1, 2, 3]})
+        with pytest.raises(ValueError):
+            tab.append_columns('b', values=[4, 5, 6, 7])
+
+    def test_drop_column(self):
+        tab = Table({'a': 1, 'b': 2})
+        tab = tab.drop_columns('a')
+        with pytest.raises(AttributeError):
+            print(tab.a)
+        print(tab.b)
+
+    def test_drop_columns(self):
+        tab = Table({'a': 1, 'b': 2, 'c': 3})
+        print(tab.dtype)
+        tab = tab.drop_columns(['a', 'b'])
+        print(tab.dtype)
+        with pytest.raises(AttributeError):
+            print(tab.a)
+        with pytest.raises(AttributeError):
+            print(tab.b)
+        print(tab.c)
+
+    def test_template(self):
         n = 10
         channel_ids = np.arange(n)
         dom_ids = np.arange(n)
         times = np.arange(n)
         tots = np.arange(n)
         triggereds = np.ones(n)
+        d_hits = {
+            'channel_id': channel_ids,
+            'dom_id': dom_ids,
+            'time': times,
+            'tot': tots,
+            'triggered': triggereds,
+            'group_id': 0,      # event_id
+        }
+        tab = Table.from_template(d_hits, 'Hits')
+        assert tab.name == 'Hits'
+        assert tab.split_h5 is True
+        assert isinstance(tab, Table)
+        ar_hits = {
+            'channel_id': np.ones(n, dtype=int),
+            'dom_id': np.ones(n, dtype=int),
+            'time': np.ones(n, dtype=float),
+            'tot': np.ones(n, dtype=float),
+            'triggered': np.ones(n, dtype=bool),
+            'group_id': np.ones(n, dtype=int),
+        }
+        tab = Table.from_template(ar_hits, 'Hits')
+        assert tab.name == 'Hits'
+        assert tab.split_h5 is True
+        assert isinstance(tab, Table)
 
-        self.hits = RawHitSeries.from_arrays(
-            channel_ids,
-            dom_ids,
-            times,
-            tots,
-            triggereds,
-            0,      # event_id
-        )
+    def test_incomplete_template(self):
+        n = 10
+        channel_ids = np.arange(n)
+        dom_ids = np.arange(n)
+        # times = np.arange(n)
+        tots = np.arange(n)
+        triggereds = np.ones(n)
+        d_hits = {
+            'channel_id': channel_ids,
+            'dom_id': dom_ids,
+            # 'time': times,
+            'tot': tots,
+            'triggered': triggereds,
+            'group_id': 0,      # event_id
+        }
+        with pytest.raises(KeyError):
+            tab = Table.from_template(d_hits, 'Hits')
+            assert tab is not None
+        ar_hits = {
+            'channel_id': np.ones(n, dtype=int),
+            'dom_id': np.ones(n, dtype=int),
+            # 'time': np.ones(n, dtype=float),
+            'tot': np.ones(n, dtype=float),
+            'triggered': np.ones(n, dtype=bool),
+            'group_id': np.ones(n, dtype=int),
+        }
+        with pytest.raises(KeyError):
+            tab = Table.from_template(ar_hits, 'Hits')
+            assert tab is not None
 
-    def test_from_arrays(self):
-        hits = self.hits
-        self.assertAlmostEqual(1, hits[1].channel_id)
-        self.assertAlmostEqual(9, hits[9].dom_id)
-        self.assertAlmostEqual(9, hits[9].time)
-        self.assertAlmostEqual(9, hits[9].tot)
-        self.assertAlmostEqual(1, hits[9].triggered)
-        self.assertEqual(10, len(hits))
+    def test_adhoc_template(self):
+        a_template = {
+            'dtype': np.dtype([
+                ('a', '<u4'),
+                ('b', 'f4')
+            ]),
+            'h5loc': '/yat',
+            'split_h5': True,
+            'name': "YetAnotherTemplate",
+        }
+        arr = np.array([(1, 3), (2, 4)], dtype=a_template['dtype'])
+        tab = Table.from_template(arr, a_template)
+        self.assertListEqual([1, 2], list(tab.a))
+        self.assertListEqual([3.0, 4.0], list(tab.b))
+        assert "YetAnotherTemplate" == tab.name
 
-    def test_single_element_attr_access(self):
-        hits = self.hits
-        a_hit = hits[2]
-        self.assertAlmostEqual(2, a_hit.channel_id)
-        self.assertAlmostEqual(2, a_hit.dom_id)
-        self.assertAlmostEqual(2, a_hit.time)
-        self.assertAlmostEqual(2, a_hit.tot)
-        self.assertAlmostEqual(1, a_hit.triggered)
+    def test_adhoc_noname_template(self):
+        a_template = {
+            'dtype': np.dtype([
+                ('a', '<u4'),
+                ('b', 'f4')
+            ]),
+            'h5loc': '/yat',
+            'split_h5': True,
+        }
+        arr = np.array([(1, 3), (2, 4)], dtype=a_template['dtype'])
+        tab = Table.from_template(arr, a_template)
+        self.assertListEqual([1, 2], list(tab.a))
+        self.assertListEqual([3.0, 4.0], list(tab.b))
+        assert DEFAULT_NAME == tab.name
+
+    def test_element_list_with_dtype(self):
+        bad_elist = [
+            [1, 2.1],
+            [3, 4.2],
+            [5, 6.3],
+        ]
+        dt = np.dtype([('a', int), ('b', float)])
+        print('list(list)')
+        arr_bad = np.array(bad_elist, dtype=dt)
+        print(arr_bad)
+        elist = [tuple(el) for el in bad_elist]
+        arr = np.array(elist, dtype=dt)
+        print('list(tuple)')
+        print(arr)
+        tab = Table(arr)
+        print(tab)
+        assert tab.a[0] == 1
+
+    def test_sort(self):
+        dt = np.dtype([('a', int), ('b', float), ('c', int)])
+        arr = np.array([
+            (0, 1.0, 2),
+            (3, 7.0, 5),
+            (6, 4.0, 8),
+        ], dtype=dt)
+        tab = Table(arr)
+        tab_sort = tab.sorted('b')
+        assert_array_equal(tab_sort['a'], np.array([0, 6, 3]))
+
+    def test_init_directly_with_df(self):
+        import pandas as pd
+        df = pd.DataFrame({'a': [1, 2, 3], 'b': [4, 5, 6]})
+        tab = Table(df, h5loc='/foo')
+        assert np.allclose(df.a, tab.a)
+        assert np.allclose(df.b, tab.b)
+        assert tab.h5loc == '/foo'
+
+    def test_df(self):
+        from pandas.util.testing import assert_frame_equal
+        import pandas as pd
+        dt = np.dtype([('a', int), ('b', float), ('c', int)])
+        arr = np.array([
+            (0, 1.0, 2),
+            (3, 7.0, 5),
+            (6, 4.0, 8),
+        ], dtype=dt)
+        print(dir(Table))
+        df = pd.DataFrame(arr)
+        tab = Table.from_dataframe(df, h5loc='/bla')
+        df2 = tab.to_dataframe()
+        assert_frame_equal(df, df2)
 
     def test_slicing(self):
-        shits = self.hits[4:6]
-        self.assertTrue(isinstance(shits, RawHitSeries))
-        self.assertEqual(2, len(shits))
-        self.assertAlmostEqual(4, shits.time[0])
+        dt = np.dtype([('a', int), ('b', float), ('c', bool)])
+        arr = np.array([
+            (0, 1.0, True),
+            (2, 3.0, False),
+            (4, 5.0, True),
+        ], dtype=dt)
+        tab = Table(arr)
+        assert 2 == len(tab[tab.c])
+        assert 1 == len(tab[tab.b > 3.0])
 
-    def test_slicing_then_single_element_access(self):
-        shits = self.hits[4:6]
-        a_hit = shits[1]
-        self.assertAlmostEqual(5, a_hit.time)
+    def test_contains(self):
+        dt = np.dtype([('a', int), ('b', float), ('c', bool)])
+        arr = np.array([
+            (0, 1.0, True),
+            (2, 3.0, False),
+            (4, 5.0, True),
+        ], dtype=dt)
+        tab = Table(arr)
+        assert 'a' in tab
+        assert 'b' in tab
+        assert 'c' in tab
+        assert 'd' not in tab
 
-    def test_appending_fields(self):
-        hits = self.hits
-        hits.append_fields('new', [1, 2, 3, 4])
-        self.assertEqual(1, hits.new[0])
+    def test_index_returns_reference(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab[1].a = 4
+        assert np.allclose(tab.a, [1, 4, 3])
 
-    def test_appending_fields_survives_slicing(self):
-        hits = self.hits
-        hits.append_fields('new', [1, 2, 3, 4])
-        shits = hits[2:4]
-        self.assertTrue(isinstance(shits, RawHitSeries))
-        self.assertEqual(3, shits.new[0])
+    def test_index_of_attribute_returns_reference(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab.a[1] = 4
+        assert np.allclose(tab.a, [1, 4, 3])
 
-    def test_from_aanet(self):
-        n_params = 16
-        n_hits = 10
-        hits = [FakeAanetHit(*p) for p in
-                np.arange(n_hits * n_params).reshape(n_hits, n_params)]
-        hit_series = RawHitSeries.from_aanet(hits, 0)
+    def test_mask_returns_copy(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab[[True, False, True]].a = [4, 5]
+        assert np.allclose(tab.a, [1, 2, 3])
 
-        self.assertAlmostEqual(16, hit_series[1].channel_id)
-        self.assertAlmostEqual(92, hit_series[5].tot)
-        self.assertTrue(hit_series[9].triggered)
-        self.assertAlmostEqual(116, hit_series[7].dom_id)
-        self.assertAlmostEqual(155, hit_series[9].time)
-        self.assertEqual(n_hits, len(hit_series))
+    def test_mask_on_attribute_returns_reference(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab.a[[True, False, True]] = [4, 5]
+        assert np.allclose(tab.a, [4, 2, 5])
 
-    def test_attributes_via_from_aanet(self):
-        n_params = 16
-        n_hits = 10
-        hits = [FakeAanetHit(*p) for p in
-                np.arange(n_hits * n_params).reshape(n_hits, n_params)]
-        hit_series = RawHitSeries.from_aanet(hits, 0)
+    def test_index_mask_returns_copy(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab[[1, 2]].a = [4, 5]
+        assert np.allclose(tab.a, [1, 2, 3])
 
-        self.assertTupleEqual(
-            (4, 20, 36, 52, 68, 84, 100, 116, 132, 148),
-            tuple(hit_series.dom_id))
-        self.assertTupleEqual(
-            (0, 16, 32, 48, 64, 80, 96, 112, 128, 144),
-            tuple(hit_series.channel_id))
-        self.assertTupleEqual(
-            (11, 27, 43, 59, 75, 91, 107, 123, 139, 155),
-            tuple(hit_series.time))
-        self.assertTupleEqual(
-            # triggered is an unsigned short integer
-            (13, 29, 45, 61, 77, 93, 109, 125, 141, 157),
-            tuple(hit_series.triggered))
-        self.assertTupleEqual(
-            (12, 28, 44, 60, 76, 92, 108, 124, 140, 156),
-            tuple(hit_series.tot))
+    def test_index_mask_of_attribute_returns_reference(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab.a[[1, 2]] = [4, 5]
+        assert np.allclose(tab.a, [1, 4, 5])
+
+    def test_slice_returns_reference(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab[:2].a = [4, 5]
+        assert np.allclose(tab.a, [4, 5, 3])
+
+    def test_slice_of_attribute_returns_reference(self):
+        tab = Table({'a': [1, 2, 3]})
+        tab.a[:2] = [4, 5]
+        assert np.allclose(tab.a, [4, 5, 3])
+
+    def test_slice_keeps_metadata(self):
+        tab = Table({'a': [1, 2, 3]}, h5loc='/lala', split_h5=True, name='bla')
+        assert tab[:2].h5loc == '/lala'
+        assert tab[:2].name == 'bla'
+        assert tab[:2].split_h5
+
+    def test_mask_keeps_metadata(self):
+        tab = Table({'a': [1, 2, 3]}, h5loc='/lala', split_h5=True, name='bla')
+        m = np.ones(len(tab), dtype=bool)
+        assert tab[m].h5loc == '/lala'
+        assert tab[m].name == 'bla'
+        assert tab[m].split_h5
+
+    def test_indexing_keeps_metadata(self):
+        tab = Table({'a': [1, 2, 3]}, h5loc='/lala', split_h5=True, name='bla')
+        im = [1, 1, 0]
+        assert tab[im].h5loc == '/lala'
+        assert tab[im].name == 'bla'
+        assert tab[im].split_h5
+
+    def test_crash_repr(self):
+        a = np.array('', dtype=[('a', '<U1')])
+        with pytest.raises(TypeError):
+            print(len(a))
+        tab = Table(a)
+        s = tab.__str__()
+        assert s is not None
+        r = tab.__repr__()
+        assert r is not None
+
+    def test_array_finalize_with_obj_none(self):
+        tab = Table({'a': [1, 2, 3]})
+        assert tab.__array_finalize__(None) is None
+
+    def test_array_wrap(self):
+        t = Table({'a': [1, 2, 3], 'b': [4, 5, 6]})
+        wrapped = t.__array_wrap__(np.array((Table({'a': 1}))))
+        assert wrapped.a[0] == 1
+
+    def test_templates_avail(self):
+        t = Table({'a': 1})
+        templates = t.templates_avail
+        assert templates
 
 
-class TestMcHitSeries(TestCase):
+class TestTableFancyAttributes(TestCase):
     def setUp(self):
-        n = 10
-        a = np.arange(n)
-        origin = np.arange(n)
-        pmt_id = np.arange(n)
-        time = np.ones(n)
-
-        self.hits = McHitSeries.from_arrays(
-            a,
-            origin,
-            pmt_id,
-            time,
-            0,      # event_id
-        )
-
-    def test_from_arrays(self):
-        hits = self.hits
-        self.assertAlmostEqual(9, hits[9].pmt_id)
-        self.assertAlmostEqual(1.0, hits[9].time)
-        self.assertAlmostEqual(9, hits[9].a)
-        self.assertAlmostEqual(9, hits[9].origin)
-        self.assertEqual(10, len(hits))
-
-    def test_from_aanet(self):
-        n_params = 16
-        n_hits = 10
-        hits = [FakeAanetHit(*p) for p in
-                np.arange(n_hits * n_params).reshape(n_hits, n_params)]
-        hit_series = McHitSeries.from_aanet(hits, 0)
-
-        self.assertAlmostEqual(22, hit_series[1].pmt_id)
-        self.assertAlmostEqual(94, hit_series[5].a)
-        self.assertTrue(hit_series[9].origin)
-        self.assertAlmostEqual(155, hit_series[9].time)
-        self.assertEqual(n_hits, len(hit_series))
-
-    def test_attributes_via_from_aanet(self):
-        n_params = 16
-        n_hits = 10
-        hits = [FakeAanetHit(*p) for p in
-                np.arange(n_hits * n_params).reshape(n_hits, n_params)]
-        hit_series = McHitSeries.from_aanet(hits, 0)
-
-        self.assertTupleEqual(
-            (6, 22, 38, 54, 70, 86, 102, 118, 134, 150),
-            tuple(hit_series.pmt_id))
-        self.assertTupleEqual(
-            (11.0, 27.0, 43.0, 59.0, 75.0, 91.0, 107.0, 123.0, 139.0, 155.0),
-            tuple(hit_series.time))
-        self.assertTupleEqual(
-            # triggered is an unsigned short integer
-            (15, 31, 47, 63, 79, 95, 111, 127, 143, 159),
-            tuple(hit_series.origin))
-        self.assertTupleEqual(
-            (14.0, 30.0, 46.0, 62.0, 78.0, 94.0, 110.0, 126.0, 142.0, 158.0),
-            tuple(hit_series.a))
-
-
-class TestMcHit(TestCase):
-
-    def setUp(self):
-        self.mchit = McHit(1, 2, 3, 4)
-
-    def test_attributes(self):
-        mchit = self.mchit
-        self.assertAlmostEqual(1, mchit.a)
-        self.assertAlmostEqual(2, mchit.origin)
-        self.assertAlmostEqual(3, mchit.pmt_id)
-        self.assertAlmostEqual(4, mchit.time)
-
-    def test_string_representation(self):
-        mchit = self.mchit
-        representation = "McHit: a(1.0), origin(2), pmt_id(3), time(4.0)"
-        self.assertEqual(representation, str(mchit))
-
-
-class TestHit(TestCase):
-
-    def setUp(self):
-        self.hit = Hit(1, nan, nan, nan, 2, 3, 4,
-                       nan, nan, nan, 0, 5, 6, 1)
-
-    def test_attributes(self):
-        hit = self.hit
-        self.assertAlmostEqual(1, hit.channel_id)
-        self.assertTrue(np.isnan(hit.dir_x))
-        self.assertTrue(np.isnan(hit.dir_y))
-        self.assertTrue(np.isnan(hit.dir_z))
-        self.assertAlmostEqual(2, hit.dom_id)
-        self.assertAlmostEqual(3, hit.id)
-        self.assertAlmostEqual(4, hit.pmt_id)
-        self.assertTrue(np.isnan(hit.pos_x))
-        self.assertTrue(np.isnan(hit.pos_y))
-        self.assertTrue(np.isnan(hit.pos_z))
-        self.assertAlmostEqual(0, hit.t0)
-        self.assertAlmostEqual(5, hit.time)
-        self.assertAlmostEqual(6, hit.tot)
-        self.assertAlmostEqual(1, hit.triggered)
-
-    def test_string_representation(self):
-        hit = self.hit
-        representation = "Hit: channel_id(1), dom_id(2), pmt_id(4), tot(6), " \
-                         "time(5), triggered(1)"
-        self.assertEqual(representation, str(hit))
-
-
-class TestRawHit(TestCase):
-
-    def setUp(self):
-        self.hit = RawHit(1, 2, 3, 4, True)
-
-    def test_attributes(self):
-        hit = self.hit
-        self.assertAlmostEqual(1, hit.channel_id)
-        self.assertAlmostEqual(2, hit.dom_id)
-        self.assertAlmostEqual(3, hit.time)
-        self.assertAlmostEqual(4, hit.tot)
-        self.assertAlmostEqual(True, hit.triggered)
-
-    def test_string_representation(self):
-        hit = self.hit
-        representation = "RawHit: channel_id(1), dom_id(2), tot(4), " \
-                         "time(3.0), triggered(1)"
-        self.assertEqual(representation, str(hit))
-
-
-class TestTrack(TestCase):
-
-    def setUp(self):
-        self.track = Track(0, np.array((1, 2, 3)), 4, 5, 6, True, 8,
-                           np.array((9, 10, 11)), 12, 13)
-
-    def test_attributes(self):
-        track = self.track
-        self.assertAlmostEqual(1, track.dir[0])
-        self.assertAlmostEqual(2, track.dir[1])
-        self.assertAlmostEqual(3, track.dir[2])
-        self.assertAlmostEqual(4, track.energy)
-        self.assertAlmostEqual(5, track.id)
-        self.assertAlmostEqual(6, track.interaction_channel)
-        self.assertTrue(track.is_cc)
-        self.assertAlmostEqual(8, track.length)
-        self.assertAlmostEqual(9, track.pos[0])
-        self.assertAlmostEqual(10, track.pos[1])
-        self.assertAlmostEqual(11, track.pos[2])
-        self.assertAlmostEqual(12, track.time)
-        self.assertAlmostEqual(13, track.type)
-
-    def test_string_representation(self):
-        track = Track(0, np.array((1, 2, 3)), 4, 5, 6, True, 8,
-                      np.array((9, 10, 11)), 12, 13)
-        representation = "Track: pos([ 9 10 11]), dir([1 2 3]), t=12, " \
-                         "E=4.0, type=13 (mu-)"
-        self.assertEqual(representation, str(track))
-
-    def test_mutable_dir(self):
-        track = self.track
-
-        track.dir = np.array((100, 101, 102))
-
-        self.assertAlmostEqual(100, track.dir[0])
-        self.assertAlmostEqual(101, track.dir[1])
-        self.assertAlmostEqual(102, track.dir[2])
-
-    def test_mutable_pos(self):
-        track = self.track
-
-        track.pos = np.array((100, 101, 102))
-
-        self.assertAlmostEqual(100, track.pos[0])
-        self.assertAlmostEqual(101, track.pos[1])
-        self.assertAlmostEqual(102, track.pos[2])
-
-
-class TestTrackSeries(TestCase):
-    def test_from_arrays(self):
-        n = 10
-        bjorkenys = np.array(range(n))
-        dir_xs = np.array(range(n))
-        dir_ys = np.array(range(n))
-        dir_zs = np.array(range(n))
-        energys = np.array(range(n))
-        ids = np.array(range(n))
-        interaction_channels = np.array(range(n))
-        is_ccs = np.array([True] * 10)
-        lengths = np.array(range(n))
-        pos_xs = np.array(range(n))
-        pos_ys = np.array(range(n))
-        pos_zs = np.array(range(n))
-        times = np.array(range(n))
-        types = np.array(range(n))
-
-        tracks = TrackSeries.from_arrays(
-            bjorkenys,
-            dir_xs,
-            dir_ys,
-            dir_zs,
-            energys,
-            ids,
-            interaction_channels,
-            is_ccs,
-            lengths,
-            pos_xs,
-            pos_ys,
-            pos_zs,
-            times,
-            types,
-            event_id=0,
-        )
-
-        self.assertAlmostEqual(1, tracks[1].id)
-        self.assertAlmostEqual(9, tracks[9].interaction_channel)
-        self.assertEqual(10, len(tracks))
-
-    def test_array(self):
-        ts = TrackSeries.from_table([{
-            'bjorkeny': 0.0,
-            'dir_x': 1.0,
-            'dir_y': 2.0,
-            'dir_z': 3.0,
-            'energy': 4.0,
-            'id': 5,
-            'interaction_channel': 7,
-            'is_cc': True,
-            'length': 9.0,
-            'pos_x': 10.0,
-            'pos_y': 11.0,
-            'pos_z': 12.0,
-            'time': 13,
-            'type': 14,
-        }], event_id=0)
-        exp = [(0.0, 1.0, 2.0, 3, 4.0, 0, 6, 7, True, 9.0, 10.0, 12.0, 12.0,
-                13, 14), ]
-        exp = np.array(exp, dtype=ts.dtype)
-        self.assertEqual(1, len(ts))
-        # self.assertAlmostEqual(exp, ts.serialise())
-
-
-class TestMcTrack(TestCase):
-
-    def setUp(self):
-        self.mctrack = McTrack(0, np.array((1, 2, 3)), 4, 5, 6, True, 8,
-                               np.array((9, 10, 11)), 12, 13)
-
-    def test_attributes(self):
-        mctrack = self.mctrack
-        self.assertAlmostEqual(1, mctrack.dir[0])
-        self.assertAlmostEqual(2, mctrack.dir[1])
-        self.assertAlmostEqual(3, mctrack.dir[2])
-        self.assertAlmostEqual(4, mctrack.energy)
-        self.assertAlmostEqual(5, mctrack.id)
-        self.assertAlmostEqual(6, mctrack.interaction_channel)
-        self.assertTrue(mctrack.is_cc)
-        self.assertAlmostEqual(8, mctrack.length)
-        self.assertAlmostEqual(9, mctrack.pos[0])
-        self.assertAlmostEqual(10, mctrack.pos[1])
-        self.assertAlmostEqual(11, mctrack.pos[2])
-        self.assertAlmostEqual(12, mctrack.time)
-        self.assertAlmostEqual(13, mctrack.type)
-
-    def test_string_representation(self):
-        mctrack = McTrack(0, np.array((1, 2, 3)), 4, 5, 6, True, 8,
-                          np.array((9, 10, 11)), 12, 13)
-        representation = "McTrack: pos([ 9 10 11]), dir([1 2 3]), t=12, " \
-                         "E=4.0, type=13 (mu-)"
-        self.assertEqual(representation, str(mctrack))
-
-    def test_mutable_dir(self):
-        mctrack = self.mctrack
-
-        mctrack.dir = np.array((100, 101, 102))
-
-        self.assertAlmostEqual(100, mctrack.dir[0])
-        self.assertAlmostEqual(101, mctrack.dir[1])
-        self.assertAlmostEqual(102, mctrack.dir[2])
-
-    def test_mutable_pos(self):
-        mctrack = self.mctrack
-
-        mctrack.pos = np.array((100, 101, 102))
-
-        self.assertAlmostEqual(100, mctrack.pos[0])
-        self.assertAlmostEqual(101, mctrack.pos[1])
-        self.assertAlmostEqual(102, mctrack.pos[2])
-
-
-class TestMcTrackSeries(TestCase):
-    def test_array(self):
-        ts = McTrackSeries.from_table([{
-            'bjorkeny': 0.0,
-            'dir_x': 1.0,
-            'dir_y': 2.0,
-            'dir_z': 3.0,
-            'energy': 4.0,
-            'id': 5,
-            'interaction_channel': 7,
-            'is_cc': True,
-            'length': 9.0,
-            'pos_x': 10.0,
-            'pos_y': 11.0,
-            'pos_z': 12.0,
-            'time': 13,
-            'type': 14,
-        }], event_id=0)
-        exp = [(0.0, 1.0, 2.0, 3, 4.0, 0, 6, 7, True, 9.0, 10.0, 12.0, 12.0,
-                13, 14), ]
-        exp = np.array(exp, dtype=ts.dtype)
-        self.assertEqual(1, len(ts))
-        # self.assertAlmostEqual(exp, ts.serialise())
-
-
-class TestSummaryframeSeries(TestCase):
-
-    def test_from_arrays(self):
-        n = 10
-        dom_ids = np.arange(n)
-        max_sequence_numbers = np.arange(n)
-        n_received_packets = np.arange(n)
-        frames = SummaryframeSeries.from_arrays(
-            dom_ids,
-            max_sequence_numbers,
-            n_received_packets,
-            23,      # slice_id
-        )
-
-        self.assertAlmostEqual(1, frames[1][0])  # dom_id
-        self.assertAlmostEqual(9, frames[9][2])  # n_received_packets
-        self.assertTupleEqual(tuple(range(n)),
-                              tuple(frames.n_received_packets))
-        self.assertEqual(10, len(frames))
-
-
-class TestTimesliceInfo(TestCase):
-    def test_timeslice_info(self):
-        s = TimesliceInfo(frame_index=0, slice_id=1, timestamp=3,
-                          nanoseconds=4, n_frames=5)
-        self.assertAlmostEqual(0, s.frame_index)
-        self.assertAlmostEqual(1, s.slice_id)
-        self.assertAlmostEqual(3, s.timestamp)
-        self.assertAlmostEqual(4, s.nanoseconds)
-        self.assertAlmostEqual(5, s.n_frames)
-
-
-class TestSummarysliceInfo(TestCase):
-    def test_timeslice_info(self):
-        s = SummarysliceInfo(frame_index=0, slice_id=1, timestamp=3,
-                             nanoseconds=4, n_frames=5)
-        self.assertAlmostEqual(0, s.frame_index)
-        self.assertAlmostEqual(1, s.slice_id)
-        self.assertAlmostEqual(3, s.timestamp)
-        self.assertAlmostEqual(4, s.nanoseconds)
-        self.assertAlmostEqual(5, s.n_frames)
-
-
-class TestEventInfo(TestCase):
-    def test_event_info(self):
-        ran = np.array(tuple(range(17)), dtype=EventInfo.dtype)
-        e = EventInfo(ran)
-        print(e.trigger_counter)
-        print(e)
-        self.assertAlmostEqual(0, e.det_id)
-        self.assertAlmostEqual(1, e.frame_index)
-        self.assertAlmostEqual(2, e.livetime_sec)
-        self.assertAlmostEqual(3, e.mc_id)
-        self.assertAlmostEqual(4, e.mc_t)
-        self.assertAlmostEqual(5, e.n_events_gen)
-        self.assertAlmostEqual(6, e.n_files_gen)
-        self.assertAlmostEqual(7, e.overlays)
-        self.assertAlmostEqual(8, e.trigger_counter)
-        self.assertAlmostEqual(9, e.trigger_mask)
-        self.assertAlmostEqual(10, e.utc_nanoseconds)
-        self.assertAlmostEqual(11, e.utc_seconds)
-        self.assertAlmostEqual(12, e.weight_w1)
-        self.assertAlmostEqual(13, e.weight_w2)
-        self.assertAlmostEqual(14, e.weight_w3)
-        self.assertAlmostEqual(15, e.run_id)
-        self.assertAlmostEqual(16, e.event_id)
-
-    def test_from_table(self):
-        e = EventInfo.from_row({
-            'det_id': 0,
-            'frame_index': 2,
-            'mc_id': 3,
-            'mc_t': 4,
-            'overlays': 5,
-            'trigger_counter': 6,
-            'trigger_mask': 7,
-            'utc_nanoseconds': 8,
-            'utc_seconds': 9,
-            'weight_w1': 10,
-            'weight_w2': 11,
-            'weight_w3': 12,
-            'livetime_sec': 13,
-            'n_events_gen': 14,
-            'n_files_gen': 15,
-            'run_id': 16,
-            'event_id': 1,
+        self.arr_bare = Table({
+            'a': [1, 2, 3],
+            'b': [3, 4, 5],
+        })
+        self.arr_wpos = Table({
+            'a': [1, 2, 3],
+            'b': [3, 4, 5],
+            'pos_x': [10, 20, 30],
+            'pos_y': [40, 50, 60],
+            'pos_z': [70, 80, 90],
+            'dir_x': [10.0, 20.0, 30.0],
+            'dir_y': [40.0, 50.0, 60.0],
+            'dir_z': [70.0, 80.0, 90.0],
         })
 
-        self.assertAlmostEqual(0, e.det_id)
-        self.assertAlmostEqual(2, e.frame_index)
-        self.assertAlmostEqual(3, e.mc_id)
-        self.assertAlmostEqual(4, e.mc_t)
-        self.assertAlmostEqual(5, e.overlays)
-        self.assertAlmostEqual(16, e.run_id)
-        self.assertAlmostEqual(6, e.trigger_counter)
-        self.assertAlmostEqual(7, e.trigger_mask)
-        self.assertAlmostEqual(8, e.utc_nanoseconds)
-        self.assertAlmostEqual(9, e.utc_seconds)
-        self.assertAlmostEqual(10, e.weight_w1)
-        self.assertAlmostEqual(11, e.weight_w2)
-        self.assertAlmostEqual(12, e.weight_w3)
-        self.assertAlmostEqual(1, e.event_id)
-        self.assertAlmostEqual(13, e.livetime_sec)
-        self.assertAlmostEqual(14, e.n_events_gen)
-        self.assertAlmostEqual(15, e.n_files_gen)
+    def test_pos_getter(self):
+        tab = Table({'pos_x': [1, 2, 3],
+                     'pos_y': [4, 5, 6],
+                     'pos_z': [7, 8, 9]})
+        assert np.allclose([[1, 4, 7], [2, 5, 8], [3, 6, 9]], tab.pos)
 
-    def test_array(self):
-        e = EventInfo.from_row({
-            'det_id': 0,
-            'frame_index': 2,
-            'livetime_sec': 13,
-            'mc_id': 3,
-            'mc_t': 4.0,
-            'n_events_gen': 14,
-            'n_files_gen': 15,
-            'overlays': 5,
-            'trigger_counter': 6,
-            'trigger_mask': 7,
-            'utc_nanoseconds': 8,
-            'utc_seconds': 9,
-            'weight_w1': 10.0,
-            'weight_w2': 11.0,
-            'weight_w3': 12.0,
-            'run_id': 16,
-            'event_id': 1,
-        })
-        exp = (0, 2, 13, 3, 4.0, 14, 15, 5, 6,
-               7, 8, 9, 10.0, 11.0, 12.0, 16, 1,)
-        self.assertAlmostEqual(e.serialise(), np.array(exp, e.dtype))
+    def test_pos_getter_for_single_entry(self):
+        tab = Table({'pos_x': [1, 2, 3],
+                     'pos_y': [4, 5, 6],
+                     'pos_z': [7, 8, 9]})
+        assert np.allclose([[2, 5, 8]], tab.pos[1])
 
-    def test_missing_run_id(self):
-        dt = EventInfo.dtype
-        fields = dict(dt.descr)
-        del fields['run_id']
-        sparse_dt = np.dtype([(k, v) for k, v in fields.items()])
-        e = np.ones(1, dtype=sparse_dt)
-        with self.assertRaises(AssertionError):
-            ei = EventInfo(e)       # noqa
+    def test_dir_getter(self):
+        tab = Table({'dir_x': [1, 2, 3],
+                     'dir_y': [4, 5, 6],
+                     'dir_z': [7, 8, 9]})
+        assert np.allclose([[1, 4, 7], [2, 5, 8], [3, 6, 9]], tab.dir)
 
+    def test_dir_getter_for_single_entry(self):
+        tab = Table({'dir_x': [1, 2, 3],
+                     'dir_y': [4, 5, 6],
+                     'dir_z': [7, 8, 9]})
+        assert np.allclose([[2, 5, 8]], tab.dir[1])
 
-class TestKM3Array(TestCase):
-    def test_km3array(self):
-        dt = np.dtype(sorted([('x', int), ('y', float),
-                              ('did_converge', bool)]))
-        dat = {'x': 4, 'y': 2.0, 'did_converge': True}
-        rec = KM3Array.from_dict(dat, dtype=dt)
-        print(rec)
-        print(rec.dtype)
-        self.assertAlmostEqual(rec.dtype, dt)
-        self.assertTrue(rec['did_converge'])
-        self.assertAlmostEqual(rec['x'], 4)
+    def test_dir_setter(self):
+        tab = Table({'dir_x': [1, 0, 0],
+                     'dir_y': [0, 1, 0],
+                     'dir_z': [0, 0, 1]})
+        new_dir = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        tab.dir = new_dir
+        assert np.allclose(new_dir, tab.dir)
 
-    def test_km3array_serialise(self):
-        dt = np.dtype(sorted([('x', int), ('y', float),
-                              ('did_converge', bool)]))
-        dat = {'x': 4, 'y': 2.0, 'did_converge': True}
-        rec = KM3Array.from_dict(dat, dtype=dt).serialise()
-        print(rec)
-        print(rec.dtype)
-        self.assertTrue(rec[0][0])
-        self.assertAlmostEqual(rec[0][1], 4)
-        self.assertAlmostEqual(rec[0][2], 2.0)
+    def test_pos_setter(self):
+        tab = Table({'pos_x': [1, 0, 0],
+                     'pos_y': [0, 1, 0],
+                     'pos_z': [0, 0, 1]})
+        new_pos = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        tab.pos = new_pos
+        assert np.allclose(new_pos, tab.pos)
 
+    def test_same_shape_pos(self):
+        with pytest.raises(AttributeError):
+            p = self.arr_bare.pos
+        p = self.arr_wpos.pos
+        self.arr_wpos.pos = p
+        assert p is not None
+        # assert p.shape[1] == 3
+        with pytest.raises(ValueError):
+            self.arr_bare.dir = p
 
-class TestKM3DataFrame(TestCase):
-    def test_h5loc_is_preserved_along_trafo(self):
-        arr = np.random.normal(size=24).reshape(-1, 3)
-        df = KM3DataFrame(arr)
-        self.assertTrue(hasattr(df, 'h5loc'))
-        self.assertEqual('/', df.h5loc)
-        df.h5loc = '/reco'
-        self.assertEqual('/reco', df.h5loc)
-        self.assertEqual('/reco', df[[0, 1]].h5loc)
+    def test_same_shape_dir(self):
+        with pytest.raises(AttributeError):
+            p = self.arr_bare.dir
+        p = self.arr_wpos.dir
+        self.arr_wpos.dir = p
+        assert p is not None
+        # assert p.shape[1] == 3
+        a2 = self.arr_bare.copy()
+        with pytest.raises(ValueError):
+            self.arr_bare.dir = p
 
+    def test_phi(self):
+        tab = Table({'dir_x': [1, 0, 0],
+                     'dir_y': [0, 1, 0],
+                     'dir_z': [0, 0, 1]})
+        p = tab.phi
+        assert p is not None
 
-class TestBinaryStruct(TestCase):
-    def test_init(self):
-        stream = BytesIO(b'')
-        b = BinaryStruct(stream)        # noqa
+    def test_phi(self):
+        tab = Table({'dir_x': [1, 0, 0],
+                     'dir_y': [0, 1, 0],
+                     'dir_z': [0, 0, 1]})
+        p = tab.theta
+        assert p is not None
 
-    def test_parsing(self):
-        structure = '<2i3fc'
-        values = (1, 2, 3.4, 5.6, 7.8, b'a')
-        fields = 'abcdef'
+    def test_zen(self):
+        tab = Table({'dir_x': [1, 0, 0],
+                     'dir_y': [0, 1, 0],
+                     'dir_z': [0, 0, 1]})
+        p = tab.zenith
+        assert p is not None
 
-        data = BytesIO(struct.pack(structure, *values))
+    def test_azi(self):
+        tab = Table({'dir_x': [1, 0, 0],
+                     'dir_y': [0, 1, 0],
+                     'dir_z': [0, 0, 1]})
+        p = tab.azimuth
+        assert p is not None
 
-        class Dummy(BinaryStruct):
-            _structure = structure
-            _fields = fields
+    def test_pos_setter_if_pos_x_y_z_are_not_present_raises(self):
+        tab = Table({'a': 1})
+        with pytest.raises(ValueError):
+            tab.pos = [[1], [2], [3]]
 
-        dummy = Dummy(data)
-        self.assertEqual(1, dummy.a)
-        self.assertEqual(2, dummy.b)
-        self.assertAlmostEqual(3.4, dummy.c, 5)
-        self.assertAlmostEqual(5.6, dummy.d, 5)
-        self.assertAlmostEqual(7.8, dummy.e, 5)
-        self.assertEqual(b'a', dummy.f)
-
-
-class TestBinaryComposite(TestCase):
-    def test_init(self):
-        stream = BytesIO(b'')
-        b = BinaryComposite(stream)     # noqa
-
-
-class TestDTypeAttr(TestCase):
-    def test_subclassing(self):
-        class Foo(DTypeAttr):
-            pass
-
-    def test_access_attribute(self):
-        class Foo(DTypeAttr):
-            def __init__(self):
-                self.dtype = lambda x: x  # quick hack to add subattr
-                self.dtype.names = ['bar']
-                self._arr = {"bar": 23}
-
-        foo = Foo()
-        self.assertEqual(23, foo.bar)
-
-    def test_access_missing_attribute(self):
-        class Foo(DTypeAttr):
-            def __init__(self):
-                self.dtype = lambda x: x  # quick hack to add subattr
-                self.dtype.names = ['bar']
-                self._arr = {"bar": 23}
-
-        foo = Foo()
-        with self.assertRaises(AttributeError):
-            foo.baz
-
-    def test_subclassing_a_class_without_dtype(self):
-        class Foo(DTypeAttr):
-            def __init__(self):
-                pass
-
-        with self.assertRaises(AttributeError):
-            foo = Foo()
-            foo.bar
-
-    def test_adding_new_attribute(self):
-
-        data = np.array([(1.0, 2), (3.0, 4)], dtype=[('x', float), ('y', int)])
-
-        class Foo(DTypeAttr):
-            dtype = data.dtype
-
-            def __init__(self):
-                self._arr = data
-
-        foo = Foo()
-
-        self.assertAlmostEqual(1.0, foo.x[0])
-        self.assertAlmostEqual(3.0, foo.x[1])
-        self.assertEqual(2, foo.y[0])
-        self.assertEqual(4, foo.y[1])
-
-        foo.append_fields('new', [5, 6])
-        self.assertAlmostEqual(1.0, foo.x[0])
-        self.assertAlmostEqual(3.0, foo.x[1])
-        self.assertEqual(2, foo.y[0])
-        self.assertEqual(4, foo.y[1])
-        self.assertEqual(5, foo.new[0])
-        self.assertEqual(6, foo.new[1])
-
-    def test_adding_new_attribute_keeps_dtype_when_slicing(self):
-        data = np.array([(1.0, 2), (3.0, 4)], dtype=[('x', float), ('y', int)])
-
-        class Foo(DTypeAttr):
-            dtype = data.dtype
-
-            def __init__(self, data):
-                self._arr = data
-
-        foo = Foo(data)
-        foo.append_fields('new', [5, 6])
-        self.assertAlmostEqual(1.0, foo.x[0])
-        self.assertAlmostEqual(3.0, foo.x[1])
-        self.assertAlmostEqual(5, foo.new[0])
-        sliced_foo = foo[1:]
-        self.assertAlmostEqual(6, sliced_foo.new[0])
+    def test_dir_setter_if_dir_x_y_z_are_not_present_raises(self):
+        tab = Table({'a': 1})
+        with pytest.raises(ValueError):
+            tab.dir = [[1], [2], [3]]

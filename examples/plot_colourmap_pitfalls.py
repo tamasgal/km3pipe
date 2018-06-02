@@ -22,7 +22,7 @@ z = np.cos(xx) + np.cos(yy)
 fig, axes = plt.subplots(2, 2)
 
 for ax, colourmap in zip(axes.flatten(),
-                         ['gray', 'jet', 'cubehelix', 'viridis']):
+                         ['gray', 'jet', 'cubehelix', 'cividis']):
     ax.set_title(colourmap)
     im = ax.imshow(z, cmap=plt.get_cmap(colourmap))
     divider = make_axes_locatable(ax)

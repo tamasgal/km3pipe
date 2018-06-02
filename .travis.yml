@@ -1,6 +1,5 @@
 language: python
 python:
-    - "2.7"
     - "3.5"
     - "3.6"
 #    - "3.7-dev"
@@ -22,11 +21,15 @@ before_install:
     - python -V
     - echo $TRAVIS_PYTHON_VERSION
     - pip install -U pip setuptools
+    - pip install -U numpy
     - pip install -Ur requirements.txt
-    - pip install -Ur dev-requirements.txt
     - ls -al
 
 install:
-    - pip install .
+    #- pip install .
+    - make install
 
-script: py.test venv/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/km3pipe
+#script: py.test venv/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/km3pipe
+script: 
+    - make test
+    - make test-km3modules

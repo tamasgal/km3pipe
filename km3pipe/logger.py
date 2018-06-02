@@ -1,15 +1,14 @@
-# coding=utf-8
 # Filename: logger.py
 # pylint: disable=locally-disabled,C0103
 """
 The logging facility.
 
 """
-from __future__ import division, absolute_import, print_function
-
+from hashlib import sha256
 import socket
 import logging
-import logging.config
+
+from .tools import colored, supports_color
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -19,28 +18,21 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-try:
-    logging.config.fileConfig('logging.conf')
-except Exception:
-    logging.basicConfig()
 
-logging.addLevelName(logging.INFO, "\033[1;32m%s\033[1;0m" %
-                     logging.getLevelName(logging.INFO))
-logging.addLevelName(logging.DEBUG, "\033[1;34m%s\033[1;0m" %
-                     logging.getLevelName(logging.DEBUG))
-logging.addLevelName(logging.WARNING, "\033[1;33m%s\033[1;0m" %
-                     logging.getLevelName(logging.WARNING))
-logging.addLevelName(logging.ERROR, "\033[1;31m%s\033[1;0m" %
-                     logging.getLevelName(logging.ERROR))
-logging.addLevelName(logging.CRITICAL, "\033[1;101m%s\033[1;0m" %
-                     logging.getLevelName(logging.CRITICAL))
+loggers = {}  # this holds all the registered loggers
+# logging.basicConfig()
 
-ch = logging.StreamHandler()
-
-# pylint: disable=C0103
-formatter = logging.Formatter('[%(levelname)s] %(name)s: %(message)s')
-# ch.setFormatter(formatter)
-# logger.addHandler(ch)
+if supports_color():
+    logging.addLevelName(logging.INFO, "\033[1;32m%s\033[1;0m" %
+                         logging.getLevelName(logging.INFO))
+    logging.addLevelName(logging.DEBUG, "\033[1;34m%s\033[1;0m" %
+                         logging.getLevelName(logging.DEBUG))
+    logging.addLevelName(logging.WARNING, "\033[1;33m%s\033[1;0m" %
+                         logging.getLevelName(logging.WARNING))
+    logging.addLevelName(logging.ERROR, "\033[1;31m%s\033[1;0m" %
+                         logging.getLevelName(logging.ERROR))
+    logging.addLevelName(logging.CRITICAL, "\033[1;101m%s\033[1;0m" %
+                         logging.getLevelName(logging.CRITICAL))
 
 
 class LogIO(object):
@@ -72,12 +64,52 @@ class LogIO(object):
         self.sock.connect((self.url, self.port))
 
 
-def get(name):
+def get_logger(name):
     """Helper function to get a logger"""
-    return logging.getLogger(name)
+    if name in loggers:
+        return loggers[name]
+    logger = logging.getLogger(name)
+    logger.propagate = False
+    pre, suf = hash_coloured_escapes(name) if supports_color() else ('', '')
+    formatter = logging.Formatter('%(levelname)s->{}%(name)s:{} %(message)s'
+                                  .format(pre, suf))
+    ch = logging.StreamHandler()
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+    loggers[name] = logger
+    return logger
 
 
 def set_level(name, level):
     """Set the log level for given logger"""
-    logger = get(name)
-    logger.setLevel(level)
+    get_logger(name).setLevel(level)
+
+
+def get_printer(name, color=None, ansi_code=None):
+    """Return a function which prints a message with a coloured name prefix"""
+
+    if supports_color():
+        if color is None and ansi_code is None:
+            name = hash_coloured(name)
+        else:
+            name = colored(name, color=color, ansi_code=ansi_code)
+
+    prefix = name + ': '
+
+    def printer(text):
+        print(prefix + str(text))
+
+    return printer
+
+
+def hash_coloured(text):
+    """Return a ANSI coloured text based on its hash"""
+    ansi_code = int(sha256(text.encode('utf-8')).hexdigest(), 16) % 230
+    return colored(text, ansi_code=ansi_code)
+
+
+def hash_coloured_escapes(text):
+    """Return the ANSI hash colour prefix and suffix for a given text"""
+    ansi_code = int(sha256(text.encode('utf-8')).hexdigest(), 16) % 230
+    prefix, suffix = colored('SPLIT', ansi_code=ansi_code).split('SPLIT')
+    return prefix, suffix

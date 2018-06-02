@@ -1,4 +1,3 @@
-# coding=utf-8
 # Filename: cmd.py
 """
 KM3Pipe command line utility.
@@ -9,8 +8,6 @@ Usage:
     km3pipe createconf [--overwrite] [--dump]
     km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID] [-o OUTFILE]
     km3pipe detectors [-s REGEX] [--temporary]
-    km3pipe runtable [-n RUNS] [-s REGEX] [--temporary] DET_ID
-    km3pipe runinfo [--temporary] DET_ID RUN
     km3pipe rundetsn [--temporary] RUN DETECTOR
     km3pipe retrieve DET_ID RUN [-o OUTFILE]
     km3pipe (-h | --help)
@@ -22,7 +19,6 @@ Options:
     -c CALIBR_ID        Geometrical calibration ID (eg. A01466417)
     -o OUTFILE          Output filename.
     -t T0_SET           Time calibration ID (eg. A01466431)
-    -n EVENTS/RUNS      Number of events/runs.
     -s REGEX            Regular expression to filter the runsetup name/id.
     --temporary         Use a temporary session. [default: False]
     --overwrite         Overwrite existing config [default: False]
@@ -30,23 +26,21 @@ Options:
     DETECTOR            Detector (eg. ARCA).
     GIT_BRANCH          Git branch to pull (eg. develop).
     RUN                 Run number.
+
 """
-
-from __future__ import division, absolute_import, print_function
-
 import re
 import sys
 import os
 from datetime import datetime
 
 from . import version
-from .tools import irods_filepath, deprecated
+from .tools import irods_filepath
 from .db import DBManager
 from .hardware import Detector
 
-from km3pipe.logger import logging
+from km3pipe.logger import get_logger
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -61,25 +55,6 @@ def run_tests():
     import pytest
     import km3pipe
     pytest.main([os.path.dirname(km3pipe.__file__)])
-
-
-@deprecated(extra="This command line tool is now standalone, "
-            "please use `runtable OPTIONS` instead "
-            "(without the km3pipe prefix).")
-def runtable(det_id, n=5, sep='\t', regex=None, temporary=False):
-    """Print the run table of the last `n` runs for given detector"""
-    log.error("This command line tool is now standalone, "
-              "please use `runtable OPTIONS` instead "
-              "(without the km3pipe prefix).")
-
-
-@deprecated(extra="This command line tool is now standalone, "
-            "please use `runtable OPTIONS` instead "
-            "(without the km3pipe prefix).")
-def runinfo(run_id, det_id, temporary=False):
-    log.error("This command line tool is now standalone, "
-              "please use `runtable OPTIONS` instead "
-              "(without the km3pipe prefix).")
 
 
 def update_km3pipe(git_branch=''):
@@ -155,11 +130,6 @@ def main():
     from docopt import docopt
     args = docopt(__doc__, version=version)
 
-    try:
-        n = int(args['-n'])
-    except TypeError:
-        n = None
-
     if args['test']:
         run_tests()
 
@@ -170,14 +140,6 @@ def main():
         overwrite_conf = bool(args['--overwrite'])
         dump = bool(args['--dump'])
         createconf(overwrite_conf, dump)
-
-    if args['runtable']:
-        runtable(args['DET_ID'], n, regex=args['-s'],
-                 temporary=args["--temporary"])
-
-    if args['runinfo']:
-        runinfo(int(args['RUN']), args['DET_ID'],
-                temporary=args["--temporary"])
 
     if args['rundetsn']:
         rundetsn(int(args['RUN']), args['DETECTOR'],

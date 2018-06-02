@@ -1,20 +1,12 @@
-# coding=utf-8
 # Filename: style.py
 # pylint: disable=locally-disabled
 """
 The KM3Pipe style definitions.
 
 """
-from __future__ import division, absolute_import, print_function
 
-import os
+from os.path import dirname, join, exists
 from itertools import cycle
-
-try:
-    import matplotlib.pyplot as plt
-except ImportError:
-    raise ImportError("Please install matplotlib: `pip install matplotlib`")
-import km3pipe as kp
 
 
 __author__ = "Tamas Gal"
@@ -26,58 +18,21 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-style_dir = os.path.dirname(kp.__file__) + '/kp-data/stylelib'
-
-
-try:
-    from nbconvert.preprocessors.base import Preprocessor
-    from pygments.style import Style
-    import pygments.token as token
-except ImportError:
-    class KM3PipePygmentsStyle(object):
-        def __init__(self):
-            raise ImportError("Module pygments could be not found")
-
-    class LatexPreprocessor(object):
-        def __init__(self):
-            raise ImportError("Module nbconvert could be not found")
-else:
-    class KM3PipePygmentsStyle(Style):
-        default_style = ""
-        styles = {
-            token.Comment: '#aaa',
-            token.Keyword: '#0095B5',
-            token.Keyword.Control: '#0095B5',
-            token.Name: '#333',
-            token.Name.Function: '#FF0082',
-            token.Name.Class: 'bold #FF0082',
-            token.String: '#666',
-            token.Operator: '#346F8A',
-        }
-
-    class LatexPreprocessor(Preprocessor):
-        """LaTeX processor for nbconvert"""
-
-        def preprocess(self, nb, resources):
-            from pygments.formatters import LatexFormatter
-            resources["latex"]["pygments_definitions"] = \
-                LatexFormatter(style=KM3PipePygmentsStyle).get_style_defs()
-            return nb, resources
+STYLE_DIR = join(dirname(dirname(__file__)), 'kp-data/stylelib')
 
 
 def get_style_path(style):
-    return style_dir + '/' + style + '.mplstyle'
+    return STYLE_DIR + '/' + style + '.mplstyle'
 
 
 def use(style='km3pipe'):
+    import matplotlib.pyplot as plt
+
     for s in (get_style_path('km3pipe-' + style),
               get_style_path(style),
               style):
-        try:
+        if exists(s):
             plt.style.use(s)
-        except (OSError, IOError):
-            pass
-        else:
             print("Loading style definitions from '{0}'".format(s))
             return
     print("Could not find style: '{0}'".format(style))
@@ -87,7 +42,7 @@ class ColourCycler(object):
     """Basic colour cycler.
 
     Instantiate with `cc = ColourCycler()` and use it in plots
-    like `plt.plot(xs, ys, c=cs.next)`.
+    like `plt.plot(xs, ys, c=next(cc))`.
     """
 
     def __init__(self, palette='km3pipe'):
@@ -105,6 +60,8 @@ class ColourCycler(object):
 
     def refresh_styles(self):
         """Load all available styles"""
+        import matplotlib.pyplot as plt
+
         self.colours = {}
         for style in plt.style.available:
             try:
@@ -122,7 +79,6 @@ class ColourCycler(object):
         """Return a list of available styles"""
         return list(self.colours.keys())
 
-    @property
-    def next(self):
+    def __next__(self):
         """Return the next colour in current palette"""
         return next(self._cycler)

@@ -1,23 +1,15 @@
-# coding=utf-8
 # Filename: root.py
 # pylint: disable=C0103,R0903
 # vim:set ts=4 sts=4 sw=4 et:
 """
 Read and write Vanilla ROOT files.
 """
-from __future__ import division, absolute_import, print_function
-
-from six import string_types
-from six.moves import range
 
 import numpy as np
-import root_numpy as rnp
-from rootpy.io import root_open
-from rootpy import ROOTError
 
-from km3pipe.logger import logging
+from km3pipe.logger import get_logger
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 __author__ = "Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -29,13 +21,16 @@ __status__ = "Development"
 
 
 def open_rfile(rfile, fmode='r'):
-    if isinstance(rfile, string_types):
+    from rootpy.io import root_open
+    if isinstance(rfile, str):
         return root_open(rfile, mode=fmode)
     return rfile
 
 
 def get_hist(rfile, histname, get_overflow=False):
     """Read a 1D Histogram."""
+    import root_numpy as rnp
+
     rfile = open_rfile(rfile)
     hist = rfile[histname]
     xlims = np.array(list(hist.xedges()))
@@ -46,6 +41,8 @@ def get_hist(rfile, histname, get_overflow=False):
 
 def get_hist2d(rfile, histname, get_overflow=False):
     """Read a 2D Histogram."""
+    import root_numpy as rnp
+
     rfile = open_rfile(rfile)
     hist = rfile[histname]
     xlims = np.array(list(hist.xedges()))
@@ -57,6 +54,8 @@ def get_hist2d(rfile, histname, get_overflow=False):
 
 def get_hist3d(rfile, histname, get_overflow=False):
     """Read a 3D Histogram."""
+    import root_numpy as rnp
+
     rfile = open_rfile(rfile)
     hist = rfile[histname]
     xlims = np.array(list(hist.xedges()))
@@ -73,6 +72,8 @@ def interpol_hist2d(h2d, oversamp_factor=10):
     Root's hist2d has a weird internal interpolation routine,
     also using neighbouring bins.
     """
+    from rootpy import ROOTError
+
     xlim = h2d.bins(axis=0)
     ylim = h2d.bins(axis=1)
     xn = h2d.nbins(0)

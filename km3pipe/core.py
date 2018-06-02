@@ -1,11 +1,9 @@
-# coding=utf-8
 # Filename: core.py
 # pylint: disable=locally-disabled
 """
 The core of the KM3Pipe framework.
 
 """
-from __future__ import division, absolute_import, print_function
 
 from collections import deque, OrderedDict
 import inspect
@@ -18,7 +16,7 @@ import types
 import numpy as np
 
 from .sys import peak_memory_usage, ignored
-from .logger import logging
+from .logger import get_logger, get_printer
 from .time import Timer
 from .tools import AnyBar
 
@@ -30,7 +28,7 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 # log.setLevel(logging.DEBUG)
 
 STAT_LIMIT = 100000
@@ -314,7 +312,8 @@ class Module(object):
         else:
             self.logger_name = self.__module__ + '.' + self.__class__.__name__
         log.debug("Setting up logger '{}'".format(self.logger_name))
-        self.log = logging.getLogger(self.logger_name)
+        self.log = get_logger(self.logger_name)
+        self.print = get_printer(self.logger_name)
         self.timeit = self.get('timeit') or False
         self._timeit = {'process': deque(maxlen=STAT_LIMIT),
                         'process_cpu': deque(maxlen=STAT_LIMIT),
@@ -436,11 +435,6 @@ class Pump(Module):
 class Blob(OrderedDict):
     """A simple (ordered) dict with a fancy name. This should hold the data."""
     pass
-
-
-class Geometry(object):
-    def __init__(self, *args, **kwargs):
-        log.error("The 'Geometry' class has been renamed to 'Calibration'!")
 
 
 class Run(object):

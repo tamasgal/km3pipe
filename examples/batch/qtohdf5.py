@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # Filename: qtohdf5.py
 # Author: Tamas Gal <tgal@km3net.de>
 """
@@ -17,7 +16,7 @@ the script with ``-s numuCC``.
 The before constructing the job scripts, the ``OUTPUT_PATH`` will be traversed
 to find files which have already been converted to avoid multiple conversions.
 
-.. code-block:: bash
+.. code-block:: console
 
     Usage:
         qtohdf5.py IRODS_PATH OUTPUT_PATH [options]

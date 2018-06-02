@@ -1,6 +1,38 @@
 Unreleased changes
 ------------------
 
+Version 8
+---------
+
+8.0.0 / 2018-06-02
+~~~~~~~~~~~~~~~~~~~
+
+* replace all dataclasses with the ``Table`` class (subclass of ``np.recarray``)
+* KM3HDF5 Version 5.0: ``group_id`` replaces ``event_id`` in every table,
+  and generalizes from it. Old ``event_id`` structure is still supported
+* no more cython!
+* python3 required!
+* new fancy ``self.print`` function for ``kp.Modules``
+* unified colourful logging/printing to increase the rainbow unicorn factor
+* ``Detector`` is now super fast when parsing DETX (hello SuperORCA!)
+* New functions to translate the detector or rotate a DOM or a DU using
+  quaternions.
+* ``EvtPump`` now reads any EVT file and supports additional parsers to
+  create convenient datatypes. By default it tries to automatically
+  apply known parsers but also supports user defined ones.
+* consolidated requirements: now everything is managed in ``requirements.txt``
+  there is also no more ``pip install km3pipe[full]``, only ``pip install km3pipe``,
+  so you always get the full load ;)
+* huge increase in code coverage by adding >200 new unit tests
+* old Python 2.7 compatible version is available on the ``legacy`` branch,
+  you can always update to the latest legacy with ``km3pipe update legacy``
+* the Aanet-bindings are broken, since Aanet/ROOT are not working with
+  Python 3 yet. Some things work, other may not, we are working on it.
+  If you want to use aanet to read or convert ROOT files, use the legacy
+  version
+* a lot of bug fixes and performance improvements!
+
+
 Version 7
 ---------
 

@@ -1,32 +1,22 @@
 #!usr/bin/env python
-# -*- coding: utf-8 -*-
-# coding=utf-8
-# cython: profile=True
-# Filename: math.pyx
-# cython: embedsignature=True
+# Filename: math.py
 # pylint: disable=C0103
 """
 Maths, Geometry, coordinates.
 """
-from __future__ import division, absolute_import, print_function
-
-from matplotlib.path import Path
 import numpy as np
-from scipy import linalg, stats
-from sklearn.neighbors import KernelDensity
 
-
-from .logger import logging
+from .logger import get_logger
 
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2017, Tamas Gal and the KM3NeT collaboration."
-__credits__ = []
+__credits__ = ['Vladimir Kulikovskiy']
 __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 
 def neutrino_to_source_direction(phi, theta, radian=True):
@@ -86,6 +76,10 @@ def theta(v):
     """
     v = np.atleast_2d(v)
     dir_z = v[:, 2]
+    return theta_separg(dir_z)
+
+
+def theta_separg(dir_z):
     return np.arccos(dir_z)
 
 
@@ -99,10 +93,12 @@ def phi(v):
     v = np.atleast_2d(v)
     dir_x = v[:, 0]
     dir_y = v[:, 1]
+    return phi_separg(dir_x, dir_y)
+
+
+def phi_separg(dir_x, dir_y):
     p = np.arctan2(dir_y, dir_x)
     p[p < 0] += 2 * np.pi
-    # if len(p) == 1:
-    #     return p[0]
     return p
 
 
@@ -183,13 +179,22 @@ def unit_vector(vector, **kwargs):
     vector = np.array(vector)
     out_shape = vector.shape
     vector = np.atleast_2d(vector)
-    unit = vector / linalg.norm(vector, axis=1, **kwargs)[:, None]
+    unit = vector / np.linalg.norm(vector, axis=1, **kwargs)[:, None]
     return unit.reshape(out_shape)
 
 
-def pld3(p1, p2, d2):
+def pld3(pos, line_vertex, line_dir):
     """Calculate the point-line-distance for given point and line."""
-    return linalg.norm(np.cross(d2, p2 - p1)) / linalg.norm(d2)
+    pos = np.atleast_2d(pos)
+    line_vertex = np.atleast_1d(line_vertex)
+    line_dir = np.atleast_1d(line_dir)
+    c = np.cross(line_dir, line_vertex - pos)
+    n1 = np.linalg.norm(c, axis=1)
+    n2 = np.linalg.norm(line_dir)
+    out = n1 / n2
+    if out.ndim == 1 and len(out) == 1:
+        return out[0]
+    return out
 
 
 def lpnorm(x, p=2):
@@ -271,6 +276,7 @@ class Polygon(object):
     """A polygon, to implement containment conditions."""
 
     def __init__(self, vertices):
+        from matplotlib.path import Path
         self.poly = Path(vertices)
 
     def contains(self, points):
@@ -407,157 +413,117 @@ def gold_parameter(time_residual):
     gold = np.sum(gold)
 
 
-def drop_zero_variance(df):
-    """Remove columns from dataframe with zero variance."""
-    return df.copy().loc[:, df.var() != 0].copy()
-
-
-def mad(v):
-    """MAD -- Median absolute deviation. More robust than standard deviation.
-    """
-    return np.median(np.abs(v - np.median(v)))
-
-
 def log_b(arg, base):
     """Logarithm to any base"""
     return np.log(arg) / np.log(base)
 
 
-class loguniform(stats.rv_continuous):
-    """Loguniform Distributon"""
-    def __init__(self, low=0.1, high=1, base=10, *args, **kwargs):
-        super(self.__class__, self).__init__(*args, **kwargs)
-        self._log_low = log_b(low, base=base)
-        self._log_high = log_b(high, base=base)
-        self._base_of_log = base
+def qrot(vector, quaternion):
+    """Rotate a 3D vector using quaternion algebra.
 
-    def _rvs(self, *args, **kwargs):
-        # `rvs(size=foo, *args)` does argcheck etc, and sets `self._size`
-        return np.power(self._base_of_log, np.random.uniform(
-            self._log_low, self._log_high, self._size))
-
-
-def param_names(scipy_dist):
-    """Get names of fit parameters from a ``scipy.rv_*`` distribution."""
-    names = ['loc', 'scale']
-    if scipy_dist.shapes is not None:
-        names += scipy_dist.shapes.split()
-    return names
-
-
-def perc(p=95):
-    """Create symmetric percentiles, with ``p`` coverage."""
-    offset = (100 - p) / 2
-    return offset, 100 - offset
-
-
-def resample_1d(arr, n_out=None):
-    """Resample an array, with replacement.
+    Implemented by Vladimir Kulikovskiy.
 
     Parameters
-    ==========
-    arr: np.ndarray
-        The array is resampled along the first axis.
-    n_out: int, optional
-        Number of samples to return. If not specified,
-        return ``len(arr)`` samples.
+    ----------
+    vector: np.array
+    quaternion: np.array
+
+    Returns
+    -------
+    np.array
+
     """
-    arr = np.atleast_1d(arr)
-    n = len(arr)
-    if n_out is None:
-        n_out = n
-    idx = np.random.randint(0, n, size=n)
-    return arr[idx]
+    t = 2 * np.cross(quaternion[1:], vector)
+    v_rot = vector + quaternion[0] * t + np.cross(quaternion[1:], t)
+    return v_rot
 
 
-def bootstrap_params(rv_cont, data, n_iter=5):
-    """Bootstrap the fit params of a distribution.
+def qeuler(yaw, pitch, roll):
+    """Convert Euler angle to quaternion.
 
     Parameters
-    ==========
-    rv_cont: scipy.stats.rv_continuous instance
-        The distribution which to fit.
-    data: array-like, 1d
-        The data on which to fit.
-    n_iter: int [default=10]
-        Number of bootstrap iterations.
+    ----------
+    yaw: number
+    pitch: number
+    roll: number
+
+    Returns
+    -------
+    np.array
+
     """
-    fit_res = []
-    for i in range(n_iter):
-        params = rv_cont.fit(resample_1d(data))
-        fit_res.append(params)
-    fit_res = np.array(fit_res)
-    return fit_res
+    yaw = np.radians(yaw)
+    pitch = np.radians(pitch)
+    roll = np.radians(roll)
+
+    cy = np.cos(yaw * 0.5)
+    sy = np.sin(yaw * 0.5)
+    cr = np.cos(roll * 0.5)
+    sr = np.sin(roll * 0.5)
+    cp = np.cos(pitch * 0.5)
+    sp = np.sin(pitch * 0.5)
+
+    q = np.array((cy * cr * cp + sy * sr * sp,
+                  cy * sr * cp - sy * cr * sp,
+                  cy * cr * sp + sy * sr * cp,
+                  sy * cr * cp - cy * sr * sp))
+    return q
 
 
-def param_describe(params, quant=95, axis=0):
-    """Get mean + quantile range from bootstrapped params."""
-    par = np.mean(params, axis=axis)
-    lo, up = perc(quant)
-    p_up = np.percentile(params, up, axis=axis)
-    p_lo = np.percentile(params, lo, axis=axis)
-    return par, p_lo, p_up
+def qrot_yaw(vector, heading):
+    """Rotate vectors using quaternion algebra.
 
-
-def bootstrap_fit(rv_cont, data, n_iter=10, quant=95, print_params=True):
-    """Bootstrap a distribution fit + get confidence intervals for the params.
 
     Parameters
-    ==========
-    rv_cont: scipy.stats.rv_continuous instance
-        The distribution which to fit.
-    data: array-like, 1d
-        The data on which to fit.
-    n_iter: int [default=10]
-        Number of bootstrap iterations.
-    quant: int [default=95]
-        percentile of the confidence limits (default is 95, i.e. 2.5%-97.5%)
-    print_params: bool [default=True]
-        Print a fit summary.
+    ----------
+    vector: np.array or list-like (3 elements)
+    heading: the heading to rotate to [deg]
+
+    Returns
+    -------
+    np.array
+
     """
-    fit_params = bootstrap_params(rv_cont, data, n_iter)
-    par, lo, up = param_describe(fit_params, quant=quant)
-    names = param_names(rv_cont)
-    maxlen = max([len(s) for s in names])
-    print("--------------")
-    print(rv_cont.name)
-    print("--------------")
-    for i, name in enumerate(names):
-        print("{nam:>{fill}}: {mean:+.3f} ∈ [{lo:+.3f}, {up:+.3f}] ({q}%)".format(
-            nam=name, fill=maxlen, mean=par[i], lo=lo[i], up=up[i], q=quant))
-    out = {
-        'mean': par,
-        'lower limit': lo,
-        'upper limit': up,
-    }
-    return out
+    return qrot(vector, qeuler(heading, 0, 0))
 
 
-class rv_kde(stats.rv_continuous):
-    """Create a `scipy.stats.rv_continuous` instance from a (gaussian) KDE.
+def intersect_3d(p1, p2):
+    """Find the closes point for a given set of lines in 3D.
 
-    Uses the KDE implementation from sklearn.
+    Parameters
+    ----------
+    p1 : (M, N) array_like
+        Starting points
+    p2 : (M, N) array_like
+        End points.
+
+    Returns
+    -------
+    x : (N,) ndarray
+        Least-squares solution - the closest point of the intersections.
+
+    Raises
+    ------
+    numpy.linalg.LinAlgError
+        If computation does not converge.
+
     """
-    def __init__(self, data, bw=None, **fitargs):
-        data = np.atleast_1d(data)
-        if bw is None:
-            bw = self._bandwidth(data, **fitargs)
-        data = data.reshape(-1, 1)
-        self.kde = KernelDensity(bandwidth=bw).fit(data)
-        super(rv_kde, self).__init__(name='KDE')
-
-    def _bandwidth(cls, sample, **fitargs):
-        gkde = stats.gaussian_kde(sample, **fitargs)
-        f = gkde.covariance_factor()
-        bw = f * sample.std()
-        return bw
-
-    def _pdf(self, x):
-        x = np.atleast_1d(x).reshape(-1, 1)
-        log_pdf = self.kde.score_samples(x)
-        pdf = np.exp(log_pdf)
-        return pdf
-
-    def _rvs(self, *args, **kwargs):
-        # don't ask me why it uses `self._size`
-        return np.exp(self.kde.sample(n_samples=self._size))
+    v = p2 - p1
+    normed_v = unit_vector(v)
+    nx = normed_v[:, 0]
+    ny = normed_v[:, 1]
+    nz = normed_v[:, 2]
+    xx = np.sum(nx**2 - 1)
+    yy = np.sum(ny**2 - 1)
+    zz = np.sum(nz**2 - 1)
+    xy = np.sum(nx * ny)
+    xz = np.sum(nx * nz)
+    yz = np.sum(ny * nz)
+    M = np.array([(xx, xy, xz), (xy, yy, yz), (xz, yz, zz)])
+    x = np.sum(p1[:, 0] * (nx**2 - 1) + p1[:, 1]
+               * (nx * ny) + p1[:, 2] * (nx * nz))
+    y = np.sum(p1[:, 0] * (nx * ny) + p1[:, 1] *
+               (ny * ny - 1) + p1[:, 2] * (ny * nz))
+    z = np.sum(p1[:, 0] * (nx * nz) + p1[:, 1] *
+               (ny * nz) + p1[:, 2] * (nz**2 - 1))
+    return np.linalg.lstsq(M, np.array((x, y, z)), rcond=None)[0]

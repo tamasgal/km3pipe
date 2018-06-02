@@ -1,12 +1,11 @@
 #!/usr/bin/env python
-from __future__ import division
 from time import ctime
+from io import StringIO
 from pyslack import SlackClient
 
 from km3pipe import Pipeline, Module
 from km3pipe.io import CHPump
 from km3pipe.io.daq import DAQPreamble, DAQEvent
-from km3pipe.common import StringIO
 
 
 class CHPrinter(Module):

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# coding=utf-8
 # Filename: srv.py
-from __future__ import print_function, absolute_import
 
 """
 The KM3srv tornado webserver.
@@ -26,16 +24,15 @@ import subprocess
 import math
 
 from time import sleep
-from six import itervalues, iterkeys
 
 import pandas as pd
 import websocket
 
 from .calib import Calibration
 from .config import Config
-from .dataclasses import HitSeries, CRawHitSeries
+from .dataclasses import Table
 from .tools import token_urlsafe
-from .logger import logging
+from .logger import get_logger
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -45,7 +42,7 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = logging.getLogger(__name__)
+log = get_logger(__name__)
 
 VERSION = '0.0.1'
 
@@ -82,7 +79,7 @@ class ClientManager(object):
         while True:
             log.info("Pinging {0} clients.".format(len(self._clients)))
             print(self._clients)
-            for client in itervalues(self._clients):
+            for client in self._clients.values():
                 print(client)
                 client.message("Ping.")
             sleep(interval)
@@ -114,7 +111,7 @@ class ClientManager(object):
 
     def broadcast(self, data, kind="info"):
         log.info("Broatcasting to {0} clients.".format(len(self._clients)))
-        for token in iterkeys(self._clients):
+        for token in self._clients.keys():
             self.message_to(token, data, kind)
 
 
@@ -281,7 +278,7 @@ def srv_event(token, hits, url=RBA_URL):
         pos = [tuple(x) for x in hits[['x', 'y', 'z']].values]
         time = list(hits['time'])
         tot = list(hits['tot'])
-    elif isinstance(hits, (CRawHitSeries, HitSeries)):
+    elif isinstance(hits, Table):
         pos = list(zip(hits.pos_x, hits.pos_y, hits.pos_z))
         time = list(hits.time)
         tot = list(hits.tot)
