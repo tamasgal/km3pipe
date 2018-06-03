@@ -77,6 +77,10 @@ class RecoType(Enum):
     KM3DeltaPos = 10000         # This is not a fit this gives position information only
 
 
+fitinf2name = {v: k for k, v in FitInfo.__members__.items()}
+reco2name = {v: k for k, v in RecoType.__members__.items()}
+
+
 class HeaderParser():
     example = {
         'XSecFile': ' /afs/in2p3.fr/home/throng/km3net/src/gSeaGen/v4r1/dat/gxspl-seawater.xml',
@@ -204,6 +208,7 @@ class AanetPump(Pump):
             blob = self._read_event(event, filename)
             log.debug('Reading header...')
             blob["Header"] = self.aanet_header
+            self.group_id += 1
             yield blob
         del event_file
 
@@ -229,6 +234,7 @@ class AanetPump(Pump):
             'weight_w2': wgt2,
             'weight_w3': wgt3,
             'weight_w4': wgt4,
+            'group_id': self.group_id,
         }, h5loc='/event_info', name='EventInfo')
         return info
 
@@ -243,10 +249,40 @@ class AanetPump(Pump):
             wgt1 = wgt2 = wgt3 = wgt4 = np.nan
         return wgt1, wgt2, wgt3, wgt4
 
-    def _parse_tracks(self, tracks, types):
+    def _parse_tracks(self, tracks):
         out = {}
         for trk in tracks:
-            name =
+            trk_type = trk.rec_type
+            trk_name = reco2name[trk_type]
+            out[trk_name] = Table(
+                self._read_track(trk),
+                h5loc='/reco/{}'.format(trk_name),
+                name=trk_name)
+        return out
+
+    def _read_track(self, trk):
+        out = {
+            'pos_x': trk.pos_x,
+            'pos_y': trk.pos_y,
+            'pos_z': trk.pos_z,
+            'dir_x': trk.dir_x,
+            'dir_y': trk.dir_y,
+            'dir_z': trk.dir_z,
+            'energy': trk.E,
+            'time': trk.t,
+            'length': trk.len,
+            'likelihood': trk.lik,
+            'rec_type': trk.rec_type,
+            # TODO: hit_ids
+            # TODO: rec_stages
+        }
+        fitinf = self._parse_fitinf(trk.fitinf)
+        out.update(fitinf)
+        return out
+
+    def _parse_fitinf(self, fitinf):
+        return {fitinf2name[i]: elem
+                for i, elem in enumerate(fitinf)}
 
     def _get_run_id(self):
         raise NotImplementedError
@@ -262,9 +298,8 @@ class AanetPump(Pump):
         blob['McHits'] = self._parse_mchits(event.mchits)
         blob['McTracks'] = self._parse_mctracks(event.mc_trks)
         blob['EventInfo'] = self._parse_eventinfo(event)
-        for trkname, trk in self._parse_tracks(event.tracks):
-            blob[trkname] = trk
-        self.group_id += 1
+        blob.update(self._parse_tracks(event.trks))
+        return blob
 
     def process(self, blob=None):
         return next(self.blobs)
