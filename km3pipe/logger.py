@@ -73,7 +73,7 @@ def get_logger(name):
     pre1, suf1 = hash_coloured_escapes(name) if supports_color() else ('', '')
     pre2, suf2 = hash_coloured_escapes(name + 'salt')  \
                  if supports_color() else ('', '')
-    formatter = logging.Formatter('%(levelname)s {}\u25A0{}\u25A0{} '
+    formatter = logging.Formatter('%(levelname)s {}+{}+{} '
                                   '%(name)s: %(message)s'
                                   .format(pre1, pre2, suf1))
     ch = logging.StreamHandler()
@@ -95,7 +95,7 @@ def get_printer(name, color=None, ansi_code=None, force_color=False):
         if color is None and ansi_code is None:
             cpre_1, csuf_1 = hash_coloured_escapes(name)
             cpre_2, csuf_2 = hash_coloured_escapes(name + 'salt')
-            name = cpre_1 + '\u25A0' + cpre_2 + '\u25A0' + csuf_1 + ' ' + name
+            name = cpre_1 + '+' + cpre_2 + '+' + csuf_1 + ' ' + name
         else:
             name = colored(name, color=color, ansi_code=ansi_code)
 
