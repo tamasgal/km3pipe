@@ -7,6 +7,7 @@ This is undoubtedly the ugliest module in the entire framework.
 If you have a way to read aanet files via the Jpp interface,
 your pull request is more than welcome!
 """
+from collections import defaultdict
 from enum import Enum
 import os.path
 
@@ -210,24 +211,15 @@ class AanetPump(Pump):
             yield blob
         del event_file
 
-    def _parse_mctracks(self, mctracks):
-        raise NotImplementedError
-
-    def _parse_mchits(self, mchits):
-        raise NotImplementedError
-
-    def _parse_hits(self, hits):
-        raise NotImplementedError
-
     def _parse_eventinfo(self, event):
         event_id = event.frame_index
         mc_id = event.frame_index - 1
-        run_id = self._get_run_id()
+        # run_id = self._get_run_id()
         wgt1, wgt2, wgt3, wgt4 = self._parse_wgts(event.w)
         info = Table({
             'event_id': event_id,
             'mc_id': mc_id,
-            'run_id': run_id,
+            # 'run_id': run_id,         # TODO
             'weight_w1': wgt1,
             'weight_w2': wgt2,
             'weight_w3': wgt3,
@@ -285,13 +277,46 @@ class AanetPump(Pump):
         return {fitinf2name[i]: elem
                 for i, elem in enumerate(fitinf)}
 
-    def _get_run_id(self):
-        raise NotImplementedError
-        # run_id = self.header_run_id
-        # else:
-        #     run_id = event.run_id
-        # if run_id == '':
-        #     run_id = -1
+    def _parse_mctracks(self, mctracks):
+        out = defaultdict(list)
+        for trk in mctracks:
+            out['dir_x'].append(trk.dir_x)
+            out['dir_y'].append(trk.dir_y)
+            out['dir_z'].append(trk.dir_z)
+            out['pos_x'].append(trk.pos_x)
+            out['pos_y'].append(trk.pos_y)
+            out['pos_z'].append(trk.pos_z)
+            out['energy'].append(trk.E)
+            out['time'].append(trk.t)
+            out['type'].append(trk.type)
+            out['id'].append(trk.id)
+            out['length'].append(trk.len)
+            out['bjorkeny'].append(trk.getusr('by'))
+            out['interaction_channel'].append(trk.getusr('ichan'))
+            out['is_cc'].append(trk.getusr('cc'))
+        out['group_id'] = self.group_id
+        return Table(out, name='McTracks', h5loc='/mc_tracks')
+
+    def _parse_mchits(self, mchits):
+        out = defaultdict(list)
+        for hit in mchits:
+            out['a'].append(hit.a)
+            out['origin'].append(hit.origin)
+            out['pmt_id'].append(hit.pmt_id)
+            out['time'].append(hit.t)
+        out['group_id'] = self.group_id
+        return Table(out, name='McHits', h5loc='/mc_hits')
+
+    def _parse_hits(self, hits):
+        out = defaultdict(list)
+        for hit in hits:
+            out['channel_id'].append(hit.channel_id)
+            out['dom_id'].append(hit.dom_id)
+            out['time'].append(hit.t)
+            out['tot'].append(hit.tot)
+            out['triggered'].append(hit.trig)
+        out['group_id'] = self.group_id
+        return Table(out, name='Hits', h5loc='/hits')
 
     def _read_event(self, event, filename):
         blob = Blob()
