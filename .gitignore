@@ -92,3 +92,4 @@ reports
 .python-version
 
 .mypy_cache/
+km3pipe/kp-data/test_data/aanet/

@@ -8,7 +8,6 @@ If you have a way to read aanet files via the Jpp interface,
 your pull request is more than welcome!
 """
 from collections import defaultdict
-from enum import Enum
 import os.path
 
 import numpy as np
@@ -28,61 +27,69 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-class FitInfo(Enum):
-    """Enumeration to identify Fit Information field."""
-    JGANDALF_BETA0_RAD = 0                  # angular resolution [rad]
-    JGANDALF_BETA1_RAD = 1                  # angular resolution [rad]
-    JGANDALF_CHI2 = 2                       # chi2
-    JGANDALF_NUMBER_OF_HITS = 3             # number of hits
-    JENERGY_ENERGY = 4                      # uncorrected energy [GeV]
-    JENERGY_CHI2 = 5                        # chi2
-    JGANDALF_LAMBDA = 6                     # control parameter
-    JGANDALF_NUMBER_OF_ITERATIONS = 7       # number of iterations
-    JSTART_NPE_MIP = 8                      # number of photo-electrons up to the barycentre
-    JSTART_NPE_MIP_TOTAL = 9                # number of photo-electrons along the whole track
-    JSTART_LENGTH_METRES = 10               # distance between first and last hits in metres
-    JVETO_NPE = 11                          # number of photo-electrons
-    JVETO_NUMBER_OF_HITS = 12               # number of hits
-    JENERGY_MUON_RANGE_METRES = 13          # range of a muon with the reconstructed energy [m]
-    JENERGY_NOISE_LIKELIHOOD = 14           # log likelihood of every hit being K40
-    JENERGY_NDF = 15                        # number of degrees of freedom
-    JENERGY_NUMBER_OF_HITS = 16             # number of hits
-    JCOPY_Z_M = 17                          # true vertex position along track [m]
+FITINF2NUM = {
+    'JGANDALF_BETA0_RAD': 0,                # angular resolution [rad]
+    'JGANDALF_BETA1_RAD': 1,                # angular resolution [rad]
+    'JGANDALF_CHI2': 2,                     # chi2
+    'JGANDALF_NUMBER_OF_HITS': 3,           # number of hits
+    'JENERGY_ENERGY': 4,                    # uncorrected energy [GeV]
+    'JENERGY_CHI2': 5,                      # chi2
+    'JGANDALF_LAMBDA': 6,                   # control parameter
+    'JGANDALF_NUMBER_OF_ITERATIONS': 7,     # number of iterations
+    'JSTART_NPE_MIP': 8,                    # number of photo-electrons
+                                            # up to the barycentre
+    'JSTART_NPE_MIP_TOTAL': 9,              # number of photo-electrons
+                                            # along the whole track
+    'JSTART_LENGTH_METRES': 10,             # distance between first
+                                            # and last hits in metres
+    'JVETO_NPE': 11,                        # number of photo-electrons
+    'JVETO_NUMBER_OF_HITS': 12,             # number of hits
+    'JENERGY_MUON_RANGE_METRES': 13,        # range of a muon with the
+                                            # reconstructed energy [m]
+    'JENERGY_NOISE_LIKELIHOOD': 14,         # log likelihood of every hit
+                                            # being K40
+    'JENERGY_NDF': 15,                      # number of degrees of freedom
+    'JENERGY_NUMBER_OF_HITS': 16,           # number of hits
+    'JCOPY_Z_M': 17,                        # true vertex position along
+                                            # track [m]
+}
 
 
-class RecoType(Enum):
-    """Enumeration to identify Reconstruction Type."""
-    JMUONBEGIN = 0        	    # Start muon fit applications
-    JMUONPREFIT = 1             # JPrefit.cc
-    JMUONSIMPLEX = 2            # JSimplex.cc
-    JMUONGANDALF = 3            # JGandalf.cc
-    JMUONENERGY = 4             # JEnergy.cc
-    JMUONSTART = 5              # JStart.cc
-    JMUONEND = 6                # Termination muon fit applications
-    LineFit = 7                 # An angular reco guess. It could be a seed for JPrefit
+RECO2NUM = {
+    'JMUONBEGIN': 0,        	  # Start muon fit applications
+    'JMUONPREFIT': 1,             # JPrefit.cc
+    'JMUONSIMPLEX': 2,            # JSimplex.cc
+    'JMUONGANDALF': 3,            # JGandalf.cc
+    'JMUONENERGY': 4,             # JEnergy.cc
+    'JMUONSTART': 5,              # JStart.cc
+    'JMUONEND': 6,                # Termination muon fit applications
+    'LineFit': 7,                 # An angular reco guess.
+                                  # It could be a seed for JPrefit
 
-    JSHOWERBEGIN = 100        	# Start shower fit applications
-    JSHOWERPREFIT = 101         # JShowerPrefit.cc
-    JSHOWEREND = 102            # Termination shower fit applications
+    'JSHOWERBEGIN': 100,       	  # Start shower fit applications
+    'JSHOWERPREFIT': 101,         # JShowerPrefit.cc
+    'JSHOWEREND': 102,            # Termination shower fit applications
 
-    JPP_REC_TYPE = 4000         # Jpp reconstruction type for AAnet
+    'JPP_REC_TYPE': 4000,         # Jpp reconstruction type for AAnet
 
-    JUSERBEGIN = 1000           # Start of user applications
-    JMUONVETO = 1001            # JVeto.cc
-    JPRESIM = 1002              # JPreSim_HTR.cc
-    JMUONPATH = 1003            # JPath.cc
-    JMCEVT = 1004               # JMCEvt.cc
+    'JUSERBEGIN': 1000,           # Start of user applications
+    'JMUONVETO': 1001,            # JVeto.cc
+    'JPRESIM': 1002,              # JPreSim_HTR.cc
+    'JMUONPATH': 1003,            # JPath.cc
+    'JMCEVT': 1004,               # JMCEvt.cc
 
-    KM3DeltaPos = 10000         # This is not a fit this gives position information only
+    'KM3DeltaPos': 10000,         # This is not a fit this gives
+                                  # position information only
+}
 
 
-FITINF2NAME = {v: k for k, v in FitInfo.__members__.items()}
-RECO2NAME = {v: k for k, v in RecoType.__members__.items()}
+FITINF2NAME = {v: k for k, v in FITINF2NUM.items()}
+RECO2NAME = {v: k for k, v in RECO2NUM.items()}
 
 
 class HeaderParser():
     example = {
-        'XSecFile': ' /afs/in2p3.fr/home/throng/km3net/src/gSeaGen/v4r1/dat/gxspl-seawater.xml',
+        'XSecFile': ' /afs/in2p3.fr/home/throng/km3net/src/gSeaGen/v4r1/dat/gxspl-seawater.xml',        # noqa
         'can': ' -117.2 139.5 205.402',
         'coord_origin': ' 0 0 0 ',
         'cut_in': ' 0 0 0 0',
@@ -90,7 +97,7 @@ class HeaderParser():
         'cut_primary': ' 0 0 0 0',
         'cut_seamuon': ' 0 0 0 0',
         'depth': '2475.000',
-        'detector': ' /afs/in2p3.fr/throng/km3net/detectors/orca_115strings_av23min20mhorizontal_18OMs_alt9mvertical_v1.det',
+        'detector': ' /afs/in2p3.fr/throng/km3net/detectors/orca_115strings_av23min20mhorizontal_18OMs_alt9mvertical_v1.det',       # noqa
         'drawing': 'surface',
         'end_event': '',
         'fgIsA': '',
@@ -112,6 +119,7 @@ class HeaderParser():
         'target': ' ',
         'tgen': '31556926.000000'
     }
+
     @staticmethod
     def get_aanet_header(header):
         """Returns a dict of the header entries.
@@ -119,7 +127,7 @@ class HeaderParser():
         http://trac.km3net.de/browser/dataformats/aanet/trunk/evt/Head.hh
 
         """
-        desc = ("cut_primary cut_seamuon cut_in cut_nu:Emin Emax cosTmin cosTmax\n"
+        desc = ("cut_primary cut_seamuon cut_in cut_nu:Emin Emax cosTmin cosTmax\n"     # noqa
                 "generator physics simul: program version date time\n"
                 "seed:program level iseed\n"
                 "PM1_type_area:type area TTS\n"
@@ -188,7 +196,7 @@ class AanetPump(Pump):
     def blob_generator(self):
         """Create a blob generator."""
         # pylint: disable:F0401,W0612
-        import aa           # pylint: disablF0401
+        import aa           # pylint: disablF0401        # noqa
         from ROOT import EventFile           # pylint: disablF0401
 
         filename = self.filename
@@ -242,9 +250,17 @@ class AanetPump(Pump):
 
     def _parse_tracks(self, tracks):
         out = {}
-        for trk in tracks:
+        for i, trk in enumerate(tracks):
+            self.log.debug('Reading Track #{}...'.format(i))
             trk_type = trk.rec_type
-            trk_name = RECO2NAME[trk_type]
+            try:
+                trk_name = RECO2NAME[trk_type]
+            except KeyError:
+                trk_name = "Generic_Track_#{}".format(i)
+                self.log.warn(
+                        "Unknown Reconstruction type! "
+                        "Setting to '{}'".format(trk_name)
+                )
             out[trk_name] = Table(
                 self._read_track(trk),
                 h5loc='/reco/{}'.format(trk_name),
@@ -252,40 +268,58 @@ class AanetPump(Pump):
         return out
 
     def _read_track(self, trk):
-        out = {
-            'pos_x': trk.pos_x,
-            'pos_y': trk.pos_y,
-            'pos_z': trk.pos_z,
-            'dir_x': trk.dir_x,
-            'dir_y': trk.dir_y,
-            'dir_z': trk.dir_z,
-            'energy': trk.E,
-            'time': trk.t,
-            'length': trk.len,
-            'likelihood': trk.lik,
-            'rec_type': trk.rec_type,
-            'group_id': self.group_id,
-            # TODO: hit_ids,
-            # TODO: rec_stages,
-        }
+        out = {}
+        self.log.debug('Reading pos...')
+        out['pos_x'] = trk.pos.x
+        out['pos_y'] = trk.pos.y
+        out['pos_z'] = trk.pos.z
+        self.log.debug('Reading dir...')
+        out['dir_x'] = trk.dir.x
+        out['dir_y'] = trk.dir.y
+        out['dir_z'] = trk.dir.z
+        self.log.debug('Reading dir...')
+        out['energy'] = trk.E
+        self.log.debug('Reading time...')
+        out['time'] = trk.t
+        self.log.debug('Reading len...')
+        out['length'] = trk.len
+        self.log.debug('Reading lik...')
+        out['likelihood'] = trk.lik
+        self.log.debug('Reading rec_type...')
+        out['rec_type'] = trk.rec_type
+        self.log.debug('Reading dir...')
+        out['group_id'] = self.group_id
+        # TODO: hit_ids,
+        # TODO: rec_stages,
+        self.log.debug('Reading fitinf...')
         fitinf = self._parse_fitinf(trk.fitinf)
         out.update(fitinf)
         return out
 
-    @staticmethod
-    def _parse_fitinf(fitinf):
-        return {FITINF2NAME[i]: elem
-                for i, elem in enumerate(fitinf)}
+    def _parse_fitinf(self, fitinf):
+        # iterating empty ROOT vector causes segfaults!
+        if len(fitinf) == 0:
+            self.log.debug("Found empty fitinf, skipping...")
+            return {}
+
+        out = {}
+        for i, elem in enumerate(fitinf):
+            log.debug(i)
+            log.debug(elem)
+            name = FITINF2NAME[i]
+            self.log.debug("Reading fitinf #{} ('{}')...".format(i, name))
+            out[name] = elem
+        return out
 
     def _parse_mctracks(self, mctracks):
         out = defaultdict(list)
         for trk in mctracks:
-            out['dir_x'].append(trk.dir_x)
-            out['dir_y'].append(trk.dir_y)
-            out['dir_z'].append(trk.dir_z)
-            out['pos_x'].append(trk.pos_x)
-            out['pos_y'].append(trk.pos_y)
-            out['pos_z'].append(trk.pos_z)
+            out['dir_x'].append(trk.dir.x)
+            out['dir_y'].append(trk.dir.y)
+            out['dir_z'].append(trk.dir.z)
+            out['pos_x'].append(trk.pos.x)
+            out['pos_y'].append(trk.pos.y)
+            out['pos_z'].append(trk.pos.z)
             out['energy'].append(trk.E)
             out['time'].append(trk.t)
             out['type'].append(trk.type)
@@ -320,10 +354,15 @@ class AanetPump(Pump):
 
     def _read_event(self, event, filename):
         blob = Blob()
+        self.log.info('Reading Hits...')
         blob['Hits'] = self._parse_hits(event.hits)
-        blob['McHits'] = self._parse_mchits(event.mchits)
+        self.log.info('Reading McHits...')
+        blob['McHits'] = self._parse_mchits(event.mc_hits)
+        self.log.info('Reading McTracks...')
         blob['McTracks'] = self._parse_mctracks(event.mc_trks)
+        self.log.info('Reading EventInfo...')
         blob['EventInfo'] = self._parse_eventinfo(event)
+        self.log.info('Reading Tracks...')
         blob.update(self._parse_tracks(event.trks))
         return blob
 

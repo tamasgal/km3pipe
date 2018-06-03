@@ -5,7 +5,6 @@
 Read and write KM3NeT-formatted HDF5 files.
 """
 from collections import OrderedDict, defaultdict
-from itertools import count
 import os.path
 import warnings
 
@@ -15,7 +14,6 @@ import tables as tb
 import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
 from km3pipe.dataclasses import Table, DEFAULT_H5LOC
-from km3pipe.dataclass_templates import TEMPLATES
 from km3pipe.logger import get_logger
 from km3pipe.tools import decamelise, camelise, split, istype
 
@@ -105,16 +103,19 @@ class HDF5Sink(Module):
         self._tables = OrderedDict()
 
     def _to_array(self, data, name=None):
+        if data is None:
+            return
         if np.isscalar(data):
             self.log.debug('toarray: is a scalar')
-            return Table({name: np.asarray(data).reshape((1,))},
-                         h5loc='/misc/{}'.format(decamelise(name)),
-                         name=name
-                    )
+            return Table(
+                    {name: np.asarray(data).reshape((1,))},
+                    h5loc='/misc/{}'.format(decamelise(name)),
+                    name=name)
         if len(data) <= 0:
             self.log.debug('toarray: data has no length')
             return
-        if istype(data, 'DataFrame'):
+        # istype instead isinstance, to avoid heavy pandas import (hmmm...)
+        if istype(data, 'DataFrame'):       # noqa
             self.log.debug('toarray: pandas dataframe')
             data = Table.from_dataframe(data)
         return data
