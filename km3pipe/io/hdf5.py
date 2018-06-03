@@ -5,6 +5,7 @@
 Read and write KM3NeT-formatted HDF5 files.
 """
 from collections import OrderedDict, defaultdict
+from itertools import count
 import os.path
 import warnings
 
@@ -229,13 +230,23 @@ class HDF5Sink(Module):
             self.log.debug("Writing into single Table...")
             self._write_array(h5loc, data, title=title)
 
+        return data
+
     def process(self, blob):
         if not self._header_written and "Header" in blob \
                 and blob["Header"] is not None:
             self._write_header(blob['Header'])
 
+        written_blob = Blob()
         for key, entry in sorted(blob.items()):
-            self._process_entry(key, entry)
+            data = self._process_entry(key, entry)
+            if data is not None:
+                written_blob[key] = data
+
+        if 'GroupInfo' not in blob:
+            gi = Table({'group_id': self.index, 'n_blobs': len(written_blob)},
+                       h5loc='/group_info', name='Group Info')
+            self._process_entry('GroupInfo', gi)
 
         if not self.index % 1000:
             self.log.info('Flushing tables to disk...')
@@ -357,18 +368,9 @@ class HDF5Pump(Pump):
         else:
             raise IOError("No such file or directory: '{0}'"
                           .format(fn))
-        try:
-            with tb.open_file(fn, 'r') as h5file:
-                event_info = h5file.get_node('/', 'event_info')
-                try:
-                    self.group_ids[fn] = event_info.cols.group_id[:]
-                except AttributeError:
-                    self.group_ids[fn] = event_info.cols.event_id[:]
-            self._n_each[fn] = len(self.group_ids[fn])
-        except tb.NoSuchNodeError:
-            self.log.critical("No /event_info table found: '{0}'"
-                              .format(fn))
-            raise SystemExit
+
+        self._read_group_info(fn)
+
         if self.cut_mask_node is not None:
             if not self.cut_mask_node.startswith('/'):
                 self.cut_mask_node = '/' + self.cut_mask_node
@@ -380,6 +382,26 @@ class HDF5Pump(Pump):
                 raise ValueError("Cut mask length differs from event ids!")
         else:
             self.cut_masks = None
+
+    def _read_group_info(self, fn):
+        with tb.open_file(fn, 'r') as h5file:
+            if '/event_info' not in h5file and '/group_info' not in h5file:
+                self.log.critical("Missing /event_info or /group_info "
+                                  "in '%s', aborting..." % fn)
+                raise SystemExit
+            elif '/group_info' in h5file:
+                self.print("Reading group information from '/group_info'.")
+                group_info = h5file.get_node('/', 'group_info')
+                self.group_ids[fn] = group_info.cols.group_id[:]
+                self._n_each[fn] = len(self.group_ids[fn])
+            elif '/event_info' in h5file:
+                self.print("Reading group information from '/group_info'.")
+                event_info = h5file.get_node('/', 'event_info')
+                try:
+                    self.group_ids[fn] = event_info.cols.group_id[:]
+                except AttributeError:
+                    self.group_ids[fn] = event_info.cols.event_id[:]
+                self._n_each[fn] = len(self.group_ids[fn])
 
     def process(self, blob):
         try:
@@ -431,29 +453,29 @@ class HDF5Pump(Pump):
         # skip groups with separate columns
         # and deal with them later
         # this should be solved using hdf5 attributes in near future
-        skipped_locs = []
+        split_locs = []
         for tab in h5file.walk_nodes(classname="Table"):
             h5loc = tab._v_pathname
             loc, tabname = os.path.split(h5loc)
-            if loc in skipped_locs:
-                self.log.info(
-                    "get_blob: '{}' is blacklisted, skipping...".format(
-                        h5loc))
+            if loc in split_locs:
+                self.log.info("get_blob: '%s' is noted, skip..." % h5loc)
                 continue
             if tabname == "_indices":
-                self.log.debug(
-                    "get_blob: found index table '{}'...".format(h5loc))
-                skipped_locs.append(loc)
+                self.log.debug("get_blob: found index table '%s'" % h5loc)
+                split_locs.append(loc)
                 self.indices[loc] = h5file.get_node(loc + '/' + '_indices')
                 continue
             tabname = camelise(tabname)
-            try:
-                split_h5 = TEMPLATES[tabname]['split_h5']
-            except KeyError:
-                split_h5 = False
+
+            index_column = None
             if 'group_id' in tab.dtype.names:
+                index_column = 'group_id'
+            if 'event_id' in tab.dtype.names:
+                index_column = 'event_id'
+
+            if index_column is not None:
                 try:
-                    arr = tab.read_where('group_id == %d' % group_id)
+                    arr = tab.read_where('%s == %d' % (index_column, group_id))
                 except NotImplementedError:
                     # 64-bit unsigned integer columns like ``group_id``
                     # are not yet supported in conditions
@@ -461,135 +483,40 @@ class HDF5Pump(Pump):
                         "get_blob: found uint64 column at '{}'...".format(
                             h5loc))
                     arr = tab.read()
-                    arr = arr[arr['group_id'] == group_id]
+                    arr = arr[arr[index_column] == group_id]
                 except ValueError:
                     # "there are no columns taking part
                     # in condition ``group_id == 0``"
                     self.log.info(
-                        "get_blob: no `group_id` column found in '{}'! "
-                        "skipping... ".format(h5loc))
+                        "get_blob: no `%s` column found in '%s'! "
+                        "skipping... " % (index_column, h5loc))
                     continue
-            if 'event_id' in tab.dtype.names:
-                try:
-                    arr = tab.read_where('event_id == %d' % group_id)
-                except NotImplementedError:
-                    # 64-bit unsigned integer columns like ``event_id``
-                    # are not yet supported in conditions
-                    self.log.debug(
-                        "get_blob: found uint64 column at '{}'...".format(
-                            h5loc))
-                    arr = tab.read()
-                    arr = arr[arr['event_id'] == group_id]
-                except ValueError:
-                    # "there are no columns taking part
-                    # in condition ``event_id == 0``"
-                    self.log.info(
-                        "get_blob: no `event_id` column found in '{}'! "
-                        "skipping... ".format(h5loc))
-                    continue
+            else:
+                self.log.warning("No group_id or event_id found for '%s', "
+                                 "skipping..." % h5loc)
+                continue
+
             self.log.debug("h5loc: '{}'".format(h5loc))
             blob[tabname] = Table(
-                arr, h5loc=h5loc, split_h5=split_h5, name=tabname)
+                arr, h5loc=h5loc, split_h5=False, name=tabname)
 
         # skipped locs are now column wise datasets (usually hits)
         # currently hardcoded, in future using hdf5 attributes
         # to get the right constructor
-        for loc in skipped_locs:
+        for loc in split_locs:
             # if some events are missing (group_id not continuous),
             # this does not work as intended
             # idx, n_items = self.indices[loc][group_id]
-            idx, n_items = self.indices[loc][local_index]
+            idx = self.indices[loc].col('index')[local_index]
+            n_items = self.indices[loc].col('n_items')[local_index]
             end = idx + n_items
-            if loc == '/hits' and not self.ignore_hits:
-                channel_id = h5file.get_node("/hits/channel_id")[idx:end]
-                dom_id = h5file.get_node("/hits/dom_id")[idx:end]
-                time = h5file.get_node("/hits/time")[idx:end]
-                tot = h5file.get_node("/hits/tot")[idx:end]
-                triggered = h5file.get_node("/hits/triggered")[idx:end]
-
-                datatype = h5file.get_node("/hits")._v_attrs.datatype
-
-                if datatype in {np.string_("CRawHitSeries"),
-                                np.string_("CalibHits")}:
-                    pos_x = h5file.get_node("/hits/pos_x")[idx:end]
-                    pos_y = h5file.get_node("/hits/pos_y")[idx:end]
-                    pos_z = h5file.get_node("/hits/pos_z")[idx:end]
-                    dir_x = h5file.get_node("/hits/dir_x")[idx:end]
-                    dir_y = h5file.get_node("/hits/dir_y")[idx:end]
-                    dir_z = h5file.get_node("/hits/dir_z")[idx:end]
-                    du = h5file.get_node("/hits/du")[idx:end]
-                    floor = h5file.get_node("/hits/floor")[idx:end]
-                    t0s = h5file.get_node("/hits/t0")[idx:end]
-                    time += t0s
-                    blob["CalibHits"] = Table.from_template(
-                        {
-                            'channel_id': channel_id,
-                            'dir_x': dir_x,
-                            'dir_y': dir_y,
-                            'dir_z': dir_z,
-                            'dom_id': dom_id,
-                            'du': du,
-                            'floor': floor,
-                            'pos_x': pos_x,
-                            'pos_y': pos_y,
-                            'pos_z': pos_z,
-                            't0': t0s,
-                            'time': time,
-                            'tot': tot,
-                            'triggered': triggered,
-                            'group_id': group_id,
-                        },
-                        'CalibHits')
-                else:
-                    blob["Hits"] = Table.from_template(
-                        {'channel_id': channel_id,
-                         'dom_id': dom_id,
-                         'time': time,
-                         'tot': tot,
-                         'triggered': triggered,
-                         'group_id': group_id},
-                        'Hits')
-
-            if loc == '/mc_hits' and not self.ignore_hits:
-                a = h5file.get_node("/mc_hits/a")[idx:end]
-                origin = h5file.get_node("/mc_hits/origin")[idx:end]
-                pmt_id = h5file.get_node("/mc_hits/pmt_id")[idx:end]
-                time = h5file.get_node("/mc_hits/time")[idx:end]
-
-                datatype = h5file.get_node("/mc_hits")._v_attrs.datatype
-
-                if datatype in {np.string_("CMcHitSeries"),
-                                np.string_("CalibMcHits")}:
-                    pos_x = h5file.get_node("/mc_hits/pos_x")[idx:end]
-                    pos_y = h5file.get_node("/mc_hits/pos_y")[idx:end]
-                    pos_z = h5file.get_node("/mc_hits/pos_z")[idx:end]
-                    dir_x = h5file.get_node("/mc_hits/dir_x")[idx:end]
-                    dir_y = h5file.get_node("/mc_hits/dir_y")[idx:end]
-                    dir_z = h5file.get_node("/mc_hits/dir_z")[idx:end]
-                    blob["CalibMcHits"] = Table.from_template({
-                        'a': a,
-                        'dir_x': dir_x,
-                        'dir_y': dir_y,
-                        'dir_z': dir_z,
-                        'origin': origin,
-                        'pmt_id': pmt_id,
-                        'pos_x': pos_x,
-                        'pos_y': pos_y,
-                        'pos_z': pos_z,
-                        'time': time,
-                        'group_id': group_id
-                    },
-                        'CalibMcHits')
-                else:
-                    blob["McHits"] = Table.from_template(
-                        {
-                            'a': a,
-                            'origin': origin,
-                            'pmt_id': pmt_id,
-                            'time': time,
-                            'group_id': group_id
-                        },
-                        'McHits')
+            node = h5file.get_node(loc)
+            columns = (c for c in node._v_children if c != '_indices')
+            data = {}
+            for column in columns:
+                data[column] = h5file.get_node(loc + '/' + column)[idx:end]
+            tabname = camelise(loc.split('/')[-1])
+            blob[tabname] = Table(data, h5loc=loc, split_h5=True, name=tabname)
 
         return blob
 

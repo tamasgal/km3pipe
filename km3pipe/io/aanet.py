@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# vim:set ts=4 sts=4 sw=4 et:
 """
 Pump for the Aanet data format.
 
@@ -25,21 +26,53 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-FITINF_ENUM = [
-    'beta0',
-    'beta1',
-    'chi2',
-    'n_hits',
-    'jenergy_energy',
-    'jenergy_chi2',
-    'lambda',
-    'n_iter',
-    'jstart_npe_mip',
-    'jstart_npe_mip_total',
-    'jstart_length',
-    # 'jveto_npe',
-    # 'jveto_nhits'
-]
+
+FITINF_ENUM = {
+    'JGANDALF_BETA0_RAD': 0,               # angular resolution [rad]
+    'JGANDALF_BETA1_RAD': 1,               # angular resolution [rad]
+    'JGANDALF_CHI2': 2,                    # chi2
+    'JGANDALF_NUMBER_OF_HITS': 3,          # number of hits
+    'JENERGY_ENERGY': 4,                   # uncorrected energy [GeV]
+    'JENERGY_CHI2': 5,                     # chi2
+    'JGANDALF_LAMBDA': 6,                  # control parameter
+    'JGANDALF_NUMBER_OF_ITERATIONS': 7,    # number of iterations
+    'JSTART_NPE_MIP': 8,                   # number of photo-electrons up to the barycentre
+    'JSTART_NPE_MIP_TOTAL': 9,             # number of photo-electrons along the whole track
+    'JSTART_LENGTH_METRES': 10,             # distance between first and last hits in metres
+    'JVETO_NPE': 11,                        # number of photo-electrons
+    'JVETO_NUMBER_OF_HITS': 12,             # number of hits
+    'JENERGY_MUON_RANGE_METRES': 13,        # range of a muon with the reconstructed energy [m]
+    'JENERGY_NOISE_LIKELIHOOD': 14,         # log likelihood of every hit being K40
+    'JENERGY_NDF': 15,                      # number of degrees of freedom
+    'JENERGY_NUMBER_OF_HITS': 16,           # number of hits
+    'JCOPY_Z_M': 17,                         # true vertex position along track [m]
+}
+
+
+RECTYPE_ENUM = {
+    'JMUONBEGI- ': 0,        	    # Start muon fit applications
+    'JMUONPREFIT': 1,               # JPrefit.cc
+    'JMUONSIMPLEX': 2,              # JSimplex.cc
+    'JMUONGANDALF': 3,              # JGandalf.cc
+    'JMUONENERGY': 4,               # JEnergy.cc
+    'JMUONSTART': 5,                # JStart.cc
+    'JMUONEND': 6,                  # Termination muon fit applications
+    'LineFit': 7,                   # An angular reco guess. It could be a seed for JPrefit
+
+    'JSHOWERBEGIN': 100,        	# Start shower fit applications
+    'JSHOWERPREFIT': 101,           # JShowerPrefit.cc
+    'JSHOWEREND': 102,              # Termination shower fit applications
+
+    'JPP_REC_TYPE': 4000,           # Jpp reconstruction type for AAnet
+
+    'JUSERBEGIN': 1000,             # Start of user applications
+    'JMUONVETO': 1001,              # JVeto.cc
+    'JPRESIM': 1002,                # JPreSim_HTR.cc
+    'JMUONPATH': 1003,              # JPath.cc
+    'JMCEVT': 1004,                 # JMCEvt.cc
+
+    'KM3DeltaPos': 10000          # This is not a fit, this gives position information only
+}
 
 
 class AanetPump(Pump):

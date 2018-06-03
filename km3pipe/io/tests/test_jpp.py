@@ -19,7 +19,7 @@ class TestEventPump(TestCase):
     def test_init(self, reader_mock):
         filename = 'a.root'
         EventPump(filename)
-        reader_mock.assert_called_with(filename)
+        reader_mock.assert_called_with(filename.encode())
 
     @surrogate('jppy.PyJDAQEventReader')
     @patch('jppy.PyJDAQEventReader')
@@ -39,16 +39,16 @@ class TestTimeslicePump(TestCase):
     def test_init(self, reader_mock):
         filename = 'a.root'
         TimeslicePump(filename)
-        reader_mock.assert_called_with(filename, 'JDAQTimesliceL1')
+        reader_mock.assert_called_with(filename.encode(), b'JDAQTimesliceL1')
 
     @surrogate('jppy.daqtimeslicereader.PyJDAQTimesliceReader')
     @patch('jppy.daqtimeslicereader.PyJDAQTimesliceReader')
     def test_init_with_specific_stream(self, reader_mock):
         filename = 'a.root'
         TimeslicePump(filename, stream='L0')
-        reader_mock.assert_called_with(filename, 'JDAQTimesliceL0')
+        reader_mock.assert_called_with(filename.encode(), b'JDAQTimesliceL0')
         TimeslicePump(filename, stream='SN')
-        reader_mock.assert_called_with(filename, 'JDAQTimesliceSN')
+        reader_mock.assert_called_with(filename.encode(), b'JDAQTimesliceSN')
 
     @surrogate('jppy.daqtimeslicereader.PyJDAQTimesliceReader')
     @patch('jppy.daqtimeslicereader.PyJDAQTimesliceReader')
@@ -68,7 +68,7 @@ class TestSummaryslicePump(TestCase):
     def test_init(self, reader_mock):
         filename = 'a.root'
         SummaryslicePump(filename)
-        reader_mock.assert_called_with(filename)
+        reader_mock.assert_called_with(filename.encode())
         
 
 class TestFitPump(TestCase):
@@ -77,7 +77,7 @@ class TestFitPump(TestCase):
     def test_init(self, reader_mock):
         filename = 'a.root'
         FitPump(filename)
-        reader_mock.assert_called_with(filename)
+        reader_mock.assert_called_with(filename.encode())
 
     @surrogate('jppy.PyJFitReader')
     @patch('jppy.PyJFitReader')
