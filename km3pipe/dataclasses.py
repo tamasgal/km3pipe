@@ -155,8 +155,13 @@ class Table(np.recarray):
             if np.isscalar(v):
                 scalars.append(k)
                 continue
-            if hasattr(v, 'ndim') and v.ndim == 0:
-                v = v.item()
+            # TODO: this is not covered yet, don't know if we need this
+            # if hasattr(v, 'shape') and v.shape == (1,):  # np.array([1])
+            #     import pdb; pdb.set_trace()
+            #     arr_dict[k] = v[0]
+            #     continue
+            if hasattr(v, 'ndim') and v.ndim == 0:  # np.array(1)
+                arr_dict[k] = v.item()
                 continue
             if len(v) > maxlen:
                 maxlen = len(v)
@@ -181,8 +186,8 @@ class Table(np.recarray):
             names = list(dtype.names)
 
         arr_dict = cls._expand_scalars(arr_dict)
-        return cls(np.rec.fromarrays(arr_dict.values(), names=names,
-                                     dtype=dtype), **kwargs)
+        data = [arr_dict[key] for key in names]
+        return cls(np.rec.fromarrays(data, names=names, dtype=dtype), **kwargs)
 
     @classmethod
     def from_columns(cls, column_list, dtype=None, colnames=None, **kwargs):
@@ -198,9 +203,8 @@ class Table(np.recarray):
         if len(column_list) != len(dtype.names):
             raise ValueError(
                 "Number of columns mismatch between data and dtype!")
-        return cls(
-            {k: column_list[i] for i, k in enumerate(dtype.names)},
-            dtype=dtype, colnames=colnames, **kwargs)
+        data = {k: column_list[i] for i, k in enumerate(dtype.names)}
+        return cls(data, dtype=dtype, colnames=colnames, **kwargs)
 
     @classmethod
     def from_rows(cls, row_list, dtype=None, colnames=None, **kwargs):
@@ -217,6 +221,8 @@ class Table(np.recarray):
         # users will never see this, this should only show in tests
         assert is_structured(dtype)
         data = np.asanyarray(row_list).view(dtype)
+        # drop useless 2nd dim
+        data = data.reshape((data.shape[0], ))
         return cls(data, **kwargs)
 
     @property
@@ -355,7 +361,9 @@ class Table(np.recarray):
     @pos.setter
     def pos(self, arr):
         try:
-            _ = self.pos_x
+            self.pos_x
+            self.pos_y
+            self.pos_z
         except AttributeError:
             raise ValueError(
                 "Table has no existing 'pos_{x,y,z}' entries. If you'd like "
@@ -376,7 +384,9 @@ class Table(np.recarray):
     @dir.setter
     def dir(self, arr):
         try:
-            _ = self.dir_x
+            self.dir_x
+            self.dir_y
+            self.dir_z
         except AttributeError:
             raise ValueError(
                 "Table has no existing 'dir_{x,y,z}' entries. If you'd like "

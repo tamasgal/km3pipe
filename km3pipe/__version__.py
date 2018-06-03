@@ -10,7 +10,7 @@ Pep 386 compliant version info.
 
 """
 
-VERSION_INFO = (8, 0, 0, 'alpha', 0)
+VERSION_INFO = (8, 0, 0, 'final', 0)
 
 
 __author__ = 'tamasgal'

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# vim:set ts=4 sts=4 sw=4 et:
 """
 Pump for the Aanet data format.
 
@@ -10,6 +11,8 @@ from collections import defaultdict
 import os.path
 
 import numpy as np
+
+from enum import Enum
 
 from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import Table
@@ -26,21 +29,52 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-FITINF_ENUM = [
-    'beta0',
-    'beta1',
-    'chi2',
-    'n_hits',
-    'jenergy_energy',
-    'jenergy_chi2',
-    'lambda',
-    'n_iter',
-    'jstart_npe_mip',
-    'jstart_npe_mip_total',
-    'jstart_length',
-    # 'jveto_npe',
-    # 'jveto_nhits'
-]
+class FitInfo(Enum):
+    """Enumeration to identify Fit Information field."""
+    JGANDALF_BETA0_RAD = 0                  # angular resolution [rad]
+    JGANDALF_BETA1_RAD = 1                  # angular resolution [rad]
+    JGANDALF_CHI2 = 2                       # chi2
+    JGANDALF_NUMBER_OF_HITS = 3             # number of hits
+    JENERGY_ENERGY = 4                      # uncorrected energy [GeV]
+    JENERGY_CHI2 = 5                        # chi2
+    JGANDALF_LAMBDA = 6                     # control parameter
+    JGANDALF_NUMBER_OF_ITERATIONS = 7       # number of iterations
+    JSTART_NPE_MIP = 8                      # number of photo-electrons up to the barycentre
+    JSTART_NPE_MIP_TOTAL = 9                # number of photo-electrons along the whole track
+    JSTART_LENGTH_METRES = 10               # distance between first and last hits in metres
+    JVETO_NPE = 11                          # number of photo-electrons
+    JVETO_NUMBER_OF_HITS = 12               # number of hits
+    JENERGY_MUON_RANGE_METRES = 13          # range of a muon with the reconstructed energy [m]
+    JENERGY_NOISE_LIKELIHOOD = 14           # log likelihood of every hit being K40
+    JENERGY_NDF = 15                        # number of degrees of freedom
+    JENERGY_NUMBER_OF_HITS = 16             # number of hits
+    JCOPY_Z_M = 17                          # true vertex position along track [m]
+
+
+class RecoType(Enum):
+    """Enumeration to identify Reconstruction Type."""
+    JMUONBEGIN = 0        	    # Start muon fit applications
+    JMUONPREFIT = 1             # JPrefit.cc
+    JMUONSIMPLEX = 2            # JSimplex.cc
+    JMUONGANDALF = 3            # JGandalf.cc
+    JMUONENERGY = 4             # JEnergy.cc
+    JMUONSTART = 5              # JStart.cc
+    JMUONEND = 6                # Termination muon fit applications
+    LineFit = 7                 # An angular reco guess. It could be a seed for JPrefit
+
+    JSHOWERBEGIN = 100        	# Start shower fit applications
+    JSHOWERPREFIT = 101         # JShowerPrefit.cc
+    JSHOWEREND = 102            # Termination shower fit applications
+
+    JPP_REC_TYPE = 4000         # Jpp reconstruction type for AAnet
+
+    JUSERBEGIN = 1000           # Start of user applications
+    JMUONVETO = 1001            # JVeto.cc
+    JPRESIM = 1002              # JPreSim_HTR.cc
+    JMUONPATH = 1003            # JPath.cc
+    JMCEVT = 1004               # JMCEvt.cc
+
+    KM3DeltaPos = 10000         # This is not a fit this gives position information only
 
 
 class HeaderParser():
@@ -75,6 +109,39 @@ class HeaderParser():
         'target': ' ',
         'tgen': '31556926.000000'
     }
+    def get_aanet_header(event_file):
+        """Returns a dict of the header entries.
+
+        http://trac.km3net.de/browser/dataformats/aanet/trunk/evt/Head.hh
+
+        """
+        header = event_file.header
+        desc = ("cut_primary cut_seamuon cut_in cut_nu:Emin Emax cosTmin cosTmax\n"
+                "generator physics simul: program version date time\n"
+                "seed:program level iseed\n"
+                "PM1_type_area:type area TTS\n"
+                "PDF:i1 i2\n"
+                "model:interaction muon scattering numberOfEnergyBins\n"
+                "can:zmin zmax r\n"
+                "genvol:zmin zmax r volume numberOfEvents\n"
+                "merge:time gain\n"
+                "coord_origin:x y z\n"
+                "genhencut:gDir Emin\n"
+                "k40: rate time\n"
+                "norma:primaryFlux numberOfPrimaries\n"
+                "livetime:numberOfSeconds errorOfSeconds\n"
+                "flux:type key file_1 file_2\n"
+                "spectrum:alpha\n"
+                "start_run:run_id")
+        d = {}
+        for line in desc.split("\n"):
+            fields, values = [s.split() for s in line.split(':')]
+            for field in fields:
+                for value in values:
+                    if field == "physics" and value == "date":  # segfaults
+                        continue
+                    d[field + '_' + value] = header.get_field(field, value)
+        return d
 
 
 class AanetPump(Pump):
@@ -106,12 +173,11 @@ class AanetPump(Pump):
     """
 
     def configure(self):
-
         self.filename = self.require('filename')
         self.header = None
         self.aanet_header = None
         self.blobs = self.blob_generator()
-        self.i = 0
+        self.group_id = 0
 
     def get_blob(self, index):
         NotImplementedError("Aanet currently does not support indexing.")
@@ -141,30 +207,48 @@ class AanetPump(Pump):
             yield blob
         del event_file
 
-    def _parse_wgts(self, w):
-        if len(w) == 3:
-            w1, w2, w3 = w
-            w4 = np.nan
-        elif len(w) == 4:
+    def _parse_mctracks(self, mctracks):
+        raise NotImplementedError
+
+    def _parse_mchits(self, mchits):
+        raise NotImplementedError
+
+    def _parse_hits(self, hits):
+        raise NotImplementedError
+
+    def _parse_eventinfo(self, event):
+        event_id = event.frame_index
+        mc_id = event.frame_index - 1
+        run_id = self._get_run_id()
+        wgt1, wgt2, wgt3, wgt4 = self._parse_wgts(event.w)
+        info = Table({
+            'event_id': event_id,
+            'mc_id': mc_id,
+            'run_id': run_id,
+            'weight_w1': wgt1,
+            'weight_w2': wgt2,
+            'weight_w3': wgt3,
+            'weight_w4': wgt4,
+        }, h5loc='/event_info', name='EventInfo')
+        return info
+
+    def _parse_wgts(self, wgt):
+        if len(wgt) == 3:
+            wgt1, wgt2, wgt3 = wgt
+            wgt4 = np.nan
+        elif len(wgt) == 4:
             # what the hell is w4?
-            w1, w2, w3, w4 = w
+            wgt1, wgt2, wgt3, wgt4 = wgt
         else:
-            w1 = w2 = w3 = w4 = np.nan
-        return w1, w2, w3, w4
+            wgt1 = wgt2 = wgt3 = wgt4 = np.nan
+        return wgt1, wgt2, wgt3, wgt4
 
-    def _parse_mctracks(self):
-        raise NotImplementedError
+    def _parse_tracks(self, tracks, types):
+        out = {}
+        for trk in tracks:
+            name =
 
-    def _parse_mchits(self):
-        raise NotImplementedError
-
-    def _parse_hits(self):
-        raise NotImplementedError
-
-    def _parse_eventinto(self):
-        raise NotImplementedError
-
-    def get_sun_id(self):
+    def _get_run_id(self):
         raise NotImplementedError
         # run_id = self.header_run_id
         # else:
@@ -174,22 +258,13 @@ class AanetPump(Pump):
 
     def _read_event(self, event, filename):
         blob = Blob()
-        group_id = self.i
-        self.i += 1
-        w1, w2, w3, w4 = self._parse_wgts(self, event.w)
-        hits = self._parse_hits(event.hits, group_id)
-        mchits = self._parse_mchits(event.mchits, group_id)
-        mctracks = self._parse_mctracks(event.mc_trks, group_id)
-        mc_id = event.frame_index - 1
-        run_id = self._get_run_id()
-        eventinfo = self._parse_eventinfo(evt)
-        trks = self._parse_tracks(event)
-
-    def event_index(self, blob):
-        if self.id:
-            return blob["Evt"].id
-        else:
-            return blob["Evt"].frame_index
+        blob['Hits'] = self._parse_hits(event.hits)
+        blob['McHits'] = self._parse_mchits(event.mchits)
+        blob['McTracks'] = self._parse_mctracks(event.mc_trks)
+        blob['EventInfo'] = self._parse_eventinfo(event)
+        for trkname, trk in self._parse_tracks(event.tracks):
+            blob[trkname] = trk
+        self.group_id += 1
 
     def process(self, blob=None):
         return next(self.blobs)
@@ -199,38 +274,3 @@ class AanetPump(Pump):
 
     def __next__(self):
         return next(self.blobs)
-
-
-def get_aanet_header(event_file):
-    """Returns a dict of the header entries.
-
-    http://trac.km3net.de/browser/dataformats/aanet/trunk/evt/Head.hh
-
-    """
-    header = event_file.header
-    desc = ("cut_primary cut_seamuon cut_in cut_nu:Emin Emax cosTmin cosTmax\n"
-            "generator physics simul: program version date time\n"
-            "seed:program level iseed\n"
-            "PM1_type_area:type area TTS\n"
-            "PDF:i1 i2\n"
-            "model:interaction muon scattering numberOfEnergyBins\n"
-            "can:zmin zmax r\n"
-            "genvol:zmin zmax r volume numberOfEvents\n"
-            "merge:time gain\n"
-            "coord_origin:x y z\n"
-            "genhencut:gDir Emin\n"
-            "k40: rate time\n"
-            "norma:primaryFlux numberOfPrimaries\n"
-            "livetime:numberOfSeconds errorOfSeconds\n"
-            "flux:type key file_1 file_2\n"
-            "spectrum:alpha\n"
-            "start_run:run_id")
-    d = {}
-    for line in desc.split("\n"):
-        fields, values = [s.split() for s in line.split(':')]
-        for field in fields:
-            for value in values:
-                if field == "physics" and value == "date":  # segfaults
-                    continue
-                d[field + '_' + value] = header.get_field(field, value)
-    return d

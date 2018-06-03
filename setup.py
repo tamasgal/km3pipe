@@ -61,6 +61,7 @@ setup(
             'ligiermirror=km3pipe.utils.ligiermirror:main',
             'runtable=km3pipe.utils.runtable:main',
             'runinfo=km3pipe.utils.runinfo:main',
+            'qrunprocessor=km3pipe.utils.qrunprocessor:main',
         ],
     },
     classifiers=[

@@ -85,10 +85,10 @@ def set_level(name, level):
     get_logger(name).setLevel(level)
 
 
-def get_printer(name, color=None, ansi_code=None):
+def get_printer(name, color=None, ansi_code=None, force_color=False):
     """Return a function which prints a message with a coloured name prefix"""
 
-    if supports_color():
+    if force_color or supports_color():
         if color is None and ansi_code is None:
             name = hash_coloured(name)
         else:
