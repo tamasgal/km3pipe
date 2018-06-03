@@ -7,12 +7,10 @@ This is undoubtedly the ugliest module in the entire framework.
 If you have a way to read aanet files via the Jpp interface,
 your pull request is more than welcome!
 """
-from collections import defaultdict
+from enum import Enum
 import os.path
 
 import numpy as np
-
-from enum import Enum
 
 from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import Table
@@ -113,13 +111,13 @@ class HeaderParser():
         'target': ' ',
         'tgen': '31556926.000000'
     }
-    def get_aanet_header(event_file):
+    @staticmethod
+    def get_aanet_header(header):
         """Returns a dict of the header entries.
 
         http://trac.km3net.de/browser/dataformats/aanet/trunk/evt/Head.hh
 
         """
-        header = event_file.header
         desc = ("cut_primary cut_seamuon cut_in cut_nu:Emin Emax cosTmin cosTmax\n"
                 "generator physics simul: program version date time\n"
                 "seed:program level iseed\n"
@@ -189,8 +187,8 @@ class AanetPump(Pump):
     def blob_generator(self):
         """Create a blob generator."""
         # pylint: disable:F0401,W0612
-        import aa
-        from ROOT import EventFile
+        import aa           # pylint: disablF0401
+        from ROOT import EventFile           # pylint: disablF0401
 
         filename = self.filename
         log.info("Reading from file: {0}".format(filename))
@@ -238,7 +236,8 @@ class AanetPump(Pump):
         }, h5loc='/event_info', name='EventInfo')
         return info
 
-    def _parse_wgts(self, wgt):
+    @staticmethod
+    def _parse_wgts(wgt):
         if len(wgt) == 3:
             wgt1, wgt2, wgt3 = wgt
             wgt4 = np.nan
@@ -273,14 +272,16 @@ class AanetPump(Pump):
             'length': trk.len,
             'likelihood': trk.lik,
             'rec_type': trk.rec_type,
-            # TODO: hit_ids
-            # TODO: rec_stages
+            'group_id': self.group_id,
+            # TODO: hit_ids,
+            # TODO: rec_stages,
         }
         fitinf = self._parse_fitinf(trk.fitinf)
         out.update(fitinf)
         return out
 
-    def _parse_fitinf(self, fitinf):
+    @staticmethod
+    def _parse_fitinf(fitinf):
         return {fitinf2name[i]: elem
                 for i, elem in enumerate(fitinf)}
 
