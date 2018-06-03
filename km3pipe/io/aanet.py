@@ -261,33 +261,30 @@ class AanetPump(Pump):
                         "Unknown Reconstruction type! "
                         "Setting to '{}'".format(trk_name)
                 )
+            trk_dict = self._read_track(trk)
+            print(trk_name)
+            print(trk_dict)
             out[trk_name] = Table(
-                self._read_track(trk),
-                h5loc='/reco/{}'.format(trk_name),
-                name=trk_name)
+                    trk_dict,
+                    h5loc='/reco/{}'.format(trk_name),
+                    name=trk_name)
+        self.log.debug(out)
         return out
 
     def _read_track(self, trk):
         out = {}
-        self.log.debug('Reading pos...')
         out['pos_x'] = trk.pos.x
         out['pos_y'] = trk.pos.y
         out['pos_z'] = trk.pos.z
-        self.log.debug('Reading dir...')
         out['dir_x'] = trk.dir.x
         out['dir_y'] = trk.dir.y
         out['dir_z'] = trk.dir.z
-        self.log.debug('Reading dir...')
+        out['id'] = trk.id
         out['energy'] = trk.E
-        self.log.debug('Reading time...')
         out['time'] = trk.t
-        self.log.debug('Reading len...')
         out['length'] = trk.len
-        self.log.debug('Reading lik...')
         out['likelihood'] = trk.lik
-        self.log.debug('Reading rec_type...')
         out['rec_type'] = trk.rec_type
-        self.log.debug('Reading dir...')
         out['group_id'] = self.group_id
         # TODO: hit_ids,
         # TODO: rec_stages,
@@ -304,8 +301,6 @@ class AanetPump(Pump):
 
         out = {}
         for i, elem in enumerate(fitinf):
-            log.debug(i)
-            log.debug(elem)
             name = FITINF2NAME[i]
             self.log.debug("Reading fitinf #{} ('{}')...".format(i, name))
             out[name] = elem
@@ -354,15 +349,15 @@ class AanetPump(Pump):
 
     def _read_event(self, event, filename):
         blob = Blob()
-        self.log.info('Reading Hits...')
+        self.log.debug('Reading Hits...')
         blob['Hits'] = self._parse_hits(event.hits)
-        self.log.info('Reading McHits...')
+        self.log.debug('Reading McHits...')
         blob['McHits'] = self._parse_mchits(event.mc_hits)
-        self.log.info('Reading McTracks...')
+        self.log.debug('Reading McTracks...')
         blob['McTracks'] = self._parse_mctracks(event.mc_trks)
-        self.log.info('Reading EventInfo...')
+        self.log.debug('Reading EventInfo...')
         blob['EventInfo'] = self._parse_eventinfo(event)
-        self.log.info('Reading Tracks...')
+        self.log.debug('Reading Tracks...')
         blob.update(self._parse_tracks(event.trks))
         return blob
 
