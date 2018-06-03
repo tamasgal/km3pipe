@@ -76,8 +76,8 @@ class RecoType(Enum):
     KM3DeltaPos = 10000         # This is not a fit this gives position information only
 
 
-fitinf2name = {v: k for k, v in FitInfo.__members__.items()}
-reco2name = {v: k for k, v in RecoType.__members__.items()}
+FITINF2NAME = {v: k for k, v in FitInfo.__members__.items()}
+RECO2NAME = {v: k for k, v in RecoType.__members__.items()}
 
 
 class HeaderParser():
@@ -244,7 +244,7 @@ class AanetPump(Pump):
         out = {}
         for trk in tracks:
             trk_type = trk.rec_type
-            trk_name = reco2name[trk_type]
+            trk_name = RECO2NAME[trk_type]
             out[trk_name] = Table(
                 self._read_track(trk),
                 h5loc='/reco/{}'.format(trk_name),
@@ -274,7 +274,7 @@ class AanetPump(Pump):
 
     @staticmethod
     def _parse_fitinf(fitinf):
-        return {fitinf2name[i]: elem
+        return {FITINF2NAME[i]: elem
                 for i, elem in enumerate(fitinf)}
 
     def _parse_mctracks(self, mctracks):
