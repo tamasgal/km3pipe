@@ -96,3 +96,22 @@ class TestCalibration(TestCase):
         self.assertAlmostEqual(80, a_hit.t0)
         t0 = a_hit.t0
         self.assertAlmostEqual(11.2 + t0, a_hit.time)
+
+    def test_apply_to_timeslice_hits(self):
+        tshits = Table.from_template({
+            'channel_id': [0, 1, 2],
+            'dom_id': [2, 3, 3],
+            'time': [10.1, 11.2, 12.3],
+            'tot': np.ones(3, dtype=float),
+            'group_id': 0,
+        }, 'TimesliceHits')
+        det = Detector()
+        det._det_file = EXAMPLE_DETX
+        det._parse_header()
+        det._parse_doms()
+        calib = Calibration(detector=det)
+        c_tshits = calib.apply(tshits)
+        assert len(c_tshits) == len(tshits)
+        assert np.allclose([40, 80, 90], c_tshits.t0)
+        # TimesliceHits is using int4 for times, so it's truncated when we pass in float64
+        assert np.allclose([50.0, 91.0, 102.0], c_tshits.time)

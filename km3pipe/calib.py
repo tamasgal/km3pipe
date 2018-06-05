@@ -9,7 +9,6 @@ import numpy as np
 from .core import Module
 from .hardware import Detector
 from .dataclasses import Table
-from .dataclass_templates import TEMPLATES
 from .tools import istype
 
 __author__ = "Tamas Gal"
@@ -136,9 +135,15 @@ class Calibration(Module):
         pos_x = cal[:, 0]
         pos_y = cal[:, 1]
         pos_z = cal[:, 2]
+
         t0 = cal[:, 6]
 
-        hits.time += t0
+        if hits.time.dtype != t0.dtype:
+            time = hits.time.astype('f4') + t0.astype('f4')
+            hits = hits.drop_columns(['time'])
+            hits = hits.append_columns(['time'], [time])
+        else:
+            hits.time += t0
 
         return hits.append_columns(
             ['dir_x', 'dir_y', 'dir_z', 'du', 'floor',
