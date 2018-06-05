@@ -1,0 +1,1803 @@
+***************************************************************
+*                  Grid Engine Batch System                   *
+*           IN2P3 Computing Centre, Villeurbanne FR           *
+***************************************************************
+* User:                    mlotze                             *
+* Group:                   km3net                             *
+* Jobname:                 mx_muon_cc_3_100_gand_1-50.job     *
+* JobID:                   23775381                           *
+* Queue:                   huge                               *
+* Worker:                  ccwsge0833.in2p3.fr                *
+* Operating system:        Linux 2.6.32-696.10.2.el6.x86_64   *
+* Project:                 P_km3net                           *
+***************************************************************
+* Submitted on:            Sun Oct 01 16:06:54 2017           *
+* Started on:              Sun Oct 01 16:42:31 2017           *
+***************************************************************
+
+mkdir: created directory `/scratch/23775381.1.huge/mlotze'
+mkdir: created directory `/scratch/23775381.1.huge/mlotze/mx_muon_cc_3_100_gandalf'
+mkdir: created directory `/scratch/23775381.1.huge/mlotze/mx_muon_cc_3_100_gandalf/1-50'
+[16MB/4.344GB][  0%][>                                                 ][16MB/s]  [80MB/4.344GB][  1%][>                                                 ][80MB/s]  [192MB/4.344GB][  4%][==>                                               ][96MB/s]  [304MB/4.344GB][  6%][===>                                              ][101.3MB/s]  [400MB/4.344GB][  8%][====>                                             ][100MB/s]  [512MB/4.344GB][ 11%][=====>                                            ][102.4MB/s]  [624MB/4.344GB][ 14%][=======>                                          ][104MB/s]  [720MB/4.344GB][ 16%][========>                                         ][102.9MB/s]  [832MB/4.344GB][ 18%][=========>                                        ][104MB/s]  [944MB/4.344GB][ 21%][==========>                                       ][104.9MB/s]  [1.031GB/4.344GB][ 23%][===========>                                      ][105.6MB/s]  [1.125GB/4.344GB][ 25%][============>                                     ][104.7MB/s]  [1.234GB/4.344GB][ 28%][==============>                                   ][105.3MB/s]  [1.344GB/4.344GB][ 30%][===============>                                  ][105.8MB/s]  [1.453GB/4.344GB][ 33%][================>                                 ][106.3MB/s]  [1.547GB/4.344GB][ 35%][=================>                                ][105.6MB/s]  [1.656GB/4.344GB][ 38%][===================>                              ][106MB/s]  [1.766GB/4.344GB][ 40%][====================>                             ][106.4MB/s]  [1.859GB/4.344GB][ 42%][=====================>                            ][105.8MB/s]  [1.969GB/4.344GB][ 45%][======================>                           ][106.1MB/s]  [2.078GB/4.344GB][ 47%][=======================>                          ][106.4MB/s]  [2.172GB/4.344GB][ 49%][========================>                         ][105.9MB/s]  [2.281GB/4.344GB][ 52%][==========================>                       ][106.2MB/s]  [2.375GB/4.344GB][ 54%][===========================>                      ][105.7MB/s]  [2.484GB/4.344GB][ 57%][============================>                     ][106MB/s]  [2.594GB/4.344GB][ 59%][=============================>                    ][106.2MB/s]  [2.688GB/4.344GB][ 61%][==============================>                   ][105.8MB/s]  [2.797GB/4.344GB][ 64%][================================>                 ][106.1MB/s]  [2.891GB/4.344GB][ 66%][=================================>                ][105.7MB/s]  [3GB/4.344GB][ 69%][==================================>               ][105.9MB/s]  [3.109GB/4.344GB][ 71%][===================================>              ][106.1MB/s]  [3.219GB/4.344GB][ 74%][=====================================>            ][106.3MB/s]  [3.312GB/4.344GB][ 76%][======================================>           ][106MB/s]  [3.422GB/4.344GB][ 78%][=======================================>          ][106.2MB/s]  [3.531GB/4.344GB][ 81%][========================================>         ][106.4MB/s]  [3.625GB/4.344GB][ 83%][=========================================>        ][106.1MB/s]  [3.734GB/4.344GB][ 85%][==========================================>       ][106.2MB/s]  [3.844GB/4.344GB][ 88%][============================================>     ][106.4MB/s]  [3.953GB/4.344GB][ 91%][=============================================>    ][106.5MB/s]  [4.047GB/4.344GB][ 93%][==============================================>   ][106.3MB/s]  [4.156GB/4.344GB][ 95%][===============================================>  ][106.4MB/s]  [4.266GB/4.344GB][ 98%][=================================================>][106.5MB/s]  [4.344GB/4.344GB][100%][==================================================][108.5MB/s]  [4.344GB/4.344GB][100%][==================================================][108.5MB/s]  
+JGandalf_aanet_muon-CC_3-100GeV_1.root
+JGandalf_aanet_muon-CC_3-100GeV_2.root
+JGandalf_aanet_muon-CC_3-100GeV_3.root
+JGandalf_aanet_muon-CC_3-100GeV_4.root
+JGandalf_aanet_muon-CC_3-100GeV_5.root
+JGandalf_aanet_muon-CC_3-100GeV_6.root
+JGandalf_aanet_muon-CC_3-100GeV_7.root
+JGandalf_aanet_muon-CC_3-100GeV_8.root
+JGandalf_aanet_muon-CC_3-100GeV_9.root
+JGandalf_aanet_muon-CC_3-100GeV_10.root
+JGandalf_aanet_muon-CC_3-100GeV_11.root
+JGandalf_aanet_muon-CC_3-100GeV_12.root
+JGandalf_aanet_muon-CC_3-100GeV_13.root
+JGandalf_aanet_muon-CC_3-100GeV_14.root
+JGandalf_aanet_muon-CC_3-100GeV_15.root
+JGandalf_aanet_muon-CC_3-100GeV_16.root
+JGandalf_aanet_muon-CC_3-100GeV_17.root
+JGandalf_aanet_muon-CC_3-100GeV_18.root
+JGandalf_aanet_muon-CC_3-100GeV_19.root
+JGandalf_aanet_muon-CC_3-100GeV_20.root
+JGandalf_aanet_muon-CC_3-100GeV_21.root
+JGandalf_aanet_muon-CC_3-100GeV_22.root
+JGandalf_aanet_muon-CC_3-100GeV_23.root
+JGandalf_aanet_muon-CC_3-100GeV_24.root
+JGandalf_aanet_muon-CC_3-100GeV_25.root
+JGandalf_aanet_muon-CC_3-100GeV_26.root
+JGandalf_aanet_muon-CC_3-100GeV_27.root
+JGandalf_aanet_muon-CC_3-100GeV_28.root
+JGandalf_aanet_muon-CC_3-100GeV_29.root
+JGandalf_aanet_muon-CC_3-100GeV_30.root
+JGandalf_aanet_muon-CC_3-100GeV_31.root
+JGandalf_aanet_muon-CC_3-100GeV_32.root
+JGandalf_aanet_muon-CC_3-100GeV_33.root
+JGandalf_aanet_muon-CC_3-100GeV_34.root
+JGandalf_aanet_muon-CC_3-100GeV_35.root
+JGandalf_aanet_muon-CC_3-100GeV_36.root
+JGandalf_aanet_muon-CC_3-100GeV_37.root
+JGandalf_aanet_muon-CC_3-100GeV_38.root
+JGandalf_aanet_muon-CC_3-100GeV_39.root
+JGandalf_aanet_muon-CC_3-100GeV_40.root
+JGandalf_aanet_muon-CC_3-100GeV_41.root
+JGandalf_aanet_muon-CC_3-100GeV_42.root
+JGandalf_aanet_muon-CC_3-100GeV_43.root
+JGandalf_aanet_muon-CC_3-100GeV_44.root
+JGandalf_aanet_muon-CC_3-100GeV_45.root
+JGandalf_aanet_muon-CC_3-100GeV_46.root
+JGandalf_aanet_muon-CC_3-100GeV_47.root
+JGandalf_aanet_muon-CC_3-100GeV_48.root
+JGandalf_aanet_muon-CC_3-100GeV_49.root
+JGandalf_aanet_muon-CC_3-100GeV_50.root
+7.5.5
+./JGandalf_aanet_muon-CC_3-100GeV_1.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 3.364s (CPU 0.680s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_1.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+--------------------------[ Blob    3500 ]---------------------------
+ EventFile io / wall time = 10.1162 / 208.817 (4.84454 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_1.h5
+============================================================
+3533 cycles drained in 3.539907min (CPU 3.206333min). Memory peak: 286.88 MB
+  wall  mean: 0.059097s  medi: 0.056001s  min: 0.025053s  max: 0.899600s  std: 0.028898s
+  CPU   mean: 0.054215s  medi: 0.050000s  min: 0.020000s  max: 0.470000s  std: 0.012979s
+./JGandalf_aanet_muon-CC_3-100GeV_10.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.651s (CPU 0.600s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_10.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 12.7249 / 214.428 (5.93433 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_10.h5
+============================================================
+3467 cycles drained in 3.587264min (CPU 3.270500min). Memory peak: 271.24 MB
+  wall  mean: 0.061840s  medi: 0.057231s  min: 0.026681s  max: 3.325122s  std: 0.060786s
+  CPU   mean: 0.056392s  medi: 0.050000s  min: 0.000000s  max: 3.100000s  std: 0.053585s
+./JGandalf_aanet_muon-CC_3-100GeV_11.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.710s (CPU 0.600s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_11.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+--------------------------[ Blob    3500 ]---------------------------
+ EventFile io / wall time = 12.5753 / 214.028 (5.87552 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_11.h5
+============================================================
+3505 cycles drained in 3.581459min (CPU 3.247000min). Memory peak: 272.91 MB
+  wall  mean: 0.061056s  medi: 0.056194s  min: 0.027531s  max: 2.952504s  std: 0.053930s
+  CPU   mean: 0.055381s  medi: 0.050000s  min: 0.000000s  max: 2.560000s  std: 0.044421s
+./JGandalf_aanet_muon-CC_3-100GeV_12.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.649s (CPU 0.590s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_12.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 10.9238 / 213.496 (5.11662 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_12.h5
+============================================================
+3396 cycles drained in 3.571771min (CPU 3.260333min). Memory peak: 285.57 MB
+  wall  mean: 0.062856s  medi: 0.058436s  min: 0.035305s  max: 1.106661s  std: 0.033134s
+  CPU   mean: 0.057388s  medi: 0.060000s  min: 0.030000s  max: 1.030000s  std: 0.021258s
+./JGandalf_aanet_muon-CC_3-100GeV_13.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.684s (CPU 0.630s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_13.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 10.4601 / 219.911 (4.7565 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_13.h5
+============================================================
+3499 cycles drained in 3.679593min (CPU 3.397667min). Memory peak: 274.87 MB
+  wall  mean: 0.062840s  medi: 0.059215s  min: 0.030812s  max: 0.633142s  std: 0.022802s
+  CPU   mean: 0.058042s  medi: 0.060000s  min: 0.030000s  max: 0.630000s  std: 0.013775s
+./JGandalf_aanet_muon-CC_3-100GeV_14.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.693s (CPU 0.610s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_14.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 10.0395 / 215.912 (4.64981 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_14.h5
+============================================================
+3483 cycles drained in 3.612703min (CPU 3.343000min). Memory peak: 274.45 MB
+  wall  mean: 0.061981s  medi: 0.058568s  min: 0.033753s  max: 0.694704s  std: 0.023667s
+  CPU   mean: 0.057379s  medi: 0.060000s  min: 0.030000s  max: 0.610000s  std: 0.013564s
+./JGandalf_aanet_muon-CC_3-100GeV_15.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.598s (CPU 0.550s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_15.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+--------------------------[ Blob    3500 ]---------------------------
+ EventFile io / wall time = 13.1092 / 217.458 (6.02836 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_15.h5
+============================================================
+3522 cycles drained in 3.636582min (CPU 3.257000min). Memory peak: 274.60 MB
+  wall  mean: 0.061734s  medi: 0.056261s  min: 0.027472s  max: 2.267440s  std: 0.047232s
+  CPU   mean: 0.055298s  medi: 0.050000s  min: 0.020000s  max: 2.100000s  std: 0.039571s
+./JGandalf_aanet_muon-CC_3-100GeV_16.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.645s (CPU 0.580s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_16.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+--------------------------[ Blob    3500 ]---------------------------
+ EventFile io / wall time = 11.2834 / 226.751 (4.97614 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_16.h5
+============================================================
+3532 cycles drained in 3.792778min (CPU 3.315000min). Memory peak: 272.01 MB
+  wall  mean: 0.064186s  medi: 0.058277s  min: 0.027626s  max: 1.006666s  std: 0.035011s
+  CPU   mean: 0.056113s  medi: 0.060000s  min: 0.020000s  max: 0.760000s  std: 0.017761s
+./JGandalf_aanet_muon-CC_3-100GeV_17.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.585s (CPU 0.510s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_17.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 9.45416 / 205.39 (4.60303 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_17.h5
+============================================================
+3380 cycles drained in 3.439527min (CPU 3.153500min). Memory peak: 279.09 MB
+  wall  mean: 0.060757s  medi: 0.057148s  min: 0.025134s  max: 1.044515s  std: 0.026483s
+  CPU   mean: 0.055790s  medi: 0.050000s  min: 0.020000s  max: 0.540000s  std: 0.013741s
+./JGandalf_aanet_muon-CC_3-100GeV_18.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.746s (CPU 0.600s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_18.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 10.4431 / 209.962 (4.97379 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_18.h5
+============================================================
+3412 cycles drained in 3.514547min (CPU 3.181000min). Memory peak: 292.00 MB
+  wall  mean: 0.061527s  medi: 0.057278s  min: 0.027488s  max: 1.078725s  std: 0.030477s
+  CPU   mean: 0.055724s  medi: 0.050000s  min: 0.030000s  max: 1.050000s  std: 0.021688s
+./JGandalf_aanet_muon-CC_3-100GeV_19.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.560s (CPU 0.480s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_19.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 11.4283 / 226.844 (5.03795 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_19.h5
+============================================================
+3481 cycles drained in 3.793151min (CPU 3.320500min). Memory peak: 274.08 MB
+  wall  mean: 0.065157s  medi: 0.059082s  min: 0.030748s  max: 1.054834s  std: 0.028712s
+  CPU   mean: 0.057058s  medi: 0.060000s  min: 0.030000s  max: 1.050000s  std: 0.021504s
+./JGandalf_aanet_muon-CC_3-100GeV_2.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.646s (CPU 0.570s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_2.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 9.64779 / 204.032 (4.72857 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_2.h5
+============================================================
+3473 cycles drained in 3.413764min (CPU 3.122333min). Memory peak: 272.47 MB
+  wall  mean: 0.058740s  medi: 0.054930s  min: 0.026287s  max: 0.957473s  std: 0.027555s
+  CPU   mean: 0.053746s  medi: 0.050000s  min: 0.020000s  max: 0.540000s  std: 0.013483s
+./JGandalf_aanet_muon-CC_3-100GeV_20.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.629s (CPU 0.580s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_20.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+--------------------------[ Blob    3500 ]---------------------------
+ EventFile io / wall time = 13.694 / 207.366 (6.60376 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_20.h5
+============================================================
+3535 cycles drained in 3.469132min (CPU 3.174667min). Memory peak: 274.54 MB
+  wall  mean: 0.058654s  medi: 0.054560s  min: 0.025286s  max: 2.727047s  std: 0.060023s
+  CPU   mean: 0.053686s  medi: 0.050000s  min: 0.000000s  max: 2.530000s  std: 0.050684s
+./JGandalf_aanet_muon-CC_3-100GeV_21.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.590s (CPU 0.490s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_21.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 8.84934 / 193.902 (4.56382 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_21.h5
+============================================================
+3479 cycles drained in 3.243949min (CPU 177.970000s). Memory peak: 276.25 MB
+  wall  mean: 0.055728s  medi: 0.053172s  min: 0.021075s  max: 0.673674s  std: 0.026196s
+  CPU   mean: 0.050977s  medi: 0.050000s  min: 0.020000s  max: 0.560000s  std: 0.016056s
+./JGandalf_aanet_muon-CC_3-100GeV_22.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.511s (CPU 0.470s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_22.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+--------------------------[ Blob    3500 ]---------------------------
+ EventFile io / wall time = 8.57756 / 178.783 (4.79776 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_22.h5
+============================================================
+3504 cycles drained in 179.480117s (CPU 163.450000s). Memory peak: 274.62 MB
+  wall  mean: 0.051014s  medi: 0.049190s  min: 0.019334s  max: 0.807649s  std: 0.027870s
+  CPU   mean: 0.046481s  medi: 0.050000s  min: 0.010000s  max: 0.510000s  std: 0.015512s
+./JGandalf_aanet_muon-CC_3-100GeV_23.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.639s (CPU 0.590s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_23.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 11.9257 / 210.836 (5.65641 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_23.h5
+============================================================
+3484 cycles drained in 3.526889min (CPU 3.169000min). Memory peak: 271.16 MB
+  wall  mean: 0.060509s  medi: 0.055086s  min: 0.026051s  max: 2.234163s  std: 0.048632s
+  CPU   mean: 0.054374s  medi: 0.050000s  min: 0.020000s  max: 2.180000s  std: 0.038380s
+./JGandalf_aanet_muon-CC_3-100GeV_24.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.730s (CPU 0.610s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_24.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+--------------------------[ Blob    3500 ]---------------------------
+ EventFile io / wall time = 13.5591 / 227.256 (5.96646 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_24.h5
+============================================================
+3544 cycles drained in 3.802096min (CPU 3.408333min). Memory peak: 276.61 MB
+  wall  mean: 0.064116s  medi: 0.058603s  min: 0.027373s  max: 3.076670s  std: 0.062059s
+  CPU   mean: 0.057494s  medi: 0.060000s  min: 0.020000s  max: 2.690000s  std: 0.046526s
+./JGandalf_aanet_muon-CC_3-100GeV_25.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.681s (CPU 0.570s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_25.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+--------------------------[ Blob    3500 ]---------------------------
+ EventFile io / wall time = 11.687 / 230.165 (5.07765 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_25.h5
+============================================================
+3534 cycles drained in 3.849928min (CPU 3.354667min). Memory peak: 271.68 MB
+  wall  mean: 0.065120s  medi: 0.058689s  min: 0.028464s  max: 1.650681s  std: 0.039501s
+  CPU   mean: 0.056760s  medi: 0.060000s  min: 0.030000s  max: 1.460000s  std: 0.025593s
+./JGandalf_aanet_muon-CC_3-100GeV_26.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.694s (CPU 0.610s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_26.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 11.0721 / 221.166 (5.00626 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_26.h5
+============================================================
+3370 cycles drained in 3.700109min (CPU 3.345833min). Memory peak: 269.93 MB
+  wall  mean: 0.065615s  medi: 0.061322s  min: 0.028308s  max: 1.214330s  std: 0.036369s
+  CPU   mean: 0.059347s  medi: 0.060000s  min: 0.020000s  max: 1.030000s  std: 0.022063s
+./JGandalf_aanet_muon-CC_3-100GeV_27.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.671s (CPU 0.610s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_27.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 11.0191 / 224.519 (4.90786 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_27.h5
+============================================================
+3479 cycles drained in 3.756216min (CPU 3.409167min). Memory peak: 272.24 MB
+  wall  mean: 0.064527s  medi: 0.059484s  min: 0.028512s  max: 1.144081s  std: 0.035982s
+  CPU   mean: 0.058580s  medi: 0.060000s  min: 0.020000s  max: 1.000000s  std: 0.020957s
+./JGandalf_aanet_muon-CC_3-100GeV_28.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.743s (CPU 0.620s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_28.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 10.8044 / 217.903 (4.95835 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_28.h5
+============================================================
+3495 cycles drained in 3.661977min (CPU 3.323000min). Memory peak: 274.77 MB
+  wall  mean: 0.062337s  medi: 0.057993s  min: 0.029106s  max: 1.011921s  std: 0.027872s
+  CPU   mean: 0.056827s  medi: 0.060000s  min: 0.030000s  max: 0.940000s  std: 0.017915s
+./JGandalf_aanet_muon-CC_3-100GeV_29.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.647s (CPU 0.600s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_29.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+--------------------------[ Blob    3500 ]---------------------------
+ EventFile io / wall time = 11.6087 / 219.594 (5.28644 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_29.h5
+============================================================
+3517 cycles drained in 3.673435min (CPU 3.317667min). Memory peak: 279.22 MB
+  wall  mean: 0.062430s  medi: 0.057320s  min: 0.024999s  max: 1.043660s  std: 0.036472s
+  CPU   mean: 0.056389s  medi: 0.060000s  min: 0.020000s  max: 1.050000s  std: 0.021411s
+./JGandalf_aanet_muon-CC_3-100GeV_3.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.741s (CPU 0.610s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_3.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 9.755 / 204.187 (4.77749 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_3.h5
+============================================================
+3347 cycles drained in 3.418679min (CPU 3.068333min). Memory peak: 270.16 MB
+  wall  mean: 0.060999s  medi: 0.055551s  min: 0.023553s  max: 1.034834s  std: 0.034712s
+  CPU   mean: 0.054783s  medi: 0.050000s  min: 0.020000s  max: 0.660000s  std: 0.014475s
+./JGandalf_aanet_muon-CC_3-100GeV_30.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.664s (CPU 0.580s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_30.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 9.09958 / 190.269 (4.78249 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_30.h5
+============================================================
+3449 cycles drained in 3.184052min (CPU 176.800000s). Memory peak: 275.73 MB
+  wall  mean: 0.055159s  medi: 0.053540s  min: 0.021440s  max: 0.629795s  std: 0.023866s
+  CPU   mean: 0.051064s  medi: 0.050000s  min: 0.020000s  max: 0.580000s  std: 0.015561s
+./JGandalf_aanet_muon-CC_3-100GeV_31.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.612s (CPU 0.550s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_31.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+--------------------------[ Blob    3500 ]---------------------------
+ EventFile io / wall time = 8.97352 / 187.092 (4.79631 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_31.h5
+============================================================
+3502 cycles drained in 3.130997min (CPU 172.680000s). Memory peak: 274.21 MB
+  wall  mean: 0.053417s  medi: 0.052720s  min: 0.021651s  max: 0.622269s  std: 0.023198s
+  CPU   mean: 0.049115s  medi: 0.050000s  min: 0.020000s  max: 0.560000s  std: 0.016751s
+./JGandalf_aanet_muon-CC_3-100GeV_32.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.639s (CPU 0.590s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_32.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 9.98517 / 209.215 (4.77268 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_32.h5
+============================================================
+3467 cycles drained in 3.499619min (CPU 3.233000min). Memory peak: 298.03 MB
+  wall  mean: 0.060336s  medi: 0.058103s  min: 0.025599s  max: 0.711535s  std: 0.026283s
+  CPU   mean: 0.055757s  medi: 0.060000s  min: 0.020000s  max: 0.570000s  std: 0.015708s
+./JGandalf_aanet_muon-CC_3-100GeV_33.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.645s (CPU 0.590s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_33.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 10.2297 / 228.882 (4.4694 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_33.h5
+============================================================
+3439 cycles drained in 3.827882min (CPU 3.301667min). Memory peak: 277.21 MB
+  wall  mean: 0.066548s  medi: 0.059872s  min: 0.028258s  max: 1.278615s  std: 0.041457s
+  CPU   mean: 0.057397s  medi: 0.060000s  min: 0.020000s  max: 0.580000s  std: 0.013740s
+./JGandalf_aanet_muon-CC_3-100GeV_34.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.714s (CPU 0.620s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_34.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 10.9683 / 221.403 (4.95401 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_34.h5
+============================================================
+3434 cycles drained in 3.704450min (CPU 3.289167min). Memory peak: 273.49 MB
+  wall  mean: 0.064465s  medi: 0.058496s  min: 0.027618s  max: 1.142525s  std: 0.037353s
+  CPU   mean: 0.057251s  medi: 0.060000s  min: 0.030000s  max: 0.740000s  std: 0.017974s
+./JGandalf_aanet_muon-CC_3-100GeV_35.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.717s (CPU 0.610s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_35.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+--------------------------[ Blob    3500 ]---------------------------
+ EventFile io / wall time = 10.7102 / 229.447 (4.66782 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_35.h5
+============================================================
+3516 cycles drained in 3.839038min (CPU 3.412833min). Memory peak: 274.18 MB
+  wall  mean: 0.065248s  medi: 0.059240s  min: 0.034135s  max: 1.069574s  std: 0.034833s
+  CPU   mean: 0.058026s  medi: 0.060000s  min: 0.030000s  max: 0.580000s  std: 0.013410s
+./JGandalf_aanet_muon-CC_3-100GeV_36.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.664s (CPU 0.600s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_36.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 12.0868 / 237.125 (5.09722 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_36.h5
+============================================================
+3494 cycles drained in 3.965806min (CPU 3.409667min). Memory peak: 286.15 MB
+  wall  mean: 0.067857s  medi: 0.060522s  min: 0.028441s  max: 1.079728s  std: 0.039872s
+  CPU   mean: 0.058351s  medi: 0.060000s  min: 0.020000s  max: 1.020000s  std: 0.021415s
+./JGandalf_aanet_muon-CC_3-100GeV_37.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.696s (CPU 0.610s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_37.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 10.6393 / 215.102 (4.94616 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_37.h5
+============================================================
+3467 cycles drained in 3.613681min (CPU 3.253833min). Memory peak: 285.90 MB
+  wall  mean: 0.062034s  medi: 0.057236s  min: 0.025535s  max: 0.823317s  std: 0.031119s
+  CPU   mean: 0.056100s  medi: 0.060000s  min: 0.020000s  max: 0.770000s  std: 0.018424s
+./JGandalf_aanet_muon-CC_3-100GeV_38.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.570s (CPU 0.520s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_38.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+--------------------------[ Blob    3500 ]---------------------------
+ EventFile io / wall time = 11.3692 / 239.926 (4.73865 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_38.h5
+============================================================
+3618 cycles drained in 4.011572min (CPU 3.417667min). Memory peak: 275.11 MB
+  wall  mean: 0.066304s  medi: 0.058906s  min: 0.028993s  max: 1.062942s  std: 0.036717s
+  CPU   mean: 0.056495s  medi: 0.060000s  min: 0.020000s  max: 0.470000s  std: 0.012144s
+./JGandalf_aanet_muon-CC_3-100GeV_39.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.631s (CPU 0.570s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_39.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+--------------------------[ Blob    3500 ]---------------------------
+ EventFile io / wall time = 9.24949 / 193.092 (4.79019 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_39.h5
+============================================================
+3507 cycles drained in 3.230938min (CPU 177.090000s). Memory peak: 295.12 MB
+  wall  mean: 0.055051s  medi: 0.053032s  min: 0.022989s  max: 0.902839s  std: 0.030401s
+  CPU   mean: 0.050305s  medi: 0.050000s  min: 0.020000s  max: 0.530000s  std: 0.015676s
+./JGandalf_aanet_muon-CC_3-100GeV_4.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.589s (CPU 0.530s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_4.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 10.4938 / 198.823 (5.27799 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_4.h5
+============================================================
+3399 cycles drained in 3.326728min (CPU 3.009500min). Memory peak: 292.23 MB
+  wall  mean: 0.058487s  medi: 0.055128s  min: 0.025590s  max: 1.211380s  std: 0.038463s
+  CPU   mean: 0.052936s  medi: 0.050000s  min: 0.000000s  max: 1.150000s  std: 0.024305s
+./JGandalf_aanet_muon-CC_3-100GeV_40.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.673s (CPU 0.610s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_40.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 10.4124 / 222.929 (4.67075 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_40.h5
+============================================================
+3465 cycles drained in 3.729205min (CPU 3.349500min). Memory peak: 273.18 MB
+  wall  mean: 0.064330s  medi: 0.059901s  min: 0.028250s  max: 0.997246s  std: 0.034379s
+  CPU   mean: 0.057784s  medi: 0.060000s  min: 0.020000s  max: 0.600000s  std: 0.014655s
+./JGandalf_aanet_muon-CC_3-100GeV_41.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.688s (CPU 0.620s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_41.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 9.88299 / 209.942 (4.70748 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_41.h5
+============================================================
+3419 cycles drained in 3.512964min (CPU 3.181333min). Memory peak: 271.38 MB
+  wall  mean: 0.061397s  medi: 0.057005s  min: 0.027412s  max: 0.970312s  std: 0.032350s
+  CPU   mean: 0.055613s  medi: 0.050000s  min: 0.020000s  max: 0.600000s  std: 0.014245s
+./JGandalf_aanet_muon-CC_3-100GeV_42.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.723s (CPU 0.630s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_42.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 11.3611 / 211.992 (5.35921 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_42.h5
+============================================================
+3390 cycles drained in 3.547716min (CPU 3.218333min). Memory peak: 289.34 MB
+  wall  mean: 0.062528s  medi: 0.058089s  min: 0.028297s  max: 1.158423s  std: 0.034412s
+  CPU   mean: 0.056737s  medi: 0.060000s  min: 0.020000s  max: 1.160000s  std: 0.023783s
+./JGandalf_aanet_muon-CC_3-100GeV_43.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.831s (CPU 0.620s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_43.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 10.4165 / 216.953 (4.80126 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_43.h5
+============================================================
+3338 cycles drained in 3.632364min (CPU 3.172500min). Memory peak: 287.38 MB
+  wall  mean: 0.064984s  medi: 0.058524s  min: 0.030078s  max: 0.919582s  std: 0.031869s
+  CPU   mean: 0.056791s  medi: 0.060000s  min: 0.030000s  max: 0.600000s  std: 0.013602s
+./JGandalf_aanet_muon-CC_3-100GeV_44.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.665s (CPU 0.610s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_44.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+--------------------------[ Blob    3500 ]---------------------------
+ EventFile io / wall time = 10.9918 / 218.397 (5.03292 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_44.h5
+============================================================
+3503 cycles drained in 3.653547min (CPU 3.333333min). Memory peak: 275.68 MB
+  wall  mean: 0.062338s  medi: 0.057852s  min: 0.028674s  max: 0.979007s  std: 0.029554s
+  CPU   mean: 0.056888s  medi: 0.060000s  min: 0.030000s  max: 0.970000s  std: 0.020687s
+./JGandalf_aanet_muon-CC_3-100GeV_45.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.660s (CPU 0.600s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_45.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 13.5698 / 223.519 (6.07099 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_45.h5
+============================================================
+3464 cycles drained in 3.738996min (CPU 3.340000min). Memory peak: 274.09 MB
+  wall  mean: 0.064518s  medi: 0.058650s  min: 0.027037s  max: 2.867821s  std: 0.061784s
+  CPU   mean: 0.057639s  medi: 0.060000s  min: 0.020000s  max: 2.440000s  std: 0.045242s
+./JGandalf_aanet_muon-CC_3-100GeV_46.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.670s (CPU 0.580s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_46.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+--------------------------[ Blob    3500 ]---------------------------
+ EventFile io / wall time = 10.1457 / 216.15 (4.6938 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_46.h5
+============================================================
+3548 cycles drained in 3.616950min (CPU 3.287167min). Memory peak: 281.59 MB
+  wall  mean: 0.060915s  medi: 0.057096s  min: 0.026627s  max: 0.918997s  std: 0.029647s
+  CPU   mean: 0.055392s  medi: 0.050000s  min: 0.000000s  max: 0.570000s  std: 0.014603s
+./JGandalf_aanet_muon-CC_3-100GeV_47.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.653s (CPU 0.600s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_47.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 8.95091 / 200.849 (4.45655 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_47.h5
+============================================================
+3481 cycles drained in 3.360217min (CPU 3.036167min). Memory peak: 275.29 MB
+  wall  mean: 0.057692s  medi: 0.054830s  min: 0.025744s  max: 1.035873s  std: 0.032473s
+  CPU   mean: 0.052129s  medi: 0.050000s  min: 0.020000s  max: 0.610000s  std: 0.016670s
+./JGandalf_aanet_muon-CC_3-100GeV_48.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.638s (CPU 0.580s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_48.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 11.7471 / 214.197 (5.48427 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_48.h5
+============================================================
+3425 cycles drained in 3.583602min (CPU 3.138667min). Memory peak: 290.33 MB
+  wall  mean: 0.062531s  medi: 0.056785s  min: 0.024518s  max: 2.229031s  std: 0.054757s
+  CPU   mean: 0.054780s  medi: 0.050000s  min: 0.020000s  max: 1.970000s  std: 0.035081s
+./JGandalf_aanet_muon-CC_3-100GeV_49.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.484s (CPU 0.460s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_49.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+--------------------------[ Blob    3500 ]---------------------------
+ EventFile io / wall time = 9.81834 / 210.137 (4.67236 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_49.h5
+============================================================
+3628 cycles drained in 3.512554min (CPU 3.205833min). Memory peak: 292.28 MB
+  wall  mean: 0.057910s  medi: 0.055793s  min: 0.026775s  max: 1.335289s  std: 0.032765s
+  CPU   mean: 0.052864s  medi: 0.050000s  min: 0.020000s  max: 0.600000s  std: 0.015903s
+./JGandalf_aanet_muon-CC_3-100GeV_5.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.516s (CPU 0.470s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_5.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+--------------------------[ Blob    3500 ]---------------------------
+ EventFile io / wall time = 8.59033 / 179.191 (4.79395 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_5.h5
+============================================================
+3527 cycles drained in 179.816429s (CPU 162.010000s). Memory peak: 274.55 MB
+  wall  mean: 0.050799s  medi: 0.048200s  min: 0.024670s  max: 0.982331s  std: 0.033653s
+  CPU   mean: 0.045773s  medi: 0.040000s  min: 0.020000s  max: 0.520000s  std: 0.015805s
+./JGandalf_aanet_muon-CC_3-100GeV_50.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.669s (CPU 0.620s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_50.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 8.31829 / 174.891 (4.75627 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_50.h5
+============================================================
+3466 cycles drained in 175.696382s (CPU 158.420000s). Memory peak: 274.22 MB
+  wall  mean: 0.050453s  medi: 0.048529s  min: 0.026787s  max: 1.034437s  std: 0.032910s
+  CPU   mean: 0.045490s  medi: 0.040000s  min: 0.020000s  max: 0.450000s  std: 0.014395s
+./JGandalf_aanet_muon-CC_3-100GeV_6.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.627s (CPU 0.590s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_6.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 7.98986 / 164.877 (4.84594 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_6.h5
+============================================================
+3473 cycles drained in 165.639974s (CPU 147.300000s). Memory peak: 274.75 MB
+  wall  mean: 0.047466s  medi: 0.040901s  min: 0.019971s  max: 1.210671s  std: 0.038552s
+  CPU   mean: 0.042208s  medi: 0.040000s  min: 0.020000s  max: 0.540000s  std: 0.015146s
+./JGandalf_aanet_muon-CC_3-100GeV_7.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.541s (CPU 0.470s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_7.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 10.3806 / 170.277 (6.09627 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_7.h5
+============================================================
+3371 cycles drained in 170.963595s (CPU 151.520000s). Memory peak: 273.66 MB
+  wall  mean: 0.050504s  medi: 0.046313s  min: 0.021289s  max: 2.482379s  std: 0.056032s
+  CPU   mean: 0.044776s  medi: 0.040000s  min: 0.000000s  max: 2.290000s  std: 0.041395s
+./JGandalf_aanet_muon-CC_3-100GeV_8.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.451s (CPU 0.420s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_8.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 8.61971 / 176.377 (4.88708 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_8.h5
+============================================================
+3458 cycles drained in 176.941901s (CPU 160.180000s). Memory peak: 287.90 MB
+  wall  mean: 0.050997s  medi: 0.047897s  min: 0.019623s  max: 0.754771s  std: 0.030015s
+  CPU   mean: 0.046177s  medi: 0.040000s  min: 0.020000s  max: 0.420000s  std: 0.015736s
+./JGandalf_aanet_muon-CC_3-100GeV_9.root
+loading root....  /afs/.in2p3.fr/system/amd64_sl6/usr/local/root/v5.34.23
+loading aalib...  /afs/in2p3.fr/throng/km3net/src/Jpp/v8.2.7878//externals/aanet/libaa.so
+Pipeline and module initialisation took 0.510s (CPU 0.480s).
+Reading from file: ./JGandalf_aanet_muon-CC_3-100GeV_9.root
+Reading header...
+Reading livetime...
+Reading genvol...
+Reading number of generated files...
+Generating blobs through new aanet API...
+--------------------------[ Blob     250 ]---------------------------
+--------------------------[ Blob     500 ]---------------------------
+--------------------------[ Blob     750 ]---------------------------
+--------------------------[ Blob    1000 ]---------------------------
+--------------------------[ Blob    1250 ]---------------------------
+--------------------------[ Blob    1500 ]---------------------------
+--------------------------[ Blob    1750 ]---------------------------
+--------------------------[ Blob    2000 ]---------------------------
+--------------------------[ Blob    2250 ]---------------------------
+--------------------------[ Blob    2500 ]---------------------------
+--------------------------[ Blob    2750 ]---------------------------
+--------------------------[ Blob    3000 ]---------------------------
+--------------------------[ Blob    3250 ]---------------------------
+ EventFile io / wall time = 7.37991 / 141.682 (5.20878 % spent on io.)
+================================[ . ]================================
+Adding index tables.
+  -> /mc_hits/_indices
+  -> /hits/_indices
+Creating pytables index tables. This may take a few minutes...
+HDF5 file written to: ./JGandalf_aanet_muon-CC_3-100GeV_9.h5
+============================================================
+3420 cycles drained in 142.300044s (CPU 127.900000s). Memory peak: 279.36 MB
+  wall  mean: 0.041420s  medi: 0.036708s  min: 0.024152s  max: 0.579877s  std: 0.022732s
+  CPU   mean: 0.037231s  medi: 0.040000s  min: 0.020000s  max: 0.540000s  std: 0.013024s
+
+***************************************************************
+* Ended on:                Sun Oct 01 19:41:47 2017           *
+* Exit status:             0                                  *
+* Consumed                                                    *
+*   cpu (HS06):            1:04:47:40                         *
+*   cpu scaling factor:    11.100000                          *
+*   cpu time:              9338 / 72000                       *
+*   efficiency:            86 %                               *
+*   io:                    126.79258GB                        *
+*   vmem:                  2.446G                             *
+*   maxvmem:               2.480G                             *
+*   maxrss:                283.094M                           *
+***************************************************************
