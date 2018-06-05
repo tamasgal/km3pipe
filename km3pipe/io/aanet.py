@@ -566,7 +566,10 @@ def parse_jgandalf_new(aanet_event, event_id, missing=0):
         outmap['time'] = track.t
         outmap['type'] = track.type
         outmap['rec_type'] = track.rec_type
-        outmap['rec_stage'] = track.rec_stage
+        try:
+            outmap['rec_stage'] = track.rec_stage
+        except AttributeError:
+            outmap['rec_stage'] = missing
         for i, key in enumerate(FITINF_ENUM):
             outmap[key] = track.fitinf[i]
 
@@ -607,7 +610,7 @@ def upgoing_vs_downgoing(tracks):
     return out
 
 
-def parse_generic_event(aanet_event, event_id):
+def parse_generic_event(aanet_event, event_id, missing=0):
     map = {}
     try:
         track = aanet_event.trks[0]
@@ -626,7 +629,10 @@ def parse_generic_event(aanet_event, event_id):
     map['lik'] = track.lik
     map['type'] = track.type
     map['rec_type'] = track.rec_type
-    map['rec_stage'] = track.rec_stage
+    try:
+        map['rec_stage'] = track.rec_stage
+    except AttributeError:
+        map['rec_stage'] = missing
     for k, entry in enumerate(track.fitinf):
         map['fitinf_{}'.format(k)] = entry
     for k, entry in enumerate(track.error_matrix):
