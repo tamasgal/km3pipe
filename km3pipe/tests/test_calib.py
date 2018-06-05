@@ -112,3 +112,6 @@ class TestCalibration(TestCase):
         calib = Calibration(detector=det)
         c_tshits = calib.apply(tshits)
         assert len(c_tshits) == len(tshits)
+        assert np.allclose([40, 80, 90], c_tshits.t0)
+        # TimesliceHits is using int4 for times, so it's truncated when we pass in float64
+        assert np.allclose([50.0, 91.0, 102.0], c_tshits.time)

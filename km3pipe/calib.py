@@ -109,8 +109,6 @@ class Calibration(Module):
         if istype(hits, 'DataFrame'):
             # do we ever see McHits here?
             hits = Table.from_template(hits, 'Hits')
-        if hasattr(hits, 'name') and hits.name == 'TimesliceHits':
-            return self._apply_to_tshits(hits)
         if hasattr(hits, 'dom_id') and hasattr(hits, 'channel_id'):
             return self._apply_to_hits(hits)
         elif hasattr(hits, 'pmt_id'):
@@ -137,35 +135,15 @@ class Calibration(Module):
         pos_x = cal[:, 0]
         pos_y = cal[:, 1]
         pos_z = cal[:, 2]
+
         t0 = cal[:, 6]
 
-        hits.time += t0
-
-        return hits.append_columns(
-            ['dir_x', 'dir_y', 'dir_z', 'du', 'floor',
-             'pos_x', 'pos_y', 'pos_z', 't0'],
-            [dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0]
-        )
-
-    def _apply_to_tshits(self, hits):
-        """Append the position, direction and t0 columns and add t0 to time"""
-        n = len(hits)
-        cal = np.empty((n, 9))
-        lookup = self._calib_by_dom_and_channel
-        for i in range(n):
-            calib = lookup[hits['dom_id'][i]][hits['channel_id'][i]]
-            cal[i] = calib
-        dir_x = cal[:, 3]
-        dir_y = cal[:, 4]
-        dir_z = cal[:, 5]
-        du = cal[:, 7]
-        floor = cal[:, 8]
-        pos_x = cal[:, 0]
-        pos_y = cal[:, 1]
-        pos_z = cal[:, 2]
-        t0 = cal[:, 6]
-
-        hits.time += t0
+        if hits.time.dtype != t0.dtype:
+            time = hits.time.astype('f4') + t0.astype('f4')
+            hits = hits.drop_columns(['time'])
+            hits = hits.append_columns(['time'], [time])
+        else:
+            hits.time += t0
 
         return hits.append_columns(
             ['dir_x', 'dir_y', 'dir_z', 'du', 'floor',
