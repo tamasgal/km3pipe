@@ -9,7 +9,6 @@ import numpy as np
 from .core import Module
 from .hardware import Detector
 from .dataclasses import Table
-from .dataclass_templates import TEMPLATES
 from .tools import istype
 
 __author__ = "Tamas Gal"
