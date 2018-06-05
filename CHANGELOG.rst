@@ -4,6 +4,10 @@ Unreleased changes
 Version 7
 ---------
 
+7.18.2 / 2018-06-05
+~~~~~~~~~~~~~~~~~~~
+* adapt JGandalf parser to changed aanet dtype, see Issue #84
+
 7.18.1 / 2018-04-26
 ~~~~~~~~~~~~~~~~~~~
 * IMPORTANT NOTE: This is probably the last release of v7, which means
