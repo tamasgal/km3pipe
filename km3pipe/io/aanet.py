@@ -493,35 +493,29 @@ def parse_ancient_recolns(aanet_event, event_id, missing=0):
 
 
 def parse_jevt_jgandalf(aanet_event, event_id, missing=0):
+    track = aanet_event.trks[0]     # this might throw IndexError
+    out = {}
+    out['id'] = track.id
+    out['pos_x'] = track.pos.x
+    out['pos_y'] = track.pos.y
+    out['pos_z'] = track.pos.z
+    out['dir_x'] = track.dir.x
+    out['dir_y'] = track.dir.y
+    out['dir_z'] = track.dir.z
+    out['time'] = track.t
+    out['type'] = track.type
+    out['rec_type'] = track.rec_type
     try:
-        track = aanet_event.trks[0]     # this might throw IndexError
-        map = {}
-        map['id'] = track.id
-        map['pos_x'] = track.pos.x
-        map['pos_y'] = track.pos.y
-        map['pos_z'] = track.pos.z
-        map['dir_x'] = track.dir.x
-        map['dir_y'] = track.dir.y
-        map['dir_z'] = track.dir.z
-        map['time'] = track.t
-        map['type'] = track.type
-        map['rec_type'] = track.rec_type
-        map['rec_stage'] = track.rec_stage
-        map['beta0'] = track.fitinf[0]
-        map['beta1'] = track.fitinf[1]
-        map['lik'] = track.fitinf[2]
-        map['lik_red'] = track.fitinf[3]
-        map['energy'] = track.fitinf[4]
-    except IndexError:
-        keys = {'id', 'pos_x', 'pos_y', 'pos_z', 'dir_x', 'dir_y', 'dir_z',
-                'time', 'type', 'rec_type', 'rec_stage', 'beta0', 'beta1',
-                'lik', 'lik_red', 'energy', }
-        map = {key: missing for key in keys}
-    dt = [(key, float) for key in sorted(map.keys())]
-    map['event_id'] = event_id
+        out['rec_stage'] = track.rec_stage
+    except AttributeError:
+        out['rec_stage'] = missing
+    for idx, elem in enumerate(track.fitinf):
+        out[FITINF_ENUM[idx]] = elem
+    dt = [(key, float) for key in sorted(out.keys())]
+    out['event_id'] = event_id
     dt.append(('event_id', '<u4'))
     dt = np.dtype(dt)
-    return map, dt
+    return out, dt
 
 
 def parse_jgandalf_new(aanet_event, event_id, missing=0):
