@@ -56,7 +56,8 @@ class TriggerMap(kp.Module):
         self.hit_counts = []
 
     def process(self, blob):
-        hits = blob['Hits'].triggered_hits
+        hits = blob['Hits']
+        hits = hits[hits.triggered.astype(bool)]
         dom_ids = np.unique(hits.dom_id)
         hit_counts = np.zeros(self.n_dus * self.n_doms)
         for dom_id in dom_ids:
@@ -111,7 +112,7 @@ def main():
     det_id = int(args['-d'])
     det = kp.hardware.Detector(det_id=det_id)
     pipe = kp.Pipeline()
-    pipe.attach(kp.io.jpp.EventPump, filename=args['FILENAME'])
+    pipe.attach(kp.io.aanet.AanetPump, filename=args['FILENAME'])
     pipe.attach(StatusBar, every=2500)
     pipe.attach(TriggerMap,
                 detector=det,
