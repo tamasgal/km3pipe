@@ -421,3 +421,9 @@ class Table(np.recarray):
         from km3pipe.math import neutrino_to_source_direction
         azi, _ = neutrino_to_source_direction(self.phi, self.theta)
         return azi
+
+    @property
+    def triggered_rows(self):
+        if not hasattr(self, 'triggered'):
+            raise KeyError("Table has no 'triggered' column!")
+        return self[self.triggered.astype(bool)]
