@@ -30,10 +30,9 @@ git commit -m "[LEGACY] Bumps changelog"
 
 git tag ${VERSION}
 
-# TODO: How can we make this not conflict with "normal" releases?
-# rm -rf dist
-# python setup.py sdist
-# twine upload dist/*
+rm -rf dist
+python setup.py sdist
+twine upload dist/*
 
 git push
 git push --tags
