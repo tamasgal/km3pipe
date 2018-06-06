@@ -72,7 +72,7 @@ def main():
 
         for ax, du in zip(axes, dus):
             du_hits = hits[hits.du == du]
-            trig_hits = du_hits.triggered_hits
+            trig_hits = du_hits.triggered_rows
 
             ax.scatter(du_hits.time - min(du_hits.time), du_hits.pos_z,
                        c='#09A9DE', label='hit')

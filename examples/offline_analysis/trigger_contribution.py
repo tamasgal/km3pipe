@@ -34,7 +34,7 @@ class TriggerContributionCalculator(kp.Module):
         self.n_events = 0
 
     def process(self, blob):
-        hits = blob['Hits'].triggered_hits
+        hits = blob['Hits'].triggered_rows
         n_hits = len(hits)
         dom_ids = np.unique(hits.dom_id)
         for dom_id in dom_ids:

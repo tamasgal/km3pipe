@@ -49,7 +49,7 @@ class TriggerMap(kp.Module):
         self.hit_counts = []
 
     def process(self, blob):
-        hits = blob['Hits'].triggered_hits
+        hits = blob['Hits'].triggered_rows
         dom_ids = np.unique(hits.dom_id)
         hit_counts = np.zeros(self.n_dus * self.n_doms)
         for dom_id in dom_ids:

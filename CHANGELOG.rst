@@ -1,6 +1,8 @@
 Unreleased changes
 ------------------
 
+* Added `triggered_hits = hits.triggered_rows` syntactical sugar
+
 Version 8
 ---------
 
