@@ -87,74 +87,6 @@ FITINF2NAME = {v: k for k, v in FITINF2NUM.items()}
 RECO2NAME = {v: k for k, v in RECO2NUM.items()}
 
 
-class HeaderParser():
-    example = {
-        'XSecFile': ' /afs/in2p3.fr/home/throng/km3net/src/gSeaGen/v4r1/dat/gxspl-seawater.xml',        # noqa
-        'can': ' -117.2 139.5 205.402',
-        'coord_origin': ' 0 0 0 ',
-        'cut_in': ' 0 0 0 0',
-        'cut_nu': ' 3 100 -1 1',
-        'cut_primary': ' 0 0 0 0',
-        'cut_seamuon': ' 0 0 0 0',
-        'depth': '2475.000',
-        'detector': ' /afs/in2p3.fr/throng/km3net/detectors/orca_115strings_av23min20mhorizontal_18OMs_alt9mvertical_v1.det',       # noqa
-        'drawing': 'surface',
-        'end_event': '',
-        'fgIsA': '',
-        'flux': '14 FUNC 1E-9*pow(x,-2)',
-        'flux_1': '-14 FUNC 1E-9*pow(x,-2)',
-        'genhencut': ' 0 0',
-        'genvol': ' 180.91 662.486 611.189 1.48e+09 9.1e+07',
-        'livetime': ' 0 0',
-        'muon_desc_file': ' ',
-        'norma': ' 0 0',
-        'physics': ' gSeaGen 4.1 160729 120347',
-        'physics_1': 'GENIE 2.10.2 160729  120347',
-        'prop_code': 'PropaMuon',
-        'seed': 'gSeaGen 1200002',
-        'simul': '    ',
-        'source_mode': 'DIFFUSE',
-        'spectrum': ' -3',
-        'start_run': ' 2',
-        'target': ' ',
-        'tgen': '31556926.000000'
-    }
-
-    @staticmethod
-    def get_aanet_header(header):
-        """Returns a dict of the header entries.
-
-        http://trac.km3net.de/browser/dataformats/aanet/trunk/evt/Head.hh
-
-        """
-        desc = ("cut_primary cut_seamuon cut_in cut_nu:Emin Emax cosTmin cosTmax\n"     # noqa
-                "generator physics simul: program version date time\n"
-                "seed:program level iseed\n"
-                "PM1_type_area:type area TTS\n"
-                "PDF:i1 i2\n"
-                "model:interaction muon scattering numberOfEnergyBins\n"
-                "can:zmin zmax r\n"
-                "genvol:zmin zmax r volume numberOfEvents\n"
-                "merge:time gain\n"
-                "coord_origin:x y z\n"
-                "genhencut:gDir Emin\n"
-                "k40: rate time\n"
-                "norma:primaryFlux numberOfPrimaries\n"
-                "livetime:numberOfSeconds errorOfSeconds\n"
-                "flux:type key file_1 file_2\n"
-                "spectrum:alpha\n"
-                "start_run:run_id")
-        d = {}
-        for line in desc.split("\n"):
-            fields, values = [s.split() for s in line.split(':')]
-            for field in fields:
-                for value in values:
-                    if field == "physics" and value == "date":  # segfaults
-                        continue
-                    d[field + '_' + value] = header.get_field(field, value)
-        return d
-
-
 class AanetPump(Pump):
     """A pump for binary Aanet files.
 
@@ -171,7 +103,6 @@ class AanetPump(Pump):
         self.filename = self.require('filename')
         self.ignore_hits = bool(self.get('ignore_hits'))
         self.header = None
-        self.aanet_header = None
         self.blobs = self.blob_generator()
         self.group_id = 0
 
@@ -195,11 +126,12 @@ class AanetPump(Pump):
             raise SystemExit("Could not open file")
 
         log.info("Generating blobs through new aanet API...")
+        self.header = self._parse_header(event_file.header)
         for event in event_file:
             log.debug('Reading event...')
             blob = self._read_event(event, filename)
             log.debug('Reading header...')
-            blob["Header"] = self.aanet_header
+            blob["AaHeader"] = self.header
             self.group_id += 1
             yield blob
         del event_file
@@ -329,6 +261,22 @@ class AanetPump(Pump):
             out['triggered'].append(hit.trig)
         out['group_id'] = self.group_id
         return Table(out, name='Hits', h5loc='/hits', split_h5=True)
+
+    @staticmethod
+    def _parse_header(header):
+        tags = {}
+        for key, taglist in header._hdr_dict():
+            tags[key] = [k for k in taglist]
+        out = {}
+        for i, (key, entries) in enumerate(header):
+            out[key] = {}
+            for j, elem in enumerate(entries.split()):
+                if key in tags:
+                    elem_name = tags[key][j]
+                else:
+                    elem_name = '{}_{}'.format(key, j)
+                out[key][elem_name] = elem
+        return out
 
     def _read_event(self, event, filename):
         blob = Blob()

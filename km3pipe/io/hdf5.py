@@ -179,7 +179,7 @@ class HDF5Sink(Module):
         d["index"] += n_items
 
     def _write_header(self, header):
-        header = self.h5file.create_group('/', 'header', 'Header')
+        hdr_group = self.h5file.create_group('/', 'header', 'Header')
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', tb.NaturalNameWarning)
             for field, value in header.items():
@@ -187,7 +187,22 @@ class HDF5Sink(Module):
                     value = float(value)
                 except ValueError:
                     pass
-                header._v_attrs[field] = value
+                hdr_group._v_attrs[field] = value
+        self._header_written = True
+
+    def _write_aa_header(self, header):
+        hdr_group = self.h5file.create_group('/', 'header', 'Header')       # noqa
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', tb.NaturalNameWarning)
+            for groupname, subdict in header.items():
+                hdr_subgroup = self.h5file.create_group('/header',
+                        groupname, groupname)
+                for field, value in subdict.items():
+                    try:
+                        value = float(value)
+                    except ValueError:
+                        pass
+                hdr_subgroup._v_attrs[field] = value
         self._header_written = True
 
     def _process_entry(self, key, entry):
@@ -237,6 +252,9 @@ class HDF5Sink(Module):
         if not self._header_written and "Header" in blob \
                 and blob["Header"] is not None:
             self._write_header(blob['Header'])
+        if not self._header_written and "AaHeader" in blob \
+                and blob["AaHeader"] is not None:
+            self._write_aa_header(blob['AaHeader'])
 
         written_blob = Blob()
         for key, entry in sorted(blob.items()):
