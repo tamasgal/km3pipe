@@ -13,6 +13,10 @@ KM3Pipe is preinstalled on the Lyon computing centre. Put this into your
 
     source $KM3NET_THRONG_DIR/src/python/pyenv.sh
 
+There is also an experimental setup with ROOT6 and Python 3.6, which can be loaded using::
+
+    source KM3NET_THRONG_DIR/src/python/conda.sh
+
 And you are ready to go! This will work on both Scientific Linux 6 and Cent OS
 machines as the ``$KM3NET_THRONG_DIR``, set by your group environment, is
 pointing to different directories.
