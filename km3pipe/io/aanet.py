@@ -262,11 +262,9 @@ class AanetPump(Pump):
                         "Setting to '{}'".format(trk_name)
                 )
             trk_dict = self._read_track(trk)
-            print(trk_name)
-            print(trk_dict)
             out[trk_name] = Table(
                     trk_dict,
-                    h5loc='/reco/{}'.format(trk_name),
+                    h5loc='/reco/{}'.format(trk_name.lower()),
                     name=trk_name)
         self.log.debug(out)
         return out
