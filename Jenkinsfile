@@ -3,7 +3,7 @@ import groovy.io.FileType
 import static groovy.io.FileType.FILES
 
 DOCKER_FILES_DIR = './dockerfiles'
-CHAT_CHANNEL = '#km3pipe'
+CHAT_CHANNEL = '#km3pipe-dev'
 DEVELOPERS = ['tgal@km3net.de', 'mlotze@km3net.de']
 MAIN_DOCKER = 'py365'
 

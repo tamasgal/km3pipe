@@ -84,7 +84,7 @@ class RBAPrompt(Cmd):
 
     def srv_event(self, event):
         print("Serving event #{0}".format(event))
-        hits = self.cal.apply(self.pump[event]["Hits"].triggered_hits)
+        hits = self.cal.apply(self.pump[event]["Hits"].triggered_rows)
         srv_event(self.token, hits)
         self.current_idx = event
 

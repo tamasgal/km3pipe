@@ -70,9 +70,12 @@ def get_logger(name):
         return loggers[name]
     logger = logging.getLogger(name)
     logger.propagate = False
-    pre, suf = hash_coloured_escapes(name) if supports_color() else ('', '')
-    formatter = logging.Formatter('%(levelname)s->{}%(name)s:{} %(message)s'
-                                  .format(pre, suf))
+    pre1, suf1 = hash_coloured_escapes(name) if supports_color() else ('', '')
+    pre2, suf2 = hash_coloured_escapes(name + 'salt')  \
+                 if supports_color() else ('', '')
+    formatter = logging.Formatter('%(levelname)s {}+{}+{} '
+                                  '%(name)s: %(message)s'
+                                  .format(pre1, pre2, suf1))
     ch = logging.StreamHandler()
     ch.setFormatter(formatter)
     logger.addHandler(ch)
@@ -85,12 +88,14 @@ def set_level(name, level):
     get_logger(name).setLevel(level)
 
 
-def get_printer(name, color=None, ansi_code=None):
+def get_printer(name, color=None, ansi_code=None, force_color=False):
     """Return a function which prints a message with a coloured name prefix"""
 
-    if supports_color():
+    if force_color or supports_color():
         if color is None and ansi_code is None:
-            name = hash_coloured(name)
+            cpre_1, csuf_1 = hash_coloured_escapes(name)
+            cpre_2, csuf_2 = hash_coloured_escapes(name + 'salt')
+            name = cpre_1 + '+' + cpre_2 + '+' + csuf_1 + ' ' + name
         else:
             name = colored(name, color=color, ansi_code=ansi_code)
 

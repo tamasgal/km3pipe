@@ -89,8 +89,7 @@ def main():
 
         walltime = time.strftime('%H:%M:%S', time.gmtime(ET_PER_RUN * n_runs))
         qsub(s, '{}_{}'.format(JOB_NAME, job_id), walltime=walltime,
-             vmem=VMEM, log_path=LOG_PATH, irods=True, platform='sl6',
-             dryrun=DRYRUN)
+             vmem=VMEM, log_path=LOG_PATH, irods=True, dryrun=DRYRUN)
 
         if DRYRUN:
             break

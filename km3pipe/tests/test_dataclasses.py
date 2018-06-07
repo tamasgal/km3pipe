@@ -864,3 +864,41 @@ class TestTableFancyAttributes(TestCase):
         tab = Table({'a': 1})
         with pytest.raises(ValueError):
             tab.dir = [[1], [2], [3]]
+
+    def test_triggered_keeps_attrs(self):
+        n = 5
+        channel_ids = np.arange(n)
+        dom_ids = np.arange(n)
+        times = np.arange(n)
+        tots = np.arange(n)
+        triggereds = np.array([0, 1, 1, 0, 1])
+        hits = Table({
+            'channel_id': channel_ids,
+            'dom_id': dom_ids,
+            'time': times,
+            'tot': tots,
+            'triggered': triggereds,
+            'group_id': 0,      # event_id
+        }, name='hits', h5loc='/foo', split_h5=True)
+        triggered_hits = hits.triggered_rows
+        assert len(triggered_hits) == 3
+        assert triggered_hits.split_h5
+        assert triggered_hits.name == 'hits'
+        assert triggered_hits.h5loc == '/foo'
+
+    def test_triggered_missing_col_raises(self):
+        n = 5
+        channel_ids = np.arange(n)
+        dom_ids = np.arange(n)
+        times = np.arange(n)
+        tots = np.arange(n)
+        hits = Table({
+            'channel_id': channel_ids,
+            'dom_id': dom_ids,
+            'time': times,
+            'tot': tots,
+            'group_id': 0,      # event_id
+        }, name='hits', h5loc='/foo', split_h5=True)
+        with pytest.raises(KeyError):
+            triggered_hits = hits.triggered_rows
+            assert triggered_hits is not None

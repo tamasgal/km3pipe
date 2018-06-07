@@ -4,8 +4,19 @@ Unreleased changes
 Version 8
 ---------
 
+8.0.1 / 2018-06-07
+~~~~~~~~~~~~~~~~~~
+
+* Completely rewrote Aanet file readout -- supporting latest jpp/aanet only,
+  and using enumerated types to label ``fitinf`` vectors / ``rec_type`` 
+  reconstruction types
+* Added `triggered_hits = hits.triggered_rows` syntactical sugar
+* Fixed datatype bug when applying t0 calibration to timeslice hits
+* Added ``qrunprocessor`` utility
+
+
 8.0.0 / 2018-06-02
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 * replace all dataclasses with the ``Table`` class (subclass of ``np.recarray``)
 * KM3HDF5 Version 5.0: ``group_id`` replaces ``event_id`` in every table,
