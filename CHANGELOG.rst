@@ -4,6 +4,11 @@ Unreleased changes
 Version 8
 ---------
 
+8.0.2 / 2018-06-07
+~~~~~~~~~~~~~~~~~~
+* Fixes an issue where `requirements.txt` is not found when installing
+  with `pip install km3pipe`
+
 8.0.1 / 2018-06-07
 ~~~~~~~~~~~~~~~~~~
 
