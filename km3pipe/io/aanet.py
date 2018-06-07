@@ -18,11 +18,11 @@ from km3pipe.logger import get_logger
 
 log = get_logger(__name__)  # pylint: disable=C0103
 
-__author__ = "Tamas Gal, Thomas Heid and Moritz Lotze"
+__author__ = "Moritz Lotze and Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
-__credits__ = ["Liam Quinn & Javier Barrios Martí"]
+__credits__ = "Thomas Heid, Liam Quinn, Javier Barrios Martí"
 __license__ = "MIT"
-__maintainer__ = "Tamas Gal and Moritz Lotze"
+__maintainer__ = "Moritz Lotze and Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
@@ -163,28 +163,13 @@ class AanetPump(Pump):
     filename: str, optional
         Name of the file to open. If this parameter is not given, ``filenames``
         needs to be specified instead.
-    filenames: list(str), optional
-        List of files to open.
-    aa_fmt: string, optional (default: 'gandalf_new')
-        Subformat of aanet in the file. Possible values:
-        ``'minidst', 'jevt_jgandalf', 'gandalf_new', 'generic_track',
-        'ancient_recolns'``
-    apply_zed_correction: bool, optional [default=False]
-        correct ~400m offset in mc tracks.
-    missing: numeric, optional [default: 0]
-        Filler for missing values.
-    skip_header: bool, optional [default=False]
-    correct_mc_times: bool, optional [default=False]
-        convert hit times from JTE to MC time
     ignore_hits: bool, optional [default=False]
         If true, don't read our the hits/mchits.
-    ignore_run_id_from_header: bool, optional [default=False]
-        Ignore run ID from header, take from event instead;
-        often, the event.run_id is overwritten with the default (1).
     """
 
     def configure(self):
         self.filename = self.require('filename')
+        self.ignore_hits = bool(self.get('ignore_hits'))
         self.header = None
         self.aanet_header = None
         self.blobs = self.blob_generator()
@@ -332,7 +317,7 @@ class AanetPump(Pump):
             out['pmt_id'].append(hit.pmt_id)
             out['time'].append(hit.t)
         out['group_id'] = self.group_id
-        return Table(out, name='McHits', h5loc='/mc_hits')
+        return Table(out, name='McHits', h5loc='/mc_hits', split_h5=True)
 
     def _parse_hits(self, hits):
         out = defaultdict(list)
@@ -343,14 +328,17 @@ class AanetPump(Pump):
             out['tot'].append(hit.tot)
             out['triggered'].append(hit.trig)
         out['group_id'] = self.group_id
-        return Table(out, name='Hits', h5loc='/hits')
+        return Table(out, name='Hits', h5loc='/hits', split_h5=True)
 
     def _read_event(self, event, filename):
         blob = Blob()
-        self.log.debug('Reading Hits...')
-        blob['Hits'] = self._parse_hits(event.hits)
-        self.log.debug('Reading McHits...')
-        blob['McHits'] = self._parse_mchits(event.mc_hits)
+        if self.ignore_hits:
+            self.log.debug('Skipping Hits...')
+        else:
+            self.log.debug('Reading Hits...')
+            blob['Hits'] = self._parse_hits(event.hits)
+            self.log.debug('Reading McHits...')
+            blob['McHits'] = self._parse_mchits(event.mc_hits)
         self.log.debug('Reading McTracks...')
         blob['McTracks'] = self._parse_mctracks(event.mc_trks)
         self.log.debug('Reading EventInfo...')
