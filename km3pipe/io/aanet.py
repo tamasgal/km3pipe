@@ -272,7 +272,10 @@ class AanetPump(Pump):
             out[key] = {}
             for j, elem in enumerate(entries.split()):
                 if key in tags:
-                    elem_name = tags[key][j]
+                    try:
+                        elem_name = tags[key][j]
+                    except IndexError:
+                        elem_name = '{}_{}'.format(key, j)
                 else:
                     elem_name = '{}_{}'.format(key, j)
                 out[key][elem_name] = elem
