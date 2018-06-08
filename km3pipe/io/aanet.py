@@ -276,8 +276,12 @@ class AanetPump(Pump):
                         elem_name = tags[key][j]
                     except IndexError:
                         elem_name = '{}_{}'.format(key, j)
+                        log.info("Can't infer field name, "
+                                 "setting to '{}'...".format(elem_name))
                 else:
                     elem_name = '{}_{}'.format(key, j)
+                    log.info("Can't infer field name, "
+                             "setting to '{}'...".format(elem_name))
                 out[key][elem_name] = elem
         return out
 
