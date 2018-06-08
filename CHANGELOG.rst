@@ -3,6 +3,11 @@ Unreleased changes
 
 Version 8
 ---------
+8.0.3 / 2018-06-08
+~~~~~~~~~~~~~~~~~~
+
+* Introduce robust aanet header readout
+* Update ``tohdf5`` to the new aanetpump
 
 8.0.2 / 2018-06-07
 ~~~~~~~~~~~~~~~~~~
