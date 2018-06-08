@@ -9,6 +9,46 @@ Pep 386 compliant version info.
     (1, 2, 0, 'beta', 2) => "1.2b2"
 
 """
+import subprocess
+import os
+from os.path import dirname, join, exists
+
+
+KP_PATH = join(dirname(__file__), '..')
+
+
+def get_git_revision_hash(short=False):
+    """Try to retrieve the hash of the last git commit"""
+    infix = '--short'
+    try:
+        return subprocess.check_output(['git', '-C', KP_PATH,
+                                        'rev-parse', 'HEAD']) \
+               .strip().decode()
+    except subprocess.CalledProcessError:
+        pass
+    fpath = join(KP_PATH, 'km3pipe/.git_revision_hash')
+    if exists(fpath):
+        with open(fpath, 'r') as fobj:
+            return fobj.read().strip()
+    else:
+        return 'no-git-revision-hash'
+
+
+def get_git_revision_short_hash():
+    """Try to retrieve the short hash of the last git commit"""
+    try:
+        return subprocess.check_output(['git', '-C', KP_PATH,
+                                        'rev-parse', '--short', 'HEAD']) \
+               .strip().decode()
+    except subprocess.CalledProcessError:
+        pass
+    fpath = join(KP_PATH, 'km3pipe/.git_revision_short_hash')
+    if exists(fpath):
+        with open(fpath, 'r') as fobj:
+            return fobj.read().strip()
+    else:
+        return 'no-git-revision-hash'
+
 
 VERSION_INFO = (8, 0, 3, 'final', 0)
 
