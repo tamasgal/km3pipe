@@ -9,6 +9,9 @@ Create a summary for a given list of runs
 Use this batch runner to process a given list of run numbers with a
 script, which takes a `-o` to create a summary file, which has the name
 of the processed file + a given suffix.
+The actual call will look like this, with a bit of copy safeness:
+
+    /abs/path/to/SCRIPT run.root -o /abs/path/to/OUTPUT_PATH+SUFFIX
 
 Before constructing the job scripts, the ``OUTPUT_PATH`` will be traversed
 to find files which have already been converted to avoid multiple conversions.
