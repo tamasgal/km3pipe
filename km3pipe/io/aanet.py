@@ -166,7 +166,7 @@ class AanetPump(Pump):
         return wgt1, wgt2, wgt3, wgt4
 
     def _parse_tracks(self, tracks):
-        out = {}
+        out = defaultdict(list)
         for i, trk in enumerate(tracks):
             self.log.debug('Reading Track #{}...'.format(i))
             trk_type = trk.rec_type
@@ -179,10 +179,19 @@ class AanetPump(Pump):
                         "Setting to '{}'".format(trk_name)
                 )
             trk_dict = self._read_track(trk)
-            out[trk_name] = Table(
+            out[trk_name].append(Table(
                     trk_dict,
                     h5loc='/reco/{}'.format(trk_name.lower()),
                     name=trk_name)
+            )
+        for key in out:
+            name = out[key][0].name
+            h5loc = out[key][0].h5loc
+            out[key] = Table(
+                    np.concatenate(out[key]),
+                    name=name,
+                    h5loc=h5loc,
+            )
         self.log.debug(out)
         return out
 

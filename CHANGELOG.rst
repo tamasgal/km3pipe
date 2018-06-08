@@ -3,6 +3,12 @@ Unreleased changes
 
 Version 8
 ---------
+
+8.0.4 / 2018-06-08
+~~~~~~~~~~~~~~~~~~
+
+* Fix: Read all tracks in AanetPump
+
 8.0.3 / 2018-06-08
 ~~~~~~~~~~~~~~~~~~
 
