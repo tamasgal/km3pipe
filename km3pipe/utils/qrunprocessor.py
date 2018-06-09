@@ -30,6 +30,7 @@ to find files which have already been converted to avoid multiple conversions.
         -s SUFFIX      The suffix which is appended by the SCRIPT [default: .summary.h5].
         -n N_FILES     Number of files to process per job [default: 10].
         -e ET          Estimated walltime per file in minutes [default: 15].
+        -f FSIZE       Estimated filesystem size for a job [default: 12G].
         -m VMEM        Estimated vmem for a job [default: 8G].
         -j JOBNAME     The name of the submitted jobs [default: qrunprocessor].
         -l LOG_PATH    Path of the job log files [default: qlogs].
@@ -65,6 +66,7 @@ def main():
     DET_ID = int(args['DET_ID'])
     ET_PER_FILE = int(args['-e']) * 60  # [s]
     FILES_PER_JOB = int(args['-n'])
+    FSIZE = args['-f']
     VMEM = args['-m']
     LOG_PATH = args['-l']
     JOB_NAME = args['-j']
@@ -126,7 +128,8 @@ def main():
         walltime = time.strftime('%H:%M:%S', time.gmtime(ET_PER_FILE*n_files))
 
         kp.shell.qsub(s, '{}_{}'.format(JOB_NAME, job_id), walltime=walltime,
-                      vmem=VMEM, log_path=LOG_PATH, irods=True, dryrun=DRYRUN)
+                      fsize=FSIZE, vmem=VMEM, log_path=LOG_PATH, irods=True,
+                      dryrun=DRYRUN)
 
         if DRYRUN:
             break
