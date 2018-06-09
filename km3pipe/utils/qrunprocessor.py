@@ -43,7 +43,7 @@ from os.path import basename, join, abspath
 import pathlib
 import time
 import km3pipe as kp
-from km3pipe.tools import chunks
+from km3pipe.tools import chunks, iexists
 
 __author__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
