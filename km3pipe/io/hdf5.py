@@ -489,8 +489,8 @@ class HDF5Pump(Pump):
             index_column = None
             if 'group_id' in tab.dtype.names:
                 index_column = 'group_id'
-            if 'event_id' in tab.dtype.names:
-                index_column = 'event_id'
+            #if 'event_id' in tab.dtype.names:   # using event_id causes event_info to get erased
+            #    index_column = 'event_id'       # the reason is that index_column is only comared to group_id
 
             if index_column is not None:
                 try:
