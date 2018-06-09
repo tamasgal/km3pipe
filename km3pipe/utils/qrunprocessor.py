@@ -31,7 +31,7 @@ to find files which have already been converted to avoid multiple conversions.
         -n N_FILES     Number of files to process per job [default: 10].
         -e ET          Estimated walltime per file in minutes [default: 15].
         -m VMEM        Estimated vmem for a job [default: 8G].
-        -j JOBNAME     The name of the submitted jobs [default: tohdf5].
+        -j JOBNAME     The name of the submitted jobs [default: qrunprocessor].
         -l LOG_PATH    Path of the job log files [default: qlogs].
         -q             Dryrun: don't submit jobs, just print the first job script.
         -h --help      Show this screen.
@@ -102,6 +102,8 @@ def main():
             s.separator('=')
             s.echo("Processing {}:".format(fname))
             s.iget(ipath)
+            s.add('ls -al {}'.format(fname))
+            s.add('JPrintTree -f {}'.format(fname))
             out_fname = fname + SUFFIX
             out_fpath = join(OUTPUT_PATH, out_fname)
             tmp_fname = out_fname + '.copying'
