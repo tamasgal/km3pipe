@@ -37,10 +37,8 @@ vim CHANGELOG.rst
 git add CHANGELOG.rst
 git commit -m "Bumps changelog"
 
-git rev-parse HEAD >> km3pipe/.git_revision_hash
-git rev-parse --short HEAD >> km3pipe/.git_revision_short_hash
-git add km3pipe/.git_revision*
-git commit -m "Update git revision hashes"
+git rev-parse HEAD > km3pipe/.git_revision_hash
+git rev-parse --short HEAD > km3pipe/.git_revision_short_hash
 
 git flow release finish "${VERSION}"
 
