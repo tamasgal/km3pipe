@@ -37,10 +37,10 @@ vim CHANGELOG.rst
 git add CHANGELOG.rst
 git commit -m "Bumps changelog"
 
+git flow release finish "${VERSION}"
+
 git rev-parse HEAD > km3pipe/.git_revision_hash
 git rev-parse --short HEAD > km3pipe/.git_revision_short_hash
-
-git flow release finish "${VERSION}"
 
 rm -rf dist
 python setup.py sdist
