@@ -489,7 +489,7 @@ class HDF5Pump(Pump):
             index_column = None
             if 'group_id' in tab.dtype.names:
                 index_column = 'group_id'
-            if 'event_id' in tab.dtype.names:
+            if 'event_id' in tab.dtype.names:   
                 index_column = 'event_id'
 
             if index_column is not None:
