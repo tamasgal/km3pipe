@@ -3,8 +3,7 @@
 The extemporary KM3NeT analysis framework.
 
 """
-
-from .__version__ import version, VERSION_INFO  # noqa
+from .__version__ import version, VERSION_INFO, get_git_revision_hash
 
 try:
     __KM3PIPE_SETUP__
