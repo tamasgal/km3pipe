@@ -140,7 +140,9 @@ def print_git_short_revision():
 
 def main():
     from docopt import docopt
-    args = docopt(__doc__, version=version)
+    args = docopt(__doc__,
+                  version="KM3Pipe {} - git: {}"
+                          .format(version, get_git_revision_hash()))
 
     if args['test']:
         run_tests()
