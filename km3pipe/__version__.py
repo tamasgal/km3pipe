@@ -10,21 +10,15 @@ Pep 386 compliant version info.
 
 """
 import subprocess
-<<<<<<< HEAD
-from os.path import join, exists, dirname
-
-=======
 import os
 from os.path import dirname, join, exists
 
 
->>>>>>> develop
 KP_PATH = join(dirname(__file__), '..')
 
 
 def get_git_revision_hash(short=False):
     """Try to retrieve the hash of the last git commit"""
-<<<<<<< HEAD
     infix = '--short' if short else ''
     try:
         return subprocess.check_output(
@@ -36,32 +30,6 @@ def get_git_revision_hash(short=False):
     fpath = join(KP_PATH,
                  'km3pipe/.git_revision_{}hash'
                  .format('short_' if short else ''))
-=======
-    infix = '--short'
-    try:
-        return subprocess.check_output(['git', '-C', KP_PATH,
-                                        'rev-parse', 'HEAD']) \
-               .strip().decode()
-    except subprocess.CalledProcessError:
-        pass
-    fpath = join(KP_PATH, 'km3pipe/.git_revision_hash')
-    if exists(fpath):
-        with open(fpath, 'r') as fobj:
-            return fobj.read().strip()
-    else:
-        return 'no-git-revision-hash'
-
-
-def get_git_revision_short_hash():
-    """Try to retrieve the short hash of the last git commit"""
-    try:
-        return subprocess.check_output(['git', '-C', KP_PATH,
-                                        'rev-parse', '--short', 'HEAD']) \
-               .strip().decode()
-    except subprocess.CalledProcessError:
-        pass
-    fpath = join(KP_PATH, 'km3pipe/.git_revision_short_hash')
->>>>>>> develop
     if exists(fpath):
         with open(fpath, 'r') as fobj:
             return fobj.read().strip()
