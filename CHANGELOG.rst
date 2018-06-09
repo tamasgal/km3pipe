@@ -4,9 +4,14 @@ Unreleased changes
 Version 8
 ---------
 
+8.0.5 / 2018-06-09
+~~~~~~~~~~~~~~~~~~
+* New commands available to print the git revision number:
+  `km3pipe git` and `km3pipe git-short`
+* Include git revision hash in pip tar ball
+
 8.0.4 / 2018-06-08
 ~~~~~~~~~~~~~~~~~~
-
 * Fix: Read all tracks in AanetPump
 
 8.0.3 / 2018-06-08
