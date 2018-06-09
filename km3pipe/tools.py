@@ -12,7 +12,6 @@ import re
 import socket
 import subprocess
 import sys
-import warnings
 
 import numpy as np
 
@@ -34,6 +33,15 @@ def ifiles(irods_path):
                                          .format(irods_path), shell=True)
     filenames = raw_output.decode('ascii').strip().split("\n")
     return filenames
+
+
+def iexists(irods_path):
+    """Returns True of iRODS path exists, otherwise False"""
+    try:
+        subprocess.check_output('ils {}'.format(irods_path), shell=True)
+        return True
+    except subprocess.CalledProcessError:
+        return False
 
 
 def token_urlsafe(nbytes=32):
