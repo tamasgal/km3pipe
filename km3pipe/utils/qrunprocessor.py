@@ -55,6 +55,7 @@ def main():
     args = docopt(__doc__, version=__version__)
 
     cprint = kp.logger.get_printer('qrunprocessor')
+    log = kp.logger.get_logger('qrunprocessor')
 
     CWD = os.getcwd()
     RUN_LIST = join(CWD, args['RUN_LIST'])
@@ -75,7 +76,15 @@ def main():
     with open(RUN_LIST, 'r') as fobj:
         run_numbers = [int(run) for run in fobj.read().split()]
 
-    irods_files = [kp.tools.irods_filepath(DET_ID, run) for run in run_numbers]
+    irods_files = []
+    for run in run_numbers:
+        irods_path = kp.tools.irods_filepath(DET_ID, run)
+        if not iexists(irods_path):
+            log.error("Skipping file, since not found on iRODS: {}"
+                      .format(irods_path))
+            continue
+        irods_files.append(irods_path)
+
     processed_files = [basename(f) for f in
                        glob(join(OUTPUT_PATH, '*{}'.format(SUFFIX)))]
 
