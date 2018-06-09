@@ -38,7 +38,8 @@ def ifiles(irods_path):
 def iexists(irods_path):
     """Returns True of iRODS path exists, otherwise False"""
     try:
-        subprocess.check_output('ils {}'.format(irods_path), shell=True)
+        subprocess.check_output('ils {}'.format(irods_path),
+                                shell=True, stderr=subprocess.PIPE,)
         return True
     except subprocess.CalledProcessError:
         return False
