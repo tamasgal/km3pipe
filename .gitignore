@@ -11,6 +11,9 @@ km3pipe/core.c
 km3pipe/dataclasses.c
 km3pipe/tools.c
 
+# Git revision hashes for PyPI
+km3pipe/.git_revision_*
+
 # Distribution / packaging
 .Python
 env/
