@@ -31,11 +31,16 @@ TITLE="KM3Pipe ${VERSION}"
 echo "${TITLE}" > doc/version.txt
 echo "$(printf '=%.0s' {1..${#TITLE}})" >> doc/version.txt
 git add doc/version.txt
-git commit -m "update version tag in docs"
+git commit -m "Update version tag in docs"
 
 vim CHANGELOG.rst
 git add CHANGELOG.rst
 git commit -m "Bumps changelog"
+
+git rev-parse HEAD >> km3pipe/.git_revision_hash
+git rev-parse --short HEAD >> km3pipe/.git_revision_short_hash
+git add km3pipe/.git_revision*
+git commit -m "Update git revision hashes"
 
 git flow release finish "${VERSION}"
 

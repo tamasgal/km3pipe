@@ -10,6 +10,8 @@ Usage:
     km3pipe detectors [-s REGEX] [--temporary]
     km3pipe rundetsn [--temporary] RUN DETECTOR
     km3pipe retrieve DET_ID RUN [-o OUTFILE]
+    km3pipe git
+    km3pipe git-short
     km3pipe (-h | --help)
     km3pipe --version
 
@@ -33,7 +35,7 @@ import sys
 import os
 from datetime import datetime
 
-from . import version
+from . import version, get_git_revision_hash
 from .tools import irods_filepath
 from .db import DBManager
 from .hardware import Detector
@@ -126,6 +128,16 @@ def createconf(overwrite=False, dump=False):
     os.chmod(fname, 0o600)
 
 
+def print_git_revision():
+    """Prints the last git commit hash"""
+    print(get_git_revision_hash())
+
+
+def print_git_short_revision():
+    """Prints the last git commit short hash"""
+    print(get_git_revision_hash(short=True))
+
+
 def main():
     from docopt import docopt
     args = docopt(__doc__, version=version)
@@ -157,3 +169,9 @@ def main():
 
     if args['detectors']:
         detectors(regex=args['-s'], temporary=args["--temporary"])
+
+    if args['git']:
+        print_git_revision()
+
+    if args['git-short']:
+        print_git_short_revision()
