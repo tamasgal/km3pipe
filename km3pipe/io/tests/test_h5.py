@@ -90,9 +90,9 @@ class TestH5Pump(TestCase):
         p.attach(HDF5Pump, filename=self.fname)
         p.drain()
     
-    def test_event_info(self):
+    def test_event_info_is_not_empty(self):
         self.fname = join(DATA_DIR,  'test_event_info.h5')
-        class Printer(kp.Module):
+        class Printer(Module):
             def process(self, blob):
                 assert blob['EventInfo'].size != 0
                 return blob
