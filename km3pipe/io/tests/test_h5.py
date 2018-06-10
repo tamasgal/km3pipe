@@ -89,6 +89,18 @@ class TestH5Pump(TestCase):
         p = Pipeline()
         p.attach(HDF5Pump, filename=self.fname)
         p.drain()
+    
+    def test_event_info(self):
+        self.fname = join(DATA_DIR,  'test_event_info.h5')
+        class Printer(kp.Module):
+            def process(self, blob):
+                assert blob['EventInfo'].size != 0
+                return blob
+        p = Pipeline()
+        p.attach(HDF5Pump, filename=self.fname)
+        p.attach(Printer)
+        p.drain()
+        
 
 
 class TestH5Sink(TestCase):
