@@ -35,6 +35,9 @@ class Client(object):
         self.valid_tags = []
 
     def subscribe(self, tag, mode='wait'):
+        if mode not in ['wait', 'all']:
+            raise ValueError("Possible subscription modes are 'wait' or 'all'")
+        log.info("Subscribing to {} in mode {}".format(tag, mode))
         full_tag = self._full_tag(tag, mode)
         if full_tag not in self.tags:
             self.tags.append(full_tag)
@@ -53,7 +56,7 @@ class Client(object):
             self._update_subscriptions()
 
     def _full_tag(self, tag, mode):
-        mode_flag = ' w ' if mode == 'wait' else ' a '
+        mode_flag = ' {} '.format(mode[0])
         full_tag = mode_flag + tag
         return full_tag
 

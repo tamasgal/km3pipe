@@ -42,6 +42,7 @@ class CHPump(Pump):
         self.max_queue = self.get('max_queue') or 50
         self.key_for_data = self.get('key_for_data') or 'CHData'
         self.key_for_prefix = self.get('key_for_prefix') or 'CHPrefix'
+        self.subscription_mode = self.get('subscription_mode', default='wait')
         self.cuckoo_warn = Cuckoo(60 * 5, log.warning)
         self.performance_warn = Cuckoo(10, self.show_performance_statistics)
 
@@ -78,7 +79,7 @@ class CHPump(Pump):
         self.client._connect()
         log.debug("Subscribing to tags: {0}".format(self.tags))
         for tag in self.tags.split(','):
-            self.client.subscribe(tag.strip())
+            self.client.subscribe(tag.strip(), mode=self.subscription_mode)
         log.debug("Controlhost initialisation done.")
 
     def _run(self):
