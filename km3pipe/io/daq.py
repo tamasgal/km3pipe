@@ -226,6 +226,7 @@ class DAQPump(Pump):
 class DAQProcessor(Module):
     def configure(self):
         self.index = 0
+        self.event_id = 0
 
     def process(self, blob):
         tag = str(blob['CHPrefix'].tag)
@@ -256,8 +257,6 @@ class DAQProcessor(Module):
         if n_hits == 0:
             return
         dom_ids, channel_ids, times, tots = zip(*hits)
-        zeros = np.zeros(n_hits)
-        nans = np.full_like(zeros, np.nan)
         triggereds = np.zeros(n_hits)
         triggered_map = {}
         for triggered_hit in event.triggered_hits:
@@ -268,27 +267,19 @@ class DAQProcessor(Module):
 
         hit_series = Table.from_template({
             'channel_id': channel_ids,
-            'dir_x': nans,
-            'dir_y': nans,
-            'dir_z': nans,
             'dom_id': dom_ids,
-            'id': range(n_hits),
-            'pmt_id': zeros,
-            'pos_x': nans,
-            'pos_y': nans,
-            'pos_z': nans,
-            't0': zeros,
             'time': times,
             'tot': tots,
             'triggered': triggereds,
-            'group_id': self.index,
-        }, 'CalibHits')
+            'group_id': self.event_id,
+        }, 'Hits')
 
-        blob['CalibHits'] = hit_series
+        blob['Hits'] = hit_series
 
         event_info = Table.from_template({
             'det_id': header.det_id,
-            'frame_index': self.index,  # header.time_slice,
+            # 'frame_index': self.index,  # header.time_slice,
+            'frame_index': header.time_slice,
             'livetime_sec': 0,
             'mc_id': 0,
             'mc_t': 0,
@@ -302,11 +293,12 @@ class DAQProcessor(Module):
             'weight_w1': 0,
             'weight_w2': 0,
             'weight_w3': 0,  # MC weights
-            'run_id': 0,  # run id
-            'group_id': 0,
+            'run_id': header.run,  # run id
+            'group_id': self.event_id,
         }, 'EventInfo')
         blob['EventInfo'] = event_info
 
+        self.event_id += 1
         self.index += 1
 
     def process_summaryslice(self, data, blob):
