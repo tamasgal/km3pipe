@@ -62,7 +62,7 @@ class CHPump(Pump):
                              "you will block other clients. "
                              "If you don't understand this message "
                              "and are running this code on a DAQ machine, "
-                             "consult a DAQ expert now and stop this script."
+                             "consult a DAQ expert now and stop this script.")
 
         print("Connecting to {0} on port {1}\n"
               "Subscribed tags: {2}\n"
