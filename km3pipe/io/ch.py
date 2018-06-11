@@ -56,6 +56,14 @@ class CHPump(Pump):
         self.client = None
         self.thread = None
 
+        if self.subscription_mode == 'all':
+            self.log.warning("You subscribed to the ligier in 'all'-mode! "
+                             "If you are too slow with data processing, "
+                             "you will block other clients. "
+                             "If you don't understand this message "
+                             "and are running this code on a DAQ machine, "
+                             "consult a DAQ expert now and stop this script."
+
         print("Connecting to {0} on port {1}\n"
               "Subscribed tags: {2}\n"
               "Connection timeout: {3}s\n"
