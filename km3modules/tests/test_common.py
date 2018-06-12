@@ -3,8 +3,8 @@
 
 import km3pipe as kp
 from km3pipe.dataclasses import Table
-from km3modules.common import (Siphon, Delete, Keep, Dump, StatusBar,
-                               TickTock, MemoryObserver, BlobIndexer)
+from km3modules.common import (Siphon, Delete, Keep, Dump, StatusBar, TickTock,
+                               MemoryObserver, BlobIndexer)
 from km3pipe.testing import TestCase, MagicMock
 from km3pipe.tools import istype
 
@@ -19,6 +19,7 @@ __status__ = "Development"
 
 class InfinitePump(kp.Pump):
     """A pump which just infinetly spits out indexed blobs"""
+
     def configure(self):
         self.i = 0
 
@@ -39,7 +40,6 @@ class TestKeep(TestCase):
                 return blob
 
         class Observer(kp.Module):
-
             def process(self, blob):
                 assert 'a' not in blob
                 assert 'b' not in blob
@@ -63,7 +63,6 @@ class TestKeep(TestCase):
                 return blob
 
         class Observer(kp.Module):
-
             def process(self, blob):
                 assert 'a' not in blob
                 assert 'b' == blob['b']
@@ -88,7 +87,6 @@ class TestDelete(TestCase):
                 return blob
 
         class Observer(kp.Module):
-
             def process(self, blob):
                 assert 'a' == blob['a']
                 assert 'b' not in blob
@@ -110,7 +108,6 @@ class TestDelete(TestCase):
                 return blob
 
         class Observer(kp.Module):
-
             def process(self, blob):
                 assert 'a' not in blob
                 assert 'b' not in blob

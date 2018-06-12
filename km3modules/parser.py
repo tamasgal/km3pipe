@@ -36,7 +36,7 @@ class CHParser(Module):
 
         data = blob['CHData']
         data_io = StringIO(data)
-        preamble = DAQPreamble(file_obj=data_io)  # noqa
+        preamble = DAQPreamble(file_obj=data_io)    # noqa
 
         blob_key, ParserClass = self.parse_map[tag]
         blob[blob_key] = ParserClass(file_obj=data_io)

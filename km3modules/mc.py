@@ -7,8 +7,12 @@ from km3pipe import Module
 from km3pipe.mc import pdg2name
 from km3pipe.math import zenith, azimuth
 
-
-NEUTRINOS = {'nu_e', 'anu_e', 'nu_mu', 'anu_mu', }      # noqa
+NEUTRINOS = {
+    'nu_e',
+    'anu_e',
+    'nu_mu',
+    'anu_mu',
+}    # noqa
 
 
 class McTruth(Module):

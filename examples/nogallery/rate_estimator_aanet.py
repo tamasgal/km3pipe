@@ -1,13 +1,11 @@
 """Open a file with real data and estimate the DOM rates.
 """
 
-
 from km3pipe import Module, Pipeline
 from km3pipe.io.aanet import AanetPump
 
 
 class RateEstimator(Module):
-
     def process(self, blob):
         hits = blob["Hits"]
         doms = {h.dom_id for h in hits}

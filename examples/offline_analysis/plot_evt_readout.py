@@ -24,7 +24,6 @@ import km3pipe.style
 
 km3pipe.style.use("km3pipe")
 
-
 filename = "../data/numu_cc.evt"
 detx = "../data/km3net_jul13_90m_r1494_corrected.detx"
 
@@ -33,6 +32,7 @@ cal = Calibration(filename=detx)
 
 class VertexHitDistanceCalculator(Module):
     """Calculate vertex-hit-distances"""
+
     def configure(self):
         self.distances = []
 

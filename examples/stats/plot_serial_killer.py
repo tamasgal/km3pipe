@@ -18,14 +18,14 @@ from statsmodels.distributions.empirical_distribution import ECDF
 import matplotlib.pyplot as plt
 
 from km3pipe.stats import bootstrap_fit
-import km3pipe.style.moritz     # noqa
-
+import km3pipe.style.moritz    # noqa
 
 ######################################################################
 # The data (times of killings) are in a text file, let's write a small
 # function to read them. We are interested in the time differences between
 # the murders.
 #
+
 
 def get_time_deltas(fname):
     with open(fname) as f:
@@ -52,7 +52,6 @@ plt.loglog(days, eucdf)
 plt.xlabel('Days between murders')
 plt.ylabel('Cumulative probability')
 
-
 ######################################################################
 # Let's fit a powerlaw
 #
@@ -61,7 +60,6 @@ pareto_idx, pareto_loc, pareto_scale = stats.pareto.fit(diffs)
 pareto = stats.pareto(pareto_idx, pareto_loc, pareto_scale)
 
 _ = bootstrap_fit(stats.pareto, diffs, n_iter=100)
-
 
 ######################################################################
 # And a lognormal, because Gauss is not mocked.
@@ -74,8 +72,10 @@ _ = bootstrap_fit(stats.lognorm, diffs, n_iter=100)
 
 ######################################################################
 
-plt.loglog(days, 1 - pareto.cdf(days),
-           label='Pareto Fit (exponent {:.3})'.format(pareto_idx + 1))
+plt.loglog(
+    days,
+    1 - pareto.cdf(days),
+    label='Pareto Fit (exponent {:.3})'.format(pareto_idx + 1))
 plt.loglog(days, 1 - lognorm.cdf(days), label='LogNorm Fit')
 plt.loglog(days, eucdf, label='Empirical CDF')
 plt.xlabel('Days between murders')

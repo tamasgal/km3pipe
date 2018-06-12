@@ -104,6 +104,7 @@ class HitCounter(Module):
 
 class HitCalibrator(Module):
     """A very basic hit calibrator, which requires a `Calibration` module."""
+
     def configure(self):
         self.input_key = self.get('input_key', default='Hits')
         self.output_key = self.get('output_key', default='CalibHits')
@@ -191,7 +192,7 @@ class Siphon(Module):
     """
 
     def configure(self):
-        self.volume = self.require('volume')  # [blobs]
+        self.volume = self.require('volume')    # [blobs]
         self.flush = self.get('flush', default=False)
 
         self.blob_count = 0

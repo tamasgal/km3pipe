@@ -11,11 +11,10 @@ import builtins
 # so we can detect in __init__.py that it's called from setup.py
 builtins.__KM3PIPE_SETUP__ = True
 
-from km3pipe import version     # noqa
+from km3pipe import version    # noqa
 
 with open('requirements.txt') as fobj:
     requirements = [l.strip() for l in fobj.readlines()]
-
 
 setup(
     name='km3pipe',
@@ -24,11 +23,16 @@ setup(
     description='An analysis framework for KM3NeT',
     author='Tamas Gal and Moritz Lotze',
     author_email='tgal@km3net.de',
-    packages=['km3pipe', 'km3pipe.io', 'km3pipe.utils',
-              'km3modules', 'pipeinspector'],
+    packages=[
+        'km3pipe', 'km3pipe.io', 'km3pipe.utils', 'km3modules', 'pipeinspector'
+    ],
     include_package_data=True,
     platforms='any',
-    setup_requires=['pip>=10.0.1', 'setuptools>=39.0', 'numpy>=1.12', ],
+    setup_requires=[
+        'pip>=10.0.1',
+        'setuptools>=39.0',
+        'numpy>=1.12',
+    ],
     install_requires=requirements,
     python_requires='>=3.5',
     entry_points={
