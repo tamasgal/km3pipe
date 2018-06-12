@@ -32,7 +32,7 @@ class Calibration(Module):
 
     Parameters
     ----------
-    apply: bool, optional [default=False]
+    apply: bool, optional [default=True]
         Apply the calibration to the hits (add position/direction/t0)?
     filename: str, optional [default=None]
         DetX file with detector description.
@@ -47,7 +47,7 @@ class Calibration(Module):
     name = 'Calibration'
 
     def configure(self):
-        self._should_apply = self.get('apply', default=False)
+        self._should_apply = self.get('apply', default=True)
         self.filename = self.get('filename')
         self.det_id = self.get('det_id')
         self.t0set = self.get('t0set')
