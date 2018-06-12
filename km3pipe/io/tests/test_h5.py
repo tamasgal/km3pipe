@@ -89,6 +89,34 @@ class TestH5Pump(TestCase):
         p = Pipeline()
         p.attach(HDF5Pump, filename=self.fname)
         p.drain()
+    
+    def test_event_info_is_not_empty(self):
+        self.fname = join(DATA_DIR,  'test_event_info.h5')
+        class Printer(Module):
+            def process(self, blob):
+                assert blob['EventInfo'].size != 0
+                return blob
+        p = Pipeline()
+        p.attach(HDF5Pump, filename=self.fname)
+        p.attach(Printer)
+        p.drain()
+
+    def test_event_info_has_correct_group_id(self):
+        self.fname = join(DATA_DIR,  'test_event_info.h5')
+
+        class Printer(Module):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                assert blob['EventInfo'][0].group_id == self.index
+                self.index += 1
+                return blob
+
+        p = Pipeline()
+        p.attach(HDF5Pump, filename=self.fname)
+        p.attach(Printer)
+        p.drain()
 
 
 class TestH5Sink(TestCase):

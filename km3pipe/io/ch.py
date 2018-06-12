@@ -42,6 +42,7 @@ class CHPump(Pump):
         self.max_queue = self.get('max_queue') or 50
         self.key_for_data = self.get('key_for_data') or 'CHData'
         self.key_for_prefix = self.get('key_for_prefix') or 'CHPrefix'
+        self.subscription_mode = self.get('subscription_mode', default='wait')
         self.cuckoo_warn = Cuckoo(60 * 5, log.warning)
         self.performance_warn = Cuckoo(10, self.show_performance_statistics)
 
@@ -54,6 +55,14 @@ class CHPump(Pump):
         self.queue = Queue()
         self.client = None
         self.thread = None
+
+        if self.subscription_mode == 'all':
+            self.log.warning("You subscribed to the ligier in 'all'-mode! "
+                             "If you are too slow with data processing, "
+                             "you will block other clients. "
+                             "If you don't understand this message "
+                             "and are running this code on a DAQ machine, "
+                             "consult a DAQ expert now and stop this script.")
 
         print("Connecting to {0} on port {1}\n"
               "Subscribed tags: {2}\n"
@@ -78,7 +87,7 @@ class CHPump(Pump):
         self.client._connect()
         log.debug("Subscribing to tags: {0}".format(self.tags))
         for tag in self.tags.split(','):
-            self.client.subscribe(tag.strip())
+            self.client.subscribe(tag.strip(), mode=self.subscription_mode)
         log.debug("Controlhost initialisation done.")
 
     def _run(self):

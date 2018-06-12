@@ -31,7 +31,7 @@ TITLE="KM3Pipe ${VERSION}"
 echo "${TITLE}" > doc/version.txt
 echo "$(printf '=%.0s' {1..${#TITLE}})" >> doc/version.txt
 git add doc/version.txt
-git commit -m "update version tag in docs"
+git commit -m "Update version tag in docs"
 
 vim CHANGELOG.rst
 git add CHANGELOG.rst
@@ -39,8 +39,14 @@ git commit -m "Bumps changelog"
 
 git flow release finish "${VERSION}"
 
+git rev-parse HEAD > km3pipe/.git_revision_hash
+git rev-parse --short HEAD > km3pipe/.git_revision_short_hash
+
 rm -rf dist
 python setup.py sdist
+
+rm km3pipe/.git_revision_*
+
 twine upload dist/*
 
 git checkout master
