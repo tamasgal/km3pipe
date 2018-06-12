@@ -17,9 +17,8 @@ import km3pipe as kp
 import numpy as np
 import tables as tb
 
-
-FILTERS = tb.Filters(complevel=5, shuffle=True,
-                     fletcher32=True, complib='zlib')
+FILTERS = tb.Filters(
+    complevel=5, shuffle=True, fletcher32=True, complib='zlib')
 
 
 def calibrate_hits(f, cal):
@@ -49,23 +48,23 @@ def calibrate_mc_hits(f, cal):
 def apply_calibration(calib, f, n, loc):
     f4_atom = tb.Float32Atom()
     u1_atom = tb.UInt8Atom()
-    for i, node in enumerate([p + '_' + s for p in ['pos', 'dir']
-                              for s in 'xyz']):
+    for i, node in enumerate(
+        [p + '_' + s for p in ['pos', 'dir'] for s in 'xyz']):
         print("  ...creating " + node)
-        ca = f.create_carray(loc, node, f4_atom, (n,), filters=FILTERS)
+        ca = f.create_carray(loc, node, f4_atom, (n, ), filters=FILTERS)
         ca[:] = calib[:, i]
 
     print("  ...creating du")
-    du = f.create_carray(loc, 'du', u1_atom, (n,), filters=FILTERS)
+    du = f.create_carray(loc, 'du', u1_atom, (n, ), filters=FILTERS)
     du[:] = calib[:, 7].astype('u1')
     print("  ...creating floor")
-    floor = f.create_carray(loc, 'floor', u1_atom, (n,), filters=FILTERS)
+    floor = f.create_carray(loc, 'floor', u1_atom, (n, ), filters=FILTERS)
     floor[:] = calib[:, 8].astype('u1')
 
     if loc == "/hits":
         print("  ...creating t0")
         print("  ...adding t0s to hit times")
-        ca = f.create_carray(loc, "t0", f4_atom, (n,), filters=FILTERS)
+        ca = f.create_carray(loc, "t0", f4_atom, (n, ), filters=FILTERS)
         ca[:] = calib[:, 6]
         f.get_node(loc + "/time")[:] += calib[:, 6]
 
@@ -82,7 +81,7 @@ def main():
             print(e)
             raise SystemExit
 
-        if("/hits/pos_x" in f or "/mc_hits/pos_y" in f):
+        if ("/hits/pos_x" in f or "/mc_hits/pos_y" in f):
             print("The file seems to be calibrated, please check.")
             raise SystemExit
 

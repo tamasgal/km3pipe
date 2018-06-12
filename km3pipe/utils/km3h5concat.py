@@ -14,7 +14,6 @@ Options:
     -n=NEVENTS                      Number of events; if not given, use all.
 """
 
-
 from km3modules.common import StatusBar
 from km3pipe import version
 from km3pipe import logger
@@ -32,8 +31,8 @@ log = logger.get_logger('km3pipe.io')
 
 def km3h5concat(input_files, output_file, n_events=None, **kwargs):
     """Concatenate KM3HDF5 files via pipeline."""
-    from km3pipe import Pipeline  # noqa
-    from km3pipe.io import HDF5Pump, HDF5Sink  # noqa
+    from km3pipe import Pipeline    # noqa
+    from km3pipe.io import HDF5Pump, HDF5Sink    # noqa
 
     pipe = Pipeline()
     pipe.attach(HDF5Pump, filenames=input_files, **kwargs)

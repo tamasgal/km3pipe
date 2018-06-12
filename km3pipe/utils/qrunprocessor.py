@@ -64,14 +64,13 @@ def main():
     SCRIPT = abspath(args['SCRIPT'])
     SUFFIX = args['-s']
     DET_ID = int(args['DET_ID'])
-    ET_PER_FILE = int(args['-e']) * 60  # [s]
+    ET_PER_FILE = int(args['-e']) * 60    # [s]
     FILES_PER_JOB = int(args['-n'])
     FSIZE = args['-f']
     VMEM = args['-m']
     LOG_PATH = args['-l']
     JOB_NAME = args['-j']
     DRYRUN = args['-q']
-
 
     pathlib.Path(OUTPUT_PATH).mkdir(parents=True, exist_ok=True)
 
@@ -87,18 +86,18 @@ def main():
             continue
         irods_files.append(irods_path)
 
-    processed_files = [basename(f) for f in
-                       glob(join(OUTPUT_PATH, '*{}'.format(SUFFIX)))]
+    processed_files = [
+        basename(f) for f in glob(join(OUTPUT_PATH, '*{}'.format(SUFFIX)))
+    ]
 
     rem_files = []
     for irods_file in irods_files:
-        if basename(irods_file)+SUFFIX not in processed_files:
+        if basename(irods_file) + SUFFIX not in processed_files:
             rem_files.append(irods_file)
 
-    cprint("{} runs in total, {} already processed."
-           .format(len(irods_files), len(processed_files)))
-    cprint("Proceeding with the remaining {} files."
-           .format(len(rem_files)))
+    cprint("{} runs in total, {} already processed.".format(
+        len(irods_files), len(processed_files)))
+    cprint("Proceeding with the remaining {} files.".format(len(rem_files)))
 
     s = kp.shell.Script()
 
@@ -125,11 +124,18 @@ def main():
             s.echo("File '{}' processed.".format(fname))
             s.separator('-')
 
-        walltime = time.strftime('%H:%M:%S', time.gmtime(ET_PER_FILE*n_files))
+        walltime = time.strftime('%H:%M:%S',
+                                 time.gmtime(ET_PER_FILE * n_files))
 
-        kp.shell.qsub(s, '{}_{}'.format(JOB_NAME, job_id), walltime=walltime,
-                      fsize=FSIZE, vmem=VMEM, log_path=LOG_PATH, irods=True,
-                      dryrun=DRYRUN)
+        kp.shell.qsub(
+            s,
+            '{}_{}'.format(JOB_NAME, job_id),
+            walltime=walltime,
+            fsize=FSIZE,
+            vmem=VMEM,
+            log_path=LOG_PATH,
+            irods=True,
+            dryrun=DRYRUN)
 
         if DRYRUN:
             break

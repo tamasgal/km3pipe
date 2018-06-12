@@ -16,7 +16,6 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-
 CONFIGURATION = StringIO("\n".join((
     "[DB]",
     "username=foo",

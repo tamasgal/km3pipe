@@ -16,20 +16,35 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 DET_ID = 'det_id1'
-JSON_DOMS = [{'DOMId': 1, 'Floor': 10, 'CLBUPI': '100', 'DetOID': DET_ID},
-             {'DOMId': 2, 'Floor': 20, 'CLBUPI': '200', 'DetOID': DET_ID},
-             {'DOMId': 3, 'Floor': 30, 'CLBUPI': '300', 'DetOID': DET_ID},
-             {'DOMId': 4, 'Floor': 40, 'CLBUPI': '400', 'DetOID': 'det_id2'}]
+JSON_DOMS = [{
+    'DOMId': 1,
+    'Floor': 10,
+    'CLBUPI': '100',
+    'DetOID': DET_ID
+}, {
+    'DOMId': 2,
+    'Floor': 20,
+    'CLBUPI': '200',
+    'DetOID': DET_ID
+}, {
+    'DOMId': 3,
+    'Floor': 30,
+    'CLBUPI': '300',
+    'DetOID': DET_ID
+}, {
+    'DOMId': 4,
+    'Floor': 40,
+    'CLBUPI': '400',
+    'DetOID': 'det_id2'
+}]
 
 log = get_logger('db')
 
-
-STREAMDS_META = join(dirname(__file__),
-                     "../kp-data/test_data/streamds_output.txt")
+STREAMDS_META = join(
+    dirname(__file__), "../kp-data/test_data/streamds_output.txt")
 
 
 class TestDBManager(TestCase):
-
     def test_login_called_on_init_when_credentials_are_provided(self):
         user = 'user'
         pwd = 'god'
@@ -40,12 +55,12 @@ class TestDBManager(TestCase):
         self.assertTupleEqual((user, pwd), DBManager.login.call_args[0])
 
     def test_login(self):
-        original_login = DBManager.login  # save for later
+        original_login = DBManager.login    # save for later
 
         # mock login to be able to create an instance without an actual login
         DBManager.login = MagicMock()
-        db = DBManager(username='foo', password='bar')  # make dummy call
-        DBManager.login = original_login  # restore function
+        db = DBManager(username='foo', password='bar')    # make dummy call
+        DBManager.login = original_login    # restore function
 
         db._make_request = MagicMock()
         db.login(username='a', password='b')
@@ -139,9 +154,9 @@ class TestStreamDS(TestCase):
                              self.sds.mandatory_selectors('datalognumbers'))
 
     def test_optional_selectors(self):
-        self.assertListEqual(['upi', 'city', 'locationid', 'operation',
-                              'operationid'],
-                              self.sds.optional_selectors('productloc'))
+        self.assertListEqual(
+            ['upi', 'city', 'locationid', 'operation', 'operationid'],
+            self.sds.optional_selectors('productloc'))
         self.assertListEqual(['run', 'runjobid', 'jobtarget', 'jobpriority'],
                              self.sds.optional_selectors('runs'))
         self.assertListEqual(['source_name', 'parameter_name'],

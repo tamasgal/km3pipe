@@ -28,7 +28,7 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = get_logger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)    # pylint: disable=C0103
 
 
 class CHPump(Pump):
@@ -67,9 +67,9 @@ class CHPump(Pump):
         print("Connecting to {0} on port {1}\n"
               "Subscribed tags: {2}\n"
               "Connection timeout: {3}s\n"
-              "Maximum queue size for incoming data: {4}"
-              .format(self.host, self.port, self.tags, self.timeout,
-                      self.max_queue))
+              "Maximum queue size for incoming data: {4}".format(
+                  self.host, self.port, self.tags, self.timeout,
+                  self.max_queue))
 
         self._init_controlhost()
         self._start_thread()

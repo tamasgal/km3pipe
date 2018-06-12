@@ -192,10 +192,10 @@ class TestPipeline(TestCase):
     def test_ctrl_c_handling(self):
         pl = Pipeline()
         self.assertFalse(pl._stop)
-        pl._handle_ctrl_c()  # first KeyboardInterrupt
+        pl._handle_ctrl_c()    # first KeyboardInterrupt
         self.assertTrue(pl._stop)
         with self.assertRaises(SystemExit):
-            pl._handle_ctrl_c()  # second KeyboardInterrupt
+            pl._handle_ctrl_c()    # second KeyboardInterrupt
 
     def test_attaching_a_pump_allows_first_param_to_be_passed_as_fname(self):
         class APump(Pump):
@@ -276,6 +276,7 @@ class TestModule(TestCase):
             def __init__(self, **context):
                 super(self.__class__, self).__init__(**context)
                 self.foo = self.get('foo') or 'default_foo'
+
         module = Foo()
         self.assertEqual('default_foo', module.foo)
         module = Foo(foo='overwritten')

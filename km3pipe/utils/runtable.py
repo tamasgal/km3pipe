@@ -27,7 +27,6 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-
 log = kp.logger.get_logger(__name__)
 
 
@@ -43,8 +42,8 @@ def runtable(det_id, n=5, sep='\t', regex=None):
             log.error("Invalid regex!")
             return
 
-        df = df[df['RUNSETUPNAME'].str.contains(regex) |
-                df['RUNSETUPID'].str.contains(regex)]
+        df = df[df['RUNSETUPNAME'].str.contains(regex)
+                | df['RUNSETUPID'].str.contains(regex)]
 
     if n is not None:
         df = df.tail(n)

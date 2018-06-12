@@ -23,7 +23,6 @@ Options:
                                     size is >= 100 MB. [default: 10000]
 """
 
-
 from km3modules.common import StatusBar
 from km3pipe import version
 from km3pipe import logger
@@ -41,8 +40,8 @@ log = logger.get_logger('km3pipe.io')
 
 def tohdf5(input_files, output_file, n_events, **kwargs):
     """Convert Any file to HDF5 file"""
-    from km3pipe import Pipeline  # noqa
-    from km3pipe.io import GenericPump, HDF5Sink, HDF5MetaData  # noqa
+    from km3pipe import Pipeline    # noqa
+    from km3pipe.io import GenericPump, HDF5Sink, HDF5MetaData    # noqa
 
     pipe = Pipeline()
     pipe.attach(GenericPump, filenames=input_files, **kwargs)
@@ -82,10 +81,11 @@ def main():
     if is_debug:
         log.setLevel('DEBUG')
     ignore_hits_arg = args['--ignore-hits']
-    tohdf5(infiles,
-           outfile,
-           n,
-           use_jppy=use_jppy_pump,
-           n_rows_expected=n_rows_expected,
-           ignore_hits=bool(ignore_hits_arg),
-           )
+    tohdf5(
+        infiles,
+        outfile,
+        n,
+        use_jppy=use_jppy_pump,
+        n_rows_expected=n_rows_expected,
+        ignore_hits=bool(ignore_hits_arg),
+    )

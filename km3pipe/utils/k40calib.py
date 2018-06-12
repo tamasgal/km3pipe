@@ -27,7 +27,6 @@ Options:
 # Author: Jonas Reubelt <jreubelt@km3net.de> and Tamas Gal <tgal@km3net.de>
 # License: MIT
 
-
 from km3pipe import version
 import km3pipe as kp
 from km3modules import k40
@@ -42,21 +41,23 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-def k40calib(filename, tmax, ctmin, stream, filter_hrv, det_id, calib_filename):
+def k40calib(filename, tmax, ctmin, stream, filter_hrv, det_id,
+             calib_filename):
     pipe = kp.Pipeline()
     pipe.attach(kp.io.jpp.TimeslicePump, filename=filename, stream=stream)
     pipe.attach(StatusBar, every=5000)
     pipe.attach(MemoryObserver, every=10000)
-    pipe.attach(k40.HRVFIFOTimesliceFilter,
-                filter_hrv=filter_hrv, filename=filename)
+    pipe.attach(
+        k40.HRVFIFOTimesliceFilter, filter_hrv=filter_hrv, filename=filename)
     pipe.attach(k40.SummaryMedianPMTRateService, filename=filename)
     pipe.attach(k40.TwofoldCounter, tmax=tmax)
     pipe.attach(k40.K40BackgroundSubtractor, mode='offline')
-    pipe.attach(k40.IntraDOMCalibrator,
-                ctmin=ctmin,
-                mode='offline',
-                det_id=det_id,
-                calib_filename=calib_filename)
+    pipe.attach(
+        k40.IntraDOMCalibrator,
+        ctmin=ctmin,
+        mode='offline',
+        det_id=det_id,
+        calib_filename=calib_filename)
     pipe.drain()
 
 
@@ -64,10 +65,5 @@ def main():
     from docopt import docopt
     args = docopt(__doc__, version=version)
 
-    k40calib(args['FILE'],
-             int(args['-t']),
-             float(args['-c']),
-             args['-s'],
-             args['-r'],
-             int(args['DET_ID']),
-             args['-o'])
+    k40calib(args['FILE'], int(args['-t']), float(args['-c']), args['-s'],
+             args['-r'], int(args['DET_ID']), args['-o'])

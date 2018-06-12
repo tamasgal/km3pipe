@@ -49,14 +49,11 @@ def runinfo(run_id, det_id):
           "  Start time defined: {3}\n"
           "  Runsetup ID:        {4}\n"
           "  Runsetup name:      {5}\n"
-          "  T0 Calibration ID:  {6}\n"
-          .format(row['DATETIME'].values[0],
-                  end_time,
-                  duration,
-                  bool(row['STARTTIME_DEFINED'].values[0]),
-                  row['RUNSETUPID'].values[0],
-                  row['RUNSETUPNAME'].values[0],
-                  row['T0_CALIBSETID'].values[0]))
+          "  T0 Calibration ID:  {6}\n".format(
+              row['DATETIME'].values[0], end_time, duration,
+              bool(row['STARTTIME_DEFINED'].values[0]),
+              row['RUNSETUPID'].values[0], row['RUNSETUPNAME'].values[0],
+              row['T0_CALIBSETID'].values[0]))
 
 
 def main():

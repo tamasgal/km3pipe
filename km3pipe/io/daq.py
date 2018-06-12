@@ -25,7 +25,7 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = get_logger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)    # pylint: disable=C0103
 
 DATA_TYPES = {
     101: 'DAQSuperFrame',
@@ -78,16 +78,17 @@ class TimesliceParser(Module):
                 timestamp, ns_ticks, dom_id = unpack('<iii', data.read(12))
                 dom_status = unpack('<iiiii', data.read(5 * 4))
                 n_hits = unpack('<i', data.read(4))[0]
-                ts_frameinfos[dom_id] = Table.from_template({
-                    'det_id': det_id,
-                    'run_id': run,
-                    'sqnr': sqnr,
-                    'timestamp': timestamp,
-                    'nanoseconds': ns_ticks * 16,
-                    'dom_id': dom_id,
-                    'dom_status': dom_status,
-                    'n_hits': n_hits,
-                }, 'TimesliceFrameInfo')
+                ts_frameinfos[dom_id] = Table.from_template(
+                    {
+                        'det_id': det_id,
+                        'run_id': run,
+                        'sqnr': sqnr,
+                        'timestamp': timestamp,
+                        'nanoseconds': ns_ticks * 16,
+                        'dom_id': dom_id,
+                        'dom_status': dom_status,
+                        'n_hits': n_hits,
+                    }, 'TimesliceFrameInfo')
                 for j in range(n_hits):
                     hit = unpack('!BlB', data.read(6))
                     _dom_ids.append(dom_id)
@@ -95,14 +96,16 @@ class TimesliceParser(Module):
                     _times.append(hit[1])
                     _tots.append(hit[2])
 
-            tshits = Table.from_template({
-                'channel_id': np.array(_channel_ids),
-                'dom_id': np.array(_dom_ids),
-                'time': np.array(_times),
-                'tot': np.array(_tots),
-                'triggered': np.zeros(len(_tots)),  # triggered
-                'group_id': 0  # event_id
-            }, 'Hits')
+            tshits = Table.from_template(
+                {
+                    'channel_id': np.array(_channel_ids),
+                    'dom_id': np.array(_dom_ids),
+                    'time': np.array(_times),
+                    'tot': np.array(_tots),
+                    'triggered': np.zeros(len(_tots)),    # triggered
+                    'group_id': 0    # event_id
+                },
+                'Hits')
             blob['TimesliceInfo'] = ts_info
             blob['TimesliceFrameInfos'] = ts_frameinfos
             blob['TSHits'] = tshits
@@ -248,7 +251,7 @@ class DAQProcessor(Module):
 
     def process_event(self, data, blob):
         data_io = BytesIO(data)
-        preamble = DAQPreamble(file_obj=data_io)  # noqa
+        preamble = DAQPreamble(file_obj=data_io)    # noqa
         event = DAQEvent(file_obj=data_io)
         header = event.header
 
@@ -276,26 +279,28 @@ class DAQProcessor(Module):
 
         blob['Hits'] = hit_series
 
-        event_info = Table.from_template({
-            'det_id': header.det_id,
-            # 'frame_index': self.index,  # header.time_slice,
-            'frame_index': header.time_slice,
-            'livetime_sec': 0,
-            'mc_id': 0,
-            'mc_t': 0,
-            'n_events_gen': 0,
-            'n_files_gen': 0,
-            'overlays': event.overlays,
-            'trigger_counter': event.trigger_counter,
-            'trigger_mask': event.trigger_mask,
-            'uts_nanoseconds': header.ticks * 16,
-            'uts_seconds': header.time_stamp,
-            'weight_w1': 0,
-            'weight_w2': 0,
-            'weight_w3': 0,  # MC weights
-            'run_id': header.run,  # run id
-            'group_id': self.event_id,
-        }, 'EventInfo')
+        event_info = Table.from_template(
+            {
+                'det_id': header.det_id,
+        # 'frame_index': self.index,  # header.time_slice,
+                'frame_index': header.time_slice,
+                'livetime_sec': 0,
+                'mc_id': 0,
+                'mc_t': 0,
+                'n_events_gen': 0,
+                'n_files_gen': 0,
+                'overlays': event.overlays,
+                'trigger_counter': event.trigger_counter,
+                'trigger_mask': event.trigger_mask,
+                'uts_nanoseconds': header.ticks * 16,
+                'uts_seconds': header.time_stamp,
+                'weight_w1': 0,
+                'weight_w2': 0,
+                'weight_w3': 0,    # MC weights
+                'run_id': header.run,    # run id
+                'group_id': self.event_id,
+            },
+            'EventInfo')
         blob['EventInfo'] = event_info
 
         self.event_id += 1
@@ -303,7 +308,7 @@ class DAQProcessor(Module):
 
     def process_summaryslice(self, data, blob):
         data_io = BytesIO(data)
-        preamble = DAQPreamble(file_obj=data_io)  # noqa
+        preamble = DAQPreamble(file_obj=data_io)    # noqa
         summaryslice = DAQSummaryslice(file_obj=data_io)
         blob["RawSummaryslice"] = summaryslice
 
@@ -435,7 +440,7 @@ class DAQSummaryslice(object):
         """Iterate through the byte data and fill the summary_frames"""
         for _ in range(self.n_summary_frames):
             dom_id = unpack('<i', file_obj.read(4))[0]
-            dq_status = file_obj.read(4)  # probably dom status? # noqa
+            dq_status = file_obj.read(4)    # probably dom status? # noqa
             dom_status = unpack('<iiii', file_obj.read(16))
             raw_rates = unpack('b' * 31, file_obj.read(31))
             pmt_rates = [self._get_rate(value) for value in raw_rates]
@@ -507,10 +512,9 @@ class DAQEvent(object):
             self.snapshot_hits.append((dom_id, pmt_id, tdc_time, tot))
 
     def __repr__(self):
-        string = '\n'.join((
-            " Number of triggered hits: " + str(self.n_triggered_hits),
-            " Number of snapshot hits: " + str(self.n_snapshot_hits)
-        ))
+        string = '\n'.join(
+            (" Number of triggered hits: " + str(self.n_triggered_hits),
+             " Number of snapshot hits: " + str(self.n_snapshot_hits)))
         string += "\nTriggered hits:\n"
         string += pprint.pformat(self.triggered_hits)
         string += "\nSnapshot hits:\n"
@@ -538,13 +542,14 @@ class TMCHData(object):
         self.dom_status_2 = unpack('>I', f.read(4))[0]
         self.dom_status_3 = unpack('>I', f.read(4))[0]
         self.pmt_rates = [
-            r * 10.0 for r in unpack('>' + 31 * 'I', f.read(31 * 4))]
+            r * 10.0 for r in unpack('>' + 31 * 'I', f.read(31 * 4))
+        ]
         self.hrvbmp = unpack('>I', f.read(4))[0]
         self.flags = unpack('>I', f.read(4))[0]
         self.yaw, self.pitch, self.roll = unpack('>fff', f.read(12))
-        self.A = unpack('>fff', f.read(12))  # AHRS: Ax, Ay, Az
-        self.G = unpack('>fff', f.read(12))  # AHRS: Gx, Gy, Gz
-        self.H = unpack('>fff', f.read(12))  # AHRS: Hx, Hy, Hz
+        self.A = unpack('>fff', f.read(12))    # AHRS: Ax, Ay, Az
+        self.G = unpack('>fff', f.read(12))    # AHRS: Gx, Gy, Gz
+        self.H = unpack('>fff', f.read(12))    # AHRS: Hx, Hy, Hz
         self.temp = unpack('>H', f.read(2))[0] / 100.0
         self.humidity = unpack('>H', f.read(2))[0] / 100.0
         self.tdcfull = unpack('>I', f.read(4))[0]

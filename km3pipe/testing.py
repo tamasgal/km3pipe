@@ -5,13 +5,13 @@ Common unit testing support for km3pipe.
 """
 import sys
 from functools import wraps
-from unittest import TestCase  # noqa
-from mock import MagicMock  # noqa
-from mock import Mock  # noqa
-from mock import patch  # noqa
+from unittest import TestCase    # noqa
+from mock import MagicMock    # noqa
+from mock import Mock    # noqa
+from mock import patch    # noqa
 
-from numpy.testing import assert_allclose  # noqa
-import pytest  # noqa
+from numpy.testing import assert_allclose    # noqa
+import pytest    # noqa
 
 skip = pytest.mark.skip
 skipif = pytest.mark.skipif
@@ -66,6 +66,7 @@ class surrogate(object):
             if prepared:
                 self.restore()
             return result
+
         return _wrapper
 
     @property
@@ -99,9 +100,11 @@ class surrogate(object):
         """Create stubs for all not-existing modules"""
         # last module in our sequence
         # it should be loaded
-        last_module = type(self.elements[-1], (object, ), {
-            '__all__': [],
-            '_importing_path': self._get_importing_path(self.elements)})
+        last_module = type(
+            self.elements[-1], (object, ), {
+                '__all__': [],
+                '_importing_path': self._get_importing_path(self.elements)
+            })
         modules = [last_module]
 
         # now we create a module stub for each
@@ -112,9 +115,11 @@ class surrogate(object):
         # sequence
         for element in reversed(self.elements[:-1]):
             next_module = modules[-1]
-            module = type(element, (object, ), {
-                next_module.__name__: next_module,
-                '__all__': [next_module.__name__]})
+            module = type(
+                element, (object, ), {
+                    next_module.__name__: next_module,
+                    '__all__': [next_module.__name__]
+                })
             modules.append(module)
         self.modules = list(reversed(modules))
         self.modules[0].__path__ = []

@@ -10,7 +10,6 @@ from numpy.lib import recfunctions as rfn
 from .dataclass_templates import TEMPLATES
 from .tools import istype
 
-
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
@@ -99,14 +98,30 @@ class Table(np.recarray):
     from_columns(list_of_columns, **kwargs)
         Instantiate from an array-like with shape (n_columns, n_rows).
     """
-    def __new__(cls, data, h5loc=DEFAULT_H5LOC, dtype=None,
-                split_h5=DEFAULT_SPLIT, name=DEFAULT_NAME, **kwargs):
+
+    def __new__(cls,
+                data,
+                h5loc=DEFAULT_H5LOC,
+                dtype=None,
+                split_h5=DEFAULT_SPLIT,
+                name=DEFAULT_NAME,
+                **kwargs):
         if isinstance(data, dict):
-            return cls.from_dict(data, h5loc=h5loc, dtype=dtype,
-                                 split_h5=split_h5, name=name, **kwargs)
+            return cls.from_dict(
+                data,
+                h5loc=h5loc,
+                dtype=dtype,
+                split_h5=split_h5,
+                name=name,
+                **kwargs)
         if istype(data, 'DataFrame'):
-            return cls.from_dataframe(data, h5loc=h5loc, dtype=dtype,
-                                      split_h5=split_h5, name=name, **kwargs)
+            return cls.from_dataframe(
+                data,
+                h5loc=h5loc,
+                dtype=dtype,
+                split_h5=split_h5,
+                name=name,
+                **kwargs)
         if isinstance(data, (list, tuple)):
             raise ValueError(
                 "Lists/tuples are not supported! "
@@ -144,13 +159,16 @@ class Table(np.recarray):
 
     def __array_wrap__(self, out_arr, context=None):
         # then just call the parent
-        return Table(np.recarray.__array_wrap__(self, out_arr, context),
-                     h5loc=self.h5loc, split_h5=self.split_h5, name=self.name)
+        return Table(
+            np.recarray.__array_wrap__(self, out_arr, context),
+            h5loc=self.h5loc,
+            split_h5=self.split_h5,
+            name=self.name)
 
     @staticmethod
     def _expand_scalars(arr_dict):
         scalars = []
-        maxlen = 1      # have at least 1-elem arrays
+        maxlen = 1    # have at least 1-elem arrays
         for k, v in arr_dict.items():
             if np.isscalar(v):
                 scalars.append(k)
@@ -160,7 +178,7 @@ class Table(np.recarray):
             #     import pdb; pdb.set_trace()
             #     arr_dict[k] = v[0]
             #     continue
-            if hasattr(v, 'ndim') and v.ndim == 0:  # np.array(1)
+            if hasattr(v, 'ndim') and v.ndim == 0:    # np.array(1)
                 arr_dict[k] = v.item()
                 continue
             if len(v) > maxlen:
@@ -196,8 +214,7 @@ class Table(np.recarray):
             if colnames is None:
                 raise ValueError(
                     "Need to either specify column names or a "
-                    "structured dtype when passing unstructured arrays!"
-                )
+                    "structured dtype when passing unstructured arrays!")
             dtype = inflate_dtype(column_list, colnames)
             colnames = dtype.names
         if len(column_list) != len(dtype.names):
@@ -213,8 +230,7 @@ class Table(np.recarray):
             if colnames is None:
                 raise ValueError(
                     "Need to either specify column names or a "
-                    "structured dtype when passing unstructured arrays!"
-                )
+                    "structured dtype when passing unstructured arrays!")
             dtype = inflate_dtype(row_list, colnames)
         # this *should* have been checked above, but do this
         # just to be sure in case I screwed up the logic above;
@@ -265,9 +281,8 @@ class Table(np.recarray):
             if len(v) == n:
                 continue
             else:
-                raise ValueError(
-                    "Trying to append more than one column, but "
-                    "some arrays mismatch in length!")
+                raise ValueError("Trying to append more than one column, but "
+                                 "some arrays mismatch in length!")
 
     def append_columns(self, colnames, values, **kwargs):
         """Append new columns to the table.
@@ -292,18 +307,16 @@ class Table(np.recarray):
 
         if values.ndim == 1:
             if len(values) > n:
-                raise ValueError(
-                    "New Column is longer than existing table!")
+                raise ValueError("New Column is longer than existing table!")
             elif len(values) > 1 and len(values) < n:
-                raise ValueError(
-                    "New Column is shorter than existing table, "
-                    "but not just one element!")
+                raise ValueError("New Column is shorter than existing table, "
+                                 "but not just one element!")
             elif len(values) == 1:
                 values = np.full(n, values[0])
-        new_arr = rfn.append_fields(self, colnames, values,
-                                    usemask=False, asrecarray=True, **kwargs)
-        return self.__class__(new_arr, h5loc=self.h5loc,
-                              split_h5=self.split_h5, name=self.name)
+        new_arr = rfn.append_fields(
+            self, colnames, values, usemask=False, asrecarray=True, **kwargs)
+        return self.__class__(
+            new_arr, h5loc=self.h5loc, split_h5=self.split_h5, name=self.name)
 
     def drop_columns(self, colnames, **kwargs):
         """Drop  columns from the table.
@@ -311,10 +324,10 @@ class Table(np.recarray):
         See the docs for ``numpy.lib.recfunctions.drop_fields`` for an
         explanation of the remaining options.
         """
-        new_arr = rfn.drop_fields(self, colnames,
-                                  usemask=False, asrecarray=True, **kwargs)
-        return self.__class__(new_arr, h5loc=self.h5loc,
-                              split_h5=self.split_h5, name=self.name)
+        new_arr = rfn.drop_fields(
+            self, colnames, usemask=False, asrecarray=True, **kwargs)
+        return self.__class__(
+            new_arr, h5loc=self.h5loc, split_h5=self.split_h5, name=self.name)
 
     def sorted(self, by, **kwargs):
         """Sort array by a column.
@@ -325,8 +338,11 @@ class Table(np.recarray):
             Name of the columns to sort by(e.g. 'time').
         """
         sort_idc = np.argsort(self[by], **kwargs)
-        return self.__class__(self[sort_idc], h5loc=self.h5loc,
-                              split_h5=self.split_h5, name=self.name)
+        return self.__class__(
+            self[sort_idc],
+            h5loc=self.h5loc,
+            split_h5=self.split_h5,
+            name=self.name)
 
     def to_dataframe(self):
         from pandas import DataFrame
@@ -342,9 +358,9 @@ class Table(np.recarray):
         spl = 'split' if self.split_h5 else 'no split'
         s = "{} {}\n".format(name, type(self))
         s += "HDF5 location: {} ({})\n".format(self.h5loc, spl)
-        s += "\n".join(map(lambda d: "{2} (dtype: {1}) = {0}"
-                           .format(self[d[0]], *d),
-                           self.dtype.descr))
+        s += "\n".join(
+            map(lambda d: "{2} (dtype: {1}) = {0}".format(self[d[0]], *d),
+                self.dtype.descr))
         return s
 
     def __repr__(self):

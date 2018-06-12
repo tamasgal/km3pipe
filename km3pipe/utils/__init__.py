@@ -3,7 +3,7 @@ A collection of utils.
 
 """
 
-from km3pipe.utils import h5info, tohdf5, ptconcat         # noqa
+from km3pipe.utils import h5info, tohdf5, ptconcat    # noqa
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

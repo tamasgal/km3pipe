@@ -7,16 +7,16 @@ import os.path
 
 import numpy as np
 
-from .evt import EvtPump  # noqa
-from .daq import DAQPump  # noqa
-from .clb import CLBPump  # noqa
-from .aanet import AanetPump  # noqa
-from .jpp import EventPump  # noqa
-from .ch import CHPump  # noqa
-from .hdf5 import HDF5Pump  # noqa
-from .hdf5 import HDF5Sink  # noqa
-from .hdf5 import HDF5MetaData  # noqa
-from .pickle import PicklePump  # noqa
+from .evt import EvtPump    # noqa
+from .daq import DAQPump    # noqa
+from .clb import CLBPump    # noqa
+from .aanet import AanetPump    # noqa
+from .jpp import EventPump    # noqa
+from .ch import CHPump    # noqa
+from .hdf5 import HDF5Pump    # noqa
+from .hdf5 import HDF5Sink    # noqa
+from .hdf5 import HDF5MetaData    # noqa
+from .pickle import PicklePump    # noqa
 
 from km3pipe.logger import get_logger
 
@@ -27,7 +27,6 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal, Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
-
 
 log = get_logger(__name__)
 
@@ -60,7 +59,8 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
     }
 
     if extension not in io:
-        log.critical("No pump found for file extension '{0}'".format(extension))
+        log.critical(
+            "No pump found for file extension '{0}'".format(extension))
         raise ValueError("Unknown filetype")
 
     missing_files = [fn for fn in filenames if not os.path.exists(fn)]
@@ -81,10 +81,12 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
         return io[extension](filenames=filenames, name=name, **kwargs)
 
 
-def read_calibration(detx=None, det_id=None, from_file=False,
+def read_calibration(detx=None,
+                     det_id=None,
+                     from_file=False,
                      det_id_table=None):
     """Retrive calibration from file, the DB."""
-    from km3pipe.calib import Calibration  # noqa
+    from km3pipe.calib import Calibration    # noqa
 
     if not (detx or det_id or from_file):
         return None
@@ -119,7 +121,7 @@ def read_hdf5(filename, detx=None, det_id=None, det_from_file=False):
     h5 = pd.HDFStore(filename, mode='r')
     opts = {}
     opts['event_info'] = h5.get('event_info')
-    optional_keys = {'hits', 'mc_hits', 'mc_tracks'}       # noqa
+    optional_keys = {'hits', 'mc_hits', 'mc_tracks'}    # noqa
     for k in optional_keys:
         try:
             opts[k] = h5.get(k)
@@ -132,5 +134,5 @@ def read_hdf5(filename, detx=None, det_id=None, det_from_file=False):
     run = Run(**opts)
 
     det_id_table = opts['event_info']['det_id']
-    run.calibration = read_calibration(detx, det_id, det_from_file,
-                                       det_id_table=det_id_table)
+    run.calibration = read_calibration(
+        detx, det_id, det_from_file, det_id_table=det_id_table)
