@@ -38,14 +38,6 @@ to find files which have already been converted to avoid multiple conversions.
         -h --help      Show this screen.
 
 """
-from glob import glob
-import os
-from os.path import basename, join, abspath
-import pathlib
-import time
-import km3pipe as kp
-from km3pipe.tools import chunks, iexists
-
 __author__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __version__ = "1.0"
@@ -54,6 +46,20 @@ __version__ = "1.0"
 def main():
     from docopt import docopt
     args = docopt(__doc__, version=__version__)
+
+    from glob import glob
+    import os
+    from os.path import basename, join, abspath
+    import pathlib
+    import time
+    import km3pipe as kp
+    from km3pipe.tools import chunks, iexists
+
+    try:
+        from tqdm import tqdm
+        HAS_TQDM = True
+    except ImportError:
+        HAS_TQDM = False
 
     cprint = kp.logger.get_printer('qrunprocessor')
     log = kp.logger.get_logger('qrunprocessor')
@@ -72,13 +78,15 @@ def main():
     JOB_NAME = args['-j']
     DRYRUN = args['-q']
 
-
     pathlib.Path(OUTPUT_PATH).mkdir(parents=True, exist_ok=True)
 
     with open(RUN_LIST, 'r') as fobj:
         run_numbers = [int(run) for run in fobj.read().split()]
 
     irods_files = []
+    cprint("Checking if files are accessible on iRODS")
+    if HAS_TQDM:
+        run_numbers = tqdm(run_numbers)
     for run in run_numbers:
         irods_path = kp.tools.irods_filepath(DET_ID, run)
         if not iexists(irods_path):
@@ -87,18 +95,18 @@ def main():
             continue
         irods_files.append(irods_path)
 
-    processed_files = [basename(f) for f in
-                       glob(join(OUTPUT_PATH, '*{}'.format(SUFFIX)))]
+    processed_files = [
+        basename(f) for f in glob(join(OUTPUT_PATH, '*{}'.format(SUFFIX)))
+    ]
 
     rem_files = []
     for irods_file in irods_files:
-        if basename(irods_file)+SUFFIX not in processed_files:
+        if basename(irods_file) + SUFFIX not in processed_files:
             rem_files.append(irods_file)
 
-    cprint("{} runs in total, {} already processed."
-           .format(len(irods_files), len(processed_files)))
-    cprint("Proceeding with the remaining {} files."
-           .format(len(rem_files)))
+    cprint("{} runs in total, {} already processed.".format(
+        len(irods_files), len(processed_files)))
+    cprint("Proceeding with the remaining {} files.".format(len(rem_files)))
 
     s = kp.shell.Script()
 
@@ -125,11 +133,18 @@ def main():
             s.echo("File '{}' processed.".format(fname))
             s.separator('-')
 
-        walltime = time.strftime('%H:%M:%S', time.gmtime(ET_PER_FILE*n_files))
+        walltime = time.strftime('%H:%M:%S',
+                                 time.gmtime(ET_PER_FILE * n_files))
 
-        kp.shell.qsub(s, '{}_{}'.format(JOB_NAME, job_id), walltime=walltime,
-                      fsize=FSIZE, vmem=VMEM, log_path=LOG_PATH, irods=True,
-                      dryrun=DRYRUN)
+        kp.shell.qsub(
+            s,
+            '{}_{}'.format(JOB_NAME, job_id),
+            walltime=walltime,
+            fsize=FSIZE,
+            vmem=VMEM,
+            log_path=LOG_PATH,
+            irods=True,
+            dryrun=DRYRUN)
 
         if DRYRUN:
             break
