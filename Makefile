@@ -57,4 +57,11 @@ dependencies:
 	pip install -U numpy
 	pip install -Ur requirements.txt
 
+.PHONY: yapf
+yapf:
+	yapf -i -r km3pipe
+	yapf -i -r km3modules
+	yapf -i -r examples
+	yapf -i setup.py
+
 .PHONY: all clean build install install-dev test test-km3modules test-nocov flake8 pep8 dependencies docstyle

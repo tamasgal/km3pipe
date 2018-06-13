@@ -69,7 +69,7 @@ class TestSummaryslicePump(TestCase):
         filename = 'a.root'
         SummaryslicePump(filename)
         reader_mock.assert_called_with(filename.encode())
-        
+
 
 class TestFitPump(TestCase):
     @surrogate('jppy.PyJFitReader')

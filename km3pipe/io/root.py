@@ -9,7 +9,7 @@ import numpy as np
 
 from km3pipe.logger import get_logger
 
-log = get_logger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)    # pylint: disable=C0103
 
 __author__ = "Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

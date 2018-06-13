@@ -18,7 +18,6 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-
 log = get_logger(__name__)
 
 BUFFER_SIZE = 1024
@@ -35,6 +34,9 @@ class Client(object):
         self.valid_tags = []
 
     def subscribe(self, tag, mode='wait'):
+        if mode not in ['wait', 'all']:
+            raise ValueError("Possible subscription modes are 'wait' or 'all'")
+        log.info("Subscribing to {} in mode {}".format(tag, mode))
         full_tag = self._full_tag(tag, mode)
         if full_tag not in self.tags:
             self.tags.append(full_tag)
@@ -53,7 +55,7 @@ class Client(object):
             self._update_subscriptions()
 
     def _full_tag(self, tag, mode):
-        mode_flag = ' w ' if mode == 'wait' else ' a '
+        mode_flag = ' {} '.format(mode[0])
         full_tag = mode_flag + tag
         return full_tag
 
@@ -90,8 +92,8 @@ class Client(object):
             if prefix_tag not in self.valid_tags:
                 log.error("Invalid tag '{0}' received, ignoring the message \n"
                           "and reconnecting.\n"
-                          "  -> valid tags are: {0}"
-                          .format(prefix_tag, self.valid_tags))
+                          "  -> valid tags are: {0}".format(
+                              prefix_tag, self.valid_tags))
                 self._reconnect()
                 continue
             else:
@@ -108,8 +110,8 @@ class Client(object):
             except OSError:
                 log.error("Failed to construct message.")
                 raise BufferError
-        log.info("     ------ returning message with {0} bytes"
-                 .format(len(message)))
+        log.info("     ------ returning message with {0} bytes".format(
+            len(message)))
         return prefix, message
 
     def _connect(self):
@@ -207,5 +209,5 @@ class Prefix(object):
         self.length = struct.unpack('>i', value[Tag.SIZE:Tag.SIZE + 4])[0]
 
     def __str__(self):
-        return ("ControlHost Prefix with tag '{0}' ({1} bytes of data)"
-                .format(self.tag, self.length))
+        return ("ControlHost Prefix with tag '{0}' ({1} bytes of data)".format(
+            self.tag, self.length))

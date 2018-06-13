@@ -19,7 +19,7 @@ import km3pipe as kp
 from km3pipe.io.daq import TMCHData
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')  # noqa
+matplotlib.use('Agg')    # noqa
 import matplotlib.pyplot as plt
 import km3pipe.style as kpst
 kpst.use("km3pipe")
@@ -57,9 +57,9 @@ class PMTRates(kp.Module):
                 self.rates = defaultdict(list)
             delta_t = (datetime.now() - now).total_seconds()
             remaining_t = self.interval - delta_t
-            log.info("Delta t: {} -> waiting for {}s"
-                     .format(delta_t, self.interval - delta_t))
-            if(remaining_t < 0):
+            log.info("Delta t: {} -> waiting for {}s".format(
+                delta_t, self.interval - delta_t))
+            if (remaining_t < 0):
                 log.error("Can't keep up with plot production. "
                           "Increase the interval!")
                 interval = 1
@@ -98,9 +98,9 @@ class PMTRates(kp.Module):
         plt.yticks([i * 31 for i in range(18)],
                    ["Floor {}".format(f) for f in range(1, 19)])
         xtics_int = range(0, max_x, int(max_x / 10))
-        plt.xticks([i for i in xtics_int],
-                   [xlabel_func(now - (max_x - i) * interval)
-                    for i in xtics_int])
+        plt.xticks(
+            [i for i in xtics_int],
+            [xlabel_func(now - (max_x - i) * interval) for i in xtics_int])
         fig.tight_layout()
         plt.savefig(self.plot_path)
         plt.close('all')
@@ -130,12 +130,13 @@ class PMTRates(kp.Module):
 def main():
     detector = kp.hardware.Detector(det_id=29)
     pipe = kp.Pipeline(timeit=True)
-    pipe.attach(kp.io.CHPump,
-                host='192.168.0.110',
-                port=5553,
-                tags='IO_MONIT',
-                timeout=60 * 60 * 24 * 7,
-                max_queue=1000)
+    pipe.attach(
+        kp.io.CHPump,
+        host='192.168.0.110',
+        port=5553,
+        tags='IO_MONIT',
+        timeout=60 * 60 * 24 * 7,
+        max_queue=1000)
     pipe.attach(PMTRates, detector=detector, du=2, interval=2)
     pipe.drain()
 

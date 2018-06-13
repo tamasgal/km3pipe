@@ -10,11 +10,10 @@ import numpy as np
 from numpy.testing import (assert_array_equal, assert_allclose)
 import pytest
 
-from km3pipe.testing import TestCase, skip   # noqa
-from km3pipe.dataclasses import (
-    Table, inflate_dtype, has_structured_dt, is_structured, DEFAULT_H5LOC,
-    DEFAULT_NAME, DEFAULT_SPLIT
-)
+from km3pipe.testing import TestCase, skip    # noqa
+from km3pipe.dataclasses import (Table, inflate_dtype, has_structured_dt,
+                                 is_structured, DEFAULT_H5LOC, DEFAULT_NAME,
+                                 DEFAULT_SPLIT)
 
 __author__ = "Tamas Gal, Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -28,8 +27,8 @@ __status__ = "Development"
 class TestDtypes(TestCase):
     def setUp(self):
         self.c_dt = np.dtype([('a', '<f4'), ('origin', '<u4'),
-                              ('pmt_id', '<u4'), ('time', '<f8'),
-                              ('group_id', '<u4')])
+                              ('pmt_id', '<u4'), ('time', '<f8'), ('group_id',
+                                                                   '<u4')])
 
     def test_is_structured(self):
         assert is_structured(self.c_dt)
@@ -72,11 +71,12 @@ class TestDtypes(TestCase):
 class TestTable(TestCase):
     def setUp(self):
         self.dt = np.dtype([('a', int), ('b', float), ('group_id', int)])
-        self.arr = np.array([
-            (0, 1.0, 2),
-            (3, 7.0, 5),
-            (6, 4.0, 8),
-        ], dtype=self.dt)
+        self.arr = np.array(
+            [
+                (0, 1.0, 2),
+                (3, 7.0, 5),
+                (6, 4.0, 8),
+            ], dtype=self.dt)
 
     def test_h5loc(self):
         tab = self.arr.view(Table)
@@ -210,14 +210,10 @@ class TestTable(TestCase):
             print(tab)
 
     def test_from_columns_with_colnames(self):
-        t = Table.from_columns([[1, 2, 3],
-                                [4, 5, 6],
-                                [7, 8, 9],
-                                [10, 11, 12],
-                                [13, 14, 15],
-                                [16, 17, 18],
-                                [19, 20, 21]],
-                               colnames=['a', 'b', 'c', 'd', 'e', 'f', 'g'])
+        t = Table.from_columns(
+            [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [13, 14, 15],
+             [16, 17, 18], [19, 20, 21]],
+            colnames=['a', 'b', 'c', 'd', 'e', 'f', 'g'])
         print("t.a: {}".format(t.a))
         assert np.allclose([1, 2, 3], t.a)
         print("t.b: {}".format(t.b))
@@ -229,8 +225,8 @@ class TestTable(TestCase):
 
     def test_from_columns_with_mismatching_columns_and_dtypes_raises(self):
         with pytest.raises(ValueError):
-            Table.from_columns([[1, 2, 3], [4, 5, 6]],
-                                dtype=np.dtype([('a', 'f4')]))
+            Table.from_columns(
+                [[1, 2, 3], [4, 5, 6]], dtype=np.dtype([('a', 'f4')]))
 
     def test_from_rows_with_colnames(self):
         t = Table.from_rows([[1, 2], [3, 4], [5, 6]], colnames=['a', 'b'])
@@ -314,7 +310,6 @@ class TestTable(TestCase):
         t5 = Table._expand_scalars(dmap5)
         assert len(t5) > 0
 
-
     def test_from_flat_dict(self):
         dmap = {
             'a': 1,
@@ -356,9 +351,7 @@ class TestTable(TestCase):
             tab = Table.from_dict(dmap, dtype=bad_dt)
 
     def test_from_2d(self):
-        l2d = [
-            (0, 1), (2, 3), (4, 5), (6, 7), (8, 9)
-        ]
+        l2d = [(0, 1), (2, 3), (4, 5), (6, 7), (8, 9)]
         names = ['a', 'origin', 'pmt_id', 'time', 'group_id']
         dta = inflate_dtype(l2d, names)
         with pytest.raises(ValueError):
@@ -370,7 +363,7 @@ class TestTable(TestCase):
         with pytest.raises(ValueError):
             t = Table(l2d, dtype=dta)
         with pytest.raises(ValueError):
-            t = Table(l2d, dtype=dta, colnames=['a', 'b', 'c', 'd'])  # noqa
+            t = Table(l2d, dtype=dta, colnames=['a', 'b', 'c', 'd'])    # noqa
 
     def test_flat_raises(self):
         with pytest.raises(ValueError):
@@ -382,7 +375,7 @@ class TestTable(TestCase):
         with pytest.raises(ValueError):
             t = Table([1, 2, 3]).dtype
         with pytest.raises(ValueError):
-            t = Table([1, 2, 3], colnames=['a', 'b', 'c'])      # noqa
+            t = Table([1, 2, 3], colnames=['a', 'b', 'c'])    # noqa
 
     def test_init_with_unstructured_raises_valueerror(self):
         with pytest.raises(ValueError):
@@ -435,7 +428,7 @@ class TestTable(TestCase):
         assert tab.n[-1] == 5
 
     def test_append__single_column(self):
-        tab = Table({'a': 1 })
+        tab = Table({'a': 1})
         print(tab.dtype)
         tab = tab.append_columns(['b'], np.array([[2]]))
         print(tab.dtype)
@@ -508,7 +501,7 @@ class TestTable(TestCase):
             'time': times,
             'tot': tots,
             'triggered': triggereds,
-            'group_id': 0,      # event_id
+            'group_id': 0,    # event_id
         }
         tab = Table.from_template(d_hits, 'Hits')
         assert tab.name == 'Hits'
@@ -537,10 +530,10 @@ class TestTable(TestCase):
         d_hits = {
             'channel_id': channel_ids,
             'dom_id': dom_ids,
-            # 'time': times,
+        # 'time': times,
             'tot': tots,
             'triggered': triggereds,
-            'group_id': 0,      # event_id
+            'group_id': 0,    # event_id
         }
         with pytest.raises(KeyError):
             tab = Table.from_template(d_hits, 'Hits')
@@ -548,7 +541,7 @@ class TestTable(TestCase):
         ar_hits = {
             'channel_id': np.ones(n, dtype=int),
             'dom_id': np.ones(n, dtype=int),
-            # 'time': np.ones(n, dtype=float),
+        # 'time': np.ones(n, dtype=float),
             'tot': np.ones(n, dtype=float),
             'triggered': np.ones(n, dtype=bool),
             'group_id': np.ones(n, dtype=int),
@@ -559,10 +552,7 @@ class TestTable(TestCase):
 
     def test_adhoc_template(self):
         a_template = {
-            'dtype': np.dtype([
-                ('a', '<u4'),
-                ('b', 'f4')
-            ]),
+            'dtype': np.dtype([('a', '<u4'), ('b', 'f4')]),
             'h5loc': '/yat',
             'split_h5': True,
             'name': "YetAnotherTemplate",
@@ -575,10 +565,7 @@ class TestTable(TestCase):
 
     def test_adhoc_noname_template(self):
         a_template = {
-            'dtype': np.dtype([
-                ('a', '<u4'),
-                ('b', 'f4')
-            ]),
+            'dtype': np.dtype([('a', '<u4'), ('b', 'f4')]),
             'h5loc': '/yat',
             'split_h5': True,
         }
@@ -608,11 +595,12 @@ class TestTable(TestCase):
 
     def test_sort(self):
         dt = np.dtype([('a', int), ('b', float), ('c', int)])
-        arr = np.array([
-            (0, 1.0, 2),
-            (3, 7.0, 5),
-            (6, 4.0, 8),
-        ], dtype=dt)
+        arr = np.array(
+            [
+                (0, 1.0, 2),
+                (3, 7.0, 5),
+                (6, 4.0, 8),
+            ], dtype=dt)
         tab = Table(arr)
         tab_sort = tab.sorted('b')
         assert_array_equal(tab_sort['a'], np.array([0, 6, 3]))
@@ -629,11 +617,12 @@ class TestTable(TestCase):
         from pandas.util.testing import assert_frame_equal
         import pandas as pd
         dt = np.dtype([('a', int), ('b', float), ('c', int)])
-        arr = np.array([
-            (0, 1.0, 2),
-            (3, 7.0, 5),
-            (6, 4.0, 8),
-        ], dtype=dt)
+        arr = np.array(
+            [
+                (0, 1.0, 2),
+                (3, 7.0, 5),
+                (6, 4.0, 8),
+            ], dtype=dt)
         print(dir(Table))
         df = pd.DataFrame(arr)
         tab = Table.from_dataframe(df, h5loc='/bla')
@@ -642,22 +631,24 @@ class TestTable(TestCase):
 
     def test_slicing(self):
         dt = np.dtype([('a', int), ('b', float), ('c', bool)])
-        arr = np.array([
-            (0, 1.0, True),
-            (2, 3.0, False),
-            (4, 5.0, True),
-        ], dtype=dt)
+        arr = np.array(
+            [
+                (0, 1.0, True),
+                (2, 3.0, False),
+                (4, 5.0, True),
+            ], dtype=dt)
         tab = Table(arr)
         assert 2 == len(tab[tab.c])
         assert 1 == len(tab[tab.b > 3.0])
 
     def test_contains(self):
         dt = np.dtype([('a', int), ('b', float), ('c', bool)])
-        arr = np.array([
-            (0, 1.0, True),
-            (2, 3.0, False),
-            (4, 5.0, True),
-        ], dtype=dt)
+        arr = np.array(
+            [
+                (0, 1.0, True),
+                (2, 3.0, False),
+                (4, 5.0, True),
+            ], dtype=dt)
         tab = Table(arr)
         assert 'a' in tab
         assert 'b' in tab
@@ -767,41 +758,53 @@ class TestTableFancyAttributes(TestCase):
         })
 
     def test_pos_getter(self):
-        tab = Table({'pos_x': [1, 2, 3],
-                     'pos_y': [4, 5, 6],
-                     'pos_z': [7, 8, 9]})
+        tab = Table({
+            'pos_x': [1, 2, 3],
+            'pos_y': [4, 5, 6],
+            'pos_z': [7, 8, 9]
+        })
         assert np.allclose([[1, 4, 7], [2, 5, 8], [3, 6, 9]], tab.pos)
 
     def test_pos_getter_for_single_entry(self):
-        tab = Table({'pos_x': [1, 2, 3],
-                     'pos_y': [4, 5, 6],
-                     'pos_z': [7, 8, 9]})
+        tab = Table({
+            'pos_x': [1, 2, 3],
+            'pos_y': [4, 5, 6],
+            'pos_z': [7, 8, 9]
+        })
         assert np.allclose([[2, 5, 8]], tab.pos[1])
 
     def test_dir_getter(self):
-        tab = Table({'dir_x': [1, 2, 3],
-                     'dir_y': [4, 5, 6],
-                     'dir_z': [7, 8, 9]})
+        tab = Table({
+            'dir_x': [1, 2, 3],
+            'dir_y': [4, 5, 6],
+            'dir_z': [7, 8, 9]
+        })
         assert np.allclose([[1, 4, 7], [2, 5, 8], [3, 6, 9]], tab.dir)
 
     def test_dir_getter_for_single_entry(self):
-        tab = Table({'dir_x': [1, 2, 3],
-                     'dir_y': [4, 5, 6],
-                     'dir_z': [7, 8, 9]})
+        tab = Table({
+            'dir_x': [1, 2, 3],
+            'dir_y': [4, 5, 6],
+            'dir_z': [7, 8, 9]
+        })
         assert np.allclose([[2, 5, 8]], tab.dir[1])
 
     def test_dir_setter(self):
-        tab = Table({'dir_x': [1, 0, 0],
-                     'dir_y': [0, 1, 0],
-                     'dir_z': [0, 0, 1]})
+        tab = Table({
+            'dir_x': [1, 0, 0],
+            'dir_y': [0, 1, 0],
+            'dir_z': [0, 0, 1]
+        })
         new_dir = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
         tab.dir = new_dir
         assert np.allclose(new_dir, tab.dir)
 
     def test_pos_setter(self):
-        tab = Table({'pos_x': [1, 0, 0],
-                     'pos_y': [0, 1, 0],
-                     'pos_z': [0, 0, 1]})
+        tab = Table({
+            'pos_x': [1, 0, 0],
+            'pos_y': [0, 1, 0],
+            'pos_z': [0, 0, 1]
+        })
         new_pos = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
         tab.pos = new_pos
         assert np.allclose(new_pos, tab.pos)
@@ -828,30 +831,38 @@ class TestTableFancyAttributes(TestCase):
             self.arr_bare.dir = p
 
     def test_phi(self):
-        tab = Table({'dir_x': [1, 0, 0],
-                     'dir_y': [0, 1, 0],
-                     'dir_z': [0, 0, 1]})
+        tab = Table({
+            'dir_x': [1, 0, 0],
+            'dir_y': [0, 1, 0],
+            'dir_z': [0, 0, 1]
+        })
         p = tab.phi
         assert p is not None
 
     def test_phi(self):
-        tab = Table({'dir_x': [1, 0, 0],
-                     'dir_y': [0, 1, 0],
-                     'dir_z': [0, 0, 1]})
+        tab = Table({
+            'dir_x': [1, 0, 0],
+            'dir_y': [0, 1, 0],
+            'dir_z': [0, 0, 1]
+        })
         p = tab.theta
         assert p is not None
 
     def test_zen(self):
-        tab = Table({'dir_x': [1, 0, 0],
-                     'dir_y': [0, 1, 0],
-                     'dir_z': [0, 0, 1]})
+        tab = Table({
+            'dir_x': [1, 0, 0],
+            'dir_y': [0, 1, 0],
+            'dir_z': [0, 0, 1]
+        })
         p = tab.zenith
         assert p is not None
 
     def test_azi(self):
-        tab = Table({'dir_x': [1, 0, 0],
-                     'dir_y': [0, 1, 0],
-                     'dir_z': [0, 0, 1]})
+        tab = Table({
+            'dir_x': [1, 0, 0],
+            'dir_y': [0, 1, 0],
+            'dir_z': [0, 0, 1]
+        })
         p = tab.azimuth
         assert p is not None
 
@@ -872,14 +883,18 @@ class TestTableFancyAttributes(TestCase):
         times = np.arange(n)
         tots = np.arange(n)
         triggereds = np.array([0, 1, 1, 0, 1])
-        hits = Table({
-            'channel_id': channel_ids,
-            'dom_id': dom_ids,
-            'time': times,
-            'tot': tots,
-            'triggered': triggereds,
-            'group_id': 0,      # event_id
-        }, name='hits', h5loc='/foo', split_h5=True)
+        hits = Table(
+            {
+                'channel_id': channel_ids,
+                'dom_id': dom_ids,
+                'time': times,
+                'tot': tots,
+                'triggered': triggereds,
+                'group_id': 0,    # event_id
+            },
+            name='hits',
+            h5loc='/foo',
+            split_h5=True)
         triggered_hits = hits.triggered_rows
         assert len(triggered_hits) == 3
         assert triggered_hits.split_h5
@@ -892,13 +907,17 @@ class TestTableFancyAttributes(TestCase):
         dom_ids = np.arange(n)
         times = np.arange(n)
         tots = np.arange(n)
-        hits = Table({
-            'channel_id': channel_ids,
-            'dom_id': dom_ids,
-            'time': times,
-            'tot': tots,
-            'group_id': 0,      # event_id
-        }, name='hits', h5loc='/foo', split_h5=True)
+        hits = Table(
+            {
+                'channel_id': channel_ids,
+                'dom_id': dom_ids,
+                'time': times,
+                'tot': tots,
+                'group_id': 0,    # event_id
+            },
+            name='hits',
+            h5loc='/foo',
+            split_h5=True)
         with pytest.raises(KeyError):
             triggered_hits = hits.triggered_rows
             assert triggered_hits is not None

@@ -14,7 +14,6 @@ Options:
     --verbose           Print more info [default: False]
 """
 
-
 import numpy as np
 
 from km3pipe import version

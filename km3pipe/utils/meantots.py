@@ -20,7 +20,7 @@ from km3pipe import version
 import pandas as pd
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')  # noqa
+matplotlib.use('Agg')    # noqa
 import matplotlib.pyplot as plt
 import km3pipe.style
 from sklearn.mixture import GaussianMixture
@@ -111,8 +111,8 @@ def meantots(filename, plotfilename):
     pipe = kp.Pipeline()
     pipe.attach(kp.io.EventPump, filename=filename, with_timeslice_hits=True)
     pipe.attach(StatusBar, every=5000)
-    pipe.attach(MeanToTPlotter, plotfilename=plotfilename,
-                only_if="TimesliceHits")
+    pipe.attach(
+        MeanToTPlotter, plotfilename=plotfilename, only_if="TimesliceHits")
     pipe.drain(100000)
 
 

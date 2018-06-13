@@ -30,7 +30,6 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-
 EXAMPLE_DETX = StringIO("\n".join((
     "1 3",
     "1 1 1 3",
@@ -44,7 +43,8 @@ EXAMPLE_DETX = StringIO("\n".join((
     "3 1 3 3",
     " 7 3.1 3.2 3.3 -1.1  0.2  0.3 70",
     " 8 3.4 3.5 3.6  0.1 -1.2  0.3 80",
-    " 9 3.7 3.8 3.9  0.1  0.2 -1.3 90",)))
+    " 9 3.7 3.8 3.9  0.1  0.2 -1.3 90",
+)))
 
 EXAMPLE_DETX_MIXED_IDS = StringIO("\n".join((
     "1 3",
@@ -59,7 +59,8 @@ EXAMPLE_DETX_MIXED_IDS = StringIO("\n".join((
     "6 1 3 3",
     " 62 3.1 3.2 3.3 -1.1  0.2  0.3 70",
     " 63 3.4 3.5 3.6  0.1 -1.2  0.3 80",
-    " 61 3.7 3.8 3.9  0.1  0.2 -1.3 90",)))
+    " 61 3.7 3.8 3.9  0.1  0.2 -1.3 90",
+)))
 
 EXAMPLE_DETX_RADIAL = StringIO("\n".join((
     "1 3",
@@ -77,11 +78,10 @@ EXAMPLE_DETX_RADIAL = StringIO("\n".join((
     "4 2 1 2",
     " 9 0 0 1 0 0 1 90",
     " 10 0 0 -1 0 0 -1 100",
-    )))
+)))
 
 
 class TestDetector(TestCase):
-
     def setUp(self):
         self.det = Detector()
         self.det._det_file = EXAMPLE_DETX
@@ -207,7 +207,8 @@ class TestDetector(TestCase):
             "3 1 3 3",
             " 7 3.1 3.2 3.3 1.3 2.3 3.3 70.0",
             " 8 3.4 3.5 3.6 4.3 5.3 6.3 80.0",
-            " 9 3.7 3.8 3.9 7.3 8.3 9.3 90.0\n",))
+            " 9 3.7 3.8 3.9 7.3 8.3 9.3 90.0\n",
+        ))
         detx_fob = StringIO(detx_string)
 
         self.det = Detector()
@@ -230,7 +231,8 @@ class TestDetector(TestCase):
             "9 1 3 3",
             " 7 3.1 3.2 3.3 1.3 2.3 3.3 70.0",
             " 8 3.4 3.5 3.6 4.3 5.3 6.3 80.0",
-            " 9 3.7 3.8 3.9 7.3 8.3 9.3 90.0\n",))
+            " 9 3.7 3.8 3.9 7.3 8.3 9.3 90.0\n",
+        ))
         detx_fobj = StringIO(detx_string)
 
         self.det = Detector()
@@ -313,7 +315,7 @@ class TestDetector(TestCase):
     def test_rescale_detector(self):
         self.det._parse_doms()
         dom_positions = deepcopy(self.det.dom_positions)
-        scale_factor = 2 
+        scale_factor = 2
         self.det.rescale(scale_factor)
         for dom_id, dom_pos in self.det.dom_positions.items():
             assert np.allclose(dom_pos, dom_positions[dom_id] * scale_factor)

@@ -20,7 +20,7 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = get_logger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)    # pylint: disable=C0103
 
 CONFIG_PATH = os.path.expanduser('~/.km3net')
 
@@ -88,8 +88,8 @@ class Config(object):
         except Error:
             password = input("Please enter your iRODS password: ")
 
-        return iRODSSession(host=host, port=port, user=user, password=password,
-                            zone=zone)
+        return iRODSSession(
+            host=host, port=port, user=user, password=password, zone=zone)
 
     @property
     def db_credentials(self):

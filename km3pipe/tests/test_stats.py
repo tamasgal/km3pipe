@@ -8,11 +8,10 @@ import pytest
 from scipy import stats
 
 from km3pipe.testing import TestCase
-from km3pipe.stats import (
-    loguniform, rv_kde, mad, mad_std, drop_zero_variance, param_names, perc,
-    resample_1d, bootstrap_params, param_describe, bootstrap_fit,
-    hist2d, bincenters
-)
+from km3pipe.stats import (loguniform, rv_kde, mad, mad_std,
+                           drop_zero_variance, param_names, perc, resample_1d,
+                           bootstrap_params, param_describe, bootstrap_fit,
+                           hist2d, bincenters)
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
 __copyright__ = "Copyright 2016, KM3Pipe devs and the KM3NeT collaboration."
@@ -31,12 +30,12 @@ class TestLogUniform(TestCase):
         lo, hi = 0.1, 10
         dist = loguniform(low=lo, high=hi, base=10)
         r = dist.rvs(size=100)
-        assert r.shape == (100,)
+        assert r.shape == (100, )
         assert np.all(r <= hi)
         assert np.all(r >= lo)
         dist = loguniform(low=lo, high=hi, base=2)
         r2 = dist.rvs(size=500)
-        assert r2.shape == (500,)
+        assert r2.shape == (500, )
         assert np.all(r2 <= hi)
         assert np.all(r2 >= lo)
 
@@ -101,10 +100,16 @@ class TestMAD(TestCase):
 
 class TestPerc(TestCase):
     def test_settings(self):
-        arr = np.array([-2.394, 0.293, 0.371, 0.384, 1.246, ])
+        arr = np.array([
+            -2.394,
+            0.293,
+            0.371,
+            0.384,
+            1.246,
+        ])
         assert np.allclose(perc(arr), [-2.1253, 1.1598])
-        assert np.allclose(perc(arr, interpolation='nearest'),
-                           [arr[0], arr[-1]])
+        assert np.allclose(
+            perc(arr, interpolation='nearest'), [arr[0], arr[-1]])
 
 
 class TestVariance(TestCase):
@@ -147,16 +152,15 @@ class TestBootstrapFit(TestCase):
 
     def test_raw(self):
         arr = np.array([1, 1, 2, 2, 4, 6, 9])
-        pars = bootstrap_params(stats.norm, arr, n_iter=500,
-                                random_state=RandomState(self.seed))
-        assert np.allclose(np.mean(pars, axis=0),
-                           [np.mean(arr), np.std(arr)],
-                           atol=.5)
+        pars = bootstrap_params(
+            stats.norm, arr, n_iter=500, random_state=RandomState(self.seed))
+        assert np.allclose(
+            np.mean(pars, axis=0), [np.mean(arr), np.std(arr)], atol=.5)
 
     def test_param_describe(self):
         arr = np.array([1, 1, 2, 2, 4, 6, 9])
-        pars = bootstrap_params(stats.norm, arr, n_iter=500,
-                                random_state=RandomState(self.seed))
+        pars = bootstrap_params(
+            stats.norm, arr, n_iter=500, random_state=RandomState(self.seed))
         desc = param_describe(pars)
         assert desc is not None
         assert len(desc) == 3
@@ -164,10 +168,9 @@ class TestBootstrapFit(TestCase):
 
     def test_full(self):
         arr = np.array([1, 1, 2, 2, 4, 6, 9])
-        fits = bootstrap_fit(stats.norm, arr, n_iter=500,
-                             random_state=RandomState(self.seed))
-        assert np.allclose(fits['mean'], [np.mean(arr), np.std(arr)],
-                           atol=.5)
+        fits = bootstrap_fit(
+            stats.norm, arr, n_iter=500, random_state=RandomState(self.seed))
+        assert np.allclose(fits['mean'], [np.mean(arr), np.std(arr)], atol=.5)
 
 
 class TestHist2D(TestCase):
@@ -177,8 +180,8 @@ class TestHist2D(TestCase):
         self.bins = ([-2, 0, 2], [-2, 0, 2])
 
     def test_pdf(self):
-        hist = np.histogram2d(self.sample[:, 0], self.sample[:, 1],
-                              normed=True, bins=self.bins)
+        hist = np.histogram2d(
+            self.sample[:, 0], self.sample[:, 1], normed=True, bins=self.bins)
         h = hist2d(hist)
         assert h.H.shape == (2, 2)
         assert h.H_pad.shape == (4, 4)
@@ -186,10 +189,10 @@ class TestHist2D(TestCase):
         assert f is not None
 
     def test_norm(self):
-        hist1 = np.histogram2d(self.sample[:, 0], self.sample[:, 1],
-                               normed=True, bins=self.bins)
-        hist2 = np.histogram2d(self.sample[:, 0], self.sample[:, 1],
-                               normed=False, bins=self.bins)
+        hist1 = np.histogram2d(
+            self.sample[:, 0], self.sample[:, 1], normed=True, bins=self.bins)
+        hist2 = np.histogram2d(
+            self.sample[:, 0], self.sample[:, 1], normed=False, bins=self.bins)
         h1 = hist2d(hist1)
         h2 = hist2d(hist2)
 

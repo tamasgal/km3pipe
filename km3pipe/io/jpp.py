@@ -12,7 +12,7 @@ from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import Table
 from km3pipe.logger import get_logger
 
-log = get_logger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)    # pylint: disable=C0103
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -36,7 +36,7 @@ class EventPump(Pump):
     def configure(self):
 
         try:
-            import jppy  # noqa
+            import jppy    # noqa
         except ImportError:
             raise ImportError("\nEither Jpp or jppy could not be found."
                               "\nMake sure you source the JPP environmanet "
@@ -76,17 +76,14 @@ class EventPump(Pump):
     def extract_event(self):
         blob = Blob()
         r = self.event_reader
-        r.retrieve_next_event()  # do it at the beginning!
+        r.retrieve_next_event()    # do it at the beginning!
 
         n = r.number_of_snapshot_hits
 
         if n > self.buf_size:
             self._resize_buffers(int(n * 3 / 2))
 
-        r.get_hits(self._channel_ids,
-                   self._dom_ids,
-                   self._times,
-                   self._tots,
+        r.get_hits(self._channel_ids, self._dom_ids, self._times, self._tots,
                    self._triggereds)
 
         hit_series = Table.from_template({
@@ -148,14 +145,14 @@ class TimeslicePump(Pump):
         stream = self.get('stream', default='L1')
         self.blobs = self.timeslice_generator()
         try:
-            import jppy  # noqa
+            import jppy    # noqa
         except ImportError:
             raise ImportError("\nEither Jpp or jppy could not be found."
                               "\nMake sure you source the JPP environmanet "
                               "and have jppy installed")
         stream = 'JDAQTimeslice' + stream
-        self.r = jppy.daqtimeslicereader.PyJDAQTimesliceReader(fname.encode(),
-                                                               stream.encode())
+        self.r = jppy.daqtimeslicereader.PyJDAQTimesliceReader(
+            fname.encode(), stream.encode())
         self.n_timeslices = self.r.n_timeslices
 
         self.buf_size = 5000
@@ -163,7 +160,7 @@ class TimeslicePump(Pump):
         self._dom_ids = np.zeros(self.buf_size, dtype='i')
         self._times = np.zeros(self.buf_size, dtype='i')
         self._tots = np.zeros(self.buf_size, dtype='i')
-        self._triggereds = np.zeros(self.buf_size, dtype=bool)  # dummy
+        self._triggereds = np.zeros(self.buf_size, dtype=bool)    # dummy
 
     def process(self, blob):
         return next(self.blobs)
@@ -173,13 +170,14 @@ class TimeslicePump(Pump):
         while slice_id < self.n_timeslices:
             blob = Blob()
             self.r.retrieve_timeslice(slice_id)
-            timeslice_info = Table.from_template({
-                'frame_index': self.r.frame_index,
-                'slice_id': slice_id,
-                'timestamp': self.r.utc_seconds,
-                'nanoseconds': self.r.utc_nanoseconds,
-                'n_frames': self.r.n_frames,
-            }, 'TimesliceInfo')
+            timeslice_info = Table.from_template(
+                {
+                    'frame_index': self.r.frame_index,
+                    'slice_id': slice_id,
+                    'timestamp': self.r.utc_seconds,
+                    'nanoseconds': self.r.utc_nanoseconds,
+                    'n_frames': self.r.n_frames,
+                }, 'TimesliceInfo')
             hits = self._extract_hits()
             hits.slice_id = slice_id
             blob['TimesliceInfo'] = timeslice_info
@@ -194,19 +192,19 @@ class TimeslicePump(Pump):
             buf_size = int(total_hits * 3 / 2)
             self._resize_buffers(buf_size)
 
-        self.r.get_hits(self._channel_ids,
-                        self._dom_ids,
-                        self._times,
+        self.r.get_hits(self._channel_ids, self._dom_ids, self._times,
                         self._tots)
 
-        hits = Table.from_template({
-            'channel_id': self._channel_ids[:total_hits],
-            'dom_id': self._dom_ids[:total_hits],
-            'time': self._times[:total_hits],
-            'tot': self._tots[:total_hits],
-            # 'triggered': self._triggereds[:total_hits],  # dummy
-            'group_id': 0,      # slice_id will be set afterwards
-        }, 'TimesliceHits')
+        hits = Table.from_template(
+            {
+                'channel_id': self._channel_ids[:total_hits],
+                'dom_id': self._dom_ids[:total_hits],
+                'time': self._times[:total_hits],
+                'tot': self._tots[:total_hits],
+        # 'triggered': self._triggereds[:total_hits],  # dummy
+                'group_id': 0,    # slice_id will be set afterwards
+            },
+            'TimesliceHits')
         return hits
 
     def _resize_buffers(self, buf_size):
@@ -216,7 +214,7 @@ class TimeslicePump(Pump):
         self._dom_ids.resize(buf_size)
         self._times.resize(buf_size)
         self._tots.resize(buf_size)
-        self._triggereds.resize(buf_size)  # dummy
+        self._triggereds.resize(buf_size)    # dummy
 
     def get_by_frame_index(self, frame_index):
         blob = Blob()
@@ -255,13 +253,14 @@ class SummaryslicePump(Pump):
             summary_slice = {}
             self.r.retrieve_next_summaryslice()
             blob = Blob()
-            summaryslice_info = Table.from_template({
-                'frame_index': self.r.frame_index,
-                'slice_id': slice_id,
-                'timestamp': self.r.utc_seconds,
-                'nanoseconds': self.r.utc_nanoseconds,
-                'n_frames': self.r.n_frames,
-            }, 'SummarysliceInfo')
+            summaryslice_info = Table.from_template(
+                {
+                    'frame_index': self.r.frame_index,
+                    'slice_id': slice_id,
+                    'timestamp': self.r.utc_seconds,
+                    'nanoseconds': self.r.utc_nanoseconds,
+                    'n_frames': self.r.n_frames,
+                }, 'SummarysliceInfo')
             blob['SummarysliceInfo'] = summaryslice_info
             while self.r.has_next_frame:
                 rates = np.zeros(31, dtype='f8')
@@ -304,7 +303,7 @@ class FitPump(Pump):
     def configure(self):
 
         try:
-            import jppy  # noqa
+            import jppy    # noqa
         except ImportError:
             raise ImportError("\nEither Jpp or jppy could not be found."
                               "\nMake sure you source the JPP environmanet "
@@ -354,7 +353,7 @@ class FitPump(Pump):
     def extract_event(self):
         blob = Blob()
         r = self.event_reader
-        r.retrieve_next_event()  # do it at the beginning!
+        r.retrieve_next_event()    # do it at the beginning!
 
         n = r.n_fits
 
@@ -373,20 +372,22 @@ class FitPump(Pump):
             self._qualities,
             self._energies,
         )
-        fit_collection = Table({
-            'pos_x': self._pos_xs[:n],
-            'pos_y': self._pos_ys[:n],
-            'pos_z': self._pos_zs[:n],
-            'dir_x': self._dir_xs[:n],
-            'dir_y': self._dir_ys[:n],
-            'dir_z': self._dir_zs[:n],
-            'ndf': self._ndfs[:n],
-            'time': self._times[:n],
-            'quality': self._qualities[:n],
-            'energy': self._energies[:n],
-        }, h5loc='/jfit')
-        fit_collection = fit_collection.append_columns(
-            ['event_id'], [self.event_index])
+        fit_collection = Table(
+            {
+                'pos_x': self._pos_xs[:n],
+                'pos_y': self._pos_ys[:n],
+                'pos_z': self._pos_zs[:n],
+                'dir_x': self._dir_xs[:n],
+                'dir_y': self._dir_ys[:n],
+                'dir_z': self._dir_zs[:n],
+                'ndf': self._ndfs[:n],
+                'time': self._times[:n],
+                'quality': self._qualities[:n],
+                'energy': self._energies[:n],
+            },
+            h5loc='/jfit')
+        fit_collection = fit_collection.append_columns(['event_id'],
+                                                       [self.event_index])
 
         # TODO make this into a datastructure
 

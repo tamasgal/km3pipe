@@ -8,7 +8,7 @@ import tables as tb
 
 from km3pipe import Blob, Module, Pipeline, Pump
 from km3pipe.dataclasses import Table
-from km3pipe.io import HDF5Pump, HDF5Sink   # noqa
+from km3pipe.io import HDF5Pump, HDF5Sink    # noqa
 from km3pipe.tools import insert_prefix_to_dtype
 from km3pipe.testing import TestCase
 
@@ -17,24 +17,39 @@ DATA_DIR = join(dirname(__file__), '../../kp-data/test_data/')
 
 class TestMultiTable(TestCase):
     def setUp(self):
-        self.foo = np.array([
-            (1.0, 2.0, 3.0),
-            (4.0, 5.0, 6.0),
-        ], dtype=[('a', '<f8'), ('b', '<f8'), ('c', '<f8'), ])
-        self.bar = np.array([
-            (10.0, 20.0, 30.0),
-            (40.0, 50.0, 60.0),
-        ], dtype=[('aa', '<f8'), ('bb', '<f8'), ('cc', '<f8'), ])
+        self.foo = np.array(
+            [
+                (1.0, 2.0, 3.0),
+                (4.0, 5.0, 6.0),
+            ],
+            dtype=[
+                ('a', '<f8'),
+                ('b', '<f8'),
+                ('c', '<f8'),
+            ])
+        self.bar = np.array(
+            [
+                (10.0, 20.0, 30.0),
+                (40.0, 50.0, 60.0),
+            ],
+            dtype=[
+                ('aa', '<f8'),
+                ('bb', '<f8'),
+                ('cc', '<f8'),
+            ])
         self.tabs = {'foo': self.foo, 'bar': self.bar}
         self.where = '/lala'
         self.fobj = tempfile.NamedTemporaryFile(delete=True)
         self.h5name = self.fobj.name
         self.h5file = tb.open_file(
-            # create the file in memory only
-            self.h5name, 'w', driver="H5FD_CORE", driver_core_backing_store=0)
+        # create the file in memory only
+            self.h5name,
+            'w',
+            driver="H5FD_CORE",
+            driver_core_backing_store=0)
         for name, tab in self.tabs.items():
-            self.h5file.create_table(self.where, name=name, obj=tab,
-                                     createparents=True)
+            self.h5file.create_table(
+                self.where, name=name, obj=tab, createparents=True)
 
     def tearDown(self):
         self.h5file.close()
@@ -65,7 +80,7 @@ class TestMultiTable(TestCase):
 
 class TestH5Pump(TestCase):
     def setUp(self):
-        self.fname = join(DATA_DIR,  'numu_cc_test.h5')
+        self.fname = join(DATA_DIR, 'numu_cc_test.h5')
 
     def test_init_sets_filename_if_no_keyword_arg_is_passed(self):
         p = HDF5Pump(self.fname)
@@ -90,13 +105,46 @@ class TestH5Pump(TestCase):
         p.attach(HDF5Pump, filename=self.fname)
         p.drain()
 
+    def test_event_info_is_not_empty(self):
+        self.fname = join(DATA_DIR, 'test_event_info.h5')
+
+        class Printer(Module):
+            def process(self, blob):
+                assert blob['EventInfo'].size != 0
+                return blob
+
+        p = Pipeline()
+        p.attach(HDF5Pump, filename=self.fname)
+        p.attach(Printer)
+        p.drain()
+
+    def test_event_info_has_correct_group_id(self):
+        self.fname = join(DATA_DIR, 'test_event_info.h5')
+
+        class Printer(Module):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                assert blob['EventInfo'][0].group_id == self.index
+                self.index += 1
+                return blob
+
+        p = Pipeline()
+        p.attach(HDF5Pump, filename=self.fname)
+        p.attach(Printer)
+        p.drain()
+
 
 class TestH5Sink(TestCase):
     def setUp(self):
         self.fname = join(DATA_DIR, 'numu_cc_test.h5')
         self.fobj = tempfile.NamedTemporaryFile(delete=True)
-        self.out = tb.open_file(self.fobj.name, "w", driver="H5FD_CORE",
-                                driver_core_backing_store=0)
+        self.out = tb.open_file(
+            self.fobj.name,
+            "w",
+            driver="H5FD_CORE",
+            driver_core_backing_store=0)
 
     def tearDown(self):
         self.out.close()
@@ -113,8 +161,11 @@ class TestH5Sink(TestCase):
         p.drain()
 
     def test_scalars(self):
-        out = tb.open_file('foobar_scalar', "a", driver="H5FD_CORE",
-                           driver_core_backing_store=0)
+        out = tb.open_file(
+            'foobar_scalar',
+            "a",
+            driver="H5FD_CORE",
+            driver_core_backing_store=0)
 
         def pu(blob):
             return {'foo': 42.0}
@@ -158,7 +209,8 @@ class TestH5SinkConsistency(TestCase):
         assert np.allclose([0, 1, 2, 3, 4], group_id)
         fobj.close()
 
-    def test_h5_consistency_for_tables_without_group_id_and_multiple_keys(self):
+    def test_h5_consistency_for_tables_without_group_id_and_multiple_keys(
+            self):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = fobj.name
 
@@ -237,7 +289,6 @@ class TestHDF5PumpConsistency(TestCase):
         pipe.drain(5)
 
         class BlobTester(Module):
-
             def configure(self):
                 self.index = 0
 
@@ -271,8 +322,13 @@ class TestHDF5PumpConsistency(TestCase):
 
             def process(self, blob):
                 self.count += 1
-                tab = Table({'a': self.count * 10, 'b': 1},
-                            h5loc='/tab', split_h5=True)
+                tab = Table(
+                    {
+                        'a': self.count * 10,
+                        'b': 1
+                    },
+                    h5loc='/tab',
+                    split_h5=True)
                 blob['Tab'] = tab
                 return blob
 
@@ -282,7 +338,6 @@ class TestHDF5PumpConsistency(TestCase):
         pipe.drain(5)
 
         class BlobTester(Module):
-
             def configure(self):
                 self.index = 0
 

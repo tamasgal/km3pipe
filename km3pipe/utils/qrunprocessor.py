@@ -70,7 +70,7 @@ def main():
     SCRIPT = abspath(args['SCRIPT'])
     SUFFIX = args['-s']
     DET_ID = int(args['DET_ID'])
-    ET_PER_FILE = int(args['-e']) * 60  # [s]
+    ET_PER_FILE = int(args['-e']) * 60    # [s]
     FILES_PER_JOB = int(args['-n'])
     FSIZE = args['-f']
     VMEM = args['-m']

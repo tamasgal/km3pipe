@@ -136,12 +136,12 @@ class TestCuckoo(TestCase):
 class TestTimer(TestCase):
     def test_context_manager(self):
         mock = MagicMock()
-        with Timer(callback=mock) as t:  # noqa
+        with Timer(callback=mock) as t:    # noqa
             pass
         mock.assert_called_once()
 
     def test_context_manager_calls_with_standard_text(self):
         mock = MagicMock()
-        with Timer(callback=mock) as t:  # noqa
+        with Timer(callback=mock) as t:    # noqa
             pass
         self.assertTrue(mock.call_args[0][0].startswith("It "))

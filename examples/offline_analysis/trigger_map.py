@@ -23,7 +23,7 @@ This script creates a histogram to show the trigger contribution for events.
 from docopt import docopt
 import matplotlib
 # Force matplotlib to not use any Xwindows backend.
-matplotlib.use('Agg')  # noqa
+matplotlib.use('Agg')    # noqa
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 import numpy as np
@@ -75,16 +75,22 @@ class TriggerMap(kp.Module):
         ax.grid(True)
         ax.set_axisbelow(True)
         hit_mat = np.array([np.array(x) for x in self.hit_counts]).transpose()
-        im = ax.matshow(hit_mat,
-                        interpolation='nearest', filternorm=None,
-                        cmap='plasma', aspect='auto', origin='lower', zorder=3,
-                        norm=LogNorm(vmin=1, vmax=np.amax(hit_mat)))
+        im = ax.matshow(
+            hit_mat,
+            interpolation='nearest',
+            filternorm=None,
+            cmap='plasma',
+            aspect='auto',
+            origin='lower',
+            zorder=3,
+            norm=LogNorm(vmin=1, vmax=np.amax(hit_mat)))
         yticks = np.arange(self.n_doms * self.n_dus)
         ytick_label_templ = "DU{0:.0f}-DOM{1:02d}" if self.du else "DOM{1:02d}"
-        ytick_labels = [ytick_label_templ
-                        .format(np.ceil((y + 1) / self.n_doms),
-                                y % (self.n_doms) + 1)
-                        for y in yticks]
+        ytick_labels = [
+            ytick_label_templ.format(
+                np.ceil((y + 1) / self.n_doms), y % (self.n_doms) + 1)
+            for y in yticks
+        ]
         ax.set_yticks(yticks)
         ax.set_yticklabels(ytick_labels)
         ax.tick_params(labelbottom=True)
@@ -106,9 +112,10 @@ if __name__ == '__main__':
     det = kp.hardware.Detector(det_id=29)
     pipe = kp.Pipeline()
     pipe.attach(kp.io.jpp.EventPump, filename=args['FILENAME'])
-    pipe.attach(TriggerMap,
-                detector=det,
-                du=du,
-                plot_filename=args['-p'],
-                subtitle=args['FILENAME'])
+    pipe.attach(
+        TriggerMap,
+        detector=det,
+        du=du,
+        plot_filename=args['-p'],
+        subtitle=args['FILENAME'])
     pipe.drain()

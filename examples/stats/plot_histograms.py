@@ -15,7 +15,7 @@ import numpy as np
 import scipy.stats
 import seaborn as sns
 
-import km3pipe.style.moritz         # noqa
+import km3pipe.style.moritz    # noqa
 
 #####################################################
 # Load the histogram from a file.
@@ -37,7 +37,6 @@ print(binlims.shape)
 
 hist = scipy.stats.rv_histogram((counts, binlims))
 
-
 #####################################
 # plot it
 
@@ -48,12 +47,10 @@ x = np.linspace(binlims[0] - padding, binlims[-1] + padding, n_points)
 
 plt.plot(x, hist.pdf(x))
 
-
 #####################################
 # plot the cumulative histogram
 
 plt.plot(x, hist.cdf(x))
-
 
 ##########################################################
 # sample from the histogram (aka draw random variates)

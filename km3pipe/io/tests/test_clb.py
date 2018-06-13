@@ -19,7 +19,6 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-
 HEX_DATA = ("7A0500005454444300000000000000030000684200BEBC2030BEAF008000000" +
             "00003F2F79B0C0003F64C6B060F03F7560B1C0F03F75631030203F88BEB040A" +
             "04039B750B0404059CF2050404059F7E0C040405AC880B1404083F480A0A040" +
@@ -139,7 +138,6 @@ HEX_DATA = ("7A0500005454444300000000000000030000684200BEBC2030BEAF008000000" +
             "000124B66406140125ABD610070127CBA40A14012DA81B1D1A012DA82206000" +
             "12F7E5F24")
 
-
 BINARY_DATA = binascii.unhexlify(HEX_DATA.encode())
 try:
     TEST_FILE = StringIO(BINARY_DATA)
@@ -150,7 +148,6 @@ except TypeError:
 
 
 class TestCLBPump(TestCase):
-
     def setUp(self):
         TEST_FILE.seek(0, 0)
         self.pump = CLBPump()
@@ -197,7 +194,6 @@ class TestCLBPump(TestCase):
 
 
 class TestCLBHeader(TestCase):
-
     def test_init_with_byte_data(self):
         raw_data = "5454444300000000000000030000684200BEBC2030BEAF0080000000"
         byte_data = binascii.unhexlify(raw_data.encode())
@@ -226,7 +222,6 @@ class TestCLBHeader(TestCase):
 
 
 class TestPMTData(TestCase):
-
     def test_init(self):
         pmt_data = PMTData(1, 2, 3)
         self.assertEqual(1, pmt_data.channel_id)

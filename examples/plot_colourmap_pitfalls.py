@@ -14,7 +14,6 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import km3pipe.style
 km3pipe.style.use("km3pipe")
 
-
 x = np.linspace(-np.pi, np.pi, 300)
 xx, yy = np.meshgrid(x, x)
 z = np.cos(xx) + np.cos(yy)

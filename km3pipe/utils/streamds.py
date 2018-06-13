@@ -98,8 +98,8 @@ def upload_runsummary(csv_filename, dryrun=False):
     cols = set(df.columns)
 
     if not required_columns.issubset(cols):
-        log.error("Missing columns: {}."
-                  .format(', '.join(str(c) for c in required_columns - cols)))
+        log.error("Missing columns: {}.".format(', '.join(
+            str(c) for c in required_columns - cols)))
         return
 
     parameters = cols - required_columns
@@ -111,8 +111,8 @@ def upload_runsummary(csv_filename, dryrun=False):
         log.critical("Empty dataset.")
         return
 
-    print("Found data for parameters: {}."
-          .format(', '.join(str(c) for c in parameters)))
+    print("Found data for parameters: {}.".format(', '.join(
+        str(c) for c in parameters)))
     print("Converting CSV data into JSON")
     if dryrun:
         log.warn("Dryrun: adding 'TEST_' prefix to parameter names")
@@ -123,9 +123,9 @@ def upload_runsummary(csv_filename, dryrun=False):
     print("We have {:.3f} MB to upload.".format(len(data) / 1024**2))
 
     print("Requesting database session.")
-    db = kp.db.DBManager()  # noqa
+    db = kp.db.DBManager()    # noqa
     if kp.db.we_are_in_lyon():
-        session_cookie = "sid=_kmcprod_134.158_lyo7783844001343100343mcprod1223user"  # noqa
+        session_cookie = "sid=_kmcprod_134.158_lyo7783844001343100343mcprod1223user"    # noqa
     else:
         session_cookie = kp.config.Config().get('DB', 'session_cookie')
         if session_cookie is None:
@@ -133,9 +133,8 @@ def upload_runsummary(csv_filename, dryrun=False):
     log.debug("Using the session cookie: {}".format(session_cookie))
     cookie_key, sid = session_cookie.split('=')
     print("Uploading the data to the database.")
-    r = requests.post(RUNSUMMARY_URL,
-                      cookies={cookie_key: sid},
-                      files={'datafile': data})
+    r = requests.post(
+        RUNSUMMARY_URL, cookies={cookie_key: sid}, files={'datafile': data})
     if r.status_code == 200:
         log.debug("POST request status code: {}".format(r.status_code))
         print("Database response:")
@@ -152,7 +151,8 @@ def upload_runsummary(csv_filename, dryrun=False):
         return
 
 
-def convert_runsummary_to_json(df, comment='Uploaded via km3pipe.StreamDS',
+def convert_runsummary_to_json(df,
+                               comment='Uploaded via km3pipe.StreamDS',
                                prefix='TEST_'):
     """Convert a Pandas DataFrame with runsummary to JSON for DB upload"""
     data_field = []
@@ -163,8 +163,10 @@ def convert_runsummary_to_json(df, comment='Uploaded via km3pipe.StreamDS',
 
         for run, run_data in det_data.groupby('run'):
             parameters_field = []
-            runs_field.append({"Run": int(run),
-                               "Parameters": parameters_field})
+            runs_field.append({
+                "Run": int(run),
+                "Parameters": parameters_field
+            })
 
             parameter_dict = {}
             for row in run_data.itertuples():
@@ -172,8 +174,10 @@ def convert_runsummary_to_json(df, comment='Uploaded via km3pipe.StreamDS',
                     if parameter_name not in parameter_dict:
                         entry = {'Name': prefix + parameter_name, 'Data': []}
                         parameter_dict[parameter_name] = entry
-                    value = {'S': str(getattr(row, 'source')),
-                             'D': float(getattr(row, parameter_name))}
+                    value = {
+                        'S': str(getattr(row, 'source')),
+                        'D': float(getattr(row, parameter_name))
+                    }
                     parameter_dict[parameter_name]['Data'].append(value)
             for parameter_data in parameter_dict.values():
                 parameters_field.append(parameter_data)

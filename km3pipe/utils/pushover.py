@@ -46,11 +46,12 @@ def main():
         exit(1)
 
     conn = httplib.HTTPSConnection("api.pushover.net:443")
-    conn.request("POST", "/1/messages.json",
-                 urlencode({
-                     "token": token,
-                     "user": user_key,
-                     "message": ' '.join(args["MESSAGE"]),
-                 }), {"Content-type": "application/x-www-form-urlencoded"})
+    conn.request(
+        "POST", "/1/messages.json",
+        urlencode({
+            "token": token,
+            "user": user_key,
+            "message": ' '.join(args["MESSAGE"]),
+        }), {"Content-type": "application/x-www-form-urlencoded"})
 
     conn.getresponse()

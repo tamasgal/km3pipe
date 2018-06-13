@@ -14,7 +14,7 @@ __author__ = "Jonas Reubelt and Tamas Gal"
 __email__ = "jreubelt@km3net.de"
 __status__ = "Development"
 
-log = kp.logger.get_logger(__name__)  # pylint: disable=C0103
+log = kp.logger.get_logger(__name__)    # pylint: disable=C0103
 
 
 class PhidgetsController(kp.Module):
@@ -123,9 +123,8 @@ class PhidgetsController(kp.Module):
         self.encoder.setPosition(motor_id, 0)
 
     def log_positions(self, motor_id=0):
-        log.info("Stepper position: {0}\nEncoder position:{1}"
-                 .format(self.stepper_pos / self.s * 360,
-                         self.encoder_pos / self.e * 360))
+        log.info("Stepper position: {0}\nEncoder position:{1}".format(
+            self.stepper_pos / self.s * 360, self.encoder_pos / self.e * 360))
 
 
 class USBTMC(object):
@@ -199,8 +198,8 @@ class Agilent33220A(object):
     def mode(self, val):
         valid_modes = ('sin', 'squ', 'ramp', 'puls', 'nois', 'dc', 'user')
         if val not in valid_modes:
-            print("Not a valid mode: '{0}'. Valid modes are: {1}"
-                  .format(val, valid_modes))
+            print("Not a valid mode: '{0}'. Valid modes are: {1}".format(
+                val, valid_modes))
             return
         self.tmc.write("FUNC {0}".format(val.upper()).encode())
         self._mode = val

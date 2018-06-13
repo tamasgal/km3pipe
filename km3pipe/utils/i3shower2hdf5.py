@@ -9,8 +9,7 @@ Options:
     -h --help     Show this screen.
 """
 
-
-from math import isnan, fabs        # todo: replace with numpy?
+from math import isnan, fabs    # todo: replace with numpy?
 
 import h5py
 import pandas as pd
@@ -19,14 +18,13 @@ import pandas as pd
 # 'from icecube import icetray' secretly loads stuff behind the scenes, it seems        # noqa
 # very un-pythonic, but eh
 # see also http://software.icecube.wisc.edu/documentation/projects/dataclasses/faq-common-probs.html#runtimeerror-extension-class-wrapper-for-base-class-i3frameobject-has-not-been-created-yet     # noqa
-from icecube import icetray, dataio     # noqa
+from icecube import icetray, dataio    # noqa
 from icecube.icetray import I3Module, I3Bool, I3Int
 from icecube.dataclasses import I3Double
 from I3Tray import I3Tray
 # CRUCIAL import this after the ones before
-from icecube import antares_common, antares_reader     # noqa
-from icecube.gulliver import I3LogLikelihoodFitParams       # noqa
-
+from icecube import antares_common, antares_reader    # noqa
+from icecube.gulliver import I3LogLikelihoodFitParams    # noqa
 
 __author__ = "Moritz Lotze"
 __copyright__ = "Copyright 2017, Moritz Lotze and the KM3NeT collaboration."
@@ -42,10 +40,8 @@ class WriteScalars(I3Module):
 
     def __init__(self, context):
         I3Module.__init__(self, context)
-        self.AddParameter("Filename",
-                          "Name the file to write into.", "foo.h5")
-        self.AddParameter("Tablename",
-                          "Name of the table.", "/data")
+        self.AddParameter("Filename", "Name the file to write into.", "foo.h5")
+        self.AddParameter("Tablename", "Name of the table.", "/data")
         self.AddOutBox("OutBox")
 
     def Configure(self):
@@ -68,9 +64,12 @@ class WriteScalars(I3Module):
         arr = pd.DataFrame(self.store).to_records(index=False)
         with h5py.File(self.filename, 'w') as h5:
             h5.create_dataset(
-                self.tablename, data=arr,
-                compression="gzip", compression_opts=5,
-                shuffle=True, fletcher32=True)
+                self.tablename,
+                data=arr,
+                compression="gzip",
+                compression_opts=5,
+                shuffle=True,
+                fletcher32=True)
 
 
 class KeepReconstructed(I3Module):
@@ -84,7 +83,9 @@ class KeepReconstructed(I3Module):
         pass
 
     def Physics(self, frame):
-        if frame.Has("best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues"):       # noqa
+        if frame.Has(
+                "best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues"
+        ):    # noqa
             self.PushFrame(frame)
 
 
@@ -109,8 +110,8 @@ class ReadLLHValues(I3Module):
 
     def __init__(self, context):
         I3Module.__init__(self, context)
-        self.AddParameter("LLHParamContainer",
-                          "Name of LLH value container", "")
+        self.AddParameter("LLHParamContainer", "Name of LLH value container",
+                          "")
         self.AddOutBox("OutBox")
 
     def Configure(self):
@@ -134,8 +135,7 @@ class ReadRecoParticle(I3Module):
 
     def __init__(self, context):
         I3Module.__init__(self, context)
-        self.AddParameter("ParticleName",
-                          "Name of the reco particle", "")
+        self.AddParameter("ParticleName", "Name of the reco particle", "")
         self.AddOutBox("OutBox")
 
     def Configure(self):
@@ -207,10 +207,8 @@ class Compare(I3Module):
 
     def Configure(self):
         self.InputParticleName = [0, 0]
-        self.InputParticleName[0] = self.GetParameter(
-            "particle_1")
-        self.InputParticleName[1] = self.GetParameter(
-            "particle_2")
+        self.InputParticleName[0] = self.GetParameter("particle_1")
+        self.InputParticleName[1] = self.GetParameter("particle_2")
 
     def Physics(self, frame):
         self.OK = True
@@ -260,9 +258,7 @@ class Distance(Compare):
 
         for Particle in self.InputParticles:
             pos = Particle.GetPos()
-            self.Vertex.append(
-                pos
-            )
+            self.Vertex.append(pos)
 
     def get_distance(self):
         self.Distance = self.Vertex[0].CalcDistance(self.Vertex[1])
@@ -306,23 +302,37 @@ def i3extract(infile, outfile=None):
     tray = I3Tray()
     tray.AddModule('I3Reader', 'i3_reader', filename=infile)
     # tray.AddModule(KeepReconstructed, "event_selector")
-    tray.AddModule(ReadEventMeta, 'read_meta')      # grab the event ID
-    tray.AddModule(Distance, "compare_space",
-                   particle_1="best_FirstDusjOrcaVertexFit_FitResult",
-                   particle_2="best_SecondDusjOrcaVertexFit_FitResult"
-                   )
-    tray.AddModule(TimeDistance, "compare_time",
-                   particle_1="best_FirstDusjOrcaVertexFit_FitResult",
-                   particle_2="best_SecondDusjOrcaVertexFit_FitResult",
-                   )
-    tray.AddModule(ReadRecoParticle, 'read_particle_first',
-                   ParticleName='best_FirstDusjOrcaVertexFit_FitResult')
-    tray.AddModule(ReadRecoParticle, 'read_particle_second',
-                   ParticleName='best_SecondDusjOrcaVertexFit_FitResult')
-    tray.AddModule(ReadRecoParticle, 'read_particle_proba',
-                   ParticleName='best_DusjOrcaUsingProbabilitiesFinalFit_FitResult')                # noqa
-    tray.AddModule(ReadLLHValues, 'read_llh_chere',
-                   LLHParamContainer='best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues')  # noqa
+    tray.AddModule(ReadEventMeta, 'read_meta')    # grab the event ID
+    tray.AddModule(
+        Distance,
+        "compare_space",
+        particle_1="best_FirstDusjOrcaVertexFit_FitResult",
+        particle_2="best_SecondDusjOrcaVertexFit_FitResult")
+    tray.AddModule(
+        TimeDistance,
+        "compare_time",
+        particle_1="best_FirstDusjOrcaVertexFit_FitResult",
+        particle_2="best_SecondDusjOrcaVertexFit_FitResult",
+    )
+    tray.AddModule(
+        ReadRecoParticle,
+        'read_particle_first',
+        ParticleName='best_FirstDusjOrcaVertexFit_FitResult')
+    tray.AddModule(
+        ReadRecoParticle,
+        'read_particle_second',
+        ParticleName='best_SecondDusjOrcaVertexFit_FitResult')
+    tray.AddModule(
+        ReadRecoParticle,
+        'read_particle_proba',
+        ParticleName='best_DusjOrcaUsingProbabilitiesFinalFit_FitResult'
+    )    # noqa
+    tray.AddModule(
+        ReadLLHValues,
+        'read_llh_chere',
+        LLHParamContainer=
+        'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues'
+    )    # noqa
     tray.AddModule(WriteScalars, 'write_scalars', filename=outfile)
     tray.AddModule('TrashCan', 'dustbin')
     tray.Execute()

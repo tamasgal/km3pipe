@@ -40,12 +40,13 @@ class UDPForwarder(kp.Module):
 
 
 pipe = kp.Pipeline()
-pipe.attach(kp.io.CHPump,
-            host='localhost',
-            port=5553,
-            tags='IO_MONIT',
-            timeout=60 * 60 * 24 * 7,
-            max_queue=1000,
-            timeit=True)
+pipe.attach(
+    kp.io.CHPump,
+    host='localhost',
+    port=5553,
+    tags='IO_MONIT',
+    timeout=60 * 60 * 24 * 7,
+    max_queue=1000,
+    timeit=True)
 pipe.attach(UDPForwarder)
 pipe.drain()

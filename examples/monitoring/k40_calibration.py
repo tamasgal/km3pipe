@@ -17,14 +17,14 @@ from km3modules.plot import IntraDOMCalibrationPlotter
 import km3pipe.style
 km3pipe.style.use("km3pipe")
 
-
 pipe = kp.Pipeline(timeit=True)
-pipe.attach(kp.io.ch.CHPump,
-            host='127.0.0.1',
-            port=5553,
-            tags='IO_TSL, IO_MONIT',
-            timeout=7 * 60 * 60 * 24,
-            max_queue=42)
+pipe.attach(
+    kp.io.ch.CHPump,
+    host='127.0.0.1',
+    port=5553,
+    tags='IO_TSL, IO_MONIT',
+    timeout=7 * 60 * 60 * 24,
+    max_queue=42)
 pipe.attach(kp.io.ch.CHTagger)
 pipe.attach(StatusBar, every=1000)
 pipe.attach(MemoryObserver, every=5000)

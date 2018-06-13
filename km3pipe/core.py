@@ -28,7 +28,7 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = get_logger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)    # pylint: disable=C0103
 # log.setLevel(logging.DEBUG)
 
 STAT_LIMIT = 100000
@@ -62,9 +62,12 @@ class Pipeline(object):
         self.calibration = None
         self.blob = blob or Blob()
         self.timeit = timeit
-        self._timeit = {'init': timer(), 'init_cpu': time.clock(),
-                        'cycles': deque(maxlen=STAT_LIMIT),
-                        'cycles_cpu': deque(maxlen=STAT_LIMIT)}
+        self._timeit = {
+            'init': timer(),
+            'init_cpu': time.clock(),
+            'cycles': deque(maxlen=STAT_LIMIT),
+            'cycles_cpu': deque(maxlen=STAT_LIMIT)
+        }
         self._cycle_count = 0
         self._stop = False
         self._finished = False
@@ -109,16 +112,18 @@ class Pipeline(object):
         else:
             module.every = 1
 
-        self._timeit[module] = {'process': deque(maxlen=STAT_LIMIT),
-                                'process_cpu': deque(maxlen=STAT_LIMIT),
-                                'finish': 0,
-                                'finish_cpu': 0}
+        self._timeit[module] = {
+            'process': deque(maxlen=STAT_LIMIT),
+            'process_cpu': deque(maxlen=STAT_LIMIT),
+            'finish': 0,
+            'finish_cpu': 0
+        }
 
-        if hasattr(module, 'get_detector'):  # Calibration-like module
+        if hasattr(module, 'get_detector'):    # Calibration-like module
             self.calibration = module
             if module._should_apply:
                 self.modules.append(module)
-        else:  # normal module
+        else:    # normal module
             module.calibration = self.calibration
             self.modules.append(module)
 
@@ -269,8 +274,8 @@ class Pipeline(object):
 
         print(60 * '=')
         print("{0} cycles drained in {1} (CPU {2}). Memory peak: {3:.2f} MB"
-              .format(self._cycle_count,
-                      timef(overall), timef(overall_cpu), memory))
+              .format(self._cycle_count, timef(overall), timef(overall_cpu),
+                      memory))
         if self._cycle_count > n_cycles:
             print("Statistics are based on the last {0} cycles."
                   .format(n_cycles))
@@ -286,11 +291,10 @@ class Pipeline(object):
             finish_time_cpu = self._timeit[module]['finish_cpu']
             process_times = self._timeit[module]['process']
             process_times_cpu = self._timeit[module]['process_cpu']
-            print(module.name +
-                  " - process: {0:.3f}s (CPU {1:.3f}s)"
-                  " - finish: {2:.3f}s (CPU {3:.3f}s)"
-                  .format(sum(process_times), sum(process_times_cpu),
-                          finish_time, finish_time_cpu))
+            print(module.name + " - process: {0:.3f}s (CPU {1:.3f}s)"
+                  " - finish: {2:.3f}s (CPU {3:.3f}s)".format(
+                      sum(process_times), sum(process_times_cpu), finish_time,
+                      finish_time_cpu))
             if len(process_times) > 0:
                 print(statsf('wall', calc_stats(process_times)))
             if len(process_times_cpu) > 0:
@@ -315,10 +319,12 @@ class Module(object):
         self.log = get_logger(self.logger_name)
         self.print = get_printer(self.logger_name)
         self.timeit = self.get('timeit') or False
-        self._timeit = {'process': deque(maxlen=STAT_LIMIT),
-                        'process_cpu': deque(maxlen=STAT_LIMIT),
-                        'finish': 0,
-                        'finish_cpu': 0}
+        self._timeit = {
+            'process': deque(maxlen=STAT_LIMIT),
+            'process_cpu': deque(maxlen=STAT_LIMIT),
+            'finish': 0,
+            'finish_cpu': 0
+        }
         self.services = {}
         self.configure()
 
@@ -350,11 +356,11 @@ class Module(object):
         """Return the value of the requested parameter or raise an error."""
         value = self.get(name)
         if value is None:
-            raise TypeError("{0} requires the parameter '{1}'."
-                            .format(self.__class__, name))
+            raise TypeError("{0} requires the parameter '{1}'.".format(
+                self.__class__, name))
         return value
 
-    def process(self, blob):  # pylint: disable=R0201
+    def process(self, blob):    # pylint: disable=R0201
         """Knead the blob and return it"""
         return blob
 
@@ -440,6 +446,7 @@ class Blob(OrderedDict):
 class Run(object):
     """A simple container for event info, hits, tracks and calibration.
     """
+
     def __init__(self, **tables):
         for key, val in tables.items():
             setattr(self, key, val)
