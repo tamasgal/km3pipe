@@ -118,6 +118,7 @@ def main():
 
         for ipath in file_chunk:
             fname = basename(ipath)
+            s.separator(' ')
             s.separator('=')
             s.echo("Processing {}:".format(fname))
             s.iget(ipath)
