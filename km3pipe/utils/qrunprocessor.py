@@ -113,7 +113,7 @@ def main():
     for job_id, file_chunk in enumerate(chunks(rem_files, FILES_PER_JOB)):
         n_files = len(file_chunk)
         s.add("echo Creating run summary for {} files".format(n_files))
-        s.add("cd $TMPDIR; mkdir -p $USER; cd $USER")
+        # s.add("cd $TMPDIR; mkdir -p $USER; cd $USER")
         s.add("echo")
 
         for ipath in file_chunk:
@@ -121,6 +121,7 @@ def main():
             s.separator(' ')
             s.separator('=')
             s.echo("Processing {}:".format(fname))
+            s.add('pwd')
             s.iget(ipath)
             s.add('ls -al {}'.format(fname))
             s.add('JPrintTree -f {}'.format(fname))
