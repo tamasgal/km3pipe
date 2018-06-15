@@ -1,9 +1,12 @@
 #!usr/bin/env python
+# -*- coding: utf-8 -*-
 # Filename: stats.py
 # pylint: disable=C0103
 """
 Statistics.
 """
+from __future__ import absolute_import, print_function, division
+
 import numpy as np
 from scipy.stats import rv_continuous
 
@@ -19,11 +22,12 @@ __maintainer__ = "Moritz Lotze"
 __email__ = "mlotze@km3net.de"
 __status__ = "Development"
 
-log = get_logger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)    # pylint: disable=C0103
 
 
 class loguniform(rv_continuous):
     """Loguniform Distributon"""
+
     def __init__(self, low=0.1, high=1, base=10, *args, **kwargs):
         super(loguniform, self).__init__(*args, **kwargs)
         self._log_low = log_b(low, base=base)
@@ -32,8 +36,9 @@ class loguniform(rv_continuous):
 
     def _rvs(self, *args, **kwargs):
         # `rvs(size=foo, *args)` does argcheck etc, and sets `self._size`
-        return np.power(self._base_of_log, np.random.uniform(
-            self._log_low, self._log_high, self._size))
+        return np.power(
+            self._base_of_log,
+            np.random.uniform(self._log_low, self._log_high, self._size))
 
 
 class rv_kde(rv_continuous):
@@ -43,7 +48,12 @@ class rv_kde(rv_continuous):
 
     Automatic bandwidth,  either from the statsmodels or scipy implementation.
     """
-    def __init__(self, data, bw=None, bw_method=None, bw_statsmodels=False,
+
+    def __init__(self,
+                 data,
+                 bw=None,
+                 bw_method=None,
+                 bw_statsmodels=False,
                  **kde_args):
         from sklearn.neighbors import KernelDensity
         from sklearn.utils import check_array
@@ -87,10 +97,9 @@ class rv_kde(rv_continuous):
         pdf = np.exp(log_pdf)
         return pdf
 
-    def rvs(self, size=1, *args, random_state=None, **kwargs):
+    def rvs(self, rgs, size=1, random_state=None):
         # don't ask me why it uses `self._size`
-        return self._kde.sample(n_samples=size,
-                                random_state=random_state)
+        return self._kde.sample(n_samples=size, random_state=random_state)
 
 
 def mad(v):
@@ -178,7 +187,11 @@ def param_describe(params, quant=95, axis=0):
     return par, p_lo, p_up
 
 
-def bootstrap_fit(rv_cont, data, n_iter=10, quant=95, print_params=True,
+def bootstrap_fit(rv_cont,
+                  data,
+                  n_iter=10,
+                  quant=95,
+                  print_params=True,
                   **kwargs):
     """Bootstrap a distribution fit + get confidence intervals for the params.
 
@@ -203,12 +216,14 @@ def bootstrap_fit(rv_cont, data, n_iter=10, quant=95, print_params=True,
     print(rv_cont.name)
     print("--------------")
     for i, name in enumerate(names):
-        print(
-            "{nam:>{fill}}: {mean:+.3f} ∈ "
-            "[{lo:+.3f}, {up:+.3f}] ({q}%)".format(
-                nam=name, fill=maxlen, mean=par[i],
-                lo=lo[i], up=up[i], q=quant)
-        )
+        print("{nam:>{fill}}: {mean:+.3f} ∈ "
+              "[{lo:+.3f}, {up:+.3f}] ({q}%)".format(
+                  nam=name,
+                  fill=maxlen,
+                  mean=par[i],
+                  lo=lo[i],
+                  up=up[i],
+                  q=quant))
     out = {
         'mean': par,
         'lower limit': lo,
@@ -219,6 +234,7 @@ def bootstrap_fit(rv_cont, data, n_iter=10, quant=95, print_params=True,
 
 class hist2d(rv_continuous):
     """Simple implementation of a 2d histogram."""
+
     def __init__(self, H2D, *args, **kwargs):
         H, xlims, ylims = H2D
         self.H = H
@@ -237,10 +253,8 @@ class hist2d(rv_continuous):
         X = np.atleast_2d(X)
         x = X[:, 0]
         y = X[:, 1]
-        return self.H_pad[
-            np.searchsorted(self.xlims, x, side='right'),
-            np.searchsorted(self.ylims, y, side='right'),
-        ]
+        return self.H_pad[np.searchsorted(self.xlims, x, side='right'),
+                          np.searchsorted(self.ylims, y, side='right'), ]
 
     @property
     def integral(self):

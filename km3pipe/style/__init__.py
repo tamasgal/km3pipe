@@ -8,7 +8,6 @@ The KM3Pipe style definitions.
 from os.path import dirname, join, exists
 from itertools import cycle
 
-
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
@@ -16,7 +15,6 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
-
 
 STYLE_DIR = join(dirname(dirname(__file__)), 'kp-data/stylelib')
 
@@ -28,8 +26,7 @@ def get_style_path(style):
 def use(style='km3pipe'):
     import matplotlib.pyplot as plt
 
-    for s in (get_style_path('km3pipe-' + style),
-              get_style_path(style),
+    for s in (get_style_path('km3pipe-' + style), get_style_path(style),
               style):
         if exists(s):
             plt.style.use(s)
@@ -70,9 +67,10 @@ class ColourCycler(object):
             except KeyError:
                 continue
 
-        self.colours['km3pipe'] = ["#ff7869", "#4babe1", "#96ad3e",
-                                   "#e4823d", "#5d72b2", "#e2a3c2",
-                                   "#fd9844", "#e480e7"]
+        self.colours['km3pipe'] = [
+            "#ff7869", "#4babe1", "#96ad3e", "#e4823d", "#5d72b2", "#e2a3c2",
+            "#fd9844", "#e480e7"
+        ]
 
     @property
     def available(self):
@@ -82,3 +80,7 @@ class ColourCycler(object):
     def __next__(self):
         """Return the next colour in current palette"""
         return next(self._cycler)
+
+    def next(self):
+        """Python 2 compatibility for iterators"""
+        return self.__next__()

@@ -1,5 +1,9 @@
+# -*- coding: utf-8 -*-
 """Read & dump events through the CH Pump.
+
 """
+from __future__ import absolute_import, print_function, division
+
 from km3pipe import Pipeline, Module
 from km3pipe.io import CHPump
 
@@ -29,11 +33,13 @@ class Dumper(Module):
 
 
 pipe = Pipeline()
-pipe.attach(CHPump, host='127.0.0.1',
-            port=5553,
-            tags='IO_EVT, IO_TSL, IO_SUM, TRG_PARS',
-            timeout=60 * 60 * 24,
-            max_queue=42)
+pipe.attach(
+    CHPump,
+    host='127.0.0.1',
+    port=5553,
+    tags='IO_EVT, IO_TSL, IO_SUM, TRG_PARS',
+    timeout=60 * 60 * 24,
+    max_queue=42)
 pipe.attach(CHPrinter)
 pipe.attach(Dumper)
 pipe.drain()

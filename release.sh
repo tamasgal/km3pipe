@@ -44,6 +44,9 @@ git rev-parse --short HEAD > km3pipe/.git_revision_short_hash
 
 rm -rf dist
 python setup.py sdist
+
+rm km3pipe/.git_revision_*
+
 twine upload dist/*
 
 git checkout master

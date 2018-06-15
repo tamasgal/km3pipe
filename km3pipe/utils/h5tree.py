@@ -47,8 +47,8 @@ def nodeinfo(node, print_titles=False):
             title = "'{}'".format(title)
     except AttributeError:
         title = None
-    return ", ".join([node for node in (pathname, title, n_rows_str)
-                      if node is not None])
+    return ", ".join(
+        [node for node in (pathname, title, n_rows_str) if node is not None])
 
 
 def meta(h5):
@@ -98,8 +98,9 @@ def main():
     do_titles = bool(args['--titles'])
     do_meta = not bool(args['--no-meta'])
     do_classic = bool(args['--classic'])
-    h5tree(fname,
-           print_titles=do_titles,
-           print_meta=do_meta,
-           print_pretty=not(do_classic),
-           )
+    h5tree(
+        fname,
+        print_titles=do_titles,
+        print_meta=do_meta,
+        print_pretty=not (do_classic),
+    )

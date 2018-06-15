@@ -3,6 +3,9 @@ Unreleased changes
 
 Version 8
 ---------
+8.1.0 / 2018-06-16
+~~~~~~~~~~~~~~~~~~
+* Python 2.7 compatibility added, thanks to ROOT
 
 8.0.5 / 2018-06-09
 ~~~~~~~~~~~~~~~~~~

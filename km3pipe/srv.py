@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # Filename: srv.py
-
 """
 The KM3srv tornado webserver.
 
 """
+from __future__ import absolute_import, print_function, division
+
 try:
     import tornado
 except ImportError:
@@ -46,13 +47,21 @@ log = get_logger(__name__)
 
 VERSION = '0.0.1'
 
-define("ip", default="0.0.0.0", type=str,
-       help="The WAN IP of this machine. You can use 127 for local tests.")
-define("port", default="8088", type=int,
-       help="The KM3srv server will be available on this port.")
-define("data", default=os.path.expanduser("~/km3net/data"), type=str,
-       help="Path to the data files.")
-
+define(
+    "ip",
+    default="0.0.0.0",
+    type=str,
+    help="The WAN IP of this machine. You can use 127 for local tests.")
+define(
+    "port",
+    default="8088",
+    type=int,
+    help="The KM3srv server will be available on this port.")
+define(
+    "data",
+    default=os.path.expanduser("~/km3net/data"),
+    type=str,
+    help="Path to the data files.")
 
 RBA_URL = Config().rba_url
 
@@ -88,8 +97,8 @@ class ClientManager(object):
         # status = {
         #    n_clients : len(self._clients)
         # }
-        self.broadcast("Number of connected clients: {0}."
-                       .format(len(self._clients)))
+        self.broadcast("Number of connected clients: {0}.".format(
+            len(self._clients)))
 
     def message_to(self, token, data, kind):
         message = pd.io.json.dumps({'kind': kind, 'data': data})
@@ -166,10 +175,9 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
             except AttributeError:
                 self.message("Syntax error, try event/DET_ID/RUN_ID/EVENT")
             else:
-                threading.Thread(target=self.get_event,
-                                 args=(int(det_id),
-                                       int(run_id),
-                                       int(event_id))).start()
+                threading.Thread(
+                    target=self.get_event,
+                    args=(int(det_id), int(run_id), int(event_id))).start()
 
     def get_event(self, det_id, run_id, event_id):
         det_dir_name = "KM3NeT_{0:08d}".format(det_id)
@@ -181,8 +189,8 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
         h5filename = basename + ".h5"
         rootfilename = basename + ".root"
 
-        irods_path = os.path.join("/in2p3/km3net/data/raw/sea",
-                                  det_dir_name, sub_dir, rootfilename)
+        irods_path = os.path.join("/in2p3/km3net/data/raw/sea", det_dir_name,
+                                  sub_dir, rootfilename)
 
         h5filepath = os.path.join(data_dir, h5filename)
         h5filepath_tmp = h5filepath + '.tmp'
@@ -213,9 +221,10 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
                 else:
                     self.message("There was a problem downloading the data.")
                     return
-            status = subprocess.call(['km3pipe', 'jpptohdf5',
-                                      '-i', rootfilepath,
-                                      '-o', h5filepath_tmp])
+            status = subprocess.call([
+                'km3pipe', 'jpptohdf5', '-i', rootfilepath, '-o',
+                h5filepath_tmp
+            ])
             if status == 0:
                 self.message("Successfully converted data.")
                 os.rename(h5filepath_tmp, h5filepath)
@@ -229,18 +238,18 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
         hits = pd.read_hdf(h5filepath, 'hits', mode='r')
         snapshot_hits = hits[(hits['event_id'] == event_id)].copy()
         triggered_hits = hits[(hits['event_id'] == event_id) &
-                              (hits['triggered'] == True)]  # noqa
+                              (hits['triggered'] == True)]    # noqa
         self.message("Det ID: {0} Run ID: {1} Event ID: {2} - "
-                     "Snapshot hits: {3}, Triggered hits: {4}"
-                     .format(det_id, run_id, event_id,
-                             len(snapshot_hits), len(triggered_hits)))
+                     "Snapshot hits: {3}, Triggered hits: {4}".format(
+                         det_id, run_id, event_id, len(snapshot_hits),
+                         len(triggered_hits)))
         cal = Calibration(det_id=det_id)
         cal.apply(snapshot_hits)
 
         event = {
             "hits": {
-                'pos': [tuple(x) for x
-                        in snapshot_hits[['x', 'y', 'z']].values],
+                'pos':
+                [tuple(x) for x in snapshot_hits[['x', 'y', 'z']].values],
                 'time': list(snapshot_hits['time']),
                 'tot': list(snapshot_hits['tot']),
             }
@@ -322,17 +331,22 @@ def main():
     print("Running on {0}:{1}".format(ip, port))
     print("Data path: {0}".format(data_path))
 
-    settings = {'debug': True,
-                'static_path': os.path.join(root, 'static'),
-                'template_path': os.path.join(root, 'static/templates'),
-                }
+    settings = {
+        'debug': True,
+        'static_path': os.path.join(root, 'static'),
+        'template_path': os.path.join(root, 'static/templates'),
+    }
 
     application = tornado.web.Application([
-        (r"/test", EchoWebSocket, {'client_manager': client_manager,
-                                   'server_status': server_status,
-                                   'data_path': data_path,
-                                   'lock': lock}),
-        (r"/message", MessageProvider, {'client_manager': client_manager}),
+        (r"/test", EchoWebSocket, {
+            'client_manager': client_manager,
+            'server_status': server_status,
+            'data_path': data_path,
+            'lock': lock
+        }),
+        (r"/message", MessageProvider, {
+            'client_manager': client_manager
+        }),
     ], **settings)
 
     try:

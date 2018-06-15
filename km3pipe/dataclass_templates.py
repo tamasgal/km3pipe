@@ -4,6 +4,7 @@
 """
 Dataclasses for internal use. Heavily based on Numpy arrays.
 """
+from __future__ import absolute_import, print_function, division
 
 import numpy as np
 
@@ -14,125 +15,106 @@ __license__ = "MIT"
 __maintainer__ = "Moritz Lotze"
 __email__ = "mlotze@km3net.de"
 __status__ = "Development"
-__all__ = ('TEMPLATES',)
-
+__all__ = ('TEMPLATES', )
 
 TEMPLATES = {
     'Direction': {
-        'dtype': np.dtype([
+        'dtype':
+        np.dtype([
             ('dir_x', '<f4'),
             ('dir_y', '<f4'),
             ('dir_z', '<f4'),
         ]),
-        'h5loc': None,
-        'split_h5': False,
+        'h5loc':
+        None,
+        'split_h5':
+        False,
     },
     'Position': {
-        'dtype': np.dtype([
+        'dtype':
+        np.dtype([
             ('pos_x', '<f4'),
             ('pos_y', '<f4'),
             ('pos_z', '<f4'),
         ]),
-        'h5loc': None,
-        'split_h5': False,
+        'h5loc':
+        None,
+        'split_h5':
+        False,
     },
     'EventInfo': {
-        'dtype': np.dtype([
-            ('det_id', '<i4'),
-            ('frame_index', '<u4'),
-            ('livetime_sec', '<u8'),
-            ('mc_id', '<i4'),
-            ('mc_t', '<f8'),
-            ('n_events_gen', '<u8'),
-            ('n_files_gen', '<u8'),
-            ('overlays', '<u4'),
-            ('trigger_counter', '<u8'),
-            ('trigger_mask', '<u8'),
-            ('utc_nanoseconds', '<u8'),
-            ('utc_seconds', '<u8'),
-            ('weight_w1', '<f8'),
-            ('weight_w2', '<f8'),
-            ('weight_w3', '<f8'),
-            ('run_id', '<u8'),
-            ('group_id', '<u8')
-        ]),
-        'h5loc': '/event_info',
-        'split_h5': False,
+        'dtype':
+        np.dtype(
+            [('det_id', '<i4'), ('frame_index', '<u4'), ('livetime_sec',
+                                                         '<u8'), ('mc_id',
+                                                                  '<i4'),
+             ('mc_t', '<f8'), ('n_events_gen', '<u8'), ('n_files_gen', '<u8'),
+             ('overlays', '<u4'), ('trigger_counter',
+                                   '<u8'), ('trigger_mask', '<u8'),
+             ('utc_nanoseconds',
+              '<u8'), ('utc_seconds', '<u8'), ('weight_w1',
+                                               '<f8'), ('weight_w2', '<f8'),
+             ('weight_w3', '<f8'), ('run_id', '<u8'), ('group_id', '<u8')]),
+        'h5loc':
+        '/event_info',
+        'split_h5':
+        False,
     },
     'TimesliceHits': {
-        'dtype': np.dtype([
-            ('channel_id', 'u1'),
-            ('dom_id', '<u4'),
-            ('time', '<i4'),
-            ('tot', 'u1'),
-            ('group_id', '<u4')
-        ]),
-        'h5loc': '/time_slice_hits',
-        'split_h5': True,
+        'dtype':
+        np.dtype([('channel_id', 'u1'), ('dom_id', '<u4'), ('time', '<i4'),
+                  ('tot', 'u1'), ('group_id', '<u4')]),
+        'h5loc':
+        '/time_slice_hits',
+        'split_h5':
+        True,
     },
     'Hits': {
-        'dtype': np.dtype([
-            ('channel_id', 'u1'),
-            ('dom_id', '<u4'),
-            ('time', '<f8'),
-            ('tot', 'u1'),
-            ('triggered', '?'),
-            ('group_id', '<u4')
-        ]),
-        'h5loc': '/hits',
-        'split_h5': True,
+        'dtype':
+        np.dtype([('channel_id', 'u1'), ('dom_id', '<u4'), ('time', '<f8'),
+                  ('tot', 'u1'), ('triggered', '?'), ('group_id', '<u4')]),
+        'h5loc':
+        '/hits',
+        'split_h5':
+        True,
     },
     'CalibHits': {
-        'dtype': np.dtype([
-            ('channel_id', 'u1'),
-            ('dir_x', '<f4'),
-            ('dir_y', '<f4'),
-            ('dir_z', '<f4'),
-            ('dom_id', '<u4'),
-            ('du', 'u1'),
-            ('floor', 'u1'),
-            ('pos_x', '<f4'),
-            ('pos_y', '<f4'),
-            ('pos_z', '<f4'),
-            ('t0', '<f4'),
-            ('time', '<f8'),
-            ('tot', 'u1'),
-            ('triggered', '?'),
-            ('group_id', '<u4')
-        ]),
-        'h5loc': '/hits',
-        'split_h5': True,
+        'dtype':
+        np.dtype([('channel_id', 'u1'), ('dir_x', '<f4'), ('dir_y', '<f4'),
+                  ('dir_z', '<f4'), ('dom_id', '<u4'), ('du', 'u1'), ('floor',
+                                                                      'u1'),
+                  ('pos_x', '<f4'), ('pos_y', '<f4'), ('pos_z',
+                                                       '<f4'), ('t0', '<f4'),
+                  ('time', '<f8'), ('tot', 'u1'), ('triggered',
+                                                   '?'), ('group_id', '<u4')]),
+        'h5loc':
+        '/hits',
+        'split_h5':
+        True,
     },
     'McHits': {
-        'dtype': np.dtype([
-            ('a', '<f4'),
-            ('origin', '<u4'),
-            ('pmt_id', '<u4'),
-            ('time', '<f8'),
-            ('group_id', '<u4')
-        ]),
-        'h5loc': '/mc_hits',
-        'split_h5': True,
+        'dtype':
+        np.dtype([('a', '<f4'), ('origin', '<u4'), ('pmt_id', '<u4'),
+                  ('time', '<f8'), ('group_id', '<u4')]),
+        'h5loc':
+        '/mc_hits',
+        'split_h5':
+        True,
     },
     'CalibMcHits': {
-        'dtype': np.dtype([
-            ('a', '<f4'),
-            ('dir_x', '<f4'),
-            ('dir_y', '<f4'),
-            ('dir_z', '<f4'),
-            ('origin', '<u4'),
-            ('pmt_id', '<u4'),
-            ('pos_x', '<f4'),
-            ('pos_y', '<f4'),
-            ('pos_z', '<f4'),
-            ('time', '<f8'),
-            ('group_id', '<u4')
-        ]),
-        'h5loc': '/mc_hits',
-        'split_h5': True,
+        'dtype':
+        np.dtype([('a', '<f4'), ('dir_x', '<f4'), ('dir_y', '<f4'),
+                  ('dir_z', '<f4'), ('origin', '<u4'), ('pmt_id', '<u4'),
+                  ('pos_x', '<f4'), ('pos_y', '<f4'), ('pos_z', '<f4'),
+                  ('time', '<f8'), ('group_id', '<u4')]),
+        'h5loc':
+        '/mc_hits',
+        'split_h5':
+        True,
     },
     'Tracks': {
-        'dtype': np.dtype([
+        'dtype':
+        np.dtype([
             ('bjorkeny', '<f8'),
             ('dir_x', '<f8'),
             ('dir_y', '<f8'),
@@ -140,7 +122,7 @@ TEMPLATES = {
             ('energy', '<f8'),
             ('id', '<u4'),
             ('interaction_channel', '<u4'),
-            ('is_cc', '<u4'),  # TODO: consider bool ('?') for slicing
+            ('is_cc', '<u4'),    # TODO: consider bool ('?') for slicing
             ('length', '<f8'),
             ('pos_x', '<f8'),
             ('pos_y', '<f8'),
@@ -149,11 +131,14 @@ TEMPLATES = {
             ('type', '<i4'),
             ('group_id', '<u4')
         ]),
-        'h5loc': '/tracks',
-        'split_h5': False,
+        'h5loc':
+        '/tracks',
+        'split_h5':
+        False,
     },
     'McTracks': {
-        'dtype': np.dtype([
+        'dtype':
+        np.dtype([
             ('bjorkeny', '<f8'),
             ('dir_x', '<f8'),
             ('dir_y', '<f8'),
@@ -161,7 +146,7 @@ TEMPLATES = {
             ('energy', '<f8'),
             ('id', '<u4'),
             ('interaction_channel', '<u4'),
-            ('is_cc', '<u4'),  # TODO: consider bool ('?') for slicing
+            ('is_cc', '<u4'),    # TODO: consider bool ('?') for slicing
             ('length', '<f8'),
             ('pos_x', '<f8'),
             ('pos_y', '<f8'),
@@ -170,80 +155,77 @@ TEMPLATES = {
             ('type', '<i4'),
             ('group_id', '<u4')
         ]),
-        'h5loc': '/mc_tracks',
-        'split_h5': False,
+        'h5loc':
+        '/mc_tracks',
+        'split_h5':
+        False,
     },
     'SummaryFrameInfo': {
-        'dtype': np.dtype([
-            ('dom_id', '<u4'),
-            ('fifo_status', '<u4'),
-            ('frame_id', '<u4'),
-            ('frame_index', '<u4'),
-            ('has_udp_trailer', '<u4'),
-            ('high_rate_veto', '<u4'),
-            ('max_sequence_number', '<u4'),
-            ('n_packets', '<u4'),
-            ('slice_id', '<u4'),
-            ('utc_nanoseconds', '<u4'),
-            ('utc_seconds', '<u4'),
-            ('white_rabbit_status', '<u4')
-        ]),
-        'h5loc': '/summary_slice_info',
-        'split_h5': False,
+        'dtype':
+        np.dtype(
+            [('dom_id', '<u4'), ('fifo_status', '<u4'), ('frame_id', '<u4'),
+             ('frame_index',
+              '<u4'), ('has_udp_trailer', '<u4'), ('high_rate_veto', '<u4'),
+             ('max_sequence_number',
+              '<u4'), ('n_packets',
+                       '<u4'), ('slice_id', '<u4'), ('utc_nanoseconds', '<u4'),
+             ('utc_seconds', '<u4'), ('white_rabbit_status', '<u4')]),
+        'h5loc':
+        '/summary_slice_info',
+        'split_h5':
+        False,
     },
     'SummarysliceInfo': {
-        'dtype': np.dtype([
-            ('frame_index', '<u4'),
-            ('slice_id', '<u4'),
-            ('timestamp', '<u4'),
-            ('nanoseconds', '<u4'),
-            ('n_frames', '<u4')
-        ]),
-        'h5loc': '/todo',
-        'split_h5': False,
+        'dtype':
+        np.dtype([('frame_index', '<u4'), ('slice_id', '<u4'),
+                  ('timestamp', '<u4'), ('nanoseconds', '<u4'), ('n_frames',
+                                                                 '<u4')]),
+        'h5loc':
+        '/todo',
+        'split_h5':
+        False,
     },
     'TimesliceInfo': {
-        'dtype': np.dtype([
-            ('frame_index', '<u4'),
-            ('slice_id', '<u4'),
-            ('timestamp', '<u4'),
-            ('nanoseconds', '<u4'),
-            ('n_frames', '<u4')
-        ]),
-        'h5loc': '/todo',
-        'split_h5': False,
+        'dtype':
+        np.dtype([('frame_index', '<u4'), ('slice_id', '<u4'),
+                  ('timestamp', '<u4'), ('nanoseconds', '<u4'), ('n_frames',
+                                                                 '<u4')]),
+        'h5loc':
+        '/todo',
+        'split_h5':
+        False,
     },
     'SummaryframeSeries': {
-        'dtype': np.dtype([
-            ('dom_id', '<u4'),
-            ('max_sequence_number', '<u4'),
-            ('n_received_packets', '<u4'),
-            ('group_id', '<u4')
-        ]),
-        'h5loc': '/todo',
-        'split_h5': False,
+        'dtype':
+        np.dtype([('dom_id', '<u4'), ('max_sequence_number', '<u4'),
+                  ('n_received_packets', '<u4'), ('group_id', '<u4')]),
+        'h5loc':
+        '/todo',
+        'split_h5':
+        False,
     },
     'TimesliceFrameInfo': {
-        'dtype': np.dtype([
-            ('det_id', '<i4'),
-            ('run_id', '<u8'),
-            ('sqnr', '<u8'),
-            ('timestamp', '<u4'),
-            ('nanoseconds', '<u4'),
-            ('dom_id', '<u4'),
-            ('dom_status', '<u4'),
-            ('n_hits', '<u4')
-        ]),
-        'h5loc': '/todo',
-        'split_h5': False,
+        'dtype':
+        np.dtype([('det_id', '<i4'), ('run_id', '<u8'), ('sqnr', '<u8'),
+                  ('timestamp', '<u4'), ('nanoseconds', '<u4'),
+                  ('dom_id', '<u4'), ('dom_status', '<u4'), ('n_hits',
+                                                             '<u4')]),
+        'h5loc':
+        '/todo',
+        'split_h5':
+        False,
     },
     'SummaryFrameSeries': {
-        'dtype': np.dtype([
+        'dtype':
+        np.dtype([
             ('dom_id', '<u4'),
             ('max_sequence_number', '<u4'),
             ('n_received_packets', '<u4'),
             ('group_id', '<u4'),
         ]),
-        'h5loc': '/summary_frame_series',
-        'split_h5': False}
+        'h5loc':
+        '/summary_frame_series',
+        'split_h5':
+        False
+    }
 }

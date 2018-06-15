@@ -4,6 +4,8 @@
 Some shell helpers
 
 """
+from __future__ import absolute_import, print_function, division
+
 
 import os
 import subprocess
@@ -19,8 +21,7 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = get_logger(__name__)  # pylint: disable=C0103
-
+log = get_logger(__name__)    # pylint: disable=C0103
 
 JOB_TEMPLATE = lstrip("""
     #$ -N {job_name}
@@ -72,16 +73,32 @@ def qsub(script, job_name, dryrun=False, *args, **kwargs):
         print(job_string)
     else:
         print("Calling qsub with the generated job script.")
-        p = subprocess.Popen('qsub -V', stdin=subprocess.PIPE, env=env,
-                             shell=True)
+        p = subprocess.Popen(
+            'qsub -V', stdin=subprocess.PIPE, env=env, shell=True)
         p.communicate(input=bytes(job_string.encode('ascii')))
 
 
-def gen_job(script, job_name, log_path='qlogs', group='km3net', platform='cl7',
-            walltime='00:10:00', vmem='8G', fsize='8G', shell=None, email=None,
-            send_mail='n', job_array_start=1, job_array_stop=None, job_array_step=1,
-            irods=False, sps=True, hpss=False, xrootd=False,
-            dcache=False, oracle=False, split_array_logs=False):
+def gen_job(script,
+            job_name,
+            log_path='qlogs',
+            group='km3net',
+            platform='cl7',
+            walltime='00:10:00',
+            vmem='8G',
+            fsize='8G',
+            shell=None,
+            email=None,
+            send_mail='n',
+            job_array_start=1,
+            job_array_stop=None,
+            job_array_step=1,
+            irods=False,
+            sps=True,
+            hpss=False,
+            xrootd=False,
+            dcache=False,
+            oracle=False,
+            split_array_logs=False):
     """Generate a job script."""
     if shell is None:
         shell = os.environ['SHELL']
@@ -101,11 +118,25 @@ def gen_job(script, job_name, log_path='qlogs', group='km3net', platform='cl7',
     else:
         task_name = ''
     job_string = JOB_TEMPLATE.format(
-        script=script, email=email, send_mail=send_mail, log_path=log_path,
-        job_name=job_name, group=group, walltime=walltime, vmem=vmem,
-        fsize=fsize, irods=irods, sps=sps, hpss=hpss, xrootd=xrootd,
-        dcache=dcache, oracle=oracle, shell=shell, platform=platform,
-        job_array_option=job_array_option, task_name=task_name)
+        script=script,
+        email=email,
+        send_mail=send_mail,
+        log_path=log_path,
+        job_name=job_name,
+        group=group,
+        walltime=walltime,
+        vmem=vmem,
+        fsize=fsize,
+        irods=irods,
+        sps=sps,
+        hpss=hpss,
+        xrootd=xrootd,
+        dcache=dcache,
+        oracle=oracle,
+        shell=shell,
+        platform=platform,
+        job_array_option=job_array_option,
+        task_name=task_name)
     return job_string
 
 
@@ -143,11 +174,14 @@ def get_jpp_env(jpp_dir):
     to execute Jpp commands.
 
     """
-    env = {v[0]: ''.join(v[1:]) for v in
-           [l.split('=') for l in
-            os.popen("source {0}/setenv.sh {0} && env"
-                     .format(jpp_dir)).read().split('\n')
-            if '=' in l]}
+    env = {
+        v[0]: ''.join(v[1:])
+        for v in [
+            l.split('=') for l in os.popen("source {0}/setenv.sh {0} && env"
+                                           .format(jpp_dir)).read().split('\n')
+            if '=' in l
+        ]
+    }
     return env
 
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # vim: ts=4 sw=4 et
 """
 =========================
@@ -8,6 +9,8 @@ K40 Intra-DOM Calibration
 The following script calculates the PMT time offsets using K40 coincidences
 
 """
+from __future__ import absolute_import, print_function, division
+
 # Author: Jonas Reubelt <jreubelt@km3net.de> and Tamas Gal <tgal@km3net.de>
 # License: MIT
 import km3pipe as kp
@@ -17,14 +20,14 @@ from km3modules.plot import IntraDOMCalibrationPlotter
 import km3pipe.style
 km3pipe.style.use("km3pipe")
 
-
 pipe = kp.Pipeline(timeit=True)
-pipe.attach(kp.io.ch.CHPump,
-            host='127.0.0.1',
-            port=5553,
-            tags='IO_TSL, IO_MONIT',
-            timeout=7 * 60 * 60 * 24,
-            max_queue=42)
+pipe.attach(
+    kp.io.ch.CHPump,
+    host='127.0.0.1',
+    port=5553,
+    tags='IO_TSL, IO_MONIT',
+    timeout=7 * 60 * 60 * 24,
+    max_queue=42)
 pipe.attach(kp.io.ch.CHTagger)
 pipe.attach(StatusBar, every=1000)
 pipe.attach(MemoryObserver, every=5000)

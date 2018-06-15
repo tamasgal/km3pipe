@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 ==================
 DOM hits.
@@ -5,6 +6,7 @@ DOM hits.
 
 Estimate track/DOM distances using the number of hits per DOM.
 """
+from __future__ import absolute_import, print_function, division
 
 # Author: Tamas Gal <tgal@km3net.de>
 # License: BSD-3
@@ -24,9 +26,9 @@ from km3modules.common import StatusBar
 import km3pipe.style
 km3pipe.style.use("km3pipe")
 
-
 filename = "data/km3net_jul13_90m_muatm50T655.km3_v5r1.JTE_r2356.root.0-499.h5"
-cal = kp.calib.Calibration(filename="data/km3net_jul13_90m_r1494_corrected.detx")
+cal = kp.calib.Calibration(
+    filename="data/km3net_jul13_90m_r1494_corrected.detx")
 
 
 def filter_muons(blob):
@@ -55,8 +57,7 @@ class DOMHits(kp.Module):
         dom_hits = Counter(triggered_hits.dom_id)
         for dom_id, n_hits in dom_hits.items():
             try:
-                distance = pld3(cal.detector.dom_positions[dom_id],
-                                muon.pos,
+                distance = pld3(cal.detector.dom_positions[dom_id], muon.pos,
                                 muon.dir)
             except KeyError:
                 self.log.warning("DOM ID %s not found!" % dom_id)
@@ -70,8 +71,12 @@ class DOMHits(kp.Module):
         print(df)
         sdf = df[(df['distance'] < 200) & (df['n_hits'] < 50)]
         bins = (max(sdf['distance']) - 1, max(sdf['n_hits']) - 1)
-        plt.hist2d(sdf['distance'], sdf['n_hits'], cmap='plasma', bins=bins,
-                   norm=LogNorm())
+        plt.hist2d(
+            sdf['distance'],
+            sdf['n_hits'],
+            cmap='plasma',
+            bins=bins,
+            norm=LogNorm())
         plt.xlabel('Distance between hit and muon track [m]')
         plt.ylabel('Number of hits on DOM')
         plt.show()

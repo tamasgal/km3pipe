@@ -9,10 +9,11 @@ Pep 386 compliant version info.
     (1, 2, 0, 'beta', 2) => "1.2b2"
 
 """
+from __future__ import absolute_import, print_function, division
+
 import subprocess
 import os
 from os.path import dirname, join, exists
-
 
 KP_PATH = join(dirname(__file__), '..')
 
@@ -24,12 +25,12 @@ def get_git_revision_hash(short=False):
         return subprocess.check_output(
             ['git', '-C', KP_PATH, 'rev-parse', infix, 'HEAD'],
             stderr=subprocess.PIPE,
-            ) .strip().decode()
+        ).strip().decode()
     except subprocess.CalledProcessError:
         pass
-    fpath = join(KP_PATH,
-                 'km3pipe/.git_revision_{}hash'
-                 .format('short_' if short else ''))
+    fpath = join(
+        KP_PATH, 'km3pipe/.git_revision_{}hash'
+        .format('short_' if short else ''))
     if exists(fpath):
         with open(fpath, 'r') as fobj:
             return fobj.read().strip()
@@ -37,8 +38,7 @@ def get_git_revision_hash(short=False):
         return 'no-git-revision-hash'
 
 
-VERSION_INFO = (8, 0, 5, 'final', 0)
-
+VERSION_INFO = (8, 1, 0, 'final', 0)
 
 __author__ = 'tamasgal'
 

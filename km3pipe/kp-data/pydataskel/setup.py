@@ -4,7 +4,6 @@
 from setuptools import setup
 from pydemo import __version__
 
-
 setup(
     name='pydemo',
     version=__version__,
@@ -13,11 +12,12 @@ setup(
     author='Moritz Lotze',
     author_email='mlotze@km3net.de',
     license='BSD-3',
-    packages=['pydemo', ],
+    packages=[
+        'pydemo',
+    ],
     install_requires=[
         'astropy',
         'numpy',
         'pandas',
         'km3pipe',
-    ]
-)
+    ])

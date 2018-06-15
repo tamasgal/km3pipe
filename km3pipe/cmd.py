@@ -30,6 +30,8 @@ Options:
     RUN                 Run number.
 
 """
+from __future__ import absolute_import, print_function, division
+
 import re
 import sys
 import os
@@ -42,7 +44,7 @@ from .hardware import Detector
 
 from km3pipe.logger import get_logger
 
-log = get_logger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)    # pylint: disable=C0103
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -140,9 +142,10 @@ def print_git_short_revision():
 
 def main():
     from docopt import docopt
-    args = docopt(__doc__,
-                  version="KM3Pipe {} - git: {}"
-                          .format(version, get_git_revision_hash()))
+    args = docopt(
+        __doc__,
+        version="KM3Pipe {} - git: {}".format(version,
+                                              get_git_revision_hash()))
 
     if args['test']:
         run_tests()
@@ -156,8 +159,8 @@ def main():
         createconf(overwrite_conf, dump)
 
     if args['rundetsn']:
-        rundetsn(int(args['RUN']), args['DETECTOR'],
-                 temporary=args["--temporary"])
+        rundetsn(
+            int(args['RUN']), args['DETECTOR'], temporary=args["--temporary"])
 
     if args['retrieve']:
         retrieve(int(args['RUN']), args['DET_ID'], args['-o'])

@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 """Dummy
 
 This is designed to fail
 """
+from __future__ import absolute_import, print_function, division
 
 from km3pipe import Module
 

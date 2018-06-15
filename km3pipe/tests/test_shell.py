@@ -61,7 +61,7 @@ class TestScript(TestCase):
     def test_separator(self):
         s = Script()
         s.separator()
-        self.assertEqual('echo "' + "="*42 + '"', str(s))
+        self.assertEqual('echo "' + "=" * 42 + '"', str(s))
 
     def test_mkdir(self):
         s = Script()

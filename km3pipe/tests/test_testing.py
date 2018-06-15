@@ -22,7 +22,6 @@ def imports():
 
 
 class TestSurrogateModuleStubs(TestCase):
-
     def test_surrogating(self):
         @surrogate('my')
         @surrogate('my.module.one')

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # vim:set ts=4 sts=4 sw=4 et:
 """
 Pump for the Aanet data format.
@@ -7,6 +8,8 @@ This is undoubtedly the ugliest module in the entire framework.
 If you have a way to read aanet files via the Jpp interface,
 your pull request is more than welcome!
 """
+from __future__ import absolute_import, print_function, division
+
 from collections import defaultdict
 import os.path
 
@@ -16,7 +19,7 @@ from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import Table
 from km3pipe.logger import get_logger
 
-log = get_logger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)    # pylint: disable=C0103
 
 __author__ = "Moritz Lotze and Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -26,62 +29,55 @@ __maintainer__ = "Moritz Lotze and Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-
 FITINF2NUM = {
-    'JGANDALF_BETA0_RAD': 0,                # angular resolution [rad]
-    'JGANDALF_BETA1_RAD': 1,                # angular resolution [rad]
-    'JGANDALF_CHI2': 2,                     # chi2
-    'JGANDALF_NUMBER_OF_HITS': 3,           # number of hits
-    'JENERGY_ENERGY': 4,                    # uncorrected energy [GeV]
-    'JENERGY_CHI2': 5,                      # chi2
-    'JGANDALF_LAMBDA': 6,                   # control parameter
-    'JGANDALF_NUMBER_OF_ITERATIONS': 7,     # number of iterations
-    'JSTART_NPE_MIP': 8,                    # number of photo-electrons
-                                            # up to the barycentre
-    'JSTART_NPE_MIP_TOTAL': 9,              # number of photo-electrons
-                                            # along the whole track
-    'JSTART_LENGTH_METRES': 10,             # distance between first
-                                            # and last hits in metres
-    'JVETO_NPE': 11,                        # number of photo-electrons
-    'JVETO_NUMBER_OF_HITS': 12,             # number of hits
-    'JENERGY_MUON_RANGE_METRES': 13,        # range of a muon with the
-                                            # reconstructed energy [m]
-    'JENERGY_NOISE_LIKELIHOOD': 14,         # log likelihood of every hit
-                                            # being K40
-    'JENERGY_NDF': 15,                      # number of degrees of freedom
-    'JENERGY_NUMBER_OF_HITS': 16,           # number of hits
-    'JCOPY_Z_M': 17,                        # true vertex position along
-                                            # track [m]
+    'JGANDALF_BETA0_RAD': 0,    # angular resolution [rad]
+    'JGANDALF_BETA1_RAD': 1,    # angular resolution [rad]
+    'JGANDALF_CHI2': 2,    # chi2
+    'JGANDALF_NUMBER_OF_HITS': 3,    # number of hits
+    'JENERGY_ENERGY': 4,    # uncorrected energy [GeV]
+    'JENERGY_CHI2': 5,    # chi2
+    'JGANDALF_LAMBDA': 6,    # control parameter
+    'JGANDALF_NUMBER_OF_ITERATIONS': 7,    # number of iterations
+    'JSTART_NPE_MIP': 8,    # number of photo-electrons
+    # up to the barycentre
+    'JSTART_NPE_MIP_TOTAL': 9,    # number of photo-electrons
+    # along the whole track
+    'JSTART_LENGTH_METRES': 10,    # distance between first
+    # and last hits in metres
+    'JVETO_NPE': 11,    # number of photo-electrons
+    'JVETO_NUMBER_OF_HITS': 12,    # number of hits
+    'JENERGY_MUON_RANGE_METRES': 13,    # range of a muon with the
+    # reconstructed energy [m]
+    'JENERGY_NOISE_LIKELIHOOD': 14,    # log likelihood of every hit
+    # being K40
+    'JENERGY_NDF': 15,    # number of degrees of freedom
+    'JENERGY_NUMBER_OF_HITS': 16,    # number of hits
+    'JCOPY_Z_M': 17,    # true vertex position along
+    # track [m]
 }
-
 
 RECO2NUM = {
-    'JMUONBEGIN': 0,        	  # Start muon fit applications
-    'JMUONPREFIT': 1,             # JPrefit.cc
-    'JMUONSIMPLEX': 2,            # JSimplex.cc
-    'JMUONGANDALF': 3,            # JGandalf.cc
-    'JMUONENERGY': 4,             # JEnergy.cc
-    'JMUONSTART': 5,              # JStart.cc
-    'JMUONEND': 6,                # Termination muon fit applications
-    'LineFit': 7,                 # An angular reco guess.
-                                  # It could be a seed for JPrefit
-
-    'JSHOWERBEGIN': 100,       	  # Start shower fit applications
-    'JSHOWERPREFIT': 101,         # JShowerPrefit.cc
-    'JSHOWEREND': 102,            # Termination shower fit applications
-
-    'JPP_REC_TYPE': 4000,         # Jpp reconstruction type for AAnet
-
-    'JUSERBEGIN': 1000,           # Start of user applications
-    'JMUONVETO': 1001,            # JVeto.cc
-    'JPRESIM': 1002,              # JPreSim_HTR.cc
-    'JMUONPATH': 1003,            # JPath.cc
-    'JMCEVT': 1004,               # JMCEvt.cc
-
-    'KM3DeltaPos': 10000,         # This is not a fit this gives
-                                  # position information only
+    'JMUONBEGIN': 0,    # Start muon fit applications
+    'JMUONPREFIT': 1,    # JPrefit.cc
+    'JMUONSIMPLEX': 2,    # JSimplex.cc
+    'JMUONGANDALF': 3,    # JGandalf.cc
+    'JMUONENERGY': 4,    # JEnergy.cc
+    'JMUONSTART': 5,    # JStart.cc
+    'JMUONEND': 6,    # Termination muon fit applications
+    'LineFit': 7,    # An angular reco guess.
+    # It could be a seed for JPrefit
+    'JSHOWERBEGIN': 100,    # Start shower fit applications
+    'JSHOWERPREFIT': 101,    # JShowerPrefit.cc
+    'JSHOWEREND': 102,    # Termination shower fit applications
+    'JPP_REC_TYPE': 4000,    # Jpp reconstruction type for AAnet
+    'JUSERBEGIN': 1000,    # Start of user applications
+    'JMUONVETO': 1001,    # JVeto.cc
+    'JPRESIM': 1002,    # JPreSim_HTR.cc
+    'JMUONPATH': 1003,    # JPath.cc
+    'JMCEVT': 1004,    # JMCEvt.cc
+    'KM3DeltaPos': 10000,    # This is not a fit this gives
+    # position information only
 }
-
 
 FITINF2NAME = {v: k for k, v in FITINF2NUM.items()}
 RECO2NAME = {v: k for k, v in RECO2NUM.items()}
@@ -112,8 +108,8 @@ class AanetPump(Pump):
     def blob_generator(self):
         """Create a blob generator."""
         # pylint: disable:F0401,W0612
-        import aa           # pylint: disablF0401        # noqa
-        from ROOT import EventFile           # pylint: disablF0401
+        import aa    # pylint: disablF0401        # noqa
+        from ROOT import EventFile    # pylint: disablF0401
 
         filename = self.filename
         log.info("Reading from file: {0}".format(filename))
@@ -141,16 +137,19 @@ class AanetPump(Pump):
         mc_id = event.frame_index - 1
         # run_id = self._get_run_id()
         wgt1, wgt2, wgt3, wgt4 = self._parse_wgts(event.w)
-        info = Table({
-            'event_id': event_id,
-            'mc_id': mc_id,
-            # 'run_id': run_id,         # TODO
-            'weight_w1': wgt1,
-            'weight_w2': wgt2,
-            'weight_w3': wgt3,
-            'weight_w4': wgt4,
-            'group_id': self.group_id,
-        }, h5loc='/event_info', name='EventInfo')
+        info = Table(
+            {
+                'event_id': event_id,
+                'mc_id': mc_id,
+        # 'run_id': run_id,         # TODO
+                'weight_w1': wgt1,
+                'weight_w2': wgt2,
+                'weight_w3': wgt3,
+                'weight_w4': wgt4,
+                'group_id': self.group_id,
+            },
+            h5loc='/event_info',
+            name='EventInfo')
         return info
 
     @staticmethod
@@ -174,23 +173,21 @@ class AanetPump(Pump):
                 trk_name = RECO2NAME[trk_type]
             except KeyError:
                 trk_name = "Generic_Track_#{}".format(i)
-                self.log.warn(
-                        "Unknown Reconstruction type! "
-                        "Setting to '{}'".format(trk_name)
-                )
+                self.log.warn("Unknown Reconstruction type! "
+                              "Setting to '{}'".format(trk_name))
             trk_dict = self._read_track(trk)
-            out[trk_name].append(Table(
+            out[trk_name].append(
+                Table(
                     trk_dict,
                     h5loc='/reco/{}'.format(trk_name.lower()),
-                    name=trk_name)
-            )
+                    name=trk_name))
         for key in out:
             name = out[key][0].name
             h5loc = out[key][0].h5loc
             out[key] = Table(
-                    np.concatenate(out[key]),
-                    name=name,
-                    h5loc=h5loc,
+                np.concatenate(out[key]),
+                name=name,
+                h5loc=h5loc,
             )
         self.log.debug(out)
         return out

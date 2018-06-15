@@ -4,6 +4,7 @@
 Some unsorted, frequently used logic.
 
 """
+from __future__ import absolute_import, print_function, division
 
 import base64
 import collections
@@ -12,10 +13,8 @@ import re
 import socket
 import subprocess
 import sys
-import warnings
 
 import numpy as np
-
 
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -28,12 +27,26 @@ __status__ = "Development"
 
 def ifiles(irods_path):
     """Return a list of filenames for given iRODS path (recursively)"""
-    raw_output = subprocess.check_output("ils -r --bundle {0}"
-                                         "    | grep 'Bundle file:'"
-                                         "    | awk '{{print $3}}'"
-                                         .format(irods_path), shell=True)
+    raw_output = subprocess.check_output(
+        "ils -r --bundle {0}"
+        "    | grep 'Bundle file:'"
+        "    | awk '{{print $3}}'".format(irods_path),
+        shell=True)
     filenames = raw_output.decode('ascii').strip().split("\n")
     return filenames
+
+
+def iexists(irods_path):
+    """Returns True of iRODS path exists, otherwise False"""
+    try:
+        subprocess.check_output(
+            'ils {}'.format(irods_path),
+            shell=True,
+            stderr=subprocess.PIPE,
+        )
+        return True
+    except subprocess.CalledProcessError:
+        return False
 
 
 def token_urlsafe(nbytes=32):
@@ -61,8 +74,8 @@ def insert_prefix_to_dtype(arr, prefix):
 def prettyln(text, fill='-', align='^', prefix='[ ', suffix=' ]', length=69):
     """Wrap `text` in a pretty line with maximum length."""
     text = '{prefix}{0}{suffix}'.format(text, prefix=prefix, suffix=suffix)
-    print("{0:{fill}{align}{length}}"
-          .format(text, fill=fill, align=align, length=length))
+    print("{0:{fill}{align}{length}}".format(
+        text, fill=fill, align=align, length=length))
 
 
 def irods_filepath(det_id, run_id):
@@ -123,7 +136,7 @@ def namedtuple_with_defaults(typename, field_names, default_values=[]):
     Node(val=4, left=None, right=7)
     """
     the_tuple = collections.namedtuple(typename, field_names)
-    the_tuple.__new__.__defaults__ = (None,) * len(the_tuple._fields)
+    the_tuple.__new__.__defaults__ = (None, ) * len(the_tuple._fields)
     if isinstance(default_values, collections.Mapping):
         prototype = the_tuple(**default_values)
     else:
@@ -138,6 +151,7 @@ def remain_file_pointer(function):
     This decorator assumes that the last argument is the file handler.
 
     """
+
     def wrapper(*args, **kwargs):
         """Wrap the function and remain its parameters and return values"""
         file_obj = args[-1]
@@ -145,11 +159,13 @@ def remain_file_pointer(function):
         return_value = function(*args, **kwargs)
         file_obj.seek(old_position, 0)
         return return_value
+
     return wrapper
 
 
 def itervalues(d):
     return iter(d.values())
+
 
 def iteritems(d):
     return iter(d.items())
@@ -163,55 +179,43 @@ def decamelise(text):
 
 def camelise(text, capital_first=True):
     """Convert lower_underscore to CamelCase."""
+
     def camelcase():
         if not capital_first:
             yield str.lower
         while True:
             yield str.capitalize
 
+    if istype(text, 'unicode'):
+        text = text.encode('utf8')
     c = camelcase()
     return "".join(next(c)(x) if x else '_' for x in text.split("_"))
 
 
 ATTRIBUTES = dict(
-        list(zip([
-            'bold',
-            'dark',
-            '',
-            'underline',
-            'blink',
-            '',
-            'reverse',
+    list(
+        zip([
+            'bold', 'dark', '', 'underline', 'blink', '', 'reverse',
             'concealed'
-            ],
-            list(range(1, 9))
-            ))
-        )
+        ], list(range(1, 9)))))
 del ATTRIBUTES['']
 
 ATTRIBUTES_RE = '\033\[(?:%s)m' % '|'  \
                 .join(['%d' % v for v in ATTRIBUTES.values()])
 
 HIGHLIGHTS = dict(
-        list(zip([
-            'on_grey',
-            'on_red',
-            'on_green',
-            'on_yellow',
-            'on_blue',
-            'on_magenta',
-            'on_cyan',
-            'on_white'
-            ],
-            list(range(40, 48))
-            ))
-        )
+    list(
+        zip([
+            'on_grey', 'on_red', 'on_green', 'on_yellow', 'on_blue',
+            'on_magenta', 'on_cyan', 'on_white'
+        ], list(range(40, 48)))))
 
 HIGHLIGHTS_RE = '\033\[(?:%s)m' % '|'  \
                 .join(['%d' % v for v in HIGHLIGHTS.values()])
 
 COLORS = dict(
-        list(zip([
+    list(
+        zip([
             'grey',
             'red',
             'green',
@@ -220,10 +224,7 @@ COLORS = dict(
             'magenta',
             'cyan',
             'white',
-            ],
-            list(range(30, 38))
-            ))
-        )
+        ], list(range(30, 38)))))
 
 COLORS_RE = '\033\[(?:%s)m' % '|'.join(['%d' % v for v in COLORS.values()])
 
@@ -265,14 +266,14 @@ def colored(text, color=None, on_color=None, attrs=None, ansi_code=None):
         return text
 
 
-def cprint(text, color=None, on_color=None, attrs=None, **kwargs):
+def cprint(text, color=None, on_color=None, attrs=None):
     """Print colorize text.
 
     Author:  Konstantin Lepa <konstantin.lepa@gmail.com> / termcolor
 
     It accepts arguments of print function.
     """
-    print((colored(text, color, on_color, attrs)), **kwargs)
+    print((colored(text, color, on_color, attrs)))
 
 
 def issorted(arr):
@@ -306,6 +307,7 @@ def is_coherent(seq):
 
 class AnyBar():
     """A lightweight interface to the AnyBar macOS app."""
+
     def __init__(self, port=1738, address='localhost'):
         self.port = port
         self.address = address

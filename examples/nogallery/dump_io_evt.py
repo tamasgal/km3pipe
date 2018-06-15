@@ -33,11 +33,13 @@ class Dumper(Module):
 
 
 pipe = Pipeline()
-pipe.attach(CHPump, host='127.0.0.1',
-            port=5553,
-            tags='IO_EVT',
-            timeout=60 * 60 * 24,
-            max_queue=10)
+pipe.attach(
+    CHPump,
+    host='127.0.0.1',
+    port=5553,
+    tags='IO_EVT',
+    timeout=60 * 60 * 24,
+    max_queue=10)
 pipe.attach(CHPrinter)
 pipe.attach(Dumper)
 pipe.drain()

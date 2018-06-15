@@ -4,6 +4,7 @@
 """
 Pandas Helpers.
 """
+from __future__ import absolute_import, print_function, division
 
 import os.path
 
@@ -14,7 +15,7 @@ import tables as tb
 from km3pipe.logger import get_logger
 from km3pipe.tools import insert_prefix_to_dtype
 
-log = get_logger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)    # pylint: disable=C0103
 
 __author__ = "Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -163,8 +164,13 @@ def df_to_h5(df, h5file, where, **kwargs):
     write_table(df.to_records(index=False), h5file, where, **kwargs)
 
 
-def write_table(array, h5file, where, force=False,
-                filters=None, createparents=True, **kwargs):
+def write_table(array,
+                h5file,
+                where,
+                force=False,
+                filters=None,
+                createparents=True,
+                **kwargs):
     """Write a structured numpy array into a H5 table.
     """
     own_h5 = False
@@ -180,11 +186,14 @@ def write_table(array, h5file, where, force=False,
         try:
             h5file.remove_node(loc, tabname, recursive=True)
         except tb.NoSuchNodeError:
-            log.warn(
-                    'Force -> Trying to remove+rewrite of table at {}, {}, '
-                    'but it did not previously exists.'.format(loc, tabname))
-    h5file.create_table(loc, tabname, obj=array,
-                        createparents=createparents, filters=filters,
-                        **kwargs)
+            log.warn('Force -> Trying to remove+rewrite of table at {}, {}, '
+                     'but it did not previously exists.'.format(loc, tabname))
+    h5file.create_table(
+        loc,
+        tabname,
+        obj=array,
+        createparents=createparents,
+        filters=filters,
+        **kwargs)
     if own_h5:
         h5file.close()

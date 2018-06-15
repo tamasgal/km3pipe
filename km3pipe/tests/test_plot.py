@@ -18,18 +18,13 @@ __status__ = "Development"
 class TestMeshStuff(TestCase):
     def test_meshgrid(self):
         xx, yy = meshgrid(-1, 1, 0.8)
-        assert np.allclose([[-1.0, -0.2,  0.6],
-                            [-1.0, -0.2,  0.6],
-                            [-1.0, -0.2,  0.6]], xx)
-        assert np.allclose([[-1.0, -1.0, -1.0],
-                            [-0.2, -0.2, -0.2],
-                            [0.6, 0.6, 0.6]], yy)
+        assert np.allclose(
+            [[-1.0, -0.2, 0.6], [-1.0, -0.2, 0.6], [-1.0, -0.2, 0.6]], xx)
+        assert np.allclose(
+            [[-1.0, -1.0, -1.0], [-0.2, -0.2, -0.2], [0.6, 0.6, 0.6]], yy)
 
     def test_meshgrid_with_y_specs(self):
         xx, yy = meshgrid(-1, 1, 0.8, -10, 10, 8)
-        assert np.allclose([[-1.0, -0.2,  0.6],
-                            [-1.0, -0.2,  0.6],
-                            [-1.0, -0.2,  0.6]], xx)
-        assert np.allclose([[-10, -10, -10],
-                            [-2, -2, -2],
-                            [6, 6, 6]], yy)
+        assert np.allclose(
+            [[-1.0, -0.2, 0.6], [-1.0, -0.2, 0.6], [-1.0, -0.2, 0.6]], xx)
+        assert np.allclose([[-10, -10, -10], [-2, -2, -2], [6, 6, 6]], yy)

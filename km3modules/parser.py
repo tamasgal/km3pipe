@@ -1,9 +1,11 @@
 # Filename: parser.py
+# -*- coding: utf-8 -*-
 # pylint: disable=locally-disabled
 """
 A collection of parsers.
 
 """
+from __future__ import absolute_import, print_function, division
 
 from km3pipe import Module
 from km3pipe.io.daq import DAQPreamble, DAQSummaryslice, DAQEvent
@@ -36,7 +38,7 @@ class CHParser(Module):
 
         data = blob['CHData']
         data_io = StringIO(data)
-        preamble = DAQPreamble(file_obj=data_io)  # noqa
+        preamble = DAQPreamble(file_obj=data_io)    # noqa
 
         blob_key, ParserClass = self.parse_map[tag]
         blob[blob_key] = ParserClass(file_obj=data_io)

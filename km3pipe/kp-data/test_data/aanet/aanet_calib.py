@@ -7,14 +7,13 @@ for mod in ['aa', 'ROOT']:
     if mod in sys.modules:
         del sys.modules[mod]
 
-import aa  # noqa
+import aa    # noqa
 from ROOT import Det, EventFile, TH2D
-
 
 det = Det("KM3NeT_00000007_02122015_zest_DR_PMT.detx")
 EventFile.read_timeslices = True
 f = EventFile('small.root')
-P = 50000       # 50 micro-seconds
+P = 50000    # 50 micro-seconds
 h2 = TH2D("h2", "h2", 200, 0, P, 60, 0, 800)
 for i, evt in enumerate(f):
     if i > 100:

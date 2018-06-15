@@ -4,6 +4,8 @@
 Database utilities.
 
 """
+from __future__ import absolute_import, print_function, division
+
 from datetime import datetime
 import ssl
 import io
@@ -11,18 +13,28 @@ import json
 import re
 import pytz
 from collections import defaultdict, OrderedDict
-from inspect import Signature, Parameter
-from urllib.parse import urlencode, unquote
-from urllib.request import (Request, build_opener, urlopen,
-                            HTTPCookieProcessor, HTTPHandler)
-from urllib.error import URLError, HTTPError
-from io import StringIO
-from http.client import IncompleteRead
+try:
+    from inspect import Signature, Parameter
+    SKIP_SIGNATURE_HINTS = False
+except ImportError:
+    SKIP_SIGNATURE_HINTS = True
+try:
+    from urllib.parse import urlencode, unquote
+    from urllib.request import (Request, build_opener, urlopen,
+                                HTTPCookieProcessor, HTTPHandler)
+    from urllib.error import URLError, HTTPError
+    from io import StringIO
+    from http.client import IncompleteRead
+except ImportError:
+    from urllib import urlencode, unquote
+    from urllib2 import (Request, build_opener, urlopen, HTTPCookieProcessor,
+                         HTTPHandler, URLError, HTTPError)
+    from StringIO import StringIO
+    from httplib import IncompleteRead
 
 from .tools import cprint
 from .time import Timer
 from .logger import get_logger
-
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -32,7 +44,7 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = get_logger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)    # pylint: disable=C0103
 
 UTC_TZ = pytz.timezone('UTC')
 
@@ -55,13 +67,13 @@ def we_are_in_lyon():
 
 def read_csv(text, sep="\t"):
     """Create a DataFrame from CSV text"""
-    import pandas as pd  # no top level load to make a faster import of db
+    import pandas as pd    # no top level load to make a faster import of db
     return pd.read_csv(StringIO(text), sep="\t")
 
 
 def make_empty_dataset():
     """Create an empty dataset"""
-    import pandas as pd  # no top level load to make a faster import of db
+    import pandas as pd    # no top level load to make a faster import of db
     return pd.DataFrame()
 
 
@@ -90,8 +102,7 @@ class DBManager(object):
 
         if not temporary and we_are_in_lyon():
             self.restore_session(
-                "sid=_kmcprod_134.158_lyo7783844001343100343mcprod1223user"
-            )
+                "sid=_kmcprod_134.158_lyo7783844001343100343mcprod1223user")
             return
 
         if username is not None and password is not None:
@@ -115,11 +126,12 @@ class DBManager(object):
 
     def _datalog(self, parameter, run, maxrun, det_id):
         "Extract data from database"
-        values = {'parameter_name': parameter,
-                  'minrun': run,
-                  'maxrun': maxrun,
-                  'detid': det_id,
-                  }
+        values = {
+            'parameter_name': parameter,
+            'minrun': run,
+            'maxrun': maxrun,
+            'detid': det_id,
+        }
         data = urlencode(values)
         content = self._get_content('streamds/datalognumbers.txt?' + data)
         if content.startswith('ERROR'):
@@ -128,7 +140,8 @@ class DBManager(object):
         try:
             dataframe = read_csv(content)
         except ValueError:
-            log.warning("Empty dataset")  # ...probably. Waiting for more info
+            log.warning(
+                "Empty dataset")    # ...probably. Waiting for more info
             return make_empty_dataset()
         else:
             add_datetime(dataframe)
@@ -189,7 +202,7 @@ class DBManager(object):
         "Retrieve a list of available parameters from the database"
         parameters = self._get_json('allparam/s')
         data = {}
-        for parameter in parameters:  # There is a case-chaos in the DB
+        for parameter in parameters:    # There is a case-chaos in the DB
             data[parameter['Name'].lower()] = parameter
         self._parameters = ParametersContainer(data)
 
@@ -207,8 +220,7 @@ class DBManager(object):
         description = raw_setup['Desc']
 
         _optical_df = raw_setup['ConfGroups'][0]
-        optical_df = {'Name': _optical_df['Name'],
-                      'Desc': _optical_df['Desc']}
+        optical_df = {'Name': _optical_df['Name'], 'Desc': _optical_df['Desc']}
         for param in _optical_df['Params']:
             pname = self.parameters.oid2name(param['OID']).replace('DAQ_', '')
             try:
@@ -219,8 +231,10 @@ class DBManager(object):
             optical_df[pname] = val
 
         _acoustic_df = raw_setup['ConfGroups'][1]
-        acoustic_df = {'Name': _acoustic_df['Name'],
-                       'Desc': _acoustic_df['Desc']}
+        acoustic_df = {
+            'Name': _acoustic_df['Name'],
+            'Desc': _acoustic_df['Desc']
+        }
         for param in _acoustic_df['Params']:
             pname = self.parameters.oid2name(param['OID']).replace('DAQ_', '')
             try:
@@ -249,7 +263,7 @@ class DBManager(object):
 
         If t0set is given, append the calibration data.
         """
-        url = 'detx/{0}?'.format(det_id)  # '?' since it's ignored if no args
+        url = 'detx/{0}?'.format(det_id)    # '?' since it's ignored if no args
         if t0set is not None:
             url += '&t0set=' + t0set
         if calibration is not None:
@@ -266,10 +280,11 @@ class DBManager(object):
             return self._ahrs(run, maxrun, clbupi, det_id)
 
     def _ahrs(self, run, maxrun, clbupi, det_id):
-        values = {'minrun': run,
-                  'maxrun': maxrun,
-                  'detid': det_id,
-                  }
+        values = {
+            'minrun': run,
+            'maxrun': maxrun,
+            'detid': det_id,
+        }
         if clbupi is not None:
             values['clbupi'] = clbupi
         data = urlencode(values)
@@ -280,7 +295,8 @@ class DBManager(object):
         try:
             dataframe = read_csv(content)
         except ValueError:
-            log.warning("Empty dataset")  # ...probably. Waiting for more info
+            log.warning(
+                "Empty dataset")    # ...probably. Waiting for more info
             return make_empty_dataset()
         else:
             add_datetime(dataframe)
@@ -301,7 +317,7 @@ class DBManager(object):
 
     def _get_content(self, url):
         "Get HTML content"
-        target_url = self._db_url + '/' + unquote(url)  # .encode('utf-8'))
+        target_url = self._db_url + '/' + unquote(url)    # .encode('utf-8'))
         log.debug("Opening '{0}'".format(target_url))
         try:
             f = self.opener.open(target_url)
@@ -367,9 +383,9 @@ class DBManager(object):
             username, password = config.db_credentials
         cookie = self.request_sid_cookie(username, password)
         try:
-            cookie_str = str(cookie, 'utf-8')  # Python 3
+            cookie_str = str(cookie, 'utf-8')    # Python 3
         except TypeError:
-            cookie_str = str(cookie)  # Python 2
+            cookie_str = str(cookie)    # Python 2
         log.debug("Session cookie: {0}".format(cookie_str))
         log.debug("Storing cookie in configuration file")
         config.set('DB', 'session_cookie', cookie_str)
@@ -398,7 +414,10 @@ class DBManager(object):
 
     def _build_opener(self):
         log.debug("Building opener.")
-        from http.cookiejar import CookieJar
+        try:
+            from http.cookiejar import CookieJar
+        except ImportError:
+            from cookielib import CookieJar
         cj = CookieJar()
         self._cookies = cj
         opener = build_opener(HTTPCookieProcessor(cj), HTTPHandler())
@@ -417,8 +436,10 @@ def add_datetime(dataframe, timestamp_key='UNIXTIME'):
 
     This currently manipulates the incoming DataFrame!
     """
+
     def convert_data(timestamp):
         return datetime.fromtimestamp(float(timestamp) / 1e3, UTC_TZ)
+
     try:
         log.debug("Adding DATETIME column to the data")
         converted = dataframe[timestamp_key].apply(convert_data)
@@ -458,17 +479,18 @@ class StreamDS(object):
 
         func.__doc__ = self._stream_parameter(stream, "DESCRIPTION")
 
-        sig_dict = OrderedDict()
-        for sel in self.mandatory_selectors(stream):
-            if sel == '-':
-                continue
-            sig_dict[Parameter(
-                sel, Parameter.POSITIONAL_OR_KEYWORD)] = None
-        for sel in self.optional_selectors(stream):
-            if sel == '-':
-                continue
-            sig_dict[Parameter(sel, Parameter.KEYWORD_ONLY)] = None
-        func.__signature__ = Signature(parameters=sig_dict)
+        if not SKIP_SIGNATURE_HINTS:
+            sig_dict = OrderedDict()
+            for sel in self.mandatory_selectors(stream):
+                if sel == '-':
+                    continue
+                sig_dict[Parameter(sel,
+                                   Parameter.POSITIONAL_OR_KEYWORD)] = None
+            for sel in self.optional_selectors(stream):
+                if sel == '-':
+                    continue
+                sig_dict[Parameter(sel, Parameter.KEYWORD_ONLY)] = None
+            func.__signature__ = Signature(parameters=sig_dict)
 
         return func
 
@@ -497,8 +519,7 @@ class StreamDS(object):
     def help(self, stream):
         """Show the help for a given stream."""
         if stream not in self.streams:
-            log.error("Stream '{}' not found in the database."
-                      .format(stream))
+            log.error("Stream '{}' not found in the database.".format(stream))
         params = self._stream_df[self._stream_df['STREAM'] == stream].values[0]
         self._print_stream_parameters(params)
 
@@ -524,7 +545,7 @@ class StreamDS(object):
         if not data:
             log.error("No data found.")
             return
-        if(data.startswith("ERROR")):
+        if (data.startswith("ERROR")):
             log.error(data)
             return
         if fmt == "txt":
@@ -595,8 +616,7 @@ class ParametersContainer(object):
             log.info("Found alternative: '{0}'".format(alternative))
             return alternative
         except IndexError:
-            raise KeyError("Could not find alternative for '{0}'"
-                           .format(name))
+            raise KeyError("Could not find alternative for '{0}'".format(name))
 
 
 class DOMContainer(object):
@@ -626,10 +646,10 @@ class DOMContainer(object):
         """Return DOM for given OMkey (DU, floor)"""
         du, floor = omkey
         try:
-            return DOM.from_json([d for d in self._json
-                                  if d["DU"] == du and
-                                  d["Floor"] == floor and
-                                  d["DetOID"] == det_id][0])
+            return DOM.from_json([
+                d for d in self._json if d["DU"] == du and d["Floor"] == floor
+                and d["DetOID"] == det_id
+            ][0])
         except IndexError:
             log.critical("No DOM found for OMKey '{0}' and DetOID '{1}'."
                          .format(omkey, det_id))
@@ -637,25 +657,28 @@ class DOMContainer(object):
     def via_dom_id(self, dom_id, det_id):
         """Return DOM for given dom_id"""
         try:
-            return DOM.from_json([d for d in self._json
-                                  if d["DOMId"] == dom_id and
-                                  d["DetOID"] == det_id][0])
+            return DOM.from_json([
+                d for d in self._json
+                if d["DOMId"] == dom_id and d["DetOID"] == det_id
+            ][0])
         except IndexError:
             log.critical("No DOM found for DOM ID '{0}'".format(dom_id))
 
     def via_clb_upi(self, clb_upi, det_id):
         """return DOM for given CLB UPI"""
         try:
-            return DOM.from_json([d for d in self._json
-                                  if d["CLBUPI"] == clb_upi and
-                                  d["DetOID"] == det_id][0])
+            return DOM.from_json([
+                d for d in self._json
+                if d["CLBUPI"] == clb_upi and d["DetOID"] == det_id
+            ][0])
         except IndexError:
             log.critical("No DOM found for CLB UPI '{0}'".format(clb_upi))
 
     def _json_list_lookup(self, from_key, value, target_key, det_id):
-        lookup = [dom[target_key] for dom in self._json if
-                  dom[from_key] == value and
-                  dom['DetOID'] == det_id]
+        lookup = [
+            dom[target_key] for dom in self._json
+            if dom[from_key] == value and dom['DetOID'] == det_id
+        ]
         if len(lookup) > 1:
             log.warning("Multiple entries found: {0}".format(lookup) + "\n" +
                         "Returning the first one.")
@@ -675,8 +698,8 @@ class DOM(object):
 
     @classmethod
     def from_json(cls, json):
-        return cls(json["CLBUPI"], json["DOMId"], json["DOMUPI"],
-                   json["DU"], json["DetOID"], json["Floor"])
+        return cls(json["CLBUPI"], json["DOMId"], json["DOMUPI"], json["DU"],
+                   json["DetOID"], json["Floor"])
 
     def __str__(self):
         return "DU{0}-DOM{1}".format(self.du, self.floor)
@@ -691,8 +714,8 @@ class DOM(object):
 
 
 class TriggerSetup(object):
-    def __init__(self, runsetup_oid, name, det_id, description,
-                 optical_df, acoustic_df):
+    def __init__(self, runsetup_oid, name, det_id, description, optical_df,
+                 acoustic_df):
         self.runsetup_oid = runsetup_oid
         self.name = name
         self.det_id = det_id

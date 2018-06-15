@@ -1,4 +1,3 @@
-
 __author__ = 'tamasgal'
 
 from km3pipe import Pipeline, Module
@@ -37,8 +36,8 @@ class MeanHits(Module):
 
     def finish(self):
         mean_hits = sum(self.hits) / len(self.hits)
-        print("Number of entries: {0}\nMean hits: {1}"
-              .format(len(self.hits), mean_hits))
+        print("Number of entries: {0}\nMean hits: {1}".format(
+            len(self.hits), mean_hits))
 
 
 class MeanRates(Module):
@@ -58,8 +57,7 @@ class MeanRates(Module):
 
 
 pipeline = Pipeline()
-pipeline.attach(DAQPump, 'daq_pump',
-                filename='dump.dat')
+pipeline.attach(DAQPump, 'daq_pump', filename='dump.dat')
 # pipeline.attach(DAQEventPrinter, 'moo')
 # pipeline.attach(DAQSummaryslicePrinter, 'summaryslice_printer')
 # pipeline.attach(MeanRates, 'mean_rates')

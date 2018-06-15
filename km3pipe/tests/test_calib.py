@@ -77,9 +77,11 @@ class TestCalibration(TestCase):
         det._parse_doms()
         calib = Calibration(detector=det)
 
-        hits = Table({'dom_id': [2, 3, 3],
-                      'channel_id': [0, 1, 2],
-                      'time': [10.1, 11.2, 12.3]})
+        hits = Table({
+            'dom_id': [2, 3, 3],
+            'channel_id': [0, 1, 2],
+            'time': [10.1, 11.2, 12.3]
+        })
 
         chits = calib.apply(hits)
 

@@ -14,11 +14,10 @@ __status__ = "Development"
 
 
 class TestStyle(TestCase):
-
     def test_get_style_path(self):
         gsp = get_style_path
-        self.assertTrue(gsp('km3pipe').endswith(
-            "kp-data/stylelib/km3pipe.mplstyle"))
+        self.assertTrue(
+            gsp('km3pipe').endswith("kp-data/stylelib/km3pipe.mplstyle"))
         self.assertTrue(gsp('foo').endswith("/stylelib/foo.mplstyle"))
         self.assertTrue(gsp('bar').endswith("/stylelib/bar.mplstyle"))
 
@@ -45,14 +44,14 @@ class TestColourCycler(TestCase):
 
     def test_raise_keyerror_if_style_not_available(self):
         with self.assertRaises(KeyError):
-            cc = ColourCycler("foo")  # noqa
+            cc = ColourCycler("foo")    # noqa
 
 
 class TestStyles(TestCase):
     @patch('matplotlib.pyplot')
     def test_non_existent_style(self, plt_mock):
-       use('non-existent')
-       assert not plt_mock.style.use.called
+        use('non-existent')
+        assert not plt_mock.style.use.called
 
     @patch('matplotlib.pyplot')
     def test_km3pipe(self, plt_mock):

@@ -1,9 +1,12 @@
 # Filename: common.py
+# -*- coding: utf-8 -*-
 # pylint: disable=locally-disabled
 """
 A collection of commonly used modules.
 
 """
+from __future__ import absolute_import, print_function, division
+
 from time import time
 
 import numpy as np
@@ -96,7 +99,7 @@ class HitCounter(Module):
 
     def process(self, blob):
         try:
-            self.print("Number of hits: {0}".format(len(blob['Hit'])))
+            self. print("Number of hits: {0}".format(len(blob['Hit'])))
         except KeyError:
             pass
         return blob
@@ -104,6 +107,7 @@ class HitCounter(Module):
 
 class HitCalibrator(Module):
     """A very basic hit calibrator, which requires a `Calibration` module."""
+
     def configure(self):
         self.input_key = self.get('input_key', default='Hits')
         self.output_key = self.get('output_key', default='CalibHits')
@@ -191,7 +195,7 @@ class Siphon(Module):
     """
 
     def configure(self):
-        self.volume = self.require('volume')  # [blobs]
+        self.volume = self.require('volume')    # [blobs]
         self.flush = self.get('flush', default=False)
 
         self.blob_count = 0

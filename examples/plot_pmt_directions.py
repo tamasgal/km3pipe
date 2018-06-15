@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 """
+
 ==================
 PMT Directions
 ==================
@@ -6,6 +8,8 @@ PMT Directions
 Plot the PMT directions for a given DOM.
 
 """
+from __future__ import absolute_import, print_function, division
+
 # Author: Tamas Gal <tgal@km3net.de>
 # License: BSD-3
 from mpl_toolkits.mplot3d import axes3d
@@ -40,9 +44,14 @@ pmts = det.pmts[det.pmts.dom_id == dom_id]
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 
-ax.quiver(pmts.pos_x, pmts.pos_y, pmts.pos_z,
-          pmts.dir_x, pmts.dir_y, pmts.dir_z,
-          length=0.1)
+ax.quiver(
+    pmts.pos_x,
+    pmts.pos_y,
+    pmts.pos_z,
+    pmts.dir_x,
+    pmts.dir_y,
+    pmts.dir_z,
+    length=0.1)
 
 ax.set_xlabel("x [m]")
 ax.set_ylabel("y [m]")

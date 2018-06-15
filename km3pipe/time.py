@@ -4,12 +4,12 @@
 Manipulating time and so...
 
 """
+from __future__ import absolute_import, print_function, division
 
 from datetime import datetime
 import numpy as np
 import time
 from timeit import default_timer as timer
-
 
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -59,10 +59,8 @@ class Timer(object):
         return self.__finish_cpu - self.__start_cpu
 
     def log(self):
-        self.callback("{0} took {1:.{3}f}s (CPU {2:.{3}f}s)."
-                      .format(self.message,
-                              self.seconds, self.cpu_seconds,
-                              self.precision))
+        self.callback("{0} took {1:.{3}f}s (CPU {2:.{3}f}s).".format(
+            self.message, self.seconds, self.cpu_seconds, self.precision))
 
 
 class Cuckoo(object):
@@ -101,15 +99,33 @@ def tai_timestamp():
         return timestamp
     offset = 10 + timestamp
     leap_seconds = [
-        (1972, 1, 1), (1972, 7, 1), (1973, 1, 1),
-        (1974, 1, 1), (1975, 1, 1), (1976, 1, 1),
-        (1977, 1, 1), (1978, 1, 1), (1979, 1, 1),
-        (1980, 1, 1), (1981, 7, 1), (1982, 7, 1),
-        (1983, 7, 1), (1985, 7, 1), (1988, 1, 1),
-        (1990, 1, 1), (1991, 1, 1), (1992, 7, 1),
-        (1993, 7, 1), (1994, 7, 1), (1996, 1, 1),
-        (1997, 7, 1), (1999, 1, 1), (2006, 1, 1),
-        (2009, 1, 1), (2012, 7, 1), (2015, 7, 1),
+        (1972, 1, 1),
+        (1972, 7, 1),
+        (1973, 1, 1),
+        (1974, 1, 1),
+        (1975, 1, 1),
+        (1976, 1, 1),
+        (1977, 1, 1),
+        (1978, 1, 1),
+        (1979, 1, 1),
+        (1980, 1, 1),
+        (1981, 7, 1),
+        (1982, 7, 1),
+        (1983, 7, 1),
+        (1985, 7, 1),
+        (1988, 1, 1),
+        (1990, 1, 1),
+        (1991, 1, 1),
+        (1992, 7, 1),
+        (1993, 7, 1),
+        (1994, 7, 1),
+        (1996, 1, 1),
+        (1997, 7, 1),
+        (1999, 1, 1),
+        (2006, 1, 1),
+        (2009, 1, 1),
+        (2012, 7, 1),
+        (2015, 7, 1),
         (2017, 1, 1),
     ]
     for idx, leap_date in enumerate(leap_seconds):

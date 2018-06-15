@@ -6,6 +6,8 @@ Fitting Distributions
 
 Histograms, PDF fits, Kernel Density.
 """
+from __future__ import absolute_import, print_function, division
+
 
 # Author: Moritz Lotze <mlotze@km3net.de>
 # License: BSD-3
@@ -19,7 +21,7 @@ from sklearn.mixture import GaussianMixture
 from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KernelDensity
 
-import km3pipe.style.moritz  # noqa
+import km3pipe.style.moritz    # noqa
 
 ##############################################################################
 # First generate some pseudodata: A bimodal gaussian, + noise.
@@ -44,7 +46,6 @@ x = np.linspace(5, 35, 3 * N + 1)
 
 plt.hist(data, bins=15, alpha=.5, normed=True)
 
-
 ##############################################################################
 # Auto Binning (recommended)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -53,14 +54,12 @@ plt.hist(data, bins=15, alpha=.5, normed=True)
 
 plt.hist(data, bins='auto', alpha=.5, normed=True)
 
-
 ##############################################################################
 # Bayesian Blocks
 # ^^^^^^^^^^^^^^^
 #
 # TODO: Compute optimal segmentation of data with Scargle’s Bayesian Blocks.
 # Produces bins of uneven width.
-
 
 ##############################################################################
 # Fit Distribution via Maximum Likelihood
@@ -85,7 +84,6 @@ plt.hist(data, bins='auto', alpha=.3, normed=True)
 ##############################################################################
 # As expected, the result is rather silly, since we are only fitting *one*
 # of the two gaussians.
-
 
 ##############################################################################
 # Fit Gaussian Mixture Model (GMM)
@@ -146,12 +144,9 @@ print("best bandwidth: {0}".format(grid.best_estimator_.bandwidth))
 
 # use the best estimator to compute the kernel density estimate
 kde_best = grid.best_estimator_
-kde_sk = np.exp(
-    kde_best.score_samples(x[:, np.newaxis])
-)
+kde_sk = np.exp(kde_best.score_samples(x[:, np.newaxis]))
 plt.fill_between(x, kde_sk, alpha=.5, label='KDE')
 plt.hist(data, bins='auto', alpha=.3, normed=True)
-
 
 ##############################################################################
 # References
