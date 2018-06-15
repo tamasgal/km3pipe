@@ -115,7 +115,7 @@ def main():
     for job_id, file_chunk in enumerate(chunks(rem_files, FILES_PER_JOB)):
         n_files = len(file_chunk)
         s.add("echo Creating run summary for {} files".format(n_files))
-        # s.add("cd $TMPDIR; mkdir -p $USER; cd $USER")
+        s.add("cd $TMPDIR; mkdir -p $USER; cd $USER")
         s.add("echo")
 
         for ipath in file_chunk:
