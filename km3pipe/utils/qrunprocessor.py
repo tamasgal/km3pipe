@@ -27,14 +27,14 @@ to find files which have already been converted to avoid multiple conversions.
         RUN_LIST       Path to the file containing the space separated run IDs.
         OUTPUT_PATH    Path to store the individual summary files.
         SCRIPT         The script to fire up.
-        -s SUFFIX      The suffix which is appended by the SCRIPT [default: .summary.h5].
+        -s SUFFIX      The suffix, appended by SCRIPT [default: .summary.h5].
         -n N_FILES     Number of files to process per job [default: 10].
         -e ET          Estimated walltime per file in minutes [default: 15].
         -f FSIZE       Estimated filesystem size for a job [default: 12G].
         -m VMEM        Estimated vmem for a job [default: 8G].
         -j JOBNAME     The name of the submitted jobs [default: qrunprocessor].
         -l LOG_PATH    Path of the job log files [default: qlogs].
-        -q             Dryrun: don't submit jobs, just print the first job script.
+        -q             Dryrun: don't submit jobs, just print the job script.
         -h --help      Show this screen.
 
 """
@@ -57,9 +57,8 @@ def main():
 
     try:
         from tqdm import tqdm
-        HAS_TQDM = True
     except ImportError:
-        HAS_TQDM = False
+        tqdm = lambda x: x
 
     cprint = kp.logger.get_printer('qrunprocessor')
     log = kp.logger.get_logger('qrunprocessor')
@@ -84,15 +83,8 @@ def main():
         run_numbers = [int(run) for run in fobj.read().split()]
 
     irods_files = []
-    cprint("Checking if files are accessible on iRODS")
-    if HAS_TQDM:
-        run_numbers = tqdm(run_numbers)
     for run in run_numbers:
         irods_path = kp.tools.irods_filepath(DET_ID, run)
-        if not iexists(irods_path):
-            log.error("Skipping file, since not found on iRODS: {}"
-                      .format(irods_path))
-            continue
         irods_files.append(irods_path)
 
     processed_files = [
@@ -104,8 +96,18 @@ def main():
         if basename(irods_file) + SUFFIX not in processed_files:
             rem_files.append(irods_file)
 
-    cprint("{} runs in total, {} already processed.".format(
-        len(irods_files), len(processed_files)))
+    cprint("Checking if files are accessible on iRODS")
+    missing_files_on_irods = 0
+    for rem_file in tqdm(rem_files):
+        if not iexists(rem_file):
+            log.error("Skipping file, since not found on iRODS: {}"
+                      .format(rem_file))
+            rem_files.remove(rem_file)
+            missing_files_on_irods += 1
+
+    cprint(
+        "{} runs in total, {} already processed ({} missing on iRODS).".format(
+            len(irods_files), len(processed_files), missing_files_on_irods))
     cprint("Proceeding with the remaining {} files.".format(len(rem_files)))
 
     s = kp.shell.Script()
