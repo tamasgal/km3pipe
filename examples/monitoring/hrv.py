@@ -8,6 +8,8 @@ HRV Monitor
 The following script checks the high-rate-veto for each PMT.
 
 """
+from __future__ import absolute_import, print_function, division
+
 # Author: Tamas Gal <tgal@km3net.de>
 # License: MIT
 from datetime import datetime

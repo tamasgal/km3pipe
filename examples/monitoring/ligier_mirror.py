@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # vim: ts=4 sw=4 et
 """
 =============
@@ -10,6 +11,8 @@ This script is also available as a command line utility in km3pipe, which can
 be accessed by the command ``ligiermirror``.
 
 """
+from __future__ import absolute_import, print_function, division
+
 # Author: Tamas Gal <tgal@km3net.de>
 # License: MIT
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Filename: qprefit.py
 # Author: Tamas Gal <tgal@km3net.de>
 """
@@ -26,6 +27,8 @@ Options:
     -h --help    Show this screen.
 
 """
+from __future__ import absolute_import, print_function, division
+
 from glob import glob
 import os
 from os.path import basename, join, abspath

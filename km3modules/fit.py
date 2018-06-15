@@ -1,9 +1,11 @@
 # Filename: fit.py
+# -*- coding: utf-8 -*-
 # pylint: disable=locally-disabled
 """
 A collection of fit functions and modules.
 
 """
+from __future__ import absolute_import, print_function, division
 
 from scipy import optimize
 import numpy as np

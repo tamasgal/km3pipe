@@ -1,9 +1,12 @@
 #!usr/bin/env python
+# -*- coding: utf-8 -*-
 # Filename: math.py
 # pylint: disable=C0103
 """
 Maths, Geometry, coordinates.
 """
+from __future__ import absolute_import, print_function, division
+
 import numpy as np
 
 from .logger import get_logger

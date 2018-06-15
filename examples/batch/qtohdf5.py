@@ -35,6 +35,8 @@ to find files which have already been converted to avoid multiple conversions.
         -h --help      Show this screen.
 
 """
+from __future__ import absolute_import, print_function, division
+
 from glob import glob
 import os
 from os.path import basename, join

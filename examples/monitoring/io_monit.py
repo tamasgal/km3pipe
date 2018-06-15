@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # vim: ts=4 sw=4 et
 """
 ==================
@@ -8,6 +9,8 @@ Monitoring Channel
 This application demonstrates how to access monitoring channel data.
 
 """
+from __future__ import absolute_import, print_function, division
+
 # Author: Tamas Gal <tgal@km3net.de>
 # License: MIT
 #!/usr/bin/env python

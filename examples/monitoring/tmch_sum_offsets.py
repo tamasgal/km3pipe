@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # vim: ts=4 sw=4 et
 """
 =====================================================
@@ -22,6 +23,8 @@ in a CSV file.
         -h --help        Show this screen.
 
 """
+from __future__ import absolute_import, print_function, division
+
 import io
 import os
 import km3pipe as kp

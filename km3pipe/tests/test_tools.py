@@ -1,5 +1,7 @@
 # Filename: test_tools.py
 # pylint: disable=locally-disabled,C0111,R0904,C0103
+from __future__ import unicode_literals
+
 from io import StringIO
 
 import numpy as np
@@ -190,4 +192,7 @@ class TestIstype(TestCase):
 
     def test_another_type(self):
         b = 'string'
-        assert istype(b, 'str')
+        if isinstance(b, str):
+            assert istype(b, 'str')
+        else:
+            assert istype(b, 'unicode')

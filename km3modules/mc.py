@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 # vim:set ts=4 sts=4 sw=4 et:
 """MC Helpers.
 """
+from __future__ import absolute_import, print_function, division
 
 from km3pipe import Module
 from km3pipe.mc import pdg2name

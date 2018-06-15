@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # vim: ts=4 sw=4 et
 """
 =============
@@ -7,6 +8,8 @@ Log.io Module
 
 A module to send live log messages to a log.io server.
 """
+from __future__ import absolute_import, print_function, division
+
 
 # Author: Tamas Gal <tgal@km3net.de>
 # License: MIT

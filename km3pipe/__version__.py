@@ -9,6 +9,8 @@ Pep 386 compliant version info.
     (1, 2, 0, 'beta', 2) => "1.2b2"
 
 """
+from __future__ import absolute_import, print_function, division
+
 import subprocess
 import os
 from os.path import dirname, join, exists

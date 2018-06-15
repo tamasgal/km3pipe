@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # vim: ts=4 sw=4 et
 """
 ======================
@@ -8,6 +9,8 @@ Mean PMT Rates Monitor
 The following script calculates the mean PMT rates and updates the plot.
 
 """
+from __future__ import absolute_import, print_function, division
+
 # Author: Tamas Gal <tgal@km3net.de>
 # License: MIT
 from datetime import datetime

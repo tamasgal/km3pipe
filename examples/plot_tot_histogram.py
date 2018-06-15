@@ -1,10 +1,13 @@
+# -*- coding: utf-8 -*-
 """
+
 ==================
 ToT histogram.
 ==================
 
 Create a simple histogram of the PMT signals (ToTs) in all events.
 """
+from __future__ import absolute_import, print_function, division
 
 # Author: Tamas Gal <tgal@km3net.de>
 # License: BSD-3

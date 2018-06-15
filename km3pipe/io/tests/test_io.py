@@ -71,7 +71,7 @@ class TestGenericPump(TestCase):
 
     def test_init_h5_with_nonexistent_files(self):
         fnames = ["nonexistent-file{}.h5".format(i) for i in range(3)]
-        with self.assertRaises(FileNotFoundError):
+        with self.assertRaises(SystemExit):
             GenericPump(fnames)
 
 

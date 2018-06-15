@@ -1,5 +1,7 @@
 # Filename: test_core.py
 # pylint: disable=C0111,E1003,R0904,C0103,R0201,C0102
+from __future__ import unicode_literals
+
 from io import StringIO
 
 from km3pipe.testing import TestCase, MagicMock
