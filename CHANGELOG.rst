@@ -3,6 +3,11 @@ Unreleased changes
 
 Version 8
 ---------
+
+8.1.1 / 2018-06-16
+~~~~~~~~~~~~~~~~~~
+* Fix a Python 2.7 syntax error (`self. print`)
+
 8.1.0 / 2018-06-16
 ~~~~~~~~~~~~~~~~~~
 * Python 2.7 compatibility added, thanks to ROOT
