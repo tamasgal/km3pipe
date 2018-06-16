@@ -4,6 +4,10 @@ Unreleased changes
 Version 8
 ---------
 
+8.1.2 / 2018-06-16
+~~~~~~~~~~~~~~~~~~
+* Fix a new typo in `stats.rv_kde.rvs`
+
 8.1.1 / 2018-06-16
 ~~~~~~~~~~~~~~~~~~
 * Fix a Python 2.7 syntax error (`self. print`)
