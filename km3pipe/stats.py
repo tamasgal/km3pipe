@@ -97,7 +97,17 @@ class rv_kde(rv_continuous):
         pdf = np.exp(log_pdf)
         return pdf
 
-    def rvs(self, *args, size=1, random_state=None, **kwargs):
+    def rvs(self, *args, **kwargs):
+        """Draw Random Variates.
+
+        Parameters
+        ----------
+        size: int, optional (default=1)
+        random_state_: optional (default=None)
+        """
+        # TODO REVERSE THIS FUCK PYTHON2
+        size = kwargs.pop('size', 1)
+        random_state = kwargs.pop('size', None)
         # don't ask me why it uses `self._size`
         return self._kde.sample(n_samples=size, random_state=random_state)
 
