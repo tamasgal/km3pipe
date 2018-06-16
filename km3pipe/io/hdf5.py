@@ -343,7 +343,7 @@ class HDF5Sink(Module):
 
         if not self.keep_open:
             self.h5file.close()
-        self. print("HDF5 file written to: {}".format(self.filename))
+        self.print("HDF5 file written to: {}".format(self.filename))
 
 
 class HDF5Pump(Pump):
@@ -432,12 +432,12 @@ class HDF5Pump(Pump):
                                   "in '%s', aborting..." % fn)
                 raise SystemExit
             elif '/group_info' in h5file:
-                self. print("Reading group information from '/group_info'.")
+                self.print("Reading group information from '/group_info'.")
                 group_info = h5file.get_node('/', 'group_info')
                 self.group_ids[fn] = group_info.cols.group_id[:]
                 self._n_each[fn] = len(self.group_ids[fn])
             elif '/event_info' in h5file:
-                self. print("Reading group information from '/group_info'.")
+                self.print("Reading group information from '/group_info'.")
                 event_info = h5file.get_node('/', 'event_info')
                 try:
                     self.group_ids[fn] = event_info.cols.group_id[:]

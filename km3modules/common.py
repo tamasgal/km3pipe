@@ -99,7 +99,7 @@ class HitCounter(Module):
 
     def process(self, blob):
         try:
-            self. print("Number of hits: {0}".format(len(blob['Hit'])))
+            self.print("Number of hits: {0}".format(len(blob['Hit'])))
         except KeyError:
             pass
         return blob
