@@ -3,7 +3,10 @@
 # vim:set ts=4 sts=4 sw=4 et:
 """
 Read and write KM3NeT-formatted HDF5 files.
+
 """
+from __future__ import absolute_import, print_function, division
+
 from collections import OrderedDict, defaultdict
 import os.path
 import warnings

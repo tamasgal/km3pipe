@@ -4,6 +4,7 @@
 The core of the KM3Pipe framework.
 
 """
+from __future__ import absolute_import, print_function, division
 
 from collections import deque, OrderedDict
 import inspect
@@ -429,6 +430,10 @@ class Pump(Module):
 
     def close(self):
         self.finish()
+
+    def next(self):
+        """Python 2 compatibility for iterators"""
+        return self.__next__()
 
     def __enter__(self, *args, **kwargs):
         self.configure(*args, **kwargs)

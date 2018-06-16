@@ -1,9 +1,12 @@
 #!usr/bin/env python
+# -*- coding: utf-8 -*-
 # Filename: stats.py
 # pylint: disable=C0103
 """
 Statistics.
 """
+from __future__ import absolute_import, print_function, division
+
 import numpy as np
 from scipy.stats import rv_continuous
 
@@ -94,7 +97,17 @@ class rv_kde(rv_continuous):
         pdf = np.exp(log_pdf)
         return pdf
 
-    def rvs(self, size=1, *args, random_state=None, **kwargs):
+    def rvs(self, *args, **kwargs):
+        """Draw Random Variates.
+
+        Parameters
+        ----------
+        size: int, optional (default=1)
+        random_state_: optional (default=None)
+        """
+        # TODO REVERSE THIS FUCK PYTHON2
+        size = kwargs.pop('size', 1)
+        random_state = kwargs.pop('size', None)
         # don't ask me why it uses `self._size`
         return self._kde.sample(n_samples=size, random_state=random_state)
 

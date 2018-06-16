@@ -7,7 +7,10 @@ KM3Pipe setup script.
 
 from setuptools import setup
 
-import builtins
+try:
+    import builtins
+except ImportError:
+    import __builtin__ as builtins
 # so we can detect in __init__.py that it's called from setup.py
 builtins.__KM3PIPE_SETUP__ = True
 
@@ -34,7 +37,7 @@ setup(
         'numpy>=1.12',
     ],
     install_requires=requirements,
-    python_requires='>=3.5',
+    python_requires='>=2.7',
     entry_points={
         'console_scripts': [
             'km3pipe=km3pipe.cmd:main',

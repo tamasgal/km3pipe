@@ -146,7 +146,7 @@ node('master') {
     stage("Reports") {
         step([$class: 'XUnitBuilder',
             thresholds: [
-                [$class: 'SkippedThreshold', failureThreshold: '5'],
+                [$class: 'SkippedThreshold', failureThreshold: '15'],
                 [$class: 'FailedThreshold', failureThreshold: '0']],
             // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
             tools: [[$class: 'JUnitType', pattern: 'reports/*.xml']]])

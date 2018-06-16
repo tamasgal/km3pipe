@@ -1,9 +1,11 @@
 # Filename: hardware.py
+# -*- coding: utf-8 -*-
 # pylint: disable=locally-disabled
 """
 A collection of controllers and hardware related stuff.
 
 """
+from __future__ import absolute_import, print_function, division
 
 import time
 import os

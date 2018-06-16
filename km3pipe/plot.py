@@ -4,7 +4,13 @@
 """
 Common Plotting utils.
 """
+from __future__ import absolute_import, print_function, division
 
+try:
+    import _tkinter
+except ImportError:
+    import matplotlib
+    matplotlib.use('agg')
 import matplotlib as mpl    # noqa
 import matplotlib.pyplot as plt
 import numpy as np

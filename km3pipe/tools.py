@@ -4,6 +4,7 @@
 Some unsorted, frequently used logic.
 
 """
+from __future__ import absolute_import, print_function, division
 
 import base64
 import collections
@@ -185,6 +186,8 @@ def camelise(text, capital_first=True):
         while True:
             yield str.capitalize
 
+    if istype(text, 'unicode'):
+        text = text.encode('utf8')
     c = camelcase()
     return "".join(next(c)(x) if x else '_' for x in text.split("_"))
 
@@ -263,14 +266,14 @@ def colored(text, color=None, on_color=None, attrs=None, ansi_code=None):
         return text
 
 
-def cprint(text, color=None, on_color=None, attrs=None, **kwargs):
+def cprint(text, color=None, on_color=None, attrs=None):
     """Print colorize text.
 
     Author:  Konstantin Lepa <konstantin.lepa@gmail.com> / termcolor
 
     It accepts arguments of print function.
     """
-    print((colored(text, color, on_color, attrs)), **kwargs)
+    print((colored(text, color, on_color, attrs)))
 
 
 def issorted(arr):

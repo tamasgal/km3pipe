@@ -4,6 +4,8 @@
 """
 Dataclasses for internal use. Heavily based on Numpy arrays.
 """
+from __future__ import absolute_import, print_function, division
+
 import numpy as np
 from numpy.lib import recfunctions as rfn
 

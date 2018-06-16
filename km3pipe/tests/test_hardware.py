@@ -13,6 +13,8 @@ dom_id line_id floor_id npmts
  ...
 
 """
+from __future__ import unicode_literals
+
 from copy import deepcopy
 from io import StringIO
 

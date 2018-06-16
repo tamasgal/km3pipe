@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Calibration
+
+"""
+from __future__ import absolute_import, print_function, division
+
 from km3pipe import Pipeline, Module
 from km3pipe.calib import Calibration
 from km3pipe.io import EvtPump

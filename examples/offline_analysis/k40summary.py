@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # vim: ts=4 sw=4 et
 """
 =======================
@@ -17,6 +18,8 @@ Combine k40calib results into a single CSV file.
         -h --help   Show this screen.
 
 """
+from __future__ import absolute_import, print_function, division
+
 from glob import glob
 import os
 import re

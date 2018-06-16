@@ -4,6 +4,8 @@
 Database utilities.
 
 """
+from __future__ import absolute_import, print_function, division
+
 from datetime import datetime
 import ssl
 import io
@@ -11,13 +13,24 @@ import json
 import re
 import pytz
 from collections import defaultdict, OrderedDict
-from inspect import Signature, Parameter
-from urllib.parse import urlencode, unquote
-from urllib.request import (Request, build_opener, urlopen,
-                            HTTPCookieProcessor, HTTPHandler)
-from urllib.error import URLError, HTTPError
-from io import StringIO
-from http.client import IncompleteRead
+try:
+    from inspect import Signature, Parameter
+    SKIP_SIGNATURE_HINTS = False
+except ImportError:
+    SKIP_SIGNATURE_HINTS = True
+try:
+    from urllib.parse import urlencode, unquote
+    from urllib.request import (Request, build_opener, urlopen,
+                                HTTPCookieProcessor, HTTPHandler)
+    from urllib.error import URLError, HTTPError
+    from io import StringIO
+    from http.client import IncompleteRead
+except ImportError:
+    from urllib import urlencode, unquote
+    from urllib2 import (Request, build_opener, urlopen, HTTPCookieProcessor,
+                         HTTPHandler, URLError, HTTPError)
+    from StringIO import StringIO
+    from httplib import IncompleteRead
 
 from .tools import cprint
 from .time import Timer
@@ -401,7 +414,10 @@ class DBManager(object):
 
     def _build_opener(self):
         log.debug("Building opener.")
-        from http.cookiejar import CookieJar
+        try:
+            from http.cookiejar import CookieJar
+        except ImportError:
+            from cookielib import CookieJar
         cj = CookieJar()
         self._cookies = cj
         opener = build_opener(HTTPCookieProcessor(cj), HTTPHandler())
@@ -463,16 +479,18 @@ class StreamDS(object):
 
         func.__doc__ = self._stream_parameter(stream, "DESCRIPTION")
 
-        sig_dict = OrderedDict()
-        for sel in self.mandatory_selectors(stream):
-            if sel == '-':
-                continue
-            sig_dict[Parameter(sel, Parameter.POSITIONAL_OR_KEYWORD)] = None
-        for sel in self.optional_selectors(stream):
-            if sel == '-':
-                continue
-            sig_dict[Parameter(sel, Parameter.KEYWORD_ONLY)] = None
-        func.__signature__ = Signature(parameters=sig_dict)
+        if not SKIP_SIGNATURE_HINTS:
+            sig_dict = OrderedDict()
+            for sel in self.mandatory_selectors(stream):
+                if sel == '-':
+                    continue
+                sig_dict[Parameter(sel,
+                                   Parameter.POSITIONAL_OR_KEYWORD)] = None
+            for sel in self.optional_selectors(stream):
+                if sel == '-':
+                    continue
+                sig_dict[Parameter(sel, Parameter.KEYWORD_ONLY)] = None
+            func.__signature__ = Signature(parameters=sig_dict)
 
         return func
 

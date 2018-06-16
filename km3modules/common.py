@@ -1,9 +1,12 @@
 # Filename: common.py
+# -*- coding: utf-8 -*-
 # pylint: disable=locally-disabled
 """
 A collection of commonly used modules.
 
 """
+from __future__ import absolute_import, print_function, division
+
 from time import time
 
 import numpy as np

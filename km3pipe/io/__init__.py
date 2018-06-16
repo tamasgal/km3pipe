@@ -3,6 +3,8 @@
 A collection of io for different kinds of data formats.
 
 """
+from __future__ import absolute_import, print_function, division
+
 import os.path
 
 import numpy as np
@@ -68,7 +70,7 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
         if len(missing_files) == len(filenames):
             message = "None of the given files could be found."
             log.critical(message)
-            raise FileNotFoundError(message)
+            raise SystemExit(message)
         else:
             log.warning("The following files are missing and ignored: {}"
                         .format(', '.join(missing_files)))

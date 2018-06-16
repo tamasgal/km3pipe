@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # vim: ts=4 sw=4 et
 """
 =================
@@ -8,6 +9,8 @@ Live Event Dumper
 Recieves triggered events from the detector and dumps them to a file.
 
 """
+from __future__ import absolute_import, print_function, division
+
 from km3pipe import Pipeline, Module
 from km3pipe.io.ch import CHPump
 from km3pipe.io.daq import DAQProcessor

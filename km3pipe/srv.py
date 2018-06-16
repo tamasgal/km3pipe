@@ -4,6 +4,8 @@
 The KM3srv tornado webserver.
 
 """
+from __future__ import absolute_import, print_function, division
+
 try:
     import tornado
 except ImportError:

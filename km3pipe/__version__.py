@@ -9,6 +9,8 @@ Pep 386 compliant version info.
     (1, 2, 0, 'beta', 2) => "1.2b2"
 
 """
+from __future__ import absolute_import, print_function, division
+
 import subprocess
 import os
 from os.path import dirname, join, exists
@@ -36,7 +38,7 @@ def get_git_revision_hash(short=False):
         return 'no-git-revision-hash'
 
 
-VERSION_INFO = (8, 0, 5, 'final', 0)
+VERSION_INFO = (8, 1, 3, 'final', 0)
 
 __author__ = 'tamasgal'
 

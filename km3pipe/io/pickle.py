@@ -4,6 +4,7 @@
 Pump for the pickle data format.
 
 """
+from __future__ import absolute_import, print_function, division
 
 import pickle
 from collections import namedtuple

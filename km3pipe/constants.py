@@ -5,6 +5,7 @@
 The constants used in KM3Pipe.
 
 """
+from __future__ import absolute_import, print_function, division
 
 # TODO: this module should be refactored soon!
 

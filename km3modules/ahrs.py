@@ -1,9 +1,11 @@
 # Filename: ahrs.py
+# -*- coding: utf-8 -*-
 # pylint: disable=locally-disabled
 """
 AHRS calibration.
 
 """
+from __future__ import absolute_import, print_function, division
 
 import io
 from collections import defaultdict

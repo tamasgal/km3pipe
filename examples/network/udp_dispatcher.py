@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Author: Tamas Gal <tgal@km3net.de>
 # License: MIT
 #!/usr/bin/env python
@@ -14,6 +15,8 @@ This application is used to forward monitoring channel data from Ligier
 to a given UDP address.
 
 """
+from __future__ import absolute_import, print_function, division
+
 
 import socket
 import sys

@@ -4,6 +4,18 @@ Unreleased changes
 Version 8
 ---------
 
+8.1.2 / 2018-06-16
+~~~~~~~~~~~~~~~~~~
+* Fix a new typo in `stats.rv_kde.rvs`
+
+8.1.1 / 2018-06-16
+~~~~~~~~~~~~~~~~~~
+* Fix a Python 2.7 syntax error (`self. print`)
+
+8.1.0 / 2018-06-16
+~~~~~~~~~~~~~~~~~~
+* Python 2.7 compatibility added, thanks to ROOT
+
 8.0.5 / 2018-06-09
 ~~~~~~~~~~~~~~~~~~
 * New commands available to print the git revision number:

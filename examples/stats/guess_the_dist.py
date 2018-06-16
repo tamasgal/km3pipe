@@ -10,6 +10,8 @@ Note: to fit the landau distribution, you need to have ROOT and the
 ``rootpy`` package installed.
 
 """
+from __future__ import absolute_import, print_function, division
+
 
 import h5py
 import matplotlib.pyplot as plt

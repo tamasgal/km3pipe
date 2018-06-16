@@ -80,3 +80,7 @@ class ColourCycler(object):
     def __next__(self):
         """Return the next colour in current palette"""
         return next(self._cycler)
+
+    def next(self):
+        """Python 2 compatibility for iterators"""
+        return self.__next__()
