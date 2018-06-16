@@ -97,7 +97,7 @@ class rv_kde(rv_continuous):
         pdf = np.exp(log_pdf)
         return pdf
 
-    def rvs(self, rgs, size=1, random_state=None):
+    def rvs(self, *args, size=1, random_state=None, **kwargs):
         # don't ask me why it uses `self._size`
         return self._kde.sample(n_samples=size, random_state=random_state)
 

@@ -49,7 +49,25 @@ class TestRvKde(TestCase):
         with pytest.raises(ValueError):
             rv = rv_kde(self.data1d)
         rv = rv_kde(self.data)
-        assert rv is not None
+        samp = rv.rvs(size=10)
+        assert len(samp) == 10
+        assert samp.ndim == 2
+        assert samp.shape == (10, 1)
+        samp = rv.rvs(size=(10, ))
+        assert len(samp) == 10
+        assert samp.ndim == 2
+        assert samp.shape == (10, 1)
+
+    def test_2d(self):
+        d2d = np.column_stack([
+            np.random.normal(size=20),
+            np.random.normal(size=20),
+        ])
+        rv = rv_kde(d2d)
+        samp = rv.rvs(size=10)
+        assert len(samp) == 10
+        assert samp.ndim == 2
+        assert samp.shape == (10, 2)
 
     def test_bw_methods(self):
         rv = rv_kde(
