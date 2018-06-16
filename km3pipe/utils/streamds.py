@@ -38,6 +38,7 @@ __status__ = "Development"
 log = kp.logger.get_logger("streamds")
 
 RUNSUMMARY_URL = "https://km3netdbweb.in2p3.fr/jsonds/runsummarynumbers/i"
+REQUIRED_COLUMNS = set(['run', 'det_id', 'source'])
 
 
 def print_streams():
@@ -94,15 +95,14 @@ def upload_runsummary(csv_filename, dryrun=False):
         log.error(e)
         return
 
-    required_columns = set(['run', 'det_id', 'source'])
     cols = set(df.columns)
 
-    if not required_columns.issubset(cols):
+    if not REQUIRED_COLUMNS.issubset(cols):
         log.error("Missing columns: {}.".format(', '.join(
-            str(c) for c in required_columns - cols)))
+            str(c) for c in REQUIRED_COLUMNS - cols)))
         return
 
-    parameters = cols - required_columns
+    parameters = cols - REQUIRED_COLUMNS
     if len(parameters) < 1:
         log.error("No parameter columns found.")
         return
@@ -170,13 +170,21 @@ def convert_runsummary_to_json(df,
 
             parameter_dict = {}
             for row in run_data.itertuples():
-                for parameter_name in run_data.columns[3:]:
+                for parameter_name in run_data.columns:
+                    if parameter_name in REQUIRED_COLUMNS:
+                        continue
+
                     if parameter_name not in parameter_dict:
                         entry = {'Name': prefix + parameter_name, 'Data': []}
                         parameter_dict[parameter_name] = entry
+                    data_value = getattr(row, parameter_name)
+                    try:
+                        data_value = float(data_value)
+                    except ValueError:
+                        pass
                     value = {
                         'S': str(getattr(row, 'source')),
-                        'D': float(getattr(row, parameter_name))
+                        'D': data_value
                     }
                     parameter_dict[parameter_name]['Data'].append(value)
             for parameter_data in parameter_dict.values():
