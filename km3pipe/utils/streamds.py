@@ -180,8 +180,9 @@ def convert_runsummary_to_json(df,
                     data_value = getattr(row, parameter_name)
                     try:
                         data_value = float(data_value)
-                    except ValueError:
-                        pass
+                    except ValueError as e:
+                        log.critical("Data values has to be floats!")
+                        raise ValueError(e)
                     value = {
                         'S': str(getattr(row, 'source')),
                         'D': data_value
