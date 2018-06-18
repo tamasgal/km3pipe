@@ -26,8 +26,8 @@ class McTruth(Module):
     """
 
     def configure(self):
-        self.most_energetic_primary = bool(
-            self.get('most_energetic_primary')) or True
+        self.most_energetic_primary = bool(self.get('most_energetic_primary')
+                                           ) or True
 
     @classmethod
     def t2f(cls, row):

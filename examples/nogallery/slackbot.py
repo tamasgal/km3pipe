@@ -37,7 +37,8 @@ class SlackSender(Module):
             self.client.chat_post_message(
                 "#du2-live",
                 "Run #{0} has started!".format(event.header.run),
-                username="slackbot")
+                username="slackbot"
+            )
 
         return blob
 
@@ -49,7 +50,8 @@ pipe.attach(
     port=5553,
     tags='IO_EVT',
     timeout=60 * 60 * 24,
-    max_queue=50)
+    max_queue=50
+)
 pipe.attach(SlackSender)
 pipe.attach(CHPrinter)
 

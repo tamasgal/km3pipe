@@ -19,32 +19,25 @@ __all__ = ('TEMPLATES', )
 
 TEMPLATES = {
     'Direction': {
-        'dtype':
-        np.dtype([
+        'dtype': np.dtype([
             ('dir_x', '<f4'),
             ('dir_y', '<f4'),
             ('dir_z', '<f4'),
         ]),
-        'h5loc':
-        None,
-        'split_h5':
-        False,
+        'h5loc': None,
+        'split_h5': False,
     },
     'Position': {
-        'dtype':
-        np.dtype([
+        'dtype': np.dtype([
             ('pos_x', '<f4'),
             ('pos_y', '<f4'),
             ('pos_z', '<f4'),
         ]),
-        'h5loc':
-        None,
-        'split_h5':
-        False,
+        'h5loc': None,
+        'split_h5': False,
     },
     'EventInfo': {
-        'dtype':
-        np.dtype([
+        'dtype': np.dtype([
             ('det_id', '<i4'),
             ('frame_index', '<u4'),
             ('livetime_sec', '<u8'),
@@ -63,28 +56,22 @@ TEMPLATES = {
             ('run_id', '<u8'),
             ('group_id', '<u8'),
         ]),
-        'h5loc':
-        '/event_info',
-        'split_h5':
-        False,
+        'h5loc': '/event_info',
+        'split_h5': False,
     },
     'TimesliceHits': {
-        'dtype':
-        np.dtype([
+        'dtype': np.dtype([
             ('channel_id', 'u1'),
             ('dom_id', '<u4'),
             ('time', '<i4'),
             ('tot', 'u1'),
             ('group_id', '<u4'),
         ]),
-        'h5loc':
-        '/time_slice_hits',
-        'split_h5':
-        True,
+        'h5loc': '/time_slice_hits',
+        'split_h5': True,
     },
     'Hits': {
-        'dtype':
-        np.dtype([
+        'dtype': np.dtype([
             ('channel_id', 'u1'),
             ('dom_id', '<u4'),
             ('time', '<f8'),
@@ -92,14 +79,11 @@ TEMPLATES = {
             ('triggered', '?'),
             ('group_id', '<u4'),
         ]),
-        'h5loc':
-        '/hits',
-        'split_h5':
-        True,
+        'h5loc': '/hits',
+        'split_h5': True,
     },
     'CalibHits': {
-        'dtype':
-        np.dtype([
+        'dtype': np.dtype([
             ('channel_id', 'u1'),
             ('dir_x', '<f4'),
             ('dir_y', '<f4'),
@@ -116,28 +100,22 @@ TEMPLATES = {
             ('triggered', '?'),
             ('group_id', '<u4'),
         ]),
-        'h5loc':
-        '/hits',
-        'split_h5':
-        True,
+        'h5loc': '/hits',
+        'split_h5': True,
     },
     'McHits': {
-        'dtype':
-        np.dtype([
+        'dtype': np.dtype([
             ('a', '<f4'),
             ('origin', '<u4'),
             ('pmt_id', '<u4'),
             ('time', '<f8'),
             ('group_id', '<u4'),
         ]),
-        'h5loc':
-        '/mc_hits',
-        'split_h5':
-        True,
+        'h5loc': '/mc_hits',
+        'split_h5': True,
     },
     'CalibMcHits': {
-        'dtype':
-        np.dtype([
+        'dtype': np.dtype([
             ('a', '<f4'),
             ('dir_x', '<f4'),
             ('dir_y', '<f4'),
@@ -150,14 +128,11 @@ TEMPLATES = {
             ('time', '<f8'),
             ('group_id', '<u4'),
         ]),
-        'h5loc':
-        '/mc_hits',
-        'split_h5':
-        True,
+        'h5loc': '/mc_hits',
+        'split_h5': True,
     },
     'Tracks': {
-        'dtype':
-        np.dtype([
+        'dtype': np.dtype([
             ('bjorkeny', '<f8'),
             ('dir_x', '<f8'),
             ('dir_y', '<f8'),
@@ -174,14 +149,11 @@ TEMPLATES = {
             ('type', '<i4'),
             ('group_id', '<u4'),
         ]),
-        'h5loc':
-        '/tracks',
-        'split_h5':
-        False,
+        'h5loc': '/tracks',
+        'split_h5': False,
     },
     'McTracks': {
-        'dtype':
-        np.dtype([
+        'dtype': np.dtype([
             ('bjorkeny', '<f8'),
             ('dir_x', '<f8'),
             ('dir_y', '<f8'),
@@ -198,14 +170,11 @@ TEMPLATES = {
             ('type', '<i4'),
             ('group_id', '<u4'),
         ]),
-        'h5loc':
-        '/mc_tracks',
-        'split_h5':
-        False,
+        'h5loc': '/mc_tracks',
+        'split_h5': False,
     },
     'SummaryFrameInfo': {
-        'dtype':
-        np.dtype([
+        'dtype': np.dtype([
             ('dom_id', '<u4'),
             ('fifo_status', '<u4'),
             ('frame_id', '<u4'),
@@ -219,55 +188,43 @@ TEMPLATES = {
             ('utc_seconds', '<u4'),
             ('white_rabbit_status', '<u4'),
         ]),
-        'h5loc':
-        '/summary_slice_info',
-        'split_h5':
-        False,
+        'h5loc': '/summary_slice_info',
+        'split_h5': False,
     },
     'SummarysliceInfo': {
-        'dtype':
-        np.dtype([
+        'dtype': np.dtype([
             ('frame_index', '<u4'),
             ('slice_id', '<u4'),
             ('timestamp', '<u4'),
             ('nanoseconds', '<u4'),
             ('n_frames', '<u4'),
         ]),
-        'h5loc':
-        '/todo',
-        'split_h5':
-        False,
+        'h5loc': '/todo',
+        'split_h5': False,
     },
     'TimesliceInfo': {
-        'dtype':
-        np.dtype([
+        'dtype': np.dtype([
             ('frame_index', '<u4'),
             ('slice_id', '<u4'),
             ('timestamp', '<u4'),
             ('nanoseconds', '<u4'),
             ('n_frames', '<u4'),
         ]),
-        'h5loc':
-        '/todo',
-        'split_h5':
-        False,
+        'h5loc': '/todo',
+        'split_h5': False,
     },
     'SummaryframeSeries': {
-        'dtype':
-        np.dtype([
+        'dtype': np.dtype([
             ('dom_id', '<u4'),
             ('max_sequence_number', '<u4'),
             ('n_received_packets', '<u4'),
             ('group_id', '<u4'),
         ]),
-        'h5loc':
-        '/todo',
-        'split_h5':
-        False,
+        'h5loc': '/todo',
+        'split_h5': False,
     },
     'TimesliceFrameInfo': {
-        'dtype':
-        np.dtype([
+        'dtype': np.dtype([
             ('det_id', '<i4'),
             ('run_id', '<u8'),
             ('sqnr', '<u8'),
@@ -277,22 +234,17 @@ TEMPLATES = {
             ('dom_status', '<u4'),
             ('n_hits', '<u4'),
         ]),
-        'h5loc':
-        '/todo',
-        'split_h5':
-        False,
+        'h5loc': '/todo',
+        'split_h5': False,
     },
     'SummaryFrameSeries': {
-        'dtype':
-        np.dtype([
+        'dtype': np.dtype([
             ('dom_id', '<u4'),
             ('max_sequence_number', '<u4'),
             ('n_received_packets', '<u4'),
             ('group_id', '<u4'),
         ]),
-        'h5loc':
-        '/summary_frame_series',
-        'split_h5':
-        False
+        'h5loc': '/summary_frame_series',
+        'split_h5': False
     }
 }

@@ -149,7 +149,8 @@ class AanetPump(Pump):
                 'group_id': self.group_id,
             },
             h5loc='/event_info',
-            name='EventInfo')
+            name='EventInfo'
+        )
         return info
 
     @staticmethod
@@ -173,14 +174,18 @@ class AanetPump(Pump):
                 trk_name = RECO2NAME[trk_type]
             except KeyError:
                 trk_name = "Generic_Track_#{}".format(i)
-                self.log.warn("Unknown Reconstruction type! "
-                              "Setting to '{}'".format(trk_name))
+                self.log.warn(
+                    "Unknown Reconstruction type! "
+                    "Setting to '{}'".format(trk_name)
+                )
             trk_dict = self._read_track(trk)
             out[trk_name].append(
                 Table(
                     trk_dict,
                     h5loc='/reco/{}'.format(trk_name.lower()),
-                    name=trk_name))
+                    name=trk_name
+                )
+            )
         for key in out:
             name = out[key][0].name
             h5loc = out[key][0].h5loc
@@ -282,12 +287,16 @@ class AanetPump(Pump):
                         elem_name = tags[key][j]
                     except IndexError:
                         elem_name = '{}_{}'.format(key, j)
-                        log.info("Can't infer field name, "
-                                 "setting to '{}'...".format(elem_name))
+                        log.info(
+                            "Can't infer field name, "
+                            "setting to '{}'...".format(elem_name)
+                        )
                 else:
                     elem_name = '{}_{}'.format(key, j)
-                    log.info("Can't infer field name, "
-                             "setting to '{}'...".format(elem_name))
+                    log.info(
+                        "Can't infer field name, "
+                        "setting to '{}'...".format(elem_name)
+                    )
                 out[key][elem_name] = elem
         return out
 

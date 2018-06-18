@@ -18,12 +18,14 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-CONFIGURATION = StringIO("\n".join((
-    "[DB]",
-    "username=foo",
-    "password=narf",
-    "timeout=10",
-)))
+CONFIGURATION = StringIO(
+    "\n".join((
+        "[DB]",
+        "username=foo",
+        "password=narf",
+        "timeout=10",
+    ))
+)
 
 
 class TestConfig(TestCase):

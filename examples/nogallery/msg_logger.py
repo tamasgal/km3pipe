@@ -52,8 +52,9 @@ class MessageDumper(km3.Module):
     def target_file(self):
         current_run = int(json.load(urllib2.urlopen(RUN_NUMBER_URL))['value'])
         return os.path.join(
-            self.path, 'MSG_dump_{0:08}_{1:08}.log'.format(
-                int(self.det_sn), current_run))
+            self.path,
+            'MSG_dump_{0:08}_{1:08}.log'.format(int(self.det_sn), current_run)
+        )
 
     def process(self, blob):
         message = blob['CHData']
@@ -66,7 +67,8 @@ class MessageDumper(km3.Module):
 
     def send_message(self, message):
         self.slack.chat_post_message(
-            "#live-arca-it", message, username="ligier")
+            "#live-arca-it", message, username="ligier"
+        )
 
     def _start_thread(self):
         self.thread = threading.Thread(target=self._run, args=())
@@ -80,8 +82,11 @@ class MessageDumper(km3.Module):
 
     def _dump(self, filename):
         with self.lock:
-            print("Dumping {0} messages to {1}".format(
-                len(self.messages), filename))
+            print(
+                "Dumping {0} messages to {1}".format(
+                    len(self.messages), filename
+                )
+            )
             with open(filename, 'a+') as f:
                 for message in self.messages:
                     f.write(message + '\n')
@@ -99,12 +104,14 @@ def main(det_sn, target_path, write_interval):
         port=5553,
         tags='MSG',
         timeout=60 * 60 * 24 * 7,
-        max_queue=2000)
+        max_queue=2000
+    )
     pipe.attach(
         MessageDumper,
         write_interval=write_interval,
         det_sn=det_sn,
-        path=target_path)
+        path=target_path
+    )
     pipe.drain()
 
 

@@ -17,26 +17,24 @@ DATA_DIR = join(dirname(__file__), '../../kp-data/test_data/')
 
 class TestMultiTable(TestCase):
     def setUp(self):
-        self.foo = np.array(
-            [
-                (1.0, 2.0, 3.0),
-                (4.0, 5.0, 6.0),
-            ],
-            dtype=[
-                ('a', '<f8'),
-                ('b', '<f8'),
-                ('c', '<f8'),
-            ])
-        self.bar = np.array(
-            [
-                (10.0, 20.0, 30.0),
-                (40.0, 50.0, 60.0),
-            ],
-            dtype=[
-                ('aa', '<f8'),
-                ('bb', '<f8'),
-                ('cc', '<f8'),
-            ])
+        self.foo = np.array([
+            (1.0, 2.0, 3.0),
+            (4.0, 5.0, 6.0),
+        ],
+                            dtype=[
+                                ('a', '<f8'),
+                                ('b', '<f8'),
+                                ('c', '<f8'),
+                            ])
+        self.bar = np.array([
+            (10.0, 20.0, 30.0),
+            (40.0, 50.0, 60.0),
+        ],
+                            dtype=[
+                                ('aa', '<f8'),
+                                ('bb', '<f8'),
+                                ('cc', '<f8'),
+                            ])
         self.tabs = {'foo': self.foo, 'bar': self.bar}
         self.where = '/lala'
         self.fobj = tempfile.NamedTemporaryFile(delete=True)
@@ -46,10 +44,12 @@ class TestMultiTable(TestCase):
             self.h5name,
             'w',
             driver="H5FD_CORE",
-            driver_core_backing_store=0)
+            driver_core_backing_store=0
+        )
         for name, tab in self.tabs.items():
             self.h5file.create_table(
-                self.where, name=name, obj=tab, createparents=True)
+                self.where, name=name, obj=tab, createparents=True
+            )
 
     def tearDown(self):
         self.h5file.close()
@@ -144,7 +144,8 @@ class TestH5Sink(TestCase):
             self.fobj.name,
             "w",
             driver="H5FD_CORE",
-            driver_core_backing_store=0)
+            driver_core_backing_store=0
+        )
 
     def tearDown(self):
         self.out.close()
@@ -165,7 +166,8 @@ class TestH5Sink(TestCase):
             'foobar_scalar',
             "a",
             driver="H5FD_CORE",
-            driver_core_backing_store=0)
+            driver_core_backing_store=0
+        )
 
         def pu(blob):
             return {'foo': 42.0}
@@ -210,7 +212,8 @@ class TestH5SinkConsistency(TestCase):
         fobj.close()
 
     def test_h5_consistency_for_tables_without_group_id_and_multiple_keys(
-            self):
+            self
+    ):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = fobj.name
 
@@ -322,13 +325,12 @@ class TestHDF5PumpConsistency(TestCase):
 
             def process(self, blob):
                 self.count += 1
-                tab = Table(
-                    {
-                        'a': self.count * 10,
-                        'b': 1
-                    },
-                    h5loc='/tab',
-                    split_h5=True)
+                tab = Table({
+                    'a': self.count * 10,
+                    'b': 1
+                },
+                            h5loc='/tab',
+                            split_h5=True)
                 blob['Tab'] = tab
                 return blob
 

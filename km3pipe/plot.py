@@ -55,21 +55,15 @@ def diag(ax=None, linecolor='0.0', linestyle='--', **kwargs):
     ax = get_ax(ax)
     xy_min = np.min((ax.get_xlim(), ax.get_ylim()))
     xy_max = np.max((ax.get_ylim(), ax.get_xlim()))
-    return ax.plot(
-        [xy_min, xy_max], [xy_min, xy_max],
-        ls=linestyle,
-        c=linecolor,
-        **kwargs)
+    return ax.plot([xy_min, xy_max], [xy_min, xy_max],
+                   ls=linestyle,
+                   c=linecolor,
+                   **kwargs)
 
 
-def automeshgrid(x,
-                 y,
-                 step=0.02,
-                 xstep=None,
-                 ystep=None,
-                 pad=0.5,
-                 xpad=None,
-                 ypad=None):
+def automeshgrid(
+        x, y, step=0.02, xstep=None, ystep=None, pad=0.5, xpad=None, ypad=None
+):
     """Make a meshgrid, inferred from data."""
     if xpad is None:
         xpad = pad
@@ -95,7 +89,8 @@ def meshgrid(x_min, x_max, x_step, y_min=None, y_max=None, y_step=None):
     if y_step is None:
         y_step = x_step
     xx, yy = np.meshgrid(
-        np.arange(x_min, x_max, x_step), np.arange(y_min, y_max, y_step))
+        np.arange(x_min, x_max, x_step), np.arange(y_min, y_max, y_step)
+    )
     return xx, yy
 
 
@@ -117,7 +112,8 @@ def prebinned_hist(counts, binlims, ax=None, *args, **kwargs):
 def joint_hex(x, y, **kwargs):
     """Seaborn Joint Hexplot with marginal KDE + hists."""
     return sns.jointplot(
-        x, y, kind='hex', stat_func=None, marginal_kws={'kde': True}, **kwargs)
+        x, y, kind='hex', stat_func=None, marginal_kws={'kde': True}, **kwargs
+    )
 
 
 def plot_convexhull(xy, ax=None, plot_points=True):

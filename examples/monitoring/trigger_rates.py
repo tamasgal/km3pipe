@@ -43,18 +43,15 @@ lock = threading.Lock()
 
 general_style = dict(markersize=6, linestyle='None')
 styles = {
-    "Overall":
-    dict(
+    "Overall": dict(
         marker='D',
         markerfacecolor='None',
         markeredgecolor='tomato',
-        markeredgewidth=1),
-    "3DMuon":
-    dict(marker='X', markerfacecolor='dodgerblue'),
-    "MXShower":
-    dict(marker='v', markerfacecolor='orange'),
-    "3DShower":
-    dict(marker='o', markerfacecolor='greenyellow'),
+        markeredgewidth=1
+    ),
+    "3DMuon": dict(marker='X', markerfacecolor='dodgerblue'),
+    "MXShower": dict(marker='v', markerfacecolor='orange'),
+    "3DShower": dict(marker='o', markerfacecolor='greenyellow'),
 }
 
 
@@ -86,7 +83,8 @@ class TriggerRate(kp.Module):
         self.trigger_rates = OrderedDict()
         for trigger in ["Overall", "3DMuon", "MXShower", "3DShower"]:
             self.trigger_rates[trigger] = deque(
-                maxlen=int(60 * 24 / (self.interval / 60)))
+                maxlen=int(60 * 24 / (self.interval / 60))
+            )
         self.thread = threading.Thread(target=self.plot).start()
 
     def process(self, blob):
@@ -135,14 +133,17 @@ class TriggerRate(kp.Module):
                 trigger_rates,
                 **styles[trigger],
                 **general_style,
-                label=trigger)
-        ax.set_title("Trigger Rates\n{0} UTC"
-                     .format(datetime.utcnow().strftime("%c")))
+                label=trigger
+            )
+        ax.set_title(
+            "Trigger Rates\n{0} UTC".format(datetime.utcnow().strftime("%c"))
+        )
         ax.set_xlabel("time")
         ax.set_ylabel("trigger rate [Hz]")
         ax.xaxis.set_major_formatter(xfmt)
         ax.yaxis.set_major_locator(
-            ticker.LogLocator(base=10.0, subs=(1.0, ), numticks=100))
+            ticker.LogLocator(base=10.0, subs=(1.0, ), numticks=100)
+        )
         ax.grid(True)
         ax.minorticks_on()
         plt.legend()
@@ -150,8 +151,9 @@ class TriggerRate(kp.Module):
         fig.tight_layout()
 
         filename = os.path.join(PLOTS_PATH, 'trigger_rates_lin_test.png')
-        filename_tmp = os.path.join(PLOTS_PATH,
-                                    'trigger_rates_lin_test_tmp.png')
+        filename_tmp = os.path.join(
+            PLOTS_PATH, 'trigger_rates_lin_test_tmp.png'
+        )
         plt.savefig(filename_tmp, dpi=120, bbox_inches="tight")
         shutil.move(filename_tmp, filename)
 
@@ -181,6 +183,7 @@ pipe.attach(
     port=5553,
     tags='IO_EVT',
     timeout=60 * 60 * 24 * 7,
-    max_queue=200000)
+    max_queue=200000
+)
 pipe.attach(TriggerRate, interval=60)
 pipe.drain()

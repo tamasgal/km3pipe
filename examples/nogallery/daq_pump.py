@@ -36,8 +36,11 @@ class MeanHits(Module):
 
     def finish(self):
         mean_hits = sum(self.hits) / len(self.hits)
-        print("Number of entries: {0}\nMean hits: {1}".format(
-            len(self.hits), mean_hits))
+        print(
+            "Number of entries: {0}\nMean hits: {1}".format(
+                len(self.hits), mean_hits
+            )
+        )
 
 
 class MeanRates(Module):

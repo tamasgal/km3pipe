@@ -43,6 +43,7 @@ pipe.attach(
     port=5553,
     tags='IO_EVT, IO_SUM, IO_TSL',
     timeout=60 * 60 * 24 * 7,
-    max_queue=2000)
+    max_queue=2000
+)
 pipe.attach(LigierSender)
 pipe.drain()

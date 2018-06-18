@@ -36,7 +36,8 @@ __status__ = "Development"
 def ptconcat(output_file, input_files, overwrite=False):
     """Concatenate HDF5 Files"""
     filt = tb.Filters(
-        complevel=5, shuffle=True, fletcher32=True, complib='zlib')
+        complevel=5, shuffle=True, fletcher32=True, complib='zlib'
+    )
     out_tabs = {}
     dt_file = input_files[0]
     log.info("Reading data struct '%s'..." % dt_file)
@@ -54,7 +55,8 @@ def ptconcat(output_file, input_files, overwrite=False):
         dtype = node.dtype
         p, n = os.path.split(path)
         out_tabs[path] = h5out.create_table(
-            p, n, description=dtype, filters=filt, createparents=True)
+            p, n, description=dtype, filters=filt, createparents=True
+        )
     h5struc.close()
     for fname in input_files:
         log.info('Reading %s...' % fname)

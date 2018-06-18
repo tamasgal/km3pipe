@@ -76,7 +76,8 @@ _ = bootstrap_fit(stats.lognorm, diffs, n_iter=100)
 plt.loglog(
     days,
     1 - pareto.cdf(days),
-    label='Pareto Fit (exponent {:.3})'.format(pareto_idx + 1))
+    label='Pareto Fit (exponent {:.3})'.format(pareto_idx + 1)
+)
 plt.loglog(days, 1 - lognorm.cdf(days), label='LogNorm Fit')
 plt.loglog(days, eucdf, label='Empirical CDF')
 plt.xlabel('Days between murders')

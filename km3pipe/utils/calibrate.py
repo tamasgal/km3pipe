@@ -18,7 +18,8 @@ import numpy as np
 import tables as tb
 
 FILTERS = tb.Filters(
-    complevel=5, shuffle=True, fletcher32=True, complib='zlib')
+    complevel=5, shuffle=True, fletcher32=True, complib='zlib'
+)
 
 
 def calibrate_hits(f, cal):

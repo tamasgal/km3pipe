@@ -39,7 +39,8 @@ pipe.attach(
     port=5553,
     tags='IO_EVT',
     timeout=60 * 60 * 24,
-    max_queue=10)
+    max_queue=10
+)
 pipe.attach(CHPrinter)
 pipe.attach(Dumper)
 pipe.drain()

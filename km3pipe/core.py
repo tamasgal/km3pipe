@@ -96,8 +96,10 @@ class Pipeline(object):
             if isinstance(fac, types.FunctionType):
                 log.debug("Attaching as function module")
             else:
-                log.critical("Don't know how to attach module '{0}'!\n"
-                             "But I'll do my best".format(name))
+                log.critical(
+                    "Don't know how to attach module '{0}'!\n"
+                    "But I'll do my best".format(name)
+                )
             module = fac
             module.name = name
             module.timeit = self.timeit
@@ -161,18 +163,24 @@ class Pipeline(object):
 
                 for module in self.modules:
                     if self.blob is None:
-                        log.debug("Skipping {0}, due to empty blob."
-                                  .format(module.name))
+                        log.debug(
+                            "Skipping {0}, due to empty blob."
+                            .format(module.name)
+                        )
                         continue
                     if module.only_if is not None and \
                             module.only_if not in self.blob:
-                        log.debug("Skipping {0}, due to missing required key"
-                                  "'{1}'.".format(module.name, module.only_if))
+                        log.debug(
+                            "Skipping {0}, due to missing required key"
+                            "'{1}'.".format(module.name, module.only_if)
+                        )
                         continue
 
                     if (self._cycle_count + 1) % module.every != 0:
-                        log.debug("Skipping {0} (every {1} iterations)."
-                                  .format(module.name, module.every))
+                        log.debug(
+                            "Skipping {0} (every {1} iterations)."
+                            .format(module.name, module.every)
+                        )
                         continue
 
                     log.debug("Processing {0} ".format(module.name))
@@ -185,8 +193,8 @@ class Pipeline(object):
                         self._timeit[module]['process_cpu'] \
                             .append(time.clock() - start_cpu)
                 self._timeit['cycles'].append(timer() - cycle_start)
-                self._timeit['cycles_cpu'].append(time.clock() -
-                                                  cycle_start_cpu)
+                self._timeit['cycles_cpu'
+                             ].append(time.clock() - cycle_start_cpu)
                 self._cycle_count += 1
                 if cycles and self._cycle_count >= cycles:
                     raise StopIteration
@@ -237,8 +245,10 @@ class Pipeline(object):
             raise SystemExit
         if not self._stop:
             hline = 42 * '='
-            print('\n' + hline + "\nGot CTRL+C, waiting for current cycle...\n"
-                  "Press CTRL+C again if you're in hurry!\n" + hline)
+            print(
+                '\n' + hline + "\nGot CTRL+C, waiting for current cycle...\n"
+                "Press CTRL+C again if you're in hurry!\n" + hline
+            )
             self._stop = True
 
     def _print_timeit_statistics(self):
@@ -274,12 +284,17 @@ class Pipeline(object):
         memory = peak_memory_usage()
 
         print(60 * '=')
-        print("{0} cycles drained in {1} (CPU {2}). Memory peak: {3:.2f} MB"
-              .format(self._cycle_count, timef(overall), timef(overall_cpu),
-                      memory))
+        print(
+            "{0} cycles drained in {1} (CPU {2}). Memory peak: {3:.2f} MB"
+            .format(
+                self._cycle_count, timef(overall), timef(overall_cpu), memory
+            )
+        )
         if self._cycle_count > n_cycles:
-            print("Statistics are based on the last {0} cycles."
-                  .format(n_cycles))
+            print(
+                "Statistics are based on the last {0} cycles."
+                .format(n_cycles)
+            )
         if cycles:
             print(statsf('wall', calc_stats(cycles)))
         if cycles_cpu:
@@ -292,10 +307,13 @@ class Pipeline(object):
             finish_time_cpu = self._timeit[module]['finish_cpu']
             process_times = self._timeit[module]['process']
             process_times_cpu = self._timeit[module]['process_cpu']
-            print(module.name + " - process: {0:.3f}s (CPU {1:.3f}s)"
-                  " - finish: {2:.3f}s (CPU {3:.3f}s)".format(
-                      sum(process_times), sum(process_times_cpu), finish_time,
-                      finish_time_cpu))
+            print(
+                module.name + " - process: {0:.3f}s (CPU {1:.3f}s)"
+                " - finish: {2:.3f}s (CPU {3:.3f}s)".format(
+                    sum(process_times), sum(process_times_cpu), finish_time,
+                    finish_time_cpu
+                )
+            )
             if len(process_times) > 0:
                 print(statsf('wall', calc_stats(process_times)))
             if len(process_times_cpu) > 0:
@@ -357,8 +375,11 @@ class Module(object):
         """Return the value of the requested parameter or raise an error."""
         value = self.get(name)
         if value is None:
-            raise TypeError("{0} requires the parameter '{1}'.".format(
-                self.__class__, name))
+            raise TypeError(
+                "{0} requires the parameter '{1}'.".format(
+                    self.__class__, name
+                )
+            )
         return value
 
     def process(self, blob):    # pylint: disable=R0201
@@ -385,9 +406,11 @@ class Pump(Module):
     def __init__(self, *args, **kwargs):
         self.blob_file = None
         if args:
-            log.warning("Non-keywords argument passed. Please use keyword "
-                        "arguments to supress this warning. I will assume the "
-                        "first argument to be the `filename`.")
+            log.warning(
+                "Non-keywords argument passed. Please use keyword "
+                "arguments to supress this warning. I will assume the "
+                "first argument to be the `filename`."
+            )
             Module.__init__(self, filename=args[0], **kwargs)
         else:
             Module.__init__(self, **kwargs)

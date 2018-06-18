@@ -78,7 +78,8 @@ pipe.attach(
     port=5553,
     tags='IO_TSL',
     timeout=60 * 60 * 24,
-    max_queue=42)
+    max_queue=42
+)
 # pipe.attach(Dumper)
 pipe.attach(TimesliceParser)
 # pipe.attach(printer)

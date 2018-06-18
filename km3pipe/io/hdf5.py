@@ -44,14 +44,18 @@ def check_version(h5file, filename):
     except AttributeError:
         log.error(
             "Could not determine HDF5 format version: '%s'."
-            "You may encounter unexpected errors! Good luck..." % filename)
+            "You may encounter unexpected errors! Good luck..." % filename
+        )
         return
     if split(version, int, np.string_('.')) < \
             split(MINIMUM_FORMAT_VERSION, int, np.string_('.')):
-        raise H5VersionError("HDF5 format version {0} or newer required!\n"
-                             "'{1}' has HDF5 format version {2}.".format(
-                                 MINIMUM_FORMAT_VERSION.decode("utf-8"),
-                                 filename, version.decode("utf-8")))
+        raise H5VersionError(
+            "HDF5 format version {0} or newer required!\n"
+            "'{1}' has HDF5 format version {2}.".format(
+                MINIMUM_FORMAT_VERSION.decode("utf-8"), filename,
+                version.decode("utf-8")
+            )
+        )
 
 
 class HDF5Sink(Module):
@@ -101,9 +105,11 @@ class HDF5Sink(Module):
                 self.filename,
                 mode=self.file_mode,
                 title="KM3NeT",
-                **self.pytab_file_args)
+                **self.pytab_file_args
+            )
         self.filters = tb.Filters(
-            complevel=5, shuffle=True, fletcher32=True, complib='zlib')
+            complevel=5, shuffle=True, fletcher32=True, complib='zlib'
+        )
         self._tables = OrderedDict()
 
     def _to_array(self, data, name=None):
@@ -111,12 +117,11 @@ class HDF5Sink(Module):
             return
         if np.isscalar(data):
             self.log.debug('toarray: is a scalar')
-            return Table(
-                {
-                    name: np.asarray(data).reshape((1, ))
-                },
-                h5loc='/misc/{}'.format(decamelise(name)),
-                name=name)
+            return Table({
+                name: np.asarray(data).reshape((1, ))
+            },
+                         h5loc='/misc/{}'.format(decamelise(name)),
+                         name=name)
         if len(data) <= 0:
             self.log.debug('toarray: data has no length')
             return
@@ -132,8 +137,11 @@ class HDF5Sink(Module):
         if h5loc not in self._tables:
             dtype = arr.dtype
             loc, tabname = os.path.split(h5loc)
-            self.log.debug("h5loc '{}', Loc '{}', tabname '{}'".format(
-                h5loc, loc, tabname))
+            self.log.debug(
+                "h5loc '{}', Loc '{}', tabname '{}'".format(
+                    h5loc, loc, tabname
+                )
+            )
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore', tb.NaturalNameWarning)
                 tab = self.h5file.create_table(
@@ -175,7 +183,8 @@ class HDF5Sink(Module):
                     col,
                     a, (0, ),
                     col.capitalize(),
-                    filters=self.filters)
+                    filters=self.filters
+                )
             else:
                 arr = getattr(group, col)
             arr.append(data)
@@ -210,7 +219,8 @@ class HDF5Sink(Module):
             warnings.simplefilter('ignore', tb.NaturalNameWarning)
             for groupname, subdict in header.items():
                 hdr_subgroup = self.h5file.create_group(
-                    '/header', groupname, groupname)
+                    '/header', groupname, groupname
+                )
                 for field, value in subdict.items():
                     try:
                         value = float(value)
@@ -231,11 +241,14 @@ class HDF5Sink(Module):
             h5loc = entry.h5loc
         except AttributeError:
             self.log.debug(
-                "h5loc not found. setting to '{}'...".format(DEFAULT_H5LOC))
+                "h5loc not found. setting to '{}'...".format(DEFAULT_H5LOC)
+            )
             h5loc = DEFAULT_H5LOC
         if data.dtype.names is None:
-            self.log.debug("Array has no named dtype. "
-                           "using blob key as h5 column name")
+            self.log.debug(
+                "Array has no named dtype. "
+                "using blob key as h5 column name"
+            )
             dt = np.dtype((data.dtype, [(key, data.dtype)]))
             data = data.view(dt)
         # where = os.path.join(h5loc, tabname)
@@ -276,13 +289,12 @@ class HDF5Sink(Module):
                 written_blob[key] = data
 
         if 'GroupInfo' not in blob:
-            gi = Table(
-                {
-                    'group_id': self.index,
-                    'n_blobs': len(written_blob)
-                },
-                h5loc='/group_info',
-                name='Group Info')
+            gi = Table({
+                'group_id': self.index,
+                'n_blobs': len(written_blob)
+            },
+                       h5loc='/group_info',
+                       name='Group Info')
             self._process_entry('GroupInfo', gi)
 
         if not self.index % 1000:
@@ -301,19 +313,20 @@ class HDF5Sink(Module):
         for where, data in self.indices.items():
             h5loc = where + "/_indices"
             self.log.info("  -> {0}".format(h5loc))
-            indices = Table(
-                {
-                    "index": data["indices"],
-                    "n_items": data["n_items"]
-                },
-                h5loc=h5loc)
+            indices = Table({
+                "index": data["indices"],
+                "n_items": data["n_items"]
+            },
+                            h5loc=h5loc)
             self._write_array(
                 h5loc,
                 self._to_array(indices),
                 title='Indices',
             )
-        self.log.info("Creating pytables index tables. "
-                      "This may take a few minutes...")
+        self.log.info(
+            "Creating pytables index tables. "
+            "This may take a few minutes..."
+        )
         for tab in self._tables.values():
             if 'frame_id' in tab.colnames:
                 tab.cols.frame_id.create_index()
@@ -325,14 +338,18 @@ class HDF5Sink(Module):
                 try:
                     tab.cols.event_id.create_index()
                 except NotImplementedError:
-                    log.warn("Table '{}' has an uint64 column, "
-                             "not indexing...".format(tab._v_name))
+                    log.warn(
+                        "Table '{}' has an uint64 column, "
+                        "not indexing...".format(tab._v_name)
+                    )
             if 'group_id' in tab.colnames:
                 try:
                     tab.cols.group_id.create_index()
                 except NotImplementedError:
-                    log.warn("Table '{}' has an uint64 column, "
-                             "not indexing...".format(tab._v_name))
+                    log.warn(
+                        "Table '{}' has an uint64 column, "
+                        "not indexing...".format(tab._v_name)
+                    )
             tab.flush()
 
         if "HDF5MetaData" in self.services:
@@ -428,8 +445,10 @@ class HDF5Pump(Pump):
     def _read_group_info(self, fn):
         with tb.open_file(fn, 'r') as h5file:
             if '/event_info' not in h5file and '/group_info' not in h5file:
-                self.log.critical("Missing /event_info or /group_info "
-                                  "in '%s', aborting..." % fn)
+                self.log.critical(
+                    "Missing /event_info or /group_info "
+                    "in '%s', aborting..." % fn
+                )
                 raise SystemExit
             elif '/group_info' in h5file:
                 self.print("Reading group information from '/group_info'.")
@@ -522,24 +541,30 @@ class HDF5Pump(Pump):
                     # 64-bit unsigned integer columns like ``group_id``
                     # are not yet supported in conditions
                     self.log.debug(
-                        "get_blob: found uint64 column at '{}'...".format(
-                            h5loc))
+                        "get_blob: found uint64 column at '{}'...".
+                        format(h5loc)
+                    )
                     arr = tab.read()
                     arr = arr[arr[index_column] == group_id]
                 except ValueError:
                     # "there are no columns taking part
                     # in condition ``group_id == 0``"
-                    self.log.info("get_blob: no `%s` column found in '%s'! "
-                                  "skipping... " % (index_column, h5loc))
+                    self.log.info(
+                        "get_blob: no `%s` column found in '%s'! "
+                        "skipping... " % (index_column, h5loc)
+                    )
                     continue
             else:
-                self.log.warning("No group_id or event_id found for '%s', "
-                                 "skipping..." % h5loc)
+                self.log.warning(
+                    "No group_id or event_id found for '%s', "
+                    "skipping..." % h5loc
+                )
                 continue
 
             self.log.debug("h5loc: '{}'".format(h5loc))
             blob[tabname] = Table(
-                arr, h5loc=h5loc, split_h5=False, name=tabname)
+                arr, h5loc=h5loc, split_h5=False, name=tabname
+            )
 
         # skipped locs are now column wise datasets (usually hits)
         # currently hardcoded, in future using hdf5 attributes

@@ -55,7 +55,8 @@ def main():
         port=int(args['-p']),
         tags=args['-m'],
         timeout=int(args['-x']),
-        max_queue=int(args['-s']))
+        max_queue=int(args['-s'])
+    )
     pipe.attach(LigierSender, target_ip=args['-t'], port=int(args['-q']))
     pipe.drain()
 

@@ -74,8 +74,9 @@ class CLBPump(Pump):
         pmt_raw_data = self.blob_file.read(remaining_length)
         pmt_raw_data_io = BytesIO(pmt_raw_data)
         for _ in range(int(remaining_length / 6)):
-            channel_id, time, tot = struct.unpack('>cic',
-                                                  pmt_raw_data_io.read(6))
+            channel_id, time, tot = struct.unpack(
+                '>cic', pmt_raw_data_io.read(6)
+            )
             pmt_data.append(PMTData(ord(channel_id), time, ord(tot)))
         blob['PMTData'] = pmt_data
         blob['PMTRawData'] = pmt_raw_data
@@ -132,16 +133,18 @@ class CLBHeader(object):
 
     def __str__(self):
         # pylint: disable=E1124
-        description = ("CLBHeader\n"
-                       "    Data type:    {self.data_type}\n"
-                       "    Run number:   {self.run}\n"
-                       "    UDP sequence: {self.udp_sequence}\n"
-                       "    Time stamp:   {self.timestamp}\n"
-                       "                  {self.human_readable_timestamp}\n"
-                       "    Ticks [16ns]: {self.ns_ticks}\n"
-                       "    DOM ID:       {self.dom_id}\n"
-                       "    DOM status:   {self.dom_status}\n"
-                       "".format(self=self))
+        description = (
+            "CLBHeader\n"
+            "    Data type:    {self.data_type}\n"
+            "    Run number:   {self.run}\n"
+            "    UDP sequence: {self.udp_sequence}\n"
+            "    Time stamp:   {self.timestamp}\n"
+            "                  {self.human_readable_timestamp}\n"
+            "    Ticks [16ns]: {self.ns_ticks}\n"
+            "    DOM ID:       {self.dom_id}\n"
+            "    DOM status:   {self.dom_status}\n"
+            "".format(self=self)
+        )
         return description
 
     def __insp__(self):
@@ -159,7 +162,8 @@ class CLBHeader(object):
         self.dom_status = "{0:032b}".format(dom_status_bits)
 
         self.human_readable_timestamp = datetime.datetime.fromtimestamp(
-            int(self.timestamp), UTC_TZ).strftime('%Y-%m-%d %H:%M:%S')
+            int(self.timestamp), UTC_TZ
+        ).strftime('%Y-%m-%d %H:%M:%S')
 
     def _parse_file(self, file_obj):
         """Directly read from file handler.

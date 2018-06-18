@@ -51,7 +51,8 @@ ax.quiver(
     pmts.dir_x,
     pmts.dir_y,
     pmts.dir_z,
-    length=0.1)
+    length=0.1
+)
 
 ax.set_xlabel("x [m]")
 ax.set_ylabel("y [m]")

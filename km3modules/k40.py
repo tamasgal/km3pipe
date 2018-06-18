@@ -57,7 +57,8 @@ class K40BackgroundSubtractor(kp.Module):
         if self.mode != 'online':
             return blob
         self.print(
-            'Subtracting random background calculated from single rates')
+            'Subtracting random background calculated from single rates'
+        )
         corrected_counts = self.subtract_background()
         blob['CorrectedTwofoldCounts'] = corrected_counts
 
@@ -76,8 +77,9 @@ class K40BackgroundSubtractor(kp.Module):
             try:
                 pmt_rates = mean_rates[dom_id]
             except KeyError:
-                log.warning("Skipping BG correction for DOM {}."
-                            .format(dom_id))
+                log.warning(
+                    "Skipping BG correction for DOM {}.".format(dom_id)
+                )
                 corrected_counts[dom_id] = counts[dom_id]
                 continue
             livetime = livetimes[dom_id]
@@ -85,8 +87,8 @@ class K40BackgroundSubtractor(kp.Module):
             bg_rates = []
             for c in self.combs:
                 bg_rates.append(pmt_rates[c[0]] * pmt_rates[c[1]] * 1e-9)
-            corrected_counts[
-                dom_id] = (k40_rates.T - np.array(bg_rates)).T * livetime
+            corrected_counts[dom_id] = (k40_rates.T -
+                                        np.array(bg_rates)).T * livetime
         return corrected_counts
 
     def finish(self):
@@ -147,8 +149,9 @@ class IntraDOMCalibrator(kp.Module):
             twofold_counts = self.services['TwofoldCounts']
             fit_background = True
 
-        blob['IntraDOMCalibration'] = self.calibrate(twofold_counts,
-                                                     fit_background)
+        blob['IntraDOMCalibration'] = self.calibrate(
+            twofold_counts, fit_background
+        )
         return blob
 
     def calibrate(self, twofold_counts, fit_background=False):
@@ -166,7 +169,8 @@ class IntraDOMCalibrator(kp.Module):
                     livetime=livetime,
                     fit_background=fit_background,
                     ad_fit_shape='exp',
-                    ctmin=self.ctmin)
+                    ctmin=self.ctmin
+                )
             except RuntimeError:
                 log.error(" skipping DOM '{0}'.".format(dom_id))
             else:
@@ -186,9 +190,11 @@ class IntraDOMCalibrator(kp.Module):
                 twofold_counts = self.services['TwofoldCounts']
                 fit_background = True
             calibration = self.calibrate(
-                twofold_counts, fit_background=fit_background)
-            self.print("Dumping calibration to '{}'."
-                       .format(self.calib_filename))
+                twofold_counts, fit_background=fit_background
+            )
+            self.print(
+                "Dumping calibration to '{}'.".format(self.calib_filename)
+            )
             with open(self.calib_filename, 'wb') as f:
                 pickle.dump(calibration, f)
 
@@ -268,7 +274,8 @@ class TwofoldCounter(kp.Module):
                 times[sort_idc],
                 channel_ids[sort_idc],
                 self.counts[dom_id],
-                tmax=self.tmax)
+                tmax=self.tmax
+            )
         return blob
 
     def dump(self):
@@ -365,15 +372,17 @@ class ResetTwofoldCounts(kp.Module):
         return blob
 
 
-def calibrate_dom(dom_id,
-                  data,
-                  detector,
-                  livetime=None,
-                  fit_ang_dist=False,
-                  scale_mc_to_data=True,
-                  ad_fit_shape='pexp',
-                  fit_background=True,
-                  ctmin=-1.):
+def calibrate_dom(
+        dom_id,
+        data,
+        detector,
+        livetime=None,
+        fit_ang_dist=False,
+        scale_mc_to_data=True,
+        ad_fit_shape='pexp',
+        fit_background=True,
+        ctmin=-1.
+):
     """Calibrate intra DOM PMT time offsets, efficiencies and sigmas
 
         Parameters
@@ -422,7 +431,8 @@ def calibrate_dom(dom_id,
     scale_factor = None
     if fit_ang_dist:
         fit_res = fit_angular_distribution(
-            angles, rates, rate_errors, shape=ad_fit_shape)
+            angles, rates, rate_errors, shape=ad_fit_shape
+        )
         fitted_rates, exp_popts, exp_pcov = fit_res
     else:
         mc_fitted_rates = exponential_polinomial(np.cos(angles), *MC_ANG_DIST)
@@ -449,9 +459,11 @@ def calibrate_dom(dom_id,
     corrected_means = correct_means(means, opt_t0s.x, combs)
     corrected_rates = correct_rates(rates, opt_qes.x, combs)
     rms_means, rms_corrected_means = calculate_rms_means(
-        means, corrected_means)
+        means, corrected_means
+    )
     rms_rates, rms_corrected_rates = calculate_rms_rates(
-        rates, fitted_rates, corrected_rates)
+        rates, fitted_rates, corrected_rates
+    )
     cos_angles = np.cos(angles)
     return_data = {
         'opt_t0s': opt_t0s,
@@ -590,14 +602,16 @@ def fit_delta_ts(data, livetime, fit_background=True):
                     xs,
                     combination,
                     p0=[mean0, 4., 5., 0.1],
-                    bounds=([start, 0, 0, 0], [end, 10, 10, 1]))
+                    bounds=([start, 0, 0, 0], [end, 10, 10, 1])
+                )
             else:
                 popt, pcov = optimize.curve_fit(
                     gaussian_wo_offset,
                     xs,
                     combination,
                     p0=[mean0, 4., 5.],
-                    bounds=([start, 0, 0], [end, 10, 10]))
+                    bounds=([start, 0, 0], [end, 10, 10])
+                )
         except RuntimeError:
             popt = (0, 0, 0, 0)
         rates.append(popt[2])
@@ -605,8 +619,10 @@ def fit_delta_ts(data, livetime, fit_background=True):
         sigmas.append(popt[1])
         popts.append(popt)
         pcovs.append(pcov)
-    return (np.array(rates), np.array(means), np.array(sigmas),
-            np.array(popts), np.array(pcovs))
+    return (
+        np.array(rates), np.array(means), np.array(sigmas), np.array(popts),
+        np.array(pcovs)
+    )
 
 
 def calculate_angles(detector, combs):
@@ -628,7 +644,9 @@ def calculate_angles(detector, combs):
     for first, second in combs:
         angles.append(
             kp.math.angle_between(
-                np.array(pmt_angles[first]), np.array(pmt_angles[second])))
+                np.array(pmt_angles[first]), np.array(pmt_angles[second])
+            )
+        )
     return np.array(angles)
 
 

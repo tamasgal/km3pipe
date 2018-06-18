@@ -20,4 +20,5 @@ setup(
         'numpy',
         'pandas',
         'km3pipe',
-    ])
+    ]
+)

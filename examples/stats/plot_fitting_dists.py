@@ -8,7 +8,6 @@ Histograms, PDF fits, Kernel Density.
 """
 from __future__ import absolute_import, print_function, division
 
-
 # Author: Moritz Lotze <mlotze@km3net.de>
 # License: BSD-3
 
@@ -27,8 +26,10 @@ import km3pipe.style.moritz    # noqa
 # First generate some pseudodata: A bimodal gaussian, + noise.
 
 N = 100
-bmg = np.concatenate((np.random.normal(15, 1, int(0.3 * N)),
-                      np.random.normal(20, 1, int(0.7 * N))))
+bmg = np.concatenate((
+    np.random.normal(15, 1, int(0.3 * N)),
+    np.random.normal(20, 1, int(0.7 * N))
+))
 noise_bmg = 0.5
 data = np.random.normal(bmg, noise_bmg)[:, np.newaxis]
 
@@ -99,10 +100,12 @@ mu1 = gmm.means_[0, 0]
 mu2 = gmm.means_[1, 0]
 var1, var2 = gmm.covariances_
 wgt1, wgt2 = gmm.weights_
-print('''Fit:
+print(
+    '''Fit:
       1: Mean {:.4}, var {:.4}, weight {:.4}
       2: Mean {:.4}, var {:.4}, weight {:.4}
-'''.format(mu1, var1, wgt1, mu2, var2, wgt2))
+'''.format(mu1, var1, wgt1, mu2, var2, wgt2)
+)
 
 plt.hist(data, bins='auto', alpha=.3, normed=True)
 plt.vlines((mu1, mu2), ymin=0, ymax=0.35, label='Fitted Means')

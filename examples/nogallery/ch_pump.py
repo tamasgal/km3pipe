@@ -17,6 +17,7 @@ pipe.attach(
     port=5553,
     tags="foo, narf",
     timeout=1000,
-    max_queue=42)
+    max_queue=42
+)
 pipe.attach(CHPrinter)
 pipe.drain()

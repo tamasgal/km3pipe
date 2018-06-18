@@ -9,8 +9,10 @@ from __future__ import absolute_import, print_function, division
 try:
     import tornado
 except ImportError:
-    print("Please 'pip install tornado websocket-client' "
-          "to use the km3srv package")
+    print(
+        "Please 'pip install tornado websocket-client' "
+        "to use the km3srv package"
+    )
     exit(1)
 
 import tornado.ioloop
@@ -51,17 +53,20 @@ define(
     "ip",
     default="0.0.0.0",
     type=str,
-    help="The WAN IP of this machine. You can use 127 for local tests.")
+    help="The WAN IP of this machine. You can use 127 for local tests."
+)
 define(
     "port",
     default="8088",
     type=int,
-    help="The KM3srv server will be available on this port.")
+    help="The KM3srv server will be available on this port."
+)
 define(
     "data",
     default=os.path.expanduser("~/km3net/data"),
     type=str,
-    help="Path to the data files.")
+    help="Path to the data files."
+)
 
 RBA_URL = Config().rba_url
 
@@ -97,8 +102,9 @@ class ClientManager(object):
         # status = {
         #    n_clients : len(self._clients)
         # }
-        self.broadcast("Number of connected clients: {0}.".format(
-            len(self._clients)))
+        self.broadcast(
+            "Number of connected clients: {0}.".format(len(self._clients))
+        )
 
     def message_to(self, token, data, kind):
         message = pd.io.json.dumps({'kind': kind, 'data': data})
@@ -177,7 +183,8 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
             else:
                 threading.Thread(
                     target=self.get_event,
-                    args=(int(det_id), int(run_id), int(event_id))).start()
+                    args=(int(det_id), int(run_id), int(event_id))
+                ).start()
 
     def get_event(self, det_id, run_id, event_id):
         det_dir_name = "KM3NeT_{0:08d}".format(det_id)
@@ -189,8 +196,9 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
         h5filename = basename + ".h5"
         rootfilename = basename + ".root"
 
-        irods_path = os.path.join("/in2p3/km3net/data/raw/sea", det_dir_name,
-                                  sub_dir, rootfilename)
+        irods_path = os.path.join(
+            "/in2p3/km3net/data/raw/sea", det_dir_name, sub_dir, rootfilename
+        )
 
         h5filepath = os.path.join(data_dir, h5filename)
         h5filepath_tmp = h5filepath + '.tmp'
@@ -239,17 +247,21 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
         snapshot_hits = hits[(hits['event_id'] == event_id)].copy()
         triggered_hits = hits[(hits['event_id'] == event_id) &
                               (hits['triggered'] == True)]    # noqa
-        self.message("Det ID: {0} Run ID: {1} Event ID: {2} - "
-                     "Snapshot hits: {3}, Triggered hits: {4}".format(
-                         det_id, run_id, event_id, len(snapshot_hits),
-                         len(triggered_hits)))
+        self.message(
+            "Det ID: {0} Run ID: {1} Event ID: {2} - "
+            "Snapshot hits: {3}, Triggered hits: {4}".format(
+                det_id, run_id, event_id, len(snapshot_hits),
+                len(triggered_hits)
+            )
+        )
         cal = Calibration(det_id=det_id)
         cal.apply(snapshot_hits)
 
         event = {
             "hits": {
-                'pos':
-                [tuple(x) for x in snapshot_hits[['x', 'y', 'z']].values],
+                'pos': [
+                    tuple(x) for x in snapshot_hits[['x', 'y', 'z']].values
+                ],
                 'time': list(snapshot_hits['time']),
                 'tot': list(snapshot_hits['tot']),
             }
@@ -292,8 +304,10 @@ def srv_event(token, hits, url=RBA_URL):
         time = list(hits.time)
         tot = list(hits.tot)
     else:
-        log.error("No calibration information found in hits (type: {0})"
-                  .format(type(hits)))
+        log.error(
+            "No calibration information found in hits (type: {0})"
+            .format(type(hits))
+        )
         return
 
     event = {
@@ -338,15 +352,19 @@ def main():
     }
 
     application = tornado.web.Application([
-        (r"/test", EchoWebSocket, {
-            'client_manager': client_manager,
-            'server_status': server_status,
-            'data_path': data_path,
-            'lock': lock
-        }),
-        (r"/message", MessageProvider, {
-            'client_manager': client_manager
-        }),
+        (
+            r"/test", EchoWebSocket,
+            {
+                'client_manager': client_manager,
+                'server_status': server_status,
+                'data_path': data_path,
+                'lock': lock
+            }
+        ),
+        (r"/message", MessageProvider,
+         {
+             'client_manager': client_manager
+         }),
     ], **settings)
 
     try:

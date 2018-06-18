@@ -100,14 +100,17 @@ def main():
     missing_files_on_irods = 0
     for rem_file in tqdm(rem_files):
         if not iexists(rem_file):
-            log.error("Skipping file, since not found on iRODS: {}"
-                      .format(rem_file))
+            log.error(
+                "Skipping file, since not found on iRODS: {}".format(rem_file)
+            )
             rem_files.remove(rem_file)
             missing_files_on_irods += 1
 
     cprint(
         "{} runs in total, {} already processed ({} missing on iRODS).".format(
-            len(irods_files), len(processed_files), missing_files_on_irods))
+            len(irods_files), len(processed_files), missing_files_on_irods
+        )
+    )
     cprint("Proceeding with the remaining {} files.".format(len(rem_files)))
 
     s = kp.shell.Script()
@@ -137,8 +140,9 @@ def main():
             s.echo("File '{}' processed.".format(fname))
             s.separator('-')
 
-        walltime = time.strftime('%H:%M:%S',
-                                 time.gmtime(ET_PER_FILE * n_files))
+        walltime = time.strftime(
+            '%H:%M:%S', time.gmtime(ET_PER_FILE * n_files)
+        )
 
         kp.shell.qsub(
             s,
@@ -148,7 +152,8 @@ def main():
             vmem=VMEM,
             log_path=LOG_PATH,
             irods=True,
-            dryrun=DRYRUN)
+            dryrun=DRYRUN
+        )
 
         if DRYRUN:
             break

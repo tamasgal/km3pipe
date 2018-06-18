@@ -6,7 +6,6 @@ Tools for global configuration.
 """
 from __future__ import absolute_import, print_function, division
 
-
 import os
 import pytz
 from configparser import ConfigParser, Error, NoOptionError, NoSectionError
@@ -72,9 +71,11 @@ class Config(object):
         try:
             from irods.session import iRODSSession
         except ImportError:
-            log.error("Please install the iRODS Python client:\n\n"
-                      "    pip install git+git://github.com/irods/"
-                      "python-irodsclient.git\n")
+            log.error(
+                "Please install the iRODS Python client:\n\n"
+                "    pip install git+git://github.com/irods/"
+                "python-irodsclient.git\n"
+            )
             return
         try:
             host = self.config.get('iRODS', 'host')
@@ -91,7 +92,8 @@ class Config(object):
             password = input("Please enter your iRODS password: ")
 
         return iRODSSession(
-            host=host, port=port, user=user, password=password, zone=zone)
+            host=host, port=port, user=user, password=password, zone=zone
+        )
 
     @property
     def db_credentials(self):

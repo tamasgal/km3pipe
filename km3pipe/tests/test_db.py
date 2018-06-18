@@ -3,8 +3,10 @@
 from os.path import dirname, join
 from km3pipe.testing import TestCase, MagicMock, patch
 
-from km3pipe.db import (DBManager, DOMContainer, we_are_in_lyon, read_csv,
-                        make_empty_dataset, StreamDS)
+from km3pipe.db import (
+    DBManager, DOMContainer, we_are_in_lyon, read_csv, make_empty_dataset,
+    StreamDS
+)
 from km3pipe.logger import get_logger
 
 __author__ = "Tamas Gal"
@@ -21,27 +23,30 @@ JSON_DOMS = [{
     'Floor': 10,
     'CLBUPI': '100',
     'DetOID': DET_ID
-}, {
-    'DOMId': 2,
-    'Floor': 20,
-    'CLBUPI': '200',
-    'DetOID': DET_ID
-}, {
-    'DOMId': 3,
-    'Floor': 30,
-    'CLBUPI': '300',
-    'DetOID': DET_ID
-}, {
-    'DOMId': 4,
-    'Floor': 40,
-    'CLBUPI': '400',
-    'DetOID': 'det_id2'
-}]
+},
+             {
+                 'DOMId': 2,
+                 'Floor': 20,
+                 'CLBUPI': '200',
+                 'DetOID': DET_ID
+             },
+             {
+                 'DOMId': 3,
+                 'Floor': 30,
+                 'CLBUPI': '300',
+                 'DetOID': DET_ID
+             }, {
+                 'DOMId': 4,
+                 'Floor': 40,
+                 'CLBUPI': '400',
+                 'DetOID': 'det_id2'
+             }]
 
 log = get_logger('db')
 
 STREAMDS_META = join(
-    dirname(__file__), "../kp-data/test_data/streamds_output.txt")
+    dirname(__file__), "../kp-data/test_data/streamds_output.txt"
+)
 
 
 class TestDBManager(TestCase):
@@ -154,9 +159,9 @@ class TestStreamDS(TestCase):
                              self.sds.mandatory_selectors('datalognumbers'))
 
     def test_optional_selectors(self):
-        self.assertListEqual(
-            ['upi', 'city', 'locationid', 'operation', 'operationid'],
-            self.sds.optional_selectors('productloc'))
+        self.assertListEqual([
+            'upi', 'city', 'locationid', 'operation', 'operationid'
+        ], self.sds.optional_selectors('productloc'))
         self.assertListEqual(['run', 'runjobid', 'jobtarget', 'jobpriority'],
                              self.sds.optional_selectors('runs'))
         self.assertListEqual(['source_name', 'parameter_name'],
