@@ -59,8 +59,11 @@ class Timer(object):
         return self.__finish_cpu - self.__start_cpu
 
     def log(self):
-        self.callback("{0} took {1:.{3}f}s (CPU {2:.{3}f}s).".format(
-            self.message, self.seconds, self.cpu_seconds, self.precision))
+        self.callback(
+            "{0} took {1:.{3}f}s (CPU {2:.{3}f}s).".format(
+                self.message, self.seconds, self.cpu_seconds, self.precision
+            )
+        )
 
 
 class Cuckoo(object):

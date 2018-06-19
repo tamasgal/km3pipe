@@ -62,7 +62,8 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
 
     if extension not in io:
         log.critical(
-            "No pump found for file extension '{0}'".format(extension))
+            "No pump found for file extension '{0}'".format(extension)
+        )
         raise ValueError("Unknown filetype")
 
     missing_files = [fn for fn in filenames if not os.path.exists(fn)]
@@ -72,8 +73,10 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
             log.critical(message)
             raise SystemExit(message)
         else:
-            log.warning("The following files are missing and ignored: {}"
-                        .format(', '.join(missing_files)))
+            log.warning(
+                "The following files are missing and ignored: {}"
+                .format(', '.join(missing_files))
+            )
 
     input_files = set(filenames) - set(missing_files)
 
@@ -83,10 +86,9 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
         return io[extension](filenames=filenames, name=name, **kwargs)
 
 
-def read_calibration(detx=None,
-                     det_id=None,
-                     from_file=False,
-                     det_id_table=None):
+def read_calibration(
+        detx=None, det_id=None, from_file=False, det_id_table=None
+):
     """Retrive calibration from file, the DB."""
     from km3pipe.calib import Calibration    # noqa
 
@@ -101,9 +103,10 @@ def read_calibration(detx=None,
         det_id = det_ids[0]
     if det_id is not None:
         if det_id < 0:
-            log.warning("Negative detector ID found ({0}). This is a MC "
-                        "detector and cannot be retrieved from the DB."
-                        .format(det_id))
+            log.warning(
+                "Negative detector ID found ({0}). This is a MC "
+                "detector and cannot be retrieved from the DB.".format(det_id)
+            )
             return None
         return Calibration(det_id=det_id)
     return None
@@ -137,4 +140,5 @@ def read_hdf5(filename, detx=None, det_id=None, det_from_file=False):
 
     det_id_table = opts['event_info']['det_id']
     run.calibration = read_calibration(
-        detx, det_id, det_from_file, det_id_table=det_id_table)
+        detx, det_id, det_from_file, det_id_table=det_id_table
+    )

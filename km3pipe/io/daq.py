@@ -80,17 +80,16 @@ class TimesliceParser(Module):
                 timestamp, ns_ticks, dom_id = unpack('<iii', data.read(12))
                 dom_status = unpack('<iiiii', data.read(5 * 4))
                 n_hits = unpack('<i', data.read(4))[0]
-                ts_frameinfos[dom_id] = Table.from_template(
-                    {
-                        'det_id': det_id,
-                        'run_id': run,
-                        'sqnr': sqnr,
-                        'timestamp': timestamp,
-                        'nanoseconds': ns_ticks * 16,
-                        'dom_id': dom_id,
-                        'dom_status': dom_status,
-                        'n_hits': n_hits,
-                    }, 'TimesliceFrameInfo')
+                ts_frameinfos[dom_id] = Table.from_template({
+                    'det_id': det_id,
+                    'run_id': run,
+                    'sqnr': sqnr,
+                    'timestamp': timestamp,
+                    'nanoseconds': ns_ticks * 16,
+                    'dom_id': dom_id,
+                    'dom_status': dom_status,
+                    'n_hits': n_hits,
+                }, 'TimesliceFrameInfo')
                 for j in range(n_hits):
                     hit = unpack('!BlB', data.read(6))
                     _dom_ids.append(dom_id)
@@ -107,7 +106,8 @@ class TimesliceParser(Module):
                     'triggered': np.zeros(len(_tots)),    # triggered
                     'group_id': 0    # event_id
                 },
-                'Hits')
+                'Hits'
+            )
             blob['TimesliceInfo'] = ts_info
             blob['TimesliceFrameInfos'] = ts_frameinfos
             blob['TSHits'] = tshits
@@ -130,8 +130,10 @@ class DAQPump(Pump):
             self.open_file(self.filename)
             self.determine_frame_positions()
         else:
-            log.warning("No filename specified. "
-                        "Take care of the file handling!")
+            log.warning(
+                "No filename specified. "
+                "Take care of the file handling!"
+            )
 
     def next_blob(self):
         """Get the next frame from file"""
@@ -160,8 +162,10 @@ class DAQPump(Pump):
             blob[data_type] = daq_frame
             blob['DAQHeader'] = daq_frame.header
         else:
-            log.warning("Skipping DAQ frame with data type code '{0}'."
-                        .format(preamble.data_type))
+            log.warning(
+                "Skipping DAQ frame with data type code '{0}'."
+                .format(preamble.data_type)
+            )
             blob_file.seek(preamble.length - DAQPreamble.size, 1)
 
         return blob
@@ -246,8 +250,10 @@ class DAQProcessor(Module):
             try:
                 self.process_summaryslice(data, blob)
             except struct.error:
-                self.log.error("Corrupt summary slice data received. "
-                               "Skipping...")
+                self.log.error(
+                    "Corrupt summary slice data received. "
+                    "Skipping..."
+                )
 
         return blob
 
@@ -302,7 +308,8 @@ class DAQProcessor(Module):
                 'run_id': header.run,    # run id
                 'group_id': self.event_id,
             },
-            'EventInfo')
+            'EventInfo'
+        )
         blob['EventInfo'] = event_info
 
         self.event_id += 1
@@ -502,8 +509,9 @@ class DAQEvent(object):
             tdc_time = unpack('>I', file_obj.read(4))[0]
             tot = unpack('<b', file_obj.read(1))[0]
             trigger_mask = unpack('<Q', file_obj.read(8))
-            self.triggered_hits.append((dom_id, pmt_id, tdc_time, tot,
-                                        trigger_mask))
+            self.triggered_hits.append(
+                (dom_id, pmt_id, tdc_time, tot, trigger_mask)
+            )
 
     def _parse_snapshot_hits(self, file_obj):
         """Parse and store snapshot hits."""
@@ -514,9 +522,10 @@ class DAQEvent(object):
             self.snapshot_hits.append((dom_id, pmt_id, tdc_time, tot))
 
     def __repr__(self):
-        string = '\n'.join(
-            (" Number of triggered hits: " + str(self.n_triggered_hits),
-             " Number of snapshot hits: " + str(self.n_snapshot_hits)))
+        string = '\n'.join((
+            " Number of triggered hits: " + str(self.n_triggered_hits),
+            " Number of snapshot hits: " + str(self.n_snapshot_hits)
+        ))
         string += "\nTriggered hits:\n"
         string += pprint.pformat(self.triggered_hits)
         string += "\nSnapshot hits:\n"

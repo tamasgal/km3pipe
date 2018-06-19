@@ -70,7 +70,8 @@ class Calibration(Module):
                 self.detector = Detector(
                     det_id=self.det_id,
                     t0set=self.t0set,
-                    calibration=self.calibration)
+                    calibration=self.calibration
+                )
 
         if self.detector is not None:
             self.log.debug("Creating lookup tables")
@@ -91,8 +92,9 @@ class Calibration(Module):
     def apply_t0(self, hits):
         """Apply only t0s"""
         if HAVE_NUMBA:
-            apply_t0_nb(hits.time, hits.dom_id, hits.channel_id,
-                        self._lookup_tables)
+            apply_t0_nb(
+                hits.time, hits.dom_id, hits.channel_id, self._lookup_tables
+            )
         else:
             n = len(hits)
             cal = np.empty(n)
@@ -115,9 +117,11 @@ class Calibration(Module):
         elif hasattr(hits, 'pmt_id'):
             return self._apply_to_mchits(hits)
         else:
-            raise TypeError("Don't know how to apply calibration to '{0}'. "
-                            "We need at least 'dom_id' and 'channel_id', or "
-                            "'pmt_id'.".format(hits.name))
+            raise TypeError(
+                "Don't know how to apply calibration to '{0}'. "
+                "We need at least 'dom_id' and 'channel_id', or "
+                "'pmt_id'.".format(hits.name)
+            )
 
     def _apply_to_hits(self, hits):
         """Append the position, direction and t0 columns and add t0 to time"""
@@ -148,7 +152,11 @@ class Calibration(Module):
         return hits.append_columns([
             'dir_x', 'dir_y', 'dir_z', 'du', 'floor', 'pos_x', 'pos_y',
             'pos_z', 't0'
-        ], [dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0])
+        ],
+                                   [
+                                       dir_x, dir_y, dir_z, du, floor, pos_x,
+                                       pos_y, pos_z, t0
+                                   ])
 
     def _apply_to_mchits(self, hits):
         """Append the position, direction and t0 columns and add t0 to time"""
@@ -172,7 +180,11 @@ class Calibration(Module):
         return hits.append_columns([
             'dir_x', 'dir_y', 'dir_z', 'du', 'floor', 'pos_x', 'pos_y',
             'pos_z', 't0'
-        ], [dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0])
+        ],
+                                   [
+                                       dir_x, dir_y, dir_z, du, floor, pos_x,
+                                       pos_y, pos_z, t0
+                                   ])
 
     def _create_dom_channel_lookup(self):
         data = {}

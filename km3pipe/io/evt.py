@@ -108,8 +108,10 @@ class EvtPump(Pump):    # pylint: disable:R0902
         self.file_index = int(self.index_start)
 
         if self.basename:
-            self.log.info("Got a basename ({}), constructing the first "
-                          "filename.".format(self.basename))
+            self.log.info(
+                "Got a basename ({}), constructing the first "
+                "filename.".format(self.basename)
+            )
             file_index = self._get_file_index_str()
 
             self.filename = "{}{}{}.evt"  \
@@ -131,8 +133,9 @@ class EvtPump(Pump):    # pylint: disable:R0902
             if parser in EVT_PARSERS.keys():
                 self.parsers.append(EVT_PARSERS[parser])
             else:
-                self.log.warning("Parser '{}' not found, ignoring..."
-                                 .format(parser))
+                self.log.warning(
+                    "Parser '{}' not found, ignoring...".format(parser)
+                )
 
     def _reset(self):
         """Clear the cache."""
@@ -222,8 +225,9 @@ class EvtPump(Pump):    # pylint: disable:R0902
                 try:
                     blob = self.get_blob(self.index)
                 except IndexError:
-                    self.log.warning("No blob found in file {}"
-                                     .format(self.filename))
+                    self.log.warning(
+                        "No blob found in file {}".format(self.filename)
+                    )
                 else:
                     return blob
             self.log.info("No files left, terminating the pipeline")
@@ -365,8 +369,8 @@ GSEAGEN_TAGS = {
         [('id', '<i4'), ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
          ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'), ('energy', 'f4'),
          ('time', 'f4'), ('bjorken_x', 'f4'), ('bjorken_y', 'f4'),
-         ('scattering_type', '<i4'), ('pdg_id', '<i4'), ('interaction_type',
-                                                         '<i4')]
+         ('scattering_type', '<i4'), ('pdg_id',
+                                      '<i4'), ('interaction_type', '<i4')]
     ],
     'track_in': [
         'TrackIns',
@@ -388,8 +392,8 @@ KM3_TAGS = {
         [('id', '<i4'), ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
          ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'), ('energy', 'f4'),
          ('time', 'f4'), ('bjorken_x', 'f4'), ('bjorken_y', 'f4'),
-         ('scattering_type', '<i4'), ('pdg_id', '<i4'), ('interaction_type',
-                                                         '<i4')]
+         ('scattering_type', '<i4'), ('pdg_id',
+                                      '<i4'), ('interaction_type', '<i4')]
     ],
     'track_in': [
         'TrackIns',
@@ -398,8 +402,8 @@ KM3_TAGS = {
          ('time', 'f4'), ('type', 'f4'), ('something', '<i4')]
     ],
     'hit_raw': [
-        'Hits', [('id', '<i4'), ('pmt_id', '<i4'), ('npe', '<i4'), ('time',
-                                                                    'f4')]
+        'Hits', [('id', '<i4'), ('pmt_id', '<i4'), ('npe', '<i4'),
+                 ('time', 'f4')]
     ],
 }
 
@@ -411,89 +415,83 @@ def parse_corant(blob):
 
         muon = blob['track_seamuon']
 
-        blob['Muon'] = Table(
-            {
-                'id': np.array(muon)[:, 0].astype(int),
-                'pos_x': np.array(muon)[:, 1],
-                'pos_y': np.array(muon)[:, 2],
-                'pos_z': np.array(muon)[:, 3],
-                'dir_x': np.array(muon)[:, 4],
-                'dir_y': np.array(muon)[:, 5],
-                'dir_z': np.array(muon)[:, 6],
-                'energy': np.array(muon)[:, 7],
-                'time': np.array(muon)[:, 8],
-                'particle_id': np.array(muon)[:, 9].astype(int),
-                'is_charm': np.array(muon)[:, 10].astype(int),
-                'mother_pid': np.array(muon)[:, 11].astype(int),
-                'grandmother_pid': np.array(muon)[:, 11].astype(int),
-            },
-            h5loc='muon')
+        blob['Muon'] = Table({
+            'id': np.array(muon)[:, 0].astype(int),
+            'pos_x': np.array(muon)[:, 1],
+            'pos_y': np.array(muon)[:, 2],
+            'pos_z': np.array(muon)[:, 3],
+            'dir_x': np.array(muon)[:, 4],
+            'dir_y': np.array(muon)[:, 5],
+            'dir_z': np.array(muon)[:, 6],
+            'energy': np.array(muon)[:, 7],
+            'time': np.array(muon)[:, 8],
+            'particle_id': np.array(muon)[:, 9].astype(int),
+            'is_charm': np.array(muon)[:, 10].astype(int),
+            'mother_pid': np.array(muon)[:, 11].astype(int),
+            'grandmother_pid': np.array(muon)[:, 11].astype(int),
+        },
+                             h5loc='muon')
 
-        blob['MuonMultiplicity'] = Table(
-            {
-                'muon_multiplicity': len(np.array(muon)[:, 6])
-            },
-            h5loc='muon_multiplicity')
+        blob['MuonMultiplicity'] = Table({
+            'muon_multiplicity': len(np.array(muon)[:, 6])
+        },
+                                         h5loc='muon_multiplicity')
 
     if 'track_seaneutrino' in blob.keys():
 
         nu = blob['track_seaneutrino']
 
-        blob['Neutrino'] = Table(
-            {
-                'id': np.array(nu)[:, 0].astype(int),
-                'pos_x': np.array(nu)[:, 1],
-                'pos_y': np.array(nu)[:, 2],
-                'pos_z': np.array(nu)[:, 3],
-                'dir_x': np.array(nu)[:, 4],
-                'dir_y': np.array(nu)[:, 5],
-                'dir_z': np.array(nu)[:, 6],
-                'energy': np.array(nu)[:, 7],
-                'time': np.array(nu)[:, 8],
-                'particle_id': np.array(nu)[:, 9].astype(int),
-                'is_charm': np.array(nu)[:, 10].astype(int),
-                'mother_pid': np.array(nu)[:, 11].astype(int),
-                'grandmother_pid': np.array(nu)[:, 11].astype(int),
-            },
-            h5loc='nu')
-        blob['NeutrinoMultiplicity'] = Table(
-            {
-                'total': len(np.array(nu)[:, 6]),
-                'nue': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 66]),
-                'anue': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 67]),
-                'numu': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 68]),
-                'anumu': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 69]),
-            },
-            h5loc='nu_multiplicity')
+        blob['Neutrino'] = Table({
+            'id': np.array(nu)[:, 0].astype(int),
+            'pos_x': np.array(nu)[:, 1],
+            'pos_y': np.array(nu)[:, 2],
+            'pos_z': np.array(nu)[:, 3],
+            'dir_x': np.array(nu)[:, 4],
+            'dir_y': np.array(nu)[:, 5],
+            'dir_z': np.array(nu)[:, 6],
+            'energy': np.array(nu)[:, 7],
+            'time': np.array(nu)[:, 8],
+            'particle_id': np.array(nu)[:, 9].astype(int),
+            'is_charm': np.array(nu)[:, 10].astype(int),
+            'mother_pid': np.array(nu)[:, 11].astype(int),
+            'grandmother_pid': np.array(nu)[:, 11].astype(int),
+        },
+                                 h5loc='nu')
+        blob['NeutrinoMultiplicity'] = Table({
+            'total': len(np.array(nu)[:, 6]),
+            'nue': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 66]),
+            'anue': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 67]),
+            'numu': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 68]),
+            'anumu': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 69]),
+        },
+                                             h5loc='nu_multiplicity')
 
     if ('track_seamuon' or 'track_seaneutrino') in blob.keys():
 
-        blob['Weights'] = Table(
-            {
-                'w1': blob['weights'][0][0],
-                'w2': blob['weights'][0][1],
-                'w3': blob['weights'][0][2],
-            },
-            h5loc='weights')
+        blob['Weights'] = Table({
+            'w1': blob['weights'][0][0],
+            'w2': blob['weights'][0][1],
+            'w3': blob['weights'][0][2],
+        },
+                                h5loc='weights')
 
     if 'track_primary' in blob.keys():
 
         primary = blob['track_primary']
 
-        blob['Primary'] = Table(
-            {
-                'id': np.array(primary)[:, 0].astype(int),
-                'pos_x': np.array(primary)[:, 1],
-                'pos_y': np.array(primary)[:, 2],
-                'pos_z': np.array(primary)[:, 3],
-                'dir_x': np.array(primary)[:, 4],
-                'dir_y': np.array(primary)[:, 5],
-                'dir_z': np.array(primary)[:, 6],
-                'energy': np.array(primary)[:, 7],
-                'time': np.array(primary)[:, 8],
-                'particle_id': np.array(primary)[:, 9].astype(int)
-            },
-            h5loc='primary')
+        blob['Primary'] = Table({
+            'id': np.array(primary)[:, 0].astype(int),
+            'pos_x': np.array(primary)[:, 1],
+            'pos_y': np.array(primary)[:, 2],
+            'pos_z': np.array(primary)[:, 3],
+            'dir_x': np.array(primary)[:, 4],
+            'dir_y': np.array(primary)[:, 5],
+            'dir_z': np.array(primary)[:, 6],
+            'energy': np.array(primary)[:, 7],
+            'time': np.array(primary)[:, 8],
+            'particle_id': np.array(primary)[:, 9].astype(int)
+        },
+                                h5loc='primary')
 
     return blob
 
@@ -505,89 +503,83 @@ def parse_propa(blob):
 
         muon = blob['track_in']
 
-        blob['Muon'] = Table(
-            {
-                'id': np.array(muon)[:, 0].astype(int),
-                'pos_x': np.array(muon)[:, 1],
-                'pos_y': np.array(muon)[:, 2],
-                'pos_z': np.array(muon)[:, 3],
-                'dir_x': np.array(muon)[:, 4],
-                'dir_y': np.array(muon)[:, 5],
-                'dir_z': np.array(muon)[:, 6],
-                'energy': np.array(muon)[:, 7],
-                'time': np.array(muon)[:, 8],
-                'particle_id': np.array(muon)[:, 9].astype(int),
-                'is_charm': np.array(muon)[:, 10].astype(int),
-                'mother_pid': np.array(muon)[:, 11].astype(int),
-                'grandmother_pid': np.array(muon)[:, 11].astype(int),
-            },
-            h5loc='muon')
+        blob['Muon'] = Table({
+            'id': np.array(muon)[:, 0].astype(int),
+            'pos_x': np.array(muon)[:, 1],
+            'pos_y': np.array(muon)[:, 2],
+            'pos_z': np.array(muon)[:, 3],
+            'dir_x': np.array(muon)[:, 4],
+            'dir_y': np.array(muon)[:, 5],
+            'dir_z': np.array(muon)[:, 6],
+            'energy': np.array(muon)[:, 7],
+            'time': np.array(muon)[:, 8],
+            'particle_id': np.array(muon)[:, 9].astype(int),
+            'is_charm': np.array(muon)[:, 10].astype(int),
+            'mother_pid': np.array(muon)[:, 11].astype(int),
+            'grandmother_pid': np.array(muon)[:, 11].astype(int),
+        },
+                             h5loc='muon')
 
-        blob['MuonMultiplicity'] = Table(
-            {
-                'muon_multiplicity': len(np.array(muon)[:, 6])
-            },
-            h5loc='muon_multiplicity')
+        blob['MuonMultiplicity'] = Table({
+            'muon_multiplicity': len(np.array(muon)[:, 6])
+        },
+                                         h5loc='muon_multiplicity')
 
     if 'neutrino' in blob.keys():
 
         nu = blob['neutrino']
 
-        blob['Neutrino'] = Table(
-            {
-                'id': np.array(nu)[:, 0].astype(int),
-                'pos_x': np.array(nu)[:, 1],
-                'pos_y': np.array(nu)[:, 2],
-                'pos_z': np.array(nu)[:, 3],
-                'dir_x': np.array(nu)[:, 4],
-                'dir_y': np.array(nu)[:, 5],
-                'dir_z': np.array(nu)[:, 6],
-                'energy': np.array(nu)[:, 7],
-                'time': np.array(nu)[:, 8],
-                'particle_id': np.array(nu)[:, 9].astype(int),
-                'is_charm': np.array(nu)[:, 10].astype(int),
-                'mother_pid': np.array(nu)[:, 11].astype(int),
-                'grandmother_pid': np.array(nu)[:, 11].astype(int),
-            },
-            h5loc='nu')
-        blob['NeutrinoMultiplicity'] = Table(
-            {
-                'total': len(np.array(nu)[:, 6]),
-                'nue': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 12]),
-                'anue': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == -12]),
-                'numu': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 14]),
-                'anumu': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == -14]),
-            },
-            h5loc='nu_multiplicity')
+        blob['Neutrino'] = Table({
+            'id': np.array(nu)[:, 0].astype(int),
+            'pos_x': np.array(nu)[:, 1],
+            'pos_y': np.array(nu)[:, 2],
+            'pos_z': np.array(nu)[:, 3],
+            'dir_x': np.array(nu)[:, 4],
+            'dir_y': np.array(nu)[:, 5],
+            'dir_z': np.array(nu)[:, 6],
+            'energy': np.array(nu)[:, 7],
+            'time': np.array(nu)[:, 8],
+            'particle_id': np.array(nu)[:, 9].astype(int),
+            'is_charm': np.array(nu)[:, 10].astype(int),
+            'mother_pid': np.array(nu)[:, 11].astype(int),
+            'grandmother_pid': np.array(nu)[:, 11].astype(int),
+        },
+                                 h5loc='nu')
+        blob['NeutrinoMultiplicity'] = Table({
+            'total': len(np.array(nu)[:, 6]),
+            'nue': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 12]),
+            'anue': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == -12]),
+            'numu': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 14]),
+            'anumu': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == -14]),
+        },
+                                             h5loc='nu_multiplicity')
 
     if ('track_in' or 'neutrino') in blob.keys():
 
-        blob['Weights'] = Table(
-            {
-                'w1': blob['weights'][0][0],
-                'w2': blob['weights'][0][1],
-                'w3': blob['weights'][0][2],
-            },
-            h5loc='weights')
+        blob['Weights'] = Table({
+            'w1': blob['weights'][0][0],
+            'w2': blob['weights'][0][1],
+            'w3': blob['weights'][0][2],
+        },
+                                h5loc='weights')
 
     if 'track_primary' in blob.keys():
 
         primary = blob['track_primary']
 
-        blob['Primary'] = Table(
-            {
-                'id': np.array(primary)[:, 0].astype(int),
-                'pos_x': np.array(primary)[:, 1],
-                'pos_y': np.array(primary)[:, 2],
-                'pos_z': np.array(primary)[:, 3],
-                'dir_x': np.array(primary)[:, 4],
-                'dir_y': np.array(primary)[:, 5],
-                'dir_z': np.array(primary)[:, 6],
-                'energy': np.array(primary)[:, 7],
-                'time': np.array(primary)[:, 8],
-                'particle_id': np.array(primary)[:, 9].astype(int)
-            },
-            h5loc='primary')
+        blob['Primary'] = Table({
+            'id': np.array(primary)[:, 0].astype(int),
+            'pos_x': np.array(primary)[:, 1],
+            'pos_y': np.array(primary)[:, 2],
+            'pos_z': np.array(primary)[:, 3],
+            'dir_x': np.array(primary)[:, 4],
+            'dir_y': np.array(primary)[:, 5],
+            'dir_z': np.array(primary)[:, 6],
+            'energy': np.array(primary)[:, 7],
+            'time': np.array(primary)[:, 8],
+            'particle_id': np.array(primary)[:, 9].astype(int)
+        },
+                                h5loc='primary')
 
     return blob
 

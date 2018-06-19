@@ -103,8 +103,9 @@ def main():
             s.echo("File '{}' converted.".format(fname))
             s.separator('-')
 
-        walltime = time.strftime('%H:%M:%S',
-                                 time.gmtime(ET_PER_FILE * n_files))
+        walltime = time.strftime(
+            '%H:%M:%S', time.gmtime(ET_PER_FILE * n_files)
+        )
 
         kp.shell.qsub(
             s,
@@ -113,7 +114,8 @@ def main():
             vmem=VMEM,
             log_path=LOG_PATH,
             irods=True,
-            dryrun=DRYRUN)
+            dryrun=DRYRUN
+        )
 
         if DRYRUN:
             break

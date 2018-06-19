@@ -75,7 +75,8 @@ pipe.attach(
     port=5553,
     tags='IO_EVT',
     timeout=60 * 60 * 24,
-    max_queue=50)
+    max_queue=50
+)
 pipe.attach(ROySender)
 pipe.attach(CHPrinter)
 

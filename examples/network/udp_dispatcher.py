@@ -17,7 +17,6 @@ to a given UDP address.
 """
 from __future__ import absolute_import, print_function, division
 
-
 import socket
 import sys
 
@@ -50,6 +49,7 @@ pipe.attach(
     tags='IO_MONIT',
     timeout=60 * 60 * 24 * 7,
     max_queue=1000,
-    timeit=True)
+    timeit=True
+)
 pipe.attach(UDPForwarder)
 pipe.drain()

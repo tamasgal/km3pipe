@@ -29,20 +29,22 @@ import km3pipe as kp    # noqa
 import km3pipe.style    # noqa
 
 
-def plot_dom_parameters(data,
-                        detector,
-                        filename,
-                        label,
-                        title,
-                        vmin=0.0,
-                        vmax=10.0,
-                        cmap='RdYlGn_r',
-                        under='deepskyblue',
-                        over='deeppink',
-                        underfactor=1.0,
-                        overfactor=1.0,
-                        missing='lightgray',
-                        hide_limits=False):
+def plot_dom_parameters(
+        data,
+        detector,
+        filename,
+        label,
+        title,
+        vmin=0.0,
+        vmax=10.0,
+        cmap='RdYlGn_r',
+        under='deepskyblue',
+        over='deeppink',
+        underfactor=1.0,
+        overfactor=1.0,
+        missing='lightgray',
+        hide_limits=False
+):
     """Creates a plot in the classical monitoring.km3net.de style.
 
     Parameters
@@ -70,7 +72,8 @@ def plot_dom_parameters(data,
         'vmax': vmax,
     }
     sc_inactive = ax.scatter(
-        x, y, c=missing, label='missing', s=m_size * 0.9, **scatter_args)
+        x, y, c=missing, label='missing', s=m_size * 0.9, **scatter_args
+    )
 
     xa, ya = map(np.array, zip(*data.keys()))
     zs = np.array(list(data.values()))
@@ -81,7 +84,8 @@ def plot_dom_parameters(data,
         c=zs[in_range_idx],
         cmap=cmap,
         s=m_size,
-        **scatter_args)
+        **scatter_args
+    )
     if not hide_limits:
         under_idx = zs < vmin
         ax.scatter(
@@ -90,7 +94,8 @@ def plot_dom_parameters(data,
             c=under,
             label='< {0}'.format(vmin),
             s=m_size * underfactor,
-            **scatter_args)
+            **scatter_args
+        )
         over_idx = zs > vmax
         ax.scatter(
             xa[over_idx],
@@ -98,13 +103,16 @@ def plot_dom_parameters(data,
             c=over,
             label='> {0}'.format(vmax),
             s=m_size * overfactor,
-            **scatter_args)
+            **scatter_args
+        )
 
     cb = plt.colorbar(sc)
     cb.set_label(label)
 
-    ax.set_title("{0}\n{1} UTC".format(title,
-                                       datetime.utcnow().strftime("%c")))
+    ax.set_title(
+        "{0}\n{1} UTC".format(title,
+                              datetime.utcnow().strftime("%c"))
+    )
     ax.set_xlabel("DU")
     ax.set_ylabel("DOM")
     ax.set_ylim(-2)
@@ -117,7 +125,8 @@ def plot_dom_parameters(data,
         loc=1,
         ncol=2,
         mode="expand",
-        borderaxespad=0.)
+        borderaxespad=0.
+    )
 
     fig.tight_layout()
 
@@ -159,36 +168,43 @@ class IntraDOMCalibrationPlotter(kp.Module):
     def create_plot(self, calibration):
         print("Creating plot...")
         fig, axes = plt.subplots(
-            6, 3, figsize=(16, 20), sharex=True, sharey=True)
+            6, 3, figsize=(16, 20), sharex=True, sharey=True
+        )
         for ax, (dom_id, calib) in zip(axes.flatten(), calibration.items()):
             ax.plot(np.cos(calib['angles']), calib["means"], '.')
             ax.plot(np.cos(calib['angles']), calib["corrected_means"], '.')
-            ax.set_title("{0} - {1}".format(
-                self.db.doms.via_dom_id(dom_id), dom_id))
+            ax.set_title(
+                "{0} - {1}".format(self.db.doms.via_dom_id(dom_id), dom_id)
+            )
             ax.set_ylim((-10, 10))
         plt.suptitle("{0} UTC".format(datetime.utcnow().strftime("%c")))
         plt.savefig(
-            os.path.join(self.plots_path, "intradom.png"), bbox_inches='tight')
+            os.path.join(self.plots_path, "intradom.png"), bbox_inches='tight'
+        )
         plt.close('all')
 
         fig, axes = plt.subplots(
-            6, 3, figsize=(16, 20), sharex=True, sharey=True)
+            6, 3, figsize=(16, 20), sharex=True, sharey=True
+        )
         for ax, (dom_id, calib) in zip(axes.flatten(), calibration.items()):
             ax.plot(np.cos(calib['angles']), calib["rates"], '.')
             ax.plot(np.cos(calib['angles']), calib["corrected_rates"], '.')
-            ax.set_title("{0} - {1}".format(
-                self.db.doms.via_dom_id(dom_id), dom_id))
+            ax.set_title(
+                "{0} - {1}".format(self.db.doms.via_dom_id(dom_id), dom_id)
+            )
             ax.set_ylim((0, 10))
         plt.suptitle("{0} UTC".format(datetime.utcnow().strftime("%c")))
         plt.savefig(
             os.path.join(self.plots_path, "angular_k40rate_distribution.png"),
-            bbox_inches='tight')
+            bbox_inches='tight'
+        )
         plt.close('all')
 
     def save_hdf5(self, calibration):
         print("Saving calibration information...")
         store = pd.HDFStore(
-            os.path.join(self.data_path, 'k40calib.h5'), mode='a')
+            os.path.join(self.data_path, 'k40calib.h5'), mode='a'
+        )
         now = int(time.time())
         timestamps = (now, ) * 31
         for dom_id, calib in calibration.items():

@@ -44,11 +44,9 @@ class Detector(object):
         calibration (when retrieving from database).
     """
 
-    def __init__(self,
-                 filename=None,
-                 det_id=None,
-                 t0set=None,
-                 calibration=None):
+    def __init__(
+            self, filename=None, det_id=None, t0set=None, calibration=None
+    ):
         self._det_file = None
         self.det_id = None
         self.n_doms = None
@@ -76,8 +74,10 @@ class Detector(object):
             self._init_from_file(filename)
 
         if det_id is not None:
-            self.print("Retrieving DETX with detector ID {0} "
-                       "from the database...".format(det_id))
+            self.print(
+                "Retrieving DETX with detector ID {0} "
+                "from the database...".format(det_id)
+            )
             db = DBManager()
             detx = db.detx(det_id, t0set=t0set, calibration=calibration)
             self._det_file = StringIO(detx)
@@ -146,8 +146,10 @@ class Detector(object):
                 self.dus.append(du)
                 self._current_floor = 1
                 if du == 1 and floor == -1:
-                    log.warning("Floor ID is -1 (Jpp conversion bug), "
-                                "using our own floor ID!")
+                    log.warning(
+                        "Floor ID is -1 (Jpp conversion bug), "
+                        "using our own floor ID!"
+                    )
             else:
                 self._current_floor += 1
 
@@ -161,9 +163,11 @@ class Detector(object):
                 self.n_pmts_per_dom = n_pmts
 
             if self.n_pmts_per_dom != n_pmts:
-                log.warning("DOMs with different number of PMTs are "
-                            "detected, this can cause some unexpected "
-                            "behaviour.")
+                log.warning(
+                    "DOMs with different number of PMTs are "
+                    "detected, this can cause some unexpected "
+                    "behaviour."
+                )
 
             for i in range(n_pmts):
                 raw_pmt_info = self._det_file.readline()
@@ -307,7 +311,8 @@ class Detector(object):
                 pmt = self.pmts[pmt_idx]
                 doms += " {0} {1} {2} {3} {4} {5} {6} {7}\n".format(
                     pmt.pmt_id, pmt.pos_x, pmt.pos_y, pmt.pos_z, pmt.dir_x,
-                    pmt.dir_y, pmt.dir_z, pmt.t0)
+                    pmt.dir_y, pmt.dir_z, pmt.t0
+                )
         return header + "\n" + doms
 
     def write(self, filename):
@@ -342,7 +347,8 @@ class Detector(object):
 
     def __str__(self):
         return "Detector id: '{0}', n_doms: {1}, dus: {2}".format(
-            self.det_id, self.n_doms, self.dus)
+            self.det_id, self.n_doms, self.dus
+        )
 
     def __repr__(self):
         return self.__str__()

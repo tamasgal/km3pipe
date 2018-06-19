@@ -63,9 +63,11 @@ def get_data(stream, parameters, fmt):
     if parameters:
         for parameter in parameters:
             if '=' not in parameter:
-                log.error("Invalid parameter syntax '{}'\n"
-                          "The correct syntax is 'parameter=value'"
-                          .format(parameter))
+                log.error(
+                    "Invalid parameter syntax '{}'\n"
+                    "The correct syntax is 'parameter=value'"
+                    .format(parameter)
+                )
                 continue
             key, value = parameter.split('=')
             params[key] = value
@@ -98,8 +100,11 @@ def upload_runsummary(csv_filename, dryrun=False):
     cols = set(df.columns)
 
     if not REQUIRED_COLUMNS.issubset(cols):
-        log.error("Missing columns: {}.".format(', '.join(
-            str(c) for c in REQUIRED_COLUMNS - cols)))
+        log.error(
+            "Missing columns: {}.".format(
+                ', '.join(str(c) for c in REQUIRED_COLUMNS - cols)
+            )
+        )
         return
 
     parameters = cols - REQUIRED_COLUMNS
@@ -111,8 +116,11 @@ def upload_runsummary(csv_filename, dryrun=False):
         log.critical("Empty dataset.")
         return
 
-    print("Found data for parameters: {}.".format(', '.join(
-        str(c) for c in parameters)))
+    print(
+        "Found data for parameters: {}.".format(
+            ', '.join(str(c) for c in parameters)
+        )
+    )
     print("Converting CSV data into JSON")
     if dryrun:
         log.warn("Dryrun: adding 'TEST_' prefix to parameter names")
@@ -134,7 +142,8 @@ def upload_runsummary(csv_filename, dryrun=False):
     cookie_key, sid = session_cookie.split('=')
     print("Uploading the data to the database.")
     r = requests.post(
-        RUNSUMMARY_URL, cookies={cookie_key: sid}, files={'datafile': data})
+        RUNSUMMARY_URL, cookies={cookie_key: sid}, files={'datafile': data}
+    )
     if r.status_code == 200:
         log.debug("POST request status code: {}".format(r.status_code))
         print("Database response:")
@@ -151,9 +160,9 @@ def upload_runsummary(csv_filename, dryrun=False):
         return
 
 
-def convert_runsummary_to_json(df,
-                               comment='Uploaded via km3pipe.StreamDS',
-                               prefix='TEST_'):
+def convert_runsummary_to_json(
+        df, comment='Uploaded via km3pipe.StreamDS', prefix='TEST_'
+):
     """Convert a Pandas DataFrame with runsummary to JSON for DB upload"""
     data_field = []
     comment += ", by {}".format(getpass.getuser())
@@ -183,10 +192,7 @@ def convert_runsummary_to_json(df,
                     except ValueError as e:
                         log.critical("Data values has to be floats!")
                         raise ValueError(e)
-                    value = {
-                        'S': str(getattr(row, 'source')),
-                        'D': data_value
-                    }
+                    value = {'S': str(getattr(row, 'source')), 'D': data_value}
                     parameter_dict[parameter_name]['Data'].append(value)
             for parameter_data in parameter_dict.values():
                 parameters_field.append(parameter_data)

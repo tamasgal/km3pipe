@@ -11,9 +11,10 @@ from numpy.testing import (assert_array_equal, assert_allclose)
 import pytest
 
 from km3pipe.testing import TestCase, skip    # noqa
-from km3pipe.dataclasses import (Table, inflate_dtype, has_structured_dt,
-                                 is_structured, DEFAULT_H5LOC, DEFAULT_NAME,
-                                 DEFAULT_SPLIT)
+from km3pipe.dataclasses import (
+    Table, inflate_dtype, has_structured_dt, is_structured, DEFAULT_H5LOC,
+    DEFAULT_NAME, DEFAULT_SPLIT
+)
 
 __author__ = "Tamas Gal, Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -27,8 +28,8 @@ __status__ = "Development"
 class TestDtypes(TestCase):
     def setUp(self):
         self.c_dt = np.dtype([('a', '<f4'), ('origin', '<u4'),
-                              ('pmt_id', '<u4'), ('time', '<f8'), ('group_id',
-                                                                   '<u4')])
+                              ('pmt_id', '<u4'), ('time',
+                                                  '<f8'), ('group_id', '<u4')])
 
     def test_is_structured(self):
         assert is_structured(self.c_dt)
@@ -71,12 +72,12 @@ class TestDtypes(TestCase):
 class TestTable(TestCase):
     def setUp(self):
         self.dt = np.dtype([('a', int), ('b', float), ('group_id', int)])
-        self.arr = np.array(
-            [
-                (0, 1.0, 2),
-                (3, 7.0, 5),
-                (6, 4.0, 8),
-            ], dtype=self.dt)
+        self.arr = np.array([
+            (0, 1.0, 2),
+            (3, 7.0, 5),
+            (6, 4.0, 8),
+        ],
+                            dtype=self.dt)
 
     def test_h5loc(self):
         tab = self.arr.view(Table)
@@ -210,10 +211,9 @@ class TestTable(TestCase):
             print(tab)
 
     def test_from_columns_with_colnames(self):
-        t = Table.from_columns(
-            [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [13, 14, 15],
-             [16, 17, 18], [19, 20, 21]],
-            colnames=['a', 'b', 'c', 'd', 'e', 'f', 'g'])
+        t = Table.from_columns([[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12],
+                                [13, 14, 15], [16, 17, 18], [19, 20, 21]],
+                               colnames=['a', 'b', 'c', 'd', 'e', 'f', 'g'])
         print("t.a: {}".format(t.a))
         assert np.allclose([1, 2, 3], t.a)
         print("t.b: {}".format(t.b))
@@ -225,8 +225,8 @@ class TestTable(TestCase):
 
     def test_from_columns_with_mismatching_columns_and_dtypes_raises(self):
         with pytest.raises(ValueError):
-            Table.from_columns(
-                [[1, 2, 3], [4, 5, 6]], dtype=np.dtype([('a', 'f4')]))
+            Table.from_columns([[1, 2, 3], [4, 5, 6]],
+                               dtype=np.dtype([('a', 'f4')]))
 
     def test_from_rows_with_colnames(self):
         t = Table.from_rows([[1, 2], [3, 4], [5, 6]], colnames=['a', 'b'])
@@ -595,12 +595,11 @@ class TestTable(TestCase):
 
     def test_sort(self):
         dt = np.dtype([('a', int), ('b', float), ('c', int)])
-        arr = np.array(
-            [
-                (0, 1.0, 2),
-                (3, 7.0, 5),
-                (6, 4.0, 8),
-            ], dtype=dt)
+        arr = np.array([
+            (0, 1.0, 2),
+            (3, 7.0, 5),
+            (6, 4.0, 8),
+        ], dtype=dt)
         tab = Table(arr)
         tab_sort = tab.sorted('b')
         assert_array_equal(tab_sort['a'], np.array([0, 6, 3]))
@@ -617,12 +616,11 @@ class TestTable(TestCase):
         from pandas.util.testing import assert_frame_equal
         import pandas as pd
         dt = np.dtype([('a', int), ('b', float), ('c', int)])
-        arr = np.array(
-            [
-                (0, 1.0, 2),
-                (3, 7.0, 5),
-                (6, 4.0, 8),
-            ], dtype=dt)
+        arr = np.array([
+            (0, 1.0, 2),
+            (3, 7.0, 5),
+            (6, 4.0, 8),
+        ], dtype=dt)
         print(dir(Table))
         df = pd.DataFrame(arr)
         tab = Table.from_dataframe(df, h5loc='/bla')
@@ -631,24 +629,24 @@ class TestTable(TestCase):
 
     def test_slicing(self):
         dt = np.dtype([('a', int), ('b', float), ('c', bool)])
-        arr = np.array(
-            [
-                (0, 1.0, True),
-                (2, 3.0, False),
-                (4, 5.0, True),
-            ], dtype=dt)
+        arr = np.array([
+            (0, 1.0, True),
+            (2, 3.0, False),
+            (4, 5.0, True),
+        ],
+                       dtype=dt)
         tab = Table(arr)
         assert 2 == len(tab[tab.c])
         assert 1 == len(tab[tab.b > 3.0])
 
     def test_contains(self):
         dt = np.dtype([('a', int), ('b', float), ('c', bool)])
-        arr = np.array(
-            [
-                (0, 1.0, True),
-                (2, 3.0, False),
-                (4, 5.0, True),
-            ], dtype=dt)
+        arr = np.array([
+            (0, 1.0, True),
+            (2, 3.0, False),
+            (4, 5.0, True),
+        ],
+                       dtype=dt)
         tab = Table(arr)
         assert 'a' in tab
         assert 'b' in tab
@@ -894,7 +892,8 @@ class TestTableFancyAttributes(TestCase):
             },
             name='hits',
             h5loc='/foo',
-            split_h5=True)
+            split_h5=True
+        )
         triggered_hits = hits.triggered_rows
         assert len(triggered_hits) == 3
         assert triggered_hits.split_h5
@@ -917,7 +916,8 @@ class TestTableFancyAttributes(TestCase):
             },
             name='hits',
             h5loc='/foo',
-            split_h5=True)
+            split_h5=True
+        )
         with pytest.raises(KeyError):
             triggered_hits = hits.triggered_rows
             assert triggered_hits is not None

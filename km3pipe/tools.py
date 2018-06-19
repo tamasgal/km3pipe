@@ -31,7 +31,8 @@ def ifiles(irods_path):
         "ils -r --bundle {0}"
         "    | grep 'Bundle file:'"
         "    | awk '{{print $3}}'".format(irods_path),
-        shell=True)
+        shell=True
+    )
     filenames = raw_output.decode('ascii').strip().split("\n")
     return filenames
 
@@ -74,8 +75,11 @@ def insert_prefix_to_dtype(arr, prefix):
 def prettyln(text, fill='-', align='^', prefix='[ ', suffix=' ]', length=69):
     """Wrap `text` in a pretty line with maximum length."""
     text = '{prefix}{0}{suffix}'.format(text, prefix=prefix, suffix=suffix)
-    print("{0:{fill}{align}{length}}".format(
-        text, fill=fill, align=align, length=length))
+    print(
+        "{0:{fill}{align}{length}}".format(
+            text, fill=fill, align=align, length=length
+        )
+    )
 
 
 def irods_filepath(det_id, run_id):
@@ -197,7 +201,9 @@ ATTRIBUTES = dict(
         zip([
             'bold', 'dark', '', 'underline', 'blink', '', 'reverse',
             'concealed'
-        ], list(range(1, 9)))))
+        ], list(range(1, 9)))
+    )
+)
 del ATTRIBUTES['']
 
 ATTRIBUTES_RE = '\033\[(?:%s)m' % '|'  \
@@ -208,7 +214,9 @@ HIGHLIGHTS = dict(
         zip([
             'on_grey', 'on_red', 'on_green', 'on_yellow', 'on_blue',
             'on_magenta', 'on_cyan', 'on_white'
-        ], list(range(40, 48)))))
+        ], list(range(40, 48)))
+    )
+)
 
 HIGHLIGHTS_RE = '\033\[(?:%s)m' % '|'  \
                 .join(['%d' % v for v in HIGHLIGHTS.values()])
@@ -224,7 +232,9 @@ COLORS = dict(
             'magenta',
             'cyan',
             'white',
-        ], list(range(30, 38)))))
+        ], list(range(30, 38)))
+    )
+)
 
 COLORS_RE = '\033\[(?:%s)m' % '|'.join(['%d' % v for v in COLORS.values()])
 

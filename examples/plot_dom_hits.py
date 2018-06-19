@@ -28,7 +28,8 @@ km3pipe.style.use("km3pipe")
 
 filename = "data/km3net_jul13_90m_muatm50T655.km3_v5r1.JTE_r2356.root.0-499.h5"
 cal = kp.calib.Calibration(
-    filename="data/km3net_jul13_90m_r1494_corrected.detx")
+    filename="data/km3net_jul13_90m_r1494_corrected.detx"
+)
 
 
 def filter_muons(blob):
@@ -57,8 +58,9 @@ class DOMHits(kp.Module):
         dom_hits = Counter(triggered_hits.dom_id)
         for dom_id, n_hits in dom_hits.items():
             try:
-                distance = pld3(cal.detector.dom_positions[dom_id], muon.pos,
-                                muon.dir)
+                distance = pld3(
+                    cal.detector.dom_positions[dom_id], muon.pos, muon.dir
+                )
             except KeyError:
                 self.log.warning("DOM ID %s not found!" % dom_id)
                 continue
@@ -76,7 +78,8 @@ class DOMHits(kp.Module):
             sdf['n_hits'],
             cmap='plasma',
             bins=bins,
-            norm=LogNorm())
+            norm=LogNorm()
+        )
         plt.xlabel('Distance between hit and muon track [m]')
         plt.ylabel('Number of hits on DOM')
         plt.show()

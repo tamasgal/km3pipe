@@ -64,8 +64,10 @@ def run_tests():
 def update_km3pipe(git_branch=''):
     if git_branch == '' or git_branch is None:
         git_branch = 'master'
-    os.system("pip install -U git+http://git.km3net.de/km3py/km3pipe.git@{0}"
-              .format(git_branch))
+    os.system(
+        "pip install -U git+http://git.km3net.de/km3py/km3pipe.git@{0}"
+        .format(git_branch)
+    )
 
 
 def retrieve(run_id, det_id, outfile=None):
@@ -144,8 +146,10 @@ def main():
     from docopt import docopt
     args = docopt(
         __doc__,
-        version="KM3Pipe {} - git: {}".format(version,
-                                              get_git_revision_hash()))
+        version="KM3Pipe {} - git: {}".format(
+            version, get_git_revision_hash()
+        )
+    )
 
     if args['test']:
         run_tests()
@@ -160,7 +164,8 @@ def main():
 
     if args['rundetsn']:
         rundetsn(
-            int(args['RUN']), args['DETECTOR'], temporary=args["--temporary"])
+            int(args['RUN']), args['DETECTOR'], temporary=args["--temporary"]
+        )
 
     if args['retrieve']:
         retrieve(int(args['RUN']), args['DET_ID'], args['-o'])

@@ -106,7 +106,8 @@ class surrogate(object):
             self.elements[-1], (object, ), {
                 '__all__': [],
                 '_importing_path': self._get_importing_path(self.elements)
-            })
+            }
+        )
         modules = [last_module]
 
         # now we create a module stub for each
@@ -121,7 +122,8 @@ class surrogate(object):
                 element, (object, ), {
                     next_module.__name__: next_module,
                     '__all__': [next_module.__name__]
-                })
+                }
+            )
             modules.append(module)
         self.modules = list(reversed(modules))
         self.modules[0].__path__ = []

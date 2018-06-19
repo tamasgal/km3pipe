@@ -31,7 +31,8 @@ class PrintCLBHeader(Module):
 
 pipeline = Pipeline()
 pipeline.attach(
-    CLBPump, filename='/Users/tamasgal/Data/KM3NeT/du1-clb/DOM2_run23.dat')
+    CLBPump, filename='/Users/tamasgal/Data/KM3NeT/du1-clb/DOM2_run23.dat'
+)
 pipeline.attach(StatusBar)
 pipeline.attach(PrintCLBHeader)
 pipeline.attach(TOTHisto)

@@ -37,7 +37,8 @@ def fit_delta_ts(data, time_s):
     for combination in data:
         try:
             popt, _ = optimize.curve_fit(
-                gaussian, xs, combination, p0=[0, 2, 1000, 20])
+                gaussian, xs, combination, p0=[0, 2, 1000, 20]
+            )
         except RuntimeError:
             popt = (0, 0, 0, 0)
         rates.append(popt[2])

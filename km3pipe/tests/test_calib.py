@@ -35,7 +35,8 @@ class TestCalibration(TestCase):
     def test_init_with_det_id(self, mock_detector):
         Calibration(det_id=1)
         mock_detector.assert_called_with(
-            t0set=None, calibration=None, det_id=1)
+            t0set=None, calibration=None, det_id=1
+        )
         Calibration(det_id=1, calibration=2, t0set=3)
         mock_detector.assert_called_with(t0set=3, calibration=2, det_id=1)
 

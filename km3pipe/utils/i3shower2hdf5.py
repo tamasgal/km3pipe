@@ -69,7 +69,8 @@ class WriteScalars(I3Module):
                 compression="gzip",
                 compression_opts=5,
                 shuffle=True,
-                fletcher32=True)
+                fletcher32=True
+            )
 
 
 class KeepReconstructed(I3Module):
@@ -110,8 +111,9 @@ class ReadLLHValues(I3Module):
 
     def __init__(self, context):
         I3Module.__init__(self, context)
-        self.AddParameter("LLHParamContainer", "Name of LLH value container",
-                          "")
+        self.AddParameter(
+            "LLHParamContainer", "Name of LLH value container", ""
+        )
         self.AddOutBox("OutBox")
 
     def Configure(self):
@@ -292,7 +294,8 @@ class TimeDistance(Compare):
 
     def GetTimeDifference(self):
         self.TimeDifference = I3Double(
-            fabs(float(self.Time[0]) - float(self.Time[1])))
+            fabs(float(self.Time[0]) - float(self.Time[1]))
+        )
 
 
 def i3extract(infile, outfile=None):
@@ -307,7 +310,8 @@ def i3extract(infile, outfile=None):
         Distance,
         "compare_space",
         particle_1="best_FirstDusjOrcaVertexFit_FitResult",
-        particle_2="best_SecondDusjOrcaVertexFit_FitResult")
+        particle_2="best_SecondDusjOrcaVertexFit_FitResult"
+    )
     tray.AddModule(
         TimeDistance,
         "compare_time",
@@ -317,11 +321,13 @@ def i3extract(infile, outfile=None):
     tray.AddModule(
         ReadRecoParticle,
         'read_particle_first',
-        ParticleName='best_FirstDusjOrcaVertexFit_FitResult')
+        ParticleName='best_FirstDusjOrcaVertexFit_FitResult'
+    )
     tray.AddModule(
         ReadRecoParticle,
         'read_particle_second',
-        ParticleName='best_SecondDusjOrcaVertexFit_FitResult')
+        ParticleName='best_SecondDusjOrcaVertexFit_FitResult'
+    )
     tray.AddModule(
         ReadRecoParticle,
         'read_particle_proba',

@@ -23,8 +23,9 @@ from km3pipe import Pipeline, Module
 from km3pipe.calib import Calibration
 from km3pipe.dataclasses import HitSeries
 from km3pipe.io import CHPump
-from km3pipe.io.daq import (DAQProcessor, DAQPreamble, DAQSummaryslice,
-                            DAQEvent)
+from km3pipe.io.daq import (
+    DAQProcessor, DAQPreamble, DAQSummaryslice, DAQEvent
+)
 from km3pipe.time import tai_timestamp
 import km3pipe.style
 
@@ -82,8 +83,10 @@ class DOMHits(Module):
         if len(self.hits) > 0:
             self.create_plot(self.hits, "Hits on DOMs", 'hits_on_doms')
         if len(self.triggered_hits) > 0:
-            self.create_plot(self.triggered_hits, "Triggered Hits on DOMs",
-                             'triggered_hits_on_doms')
+            self.create_plot(
+                self.triggered_hits, "Triggered Hits on DOMs",
+                'triggered_hits_on_doms'
+            )
 
     def create_plot(self, hits, title, filename):
         fig, ax = plt.subplots(figsize=(16, 8))
@@ -98,20 +101,25 @@ class DOMHits(Module):
             aspect='auto',
             origin='lower',
             zorder=3,
-            norm=LogNorm(vmin=1, vmax=np.amax(hit_matrix)))
+            norm=LogNorm(vmin=1, vmax=np.amax(hit_matrix))
+        )
         yticks = np.arange(N_DOMS * N_DUS)
         ytick_labels = [
             "DU{0:0.0f}-DOM{1:02d}".format(
-                np.ceil((y + 1) / N_DOMS), y % (N_DOMS) + 1) for y in yticks
+                np.ceil((y + 1) / N_DOMS), y % (N_DOMS) + 1
+            ) for y in yticks
         ]
         ax.set_yticks(yticks)
         ax.set_yticklabels(ytick_labels)
         ax.tick_params(labelbottom=False)
         ax.tick_params(labeltop=False)
         ax.set_xlabel("event (latest on the right)")
-        ax.set_title("{0} - via the last {1} Events\n{2}".format(
-            title, self.max_events,
-            datetime.utcnow().strftime("%c")))
+        ax.set_title(
+            "{0} - via the last {1} Events\n{2}".format(
+                title, self.max_events,
+                datetime.utcnow().strftime("%c")
+            )
+        )
         cb = fig.colorbar(im, pad=0.05)
         cb.set_label("number of hits")
 
@@ -141,8 +149,10 @@ class TriggerRate(Module):
 
     def restore_data(self):
         with lock:
-            data = zip(self.store.trigger_rates.timestamp,
-                       self.store.trigger_rates.rate)
+            data = zip(
+                self.store.trigger_rates.timestamp,
+                self.store.trigger_rates.rate
+            )
             self.trigger_rates.extend(data)
             print("{0} data points restored.".format(len(self.trigger_rates)))
 
@@ -182,11 +192,15 @@ class TriggerRate(Module):
                 pd.DataFrame({
                     'timestamp': [now],
                     'rate': [rate]
-                }))
+                })
+            )
         except pd.io.pytables.ClosedFileError:
             pass
-        print("Number of rates recorded: {0} (last: {1}".format(
-            len(self.trigger_rates), self.trigger_rates[-1]))
+        print(
+            "Number of rates recorded: {0} (last: {1}".format(
+                len(self.trigger_rates), self.trigger_rates[-1]
+            )
+        )
 
         x, y = zip(*self.trigger_rates)
         if not any(y):
@@ -197,8 +211,10 @@ class TriggerRate(Module):
         data = pd.DataFrame({'dates': x, 'rates': y})
         #            plt.scatter(x, y)
         data.plot('dates', 'rates', grid=True, ax=ax, legend=False, style='.')
-        ax.set_title("Trigger Rate - via Event Times\n{0}"
-                     .format(datetime.utcnow().strftime("%c")))
+        ax.set_title(
+            "Trigger Rate - via Event Times\n{0}"
+            .format(datetime.utcnow().strftime("%c"))
+        )
         ax.set_xlabel("time")
         ax.set_ylabel("trigger rate [Hz]")
         #        ax.set_ylim(-0.1)
@@ -276,7 +292,8 @@ class DOMActivityPlotter(Module):
             'vmax': vmax,
         }
         sc_inactive = ax.scatter(
-            x, y, c='lightgray', label='inactive', **scatter_args)
+            x, y, c='lightgray', label='inactive', **scatter_args
+        )
         now = tai_timestamp()
 
         try:
@@ -293,20 +310,24 @@ class DOMActivityPlotter(Module):
                 ya[active_idx],
                 c=ts[active_idx],
                 cmap=cmap,
-                **scatter_args)
+                **scatter_args
+            )
             ax.scatter(
                 xa[~active_idx],
                 ya[~active_idx],
                 c='deeppink',
                 label='> {0} s'.format(vmax),
-                **scatter_args)
+                **scatter_args
+            )
             cb = plt.colorbar(sc_active)
             cb.set_label("last activity [s]")
             # ts_series = pd.Series(ts)
             # print(ts_series.describe())
 
-        ax.set_title("DOM Activity - via Summary Slices\n{0}"
-                     .format(datetime.utcnow().strftime("%c")))
+        ax.set_title(
+            "DOM Activity - via Summary Slices\n{0}"
+            .format(datetime.utcnow().strftime("%c"))
+        )
         ax.set_xlabel("DU")
         ax.set_ylabel("DOM")
         ax.set_ylim(-2)
@@ -319,7 +340,8 @@ class DOMActivityPlotter(Module):
             loc=1,
             ncol=2,
             mode="expand",
-            borderaxespad=0.)
+            borderaxespad=0.
+        )
 
         fig.tight_layout()
 
@@ -377,7 +399,8 @@ class ZTPlot(Module):
             nrows=n_rows,
             sharex=True,
             sharey=True,
-            figsize=(16, 8))
+            figsize=(16, 8)
+        )
 
         for ax, du in zip(axes.flat, dus):
             _hits = [h for h in hits if detector.doms[h.dom_id][0] == du]
@@ -387,11 +410,13 @@ class ZTPlot(Module):
             ax.scatter(
                 du_hits.time, [z for (x, y, z) in du_hits.pos],
                 c='#09A9DE',
-                label='hit')
+                label='hit'
+            )
             ax.scatter(
                 trig_hits.time, [z for (x, y, z) in trig_hits.pos],
                 c='#FF6363',
-                label='triggered hit')
+                label='triggered hit'
+            )
             ax.set_title('DU{0}'.format(du), fontsize=16, fontweight='bold')
 
         for ax in axes.flat:
@@ -404,8 +429,10 @@ class ZTPlot(Module):
         plt.suptitle(
             "Run {0}, FrameIndex {1}, TriggerCounter {2}\n{3}".format(
                 e_info.run_id, e_info.frame_index, e_info.trigger_counter,
-                datetime.utcfromtimestamp(e_info.utc_seconds)),
-            fontsize=16)
+                datetime.utcfromtimestamp(e_info.utc_seconds)
+            ),
+            fontsize=16
+        )
         fig.text(0.5, 0.01, 'time [ns]', ha='center')
         fig.text(0.08, 0.5, 'z [m]', va='center', rotation='vertical')
         #        plt.tight_layout()
@@ -430,7 +457,8 @@ pipe.attach(
     port=5553,
     tags='IO_EVT, IO_SUM',
     timeout=60 * 60 * 24 * 7,
-    max_queue=2000)
+    max_queue=2000
+)
 pipe.attach(DAQProcessor)
 pipe.attach(DOMActivityPlotter)
 pipe.attach(TriggerRate)

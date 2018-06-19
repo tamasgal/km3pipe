@@ -3,8 +3,10 @@
 
 import km3pipe as kp
 from km3pipe.dataclasses import Table
-from km3modules.common import (Siphon, Delete, Keep, Dump, StatusBar, TickTock,
-                               MemoryObserver, BlobIndexer)
+from km3modules.common import (
+    Siphon, Delete, Keep, Dump, StatusBar, TickTock, MemoryObserver,
+    BlobIndexer
+)
 from km3pipe.testing import TestCase, MagicMock
 from km3pipe.tools import istype
 
