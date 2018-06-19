@@ -32,8 +32,6 @@ setup(
     include_package_data=True,
     platforms='any',
     setup_requires=[
-        'pip>=10.0.1',
-        'setuptools>=39.0',
         'numpy>=1.12',
     ],
     install_requires=requirements,
