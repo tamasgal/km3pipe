@@ -56,7 +56,7 @@ class McTruth(Module):
         return blob
 
 
-def time_converter(hits_times_jte, evt_timestamp_in_ns, evt_mc_time):
+def convert_mctime(hits_times_jte, evt_timestamp_in_ns, evt_mc_time):
     """
     Function that converts JTE times of hits to MC times.
 
@@ -93,7 +93,7 @@ class MCTimeCorrector(Module):
     def configure(self):
         self.hits_key = self.get('hits_key', default='Hits')
         self.event_info_key = self.get('event_info_key', default='EventInfo')
-        self.convert_time = np.frompyfunc(time_converter, 1, 1)
+        self.convert_time = np.frompyfunc(convert_mctime, 1, 1)
 
     def process(self, blob):
         event_info = blob[self.event_info_key]
@@ -101,4 +101,5 @@ class MCTimeCorrector(Module):
         hits['time'] = self.convert_time(
             hits.time, event_info.timestamp_in_ns, event_info.mc_time
         )
+        blob[self.hits_key] = hits
         return blob
