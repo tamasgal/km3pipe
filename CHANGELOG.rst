@@ -4,6 +4,10 @@ Unreleased changes
 Version 8
 ---------
 
+8.1.3 / 2018-06-21
+~~~~~~~~~~~~~~~~~~
+* tohdf5.py: adds a hit time conversion option from JTE to MC time.
+
 8.1.2 / 2018-06-16
 ~~~~~~~~~~~~~~~~~~
 * Fix a new typo in `stats.rv_kde.rvs`
