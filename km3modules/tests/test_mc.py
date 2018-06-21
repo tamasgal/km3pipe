@@ -25,7 +25,7 @@ __status__ = "Development"
 class TestMCConvert(TestCase):
     def setUp(self):
         self.info = Table({
-            'timestamp': 12.3,
+            'timestamp': 12.3 * 1e-6,
             'nanoseconds': 42,
             'mc_time': 10000,
         })
@@ -39,15 +39,15 @@ class TestMCConvert(TestCase):
 
     def test_convert(self):
         times = convert_mctime(
-            self.hits, self.info.timestamp, self.info.nanoseconds
+            self.hits, self.info.timestamp * 1e9 + self.info.nanoseconds,
+            self.info.mc_time
         )
         assert times is not None
+        print(times)
+        assert np.allclose(times, 3216.42)
 
     def test_process(self):
         corr = MCTimeCorrector(hits_key='Les_Hits', event_info_key='Info')
         newblob = corr.process(self.blob)
         assert newblob['Les_Hits'] is not None
-
-    def test_pipe(self):
-        p = Pipeline()
-        pass
+        assert np.allclose(newblob['Les_Hits'].time, 3216.42)
