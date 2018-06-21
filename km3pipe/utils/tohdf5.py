@@ -50,7 +50,7 @@ def tohdf5(input_files, output_file, n_events, conv_hits_time, **kwargs):
     pipe.attach(GenericPump, filenames=input_files, **kwargs)
     pipe.attach(HDF5MetaData, data=kwargs)
     pipe.attach(StatusBar, every=250)
-    if conv_hits_time is True: 
+    if conv_hits_time: 
         from km3modules.mc import MCTimeCorrector
         pipe.attach(MCTimeCorrector)
     pipe.attach(HDF5Sink, filename=output_file, **kwargs)
@@ -87,7 +87,7 @@ def main():
     if is_debug:
         log.setLevel('DEBUG')
     ignore_hits_arg = args['--ignore-hits']
-    conv_hits_time = args['--conv-hits-time']
+    conv_hits_time = bool(args['--conv-hits-time'])
     tohdf5(
         infiles,
         outfile,
