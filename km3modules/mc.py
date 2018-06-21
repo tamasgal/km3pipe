@@ -93,7 +93,7 @@ class MCTimeCorrector(Module):
     def configure(self):
         self.hits_key = self.get('hits_key', default='Hits')
         self.event_info_key = self.get('event_info_key', default='EventInfo')
-        self.convert_time = np.frompyfunc(convert_mctime, 1, 1)
+        self.convert_time = np.frompyfunc(convert_mctime, 3, 1)
 
     def process(self, blob):
         event_info = blob[self.event_info_key]
