@@ -27,6 +27,7 @@ class TestMCConvert(TestCase):
         self.info = Table({
             'timestamp': 12.3,
             'nanoseconds': 42,
+            'mc_time': 10000,
         })
         self.hits = Table({
             'time': 874.42,
