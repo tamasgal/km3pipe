@@ -1,12 +1,15 @@
 Unreleased changes
 ------------------
 
+* tohdf5.py: adds a hit time conversion option from JTE to MC time.
+
+
 Version 8
 ---------
 
-8.1.3 / 2018-06-21
+8.1.3 / 2018-06-16
 ~~~~~~~~~~~~~~~~~~
-* tohdf5.py: adds a hit time conversion option from JTE to MC time.
+* minor fixes
 
 8.1.2 / 2018-06-16
 ~~~~~~~~~~~~~~~~~~
