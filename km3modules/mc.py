@@ -99,8 +99,9 @@ class MCTimeCorrector(Module):
     def process(self, blob):
         event_info = blob[self.event_info_key]
         hits = blob[self.hits_key]
+        timestamp_in_ns = event_info.timestamp * 1e9 + event_info.nanoseconds
         hits['time'] = self.convert_time(
-            hits.time, event_info.timestamp_in_ns, event_info.mc_time
+            hits.time, timestamp_in_ns, event_info.mc_time
         )
         blob[self.hits_key] = hits
         return blob
