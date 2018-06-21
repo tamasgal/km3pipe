@@ -116,6 +116,8 @@ class MCTimeCorrector(Module):
     ----------
     hits_key : str, optional
         Name of the Hits to convert (default: 'Hits').
+    mc_tracks_key : str, optional
+        Name of the mc_tracks to convert (default: 'McTracks').
     event_info_key : str, optional
         Name of the EventInfo to store this in (default: 'EventInfo').
     """
