@@ -9,4 +9,4 @@ dependencies:
   - hdf5=1.8.17=1
   - numpy>=1.12
   - pip:
-    - "-r ./requirements.txt"
+    - "-r ./rtd-requirements.txt"
