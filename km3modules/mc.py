@@ -56,7 +56,8 @@ class McTruth(Module):
         return blob
 
 
-def convert_mctime(hits_times_jte, evt_timestamp_in_ns, evt_mc_time):
+def convert_hits_jte_t_to_mc_t(hits_times_jte, evt_timestamp_in_ns, 
+                               evt_mc_time):
     """
     Function that converts JTE times of hits to MC times.
 
@@ -79,6 +80,32 @@ def convert_mctime(hits_times_jte, evt_timestamp_in_ns, evt_mc_time):
     hits_times_jte = np.array(hits_times_jte).astype(float)
     hits_times_mc = hits_times_jte + evt_timestamp_in_ns - evt_mc_time
     return hits_times_mc
+    
+    
+def convert_tracks_mc_t_to_jte_t(tracks_times_mc_t, evt_timestamp_in_ns, 
+                                 evt_mc_time):
+    """
+    Function that converts MC times of mc_tracks to JTE times.
+
+    Parameters
+    ----------
+    tracks_times_mc_t : np.ndarray
+        Mc_tracks array with MC times.
+    evt_timestamp_in_ns : int
+        Total timestamp of the event in nanoseconds.
+    evt_mc_time : int
+        Mc time of the event in nanoseconds.
+
+    Returns
+    -------
+    ndarray
+        Converted mc_tracks array with JTE times.
+    """
+    # needs to be cast to normal ndarray (not recarray), or else we
+    # would get invalid type promotion
+    tracks_times_mc_t = np.array(tracks_times_mc_t).astype(float)
+    tracks_times_jte_t = tracks_times_mc_t - evt_timestamp_in_ns + evt_mc_time
+    return tracks_times_jte_t
 
 
 class MCTimeCorrector(Module):
@@ -92,18 +119,39 @@ class MCTimeCorrector(Module):
     event_info_key : str, optional
         Name of the EventInfo to store this in (default: 'EventInfo').
     """
+    def __init__(self, convert_hits_jte_t_to_mc_t_flag,
+                 convert_tracks_mc_t_to_jte_t_flag):
+        Module.__init__(self)
+        self.convert_hits_jte_t_to_mc_t_flag = \
+        convert_hits_jte_t_to_mc_t_flag
+        self.convert_tracks_mc_t_to_jte_t_flag = \
+        convert_tracks_mc_t_to_jte_t_flag
 
     def configure(self):
-        self.hits_key = self.get('hits_key', default='Hits')
         self.event_info_key = self.get('event_info_key', default='EventInfo')
-        self.convert_time = np.frompyfunc(convert_mctime, 3, 1)
+        if self.convert_hits_jte_t_to_mc_t_flag:
+            self.hits_key = self.get('hits_key', default='Hits')
+            self.convert_hits_jte_t_to_mc_t = \
+            np.frompyfunc(convert_hits_jte_t_to_mc_t, 3, 1)
+        if self.convert_tracks_mc_t_to_jte_t_flag:
+            self.mc_tracks_key = self.get('mc_tracks_key', default='McTracks')
+            self.convert_tracks_mc_t_to_jte_t = \
+            np.frompyfunc(convert_tracks_mc_t_to_jte_t, 3, 1)
 
     def process(self, blob):
         event_info = blob[self.event_info_key]
-        hits = blob[self.hits_key]
         timestamp_in_ns = event_info.timestamp * 1e9 + event_info.nanoseconds
-        hits['time'] = self.convert_time(
-            hits.time, timestamp_in_ns, event_info.mc_time
-        )
-        blob[self.hits_key] = hits
+        
+        if self.convert_hits_jte_t_to_mc_t_flag:
+            hits = blob[self.hits_key]
+            hits['time'] = self.convert_hits_jte_t_to_mc_t(
+                hits.time, timestamp_in_ns, event_info.mc_time)
+            blob[self.hits_key] = hits
+            
+        if self.convert_tracks_mc_t_to_jte_t_flag:
+            mc_tracks = blob[self.mc_tracks_key]
+            mc_tracks['time'] = self.convert_tracks_mc_t_to_jte_t(
+                mc_tracks.time, timestamp_in_ns, event_info.mc_time)
+            blob[self.mc_tracks_key] = mc_tracks
+            
         return blob
