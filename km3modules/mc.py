@@ -74,7 +74,9 @@ def convert_mctime(hits_times_jte, evt_timestamp_in_ns, evt_mc_time):
     ndarray
         Converted hits array with MC times.
     """
-    hits_times_jte = np.atleast_1d(hits_times_jte)
+    # needs to be cast to normal ndarray (not recarray), or else we
+    # would get invalid type promotion
+    hits_times_jte = np.array(hits_times_jte).astype(float)
     hits_times_mc = hits_times_jte + evt_timestamp_in_ns - evt_mc_time
     return hits_times_mc
 
