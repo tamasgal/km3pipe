@@ -137,20 +137,20 @@ class AanetPump(Pump):
         mc_id = event.frame_index - 1
         # run_id = self._get_run_id()
         wgt1, wgt2, wgt3, wgt4 = self._parse_wgts(event.w)
-        info = Table(
-            {
-                'event_id': event_id,
-                'mc_id': mc_id,
+        tab_data = {
+            'event_id': event_id,
+            'mc_id': mc_id,
         # 'run_id': run_id,         # TODO
-                'weight_w1': wgt1,
-                'weight_w2': wgt2,
-                'weight_w3': wgt3,
-                'weight_w4': wgt4,
-                'group_id': self.group_id,
-            },
-            h5loc='/event_info',
-            name='EventInfo'
-        )
+            'weight_w1': wgt1,
+            'weight_w2': wgt2,
+            'weight_w3': wgt3,
+            'weight_w4': wgt4,
+            'group_id': self.group_id,
+        }
+        tab_data['timestamp'] = event.t.GetSec()
+        tab_data['nanoseconds'] = event.t.GetNanoSec()
+        tab_data['mc_time'] = event.mc_t
+        info = Table(tab_data, h5loc='/event_info', name='EventInfo')
         return info
 
     @staticmethod
