@@ -1,8 +1,7 @@
 Unreleased changes
 ------------------
 
-* tohdf5.py: - adds a hit time conversion option from JTE to MC time.
-             - adds a mc_tracks time conversion option from MC to JTE time.
+* tohdf5.py: - adds a time conversion from mc time to jte time.
 
 Version 8
 ---------
