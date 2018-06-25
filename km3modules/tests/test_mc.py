@@ -54,7 +54,7 @@ class TestMCConvert(TestCase):
         assert np.allclose(times_mc_hits, 49999810.79)
 
     def test_process(self):
-        corr = MCTimeCorrector(mc_hits_key='mc_hits', mc_tracks_key='mc_tracks'
+        corr = MCTimeCorrector(mc_hits_key='mc_hits', mc_tracks_key='mc_tracks',
                                event_info_key='event_info')
         newblob = corr.process(self.blob)
         assert newblob['mc_hits'] is not None
