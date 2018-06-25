@@ -215,8 +215,6 @@ class Table(np.recarray):
 
         arr_dict = cls._expand_scalars(arr_dict)
         data = [arr_dict[key] for key in names]
-        if len(data) == 0:
-            return None
         return cls(np.rec.fromarrays(data, names=names, dtype=dtype), **kwargs)
 
     @classmethod
