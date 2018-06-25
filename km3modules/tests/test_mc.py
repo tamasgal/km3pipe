@@ -60,7 +60,7 @@ class TestMCConvert(TestCase):
 
     def test_process(self):
         corr = MCTimeCorrector(True, False, 
-                               hits_key='hits', event_info_key='event_info)
+                               hits_key='hits', event_info_key='event_info')
         newblob = corr.process(self.blob)
         assert newblob['hits'] is not None
         assert np.allclose(newblob['hits'].time, 3216.42) # TODO fix number
