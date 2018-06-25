@@ -37,7 +37,9 @@ class TestMCConvert(TestCase):
             
         self.blob = Blob({
             'event_info': self.event_info,
-            'mc_hits': self.mc_hits, })
+            'mc_hits': self.mc_hits, 
+            'mc_tracks': self.mc_tracks,
+        })
 
     def test_convert_mc_times_to_jte_times(self):
         times_mc_tracks = convert_mc_times_to_jte_times(
