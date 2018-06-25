@@ -26,15 +26,15 @@ __status__ = "Development"
 class TestMCConvert(TestCase):
     def setUp(self):
         self.event_info = Table({
-            'timestamp': 12.3 * 1e-6,
+            'timestamp': 888,
             'nanoseconds': 42,
-            'mc_time': 10000, })
+            'mc_time': 88849999269.5, })
             
         self.mc_tracks = Table({
-            'time': 42, })
+            'time': 1, })
             
         self.hits = Table({
-            'time': 874.42, })
+            'time': 88849999569.5, })
             
         self.blob = Blob({
             'event_info': self.event_info,
