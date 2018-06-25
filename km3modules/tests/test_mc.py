@@ -47,7 +47,8 @@ class TestMCConvert(TestCase):
             self.mc_hits.time, self.event_info.timestamp * 1e9 + 
             self.event_info.nanoseconds, self.event_info.mc_time)
 
-        assert times_mc_tracks is not None, assert times_mc_hits is not None
+        assert times_mc_tracks is not None
+        assert times_mc_hits is not None
         print(times_mc_tracks, times_mc_hits)
         assert np.allclose(times_mc_tracks, 49999781)
         assert np.allclose(times_mc_hits, 49999810.79)
@@ -58,5 +59,5 @@ class TestMCConvert(TestCase):
         newblob = corr.process(self.blob)
         assert newblob['mc_hits'] is not None
         assert newblob['mc_tracks'] is not None
-        assert np.allclose(newblob['mc_hits'].time, 49999810.79) # TODO fix number
-        assert np.allclose(newblob['mc_tracks'].time, 49999781) # TODO fix number
+        assert np.allclose(newblob['mc_hits'].time, 49999810.79)
+        assert np.allclose(newblob['mc_tracks'].time, 49999781)
