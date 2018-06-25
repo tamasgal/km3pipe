@@ -2,6 +2,8 @@ Unreleased changes
 ------------------
 
 * tohdf5.py: adds a hit time conversion option from JTE to MC time.
+* Fixes a crash where `jpp.TimeslicePump` had problem when reading 0 hit
+  timeslices
 
 
 Version 8
