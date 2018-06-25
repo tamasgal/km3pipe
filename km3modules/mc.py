@@ -121,15 +121,15 @@ class MCTimeCorrector(Module):
     event_info_key : str, optional
         Name of the EventInfo to store this in (default: 'EventInfo').
     """
-    def __init__(self, convert_hits_jte_t_to_mc_t_flag,
-                 convert_tracks_mc_t_to_jte_t_flag):
-        Module.__init__(self)
+    def configure(selfconvert_hits_jte_t_to_mc_t_flag,
+                  convert_tracks_mc_t_to_jte_t_flag):
+        # parse input
         self.convert_hits_jte_t_to_mc_t_flag = \
         convert_hits_jte_t_to_mc_t_flag
         self.convert_tracks_mc_t_to_jte_t_flag = \
         convert_tracks_mc_t_to_jte_t_flag
-
-    def configure(self):
+        
+        # get event_info, hits and mc_tracks key ; define conversion func
         self.event_info_key = self.get('event_info_key', default='EventInfo')
         if self.convert_hits_jte_t_to_mc_t_flag:
             self.hits_key = self.get('hits_key', default='Hits')
@@ -141,6 +141,7 @@ class MCTimeCorrector(Module):
             np.frompyfunc(convert_tracks_mc_t_to_jte_t, 3, 1)
 
     def process(self, blob):
+        # convert the hits / mc_tracks time
         event_info = blob[self.event_info_key]
         timestamp_in_ns = event_info.timestamp * 1e9 + event_info.nanoseconds
         
