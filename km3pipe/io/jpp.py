@@ -203,6 +203,8 @@ class TimeslicePump(Pump):
             self._channel_ids, self._dom_ids, self._times, self._tots
         )
 
+        group_id = 0 if total_hits > 0 else []
+
         hits = Table.from_template(
             {
                 'channel_id': self._channel_ids[:total_hits],
@@ -210,7 +212,7 @@ class TimeslicePump(Pump):
                 'time': self._times[:total_hits],
                 'tot': self._tots[:total_hits],
         # 'triggered': self._triggereds[:total_hits],  # dummy
-                'group_id': 0,    # slice_id will be set afterwards
+                'group_id': group_id,    # slice_id will be set afterwards
             },
             'TimesliceHits'
         )
