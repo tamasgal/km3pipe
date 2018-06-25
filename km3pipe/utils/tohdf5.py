@@ -21,9 +21,8 @@ Options:
                                     and memory usage.
                                     Strongly recommended if the table/array
                                     size is >= 100 MB. [default: 10000]
-    -c --conv-hits-time             Specifies, if the time of the hits in the 
-                                    file should be converted from JTE to 
-                                    MC time.
+    -t --conv-times-to-jte          Converts all MC times in the file to JTE
+                                    times.
 """
 
 from km3modules.common import StatusBar
@@ -41,7 +40,8 @@ __status__ = "Development"
 log = logger.get_logger('km3pipe.io')
 
 
-def tohdf5(input_files, output_file, n_events, conv_hits_time, **kwargs):
+def tohdf5(input_files, output_file, n_events, conv_times_to_jte,
+           **kwargs):
     """Convert Any file to HDF5 file"""
     from km3pipe import Pipeline    # noqa
     from km3pipe.io import GenericPump, HDF5Sink, HDF5MetaData    # noqa
@@ -50,7 +50,7 @@ def tohdf5(input_files, output_file, n_events, conv_hits_time, **kwargs):
     pipe.attach(GenericPump, filenames=input_files, **kwargs)
     pipe.attach(HDF5MetaData, data=kwargs)
     pipe.attach(StatusBar, every=250)
-    if conv_hits_time: 
+    if conv_times_to_jte: 
         from km3modules.mc import MCTimeCorrector
         pipe.attach(MCTimeCorrector)
     pipe.attach(HDF5Sink, filename=output_file, **kwargs)
@@ -87,12 +87,12 @@ def main():
     if is_debug:
         log.setLevel('DEBUG')
     ignore_hits_arg = args['--ignore-hits']
-    conv_hits_time = bool(args['--conv-hits-time'])
+    conv_times_to_jte = bool(args['--conv-times-to-jte'])
     tohdf5(
         infiles,
         outfile,
         n,
-        conv_hits_time,
+        conv_times_to_jte,
         use_jppy=use_jppy_pump,
         n_rows_expected=n_rows_expected,
         ignore_hits=bool(ignore_hits_arg),
