@@ -24,6 +24,9 @@ Options:
     -c --conv-hits-time             Specifies, if the time of the hits in the 
                                     file should be converted from JTE to 
                                     MC time.
+    -t --conv-tracks-time           Specifies, if the time of the mc_tracks in
+                                    the file should be converted from
+                                    MC to JTE time.
 """
 
 from km3modules.common import StatusBar
@@ -41,7 +44,8 @@ __status__ = "Development"
 log = logger.get_logger('km3pipe.io')
 
 
-def tohdf5(input_files, output_file, n_events, conv_hits_time, **kwargs):
+def tohdf5(input_files, output_file, n_events, conv_hits_time, conv_tracks_time,
+           **kwargs):
     """Convert Any file to HDF5 file"""
     from km3pipe import Pipeline    # noqa
     from km3pipe.io import GenericPump, HDF5Sink, HDF5MetaData    # noqa
@@ -50,9 +54,9 @@ def tohdf5(input_files, output_file, n_events, conv_hits_time, **kwargs):
     pipe.attach(GenericPump, filenames=input_files, **kwargs)
     pipe.attach(HDF5MetaData, data=kwargs)
     pipe.attach(StatusBar, every=250)
-    if conv_hits_time: 
+    if conv_hits_time or conv_tracks_time: 
         from km3modules.mc import MCTimeCorrector
-        pipe.attach(MCTimeCorrector)
+        pipe.attach(MCTimeCorrector(conv_hits_time, conv_tracks_time))
     pipe.attach(HDF5Sink, filename=output_file, **kwargs)
     pipe.drain(n_events)
 
@@ -88,11 +92,13 @@ def main():
         log.setLevel('DEBUG')
     ignore_hits_arg = args['--ignore-hits']
     conv_hits_time = bool(args['--conv-hits-time'])
+    conv_tracks_time = bool(args['--conv-tracks-time'])
     tohdf5(
         infiles,
         outfile,
         n,
         conv_hits_time,
+        conv_tracks_time,
         use_jppy=use_jppy_pump,
         n_rows_expected=n_rows_expected,
         ignore_hits=bool(ignore_hits_arg),
