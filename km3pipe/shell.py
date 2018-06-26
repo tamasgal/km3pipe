@@ -233,6 +233,11 @@ class Script(object):
     def clear(self):
         self.lines = []
 
+    def __add__(self, other):
+        new_script = Script()
+        new_script.lines = self.lines + other.lines
+        return new_script
+
     def __str__(self):
         return '\n'.join(self.lines)
 

@@ -12,9 +12,9 @@ import pytest
 from km3pipe import Table, Blob, Pipeline
 from km3pipe.testing import TestCase
 
-from km3modules.mc import convert_mctime, MCTimeCorrector
+from km3modules.mc import convert_mc_times_to_jte_times, MCTimeCorrector
 
-__author__ = "Moritz Lotze"
+__author__ = "Moritz Lotze, Michael Moser"
 __copyright__ = "Copyright 2018, Tamas Gal and the KM3NeT collaboration."
 __license__ = "MIT"
 __maintainer__ = "Tamas Gal, Moritz Lotze"
@@ -24,30 +24,42 @@ __status__ = "Development"
 
 class TestMCConvert(TestCase):
     def setUp(self):
-        self.info = Table({
-            'timestamp': 12.3 * 1e-6,
-            'nanoseconds': 42,
-            'mc_time': 10000,
-        })
-        self.hits = Table({
-            'time': 874.42,
-        })
+        self.event_info = Table({
+            'timestamp': 1,
+            'nanoseconds': 700000000,
+            'mc_time': 1.74999978e9, })
+            
+        self.mc_tracks = Table({
+            'time': 1, })
+            
+        self.mc_hits = Table({
+            'time': 30.79, })
+            
         self.blob = Blob({
-            'Info': self.info,
-            'Les_Hits': self.hits,
+            'event_info': self.event_info,
+            'mc_hits': self.mc_hits, 
+            'mc_tracks': self.mc_tracks,
         })
 
-    def test_convert(self):
-        times = convert_mctime(
-            self.hits, self.info.timestamp * 1e9 + self.info.nanoseconds,
-            self.info.mc_time
-        )
-        assert times is not None
-        print(times)
-        assert np.allclose(times, 3216.42)
+    def test_convert_mc_times_to_jte_times(self):
+        times_mc_tracks = convert_mc_times_to_jte_times(
+            self.mc_tracks.time, self.event_info.timestamp * 1e9 + 
+            self.event_info.nanoseconds, self.event_info.mc_time)
+        times_mc_hits = convert_mc_times_to_jte_times(
+            self.mc_hits.time, self.event_info.timestamp * 1e9 + 
+            self.event_info.nanoseconds, self.event_info.mc_time)
+
+        assert times_mc_tracks is not None
+        assert times_mc_hits is not None
+        print(times_mc_tracks, times_mc_hits)
+        assert np.allclose(times_mc_tracks, 49999781)
+        assert np.allclose(times_mc_hits, 49999810.79)
 
     def test_process(self):
-        corr = MCTimeCorrector(hits_key='Les_Hits', event_info_key='Info')
+        corr = MCTimeCorrector(mc_hits_key='mc_hits', mc_tracks_key='mc_tracks',
+                               event_info_key='event_info')
         newblob = corr.process(self.blob)
-        assert newblob['Les_Hits'] is not None
-        assert np.allclose(newblob['Les_Hits'].time, 3216.42)
+        assert newblob['mc_hits'] is not None
+        assert newblob['mc_tracks'] is not None
+        assert np.allclose(newblob['mc_hits'].time, 49999810.79)
+        assert np.allclose(newblob['mc_tracks'].time, 49999781)

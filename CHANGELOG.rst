@@ -1,10 +1,9 @@
 Unreleased changes
 ------------------
 
-* tohdf5.py: adds a hit time conversion option from JTE to MC time.
-* Fixes a crash where `jpp.TimeslicePump` had problem when reading 0 hit
-  timeslices
-
+* tohdf5.py: - adds a time conversion from mc time to jte time.
+* `kp.shell.Script` now implements addition, so you can concatenate multiple
+  scripts together
 
 Version 8
 ---------
