@@ -379,6 +379,7 @@ class HDF5Pump(Pump):
         self.cut_mask_node = self.get('cut_mask') or None
         self.cut_masks = defaultdict(list)
         self.indices = {}
+        self._singletons = {}
         if not self.filename and not self.filenames:
             raise ValueError("No filename(s) defined")
 
@@ -542,10 +543,16 @@ class HDF5Pump(Pump):
                     )
                     continue
             else:
-                self.log.warning(
-                    "No group_id or event_id found for '%s', "
-                    "skipping..." % h5loc
-                )
+                self.print("H5 singleton: {} ({})".format(tabname, h5loc))
+                if h5loc not in self._singletons:
+                    self._singletons[h5loc] = Table(
+                        tab.read(),
+                        h5loc=h5loc,
+                        split_h5=False,
+                        name=tabname,
+                        h5singleton=True
+                    )
+                blob[tabname] = self._singletons[h5loc]
                 continue
 
             self.log.debug("h5loc: '{}'".format(h5loc))
