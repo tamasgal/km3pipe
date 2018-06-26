@@ -30,7 +30,7 @@ from km3modules.common import StatusBar
 from km3pipe import version
 from km3pipe import logger
 
-__author__ = "Tamas Gal"
+__author__ = "Tamas Gal and Michael Moser"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
 __license__ = "MIT"
