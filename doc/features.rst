@@ -71,3 +71,21 @@ Pass the `Pipeline(timeit=True)` argument to show detailed time and CPU
   DOMHits - process: 3.839s (CPU 3.821s) - finish: 0.038s (CPU 0.038s)
     wall  mean: 0.007678s  medi: 0.007034s  min: 0.000944s  max: 0.075129s  std: 0.005830s
     CPU   mean: 0.007642s  medi: 0.007021s  min: 0.000945s  max: 0.074965s  std: 0.005801s
+
+
+Services
+--------
+
+Modules can provide services with can be used in the whole pipeline, without
+the need to attach anything to the blob.
+
+This part of the documentation is WIP, but the feature is there ;)
+
+Automatic HDF5 Writing
+----------------------
+
+The `Table` class has the attribute `h5loc` which can also be set upon initialisation.
+It is the target location in an HDF5 file if a `km3pipe.io.hdf5.HDF5Sink` is attached
+to the pipeline.
+Use this datastructure if you want to dump out your data into an HDF5 file.
+
