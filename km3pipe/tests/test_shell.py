@@ -72,3 +72,12 @@ class TestScript(TestCase):
         s = Script()
         s.iget("/path/to/file")
         self.assertEqual('iget -v "/path/to/file"', str(s))
+
+    def test_combining_scripts(self):
+        s1 = Script()
+        s2 = Script()
+        s1.add("a")
+        s1.add("b")
+        s2.add("c")
+        s2.add("d")
+        assert "a\nb\nc\nd" == str(s1 + s2)
