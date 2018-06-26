@@ -1,12 +1,15 @@
 Unreleased changes
 ------------------
 
-* tohdf5.py: - adds a time conversion from mc time to jte time.
-* `kp.shell.Script` now implements addition, so you can concatenate multiple
-  scripts together
 
 Version 8
 ---------
+
+8.1.4 / 2018-06-26
+~~~~~~~~~~~~~~~~~~
+* tohdf5.py: - adds a time conversion from mc time to jte time.
+* `kp.shell.Script` now implements addition, so you can concatenate multiple
+  scripts together
 
 8.1.3 / 2018-06-16
 ~~~~~~~~~~~~~~~~~~
