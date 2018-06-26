@@ -28,8 +28,9 @@ class TestDetx(TestCase):
         det = mock_detector.return_value
         det.n_doms = 1
         detx(1)
-        self.assertTrue(det.write.call_args[0][0]
-                        .startswith("KM3NeT_00000001_"))
+        self.assertTrue(
+            det.write.call_args[0][0].startswith("KM3NeT_00000001_")
+        )
         self.assertTrue(det.write.call_args[0][0].endswith(".detx"))
 
     @patch('km3pipe.cmd.Detector')

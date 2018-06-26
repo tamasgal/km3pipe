@@ -12,7 +12,6 @@ Note: to fit the landau distribution, you need to have ROOT and the
 """
 from __future__ import absolute_import, print_function, division
 
-
 import h5py
 import matplotlib.pyplot as plt
 import numpy as np
@@ -45,11 +44,14 @@ n_bs = 5
 q = 95
 
 ln_par, ln_lo, ln_up = bootstrap_fit(
-    stats.lognorm, resid, n_iter=n_bs, quant=q)
+    stats.lognorm, resid, n_iter=n_bs, quant=q
+)
 hc_par, hc_lo, hc_up = bootstrap_fit(
-    stats.halfcauchy, resid, n_iter=n_bs, quant=q)
+    stats.halfcauchy, resid, n_iter=n_bs, quant=q
+)
 gam_par, gam_lo, gam_up = bootstrap_fit(
-    stats.gamma, resid, n_iter=n_bs, quant=q)
+    stats.gamma, resid, n_iter=n_bs, quant=q
+)
 
 ##################################################################
 
@@ -78,8 +80,9 @@ if HAS_ROOT:
     try:
         p = fr.GetParams()
         land = np.array([ROOT.TMath.Landau(xi, p[0], p[1], True) for xi in x])
-        land_cdf = np.array(
-            [ROOT.ROOT.Math.landau_cdf(k, p[0], p[1]) for k in ex])
+        land_cdf = np.array([
+            ROOT.ROOT.Math.landau_cdf(k, p[0], p[1]) for k in ex
+        ])
     except AttributeError:
         # wtf this fails sometimes, idk, works on root6
         HAS_ROOT = False
@@ -116,7 +119,8 @@ if HAS_ROOT:
     axes[1, 0].plot(ex, 1 - land_cdf, label='Landau', color='blue')
 axes[1, 0].plot(ex, 1 - hc.cdf(ex), label='Half Cauchy')
 axes[1, 0].plot(
-    ex, 1 - ecdf.y, label='Empirical CDF', linewidth=3, linestyle='--')
+    ex, 1 - ecdf.y, label='Empirical CDF', linewidth=3, linestyle='--'
+)
 axes[1, 0].set_xscale('log')
 axes[1, 0].set_xlabel('x')
 axes[1, 0].set_ylabel('1 - CDF(x)')
@@ -127,7 +131,8 @@ if HAS_ROOT:
     axes[1, 1].loglog(ex, 1 - land_cdf, label='Landau', color='blue')
 axes[1, 1].loglog(ex, 1 - hc.cdf(ex), label='Half Cauchy')
 axes[1, 1].loglog(
-    ex, 1 - ecdf.y, label='Empirical CDF', linewidth=3, linestyle='--')
+    ex, 1 - ecdf.y, label='Empirical CDF', linewidth=3, linestyle='--'
+)
 axes[1, 1].set_xlabel('x')
 axes[1, 1].set_ylabel('1 - CDF(x)')
 axes[1, 1].legend()

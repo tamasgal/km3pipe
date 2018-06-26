@@ -47,8 +47,9 @@ def nodeinfo(node, print_titles=False):
             title = "'{}'".format(title)
     except AttributeError:
         title = None
-    return ", ".join(
-        [node for node in (pathname, title, n_rows_str) if node is not None])
+    return ", ".join([
+        node for node in (pathname, title, n_rows_str) if node is not None
+    ])
 
 
 def meta(h5):

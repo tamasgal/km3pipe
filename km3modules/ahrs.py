@@ -85,8 +85,11 @@ class AHRSCalibrator(kp.Module):
         """
         now = time.time()
         dom_ids = self.A.keys()
-        print("Calibrating AHRS from median A and H for {} DOMs.".format(
-            len(dom_ids)))
+        print(
+            "Calibrating AHRS from median A and H for {} DOMs.".format(
+                len(dom_ids)
+            )
+        )
         calibrations = {}
         for dom_id in dom_ids:
             print("Calibrating DOM ID {}".format(dom_id))
@@ -137,8 +140,11 @@ def fit_ahrs(A, H, Aoff, Arot, Hoff, Hrot):
     pitch = arctan2(Acal[0], np.sqrt(Acal[1] * Acal[1] + Acal[2] * Acal[2]))
     yaw = arctan2(
         Hcal[2] * sin(roll) - Hcal[1] * cos(roll),
-        sum((Hcal[0] * cos(pitch), Hcal[1] * sin(pitch) * sin(roll),
-             Hcal[2] * sin(pitch) * cos(roll))))
+        sum((
+            Hcal[0] * cos(pitch), Hcal[1] * sin(pitch) * sin(roll),
+            Hcal[2] * sin(pitch) * cos(roll)
+        ))
+    )
 
     yaw = np.degrees(yaw)
     while yaw < 0:

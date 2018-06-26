@@ -39,9 +39,11 @@ class EventPump(Pump):
         try:
             import jppy    # noqa
         except ImportError:
-            raise ImportError("\nEither Jpp or jppy could not be found."
-                              "\nMake sure you source the JPP environmanet "
-                              "and have jppy installed")
+            raise ImportError(
+                "\nEither Jpp or jppy could not be found."
+                "\nMake sure you source the JPP environmanet "
+                "and have jppy installed"
+            )
 
         self.event_index = self.get('index') or 0
         self.filename = self.require('filename')
@@ -84,8 +86,10 @@ class EventPump(Pump):
         if n > self.buf_size:
             self._resize_buffers(int(n * 3 / 2))
 
-        r.get_hits(self._channel_ids, self._dom_ids, self._times, self._tots,
-                   self._triggereds)
+        r.get_hits(
+            self._channel_ids, self._dom_ids, self._times, self._tots,
+            self._triggereds
+        )
 
         hit_series = Table.from_template({
             'channel_id': self._channel_ids[:n],
@@ -148,12 +152,15 @@ class TimeslicePump(Pump):
         try:
             import jppy    # noqa
         except ImportError:
-            raise ImportError("\nEither Jpp or jppy could not be found."
-                              "\nMake sure you source the JPP environmanet "
-                              "and have jppy installed")
+            raise ImportError(
+                "\nEither Jpp or jppy could not be found."
+                "\nMake sure you source the JPP environmanet "
+                "and have jppy installed"
+            )
         stream = 'JDAQTimeslice' + stream
         self.r = jppy.daqtimeslicereader.PyJDAQTimesliceReader(
-            fname.encode(), stream.encode())
+            fname.encode(), stream.encode()
+        )
         self.n_timeslices = self.r.n_timeslices
 
         self.buf_size = 5000
@@ -171,14 +178,13 @@ class TimeslicePump(Pump):
         while slice_id < self.n_timeslices:
             blob = Blob()
             self.r.retrieve_timeslice(slice_id)
-            timeslice_info = Table.from_template(
-                {
-                    'frame_index': self.r.frame_index,
-                    'slice_id': slice_id,
-                    'timestamp': self.r.utc_seconds,
-                    'nanoseconds': self.r.utc_nanoseconds,
-                    'n_frames': self.r.n_frames,
-                }, 'TimesliceInfo')
+            timeslice_info = Table.from_template({
+                'frame_index': self.r.frame_index,
+                'slice_id': slice_id,
+                'timestamp': self.r.utc_seconds,
+                'nanoseconds': self.r.utc_nanoseconds,
+                'n_frames': self.r.n_frames,
+            }, 'TimesliceInfo')
             hits = self._extract_hits()
             hits.slice_id = slice_id
             blob['TimesliceInfo'] = timeslice_info
@@ -193,8 +199,11 @@ class TimeslicePump(Pump):
             buf_size = int(total_hits * 3 / 2)
             self._resize_buffers(buf_size)
 
-        self.r.get_hits(self._channel_ids, self._dom_ids, self._times,
-                        self._tots)
+        self.r.get_hits(
+            self._channel_ids, self._dom_ids, self._times, self._tots
+        )
+
+        group_id = 0 if total_hits > 0 else []
 
         hits = Table.from_template(
             {
@@ -203,9 +212,10 @@ class TimeslicePump(Pump):
                 'time': self._times[:total_hits],
                 'tot': self._tots[:total_hits],
         # 'triggered': self._triggereds[:total_hits],  # dummy
-                'group_id': 0,    # slice_id will be set afterwards
+                'group_id': group_id,    # slice_id will be set afterwards
             },
-            'TimesliceHits')
+            'TimesliceHits'
+        )
         return hits
 
     def _resize_buffers(self, buf_size):
@@ -240,9 +250,11 @@ class SummaryslicePump(Pump):
         try:
             from jppy.daqsummaryslicereader import PyJDAQSummarysliceReader
         except ImportError:
-            raise ImportError("\nEither Jpp or jppy could not be found."
-                              "\nMake sure you source the JPP environmanet "
-                              "and have jppy installed")
+            raise ImportError(
+                "\nEither Jpp or jppy could not be found."
+                "\nMake sure you source the JPP environmanet "
+                "and have jppy installed"
+            )
         self.r = PyJDAQSummarysliceReader(filename.encode())
 
     def process(self, blob):
@@ -254,14 +266,13 @@ class SummaryslicePump(Pump):
             summary_slice = {}
             self.r.retrieve_next_summaryslice()
             blob = Blob()
-            summaryslice_info = Table.from_template(
-                {
-                    'frame_index': self.r.frame_index,
-                    'slice_id': slice_id,
-                    'timestamp': self.r.utc_seconds,
-                    'nanoseconds': self.r.utc_nanoseconds,
-                    'n_frames': self.r.n_frames,
-                }, 'SummarysliceInfo')
+            summaryslice_info = Table.from_template({
+                'frame_index': self.r.frame_index,
+                'slice_id': slice_id,
+                'timestamp': self.r.utc_seconds,
+                'nanoseconds': self.r.utc_nanoseconds,
+                'n_frames': self.r.n_frames,
+            }, 'SummarysliceInfo')
             blob['SummarysliceInfo'] = summaryslice_info
             while self.r.has_next_frame:
                 rates = np.zeros(31, dtype='f8')
@@ -306,9 +317,11 @@ class FitPump(Pump):
         try:
             import jppy    # noqa
         except ImportError:
-            raise ImportError("\nEither Jpp or jppy could not be found."
-                              "\nMake sure you source the JPP environmanet "
-                              "and have jppy installed")
+            raise ImportError(
+                "\nEither Jpp or jppy could not be found."
+                "\nMake sure you source the JPP environmanet "
+                "and have jppy installed"
+            )
 
         self.event_index = self.get('index') or 0
         self.filename = self.require('filename')
@@ -373,20 +386,19 @@ class FitPump(Pump):
             self._qualities,
             self._energies,
         )
-        fit_collection = Table(
-            {
-                'pos_x': self._pos_xs[:n],
-                'pos_y': self._pos_ys[:n],
-                'pos_z': self._pos_zs[:n],
-                'dir_x': self._dir_xs[:n],
-                'dir_y': self._dir_ys[:n],
-                'dir_z': self._dir_zs[:n],
-                'ndf': self._ndfs[:n],
-                'time': self._times[:n],
-                'quality': self._qualities[:n],
-                'energy': self._energies[:n],
-            },
-            h5loc='/jfit')
+        fit_collection = Table({
+            'pos_x': self._pos_xs[:n],
+            'pos_y': self._pos_ys[:n],
+            'pos_z': self._pos_zs[:n],
+            'dir_x': self._dir_xs[:n],
+            'dir_y': self._dir_ys[:n],
+            'dir_z': self._dir_zs[:n],
+            'ndf': self._ndfs[:n],
+            'time': self._times[:n],
+            'quality': self._qualities[:n],
+            'energy': self._energies[:n],
+        },
+                               h5loc='/jfit')
         fit_collection = fit_collection.append_columns(['event_id'],
                                                        [self.event_index])
 

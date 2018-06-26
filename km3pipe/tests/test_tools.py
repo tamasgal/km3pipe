@@ -7,9 +7,10 @@ from io import StringIO
 import numpy as np
 
 from km3pipe.testing import TestCase
-from km3pipe.tools import (unpack_nfirst, split, namedtuple_with_defaults,
-                           remain_file_pointer, decamelise, camelise, issorted,
-                           lstrip, chunks, is_coherent, istype)
+from km3pipe.tools import (
+    unpack_nfirst, split, namedtuple_with_defaults, remain_file_pointer,
+    decamelise, camelise, issorted, lstrip, chunks, is_coherent, istype
+)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

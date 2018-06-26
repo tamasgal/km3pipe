@@ -27,7 +27,8 @@ pipe.attach(
     port=5553,
     tags='IO_TSL, IO_MONIT',
     timeout=7 * 60 * 60 * 24,
-    max_queue=42)
+    max_queue=42
+)
 pipe.attach(kp.io.ch.CHTagger)
 pipe.attach(StatusBar, every=1000)
 pipe.attach(MemoryObserver, every=5000)

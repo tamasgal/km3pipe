@@ -41,8 +41,10 @@ def main():
     token = config.get("Pushover", "token")
     user_key = config.get("Pushover", "user_key")
     if token is None or user_key is None:
-        print("Please define your 'token' and 'user_key' in the "
-              "'Pushover' section of your ~/.km3net configuration.")
+        print(
+            "Please define your 'token' and 'user_key' in the "
+            "'Pushover' section of your ~/.km3net configuration."
+        )
         exit(1)
 
     conn = httplib.HTTPSConnection("api.pushover.net:443")
@@ -52,6 +54,7 @@ def main():
             "token": token,
             "user": user_key,
             "message": ' '.join(args["MESSAGE"]),
-        }), {"Content-type": "application/x-www-form-urlencoded"})
+        }), {"Content-type": "application/x-www-form-urlencoded"}
+    )
 
     conn.getresponse()

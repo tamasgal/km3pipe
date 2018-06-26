@@ -86,13 +86,14 @@ class TriggerMap(kp.Module):
             aspect='auto',
             origin='lower',
             zorder=3,
-            norm=LogNorm(vmin=1, vmax=np.amax(hit_mat)))
+            norm=LogNorm(vmin=1, vmax=np.amax(hit_mat))
+        )
         yticks = np.arange(self.n_doms * self.n_dus)
         ytick_label_templ = "DU{0:.0f}-DOM{1:02d}" if self.du else "DOM{1:02d}"
         ytick_labels = [
             ytick_label_templ.format(
-                np.ceil((y + 1) / self.n_doms), y % (self.n_doms) + 1)
-            for y in yticks
+                np.ceil((y + 1) / self.n_doms), y % (self.n_doms) + 1
+            ) for y in yticks
         ]
         ax.set_yticks(yticks)
         ax.set_yticklabels(ytick_labels)
@@ -120,5 +121,6 @@ if __name__ == '__main__':
         detector=det,
         du=du,
         plot_filename=args['-p'],
-        subtitle=args['FILENAME'])
+        subtitle=args['FILENAME']
+    )
     pipe.drain()

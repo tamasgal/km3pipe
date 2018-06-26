@@ -8,10 +8,11 @@ import pytest
 from scipy import stats
 
 from km3pipe.testing import TestCase
-from km3pipe.stats import (loguniform, rv_kde, mad, mad_std,
-                           drop_zero_variance, param_names, perc, resample_1d,
-                           bootstrap_params, param_describe, bootstrap_fit,
-                           hist2d, bincenters)
+from km3pipe.stats import (
+    loguniform, rv_kde, mad, mad_std, drop_zero_variance, param_names, perc,
+    resample_1d, bootstrap_params, param_describe, bootstrap_fit, hist2d,
+    bincenters
+)
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
 __copyright__ = "Copyright 2016, KM3Pipe devs and the KM3NeT collaboration."
@@ -127,7 +128,8 @@ class TestPerc(TestCase):
         ])
         assert np.allclose(perc(arr), [-2.1253, 1.1598])
         assert np.allclose(
-            perc(arr, interpolation='nearest'), [arr[0], arr[-1]])
+            perc(arr, interpolation='nearest'), [arr[0], arr[-1]]
+        )
 
 
 class TestVariance(TestCase):
@@ -171,14 +173,17 @@ class TestBootstrapFit(TestCase):
     def test_raw(self):
         arr = np.array([1, 1, 2, 2, 4, 6, 9])
         pars = bootstrap_params(
-            stats.norm, arr, n_iter=500, random_state=RandomState(self.seed))
+            stats.norm, arr, n_iter=500, random_state=RandomState(self.seed)
+        )
         assert np.allclose(
-            np.mean(pars, axis=0), [np.mean(arr), np.std(arr)], atol=.5)
+            np.mean(pars, axis=0), [np.mean(arr), np.std(arr)], atol=.5
+        )
 
     def test_param_describe(self):
         arr = np.array([1, 1, 2, 2, 4, 6, 9])
         pars = bootstrap_params(
-            stats.norm, arr, n_iter=500, random_state=RandomState(self.seed))
+            stats.norm, arr, n_iter=500, random_state=RandomState(self.seed)
+        )
         desc = param_describe(pars)
         assert desc is not None
         assert len(desc) == 3
@@ -187,7 +192,8 @@ class TestBootstrapFit(TestCase):
     def test_full(self):
         arr = np.array([1, 1, 2, 2, 4, 6, 9])
         fits = bootstrap_fit(
-            stats.norm, arr, n_iter=500, random_state=RandomState(self.seed))
+            stats.norm, arr, n_iter=500, random_state=RandomState(self.seed)
+        )
         assert np.allclose(fits['mean'], [np.mean(arr), np.std(arr)], atol=.5)
 
 
@@ -199,7 +205,8 @@ class TestHist2D(TestCase):
 
     def test_pdf(self):
         hist = np.histogram2d(
-            self.sample[:, 0], self.sample[:, 1], normed=True, bins=self.bins)
+            self.sample[:, 0], self.sample[:, 1], normed=True, bins=self.bins
+        )
         h = hist2d(hist)
         assert h.H.shape == (2, 2)
         assert h.H_pad.shape == (4, 4)
@@ -208,9 +215,11 @@ class TestHist2D(TestCase):
 
     def test_norm(self):
         hist1 = np.histogram2d(
-            self.sample[:, 0], self.sample[:, 1], normed=True, bins=self.bins)
+            self.sample[:, 0], self.sample[:, 1], normed=True, bins=self.bins
+        )
         hist2 = np.histogram2d(
-            self.sample[:, 0], self.sample[:, 1], normed=False, bins=self.bins)
+            self.sample[:, 0], self.sample[:, 1], normed=False, bins=self.bins
+        )
         h1 = hist2d(hist1)
         h2 = hist2d(hist2)
 

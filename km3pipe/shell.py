@@ -6,7 +6,6 @@ Some shell helpers
 """
 from __future__ import absolute_import, print_function, division
 
-
 import os
 import subprocess
 
@@ -23,7 +22,8 @@ __status__ = "Development"
 
 log = get_logger(__name__)    # pylint: disable=C0103
 
-JOB_TEMPLATE = lstrip("""
+JOB_TEMPLATE = lstrip(
+    """
     #$ -N {job_name}
     #$ -M {email}
     ## Send mail at: start (b), completion (e), never (n)
@@ -59,7 +59,8 @@ JOB_TEMPLATE = lstrip("""
     echo "========================================================"
     echo "JAWOLLJA! Job exited on" $(date)
     echo "========================================================"
-""")
+"""
+)
 
 
 def qsub(script, job_name, dryrun=False, *args, **kwargs):
@@ -68,37 +69,42 @@ def qsub(script, job_name, dryrun=False, *args, **kwargs):
     job_string = gen_job(script=script, job_name=job_name, *args, **kwargs)
     env = os.environ.copy()
     if dryrun:
-        print("This is a dry run! Here is the generated job file, which will "
-              "not be submitted:")
+        print(
+            "This is a dry run! Here is the generated job file, which will "
+            "not be submitted:"
+        )
         print(job_string)
     else:
         print("Calling qsub with the generated job script.")
         p = subprocess.Popen(
-            'qsub -V', stdin=subprocess.PIPE, env=env, shell=True)
+            'qsub -V', stdin=subprocess.PIPE, env=env, shell=True
+        )
         p.communicate(input=bytes(job_string.encode('ascii')))
 
 
-def gen_job(script,
-            job_name,
-            log_path='qlogs',
-            group='km3net',
-            platform='cl7',
-            walltime='00:10:00',
-            vmem='8G',
-            fsize='8G',
-            shell=None,
-            email=None,
-            send_mail='n',
-            job_array_start=1,
-            job_array_stop=None,
-            job_array_step=1,
-            irods=False,
-            sps=True,
-            hpss=False,
-            xrootd=False,
-            dcache=False,
-            oracle=False,
-            split_array_logs=False):
+def gen_job(
+        script,
+        job_name,
+        log_path='qlogs',
+        group='km3net',
+        platform='cl7',
+        walltime='00:10:00',
+        vmem='8G',
+        fsize='8G',
+        shell=None,
+        email=None,
+        send_mail='n',
+        job_array_start=1,
+        job_array_stop=None,
+        job_array_step=1,
+        irods=False,
+        sps=True,
+        hpss=False,
+        xrootd=False,
+        dcache=False,
+        oracle=False,
+        split_array_logs=False
+):
     """Generate a job script."""
     if shell is None:
         shell = os.environ['SHELL']
@@ -136,7 +142,8 @@ def gen_job(script,
         shell=shell,
         platform=platform,
         job_array_option=job_array_option,
-        task_name=task_name)
+        task_name=task_name
+    )
     return job_string
 
 
@@ -177,9 +184,9 @@ def get_jpp_env(jpp_dir):
     env = {
         v[0]: ''.join(v[1:])
         for v in [
-            l.split('=') for l in os.popen("source {0}/setenv.sh {0} && env"
-                                           .format(jpp_dir)).read().split('\n')
-            if '=' in l
+            l.split('=') for l in
+            os.popen("source {0}/setenv.sh {0} && env"
+                     .format(jpp_dir)).read().split('\n') if '=' in l
         ]
     }
     return env
@@ -225,6 +232,11 @@ class Script(object):
 
     def clear(self):
         self.lines = []
+
+    def __add__(self, other):
+        new_script = Script()
+        new_script.lines = self.lines + other.lines
+        return new_script
 
     def __str__(self):
         return '\n'.join(self.lines)

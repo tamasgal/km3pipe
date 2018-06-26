@@ -47,21 +47,29 @@ class TriggerContributionCalculator(kp.Module):
         return blob
 
     def finish(self):
-        print("{}\n{:>12}  {:>4} {:>4}  {:>12}\n{}".format(
-            "=" * 42, "DOM ID", "du", "floor", "trig. contr.", "-" * 42))
+        print(
+            "{}\n{:>12}  {:>4} {:>4}  {:>12}\n{}".format(
+                "=" * 42, "DOM ID", "du", "floor", "trig. contr.", "-" * 42
+            )
+        )
         summary = []
         for dom_id, trigger_contribution in self.trigger_contributions.items():
             du, floor = omkey(dom_id)
             mean_tc = np.sum(trigger_contribution) / self.n_events
             summary.append(((du, floor), dom_id, mean_tc))
         for (du, floor), dom_id, mean_tc in sorted(summary):
-            print("{:>12}  {:>4} {:>4}  {:>12.2f}%".format(
-                dom_id, du, floor, mean_tc * 100))
+            print(
+                "{:>12}  {:>4} {:>4}  {:>12.2f}%".format(
+                    dom_id, du, floor, mean_tc * 100
+                )
+            )
 
         dom_ids = set(det.doms.keys())
         if self.dus is not None:
-            log.warning("Showing only DOMs which are on the following DUs: {}"
-                        .format(', '.join(str(du) for du in self.dus)))
+            log.warning(
+                "Showing only DOMs which are on the following DUs: {}"
+                .format(', '.join(str(du) for du in self.dus))
+            )
             dom_ids = set(d for d in dom_ids if det.doms[d][0] in self.dus)
 
         inactive_doms = []

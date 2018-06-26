@@ -10,7 +10,6 @@ A module to send live log messages to a log.io server.
 """
 from __future__ import absolute_import, print_function, division
 
-
 # Author: Tamas Gal <tgal@km3net.de>
 # License: MIT
 import socket
@@ -41,8 +40,11 @@ class LogIO(Module):
             source = "DataQueue"
         if " W0" in data:
             source = "DataWriter"
-        self.sock.send("+log|{0}|Portopalo DAQ|{1}|{2}\r\n".format(
-            source, log_level, data))
+        self.sock.send(
+            "+log|{0}|Portopalo DAQ|{1}|{2}\r\n".format(
+                source, log_level, data
+            )
+        )
         return blob
 
     def finish(self):
@@ -56,6 +58,7 @@ pipe.attach(
     port=5553,
     tags='MSG',
     timeout=60 * 60 * 24,
-    max_queue=500)
+    max_queue=500
+)
 pipe.attach(LogIO)
 pipe.drain()

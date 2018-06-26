@@ -230,11 +230,10 @@ plt.title('Zenith Reconstruction Difference for lambda < {}'.format(l))
 fig, ax = plt.subplots()
 for l in [100, 5, 2, 1, 0.1]:
     l_cut = gandalfs['lambda'] < l
-    ax.hist(
-        (primaries.zenith - gandalfs.zenith)[l_cut].dropna(),
-        bins=100,
-        label=r"$\lambda$ = {}".format(l),
-        alpha=.7)
+    ax.hist((primaries.zenith - gandalfs.zenith)[l_cut].dropna(),
+            bins=100,
+            label=r"$\lambda$ = {}".format(l),
+            alpha=.7)
 plt.xlabel(r'true zenith - reconstructed zenith [rad]')
 plt.ylabel('count')
 plt.legend()
@@ -276,17 +275,20 @@ plt.plot(
     x,
     cauchy(c_loc, c_gamma).pdf(x),
     label='Lorentz: FWHM $=${:.3f}'.format(fwhm),
-    linewidth=2)
+    linewidth=2
+)
 plt.plot(
     x,
     norm(g_mu_bad, g_sigma_bad).pdf(x),
     label='Unrestricted Gauss: $\sigma =$ {:.3f}'.format(g_sigma_bad),
-    linewidth=2)
+    linewidth=2
+)
 plt.plot(
     x,
     norm(g_mu, g_sigma).pdf(x),
     label='+- 10 deg Gauss: $\sigma =$ {:.3f}'.format(g_sigma),
-    linewidth=2)
+    linewidth=2
+)
 plt.xlim(-pi / 4, pi / 4)
 plt.xlabel('Zenith residuals / deg')
 plt.legend()

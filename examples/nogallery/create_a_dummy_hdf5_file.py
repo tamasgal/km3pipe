@@ -19,7 +19,8 @@ class APump(kp.Pump):
             data2,
             h5loc='/columnwise',
             split_h5=True,
-            name='Column-wise Split')
+            name='Column-wise Split'
+        )
         self.index += 1
         return blob
 

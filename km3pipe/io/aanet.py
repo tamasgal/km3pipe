@@ -137,19 +137,20 @@ class AanetPump(Pump):
         mc_id = event.frame_index - 1
         # run_id = self._get_run_id()
         wgt1, wgt2, wgt3, wgt4 = self._parse_wgts(event.w)
-        info = Table(
-            {
-                'event_id': event_id,
-                'mc_id': mc_id,
-        # 'run_id': run_id,         # TODO
-                'weight_w1': wgt1,
-                'weight_w2': wgt2,
-                'weight_w3': wgt3,
-                'weight_w4': wgt4,
-                'group_id': self.group_id,
-            },
-            h5loc='/event_info',
-            name='EventInfo')
+        tab_data = {
+            'event_id': event_id,
+            'mc_id': mc_id,
+            'run_id': event.run_id,  # TODO: this may segfault in aanet (yeah!)
+            'weight_w1': wgt1,
+            'weight_w2': wgt2,
+            'weight_w3': wgt3,
+            'weight_w4': wgt4,
+            'group_id': self.group_id,
+        }
+        tab_data['timestamp'] = event.t.GetSec()
+        tab_data['nanoseconds'] = event.t.GetNanoSec()
+        tab_data['mc_time'] = event.mc_t
+        info = Table(tab_data, h5loc='/event_info', name='EventInfo')
         return info
 
     @staticmethod
@@ -173,14 +174,18 @@ class AanetPump(Pump):
                 trk_name = RECO2NAME[trk_type]
             except KeyError:
                 trk_name = "Generic_Track_#{}".format(i)
-                self.log.warn("Unknown Reconstruction type! "
-                              "Setting to '{}'".format(trk_name))
+                self.log.warn(
+                    "Unknown Reconstruction type! "
+                    "Setting to '{}'".format(trk_name)
+                )
             trk_dict = self._read_track(trk)
             out[trk_name].append(
                 Table(
                     trk_dict,
                     h5loc='/reco/{}'.format(trk_name.lower()),
-                    name=trk_name))
+                    name=trk_name
+                )
+            )
         for key in out:
             name = out[key][0].name
             h5loc = out[key][0].h5loc
@@ -282,12 +287,16 @@ class AanetPump(Pump):
                         elem_name = tags[key][j]
                     except IndexError:
                         elem_name = '{}_{}'.format(key, j)
-                        log.info("Can't infer field name, "
-                                 "setting to '{}'...".format(elem_name))
+                        log.info(
+                            "Can't infer field name, "
+                            "setting to '{}'...".format(elem_name)
+                        )
                 else:
                     elem_name = '{}_{}'.format(key, j)
-                    log.info("Can't infer field name, "
-                             "setting to '{}'...".format(elem_name))
+                    log.info(
+                        "Can't infer field name, "
+                        "setting to '{}'...".format(elem_name)
+                    )
                 out[key][elem_name] = elem
         return out
 

@@ -58,19 +58,23 @@ class CHPump(Pump):
         self.thread = None
 
         if self.subscription_mode == 'all':
-            self.log.warning("You subscribed to the ligier in 'all'-mode! "
-                             "If you are too slow with data processing, "
-                             "you will block other clients. "
-                             "If you don't understand this message "
-                             "and are running this code on a DAQ machine, "
-                             "consult a DAQ expert now and stop this script.")
+            self.log.warning(
+                "You subscribed to the ligier in 'all'-mode! "
+                "If you are too slow with data processing, "
+                "you will block other clients. "
+                "If you don't understand this message "
+                "and are running this code on a DAQ machine, "
+                "consult a DAQ expert now and stop this script."
+            )
 
-        print("Connecting to {0} on port {1}\n"
-              "Subscribed tags: {2}\n"
-              "Connection timeout: {3}s\n"
-              "Maximum queue size for incoming data: {4}".format(
-                  self.host, self.port, self.tags, self.timeout,
-                  self.max_queue))
+        print(
+            "Connecting to {0} on port {1}\n"
+            "Subscribed tags: {2}\n"
+            "Connection timeout: {3}s\n"
+            "Maximum queue size for incoming data: {4}".format(
+                self.host, self.port, self.tags, self.timeout, self.max_queue
+            )
+        )
 
         self._init_controlhost()
         self._start_thread()
@@ -111,8 +115,10 @@ class CHPump(Pump):
                 log.error("Buffer error in Ligier stream, aborting...")
                 break
             if not data:
-                log.critical("No data received, connection died.\n" +
-                             "Trying to reconnect in 30 seconds.")
+                log.critical(
+                    "No data received, connection died.\n" +
+                    "Trying to reconnect in 30 seconds."
+                )
                 time.sleep(30)
                 try:
                     log.debug("Reinitialising new CH connection.")
@@ -121,8 +127,10 @@ class CHPump(Pump):
                     log.error("Failed to connect to host.")
                 continue
             if current_qsize > self.max_queue:
-                self.cuckoo_warn("Maximum queue size ({0}) reached, "
-                                 "dropping data.".format(self.max_queue))
+                self.cuckoo_warn(
+                    "Maximum queue size ({0}) reached, "
+                    "dropping data.".format(self.max_queue)
+                )
             else:
                 log.debug("Filling data into queue.")
                 self.queue.put((prefix, data))
@@ -136,8 +144,9 @@ class CHPump(Pump):
             prefix, data = self.queue.get(timeout=self.timeout)
             log.debug("Got {0} bytes from queue.".format(len(data)))
         except Empty:
-            log.warning("ControlHost timeout ({0}s) reached"
-                        .format(self.timeout))
+            log.warning(
+                "ControlHost timeout ({0}s) reached".format(self.timeout)
+            )
             raise StopIteration("ControlHost timeout reached.")
         blob[self.key_for_prefix] = prefix
         blob[self.key_for_data] = data
@@ -147,8 +156,10 @@ class CHPump(Pump):
         dt = np.mean(self.packet_dt) - np.mean(self.process_dt)
         current_qsize = self.queue.qsize()
         log_func = print if dt > 0 else log.warning
-        log_func("Average idle time per packet: {0:.3f}us (queue size: {1})"
-                 .format(dt * 1e6, current_qsize))
+        log_func(
+            "Average idle time per packet: {0:.3f}us (queue size: {1})"
+            .format(dt * 1e6, current_qsize)
+        )
 
     def _add_process_dt(self):
         now = time.time()

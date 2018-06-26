@@ -71,12 +71,14 @@ class H5Chain(object):
                 try:
                     tab = h5.get_node(key)[:]
                 except KeyError as ke:
-                    self.log.error('{} does not exist in {}!'.format(
-                        key, fname))
+                    self.log.error(
+                        '{} does not exist in {}!'.format(key, fname)
+                    )
                     raise ke
                 except tb.exceptions.NodeError as ne:
-                    self.log.error('{} does not exist in {}!'.format(
-                        key, fname))
+                    self.log.error(
+                        '{} does not exist in {}!'.format(key, fname)
+                    )
                     raise ne
             self.log.debug("Table shape: {}".format(tab.shape))
             df = pd.DataFrame(tab)
@@ -164,13 +166,15 @@ def df_to_h5(df, h5file, where, **kwargs):
     write_table(df.to_records(index=False), h5file, where, **kwargs)
 
 
-def write_table(array,
-                h5file,
-                where,
-                force=False,
-                filters=None,
-                createparents=True,
-                **kwargs):
+def write_table(
+        array,
+        h5file,
+        where,
+        force=False,
+        filters=None,
+        createparents=True,
+        **kwargs
+):
     """Write a structured numpy array into a H5 table.
     """
     own_h5 = False
@@ -186,14 +190,17 @@ def write_table(array,
         try:
             h5file.remove_node(loc, tabname, recursive=True)
         except tb.NoSuchNodeError:
-            log.warn('Force -> Trying to remove+rewrite of table at {}, {}, '
-                     'but it did not previously exists.'.format(loc, tabname))
+            log.warn(
+                'Force -> Trying to remove+rewrite of table at {}, {}, '
+                'but it did not previously exists.'.format(loc, tabname)
+            )
     h5file.create_table(
         loc,
         tabname,
         obj=array,
         createparents=createparents,
         filters=filters,
-        **kwargs)
+        **kwargs
+    )
     if own_h5:
         h5file.close()

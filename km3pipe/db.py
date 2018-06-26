@@ -20,15 +20,18 @@ except ImportError:
     SKIP_SIGNATURE_HINTS = True
 try:
     from urllib.parse import urlencode, unquote
-    from urllib.request import (Request, build_opener, urlopen,
-                                HTTPCookieProcessor, HTTPHandler)
+    from urllib.request import (
+        Request, build_opener, urlopen, HTTPCookieProcessor, HTTPHandler
+    )
     from urllib.error import URLError, HTTPError
     from io import StringIO
     from http.client import IncompleteRead
 except ImportError:
     from urllib import urlencode, unquote
-    from urllib2 import (Request, build_opener, urlopen, HTTPCookieProcessor,
-                         HTTPHandler, URLError, HTTPError)
+    from urllib2 import (
+        Request, build_opener, urlopen, HTTPCookieProcessor, HTTPHandler,
+        URLError, HTTPError
+    )
     from StringIO import StringIO
     from httplib import IncompleteRead
 
@@ -80,8 +83,9 @@ def make_empty_dataset():
 class DBManager(object):
     """A wrapper for the KM3NeT Web DB"""
 
-    def __init__(self, username=None, password=None, url=None,
-                 temporary=False):
+    def __init__(
+            self, username=None, password=None, url=None, temporary=False
+    ):
         "Create database connection"
         self._cookies = []
         self._parameters = None
@@ -102,7 +106,8 @@ class DBManager(object):
 
         if not temporary and we_are_in_lyon():
             self.restore_session(
-                "sid=_kmcprod_134.158_lyo7783844001343100343mcprod1223user")
+                "sid=_kmcprod_134.158_lyo7783844001343100343mcprod1223user"
+            )
             return
 
         if username is not None and password is not None:
@@ -141,15 +146,17 @@ class DBManager(object):
             dataframe = read_csv(content)
         except ValueError:
             log.warning(
-                "Empty dataset")    # ...probably. Waiting for more info
+                "Empty dataset"
+            )    # ...probably. Waiting for more info
             return make_empty_dataset()
         else:
             add_datetime(dataframe)
             try:
                 self._add_converted_units(dataframe, parameter)
             except KeyError:
-                log.warning("Could not add converted units for {0}"
-                            .format(parameter))
+                log.warning(
+                    "Could not add converted units for {0}".format(parameter)
+                )
             return dataframe
 
     def run_table(self, det_id='D_ARCA001'):
@@ -208,8 +215,10 @@ class DBManager(object):
 
     def trigger_setup(self, runsetup_oid):
         "Retrieve the trigger setup for a given runsetup OID"
-        r = self._get_content("jsonds/rslite/s?rs_oid={}&upifilter=1.1.2.2.3/*"
-                              .format(runsetup_oid))
+        r = self._get_content(
+            "jsonds/rslite/s?rs_oid={}&upifilter=1.1.2.2.3/*"
+            .format(runsetup_oid)
+        )
         data = json.loads(r)['Data']
         if not data:
             log.error("Empty dataset.")
@@ -244,8 +253,9 @@ class DBManager(object):
                 val = param['Val']
             acoustic_df[pname] = val
 
-        return TriggerSetup(runsetup_oid, name, det_id, description,
-                            optical_df, acoustic_df)
+        return TriggerSetup(
+            runsetup_oid, name, det_id, description, optical_df, acoustic_df
+        )
 
     @property
     def doms(self):
@@ -296,7 +306,8 @@ class DBManager(object):
             dataframe = read_csv(content)
         except ValueError:
             log.warning(
-                "Empty dataset")    # ...probably. Waiting for more info
+                "Empty dataset"
+            )    # ...probably. Waiting for more info
             return make_empty_dataset()
         else:
             add_datetime(dataframe)
@@ -333,8 +344,10 @@ class DBManager(object):
         try:
             content = f.read()
         except IncompleteRead as icread:
-            log.critical("Incomplete data received from the DB, " +
-                         "the data could be corrupted.")
+            log.critical(
+                "Incomplete data received from the DB, " +
+                "the data could be corrupted."
+            )
             content = icread.partial
         log.debug("Got {0} bytes of data.".format(len(content)))
         return content.decode('utf-8')
@@ -361,7 +374,8 @@ class DBManager(object):
         """Request cookie for permanent session token."""
         log.debug("Requesting SID cookie")
         target_url = self._login_url + '?usr={0}&pwd={1}&persist=y'.format(
-            username, password)
+            username, password
+        )
         cookie = urlopen(target_url).read()
         return cookie
 
@@ -451,8 +465,9 @@ def add_datetime(dataframe, timestamp_key='UNIXTIME'):
 class StreamDS(object):
     """Access to the streamds data stored in the KM3NeT database."""
 
-    def __init__(self, username=None, password=None, url=None,
-                 temporary=False):
+    def __init__(
+            self, username=None, password=None, url=None, temporary=False
+    ):
         self._db = DBManager(username, password, url, temporary)
         self._stream_df = None
         self._streams = None
@@ -608,8 +623,10 @@ class ParametersContainer(object):
             log.info("Alias found for {0}: {1}".format(name, aliases[0]))
             return aliases[0]
 
-        log.info("Parameter '{0}' not found, trying to find alternative."
-                 .format(name))
+        log.info(
+            "Parameter '{0}' not found, trying to find alternative."
+            .format(name)
+        )
         try:
             # ahrs_g[0] for example should be looked up as ahrs_g
             alternative = re.findall(r'(.*)\[[0-9*]\]', name)[0]
@@ -651,8 +668,10 @@ class DOMContainer(object):
                 and d["DetOID"] == det_id
             ][0])
         except IndexError:
-            log.critical("No DOM found for OMKey '{0}' and DetOID '{1}'."
-                         .format(omkey, det_id))
+            log.critical(
+                "No DOM found for OMKey '{0}' and DetOID '{1}'."
+                .format(omkey, det_id)
+            )
 
     def via_dom_id(self, dom_id, det_id):
         """Return DOM for given dom_id"""
@@ -676,12 +695,15 @@ class DOMContainer(object):
 
     def _json_list_lookup(self, from_key, value, target_key, det_id):
         lookup = [
-            dom[target_key] for dom in self._json
+            dom[target_key]
+            for dom in self._json
             if dom[from_key] == value and dom['DetOID'] == det_id
         ]
         if len(lookup) > 1:
-            log.warning("Multiple entries found: {0}".format(lookup) + "\n" +
-                        "Returning the first one.")
+            log.warning(
+                "Multiple entries found: {0}".format(lookup) + "\n" +
+                "Returning the first one."
+            )
         return lookup[0]
 
 
@@ -698,24 +720,31 @@ class DOM(object):
 
     @classmethod
     def from_json(cls, json):
-        return cls(json["CLBUPI"], json["DOMId"], json["DOMUPI"], json["DU"],
-                   json["DetOID"], json["Floor"])
+        return cls(
+            json["CLBUPI"], json["DOMId"], json["DOMUPI"], json["DU"],
+            json["DetOID"], json["Floor"]
+        )
 
     def __str__(self):
         return "DU{0}-DOM{1}".format(self.du, self.floor)
 
     def __repr__(self):
-        return ("{0} - DOM ID: {1}\n"
-                "   DOM UPI: {2}\n"
-                "   CLB UPI: {3}\n"
-                "   DET OID: {4}\n"
-                .format(self.__str__(), self.dom_id, self.dom_upi,
-                        self.clb_upi, self.det_oid))
+        return (
+            "{0} - DOM ID: {1}\n"
+            "   DOM UPI: {2}\n"
+            "   CLB UPI: {3}\n"
+            "   DET OID: {4}\n".format(
+                self.__str__(), self.dom_id, self.dom_upi, self.clb_upi,
+                self.det_oid
+            )
+        )
 
 
 class TriggerSetup(object):
-    def __init__(self, runsetup_oid, name, det_id, description, optical_df,
-                 acoustic_df):
+    def __init__(
+            self, runsetup_oid, name, det_id, description, optical_df,
+            acoustic_df
+    ):
         self.runsetup_oid = runsetup_oid
         self.name = name
         self.det_id = det_id
@@ -724,12 +753,14 @@ class TriggerSetup(object):
         self.acoustic_df = acoustic_df
 
     def __str__(self):
-        text = ("Runsetup OID: {}\n"
-                "Name: {}\n"
-                "Detector ID: {}\n"
-                "Description:\n    {}\n\n"
-                .format(self.runsetup_oid, self.name, self.det_id,
-                        self.description))
+        text = (
+            "Runsetup OID: {}\n"
+            "Name: {}\n"
+            "Detector ID: {}\n"
+            "Description:\n    {}\n\n".format(
+                self.runsetup_oid, self.name, self.det_id, self.description
+            )
+        )
         for df, parameters in zip(["Optical", "Acoustic"],
                                   [self.optical_df, self.acoustic_df]):
             text += "{} Datafilter:\n".format(df)

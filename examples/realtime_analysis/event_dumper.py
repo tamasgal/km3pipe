@@ -42,7 +42,8 @@ pipe.attach(
     port=5553,
     tags='IO_EVT',
     timeout=60 * 60 * 24,
-    max_queue=42)
+    max_queue=42
+)
 pipe.attach(DAQProcessor)
 pipe.attach(Dumper)
 pipe.drain()

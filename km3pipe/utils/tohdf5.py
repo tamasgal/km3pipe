@@ -13,7 +13,7 @@ Options:
     --debug                         Print everything.
     -n EVENTS                       Number of events/runs.
     -o OUTFILE                      Output file.
-    -j --jppy                       (Jpp): Use jppy (not aanet) for Jpp readout
+    -j --jppy                       (Jpp): Use jppy (not aanet) for Jpp readout.
     --ignore-hits                   Don't read the hits.
     -e --expected-rows NROWS        Approximate number of events.  Providing a
                                     rough estimate for this (100, 1000000, ...)
@@ -21,13 +21,15 @@ Options:
                                     and memory usage.
                                     Strongly recommended if the table/array
                                     size is >= 100 MB. [default: 10000]
+    -t --conv-times-to-jte          Converts all MC times in the file to JTE
+                                    times.
 """
 
 from km3modules.common import StatusBar
 from km3pipe import version
 from km3pipe import logger
 
-__author__ = "Tamas Gal"
+__author__ = "Tamas Gal and Michael Moser"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
 __license__ = "MIT"
@@ -38,7 +40,8 @@ __status__ = "Development"
 log = logger.get_logger('km3pipe.io')
 
 
-def tohdf5(input_files, output_file, n_events, **kwargs):
+def tohdf5(input_files, output_file, n_events, conv_times_to_jte,
+           **kwargs):
     """Convert Any file to HDF5 file"""
     from km3pipe import Pipeline    # noqa
     from km3pipe.io import GenericPump, HDF5Sink, HDF5MetaData    # noqa
@@ -47,6 +50,9 @@ def tohdf5(input_files, output_file, n_events, **kwargs):
     pipe.attach(GenericPump, filenames=input_files, **kwargs)
     pipe.attach(HDF5MetaData, data=kwargs)
     pipe.attach(StatusBar, every=250)
+    if conv_times_to_jte: 
+        from km3modules.mc import MCTimeCorrector
+        pipe.attach(MCTimeCorrector)
     pipe.attach(HDF5Sink, filename=output_file, **kwargs)
     pipe.drain(n_events)
 
@@ -81,10 +87,12 @@ def main():
     if is_debug:
         log.setLevel('DEBUG')
     ignore_hits_arg = args['--ignore-hits']
+    conv_times_to_jte = bool(args['--conv-times-to-jte'])
     tohdf5(
         infiles,
         outfile,
         n,
+        conv_times_to_jte,
         use_jppy=use_jppy_pump,
         n_rows_expected=n_rows_expected,
         ignore_hits=bool(ignore_hits_arg),

@@ -9,7 +9,8 @@ from km3pipe.testing import TestCase
 from km3pipe.math import (
     angle_between, pld3, com, zenith, azimuth, Polygon, IrregularPrism,
     rotation_matrix, SparseCone, space_angle, hsin, phi, theta, unit_vector,
-    innerprod_1d, log_b, qeuler, qrot, qrot_yaw, intersect_3d)
+    innerprod_1d, log_b, qeuler, qrot, qrot_yaw, intersect_3d
+)
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
 __copyright__ = "Copyright 2016, KM3Pipe devs and the KM3NeT collaboration."
@@ -46,8 +47,10 @@ class TestMath(TestCase):
         assert_almost_equal(phi(self.v), 1.10714872)
         assert_almost_equal(
             phi(self.vecs),
-            np.array(
-                [1.57079633, 0.78539816, 0.46364761, 0.32175055, 0.24497866]))
+            np.array([
+                1.57079633, 0.78539816, 0.46364761, 0.32175055, 0.24497866
+            ])
+        )
 
     def test_zenith(self):
         assert_allclose(np.pi, zenith((0, 0, 1)))
@@ -59,8 +62,10 @@ class TestMath(TestCase):
         assert_almost_equal(zenith(self.v), 2.5010703409103687)
         assert_allclose(
             zenith(self.vecs),
-            np.array(
-                [2.94419709, 2.80175574, 2.50107034, 2.13473897, 1.80873745]))
+            np.array([
+                2.94419709, 2.80175574, 2.50107034, 2.13473897, 1.80873745
+            ])
+        )
 
     def test_azimuth(self):
         self.assertTrue(np.allclose(np.pi, azimuth((1, 0, 0))))
@@ -80,7 +85,9 @@ class TestMath(TestCase):
                 azimuth(self.vecs),
                 np.array([
                     4.71238898, 3.92699082, 3.60524026, 3.46334321, 3.38657132
-                ])))
+                ])
+            )
+        )
 
     def test_theta(self):
         print(theta((0, 0, -1)))
@@ -103,7 +110,9 @@ class TestMath(TestCase):
                 theta(self.vecs),
                 np.array([
                     0.19739554, 0.33983691, 0.64052231, 1.00685369, 1.3328552
-                ])))
+                ])
+            )
+        )
 
     def test_unit_vector(self):
         v1 = (1, 0, 0)
@@ -131,21 +140,27 @@ class TestMath(TestCase):
         self.assertTrue(
             np.allclose(
                 angle_between(self.vecs, v1),
-                np.array(
-                    [1.57079633, 1.3328552, 1.0068537, 0.64052231,
-                     0.33983691])))
+                np.array([
+                    1.57079633, 1.3328552, 1.0068537, 0.64052231, 0.33983691
+                ])
+            )
+        )
         self.assertTrue(
             np.allclose(
                 angle_between(self.vecs, v2),
-                np.array(
-                    [1.37340077, 1.3328552, 1.3002466, 1.30024656,
-                     1.3328552])))
+                np.array([
+                    1.37340077, 1.3328552, 1.3002466, 1.30024656, 1.3328552
+                ])
+            )
+        )
         self.assertTrue(
             np.allclose(
                 angle_between(self.vecs, v3),
                 np.array([
                     1.57079633, 1.80873745, 2.13473897, 2.50107034, 2.80175574
-                ])))
+                ])
+            )
+        )
 
     def test_angle_between_returns_nan_for_zero_length_vectors(self):
         v1 = (0, 0, 0)
@@ -157,11 +172,13 @@ class TestMath(TestCase):
         p1 = (np.pi / 2, np.pi)
         p2 = (np.pi, 0)
         self.assertAlmostEqual(
-            space_angle(p1[0], p2[0], p1[1], p2[1]), 1.57079632679489)
+            space_angle(p1[0], p2[0], p1[1], p2[1]), 1.57079632679489
+        )
         p3 = (0, np.pi)
         p4 = (np.pi / 2, 0)
         self.assertAlmostEqual(
-            space_angle(p3[0], p4[0], p3[1], p4[1]), 1.57079632679489)
+            space_angle(p3[0], p4[0], p3[1], p4[1]), 1.57079632679489
+        )
 
     def test_hsin(self):
         assert np.all(hsin((np.pi, 0)) == (1, 0))
@@ -196,8 +213,8 @@ class TestMath(TestCase):
     def test_com(self):
         center_of_mass = com(((1, 2, 3), (4, 5, 6), (7, 8, 9), (10, 11, 12)))
         self.assertEqual((5.5, 6.5, 7.5), tuple(center_of_mass))
-        center_of_mass = com(
-            ((1, 2, 3), (4, 5, 6), (7, 8, 9)), masses=(1, 0, 0))
+        center_of_mass = com(((1, 2, 3), (4, 5, 6), (7, 8, 9)),
+                             masses=(1, 0, 0))
         self.assertEqual((1, 2, 3), tuple(center_of_mass))
         center_of_mass = com(((1, 1, 1), (0, 0, 0)))
         self.assertEqual((0.5, 0.5, 0.5), tuple(center_of_mass))
@@ -261,8 +278,10 @@ class TestRotation(TestCase):
         theta = 1.2
         newvec = np.dot(rotation_matrix(axis, theta), v)
         self.assertTrue(
-            np.allclose(newvec, np.array([2.74911638, 4.77180932,
-                                          1.91629719])))
+            np.allclose(
+                newvec, np.array([2.74911638, 4.77180932, 1.91629719])
+            )
+        )
 
     def test_cone(self):
         spike = [1, 1, 0]

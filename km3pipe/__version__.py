@@ -30,7 +30,8 @@ def get_git_revision_hash(short=False):
         pass
     fpath = join(
         KP_PATH, 'km3pipe/.git_revision_{}hash'
-        .format('short_' if short else ''))
+        .format('short_' if short else '')
+    )
     if exists(fpath):
         with open(fpath, 'r') as fobj:
             return fobj.read().strip()
@@ -38,7 +39,7 @@ def get_git_revision_hash(short=False):
         return 'no-git-revision-hash'
 
 
-VERSION_INFO = (8, 1, 3, 'final', 0)
+VERSION_INFO = (8, 1, 4, 'final', 0)
 
 __author__ = 'tamasgal'
 
@@ -79,10 +80,12 @@ def check_for_update():
     else:
         version = _get_version(VERSION_INFO)
         if latest_version != version:
-            print("There is an update for km3pipe available.\n" +
-                  "    Installed: {0}\n"
-                  "    Latest: {1}\n".format(version, latest_version) +
-                  "Please run `pip install --upgrade km3pipe`.")
+            print(
+                "There is an update for km3pipe available.\n" +
+                "    Installed: {0}\n"
+                "    Latest: {1}\n".format(version, latest_version) +
+                "Please run `pip install --upgrade km3pipe`."
+            )
 
 
 version = _get_version(VERSION_INFO)

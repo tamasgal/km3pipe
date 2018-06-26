@@ -350,3 +350,18 @@ KM3Modules: Pipeline Segments
   :toctree: api
   
   CHParser
+
+
+``km3modules.mc``
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: km3modules.mc
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3modules.mc
+
+.. autosummary::
+  :toctree: api
+  
+  MCTimeCorrector

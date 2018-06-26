@@ -80,9 +80,11 @@ class SummarysliceMatcher(kp.Module):
     def _get_file_handler(self, filename):
         if not os.path.exists(filename):
             fobj = open(filename, 'w')
-            fobj.write("run dom_id nearest_idx diff "
-                       "tmch_timestamp tmch_ns "
-                       "summary_timestamp summary_ns\n")
+            fobj.write(
+                "run dom_id nearest_idx diff "
+                "tmch_timestamp tmch_ns "
+                "summary_timestamp summary_ns\n"
+            )
         else:
             fobj = open(filename, 'a')
         return fobj
@@ -116,19 +118,28 @@ class SummarysliceMatcher(kp.Module):
                 print("Trying to match a summaryslice.")
                 idx_nearest = (np.abs(self._diff)).argmin()
                 summary = self._summaries[idx_nearest]
-                print("min", min(self._diff), "max", max(self._diff),
-                      "nearest", self._diff[idx_nearest])
+                print(
+                    "min", min(self._diff), "max", max(self._diff), "nearest",
+                    self._diff[idx_nearest]
+                )
                 print(self._rates_io_monit)
                 print(summary.summary_frames[self.dom_id])
-                print("Time of IO_MONIT:", self._candidate.utc_seconds,
-                      self._candidate.nanoseconds)
-                print("Time of IO_SUM:", summary.header.time_stamp,
-                      summary.header.ticks * 16)
-                self.fobj.write("{} {} {} {} {} {} {} {}\n".format(
-                    self._candidate.run, self.dom_id, idx_nearest,
-                    self._diff[idx_nearest], self._candidate.utc_seconds,
-                    self._candidate.nanoseconds, summary.header.time_stamp,
-                    summary.header.ticks * 16))
+                print(
+                    "Time of IO_MONIT:", self._candidate.utc_seconds,
+                    self._candidate.nanoseconds
+                )
+                print(
+                    "Time of IO_SUM:", summary.header.time_stamp,
+                    summary.header.ticks * 16
+                )
+                self.fobj.write(
+                    "{} {} {} {} {} {} {} {}\n".format(
+                        self._candidate.run, self.dom_id, idx_nearest,
+                        self._diff[idx_nearest], self._candidate.utc_seconds,
+                        self._candidate.nanoseconds, summary.header.time_stamp,
+                        summary.header.ticks * 16
+                    )
+                )
                 self._reset()
                 self.fobj.flush()
         return blob
@@ -154,10 +165,12 @@ def main():
         port=5553,
         tags='IO_SUM, IO_MONIT',
         timeout=60 * 60 * 24 * 7,
-        max_queue=1000)
+        max_queue=1000
+    )
     pipe.attach(MonitoringChannelPicker, dom_id=dom_id)
     pipe.attach(
-        SummarysliceMatcher, dom_id=dom_id, n_timeslices=int(args['-n']))
+        SummarysliceMatcher, dom_id=dom_id, n_timeslices=int(args['-n'])
+    )
     pipe.drain()
 
 
