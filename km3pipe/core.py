@@ -468,7 +468,16 @@ class Pump(Module):
 
 class Blob(OrderedDict):
     """A simple (ordered) dict with a fancy name. This should hold the data."""
-    pass
+
+    def __str__(self):
+        padding = max(len(k) for k in self.keys()) + 3
+        s = ["Blob ({} entries):".format(len(self))]
+        for key, value in self.items():
+            s.append(
+                " '{}'".format(key).ljust(padding) +
+                " => {}".format(repr(value))
+            )
+        return "\n".join(s)
 
 
 class Run(object):
