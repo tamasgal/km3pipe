@@ -122,7 +122,9 @@ class AanetPump(Pump):
             raise SystemExit("Could not open file")
 
         log.info("Generating blobs through new aanet API...")
-        self.header = self._parse_header(event_file.header)
+        self.header = self._convert_header_dict_to_table(
+            self._parse_header(event_file.header)
+        )
         for event in event_file:
             log.debug('Reading event...')
             blob = self._read_event(event, filename)
@@ -299,7 +301,7 @@ class AanetPump(Pump):
                         "setting to '{}'...".format(elem_name)
                     )
                 out[key][elem_name] = elem
-        return self._convert_header_dict_to_table(out)
+        return out
 
     @staticmethod
     def _convert_header_dict_to_table(header_dict):
@@ -320,7 +322,9 @@ class AanetPump(Pump):
             tab_dict['field_names'].append(' '.join(fields))
             tab_dict['field_values'].append(' '.join(values))
             tab_dict['dtype'].append(', '.join(types))
-        return Table(tab_dict, h5loc='/header', name='Header')
+        return Table(
+            tab_dict, h5loc='/header', name='Header', h5singleton=True
+        )
 
     def _read_event(self, event, filename):
         blob = Blob()

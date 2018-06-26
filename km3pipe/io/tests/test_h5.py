@@ -268,6 +268,27 @@ class TestH5SinkConsistency(TestCase):
 
         fobj.close()
 
+    def test_h5_singletons(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Pump):
+            def process(self, blob):
+                tab = Table({'a': 2}, h5loc='tab', h5singleton=True)
+                return Blob({'tab': tab})
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        with tb.File(fname) as f:
+            a = f.get_node("/tab")[:]['a']
+
+        assert len(a) == 1
+
+        fobj.close()
+
 
 class TestHDF5PumpConsistency(TestCase):
     def test_hdf5_readout(self):

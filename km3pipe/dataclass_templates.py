@@ -26,6 +26,7 @@ TEMPLATES = {
         ]),
         'h5loc': None,
         'split_h5': False,
+        'h5singleton': False,
     },
     'Position': {
         'dtype': np.dtype([
@@ -35,6 +36,7 @@ TEMPLATES = {
         ]),
         'h5loc': None,
         'split_h5': False,
+        'h5singleton': False,
     },
     'EventInfo': {
         'dtype': np.dtype([
@@ -58,6 +60,7 @@ TEMPLATES = {
         ]),
         'h5loc': '/event_info',
         'split_h5': False,
+        'h5singleton': False,
     },
     'TimesliceHits': {
         'dtype': np.dtype([
@@ -69,6 +72,7 @@ TEMPLATES = {
         ]),
         'h5loc': '/time_slice_hits',
         'split_h5': True,
+        'h5singleton': False,
     },
     'Hits': {
         'dtype': np.dtype([
@@ -81,6 +85,7 @@ TEMPLATES = {
         ]),
         'h5loc': '/hits',
         'split_h5': True,
+        'h5singleton': False,
     },
     'CalibHits': {
         'dtype': np.dtype([
@@ -102,6 +107,7 @@ TEMPLATES = {
         ]),
         'h5loc': '/hits',
         'split_h5': True,
+        'h5singleton': False,
     },
     'McHits': {
         'dtype': np.dtype([
@@ -113,6 +119,7 @@ TEMPLATES = {
         ]),
         'h5loc': '/mc_hits',
         'split_h5': True,
+        'h5singleton': False,
     },
     'CalibMcHits': {
         'dtype': np.dtype([
@@ -130,6 +137,7 @@ TEMPLATES = {
         ]),
         'h5loc': '/mc_hits',
         'split_h5': True,
+        'h5singleton': False,
     },
     'Tracks': {
         'dtype': np.dtype([
@@ -151,6 +159,7 @@ TEMPLATES = {
         ]),
         'h5loc': '/tracks',
         'split_h5': False,
+        'h5singleton': False,
     },
     'McTracks': {
         'dtype': np.dtype([
@@ -172,6 +181,7 @@ TEMPLATES = {
         ]),
         'h5loc': '/mc_tracks',
         'split_h5': False,
+        'h5singleton': False,
     },
     'SummaryFrameInfo': {
         'dtype': np.dtype([
@@ -190,6 +200,7 @@ TEMPLATES = {
         ]),
         'h5loc': '/summary_slice_info',
         'split_h5': False,
+        'h5singleton': False,
     },
     'SummarysliceInfo': {
         'dtype': np.dtype([
@@ -201,6 +212,7 @@ TEMPLATES = {
         ]),
         'h5loc': '/todo',
         'split_h5': False,
+        'h5singleton': False,
     },
     'TimesliceInfo': {
         'dtype': np.dtype([
@@ -212,6 +224,7 @@ TEMPLATES = {
         ]),
         'h5loc': '/todo',
         'split_h5': False,
+        'h5singleton': False,
     },
     'SummaryframeSeries': {
         'dtype': np.dtype([
@@ -222,6 +235,7 @@ TEMPLATES = {
         ]),
         'h5loc': '/todo',
         'split_h5': False,
+        'h5singleton': False,
     },
     'TimesliceFrameInfo': {
         'dtype': np.dtype([
@@ -236,6 +250,7 @@ TEMPLATES = {
         ]),
         'h5loc': '/todo',
         'split_h5': False,
+        'h5singleton': False,
     },
     'SummaryFrameSeries': {
         'dtype': np.dtype([
@@ -245,6 +260,7 @@ TEMPLATES = {
             ('group_id', '<u4'),
         ]),
         'h5loc': '/summary_frame_series',
-        'split_h5': False
+        'split_h5': False,
+        'h5singleton': False,
     }
 }

@@ -88,7 +88,7 @@ class HDF5Sink(Module):
         self.file_mode = 'a' if self.get('append') else 'w'
         self.keep_open = self.get('keep_open')
         self.indices = {}
-        self._header_written = False
+        self._singletons_written = {}
         # magic 10000: this is the default of the "expectedrows" arg
         # from the tables.File.create_table() function
         # at least according to the docs
@@ -214,6 +214,14 @@ class HDF5Sink(Module):
 
     def _process_entry(self, key, entry):
         self.log.debug("Inspecting {}".format(key))
+        if hasattr(
+                entry, 'h5singleton'
+        ) and entry.h5singleton and entry.h5loc in self._singletons_written:
+            self.log.debug(
+                "Skipping '%s' since it's a singleton and already written." %
+                entry.h5loc
+            )
+            return
         self.log.debug("Converting to numpy array...")
         data = self._to_array(entry, name=key)
         if data is None or not hasattr(data, 'dtype'):
@@ -240,7 +248,7 @@ class HDF5Sink(Module):
         except AttributeError:
             title = key
 
-        if isinstance(data, Table) and data.h5loc != '/header':
+        if isinstance(data, Table) and not data.h5singleton:
             if 'group_id' not in data:
                 data = data.append_columns('group_id', self.index)
 
@@ -255,16 +263,14 @@ class HDF5Sink(Module):
             self.log.debug("Writing into single Table...")
             self._write_array(h5loc, data, title=title)
 
+        if hasattr(entry, 'h5singleton') and entry.h5singleton:
+            self._singletons_written[entry.h5loc] = True
+
         return data
 
     def process(self, blob):
         written_blob = Blob()
         for key, entry in sorted(blob.items()):
-            if key == 'Header' and self._header_written:
-                self.log.info("Skipping header, since already written")
-                continue
-            if key == 'Header':
-                self._header_written == True    # TODO: pattern for such singles
             data = self._process_entry(key, entry)
             if data is not None:
                 written_blob[key] = data
