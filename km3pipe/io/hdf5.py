@@ -211,23 +211,6 @@ class HDF5Sink(Module):
                 except ValueError:
                     pass
                 hdr_group._v_attrs[field] = value
-        self._header_written = True
-
-    def _write_aa_header(self, header):
-        hdr_group = self.h5file.create_group('/', 'header', 'Header')    # noqa
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore', tb.NaturalNameWarning)
-            for groupname, subdict in header.items():
-                hdr_subgroup = self.h5file.create_group(
-                    '/header', groupname, groupname
-                )
-                for field, value in subdict.items():
-                    try:
-                        value = float(value)
-                    except ValueError:
-                        pass
-                hdr_subgroup._v_attrs[field] = value
-        self._header_written = True
 
     def _process_entry(self, key, entry):
         self.log.debug("Inspecting {}".format(key))
@@ -257,11 +240,11 @@ class HDF5Sink(Module):
         except AttributeError:
             title = key
 
-        if isinstance(data, Table):
+        if isinstance(data, Table) and data.h5loc != '/header':
             if 'group_id' not in data:
                 data = data.append_columns('group_id', self.index)
 
-        assert 'group_id' in data.dtype.names
+        # assert 'group_id' in data.dtype.names
 
         self.log.debug("h5l: '{}', title '{}'".format(h5loc, title))
 
@@ -275,15 +258,13 @@ class HDF5Sink(Module):
         return data
 
     def process(self, blob):
-        if not self._header_written and "Header" in blob \
-                and blob["Header"] is not None:
-            self._write_header(blob['Header'])
-        if not self._header_written and "AaHeader" in blob \
-                and blob["AaHeader"] is not None:
-            self._write_aa_header(blob['AaHeader'])
-
         written_blob = Blob()
         for key, entry in sorted(blob.items()):
+            if key == 'Header' and self._header_written:
+                self.log.info("Skipping header, since already written")
+                continue
+            if key == 'Header':
+                self._header_written == True    # TODO: pattern for such singles
             data = self._process_entry(key, entry)
             if data is not None:
                 written_blob[key] = data
