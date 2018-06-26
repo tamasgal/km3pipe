@@ -142,8 +142,7 @@ class AanetPump(Pump):
         tab_data = {
             'event_id': event_id,
             'mc_id': mc_id,
-            'run_id': event.
-            run_id,    # TODO: this may segfault in aanet (yeah!)
+            'run_id': event.run_id,    # TODO: this may segfault in aanet
             'weight_w1': wgt1,
             'weight_w2': wgt2,
             'weight_w3': wgt3,
