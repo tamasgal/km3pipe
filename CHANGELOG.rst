@@ -1,8 +1,14 @@
 Unreleased changes
 ------------------
 
+* tohdf5.py: - adds a time conversion from mc time to jte time.
+
 Version 8
 ---------
+
+8.1.3 / 2018-06-16
+~~~~~~~~~~~~~~~~~~
+* minor fixes
 
 8.1.2 / 2018-06-16
 ~~~~~~~~~~~~~~~~~~
