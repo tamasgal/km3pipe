@@ -1,6 +1,6 @@
 Unreleased changes
 ------------------
-
+* prettier `Blob` when printed
 
 Version 8
 ---------
