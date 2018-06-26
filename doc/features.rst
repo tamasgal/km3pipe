@@ -1,5 +1,5 @@
-Performance Analysis
-====================
+Pipeline Features
+=================
 
 
 .. contents:: :local:
@@ -7,7 +7,39 @@ Performance Analysis
 
 Introduction
 ------------
-Coming soon.
+The pipeline offers some convenient features which will make your life easier.
+
+
+Ctrl+C for Graceful Exits
+-------------------------
+If you launched a pipeline and need to stop for whatever reason, you can simply
+hit `CTRL+C` once. The pipeline will continue executing  its current cycle and then
+proceeds with the finish procedure. This means that usually everything is
+cleaned up gracefully.
+
+Here is an example where the pipeline while converting
+a ROOT file to HDF5 is suddenly interrupted. The resulting file is still readable
+and properly closed::
+
+    > tohdf5 JTE_muon-CC_3-100GeV_401.root -o test.h5
+    Pipeline and module initialisation took 0.008s (CPU 0.000s).
+    loading root....  /afs/.in2p3.fr/system/amd64_sl7/usr/local/root/v5.34.23/
+    loading aalib...  /pbs/throng/km3net/src/Jpp/v9.0.8454/externals/aanet//libaa.so
+    --------------------------[ Blob     250 ]---------------------------
+    --------------------------[ Blob     500 ]---------------------------
+    --------------------------[ Blob     750 ]---------------------------
+    ^C
+    ==========================================
+    Got CTRL+C, waiting for current cycle...
+    Press CTRL+C again if you're in hurry!
+    ==========================================
+    ================================[ . ]================================
+    ++ km3pipe.io.hdf5.HDF5Sink: HDF5 file written to: test.h5
+    ============================================================
+    904 cycles drained in 21.279237s (CPU 20.320000s). Memory peak: 150.32 MB
+      wall  mean: 0.023490s  medi: 0.020623s  min: 0.016564s  max: 1.540565s  std: 0.050769s
+      CPU   mean: 0.022434s  medi: 0.020000s  min: 0.010000s  max: 0.990000s  std: 0.032663s
+    EventFile io / wall time = 1.72786 / 20.5438 (8.41063 % spent on io.)
 
 
 Time / Memory / CPU Usage 
