@@ -129,7 +129,7 @@ class AanetPump(Pump):
             log.debug('Reading event...')
             blob = self._read_event(event, filename)
             log.debug('Reading header...')
-            blob["Header"] = self.header
+            blob["RawHeader"] = self.header
             self.group_id += 1
             yield blob
         del event_file
@@ -323,7 +323,7 @@ class AanetPump(Pump):
             tab_dict['field_values'].append(' '.join(values))
             tab_dict['dtype'].append(', '.join(types))
         return Table(
-            tab_dict, h5loc='/header', name='Header', h5singleton=True
+            tab_dict, h5loc='/raw_header', name='RawHeader', h5singleton=True
         )
 
     def _read_event(self, event, filename):
