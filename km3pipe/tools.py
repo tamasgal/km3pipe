@@ -352,6 +352,8 @@ def get_jpp_revision(via_command='JPrint'):
     """Retrieves the Jpp revision number"""
     try:
         output = subprocess.check_output([via_command, '-v']).decode()
+    except subprocess.CalledProcessError:
+        pass
     except OSError:
         return None
     revision = output.split('\n')[0].split()[1].strip()
