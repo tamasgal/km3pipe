@@ -6,9 +6,9 @@ from os.path import join, dirname
 import numpy as np
 import tables as tb
 
-from km3pipe import Blob, Module, Pipeline, Pump
+from km3pipe import Blob, Module, Pipeline, Pump, version
 from km3pipe.dataclasses import Table
-from km3pipe.io import HDF5Pump, HDF5Sink    # noqa
+from km3pipe.io.hdf5 import HDF5Pump, HDF5Sink, FORMAT_VERSION    # noqa
 from km3pipe.tools import insert_prefix_to_dtype
 from km3pipe.testing import TestCase
 
@@ -181,6 +181,27 @@ class TestH5Sink(TestCase):
         assert node.cols is not None
         assert 'foo' in set(node.cols._v_colnames)
         out.close()
+
+    def test_h5info(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Pump):
+            def process(self, blob):
+                return Blob()
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        with tb.open_file(fname, 'r') as h5file:
+            assert version == h5file.root._v_attrs.km3pipe.decode()
+            assert tb.__version__ == h5file.root._v_attrs.pytables.decode()
+            assert FORMAT_VERSION == h5file.root._v_attrs.format_version
+            assert 'None' == h5file.root._v_attrs.jpp.decode()
+
+        fobj.close()
 
 
 class TestH5SinkConsistency(TestCase):
