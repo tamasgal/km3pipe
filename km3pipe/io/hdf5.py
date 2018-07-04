@@ -18,7 +18,7 @@ import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
 from km3pipe.dataclasses import Table, DEFAULT_H5LOC
 from km3pipe.logger import get_logger
-from km3pipe.tools import decamelise, camelise, split, istype
+from km3pipe.tools import decamelise, camelise, split, istype, get_jpp_revision
 
 log = get_logger(__name__)    # pylint: disable=C0103
 
@@ -308,6 +308,7 @@ class HDF5Sink(Module):
     def finish(self):
         self.h5file.root._v_attrs.km3pipe = np.string_(kp.__version__)
         self.h5file.root._v_attrs.pytables = np.string_(tb.__version__)
+        self.h5file.root._v_attrs.jpp = np.string_(get_jpp_revision())
         self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
         self.log.info("Adding index tables.")
         for where, data in self.indices.items():
