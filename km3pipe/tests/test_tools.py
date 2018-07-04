@@ -6,10 +6,11 @@ from io import StringIO
 
 import numpy as np
 
-from km3pipe.testing import TestCase
+from km3pipe.testing import TestCase, patch
 from km3pipe.tools import (
     unpack_nfirst, split, namedtuple_with_defaults, remain_file_pointer,
-    decamelise, camelise, issorted, lstrip, chunks, is_coherent, istype
+    decamelise, camelise, issorted, lstrip, chunks, is_coherent, istype,
+    get_jpp_revision
 )
 
 __author__ = "Tamas Gal"
@@ -197,3 +198,13 @@ class TestIstype(TestCase):
             assert istype(b, 'str')
         else:
             assert istype(b, 'unicode')
+
+
+class TestJppRevision(TestCase):
+    @patch('subprocess.check_output')
+    def test_revision(self, co_mock):
+        co_mock.return_value = b'version:    8519\nname space: KM3NET\n'
+        assert '8519' == get_jpp_revision()
+
+    def test_revision(self):
+        assert get_jpp_revision(via_command='a_non_existing_command') is None
