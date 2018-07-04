@@ -354,7 +354,7 @@ def get_jpp_revision(via_command='JPrint'):
         output = subprocess.check_output([via_command, '-v'],
                                          stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
-        if e.return_code == 1:
+        if e.returncode == 1:
             output = e.output
         else:
             return None
