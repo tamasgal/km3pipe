@@ -67,7 +67,7 @@ TEMPLATES = {
             ('tot', 'u1'),
             ('group_id', '<u4'),
         ]),
-        'h5loc': '/time_slice_hits',
+        'h5loc': '/timeslice_hits',
         'split_h5': True,
     },
     'Hits': {
@@ -210,7 +210,7 @@ TEMPLATES = {
             ('nanoseconds', '<u4'),
             ('n_frames', '<u4'),
         ]),
-        'h5loc': '/todo',
+        'h5loc': '/timeslice_info',
         'split_h5': False,
     },
     'SummaryframeSeries': {
