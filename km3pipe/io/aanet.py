@@ -122,12 +122,14 @@ class AanetPump(Pump):
             raise SystemExit("Could not open file")
 
         log.info("Generating blobs through new aanet API...")
-        self.header = self._parse_header(event_file.header)
+        self.header = self._convert_header_dict_to_table(
+            self._parse_header(event_file.header)
+        )
         for event in event_file:
             log.debug('Reading event...')
             blob = self._read_event(event, filename)
             log.debug('Reading header...')
-            blob["AaHeader"] = self.header
+            blob["RawHeader"] = self.header
             self.group_id += 1
             yield blob
         del event_file
@@ -140,7 +142,7 @@ class AanetPump(Pump):
         tab_data = {
             'event_id': event_id,
             'mc_id': mc_id,
-            'run_id': event.run_id,  # TODO: this may segfault in aanet (yeah!)
+            'run_id': event.run_id,    # TODO: this may segfault in aanet
             'weight_w1': wgt1,
             'weight_w2': wgt2,
             'weight_w3': wgt3,
@@ -299,6 +301,29 @@ class AanetPump(Pump):
                     )
                 out[key][elem_name] = elem
         return out
+
+    @staticmethod
+    def _convert_header_dict_to_table(header_dict):
+        tab_dict = defaultdict(list)
+        for parameter, data in header_dict.items():
+            fields = []
+            values = []
+            types = []
+            for field_name, field_value in data.items():
+                fields.append(field_name)
+                values.append(field_value)
+                try:
+                    v = float(field_value)
+                    types.append('f4')
+                except ValueError:
+                    types.append('a{}'.format(len(field_value)))
+            tab_dict['parameter'].append(parameter)
+            tab_dict['field_names'].append(' '.join(fields))
+            tab_dict['field_values'].append(' '.join(values))
+            tab_dict['dtype'].append(', '.join(types))
+        return Table(
+            tab_dict, h5loc='/raw_header', name='RawHeader', h5singleton=True
+        )
 
     def _read_event(self, event, filename):
         blob = Blob()
