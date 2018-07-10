@@ -6,9 +6,9 @@ from os.path import join, dirname
 import numpy as np
 import tables as tb
 
-from km3pipe import Blob, Module, Pipeline, Pump
+from km3pipe import Blob, Module, Pipeline, Pump, version
 from km3pipe.dataclasses import Table
-from km3pipe.io import HDF5Pump, HDF5Sink    # noqa
+from km3pipe.io.hdf5 import HDF5Pump, HDF5Sink, FORMAT_VERSION    # noqa
 from km3pipe.tools import insert_prefix_to_dtype
 from km3pipe.testing import TestCase
 
@@ -182,6 +182,27 @@ class TestH5Sink(TestCase):
         assert 'foo' in set(node.cols._v_colnames)
         out.close()
 
+    def test_h5info(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Pump):
+            def process(self, blob):
+                return Blob()
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        with tb.open_file(fname, 'r') as h5file:
+            assert version == h5file.root._v_attrs.km3pipe.decode()
+            assert tb.__version__ == h5file.root._v_attrs.pytables.decode()
+            assert FORMAT_VERSION == h5file.root._v_attrs.format_version
+            assert 'None' == h5file.root._v_attrs.jpp.decode()
+
+        fobj.close()
+
 
 class TestH5SinkConsistency(TestCase):
     def test_h5_consistency_for_tables_without_group_id(self):
@@ -265,6 +286,57 @@ class TestH5SinkConsistency(TestCase):
             group_id = f.get_node("/tab")[:]['group_id']
 
         assert np.allclose([2, 2, 2, 2, 2], group_id)
+
+        fobj.close()
+
+    def test_h5_singletons(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Pump):
+            def process(self, blob):
+                tab = Table({'a': 2}, h5loc='tab', h5singleton=True)
+                return Blob({'tab': tab})
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        with tb.File(fname) as f:
+            a = f.get_node("/tab")[:]['a']
+
+        assert len(a) == 1
+
+        fobj.close()
+
+    def test_h5_singletons_reading(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Pump):
+            def process(self, blob):
+                tab = Table({'a': 2}, h5loc='tab', h5singleton=True)
+                return Blob({'Tab': tab})
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        class Observer(Module):
+            def process(self, blob):
+                print(blob)
+                assert 'Tab' in blob
+                print(blob['Tab'])
+                assert len(blob['Tab']) == 1
+                assert blob['Tab'].a[0] == 2
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(HDF5Pump, filename=fname)
+        pipe.attach(Observer)
+        pipe.drain()
 
         fobj.close()
 

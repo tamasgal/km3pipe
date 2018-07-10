@@ -18,7 +18,7 @@ import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
 from km3pipe.dataclasses import Table, DEFAULT_H5LOC
 from km3pipe.logger import get_logger
-from km3pipe.tools import decamelise, camelise, split, istype
+from km3pipe.tools import decamelise, camelise, split, istype, get_jpp_revision
 
 log = get_logger(__name__)    # pylint: disable=C0103
 
@@ -30,7 +30,7 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-FORMAT_VERSION = np.string_('5.0')
+FORMAT_VERSION = np.string_('5.1')
 MINIMUM_FORMAT_VERSION = np.string_('4.1')
 
 
@@ -88,7 +88,7 @@ class HDF5Sink(Module):
         self.file_mode = 'a' if self.get('append') else 'w'
         self.keep_open = self.get('keep_open')
         self.indices = {}
-        self._header_written = False
+        self._singletons_written = {}
         # magic 10000: this is the default of the "expectedrows" arg
         # from the tables.File.create_table() function
         # at least according to the docs
@@ -211,26 +211,17 @@ class HDF5Sink(Module):
                 except ValueError:
                     pass
                 hdr_group._v_attrs[field] = value
-        self._header_written = True
-
-    def _write_aa_header(self, header):
-        hdr_group = self.h5file.create_group('/', 'header', 'Header')    # noqa
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore', tb.NaturalNameWarning)
-            for groupname, subdict in header.items():
-                hdr_subgroup = self.h5file.create_group(
-                    '/header', groupname, groupname
-                )
-                for field, value in subdict.items():
-                    try:
-                        value = float(value)
-                    except ValueError:
-                        pass
-                hdr_subgroup._v_attrs[field] = value
-        self._header_written = True
 
     def _process_entry(self, key, entry):
         self.log.debug("Inspecting {}".format(key))
+        if hasattr(
+                entry, 'h5singleton'
+        ) and entry.h5singleton and entry.h5loc in self._singletons_written:
+            self.log.debug(
+                "Skipping '%s' since it's a singleton and already written." %
+                entry.h5loc
+            )
+            return
         self.log.debug("Converting to numpy array...")
         data = self._to_array(entry, name=key)
         if data is None or not hasattr(data, 'dtype'):
@@ -257,11 +248,11 @@ class HDF5Sink(Module):
         except AttributeError:
             title = key
 
-        if isinstance(data, Table):
+        if isinstance(data, Table) and not data.h5singleton:
             if 'group_id' not in data:
                 data = data.append_columns('group_id', self.index)
 
-        assert 'group_id' in data.dtype.names
+        # assert 'group_id' in data.dtype.names
 
         self.log.debug("h5l: '{}', title '{}'".format(h5loc, title))
 
@@ -272,16 +263,12 @@ class HDF5Sink(Module):
             self.log.debug("Writing into single Table...")
             self._write_array(h5loc, data, title=title)
 
+        if hasattr(entry, 'h5singleton') and entry.h5singleton:
+            self._singletons_written[entry.h5loc] = True
+
         return data
 
     def process(self, blob):
-        if not self._header_written and "Header" in blob \
-                and blob["Header"] is not None:
-            self._write_header(blob['Header'])
-        if not self._header_written and "AaHeader" in blob \
-                and blob["AaHeader"] is not None:
-            self._write_aa_header(blob['AaHeader'])
-
         written_blob = Blob()
         for key, entry in sorted(blob.items()):
             data = self._process_entry(key, entry)
@@ -308,6 +295,7 @@ class HDF5Sink(Module):
     def finish(self):
         self.h5file.root._v_attrs.km3pipe = np.string_(kp.__version__)
         self.h5file.root._v_attrs.pytables = np.string_(tb.__version__)
+        self.h5file.root._v_attrs.jpp = np.string_(get_jpp_revision())
         self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
         self.log.info("Adding index tables.")
         for where, data in self.indices.items():
@@ -392,6 +380,7 @@ class HDF5Pump(Pump):
         self.cut_mask_node = self.get('cut_mask') or None
         self.cut_masks = defaultdict(list)
         self.indices = {}
+        self._singletons = {}
         if not self.filename and not self.filenames:
             raise ValueError("No filename(s) defined")
 
@@ -555,10 +544,16 @@ class HDF5Pump(Pump):
                     )
                     continue
             else:
-                self.log.warning(
-                    "No group_id or event_id found for '%s', "
-                    "skipping..." % h5loc
-                )
+                self.print("H5 singleton: {} ({})".format(tabname, h5loc))
+                if h5loc not in self._singletons:
+                    self._singletons[h5loc] = Table(
+                        tab.read(),
+                        h5loc=h5loc,
+                        split_h5=False,
+                        name=tabname,
+                        h5singleton=True
+                    )
+                blob[tabname] = self._singletons[h5loc]
                 continue
 
             self.log.debug("h5loc: '{}'".format(h5loc))
