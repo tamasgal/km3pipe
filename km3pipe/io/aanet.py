@@ -82,6 +82,13 @@ RECO2NUM = {
 FITINF2NAME = {v: k for k, v in FITINF2NUM.items()}
 RECO2NAME = {v: k for k, v in RECO2NUM.items()}
 
+IS_CC = {
+    3: 0,    # False,
+    2: 1,    # True,
+    1: 0,    # False,
+    0: 1,    # True,
+}
+
 
 class AanetPump(Pump):
     """A pump for binary Aanet files.
@@ -250,7 +257,7 @@ class AanetPump(Pump):
             out['length'].append(trk.len)
             out['bjorkeny'].append(trk.getusr('by'))
             out['interaction_channel'].append(trk.getusr('ichan'))
-            out['is_cc'].append(trk.getusr('cc'))
+            out['is_cc'].append(IS_CC[trk.getusr('cc')])
         out['group_id'] = self.group_id
         return Table(out, name='McTracks', h5loc='/mc_tracks')
 
