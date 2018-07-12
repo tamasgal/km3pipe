@@ -357,53 +357,110 @@ class Parser(object):
 KM3SIM_TAGS = {
     'hit': [
         'KM3SimHits',
-        [('id', 'f4'), ('pmt_id', '<i4'), ('pe', 'f4'), ('time', 'f4'),
-         ('type', 'f4'), ('n_photons', 'f4'), ('track_in', 'f4'),
-         ('c_time', 'f4'), ('unknown', 'f4')],
+        [
+            ('id', 'f4'),
+            ('pmt_id', '<i4'),
+            ('pe', 'f4'),
+            ('time', 'f4'),
+            ('type', 'f4'),
+            ('n_photons', 'f4'),
+            ('track_in', 'f4'),
+            ('c_time', 'f4'),
+            ('unknown', 'f4'),
+        ],
     ],
 }
 
 GSEAGEN_TAGS = {
     'neutrino': [
-        'Neutrinos',
-        [('id', '<i4'), ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
-         ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'), ('energy', 'f4'),
-         ('time', 'f4'), ('bjorken_x', 'f4'), ('bjorken_y', 'f4'),
-         ('scattering_type', '<i4'), ('pdg_id',
-                                      '<i4'), ('interaction_type', '<i4')]
+        'Neutrinos', [
+            ('id', '<i4'),
+            ('pos_x', 'f4'),
+            ('pos_y', 'f4'),
+            ('pos_z', 'f4'),
+            ('dir_x', 'f4'),
+            ('dir_y', 'f4'),
+            ('dir_z', 'f4'),
+            ('energy', 'f4'),
+            ('time', 'f4'),
+            ('bjorken_x', 'f4'),
+            ('bjorken_y', 'f4'),
+            ('scattering_type', '<i4'),
+            ('pdg_id', '<i4'),
+            ('interaction_type', '<i4'),
+        ]
     ],
     'track_in': [
-        'TrackIns',
-        [('id', '<i4'), ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
-         ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'), ('energy', 'f4'),
-         ('time', 'f4'), ('geant_id', 'f4')]
+        'TrackIns', [
+            ('id', '<i4'),
+            ('pos_x', 'f4'),
+            ('pos_y', 'f4'),
+            ('pos_z', 'f4'),
+            ('dir_x', 'f4'),
+            ('dir_y', 'f4'),
+            ('dir_z', 'f4'),
+            ('energy', 'f4'),
+            ('time', 'f4'),
+            ('geant_id', 'f4'),
+        ]
     ],
     'primary_lepton': [
-        'PrimaryLeptons',
-        [('id', '<i4'), ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
-         ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'), ('energy', 'f4'),
-         ('time', 'f4'), ('geant_id', 'f4')]
+        'PrimaryLeptons', [
+            ('id', '<i4'),
+            ('pos_x', 'f4'),
+            ('pos_y', 'f4'),
+            ('pos_z', 'f4'),
+            ('dir_x', 'f4'),
+            ('dir_y', 'f4'),
+            ('dir_z', 'f4'),
+            ('energy', 'f4'),
+            ('time', 'f4'),
+            ('geant_id', 'f4'),
+        ]
     ]
 }
 
 KM3_TAGS = {
     'neutrino': [
-        'Neutrinos',
-        [('id', '<i4'), ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
-         ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'), ('energy', 'f4'),
-         ('time', 'f4'), ('bjorken_x', 'f4'), ('bjorken_y', 'f4'),
-         ('scattering_type', '<i4'), ('pdg_id',
-                                      '<i4'), ('interaction_type', '<i4')]
+        'Neutrinos', [
+            ('id', '<i4'),
+            ('pos_x', 'f4'),
+            ('pos_y', 'f4'),
+            ('pos_z', 'f4'),
+            ('dir_x', 'f4'),
+            ('dir_y', 'f4'),
+            ('dir_z', 'f4'),
+            ('energy', 'f4'),
+            ('time', 'f4'),
+            ('bjorken_x', 'f4'),
+            ('bjorken_y', 'f4'),
+            ('scattering_type', '<i4'),
+            ('pdg_id', '<i4'),
+            ('interaction_type', '<i4'),
+        ]
     ],
     'track_in': [
-        'TrackIns',
-        [('id', '<i4'), ('pos_x', 'f4'), ('pos_y', 'f4'), ('pos_z', 'f4'),
-         ('dir_x', 'f4'), ('dir_y', 'f4'), ('dir_z', 'f4'), ('energy', 'f4'),
-         ('time', 'f4'), ('type', 'f4'), ('something', '<i4')]
+        'TrackIns', [
+            ('id', '<i4'),
+            ('pos_x', 'f4'),
+            ('pos_y', 'f4'),
+            ('pos_z', 'f4'),
+            ('dir_x', 'f4'),
+            ('dir_y', 'f4'),
+            ('dir_z', 'f4'),
+            ('energy', 'f4'),
+            ('time', 'f4'),
+            ('type', 'f4'),
+            ('something', '<i4'),
+        ]
     ],
     'hit_raw': [
-        'Hits', [('id', '<i4'), ('pmt_id', '<i4'), ('npe', '<i4'),
-                 ('time', 'f4')]
+        'Hits', [
+            ('id', '<i4'),
+            ('pmt_id', '<i4'),
+            ('npe', '<i4'),
+            ('time', 'f4'),
+        ]
     ],
 }
 
