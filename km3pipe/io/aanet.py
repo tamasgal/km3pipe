@@ -327,7 +327,7 @@ class AanetPump(Pump):
             tab_dict['parameter'].append(parameter)
             tab_dict['field_names'].append(' '.join(fields))
             tab_dict['field_values'].append(' '.join(values))
-            tab_dict['dtype'].append(', '.join(types))
+            tab_dict['dtype'].append(' '.join(types))
         return Table(
             tab_dict, h5loc='/raw_header', name='RawHeader', h5singleton=True
         )
