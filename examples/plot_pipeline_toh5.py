@@ -48,10 +48,10 @@ OUTFILE = tb.open_file(
 # Setting up the pipeline
 # -----------------------
 
-p = Pipeline(timeit=True)
-p.attach(StatusBar, every=25)
-p.attach(EvtPump, filename=IN_FNAME)
-p.attach(
+pipe = Pipeline(timeit=True)
+pipe.attach(EvtPump, filename=IN_FNAME)
+pipe.attach(StatusBar, every=25)
+pipe.attach(
     HDF5Sink,
     # filename=OUT_FNAME,
     h5file=OUTFILE,
@@ -61,4 +61,4 @@ p.attach(
 # Draining the pipeline
 # ---------------------
 
-p.drain(N_EVENTS)
+pipe.drain(N_EVENTS)
