@@ -24,6 +24,7 @@ __all__ = ('Table', 'is_structured', 'has_structured_dt', 'inflate_dtype')
 DEFAULT_H5LOC = '/misc'
 DEFAULT_NAME = 'Generic Table'
 DEFAULT_SPLIT = False
+DEFAULT_H5SINGLETON = False
 
 
 def has_structured_dt(arr):
@@ -66,7 +67,10 @@ class Table(np.recarray):
     data: array-like or dict(array-like)
         numpy array with structured/flat dtype, or dict of arrays.
     h5loc: str
-    Location in HDF5 file where to store the data. [default: '/misc'
+        Location in HDF5 file where to store the data. [default: '/misc']
+    h5singleton: bool
+        Tables defined as h5singletons are only written once to an HDF5 file.
+        This is used for headers for example (default=False).
     dtype: numpy dtype
         Datatype over array. If not specified and data is an unstructured
         array, ``names`` needs to be specified. [default: None]
@@ -80,6 +84,9 @@ class Table(np.recarray):
         to hdf5? (default=False)
     name: str
         Human-readable name, e.g. 'Hits'
+    h5singleton: bool
+        Tables defined as h5singletons are only written once to an HDF5 file.
+        This is used for headers for example (default=False).
 
     Methods
     -------
@@ -108,6 +115,7 @@ class Table(np.recarray):
             dtype=None,
             split_h5=DEFAULT_SPLIT,
             name=DEFAULT_NAME,
+            h5singleton=DEFAULT_H5SINGLETON,
             **kwargs
     ):
         if isinstance(data, dict):
@@ -117,6 +125,7 @@ class Table(np.recarray):
                 dtype=dtype,
                 split_h5=split_h5,
                 name=name,
+                h5singleton=h5singleton,
                 **kwargs
             )
         if istype(data, 'DataFrame'):
@@ -126,6 +135,7 @@ class Table(np.recarray):
                 dtype=dtype,
                 split_h5=split_h5,
                 name=name,
+                h5singleton=h5singleton,
                 **kwargs
             )
         if isinstance(data, (list, tuple)):
@@ -149,6 +159,7 @@ class Table(np.recarray):
         obj.h5loc = h5loc
         obj.split_h5 = split_h5
         obj.name = name
+        obj.h5singleton = h5singleton
         return obj
 
     def __array_finalize__(self, obj):
@@ -159,6 +170,7 @@ class Table(np.recarray):
         self.h5loc = getattr(obj, 'h5loc', DEFAULT_H5LOC)
         self.split_h5 = getattr(obj, 'split_h5', DEFAULT_SPLIT)
         self.name = getattr(obj, 'name', DEFAULT_NAME)
+        self.h5singleton = getattr(obj, 'h5singleton', DEFAULT_H5SINGLETON)
         # attribute access returns void instances on slicing/iteration
         # kudos to
         # https://github.com/numpy/numpy/issues/3581#issuecomment-108957200
@@ -171,7 +183,8 @@ class Table(np.recarray):
             np.recarray.__array_wrap__(self, out_arr, context),
             h5loc=self.h5loc,
             split_h5=self.split_h5,
-            name=self.name
+            name=self.name,
+            h5singleton=self.h5singleton,
         )
 
     @staticmethod
@@ -284,8 +297,16 @@ class Table(np.recarray):
         dt = table_info['dtype']
         loc = table_info['h5loc']
         split = table_info['split_h5']
+        h5singleton = table_info['h5singleton']
 
-        return cls(data, h5loc=loc, dtype=dt, split_h5=split, name=name)
+        return cls(
+            data,
+            h5loc=loc,
+            dtype=dt,
+            split_h5=split,
+            name=name,
+            h5singleton=h5singleton
+        )
 
     @staticmethod
     def _check_column_length(values, n):
@@ -334,7 +355,11 @@ class Table(np.recarray):
             self, colnames, values, usemask=False, asrecarray=True, **kwargs
         )
         return self.__class__(
-            new_arr, h5loc=self.h5loc, split_h5=self.split_h5, name=self.name
+            new_arr,
+            h5loc=self.h5loc,
+            split_h5=self.split_h5,
+            name=self.name,
+            h5singleton=self.h5singleton
         )
 
     def drop_columns(self, colnames, **kwargs):
@@ -347,7 +372,11 @@ class Table(np.recarray):
             self, colnames, usemask=False, asrecarray=True, **kwargs
         )
         return self.__class__(
-            new_arr, h5loc=self.h5loc, split_h5=self.split_h5, name=self.name
+            new_arr,
+            h5loc=self.h5loc,
+            split_h5=self.split_h5,
+            name=self.name,
+            h5singleton=self.h5singleton
         )
 
     def sorted(self, by, **kwargs):
