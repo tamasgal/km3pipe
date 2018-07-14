@@ -199,7 +199,6 @@ class TestH5Sink(TestCase):
             assert version == h5file.root._v_attrs.km3pipe.decode()
             assert tb.__version__ == h5file.root._v_attrs.pytables.decode()
             assert FORMAT_VERSION == h5file.root._v_attrs.format_version
-            assert 'None' == h5file.root._v_attrs.jpp.decode()
 
         fobj.close()
 
