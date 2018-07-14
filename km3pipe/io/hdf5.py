@@ -544,8 +544,10 @@ class HDF5Pump(Pump):
                     )
                     continue
             else:
-                self.print("H5 singleton: {} ({})".format(tabname, h5loc))
                 if h5loc not in self._singletons:
+                    self.print(
+                        "Caching H5 singleton: {} ({})".format(tabname, h5loc)
+                    )
                     self._singletons[h5loc] = Table(
                         tab.read(),
                         h5loc=h5loc,
