@@ -174,23 +174,29 @@ class TimeslicePump(Pump):
         return next(self.blobs)
 
     def timeslice_generator(self):
+        """Uses slice ID as iterator"""
         slice_id = 0
         while slice_id < self.n_timeslices:
-            blob = Blob()
-            self.r.retrieve_timeslice(slice_id)
-            timeslice_info = Table.from_template({
-                'frame_index': self.r.frame_index,
-                'slice_id': slice_id,
-                'timestamp': self.r.utc_seconds,
-                'nanoseconds': self.r.utc_nanoseconds,
-                'n_frames': self.r.n_frames,
-            }, 'TimesliceInfo')
-            hits = self._extract_hits()
-            hits.slice_id = slice_id
-            blob['TimesliceInfo'] = timeslice_info
-            blob['TSHits'] = hits
+            blob = self.get_blob(slice_id)
             yield blob
             slice_id += 1
+
+    def get_blob(self, index):
+        """Index is slice ID"""
+        blob = Blob()
+        self.r.retrieve_timeslice(index)
+        timeslice_info = Table.from_template({
+            'frame_index': self.r.frame_index,
+            'slice_id': index,
+            'timestamp': self.r.utc_seconds,
+            'nanoseconds': self.r.utc_nanoseconds,
+            'n_frames': self.r.n_frames,
+        }, 'TimesliceInfo')
+        hits = self._extract_hits()
+        hits.slice_id = index
+        blob['TimesliceInfo'] = timeslice_info
+        blob['TSHits'] = hits
+        return blob
 
     def _extract_hits(self):
         total_hits = self.r.number_of_hits
@@ -234,11 +240,28 @@ class TimeslicePump(Pump):
         blob['TSHits'] = hits
         return blob
 
+    def __len__(self):
+        return self.n_timeslices
+
     def __iter__(self):
         return self
 
     def __next__(self):
         return next(self.blobs)
+
+    def __getitem__(self, index):
+        if isinstance(index, int):
+            return self.get_blob(index)
+        elif isinstance(index, slice):
+            return self._slice_generator(index)
+        else:
+            raise TypeError("index must be int or slice")
+
+    def _slice_generator(self, index):
+        """A simple slice generator for iterations"""
+        start, stop, step = index.indices(len(self))
+        for i in range(start, stop, step):
+            yield self.get_blob(i)
 
 
 class SummaryslicePump(Pump):
