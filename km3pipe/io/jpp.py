@@ -193,7 +193,7 @@ class TimeslicePump(Pump):
             'n_frames': self.r.n_frames,
         }, 'TimesliceInfo')
         hits = self._extract_hits()
-        hits.slice_id = index
+        hits.group_id = index
         blob['TimesliceInfo'] = timeslice_info
         blob['TSHits'] = hits
         return blob
