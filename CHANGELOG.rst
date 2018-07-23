@@ -2,6 +2,7 @@ Unreleased changes
 ------------------
 * prettier `Blob` when printed
 * KM3HDF5 v5.1 - introducing a new raw_header definition to store file/MC info
+* Read only aanet data when passing ``bare=True`` to ``kp.io.aanet.AanetPump``
 
 Version 8
 ---------
