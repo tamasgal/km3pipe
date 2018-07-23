@@ -100,11 +100,15 @@ class AanetPump(Pump):
         needs to be specified instead.
     ignore_hits: bool, optional [default=False]
         If true, don't read our the hits/mchits.
+    bare: bool, optional [default=False]
+        Do not create KM3Pipe specific data, just wrap the bare aanet API.
+        This will only give you ``blob['evt']``.
     """
 
     def configure(self):
         self.filename = self.require('filename')
         self.ignore_hits = bool(self.get('ignore_hits'))
+        self.bare = self.get('bare', default=False)
         self.header = None
         self.blobs = self.blob_generator()
         self.group_id = 0
@@ -129,16 +133,22 @@ class AanetPump(Pump):
             raise SystemExit("Could not open file")
 
         log.info("Generating blobs through new aanet API...")
-        self.header = self._convert_header_dict_to_table(
-            self._parse_header(event_file.header)
-        )
-        for event in event_file:
-            log.debug('Reading event...')
-            blob = self._read_event(event, filename)
-            log.debug('Reading header...')
-            blob["RawHeader"] = self.header
-            self.group_id += 1
-            yield blob
+
+        if self.bare:
+            log.info("Skipping data conversion, only passing bare aanet data")
+            for event in event_file:
+                yield Blob({'evt': event})
+        else:
+            self.header = self._convert_header_dict_to_table(
+                self._parse_header(event_file.header)
+            )
+            for event in event_file:
+                log.debug('Reading event...')
+                blob = self._read_event(event, filename)
+                log.debug('Reading header...')
+                blob["RawHeader"] = self.header
+                self.group_id += 1
+                yield blob
         del event_file
 
     def _parse_eventinfo(self, event):
