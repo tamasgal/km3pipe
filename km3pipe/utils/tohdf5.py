@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Filename: tohdf5.py
 """
 Convert ROOT and EVT files to HDF5.
@@ -50,7 +51,7 @@ def tohdf5(input_files, output_file, n_events, conv_times_to_jte,
     pipe.attach(GenericPump, filenames=input_files, **kwargs)
     pipe.attach(HDF5MetaData, data=kwargs)
     pipe.attach(StatusBar, every=250)
-    if conv_times_to_jte: 
+    if conv_times_to_jte:
         from km3modules.mc import MCTimeCorrector
         pipe.attach(MCTimeCorrector)
     pipe.attach(HDF5Sink, filename=output_file, **kwargs)
@@ -97,3 +98,7 @@ def main():
         n_rows_expected=n_rows_expected,
         ignore_hits=bool(ignore_hits_arg),
     )
+
+
+if __name__ == '__main__':
+    main()
