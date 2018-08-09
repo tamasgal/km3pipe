@@ -139,9 +139,14 @@ class AanetPump(Pump):
             for event in event_file:
                 yield Blob({'evt': event})
         else:
-            self.header = self._convert_header_dict_to_table(
-                self._parse_header(event_file.header)
-            )
+            log.info("Unpacking aanet header into dictionary...")
+            hdr = self._parse_header(event_file.header)
+            if not hdr:
+                log.info("Empty header dict found, skipping...")
+                self.header = None
+            else:
+                log.info("Converting Header dict to Table...")
+                self.header = self._convert_header_dict_to_table(hdr)
             for event in event_file:
                 log.debug('Reading event...')
                 blob = self._read_event(event, filename)
@@ -185,6 +190,7 @@ class AanetPump(Pump):
         return wgt1, wgt2, wgt3, wgt4
 
     def _parse_tracks(self, tracks):
+        log.info("Reading Tracks...")
         out = defaultdict(list)
         for i, trk in enumerate(tracks):
             self.log.debug('Reading Track #{}...'.format(i))
@@ -205,7 +211,9 @@ class AanetPump(Pump):
                     name=trk_name
                 )
             )
+        log.info("Merging tracks into table...")
         for key in out:
+            log.debug("Merging '{}'...".format(key))
             name = out[key][0].name
             h5loc = out[key][0].h5loc
             out[key] = Table(
@@ -321,7 +329,11 @@ class AanetPump(Pump):
 
     @staticmethod
     def _convert_header_dict_to_table(header_dict):
+        if not header_dict:
+            log.warn("Can't convert empty header dict to table, skipping...")
+            return
         tab_dict = defaultdict(list)
+        log.debug("Param:   field_names    field_values    dtype")
         for parameter, data in header_dict.items():
             fields = []
             values = []
@@ -330,7 +342,7 @@ class AanetPump(Pump):
                 fields.append(field_name)
                 values.append(field_value)
                 try:
-                    v = float(field_value)
+                    _ = float(field_value)
                     types.append('f4')
                 except ValueError:
                     types.append('a{}'.format(len(field_value)))
@@ -338,6 +350,12 @@ class AanetPump(Pump):
             tab_dict['field_names'].append(' '.join(fields))
             tab_dict['field_values'].append(' '.join(values))
             tab_dict['dtype'].append(' '.join(types))
+            log.debug("{}: {} {} {}".format(
+                tab_dict['parameter'][-1],
+                tab_dict['field_names'][-1],
+                tab_dict['field_values'][-1],
+                tab_dict['dtype'][-1],
+            ))
         return Table(
             tab_dict, h5loc='/raw_header', name='RawHeader', h5singleton=True
         )
