@@ -196,6 +196,16 @@ class AanetPump(Pump):
         for i, trk in enumerate(tracks):
             self.log.debug('Reading Track #{}...'.format(i))
             trk_type = trk.rec_type
+            # THIS DOES NOT WORK! DTYPE DEPENDS ON FULL HISTORY
+            # # hack-ish: rec type is the last entry in the history
+            # if trk_type == 4000:
+            #    # iterating empty ROOT vector causes segfaults!
+            #    if len(trk.rec_stages) == 0:
+            #        pass
+            #    else:
+            #        trk_type = trk.rec_stages[-1]
+            # # after that, if the tracktype is still 4000, just
+            # enumerate it as another generic track
             try:
                 trk_name = RECO2NAME[trk_type]
             except KeyError:
@@ -207,19 +217,16 @@ class AanetPump(Pump):
                 name=trk_name
             )
             if trk_type == AANET_RECTYPE_PLACEHOLDER:
-                self.log.warn(
-                    "Unknown Reconstruction type! "
-                    "Setting to 'GENERIC_TRACK_#'. This may lead to "
-                    "unrelated fit getting merged -- which is very likely not "
-                    "what you want! The only way to fix this is to put the "
-                    "proper numbers into the `rec_type` of your input file! "
-                    "For now, we will just count + enumerate all different "
-                    "datastructures but I do not have any information to tell "
-                    "them apart!".format(trk_name)
+                self.log.info(
+                    "Unknown Reconstruction type! Setting to 'GENERIC_TRACK_#'"
                 )
                 trk_name = self._handle_generic(tab.dtype)
                 tab.name = trk_name
                 tab.h5loc = '/reco/{}'.format(trk_name.lower())
+            # print(RECO2NAME[trk_type],
+            #     [RECO2NAME[k] for k in trk.rec_stages],
+            #     tab.dtype.names,
+            # )
             out[trk_name].append(tab)
         log.info("Merging tracks into table...")
         for key in out:
@@ -253,6 +260,16 @@ class AanetPump(Pump):
             return nam
         cnt = len(self._generic_dtypes_avail)
         nam = '{}_{}'.format(pref, cnt)
+        self.log.warn(
+            "Unknown Reconstruction type! "
+            "Setting to '{}'. This may lead to "
+            "unrelated fit getting merged -- which is very likely not "
+            "what you want! The only way to fix this is to put the "
+            "proper numbers into the `rec_type` of your input file! "
+            "For now, we will just count + enumerate all different "
+            "datastructures but I do not have any information to tell "
+            "them apart!".format(nam)
+        )
         self._generic_dtypes_avail[dt] = nam
         return nam
 
