@@ -30,53 +30,53 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 FITINF2NUM = {
-    'JGANDALF_BETA0_RAD': 0,    # angular resolution [rad]
-    'JGANDALF_BETA1_RAD': 1,    # angular resolution [rad]
-    'JGANDALF_CHI2': 2,    # chi2
-    'JGANDALF_NUMBER_OF_HITS': 3,    # number of hits
-    'JENERGY_ENERGY': 4,    # uncorrected energy [GeV]
-    'JENERGY_CHI2': 5,    # chi2
-    'JGANDALF_LAMBDA': 6,    # control parameter
-    'JGANDALF_NUMBER_OF_ITERATIONS': 7,    # number of iterations
-    'JSTART_NPE_MIP': 8,    # number of photo-electrons
-    # up to the barycentre
-    'JSTART_NPE_MIP_TOTAL': 9,    # number of photo-electrons
-    # along the whole track
-    'JSTART_LENGTH_METRES': 10,    # distance between first
-    # and last hits in metres
-    'JVETO_NPE': 11,    # number of photo-electrons
-    'JVETO_NUMBER_OF_HITS': 12,    # number of hits
-    'JENERGY_MUON_RANGE_METRES': 13,    # range of a muon with the
-    # reconstructed energy [m]
-    'JENERGY_NOISE_LIKELIHOOD': 14,    # log likelihood of every hit
-    # being K40
-    'JENERGY_NDF': 15,    # number of degrees of freedom
-    'JENERGY_NUMBER_OF_HITS': 16,    # number of hits
-    'JCOPY_Z_M': 17,    # true vertex position along
-    # track [m]
+    'JGANDALF_BETA0_RAD': 0,
+    'JGANDALF_BETA1_RAD': 1,
+    'JGANDALF_CHI2': 2,
+    'JGANDALF_NUMBER_OF_HITS': 3,
+    'JENERGY_ENERGY': 4,
+    'JENERGY_CHI2': 5,
+    'JGANDALF_LAMBDA': 6,
+    'JGANDALF_NUMBER_OF_ITERATIONS': 7,
+    'JSTART_NPE_MIP': 8,
+    'JSTART_NPE_MIP_TOTAL': 9,
+    'JSTART_LENGTH_METRES': 10,
+    'JVETO_NPE': 11,
+    'JVETO_NUMBER_OF_HITS': 12,
+    'JENERGY_MUON_RANGE_METRES': 13,
+    'JENERGY_NOISE_LIKELIHOOD': 14,
+    'JENERGY_NDF': 15,
+    'JENERGY_NUMBER_OF_HITS': 16,
+    'JCOPY_Z_M': 17,
 }
 
+# jpp > 10.1 (trunk @10276)
+AANET_RECTYPE_PLACEHOLDER = 4000
+
 RECO2NUM = {
-    'JMUONBEGIN': 0,    # Start muon fit applications
-    'JMUONPREFIT': 1,    # JPrefit.cc
-    'JMUONSIMPLEX': 2,    # JSimplex.cc
-    'JMUONGANDALF': 3,    # JGandalf.cc
-    'JMUONENERGY': 4,    # JEnergy.cc
-    'JMUONSTART': 5,    # JStart.cc
-    'JMUONEND': 6,    # Termination muon fit applications
-    'LineFit': 7,    # An angular reco guess.
-    # It could be a seed for JPrefit
-    'JSHOWERBEGIN': 100,    # Start shower fit applications
-    'JSHOWERPREFIT': 101,    # JShowerPrefit.cc
-    'JSHOWEREND': 102,    # Termination shower fit applications
-    'JPP_REC_TYPE': 4000,    # Jpp reconstruction type for AAnet
-    'JUSERBEGIN': 1000,    # Start of user applications
-    'JMUONVETO': 1001,    # JVeto.cc
-    'JPRESIM': 1002,    # JPreSim_HTR.cc
-    'JMUONPATH': 1003,    # JPath.cc
-    'JMCEVT': 1004,    # JMCEvt.cc
-    'KM3DeltaPos': 10000,    # This is not a fit this gives
-    # position information only
+    'JMUONBEGIN': 0,
+    'JMUONPREFIT': 1,
+    'JMUONSIMPLEX': 2,
+    'JMUONGANDALF': 3,
+    'JMUONENERGY': 4,
+    'JMUONSTART': 5,
+    'JLINEFIT': 6,                      # JMUONEND @ 10.1, JLINEFIT @ trunk
+    'LineFit': 7,                       # 10.1 artifact, REMOVE IN FUTURE
+    'JMUONEND': 99,
+    'JSHOWERBEGIN': 100,
+    'JSHOWERPREFIT': 101,
+    'JSHOWERPOSITIONFIT': 102,
+    'JSHOWERCOMPLETEFIT': 103,
+    'JSHOWEREND': 199,
+    'JPP_REC_TYPE': AANET_RECTYPE_PLACEHOLDER,
+    'JUSERBEGIN': 1000,
+    'JMUONVETO': 1001,
+    'JPRESIM': 1002,
+    'JMUONPATH': 1003,
+    'JMCEVT': 1004,
+    'JUSEREND': 1099,
+    'KM3DeltaPos': 10000,
+
 }
 
 FITINF2NAME = {v: k for k, v in FITINF2NUM.items()}
@@ -112,6 +112,7 @@ class AanetPump(Pump):
         self.header = None
         self.blobs = self.blob_generator()
         self.group_id = 0
+        self._generic_dtypes_avail = {}
 
     def get_blob(self, index):
         NotImplementedError("Aanet currently does not support indexing.")
@@ -195,22 +196,38 @@ class AanetPump(Pump):
         for i, trk in enumerate(tracks):
             self.log.debug('Reading Track #{}...'.format(i))
             trk_type = trk.rec_type
+            # THIS DOES NOT WORK! DTYPE DEPENDS ON FULL HISTORY
+            # # hack-ish: rec type is the last entry in the history
+            # if trk_type == 4000:
+            #    # iterating empty ROOT vector causes segfaults!
+            #    if len(trk.rec_stages) == 0:
+            #        pass
+            #    else:
+            #        trk_type = trk.rec_stages[-1]
+            # # after that, if the tracktype is still 4000, just
+            # enumerate it as another generic track
             try:
                 trk_name = RECO2NAME[trk_type]
             except KeyError:
-                trk_name = "Generic_Track_#{}".format(i)
-                self.log.warn(
-                    "Unknown Reconstruction type! "
-                    "Setting to '{}'".format(trk_name)
-                )
+                trk_type = AANET_RECTYPE_PLACEHOLDER
             trk_dict = self._read_track(trk)
-            out[trk_name].append(
-                Table(
-                    trk_dict,
-                    h5loc='/reco/{}'.format(trk_name.lower()),
-                    name=trk_name
-                )
+            tab = Table(
+                trk_dict,
+                h5loc='/reco/{}'.format(trk_name.lower()),
+                name=trk_name
             )
+            if trk_type == AANET_RECTYPE_PLACEHOLDER:
+                self.log.info(
+                    "Unknown Reconstruction type! Setting to 'GENERIC_TRACK_#'"
+                )
+                trk_name = self._handle_generic(tab.dtype)
+                tab.name = trk_name
+                tab.h5loc = '/reco/{}'.format(trk_name.lower())
+            # print(RECO2NAME[trk_type],
+            #     [RECO2NAME[k] for k in trk.rec_stages],
+            #     tab.dtype.names,
+            # )
+            out[trk_name].append(tab)
         log.info("Merging tracks into table...")
         for key in out:
             log.debug("Merging '{}'...".format(key))
@@ -223,6 +240,38 @@ class AanetPump(Pump):
             )
         self.log.debug(out)
         return out
+
+    # sometimes the reco name/tag is not correctly written
+    # which means that multiple different fits with
+    # different dtypes have the same name.
+    # Keep track of the dtypes from unnamed tracks and just enumerate them
+    # this is problematic since 2 unnamed tracks with same length
+    # (e.g. fit A and B just write pos_x, pos_y, pos_z)
+    # would get merged -- they would be thrown into a table containing
+    # both A and B.
+    # This needs to be fixed upstream obviously, so here we should just make
+    # noise about it
+    dtypes_avail = {}
+
+    def _handle_generic(self, dt):
+        pref = "GENERIC_TRACK"
+        if dt in self._generic_dtypes_avail:
+            nam = self._generic_dtypes_avail[dt]
+            return nam
+        cnt = len(self._generic_dtypes_avail)
+        nam = '{}_{}'.format(pref, cnt)
+        self.log.warn(
+            "Unknown Reconstruction type! "
+            "Setting to '{}'. This may lead to "
+            "unrelated fit getting merged -- which is very likely not "
+            "what you want! The only way to fix this is to put the "
+            "proper numbers into the `rec_type` of your input file! "
+            "For now, we will just count + enumerate all different "
+            "datastructures but I do not have any information to tell "
+            "them apart!".format(nam)
+        )
+        self._generic_dtypes_avail[dt] = nam
+        return nam
 
     def _read_track(self, trk):
         out = {}
@@ -342,7 +391,7 @@ class AanetPump(Pump):
                 fields.append(field_name)
                 values.append(field_value)
                 try:
-                    _ = float(field_value)
+                    _ = float(field_value)          # noqa
                     types.append('f4')
                 except ValueError:
                     types.append('a{}'.format(len(field_value)))
