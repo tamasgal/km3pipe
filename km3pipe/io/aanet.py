@@ -220,9 +220,12 @@ class AanetPump(Pump):
                     self.log.info(
                         "Unknown Reconstruction type! Using history..."
                     )
+                    # iteration in reverse order segfaults, whyever...
+                    stages = [k for k in trk.rec_stages]
                     trk_name = '__'.join([
-                        RECO2NAME[k] for k in trk.rec_stages[::-1]
+                        RECO2NAME[k] for k in stages[::-1]
                     ])
+                    # trk_name = 'JHIST__' + trk_name
 
             tab.name = trk_name
             tab.h5loc = '/reco/{}'.format(trk_name.lower())
@@ -250,7 +253,6 @@ class AanetPump(Pump):
     # both A and B.
     # This needs to be fixed upstream obviously, so here we should just make
     # noise about it
-    dtypes_avail = {}
 
     def _handle_generic(self, dt):
         pref = "GENERIC_TRACK"
