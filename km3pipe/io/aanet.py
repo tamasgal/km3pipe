@@ -60,8 +60,10 @@ RECO2NUM = {
     'JMUONGANDALF': 3,
     'JMUONENERGY': 4,
     'JMUONSTART': 5,
-    'JLINEFIT': 6,    # JMUONEND @ 10.1, JLINEFIT @ trunk
-    'LineFit': 7,    # 10.1 artifact, REMOVE IN FUTURE
+    # JMUONEND @ 10.1, JLINEFIT @ trunk
+    'JLINEFIT': 6,
+    # 10.1 artifact, REMOVE IN FUTURE
+    'LineFit': 7,
     'JMUONEND': 99,
     'JSHOWERBEGIN': 100,
     'JSHOWERPREFIT': 101,
@@ -120,7 +122,7 @@ class AanetPump(Pump):
         """Create a blob generator."""
         # pylint: disable:F0401,W0612
         import aa    # pylint: disablF0401        # noqa
-        from ROOT import EventFile    # pylint: disablF0401
+        from ROOT import EventFile    # pylint: disable F0401
 
         filename = self.filename
         log.info("Reading from file: {0}".format(filename))
