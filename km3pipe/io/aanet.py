@@ -225,7 +225,7 @@ class AanetPump(Pump):
                     trk_name = '__'.join([
                         RECO2NAME[k] for k in stages[::-1]
                     ])
-                    # trk_name = 'JHIST__' + trk_name
+                    trk_name = 'JHIST__' + trk_name
 
             tab.name = trk_name
             tab.h5loc = '/reco/{}'.format(trk_name.lower())
