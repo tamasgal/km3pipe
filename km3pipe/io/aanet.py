@@ -60,8 +60,10 @@ RECO2NUM = {
     'JMUONGANDALF': 3,
     'JMUONENERGY': 4,
     'JMUONSTART': 5,
-    'JLINEFIT': 6,                      # JMUONEND @ 10.1, JLINEFIT @ trunk
-    'LineFit': 7,                       # 10.1 artifact, REMOVE IN FUTURE
+    # JMUONEND @ 10.1, JLINEFIT @ trunk
+    'JLINEFIT': 6,
+    # 10.1 artifact, REMOVE IN FUTURE
+    'LineFit': 7,
     'JMUONEND': 99,
     'JSHOWERBEGIN': 100,
     'JSHOWERPREFIT': 101,
@@ -76,7 +78,6 @@ RECO2NUM = {
     'JMCEVT': 1004,
     'JUSEREND': 1099,
     'KM3DeltaPos': 10000,
-
 }
 
 FITINF2NAME = {v: k for k, v in FITINF2NUM.items()}
@@ -121,7 +122,7 @@ class AanetPump(Pump):
         """Create a blob generator."""
         # pylint: disable:F0401,W0612
         import aa    # pylint: disablF0401        # noqa
-        from ROOT import EventFile    # pylint: disablF0401
+        from ROOT import EventFile    # pylint: disable F0401
 
         filename = self.filename
         log.info("Reading from file: {0}".format(filename))
@@ -195,38 +196,39 @@ class AanetPump(Pump):
         out = defaultdict(list)
         for i, trk in enumerate(tracks):
             self.log.debug('Reading Track #{}...'.format(i))
+            trk_dict = self._read_track(trk)
+            # set name + h5loc later, if the name is not available, we need
+            # the dtype to make a new name
+            tab = Table(trk_dict)
+
             trk_type = trk.rec_type
-            # THIS DOES NOT WORK! DTYPE DEPENDS ON FULL HISTORY
-            # # hack-ish: rec type is the last entry in the history
-            # if trk_type == 4000:
-            #    # iterating empty ROOT vector causes segfaults!
-            #    if len(trk.rec_stages) == 0:
-            #        pass
-            #    else:
-            #        trk_type = trk.rec_stages[-1]
-            # # after that, if the tracktype is still 4000, just
-            # enumerate it as another generic track
             try:
                 trk_name = RECO2NAME[trk_type]
             except KeyError:
                 trk_type = AANET_RECTYPE_PLACEHOLDER
-            trk_dict = self._read_track(trk)
-            tab = Table(
-                trk_dict,
-                h5loc='/reco/{}'.format(trk_name.lower()),
-                name=trk_name
-            )
             if trk_type == AANET_RECTYPE_PLACEHOLDER:
-                self.log.info(
-                    "Unknown Reconstruction type! Setting to 'GENERIC_TRACK_#'"
-                )
-                trk_name = self._handle_generic(tab.dtype)
-                tab.name = trk_name
-                tab.h5loc = '/reco/{}'.format(trk_name.lower())
-            # print(RECO2NAME[trk_type],
-            #     [RECO2NAME[k] for k in trk.rec_stages],
-            #     tab.dtype.names,
-            # )
+                # if we have a history available but no name (because JEvt.cc),
+                # then use the concatenated history as the name.
+                # If that is not available, enumerate the tracks by their
+                # dtypes (since they have no other tagging)
+                if len(trk.rec_stages) == 0:
+                    self.log.info(
+                        "Unknown Reconstruction type & no history available!"
+                    )
+                    trk_name = self._handle_generic(tab.dtype)
+                else:
+                    self.log.info(
+                        "Unknown Reconstruction type! Using history..."
+                    )
+                    # iteration in reverse order segfaults, whyever...
+                    stages = [k for k in trk.rec_stages]
+                    trk_name = '__'.join([
+                        RECO2NAME[k] for k in stages[::-1]
+                    ])
+                    # trk_name = 'JHIST__' + trk_name
+
+            tab.name = trk_name
+            tab.h5loc = '/reco/{}'.format(trk_name.lower())
             out[trk_name].append(tab)
         log.info("Merging tracks into table...")
         for key in out:
@@ -251,7 +253,6 @@ class AanetPump(Pump):
     # both A and B.
     # This needs to be fixed upstream obviously, so here we should just make
     # noise about it
-    dtypes_avail = {}
 
     def _handle_generic(self, dt):
         pref = "GENERIC_TRACK"
@@ -391,7 +392,7 @@ class AanetPump(Pump):
                 fields.append(field_name)
                 values.append(field_value)
                 try:
-                    _ = float(field_value)          # noqa
+                    _ = float(field_value)    # noqa
                     types.append('f4')
                 except ValueError:
                     types.append('a{}'.format(len(field_value)))
@@ -399,12 +400,14 @@ class AanetPump(Pump):
             tab_dict['field_names'].append(' '.join(fields))
             tab_dict['field_values'].append(' '.join(values))
             tab_dict['dtype'].append(' '.join(types))
-            log.debug("{}: {} {} {}".format(
-                tab_dict['parameter'][-1],
-                tab_dict['field_names'][-1],
-                tab_dict['field_values'][-1],
-                tab_dict['dtype'][-1],
-            ))
+            log.debug(
+                "{}: {} {} {}".format(
+                    tab_dict['parameter'][-1],
+                    tab_dict['field_names'][-1],
+                    tab_dict['field_values'][-1],
+                    tab_dict['dtype'][-1],
+                )
+            )
         return Table(
             tab_dict, h5loc='/raw_header', name='RawHeader', h5singleton=True
         )
