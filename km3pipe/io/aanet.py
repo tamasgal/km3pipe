@@ -194,6 +194,9 @@ class AanetPump(Pump):
     def _parse_tracks(self, tracks):
         log.info("Reading Tracks...")
         out = defaultdict(list)
+        # iterating empty ROOT vector causes segfaults!
+        if len(tracks) == 0:
+            return out
         for i, trk in enumerate(tracks):
             self.log.debug('Reading Track #{}...'.format(i))
             trk_dict = self._read_track(trk)
@@ -222,9 +225,7 @@ class AanetPump(Pump):
                     )
                     # iteration in reverse order segfaults, whyever...
                     stages = [k for k in trk.rec_stages]
-                    trk_name = '__'.join([
-                        RECO2NAME[k] for k in stages[::-1]
-                    ])
+                    trk_name = '__'.join([RECO2NAME[k] for k in stages[::-1]])
                     trk_name = 'JHIST__' + trk_name
 
             tab.name = trk_name
