@@ -42,9 +42,9 @@ def get_git_revision_hash(short=False):
         return 'no-git-revision-hash'
 
 
-VERSION_INFO = (8, 1, 4, 'final', 0)
+VERSION_INFO = (8, 2, 0, 'final', 0)
 
-__author__ = 'tamasgal'
+__author__ = 'tamasgal + moritzlotze'
 
 
 def _get_version(version_info):
