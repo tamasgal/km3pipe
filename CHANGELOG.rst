@@ -4,7 +4,7 @@ Unreleased changes
 Version 8
 ---------
 
-8.2.0 / 2018-08-15
+8.2.1 / 2018-08-15
 ~~~~~~~~~~~~~~~~~~
 * prettier `Blob` when printed
 * KM3HDF5 v5.1 - introducing a new raw_header definition to store file/MC info
