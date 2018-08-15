@@ -555,6 +555,7 @@ class TestTable(TestCase):
             'dtype': np.dtype([('a', '<u4'), ('b', 'f4')]),
             'h5loc': '/yat',
             'split_h5': True,
+            'h5singleton': True,
             'name': "YetAnotherTemplate",
         }
         arr = np.array([(1, 3), (2, 4)], dtype=a_template['dtype'])
@@ -562,18 +563,21 @@ class TestTable(TestCase):
         self.assertListEqual([1, 2], list(tab.a))
         self.assertListEqual([3.0, 4.0], list(tab.b))
         assert "YetAnotherTemplate" == tab.name
+        assert tab.h5singleton
 
     def test_adhoc_noname_template(self):
         a_template = {
             'dtype': np.dtype([('a', '<u4'), ('b', 'f4')]),
             'h5loc': '/yat',
             'split_h5': True,
+            'h5singleton': True,
         }
         arr = np.array([(1, 3), (2, 4)], dtype=a_template['dtype'])
         tab = Table.from_template(arr, a_template)
         self.assertListEqual([1, 2], list(tab.a))
         self.assertListEqual([3.0, 4.0], list(tab.b))
         assert DEFAULT_NAME == tab.name
+        assert tab.h5singleton
 
     def test_element_list_with_dtype(self):
         bad_elist = [
@@ -694,23 +698,44 @@ class TestTable(TestCase):
         assert np.allclose(tab.a, [4, 5, 3])
 
     def test_slice_keeps_metadata(self):
-        tab = Table({'a': [1, 2, 3]}, h5loc='/lala', split_h5=True, name='bla')
+        tab = Table({
+            'a': [1, 2, 3]
+        },
+                    h5loc='/lala',
+                    split_h5=True,
+                    name='bla',
+                    h5singleton=False)
         assert tab[:2].h5loc == '/lala'
         assert tab[:2].name == 'bla'
+        assert not tab[:2].h5singleton
         assert tab[:2].split_h5
 
     def test_mask_keeps_metadata(self):
-        tab = Table({'a': [1, 2, 3]}, h5loc='/lala', split_h5=True, name='bla')
+        tab = Table({
+            'a': [1, 2, 3]
+        },
+                    h5loc='/lala',
+                    split_h5=True,
+                    name='bla',
+                    h5singleton=True)
         m = np.ones(len(tab), dtype=bool)
         assert tab[m].h5loc == '/lala'
         assert tab[m].name == 'bla'
+        assert tab[m].h5singleton
         assert tab[m].split_h5
 
     def test_indexing_keeps_metadata(self):
-        tab = Table({'a': [1, 2, 3]}, h5loc='/lala', split_h5=True, name='bla')
+        tab = Table({
+            'a': [1, 2, 3]
+        },
+                    h5loc='/lala',
+                    split_h5=True,
+                    name='bla',
+                    h5singleton=True)
         im = [1, 1, 0]
         assert tab[im].h5loc == '/lala'
         assert tab[im].name == 'bla'
+        assert tab[im].h5singleton
         assert tab[im].split_h5
 
     def test_crash_repr(self):

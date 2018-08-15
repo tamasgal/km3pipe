@@ -20,10 +20,13 @@ KP_PATH = join(dirname(__file__), '..')
 
 def get_git_revision_hash(short=False):
     """Try to retrieve the hash of the last git commit"""
-    infix = '--short' if short else ''
+    if short:
+        cmd = ['git', '-C', KP_PATH, 'rev-parse', '--short', 'HEAD']
+    else:
+        cmd = ['git', '-C', KP_PATH, 'rev-parse', 'HEAD']
     try:
         return subprocess.check_output(
-            ['git', '-C', KP_PATH, 'rev-parse', infix, 'HEAD'],
+            cmd,
             stderr=subprocess.PIPE,
         ).strip().decode()
     except subprocess.CalledProcessError:
@@ -39,9 +42,9 @@ def get_git_revision_hash(short=False):
         return 'no-git-revision-hash'
 
 
-VERSION_INFO = (8, 1, 4, 'final', 0)
+VERSION_INFO = (8, 2, 0, 'final', 0)
 
-__author__ = 'tamasgal'
+__author__ = 'tamasgal + moritzlotze'
 
 
 def _get_version(version_info):

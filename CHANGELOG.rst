@@ -1,9 +1,20 @@
 Unreleased changes
 ------------------
 
-
 Version 8
 ---------
+
+8.2.0 / 2018-08-15
+~~~~~~~~~~~~~~~~~~
+* prettier `Blob` when printed
+* KM3HDF5 v5.1 - introducing a new raw_header definition to store file/MC info
+* Read only aanet data when passing ``bare=True`` to ``kp.io.aanet.AanetPump``
+* AA: If ``rec_type`` (defined in JFitApplications.hh) is not available, use the
+  JHistory ( ``rec_stages`` ) to derive the fit name, like ``jhist__jgandalf__jprefit``
+* AA: If neither ``rec_type`` nor history are available, enumerate track names
+   names ``generic_track_``, based on their dtype.
+* AA: more robust track readout (segfaults etc form looping over empty pyroot
+  vectors
 
 8.1.4 / 2018-06-26
 ~~~~~~~~~~~~~~~~~~

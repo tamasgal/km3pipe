@@ -141,7 +141,7 @@ def cartesian(phi, theta, radius=1):
 
 
 def angle_between(v1, v2):
-    """Returns the angle in radians between vectors 'v1' and 'v2'::
+    """Returns the angle in radians between vectors 'v1' and 'v2'.
 
     >>> angle_between((1, 0, 0), (0, 1, 0))
     1.5707963267948966

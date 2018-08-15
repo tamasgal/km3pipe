@@ -346,3 +346,19 @@ def supports_color():
         return False
 
     return True
+
+
+def get_jpp_revision(via_command='JPrint'):
+    """Retrieves the Jpp revision number"""
+    try:
+        output = subprocess.check_output([via_command, '-v'],
+                                         stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        if e.returncode == 1:
+            output = e.output
+        else:
+            return None
+    except OSError:
+        return None
+    revision = output.decode().split('\n')[0].split()[1].strip()
+    return revision

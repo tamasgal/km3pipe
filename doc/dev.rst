@@ -224,3 +224,5 @@ is happy with your changes. If there are any changes needed, commit and push tho
 fork, and create a new merge request to the same issue branch. Rinse and repeat...
 
 That's it!
+
+If you want to work directly on KM3Pipe, feel free to join our dev-team :)

@@ -30,57 +30,65 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 FITINF2NUM = {
-    'JGANDALF_BETA0_RAD': 0,    # angular resolution [rad]
-    'JGANDALF_BETA1_RAD': 1,    # angular resolution [rad]
-    'JGANDALF_CHI2': 2,    # chi2
-    'JGANDALF_NUMBER_OF_HITS': 3,    # number of hits
-    'JENERGY_ENERGY': 4,    # uncorrected energy [GeV]
-    'JENERGY_CHI2': 5,    # chi2
-    'JGANDALF_LAMBDA': 6,    # control parameter
-    'JGANDALF_NUMBER_OF_ITERATIONS': 7,    # number of iterations
-    'JSTART_NPE_MIP': 8,    # number of photo-electrons
-    # up to the barycentre
-    'JSTART_NPE_MIP_TOTAL': 9,    # number of photo-electrons
-    # along the whole track
-    'JSTART_LENGTH_METRES': 10,    # distance between first
-    # and last hits in metres
-    'JVETO_NPE': 11,    # number of photo-electrons
-    'JVETO_NUMBER_OF_HITS': 12,    # number of hits
-    'JENERGY_MUON_RANGE_METRES': 13,    # range of a muon with the
-    # reconstructed energy [m]
-    'JENERGY_NOISE_LIKELIHOOD': 14,    # log likelihood of every hit
-    # being K40
-    'JENERGY_NDF': 15,    # number of degrees of freedom
-    'JENERGY_NUMBER_OF_HITS': 16,    # number of hits
-    'JCOPY_Z_M': 17,    # true vertex position along
-    # track [m]
+    'JGANDALF_BETA0_RAD': 0,
+    'JGANDALF_BETA1_RAD': 1,
+    'JGANDALF_CHI2': 2,
+    'JGANDALF_NUMBER_OF_HITS': 3,
+    'JENERGY_ENERGY': 4,
+    'JENERGY_CHI2': 5,
+    'JGANDALF_LAMBDA': 6,
+    'JGANDALF_NUMBER_OF_ITERATIONS': 7,
+    'JSTART_NPE_MIP': 8,
+    'JSTART_NPE_MIP_TOTAL': 9,
+    'JSTART_LENGTH_METRES': 10,
+    'JVETO_NPE': 11,
+    'JVETO_NUMBER_OF_HITS': 12,
+    'JENERGY_MUON_RANGE_METRES': 13,
+    'JENERGY_NOISE_LIKELIHOOD': 14,
+    'JENERGY_NDF': 15,
+    'JENERGY_NUMBER_OF_HITS': 16,
+    'JCOPY_Z_M': 17,
 }
 
+# jpp > 10.1 (trunk @10276)
+AANET_RECTYPE_PLACEHOLDER = 4000
+
 RECO2NUM = {
-    'JMUONBEGIN': 0,    # Start muon fit applications
-    'JMUONPREFIT': 1,    # JPrefit.cc
-    'JMUONSIMPLEX': 2,    # JSimplex.cc
-    'JMUONGANDALF': 3,    # JGandalf.cc
-    'JMUONENERGY': 4,    # JEnergy.cc
-    'JMUONSTART': 5,    # JStart.cc
-    'JMUONEND': 6,    # Termination muon fit applications
-    'LineFit': 7,    # An angular reco guess.
-    # It could be a seed for JPrefit
-    'JSHOWERBEGIN': 100,    # Start shower fit applications
-    'JSHOWERPREFIT': 101,    # JShowerPrefit.cc
-    'JSHOWEREND': 102,    # Termination shower fit applications
-    'JPP_REC_TYPE': 4000,    # Jpp reconstruction type for AAnet
-    'JUSERBEGIN': 1000,    # Start of user applications
-    'JMUONVETO': 1001,    # JVeto.cc
-    'JPRESIM': 1002,    # JPreSim_HTR.cc
-    'JMUONPATH': 1003,    # JPath.cc
-    'JMCEVT': 1004,    # JMCEvt.cc
-    'KM3DeltaPos': 10000,    # This is not a fit this gives
-    # position information only
+    'JMUONBEGIN': 0,
+    'JMUONPREFIT': 1,
+    'JMUONSIMPLEX': 2,
+    'JMUONGANDALF': 3,
+    'JMUONENERGY': 4,
+    'JMUONSTART': 5,
+    # JMUONEND @ 10.1, JLINEFIT @ trunk
+    'JLINEFIT': 6,
+    # 10.1 artifact, REMOVE IN FUTURE
+    'LineFit': 7,
+    'JMUONEND': 99,
+    'JSHOWERBEGIN': 100,
+    'JSHOWERPREFIT': 101,
+    'JSHOWERPOSITIONFIT': 102,
+    'JSHOWERCOMPLETEFIT': 103,
+    'JSHOWEREND': 199,
+    'JPP_REC_TYPE': AANET_RECTYPE_PLACEHOLDER,
+    'JUSERBEGIN': 1000,
+    'JMUONVETO': 1001,
+    'JPRESIM': 1002,
+    'JMUONPATH': 1003,
+    'JMCEVT': 1004,
+    'JUSEREND': 1099,
+    'KM3DeltaPos': 10000,
 }
 
 FITINF2NAME = {v: k for k, v in FITINF2NUM.items()}
 RECO2NAME = {v: k for k, v in RECO2NUM.items()}
+
+IS_CC = {
+    3: 0,    # False,
+    2: 1,    # True,
+    1: 0,    # False,
+    0: 1,    # True,
+}
 
 
 class AanetPump(Pump):
@@ -93,14 +101,19 @@ class AanetPump(Pump):
         needs to be specified instead.
     ignore_hits: bool, optional [default=False]
         If true, don't read our the hits/mchits.
+    bare: bool, optional [default=False]
+        Do not create KM3Pipe specific data, just wrap the bare aanet API.
+        This will only give you ``blob['evt']``.
     """
 
     def configure(self):
         self.filename = self.require('filename')
         self.ignore_hits = bool(self.get('ignore_hits'))
+        self.bare = self.get('bare', default=False)
         self.header = None
         self.blobs = self.blob_generator()
         self.group_id = 0
+        self._generic_dtypes_avail = {}
 
     def get_blob(self, index):
         NotImplementedError("Aanet currently does not support indexing.")
@@ -109,7 +122,7 @@ class AanetPump(Pump):
         """Create a blob generator."""
         # pylint: disable:F0401,W0612
         import aa    # pylint: disablF0401        # noqa
-        from ROOT import EventFile    # pylint: disablF0401
+        from ROOT import EventFile    # pylint: disable F0401
 
         filename = self.filename
         log.info("Reading from file: {0}".format(filename))
@@ -122,14 +135,27 @@ class AanetPump(Pump):
             raise SystemExit("Could not open file")
 
         log.info("Generating blobs through new aanet API...")
-        self.header = self._parse_header(event_file.header)
-        for event in event_file:
-            log.debug('Reading event...')
-            blob = self._read_event(event, filename)
-            log.debug('Reading header...')
-            blob["AaHeader"] = self.header
-            self.group_id += 1
-            yield blob
+
+        if self.bare:
+            log.info("Skipping data conversion, only passing bare aanet data")
+            for event in event_file:
+                yield Blob({'evt': event})
+        else:
+            log.info("Unpacking aanet header into dictionary...")
+            hdr = self._parse_header(event_file.header)
+            if not hdr:
+                log.info("Empty header dict found, skipping...")
+                self.header = None
+            else:
+                log.info("Converting Header dict to Table...")
+                self.header = self._convert_header_dict_to_table(hdr)
+            for event in event_file:
+                log.debug('Reading event...')
+                blob = self._read_event(event, filename)
+                log.debug('Reading header...')
+                blob["RawHeader"] = self.header
+                self.group_id += 1
+                yield blob
         del event_file
 
     def _parse_eventinfo(self, event):
@@ -140,7 +166,7 @@ class AanetPump(Pump):
         tab_data = {
             'event_id': event_id,
             'mc_id': mc_id,
-            'run_id': event.run_id,  # TODO: this may segfault in aanet (yeah!)
+            'run_id': event.run_id,    # TODO: this may segfault in aanet
             'weight_w1': wgt1,
             'weight_w2': wgt2,
             'weight_w3': wgt3,
@@ -166,27 +192,48 @@ class AanetPump(Pump):
         return wgt1, wgt2, wgt3, wgt4
 
     def _parse_tracks(self, tracks):
+        log.info("Reading Tracks...")
         out = defaultdict(list)
+        # iterating empty ROOT vector causes segfaults!
+        if len(tracks) == 0:
+            return out
         for i, trk in enumerate(tracks):
             self.log.debug('Reading Track #{}...'.format(i))
+            trk_dict = self._read_track(trk)
+            # set name + h5loc later, if the name is not available, we need
+            # the dtype to make a new name
+            tab = Table(trk_dict)
+
             trk_type = trk.rec_type
             try:
                 trk_name = RECO2NAME[trk_type]
             except KeyError:
-                trk_name = "Generic_Track_#{}".format(i)
-                self.log.warn(
-                    "Unknown Reconstruction type! "
-                    "Setting to '{}'".format(trk_name)
-                )
-            trk_dict = self._read_track(trk)
-            out[trk_name].append(
-                Table(
-                    trk_dict,
-                    h5loc='/reco/{}'.format(trk_name.lower()),
-                    name=trk_name
-                )
-            )
+                trk_type = AANET_RECTYPE_PLACEHOLDER
+            if trk_type == AANET_RECTYPE_PLACEHOLDER:
+                # if we have a history available but no name (because JEvt.cc),
+                # then use the concatenated history as the name.
+                # If that is not available, enumerate the tracks by their
+                # dtypes (since they have no other tagging)
+                if len(trk.rec_stages) == 0:
+                    self.log.info(
+                        "Unknown Reconstruction type & no history available!"
+                    )
+                    trk_name = self._handle_generic(tab.dtype)
+                else:
+                    self.log.info(
+                        "Unknown Reconstruction type! Using history..."
+                    )
+                    # iteration in reverse order segfaults, whyever...
+                    stages = [k for k in trk.rec_stages]
+                    trk_name = '__'.join([RECO2NAME[k] for k in stages[::-1]])
+                    trk_name = 'JHIST__' + trk_name
+
+            tab.name = trk_name
+            tab.h5loc = '/reco/{}'.format(trk_name.lower())
+            out[trk_name].append(tab)
+        log.info("Merging tracks into table...")
         for key in out:
+            log.debug("Merging '{}'...".format(key))
             name = out[key][0].name
             h5loc = out[key][0].h5loc
             out[key] = Table(
@@ -196,6 +243,37 @@ class AanetPump(Pump):
             )
         self.log.debug(out)
         return out
+
+    # sometimes the reco name/tag is not correctly written
+    # which means that multiple different fits with
+    # different dtypes have the same name.
+    # Keep track of the dtypes from unnamed tracks and just enumerate them
+    # this is problematic since 2 unnamed tracks with same length
+    # (e.g. fit A and B just write pos_x, pos_y, pos_z)
+    # would get merged -- they would be thrown into a table containing
+    # both A and B.
+    # This needs to be fixed upstream obviously, so here we should just make
+    # noise about it
+
+    def _handle_generic(self, dt):
+        pref = "GENERIC_TRACK"
+        if dt in self._generic_dtypes_avail:
+            nam = self._generic_dtypes_avail[dt]
+            return nam
+        cnt = len(self._generic_dtypes_avail)
+        nam = '{}_{}'.format(pref, cnt)
+        self.log.warn(
+            "Unknown Reconstruction type! "
+            "Setting to '{}'. This may lead to "
+            "unrelated fit getting merged -- which is very likely not "
+            "what you want! The only way to fix this is to put the "
+            "proper numbers into the `rec_type` of your input file! "
+            "For now, we will just count + enumerate all different "
+            "datastructures but I do not have any information to tell "
+            "them apart!".format(nam)
+        )
+        self._generic_dtypes_avail[dt] = nam
+        return nam
 
     def _read_track(self, trk):
         out = {}
@@ -248,7 +326,7 @@ class AanetPump(Pump):
             out['length'].append(trk.len)
             out['bjorkeny'].append(trk.getusr('by'))
             out['interaction_channel'].append(trk.getusr('ichan'))
-            out['is_cc'].append(trk.getusr('cc'))
+            out['is_cc'].append(IS_CC[trk.getusr('cc')])
         out['group_id'] = self.group_id
         return Table(out, name='McTracks', h5loc='/mc_tracks')
 
@@ -299,6 +377,41 @@ class AanetPump(Pump):
                     )
                 out[key][elem_name] = elem
         return out
+
+    @staticmethod
+    def _convert_header_dict_to_table(header_dict):
+        if not header_dict:
+            log.warn("Can't convert empty header dict to table, skipping...")
+            return
+        tab_dict = defaultdict(list)
+        log.debug("Param:   field_names    field_values    dtype")
+        for parameter, data in header_dict.items():
+            fields = []
+            values = []
+            types = []
+            for field_name, field_value in data.items():
+                fields.append(field_name)
+                values.append(field_value)
+                try:
+                    _ = float(field_value)    # noqa
+                    types.append('f4')
+                except ValueError:
+                    types.append('a{}'.format(len(field_value)))
+            tab_dict['parameter'].append(parameter)
+            tab_dict['field_names'].append(' '.join(fields))
+            tab_dict['field_values'].append(' '.join(values))
+            tab_dict['dtype'].append(' '.join(types))
+            log.debug(
+                "{}: {} {} {}".format(
+                    tab_dict['parameter'][-1],
+                    tab_dict['field_names'][-1],
+                    tab_dict['field_values'][-1],
+                    tab_dict['dtype'][-1],
+                )
+            )
+        return Table(
+            tab_dict, h5loc='/raw_header', name='RawHeader', h5singleton=True
+        )
 
     def _read_event(self, event, filename):
         blob = Blob()

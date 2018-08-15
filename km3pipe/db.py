@@ -163,13 +163,15 @@ class DBManager(object):
         url = 'streamds/runs.txt?detid={0}'.format(det_id)
         content = self._get_content(url)
         try:
-            dataframe = read_csv(content)
+            df = read_csv(content)
         except ValueError:
             log.warning("Empty dataset")
             return None
         else:
-            add_datetime(dataframe, 'UNIXSTARTTIME')
-            return dataframe
+            timestamp_column = 'UNIXSTARTTIME'
+            add_datetime(df, timestamp_column)
+            df['RUNDURATION'] = -df[timestamp_column].diff(periods=-1) / 1000
+            return df
 
     def _add_converted_units(self, dataframe, parameter, key='VALUE'):
         """Add an additional DATA_VALUE column with converted VALUEs"""
