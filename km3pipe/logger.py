@@ -95,6 +95,11 @@ def get_logger(name):
     return logger
 
 
+def available_loggers():
+    """Return a list of avialable logger names"""
+    return list(logging.Logger.manager.loggerDict.keys())
+
+
 def set_level(name, level):
     """Set the log level for given logger"""
     get_logger(name).setLevel(level)
