@@ -94,7 +94,7 @@ class Client(object):
                 log.error(
                     "Invalid tag '{0}' received, ignoring the message \n"
                     "and reconnecting.\n"
-                    "  -> valid tags are: {0}".format(
+                    "  -> valid tags are: {1}".format(
                         prefix_tag, self.valid_tags
                     )
                 )
