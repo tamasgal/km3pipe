@@ -276,12 +276,14 @@ class HDF5Sink(Module):
                 written_blob[key] = data
 
         if 'GroupInfo' not in blob:
-            gi = Table({
-                'group_id': self.index,
-                'n_blobs': len(written_blob)
-            },
-                       h5loc='/group_info',
-                       name='Group Info')
+            gi = Table(
+                {
+                    'group_id': self.index,
+                    'blob_len': len(written_blob)
+                },
+                h5loc='/group_info',
+                name='Group Info',
+            )
             self._process_entry('GroupInfo', gi)
 
         if not self.index % 1000:
