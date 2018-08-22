@@ -279,7 +279,7 @@ class HDF5Sink(Module):
             gi = Table(
                 {
                     'group_id': self.index,
-                    'blob_len': len(written_blob)
+                    'blob_length': len(written_blob)
                 },
                 h5loc='/group_info',
                 name='Group Info',
