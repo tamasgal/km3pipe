@@ -278,7 +278,7 @@ class HDF5Sink(Module):
         if 'GroupInfo' not in blob:
             gi = Table({
                 'group_id': self.index,
-                'n_blobs': len(written_blob)
+                'blob_length': len(written_blob)
             },
                        h5loc='/group_info',
                        name='Group Info')
