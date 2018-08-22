@@ -92,6 +92,7 @@ class Pipeline(object):
                 for service_name, obj in module.services.items():
                     self.services[service_name] = obj
             module.services = self.services
+            module.pipeline = self
         else:
             if isinstance(fac, types.FunctionType):
                 log.debug("Attaching as function module")
