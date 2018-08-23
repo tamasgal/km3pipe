@@ -24,7 +24,7 @@ node('master') {
 
     customImage.inside("-u root:root") {
             withEnv(["HOME=${env.WORKSPACE}", "MPLBACKEND=agg"]){
-                // gitlabBuilds(builds: ["Install", "Test", "Docs"]) {
+                gitlabBuilds(builds: ["Install", "Test", "Test Modules", "Coverage", "Documentation", "Reports"]) {
 
                         // gitlabCommitStatus("Install") {
                         stage("Install") {
@@ -114,7 +114,7 @@ node('master') {
                         }
                         // }
 
-                // }
+                }
             }
     }
 
