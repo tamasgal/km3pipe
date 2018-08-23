@@ -10,31 +10,23 @@ MAIN_DOCKER = 'py365'
 properties([gitLabConnection('KM3NeT GitLab')])
 
 
-def get_stages(dockerfile) {
-    stages = {
 
-        // Bug in Jenkins prevents using custom folder in docker.build
-        def customImage = ''
-        dir("${DOCKER_FILES_DIR}"){
-            customImage = docker.build("km3pipe:${env.BUILD_ID}",
-                                       "-f ${dockerfile} .")
-        }
 
-        customImage.inside("-u root:root") {
+node('master') {
 
-            // The following line causes a weird issue, where pip tries to 
-            // install into /usr/local/... instead of the virtual env.
-            // Any help figuring out what's happening is appreciated.
-            //
-            // def PYTHON_VENV = docker_image.replaceAll('[:.]', '') + 'venv'
-            //
-            // So we set it to 'venv' for all parallel builds now
-            def DOCKER_NAME = dockerfile
-            def DOCKER_HOME = env.WORKSPACE + '/' + DOCKER_NAME + '_home'
-            withEnv(["HOME=${env.WORKSPACE}", "MPLBACKEND=agg", "DOCKER_NAME=${DOCKER_NAME}"]){
-                gitlabBuilds(builds: ["Install (${DOCKER_NAME})", "Test (${DOCKER_NAME})", "Docs (${DOCKER_NAME})"]) {
-                    stage("Install (${DOCKER_NAME})") {
-                        gitlabCommitStatus("Install (${DOCKER_NAME})") {
+    cleanWs()
+    checkout scm
+
+    def customImage = ''
+    dir("${DOCKER_FILES_DIR}"){
+        customImage = docker.build("km3pipe:${env.BUILD_ID}", "-f ${MAIN_DOCKER} .")
+    }
+
+    customImage.inside("-u root:root") {
+            withEnv(["HOME=${env.WORKSPACE}", "MPLBACKEND=agg"]){
+                gitlabBuilds(builds: ["Install", "Test", "Docs"]) {
+
+                        gitlabCommitStatus("Install") {
                             try { 
                                 sh """
                                     pip install -U pip setuptools wheel
@@ -42,22 +34,21 @@ def get_stages(dockerfile) {
                                     make install
                                 """
                             } catch (e) { 
-                                sendChatMessage("Install (${DOCKER_NAME}) Failed")
-                                sendMail("Install (${DOCKER_NAME}) Failed")
+                                sendChatMessage("Install Failed")
+                                sendMail("Install Failed")
                                 throw e
                             }
                         }
-                    }
-                    stage("Test (${DOCKER_NAME})") {
-                        gitlabCommitStatus("Test (${DOCKER_NAME})") {
+
+                        gitlabCommitStatus("Test") {
                             try { 
                                 sh """
                                     make clean
                                     make test
                                 """
                             } catch (e) { 
-                                sendChatMessage("Test Suite (${DOCKER_NAME}) Failed")
-                                sendMail("Test Suite (${DOCKER_NAME}) Failed")
+                                sendChatMessage("Test Suite Failed")
+                                sendMail("Test Suite Failed")
                                 throw e
                             }
                             try { 
@@ -65,8 +56,8 @@ def get_stages(dockerfile) {
                                     make test-km3modules
                                 """
                             } catch (e) { 
-                                sendChatMessage("KM3Modules Test Suite (${DOCKER_NAME}) Failed")
-                                sendMail("KM3Modules Test Suite (${DOCKER_NAME}) Failed")
+                                sendChatMessage("KM3Modules Test Suite Failed")
+                                sendMail("KM3Modules Test Suite Failed")
                                 throw e
                             }
                             try { 
@@ -78,7 +69,7 @@ def get_stages(dockerfile) {
                                     step([$class: 'CoberturaPublisher',
                                             autoUpdateHealth: false,
                                             autoUpdateStability: false,
-                                            coberturaReportFile: "reports/coverage${DOCKER_NAME}.xml",
+                                            coberturaReportFile: "reports/coverage.xml",
                                             failNoReports: false,
                                             failUnhealthy: false,
                                             failUnstable: false,
@@ -88,60 +79,36 @@ def get_stages(dockerfile) {
                                             zoomCoverageChart: false])
                                 }
                             } catch (e) { 
-                                sendChatMessage("Coverage (${DOCKER_NAME}) Failed")
-                                sendMail("Coverage  (${DOCKER_NAME}) Failed")
+                                sendChatMessage("Coverage Failed")
+                                sendMail("Coverage Failed")
                                 throw e
                             }
                         }
-                    }
-                    stage("Docs (${DOCKER_NAME})") {
-                        gitlabCommitStatus("Docs (${DOCKER_NAME})") {
+
+                        gitlabCommitStatus("Docs") {
                             try { 
                                 sh """
-                                    cp -R doc doc_${DOCKER_NAME}
-                                    cd doc_${DOCKER_NAME}
+                                    cd doc
                                     make html
                                 """
                             } catch (e) { 
-                                sendChatMessage("Building Docs (${DOCKER_NAME}) Failed")
-                                sendMail("Building Docs (${DOCKER_NAME}) Failed")
+                                sendChatMessage("Building Docs Failed")
+                                sendMail("Building Docs Failed")
                                 throw e
                             }
                             publishHTML target: [
                                 allowMissing: false,
                                 alwaysLinkToLastBuild: false,
                                 keepAll: true,
-                                reportDir: "doc_${DOCKER_NAME}/_build/html",
+                                reportDir: "doc/_build/html",
                                 reportFiles: 'index.html',
-                                reportName: "Documentation (${DOCKER_NAME})"
+                                reportName: "Documentation"
                             ]
                         }
                     }
                 }
-            }
-        }
-    }
-    return stages
-}
-
-
-node('master') {
-
-    cleanWs()
-    checkout scm
-
-    def TMP_FILENAME = ".docker_files_list"
-    sh "ls ${DOCKER_FILES_DIR} > ${TMP_FILENAME}"
-    def dockerfiles = readFile(TMP_FILENAME).split( "\\r?\\n" );
-    sh "rm -f ${TMP_FILENAME}"
-
-    def stages = [:]
-    for (int i = 0; i < dockerfiles.size(); i++) {
-        def dockerfile = dockerfiles[i]
-        stages[dockerfile] = get_stages(dockerfile)
     }
 
-    parallel stages
 
     stage("Reports") {
         step([$class: 'XUnitBuilder',
