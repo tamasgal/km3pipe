@@ -26,107 +26,110 @@ node('master') {
             withEnv(["HOME=${env.WORKSPACE}", "MPLBACKEND=agg"]){
                 gitlabBuilds(builds: ["Install", "Test", "Test Modules", "Coverage", "Documentation", "Reports"]) {
 
-                        // gitlabCommitStatus("Install") {
-                        stage("Install") {
-                            try { 
-                                sh """
-                                    pip install -U pip setuptools wheel
-                                    make dependencies
-                                    make install
-                                """
-                            } catch (e) { 
-                                sendChatMessage("Install Failed")
-                                sendMail("Install Failed")
-                                throw e
+                        gitlabCommitStatus("Install") {
+                            stage("Install") {
+                                try { 
+                                    sh """
+                                        pip install -U pip setuptools wheel
+                                        make dependencies
+                                        make install
+                                    """
+                                } catch (e) { 
+                                    sendChatMessage("Install Failed")
+                                    sendMail("Install Failed")
+                                    throw e
+                                }
                             }
                         }
-                        // }
-                        //
-                        // gitlabCommitStatus("Test") {
-                        stage("Test") {
-                            try { 
-                                sh """
-                                    make clean
-                                    make test
-                                """
-                            } catch (e) { 
-                                sendChatMessage("Test Suite Failed")
-                                sendMail("Test Suite Failed")
-                                throw e
+                        gitlabCommitStatus("Test") {
+                            stage("Test") {
+                                try { 
+                                    sh """
+                                        make clean
+                                        make test
+                                    """
+                                } catch (e) { 
+                                    sendChatMessage("Test Suite Failed")
+                                    sendMail("Test Suite Failed")
+                                    throw e
+                                }
                             }
                         }
-                        stage("Test Modules") {
-                            try { 
-                                sh """
-                                    make test-km3modules
-                                """
-                            } catch (e) { 
-                                sendChatMessage("KM3Modules Test Suite Failed")
-                                sendMail("KM3Modules Test Suite Failed")
-                                throw e
+                        gitlabCommitStatus(name: "Test Modules") {
+                            stage("Test Modules") {
+                                try { 
+                                    sh """
+                                        make test-km3modules
+                                    """
+                                } catch (e) { 
+                                    sendChatMessage("KM3Modules Test Suite Failed")
+                                    sendMail("KM3Modules Test Suite Failed")
+                                    throw e
+                                }
                             }
                         }
-                        stage("Coverage") {
-                            try { 
-                                sh """
-                                    make clean
-                                    make test-cov
-                                """
-                                step([$class: 'CoberturaPublisher',
-                                        autoUpdateHealth: false,
-                                        autoUpdateStability: false,
-                                        coberturaReportFile: "reports/coverage.xml",
-                                        failNoReports: false,
-                                        failUnhealthy: false,
-                                        failUnstable: false,
-                                        maxNumberOfBuilds: 0,
-                                        onlyStable: false,
-                                        sourceEncoding: 'ASCII',
-                                        zoomCoverageChart: false])
-                            } catch (e) { 
-                                sendChatMessage("Coverage Failed")
-                                sendMail("Coverage Failed")
-                                throw e
+                        gitlabCommitStatus(name: "Coverage") {
+                            stage("Coverage") {
+                                try { 
+                                    sh """
+                                        make clean
+                                        make test-cov
+                                    """
+                                    step([$class: 'CoberturaPublisher',
+                                            autoUpdateHealth: false,
+                                            autoUpdateStability: false,
+                                            coberturaReportFile: "reports/coverage.xml",
+                                            failNoReports: false,
+                                            failUnhealthy: false,
+                                            failUnstable: false,
+                                            maxNumberOfBuilds: 0,
+                                            onlyStable: false,
+                                            sourceEncoding: 'ASCII',
+                                            zoomCoverageChart: false])
+                                } catch (e) { 
+                                    sendChatMessage("Coverage Failed")
+                                    sendMail("Coverage Failed")
+                                    throw e
+                                }
                             }
                         }
-                        // }
-                        //
-                        // gitlabCommitStatus("Docs") {
-                        stage("Documentation") {
-                            try { 
-                                sh """
-                                    cd doc
-                                    make html
-                                """
-                            } catch (e) { 
-                                sendChatMessage("Building Docs Failed")
-                                sendMail("Building Docs Failed")
-                                throw e
+                        gitlabCommitStatus(name: "Documentation") {
+                            stage("Documentation") {
+                                try { 
+                                    sh """
+                                        cd doc
+                                        make html
+                                    """
+                                } catch (e) { 
+                                    sendChatMessage("Building Docs Failed")
+                                    sendMail("Building Docs Failed")
+                                    throw e
+                                }
+                                publishHTML target: [
+                                    allowMissing: false,
+                                    alwaysLinkToLastBuild: false,
+                                    keepAll: true,
+                                    reportDir: "doc/_build/html",
+                                    reportFiles: 'index.html',
+                                    reportName: "Documentation"
+                                ]
                             }
-                            publishHTML target: [
-                                allowMissing: false,
-                                alwaysLinkToLastBuild: false,
-                                keepAll: true,
-                                reportDir: "doc/_build/html",
-                                reportFiles: 'index.html',
-                                reportName: "Documentation"
-                            ]
                         }
-                        // }
-
+                        gitlabCommitStatus(name: "Reports") {
+                            stage("Reports") {
+                                step([$class: 'XUnitBuilder',
+                                    thresholds: [
+                                        [$class: 'SkippedThreshold', failureThreshold: '15'],
+                                        [$class: 'FailedThreshold', failureThreshold: '0']],
+                                    // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
+                                    tools: [[$class: 'JUnitType', pattern: 'reports/*.xml']]])
+                            }
+                        }
                 }
             }
     }
 
 
-    stage("Reports") {
-        step([$class: 'XUnitBuilder',
-            thresholds: [
-                [$class: 'SkippedThreshold', failureThreshold: '15'],
-                [$class: 'FailedThreshold', failureThreshold: '0']],
-            // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
-            tools: [[$class: 'JUnitType', pattern: 'reports/*.xml']]])
-    }
 }
 
 
