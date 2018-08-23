@@ -26,7 +26,7 @@ node('master') {
             withEnv(["HOME=${env.WORKSPACE}", "MPLBACKEND=agg"]){
                 gitlabBuilds(builds: ["Install", "Test", "Test Modules", "Coverage", "Documentation", "Reports"]) {
 
-                        gitlabCommitStatus("Install") {
+                        // gitlabCommitStatus("Install") {
                             stage("Install") {
                                 try { 
                                     sh """
@@ -40,8 +40,8 @@ node('master') {
                                     throw e
                                 }
                             }
-                        }
-                        gitlabCommitStatus("Test") {
+                        // }
+                        // gitlabCommitStatus("Test") {
                             stage("Test") {
                                 try { 
                                     sh """
@@ -54,8 +54,8 @@ node('master') {
                                     throw e
                                 }
                             }
-                        }
-                        gitlabCommitStatus(name: "Test Modules") {
+                        // }
+                        // gitlabCommitStatus(name: "Test Modules") {
                             stage("Test Modules") {
                                 try { 
                                     sh """
@@ -67,8 +67,8 @@ node('master') {
                                     throw e
                                 }
                             }
-                        }
-                        gitlabCommitStatus(name: "Coverage") {
+                        // }
+                        // gitlabCommitStatus(name: "Coverage") {
                             stage("Coverage") {
                                 try { 
                                     sh """
@@ -92,8 +92,8 @@ node('master') {
                                     throw e
                                 }
                             }
-                        }
-                        gitlabCommitStatus(name: "Documentation") {
+                        // }
+                        // gitlabCommitStatus(name: "Documentation") {
                             stage("Documentation") {
                                 try { 
                                     sh """
@@ -114,8 +114,8 @@ node('master') {
                                     reportName: "Documentation"
                                 ]
                             }
-                        }
-                        gitlabCommitStatus(name: "Reports") {
+                        // }
+                        // gitlabCommitStatus(name: "Reports") {
                             stage("Reports") {
                                 step([$class: 'XUnitBuilder',
                                     thresholds: [
@@ -124,7 +124,7 @@ node('master') {
                                     // thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
                                     tools: [[$class: 'JUnitType', pattern: 'reports/*.xml']]])
                             }
-                        }
+                        // }
                 }
             }
     }
