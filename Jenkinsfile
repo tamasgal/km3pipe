@@ -65,19 +65,17 @@ node('master') {
                                     make clean
                                     make test-cov
                                 """
-                                if(DOCKER_NAME == MAIN_DOCKER) {
-                                    step([$class: 'CoberturaPublisher',
-                                            autoUpdateHealth: false,
-                                            autoUpdateStability: false,
-                                            coberturaReportFile: "reports/coverage.xml",
-                                            failNoReports: false,
-                                            failUnhealthy: false,
-                                            failUnstable: false,
-                                            maxNumberOfBuilds: 0,
-                                            onlyStable: false,
-                                            sourceEncoding: 'ASCII',
-                                            zoomCoverageChart: false])
-                                }
+                                step([$class: 'CoberturaPublisher',
+                                        autoUpdateHealth: false,
+                                        autoUpdateStability: false,
+                                        coberturaReportFile: "reports/coverage.xml",
+                                        failNoReports: false,
+                                        failUnhealthy: false,
+                                        failUnstable: false,
+                                        maxNumberOfBuilds: 0,
+                                        onlyStable: false,
+                                        sourceEncoding: 'ASCII',
+                                        zoomCoverageChart: false])
                             } catch (e) { 
                                 sendChatMessage("Coverage Failed")
                                 sendMail("Coverage Failed")
