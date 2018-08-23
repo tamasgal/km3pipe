@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* ``tohdf5`` can now convert multiple files in one shot (again). There is no
+  merging anymore, this will be done by ``h5concat`` in future.
 
 Version 8
 ---------
