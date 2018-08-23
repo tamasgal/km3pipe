@@ -27,6 +27,7 @@ node('master') {
                 gitlabBuilds(builds: ["Install", "Test", "Test Modules", "Coverage", "Documentation", "Reports"]) {
 
                         // gitlabCommitStatus("Install") {
+                            updateGitlabCommitStatus name: 'Install', state: 'pending'
                             stage("Install") {
                                 try { 
                                     sh """
@@ -34,9 +35,11 @@ node('master') {
                                         make dependencies
                                         make install
                                     """
+                                    updateGitlabCommitStatus name: 'Install', state: 'success'
                                 } catch (e) { 
                                     sendChatMessage("Install Failed")
                                     sendMail("Install Failed")
+                                    updateGitlabCommitStatus name: 'Install', state: 'error'
                                     throw e
                                 }
                             }
