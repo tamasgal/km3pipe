@@ -27,6 +27,7 @@ node('master') {
                 // gitlabBuilds(builds: ["Install", "Test", "Docs"]) {
 
                         // gitlabCommitStatus("Install") {
+                        stage("Install") {
                             try { 
                                 sh """
                                     pip install -U pip setuptools wheel
@@ -38,9 +39,11 @@ node('master') {
                                 sendMail("Install Failed")
                                 throw e
                             }
+                        }
                         // }
                         //
                         // gitlabCommitStatus("Test") {
+                        stage("Test") {
                             try { 
                                 sh """
                                     make clean
@@ -51,6 +54,8 @@ node('master') {
                                 sendMail("Test Suite Failed")
                                 throw e
                             }
+                        }
+                        stage("Test Modules") {
                             try { 
                                 sh """
                                     make test-km3modules
@@ -60,6 +65,8 @@ node('master') {
                                 sendMail("KM3Modules Test Suite Failed")
                                 throw e
                             }
+                        }
+                        stage("Coverage") {
                             try { 
                                 sh """
                                     make clean
@@ -81,9 +88,11 @@ node('master') {
                                 sendMail("Coverage Failed")
                                 throw e
                             }
+                        }
                         // }
                         //
                         // gitlabCommitStatus("Docs") {
+                        stage("Documentation") {
                             try { 
                                 sh """
                                     cd doc
@@ -102,7 +111,9 @@ node('master') {
                                 reportFiles: 'index.html',
                                 reportName: "Documentation"
                             ]
+                        }
                         // }
+
                 // }
             }
     }
