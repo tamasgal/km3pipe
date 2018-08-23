@@ -24,9 +24,9 @@ node('master') {
 
     customImage.inside("-u root:root") {
             withEnv(["HOME=${env.WORKSPACE}", "MPLBACKEND=agg"]){
-                gitlabBuilds(builds: ["Install", "Test", "Docs"]) {
+                // gitlabBuilds(builds: ["Install", "Test", "Docs"]) {
 
-                        gitlabCommitStatus("Install") {
+                        // gitlabCommitStatus("Install") {
                             try { 
                                 sh """
                                     pip install -U pip setuptools wheel
@@ -38,9 +38,9 @@ node('master') {
                                 sendMail("Install Failed")
                                 throw e
                             }
-                        }
-
-                        gitlabCommitStatus("Test") {
+                        // }
+                        //
+                        // gitlabCommitStatus("Test") {
                             try { 
                                 sh """
                                     make clean
@@ -83,9 +83,9 @@ node('master') {
                                 sendMail("Coverage Failed")
                                 throw e
                             }
-                        }
-
-                        gitlabCommitStatus("Docs") {
+                        // }
+                        //
+                        // gitlabCommitStatus("Docs") {
                             try { 
                                 sh """
                                     cd doc
@@ -104,9 +104,9 @@ node('master') {
                                 reportFiles: 'index.html',
                                 reportName: "Documentation"
                             ]
-                        }
-                    }
-                }
+                        // }
+                // }
+            }
     }
 
 
