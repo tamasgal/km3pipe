@@ -196,6 +196,7 @@ class AanetPump(Pump):
         out = defaultdict(list)
         # iterating empty ROOT vector causes segfaults!
         if len(tracks) == 0:
+            self.log.debug("Found empty tracks, skipping...")
             return out
         for i, trk in enumerate(tracks):
             self.log.debug('Reading Track #{}...'.format(i))
@@ -314,6 +315,7 @@ class AanetPump(Pump):
         out = defaultdict(list)
         # iterating empty ROOT vector causes segfaults!
         if len(mctracks) == 0:
+            self.log.debug("Found empty mctracks, skipping...")
             return out
         for trk in mctracks:
             out['dir_x'].append(trk.dir.x)
@@ -337,6 +339,7 @@ class AanetPump(Pump):
         out = defaultdict(list)
         # iterating empty ROOT vector causes segfaults!
         if len(mchits) == 0:
+            self.log.debug("Found empty mchits, skipping...")
             return out
         for hit in mchits:
             out['a'].append(hit.a)
@@ -350,6 +353,7 @@ class AanetPump(Pump):
         out = defaultdict(list)
         # iterating empty ROOT vector causes segfaults!
         if len(hits) == 0:
+            self.log.debug("Found empty hits, skipping...")
             return out
         for hit in hits:
             out['channel_id'].append(hit.channel_id)
@@ -367,6 +371,7 @@ class AanetPump(Pump):
             tags[key] = [k for k in taglist]
         out = {}
         if len(header) == 0:
+            self.log.debug("Found empty header, skipping...")
             return out
         for i, (key, entries) in enumerate(header):
             out[key] = {}
