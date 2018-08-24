@@ -312,6 +312,9 @@ class AanetPump(Pump):
 
     def _parse_mctracks(self, mctracks):
         out = defaultdict(list)
+        # iterating empty ROOT vector causes segfaults!
+        if len(mctracks) == 0:
+            return out
         for trk in mctracks:
             out['dir_x'].append(trk.dir.x)
             out['dir_y'].append(trk.dir.y)
@@ -332,6 +335,9 @@ class AanetPump(Pump):
 
     def _parse_mchits(self, mchits):
         out = defaultdict(list)
+        # iterating empty ROOT vector causes segfaults!
+        if len(mchits) == 0:
+            return out
         for hit in mchits:
             out['a'].append(hit.a)
             out['origin'].append(hit.origin)
@@ -342,6 +348,9 @@ class AanetPump(Pump):
 
     def _parse_hits(self, hits):
         out = defaultdict(list)
+        # iterating empty ROOT vector causes segfaults!
+        if len(hits) == 0:
+            return out
         for hit in hits:
             out['channel_id'].append(hit.channel_id)
             out['dom_id'].append(hit.dom_id)
@@ -357,6 +366,8 @@ class AanetPump(Pump):
         for key, taglist in header._hdr_dict():
             tags[key] = [k for k in taglist]
         out = {}
+        if len(header) == 0:
+            return out
         for i, (key, entries) in enumerate(header):
             out[key] = {}
             for j, elem in enumerate(entries.split()):
