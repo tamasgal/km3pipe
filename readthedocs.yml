@@ -5,4 +5,5 @@ python:
   version: 3.5
   pip_install: true
 
-formats: []
+formats:
+    - pdf

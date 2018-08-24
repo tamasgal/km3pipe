@@ -1,5 +1,8 @@
 Unreleased changes
 ------------------
+* ``tohdf5`` can now convert multiple files in one shot (again). There is no
+  merging anymore, this will be done by ``h5concat`` in future.
+* ``runtable`` now accepts ranges of runs ``-r FROM_RUN-TO_RUN``
 
 Version 8
 ---------
