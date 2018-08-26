@@ -371,7 +371,6 @@ class AanetPump(Pump):
             tags[key] = [k for k in taglist]
         out = {}
         if len(header) == 0:
-            self.log.debug("Found empty header, skipping...")
             return out
         for i, (key, entries) in enumerate(header):
             out[key] = {}
