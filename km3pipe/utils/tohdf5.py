@@ -82,6 +82,8 @@ def main():
     # so the bug checking-string-length should not happen here
     infiles = args['FILE']
     outfile = args['-o']
+    if len(infiles) == 1 and outfile is None:
+        outfile = infiles[0] + '.h5'
     if len(infiles) > 1 and outfile is not None:
         log.warning("Ignoring output file name for multiple files.")
         outfile = None
