@@ -3,6 +3,8 @@ Unreleased changes
 * ``tohdf5`` can now convert multiple files in one shot (again). There is no
   merging anymore, this will be done by ``h5concat`` in future.
 * ``runtable`` now accepts ranges of runs ``-r FROM_RUN-TO_RUN``
+* fixes a bug in ``tohdf5`` where the default output filename is ``dump.h5``
+  now it's original filename + .h5 if no output filename is specified
 
 Version 8
 ---------
