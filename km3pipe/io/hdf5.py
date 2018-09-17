@@ -201,17 +201,6 @@ class HDF5Sink(Module):
         d["n_items"].append(n_items)
         d["index"] += n_items
 
-    def _write_header(self, header):
-        hdr_group = self.h5file.create_group('/', 'header', 'Header')
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore', tb.NaturalNameWarning)
-            for field, value in header.items():
-                try:
-                    value = float(value)
-                except ValueError:
-                    pass
-                hdr_group._v_attrs[field] = value
-
     def _process_entry(self, key, entry):
         self.log.debug("Inspecting {}".format(key))
         if hasattr(
