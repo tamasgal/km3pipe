@@ -58,6 +58,11 @@ def check_version(h5file, filename):
         )
 
 
+class HDF5Header(object):
+    """Wrapper class for the `/raw_header` table in KM3HDF5"""
+    pass
+
+
 class HDF5Sink(Module):
     """Write KM3NeT-formatted HDF5 files, event-by-event.
 

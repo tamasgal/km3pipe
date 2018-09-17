@@ -8,7 +8,7 @@ import tables as tb
 
 from km3pipe import Blob, Module, Pipeline, Pump, version
 from km3pipe.dataclasses import Table
-from km3pipe.io.hdf5 import HDF5Pump, HDF5Sink, FORMAT_VERSION    # noqa
+from km3pipe.io.hdf5 import HDF5Pump, HDF5Sink, HDF5Header, FORMAT_VERSION    # noqa
 from km3pipe.tools import insert_prefix_to_dtype
 from km3pipe.testing import TestCase
 
@@ -429,3 +429,8 @@ class TestHDF5PumpConsistency(TestCase):
         pipe.drain()
 
         fobj.close()
+
+
+class TestHDF5Header(TestCase):
+    def test_init(self):
+        header = HDF5Header()
