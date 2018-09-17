@@ -139,7 +139,7 @@ class AanetPump(Pump):
         if self.bare:
             log.info("Skipping data conversion, only passing bare aanet data")
             for event in event_file:
-                yield Blob({'evt': event})
+                yield Blob({'evt': event, 'event_file': event_file})
         else:
             log.info("Unpacking aanet header into dictionary...")
             hdr = self._parse_header(event_file.header)
