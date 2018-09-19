@@ -464,3 +464,4 @@ class TestConvertHeaderDictToTable(TestCase):
 
     def test_conversion_returns_none_for_empty_dict(self):
         assert None is convert_header_dict_to_table(None)
+        assert None is convert_header_dict_to_table({})
