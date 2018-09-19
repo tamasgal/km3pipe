@@ -629,3 +629,39 @@ class HDF5MetaData(Module):
     def configure(self):
         self.data = self.require("data")
         self.expose(self.data, "HDF5MetaData")
+
+
+def convert_header_dict_to_table(header_dict):
+    """Converts a header dictionary (usually from aanet) to a Table"""
+    if not header_dict:
+        log.warn("Can't convert empty header dict to table, skipping...")
+        return
+    tab_dict = defaultdict(list)
+    log.debug("Param:   field_names    field_values    dtype")
+    for parameter, data in header_dict.items():
+        fields = []
+        values = []
+        types = []
+        for field_name, field_value in data.items():
+            fields.append(field_name)
+            values.append(field_value)
+            try:
+                _ = float(field_value)    # noqa
+                types.append('f4')
+            except ValueError:
+                types.append('a{}'.format(len(field_value)))
+        tab_dict['parameter'].append(parameter)
+        tab_dict['field_names'].append(' '.join(fields))
+        tab_dict['field_values'].append(' '.join(values))
+        tab_dict['dtype'].append(' '.join(types))
+        log.debug(
+            "{}: {} {} {}".format(
+                tab_dict['parameter'][-1],
+                tab_dict['field_names'][-1],
+                tab_dict['field_values'][-1],
+                tab_dict['dtype'][-1],
+            )
+        )
+    return Table(
+        tab_dict, h5loc='/raw_header', name='RawHeader', h5singleton=True
+    )

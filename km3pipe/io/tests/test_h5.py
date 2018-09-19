@@ -8,7 +8,10 @@ import tables as tb
 
 from km3pipe import Blob, Module, Pipeline, Pump, version
 from km3pipe.dataclasses import Table
-from km3pipe.io.hdf5 import HDF5Pump, HDF5Sink, HDF5Header, FORMAT_VERSION    # noqa
+from km3pipe.io.hdf5 import (
+    HDF5Pump, HDF5Sink, HDF5Header, convert_header_dict_to_table,
+    FORMAT_VERSION
+)
 from km3pipe.tools import insert_prefix_to_dtype
 from km3pipe.testing import TestCase
 
@@ -434,3 +437,27 @@ class TestHDF5PumpConsistency(TestCase):
 class TestHDF5Header(TestCase):
     def test_init(self):
         header = HDF5Header()
+
+
+class TestConvertHeaderDictToTable(TestCase):
+    def test_convert_header_dict_to_table(self):
+        hdict = {
+            "param_a": {
+                "field_a_1": "1",
+                "field_a_2": "2"
+            },
+            "param_b": {
+                "field_b_1": "a"
+            }
+        }
+        tab = convert_header_dict_to_table(hdict)
+        print(tab)
+        assert 2 == len(tab)
+        assert "param_a" == tab.parameter[0]
+        assert "field_a_1 field_a_2" == tab.field_names[0]
+        assert "1 2" == tab.field_values[0]
+        assert "f4 f4" == tab['dtype'][0]
+        assert "param_b" == tab.parameter[1]
+        assert "field_b_1" == tab.field_names[1]
+        assert "a" == tab.field_values[1]
+        assert "a1" == tab['dtype'][1]
