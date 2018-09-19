@@ -436,7 +436,7 @@ class TestHDF5PumpConsistency(TestCase):
 
 class TestHDF5Header(TestCase):
     def test_init(self):
-        header = HDF5Header()
+        HDF5Header({})
 
 
 class TestConvertHeaderDictToTable(TestCase):

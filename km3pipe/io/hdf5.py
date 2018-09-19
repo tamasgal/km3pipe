@@ -60,7 +60,16 @@ def check_version(h5file, filename):
 
 class HDF5Header(object):
     """Wrapper class for the `/raw_header` table in KM3HDF5"""
-    pass
+
+    def __init__(self, data):
+        self._data = data
+
+    @classmethod
+    def from_table(cls, table):
+        data = dict()
+        for parameter in table.parameter:
+            data[parameter] = 1
+        return cls(data)
 
 
 class HDF5Sink(Module):
