@@ -454,8 +454,12 @@ class TestConvertHeaderDictToTable(TestCase):
         print(tab)
         assert 2 == len(tab)
         assert "param_a" == tab.parameter[0]
-        assert "field_a_1 field_a_2" == tab.field_names[0]
-        assert "1 2" == tab.field_values[0]
+        assert "field_a_1" in tab.field_names[0]
+        assert "field_a_2" in tab.field_names[0]
+        if "field_a_1 field_a_2" == tab.field_names[0]:
+            assert "1 2" == tab.field_values[0]
+        else:
+            assert "2 1" == tab.field_values[0]
         assert "f4 f4" == tab['dtype'][0]
         assert "param_b" == tab.parameter[1]
         assert "field_b_1" == tab.field_names[1]
