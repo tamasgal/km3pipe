@@ -461,3 +461,6 @@ class TestConvertHeaderDictToTable(TestCase):
         assert "field_b_1" == tab.field_names[1]
         assert "a" == tab.field_values[1]
         assert "a1" == tab['dtype'][1]
+
+    def test_conversion_returns_none_for_empty_dict(self):
+        assert None is convert_header_dict_to_table(None)
