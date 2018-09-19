@@ -453,18 +453,20 @@ class TestConvertHeaderDictToTable(TestCase):
         tab = convert_header_dict_to_table(hdict)
         print(tab)
         assert 2 == len(tab)
-        assert "param_a" == tab.parameter[0]
-        assert "field_a_1" in tab.field_names[0]
-        assert "field_a_2" in tab.field_names[0]
-        if "field_a_1 field_a_2" == tab.field_names[0]:
-            assert "1 2" == tab.field_values[0]
+        index_a = tab.parameter.tolist().index("param_a")
+        index_b = tab.parameter.tolist().index("param_b")
+        assert "param_a" == tab.parameter[index_a]
+        assert "field_a_1" in tab.field_names[index_a]
+        assert "field_a_2" in tab.field_names[index_a]
+        if "field_a_1 field_a_2" == tab.field_names[index_a]:
+            assert "1 2" == tab.field_values[index_a]
         else:
-            assert "2 1" == tab.field_values[0]
-        assert "f4 f4" == tab['dtype'][0]
-        assert "param_b" == tab.parameter[1]
-        assert "field_b_1" == tab.field_names[1]
-        assert "a" == tab.field_values[1]
-        assert "a1" == tab['dtype'][1]
+            assert "2 1" == tab.field_values[index_a]
+        assert "f4 f4" == tab['dtype'][index_a]
+        assert "param_b" == tab.parameter[index_b]
+        assert "field_b_1" == tab.field_names[index_b]
+        assert "a" == tab.field_values[index_b]
+        assert "a1" == tab['dtype'][index_b]
 
     def test_conversion_returns_none_for_empty_dict(self):
         assert None is convert_header_dict_to_table(None)
