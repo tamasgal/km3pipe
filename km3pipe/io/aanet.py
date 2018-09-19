@@ -393,6 +393,7 @@ class AanetPump(Pump):
                 out[key][elem_name] = elem
         return out
 
+    # TODO: delete this method and use the function in io/hdf5.py
     @staticmethod
     def _convert_header_dict_to_table(header_dict):
         if not header_dict:
