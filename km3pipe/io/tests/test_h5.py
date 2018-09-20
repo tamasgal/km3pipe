@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Tests for HDF5 stuff"""
+from collections import OrderedDict
 import tempfile
 from os.path import join, dirname
 
@@ -436,6 +437,18 @@ class TestHDF5PumpConsistency(TestCase):
 
 class TestHDF5Header(TestCase):
     def setUp(self):
+        # self.hdict = OrderedDict([
+        # # yapf crushes the formatting, never mind...
+        # # we use OrderedDict here to ensure the correct ordering
+        #     ("param_a", OrderedDict([("field_a_1", "1"), ("field_a_2", "2")])),
+        #     ("param_b", OrderedDict([("field_b_1", "a")])),
+        #     ("param_c", OrderedDict([("field_c_1", 23)])),
+        #     (
+        #         "param_d",
+        #         OrderedDict([("param_d_0", 1), ("param_d_1", 2),
+        #                      ("param_d_2", 3)])
+        #     )
+        # ])
         self.hdict = {
             "param_a": {
                 "field_a_1": "1",
@@ -452,10 +465,11 @@ class TestHDF5Header(TestCase):
                 "param_d_1": 2,
                 "param_d_2": 3
             },
-        # the following are not supported by aanet
-        # "param_e": 4,
-        # "param_f": 5.6,
-        # "param_g": 7e+08,
+            "param_e": {
+                "param_e_2": 3,
+                "param_e_0": 1,
+                "param_e_1": 2
+            },
         }
 
     def test_init(self):
@@ -472,6 +486,10 @@ class TestHDF5Header(TestCase):
         header = HDF5Header(self.hdict)
         self.assertTupleEqual((1, 2, 3), header.param_d)
 
+    def test_header_with_scrumbled_vectors(self):
+        header = HDF5Header(self.hdict)
+        self.assertTupleEqual((1, 2, 3), header.param_e)
+
     # def test_header_with_scalars(self):
     #     header = HDF5Header(self.hdict)
     #     assert 4 == header.param_e
@@ -484,6 +502,7 @@ class TestHDF5Header(TestCase):
     def test_header_from_table(self):
         table = convert_header_dict_to_table(self.hdict)
         header = HDF5Header.from_table(table)
+        print(header)
         assert 1.0 == header.param_a.field_a_1
         assert 2.0 == header.param_a.field_a_2
         assert "a" == header.param_b.field_b_1

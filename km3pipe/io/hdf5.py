@@ -70,30 +70,36 @@ class HDF5Header(object):
         for parameter, data in self._data.items():
             if isinstance(data, dict):
                 field_names, field_values = zip(*data.items())
-                attr = namedtuple(parameter, field_names)
-                setattr(self, parameter, attr(*field_values))
+                sorted_indices = np.argsort(field_names)
+                attr = namedtuple(
+                    parameter,
+                    [field_names[i] for i in sorted_indices]
+                )
+                setattr(
+                    self, parameter,
+                    attr(*[field_values[i] for i in sorted_indices])
+                )
             else:
                 setattr(self, parameter, data)
 
     @classmethod
     def from_table(cls, table):
-        data = dict()
-        for row in table:
-            parameter, field_names, field_values, dtypes = row
-            print(row)
-            field_names = field_names.split(' ')
-            field_values = field_values.split(' ')
+        data = OrderedDict()
+        for i in range(len(table)):
+            parameter = table['parameter'][i]
+            field_names = table['field_names'][i].split(' ')
+            field_values = table['field_values'][i].split(' ')
+            dtypes = table['dtype'][i]
             dtyped_values = []
+            print(field_names)
+            print(field_values)
             for dtype, value in zip(dtypes.split(' '), field_values):
                 if dtype.startswith('a'):
                     dtyped_values.append(value)
                 else:
                     value = np.fromstring(value, dtype=dtype, sep=' ')[0]
                     dtyped_values.append(value)
-            data[parameter] = {
-                k: v
-                for (k, v) in zip(field_names, dtyped_values)
-            }
+            data[parameter] = OrderedDict(zip(field_names, dtyped_values))
         return cls(data)
 
 
