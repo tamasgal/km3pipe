@@ -13,7 +13,7 @@ Options:
     --verbose                       Print more output.
     --debug                         Print everything.
     -n EVENTS                       Number of events/runs.
-    -o OUTFILE                      Output file.
+    -o OUTFILE                      Output file (only if one file is converted).
     -j --jppy                       (Jpp): Use jppy (not aanet) for Jpp readout.
     --ignore-hits                   Don't read the hits.
     -e --expected-rows NROWS        Approximate number of events.  Providing a
@@ -38,24 +38,35 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = logger.get_logger('km3pipe.io')
+log = logger.get_logger('tohdf5')
+cprint = logger.get_printer('tohdf5')
+io_log = logger.get_logger('km3pipe.io')
 
 
-def tohdf5(input_files, output_file, n_events, conv_times_to_jte,
-           **kwargs):
+def tohdf5(input_files, output_file, n_events, conv_times_to_jte, **kwargs):
     """Convert Any file to HDF5 file"""
+    if len(input_files) > 1:
+        cprint(
+            "Preparing to convert {} files to HDF5.".format(len(input_files))
+        )
+
     from km3pipe import Pipeline    # noqa
     from km3pipe.io import GenericPump, HDF5Sink, HDF5MetaData    # noqa
 
-    pipe = Pipeline()
-    pipe.attach(GenericPump, filenames=input_files, **kwargs)
-    pipe.attach(HDF5MetaData, data=kwargs)
-    pipe.attach(StatusBar, every=250)
-    if conv_times_to_jte:
-        from km3modules.mc import MCTimeCorrector
-        pipe.attach(MCTimeCorrector)
-    pipe.attach(HDF5Sink, filename=output_file, **kwargs)
-    pipe.drain(n_events)
+    for input_file in input_files:
+        cprint("Converting '{}'...".format(input_file))
+        if len(input_files) > 1:
+            output_file = input_file + '.h5'
+        pipe = Pipeline()
+        pipe.attach(GenericPump, filenames=input_file, **kwargs)
+        pipe.attach(HDF5MetaData, data=kwargs)
+        pipe.attach(StatusBar, every=250)
+        if conv_times_to_jte:
+            from km3modules.mc import MCTimeCorrector
+            pipe.attach(MCTimeCorrector)
+        pipe.attach(HDF5Sink, filename=output_file, **kwargs)
+        pipe.drain(n_events)
+        cprint("File '{}' was converted.".format(input_file))
 
 
 def main():
@@ -70,30 +81,28 @@ def main():
     # FILE... (ellipsis) always returns a list in docopt.
     # so the bug checking-string-length should not happen here
     infiles = args['FILE']
-    if len(infiles) == 1:
-        suffix = '.h5'
-    else:
-        # if the user is too lazy specifying an outfile name
-        # when converting *multiple files into one* (yeah, I know),
-        # at least be clear that it's a combined file
-        suffix = '.combined.h5'
-    outfile = args['-o'] or infiles[0] + suffix
+    outfile = args['-o']
+    if len(infiles) == 1 and outfile is None:
+        outfile = infiles[0] + '.h5'
+    if len(infiles) > 1 and outfile is not None:
+        log.warning("Ignoring output file name for multiple files.")
+        outfile = None
 
     n_rows_expected = int(args['--expected-rows'])
     use_jppy_pump = args['--jppy']
     is_verbose = bool(args['--verbose'])
     if is_verbose:
-        log.setLevel('INFO')
+        io_log.setLevel('INFO')
     is_debug = bool(args['--debug'])
     if is_debug:
-        log.setLevel('DEBUG')
+        io_log.setLevel('DEBUG')
     ignore_hits_arg = args['--ignore-hits']
     conv_times_to_jte = bool(args['--conv-times-to-jte'])
     tohdf5(
-        infiles,
-        outfile,
-        n,
-        conv_times_to_jte,
+        input_files=infiles,
+        output_file=outfile,
+        n_events=n,
+        conv_times_to_jte=conv_times_to_jte,
         use_jppy=use_jppy_pump,
         n_rows_expected=n_rows_expected,
         ignore_hits=bool(ignore_hits_arg),

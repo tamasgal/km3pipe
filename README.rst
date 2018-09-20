@@ -8,7 +8,7 @@ KM3Pipe
     :target: http://km3pipe.readthedocs.io/en/latest/
 
 .. image:: https://zenodo.org/badge/24634697.svg
-   :target: https://zenodo.org/badge/latestdoi/24634697
+   :target: https://doi.org/10.5281/zenodo.808829
 
 
 KM3Pipe is a framework for KM3NeT related stuff including MC, data files, live access to detectors and databases, parsers for different file formats and an easy to use framework for batch processing.
