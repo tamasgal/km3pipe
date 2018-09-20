@@ -16,6 +16,7 @@ import os.path
 import numpy as np
 
 from km3pipe.core import Pump, Blob
+from km3pipe.io.hdf5 import HDF5Header
 from km3pipe.dataclasses import Table
 from km3pipe.logger import get_logger
 
@@ -110,6 +111,7 @@ class AanetPump(Pump):
         self.filename = self.require('filename')
         self.ignore_hits = bool(self.get('ignore_hits'))
         self.bare = self.get('bare', default=False)
+        self.raw_header = None
         self.header = None
         self.blobs = self.blob_generator()
         self.group_id = 0
@@ -145,15 +147,18 @@ class AanetPump(Pump):
             hdr = self._parse_header(event_file.header)
             if not hdr:
                 log.info("Empty header dict found, skipping...")
-                self.header = None
+                self.raw_header = None
             else:
                 log.info("Converting Header dict to Table...")
-                self.header = self._convert_header_dict_to_table(hdr)
+                self.raw_header = self._convert_header_dict_to_table(hdr)
+                log.info("Creating HDF5Header")
+                self.header = HDF5Header.from_table(self.raw_header)
             for event in event_file:
                 log.debug('Reading event...')
                 blob = self._read_event(event, filename)
                 log.debug('Reading header...')
-                blob["RawHeader"] = self.header
+                blob["RawHeader"] = self.raw_header
+                blob["Header"] = self.header
                 self.group_id += 1
                 yield blob
         del event_file
@@ -393,6 +398,7 @@ class AanetPump(Pump):
                 out[key][elem_name] = elem
         return out
 
+    # TODO: delete this method and use the function in io/hdf5.py
     @staticmethod
     def _convert_header_dict_to_table(header_dict):
         if not header_dict:
