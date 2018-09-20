@@ -568,7 +568,6 @@ class HDF5Pump(Pump):
         evt_ids = self.group_ids[fname]
         local_index = self._translate_index(fname, index)
         group_id = evt_ids[local_index]
-        header = self.headers[fname]
         if self.cut_masks is not None:
             self.log.debug('Cut masks found, applying...')
             mask = self.cut_masks[fname]
@@ -657,7 +656,9 @@ class HDF5Pump(Pump):
             tabname = camelise(loc.split('/')[-1])
             blob[tabname] = Table(data, h5loc=loc, split_h5=True, name=tabname)
 
-        blob['Header'] = header
+        if fname in self.headers:
+            header = self.headers[fname]
+            blob['Header'] = header
 
         return blob
 
