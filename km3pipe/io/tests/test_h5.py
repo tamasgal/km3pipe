@@ -435,12 +435,64 @@ class TestHDF5PumpConsistency(TestCase):
 
 
 class TestHDF5Header(TestCase):
+    def setUp(self):
+        self.hdict = {
+            "param_a": {
+                "field_a_1": "1",
+                "field_a_2": "2"
+            },
+            "param_b": {
+                "field_b_1": "a"
+            },
+            "param_c": {
+                "field_c_1": 23
+            },
+            "param_d": {
+                "param_d_0": 1,
+                "param_d_1": 2,
+                "param_d_2": 3
+            },
+        # the following are not supported by aanet
+        # "param_e": 4,
+        # "param_f": 5.6,
+        # "param_g": 7e+08,
+        }
+
     def test_init(self):
         HDF5Header({})
 
+    def test_header(self):
+        header = HDF5Header(self.hdict)
+        assert "1" == header.param_a.field_a_1
+        assert "2" == header.param_a.field_a_2
+        assert "a" == header.param_b.field_b_1
+        assert 23 == header.param_c.field_c_1
+
+    def test_header_with_vectors(self):
+        header = HDF5Header(self.hdict)
+        self.assertTupleEqual((1, 2, 3), header.param_d)
+
+    # def test_header_with_scalars(self):
+    #     header = HDF5Header(self.hdict)
+    #     assert 4 == header.param_e
+    #     assert 5.6 == header.param_f
+    #
+    # def test_scientific_notation(self):
+    #     header = HDF5Header(self.hdict)
+    #     assert 7e+08 == header.param_g
+
+    def test_header_from_table(self):
+        table = convert_header_dict_to_table(self.hdict)
+        header = HDF5Header.from_table(table)
+        assert 1.0 == header.param_a.field_a_1
+        assert 2.0 == header.param_a.field_a_2
+        assert "a" == header.param_b.field_b_1
+        assert 23 == header.param_c.field_c_1
+        self.assertTupleEqual((1, 2, 3), header.param_d)
+
 
 class TestConvertHeaderDictToTable(TestCase):
-    def test_convert_header_dict_to_table(self):
+    def setUp(self):
         hdict = {
             "param_a": {
                 "field_a_1": "1",
@@ -448,13 +500,22 @@ class TestConvertHeaderDictToTable(TestCase):
             },
             "param_b": {
                 "field_b_1": "a"
+            },
+            "param_c": {
+                "field_c_1": 1
             }
         }
-        tab = convert_header_dict_to_table(hdict)
-        print(tab)
-        assert 2 == len(tab)
+        self.tab = convert_header_dict_to_table(hdict)
+
+    def test_length(self):
+        assert 3 == len(self.tab)
+
+    def test_values(self):
+        tab = self.tab
+
         index_a = tab.parameter.tolist().index("param_a")
         index_b = tab.parameter.tolist().index("param_b")
+
         assert "param_a" == tab.parameter[index_a]
         assert "field_a_1" in tab.field_names[index_a]
         assert "field_a_2" in tab.field_names[index_a]
@@ -463,10 +524,16 @@ class TestConvertHeaderDictToTable(TestCase):
         else:
             assert "2 1" == tab.field_values[index_a]
         assert "f4 f4" == tab['dtype'][index_a]
+
         assert "param_b" == tab.parameter[index_b]
         assert "field_b_1" == tab.field_names[index_b]
         assert "a" == tab.field_values[index_b]
         assert "a1" == tab['dtype'][index_b]
+
+    def test_values_are_converted_to_str(self):
+        index_c = self.tab.parameter.tolist().index("param_c")
+        assert "param_c" == self.tab.parameter[index_c]
+        assert "1" == self.tab.field_values[index_c]
 
     def test_conversion_returns_none_for_empty_dict(self):
         assert None is convert_header_dict_to_table(None)

@@ -7,7 +7,7 @@ Read and write KM3NeT-formatted HDF5 files.
 """
 from __future__ import absolute_import, print_function, division
 
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict, defaultdict, namedtuple
 import os.path
 import warnings
 
@@ -63,12 +63,37 @@ class HDF5Header(object):
 
     def __init__(self, data):
         self._data = data
+        self._set_attributes()
+
+    def _set_attributes(self):
+        """Traverse the internal dictionary and set the getters"""
+        for parameter, data in self._data.items():
+            if isinstance(data, dict):
+                field_names, field_values = zip(*data.items())
+                attr = namedtuple(parameter, field_names)
+                setattr(self, parameter, attr(*field_values))
+            else:
+                setattr(self, parameter, data)
 
     @classmethod
     def from_table(cls, table):
         data = dict()
-        for parameter in table.parameter:
-            data[parameter] = 1
+        for row in table:
+            parameter, field_names, field_values, dtypes = row
+            print(row)
+            field_names = field_names.split(' ')
+            field_values = field_values.split(' ')
+            dtyped_values = []
+            for dtype, value in zip(dtypes.split(' '), field_values):
+                if dtype.startswith('a'):
+                    dtyped_values.append(value)
+                else:
+                    value = np.fromstring(value, dtype=dtype, sep=' ')[0]
+                    dtyped_values.append(value)
+            data[parameter] = {
+                k: v
+                for (k, v) in zip(field_names, dtyped_values)
+            }
         return cls(data)
 
 
@@ -653,7 +678,7 @@ def convert_header_dict_to_table(header_dict):
         types = []
         for field_name, field_value in data.items():
             fields.append(field_name)
-            values.append(field_value)
+            values.append(str(field_value))
             try:
                 _ = float(field_value)    # noqa
                 types.append('f4')
