@@ -1,5 +1,12 @@
 Unreleased changes
 ------------------
+
+
+Version 8
+---------
+
+8.3.0 / 2018-09-20
+~~~~~~~~~~~~~~~~~~
 * ``tohdf5`` can now convert multiple files in one shot (again). There is no
   merging anymore, this will be done by ``h5concat`` in future.
 * ``runtable`` now accepts ranges of runs ``-r FROM_RUN-TO_RUN``
@@ -8,9 +15,6 @@ Unreleased changes
 * Adds ``HDF5Header`` which is a convenient way to access the ``/raw_header``
   data from ``KM3HDF5`` formatted files.
   It can be used like ``header = km3pipe.io.hdf5.HDF5Header.from_hdf5(filename)``
-
-Version 8
----------
 
 8.2.1 / 2018-08-15
 ~~~~~~~~~~~~~~~~~~
