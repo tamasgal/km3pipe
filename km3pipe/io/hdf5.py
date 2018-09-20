@@ -110,27 +110,31 @@ class HDF5Header(object):
     def from_hdf5(cls, filename):
         with tb.open_file(filename, 'r') as f:
             table = f.get_node('/raw_header')
-            data = OrderedDict()
-            for row in table:
-                parameter = row['parameter'].decode()
-                field_names = row['field_names'].decode().split(' ')
-                field_values = row['field_values'].decode().split(' ')
-                if field_values == ['']:
-                    log.info(
-                        "No value for parameter '{}'! Skipping...".
-                        format(parameter)
-                    )
-                    continue
-                dtypes = row['dtype'].decode()
-                dtyped_values = []
-                for dtype, value in zip(dtypes.split(' '), field_values):
-                    if dtype.startswith('a'):
-                        dtyped_values.append(value)
-                    else:
-                        value = np.fromstring(value, dtype=dtype, sep=' ')[0]
-                        dtyped_values.append(value)
-                data[parameter] = OrderedDict(zip(field_names, dtyped_values))
-            return cls(data)
+            return cls.from_pytable(table)
+
+    @classmethod
+    def from_pytable(cls, table):
+        data = OrderedDict()
+        for row in table:
+            parameter = row['parameter'].decode()
+            field_names = row['field_names'].decode().split(' ')
+            field_values = row['field_values'].decode().split(' ')
+            if field_values == ['']:
+                log.info(
+                    "No value for parameter '{}'! Skipping...".
+                    format(parameter)
+                )
+                continue
+            dtypes = row['dtype'].decode()
+            dtyped_values = []
+            for dtype, value in zip(dtypes.split(' '), field_values):
+                if dtype.startswith('a'):
+                    dtyped_values.append(value)
+                else:
+                    value = np.fromstring(value, dtype=dtype, sep=' ')[0]
+                    dtyped_values.append(value)
+            data[parameter] = OrderedDict(zip(field_names, dtyped_values))
+        return cls(data)
 
 
 class HDF5Sink(Module):
@@ -197,7 +201,7 @@ class HDF5Sink(Module):
             },
                          h5loc='/misc/{}'.format(decamelise(name)),
                          name=name)
-        if len(data) <= 0:
+        if hasattr(data, 'len') and len(data) <= 0:    # a bit smelly ;)
             self.log.debug('toarray: data has no length')
             return
         # istype instead isinstance, to avoid heavy pandas import (hmmm...)
@@ -457,6 +461,7 @@ class HDF5Pump(Pump):
         self.h5file = None
         self._set_next_file()
 
+        self.headers = OrderedDict()
         self.group_ids = OrderedDict()
         self._n_each = OrderedDict()
         for fn in self.filenames:
@@ -518,6 +523,10 @@ class HDF5Pump(Pump):
                 except AttributeError:
                     self.group_ids[fn] = event_info.cols.event_id[:]
                 self._n_each[fn] = len(self.group_ids[fn])
+            if '/raw_header' in h5file:
+                self.headers[fn] = HDF5Header.from_pytable(
+                    h5file.get_node('/raw_header')
+                )
 
     def process(self, blob):
         try:
@@ -559,6 +568,7 @@ class HDF5Pump(Pump):
         evt_ids = self.group_ids[fname]
         local_index = self._translate_index(fname, index)
         group_id = evt_ids[local_index]
+        header = self.headers[fname]
         if self.cut_masks is not None:
             self.log.debug('Cut masks found, applying...')
             mask = self.cut_masks[fname]
@@ -646,6 +656,8 @@ class HDF5Pump(Pump):
                 data[column] = h5file.get_node(loc + '/' + column)[idx:end]
             tabname = camelise(loc.split('/')[-1])
             blob[tabname] = Table(data, h5loc=loc, split_h5=True, name=tabname)
+
+        blob['Header'] = header
 
         return blob
 
