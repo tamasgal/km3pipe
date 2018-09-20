@@ -89,6 +89,12 @@ class HDF5Header(object):
             parameter = table['parameter'][i]
             field_names = table['field_names'][i].split(' ')
             field_values = table['field_values'][i].split(' ')
+            if field_values == ['']:
+                log.info(
+                    "No value for parameter '{}'! Skipping...".
+                    format(parameter)
+                )
+                continue
             dtypes = table['dtype'][i]
             dtyped_values = []
             for dtype, value in zip(dtypes.split(' '), field_values):
