@@ -509,6 +509,18 @@ class TestHDF5Header(TestCase):
         assert 23 == header.param_c.field_c_1
         self.assertTupleEqual((1, 2, 3), header.param_d)
 
+    def test_header_from_hdf5_file(self):
+        header = HDF5Header.from_hdf5(join(DATA_DIR, 'raw_header.h5'))
+        assert 'MUSIC' == header.propag[0]
+        assert 'seawater' == header.propag[1]
+        assert 3450 == header.seabottom[0]
+        self.assertAlmostEqual(12.1, header.livetime.numberOfSeconds, places=3)
+        self.assertAlmostEqual(0.09, header.livetime.errorOfSeconds, places=3)
+        assert 0 == header.coord_origin.x
+        assert 0 == header.coord_origin.y
+        assert 0 == header.coord_origin.z
+        self.assertTupleEqual((0, 0, 0), header.coord_origin)
+
 
 class TestConvertHeaderDictToTable(TestCase):
     def setUp(self):

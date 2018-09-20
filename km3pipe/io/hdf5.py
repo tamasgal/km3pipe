@@ -68,7 +68,7 @@ class HDF5Header(object):
     def _set_attributes(self):
         """Traverse the internal dictionary and set the getters"""
         for parameter, data in self._data.items():
-            if isinstance(data, dict):
+            if isinstance(data, dict) or isinstance(data, OrderedDict):
                 field_names, field_values = zip(*data.items())
                 sorted_indices = np.argsort(field_names)
                 attr = namedtuple(
@@ -91,8 +91,6 @@ class HDF5Header(object):
             field_values = table['field_values'][i].split(' ')
             dtypes = table['dtype'][i]
             dtyped_values = []
-            print(field_names)
-            print(field_values)
             for dtype, value in zip(dtypes.split(' '), field_values):
                 if dtype.startswith('a'):
                     dtyped_values.append(value)
@@ -101,6 +99,32 @@ class HDF5Header(object):
                     dtyped_values.append(value)
             data[parameter] = OrderedDict(zip(field_names, dtyped_values))
         return cls(data)
+
+    @classmethod
+    def from_hdf5(cls, filename):
+        with tb.open_file(filename, 'r') as f:
+            table = f.get_node('/raw_header')
+            data = OrderedDict()
+            for row in table:
+                parameter = row['parameter'].decode()
+                field_names = row['field_names'].decode().split(' ')
+                field_values = row['field_values'].decode().split(' ')
+                if field_values == ['']:
+                    log.info(
+                        "No value for parameter '{}'! Skipping...".
+                        format(parameter)
+                    )
+                    continue
+                dtypes = row['dtype'].decode()
+                dtyped_values = []
+                for dtype, value in zip(dtypes.split(' '), field_values):
+                    if dtype.startswith('a'):
+                        dtyped_values.append(value)
+                    else:
+                        value = np.fromstring(value, dtype=dtype, sep=' ')[0]
+                        dtyped_values.append(value)
+                data[parameter] = OrderedDict(zip(field_names, dtyped_values))
+            return cls(data)
 
 
 class HDF5Sink(Module):
