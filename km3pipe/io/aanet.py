@@ -337,7 +337,7 @@ class AanetPump(Pump):
             out['bjorkeny'].append(trk.getusr('by'))
             out['interaction_channel'].append(trk.getusr('ichan'))
             try:
-                out['is_cc'].append(IS_CC[trk.getusr('cc')])
+                is_cc = IS_CC[trk.getusr('cc')]
             except KeyError:
                 # see git.km3net.de/km3py/km3pipe/issues/112
                 # and http://trac.km3net.de/ticket/222
@@ -347,7 +347,9 @@ class AanetPump(Pump):
                         trk.getusr('cc')
                     )
                 )
-                out['is_cc'] = 0
+                is_cc = 0
+            finally:
+                out['is_cc'].append(is_cc)
         out['group_id'] = self.group_id
         return Table(out, name='McTracks', h5loc='/mc_tracks')
 
