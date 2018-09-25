@@ -7,7 +7,7 @@ Pump for the jpp file read through aanet interface.
 """
 from __future__ import absolute_import, print_function, division
 
-from km3pipe.core import Pump
+from km3pipe.core import Pump, Blob
 from km3pipe.controlhost import Client
 from km3pipe.time import Cuckoo
 from km3pipe.logger import get_logger
@@ -176,6 +176,16 @@ class CHPump(Pump):
         log.debug("Disconnecting from JLigier.")
         self.client.socket.shutdown(socket.SHUT_RDWR)
         self.client._disconnect()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return self.process(Blob())
+        return blob
+
+    def next(self):
+        return self.__next__()
 
 
 def CHTagger(blob):
