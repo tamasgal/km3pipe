@@ -300,8 +300,8 @@ class DAQProcessor(Module):
                 'overlays': event.overlays,
                 'trigger_counter': event.trigger_counter,
                 'trigger_mask': event.trigger_mask,
-                'uts_nanoseconds': header.ticks * 16,
-                'uts_seconds': header.time_stamp,
+                'utc_nanoseconds': header.ticks * 16,
+                'utc_seconds': header.time_stamp,
                 'weight_w1': 0,
                 'weight_w2': 0,
                 'weight_w3': 0,    # MC weights
