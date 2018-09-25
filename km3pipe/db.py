@@ -34,6 +34,7 @@ except ImportError:
     )
     from StringIO import StringIO
     from httplib import IncompleteRead
+    input = raw_input
 
 from .tools import cprint
 from .time import Timer
