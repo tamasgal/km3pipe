@@ -38,7 +38,7 @@ node('master') {
                             } catch (e) { 
                                 sendChatMessage("Install Failed")
                                 sendMail("Install Failed")
-                                updateGitlabCommitStatus name: 'Install', state: 'error'
+                                updateGitlabCommitStatus name: 'Install', state: 'failed'
                                 throw e
                             }
                         }
@@ -53,7 +53,7 @@ node('master') {
                             } catch (e) { 
                                 sendChatMessage("Test Suite Failed")
                                 sendMail("Test Suite Failed")
-                                updateGitlabCommitStatus name: 'Test', state: 'error'
+                                updateGitlabCommitStatus name: 'Test', state: 'failed'
                                 throw e
                             }
                         }
@@ -67,7 +67,7 @@ node('master') {
                             } catch (e) { 
                                 sendChatMessage("KM3Modules Test Suite Failed")
                                 sendMail("KM3Modules Test Suite Failed")
-                                updateGitlabCommitStatus name: 'Test Modules', state: 'error'
+                                updateGitlabCommitStatus name: 'Test Modules', state: 'failed'
                                 throw e
                             }
                         }
@@ -93,7 +93,7 @@ node('master') {
                             } catch (e) { 
                                 sendChatMessage("Coverage Failed")
                                 sendMail("Coverage Failed")
-                                updateGitlabCommitStatus name: 'Coverage', state: 'error'
+                                updateGitlabCommitStatus name: 'Coverage', state: 'failed'
                                 throw e
                             }
                         }
@@ -107,7 +107,7 @@ node('master') {
                             } catch (e) { 
                                 sendChatMessage("Building Docs Failed")
                                 sendMail("Building Docs Failed")
-                                updateGitlabCommitStatus name: 'Documentation', state: 'error'
+                                updateGitlabCommitStatus name: 'Documentation', state: 'failed'
                                 throw e
                             }
                             publishHTML target: [
