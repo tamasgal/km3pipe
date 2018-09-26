@@ -45,15 +45,18 @@ node('master') {
                             }
                         // }
                         // gitlabCommitStatus("Test") {
+                            updateGitlabCommitStatus name: 'Test', state: 'pending'
                             stage("Test") {
                                 try { 
                                     sh """
                                         make clean
                                         make test
                                     """
+                                    updateGitlabCommitStatus name: 'Test', state: 'success'
                                 } catch (e) { 
                                     sendChatMessage("Test Suite Failed")
                                     sendMail("Test Suite Failed")
+                                    updateGitlabCommitStatus name: 'Test', state: 'error'
                                     throw e
                                 }
                             }
