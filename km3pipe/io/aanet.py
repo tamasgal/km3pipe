@@ -472,3 +472,63 @@ class AanetPump(Pump):
 
     def __next__(self):
         return next(self.blobs)
+
+
+class MetaParser(object):
+    """A class which parses the JPrintMeta output for a given filenam"""
+
+    def __init__(self, filename=None, string=None):
+        self.log = get_logger(__name__ + '.' + self.__class__.__name__)
+        self.meta = []
+        if filename is not None:
+            with open(filename, 'r') as fobj:
+                string = fobj.read()
+            self.parse_string(string)
+            return
+
+    def parse_string(self, string):
+        """Parse ASCII output of JPrintMeta"""
+        self.log.info("Parsing ASCII data")
+
+        lines = string.split('\n')
+        application_data = []
+
+        application = lines[0].split(' ')[0]
+        self.log.debug("Reading meta information for '%s'" % application)
+
+        for line in lines:
+            if application is None:
+                self.log.debug(
+                    "Reading meta information for '%s'" % application
+                )
+                application = line.split(' ')[0]
+            application_data.append(line)
+            if line.startswith(application + ' Linux'):
+                self._record_app_data(application_data)
+                application_data = []
+                application = None
+
+    def _record_app_data(self, data):
+        """Parse raw metadata output for a single application
+        
+        The usual output is:
+        ApplicationName RevisionNumber
+        ApplicationName ROOT_Version
+        ApplicationName KM3NET
+        ApplicationName ./command/line --arguments --which --can
+        contain
+        also
+        multiple lines
+        and --addtional flags
+        etc.
+        ApplicationName Linux ... (just the `uname -a` output)
+        """
+        name, revision = data[0].split(' ')
+        root_version = data[1].split(' ')[1]
+        command = '\n'.join(data[3:]).split('\n' + name + ' Linux')[0]
+        self.meta.append({
+            'name': name,
+            'revision': revision,
+            'root_version': root_version,
+            'command': command
+        })
