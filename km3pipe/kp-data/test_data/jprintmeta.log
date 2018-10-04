@@ -1,0 +1,83 @@
+JEvt 9912
+JEvt 5.34/23
+JEvt KM3NET
+JEvt /pbs/throng/km3net/src/Jpp/tag_candidates/v10.0.9322/out//Linux/bin//JEvt -f /sps/km3net/users/kmcprod/7DUprod/atm-muons/reco/JGandalf_v10/JGandalf_JEnergy_ORCA7_atm-muon_49runs_16251-16300.root -o /sps/km3net/users/kmcprod/7DUprod/atm-muons/reco/JGandalf_v10/JGandalf_aanet_ORCA7_atm-muon_49runs_16251-16300.root -n 0 -d 2 --!
+JEvt Linux cca001 3.10.0-862.11.6.el7.x86_64 #1 SMP Tue Aug 14 21:49:04 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux
+JEnergy 9912
+JEnergy 5.34/23
+JEnergy KM3NET
+JEnergy /pbs/throng/km3net/src/Jpp/tag_candidates/v10.0.9322/out//Linux/bin//JEnergy -a /sps/km3net/users/shallman/detectorFiles/orca_7strings_av23min20mhorizontal_18OMs_alt9mvertical_v1.detx -f /sps/km3net/users/kmcprod/7DUprod/atm-muons/reco/JGandalf_v10/JGandalf_JStart_ORCA7_atm-muon_49runs_16251-16300.root -P /pbs/throng/km3net/src/Jpp/tag_candidates/v10.0.9322/data//J%p.dat -o /sps/km3net/users/kmcprod/7DUprod/atm-muons/reco/JGandalf_v10/JGandalf_JEnergy_ORCA7_atm-muon_49runs_16251-16300.root -R 50 -T -25 +25 -s 1e-3 1e-2 -x 0 2 -B 10e3 500 50 5 0.5 -M 3 -N 50 -d 1 --!
+JEnergy Linux cca001 3.10.0-862.11.6.el7.x86_64 #1 SMP Tue Aug 14 21:49:04 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux
+JStart 9912
+JStart 5.34/23
+JStart KM3NET
+JStart /pbs/throng/km3net/src/Jpp/tag_candidates/v10.0.9322/out//Linux/bin//JStart -a /sps/km3net/users/shallman/detectorFiles/orca_7strings_av23min20mhorizontal_18OMs_alt9mvertical_v1.detx -f /sps/km3net/users/kmcprod/7DUprod/atm-muons/reco/JGandalf_v10/JGandalf_JGandalf_ORCA7_atm-muon_49runs_16251-16300.root -P /pbs/throng/km3net/src/Jpp/tag_candidates/v10.0.9322/data//J%p.dat -o /sps/km3net/users/kmcprod/7DUprod/atm-muons/reco/JGandalf_v10/JGandalf_JStart_ORCA7_atm-muon_49runs_16251-16300.root -R 50 -T -25 +25 -s 1e-3 1e-2 -B 10e3 500 50 5 0.5 -N 50 -d 1 --!
+JStart Linux cca001 3.10.0-862.11.6.el7.x86_64 #1 SMP Tue Aug 14 21:49:04 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux
+JGandalf 9912
+JGandalf 5.34/23
+JGandalf KM3NET
+JGandalf /pbs/throng/km3net/src/Jpp/tag_candidates/v10.0.9322/out//Linux/bin//JGandalf -a /sps/km3net/users/shallman/detectorFiles/orca_7strings_av23min20mhorizontal_18OMs_alt9mvertical_v1.detx -f /sps/km3net/users/kmcprod/7DUprod/atm-muons/reco/JGandalf_v10/JGandalf_JSimplex_ORCA7_atm-muon_49runs_16251-16300.root -P /pbs/throng/km3net/src/Jpp/tag_candidates/v10.0.9322/data//J%p.dat -o /sps/km3net/users/kmcprod/7DUprod/atm-muons/reco/JGandalf_v10/JGandalf_JGandalf_ORCA7_atm-muon_49runs_16251-16300.root -T 2.0 -E 0.0 -B 10e3 -R 50 -N 50 -d 1 --!
+JGandalf Linux cca001 3.10.0-862.11.6.el7.x86_64 #1 SMP Tue Aug 14 21:49:04 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux
+JSimplex 9912
+JSimplex 5.34/23
+JSimplex KM3NET
+JSimplex /pbs/throng/km3net/src/Jpp/tag_candidates/v10.0.9322/out//Linux/bin//JSimplex -a /sps/km3net/users/shallman/detectorFiles/orca_7strings_av23min20mhorizontal_18OMs_alt9mvertical_v1.detx -f /sps/km3net/users/kmcprod/7DUprod/atm-muons/reco/JGandalf_v10/JGandalf_JPrefit_ORCA7_atm-muon_49runs_16251-16300.root -o /sps/km3net/users/kmcprod/7DUprod/atm-muons/reco/JGandalf_v10/JGandalf_JSimplex_ORCA7_atm-muon_49runs_16251-16300.root -S 3.0 -T 15 -N 50 -U -d 1 --!
+JSimplex Linux cca001 3.10.0-862.11.6.el7.x86_64 #1 SMP Tue Aug 14 21:49:04 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux
+JPrefit 9912
+JPrefit 5.34/23
+JPrefit KM3NET
+JPrefit /pbs/throng/km3net/src/Jpp/tag_candidates/v10.0.9322/out//Linux/bin//JPrefit -a /sps/km3net/users/shallman/detectorFiles/orca_7strings_av23min20mhorizontal_18OMs_alt9mvertical_v1.detx -f /sps/km3net/users/kmcprod/7DUprod/atm-muons/JTE/JTE_ORCA7_atm-muon_49runs_16251-16300.root -o /sps/km3net/users/kmcprod/7DUprod/atm-muons/reco/JGandalf_v10/JGandalf_JPrefit_ORCA7_atm-muon_49runs_16251-16300.root -g 5 -T 18 -R 50 -S 5 -O 3 -N 288 -U -d 1 --!
+JPrefit Linux cca001 3.10.0-862.11.6.el7.x86_64 #1 SMP Tue Aug 14 21:49:04 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux
+JTriggerEfficiency 8519
+JTriggerEfficiency 5.34/23
+JTriggerEfficiency KM3NET
+JTriggerEfficiency /pbs/throng/km3net/src/Jpp/v9.0.8454/out//Linux/bin//JTriggerEfficiency -a /sps/km3net/users/shallman/detectorFiles/orca_7strings_av23min20mhorizontal_18OMs_alt9mvertical_v1.detx -f /scratch/47469646.1.long/totrigger/JTE_atm-muon_16252.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16253.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16254.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16255.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16256.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16257.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16258.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16259.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16260.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16261.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16262.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16263.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16264.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16265.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16266.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16267.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16268.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16269.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16270.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16271.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16272.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16273.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16274.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16275.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16276.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16277.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16278.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16279.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16280.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16281.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16282.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16283.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16284.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16285.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16286.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16287.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16288.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16289.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16290.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16291.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16292.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16293.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16294.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16295.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16296.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16297.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16298.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16299.root
+/scratch/47469646.1.long/totrigger/JTE_atm-muon_16300.root -o /sps/km3net/users/shallman/ORCA_7DUs_9m_2016/mupage/JTE_v9/JTE_ORCA7_atm-muon_49runs_16252-16300.root -P QE=1.0 -@ /sps/km3net/users/shallman/ORCA_7DUs_9m_2016/triggerParameters_orca7DU_av23m.txt -O -d 1 -B 10e3 600 60 7 0.8 -S 326 --!
+JTriggerEfficiency Linux ccwsge0409 3.10.0-693.21.1.el7.x86_64 #1 SMP Wed Mar 7 19:03:37 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux
