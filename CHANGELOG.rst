@@ -1,6 +1,6 @@
 Unreleased changes
 ------------------
-
+* added Dusj fitinf enum names and extended reco enum to hold Dusj reconstruction information (range 200-299)
 
 Version 8
 ---------
