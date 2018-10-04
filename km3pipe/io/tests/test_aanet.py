@@ -69,7 +69,10 @@ class TestMetaParser(TestCase):
 
     def test_parse_testfile(self):
         fname = join(TEST_DATA_DIR, 'jprintmeta.log')
-        mp = MetaParser(fname)
+        with open(fname, 'r') as fobj:
+            string = fobj.read()
+        mp = MetaParser()
+        mp.parse_string(string)
         assert 7 == len(mp.meta)
 
         assert 'JEvt' == mp.meta[0]['name']

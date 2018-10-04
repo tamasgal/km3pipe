@@ -11,6 +11,7 @@ your pull request is more than welcome!
 from __future__ import absolute_import, print_function, division
 
 from collections import defaultdict
+import subprocess
 import os.path
 
 import numpy as np
@@ -135,6 +136,10 @@ class AanetPump(Pump):
             event_file = EventFile(filename)
         except Exception:
             raise SystemExit("Could not open file")
+
+        log.warning("Reading metadata using 'JPrintMeta'")
+        meta = MetaParser(filename=filename).meta
+        print(meta)
 
         log.info("Generating blobs through new aanet API...")
 
@@ -481,10 +486,8 @@ class MetaParser(object):
         self.log = get_logger(__name__ + '.' + self.__class__.__name__)
         self.meta = []
         if filename is not None:
-            with open(filename, 'r') as fobj:
-                string = fobj.read()
+            string = subprocess.check_output(['JPrintMeta', '-f', filename])
             self.parse_string(string)
-            return
 
     def parse_string(self, string):
         """Parse ASCII output of JPrintMeta"""
