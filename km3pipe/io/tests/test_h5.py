@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Tests for HDF5 stuff"""
+from collections import OrderedDict
 import tempfile
 from os.path import join, dirname
 
@@ -8,7 +9,10 @@ import tables as tb
 
 from km3pipe import Blob, Module, Pipeline, Pump, version
 from km3pipe.dataclasses import Table
-from km3pipe.io.hdf5 import HDF5Pump, HDF5Sink, FORMAT_VERSION    # noqa
+from km3pipe.io.hdf5 import (
+    HDF5Pump, HDF5Sink, HDF5Header, convert_header_dict_to_table,
+    FORMAT_VERSION
+)
 from km3pipe.tools import insert_prefix_to_dtype
 from km3pipe.testing import TestCase
 
@@ -429,3 +433,139 @@ class TestHDF5PumpConsistency(TestCase):
         pipe.drain()
 
         fobj.close()
+
+
+class TestHDF5Header(TestCase):
+    def setUp(self):
+        # self.hdict = OrderedDict([
+        # # yapf crushes the formatting, never mind...
+        # # we use OrderedDict here to ensure the correct ordering
+        #     ("param_a", OrderedDict([("field_a_1", "1"), ("field_a_2", "2")])),
+        #     ("param_b", OrderedDict([("field_b_1", "a")])),
+        #     ("param_c", OrderedDict([("field_c_1", 23)])),
+        #     (
+        #         "param_d",
+        #         OrderedDict([("param_d_0", 1), ("param_d_1", 2),
+        #                      ("param_d_2", 3)])
+        #     )
+        # ])
+        self.hdict = {
+            "param_a": {
+                "field_a_1": "1",
+                "field_a_2": "2"
+            },
+            "param_b": {
+                "field_b_1": "a"
+            },
+            "param_c": {
+                "field_c_1": 23
+            },
+            "param_d": {
+                "param_d_0": 1,
+                "param_d_1": 2,
+                "param_d_2": 3
+            },
+            "param_e": {
+                "param_e_2": 3,
+                "param_e_0": 1,
+                "param_e_1": 2
+            },
+        }
+
+    def test_init(self):
+        HDF5Header({})
+
+    def test_header(self):
+        header = HDF5Header(self.hdict)
+        assert "1" == header.param_a.field_a_1
+        assert "2" == header.param_a.field_a_2
+        assert "a" == header.param_b.field_b_1
+        assert 23 == header.param_c.field_c_1
+
+    def test_header_with_vectors(self):
+        header = HDF5Header(self.hdict)
+        self.assertTupleEqual((1, 2, 3), header.param_d)
+
+    def test_header_with_scrumbled_vectors(self):
+        header = HDF5Header(self.hdict)
+        self.assertTupleEqual((1, 2, 3), header.param_e)
+
+    # def test_header_with_scalars(self):
+    #     header = HDF5Header(self.hdict)
+    #     assert 4 == header.param_e
+    #     assert 5.6 == header.param_f
+    #
+    # def test_scientific_notation(self):
+    #     header = HDF5Header(self.hdict)
+    #     assert 7e+08 == header.param_g
+
+    def test_header_from_table(self):
+        table = convert_header_dict_to_table(self.hdict)
+        header = HDF5Header.from_table(table)
+        print(header)
+        assert 1.0 == header.param_a.field_a_1
+        assert 2.0 == header.param_a.field_a_2
+        assert "a" == header.param_b.field_b_1
+        assert 23 == header.param_c.field_c_1
+        self.assertTupleEqual((1, 2, 3), header.param_d)
+
+    def test_header_from_hdf5_file(self):
+        header = HDF5Header.from_hdf5(join(DATA_DIR, 'raw_header.h5'))
+        assert 'MUSIC' == header.propag[0]
+        assert 'seawater' == header.propag[1]
+        assert 3450 == header.seabottom[0]
+        self.assertAlmostEqual(12.1, header.livetime.numberOfSeconds, places=3)
+        self.assertAlmostEqual(0.09, header.livetime.errorOfSeconds, places=3)
+        assert 0 == header.coord_origin.x
+        assert 0 == header.coord_origin.y
+        assert 0 == header.coord_origin.z
+        self.assertTupleEqual((0, 0, 0), header.coord_origin)
+
+
+class TestConvertHeaderDictToTable(TestCase):
+    def setUp(self):
+        hdict = {
+            "param_a": {
+                "field_a_1": "1",
+                "field_a_2": "2"
+            },
+            "param_b": {
+                "field_b_1": "a"
+            },
+            "param_c": {
+                "field_c_1": 1
+            }
+        }
+        self.tab = convert_header_dict_to_table(hdict)
+
+    def test_length(self):
+        assert 3 == len(self.tab)
+
+    def test_values(self):
+        tab = self.tab
+
+        index_a = tab.parameter.tolist().index("param_a")
+        index_b = tab.parameter.tolist().index("param_b")
+
+        assert "param_a" == tab.parameter[index_a]
+        assert "field_a_1" in tab.field_names[index_a]
+        assert "field_a_2" in tab.field_names[index_a]
+        if "field_a_1 field_a_2" == tab.field_names[index_a]:
+            assert "1 2" == tab.field_values[index_a]
+        else:
+            assert "2 1" == tab.field_values[index_a]
+        assert "f4 f4" == tab['dtype'][index_a]
+
+        assert "param_b" == tab.parameter[index_b]
+        assert "field_b_1" == tab.field_names[index_b]
+        assert "a" == tab.field_values[index_b]
+        assert "a1" == tab['dtype'][index_b]
+
+    def test_values_are_converted_to_str(self):
+        index_c = self.tab.parameter.tolist().index("param_c")
+        assert "param_c" == self.tab.parameter[index_c]
+        assert "1" == self.tab.field_values[index_c]
+
+    def test_conversion_returns_none_for_empty_dict(self):
+        assert None is convert_header_dict_to_table(None)
+        assert None is convert_header_dict_to_table({})

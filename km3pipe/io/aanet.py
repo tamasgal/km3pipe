@@ -16,6 +16,7 @@ import os.path
 import numpy as np
 
 from km3pipe.core import Pump, Blob
+from km3pipe.io.hdf5 import HDF5Header
 from km3pipe.dataclasses import Table
 from km3pipe.logger import get_logger
 
@@ -209,6 +210,7 @@ class AanetPump(Pump):
         self.filename = self.require('filename')
         self.ignore_hits = bool(self.get('ignore_hits'))
         self.bare = self.get('bare', default=False)
+        self.raw_header = None
         self.header = None
         self.blobs = self.blob_generator()
         self.group_id = 0
@@ -238,21 +240,24 @@ class AanetPump(Pump):
         if self.bare:
             log.info("Skipping data conversion, only passing bare aanet data")
             for event in event_file:
-                yield Blob({'evt': event})
+                yield Blob({'evt': event, 'event_file': event_file})
         else:
             log.info("Unpacking aanet header into dictionary...")
             hdr = self._parse_header(event_file.header)
             if not hdr:
                 log.info("Empty header dict found, skipping...")
-                self.header = None
+                self.raw_header = None
             else:
                 log.info("Converting Header dict to Table...")
-                self.header = self._convert_header_dict_to_table(hdr)
+                self.raw_header = self._convert_header_dict_to_table(hdr)
+                log.info("Creating HDF5Header")
+                self.header = HDF5Header.from_table(self.raw_header)
             for event in event_file:
                 log.debug('Reading event...')
                 blob = self._read_event(event, filename)
                 log.debug('Reading header...')
-                blob["RawHeader"] = self.header
+                blob["RawHeader"] = self.raw_header
+                blob["Header"] = self.header
                 self.group_id += 1
                 yield blob
         del event_file
@@ -452,7 +457,20 @@ class AanetPump(Pump):
             out['length'].append(trk.len)
             out['bjorkeny'].append(trk.getusr('by'))
             out['interaction_channel'].append(trk.getusr('ichan'))
-            out['is_cc'].append(IS_CC[trk.getusr('cc')])
+            try:
+                is_cc = IS_CC[trk.getusr('cc')]
+            except KeyError:
+                # see git.km3net.de/km3py/km3pipe/issues/112
+                # and http://trac.km3net.de/ticket/222
+                self.log.error(
+                    "Invalid value ({}) for the 'cc' usr-parameter in the "
+                    "MC track. 'is_cc' is now set to 0 (False).".format(
+                        trk.getusr('cc')
+                    )
+                )
+                is_cc = 0
+            finally:
+                out['is_cc'].append(is_cc)
         out['group_id'] = self.group_id
         return Table(out, name='McTracks', h5loc='/mc_tracks')
 
@@ -514,6 +532,7 @@ class AanetPump(Pump):
                 out[key][elem_name] = elem
         return out
 
+    # TODO: delete this method and use the function in io/hdf5.py
     @staticmethod
     def _convert_header_dict_to_table(header_dict):
         if not header_dict:
