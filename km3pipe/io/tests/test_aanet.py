@@ -43,7 +43,7 @@ class TestMetaParser(TestCase):
 
         assert 1 == len(mp.meta)
 
-        assert 'A' == mp.meta[0]['name']
+        assert 'A' == mp.meta[0]['application_name']
         assert '123' == mp.meta[0]['revision']
         assert 'A a\nA b' == mp.meta[0]['command']
 
@@ -57,12 +57,12 @@ class TestMetaParser(TestCase):
 
         assert 2 == len(mp.meta)
 
-        assert 'A' == mp.meta[0]['name']
+        assert 'A' == mp.meta[0]['application_name']
         assert '123' == mp.meta[0]['revision']
         assert '1.2.3' == mp.meta[0]['root_version']
         assert 'A a\nA b' == mp.meta[0]['command']
 
-        assert 'B' == mp.meta[1]['name']
+        assert 'B' == mp.meta[1]['application_name']
         assert '456' == mp.meta[1]['revision']
         assert '4.5.6' == mp.meta[1]['root_version']
         assert 'B c' == mp.meta[1]['command']
@@ -75,19 +75,19 @@ class TestMetaParser(TestCase):
         mp.parse_string(string)
         assert 7 == len(mp.meta)
 
-        assert 'JEvt' == mp.meta[0]['name']
+        assert 'JEvt' == mp.meta[0]['application_name']
         assert '9912' == mp.meta[0]['revision']
         assert '5.34/23' == mp.meta[0]['root_version']
         assert mp.meta[0]['command'].startswith('JEvt /pbs/throng/km3net')
         assert mp.meta[0]['command'].endswith('2 --!')
 
-        assert 'JEnergy' == mp.meta[1]['name']
+        assert 'JEnergy' == mp.meta[1]['application_name']
         assert '9912' == mp.meta[1]['revision']
         assert '5.34/23' == mp.meta[1]['root_version']
         assert mp.meta[1]['command'].startswith('JEnergy /pbs/throng/km3net')
         assert mp.meta[1]['command'].endswith('1 --!')
 
-        assert 'JTriggerEfficiency' == mp.meta[-1]['name']
+        assert 'JTriggerEfficiency' == mp.meta[-1]['application_name']
         assert '8519' == mp.meta[-1]['revision']
         assert '5.34/23' == mp.meta[-1]['root_version']
         assert mp.meta[-1]['command'].startswith(

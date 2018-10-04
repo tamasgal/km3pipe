@@ -144,7 +144,6 @@ FITINFDUSJ2NUM = {
     'geoCoverage_R130h160_angle75_lmin30_best_DusjOrcaUsingProbabilitiesFinalFit_FitResult': 88
 }
 
-
 # jpp > 10.1 (trunk @10276)
 AANET_RECTYPE_PLACEHOLDER = 4000
 
@@ -236,11 +235,13 @@ class AanetPump(Pump):
         except Exception:
             raise SystemExit("Could not open file")
 
-        log.warning("Reading metadata using 'JPrintMeta'")
-        meta = MetaParser(filename=filename).meta
-        print(meta)
-
         log.info("Generating blobs through new aanet API...")
+
+        log.warning("Reading metadata using 'JPrintMeta'")
+        meta_parser = MetaParser(filename=filename)
+        meta = meta_parser.to_table()
+        print(meta.dtype)
+        input()
 
         if self.bare:
             log.info("Skipping data conversion, only passing bare aanet data")
@@ -263,6 +264,9 @@ class AanetPump(Pump):
                 log.debug('Reading header...')
                 blob["RawHeader"] = self.raw_header
                 blob["Header"] = self.header
+
+                blob['Meta'] = meta
+
                 self.group_id += 1
                 yield blob
         del event_file
@@ -403,16 +407,17 @@ class AanetPump(Pump):
         # TODO: hit_ids,
         # TODO: rec_stages,
         self.log.debug('Reading fitinf...')
-        
+
         isDusj = False
-        if len(trk.rec_stages)>0:
-            if (min(trk.rec_stages)>= RECO2NUM['JDUSJBEGIN']) and (max(trk.rec_stages) <= RECO2NUM['JDUSJEND']):
+        if len(trk.rec_stages) > 0:
+            if (min(trk.rec_stages) >= RECO2NUM['JDUSJBEGIN']) and (max(
+                    trk.rec_stages) <= RECO2NUM['JDUSJEND']):
                 isDusj = True
         if isDusj:
             fitinf = self._parse_fitinf_dusj(trk.fitinf)
         else:
             fitinf = self._parse_fitinf(trk.fitinf)
-        
+
         out.update(fitinf)
         return out
 
@@ -428,7 +433,7 @@ class AanetPump(Pump):
             self.log.debug("Reading fitinf #{} ('{}')...".format(i, name))
             out[name] = elem
         return out
-    
+
     def _parse_fitinf_dusj(self, fitinf):
         # iterating empty ROOT vector causes segfaults!
         if len(fitinf) == 0:
@@ -651,8 +656,14 @@ class MetaParser(object):
         root_version = data[1].split(' ')[1]
         command = '\n'.join(data[3:]).split('\n' + name + ' Linux')[0]
         self.meta.append({
-            'name': name,
-            'revision': revision,
-            'root_version': root_version,
-            'command': command
+            'application_name': np.string_(name),
+            'revision': np.string_(revision),
+            'root_version': np.string_(root_version),
+            'command': np.string_(command)
         })
+
+    def to_table(self):
+        """Convert metadata to a KM3Pipe Table"""
+        import pandas as pd
+        df = pd.DataFrame(self.meta)
+        return Table.from_dataframe(df, h5loc='/meta', h5singleton=True)
