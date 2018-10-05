@@ -619,10 +619,10 @@ class MetaParser(object):
         """Parse ASCII output of JPrintMeta"""
         self.log.info("Parsing ASCII data")
 
-        lines = string.split('\n')
+        lines = string.splitlines()
         application_data = []
 
-        application = lines[0].split(' ')[0]
+        application = lines[0].split()[0]
         self.log.debug("Reading meta information for '%s'" % application)
 
         for line in lines:
@@ -630,9 +630,9 @@ class MetaParser(object):
                 self.log.debug(
                     "Reading meta information for '%s'" % application
                 )
-                application = line.split(' ')[0]
+                application = line.split()[0]
             application_data.append(line)
-            if line.startswith(application + ' Linux'):
+            if line.startswith(application + b' Linux'):
                 self._record_app_data(application_data)
                 application_data = []
                 application = None
@@ -652,9 +652,9 @@ class MetaParser(object):
         etc.
         ApplicationName Linux ... (just the `uname -a` output)
         """
-        name, revision = data[0].split(' ')
-        root_version = data[1].split(' ')[1]
-        command = '\n'.join(data[3:]).split('\n' + name + ' Linux')[0]
+        name, revision = data[0].split()
+        root_version = data[1].split()[1]
+        command = b'\n'.join(data[3:]).split(b'\n' + name + b' Linux')[0]
         self.meta.append({
             'application_name': np.string_(name),
             'revision': np.string_(revision),
