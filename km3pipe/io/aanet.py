@@ -11,6 +11,7 @@ your pull request is more than welcome!
 from __future__ import absolute_import, print_function, division
 
 from collections import defaultdict
+import subprocess
 import os.path
 
 import numpy as np
@@ -143,7 +144,6 @@ FITINFDUSJ2NUM = {
     'geoCoverage_R130h160_angle75_lmin30_best_DusjOrcaUsingProbabilitiesFinalFit_FitResult': 88
 }
 
-
 # jpp > 10.1 (trunk @10276)
 AANET_RECTYPE_PLACEHOLDER = 4000
 
@@ -237,6 +237,14 @@ class AanetPump(Pump):
 
         log.info("Generating blobs through new aanet API...")
 
+        self.print("Reading metadata using 'JPrintMeta'")
+        meta_parser = MetaParser(filename=filename)
+        meta = meta_parser.get_table()
+        if meta is None:
+            self.log.warning(
+                "No metadata found, this means no data provenance!"
+            )
+
         if self.bare:
             log.info("Skipping data conversion, only passing bare aanet data")
             for event in event_file:
@@ -258,6 +266,10 @@ class AanetPump(Pump):
                 log.debug('Reading header...')
                 blob["RawHeader"] = self.raw_header
                 blob["Header"] = self.header
+
+                if meta is not None:
+                    blob['Meta'] = meta
+
                 self.group_id += 1
                 yield blob
         del event_file
@@ -398,16 +410,17 @@ class AanetPump(Pump):
         # TODO: hit_ids,
         # TODO: rec_stages,
         self.log.debug('Reading fitinf...')
-        
+
         isDusj = False
-        if len(trk.rec_stages)>0:
-            if (min(trk.rec_stages)>= RECO2NUM['JDUSJBEGIN']) and (max(trk.rec_stages) <= RECO2NUM['JDUSJEND']):
+        if len(trk.rec_stages) > 0:
+            if (min(trk.rec_stages) >= RECO2NUM['JDUSJBEGIN']) and (max(
+                    trk.rec_stages) <= RECO2NUM['JDUSJEND']):
                 isDusj = True
         if isDusj:
             fitinf = self._parse_fitinf_dusj(trk.fitinf)
         else:
             fitinf = self._parse_fitinf(trk.fitinf)
-        
+
         out.update(fitinf)
         return out
 
@@ -423,7 +436,7 @@ class AanetPump(Pump):
             self.log.debug("Reading fitinf #{} ('{}')...".format(i, name))
             out[name] = elem
         return out
-    
+
     def _parse_fitinf_dusj(self, fitinf):
         # iterating empty ROOT vector causes segfaults!
         if len(fitinf) == 0:
@@ -593,3 +606,91 @@ class AanetPump(Pump):
 
     def __next__(self):
         return next(self.blobs)
+
+
+class MetaParser(object):
+    """A class which parses the JPrintMeta output for a given filenam"""
+
+    def __init__(self, filename=None, string=None):
+        self.log = get_logger(__name__ + '.' + self.__class__.__name__)
+        self.meta = []
+        if filename is not None:
+            string = subprocess.check_output(['JPrintMeta', '-f', filename])
+            self.parse_string(string)
+
+    def parse_string(self, string):
+        """Parse ASCII output of JPrintMeta"""
+        self.log.info("Parsing ASCII data")
+
+        if not string:
+            self.log.warning("Empty metadata")
+            return
+
+        lines = string.splitlines()
+        application_data = []
+
+        application = lines[0].split()[0]
+        self.log.debug("Reading meta information for '%s'" % application)
+
+        for line in lines:
+            if application is None:
+                self.log.debug(
+                    "Reading meta information for '%s'" % application
+                )
+                application = line.split()[0]
+            application_data.append(line)
+            if line.startswith(application + b' Linux'):
+                self._record_app_data(application_data)
+                application_data = []
+                application = None
+
+    def _record_app_data(self, data):
+        """Parse raw metadata output for a single application
+        
+        The usual output is:
+        ApplicationName RevisionNumber
+        ApplicationName ROOT_Version
+        ApplicationName KM3NET
+        ApplicationName ./command/line --arguments --which --can
+        contain
+        also
+        multiple lines
+        and --addtional flags
+        etc.
+        ApplicationName Linux ... (just the `uname -a` output)
+        """
+        name, revision = data[0].split()
+        root_version = data[1].split()[1]
+        command = b'\n'.join(data[3:]).split(b'\n' + name + b' Linux')[0]
+        self.meta.append({
+            'application_name': np.string_(name),
+            'revision': np.string_(revision),
+            'root_version': np.string_(root_version),
+            'command': np.string_(command)
+        })
+
+    def get_table(self, name='Meta', h5loc='/meta'):
+        """Convert metadata to a KM3Pipe Table.
+
+        Returns `None` if there is no data.
+        
+        Each column's dtype will be set to a fixed size string (numpy.string_)
+        with the length of the longest entry, since writing variable length
+        strings does not fit the current scheme.
+        """
+        if not self.meta:
+            return None
+
+        data = defaultdict(list)
+        for entry in self.meta:
+            for key, value in entry.items():
+                data[key].append(value)
+        dtypes = []
+        for key, values in data.items():
+            max_len = max(map(len, values))
+            dtype = 'S{}'.format(max_len)
+            dtypes.append((key, dtype))
+        tab = Table(
+            data, dtype=dtypes, h5loc=h5loc, name='Meta', h5singleton=True
+        )
+        return tab
