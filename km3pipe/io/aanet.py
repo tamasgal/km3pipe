@@ -237,11 +237,13 @@ class AanetPump(Pump):
 
         log.info("Generating blobs through new aanet API...")
 
-        log.warning("Reading metadata using 'JPrintMeta'")
+        self.print("Reading metadata using 'JPrintMeta'")
         meta_parser = MetaParser(filename=filename)
-        meta = meta_parser.to_table()
-        print(meta.dtype)
-        input()
+        meta = meta_parser.get_table()
+        if meta is None:
+            self.log.warning(
+                "No metadata found, this means no data provenance!"
+            )
 
         if self.bare:
             log.info("Skipping data conversion, only passing bare aanet data")
@@ -265,7 +267,8 @@ class AanetPump(Pump):
                 blob["RawHeader"] = self.raw_header
                 blob["Header"] = self.header
 
-                blob['Meta'] = meta
+                if meta is not None:
+                    blob['Meta'] = meta
 
                 self.group_id += 1
                 yield blob
@@ -619,6 +622,10 @@ class MetaParser(object):
         """Parse ASCII output of JPrintMeta"""
         self.log.info("Parsing ASCII data")
 
+        if not string:
+            self.log.warning("Empty metadata")
+            return
+
         lines = string.splitlines()
         application_data = []
 
@@ -662,8 +669,28 @@ class MetaParser(object):
             'command': np.string_(command)
         })
 
-    def to_table(self):
-        """Convert metadata to a KM3Pipe Table"""
-        import pandas as pd
-        df = pd.DataFrame(self.meta)
-        return Table.from_dataframe(df, h5loc='/meta', h5singleton=True)
+    def get_table(self, name='Meta', h5loc='/meta'):
+        """Convert metadata to a KM3Pipe Table.
+
+        Returns `None` if there is no data.
+        
+        Each column's dtype will be set to a fixed size string (numpy.string_)
+        with the length of the longest entry, since writing variable length
+        strings does not fit the current scheme.
+        """
+        if not self.meta:
+            return None
+
+        data = defaultdict(list)
+        for entry in self.meta:
+            for key, value in entry.items():
+                data[key].append(value)
+        dtypes = []
+        for key, values in data.items():
+            max_len = max(map(len, values))
+            dtype = 'S{}'.format(max_len)
+            dtypes.append((key, dtype))
+        tab = Table(
+            data, dtype=dtypes, h5loc=h5loc, name='Meta', h5singleton=True
+        )
+        return tab

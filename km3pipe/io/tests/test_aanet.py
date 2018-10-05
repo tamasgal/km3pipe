@@ -2,6 +2,8 @@
 # pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
 from os.path import join, dirname
 
+import numpy as np
+
 from km3pipe.testing import TestCase, patch, Mock, skip
 from km3pipe.io.aanet import AanetPump, MetaParser
 
@@ -94,3 +96,22 @@ class TestMetaParser(TestCase):
             b'JTriggerEfficiency /pbs/throng/km3net'
         )
         assert mp.meta[-1]['command'].endswith(b'326 --!')
+
+    def test_get_table(self):
+        string = (
+            b"A 123\nA 1.2.3\nA KM3NET\nA a\nA b\nA Linux\n"
+            b"B 456\nB 4.5.6\nB KM3NET\nB c\nB Linux"
+        )
+        mp = MetaParser()
+        mp.parse_string(string)
+        tab = mp.get_table()
+        assert 2 == len(tab)
+        assert '/meta' == tab.h5loc
+        assert tab.h5singleton
+        assert b'B c' == tab['command'][1]
+        assert np.dtype('S7') == tab['command'].dtype
+
+    def test_empty_string(self):
+        mp = MetaParser()
+        mp.parse_string('')
+        assert mp.get_table() is None
