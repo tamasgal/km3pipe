@@ -557,6 +557,11 @@ class TMCHData(object):
         ]
         self.hrvbmp = unpack('>I', f.read(4))[0]
         self.flags = unpack('>I', f.read(4))[0]
+        # flags:
+        # bit 0: AHRS valid
+        # bit 3-1: structure version
+        #          000 - 1, 001 - 2, 010 - unused, 011 - 3
+        self.version = int(bin((self.flags >> 1) & 7), 2) + 1
         self.yaw, self.pitch, self.roll = unpack('>fff', f.read(12))
         self.A = unpack('>fff', f.read(12))    # AHRS: Ax, Ay, Az
         self.G = unpack('>fff', f.read(12))    # AHRS: Gx, Gy, Gz
@@ -566,7 +571,12 @@ class TMCHData(object):
         self.tdcfull = unpack('>I', f.read(4))[0]
         self.aesfull = unpack('>I', f.read(4))[0]
         self.flushc = unpack('>I', f.read(4))[0]
-        # self.ts_duration_microseconds = unpack('>I', f.read(4))[0]
+
+        if self.version >= 2:
+            self.ts_duration_ms = unpack('>I', f.read(4))[0]
+        if self.version >= 3:
+            self.tdc_supertime_fifo_size = unpack('>H', f.read(2))[0]
+            self.aes_supertime_fifo_size = unpack('>H', f.read(2))[0]
 
     def __str__(self):
         return str(vars(self))
