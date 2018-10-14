@@ -11,6 +11,7 @@ your pull request is more than welcome!
 from __future__ import absolute_import, print_function, division
 
 from collections import defaultdict
+import subprocess
 import os.path
 
 import numpy as np
@@ -51,6 +52,98 @@ FITINF2NUM = {
     'JCOPY_Z_M': 17,
 }
 
+FITINFDUSJ2NUM = {
+    'DifferencesFirstAndSecondVertexFit_deltaTime': 0,
+    'DifferencesFirstAndSecondVertexFit_distance': 1,
+    'FinalShowerHits_0dist60_L1cc_SingleHits_emisAng40_trackShowerTres_N': 2,
+    'FinalShowerHits_0dist60_L1cc_SingleHits_emisAng40_trackShowerTres_difference': 3,
+    'FinalShowerHits_0dist60_L1cc_SingleHits_emisAng40_trackShowerTres_meanDifference': 4,
+    'Fork_muonSuppression_decision': 5,
+    'HitPatternCharge_finalShowerHits_10degAroundCherAngle_Charge_correlationCoefficient': 6,
+    'HitPatternCharge_finalShowerHits_10degAroundCherAngle_Charge_scalarProduct': 7,
+    'HitPatternCharge_finalShowerHits_10degAroundCherAngle_Charge_sum_Xcharge2': 8,
+    'HitPatternCharge_finalShowerHits_10degAroundCherAngle_Charge_sum_Xcharge_times_charge': 9,
+    'HitPatternCharge_finalShowerHits_10degAroundCherAngle_Charge_sum_XhitProb2': 10,
+    'HitPatternCharge_finalShowerHits_10degAroundCherAngle_Charge_sum_XhitProb_times_charge': 11,
+    'HitPatternCharge_finalShowerHits_10degAroundCherAngle_Charge_sum_XhitProb_times_hit': 12,
+    'HitPatternCharge_finalShowerHits_10degAroundCherAngle_Charge_sum_charge2': 13,
+    'HitPatternCharge_finalShowerHits_10degAroundCherAngle_Charge_sum_charge2__forXhitProb': 14,
+    'HitPatternCharge_finalShowerHits_10degAroundCherAngle_Charge_sum_hit2': 15,
+    'HitPatternCharge_finalShowerHits_10degAroundCherAngle_HitProbCharge_scalarProduct': 16,
+    'HitPatternCharge_finalShowerHits_10degAroundCherAngle_HitProb_scalarProduct': 17,
+    'HitPatternCharge_finalShowerHits_10degAroundCherAngle_NXcharge': 18,
+    'HitPatternCharge_finalShowerHits_10degAroundCherAngle_Ncharge': 19,
+    'HitPatternCharge_finalShowerHits_10degAroundCherAngle_Nhits': 20,
+    'HitPatternTres_finalShowerHits_10degAroundCherAngle_AbsTres_Mean': 21,
+    'HitPatternTres_finalShowerHits_10degAroundCherAngle_AbsTres_weightedMean': 22,
+    'HitPatternTres_finalShowerHits_10degAroundCherAngle_Nhits': 23,
+    'HitPatternTres_finalShowerHits_10degAroundCherAngle_Tres_Mean': 24,
+    'HitPatternTres_finalShowerHits_10degAroundCherAngle_Tres_sum_XhitProb': 25,
+    'HitPatternTres_finalShowerHits_10degAroundCherAngle_Tres_weightedMean': 26,
+    'L0AroundL1HitSelection__weight_withoutSelfSquared': 27,
+    'L0AroundL1HitSelection_weight': 28,
+    'L0AroundL1HitSelection_weight_withoutSelfSquared': 29,
+    'MuonSuppression_decision': 30,
+    'MuonSuppression_deltaTresQ20Q80': 31,
+    'MuonSuppression_enoughHits': 32,
+    'Trigger_3L1Dmax52_FinalShowerHits_0dist80': 33,
+    'Trigger_3L1Dmax52_FinalShowerHits_0dist80m25tres75': 34,
+    'Trigger_MX8hitsDmax46_FinalShowerHits_0dist80': 35,
+    'Trigger_MX8hitsDmax46_FinalShowerHits_0dist80m25tres75': 36,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_BjorkenY': 37,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues_Nom': 38,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues_Npmt': 39,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues_Npmt_maxDeltaT10ns': 40,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues_azimuth': 41,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues_energy': 42,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues_energyErrorDown_bestLLH': 43,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues_energyErrorUp_bestLLH': 44,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues_energy_bestLLH': 45,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues_llhBestSinglePMTperDOM__sum_forNoSignal': 46,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues_llhBestSinglePMTperDOM_sum': 47,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues_llhSinglePMT_sum': 48,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues_llhSinglePMT_sum_forNoSignal': 49,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues_llh_sum': 50,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues_multiplicity': 51,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues_sumExpFromPoissonOMhits': 52,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues_sumExpOMhits': 53,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues_sumMeasuredOMhits': 54,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues_sumMeasuredPMThits': 55,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_FinalLLHValues_zenith': 56,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_aroundCherAngle_FinalLLHValues_azimuth': 57,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_aroundCherAngle_FinalLLHValues_energy': 58,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_aroundCherAngle_FinalLLHValues_llh_diff_forE0p8': 59,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_aroundCherAngle_FinalLLHValues_llh_diff_forE1p2': 60,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_aroundCherAngle_FinalLLHValues_llh_overAllNorm': 61,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_aroundCherAngle_FinalLLHValues_llh_sum': 62,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_aroundCherAngle_FinalLLHValues_llh_sum_forNoSignal': 63,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_aroundCherAngle_FinalLLHValues_llh_total': 64,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_aroundCherAngle_FinalLLHValues_meanNomOverAllNorm': 65,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_aroundCherAngle_FinalLLHValues_multiplicity': 66,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_aroundCherAngle_FinalLLHValues_premiumEventFraction': 67,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_aroundCherAngle_FinalLLHValues_pull': 68,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_aroundCherAngle_FinalLLHValues_relativeWeightForOverAllNorm': 69,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_aroundCherAngle_FinalLLHValues_sigmaNomOverAllNorm': 70,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_aroundCherAngle_FinalLLHValues_sumExpFromPoissonOMhits': 71,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_aroundCherAngle_FinalLLHValues_sumExpOMhits': 72,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_aroundCherAngle_FinalLLHValues_sumMeasuredOMhits': 73,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_aroundCherAngle_FinalLLHValues_sumMeasuredPMThits': 74,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_FitResult_aroundCherAngle_FinalLLHValues_zenith': 75,
+    'best_DusjOrcaUsingProbabilitiesFinalFit_OUTVicinityNumber': 76,
+    'best_FirstDusjOrcaVertexFit_OUTVicinityNumber': 77,
+    'best_FirstDusjOrcaVertexFit_OUTVicinityWithTimeResidualToSeedNumber': 78,
+    'best_SecondDusjOrcaVertexFit_OUTFiducalNumber': 79,
+    'best_SecondDusjOrcaVertexFit_OUTVicinityNumber': 80,
+    'deltaTres_Q20_Q80_ClusteredL2ORV1L1HitSelection_SingleHits_N': 81,
+    'deltaTres_Q20_Q80_ClusteredL2ORV1L1HitSelection_SingleHits_difference': 82,
+    'deltaTres_Q20_Q80_FinalShowerHits_0dist60_L1cc_SingleHits_N': 83,
+    'deltaTres_Q20_Q80_FinalShowerHits_0dist60_L1cc_SingleHits_difference': 84,
+    'geoCoverage_R130h160_angle20_lmin30_best_DusjOrcaUsingProbabilitiesFinalFit_FitResult': 85,
+    'geoCoverage_R130h160_angle45_lmin30_best_DusjOrcaUsingProbabilitiesFinalFit_FitResult': 86,
+    'geoCoverage_R130h160_angle60_lmin30_best_DusjOrcaUsingProbabilitiesFinalFit_FitResult': 87,
+    'geoCoverage_R130h160_angle75_lmin30_best_DusjOrcaUsingProbabilitiesFinalFit_FitResult': 88
+}
+
 # jpp > 10.1 (trunk @10276)
 AANET_RECTYPE_PLACEHOLDER = 4000
 
@@ -71,6 +164,11 @@ RECO2NUM = {
     'JSHOWERPOSITIONFIT': 102,
     'JSHOWERCOMPLETEFIT': 103,
     'JSHOWEREND': 199,
+    'JDUSJBEGIN': 200,
+    'JDUSJPREFIT': 201,
+    'JDUSJPOSITIONFIT': 202,
+    'JDUSJCOMPLETEFIT': 203,
+    'JDUSJEND': 299,
     'JPP_REC_TYPE': AANET_RECTYPE_PLACEHOLDER,
     'JUSERBEGIN': 1000,
     'JMUONVETO': 1001,
@@ -82,6 +180,7 @@ RECO2NUM = {
 }
 
 FITINF2NAME = {v: k for k, v in FITINF2NUM.items()}
+FITINFDUSJ2NAME = {v: k for k, v in FITINFDUSJ2NUM.items()}
 RECO2NAME = {v: k for k, v in RECO2NUM.items()}
 
 IS_CC = {
@@ -138,6 +237,14 @@ class AanetPump(Pump):
 
         log.info("Generating blobs through new aanet API...")
 
+        self.print("Reading metadata using 'JPrintMeta'")
+        meta_parser = MetaParser(filename=filename)
+        meta = meta_parser.get_table()
+        if meta is None:
+            self.log.warning(
+                "No metadata found, this means no data provenance!"
+            )
+
         if self.bare:
             log.info("Skipping data conversion, only passing bare aanet data")
             for event in event_file:
@@ -159,6 +266,10 @@ class AanetPump(Pump):
                 log.debug('Reading header...')
                 blob["RawHeader"] = self.raw_header
                 blob["Header"] = self.header
+
+                if meta is not None:
+                    blob['Meta'] = meta
+
                 self.group_id += 1
                 yield blob
         del event_file
@@ -299,7 +410,17 @@ class AanetPump(Pump):
         # TODO: hit_ids,
         # TODO: rec_stages,
         self.log.debug('Reading fitinf...')
-        fitinf = self._parse_fitinf(trk.fitinf)
+
+        isDusj = False
+        if len(trk.rec_stages) > 0:
+            if (min(trk.rec_stages) >= RECO2NUM['JDUSJBEGIN']) and (max(
+                    trk.rec_stages) <= RECO2NUM['JDUSJEND']):
+                isDusj = True
+        if isDusj:
+            fitinf = self._parse_fitinf_dusj(trk.fitinf)
+        else:
+            fitinf = self._parse_fitinf(trk.fitinf)
+
         out.update(fitinf)
         return out
 
@@ -312,6 +433,19 @@ class AanetPump(Pump):
         out = {}
         for i, elem in enumerate(fitinf):
             name = FITINF2NAME[i]
+            self.log.debug("Reading fitinf #{} ('{}')...".format(i, name))
+            out[name] = elem
+        return out
+
+    def _parse_fitinf_dusj(self, fitinf):
+        # iterating empty ROOT vector causes segfaults!
+        if len(fitinf) == 0:
+            self.log.debug("Found empty fitinf, skipping...")
+            return {}
+
+        out = {}
+        for i, elem in enumerate(fitinf):
+            name = FITINFDUSJ2NAME[i]
             self.log.debug("Reading fitinf #{} ('{}')...".format(i, name))
             out[name] = elem
         return out
@@ -336,7 +470,20 @@ class AanetPump(Pump):
             out['length'].append(trk.len)
             out['bjorkeny'].append(trk.getusr('by'))
             out['interaction_channel'].append(trk.getusr('ichan'))
-            out['is_cc'].append(IS_CC[trk.getusr('cc')])
+            try:
+                is_cc = IS_CC[trk.getusr('cc')]
+            except KeyError:
+                # see git.km3net.de/km3py/km3pipe/issues/112
+                # and http://trac.km3net.de/ticket/222
+                self.log.error(
+                    "Invalid value ({}) for the 'cc' usr-parameter in the "
+                    "MC track. 'is_cc' is now set to 0 (False).".format(
+                        trk.getusr('cc')
+                    )
+                )
+                is_cc = 0
+            finally:
+                out['is_cc'].append(is_cc)
         out['group_id'] = self.group_id
         return Table(out, name='McTracks', h5loc='/mc_tracks')
 
@@ -459,3 +606,91 @@ class AanetPump(Pump):
 
     def __next__(self):
         return next(self.blobs)
+
+
+class MetaParser(object):
+    """A class which parses the JPrintMeta output for a given filenam"""
+
+    def __init__(self, filename=None, string=None):
+        self.log = get_logger(__name__ + '.' + self.__class__.__name__)
+        self.meta = []
+        if filename is not None:
+            string = subprocess.check_output(['JPrintMeta', '-f', filename])
+            self.parse_string(string)
+
+    def parse_string(self, string):
+        """Parse ASCII output of JPrintMeta"""
+        self.log.info("Parsing ASCII data")
+
+        if not string:
+            self.log.warning("Empty metadata")
+            return
+
+        lines = string.splitlines()
+        application_data = []
+
+        application = lines[0].split()[0]
+        self.log.debug("Reading meta information for '%s'" % application)
+
+        for line in lines:
+            if application is None:
+                self.log.debug(
+                    "Reading meta information for '%s'" % application
+                )
+                application = line.split()[0]
+            application_data.append(line)
+            if line.startswith(application + b' Linux'):
+                self._record_app_data(application_data)
+                application_data = []
+                application = None
+
+    def _record_app_data(self, data):
+        """Parse raw metadata output for a single application
+        
+        The usual output is:
+        ApplicationName RevisionNumber
+        ApplicationName ROOT_Version
+        ApplicationName KM3NET
+        ApplicationName ./command/line --arguments --which --can
+        contain
+        also
+        multiple lines
+        and --addtional flags
+        etc.
+        ApplicationName Linux ... (just the `uname -a` output)
+        """
+        name, revision = data[0].split()
+        root_version = data[1].split()[1]
+        command = b'\n'.join(data[3:]).split(b'\n' + name + b' Linux')[0]
+        self.meta.append({
+            'application_name': np.string_(name),
+            'revision': np.string_(revision),
+            'root_version': np.string_(root_version),
+            'command': np.string_(command)
+        })
+
+    def get_table(self, name='Meta', h5loc='/meta'):
+        """Convert metadata to a KM3Pipe Table.
+
+        Returns `None` if there is no data.
+        
+        Each column's dtype will be set to a fixed size string (numpy.string_)
+        with the length of the longest entry, since writing variable length
+        strings does not fit the current scheme.
+        """
+        if not self.meta:
+            return None
+
+        data = defaultdict(list)
+        for entry in self.meta:
+            for key, value in entry.items():
+                data[key].append(value)
+        dtypes = []
+        for key, values in data.items():
+            max_len = max(map(len, values))
+            dtype = 'S{}'.format(max_len)
+            dtypes.append((key, dtype))
+        tab = Table(
+            data, dtype=dtypes, h5loc=h5loc, name='Meta', h5singleton=True
+        )
+        return tab
