@@ -1,12 +1,15 @@
 Unreleased changes
 ------------------
-* added Dusj fitinf enum names and extended reco enum to hold Dusj reconstruction information (range 200-299)
-* the ``AanetPump`` now reads the metadata using ``JPrintMeta``, which will
-  be automatically captures by the ``HDF5Sink`` to dump it to ``/meta``.
-  A simple table which can be read by ``meta = pandas.read_hdf(filename, 'meta')``
+
 
 Version 8
 ---------
+
+8.4.0 / 2018-10-14
+~~~~~~~~~~~~~~~~~~
+* added Dusj fitinf enum names and extended reco enum to hold Dusj reconstruction information (range 200-299) * the ``AanetPump`` now reads the metadata using ``JPrintMeta``, which will
+  be automatically captures by the ``HDF5Sink`` to dump it to ``/meta``.
+  A simple table which can be read by ``meta = pandas.read_hdf(filename, 'meta')``
 
 8.3.0 / 2018-09-20
 ~~~~~~~~~~~~~~~~~~
