@@ -176,7 +176,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
             ax.plot(np.cos(calib['angles']), calib["corrected_means"], '.')
             ax.set_title(
                 "{0} - {1}".format(
-                    self.db.doms.via_dom_id(dom_id, det_id), dom_id
+                    self.db.doms.via_dom_id(dom_id, self.det_id), dom_id
                 )
             )
             ax.set_ylim((-10, 10))
@@ -194,7 +194,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
             ax.plot(np.cos(calib['angles']), calib["corrected_rates"], '.')
             ax.set_title(
                 "{0} - {1}".format(
-                    self.db.doms.via_dom_id(dom_id, det_id), dom_id
+                    self.db.doms.via_dom_id(dom_id, self.det_id), dom_id
                 )
             )
             ax.set_ylim((0, 10))
