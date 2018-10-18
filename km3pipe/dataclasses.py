@@ -404,6 +404,16 @@ class Table(np.recarray):
         rec = df.to_records(index=False)
         return cls(rec, **kwargs)
 
+    def __add__(self, other):
+        if not self.dtype == other.dtype:
+            raise KeyError("dtypes of added tables do not match")
+        import pandas as pd
+        df1 = pd.DataFrame(self)
+        df2 = pd.DataFrame(other)
+        df_cc = pd.concat([df1, df2], ignore_index=True)
+        ret_tbl = Table(df_cc.to_dict('list'))
+        return ret_tbl
+
     def __str__(self):
         name = self.name
         spl = 'split' if self.split_h5 else 'no split'
