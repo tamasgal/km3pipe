@@ -154,7 +154,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
     def configure(self):
         self.plots_path = self.get('plots_path', default=os.getcwd())
         self.data_path = self.get('data_path', default=os.getcwd())
-        self.det_id = self.require('det_id')
+        self.det_oid = self.require('det_oid')
         self.db = kp.db.DBManager()
 
     def process(self, blob):
@@ -176,7 +176,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
             ax.plot(np.cos(calib['angles']), calib["corrected_means"], '.')
             ax.set_title(
                 "{0} - {1}".format(
-                    self.db.doms.via_dom_id(dom_id, self.det_id), dom_id
+                    self.db.doms.via_dom_id(dom_id, self.det_oid), dom_id
                 )
             )
             ax.set_ylim((-10, 10))
@@ -194,7 +194,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
             ax.plot(np.cos(calib['angles']), calib["corrected_rates"], '.')
             ax.set_title(
                 "{0} - {1}".format(
-                    self.db.doms.via_dom_id(dom_id, self.det_id), dom_id
+                    self.db.doms.via_dom_id(dom_id, self.det_oid), dom_id
                 )
             )
             ax.set_ylim((0, 10))
