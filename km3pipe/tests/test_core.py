@@ -244,6 +244,14 @@ class TestPipeline(TestCase):
         pl.drain(5)
 
 
+class TestPipelineConfigurationViaFile(TestCase):
+    """Auto-configuration of pipelines using TOML files"""
+
+    def test_configuration(self):
+        configfile
+        pipe = Pipeline(configfile="")
+
+
 class TestModule(TestCase):
     """Tests for the pipeline module"""
 
