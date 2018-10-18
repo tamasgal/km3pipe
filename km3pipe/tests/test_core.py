@@ -2,6 +2,7 @@
 # pylint: disable=C0111,E1003,R0904,C0103,R0201,C0102
 from __future__ import unicode_literals
 
+import tempfile
 from io import StringIO
 
 from km3pipe.testing import TestCase, MagicMock
@@ -248,8 +249,69 @@ class TestPipelineConfigurationViaFile(TestCase):
     """Auto-configuration of pipelines using TOML files"""
 
     def test_configuration(self):
-        configfile
-        pipe = Pipeline(configfile="")
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = str(fobj.name)
+        Pipeline(configfile=fname)
+        fobj.close()
+
+    def test_configuration_with_config_for_a_module(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fobj.write(b"[A]\na = 1")
+        fobj.flush()
+        fname = str(fobj.name)
+
+        class A(Module):
+            def process(self, blob):
+                assert 1 == self.a
+                return blob
+
+        pipe = Pipeline(configfile=fname)
+        pipe.attach(A)
+        pipe.drain(1)
+
+        fobj.close()
+
+    def test_configuration_with_config_for_multiple_modules(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fobj.write(b"[A]\na = 1\nb = 2\n[B]\nc='d'")
+        fobj.flush()
+        fname = str(fobj.name)
+
+        class A(Module):
+            def process(self, blob):
+                assert 1 == self.a
+                assert 2 == self.b
+                return blob
+
+        class B(Module):
+            def process(self, blob):
+                assert 'd' == self.c
+                return blob
+
+        pipe = Pipeline(configfile=fname)
+        pipe.attach(A)
+        pipe.attach(B)
+        pipe.drain(1)
+
+        fobj.close()
+
+    def test_configuration_precedence_over_kwargs(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fobj.write(b"[A]\na = 1\nb = 2")
+        fobj.flush()
+        fname = str(fobj.name)
+
+        class A(Module):
+            def process(self, blob):
+                assert 1 == self.a
+                assert 2 == self.b
+                return blob
+
+        pipe = Pipeline(configfile=fname)
+        pipe.attach(A, b='foo')
+        pipe.drain(1)
+
+        fobj.close()
 
 
 class TestModule(TestCase):
