@@ -295,6 +295,30 @@ class TestPipelineConfigurationViaFile(TestCase):
 
         fobj.close()
 
+    def test_configuration_with_named_modules(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fobj.write(b"[X]\na = 1\nb = 2\n[Y]\nc='d'")
+        fobj.flush()
+        fname = str(fobj.name)
+
+        class A(Module):
+            def process(self, blob):
+                assert 1 == self.a
+                assert 2 == self.b
+                return blob
+
+        class B(Module):
+            def process(self, blob):
+                assert 'd' == self.c
+                return blob
+
+        pipe = Pipeline(configfile=fname)
+        pipe.attach(A, 'X')
+        pipe.attach(B, 'Y')
+        pipe.drain(1)
+
+        fobj.close()
+
     def test_configuration_precedence_over_kwargs(self):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fobj.write(b"[A]\na = 1\nb = 2")
