@@ -1,5 +1,10 @@
 Unreleased changes
 ------------------
+* The modules attached to a pipeline can now be configured using an external
+  file. The default filename is ``pipeline.toml`` and uses the TOML format.
+  You can specify your own configuration file with the ``configfile``
+  parameter in the ``Pipeline`` constructor.
+  The module configuration has precedence over keyword arguments!
 
 
 Version 8
