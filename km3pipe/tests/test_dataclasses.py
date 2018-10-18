@@ -762,6 +762,11 @@ class TestTable(TestCase):
         templates = t.templates_avail
         assert templates
 
+    def test_add_table_to_itself(self):
+        tab = Table({'a': [1]})
+        added_tab = tab + tab
+        assert 2 == len(added_tab)
+
 
 class TestTableFancyAttributes(TestCase):
     def setUp(self):
