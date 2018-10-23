@@ -93,3 +93,18 @@ a list of dictionaries and "io" one blob after another on each
 .. literalinclude:: ../examples/nogallery/module_workflow.py
    :pyobject: DummyPump
    :linenos:
+
+
+Logging and Printing
+--------------------
+
+Every module inheriting from the ``Module`` class has a fancy logger and a
+printer available to produce output which is unique (an actual colour code
+is generated using a hash of the module name).
+
+Inside any method of the module, use ``self.log`` to access the logger, which
+comes with the usual functions like ``self.log.debug()``, ``self.log.info()``,
+``self.log.warning()``, ``self.log.error()`` or ``self.log.critical()``.
+
+The ``self.print`` function can be used to print messages which are colour
+coded with the same colours used for the logger.
