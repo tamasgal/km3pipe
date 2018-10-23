@@ -108,3 +108,18 @@ comes with the usual functions like ``self.log.debug()``, ``self.log.info()``,
 
 The ``self.print`` function can be used to print messages which are colour
 coded with the same colours used for the logger.
+
+
+Configuring the Pipeline using Configuration Files
+--------------------------------------------------
+
+The pipeline and all the attached modules can be configured by a TOML formatted
+file, sitting at the current working directory (where the initial script is
+invoked to launch the pipeline). The default filename is ``pipeline.toml``
+but a different filename can be chosen when creating the ``Pipeline`` instance
+using ``Pipeline(configfile='your_desired_filename.toml')``.
+
+Here is an example of the file:
+
+.. literalinclude:: ../examples/nogallery/pipeline.toml
+   :linenos:
