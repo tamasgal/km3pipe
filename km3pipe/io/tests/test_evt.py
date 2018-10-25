@@ -290,8 +290,8 @@ class TestPropa(TestCase):
     def setUp(self):
         self.fname = join(TEST_DATA_DIR, 'DAT000007_propa_1-4.evt')
         self.fnames = []
-        for i in [7,9]:
-            self.fnames.append(join(TEST_DATA_DIR, 'DAT00000'+str(i)+'_propa_1-4.evt'))
+        for i in [0,1]:
+            self.fnames.append(join(TEST_DATA_DIR, 'DAT000007_propa_1-4.evt'))
 
     def test_pipe(self):
         pump = EvtPump(filename=self.fname, parsers=['propa'])
