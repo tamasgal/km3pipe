@@ -299,12 +299,7 @@ class TestPropa(TestCase):
         blob = next(pump)
         assert 'start_event' in blob
         assert 'track_primary' in blob
-        assert 'Muon' in blob
-        assert 'MuonMultiplicity' in blob
-        assert 'Neutrino' in blob
-        assert 'NeutrinoMultiplicity' in blob
-        assert 'Weights' in blob
-        assert 'Primary' in blob
+        assert 'track_in' in blob
         pump.finish()
         
     def test_filenames(self):
@@ -313,12 +308,7 @@ class TestPropa(TestCase):
         blob = next(pump)
         assert 'start_event' in blob
         assert 'track_primary' in blob
-        assert 'Muon' in blob
-        assert 'MuonMultiplicity' in blob
-        assert 'Neutrino' in blob
-        assert 'NeutrinoMultiplicity' in blob
-        assert 'Weights' in blob
-        assert 'Primary' in blob
+        assert 'track_in' in blob
         pump.finish()
 
     @skip
