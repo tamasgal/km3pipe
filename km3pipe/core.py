@@ -72,7 +72,7 @@ class Pipeline(object):
                 "Reading module configuration from '{}'".format(configfile)
             )
             self.log.warning(
-                "Kepp in mind that the module configuration file has "
+                "Keep in mind that the module configuration file has "
                 "precedence over keyword arguments in the attach method!"
             )
             with open(configfile, 'r') as fobj:
