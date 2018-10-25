@@ -288,10 +288,10 @@ class TestCorsika(TestCase):
 
 class TestPropa(TestCase):
     def setUp(self):
-        self.fname = join(TEST_DATA_DIR, 'DAT000007_propa_1-4.evt')
+        self.fname = join(TEST_DATA_DIR, 'test_file.evt')
         self.fnames = []
         for i in [0,1]:
-            self.fnames.append(join(TEST_DATA_DIR, 'DAT000007_propa_1-4.evt'))
+            self.fnames.append(join(TEST_DATA_DIR, 'test_file.evt'))
 
     def test_pipe(self):
         pump = EvtPump(filename=self.fname, parsers=['propa'])
