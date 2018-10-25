@@ -76,13 +76,18 @@ class EvtPump(Pump):    # pylint: disable:R0902
     """
 
     def configure(self):
-        self.filename = self.get('filename')
+        self.filename = self.get('filename')  or None
+        self.filenames = self.get('filenames') or []
         parsers = self.get('parsers', default='auto')
         self.cache_enabled = self.get('cache_enabled') or False
         self.basename = self.get('basename') or None
         self.suffix = self.get('suffix', default='')
         self.index_start = self.get('index_start', default=1)
-        self.index_stop = self.get('index_stop', default=1)
+        if self.filenames:
+            self.filename = self.filenames[0]
+            self.index_stop = len(self.filenames)
+        else:
+            self.index_stop = self.get('index_stop', default=1)
         self.n_digits = self.get('n_digits', default=None)
         self.exclude_tags = self.get('exclude_tags')
         if self.exclude_tags is None:
@@ -95,6 +100,9 @@ class EvtPump(Pump):    # pylint: disable:R0902
         self.parsers = []
         self._auto_parse = False
 
+        if not self.filename and not self.filenames and not self.basename:
+            raise ValueError("No file- or basename(s) defined")
+
         if parsers:
             if parsers == 'auto':
                 self.print("Automatic tag parsing enabled.")
@@ -106,8 +114,9 @@ class EvtPump(Pump):    # pylint: disable:R0902
                 self._register_parsers(parsers)
 
         self.file_index = int(self.index_start)
-
-        if self.basename:
+        if self.filenames:
+            self.filename = self.filenames[self.file_index-1]
+        elif self.basename:
             self.log.info(
                 "Got a basename ({}), constructing the first "
                 "filename.".format(self.basename)
@@ -205,9 +214,10 @@ class EvtPump(Pump):    # pylint: disable:R0902
         """Pump the next blob to the modules"""
         try:
             blob = self.get_blob(self.index)
+
         except IndexError:
             self.log.info("Got an IndexError, trying the next file")
-            if self.basename and self.file_index < self.index_stop:
+            if (self.basename or self.filenames) and self.file_index < self.index_stop:
                 self.file_index += 1
                 self.log.info("Now at file_index={}".format(self.file_index))
                 self._reset()
@@ -215,9 +225,11 @@ class EvtPump(Pump):    # pylint: disable:R0902
                 self.log.info("Resetting blob index to 0")
                 self.index = 0
                 file_index = self._get_file_index_str()
-
-                self.filename = "{}{}{}.evt"  \
-                                .format(self.basename, file_index, self.suffix)
+                if self.filenames:
+                    self.filename = self.filenames[self.file_index-1]
+                elif self.basename:
+                    self.filename = "{}{}{}.evt"  \
+                                    .format(self.basename, file_index, self.suffix)
                 self.log.info("Next filename: {}".format(self.filename))
                 self.print("Opening {0}".format(self.filename))
                 self.open_file(self.filename)
