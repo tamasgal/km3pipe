@@ -76,11 +76,11 @@ class EvtPump(Pump):    # pylint: disable:R0902
     """
 
     def configure(self):
-        self.filename = self.get('filename')  or None
-        self.filenames = self.get('filenames') or []
+        self.filename = self.get('filename', default=None) 
+        self.filenames = self.get('filenames', default=[]]) 
         parsers = self.get('parsers', default='auto')
-        self.cache_enabled = self.get('cache_enabled') or False
-        self.basename = self.get('basename') or None
+        self.cache_enabled = self.get('cache_enabled', default=False)
+        self.basename = self.get('basename', default=None)
         self.suffix = self.get('suffix', default='')
         self.index_start = self.get('index_start', default=1)
         if self.filenames:
