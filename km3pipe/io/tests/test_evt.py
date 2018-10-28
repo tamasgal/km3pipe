@@ -288,7 +288,10 @@ class TestCorsika(TestCase):
 
 class TestPropa(TestCase):
     def setUp(self):
-        self.fname = join(TEST_DATA_DIR, 'DAT000007_propa_1-4.evt')
+        self.fname = join(TEST_DATA_DIR, 'example_corant_propa.evt')
+        self.fnames = []
+        for i in [0,1]:
+            self.fnames.append(join(TEST_DATA_DIR, 'example_corant_propa.evt'))
 
     def test_pipe(self):
         pump = EvtPump(filename=self.fname, parsers=['propa'])
@@ -296,12 +299,16 @@ class TestPropa(TestCase):
         blob = next(pump)
         assert 'start_event' in blob
         assert 'track_primary' in blob
-        assert 'Muon' in blob
-        assert 'MuonMultiplicity' in blob
-        assert 'Neutrino' in blob
-        assert 'NeutrinoMultiplicity' in blob
-        assert 'Weights' in blob
-        assert 'Primary' in blob
+        assert 'track_in' in blob
+        pump.finish()
+        
+    def test_filenames(self):
+        pump = EvtPump(filenames=self.fnames, parsers=['propa'])
+        assert EVT_PARSERS['propa'] in pump.parsers
+        blob = next(pump)
+        assert 'start_event' in blob
+        assert 'track_primary' in blob
+        assert 'track_in' in blob
         pump.finish()
 
     @skip
