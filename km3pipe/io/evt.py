@@ -101,7 +101,7 @@ class EvtPump(Pump):    # pylint: disable:R0902
         self._auto_parse = False
 
         if not self.filename and not self.filenames and not self.basename:
-            raise ValueError("No file- or basename(s) defined")
+            print("No file- or basename(s) defined!")
 
         if parsers:
             if parsers == 'auto':
