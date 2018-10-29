@@ -290,7 +290,7 @@ class TestPropa(TestCase):
     def setUp(self):
         self.fname = join(TEST_DATA_DIR, 'example_corant_propa.evt')
         self.fnames = []
-        for i in [0,1]:
+        for i in [0, 1]:
             self.fnames.append(join(TEST_DATA_DIR, 'example_corant_propa.evt'))
 
     def test_pipe(self):
@@ -301,7 +301,7 @@ class TestPropa(TestCase):
         assert 'track_primary' in blob
         assert 'track_in' in blob
         pump.finish()
-        
+
     def test_filenames(self):
         pump = EvtPump(filenames=self.fnames, parsers=['propa'])
         assert EVT_PARSERS['propa'] in pump.parsers

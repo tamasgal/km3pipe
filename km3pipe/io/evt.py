@@ -76,8 +76,8 @@ class EvtPump(Pump):    # pylint: disable:R0902
     """
 
     def configure(self):
-        self.filename = self.get('filename', default=None) 
-        self.filenames = self.get('filenames', default=[]) 
+        self.filename = self.get('filename', default=None)
+        self.filenames = self.get('filenames', default=[])
         parsers = self.get('parsers', default='auto')
         self.cache_enabled = self.get('cache_enabled', default=False)
         self.basename = self.get('basename', default=None)
@@ -115,7 +115,7 @@ class EvtPump(Pump):    # pylint: disable:R0902
 
         self.file_index = int(self.index_start)
         if self.filenames:
-            self.filename = self.filenames[self.file_index-1]
+            self.filename = self.filenames[self.file_index - 1]
         elif self.basename:
             self.log.info(
                 "Got a basename ({}), constructing the first "
@@ -217,7 +217,8 @@ class EvtPump(Pump):    # pylint: disable:R0902
 
         except IndexError:
             self.log.info("Got an IndexError, trying the next file")
-            if (self.basename or self.filenames) and self.file_index < self.index_stop:
+            if (self.basename
+                    or self.filenames) and self.file_index < self.index_stop:
                 self.file_index += 1
                 self.log.info("Now at file_index={}".format(self.file_index))
                 self._reset()
@@ -226,7 +227,7 @@ class EvtPump(Pump):    # pylint: disable:R0902
                 self.index = 0
                 file_index = self._get_file_index_str()
                 if self.filenames:
-                    self.filename = self.filenames[self.file_index-1]
+                    self.filename = self.filenames[self.file_index - 1]
                 elif self.basename:
                     self.filename = "{}{}{}.evt"  \
                                     .format(self.basename, file_index, self.suffix)

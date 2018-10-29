@@ -54,10 +54,9 @@ class McTruth(Module):
         mc['is_neutrino'] = flavor.apply(self.is_nu)
         blob['McTruth'] = mc
         return blob
-    
-    
-def convert_mc_times_to_jte_times(times_mc, evt_timestamp_in_ns, 
-                                 evt_mc_time):
+
+
+def convert_mc_times_to_jte_times(times_mc, evt_timestamp_in_ns, evt_mc_time):
     """
     Function that converts MC times to JTE times.
 
@@ -80,7 +79,7 @@ def convert_mc_times_to_jte_times(times_mc, evt_timestamp_in_ns,
     times_mc = np.array(times_mc).astype(float)
     times_jte = times_mc - evt_timestamp_in_ns + evt_mc_time
     return times_jte
-    
+
 
 class MCTimeCorrector(Module):
     """
@@ -98,12 +97,13 @@ class MCTimeCorrector(Module):
     event_info_key : str, optional
         Name of the event_info to store this in (default: 'EventInfo').
     """
+
     def configure(self):
         # get event_info, hits and mc_tracks key ; define conversion func
         self.event_info_key = self.get('event_info_key', default='EventInfo')
         self.mc_tracks_key = self.get('mc_tracks_key', default='McTracks')
         self.mc_hits_key = self.get('mc_hits_key', default='McHits')
-        
+
         self.convert_mc_times_to_jte_times = \
             np.frompyfunc(convert_mc_times_to_jte_times, 3, 1)
 
@@ -113,13 +113,15 @@ class MCTimeCorrector(Module):
         mc_tracks = blob[self.mc_tracks_key]
         mc_hits = blob[self.mc_hits_key]
         timestamp_in_ns = event_info.timestamp * 1e9 + event_info.nanoseconds
-        
+
         mc_tracks['time'] = self.convert_mc_times_to_jte_times(
-                            mc_tracks.time, timestamp_in_ns, event_info.mc_time)
+            mc_tracks.time, timestamp_in_ns, event_info.mc_time
+        )
         mc_hits['time'] = self.convert_mc_times_to_jte_times(
-                          mc_hits.time, timestamp_in_ns, event_info.mc_time)
-        
-        blob[self.mc_tracks_key] = mc_tracks     
+            mc_hits.time, timestamp_in_ns, event_info.mc_time
+        )
+
+        blob[self.mc_tracks_key] = mc_tracks
         blob[self.mc_hits_key] = mc_hits
-            
+
         return blob
