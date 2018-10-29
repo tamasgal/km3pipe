@@ -208,6 +208,9 @@ class HDF5Sink(Module):
         )
         self._tables = OrderedDict()
 
+        if self.file_mode == 'a' and '/group_info' in self.h5file:
+            self._tables['/group_info'] = self.h5file.get_node('/group_info')
+
     def _to_array(self, data, name=None):
         if data is None:
             return
