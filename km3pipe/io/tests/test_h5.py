@@ -235,7 +235,7 @@ class TestH5Sink(TestCase):
 
         pipe = Pipeline()
         pipe.attach(B)
-        pipe.attach(HDF5Sink, filename=fname, file_mode='append')
+        pipe.attach(HDF5Sink, filename=fname, append=True)
         pipe.drain(10)
 
         drain_count = 0
