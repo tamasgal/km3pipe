@@ -206,7 +206,7 @@ class TestH5Sink(TestCase):
 
         fobj.close()
 
-    def test_append_mode_for_different_tables(self):
+    def test_append_mode_for_different_h5locs(self):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = fobj.name
 
@@ -230,6 +230,10 @@ class TestH5Sink(TestCase):
 
         pipe = Pipeline()
         pipe.attach(A)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(10)
+
+        pipe = Pipeline()
         pipe.attach(B)
         pipe.attach(HDF5Sink, filename=fname, file_mode='append')
         pipe.drain(10)
