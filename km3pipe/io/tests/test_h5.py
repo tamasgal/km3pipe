@@ -206,6 +206,47 @@ class TestH5Sink(TestCase):
 
         fobj.close()
 
+    def test_append_mode_for_different_tables(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class A(Module):
+            def configure(self):
+                self.i = 0
+
+            def process(self, blob):
+                blob['A'] = Table({'a': self.i}, h5loc='tab_a')
+                self.i += 1
+                return blob
+
+        class B(Module):
+            def configure(self):
+                self.i = 100
+
+            def process(self, blob):
+                blob['B'] = Table({'b': self.i}, h5loc='tab_b')
+                self.i += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(A)
+        pipe.attach(B)
+        pipe.attach(HDF5Sink, filename=fname, file_mode='append')
+        pipe.drain(10)
+
+        drain_count = 0
+
+        for blob in HDF5Pump(filename=fname):
+            drain_count += 1
+            assert 'TabA' in blob
+            assert blob['TabA'].a[0] == drain_count - 1
+            assert 'TabB' in blob
+            assert blob['TabB'].b[0] == drain_count - 1 + 100
+
+        assert 10 == drain_count
+
+        fobj.close()
+
 
 class TestH5SinkConsistency(TestCase):
     def test_h5_consistency_for_tables_without_group_id(self):
