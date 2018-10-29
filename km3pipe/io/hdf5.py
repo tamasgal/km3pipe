@@ -157,6 +157,16 @@ class HDF5Sink(Module):
         pass more arguments to the pytables File init
     n_rows_expected = int, optional [default: 10000]
     append: bool, optional [default: False]
+    keep_open: bool, optional [default: False]
+        Keep the file open after finishing this module.
+    complevel: int, optional [default: 5]
+        Compression level, passed through as HDF5 filter.
+    shuffle: bool, optional [default: True]
+        Shuffle the data for compression.
+    fletcher32: bool, optional [default: True]
+        HDF5 compression option
+    complib: str, optional [default: 'zlib']
+        Compression method to be used
 
     """
 
@@ -165,7 +175,11 @@ class HDF5Sink(Module):
         self.ext_h5file = self.get('h5file') or None
         self.pytab_file_args = self.get('pytab_file_args') or dict()
         self.file_mode = 'a' if self.get('append') else 'w'
-        self.keep_open = self.get('keep_open')
+        self.keep_open = self.get('keep_open', default=False)
+        complevel = self.get('complevel', default=5)
+        shuffle = self.get('shuffle', default=True)
+        fletcher32 = self.get('fletcher32', default=True)
+        complib = self.get('complib', default='zlib')
         self.indices = {}
         self._singletons_written = {}
         # magic 10000: this is the default of the "expectedrows" arg
@@ -187,7 +201,10 @@ class HDF5Sink(Module):
                 **self.pytab_file_args
             )
         self.filters = tb.Filters(
-            complevel=5, shuffle=True, fletcher32=True, complib='zlib'
+            complevel=complevel,
+            shuffle=shuffle,
+            fletcher32=fletcher32,
+            complib=complib
         )
         self._tables = OrderedDict()
 
