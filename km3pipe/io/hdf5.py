@@ -523,7 +523,7 @@ class HDF5Pump(Pump):
                 except AttributeError:
                     self.group_ids[fn] = event_info.cols.event_id[:]
                 self._n_each[fn] = len(self.group_ids[fn])
-            elif '/raw_header' in h5file:
+            if '/raw_header' in h5file:
                 self.headers[fn] = HDF5Header.from_pytable(
                     h5file.get_node('/raw_header')
                 )
