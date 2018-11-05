@@ -1,14 +1,18 @@
 Unreleased changes
 ------------------
+
+Version 8
+---------
+
+8.4.1 / 2018-11-06
+~~~~~~~~~~~~~~~~~~
+* ``Vec3`` is a new standard datatype for 3D vectors. Mainly used in
+  RainbowAlga
 * The modules attached to a pipeline can now be configured using an external
   file. The default filename is ``pipeline.toml`` and uses the TOML format.
   You can specify your own configuration file with the ``configfile``
   parameter in the ``Pipeline`` constructor.
   The module configuration has precedence over keyword arguments!
-
-
-Version 8
----------
 
 8.4.0 / 2018-10-14
 ~~~~~~~~~~~~~~~~~~
