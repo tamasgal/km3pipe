@@ -346,7 +346,12 @@ class MedianPMTRatesService(kp.Module):
         self.expose(self.get_median_rates, 'GetMedianPMTRates')
 
     def process(self, blob):
-        tmch_data = TMCHData(io.BytesIO(blob['CHData']))
+        try:
+            tmch_data = TMCHData(io.BytesIO(blob['CHData']))
+        except ValueError as e:
+            self.log.error(e)
+            self.log.error("Skipping corrupt monitoring channel packet.")
+            return
         dom_id = tmch_data.dom_id
         for channel_id, rate in enumerate(tmch_data.pmt_rates):
             self.rates[dom_id][channel_id].append(rate)

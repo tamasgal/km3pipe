@@ -1,0 +1,10 @@
+[StatusBar]
+every = 1000
+
+[AModule]
+some_parameter = "foo"
+other_parameter = 23
+a_list = [1, 2, 3, 23]
+
+[BModule]
+bar = 42

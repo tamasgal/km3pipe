@@ -524,9 +524,12 @@ class HDF5Pump(Pump):
                     self.group_ids[fn] = event_info.cols.event_id[:]
                 self._n_each[fn] = len(self.group_ids[fn])
             if '/raw_header' in h5file:
-                self.headers[fn] = HDF5Header.from_pytable(
-                    h5file.get_node('/raw_header')
-                )
+                try:
+                    self.headers[fn] = HDF5Header.from_pytable(
+                        h5file.get_node('/raw_header')
+                    )
+                except TypeError:
+                    self.log.error("Could not parse the raw header, skipping!")
 
     def process(self, blob):
         try:

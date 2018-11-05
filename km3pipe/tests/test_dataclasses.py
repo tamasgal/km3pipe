@@ -12,8 +12,8 @@ import pytest
 
 from km3pipe.testing import TestCase, skip    # noqa
 from km3pipe.dataclasses import (
-    Table, inflate_dtype, has_structured_dt, is_structured, DEFAULT_H5LOC,
-    DEFAULT_NAME, DEFAULT_SPLIT
+    Table, Vec3, inflate_dtype, has_structured_dt, is_structured,
+    DEFAULT_H5LOC, DEFAULT_NAME, DEFAULT_SPLIT
 )
 
 __author__ = "Tamas Gal, Moritz Lotze"
@@ -946,3 +946,94 @@ class TestTableFancyAttributes(TestCase):
         with pytest.raises(KeyError):
             triggered_hits = hits.triggered_rows
             assert triggered_hits is not None
+
+
+class TestVec3(TestCase):
+    def test_init(self):
+        Vec3(0, 1, 2)
+
+    def test_indices(self):
+        v = Vec3(0, 1, 2)
+        assert 0 == v[0]
+        assert 1 == v[1]
+        assert 2 == v[2]
+
+    def test_attributes(self):
+        v = Vec3(0, 1, 2)
+        assert 0 == v.x
+        assert 1 == v.y
+        assert 2 == v.z
+
+    def test_mutability(self):
+        v = Vec3(0, 1, 2)
+        v.x = 42
+        assert 42 == v.x
+
+    def test_vector_addition(self):
+        u = Vec3(1, 2, 3)
+        v = Vec3(4, 5, 6)
+        w = u + v
+        assert 5 == w.x
+        assert 7 == w.y
+        assert 9 == w.z
+
+    def test_vector_subtraction(self):
+        u = Vec3(1, 2, 3)
+        v = Vec3(4, 7, 11)
+        w = u - v
+        assert -3 == w.x
+        assert -5 == w.y
+        assert -8 == w.z
+
+    def test_scalar_addition(self):
+        u = Vec3(1, 2, 3)
+
+        v = u + 1
+        assert 2 == v.x
+        assert 3 == v.y
+        assert 4 == v.z
+        w = 1 + u
+        assert 2 == w.x
+        assert 3 == w.y
+        assert 4 == w.z
+
+    def test_scalar_subtraction(self):
+        u = Vec3(1, 2, 3)
+
+        v = u - 1
+        assert 0 == v.x
+        assert 1 == v.y
+        assert 2 == v.z
+        w = 1 - u
+        assert 0 == w.x
+        assert -1 == w.y
+        assert -2 == w.z
+
+    def test_multiplication(self):
+        u = Vec3(1, 2, 3)
+        v = u * 2
+        assert 2 == v.x
+        assert 4 == v.y
+        assert 6 == v.z
+        w = 2 * u
+        assert 2 == w.x
+        assert 4 == w.y
+        assert 6 == w.z
+
+    def test_division(self):
+        u = Vec3(2, 4, 8)
+        v = u / 2
+        assert 1 == v.x
+        assert 2 == v.y
+        assert 4 == v.z
+
+    def test_linalg_norm(self):
+        u = Vec3(1, 0, 0)
+        norm = np.linalg.norm(u)
+        assert 1 == norm
+        u = Vec3(0, 3, 0)
+        norm = np.linalg.norm(u)
+        assert 3 == norm
+        u = Vec3(1, 1, 0)
+        norm = np.linalg.norm(u)
+        assert np.sqrt(2) == norm

@@ -10,10 +10,12 @@ from collections import deque, OrderedDict
 import inspect
 import signal
 import gzip
+import os
 import time
 from timeit import default_timer as timer
 import types
 
+import toml
 import numpy as np
 
 from .sys import peak_memory_usage, ignored
@@ -33,6 +35,7 @@ log = get_logger(__name__)    # pylint: disable=C0103
 # log.setLevel(logging.DEBUG)
 
 STAT_LIMIT = 100000
+MODULE_CONFIGURATION = 'pipeline.toml'
 
 
 class Pipeline(object):
@@ -46,14 +49,36 @@ class Pipeline(object):
     ----------
     timeit: bool, optional [default=False]
         Display time profiling statistics for the pipeline?
+    configfile: str, optional
+        Path to a configuration file (TOML format) which contains parameters
+        for attached modules.
     """
 
-    def __init__(self, blob=None, timeit=False, anybar=False):
+    def __init__(self, blob=None, timeit=False, configfile=None, anybar=False):
+        self.log = get_logger(self.__class__.__name__)
+        self.print = get_printer(self.__class__.__name__)
+
         if anybar:
             self.anybar = AnyBar()
             self.anybar.change("blue")
         else:
             self.anybar = None
+
+        if configfile is None and os.path.exists(MODULE_CONFIGURATION):
+            configfile = MODULE_CONFIGURATION
+
+        if configfile is not None:
+            self.print(
+                "Reading module configuration from '{}'".format(configfile)
+            )
+            self.log.warning(
+                "Keep in mind that the module configuration file has "
+                "precedence over keyword arguments in the attach method!"
+            )
+            with open(configfile, 'r') as fobj:
+                self.module_configuration = toml.load(fobj)
+        else:
+            self.module_configuration = {}
 
         self.init_timer = Timer("Pipeline and module initialisation")
         self.init_timer.start()
@@ -104,6 +129,10 @@ class Pipeline(object):
             module = fac
             module.name = name
             module.timeit = self.timeit
+
+        if name in self.module_configuration:
+            for key, value in self.module_configuration[name].items():
+                setattr(module, key, value)
 
         # Special parameters
         if 'only_if' in kwargs:
