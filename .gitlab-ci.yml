@@ -1,12 +1,15 @@
 before_script:
   - apt-get update -qq && apt-get install -y -qq libhdf5-dev
-
-install:
-    image: python:3.7.0
-    script:
-        - pip install .
+  - pip install -U pip setuptools wheel
+  - make install
 
 test:
     image: python:3.7.0
     script:
-        - km3pipe test
+        - make test
+    junit: reports/junit.xml
+
+doc:
+    image: python:3.7.0
+    script:
+        - cd doc && make doc
