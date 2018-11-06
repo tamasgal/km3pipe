@@ -1,7 +1,9 @@
 install:
+    image: python:3.7.0
     script:
         - pip install .
 
 test:
+    image: python:3.7.0
     script:
         - km3pipe test
