@@ -7,9 +7,10 @@ test:
     image: python:3.7.0
     script:
         - make test
+        - make test-km3modules
     artifacts:
       reports:
-        junit: reports/junit.xml
+        junit: "reports/junit*.xml"
 
 doc:
     image: python:3.7.0
