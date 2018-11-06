@@ -14,4 +14,4 @@ test:
 doc:
     image: python:3.7.0
     script:
-        - cd doc && make doc
+        - cd doc && make html
