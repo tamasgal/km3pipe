@@ -1,0 +1,7 @@
+install:
+    script:
+        - pip install .
+
+test:
+    script:
+        - km3pipe test
