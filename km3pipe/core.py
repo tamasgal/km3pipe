@@ -38,7 +38,7 @@ STAT_LIMIT = 100000
 MODULE_CONFIGURATION = 'pipeline.toml'
 
 
-if sys.version_info >= (3,3)
+if sys.version_info >= (3,3):
     process_time = time.process_time
 else:
     process_time = time.clock
