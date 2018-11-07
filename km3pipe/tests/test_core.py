@@ -327,7 +327,7 @@ class TestPipelineConfigurationViaFile(TestCase):
 
         class A(Module):
             def process(self, blob):
-                assert 1 == self.a
+                assert 12 == self.a
                 assert 2 == self.b
                 return blob
 
