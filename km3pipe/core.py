@@ -38,6 +38,13 @@ STAT_LIMIT = 100000
 MODULE_CONFIGURATION = 'pipeline.toml'
 
 
+if sys.version_info >= (3,3)
+    process_time = time.process_time
+else:
+    process_time = time.clock
+
+
+
 class Pipeline(object):
     """The holy pipeline which holds everything together.
 
@@ -90,7 +97,7 @@ class Pipeline(object):
         self.timeit = timeit
         self._timeit = {
             'init': timer(),
-            'init_cpu': time.process_time(),
+            'init_cpu': process_time(),
             'cycles': deque(maxlen=STAT_LIMIT),
             'cycles_cpu': deque(maxlen=STAT_LIMIT)
         }
@@ -186,7 +193,7 @@ class Pipeline(object):
         try:
             while not self._stop:
                 cycle_start = timer()
-                cycle_start_cpu = time.process_time()
+                cycle_start_cpu = process_time()
 
                 log.debug("Pumping blob #{0}".format(self._cycle_count))
                 self.blob = Blob()
@@ -215,16 +222,16 @@ class Pipeline(object):
 
                     log.debug("Processing {0} ".format(module.name))
                     start = timer()
-                    start_cpu = time.process_time()
+                    start_cpu = process_time()
                     self.blob = module(self.blob)
                     if self.timeit or module.timeit:
                         self._timeit[module]['process'] \
                             .append(timer() - start)
                         self._timeit[module]['process_cpu'] \
-                            .append(time.process_time() - start_cpu)
+                            .append(process_time() - start_cpu)
                 self._timeit['cycles'].append(timer() - cycle_start)
                 self._timeit['cycles_cpu'
-                             ].append(time.process_time() - cycle_start_cpu)
+                             ].append(process_time() - cycle_start_cpu)
                 self._cycle_count += 1
                 if cycles and self._cycle_count >= cycles:
                     raise StopIteration
@@ -251,15 +258,15 @@ class Pipeline(object):
             if hasattr(module, 'pre_finish'):
                 log.info("Finishing {0}".format(module.name))
                 start_time = timer()
-                start_time_cpu = time.process_time()
+                start_time_cpu = process_time()
                 finish_blob[module.name] = module.pre_finish()
                 self._timeit[module]['finish'] = timer() - start_time
                 self._timeit[module]['finish_cpu'] = \
-                    time.process_time() - start_time_cpu
+                    process_time() - start_time_cpu
             else:
                 log.info("Skipping function module {0}".format(module.name))
         self._timeit['finish'] = timer()
-        self._timeit['finish_cpu'] = time.process_time()
+        self._timeit['finish_cpu'] = process_time()
         self._print_timeit_statistics()
         self._finished = True
 
