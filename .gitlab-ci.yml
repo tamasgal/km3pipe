@@ -14,7 +14,11 @@ test:
       reports:
         junit: "reports/junit*.xml"
 
-doc:
+pages:
     image: python:3.7.0
     script:
         - cd doc && make html
+        - mv _build/html public/
+    artifacts:
+        paths:
+            - public
