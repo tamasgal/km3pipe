@@ -1,0 +1,20 @@
+before_script:
+  - apt-get update -qq && apt-get install -y -qq libhdf5-dev
+  - pip install -U pip setuptools wheel
+  - make install
+
+test:
+    image: python:3.7.0
+    script:
+        - make test
+        - make test-km3modules
+        - make test-cov
+    coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
+    artifacts:
+      reports:
+        junit: "reports/junit*.xml"
+
+doc:
+    image: python:3.7.0
+    script:
+        - cd doc && make html
