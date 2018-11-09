@@ -10,10 +10,13 @@ from collections import deque, OrderedDict
 import inspect
 import signal
 import gzip
+import os
+import sys
 import time
 from timeit import default_timer as timer
 import types
 
+import toml
 import numpy as np
 
 from .sys import peak_memory_usage, ignored
@@ -33,6 +36,14 @@ log = get_logger(__name__)    # pylint: disable=C0103
 # log.setLevel(logging.DEBUG)
 
 STAT_LIMIT = 100000
+MODULE_CONFIGURATION = 'pipeline.toml'
+
+
+if sys.version_info >= (3,3):
+    process_time = time.process_time
+else:
+    process_time = time.clock
+
 
 
 class Pipeline(object):
@@ -46,14 +57,36 @@ class Pipeline(object):
     ----------
     timeit: bool, optional [default=False]
         Display time profiling statistics for the pipeline?
+    configfile: str, optional
+        Path to a configuration file (TOML format) which contains parameters
+        for attached modules.
     """
 
-    def __init__(self, blob=None, timeit=False, anybar=False):
+    def __init__(self, blob=None, timeit=False, configfile=None, anybar=False):
+        self.log = get_logger(self.__class__.__name__)
+        self.print = get_printer(self.__class__.__name__)
+
         if anybar:
             self.anybar = AnyBar()
             self.anybar.change("blue")
         else:
             self.anybar = None
+
+        if configfile is None and os.path.exists(MODULE_CONFIGURATION):
+            configfile = MODULE_CONFIGURATION
+
+        if configfile is not None:
+            self.print(
+                "Reading module configuration from '{}'".format(configfile)
+            )
+            self.log.warning(
+                "Keep in mind that the module configuration file has "
+                "precedence over keyword arguments in the attach method!"
+            )
+            with open(configfile, 'r') as fobj:
+                self.module_configuration = toml.load(fobj)
+        else:
+            self.module_configuration = {}
 
         self.init_timer = Timer("Pipeline and module initialisation")
         self.init_timer.start()
@@ -65,7 +98,7 @@ class Pipeline(object):
         self.timeit = timeit
         self._timeit = {
             'init': timer(),
-            'init_cpu': time.clock(),
+            'init_cpu': process_time(),
             'cycles': deque(maxlen=STAT_LIMIT),
             'cycles_cpu': deque(maxlen=STAT_LIMIT)
         }
@@ -104,6 +137,10 @@ class Pipeline(object):
             module = fac
             module.name = name
             module.timeit = self.timeit
+
+        if name in self.module_configuration:
+            for key, value in self.module_configuration[name].items():
+                setattr(module, key, value)
 
         # Special parameters
         if 'only_if' in kwargs:
@@ -157,7 +194,7 @@ class Pipeline(object):
         try:
             while not self._stop:
                 cycle_start = timer()
-                cycle_start_cpu = time.clock()
+                cycle_start_cpu = process_time()
 
                 log.debug("Pumping blob #{0}".format(self._cycle_count))
                 self.blob = Blob()
@@ -186,16 +223,16 @@ class Pipeline(object):
 
                     log.debug("Processing {0} ".format(module.name))
                     start = timer()
-                    start_cpu = time.clock()
+                    start_cpu = process_time()
                     self.blob = module(self.blob)
                     if self.timeit or module.timeit:
                         self._timeit[module]['process'] \
                             .append(timer() - start)
                         self._timeit[module]['process_cpu'] \
-                            .append(time.clock() - start_cpu)
+                            .append(process_time() - start_cpu)
                 self._timeit['cycles'].append(timer() - cycle_start)
                 self._timeit['cycles_cpu'
-                             ].append(time.clock() - cycle_start_cpu)
+                             ].append(process_time() - cycle_start_cpu)
                 self._cycle_count += 1
                 if cycles and self._cycle_count >= cycles:
                     raise StopIteration
@@ -222,15 +259,15 @@ class Pipeline(object):
             if hasattr(module, 'pre_finish'):
                 log.info("Finishing {0}".format(module.name))
                 start_time = timer()
-                start_time_cpu = time.clock()
+                start_time_cpu = process_time()
                 finish_blob[module.name] = module.pre_finish()
                 self._timeit[module]['finish'] = timer() - start_time
                 self._timeit[module]['finish_cpu'] = \
-                    time.clock() - start_time_cpu
+                    process_time() - start_time_cpu
             else:
                 log.info("Skipping function module {0}".format(module.name))
         self._timeit['finish'] = timer()
-        self._timeit['finish_cpu'] = time.clock()
+        self._timeit['finish_cpu'] = process_time()
         self._print_timeit_statistics()
         self._finished = True
 
