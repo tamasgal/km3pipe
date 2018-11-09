@@ -499,3 +499,43 @@ class Table(np.recarray):
         if not hasattr(self, 'triggered'):
             raise KeyError("Table has no 'triggered' column!")
         return self[self.triggered.astype(bool)]
+
+
+class Vec3(object):
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+
+    def __add__(self, other):
+        return Vec3(*np.add(self, other))
+
+    def __radd__(self, other):
+        return Vec3(*np.add(other, self))
+
+    def __sub__(self, other):
+        return Vec3(*np.subtract(self, other))
+
+    def __rsub__(self, other):
+        return Vec3(*np.subtract(other, self))
+
+    def __mul__(self, other):
+        return Vec3(*np.multiply(self, other))
+
+    def __rmul__(self, other):
+        return Vec3(*np.multiply(other, self))
+
+    def __div__(self, other):
+        return self.__truediv__(other)
+
+    def __truediv__(self, other):
+        return Vec3(*np.divide(self, other))
+
+    def __array__(self, dtype=None):
+        if dtype is not None:
+            return np.array([self.x, self.y, self.z], dtype=dtype)
+        else:
+            return np.array([self.x, self.y, self.z])
+
+    def __getitem__(self, index):
+        return self.__array__()[index]

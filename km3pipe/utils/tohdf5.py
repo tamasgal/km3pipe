@@ -57,9 +57,13 @@ def tohdf5(input_files, output_file, n_events, conv_times_to_jte, **kwargs):
         cprint("Converting '{}'...".format(input_file))
         if len(input_files) > 1:
             output_file = input_file + '.h5'
+
+        meta_data = kwargs.copy()
+        meta_data['origin'] = input_file
+
         pipe = Pipeline()
+        pipe.attach(HDF5MetaData, data=meta_data)
         pipe.attach(GenericPump, filenames=input_file, **kwargs)
-        pipe.attach(HDF5MetaData, data=kwargs)
         pipe.attach(StatusBar, every=250)
         if conv_times_to_jte:
             from km3modules.mc import MCTimeCorrector
