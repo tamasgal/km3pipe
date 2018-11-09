@@ -4,7 +4,6 @@ before_script:
   - make install
 
 test:
-    image: python:3.7.0
     script:
         - make test
         - make test-km3modules
@@ -15,7 +14,6 @@ test:
         junit: "reports/junit*.xml"
 
 pages:
-    image: python:3.7.0
     script:
         - cd doc && make html
         - mv _build/html ../public/
