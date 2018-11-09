@@ -1,6 +1,6 @@
+image: docker.km3net.de/python:3
+
 before_script:
-  - apt-get update -qq && apt-get install -y -qq libhdf5-dev
-  - pip install -U pip setuptools wheel
   - make install
 
 test:
