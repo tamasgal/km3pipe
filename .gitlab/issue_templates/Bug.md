@@ -39,4 +39,4 @@ at http://km3py.pages.km3net.de/km3pipe
 
 (Paste any relevant logs - please use code blocks (put the code between ```) to format console output, logs, and code as it's very hard to read otherwise.)
 
-/label ~Defect
+/label ~bug
