@@ -12,7 +12,7 @@ at http://km3py.pages.km3net.de/km3pipe
 ### Environment
 
 - KM3Pipe version (`km3pipe --version`):
-- Python version: (`python --version`):
+- Python version (`python --version`):
 - OS: (`uname -a`)
 
 #### Additional information
