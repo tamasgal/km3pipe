@@ -7,7 +7,21 @@ at http://km3py.pages.km3net.de/km3pipe
 
 ### Summary
 
-(Summarize the bug encountered concisely)
+(Summarize the bug encountered concisely.)
+
+### Environment
+
+- KM3Pipe version (`km3pipe --version`):
+- Python version: (`python --version`):
+- OS: (`uname -a`)
+
+#### Additional information
+
+(The following are optional but may be relevant.)
+
+- HDF5 metadata (`h5info /path/to/relevant/file.h5`)
+- ROOT file metadata (`JPrintMeta -f /path/to/relevant/file.root`):
+- Jpp version (only if relevant, `JPrint -v`)
 
 ### What is the current *bug* behavior?
 
@@ -23,7 +37,6 @@ at http://km3py.pages.km3net.de/km3pipe
 
 ### Relevant logs and/or screenshots
 
-(Paste any relevant logs - please use code blocks (put the code between ```)
-to format console output, logs, and code as it's very hard to read otherwise.)
+(Paste any relevant logs - please use code blocks (put the code between ```) to format console output, logs, and code as it's very hard to read otherwise.)
 
 /label ~Defect
