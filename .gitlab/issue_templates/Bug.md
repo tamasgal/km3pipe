@@ -7,7 +7,7 @@ at http://km3py.pages.km3net.de/km3pipe
 
 ### Summary
 
-(Summarize the bug encountered concisely.)
+(Summarise the bug encountered concisely.)
 
 ### Environment
 
