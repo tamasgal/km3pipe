@@ -167,10 +167,10 @@ class Pipeline(object):
                 for service_name, obj in module.provided_services.items():
                     self.services.register(service_name, obj)
             if hasattr(module, "required_services"):
-                self.required_services = dict(
-                    self.required_services.items() +
-                    module.required_services.items()
-                )
+                updated_required_services = {}
+                updated_required_services.update(self.required_services)
+                updated_required_services.update(module.required_services)
+                self.required_services = updated_required_services
             module.services = self.services
             module.pipeline = self
         else:
