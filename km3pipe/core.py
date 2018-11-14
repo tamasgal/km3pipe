@@ -295,18 +295,22 @@ class Pipeline(object):
         missing = self.services.get_missing_services(
             self.required_services.keys()
         )
-        self.log.critical(
-            "Following services are required and missing: {}".format(
-                ', '.join(missing)
+        if missing:
+            self.log.critical(
+                "Following services are required and missing: {}".format(
+                    ', '.join(missing)
+                )
             )
-        )
+            raise StopIteration
 
     def drain(self, cycles=None):
         """Execute _drain while trapping KeyboardInterrupt"""
-        self._check_service_requirements()
+        try:
+            self._check_service_requirements()
+        except StopIteration:
+            return self.finish()
 
         if self.anybar: self.anybar.change("orange")
-
         self.init_timer.stop()
         log.info("Trapping CTRL+C and starting to drain.")
         signal.signal(signal.SIGINT, self._handle_ctrl_c)
