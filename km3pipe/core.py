@@ -75,7 +75,7 @@ class ServiceManager(object):
         provided_services = set(self._services.keys())
         missing_services = required_services.difference(provided_services)
 
-        return missing_services
+        return sorted(missing_services)
 
     def __getitem__(self, name):
         return self._services[name]
