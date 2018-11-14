@@ -301,13 +301,12 @@ class Pipeline(object):
                     ', '.join(missing)
                 )
             )
-            raise StopIteration
+            return False
+        return True
 
     def drain(self, cycles=None):
         """Execute _drain while trapping KeyboardInterrupt"""
-        try:
-            self._check_service_requirements()
-        except StopIteration:
+        if not self._check_service_requirements():
             self.init_timer.stop()
             return self.finish()
 
