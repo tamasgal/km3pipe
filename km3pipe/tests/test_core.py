@@ -431,3 +431,125 @@ class TestServices(TestCase):
         self.pl.attach(Service)
         self.pl.attach(UseService)
         self.pl.drain(1)
+
+    def test_service_usable_in_configure_when_attached_before(self):
+        return
+
+        class Service(Module):
+            def configure(self):
+                self.expose(23, "foo")
+                self.expose(self.whatever, "whatever")
+
+            def whatever(self, x):
+                return x * 2
+
+        class UseService(Module):
+            def configure(self):
+                assert 23 == self.services["foo"]
+                assert 2 == self.services["whatever"](1)
+
+        self.pl.attach(Service)
+        self.pl.attach(UseService)
+        self.pl.drain(1)
+
+    def test_required_service(self):
+        class AService(Module):
+            def configure(self):
+                self.expose(self.a_function, 'a_function')
+
+            def a_function(self, b='c'):
+                return b + 'd'
+
+        class AModule(Module):
+            def configure(self):
+                self.require_service('a_function', why='because')
+
+            def process(self, blob):
+                assert 'ed' == self.services['a_function']("e")
+
+        self.pl.attach(AService)
+        self.pl.attach(AModule)
+        self.pl.drain(2)
+
+    def test_required_service_not_present(self):
+        self.pl.log = MagicMock()
+
+        class AModule(Module):
+            def configure(self):
+                self.require_service('a_function', why='because')
+
+            def process(self, blob):
+                assert False    # make sure that process is not called
+
+        self.pl.attach(AModule)
+        self.pl.drain(1)
+
+        self.pl.log.critical.assert_called_with(
+            'Following services are required and missing: a_function'
+        )
+
+    def test_required_service_not_present_in_multiple_modules(self):
+        self.pl.log = MagicMock()
+
+        class AModule(Module):
+            def configure(self):
+                self.require_service('a_function', why='because')
+                self.require_service('b_function', why='because')
+
+            def process(self, blob):
+                assert False    # make sure that process is not called
+
+        class BModule(Module):
+            def configure(self):
+                self.require_service('c_function', why='because')
+
+            def process(self, blob):
+                assert False    # make sure that process is not called
+
+        self.pl.attach(AModule)
+        self.pl.attach(BModule)
+        self.pl.drain(1)
+
+        self.pl.log.critical.assert_called_with(
+            'Following services are required and missing: '
+            'a_function, b_function, c_function'
+        )
+
+    def test_required_service_not_present_but_some_are_present(self):
+        self.pl.log = MagicMock()
+
+        class AModule(Module):
+            def configure(self):
+                self.expose(self.d_function, 'd_function')
+                self.require_service('a_function', why='because')
+                self.require_service('b_function', why='because')
+
+            def d_function(self):
+                pass
+
+            def process(self, blob):
+                assert False    # make sure that process is not called
+
+        class BModule(Module):
+            def configure(self):
+                self.require_service('c_function', why='because')
+
+            def process(self, blob):
+                assert False    # make sure that process is not called
+
+        class CModule(Module):
+            def configure(self):
+                self.require_service('d_function', why='because')
+
+            def process(self, blob):
+                assert False    # make sure that process is not called
+
+        self.pl.attach(AModule)
+        self.pl.attach(BModule)
+        self.pl.attach(CModule)
+        self.pl.drain(1)
+
+        self.pl.log.critical.assert_called_with(
+            'Following services are required and missing: '
+            'a_function, b_function, c_function'
+        )
