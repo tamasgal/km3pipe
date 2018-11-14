@@ -308,6 +308,7 @@ class Pipeline(object):
         try:
             self._check_service_requirements()
         except StopIteration:
+            self.init_timer.stop()
             return self.finish()
 
         if self.anybar: self.anybar.change("orange")
