@@ -122,20 +122,19 @@ be used to update KM3Pipe itself::
 
     $ km3pipe update
 
-To get the latest developer version::
-
-    $ km3pipe update develop
-
 Or you can of course use `pip`::
 
     $ pip install --upgrade km3pipe
+
+To get the latest developer version::
+
+    $ km3pipe update develop
 
 If you installed KM3Pipe from source via `make install-dev`,
 you simply pull the changes from git and rebuild it::
 
     $ cd /path/to/km3pipe_repo
     $ git pull
-    $ make
 
 
 Configuration

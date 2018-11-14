@@ -1,4 +1,4 @@
-image: docker.km3net.de/python:3
+image: docker.km3net.de/base/python:3
 
 stages:
   - test
@@ -9,7 +9,7 @@ before_script:
   - make install
 
 test-py2:
-    image: docker.km3net.de/python:2
+    image: docker.km3net.de/base/python:2
     stage: test
     script:
         - make test
