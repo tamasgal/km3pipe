@@ -49,6 +49,7 @@ test-py3.7:
         junit: "reports/junit*.xml"
 
 coverage:
+    image: docker.km3net.de/base/python:3.6
     stage: coverage
     script:
         - make test-cov
