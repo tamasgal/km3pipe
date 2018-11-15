@@ -767,6 +767,14 @@ class TestTable(TestCase):
         added_tab = tab + tab
         assert 2 == len(added_tab)
 
+    def test_add_table_with_different_cols(self):
+        tab1 = Table({'a':[1]})
+        tab2 = Table({'b':[2]})
+        added_tab = tab1 + tab2
+        expected_tab = Table({'a':[1,np.nan], 'b':[np.nan,2]})
+        assert 2 == len(added_tab)
+        assert_array_equal(added_tab.a, expected_tab.a)
+        assert_array_equal(added_tab.b, expected_tab.b)
 
 class TestTableFancyAttributes(TestCase):
     def setUp(self):
