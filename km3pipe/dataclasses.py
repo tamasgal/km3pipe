@@ -406,6 +406,9 @@ class Table(np.recarray):
 
     def __add__(self, other):
         if not np.equal(self.dtype, other.dtype):
+            # if set(self.dtype.descr) == set(other.dtype.descr):
+            #     print("ok")
+            # else:
             raise TypeError("Table columns do not match")
         ret = self.copy()
         len_self = len(self)
