@@ -28,8 +28,8 @@ __status__ = "Development"
 class TestDtypes(TestCase):
     def setUp(self):
         self.c_dt = np.dtype([('a', '<f4'), ('origin', '<u4'),
-                              ('pmt_id', '<u4'), ('time', '<f8'),
-                              ('group_id', '<u4')])
+                              ('pmt_id', '<u4'), ('time',
+                                                  '<f8'), ('group_id', '<u4')])
 
     def test_is_structured(self):
         assert is_structured(self.c_dt)
@@ -789,6 +789,15 @@ class TestTable(TestCase):
         assert 5 == len(added_tab)
         self.assertListEqual([1, 2, 3, 4, 5], list(added_tab.a))
         self.assertListEqual([100, 200, 300, 400, 500], list(added_tab.b))
+
+    def test_add_tables_with_same_colnames_but_different_dtype_raises(self):
+        cols1 = ('b', 'a')
+        tab1 = Table.from_columns([[100, 200], [1, 2]], colnames=cols1)
+        self.assertTupleEqual(cols1, tab1.dtype.names)
+        cols2 = ('a', 'b')
+        tab2 = Table.from_columns([[3, 4, 5], [300, 400, 500]], colnames=cols2)
+        with self.assertRaises(TypeError):
+            added_tab = tab1 + tab2
 
     def test_add_table_with_different_cols(self):
         tab1 = Table({'a': [1]})
