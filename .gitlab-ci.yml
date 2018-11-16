@@ -53,7 +53,11 @@ coverage:
     stage: coverage
     script:
         - make test-cov
+        - mv coverage/reports public/coverage
     coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
+    artifacts:
+        paths:
+            - public/coverage
 
 pages:
     stage: doc
