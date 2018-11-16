@@ -28,8 +28,8 @@ __status__ = "Development"
 class TestDtypes(TestCase):
     def setUp(self):
         self.c_dt = np.dtype([('a', '<f4'), ('origin', '<u4'),
-                              ('pmt_id', '<u4'), ('time',
-                                                  '<f8'), ('group_id', '<u4')])
+                              ('pmt_id', '<u4'), ('time', '<f8'),
+                              ('group_id', '<u4')])
 
     def test_is_structured(self):
         assert is_structured(self.c_dt)
@@ -768,13 +768,11 @@ class TestTable(TestCase):
         assert 2 == len(added_tab)
 
     def test_add_table_with_different_cols(self):
-        tab1 = Table({'a':[1]})
-        tab2 = Table({'b':[2]})
-        added_tab = tab1 + tab2
-        expected_tab = Table({'a':[1,np.nan], 'b':[np.nan,2]})
-        assert 2 == len(added_tab)
-        assert_array_equal(added_tab.a, expected_tab.a)
-        assert_array_equal(added_tab.b, expected_tab.b)
+        tab1 = Table({'a': [1]})
+        tab2 = Table({'b': [2]})
+        with self.assertRaises(KeyError):
+            added_tab = tab1 + tab2
+
 
 class TestTableFancyAttributes(TestCase):
     def setUp(self):
