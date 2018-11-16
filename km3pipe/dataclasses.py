@@ -405,14 +405,15 @@ class Table(np.recarray):
         return cls(rec, **kwargs)
 
     def __add__(self, other):
-        if self.dtype is not other.dtype:
-            raise KeyError("Table columns do not match")
-        a = self.copy()
-        b = self.copy()
-        a = a[np.sort(a.dtype.names)]
-        b = b[np.sort(b.dtype.names)]
-        ret_tbl = Table(np.concatenate((a, b), axis=0))
-        return ret_tbl
+        if not np.equal(self.dtype, other.dtype):
+            raise TypeError("Table columns do not match")
+        ret = self.copy()
+        len_self = len(self)
+        len_other = len(other)
+        final_length = len_self + len_other
+        ret.resize(final_length, refcheck=False)
+        ret[len_self:] = other
+        return Table(ret)
 
     def __str__(self):
         name = self.name
