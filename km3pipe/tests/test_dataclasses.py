@@ -766,7 +766,7 @@ class TestTable(TestCase):
         tab = Table({'a': [1]})
         added_tab = tab + tab
         assert 2 == len(added_tab)
-        self.assertListEqual([1, 2], list(added_tab.a))
+        self.assertListEqual([1, 1], list(added_tab.a))
 
     def test_add_two_tables(self):
         tab1 = Table({'a': [1, 2]})
