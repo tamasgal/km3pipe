@@ -793,7 +793,7 @@ class TestTable(TestCase):
     def test_add_table_with_different_cols(self):
         tab1 = Table({'a': [1]})
         tab2 = Table({'b': [2]})
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             added_tab = tab1 + tab2
 
 
