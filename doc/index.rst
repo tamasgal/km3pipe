@@ -22,5 +22,6 @@
     examples
     api
     changelog
+    _coverage: /coverage/index.html
 
 * :ref:`genindex`

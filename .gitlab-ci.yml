@@ -53,17 +53,19 @@ coverage:
     stage: coverage
     script:
         - make test-cov
-        - mv reports/coverage public/coverage
+        - ls
+        - ls reports/coverage
     coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
     artifacts:
         paths:
-            - public/coverage
+            - reports/coverage
 
 pages:
     stage: doc
     script:
         - cd doc && make html
         - mv _build/html ../public/
+        - cd .. && mv reports/coverage public/coverage
     artifacts:
         paths:
             - public
