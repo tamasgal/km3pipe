@@ -1,6 +1,9 @@
 Unreleased changes
 ------------------
 
+* ``Module`` can now require services with the
+  ``self.require_service(service_name, [reason])``
+
 Version 8
 ---------
 

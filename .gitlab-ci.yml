@@ -1,13 +1,45 @@
-image: docker.km3net.de/python:3
+image: docker.km3net.de/base/python:3
 
 stages:
   - test
+  - coverage
   - doc
 
 before_script:
   - make install
 
-test:
+test-py2:
+    image: docker.km3net.de/base/python:2
+    stage: test
+    script:
+        - make test
+        - make test-km3modules
+    artifacts:
+      reports:
+        junit: "reports/junit*.xml"
+
+test-py3.5:
+    image: docker.km3net.de/base/python:3.5
+    stage: test
+    script:
+        - make test
+        - make test-km3modules
+    artifacts:
+      reports:
+        junit: "reports/junit*.xml"
+
+test-py3.6:
+    image: docker.km3net.de/base/python:3.6
+    stage: test
+    script:
+        - make test
+        - make test-km3modules
+    artifacts:
+      reports:
+        junit: "reports/junit*.xml"
+
+test-py3.7:
+    image: docker.km3net.de/base/python:3.7
     stage: test
     script:
         - make test
@@ -17,7 +49,8 @@ test:
         junit: "reports/junit*.xml"
 
 coverage:
-    stage: test
+    image: docker.km3net.de/base/python:3.6
+    stage: coverage
     script:
         - make test-cov
     coverage: '/TOTAL.+ ([0-9]{1,3}%)/'

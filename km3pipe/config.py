@@ -53,7 +53,7 @@ class Config(object):
             self._read_from_file(config_file)
 
     def _read_from_file(self, file_obj):
-        self.config.readfp(file_obj)
+        self.config.read_file(file_obj)
 
     def set(self, section, key, value):
         if section not in self.config.sections():
