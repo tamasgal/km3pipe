@@ -766,11 +766,34 @@ class TestTable(TestCase):
         tab = Table({'a': [1]})
         added_tab = tab + tab
         assert 2 == len(added_tab)
+        self.assertListEqual([1, 2], list(added_tab.a))
+
+    def test_add_two_tables(self):
+        tab1 = Table({'a': [1, 2]})
+        tab2 = Table({'a': [3, 4]})
+        added_tab = tab1 + tab2
+        assert 4 == len(added_tab)
+        self.assertListEqual([1, 2, 3, 4], list(added_tab.a))
+
+    def test_add_two_tables_with_different_lengths(self):
+        tab1 = Table({'a': [1, 2]})
+        tab2 = Table({'a': [3, 4, 5]})
+        added_tab = tab1 + tab2
+        assert 5 == len(added_tab)
+        self.assertListEqual([1, 2, 3, 4, 5], list(added_tab.a))
+
+    def test_add_two_tables_with_different_lengths_and_columns(self):
+        tab1 = Table({'a': [1, 2], 'b': [100, 200]})
+        tab2 = Table({'a': [3, 4, 5], 'b': [300, 400, 500]})
+        added_tab = tab1 + tab2
+        assert 5 == len(added_tab)
+        self.assertListEqual([1, 2, 3, 4, 5], list(added_tab.a))
+        self.assertListEqual([100, 200, 300, 400, 500], list(added_tab.b))
 
     def test_add_table_with_different_cols(self):
         tab1 = Table({'a': [1]})
         tab2 = Table({'b': [2]})
-        with self.assertRaises(KeyError):
+        with self.assertRaises(ValueError):
             added_tab = tab1 + tab2
 
 
