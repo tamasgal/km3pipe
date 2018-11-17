@@ -52,10 +52,8 @@ coverage:
     image: docker.km3net.de/base/python:3.6
     stage: coverage
     script:
-        - make test-cov
-        - ls
-        - ls reports/coverage
-    coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
+        - make test-cov|grep TOTAL| awk  -F " " '{printf "COVERAGE: %4.4f%%\n", (1-$3/$2)*100 }'
+    coverage: '/COVERAGE ([0-9]{1,4}\.[0-9]{1,4}%)/'
     artifacts:
         paths:
             - reports/coverage
