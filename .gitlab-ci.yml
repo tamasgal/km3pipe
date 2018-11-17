@@ -28,15 +28,19 @@ before_script:
   - source venv/bin/activate
   - make install
 
+.junit_template: &junit_definition
+    artifacts:
+      reports:
+        junit: "reports/junit*.xml"
+
+
 test-py2:
     image: docker.km3net.de/base/python:2
     stage: test
     script:
         - make test
         - make test-km3modules
-    artifacts:
-      reports:
-        junit: "reports/junit*.xml"
+    <<: *junit_definition
 
 test-py3.5:
     image: docker.km3net.de/base/python:3.5
@@ -44,9 +48,7 @@ test-py3.5:
     script:
         - make test
         - make test-km3modules
-    artifacts:
-      reports:
-        junit: "reports/junit*.xml"
+    <<: *junit_definition
 
 test-py3.6:
     image: docker.km3net.de/base/python:3.6
@@ -54,9 +56,7 @@ test-py3.6:
     script:
         - make test
         - make test-km3modules
-    artifacts:
-      reports:
-        junit: "reports/junit*.xml"
+    <<: *junit_definition
 
 test-py3.7:
     image: docker.km3net.de/base/python:3.7
@@ -64,9 +64,7 @@ test-py3.7:
     script:
         - make test
         - make test-km3modules
-    artifacts:
-      reports:
-        junit: "reports/junit*.xml"
+    <<: *junit_definition
 
 coverage:
     image: docker.km3net.de/base/python:3.6
