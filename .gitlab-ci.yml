@@ -70,7 +70,7 @@ coverage:
     image: docker.km3net.de/base/python:3.6
     stage: coverage
     script:
-        - "make test-cov|grep TOTAL| awk '{printf \"COVERAGE: %.2f%%\n\", (1-$3/$2)*100 }'"
+        - "make test-cov|grep TOTAL| awk '{printf \"COVERAGE: %.2f%%\", (1-$3/$2)*100 }'"
     coverage: '/COVERAGE:\s*([0-9]*\.[0-9]*%)/'
     #     - make test-cov
     # coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
