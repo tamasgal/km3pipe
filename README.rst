@@ -1,8 +1,11 @@
 KM3Pipe
 =======
 
-.. image:: https://travis-ci.org/tamasgal/km3pipe.svg?branch=develop
-    :target: https://travis-ci.org/tamasgal/km3pipe
+.. image:: https://git.km3net.de/km3py/km3pipe/badges/develop/build.svg
+    :target: https://git.km3net.de/km3py/km3pipe/pipelines
+
+.. image:: https://git.km3net.de/km3py/km3pipe/badges/develop/coverage.svg
+    :target: https://km3py.pages.km3net.de/km3pipe/coverage
 
 .. image:: https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat
     :target: http://km3pipe.readthedocs.io/en/latest/
