@@ -27,13 +27,12 @@ stages:
   - docker
   - release
 
-.virtualenv_template:
-    script: &virtualenv_definition
-      - python -V
-      - pip install virtualenv
-      - virtualenv venv
-      - source venv/bin/activate
-      - make install
+.virtualenv_template: &virtualenv_definition |
+  python -V
+  pip install virtualenv
+  virtualenv venv
+  source venv/bin/activate
+  make install
 
 .junit_template: &junit_definition
     artifacts:
