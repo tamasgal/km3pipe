@@ -1,5 +1,21 @@
 image: docker.km3net.de/base/python:3
 
+# Change pip's cache directory to be inside the project directory since we can
+# only cache local items.
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+
+# Pip's cache doesn't store the python packages
+# https://pip.pypa.io/en/stable/reference/pip_install/#caching
+#
+# If you want to also cache the installed packages, you have to install
+# them in a virtualenv and cache it as well.
+cache:
+  paths:
+    - .cache/pip
+    - venv/
+
 stages:
   - test
   - coverage
@@ -13,7 +29,17 @@ variables:
   CONTAINER_RELEASE_IMAGE: docker.km3net.de/test/km3pipe:$CI_COMMIT_TAG
 
 before_script:
+  - python -V
+  - pip install virtualenv
+  - virtualenv venv
+  - source venv/bin/activate
   - make install
+
+.junit_template: &junit_definition
+    artifacts:
+      reports:
+        junit: "reports/junit*.xml"
+
 
 test-py2:
     image: docker.km3net.de/base/python:2
@@ -21,9 +47,7 @@ test-py2:
     script:
         - make test
         - make test-km3modules
-    artifacts:
-      reports:
-        junit: "reports/junit*.xml"
+    <<: *junit_definition
 
 test-py3.5:
     image: docker.km3net.de/base/python:3.5
@@ -31,9 +55,7 @@ test-py3.5:
     script:
         - make test
         - make test-km3modules
-    artifacts:
-      reports:
-        junit: "reports/junit*.xml"
+    <<: *junit_definition
 
 test-py3.6:
     image: docker.km3net.de/base/python:3.6
@@ -41,9 +63,7 @@ test-py3.6:
     script:
         - make test
         - make test-km3modules
-    artifacts:
-      reports:
-        junit: "reports/junit*.xml"
+    <<: *junit_definition
 
 test-py3.7:
     image: docker.km3net.de/base/python:3.7
@@ -51,18 +71,16 @@ test-py3.7:
     script:
         - make test
         - make test-km3modules
-    artifacts:
-      reports:
-        junit: "reports/junit*.xml"
+    <<: *junit_definition
 
 coverage:
     image: docker.km3net.de/base/python:3.6
     stage: coverage
     script:
-        - make test-cov
-        - ls
-        - ls reports/coverage
-    coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
+        - "make test-cov|grep TOTAL| awk '{printf \"COVERAGE: %.2f%%\", (1-$3/$2)*100 }'"
+    coverage: '/COVERAGE:\s*([0-9]*\.[0-9]*%)/'
+    #     - make test-cov
+    # coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
     artifacts:
         paths:
             - reports/coverage
