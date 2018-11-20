@@ -106,6 +106,7 @@ docker:
     - docker
   only:
     - tags
+    - develop
 
 release-image:
   image: docker:stable
