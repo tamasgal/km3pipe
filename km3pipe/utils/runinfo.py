@@ -3,11 +3,12 @@
 Prints the run table for a given detector ID.
 
 Usage:
-    runinfo DET_ID RUN
+    runinfo [-t] DET_ID RUN
     runinfo (-h | --help)
     runinfo --version
 
 Options:
+    -t                  Show the trigger information.
     -h --help           Show this screen.
     DET_ID              Detector ID (eg. D_ARCA001).
     RUN                 Run number.
@@ -27,7 +28,7 @@ __status__ = "Development"
 log = kp.logger.get_logger(__name__)
 
 
-def runinfo(run_id, det_id):
+def runinfo(run_id, det_id, show_trigger=False):
     db = kp.db.DBManager()
     df = db.run_table(det_id)
     row = df[df['RUN'] == run_id]
@@ -59,10 +60,12 @@ def runinfo(run_id, det_id):
             row['T0_CALIBSETID'].values[0]
         )
     )
+    if show_trigger:
+        print(db.trigger_setup(row['RUNSETUPID'].values[0]))
 
 
 def main():
     from docopt import docopt
     args = docopt(__doc__, version=kp.version)
 
-    runinfo(int(args['RUN']), args['DET_ID'])
+    runinfo(int(args['RUN']), args['DET_ID'], args['-t'])
