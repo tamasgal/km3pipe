@@ -27,12 +27,13 @@ stages:
   - docker
   - release
 
-before_script:
-  - python -V
-  - pip install virtualenv
-  - virtualenv venv
-  - source venv/bin/activate
-  - make install
+.virtualenv_template:
+    script: &virtualenv_definition
+      - python -V
+      - pip install virtualenv
+      - virtualenv venv
+      - source venv/bin/activate
+      - make install
 
 .junit_template: &junit_definition
     artifacts:
@@ -44,6 +45,7 @@ test-py2:
     image: docker.km3net.de/base/python:2
     stage: test
     script:
+        *virtualenv_definition
         - make test
         - make test-km3modules
     <<: *junit_definition
@@ -52,6 +54,7 @@ test-py3.5:
     image: docker.km3net.de/base/python:3.5
     stage: test
     script:
+        *virtualenv_definition
         - make test
         - make test-km3modules
     <<: *junit_definition
@@ -60,6 +63,7 @@ test-py3.6:
     image: docker.km3net.de/base/python:3.6
     stage: test
     script:
+        *virtualenv_definition
         - make test
         - make test-km3modules
     <<: *junit_definition
@@ -68,6 +72,7 @@ test-py3.7:
     image: docker.km3net.de/base/python:3.7
     stage: test
     script:
+        *virtualenv_definition
         - make test
         - make test-km3modules
     <<: *junit_definition
@@ -76,6 +81,7 @@ coverage:
     image: docker.km3net.de/base/python:3.6
     stage: coverage
     script:
+        *virtualenv_definition
         - "make test-cov|grep TOTAL| awk '{printf \"COVERAGE: %.2f%%\", (1-$3/$2)*100 }'"
     coverage: '/COVERAGE:\s*([0-9]*\.[0-9]*%)/'
     #     - make test-cov
@@ -87,6 +93,7 @@ coverage:
 pages:
     stage: doc
     script:
+        *virtualenv_definition
         - cd doc && make html
         - mv _build/html ../public/
         - cd .. && mv reports/coverage public/coverage
