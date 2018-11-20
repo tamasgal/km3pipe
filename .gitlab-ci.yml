@@ -4,6 +4,13 @@ stages:
   - test
   - coverage
   - doc
+  - docker
+
+variables:
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_DRIVER: overlay2
+  CONTAINER_TEST_IMAGE: docker.km3net.de/test/km3pipe:$CI_COMMIT_REF_SLUG
+  CONTAINER_RELEASE_IMAGE: docker.km3net.de/test/km3pipe:$CI_COMMIT_TAG
 
 before_script:
   - make install
@@ -69,3 +76,28 @@ pages:
     artifacts:
         paths:
             - public
+
+docker:
+  image: docker:stable
+  services:
+    - docker:dind
+  stage: docker
+  script:
+    - docker build --pull -t $CONTAINER_TEST_IMAGE .
+    - docker push $CONTAINER_TEST_IMAGE
+  tags:
+    - docker
+  only:
+    - tags
+
+release-image:
+  image: docker:stable
+  services:
+    - docker:dind
+  stage: release
+  script:
+    - docker pull $CONTAINER_TEST_IMAGE
+    - docker tag $CONTAINER_TEST_IMAGE $CONTAINER_RELEASE_IMAGE
+    - docker push $CONTAINER_RELEASE_IMAGE
+  only:
+    - tags
