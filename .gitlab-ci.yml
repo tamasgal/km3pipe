@@ -25,6 +25,7 @@ stages:
   - coverage
   - doc
   - docker
+  - release
 
 before_script:
   - python -V
