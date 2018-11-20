@@ -99,6 +99,9 @@ pages:
     artifacts:
         paths:
             - public
+    only:
+        - tags
+        - develop
 
 docker:
   image: docker:stable
