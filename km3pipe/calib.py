@@ -42,8 +42,8 @@ class Calibration(Module):
         .detx ID of detector (when retrieving from database).
     t0set: optional
         t0set (when retrieving from database).
-    calibration: optional
-        calibration (when retrieving from database).
+    calibset: optional
+        calibset (when retrieving from database).
     """
     __name__ = 'Calibration'
     name = 'Calibration'
@@ -53,7 +53,7 @@ class Calibration(Module):
         self.filename = self.get('filename')
         self.det_id = self.get('det_id')
         self.t0set = self.get('t0set')
-        self.calibration = self.get('calibration')
+        self.calibset = self.get('calibset')
         self.detector = self.get('detector')
         self._pos_dom_channel = None
         self._dir_dom_channel = None
@@ -63,6 +63,15 @@ class Calibration(Module):
         self._t0_pmt_id = None
         self._lookup_tables = None    # for Numba
 
+        # TODO: deprecation
+        if self.get('calibration'):
+            self.log.warning(
+                "The parameter 'calibration' has been renamed "
+                "to 'calibset'. The 'calibration' parameter will be removed "
+                "in the next version of KM3Pipe"
+            )
+            self.calibset = self.get('calibration')
+
         if self.filename or self.det_id:
             if self.filename is not None:
                 self.detector = Detector(filename=self.filename)
@@ -70,7 +79,7 @@ class Calibration(Module):
                 self.detector = Detector(
                     det_id=self.det_id,
                     t0set=self.t0set,
-                    calibration=self.calibration
+                    calibration=self.calibset
                 )
 
         if self.detector is not None:
@@ -238,3 +247,42 @@ if HAVE_NUMBA:
                         np.copyto(lookup, m)
             t0 = lookup[channel_ids[i]][6]
             times[i] += t0
+
+
+class CalibrationService(Module):
+    """A service which provides calibration routines for hits
+
+    Parameters
+    ----------
+    filename: str, optional [default=None]
+        DetX file with detector description.
+    det_id: int, optional
+        .detx ID of detector (when retrieving from database).
+    t0set: optional
+        t0set (when retrieving from database).
+    calibset: optional
+        calibset (when retrieving from database).
+    detector: kp.hardware.Detector, optional
+    """
+    __name__ = 'Calibration'
+    name = 'Calibration'
+
+    def configure(self):
+        filename = self.get('filename')
+        det_id = self.get('det_id')
+        t0set = self.get('t0set')
+        calibset = self.get('calibset')
+        detector = self.get('detector')
+
+        self._calibration = Calibration(
+            filename=filename,
+            det_id=det_id,
+            t0set=t0set,
+            calibset=calibset,
+            detector=detector
+        )
+
+        self.expose(self.calibrate, "calibrate")
+
+    def calibrate(self, hits):
+        return self._calibration.apply(hits)
