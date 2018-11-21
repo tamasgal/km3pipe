@@ -122,7 +122,7 @@ class TestCalibrationService(TestCase):
 
         class HitCalibrator(Module):
             def process(self, blob):
-                chits = self.service['Calibration'](hits)
+                chits = self.services['Calibration'](hits)
 
                 assert len(hits) == len(chits)
 
