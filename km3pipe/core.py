@@ -208,6 +208,19 @@ class Pipeline(object):
         }
 
         if hasattr(module, 'get_detector'):    # Calibration-like module
+            self.log.deprecation(
+                "Calibration-like modules will not be supported in future "
+                "versions of KM3Pipe. Please use services instead.\n"
+                "If you are attaching the `calib.Calibration` as a module, "
+                "switch to `calib.CalibrationService` and use the "
+                "`self.services['calibrate']()` method in your modules "
+                "to apply calibration.\n\n"
+                "This means:\n\n"
+                "    pipe.attach(kp.calib.CalibrationService, ...)\n\n"
+                "And inside the attached modules, you can apply the "
+                "calibration with e.g.:\n\n"
+                "    cal_hits = self.services['calibrate'](blob['Hits'])\n"
+            )
             self.calibration = module
             if module._should_apply:
                 self.modules.append(module)

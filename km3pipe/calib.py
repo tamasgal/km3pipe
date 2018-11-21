@@ -282,7 +282,7 @@ class CalibrationService(Module):
             detector=detector
         )
 
-        self.expose(self.calibrate, "Calibration")
+        self.expose(self.calibrate, "calibrate")
 
     def calibrate(self, hits):
         return self._calibration.apply(hits)
