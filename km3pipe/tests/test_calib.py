@@ -120,6 +120,8 @@ class TestCalibrationService(TestCase):
             'time': [10.1, 11.2, 12.3]
         })
 
+        tester = self
+
         class HitCalibrator(Module):
             def process(self, blob):
                 chits = self.services['Calibration'](hits)
@@ -127,16 +129,16 @@ class TestCalibrationService(TestCase):
                 assert len(hits) == len(chits)
 
                 a_hit = chits[0]
-                self.assertAlmostEqual(2.1, a_hit.pos_x)
-                self.assertAlmostEqual(40, a_hit.t0)
+                tester.assertAlmostEqual(2.1, a_hit.pos_x)
+                tester.assertAlmostEqual(40, a_hit.t0)
                 t0 = a_hit.t0
-                self.assertAlmostEqual(10.1 + t0, a_hit.time)
+                tester.assertAlmostEqual(10.1 + t0, a_hit.time)
 
                 a_hit = chits[1]
-                self.assertAlmostEqual(3.4, a_hit.pos_x)
-                self.assertAlmostEqual(80, a_hit.t0)
+                tester.assertAlmostEqual(3.4, a_hit.pos_x)
+                tester.assertAlmostEqual(80, a_hit.t0)
                 t0 = a_hit.t0
-                self.assertAlmostEqual(11.2 + t0, a_hit.time)
+                tester.assertAlmostEqual(11.2 + t0, a_hit.time)
                 return blob
 
         pipe = Pipeline()
