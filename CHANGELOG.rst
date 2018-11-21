@@ -1,8 +1,15 @@
 Unreleased changes
 ------------------
 
+
 Version 8
 ---------
+8.5.0 / 2018-11-21
+~~~~~~~~~~~~~~~~~~
+* ``Module`` can now require services with the
+  ``self.require_service(service_name, [reason])``
+* Logging can now show deprecation warnings with ``[self.]log.deprecate()``
+* ``runinfo`` optionally prints out the trigger parameters when ``-t`` is used
 
 8.4.1 / 2018-11-06
 ~~~~~~~~~~~~~~~~~~

@@ -1,8 +1,11 @@
 KM3Pipe
 =======
 
-.. image:: https://travis-ci.org/tamasgal/km3pipe.svg?branch=develop
-    :target: https://travis-ci.org/tamasgal/km3pipe
+.. image:: https://git.km3net.de/km3py/km3pipe/badges/develop/build.svg
+    :target: https://git.km3net.de/km3py/km3pipe/pipelines
+
+.. image:: https://git.km3net.de/km3py/km3pipe/badges/develop/coverage.svg
+    :target: https://km3py.pages.km3net.de/km3pipe/coverage
 
 .. image:: https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat
     :target: http://km3pipe.readthedocs.io/en/latest/
@@ -21,7 +24,7 @@ Although it is mainly designed for the KM3NeT neutrino detectors, it can easily 
 
 Feel free to get in touch if you’re looking for a small, versatile framework which provides a quite straightforward module system to make code exchange between your project members as easily as possible. KM3Pipe already comes with several types of Pumps, so it should be easy to find an example to implement your owns. As of version 8.0.0 you find Pumps and Sinks based on popular formats like HDF5 (https://www.hdfgroup.org), ROOT (https://root.cern.ch) but also some very specialised project internal binary data formats, which on the other hand can act as templates for your own ones. Just have a look at the io subpackage and of course the documention if you’re interested!
 
-Read the docs at http://km3pipe.readthedocs.io (updated on each commit)
+Read the docs at http://km3py.pages.km3net.de/km3pipe (updated on each commit)
 
 KM3NeT related documentation (internal) at http://wiki.km3net.de/index.php/KM3Pipe
 

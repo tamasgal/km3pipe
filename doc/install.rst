@@ -13,9 +13,14 @@ KM3Pipe is preinstalled on the Lyon computing centre. Put this into your
 
     source $KM3NET_THRONG_DIR/src/python/pyenv.sh
 
-There is also an experimental setup with ROOT6 and Python 3.6, which can be loaded using::
+If you see the following warnings, just ignore them::
 
-    source KM3NET_THRONG_DIR/src/python/conda.sh
+    pyenv: cannot rehash: /pbs/throng/km3net/src/python/python_env/shims isn't writable
+    pyenv: no such command `virtualenv-init'
+
+To test if everything is working, run the following command::
+
+    km3pipe test
 
 And you are ready to go! This will work on both Scientific Linux 6 and Cent OS
 machines as the ``$KM3NET_THRONG_DIR``, set by your group environment, is
@@ -117,20 +122,19 @@ be used to update KM3Pipe itself::
 
     $ km3pipe update
 
-To get the latest developer version::
-
-    $ km3pipe update develop
-
 Or you can of course use `pip`::
 
     $ pip install --upgrade km3pipe
+
+To get the latest developer version::
+
+    $ km3pipe update develop
 
 If you installed KM3Pipe from source via `make install-dev`,
 you simply pull the changes from git and rebuild it::
 
     $ cd /path/to/km3pipe_repo
     $ git pull
-    $ make
 
 
 Configuration

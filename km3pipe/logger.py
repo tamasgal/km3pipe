@@ -23,6 +23,16 @@ __status__ = "Development"
 loggers = {}    # this holds all the registered loggers
 # logging.basicConfig()
 
+DEPRECATION = 45
+logging.addLevelName(DEPRECATION, "DEPRECATION")
+
+
+def deprecation(self, message, *args, **kws):
+    self._log(DEPRECATION, message, args, **kws)
+
+
+logging.Logger.deprecation = deprecation
+
 if supports_color():
     logging.addLevelName(
         logging.INFO,
@@ -44,6 +54,7 @@ if supports_color():
         logging.CRITICAL,
         "\033[1;101m%s\033[1;0m" % logging.getLevelName(logging.CRITICAL)
     )
+    logging.addLevelName(DEPRECATION, "\033[1;35m%s\033[1;0m" % 'DEPRECATION')
 
 
 class LogIO(object):
@@ -92,6 +103,7 @@ def get_logger(name):
     ch.setFormatter(formatter)
     logger.addHandler(ch)
     loggers[name] = logger
+
     return logger
 
 
