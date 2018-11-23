@@ -41,6 +41,7 @@ setup(
             'km3pipe=km3pipe.cmd:main',
             'km3srv=km3pipe.srv:main',
             'tohdf5=km3pipe.utils.tohdf5:main',
+            'qtohdf5=km3pipe.utils.qtohdf5:main',
             'hdf2root=km3pipe.utils.hdf2root:main',
             'pipeinspector=pipeinspector.app:main',
             'rtree=km3pipe.utils.rtree:main',
