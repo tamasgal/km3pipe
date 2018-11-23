@@ -12,7 +12,7 @@ import threading
 
 import matplotlib
 # Force matplotlib to not use any Xwindows backend.
-matplotlib.use('Agg')  # noqa
+matplotlib.use('Agg')    # noqa
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 import pandas as pd
@@ -23,7 +23,6 @@ from km3pipe.io import CHPump
 from km3pipe.io.daq import (DAQPreamble, DAQEvent)
 from km3pipe.logger import get_logger
 import km3pipe.style
-
 
 km3pipe.style.use('km3pipe')
 log = get_logger("trigger_rate")
@@ -45,7 +44,7 @@ class TriggerRate(Module):
     def configure(self):
         self.run = True
         self.interval = self.get("interval") or trigger_rate_sampling_period()
-        self.event_times = deque(maxlen=4000)  # max events per interval
+        self.event_times = deque(maxlen=4000)    # max events per interval
         # minutes to monitor
         self.trigger_rates = deque(maxlen=60 * 24 // (self.interval // 60))
         self.thread = threading.Thread(target=self.plot).start()
@@ -55,11 +54,16 @@ class TriggerRate(Module):
     def restore_data(self):
         with lock:
             try:
-                data = zip(self.store.trigger_rates.timestamp,
-                           self.store.trigger_rates.rate)
+                data = zip(
+                    self.store.trigger_rates.timestamp,
+                    self.store.trigger_rates.rate
+                )
                 self.trigger_rates.extend(data)
-                print("\n{0} data points restored."
-                      .format(len(self.trigger_rates)))
+                print(
+                    "\n{0} data points restored.".format(
+                        len(self.trigger_rates)
+                    )
+                )
             except AttributeError:
                 pass
 
@@ -71,7 +75,7 @@ class TriggerRate(Module):
 
         data = blob['CHData']
         data_io = StringIO(data)
-        preamble = DAQPreamble(file_obj=data_io)  # noqa
+        preamble = DAQPreamble(file_obj=data_io)    # noqa
         event = DAQEvent(file_obj=data_io)
         timestamp = event.header.time_stamp
         with lock:
@@ -95,9 +99,13 @@ class TriggerRate(Module):
         rate = n_events / interval
         self.trigger_rates.append((now, rate))
         try:
-            self.store.append('trigger_rates',
-                              pd.DataFrame({'timestamp': [now],
-                                            'rate': [rate]}))
+            self.store.append(
+                'trigger_rates',
+                pd.DataFrame({
+                    'timestamp': [now],
+                    'rate': [rate]
+                })
+            )
         except pd.io.pytables.ClosedFileError:
             pass
 
@@ -108,8 +116,11 @@ class TriggerRate(Module):
         ax.xaxis.set_major_formatter(xfmt)
         data = pd.DataFrame({'dates': x, 'rates': y})
         data.plot('dates', 'rates', grid=True, ax=ax, legend=False, style='.')
-        ax.set_title("Trigger Rate - via Event Times\n{0} UTC"
-                     .format(datetime.utcnow().strftime("%c")))
+        ax.set_title(
+            "Trigger Rate - via Event Times\n{0} UTC".format(
+                datetime.utcnow().strftime("%c")
+            )
+        )
         ax.set_xlabel("time")
         ax.set_ylabel("trigger rate [Hz]")
         try:

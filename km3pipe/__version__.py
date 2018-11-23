@@ -32,8 +32,8 @@ def get_git_revision_hash(short=False):
     except subprocess.CalledProcessError:
         pass
     fpath = join(
-        KP_PATH, 'km3pipe/.git_revision_{}hash'
-        .format('short_' if short else '')
+        KP_PATH,
+        'km3pipe/.git_revision_{}hash'.format('short_' if short else '')
     )
     if exists(fpath):
         with open(fpath, 'r') as fobj:

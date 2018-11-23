@@ -386,7 +386,8 @@ KM3SIM_TAGS = {
 
 GSEAGEN_TAGS = {
     'neutrino': [
-        'Neutrinos', [
+        'Neutrinos',
+        [
             ('id', '<i4'),
             ('pos_x', 'f4'),
             ('pos_y', 'f4'),
@@ -404,7 +405,8 @@ GSEAGEN_TAGS = {
         ]
     ],
     'track_in': [
-        'TrackIns', [
+        'TrackIns',
+        [
             ('id', '<i4'),
             ('pos_x', 'f4'),
             ('pos_y', 'f4'),
@@ -418,7 +420,8 @@ GSEAGEN_TAGS = {
         ]
     ],
     'primary_lepton': [
-        'PrimaryLeptons', [
+        'PrimaryLeptons',
+        [
             ('id', '<i4'),
             ('pos_x', 'f4'),
             ('pos_y', 'f4'),
@@ -435,7 +438,8 @@ GSEAGEN_TAGS = {
 
 KM3_TAGS = {
     'neutrino': [
-        'Neutrinos', [
+        'Neutrinos',
+        [
             ('id', '<i4'),
             ('pos_x', 'f4'),
             ('pos_y', 'f4'),
@@ -453,7 +457,8 @@ KM3_TAGS = {
         ]
     ],
     'track_in': [
-        'TrackIns', [
+        'TrackIns',
+        [
             ('id', '<i4'),
             ('pos_x', 'f4'),
             ('pos_y', 'f4'),
@@ -468,7 +473,8 @@ KM3_TAGS = {
         ]
     ],
     'hit_raw': [
-        'Hits', [
+        'Hits',
+        [
             ('id', '<i4'),
             ('pmt_id', '<i4'),
             ('npe', '<i4'),

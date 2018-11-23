@@ -11,7 +11,6 @@ from km3modules.plot import plot_dom_parameters
 from km3modules.fit import fit_delta_ts
 import km3pipe.style
 
-
 km3pipe.style.use('km3pipe')
 
 PLOTS_PATH = 'www/plots'
@@ -44,8 +43,8 @@ class MonitorK40(kp.Module):
 
     def process(self, blob):
         self.index += 1
-#        if self.index % 30:
-#            return blob
+        #        if self.index % 30:
+        #            return blob
 
         self.n_slices += 1
 
@@ -84,21 +83,31 @@ class MonitorK40(kp.Module):
         self.n_slices = 0
 
         filename = os.path.join(PLOTS_PATH, 'k40.png')
-        plot_dom_parameters(data, detector, filename,
-                            'rate [Hz]',
-                            "K40 rate",
-                            vmin=600, vmax=1200,
-                            cmap='coolwarm', missing='black',
-                            under='darkorchid', over='deeppink')
+        plot_dom_parameters(
+            data,
+            detector,
+            filename,
+            'rate [Hz]',
+            "K40 rate",
+            vmin=600,
+            vmax=1200,
+            cmap='coolwarm',
+            missing='black',
+            under='darkorchid',
+            over='deeppink'
+        )
         print("done")
 
 
 pipe = kp.Pipeline()
-pipe.attach(kp.io.ch.CHPump, host='127.0.0.1',
-            port=5553,
-            tags='IO_TSL',
-            timeout=60 * 60 * 24 * 7,
-            max_queue=2000)
+pipe.attach(
+    kp.io.ch.CHPump,
+    host='127.0.0.1',
+    port=5553,
+    tags='IO_TSL',
+    timeout=60 * 60 * 24 * 7,
+    max_queue=2000
+)
 pipe.attach(kp.io.daq.TimesliceParser)
 pipe.attach(MonitorK40)
 pipe.drain()

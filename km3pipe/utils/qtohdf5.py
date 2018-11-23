@@ -64,7 +64,7 @@ def main():
     OUTPUT_PATH = join(CWD, args['OUTPUT_PATH'])
     USE_IRODS = args['-i']
     SUBSTRING = '' if args['-s'] is None else args['-s']
-    ET_PER_FILE = int(args['-e']) * 60  # [s]
+    ET_PER_FILE = int(args['-e']) * 60    # [s]
     FILES_PER_JOB = int(args['-n'])
     VMEM = args['-m']
     LOG_PATH = args['-l']
@@ -103,8 +103,11 @@ def main():
                 s.iget(ipath)
                 s.add("tohdf5 {} -o {}".format(fname, h5_fname))
             else:
-                s.add("tohdf5 {} -o {}".format(
-                    join(INPUT_PATH, fname), h5_fname))
+                s.add(
+                    "tohdf5 {} -o {}".format(
+                        join(INPUT_PATH, fname), h5_fname
+                    )
+                )
             s.add("touch {}".format(lock_fname))
             s.cp(h5_fname, OUTPUT_PATH)
             s.add("rm -f {}".format(lock_fname))
@@ -114,8 +117,9 @@ def main():
             s.echo("File '{}' converted.".format(fname))
             s.separator('-')
 
-        walltime = time.strftime('%H:%M:%S',
-                                 time.gmtime(ET_PER_FILE * n_files))
+        walltime = time.strftime(
+            '%H:%M:%S', time.gmtime(ET_PER_FILE * n_files)
+        )
 
         kp.shell.qsub(
             s,
@@ -124,7 +128,8 @@ def main():
             vmem=VMEM,
             log_path=LOG_PATH,
             irods=args['-i'],
-            dryrun=DRYRUN)
+            dryrun=DRYRUN
+        )
 
         if DRYRUN:
             break
