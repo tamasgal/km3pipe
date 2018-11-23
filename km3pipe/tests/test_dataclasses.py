@@ -28,8 +28,8 @@ __status__ = "Development"
 class TestDtypes(TestCase):
     def setUp(self):
         self.c_dt = np.dtype([('a', '<f4'), ('origin', '<u4'),
-                              ('pmt_id', '<u4'), ('time',
-                                                  '<f8'), ('group_id', '<u4')])
+                              ('pmt_id', '<u4'), ('time', '<f8'),
+                              ('group_id', '<u4')])
 
     def test_is_structured(self):
         assert is_structured(self.c_dt)
@@ -761,6 +761,60 @@ class TestTable(TestCase):
         t = Table({'a': 1})
         templates = t.templates_avail
         assert templates
+
+    def test_add_table_to_itself(self):
+        tab = Table({'a': [1]})
+        added_tab = tab + tab
+        assert 2 == len(added_tab)
+        self.assertListEqual([1, 1], list(added_tab.a))
+
+    def test_add_two_tables(self):
+        tab1 = Table({'a': [1, 2]})
+        tab2 = Table({'a': [3, 4]})
+        added_tab = tab1 + tab2
+        assert 4 == len(added_tab)
+        self.assertListEqual([1, 2, 3, 4], list(added_tab.a))
+
+    def test_add_two_tables_with_different_lengths(self):
+        tab1 = Table({'a': [1, 2]})
+        tab2 = Table({'a': [3, 4, 5]})
+        added_tab = tab1 + tab2
+        assert 5 == len(added_tab)
+        self.assertListEqual([1, 2, 3, 4, 5], list(added_tab.a))
+
+    def test_add_two_tables_with_different_lengths_and_columns(self):
+        tab1 = Table({'a': [1, 2], 'b': [100, 200]})
+        tab2 = Table({'a': [3, 4, 5], 'b': [300, 400, 500]})
+        added_tab = tab1 + tab2
+        assert 5 == len(added_tab)
+        self.assertListEqual([1, 2, 3, 4, 5], list(added_tab.a))
+        self.assertListEqual([100, 200, 300, 400, 500], list(added_tab.b))
+
+    def test_adding_preserves_metadata(self):
+        tab1 = Table({'a': [1, 2]}, h5loc='/a', h5singleton=True)
+        tab2 = Table({'a': [3, 4, 5]})
+        added_tab = tab1 + tab2
+        assert '/a' == tab1.h5loc
+        assert tab1.h5singleton
+
+    def test_add_tables_with_same_colnames_but_different_dtype_order(self):
+        cols1 = ('b', 'a')
+        tab1 = Table.from_columns([[100, 200], [1, 2]], colnames=cols1)
+        self.assertTupleEqual(cols1, tab1.dtype.names)
+        cols2 = ('a', 'b')
+        tab2 = Table.from_columns([[3, 4, 5], [300, 400, 500]], colnames=cols2)
+        added_tab = tab1 + tab2
+        self.assertListEqual([1, 2, 3, 4, 5], list(added_tab.a))
+        self.assertListEqual([100, 200, 300, 400, 500], list(added_tab.b))
+        self.assertListEqual(
+            list(added_tab.dtype.names), list(tab1.dtype.names)
+        )
+
+    def test_add_table_with_different_cols(self):
+        tab1 = Table({'a': [1]})
+        tab2 = Table({'b': [2]})
+        with self.assertRaises(TypeError):
+            added_tab = tab1 + tab2
 
 
 class TestTableFancyAttributes(TestCase):

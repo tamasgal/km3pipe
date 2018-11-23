@@ -404,6 +404,25 @@ class Table(np.recarray):
         rec = df.to_records(index=False)
         return cls(rec, **kwargs)
 
+    def __add__(self, other):
+        cols1 = set(self.dtype.descr)
+        cols2 = set(other.dtype.descr)
+        if len(cols1 ^ cols2) != 0:
+            cols1 = set(self.dtype.names)
+            cols2 = set(other.dtype.names)
+            if len(cols1 ^ cols2) == 0:
+                raise NotImplementedError
+            else:
+                raise TypeError("Table columns do not match")
+        col_order = list(self.dtype.names)
+        ret = self.copy()
+        len_self = len(self)
+        len_other = len(other)
+        final_length = len_self + len_other
+        ret.resize(final_length, refcheck=False)
+        ret[len_self:] = other[col_order]
+        return Table(ret)
+
     def __str__(self):
         name = self.name
         spl = 'split' if self.split_h5 else 'no split'
