@@ -83,6 +83,7 @@ code-style:
     script:
         - *virtualenv_definition
         - yapf -r -d -e "venv" .
+    allow_failure: true
 
 coverage:
     image: docker.km3net.de/base/python:3.6
