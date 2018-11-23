@@ -82,7 +82,7 @@ code-style:
     stage: test
     script:
         - *virtualenv_definition
-        - yapf -d -r .
+        - yapf -r -d -e "venv" .
 
 coverage:
     image: docker.km3net.de/base/python:3.6
