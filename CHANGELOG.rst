@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 
+* ``qtohdf5`` can now be used to convert multiple files using the batch farm
+  use the ``-i`` option to indicate that the input path is an IRODS path if you
+  convert files from IRODS to SPS for example
+
 
 Version 8
 ---------
