@@ -91,6 +91,7 @@ def main():
         s.add("echo A job to convert {} files to HDF5".format(n_files))
         s.add("cd $TMPDIR; mkdir -p $USER; cd $USER")
         s.add("echo")
+        s.add("set -e")
 
         for fname in file_chunk:
             s.separator('=')
