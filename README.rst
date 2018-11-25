@@ -7,9 +7,6 @@ KM3Pipe
 .. image:: https://git.km3net.de/km3py/km3pipe/badges/develop/coverage.svg
     :target: https://km3py.pages.km3net.de/km3pipe/coverage
 
-.. image:: http://examples.pages.km3net.de/km3badges/docs-latest-brightgreen.svg
-    :target: http://km3pipe.readthedocs.io/en/latest/
-
 .. image:: https://zenodo.org/badge/24634697.svg
    :target: https://doi.org/10.5281/zenodo.808829
 
