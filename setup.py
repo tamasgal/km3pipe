@@ -68,6 +68,7 @@ setup(
             'runtable=km3pipe.utils.runtable:main',
             'runinfo=km3pipe.utils.runinfo:main',
             'qrunprocessor=km3pipe.utils.qrunprocessor:main',
+            'wtd=km3pipe.utils.wtd:main',
         ],
     },
     classifiers=[
