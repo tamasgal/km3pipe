@@ -212,8 +212,9 @@ class TriggerRate(Module):
         #            plt.scatter(x, y)
         data.plot('dates', 'rates', grid=True, ax=ax, legend=False, style='.')
         ax.set_title(
-            "Trigger Rate - via Event Times\n{0}"
-            .format(datetime.utcnow().strftime("%c"))
+            "Trigger Rate - via Event Times\n{0}".format(
+                datetime.utcnow().strftime("%c")
+            )
         )
         ax.set_xlabel("time")
         ax.set_ylabel("trigger rate [Hz]")
@@ -325,8 +326,9 @@ class DOMActivityPlotter(Module):
             # print(ts_series.describe())
 
         ax.set_title(
-            "DOM Activity - via Summary Slices\n{0}"
-            .format(datetime.utcnow().strftime("%c"))
+            "DOM Activity - via Summary Slices\n{0}".format(
+                datetime.utcnow().strftime("%c")
+            )
         )
         ax.set_xlabel("DU")
         ax.set_ylabel("DOM")
@@ -408,12 +410,14 @@ class ZTPlot(Module):
             trig_hits = HitSeries([h for h in _hits if h.triggered])
 
             ax.scatter(
-                du_hits.time, [z for (x, y, z) in du_hits.pos],
+                du_hits.time,
+                [z for (x, y, z) in du_hits.pos],
                 c='#09A9DE',
                 label='hit'
             )
             ax.scatter(
-                trig_hits.time, [z for (x, y, z) in trig_hits.pos],
+                trig_hits.time,
+                [z for (x, y, z) in trig_hits.pos],
                 c='#FF6363',
                 label='triggered hit'
             )

@@ -35,7 +35,7 @@ class DOMActivityPlotter(kp.Module):
 
         data = blob['CHData']
         data_io = BytesIO(data)
-        preamble = kp.io.daq.DAQPreamble(file_obj=data_io)  # noqa
+        preamble = kp.io.daq.DAQPreamble(file_obj=data_io)    # noqa
         summaryslice = kp.io.daq.DAQSummaryslice(file_obj=data_io)
         timestamp = summaryslice.header.time_stamp
 
@@ -54,18 +54,26 @@ class DOMActivityPlotter(kp.Module):
         delta_ts = {}
         for key, timestamp in self.last_activity.items():
             delta_ts[key] = now - timestamp
-        plot_dom_parameters(delta_ts, detector, filename,
-                            'last activity [s]',
-                            "DOM Activity - via Summary Slices",
-                            vmin=0.0, vmax=15 * 60)
+        plot_dom_parameters(
+            delta_ts,
+            detector,
+            filename,
+            'last activity [s]',
+            "DOM Activity - via Summary Slices",
+            vmin=0.0,
+            vmax=15 * 60
+        )
 
 
 pipe = kp.Pipeline()
-pipe.attach(kp.io.ch.CHPump, host='127.0.0.1',
-            port=5553,
-            tags='IO_SUM',
-            timeout=60 * 60 * 24 * 7,
-            max_queue=2000)
+pipe.attach(
+    kp.io.ch.CHPump,
+    host='127.0.0.1',
+    port=5553,
+    tags='IO_SUM',
+    timeout=60 * 60 * 24 * 7,
+    max_queue=2000
+)
 pipe.attach(kp.io.daq.DAQProcessor)
 pipe.attach(DOMActivityPlotter)
 pipe.drain()

@@ -31,4 +31,4 @@ tornado
 twine
 urwid
 websocket-client
-yapf
+yapf>=0.24

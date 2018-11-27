@@ -74,8 +74,9 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
             raise SystemExit(message)
         else:
             log.warning(
-                "The following files are missing and ignored: {}"
-                .format(', '.join(missing_files))
+                "The following files are missing and ignored: {}".format(
+                    ', '.join(missing_files)
+                )
             )
 
     input_files = set(filenames) - set(missing_files)

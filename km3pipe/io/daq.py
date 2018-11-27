@@ -163,8 +163,9 @@ class DAQPump(Pump):
             blob['DAQHeader'] = daq_frame.header
         else:
             log.warning(
-                "Skipping DAQ frame with data type code '{0}'."
-                .format(preamble.data_type)
+                "Skipping DAQ frame with data type code '{0}'.".format(
+                    preamble.data_type
+                )
             )
             blob_file.seek(preamble.length - DAQPreamble.size, 1)
 

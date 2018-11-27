@@ -41,7 +41,8 @@ class BlobBrowser(urwid.Frame):
             item_widget = ItemWidget(key, blob[key])
             new_items.append(item_widget)
             urwid.connect_signal(
-                item_widget, 'key_selected', self.key_selected)
+                item_widget, 'key_selected', self.key_selected
+            )
         self.listbox.body.extend(new_items)
         self.listbox.set_focus(self.cursor_position)
 
@@ -59,11 +60,14 @@ class BlobBrowser(urwid.Frame):
         content = [urwid.Text(line) for line in formatter(data).split('\n')]
         self.popup = urwid.ListBox(content)
         popup_box = urwid.LineBox(self.popup)
-        self.overlay = urwid.Overlay(popup_box, self.body,
-                                     'center',
-                                     ('relative', 80),
-                                     'middle',
-                                     ('relative', 80),)
+        self.overlay = urwid.Overlay(
+            popup_box,
+            self.body,
+            'center',
+            ('relative', 80),
+            'middle',
+            ('relative', 80),
+        )
         self.body = self.overlay
 
     def keypress(self, size, key):
@@ -77,7 +81,7 @@ class BlobBrowser(urwid.Frame):
             return input
 
 
-class ItemWidget (urwid.WidgetWrap):
+class ItemWidget(urwid.WidgetWrap):
     signals = ['key_selected']
 
     def __init__(self, key, data):
@@ -91,8 +95,12 @@ class ItemWidget (urwid.WidgetWrap):
         type_label = str(type(data)).split("'")[1]
 
         self.item = [
-            ('fixed', 35, urwid.Padding(
-                urwid.AttrWrap(urwid.Text(key), 'body', 'focus'), left=2)),
+            (
+                'fixed', 35,
+                urwid.Padding(
+                    urwid.AttrWrap(urwid.Text(key), 'body', 'focus'), left=2
+                )
+            ),
             urwid.AttrWrap(urwid.Text(type_label), 'body', 'focus'),
             urwid.AttrWrap(urwid.Text(size_label), 'body', 'focus'),
         ]
@@ -113,11 +121,15 @@ class BlobWidget(urwid.Pile):
 
     def __init__(self):
         self.width = 50
-        self.size = (0,)
+        self.size = (0, )
         self.index = 0
-        urwid.Pile.__init__(self, [urwid.Text('', wrap='clip'),
-                                   urwid.Text('', wrap='clip'),
-                                   urwid.Text('', wrap='clip')])
+        urwid.Pile.__init__(
+            self, [
+                urwid.Text('', wrap='clip'),
+                urwid.Text('', wrap='clip'),
+                urwid.Text('', wrap='clip')
+            ]
+        )
 
     def goto_blob(self, position):
         self.index = position
@@ -168,8 +180,9 @@ class BlobWidget(urwid.Pile):
             start -= 10
         lowest_tick = int(math.floor(start / 10) * 10)
         highest_tick = lowest_tick + self.width
-        ticks_labels = ['{0:<10}'.format(i)
-                        for i in range(lowest_tick, highest_tick, 10)]
+        ticks_labels = [
+            '{0:<10}'.format(i) for i in range(lowest_tick, highest_tick, 10)
+        ]
         slice_start = (start % 10)
         slice_end = (start % 10) + self.width
         ticks = ''.join(ticks_labels)[slice_start:slice_end]
@@ -183,6 +196,5 @@ class BlobWidget(urwid.Pile):
             icons = icon * self.width
         if start > 10:
             start = 10
-        return [('blob', icons[:start]),
-                ('blob_selected', icons[start]),
+        return [('blob', icons[:start]), ('blob_selected', icons[start]),
                 ('blob', icons[start + 1:])]

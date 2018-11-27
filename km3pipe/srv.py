@@ -305,8 +305,9 @@ def srv_event(token, hits, url=RBA_URL):
         tot = list(hits.tot)
     else:
         log.error(
-            "No calibration information found in hits (type: {0})"
-            .format(type(hits))
+            "No calibration information found in hits (type: {0})".format(
+                type(hits)
+            )
         )
         return
 

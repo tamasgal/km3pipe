@@ -157,8 +157,9 @@ class CHPump(Pump):
         current_qsize = self.queue.qsize()
         log_func = print if dt > 0 else log.warning
         log_func(
-            "Average idle time per packet: {0:.3f}us (queue size: {1})"
-            .format(dt * 1e6, current_qsize)
+            "Average idle time per packet: {0:.3f}us (queue size: {1})".format(
+                dt * 1e6, current_qsize
+            )
         )
 
     def _add_process_dt(self):

@@ -41,18 +41,24 @@ class UI(object):
         'up': ('up', 'k'),
         'down': ('down', 'j'),
         'goto': ('g', 'G'),
-        'help': ('?',),
+        'help': ('?', ),
     }
 
 
-class ItemWidget (urwid.WidgetWrap):
-
+class ItemWidget(urwid.WidgetWrap):
     def __init__(self, id, description):
         self.id = id
         self.content = 'item %s: %s...' % (str(id), description[:25])
         self.item = [
-            ('fixed', 15, urwid.Padding(urwid.AttrWrap(
-                urwid.Text('item %s' % str(id)), 'body', 'focus'), left=2)),
+            (
+                'fixed', 15,
+                urwid.Padding(
+                    urwid.AttrWrap(
+                        urwid.Text('item %s' % str(id)), 'body', 'focus'
+                    ),
+                    left=2
+                )
+            ),
             urwid.AttrWrap(urwid.Text('%s' % description), 'body', 'focus'),
         ]
         w = urwid.Columns(self.item)
@@ -84,10 +90,14 @@ class BlobSelector(urwid.WidgetWrap):
 class BlobWidget(urwid.Pile):
     def __init__(self):
         self.width = 20
-        self.size = (0,)
-        urwid.Pile.__init__(self, [urwid.Text('', wrap='clip'),
-                                   urwid.Text('', wrap='clip'),
-                                   urwid.Text('', wrap='clip')])
+        self.size = (0, )
+        urwid.Pile.__init__(
+            self, [
+                urwid.Text('', wrap='clip'),
+                urwid.Text('', wrap='clip'),
+                urwid.Text('', wrap='clip')
+            ]
+        )
 
     def draw(self):
         self.widget_list[0].set_text(".OOOOOOOOOOOOOOOOOOOO")
@@ -107,21 +117,22 @@ def next_blob():
 header = urwid.AttrWrap(urwid.Text("The header!", align='center'), 'header')
 footer = urwid.AttrWrap(urwid.Text("The footer"), 'footer')
 
-
 items = []
 for i in range(100):
     items.append(ItemWidget(i, "Item {0}".format(i)))
 
 browser_header = urwid.AttrMap(urwid.Text('selected:'), 'head')
 browser_listbox = urwid.ListBox(urwid.SimpleListWalker(items))
-browser_view = urwid.Frame(urwid.AttrWrap(
-    browser_listbox, 'body'), header=browser_header)
+browser_view = urwid.Frame(
+    urwid.AttrWrap(browser_listbox, 'body'), header=browser_header
+)
 
 blobs = BlobWidget()
 footer = urwid.Columns([urwid.Text('Info\nSecond kube'), blobs])
 
-main_frame = urwid.AttrWrap(urwid.Frame(
-    browser_view, focus_part='body'), 'default')
+main_frame = urwid.AttrWrap(
+    urwid.Frame(browser_view, focus_part='body'), 'default'
+)
 main_frame.set_header(header)
 main_frame.set_footer(footer)
 

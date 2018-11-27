@@ -53,8 +53,9 @@ class ColourCycler(object):
             self._cycler = cycle(self.colours[palette])
         except KeyError:
             raise KeyError(
-                "Chose one of the following colour palettes: {0}"
-                .format(self.available)
+                "Chose one of the following colour palettes: {0}".format(
+                    self.available
+                )
             )
 
     def refresh_styles(self):
