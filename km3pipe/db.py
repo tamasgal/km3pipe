@@ -201,6 +201,42 @@ class DBManager(object):
         else:
             return dataframe
 
+    def get_det_id(self, det_oid):
+        """Convert detector string representation (OID) to serialnumber"""
+        try:
+            return self.detectors[self.detectors.OID == det_oid
+                                  ].SERIALNUMBER.iloc[0]
+        except IndexError:
+            log.critical("No det ID found for OID '{}'".format(det_oid))
+            return None
+
+    def get_det_oid(self, det_id):
+        """Convert detector serialnumber to string representation (OID)"""
+        try:
+            return self.detectors[self.detectors.SERIALNUMBER == det_id
+                                  ].OID.iloc[0]
+        except IndexError:
+            log.critical("No OID found for det ID '{}'".format(det_id))
+            return None
+
+    def to_det_id(self, det_id_or_det_oid):
+        """Convert det ID or OID to det ID"""
+        try:
+            int(det_id_or_det_oid)
+        except ValueError:
+            return self.get_det_id(det_id_or_det_oid)
+        else:
+            return det_id_or_det_oid
+
+    def to_det_oid(self, det_id_or_det_oid):
+        """Convert det OID or ID to det OID"""
+        try:
+            int(det_id_or_det_oid)
+        except ValueError:
+            return det_id_or_det_oid
+        else:
+            return self.get_det_oid(det_id_or_det_oid)
+
     @property
     def parameters(self):
         "Return the parameters container for quick access to their details"
@@ -219,8 +255,8 @@ class DBManager(object):
     def trigger_setup(self, runsetup_oid):
         "Retrieve the trigger setup for a given runsetup OID"
         r = self._get_content(
-            "jsonds/rslite/s?rs_oid={}&upifilter=1.1.2.2.3/*"
-            .format(runsetup_oid)
+            "jsonds/rslite/s?rs_oid={}&upifilter=1.1.2.2.3/*".
+            format(runsetup_oid)
         )
         data = json.loads(r)['Data']
         if not data:
@@ -627,8 +663,8 @@ class ParametersContainer(object):
             return aliases[0]
 
         log.info(
-            "Parameter '{0}' not found, trying to find alternative."
-            .format(name)
+            "Parameter '{0}' not found, trying to find alternative.".
+            format(name)
         )
         try:
             # ahrs_g[0] for example should be looked up as ahrs_g
@@ -672,8 +708,9 @@ class DOMContainer(object):
             ][0])
         except IndexError:
             log.critical(
-                "No DOM found for OMKey '{0}' and DetOID '{1}'."
-                .format(omkey, det_id)
+                "No DOM found for OMKey '{0}' and DetOID '{1}'.".format(
+                    omkey, det_id
+                )
             )
 
     def via_dom_id(self, dom_id, det_id):
