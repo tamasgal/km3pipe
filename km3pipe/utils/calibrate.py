@@ -30,10 +30,21 @@ cprint = kp.logger.get_printer(os.path.basename(__file__))
 log = kp.logger.get_logger(os.path.basename(__file__))
 
 
-def calibrate_hits(f, cal, chunk_size):
-    dom_ids = f.get_node("/hits/dom_id")
-    channel_ids = f.get_node("/hits/channel_id")
-    n_hits = len(dom_ids)
+def calibrate_hits(f, cal, chunk_size, h5group):
+    if h5group + "/pmt_id" in f:
+        cprint("Found MC hits in '{}'".format(h5group))
+        is_mc = True
+    else:
+        cprint("Found DAQ hits in '{}'".format(h5group))
+        is_mc = False
+    if is_mc:
+        pmt_ids = f.get_node(h5group + "/pmt_id")
+    else:
+        dom_ids = f.get_node(h5group + "/dom_id")
+        channel_ids = f.get_node(h5group + "/channel_id")
+
+    n_hits = len(f.get_node(h5group + "/time"))
+
     idx = 0
 
     chunks = kp.tools.chunks(range(n_hits), chunk_size)
@@ -41,30 +52,29 @@ def calibrate_hits(f, cal, chunk_size):
         n = len(chunk)
         calib = np.empty((n, 9), dtype='f4')
 
-        _dom_ids = dom_ids[idx:idx + n]
-        _channel_ids = channel_ids[idx:idx + n]
+        if is_mc:
+            _pmt_ids = pmt_ids[idx:idx + n]
+        else:
+            _dom_ids = dom_ids[idx:idx + n]
+            _channel_ids = channel_ids[idx:idx + n]
 
         idx += n
 
         for i in range(n):
-            dom_id = _dom_ids[i]
-            channel_id = _channel_ids[i]
-            calib[i] = cal._calib_by_dom_and_channel[dom_id][channel_id]
+            if is_mc:
+                pmt_id = _pmt_ids[i]
+                calib[i] = cal._calib_by_pmt_id[pmt_id]
+            else:
+                dom_id = _dom_ids[i]
+                channel_id = _channel_ids[i]
+                calib[i] = cal._calib_by_dom_and_channel[dom_id][channel_id]
 
-        write_calibration(calib, f, "/hits")
+        write_calibration(calib, f, h5group)
 
-    f.get_node("/hits")._v_attrs.datatype = "CRawHitSeries"
-
-
-def calibrate_mc_hits(f, cal):
-    pmt_ids = f.get_node("/mc_hits/pmt_id")[:]
-    n = len(pmt_ids)
-    calib = np.empty((n, 9), dtype='f4')
-    for i in range(n):
-        pmt_id = pmt_ids[i]
-        calib[i] = cal._calib_by_pmt_id[pmt_id]
-    write_calibration(calib, f, "/mc_hits")
-    f.get_node("/mc_hits")._v_attrs.datatype = "CMcHitSeries"
+    if is_mc:
+        f.get_node(h5group)._v_attrs.datatype = "CMcHitSeries"
+    else:
+        f.get_node(h5group)._v_attrs.datatype = "CRawHitSeries"
 
 
 def write_calibration(calib, f, loc):
@@ -121,14 +131,12 @@ def main():
         cprint("Reading calbration information")
         cal = kp.calib.Calibration(filename=args['DETXFILE'])
 
-        if '/hits' in f:
-            initialise_arrays('/hits', f)
-            cprint("Calibrating hits")
-            calibrate_hits(f, cal, int(args['-c']))
-        if '/mc_hits' in f:
-            initialise_arrays('/mc_hits', f)
-            cprint("Calibrate MC hits")
-            calibrate_mc_hits(f, cal, args['CHUNK_SIZE'])
+        for h5group in ['/hits', '/mc_hits']:
+
+            if h5group in f:
+                initialise_arrays(h5group, f)
+                cprint("Calibrating hits in '{}'".format(h5group))
+                calibrate_hits(f, cal, int(args['-c']), h5group)
 
         cprint("Done.")
 
