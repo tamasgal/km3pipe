@@ -179,6 +179,13 @@ RECO2NUM = {
     'KM3DeltaPos': 10000,
 }
 
+JHIST_CHAINS = {
+    'JMUONGANDALF': [
+        'JMUONGANDALF', 'JMUONENERGY', 'JMUONPREFIT', 'JMUONSIMPLEX',
+        'JMUONSTART'
+    ]
+}
+
 FITINF2NAME = {v: k for k, v in FITINF2NUM.items()}
 FITINFDUSJ2NAME = {v: k for k, v in FITINFDUSJ2NUM.items()}
 RECO2NAME = {v: k for k, v in RECO2NUM.items()}
@@ -340,10 +347,23 @@ class AanetPump(Pump):
                     self.log.info(
                         "Unknown Reconstruction type! Using history..."
                     )
-                    # iteration in reverse order segfaults, whyever...
-                    stages = [k for k in trk.rec_stages]
-                    trk_name = '__'.join([RECO2NAME[k] for k in stages[::-1]])
-                    trk_name = 'JHIST__' + trk_name
+                    stages = [RECO2NAME[s] for s in trk.rec_stages]
+                    # TODO: make this more generic (using JHIST_CHAINS)
+                    if 'JMUONGANDALF' in stages:
+                        self.log.info("Found JGandalf, adding stage flags")
+                        trk_name = 'JGandalf'
+                        default_stages = JHIST_CHAINS['JMUONGANDALF']
+                        stage_values = np.full((len(default_stages), 1),
+                                               0,
+                                               dtype=bool)
+                        for stage_idx, stage in enumerate(default_stages):
+                            if stage in stages:
+                                stage_values[stage_idx, 0] = True
+                        tab = tab.append_columns(default_stages, stage_values)
+                    else:
+                        self.log.info("Unknown chain, using stages as name")
+                        trk_name = '__'.join([s for s in stages[::-1]])
+                        trk_name = 'JHIST__' + trk_name
 
             tab.name = trk_name
             tab.h5loc = '/reco/{}'.format(trk_name.lower())
