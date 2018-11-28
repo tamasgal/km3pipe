@@ -37,6 +37,7 @@ def calibrate_hits(f, cal, chunk_size, h5group):
     else:
         cprint("Found DAQ hits in '{}'".format(h5group))
         is_mc = False
+
     if is_mc:
         pmt_ids = f.get_node(h5group + "/pmt_id")
     else:
