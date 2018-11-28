@@ -791,11 +791,17 @@ class TestTable(TestCase):
         self.assertListEqual([100, 200, 300, 400, 500], list(added_tab.b))
 
     def test_adding_preserves_metadata(self):
-        tab1 = Table({'a': [1, 2]}, h5loc='/a', h5singleton=True)
+        tab1 = Table({
+            'a': [1, 2]
+        },
+                     h5loc='/a',
+                     h5singleton=True,
+                     split_h5=True)
         tab2 = Table({'a': [3, 4, 5]})
         added_tab = tab1 + tab2
         assert '/a' == tab1.h5loc
         assert tab1.h5singleton
+        assert tab1.split_h5
 
     def test_add_tables_with_same_colnames_but_different_dtype_order(self):
         cols1 = ('b', 'a')
@@ -815,6 +821,71 @@ class TestTable(TestCase):
         tab2 = Table({'b': [2]})
         with self.assertRaises(TypeError):
             added_tab = tab1 + tab2
+
+    def test_merge(self):
+        tab1 = Table({'a': [1]}, h5loc='/a', h5singleton=True)
+        tab2 = Table({'a': [2]})
+        tab3 = Table({'a': [3]})
+        merged_tab = Table.merge([tab1, tab2, tab3])
+        assert 3 == len(merged_tab)
+        self.assertListEqual([1, 2, 3], list(merged_tab.a))
+        assert '/a' == merged_tab.h5loc
+        assert merged_tab.h5singleton
+
+    def test_merge_different_columns_with_no_nan_compatible_dtype(self):
+        tab1 = Table({'a': [1]}, h5loc='/a', h5singleton=True)
+        tab2 = Table({'b': [2]})
+        tab3 = Table({'c': [3]})
+        with self.assertRaises(ValueError):
+            merged_tab = Table.merge([tab1, tab2, tab3])
+
+    def test_merge_different_columns_with_no_nan_compatible_dtype_even_if_fillna(
+            self
+    ):
+        tab1 = Table({'a': [1]}, h5loc='/a', h5singleton=True)
+        tab2 = Table({'b': [2]})
+        tab3 = Table({'c': [3]})
+        with self.assertRaises(ValueError):
+            merged_tab = Table.merge([tab1, tab2, tab3], fillna=True)
+
+    def test_merge_different_columns_fills_nan_when_fillna(self):
+        tab1 = Table({'a': [1.1]}, h5loc='/a', h5singleton=True, split_h5=True)
+        tab2 = Table({'b': [2.2]})
+        tab3 = Table({'c': [3.3]})
+        merged_tab = Table.merge([tab1, tab2, tab3], fillna=True)
+        assert 3 == len(merged_tab)
+
+        assert 1.1 == merged_tab.a[0]
+        assert np.isnan(merged_tab.a[1])
+        assert np.isnan(merged_tab.a[2])
+
+        assert np.isnan(merged_tab.b[0])
+        assert 2.2 == merged_tab.b[1]
+        assert np.isnan(merged_tab.b[2])
+
+        assert np.isnan(merged_tab.c[0])
+        assert np.isnan(merged_tab.c[1])
+        assert 3.3 == merged_tab.c[2]
+
+        assert '/a' == merged_tab.h5loc
+        assert merged_tab.h5singleton
+        assert merged_tab.split_h5
+
+    def test_merge_other_different_columns_fills_nan_when_fillna(self):
+        tab1 = Table({'a': [1.1, 1.2], 'b': [10.1, 10.2]})
+        tab2 = Table({'a': [2.1, 2.2], 'c': [100.1, 100.2]})
+
+        merged_tab = Table.merge([tab1, tab2], fillna=True)
+
+        assert 4 == len(merged_tab)
+
+        self.assertListEqual([1.1, 1.2, 2.1, 2.2], list(merged_tab.a))
+        self.assertListEqual([10.1, 10.2], list(merged_tab.b[:2]))
+        self.assertListEqual([100.1, 100.2], list(merged_tab.c[2:]))
+        assert np.isnan(merged_tab.c[0])
+        assert np.isnan(merged_tab.c[1])
+        assert np.isnan(merged_tab.b[2])
+        assert np.isnan(merged_tab.b[3])
 
 
 class TestTableFancyAttributes(TestCase):
