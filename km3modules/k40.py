@@ -87,8 +87,8 @@ class K40BackgroundSubtractor(kp.Module):
             bg_rates = []
             for c in self.combs:
                 bg_rates.append(pmt_rates[c[0]] * pmt_rates[c[1]] * 1e-9)
-            corrected_counts[dom_id] = (k40_rates.T -
-                                        np.array(bg_rates)).T * livetime
+            corrected_counts[
+                dom_id] = (k40_rates.T - np.array(bg_rates)).T * livetime
         return corrected_counts
 
     def finish(self):
