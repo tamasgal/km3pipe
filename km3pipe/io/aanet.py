@@ -321,12 +321,12 @@ class AanetPump(Pump):
         if len(tracks) == 0:
             self.log.debug("Found empty tracks, skipping...")
             return out
+
         for i, trk in enumerate(tracks):
             self.log.debug('Reading Track #{}...'.format(i))
             trk_dict = self._read_track(trk)
             # set name + h5loc later, if the name is not available, we need
             # the dtype to make a new name
-            tab = Table(trk_dict)
 
             trk_type = trk.rec_type
             try:
@@ -339,40 +339,38 @@ class AanetPump(Pump):
                 # If that is not available, enumerate the tracks by their
                 # dtypes (since they have no other tagging)
                 if len(trk.rec_stages) == 0:
-                    self.log.info(
-                        "Unknown Reconstruction type & no history available!"
-                    )
+                    self.log.info("Unknown reco type & no history!")
+                    tab = Table(trk_dict)
                     trk_name = self._handle_generic(tab.dtype)
                 else:
-                    self.log.info(
-                        "Unknown Reconstruction type! Using history..."
-                    )
+                    self.log.info("Unknown recoo type! Using history...")
                     stages = [RECO2NAME[s] for s in trk.rec_stages]
                     # TODO: make this more generic (using JHIST_CHAINS)
                     if 'JMUONPREFIT' in stages:
                         self.log.info("Found JMuon, adding stage flags")
                         trk_name = 'JMuon'
                         default_stages = JHIST_CHAINS['JMUON']
-                        stage_values = np.full((len(default_stages), 1),
-                                               0,
-                                               dtype=bool)
-                        for stage_idx, stage in enumerate(default_stages):
+                        for stage in default_stages:
                             if stage in stages:
-                                stage_values[stage_idx, 0] = True
-                        tab = tab.append_columns(default_stages, stage_values)
+                                trk_dict[stage] = True
+                            else:
+                                trk_dict[stage] = False
                     else:
                         self.log.info("Unknown chain, using stages as name")
                         trk_name = '__'.join([s for s in stages[::-1]])
                         trk_name = 'JHIST__' + trk_name
 
+                    tab = Table(trk_dict)
+            else:
+                tab = Table(trk_dict)
+
             tab.name = trk_name
             tab.h5loc = '/reco/{}'.format(trk_name.lower())
             out[trk_name].append(tab)
+
         log.info("Merging tracks into table...")
         for key in out:
             log.debug("Merging '{}'...".format(key))
-            name = out[key][0].name
-            h5loc = out[key][0].h5loc
             out[key] = Table.merge(out[key], fillna=True)
         self.log.debug(out)
         return out
