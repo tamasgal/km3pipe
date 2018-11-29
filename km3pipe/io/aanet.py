@@ -180,7 +180,7 @@ RECO2NUM = {
 }
 
 JHIST_CHAINS = {
-    'JMUONGANDALF': [
+    'JMUON': [
         'JMUONGANDALF', 'JMUONENERGY', 'JMUONPREFIT', 'JMUONSIMPLEX',
         'JMUONSTART'
     ]
@@ -349,10 +349,10 @@ class AanetPump(Pump):
                     )
                     stages = [RECO2NAME[s] for s in trk.rec_stages]
                     # TODO: make this more generic (using JHIST_CHAINS)
-                    if 'JMUONGANDALF' in stages:
-                        self.log.info("Found JGandalf, adding stage flags")
-                        trk_name = 'JGandalf'
-                        default_stages = JHIST_CHAINS['JMUONGANDALF']
+                    if 'JMUONPREFIT' in stages:
+                        self.log.info("Found JMuon, adding stage flags")
+                        trk_name = 'JMuon'
+                        default_stages = JHIST_CHAINS['JMUON']
                         stage_values = np.full((len(default_stages), 1),
                                                0,
                                                dtype=bool)
@@ -373,11 +373,7 @@ class AanetPump(Pump):
             log.debug("Merging '{}'...".format(key))
             name = out[key][0].name
             h5loc = out[key][0].h5loc
-            out[key] = Table(
-                np.concatenate(out[key]),
-                name=name,
-                h5loc=h5loc,
-            )
+            out[key] = Table.merge(out[key], fillna=True)
         self.log.debug(out)
         return out
 
