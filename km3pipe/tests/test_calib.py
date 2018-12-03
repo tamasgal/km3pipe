@@ -145,3 +145,15 @@ class TestCalibrationService(TestCase):
         pipe.attach(CalibrationService, filename=DETX_FILENAME)
         pipe.attach(HitCalibrator)
         pipe.drain(1)
+
+    def test_provided_detector_data(self):
+        class DetectorReader(Module):
+            def process(self, blob):
+                assert 'detector' in self.services
+                det = self.services['detector']
+                assert isinstance(det, Detector)
+
+        pipe = Pipeline()
+        pipe.attach(CalibrationService, filename=DETX_FILENAME)
+        pipe.attach(DetectorReader)
+        pipe.drain(1)
