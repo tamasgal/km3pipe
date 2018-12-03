@@ -78,6 +78,148 @@ class TestKeep(TestCase):
         pipe.attach(Observer)
         pipe.drain(5)
 
+    def test_hdf5_keep_group_wo_subgroup(self):
+        class APump(kp.Pump):
+            def process(self, blob):
+                blob['A'] = kp.Table({
+                    'foo': [1, 2, 3],
+                    'bar': [4, 5, 6]
+                },
+                                     h5loc='/foobar')
+                blob['B'] = kp.Table({
+                    'a': [1.1, 2.1, 3.1],
+                    'b': [4.2, 5.2, 6.2]
+                },
+                                     h5loc='/ab')
+                return blob
+
+        class Observer(kp.Module):
+            def process(self, blob):
+                assert 'A' in blob.keys()
+                assert '/foobar' == blob['A'].h5loc
+                assert not 'B' in blob.keys()
+                return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(APump)
+        pipe.attach(Keep, h5locs=['/foobar'])
+        pipe.attach(Observer)
+        pipe.drain(5)
+
+    def test_hdf5_keep_group_w_subgroup(self):
+        class APump(kp.Pump):
+            def process(self, blob):
+                blob['A'] = kp.Table({
+                    'foo': [1, 2, 3],
+                    'bar': [4, 5, 6]
+                },
+                                     h5loc='/foobar')
+                blob['B'] = kp.Table({
+                    'a': [1.1, 2.1, 3.1],
+                    'b': [4.2, 5.2, 6.2]
+                },
+                                     h5loc='/ab')
+                return blob
+
+        class Observer(kp.Module):
+            def process(self, blob):
+                assert 'A' in blob.keys()
+                assert '/foobar' == blob['A'].h5loc
+                assert not 'B' in blob.keys()
+                return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(APump)
+        pipe.attach(Keep, h5locs=['/foobar'])
+        pipe.attach(Observer)
+        pipe.drain(5)
+
+    def test_key_hdf5_group_individual(self):
+        class APump(kp.Pump):
+            def process(self, blob):
+                blob['A'] = kp.Table({
+                    'foo': [1, 2, 3],
+                    'bar': [4, 5, 6]
+                },
+                                     h5loc='/foobar')
+                blob['B'] = kp.Table({
+                    'a': [1.1, 2.1, 3.1],
+                    'b': [4.2, 5.2, 6.2]
+                },
+                                     h5loc='/ab')
+                return blob
+
+        class Observer(kp.Module):
+            def process(self, blob):
+                assert 'A' in blob.keys()
+                assert '/foobar' == blob['A'].h5loc
+                assert 'B' in blob.keys()
+                assert '/ab' == blob['B'].h5loc
+                return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(APump)
+        pipe.attach(Keep, keys=['B'], h5locs=['/foobar'])
+        pipe.attach(Observer)
+        pipe.drain(5)
+
+    def test_key_hdf5_group_parallel(self):
+        class APump(kp.Pump):
+            def process(self, blob):
+                blob['A'] = kp.Table({
+                    'foo': [1, 2, 3],
+                    'bar': [4, 5, 6]
+                },
+                                     h5loc='/foobar')
+                blob['B'] = kp.Table({
+                    'a': [1.1, 2.1, 3.1],
+                    'b': [4.2, 5.2, 6.2]
+                },
+                                     h5loc='/ab')
+                return blob
+
+        class Observer(kp.Module):
+            def process(self, blob):
+                assert 'A' in blob.keys()
+                assert '/foobar' == blob['A'].h5loc
+                assert not 'B' in blob.keys()
+                return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(APump)
+        pipe.attach(Keep, keys=['A'], h5locs=['/foobar'])
+        pipe.attach(Observer)
+        pipe.drain(5)
+
+    def test_major_hdf5_group(self):
+        class APump(kp.Pump):
+            def process(self, blob):
+                blob['A'] = kp.Table({
+                    'foo': [1, 2, 3],
+                    'bar': [4, 5, 6]
+                },
+                                     h5loc='/foobar/a')
+                blob['B'] = kp.Table({
+                    'a': [1.1, 2.1, 3.1],
+                    'b': [4.2, 5.2, 6.2]
+                },
+                                     h5loc='/foobar/b')
+                return blob
+
+        class Observer(kp.Module):
+            def process(self, blob):
+                assert 'A' in blob.keys()
+                assert '/foobar/a' == blob['A'].h5loc
+                assert 'B' in blob.keys()
+                assert '/foobar/b' == blob['B'].h5loc
+                return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(APump)
+        pipe.attach(Keep, h5locs=['/foobar'])
+        pipe.attach(Observer)
+        pipe.drain(5)
+
 
 class TestDelete(TestCase):
     def test_delete_a_single_key(self):
