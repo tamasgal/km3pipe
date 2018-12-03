@@ -440,15 +440,12 @@ class Table(np.recarray):
 
         first_table = tables_to_merge[0]
 
-        h5loc = first_table.h5loc
-        h5singleton = first_table.h5singleton
-        split_h5 = first_table.split_h5
+        merged_table = sum(tables_to_merge[1:], first_table)
 
-        merged_table = sum(tables_to_merge[1:], tables_to_merge[0])
-
-        merged_table.h5loc = h5loc
-        merged_table.h5singleton = h5singleton
-        merged_table.split_h5 = split_h5
+        merged_table.h5loc = first_table.h5loc
+        merged_table.h5singleton = first_table.h5singleton
+        merged_table.split_h5 = first_table.split_h5
+        merged_table.name = first_table.name
 
         return merged_table
 
@@ -469,7 +466,13 @@ class Table(np.recarray):
         final_length = len_self + len_other
         ret.resize(final_length, refcheck=False)
         ret[len_self:] = other[col_order]
-        return Table(ret)
+        return Table(
+            ret,
+            h5loc=self.h5loc,
+            h5singleton=self.h5singleton,
+            split_h5=self.split_h5,
+            name=self.name
+        )
 
     def __str__(self):
         name = self.name

@@ -796,12 +796,14 @@ class TestTable(TestCase):
         },
                      h5loc='/a',
                      h5singleton=True,
-                     split_h5=True)
+                     split_h5=True,
+                     name='FooTable')
         tab2 = Table({'a': [3, 4, 5]})
         added_tab = tab1 + tab2
         assert '/a' == tab1.h5loc
-        assert tab1.h5singleton
-        assert tab1.split_h5
+        assert added_tab.h5singleton
+        assert added_tab.split_h5
+        assert 'FooTable' == added_tab.name
 
     def test_add_tables_with_same_colnames_but_different_dtype_order(self):
         cols1 = ('b', 'a')
