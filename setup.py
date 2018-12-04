@@ -19,13 +19,6 @@ from pkg_resources import get_distribution, DistributionNotFound
 with open('requirements.txt') as fobj:
     requirements = [l.strip() for l in fobj.readlines()]
 
-from pkg_resources import get_distribution, DistributionNotFound
-try:
-    __version__ = get_distribution('km3pipe').version
-except DistributionNotFound:
-    # package is not installed
-    pass
-
 setup(
     name='km3pipe',
     url='http://github.com/tamasgal/km3pipe/',
@@ -38,9 +31,13 @@ setup(
     include_package_data=True,
     platforms='any',
     setup_requires=[
-        'numpy>=1.12', 'setuptools_scm',
+        'numpy>=1.12',
+        'setuptools_scm',
     ],
-    use_scm_version=True,
+    use_scm_version={
+        'write_to': 'km3pipe/version.txt',
+        'tag_regex': r'^(?P<prefix>v)?(?P<version>[^\+]+)(?P<suffix>.*)?$',
+    },
     install_requires=requirements,
     python_requires='>=2.7',
     entry_points={
