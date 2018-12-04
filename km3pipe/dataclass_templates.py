@@ -4,6 +4,7 @@
 """
 Dataclasses for internal use. Heavily based on Numpy arrays.
 """
+from __future__ import absolute_import, print_function, division
 
 import numpy as np
 
@@ -14,8 +15,7 @@ __license__ = "MIT"
 __maintainer__ = "Moritz Lotze"
 __email__ = "mlotze@km3net.de"
 __status__ = "Development"
-__all__ = ('TEMPLATES',)
-
+__all__ = ('TEMPLATES', )
 
 TEMPLATES = {
     'Direction': {
@@ -26,6 +26,7 @@ TEMPLATES = {
         ]),
         'h5loc': None,
         'split_h5': False,
+        'h5singleton': False,
     },
     'Position': {
         'dtype': np.dtype([
@@ -35,6 +36,7 @@ TEMPLATES = {
         ]),
         'h5loc': None,
         'split_h5': False,
+        'h5singleton': False,
     },
     'EventInfo': {
         'dtype': np.dtype([
@@ -54,10 +56,11 @@ TEMPLATES = {
             ('weight_w2', '<f8'),
             ('weight_w3', '<f8'),
             ('run_id', '<u8'),
-            ('group_id', '<u8')
+            ('group_id', '<u8'),
         ]),
         'h5loc': '/event_info',
         'split_h5': False,
+        'h5singleton': False,
     },
     'TimesliceHits': {
         'dtype': np.dtype([
@@ -65,10 +68,11 @@ TEMPLATES = {
             ('dom_id', '<u4'),
             ('time', '<i4'),
             ('tot', 'u1'),
-            ('group_id', '<u4')
+            ('group_id', '<u4'),
         ]),
-        'h5loc': '/time_slice_hits',
+        'h5loc': '/timeslice_hits',
         'split_h5': True,
+        'h5singleton': False,
     },
     'Hits': {
         'dtype': np.dtype([
@@ -77,10 +81,11 @@ TEMPLATES = {
             ('time', '<f8'),
             ('tot', 'u1'),
             ('triggered', '?'),
-            ('group_id', '<u4')
+            ('group_id', '<u4'),
         ]),
         'h5loc': '/hits',
         'split_h5': True,
+        'h5singleton': False,
     },
     'CalibHits': {
         'dtype': np.dtype([
@@ -98,10 +103,11 @@ TEMPLATES = {
             ('time', '<f8'),
             ('tot', 'u1'),
             ('triggered', '?'),
-            ('group_id', '<u4')
+            ('group_id', '<u4'),
         ]),
         'h5loc': '/hits',
         'split_h5': True,
+        'h5singleton': False,
     },
     'McHits': {
         'dtype': np.dtype([
@@ -109,10 +115,11 @@ TEMPLATES = {
             ('origin', '<u4'),
             ('pmt_id', '<u4'),
             ('time', '<f8'),
-            ('group_id', '<u4')
+            ('group_id', '<u4'),
         ]),
         'h5loc': '/mc_hits',
         'split_h5': True,
+        'h5singleton': False,
     },
     'CalibMcHits': {
         'dtype': np.dtype([
@@ -126,10 +133,11 @@ TEMPLATES = {
             ('pos_y', '<f4'),
             ('pos_z', '<f4'),
             ('time', '<f8'),
-            ('group_id', '<u4')
+            ('group_id', '<u4'),
         ]),
         'h5loc': '/mc_hits',
         'split_h5': True,
+        'h5singleton': False,
     },
     'Tracks': {
         'dtype': np.dtype([
@@ -140,17 +148,18 @@ TEMPLATES = {
             ('energy', '<f8'),
             ('id', '<u4'),
             ('interaction_channel', '<u4'),
-            ('is_cc', '<u4'),  # TODO: consider bool ('?') for slicing
+            ('is_cc', '<u4'),    # TODO: consider bool ('?') for slicing
             ('length', '<f8'),
             ('pos_x', '<f8'),
             ('pos_y', '<f8'),
             ('pos_z', '<f8'),
             ('time', '<i4'),
             ('type', '<i4'),
-            ('group_id', '<u4')
+            ('group_id', '<u4'),
         ]),
         'h5loc': '/tracks',
         'split_h5': False,
+        'h5singleton': False,
     },
     'McTracks': {
         'dtype': np.dtype([
@@ -161,17 +170,18 @@ TEMPLATES = {
             ('energy', '<f8'),
             ('id', '<u4'),
             ('interaction_channel', '<u4'),
-            ('is_cc', '<u4'),  # TODO: consider bool ('?') for slicing
+            ('is_cc', '<u4'),    # TODO: consider bool ('?') for slicing
             ('length', '<f8'),
             ('pos_x', '<f8'),
             ('pos_y', '<f8'),
             ('pos_z', '<f8'),
             ('time', '<i4'),
             ('type', '<i4'),
-            ('group_id', '<u4')
+            ('group_id', '<u4'),
         ]),
         'h5loc': '/mc_tracks',
         'split_h5': False,
+        'h5singleton': False,
     },
     'SummaryFrameInfo': {
         'dtype': np.dtype([
@@ -186,10 +196,11 @@ TEMPLATES = {
             ('slice_id', '<u4'),
             ('utc_nanoseconds', '<u4'),
             ('utc_seconds', '<u4'),
-            ('white_rabbit_status', '<u4')
+            ('white_rabbit_status', '<u4'),
         ]),
         'h5loc': '/summary_slice_info',
         'split_h5': False,
+        'h5singleton': False,
     },
     'SummarysliceInfo': {
         'dtype': np.dtype([
@@ -197,10 +208,11 @@ TEMPLATES = {
             ('slice_id', '<u4'),
             ('timestamp', '<u4'),
             ('nanoseconds', '<u4'),
-            ('n_frames', '<u4')
+            ('n_frames', '<u4'),
         ]),
         'h5loc': '/todo',
         'split_h5': False,
+        'h5singleton': False,
     },
     'TimesliceInfo': {
         'dtype': np.dtype([
@@ -208,20 +220,22 @@ TEMPLATES = {
             ('slice_id', '<u4'),
             ('timestamp', '<u4'),
             ('nanoseconds', '<u4'),
-            ('n_frames', '<u4')
+            ('n_frames', '<u4'),
         ]),
-        'h5loc': '/todo',
+        'h5loc': '/timeslice_info',
         'split_h5': False,
+        'h5singleton': False,
     },
     'SummaryframeSeries': {
         'dtype': np.dtype([
             ('dom_id', '<u4'),
             ('max_sequence_number', '<u4'),
             ('n_received_packets', '<u4'),
-            ('group_id', '<u4')
+            ('group_id', '<u4'),
         ]),
         'h5loc': '/todo',
         'split_h5': False,
+        'h5singleton': False,
     },
     'TimesliceFrameInfo': {
         'dtype': np.dtype([
@@ -232,10 +246,11 @@ TEMPLATES = {
             ('nanoseconds', '<u4'),
             ('dom_id', '<u4'),
             ('dom_status', '<u4'),
-            ('n_hits', '<u4')
+            ('n_hits', '<u4'),
         ]),
         'h5loc': '/todo',
         'split_h5': False,
+        'h5singleton': False,
     },
     'SummaryFrameSeries': {
         'dtype': np.dtype([
@@ -245,5 +260,7 @@ TEMPLATES = {
             ('group_id', '<u4'),
         ]),
         'h5loc': '/summary_frame_series',
-        'split_h5': False}
+        'split_h5': False,
+        'h5singleton': False,
+    }
 }

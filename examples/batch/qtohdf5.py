@@ -13,7 +13,7 @@ substring will be used to filter the files. You can for example convert
 all numu CC files in ``/in2p3/km3net/mc/prod/v4/JTE_r2356`` if you call
 the script with ``-s numuCC``.
 
-The before constructing the job scripts, the ``OUTPUT_PATH`` will be traversed
+Before constructing the job scripts, the ``OUTPUT_PATH`` will be traversed
 to find files which have already been converted to avoid multiple conversions.
 
 .. code-block:: console
@@ -35,6 +35,8 @@ to find files which have already been converted to avoid multiple conversions.
         -h --help      Show this screen.
 
 """
+from __future__ import absolute_import, print_function, division
+
 from glob import glob
 import os
 from os.path import basename, join
@@ -61,7 +63,7 @@ def main():
     IRODS_PATH = args['IRODS_PATH']
     OUTPUT_PATH = join(CWD, args['OUTPUT_PATH'])
     SUBSTRING = '' if args['-s'] is None else args['-s']
-    ET_PER_FILE = int(args['-e']) * 60  # [s]
+    ET_PER_FILE = int(args['-e']) * 60    # [s]
     FILES_PER_JOB = int(args['-n'])
     VMEM = args['-m']
     LOG_PATH = args['-l']
@@ -101,11 +103,19 @@ def main():
             s.echo("File '{}' converted.".format(fname))
             s.separator('-')
 
-        walltime = time.strftime('%H:%M:%S', time.gmtime(ET_PER_FILE*n_files))
+        walltime = time.strftime(
+            '%H:%M:%S', time.gmtime(ET_PER_FILE * n_files)
+        )
 
-        kp.shell.qsub(s, '{}_{}'.format(JOB_NAME, job_id), walltime=walltime,
-                      platform='sl6',
-                      vmem=VMEM, log_path=LOG_PATH, irods=True, dryrun=DRYRUN)
+        kp.shell.qsub(
+            s,
+            '{}_{}'.format(JOB_NAME, job_id),
+            walltime=walltime,
+            vmem=VMEM,
+            log_path=LOG_PATH,
+            irods=True,
+            dryrun=DRYRUN
+        )
 
         if DRYRUN:
             break

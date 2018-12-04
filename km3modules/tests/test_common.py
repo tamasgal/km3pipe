@@ -3,8 +3,10 @@
 
 import km3pipe as kp
 from km3pipe.dataclasses import Table
-from km3modules.common import (Siphon, Delete, Keep, Dump, StatusBar,
-                               TickTock, MemoryObserver, BlobIndexer)
+from km3modules.common import (
+    Siphon, Delete, Keep, Dump, StatusBar, TickTock, MemoryObserver,
+    BlobIndexer
+)
 from km3pipe.testing import TestCase, MagicMock
 from km3pipe.tools import istype
 
@@ -19,6 +21,7 @@ __status__ = "Development"
 
 class InfinitePump(kp.Pump):
     """A pump which just infinetly spits out indexed blobs"""
+
     def configure(self):
         self.i = 0
 
@@ -39,7 +42,6 @@ class TestKeep(TestCase):
                 return blob
 
         class Observer(kp.Module):
-
             def process(self, blob):
                 assert 'a' not in blob
                 assert 'b' not in blob
@@ -63,7 +65,6 @@ class TestKeep(TestCase):
                 return blob
 
         class Observer(kp.Module):
-
             def process(self, blob):
                 assert 'a' not in blob
                 assert 'b' == blob['b']
@@ -74,6 +75,148 @@ class TestKeep(TestCase):
         pipe = kp.Pipeline()
         pipe.attach(APump)
         pipe.attach(Keep, keys=['b', 'd'])
+        pipe.attach(Observer)
+        pipe.drain(5)
+
+    def test_hdf5_keep_group_wo_subgroup(self):
+        class APump(kp.Pump):
+            def process(self, blob):
+                blob['A'] = kp.Table({
+                    'foo': [1, 2, 3],
+                    'bar': [4, 5, 6]
+                },
+                                     h5loc='/foobar')
+                blob['B'] = kp.Table({
+                    'a': [1.1, 2.1, 3.1],
+                    'b': [4.2, 5.2, 6.2]
+                },
+                                     h5loc='/ab')
+                return blob
+
+        class Observer(kp.Module):
+            def process(self, blob):
+                assert 'A' in blob.keys()
+                assert '/foobar' == blob['A'].h5loc
+                assert not 'B' in blob.keys()
+                return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(APump)
+        pipe.attach(Keep, h5locs=['/foobar'])
+        pipe.attach(Observer)
+        pipe.drain(5)
+
+    def test_hdf5_keep_group_w_subgroup(self):
+        class APump(kp.Pump):
+            def process(self, blob):
+                blob['A'] = kp.Table({
+                    'foo': [1, 2, 3],
+                    'bar': [4, 5, 6]
+                },
+                                     h5loc='/foobar')
+                blob['B'] = kp.Table({
+                    'a': [1.1, 2.1, 3.1],
+                    'b': [4.2, 5.2, 6.2]
+                },
+                                     h5loc='/ab')
+                return blob
+
+        class Observer(kp.Module):
+            def process(self, blob):
+                assert 'A' in blob.keys()
+                assert '/foobar' == blob['A'].h5loc
+                assert not 'B' in blob.keys()
+                return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(APump)
+        pipe.attach(Keep, h5locs=['/foobar'])
+        pipe.attach(Observer)
+        pipe.drain(5)
+
+    def test_key_hdf5_group_individual(self):
+        class APump(kp.Pump):
+            def process(self, blob):
+                blob['A'] = kp.Table({
+                    'foo': [1, 2, 3],
+                    'bar': [4, 5, 6]
+                },
+                                     h5loc='/foobar')
+                blob['B'] = kp.Table({
+                    'a': [1.1, 2.1, 3.1],
+                    'b': [4.2, 5.2, 6.2]
+                },
+                                     h5loc='/ab')
+                return blob
+
+        class Observer(kp.Module):
+            def process(self, blob):
+                assert 'A' in blob.keys()
+                assert '/foobar' == blob['A'].h5loc
+                assert 'B' in blob.keys()
+                assert '/ab' == blob['B'].h5loc
+                return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(APump)
+        pipe.attach(Keep, keys=['B'], h5locs=['/foobar'])
+        pipe.attach(Observer)
+        pipe.drain(5)
+
+    def test_key_hdf5_group_parallel(self):
+        class APump(kp.Pump):
+            def process(self, blob):
+                blob['A'] = kp.Table({
+                    'foo': [1, 2, 3],
+                    'bar': [4, 5, 6]
+                },
+                                     h5loc='/foobar')
+                blob['B'] = kp.Table({
+                    'a': [1.1, 2.1, 3.1],
+                    'b': [4.2, 5.2, 6.2]
+                },
+                                     h5loc='/ab')
+                return blob
+
+        class Observer(kp.Module):
+            def process(self, blob):
+                assert 'A' in blob.keys()
+                assert '/foobar' == blob['A'].h5loc
+                assert not 'B' in blob.keys()
+                return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(APump)
+        pipe.attach(Keep, keys=['A'], h5locs=['/foobar'])
+        pipe.attach(Observer)
+        pipe.drain(5)
+
+    def test_major_hdf5_group(self):
+        class APump(kp.Pump):
+            def process(self, blob):
+                blob['A'] = kp.Table({
+                    'foo': [1, 2, 3],
+                    'bar': [4, 5, 6]
+                },
+                                     h5loc='/foobar/a')
+                blob['B'] = kp.Table({
+                    'a': [1.1, 2.1, 3.1],
+                    'b': [4.2, 5.2, 6.2]
+                },
+                                     h5loc='/foobar/b')
+                return blob
+
+        class Observer(kp.Module):
+            def process(self, blob):
+                assert 'A' in blob.keys()
+                assert '/foobar/a' == blob['A'].h5loc
+                assert 'B' in blob.keys()
+                assert '/foobar/b' == blob['B'].h5loc
+                return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(APump)
+        pipe.attach(Keep, h5locs=['/foobar'])
         pipe.attach(Observer)
         pipe.drain(5)
 
@@ -88,7 +231,6 @@ class TestDelete(TestCase):
                 return blob
 
         class Observer(kp.Module):
-
             def process(self, blob):
                 assert 'a' == blob['a']
                 assert 'b' not in blob
@@ -110,7 +252,6 @@ class TestDelete(TestCase):
                 return blob
 
         class Observer(kp.Module):
-
             def process(self, blob):
                 assert 'a' not in blob
                 assert 'b' not in blob

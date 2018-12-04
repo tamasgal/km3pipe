@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import km3pipe as kp
-import km3pipe.style  # noqa
+import km3pipe.style    # noqa
 km3pipe.style.use("km3pipe")
 
 __author__ = "Tamas Gal"
@@ -49,7 +49,7 @@ def main():
         blob = pump[event_id]
         event_info = blob['EventInfo']
         hits = blob['Hits']
-        if(arguments['-d']):
+        if (arguments['-d']):
             cal = kp.calib.Calibration(filename=arguments['-d'])
         else:
             cal = kp.calib.Calibration(det_id=event_info.det_id)
@@ -64,20 +64,33 @@ def main():
         n_plots = len(dus)
         n_cols = int(np.ceil(np.sqrt(n_plots)))
         n_rows = int(n_plots / n_cols) + (n_plots % n_cols > 0)
-        fig, axes = plt.subplots(ncols=n_cols, nrows=n_rows,
-                                 sharex=True, sharey=True, figsize=(16, 16))
+        fig, axes = plt.subplots(
+            ncols=n_cols,
+            nrows=n_rows,
+            sharex=True,
+            sharey=True,
+            figsize=(16, 16)
+        )
 
         if n_cols == 1 and n_rows == 1:
             axes = (axes, )
 
         for ax, du in zip(axes, dus):
             du_hits = hits[hits.du == du]
-            trig_hits = du_hits.triggered_hits
+            trig_hits = du_hits.triggered_rows
 
-            ax.scatter(du_hits.time - min(du_hits.time), du_hits.pos_z,
-                       c='#09A9DE', label='hit')
-            ax.scatter(trig_hits.time - min(du_hits.time), trig_hits.pos_z,
-                       c='#FF6363', label='triggered hit')
+            ax.scatter(
+                du_hits.time - min(du_hits.time),
+                du_hits.pos_z,
+                c='#09A9DE',
+                label='hit'
+            )
+            ax.scatter(
+                trig_hits.time - min(du_hits.time),
+                trig_hits.pos_z,
+                c='#FF6363',
+                label='triggered hit'
+            )
             ax.set_title('DU{0}'.format(du), fontsize=8, fontweight='bold')
 
         for ax in axes:
@@ -87,9 +100,11 @@ def main():
             for label in xlabels:
                 label.set_rotation(45)
 
-        plt.suptitle("Filename: {0} - Event #{1}"
-                     .format(arguments['FILE'], event_id), fontsize=16)
+        plt.suptitle(
+            "Filename: {0} - Event #{1}".format(arguments['FILE'], event_id),
+            fontsize=16
+        )
         fig.text(0.5, 0.04, 'time [ns]', ha='center')
         fig.text(0.08, 0.5, 'z [m]', va='center', rotation='vertical')
-#        plt.tight_layout()
+        #        plt.tight_layout()
         plt.show()

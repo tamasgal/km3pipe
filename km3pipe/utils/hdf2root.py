@@ -14,7 +14,6 @@ Options:
     --verbose           Print more info [default: False]
 """
 
-
 import numpy as np
 
 from km3pipe import version
@@ -36,7 +35,8 @@ def hdf2root(infile, outfile, verbose=False):
     except ImportError:
         raise ImportError(
             "Please load ROOT into PYTHONPATH and install rootpy+root_numpy:\n"
-            "   `pip install rootpy root_numpy`")
+            "   `pip install rootpy root_numpy`"
+        )
 
     from tables import open_file
 

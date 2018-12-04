@@ -4,6 +4,8 @@
 The logging facility.
 
 """
+from __future__ import absolute_import, print_function, division
+
 from hashlib import sha256
 import socket
 import logging
@@ -18,30 +20,50 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-
-loggers = {}  # this holds all the registered loggers
+loggers = {}    # this holds all the registered loggers
 # logging.basicConfig()
 
+DEPRECATION = 45
+logging.addLevelName(DEPRECATION, "DEPRECATION")
+
+
+def deprecation(self, message, *args, **kws):
+    self._log(DEPRECATION, message, args, **kws)
+
+
+logging.Logger.deprecation = deprecation
+
 if supports_color():
-    logging.addLevelName(logging.INFO, "\033[1;32m%s\033[1;0m" %
-                         logging.getLevelName(logging.INFO))
-    logging.addLevelName(logging.DEBUG, "\033[1;34m%s\033[1;0m" %
-                         logging.getLevelName(logging.DEBUG))
-    logging.addLevelName(logging.WARNING, "\033[1;33m%s\033[1;0m" %
-                         logging.getLevelName(logging.WARNING))
-    logging.addLevelName(logging.ERROR, "\033[1;31m%s\033[1;0m" %
-                         logging.getLevelName(logging.ERROR))
-    logging.addLevelName(logging.CRITICAL, "\033[1;101m%s\033[1;0m" %
-                         logging.getLevelName(logging.CRITICAL))
+    logging.addLevelName(
+        logging.INFO,
+        "\033[1;32m%s\033[1;0m" % logging.getLevelName(logging.INFO)
+    )
+    logging.addLevelName(
+        logging.DEBUG,
+        "\033[1;34m%s\033[1;0m" % logging.getLevelName(logging.DEBUG)
+    )
+    logging.addLevelName(
+        logging.WARNING,
+        "\033[1;33m%s\033[1;0m" % logging.getLevelName(logging.WARNING)
+    )
+    logging.addLevelName(
+        logging.ERROR,
+        "\033[1;31m%s\033[1;0m" % logging.getLevelName(logging.ERROR)
+    )
+    logging.addLevelName(
+        logging.CRITICAL,
+        "\033[1;101m%s\033[1;0m" % logging.getLevelName(logging.CRITICAL)
+    )
+    logging.addLevelName(DEPRECATION, "\033[1;35m%s\033[1;0m" % 'DEPRECATION')
 
 
 class LogIO(object):
     """Read/write logging information.
     """
 
-    def __init__(self, node, stream,
-                 url='pi2089.physik.uni-erlangen.de',
-                 port=28777):
+    def __init__(
+            self, node, stream, url='pi2089.physik.uni-erlangen.de', port=28777
+    ):
         self.node = node
         self.stream = stream
         self.url = url
@@ -70,14 +92,24 @@ def get_logger(name):
         return loggers[name]
     logger = logging.getLogger(name)
     logger.propagate = False
-    pre, suf = hash_coloured_escapes(name) if supports_color() else ('', '')
-    formatter = logging.Formatter('%(levelname)s->{}%(name)s:{} %(message)s'
-                                  .format(pre, suf))
+    pre1, suf1 = hash_coloured_escapes(name) if supports_color() else ('', '')
+    pre2, suf2 = hash_coloured_escapes(name + 'salt')  \
+                 if supports_color() else ('', '')
+    formatter = logging.Formatter(
+        '%(levelname)s {}+{}+{} '
+        '%(name)s: %(message)s'.format(pre1, pre2, suf1)
+    )
     ch = logging.StreamHandler()
     ch.setFormatter(formatter)
     logger.addHandler(ch)
     loggers[name] = logger
+
     return logger
+
+
+def available_loggers():
+    """Return a list of avialable logger names"""
+    return list(logging.Logger.manager.loggerDict.keys())
 
 
 def set_level(name, level):
@@ -85,12 +117,14 @@ def set_level(name, level):
     get_logger(name).setLevel(level)
 
 
-def get_printer(name, color=None, ansi_code=None):
+def get_printer(name, color=None, ansi_code=None, force_color=False):
     """Return a function which prints a message with a coloured name prefix"""
 
-    if supports_color():
+    if force_color or supports_color():
         if color is None and ansi_code is None:
-            name = hash_coloured(name)
+            cpre_1, csuf_1 = hash_coloured_escapes(name)
+            cpre_2, csuf_2 = hash_coloured_escapes(name + 'salt')
+            name = cpre_1 + '+' + cpre_2 + '+' + csuf_1 + ' ' + name
         else:
             name = colored(name, color=color, ansi_code=ansi_code)
 

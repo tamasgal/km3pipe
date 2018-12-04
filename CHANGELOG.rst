@@ -1,11 +1,117 @@
 Unreleased changes
 ------------------
 
+* ``qtohdf5`` can now be used to convert multiple files using the batch farm
+  use the ``-i`` option to indicate that the input path is an IRODS path if you
+  convert files from IRODS to SPS for example
+* ``wtd`` is the "what the DOM???" command line utility, which will print
+  information (like DU and floor) for a given DOM (and DOM [O]ID).
+
+
 Version 8
 ---------
+8.5.0 / 2018-11-21
+~~~~~~~~~~~~~~~~~~
+* ``Module`` can now require services with the
+  ``self.require_service(service_name, [reason])``
+* Logging can now show deprecation warnings with ``[self.]log.deprecate()``
+* ``runinfo`` optionally prints out the trigger parameters when ``-t`` is used
+
+8.4.1 / 2018-11-06
+~~~~~~~~~~~~~~~~~~
+* ``Vec3`` is a new standard datatype for 3D vectors. Mainly used in
+  RainbowAlga
+* The modules attached to a pipeline can now be configured using an external
+  file. The default filename is ``pipeline.toml`` and uses the TOML format.
+  You can specify your own configuration file with the ``configfile``
+  parameter in the ``Pipeline`` constructor.
+  The module configuration has precedence over keyword arguments!
+
+8.4.0 / 2018-10-14
+~~~~~~~~~~~~~~~~~~
+* added Dusj fitinf enum names and extended reco enum to hold Dusj reconstruction information (range 200-299) * the ``AanetPump`` now reads the metadata using ``JPrintMeta``, which will
+  be automatically captures by the ``HDF5Sink`` to dump it to ``/meta``.
+  A simple table which can be read by ``meta = pandas.read_hdf(filename, 'meta')``
+
+8.3.0 / 2018-09-20
+~~~~~~~~~~~~~~~~~~
+* ``tohdf5`` can now convert multiple files in one shot (again). There is no
+  merging anymore, this will be done by ``h5concat`` in future.
+* ``runtable`` now accepts ranges of runs ``-r FROM_RUN-TO_RUN``
+* fixes a bug in ``tohdf5`` where the default output filename is ``dump.h5``
+  now it's original filename + .h5 if no output filename is specified
+* Adds ``HDF5Header`` which is a convenient way to access the ``/raw_header``
+  data from ``KM3HDF5`` formatted files.
+  It can be used like ``header = km3pipe.io.hdf5.HDF5Header.from_hdf5(filename)``
+
+8.2.1 / 2018-08-15
+~~~~~~~~~~~~~~~~~~
+* prettier `Blob` when printed
+* KM3HDF5 v5.1 - introducing a new raw_header definition to store file/MC info
+* Read only aanet data when passing ``bare=True`` to ``kp.io.aanet.AanetPump``
+* AA: If ``rec_type`` (defined in JFitApplications.hh) is not available, use the
+  JHistory ( ``rec_stages`` ) to derive the fit name, like ``jhist__jgandalf__jprefit``
+* AA: If neither ``rec_type`` nor history are available, enumerate track names
+   names ``generic_track_``, based on their dtype.
+* AA: more robust track readout (segfaults etc form looping over empty pyroot
+  vectors
+
+8.1.4 / 2018-06-26
+~~~~~~~~~~~~~~~~~~
+* tohdf5.py: - adds a time conversion from mc time to jte time.
+* `kp.shell.Script` now implements addition, so you can concatenate multiple
+  scripts together
+
+8.1.3 / 2018-06-16
+~~~~~~~~~~~~~~~~~~
+* minor fixes
+
+8.1.2 / 2018-06-16
+~~~~~~~~~~~~~~~~~~
+* Fix a new typo in `stats.rv_kde.rvs`
+
+8.1.1 / 2018-06-16
+~~~~~~~~~~~~~~~~~~
+* Fix a Python 2.7 syntax error (`self. print`)
+
+8.1.0 / 2018-06-16
+~~~~~~~~~~~~~~~~~~
+* Python 2.7 compatibility added, thanks to ROOT
+
+8.0.5 / 2018-06-09
+~~~~~~~~~~~~~~~~~~
+* New commands available to print the git revision number:
+  `km3pipe git` and `km3pipe git-short`
+* Include git revision hash in pip tar ball
+
+8.0.4 / 2018-06-08
+~~~~~~~~~~~~~~~~~~
+* Fix: Read all tracks in AanetPump
+
+8.0.3 / 2018-06-08
+~~~~~~~~~~~~~~~~~~
+
+* Introduce robust aanet header readout
+* Update ``tohdf5`` to the new aanetpump
+
+8.0.2 / 2018-06-07
+~~~~~~~~~~~~~~~~~~
+* Fixes an issue where `requirements.txt` is not found when installing
+  with `pip install km3pipe`
+
+8.0.1 / 2018-06-07
+~~~~~~~~~~~~~~~~~~
+
+* Completely rewrote Aanet file readout -- supporting latest jpp/aanet only,
+  and using enumerated types to label ``fitinf`` vectors / ``rec_type`` 
+  reconstruction types
+* Added `triggered_hits = hits.triggered_rows` syntactical sugar
+* Fixed datatype bug when applying t0 calibration to timeslice hits
+* Added ``qrunprocessor`` utility
+
 
 8.0.0 / 2018-06-02
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 * replace all dataclasses with the ``Table`` class (subclass of ``np.recarray``)
 * KM3HDF5 Version 5.0: ``group_id`` replaces ``event_id`` in every table,

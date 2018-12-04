@@ -13,6 +13,8 @@ dom_id line_id floor_id npmts
  ...
 
 """
+from __future__ import unicode_literals
+
 from copy import deepcopy
 from io import StringIO
 
@@ -30,58 +32,64 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
+EXAMPLE_DETX = StringIO(
+    "\n".join((
+        "1 3",
+        "1 1 1 3",
+        " 1 1.1 1.2 1.3 -1.1  0.2  0.3 10",
+        " 2 1.4 1.5 1.6  0.1 -1.2  0.3 20",
+        " 3 1.7 1.8 1.9  0.1  0.2 -1.3 30",
+        "2 1 2 3",
+        " 4 2.1 2.2 2.3 -1.1  0.2  0.3 40",
+        " 5 2.4 2.5 2.6  0.1 -1.2  0.3 50",
+        " 6 2.7 2.8 2.9  0.1  0.2 -1.3 60",
+        "3 1 3 3",
+        " 7 3.1 3.2 3.3 -1.1  0.2  0.3 70",
+        " 8 3.4 3.5 3.6  0.1 -1.2  0.3 80",
+        " 9 3.7 3.8 3.9  0.1  0.2 -1.3 90",
+    ))
+)
 
-EXAMPLE_DETX = StringIO("\n".join((
-    "1 3",
-    "1 1 1 3",
-    " 1 1.1 1.2 1.3 -1.1  0.2  0.3 10",
-    " 2 1.4 1.5 1.6  0.1 -1.2  0.3 20",
-    " 3 1.7 1.8 1.9  0.1  0.2 -1.3 30",
-    "2 1 2 3",
-    " 4 2.1 2.2 2.3 -1.1  0.2  0.3 40",
-    " 5 2.4 2.5 2.6  0.1 -1.2  0.3 50",
-    " 6 2.7 2.8 2.9  0.1  0.2 -1.3 60",
-    "3 1 3 3",
-    " 7 3.1 3.2 3.3 -1.1  0.2  0.3 70",
-    " 8 3.4 3.5 3.6  0.1 -1.2  0.3 80",
-    " 9 3.7 3.8 3.9  0.1  0.2 -1.3 90",)))
+EXAMPLE_DETX_MIXED_IDS = StringIO(
+    "\n".join((
+        "1 3",
+        "8 1 1 3",
+        " 83 1.1 1.2 1.3 -1.1  0.2  0.3 10",
+        " 81 1.4 1.5 1.6  0.1 -1.2  0.3 20",
+        " 82 1.7 1.8 1.9  0.1  0.2 -1.3 30",
+        "7 1 2 3",
+        " 71 2.1 2.2 2.3 -1.1  0.2  0.3 40",
+        " 73 2.4 2.5 2.6  0.1 -1.2  0.3 50",
+        " 72 2.7 2.8 2.9  0.1  0.2 -1.3 60",
+        "6 1 3 3",
+        " 62 3.1 3.2 3.3 -1.1  0.2  0.3 70",
+        " 63 3.4 3.5 3.6  0.1 -1.2  0.3 80",
+        " 61 3.7 3.8 3.9  0.1  0.2 -1.3 90",
+    ))
+)
 
-EXAMPLE_DETX_MIXED_IDS = StringIO("\n".join((
-    "1 3",
-    "8 1 1 3",
-    " 83 1.1 1.2 1.3 -1.1  0.2  0.3 10",
-    " 81 1.4 1.5 1.6  0.1 -1.2  0.3 20",
-    " 82 1.7 1.8 1.9  0.1  0.2 -1.3 30",
-    "7 1 2 3",
-    " 71 2.1 2.2 2.3 -1.1  0.2  0.3 40",
-    " 73 2.4 2.5 2.6  0.1 -1.2  0.3 50",
-    " 72 2.7 2.8 2.9  0.1  0.2 -1.3 60",
-    "6 1 3 3",
-    " 62 3.1 3.2 3.3 -1.1  0.2  0.3 70",
-    " 63 3.4 3.5 3.6  0.1 -1.2  0.3 80",
-    " 61 3.7 3.8 3.9  0.1  0.2 -1.3 90",)))
-
-EXAMPLE_DETX_RADIAL = StringIO("\n".join((
-    "1 3",
-    "1 1 1 4",
-    " 1 1 0 0 1 0 0 10",
-    " 2 0 1 0 0 1 0 20",
-    " 3 -1 0 0 -1 0 0 30",
-    " 4 0 -1 0 0 -1 0 40",
-    "2 1 2 2",
-    " 5 0 0 1 0 0 1 50",
-    " 6 0 0 -1 0 0 -1 60",
-    "3 1 3 2",
-    " 7 1 2 3 1 2 3 70",
-    " 8 -3 -2 -1 -3 -2 -1 80",
-    "4 2 1 2",
-    " 9 0 0 1 0 0 1 90",
-    " 10 0 0 -1 0 0 -1 100",
-    )))
+EXAMPLE_DETX_RADIAL = StringIO(
+    "\n".join((
+        "1 3",
+        "1 1 1 4",
+        " 1 1 0 0 1 0 0 10",
+        " 2 0 1 0 0 1 0 20",
+        " 3 -1 0 0 -1 0 0 30",
+        " 4 0 -1 0 0 -1 0 40",
+        "2 1 2 2",
+        " 5 0 0 1 0 0 1 50",
+        " 6 0 0 -1 0 0 -1 60",
+        "3 1 3 2",
+        " 7 1 2 3 1 2 3 70",
+        " 8 -3 -2 -1 -3 -2 -1 80",
+        "4 2 1 2",
+        " 9 0 0 1 0 0 1 90",
+        " 10 0 0 -1 0 0 -1 100",
+    ))
+)
 
 
 class TestDetector(TestCase):
-
     def setUp(self):
         self.det = Detector()
         self.det._det_file = EXAMPLE_DETX
@@ -207,7 +215,8 @@ class TestDetector(TestCase):
             "3 1 3 3",
             " 7 3.1 3.2 3.3 1.3 2.3 3.3 70.0",
             " 8 3.4 3.5 3.6 4.3 5.3 6.3 80.0",
-            " 9 3.7 3.8 3.9 7.3 8.3 9.3 90.0\n",))
+            " 9 3.7 3.8 3.9 7.3 8.3 9.3 90.0\n",
+        ))
         detx_fob = StringIO(detx_string)
 
         self.det = Detector()
@@ -230,7 +239,8 @@ class TestDetector(TestCase):
             "9 1 3 3",
             " 7 3.1 3.2 3.3 1.3 2.3 3.3 70.0",
             " 8 3.4 3.5 3.6 4.3 5.3 6.3 80.0",
-            " 9 3.7 3.8 3.9 7.3 8.3 9.3 90.0\n",))
+            " 9 3.7 3.8 3.9 7.3 8.3 9.3 90.0\n",
+        ))
         detx_fobj = StringIO(detx_string)
 
         self.det = Detector()
@@ -272,8 +282,9 @@ class TestDetector(TestCase):
         pmt_dir = det.pmts[det.pmts.dom_id == dom_id].dir[channel_id].copy()
         pmt_dir_rot = qrot_yaw(pmt_dir, heading)
         det.rotate_dom_by_yaw(dom_id, heading)
-        assert np.allclose(pmt_dir_rot,
-                           det.pmts[det.pmts.dom_id == dom_id].dir[channel_id])
+        assert np.allclose(
+            pmt_dir_rot, det.pmts[det.pmts.dom_id == dom_id].dir[channel_id]
+        )
         assert np.allclose([0.92050485, 0.39073113, 0],
                            det.pmts[det.pmts.dom_id == dom_id].pos[channel_id])
 
@@ -313,7 +324,7 @@ class TestDetector(TestCase):
     def test_rescale_detector(self):
         self.det._parse_doms()
         dom_positions = deepcopy(self.det.dom_positions)
-        scale_factor = 2 
+        scale_factor = 2
         self.det.rescale(scale_factor)
         for dom_id, dom_pos in self.det.dom_positions.items():
             assert np.allclose(dom_pos, dom_positions[dom_id] * scale_factor)

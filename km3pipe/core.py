@@ -4,15 +4,19 @@
 The core of the KM3Pipe framework.
 
 """
+from __future__ import absolute_import, print_function, division
 
 from collections import deque, OrderedDict
 import inspect
 import signal
 import gzip
+import os
+import sys
 import time
 from timeit import default_timer as timer
 import types
 
+import toml
 import numpy as np
 
 from .sys import peak_memory_usage, ignored
@@ -22,16 +26,65 @@ from .tools import AnyBar
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
-__credits__ = ["Thomas Heid"]
+__credits__ = ["Thomas Heid", "Johannes Schumann"]
 __license__ = "MIT"
 __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = get_logger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)    # pylint: disable=C0103
 # log.setLevel(logging.DEBUG)
 
 STAT_LIMIT = 100000
+MODULE_CONFIGURATION = 'pipeline.toml'
+
+if sys.version_info >= (3, 3):
+    process_time = time.process_time
+else:
+    process_time = time.clock
+
+
+class ServiceManager(object):
+    """
+    Main service manager
+    """
+
+    def __init__(self):
+        self._services = {}
+
+    def register(self, name, service):
+        """
+        Service registration
+
+        Args:
+            name: Name of the provided service
+            service: Reference to the service
+        """
+        self._services[name] = service
+
+    def get_missing_services(self, services):
+        """
+        Check if all required services are provided
+
+        Args:
+            services: List with the service names which are required
+        Returns:
+            List with missing services
+        """
+        required_services = set(services)
+        provided_services = set(self._services.keys())
+        missing_services = required_services.difference(provided_services)
+
+        return sorted(missing_services)
+
+    def __getitem__(self, name):
+        return self._services[name]
+
+    def __getattr__(self, name):
+        return self._service[name]
+
+    def __contains__(self, name):
+        return name in self._services
 
 
 class Pipeline(object):
@@ -45,26 +98,52 @@ class Pipeline(object):
     ----------
     timeit: bool, optional [default=False]
         Display time profiling statistics for the pipeline?
+    configfile: str, optional
+        Path to a configuration file (TOML format) which contains parameters
+        for attached modules.
     """
 
-    def __init__(self, blob=None, timeit=False, anybar=False):
+    def __init__(self, blob=None, timeit=False, configfile=None, anybar=False):
+        self.log = get_logger(self.__class__.__name__)
+        self.print = get_printer(self.__class__.__name__)
+
         if anybar:
             self.anybar = AnyBar()
             self.anybar.change("blue")
         else:
             self.anybar = None
 
+        if configfile is None and os.path.exists(MODULE_CONFIGURATION):
+            configfile = MODULE_CONFIGURATION
+
+        if configfile is not None:
+            self.print(
+                "Reading module configuration from '{}'".format(configfile)
+            )
+            self.log.warning(
+                "Keep in mind that the module configuration file has "
+                "precedence over keyword arguments in the attach method!"
+            )
+            with open(configfile, 'r') as fobj:
+                self.module_configuration = toml.load(fobj)
+        else:
+            self.module_configuration = {}
+
         self.init_timer = Timer("Pipeline and module initialisation")
         self.init_timer.start()
 
         self.modules = []
-        self.services = {}
+        self.services = ServiceManager()
+        self.required_services = {}
         self.calibration = None
         self.blob = blob or Blob()
         self.timeit = timeit
-        self._timeit = {'init': timer(), 'init_cpu': time.clock(),
-                        'cycles': deque(maxlen=STAT_LIMIT),
-                        'cycles_cpu': deque(maxlen=STAT_LIMIT)}
+        self._timeit = {
+            'init': timer(),
+            'init_cpu': process_time(),
+            'cycles': deque(maxlen=STAT_LIMIT),
+            'cycles_cpu': deque(maxlen=STAT_LIMIT)
+        }
         self._cycle_count = 0
         self._stop = False
         self._finished = False
@@ -84,19 +163,31 @@ class Pipeline(object):
                 name == 'GenericPump':
             log.debug("Attaching as regular module")
             module = fac(name=name, **kwargs)
-            if hasattr(module, "services"):
-                for service_name, obj in module.services.items():
-                    self.services[service_name] = obj
+            if hasattr(module, "provided_services"):
+                for service_name, obj in module.provided_services.items():
+                    self.services.register(service_name, obj)
+            if hasattr(module, "required_services"):
+                updated_required_services = {}
+                updated_required_services.update(self.required_services)
+                updated_required_services.update(module.required_services)
+                self.required_services = updated_required_services
             module.services = self.services
+            module.pipeline = self
         else:
             if isinstance(fac, types.FunctionType):
                 log.debug("Attaching as function module")
             else:
-                log.critical("Don't know how to attach module '{0}'!\n"
-                             "But I'll do my best".format(name))
+                log.critical(
+                    "Don't know how to attach module '{0}'!\n"
+                    "But I'll do my best".format(name)
+                )
             module = fac
             module.name = name
             module.timeit = self.timeit
+
+        if name in self.module_configuration:
+            for key, value in self.module_configuration[name].items():
+                setattr(module, key, value)
 
         # Special parameters
         if 'only_if' in kwargs:
@@ -109,16 +200,31 @@ class Pipeline(object):
         else:
             module.every = 1
 
-        self._timeit[module] = {'process': deque(maxlen=STAT_LIMIT),
-                                'process_cpu': deque(maxlen=STAT_LIMIT),
-                                'finish': 0,
-                                'finish_cpu': 0}
+        self._timeit[module] = {
+            'process': deque(maxlen=STAT_LIMIT),
+            'process_cpu': deque(maxlen=STAT_LIMIT),
+            'finish': 0,
+            'finish_cpu': 0
+        }
 
-        if hasattr(module, 'get_detector'):  # Calibration-like module
+        if hasattr(module, 'get_detector'):    # Calibration-like module
+            self.log.deprecation(
+                "Calibration-like modules will not be supported in future "
+                "versions of KM3Pipe. Please use services instead.\n"
+                "If you are attaching the `calib.Calibration` as a module, "
+                "switch to `calib.CalibrationService` and use the "
+                "`self.services['calibrate']()` method in your modules "
+                "to apply calibration.\n\n"
+                "This means:\n\n"
+                "    pipe.attach(kp.calib.CalibrationService, ...)\n\n"
+                "And inside the attached modules, you can apply the "
+                "calibration with e.g.:\n\n"
+                "    cal_hits = self.services['calibrate'](blob['Hits'])\n"
+            )
             self.calibration = module
             if module._should_apply:
                 self.modules.append(module)
-        else:  # normal module
+        else:    # normal module
             module.calibration = self.calibration
             self.modules.append(module)
 
@@ -148,39 +254,48 @@ class Pipeline(object):
         try:
             while not self._stop:
                 cycle_start = timer()
-                cycle_start_cpu = time.clock()
+                cycle_start_cpu = process_time()
 
                 log.debug("Pumping blob #{0}".format(self._cycle_count))
                 self.blob = Blob()
 
                 for module in self.modules:
                     if self.blob is None:
-                        log.debug("Skipping {0}, due to empty blob."
-                                  .format(module.name))
+                        log.debug(
+                            "Skipping {0}, due to empty blob.".format(
+                                module.name
+                            )
+                        )
                         continue
                     if module.only_if is not None and \
                             module.only_if not in self.blob:
-                        log.debug("Skipping {0}, due to missing required key"
-                                  "'{1}'.".format(module.name, module.only_if))
+                        log.debug(
+                            "Skipping {0}, due to missing required key"
+                            "'{1}'.".format(module.name, module.only_if)
+                        )
                         continue
 
                     if (self._cycle_count + 1) % module.every != 0:
-                        log.debug("Skipping {0} (every {1} iterations)."
-                                  .format(module.name, module.every))
+                        log.debug(
+                            "Skipping {0} (every {1} iterations).".format(
+                                module.name, module.every
+                            )
+                        )
                         continue
 
                     log.debug("Processing {0} ".format(module.name))
                     start = timer()
-                    start_cpu = time.clock()
+                    start_cpu = process_time()
                     self.blob = module(self.blob)
                     if self.timeit or module.timeit:
                         self._timeit[module]['process'] \
                             .append(timer() - start)
                         self._timeit[module]['process_cpu'] \
-                            .append(time.clock() - start_cpu)
+                            .append(process_time() - start_cpu)
                 self._timeit['cycles'].append(timer() - cycle_start)
-                self._timeit['cycles_cpu'].append(time.clock() -
-                                                  cycle_start_cpu)
+                self._timeit['cycles_cpu'].append(
+                    process_time() - cycle_start_cpu
+                )
                 self._cycle_count += 1
                 if cycles and self._cycle_count >= cycles:
                     raise StopIteration
@@ -188,10 +303,27 @@ class Pipeline(object):
             log.info("Nothing left to pump through.")
         return self.finish()
 
+    def _check_service_requirements(self):
+        """Final comparison of provided and required modules"""
+        missing = self.services.get_missing_services(
+            self.required_services.keys()
+        )
+        if missing:
+            self.log.critical(
+                "Following services are required and missing: {}".format(
+                    ', '.join(missing)
+                )
+            )
+            return False
+        return True
+
     def drain(self, cycles=None):
         """Execute _drain while trapping KeyboardInterrupt"""
-        if self.anybar: self.anybar.change("orange")
+        if not self._check_service_requirements():
+            self.init_timer.stop()
+            return self.finish()
 
+        if self.anybar: self.anybar.change("orange")
         self.init_timer.stop()
         log.info("Trapping CTRL+C and starting to drain.")
         signal.signal(signal.SIGINT, self._handle_ctrl_c)
@@ -207,15 +339,15 @@ class Pipeline(object):
             if hasattr(module, 'pre_finish'):
                 log.info("Finishing {0}".format(module.name))
                 start_time = timer()
-                start_time_cpu = time.clock()
+                start_time_cpu = process_time()
                 finish_blob[module.name] = module.pre_finish()
                 self._timeit[module]['finish'] = timer() - start_time
                 self._timeit[module]['finish_cpu'] = \
-                    time.clock() - start_time_cpu
+                    process_time() - start_time_cpu
             else:
                 log.info("Skipping function module {0}".format(module.name))
         self._timeit['finish'] = timer()
-        self._timeit['finish_cpu'] = time.clock()
+        self._timeit['finish_cpu'] = process_time()
         self._print_timeit_statistics()
         self._finished = True
 
@@ -231,8 +363,10 @@ class Pipeline(object):
             raise SystemExit
         if not self._stop:
             hline = 42 * '='
-            print('\n' + hline + "\nGot CTRL+C, waiting for current cycle...\n"
-                  "Press CTRL+C again if you're in hurry!\n" + hline)
+            print(
+                '\n' + hline + "\nGot CTRL+C, waiting for current cycle...\n"
+                "Press CTRL+C again if you're in hurry!\n" + hline
+            )
             self._stop = True
 
     def _print_timeit_statistics(self):
@@ -268,12 +402,17 @@ class Pipeline(object):
         memory = peak_memory_usage()
 
         print(60 * '=')
-        print("{0} cycles drained in {1} (CPU {2}). Memory peak: {3:.2f} MB"
-              .format(self._cycle_count,
-                      timef(overall), timef(overall_cpu), memory))
+        print(
+            "{0} cycles drained in {1} (CPU {2}). Memory peak: {3:.2f} MB".
+            format(
+                self._cycle_count, timef(overall), timef(overall_cpu), memory
+            )
+        )
         if self._cycle_count > n_cycles:
-            print("Statistics are based on the last {0} cycles."
-                  .format(n_cycles))
+            print(
+                "Statistics are based on the last {0} cycles.".
+                format(n_cycles)
+            )
         if cycles:
             print(statsf('wall', calc_stats(cycles)))
         if cycles_cpu:
@@ -286,11 +425,13 @@ class Pipeline(object):
             finish_time_cpu = self._timeit[module]['finish_cpu']
             process_times = self._timeit[module]['process']
             process_times_cpu = self._timeit[module]['process_cpu']
-            print(module.name +
-                  " - process: {0:.3f}s (CPU {1:.3f}s)"
-                  " - finish: {2:.3f}s (CPU {3:.3f}s)"
-                  .format(sum(process_times), sum(process_times_cpu),
-                          finish_time, finish_time_cpu))
+            print(
+                module.name + " - process: {0:.3f}s (CPU {1:.3f}s)"
+                " - finish: {2:.3f}s (CPU {3:.3f}s)".format(
+                    sum(process_times), sum(process_times_cpu), finish_time,
+                    finish_time_cpu
+                )
+            )
             if len(process_times) > 0:
                 print(statsf('wall', calc_stats(process_times)))
             if len(process_times_cpu) > 0:
@@ -315,11 +456,15 @@ class Module(object):
         self.log = get_logger(self.logger_name)
         self.print = get_printer(self.logger_name)
         self.timeit = self.get('timeit') or False
-        self._timeit = {'process': deque(maxlen=STAT_LIMIT),
-                        'process_cpu': deque(maxlen=STAT_LIMIT),
-                        'finish': 0,
-                        'finish_cpu': 0}
-        self.services = {}
+        self._timeit = {
+            'process': deque(maxlen=STAT_LIMIT),
+            'process_cpu': deque(maxlen=STAT_LIMIT),
+            'finish': 0,
+            'finish_cpu': 0
+        }
+        self.services = ServiceManager()
+        self.provided_services = {}
+        self.required_services = {}
         self.configure()
 
     def configure(self):
@@ -328,7 +473,7 @@ class Module(object):
 
     def expose(self, obj, name):
         """Expose an object as a service to the Pipeline"""
-        self.services[name] = obj
+        self.provided_services[name] = obj
 
     @property
     def name(self):
@@ -350,11 +495,17 @@ class Module(object):
         """Return the value of the requested parameter or raise an error."""
         value = self.get(name)
         if value is None:
-            raise TypeError("{0} requires the parameter '{1}'."
-                            .format(self.__class__, name))
+            raise TypeError(
+                "{0} requires the parameter '{1}'.".format(
+                    self.__class__, name
+                )
+            )
         return value
 
-    def process(self, blob):  # pylint: disable=R0201
+    def require_service(self, name, why=''):
+        self.required_services[name] = why
+
+    def process(self, blob):    # pylint: disable=R0201
         """Knead the blob and return it"""
         return blob
 
@@ -378,9 +529,11 @@ class Pump(Module):
     def __init__(self, *args, **kwargs):
         self.blob_file = None
         if args:
-            log.warning("Non-keywords argument passed. Please use keyword "
-                        "arguments to supress this warning. I will assume the "
-                        "first argument to be the `filename`.")
+            log.warning(
+                "Non-keywords argument passed. Please use keyword "
+                "arguments to supress this warning. I will assume the "
+                "first argument to be the `filename`."
+            )
             Module.__init__(self, filename=args[0], **kwargs)
         else:
             Module.__init__(self, **kwargs)
@@ -424,6 +577,10 @@ class Pump(Module):
     def close(self):
         self.finish()
 
+    def next(self):
+        """Python 2 compatibility for iterators"""
+        return self.__next__()
+
     def __enter__(self, *args, **kwargs):
         self.configure(*args, **kwargs)
         return self
@@ -434,12 +591,22 @@ class Pump(Module):
 
 class Blob(OrderedDict):
     """A simple (ordered) dict with a fancy name. This should hold the data."""
-    pass
+
+    def __str__(self):
+        padding = max(len(k) for k in self.keys()) + 3
+        s = ["Blob ({} entries):".format(len(self))]
+        for key, value in self.items():
+            s.append(
+                " '{}'".format(key).ljust(padding) +
+                " => {}".format(repr(value))
+            )
+        return "\n".join(s)
 
 
 class Run(object):
     """A simple container for event info, hits, tracks and calibration.
     """
+
     def __init__(self, **tables):
         for key, val in tables.items():
             setattr(self, key, val)

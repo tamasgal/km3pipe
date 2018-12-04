@@ -4,6 +4,7 @@
 Tools for global configuration.
 
 """
+from __future__ import absolute_import, print_function, division
 
 import os
 import pytz
@@ -11,6 +12,11 @@ from configparser import ConfigParser, Error, NoOptionError, NoSectionError
 import getpass
 
 from .logger import get_logger
+
+try:
+    input = raw_input
+except NameError:
+    pass
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -20,7 +26,7 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = get_logger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)    # pylint: disable=C0103
 
 CONFIG_PATH = os.path.expanduser('~/.km3net')
 
@@ -47,7 +53,7 @@ class Config(object):
             self._read_from_file(config_file)
 
     def _read_from_file(self, file_obj):
-        self.config.readfp(file_obj)
+        self.config.read_file(file_obj)
 
     def set(self, section, key, value):
         if section not in self.config.sections():
@@ -70,9 +76,11 @@ class Config(object):
         try:
             from irods.session import iRODSSession
         except ImportError:
-            log.error("Please install the iRODS Python client:\n\n"
-                      "    pip install git+git://github.com/irods/"
-                      "python-irodsclient.git\n")
+            log.error(
+                "Please install the iRODS Python client:\n\n"
+                "    pip install git+git://github.com/irods/"
+                "python-irodsclient.git\n"
+            )
             return
         try:
             host = self.config.get('iRODS', 'host')
@@ -88,8 +96,9 @@ class Config(object):
         except Error:
             password = input("Please enter your iRODS password: ")
 
-        return iRODSSession(host=host, port=port, user=user, password=password,
-                            zone=zone)
+        return iRODSSession(
+            host=host, port=port, user=user, password=password, zone=zone
+        )
 
     @property
     def db_credentials(self):

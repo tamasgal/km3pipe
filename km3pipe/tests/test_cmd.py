@@ -12,7 +12,6 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-
 KM3PIPE_GIT = "http://git.km3net.de/km3py/km3pipe.git"
 
 
@@ -29,10 +28,10 @@ class TestDetx(TestCase):
         det = mock_detector.return_value
         det.n_doms = 1
         detx(1)
-        self.assertTrue(det.write.call_args[0][0]
-                        .startswith("KM3NeT_00000001_"))
-        self.assertTrue(det.write.call_args[0][0]
-                        .endswith(".detx"))
+        self.assertTrue(
+            det.write.call_args[0][0].startswith("KM3NeT_00000001_")
+        )
+        self.assertTrue(det.write.call_args[0][0].endswith(".detx"))
 
     @patch('km3pipe.cmd.Detector')
     def test_detector_called_with_correct_args(self, mock_detector):

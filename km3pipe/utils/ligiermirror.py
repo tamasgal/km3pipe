@@ -27,6 +27,7 @@ import km3pipe as kp
 
 class LigierSender(kp.Module):
     """Forwards a message to another ligier"""
+
     def configure(self):
         target_ip = self.get("target_ip", default="127.0.0.1")
         port = self.get("port", default=5553)
@@ -48,11 +49,14 @@ def main():
     kp.logger.set_level("km3pipe", args['-d'])
 
     pipe = kp.Pipeline()
-    pipe.attach(kp.io.ch.CHPump, host=args['SOURCE_IP'],
-                port=int(args['-p']),
-                tags=args['-m'],
-                timeout=int(args['-x']),
-                max_queue=int(args['-s']))
+    pipe.attach(
+        kp.io.ch.CHPump,
+        host=args['SOURCE_IP'],
+        port=int(args['-p']),
+        tags=args['-m'],
+        timeout=int(args['-x']),
+        max_queue=int(args['-s'])
+    )
     pipe.attach(LigierSender, target_ip=args['-t'], port=int(args['-q']))
     pipe.drain()
 

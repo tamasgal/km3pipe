@@ -4,6 +4,7 @@
 Monte Carlo related things.
 
 """
+from __future__ import absolute_import, print_function, division
 
 import numpy as np
 
@@ -17,27 +18,27 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = get_logger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)    # pylint: disable=C0103
 
 
 def geant2pdg(geant_code):
     """Convert GEANT particle ID to PDG"""
     conversion_table = {
-        1: 22,     # photon
+        1: 22,    # photon
         2: -11,    # positron
-        3: 11,     # electron
+        3: 11,    # electron
         5: -13,    # muplus
-        6: 13,     # muminus
+        6: 13,    # muminus
         7: 111,    # pi0
         8: 211,    # piplus
-        9: -211,   # piminus
-        10: 130,   # k0long
-        11: 321,   # kplus
-        12: -321,  # kminus
-        13: 2112,  # neutron
-        14: 2212,  # proton
-        16: 310,   # kaon0short
-        17: 221,   # eta
+        9: -211,    # piminus
+        10: 130,    # k0long
+        11: 321,    # kplus
+        12: -321,    # kminus
+        13: 2112,    # neutron
+        14: 2212,    # proton
+        16: 310,    # kaon0short
+        17: 221,    # eta
     }
     try:
         return conversion_table[geant_code]
@@ -78,7 +79,7 @@ _PDG2NAME = {
     -2212: 'p-',
 }
 
-_NAME2PDG = {val: key for key, val in _PDG2NAME.items()}      # noqa
+_NAME2PDG = {val: key for key, val in _PDG2NAME.items()}    # noqa
 
 
 def pdg2name(pdg_id):

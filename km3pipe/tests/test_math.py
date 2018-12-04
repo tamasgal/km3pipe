@@ -8,8 +8,8 @@ import pytest
 from km3pipe.testing import TestCase
 from km3pipe.math import (
     angle_between, pld3, com, zenith, azimuth, Polygon, IrregularPrism,
-    rotation_matrix, SparseCone, space_angle, hsin, phi, theta,
-    unit_vector, innerprod_1d, log_b, qeuler, qrot, qrot_yaw, intersect_3d
+    rotation_matrix, SparseCone, space_angle, hsin, phi, theta, unit_vector,
+    innerprod_1d, log_b, qeuler, qrot, qrot_yaw, intersect_3d
 )
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
@@ -45,10 +45,12 @@ class TestMath(TestCase):
         assert_almost_equal(np.pi / 2 * 3, phi((0, -1, 0)))
         assert_almost_equal(0, phi((0, 0, 0)))
         assert_almost_equal(phi(self.v), 1.10714872)
-        assert_almost_equal(phi(self.vecs),
-                            np.array([1.57079633, 0.78539816,
-                                      0.46364761, 0.32175055,
-                                      0.24497866]))
+        assert_almost_equal(
+            phi(self.vecs),
+            np.array([
+                1.57079633, 0.78539816, 0.46364761, 0.32175055, 0.24497866
+            ])
+        )
 
     def test_zenith(self):
         assert_allclose(np.pi, zenith((0, 0, 1)))
@@ -58,10 +60,12 @@ class TestMath(TestCase):
         assert_allclose(np.pi / 4 * 3, zenith((0, 1, 1)))
         assert_allclose(np.pi / 4 * 3, zenith((0, -1, 1)))
         assert_almost_equal(zenith(self.v), 2.5010703409103687)
-        assert_allclose(zenith(self.vecs),
-                        np.array([2.94419709, 2.80175574,
-                                  2.50107034, 2.13473897,
-                                  1.80873745]))
+        assert_allclose(
+            zenith(self.vecs),
+            np.array([
+                2.94419709, 2.80175574, 2.50107034, 2.13473897, 1.80873745
+            ])
+        )
 
     def test_azimuth(self):
         self.assertTrue(np.allclose(np.pi, azimuth((1, 0, 0))))
@@ -76,11 +80,14 @@ class TestMath(TestCase):
         self.assertTrue(np.allclose(np.pi / 2, azimuth((0, -1, 0))))
         self.assertTrue(np.allclose(np.pi, azimuth((0, 0, 0))))
         self.assertTrue(np.allclose(azimuth(self.v), 4.24874137138))
-        self.assertTrue(np.allclose(azimuth(self.vecs),
-                                    np.array([4.71238898, 3.92699082,
-                                              3.60524026, 3.46334321,
-                                              3.38657132]
-                                             )))
+        self.assertTrue(
+            np.allclose(
+                azimuth(self.vecs),
+                np.array([
+                    4.71238898, 3.92699082, 3.60524026, 3.46334321, 3.38657132
+                ])
+            )
+        )
 
     def test_theta(self):
         print(theta((0, 0, -1)))
@@ -98,10 +105,14 @@ class TestMath(TestCase):
         self.assertTrue(np.allclose(0, theta((0, 1, 1))))
         self.assertTrue(np.allclose(0, theta((0, -1, 1))))
         self.assertTrue(np.allclose(theta(self.v), 0.64052231))
-        self.assertTrue(np.allclose(theta(self.vecs),
-                                    np.array([0.19739554, 0.33983691,
-                                              0.64052231, 1.00685369,
-                                              1.3328552])))
+        self.assertTrue(
+            np.allclose(
+                theta(self.vecs),
+                np.array([
+                    0.19739554, 0.33983691, 0.64052231, 1.00685369, 1.3328552
+                ])
+            )
+        )
 
     def test_unit_vector(self):
         v1 = (1, 0, 0)
@@ -126,16 +137,30 @@ class TestMath(TestCase):
         self.assertAlmostEqual(angle_between(self.v, v1), 1.3002465638163236)
         self.assertAlmostEqual(angle_between(self.v, v2), 1.0068536854342678)
         self.assertAlmostEqual(angle_between(self.v, v3), 1.8413460897734695)
-        self.assertTrue(np.allclose(angle_between(self.vecs, v1),
-                                    np.array([1.57079633, 1.3328552, 1.0068537,
-                                              0.64052231, 0.33983691])))
-        self.assertTrue(np.allclose(angle_between(self.vecs, v2),
-                                    np.array([1.37340077, 1.3328552, 1.3002466,
-                                              1.30024656, 1.3328552])))
-        self.assertTrue(np.allclose(angle_between(self.vecs, v3),
-                                    np.array([1.57079633, 1.80873745,
-                                              2.13473897, 2.50107034,
-                                              2.80175574])))
+        self.assertTrue(
+            np.allclose(
+                angle_between(self.vecs, v1),
+                np.array([
+                    1.57079633, 1.3328552, 1.0068537, 0.64052231, 0.33983691
+                ])
+            )
+        )
+        self.assertTrue(
+            np.allclose(
+                angle_between(self.vecs, v2),
+                np.array([
+                    1.37340077, 1.3328552, 1.3002466, 1.30024656, 1.3328552
+                ])
+            )
+        )
+        self.assertTrue(
+            np.allclose(
+                angle_between(self.vecs, v3),
+                np.array([
+                    1.57079633, 1.80873745, 2.13473897, 2.50107034, 2.80175574
+                ])
+            )
+        )
 
     def test_angle_between_returns_nan_for_zero_length_vectors(self):
         v1 = (0, 0, 0)
@@ -146,12 +171,14 @@ class TestMath(TestCase):
     def test_space_angle(self):
         p1 = (np.pi / 2, np.pi)
         p2 = (np.pi, 0)
-        self.assertAlmostEqual(space_angle(
-            p1[0], p2[0], p1[1], p2[1]), 1.57079632679489)
+        self.assertAlmostEqual(
+            space_angle(p1[0], p2[0], p1[1], p2[1]), 1.57079632679489
+        )
         p3 = (0, np.pi)
         p4 = (np.pi / 2, 0)
-        self.assertAlmostEqual(space_angle(
-            p3[0], p4[0], p3[1], p4[1]), 1.57079632679489)
+        self.assertAlmostEqual(
+            space_angle(p3[0], p4[0], p3[1], p4[1]), 1.57079632679489
+        )
 
     def test_hsin(self):
         assert np.all(hsin((np.pi, 0)) == (1, 0))
@@ -250,8 +277,11 @@ class TestRotation(TestCase):
         axis = [4, 4, 1]
         theta = 1.2
         newvec = np.dot(rotation_matrix(axis, theta), v)
-        self.assertTrue(np.allclose(
-            newvec, np.array([2.74911638, 4.77180932, 1.91629719])))
+        self.assertTrue(
+            np.allclose(
+                newvec, np.array([2.74911638, 4.77180932, 1.91629719])
+            )
+        )
 
     def test_cone(self):
         spike = [1, 1, 0]
@@ -299,7 +329,7 @@ class TestQeuler(TestCase):
     def test_mixed_conversion(self):
         assert np.allclose([0.999471, 0.02601972, 0.01767416, 0.00826538],
                            qeuler(1, 2, 3))
-        assert np.allclose([ 0.94371436, 0.26853582, -0.14487813, 0.12767944],
+        assert np.allclose([0.94371436, 0.26853582, -0.14487813, 0.12767944],
                            qeuler(10, -20, 30))
         assert np.allclose([-0.16575384, -0.69624819, 0.05479592, -0.69624819],
                            qeuler(-999, 999, -999))
@@ -307,35 +337,35 @@ class TestQeuler(TestCase):
 
 class TestQrot(TestCase):
     def test_rotation_of_x_vector(self):
-        assert np.allclose([0, 1, 0], qrot([1, 0, 0], qeuler(90, 0, 0))) 
-        assert np.allclose([-1, 0, 0], qrot([1, 0, 0], qeuler(180, 0, 0))) 
-        assert np.allclose([-1, 0, 0], qrot([1, 0, 0], qeuler(180, 0, -45))) 
-        assert np.allclose([0, 0, -1], qrot([1, 0, 0], qeuler(180, 90, 45))) 
+        assert np.allclose([0, 1, 0], qrot([1, 0, 0], qeuler(90, 0, 0)))
+        assert np.allclose([-1, 0, 0], qrot([1, 0, 0], qeuler(180, 0, 0)))
+        assert np.allclose([-1, 0, 0], qrot([1, 0, 0], qeuler(180, 0, -45)))
+        assert np.allclose([0, 0, -1], qrot([1, 0, 0], qeuler(180, 90, 45)))
 
     def test_rotation_of_y_vector(self):
-        assert np.allclose([-1, 0, 0], qrot([0, 1, 0], qeuler(90, 0, 0))) 
-        assert np.allclose([0, -1, 0], qrot([0, 1, 0], qeuler(180, 0, 0))) 
+        assert np.allclose([-1, 0, 0], qrot([0, 1, 0], qeuler(90, 0, 0)))
+        assert np.allclose([0, -1, 0], qrot([0, 1, 0], qeuler(180, 0, 0)))
         assert np.allclose([0, -0.70710, -0.70710],
-                           qrot([0, 1, 0], qeuler(180, 0, -45))) 
+                           qrot([0, 1, 0], qeuler(180, 0, -45)))
         assert np.allclose([-0.70710, -0.70710, 0],
-                           qrot([0, 1, 0], qeuler(180, 90, 45))) 
+                           qrot([0, 1, 0], qeuler(180, 90, 45)))
 
     def test_rotation_of_z_vector(self):
-        assert np.allclose([0, 0, 1], qrot([0, 0, 1], qeuler(90, 0, 0))) 
-        assert np.allclose([0, 0, 1], qrot([0, 0, 1], qeuler(180, 0, 0))) 
+        assert np.allclose([0, 0, 1], qrot([0, 0, 1], qeuler(90, 0, 0)))
+        assert np.allclose([0, 0, 1], qrot([0, 0, 1], qeuler(180, 0, 0)))
         assert np.allclose([0, -0.70710, 0.70710],
-                           qrot([0, 0, 1], qeuler(180, 0, -45))) 
+                           qrot([0, 0, 1], qeuler(180, 0, -45)))
         assert np.allclose([-0.70710, 0.70710, 0],
-                           qrot([0, 0, 1], qeuler(180, 90, 45))) 
+                           qrot([0, 0, 1], qeuler(180, 90, 45)))
 
     def test_mixed_rotation(self):
-        assert np.allclose([1, 2, 3], qrot([1, 2, 3], qeuler(0, 0, 0))) 
+        assert np.allclose([1, 2, 3], qrot([1, 2, 3], qeuler(0, 0, 0)))
         assert np.allclose([0, -1.414213, 0],
-                           qrot([0, 1, -1], qeuler(180, 90, 45))) 
-        assert np.allclose([-1.41421356,  0, -1],
-                           qrot([1, 1, 1], qeuler(180, 90, 45))) 
-        assert np.allclose([-14.1421356,  0, -10],
-                           qrot([10, 10, 10], qeuler(180, 90, 45))) 
+                           qrot([0, 1, -1], qeuler(180, 90, 45)))
+        assert np.allclose([-1.41421356, 0, -1],
+                           qrot([1, 1, 1], qeuler(180, 90, 45)))
+        assert np.allclose([-14.1421356, 0, -10],
+                           qrot([10, 10, 10], qeuler(180, 90, 45)))
 
 
 class TestQrotYaw(TestCase):
@@ -393,6 +423,3 @@ class TestIntersect3D(TestCase):
         p2 = np.array([(-1, 10, 0), (0, 10, -1)])
         intersection = intersect_3d(p1, p2)
         assert np.allclose([0, 10, 0], intersection)
-
-
- 

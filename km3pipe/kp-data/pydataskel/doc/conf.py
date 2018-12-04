@@ -20,7 +20,7 @@
 import sys
 sys.path.append('../')
 
-import pydataskel  # noqa
+import pydataskel    # noqa
 
 # -- General configuration ------------------------------------------------
 
@@ -39,7 +39,6 @@ extensions = [
     'numpydoc',
     'sphinx_gallery.gen_gallery',
 ]
-
 
 exclude_patterns = ['_build', '**.ipynb_checkpoints']
 
@@ -124,7 +123,6 @@ pygments_style = 'sphinx'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
-
 
 # -- Options for HTML output ----------------------------------------------
 
@@ -277,8 +275,10 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'pydataskel.tex', 'pydataskel Documentation',
-     'Moritz Lotze', 'manual'),
+    (
+        master_doc, 'pydataskel.tex', 'pydataskel Documentation',
+        'Moritz Lotze', 'manual'
+    ),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -313,7 +313,6 @@ latex_documents = [
 #
 # latex_domain_indices = True
 
-
 # -- Options for manual page output ---------------------------------------
 
 # One entry per manual page. List of tuples
@@ -327,16 +326,16 @@ man_pages = [
 #
 # man_show_urls = False
 
-
 # -- Options for Texinfo output -------------------------------------------
 
 # Grouping the document tree into Texinfo files. List of tuples
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'pydataskel', 'pydataskel Documentation',
-     author, 'pydataskel', 'One line description of project.',
-     'Miscellaneous'),
+    (
+        master_doc, 'pydataskel', 'pydataskel Documentation', author,
+        'pydataskel', 'One line description of project.', 'Miscellaneous'
+    ),
 ]
 
 # Documents to append as an appendix to all manuals.

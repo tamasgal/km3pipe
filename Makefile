@@ -2,7 +2,6 @@ PKGNAME=km3pipe
 ALLNAMES = $(PKGNAME)
 ALLNAMES += km3modules 
 ALLNAMES += pipeinspector
-SUFFIX=${DOCKER_NAME}
 
 default: build
 
@@ -27,17 +26,17 @@ clean:
 	rm -f $(PKGNAME)/*.so
 
 test: 
-	py.test --junitxml=./reports/junit$(SUFFIX).xml -o junit_suite_name=$(PKGNAME)_$(SUFFIX) $(PKGNAME)
+	py.test --junitxml=./reports/junit.xml -o junit_suite_name=$(PKGNAME) $(PKGNAME)
 
 test-km3modules: 
-	py.test --junitxml=./reports/junit_km3modules$(SUFFIX).xml -o junit_suite_name=km3modules_$(SUFFIX) km3modules
+	py.test --junitxml=./reports/junit_km3modules.xml -o junit_suite_name=km3modules km3modules
 
 test-cov:
-	py.test --cov ./ --cov-report term-missing --cov-report xml:reports/coverage$(SUFFIX).xml --cov-report html:reports/coverage $(ALLNAMES)
+	py.test --cov ./ --cov-report term-missing --cov-report xml:reports/coverage.xml --cov-report html:reports/coverage $(ALLNAMES)
 
 test-loop: 
-	py.test
-	ptw --ext=.py,.pyx --ignore=doc
+	py.test $(PKGNAME) km3modules
+	ptw --ext=.py,.pyx --ignore=doc $(PKGNAME) km3modules
 
 flake8: 
 	py.test --flake8
@@ -56,5 +55,12 @@ lint:
 dependencies:
 	pip install -U numpy
 	pip install -Ur requirements.txt
+
+.PHONY: yapf
+yapf:
+	yapf -i -r km3pipe
+	yapf -i -r km3modules
+	yapf -i -r examples
+	yapf -i setup.py
 
 .PHONY: all clean build install install-dev test test-km3modules test-nocov flake8 pep8 dependencies docstyle

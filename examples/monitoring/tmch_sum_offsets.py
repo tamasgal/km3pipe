@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # vim: ts=4 sw=4 et
 """
 =====================================================
@@ -22,6 +23,8 @@ in a CSV file.
         -h --help        Show this screen.
 
 """
+from __future__ import absolute_import, print_function, division
+
 import io
 import os
 import km3pipe as kp
@@ -77,9 +80,11 @@ class SummarysliceMatcher(kp.Module):
     def _get_file_handler(self, filename):
         if not os.path.exists(filename):
             fobj = open(filename, 'w')
-            fobj.write("run dom_id nearest_idx diff "
-                       "tmch_timestamp tmch_ns "
-                       "summary_timestamp summary_ns\n")
+            fobj.write(
+                "run dom_id nearest_idx diff "
+                "tmch_timestamp tmch_ns "
+                "summary_timestamp summary_ns\n"
+            )
         else:
             fobj = open(filename, 'a')
         return fobj
@@ -97,7 +102,7 @@ class SummarysliceMatcher(kp.Module):
         tag = str(blob['CHPrefix'].tag)
         if tag == 'IO_SUM':
             data = io.BytesIO(blob['CHData'])
-            preamble = DAQPreamble(file_obj=data)  # noqa
+            preamble = DAQPreamble(file_obj=data)    # noqa
             summary = DAQSummaryslice(file_obj=data)
             try:
                 rates = np.array(summary.summary_frames[self.dom_id])
@@ -113,24 +118,28 @@ class SummarysliceMatcher(kp.Module):
                 print("Trying to match a summaryslice.")
                 idx_nearest = (np.abs(self._diff)).argmin()
                 summary = self._summaries[idx_nearest]
-                print("min", min(self._diff), "max", max(self._diff),
-                      "nearest", self._diff[idx_nearest])
+                print(
+                    "min", min(self._diff), "max", max(self._diff), "nearest",
+                    self._diff[idx_nearest]
+                )
                 print(self._rates_io_monit)
                 print(summary.summary_frames[self.dom_id])
-                print("Time of IO_MONIT:",
-                      self._candidate.utc_seconds,
-                      self._candidate.nanoseconds)
-                print("Time of IO_SUM:",
-                      summary.header.time_stamp,
-                      summary.header.ticks * 16)
-                self.fobj.write("{} {} {} {} {} {} {} {}\n"
-                                .format(self._candidate.run, self.dom_id,
-                                        idx_nearest,
-                                        self._diff[idx_nearest],
-                                        self._candidate.utc_seconds,
-                                        self._candidate.nanoseconds,
-                                        summary.header.time_stamp,
-                                        summary.header.ticks * 16))
+                print(
+                    "Time of IO_MONIT:", self._candidate.utc_seconds,
+                    self._candidate.nanoseconds
+                )
+                print(
+                    "Time of IO_SUM:", summary.header.time_stamp,
+                    summary.header.ticks * 16
+                )
+                self.fobj.write(
+                    "{} {} {} {} {} {} {} {}\n".format(
+                        self._candidate.run, self.dom_id, idx_nearest,
+                        self._diff[idx_nearest], self._candidate.utc_seconds,
+                        self._candidate.nanoseconds, summary.header.time_stamp,
+                        summary.header.ticks * 16
+                    )
+                )
                 self._reset()
                 self.fobj.flush()
         return blob
@@ -150,15 +159,18 @@ def main():
     dom_id = int(args['DOM_ID'])
 
     pipe = kp.Pipeline(timeit=True)
-    pipe.attach(kp.io.CHPump,
-                host='127.0.0.1',
-                port=5553,
-                tags='IO_SUM, IO_MONIT',
-                timeout=60 * 60 * 24 * 7,
-                max_queue=1000)
+    pipe.attach(
+        kp.io.CHPump,
+        host='127.0.0.1',
+        port=5553,
+        tags='IO_SUM, IO_MONIT',
+        timeout=60 * 60 * 24 * 7,
+        max_queue=1000
+    )
     pipe.attach(MonitoringChannelPicker, dom_id=dom_id)
-    pipe.attach(SummarysliceMatcher,
-                dom_id=dom_id, n_timeslices=int(args['-n']))
+    pipe.attach(
+        SummarysliceMatcher, dom_id=dom_id, n_timeslices=int(args['-n'])
+    )
     pipe.drain()
 
 

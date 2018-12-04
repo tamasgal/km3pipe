@@ -1,9 +1,11 @@
 # Filename: ahrs.py
+# -*- coding: utf-8 -*-
 # pylint: disable=locally-disabled
 """
 AHRS calibration.
 
 """
+from __future__ import absolute_import, print_function, division
 
 import io
 from collections import defaultdict
@@ -20,7 +22,8 @@ __author__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = kp.logger.get_logger(__name__)  # pylint: disable=C0103
+log = kp.logger.get_logger(__name__)    # pylint: disable=C0103
+
 # log.setLevel("DEBUG")
 
 
@@ -44,7 +47,7 @@ class AHRSCalibrator(kp.Module):
 
     def configure(self):
         det_id = self.require('det_id')
-        self.interval = self.get('interval') or 10  # in sec
+        self.interval = self.get('interval') or 10    # in sec
         self.A = defaultdict(list)
         self.H = defaultdict(list)
         self.detector = kp.hardware.Detector(det_id=det_id)
@@ -56,7 +59,7 @@ class AHRSCalibrator(kp.Module):
         dom_id = tmch_data.dom_id
         try:
             du, floor, _ = self.detector.doms[dom_id]
-        except KeyError:  # base CLB
+        except KeyError:    # base CLB
             return blob
 
         self.A[dom_id].append(tmch_data.A)
@@ -82,8 +85,11 @@ class AHRSCalibrator(kp.Module):
         """
         now = time.time()
         dom_ids = self.A.keys()
-        print("Calibrating AHRS from median A and H for {} DOMs."
-              .format(len(dom_ids)))
+        print(
+            "Calibrating AHRS from median A and H for {} DOMs.".format(
+                len(dom_ids)
+            )
+        )
         calibrations = {}
         for dom_id in dom_ids:
             print("Calibrating DOM ID {}".format(dom_id))
@@ -132,10 +138,13 @@ def fit_ahrs(A, H, Aoff, Arot, Hoff, Hrot):
 
     roll = arctan2(-Acal[1], -Acal[2])
     pitch = arctan2(Acal[0], np.sqrt(Acal[1] * Acal[1] + Acal[2] * Acal[2]))
-    yaw = arctan2(Hcal[2] * sin(roll) - Hcal[1] * cos(roll),
-                  sum((Hcal[0] * cos(pitch),
-                       Hcal[1] * sin(pitch) * sin(roll),
-                       Hcal[2] * sin(pitch) * cos(roll))))
+    yaw = arctan2(
+        Hcal[2] * sin(roll) - Hcal[1] * cos(roll),
+        sum((
+            Hcal[0] * cos(pitch), Hcal[1] * sin(pitch) * sin(roll),
+            Hcal[2] * sin(pitch) * cos(roll)
+        ))
+    )
 
     yaw = np.degrees(yaw)
     while yaw < 0:

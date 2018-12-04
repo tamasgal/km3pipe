@@ -10,6 +10,8 @@ Usage:
     km3pipe detectors [-s REGEX] [--temporary]
     km3pipe rundetsn [--temporary] RUN DETECTOR
     km3pipe retrieve DET_ID RUN [-o OUTFILE]
+    km3pipe git
+    km3pipe git-short
     km3pipe (-h | --help)
     km3pipe --version
 
@@ -28,6 +30,8 @@ Options:
     RUN                 Run number.
 
 """
+from __future__ import absolute_import, print_function, division
+
 import re
 import sys
 import os
@@ -40,7 +44,7 @@ from .hardware import Detector
 
 from km3pipe.logger import get_logger
 
-log = get_logger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)    # pylint: disable=C0103
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -60,8 +64,10 @@ def run_tests():
 def update_km3pipe(git_branch=''):
     if git_branch == '' or git_branch is None:
         git_branch = 'master'
-    os.system("pip install -U git+http://git.km3net.de/km3py/km3pipe.git@{0}"
-              .format(git_branch))
+    os.system(
+        "pip install -U git+http://git.km3net.de/km3py/km3pipe.git@{0}".
+        format(git_branch)
+    )
 
 
 def retrieve(run_id, det_id, outfile=None):
@@ -126,9 +132,19 @@ def createconf(overwrite=False, dump=False):
     os.chmod(fname, 0o600)
 
 
+def print_git_revision():
+    """Prints the last git commit hash"""
+    print(get_git_revision_hash())
+
+
+def print_git_short_revision():
+    """Prints the last git commit short hash"""
+    print(get_git_revision_hash(short=True))
+
+
 def main():
     from docopt import docopt
-    args = docopt(__doc__, version=version)
+    args = docopt(__doc__, version="KM3Pipe {}".format(version, ))
 
     if args['test']:
         run_tests()
@@ -142,8 +158,9 @@ def main():
         createconf(overwrite_conf, dump)
 
     if args['rundetsn']:
-        rundetsn(int(args['RUN']), args['DETECTOR'],
-                 temporary=args["--temporary"])
+        rundetsn(
+            int(args['RUN']), args['DETECTOR'], temporary=args["--temporary"]
+        )
 
     if args['retrieve']:
         retrieve(int(args['RUN']), args['DET_ID'], args['-o'])
@@ -157,3 +174,9 @@ def main():
 
     if args['detectors']:
         detectors(regex=args['-s'], temporary=args["--temporary"])
+
+    if args['git']:
+        print_git_revision()
+
+    if args['git-short']:
+        print_git_short_revision()

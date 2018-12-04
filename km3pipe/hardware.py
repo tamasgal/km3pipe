@@ -4,6 +4,7 @@
 Classes representing KM3NeT hardware.
 
 """
+from __future__ import absolute_import, print_function, division
 
 from collections import OrderedDict, defaultdict
 from io import StringIO
@@ -12,13 +13,12 @@ import numpy as np
 
 from .dataclasses import Table
 from .tools import unpack_nfirst, split
-from .math import intersect_3d, qrot_yaw  # , ignored
+from .math import intersect_3d, qrot_yaw    # , ignored
 from .db import DBManager
 
 from .logger import get_logger, get_printer
 
-
-log = get_logger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)    # pylint: disable=C0103
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -44,10 +44,9 @@ class Detector(object):
         calibration (when retrieving from database).
     """
 
-    def __init__(self, filename=None,
-                 det_id=None,
-                 t0set=None,
-                 calibration=None):
+    def __init__(
+            self, filename=None, det_id=None, t0set=None, calibration=None
+    ):
         self._det_file = None
         self.det_id = None
         self.n_doms = None
@@ -66,7 +65,7 @@ class Detector(object):
 
         self._dom_positions = None
         self._pmt_angles = None
-        self._xy_positions = None 
+        self._xy_positions = None
         self.reset_caches()
 
         self.print = get_printer(self.__class__.__name__)
@@ -75,9 +74,10 @@ class Detector(object):
             self._init_from_file(filename)
 
         if det_id is not None:
-            self.print("Retrieving DETX with detector ID {0} "
-                       "from the database..."
-                       .format(det_id))
+            self.print(
+                "Retrieving DETX with detector ID {0} "
+                "from the database...".format(det_id)
+            )
             db = DBManager()
             detx = db.detx(det_id, t0set=t0set, calibration=calibration)
             self._det_file = StringIO(detx)
@@ -146,8 +146,10 @@ class Detector(object):
                 self.dus.append(du)
                 self._current_floor = 1
                 if du == 1 and floor == -1:
-                    log.warning("Floor ID is -1 (Jpp conversion bug), "
-                                "using our own floor ID!")
+                    log.warning(
+                        "Floor ID is -1 (Jpp conversion bug), "
+                        "using our own floor ID!"
+                    )
             else:
                 self._current_floor += 1
 
@@ -161,9 +163,11 @@ class Detector(object):
                 self.n_pmts_per_dom = n_pmts
 
             if self.n_pmts_per_dom != n_pmts:
-                log.warning("DOMs with different number of PMTs are "
-                            "detected, this can cause some unexpected "
-                            "behaviour.")
+                log.warning(
+                    "DOMs with different number of PMTs are "
+                    "detected, this can cause some unexpected "
+                    "behaviour."
+                )
 
             for i in range(n_pmts):
                 raw_pmt_info = self._det_file.readline()
@@ -192,7 +196,6 @@ class Detector(object):
 
         self.pmts = Table(pmts, name='PMT')
 
-
     def reset_caches(self):
         log.debug('Resetting caches.')
         self._dom_positions = OrderedDict()
@@ -220,7 +223,7 @@ class Detector(object):
     @property
     def xy_positions(self):
         """XY positions of the DUs, given by the DOMs on floor 1."""
-        if self._xy_positions == []:
+        if self._xy_positions is None or len(self._xy_positions) == 0:
             xy_pos = []
             for dom_id, pos in self.dom_positions.items():
                 if self.domid2floor(dom_id) == 1:
@@ -241,7 +244,7 @@ class Detector(object):
         pmts = self.pmts[self.pmts.dom_id == dom_id]
         if centre_point is None:
             centre_point = self.dom_positions[dom_id]
-            
+
         for pmt in pmts:
             pmt_pos = np.array([pmt.pos_x, pmt.pos_y, pmt.pos_z])
             pmt_dir = np.array([pmt.dir_x, pmt.dir_y, pmt.dir_z])
@@ -307,9 +310,8 @@ class Detector(object):
                 pmt_idx = self._pmt_index_by_omkey[(line, floor, channel_id)]
                 pmt = self.pmts[pmt_idx]
                 doms += " {0} {1} {2} {3} {4} {5} {6} {7}\n".format(
-                        pmt.pmt_id, pmt.pos_x, pmt.pos_y, pmt.pos_z,
-                        pmt.dir_x, pmt.dir_y, pmt.dir_z,
-                        pmt.t0
+                    pmt.pmt_id, pmt.pos_x, pmt.pos_y, pmt.pos_z, pmt.dir_x,
+                    pmt.dir_y, pmt.dir_z, pmt.t0
                 )
         return header + "\n" + doms
 
@@ -345,7 +347,8 @@ class Detector(object):
 
     def __str__(self):
         return "Detector id: '{0}', n_doms: {1}, dus: {2}".format(
-            self.det_id, self.n_doms, self.dus)
+            self.det_id, self.n_doms, self.dus
+        )
 
     def __repr__(self):
         return self.__str__()
@@ -353,6 +356,7 @@ class Detector(object):
 
 class UTMInfo(object):
     """The UTM information"""
+
     def __init__(self, ellipsoid, grid, easting, northing, z):
         self.ellipsoid = ellipsoid
         self.grid = grid
@@ -396,5 +400,7 @@ class PMT(object):
 
 
 # PMT DAQ channel IDs ordered from top to bottom
-ORDERED_PMT_IDS = [28, 23, 22, 21, 27, 29, 20, 30, 26, 25, 19, 24, 13, 7, 1,
-                   14, 18, 12, 6, 2, 11, 8, 0, 15, 4, 3, 5, 17, 10, 9, 16]
+ORDERED_PMT_IDS = [
+    28, 23, 22, 21, 27, 29, 20, 30, 26, 25, 19, 24, 13, 7, 1, 14, 18, 12, 6, 2,
+    11, 8, 0, 15, 4, 3, 5, 17, 10, 9, 16
+]

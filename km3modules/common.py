@@ -1,9 +1,12 @@
 # Filename: common.py
+# -*- coding: utf-8 -*-
 # pylint: disable=locally-disabled
 """
 A collection of commonly used modules.
 
 """
+from __future__ import absolute_import, print_function, division
+
 from time import time
 
 import numpy as np
@@ -78,8 +81,9 @@ class Keep(Module):
     """
 
     def configure(self):
-        self.keys = self.get('keys') or set()
-        key = self.get('key') or None
+        self.keys = self.get('keys', default=set())
+        key = self.get('key', default=None)
+        self.h5locs = self.get('h5locs', default=set())
         if key and not self.keys:
             self.keys = [key]
 
@@ -87,6 +91,9 @@ class Keep(Module):
         out = Blob()
         for key in blob.keys():
             if key in self.keys:
+                out[key] = blob[key]
+            elif hasattr(blob[key], 'h5loc') and blob[key].h5loc.startswith(
+                    tuple(self.h5locs)):
                 out[key] = blob[key]
         return out
 
@@ -104,6 +111,7 @@ class HitCounter(Module):
 
 class HitCalibrator(Module):
     """A very basic hit calibrator, which requires a `Calibration` module."""
+
     def configure(self):
         self.input_key = self.get('input_key', default='Hits')
         self.output_key = self.get('output_key', default='CalibHits')
@@ -191,7 +199,7 @@ class Siphon(Module):
     """
 
     def configure(self):
-        self.volume = self.require('volume')  # [blobs]
+        self.volume = self.require('volume')    # [blobs]
         self.flush = self.get('flush', default=False)
 
         self.blob_count = 0

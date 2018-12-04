@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Author: Tamas Gal <tgal@km3net.de>
 # License: MIT
 #!/usr/bin/env python
@@ -14,6 +15,7 @@ This application is used to forward monitoring channel data from Ligier
 to a given UDP address.
 
 """
+from __future__ import absolute_import, print_function, division
 
 import socket
 import sys
@@ -40,12 +42,14 @@ class UDPForwarder(kp.Module):
 
 
 pipe = kp.Pipeline()
-pipe.attach(kp.io.CHPump,
-            host='localhost',
-            port=5553,
-            tags='IO_MONIT',
-            timeout=60 * 60 * 24 * 7,
-            max_queue=1000,
-            timeit=True)
+pipe.attach(
+    kp.io.CHPump,
+    host='localhost',
+    port=5553,
+    tags='IO_MONIT',
+    timeout=60 * 60 * 24 * 7,
+    max_queue=1000,
+    timeit=True
+)
 pipe.attach(UDPForwarder)
 pipe.drain()

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # vim: ts=4 sw=4 et
 """
 =======================
@@ -17,6 +18,8 @@ Combine k40calib results into a single CSV file.
         -h --help   Show this screen.
 
 """
+from __future__ import absolute_import, print_function, division
+
 from glob import glob
 import os
 import re
@@ -44,8 +47,9 @@ def main():
         write_header(csv_file)
 
         for fn in files:
-            det_id, run_id = [int(x) for x
-                              in re.search("_(\\d{8})" * 2, fn).groups()]
+            det_id, run_id = [
+                int(x) for x in re.search("_(\\d{8})" * 2, fn).groups()
+            ]
             with open(fn, 'rb') as f:
                 data = pickle.load(f)
             if not data:

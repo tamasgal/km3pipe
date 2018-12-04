@@ -2,9 +2,9 @@
 # pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
 
 from km3pipe.testing import TestCase, patch, Mock, surrogate
-from km3pipe.io.root import (open_rfile, get_hist, get_hist2d, get_hist3d,
-                             interpol_hist2d)
-
+from km3pipe.io.root import (
+    open_rfile, get_hist, get_hist2d, get_hist3d, interpol_hist2d
+)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2018, Tamas Gal and the KM3NeT collaboration."

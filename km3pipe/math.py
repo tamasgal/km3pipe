@@ -1,9 +1,12 @@
 #!usr/bin/env python
+# -*- coding: utf-8 -*-
 # Filename: math.py
 # pylint: disable=C0103
 """
 Maths, Geometry, coordinates.
 """
+from __future__ import absolute_import, print_function, division
+
 import numpy as np
 
 from .logger import get_logger
@@ -16,7 +19,7 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = get_logger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)    # pylint: disable=C0103
 
 
 def neutrino_to_source_direction(phi, theta, radian=True):
@@ -138,7 +141,7 @@ def cartesian(phi, theta, radius=1):
 
 
 def angle_between(v1, v2):
-    """Returns the angle in radians between vectors 'v1' and 'v2'::
+    """Returns the angle in radians between vectors 'v1' and 'v2'.
 
     >>> angle_between((1, 0, 0), (0, 1, 0))
     1.5707963267948966
@@ -240,9 +243,8 @@ def space_angle(phi1, theta1, phi2, theta2):
     lambdelt = lamb2 - lamb1
     under = sin(phi1) * sin(phi2) + cos(phi1) * cos(phi2) * cos(lambdelt)
     over = sqrt(
-        np.square((cos(phi2) * sin(lambdelt))) + square(
-            cos(phi1) * sin(phi2) - sin(phi1) * cos(phi2) * cos(lambdelt)
-        )
+        np.square((cos(phi2) * sin(lambdelt))) +
+        square(cos(phi1) * sin(phi2) - sin(phi1) * cos(phi2) * cos(lambdelt))
     )
     angle = arctan2(over, under)
     return angle
@@ -358,8 +360,7 @@ class SparseCone(object):
             np.dot(
                 rotation_matrix(self.top_bottom_vec, theta),
                 random_circle_vector
-            )
-            for theta in angles
+            ) for theta in angles
         ]
         return points_on_circle
 
@@ -407,9 +408,8 @@ def g_parameter(time_residual):
 
 def gold_parameter(time_residual):
     """stolen from thomas"""
-    gold = np.exp(
-        -1 * time_residual * time_residual / (2 * 1.5 * 1.5)
-    ) / len(time_residual)
+    gold = np.exp(-1 * time_residual * time_residual / (2 * 1.5 * 1.5)
+                  ) / len(time_residual)
     gold = np.sum(gold)
 
 
@@ -463,10 +463,10 @@ def qeuler(yaw, pitch, roll):
     cp = np.cos(pitch * 0.5)
     sp = np.sin(pitch * 0.5)
 
-    q = np.array((cy * cr * cp + sy * sr * sp,
-                  cy * sr * cp - sy * cr * sp,
-                  cy * cr * sp + sy * sr * cp,
-                  sy * cr * cp - cy * sr * sp))
+    q = np.array((
+        cy * cr * cp + sy * sr * sp, cy * sr * cp - sy * cr * sp,
+        cy * cr * sp + sy * sr * cp, sy * cr * cp - cy * sr * sp
+    ))
     return q
 
 
@@ -520,10 +520,13 @@ def intersect_3d(p1, p2):
     xz = np.sum(nx * nz)
     yz = np.sum(ny * nz)
     M = np.array([(xx, xy, xz), (xy, yy, yz), (xz, yz, zz)])
-    x = np.sum(p1[:, 0] * (nx**2 - 1) + p1[:, 1]
-               * (nx * ny) + p1[:, 2] * (nx * nz))
-    y = np.sum(p1[:, 0] * (nx * ny) + p1[:, 1] *
-               (ny * ny - 1) + p1[:, 2] * (ny * nz))
-    z = np.sum(p1[:, 0] * (nx * nz) + p1[:, 1] *
-               (ny * nz) + p1[:, 2] * (nz**2 - 1))
+    x = np.sum(
+        p1[:, 0] * (nx**2 - 1) + p1[:, 1] * (nx * ny) + p1[:, 2] * (nx * nz)
+    )
+    y = np.sum(
+        p1[:, 0] * (nx * ny) + p1[:, 1] * (ny * ny - 1) + p1[:, 2] * (ny * nz)
+    )
+    z = np.sum(
+        p1[:, 0] * (nx * nz) + p1[:, 1] * (ny * nz) + p1[:, 2] * (nz**2 - 1)
+    )
     return np.linalg.lstsq(M, np.array((x, y, z)), rcond=None)[0]

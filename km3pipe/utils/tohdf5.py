@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Filename: tohdf5.py
 """
 Convert ROOT and EVT files to HDF5.
@@ -12,24 +13,8 @@ Options:
     --verbose                       Print more output.
     --debug                         Print everything.
     -n EVENTS                       Number of events/runs.
-    -o OUTFILE                      Output file.
-    -j --jppy                       (Jpp): Use jppy (not aanet) for Jpp readout
-    --aa-format=<fmt>               (aa): Which aanet subformat ('minidst',
-                                    'orca_recolns', 'gandalf', 'gandalf_new',
-                                    'generic_track') [default: gandalf_new]
-    --aa-lib=<lib.so>               (aa): path to aanet binary (for old
-                                    versions which must be loaded via
-                                    `ROOT.gSystem.Load()` instead of
-                                    `import aa`)
-    --aa-old-mc-id                  (aa): read mc id as `evt.mc_id`, instead
-                                    of the newer `mc_id = evt.frame_index - 1`
-    --aa-ignore-run-id-from-header  (aa) read run id from event, not header.
-    --correct-zed                   (aa) Correct offset in mc tracks (aanet).
-    --correct-mc-times              (aa) Correct MC times (from JTE to MC).
-    --skip-header                   (aa) don't read the full header.
-                                    Entries like `genvol` and `neventgen` will
-                                    still be retrived. This switch enables
-                                    skipping the `get_aanet_header()`.
+    -o OUTFILE                      Output file (only if one file is converted).
+    -j --jppy                       (Jpp): Use jppy (not aanet) for Jpp readout.
     --ignore-hits                   Don't read the hits.
     -e --expected-rows NROWS        Approximate number of events.  Providing a
                                     rough estimate for this (100, 1000000, ...)
@@ -37,14 +22,15 @@ Options:
                                     and memory usage.
                                     Strongly recommended if the table/array
                                     size is >= 100 MB. [default: 10000]
+    -t --conv-times-to-jte          Converts all MC times in the file to JTE
+                                    times.
 """
-
 
 from km3modules.common import StatusBar
 from km3pipe import version
 from km3pipe import logger
 
-__author__ = "Tamas Gal"
+__author__ = "Tamas Gal and Michael Moser"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
 __license__ = "MIT"
@@ -52,20 +38,39 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = logger.get_logger('km3pipe.io')
+log = logger.get_logger('tohdf5')
+cprint = logger.get_printer('tohdf5')
+io_log = logger.get_logger('km3pipe.io')
 
 
-def tohdf5(input_files, output_file, n_events, **kwargs):
+def tohdf5(input_files, output_file, n_events, conv_times_to_jte, **kwargs):
     """Convert Any file to HDF5 file"""
-    from km3pipe import Pipeline  # noqa
-    from km3pipe.io import GenericPump, HDF5Sink, HDF5MetaData  # noqa
+    if len(input_files) > 1:
+        cprint(
+            "Preparing to convert {} files to HDF5.".format(len(input_files))
+        )
 
-    pipe = Pipeline()
-    pipe.attach(GenericPump, filenames=input_files, **kwargs)
-    pipe.attach(HDF5MetaData, data=kwargs)
-    pipe.attach(StatusBar, every=250)
-    pipe.attach(HDF5Sink, filename=output_file, **kwargs)
-    pipe.drain(n_events)
+    from km3pipe import Pipeline    # noqa
+    from km3pipe.io import GenericPump, HDF5Sink, HDF5MetaData    # noqa
+
+    for input_file in input_files:
+        cprint("Converting '{}'...".format(input_file))
+        if len(input_files) > 1:
+            output_file = input_file + '.h5'
+
+        meta_data = kwargs.copy()
+        meta_data['origin'] = input_file
+
+        pipe = Pipeline()
+        pipe.attach(HDF5MetaData, data=meta_data)
+        pipe.attach(GenericPump, filenames=input_file, **kwargs)
+        pipe.attach(StatusBar, every=250)
+        if conv_times_to_jte:
+            from km3modules.mc import MCTimeCorrector
+            pipe.attach(MCTimeCorrector)
+        pipe.attach(HDF5Sink, filename=output_file, **kwargs)
+        pipe.drain(n_events)
+        cprint("File '{}' was converted.".format(input_file))
 
 
 def main():
@@ -80,42 +85,33 @@ def main():
     # FILE... (ellipsis) always returns a list in docopt.
     # so the bug checking-string-length should not happen here
     infiles = args['FILE']
-    if len(infiles) == 1:
-        suffix = '.h5'
-    else:
-        # if the user is too lazy specifying an outfile name
-        # when converting *multiple files into one* (yeah, I know),
-        # at least be clear that it's a combined file
-        suffix = '.combined.h5'
-    outfile = args['-o'] or infiles[0] + suffix
+    outfile = args['-o']
+    if len(infiles) == 1 and outfile is None:
+        outfile = infiles[0] + '.h5'
+    if len(infiles) > 1 and outfile is not None:
+        log.warning("Ignoring output file name for multiple files.")
+        outfile = None
 
     n_rows_expected = int(args['--expected-rows'])
     use_jppy_pump = args['--jppy']
-    aa_format = args['--aa-format']
     is_verbose = bool(args['--verbose'])
     if is_verbose:
-        log.setLevel('INFO')
+        io_log.setLevel('INFO')
     is_debug = bool(args['--debug'])
     if is_debug:
-        log.setLevel('DEBUG')
-    aa_lib = args['--aa-lib']
-    aa_old_mc_id = args['--aa-old-mc-id']
-    correct_zed = args['--correct-zed']
-    skip_header = args['--skip-header']
-    correct_mc_times = args['--correct-mc-times']
+        io_log.setLevel('DEBUG')
     ignore_hits_arg = args['--ignore-hits']
-    ignore_run_id_from_header = args['--aa-ignore-run-id-from-header']
-    tohdf5(infiles,
-           outfile,
-           n,
-           use_jppy=use_jppy_pump,
-           aa_fmt=aa_format,
-           aa_lib=aa_lib,
-           n_rows_expected=n_rows_expected,
-           apply_zed_correction=bool(correct_zed),
-           old_mc_id=aa_old_mc_id,
-           skip_header=bool(skip_header),
-           correct_mc_times=bool(correct_mc_times),
-           ignore_hits=bool(ignore_hits_arg),
-           ignore_run_id_from_header=bool(ignore_run_id_from_header),
-           )
+    conv_times_to_jte = bool(args['--conv-times-to-jte'])
+    tohdf5(
+        input_files=infiles,
+        output_file=outfile,
+        n_events=n,
+        conv_times_to_jte=conv_times_to_jte,
+        use_jppy=use_jppy_pump,
+        n_rows_expected=n_rows_expected,
+        ignore_hits=bool(ignore_hits_arg),
+    )
+
+
+if __name__ == '__main__':
+    main()

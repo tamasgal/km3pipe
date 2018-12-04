@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # vim: ts=4 sw=4 et
 """
 =============
@@ -10,6 +11,8 @@ This script is also available as a command line utility in km3pipe, which can
 be accessed by the command ``ligiermirror``.
 
 """
+from __future__ import absolute_import, print_function, division
+
 # Author: Tamas Gal <tgal@km3net.de>
 # License: MIT
 
@@ -34,10 +37,13 @@ class LigierSender(Module):
 
 
 pipe = Pipeline()
-pipe.attach(CHPump, host='192.168.0.121',
-            port=5553,
-            tags='IO_EVT, IO_SUM, IO_TSL',
-            timeout=60 * 60 * 24 * 7,
-            max_queue=2000)
+pipe.attach(
+    CHPump,
+    host='192.168.0.121',
+    port=5553,
+    tags='IO_EVT, IO_SUM, IO_TSL',
+    timeout=60 * 60 * 24 * 7,
+    max_queue=2000
+)
 pipe.attach(LigierSender)
 pipe.drain()

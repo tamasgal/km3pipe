@@ -4,7 +4,13 @@
 """
 Common Plotting utils.
 """
+from __future__ import absolute_import, print_function, division
 
+try:
+    import _tkinter
+except ImportError:
+    import matplotlib
+    matplotlib.use('agg')
 import matplotlib as mpl    # noqa
 import matplotlib.pyplot as plt
 import numpy as np
@@ -49,12 +55,16 @@ def diag(ax=None, linecolor='0.0', linestyle='--', **kwargs):
     ax = get_ax(ax)
     xy_min = np.min((ax.get_xlim(), ax.get_ylim()))
     xy_max = np.max((ax.get_ylim(), ax.get_xlim()))
-    return ax.plot([xy_min, xy_max], [xy_min, xy_max],
-                   ls=linestyle, c=linecolor, **kwargs)
+    return ax.plot([xy_min, xy_max],
+                   [xy_min, xy_max],
+                   ls=linestyle,
+                   c=linecolor,
+                   **kwargs)
 
 
-def automeshgrid(x, y, step=0.02, xstep=None, ystep=None, pad=0.5,
-                 xpad=None, ypad=None):
+def automeshgrid(
+        x, y, step=0.02, xstep=None, ystep=None, pad=0.5, xpad=None, ypad=None
+):
     """Make a meshgrid, inferred from data."""
     if xpad is None:
         xpad = pad
@@ -79,8 +89,9 @@ def meshgrid(x_min, x_max, x_step, y_min=None, y_max=None, y_step=None):
         y_max = x_max
     if y_step is None:
         y_step = x_step
-    xx, yy = np.meshgrid(np.arange(x_min, x_max, x_step),
-                         np.arange(y_min, y_max, y_step))
+    xx, yy = np.meshgrid(
+        np.arange(x_min, x_max, x_step), np.arange(y_min, y_max, y_step)
+    )
     return xx, yy
 
 
@@ -96,14 +107,14 @@ def prebinned_hist(counts, binlims, ax=None, *args, **kwargs):
     ax = get_ax(ax)
     x = bincenters(binlims)
     weights = counts
-    return ax.hist(x, bins=binlims, weights=weights,
-                   *args, **kwargs)
+    return ax.hist(x, bins=binlims, weights=weights, *args, **kwargs)
 
 
 def joint_hex(x, y, **kwargs):
     """Seaborn Joint Hexplot with marginal KDE + hists."""
-    return sns.jointplot(x, y, kind='hex', stat_func=None,
-            marginal_kws={'kde' :True}, **kwargs)
+    return sns.jointplot(
+        x, y, kind='hex', stat_func=None, marginal_kws={'kde': True}, **kwargs
+    )
 
 
 def plot_convexhull(xy, ax=None, plot_points=True):

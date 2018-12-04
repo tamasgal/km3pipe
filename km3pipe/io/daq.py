@@ -4,6 +4,8 @@
 Pumps for the DAQ data formats.
 
 """
+from __future__ import absolute_import, print_function, division
+
 from io import BytesIO
 import math
 import struct
@@ -25,7 +27,7 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = get_logger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)    # pylint: disable=C0103
 
 DATA_TYPES = {
     101: 'DAQSuperFrame',
@@ -95,14 +97,17 @@ class TimesliceParser(Module):
                     _times.append(hit[1])
                     _tots.append(hit[2])
 
-            tshits = Table.from_template({
-                'channel_id': np.array(_channel_ids),
-                'dom_id': np.array(_dom_ids),
-                'time': np.array(_times),
-                'tot': np.array(_tots),
-                'triggered': np.zeros(len(_tots)),  # triggered
-                'group_id': 0  # event_id
-            }, 'Hits')
+            tshits = Table.from_template(
+                {
+                    'channel_id': np.array(_channel_ids),
+                    'dom_id': np.array(_dom_ids),
+                    'time': np.array(_times),
+                    'tot': np.array(_tots),
+                    'triggered': np.zeros(len(_tots)),    # triggered
+                    'group_id': 0    # event_id
+                },
+                'Hits'
+            )
             blob['TimesliceInfo'] = ts_info
             blob['TimesliceFrameInfos'] = ts_frameinfos
             blob['TSHits'] = tshits
@@ -125,8 +130,10 @@ class DAQPump(Pump):
             self.open_file(self.filename)
             self.determine_frame_positions()
         else:
-            log.warning("No filename specified. "
-                        "Take care of the file handling!")
+            log.warning(
+                "No filename specified. "
+                "Take care of the file handling!"
+            )
 
     def next_blob(self):
         """Get the next frame from file"""
@@ -155,8 +162,11 @@ class DAQPump(Pump):
             blob[data_type] = daq_frame
             blob['DAQHeader'] = daq_frame.header
         else:
-            log.warning("Skipping DAQ frame with data type code '{0}'."
-                        .format(preamble.data_type))
+            log.warning(
+                "Skipping DAQ frame with data type code '{0}'.".format(
+                    preamble.data_type
+                )
+            )
             blob_file.seek(preamble.length - DAQPreamble.size, 1)
 
         return blob
@@ -226,6 +236,7 @@ class DAQPump(Pump):
 class DAQProcessor(Module):
     def configure(self):
         self.index = 0
+        self.event_id = 0
 
     def process(self, blob):
         tag = str(blob['CHPrefix'].tag)
@@ -240,14 +251,16 @@ class DAQProcessor(Module):
             try:
                 self.process_summaryslice(data, blob)
             except struct.error:
-                self.log.error("Corrupt summary slice data received. "
-                               "Skipping...")
+                self.log.error(
+                    "Corrupt summary slice data received. "
+                    "Skipping..."
+                )
 
         return blob
 
     def process_event(self, data, blob):
         data_io = BytesIO(data)
-        preamble = DAQPreamble(file_obj=data_io)  # noqa
+        preamble = DAQPreamble(file_obj=data_io)    # noqa
         event = DAQEvent(file_obj=data_io)
         header = event.header
 
@@ -256,8 +269,6 @@ class DAQProcessor(Module):
         if n_hits == 0:
             return
         dom_ids, channel_ids, times, tots = zip(*hits)
-        zeros = np.zeros(n_hits)
-        nans = np.full_like(zeros, np.nan)
         triggereds = np.zeros(n_hits)
         triggered_map = {}
         for triggered_hit in event.triggered_hits:
@@ -268,50 +279,46 @@ class DAQProcessor(Module):
 
         hit_series = Table.from_template({
             'channel_id': channel_ids,
-            'dir_x': nans,
-            'dir_y': nans,
-            'dir_z': nans,
             'dom_id': dom_ids,
-            'id': range(n_hits),
-            'pmt_id': zeros,
-            'pos_x': nans,
-            'pos_y': nans,
-            'pos_z': nans,
-            't0': zeros,
             'time': times,
             'tot': tots,
             'triggered': triggereds,
-            'group_id': self.index,
-        }, 'CalibHits')
+            'group_id': self.event_id,
+        }, 'Hits')
 
-        blob['CalibHits'] = hit_series
+        blob['Hits'] = hit_series
 
-        event_info = Table.from_template({
-            'det_id': header.det_id,
-            'frame_index': self.index,  # header.time_slice,
-            'livetime_sec': 0,
-            'mc_id': 0,
-            'mc_t': 0,
-            'n_events_gen': 0,
-            'n_files_gen': 0,
-            'overlays': event.overlays,
-            'trigger_counter': event.trigger_counter,
-            'trigger_mask': event.trigger_mask,
-            'uts_nanoseconds': header.ticks * 16,
-            'uts_seconds': header.time_stamp,
-            'weight_w1': 0,
-            'weight_w2': 0,
-            'weight_w3': 0,  # MC weights
-            'run_id': 0,  # run id
-            'group_id': 0,
-        }, 'EventInfo')
+        event_info = Table.from_template(
+            {
+                'det_id': header.det_id,
+        # 'frame_index': self.index,  # header.time_slice,
+                'frame_index': header.time_slice,
+                'livetime_sec': 0,
+                'mc_id': 0,
+                'mc_t': 0,
+                'n_events_gen': 0,
+                'n_files_gen': 0,
+                'overlays': event.overlays,
+                'trigger_counter': event.trigger_counter,
+                'trigger_mask': event.trigger_mask,
+                'utc_nanoseconds': header.ticks * 16,
+                'utc_seconds': header.time_stamp,
+                'weight_w1': 0,
+                'weight_w2': 0,
+                'weight_w3': 0,    # MC weights
+                'run_id': header.run,    # run id
+                'group_id': self.event_id,
+            },
+            'EventInfo'
+        )
         blob['EventInfo'] = event_info
 
+        self.event_id += 1
         self.index += 1
 
     def process_summaryslice(self, data, blob):
         data_io = BytesIO(data)
-        preamble = DAQPreamble(file_obj=data_io)  # noqa
+        preamble = DAQPreamble(file_obj=data_io)    # noqa
         summaryslice = DAQSummaryslice(file_obj=data_io)
         blob["RawSummaryslice"] = summaryslice
 
@@ -443,7 +450,7 @@ class DAQSummaryslice(object):
         """Iterate through the byte data and fill the summary_frames"""
         for _ in range(self.n_summary_frames):
             dom_id = unpack('<i', file_obj.read(4))[0]
-            dq_status = file_obj.read(4)  # probably dom status? # noqa
+            dq_status = file_obj.read(4)    # probably dom status? # noqa
             dom_status = unpack('<iiii', file_obj.read(16))
             raw_rates = unpack('b' * 31, file_obj.read(31))
             pmt_rates = [self._get_rate(value) for value in raw_rates]
@@ -503,8 +510,9 @@ class DAQEvent(object):
             tdc_time = unpack('>I', file_obj.read(4))[0]
             tot = unpack('<b', file_obj.read(1))[0]
             trigger_mask = unpack('<Q', file_obj.read(8))
-            self.triggered_hits.append((dom_id, pmt_id, tdc_time, tot,
-                                        trigger_mask))
+            self.triggered_hits.append(
+                (dom_id, pmt_id, tdc_time, tot, trigger_mask)
+            )
 
     def _parse_snapshot_hits(self, file_obj):
         """Parse and store snapshot hits."""
@@ -546,19 +554,30 @@ class TMCHData(object):
         self.dom_status_2 = unpack('>I', f.read(4))[0]
         self.dom_status_3 = unpack('>I', f.read(4))[0]
         self.pmt_rates = [
-            r * 10.0 for r in unpack('>' + 31 * 'I', f.read(31 * 4))]
+            r * 10.0 for r in unpack('>' + 31 * 'I', f.read(31 * 4))
+        ]
         self.hrvbmp = unpack('>I', f.read(4))[0]
         self.flags = unpack('>I', f.read(4))[0]
+        # flags:
+        # bit 0: AHRS valid
+        # bit 3-1: structure version
+        #          000 - 1, 001 - 2, 010 - unused, 011 - 3
+        self.version = int(bin((self.flags >> 1) & 7), 2) + 1
         self.yaw, self.pitch, self.roll = unpack('>fff', f.read(12))
-        self.A = unpack('>fff', f.read(12))  # AHRS: Ax, Ay, Az
-        self.G = unpack('>fff', f.read(12))  # AHRS: Gx, Gy, Gz
-        self.H = unpack('>fff', f.read(12))  # AHRS: Hx, Hy, Hz
+        self.A = unpack('>fff', f.read(12))    # AHRS: Ax, Ay, Az
+        self.G = unpack('>fff', f.read(12))    # AHRS: Gx, Gy, Gz
+        self.H = unpack('>fff', f.read(12))    # AHRS: Hx, Hy, Hz
         self.temp = unpack('>H', f.read(2))[0] / 100.0
         self.humidity = unpack('>H', f.read(2))[0] / 100.0
         self.tdcfull = unpack('>I', f.read(4))[0]
         self.aesfull = unpack('>I', f.read(4))[0]
         self.flushc = unpack('>I', f.read(4))[0]
-        # self.ts_duration_microseconds = unpack('>I', f.read(4))[0]
+
+        if self.version >= 2:
+            self.ts_duration_ms = unpack('>I', f.read(4))[0]
+        if self.version >= 3:
+            self.tdc_supertime_fifo_size = unpack('>H', f.read(2))[0]
+            self.aes_supertime_fifo_size = unpack('>H', f.read(2))[0]
 
     def __str__(self):
         return str(vars(self))

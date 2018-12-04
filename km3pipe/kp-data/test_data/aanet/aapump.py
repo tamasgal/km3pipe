@@ -1,22 +1,13 @@
 #!/usr/bin/env python
-# pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
-
 import sys
+import km3pipe as kp
 
-from km3pipe import Pipeline
-from km3pipe.io import AanetPump
-from km3modules.common import Dump
+log = kp.logger.get_logger('km3pipe.io.aanet')
+log.setLevel('INFO')
 
-for mod in ['aa', 'ROOT']:
-    if mod in sys.modules:
-        del sys.modules[mod]
+fname = sys.argv[-1]
 
-import aa  # noqa
-
-
-fname = 'small.root'
-
-p = Pipeline()
-p.attach(AanetPump, filename=fname)
-p.attach(Dump)
+p = kp.Pipeline()
+p.attach(kp.io.AanetPump, filename=fname, ignore_hits=True)
+p.attach(kp.io.HDF5Sink, filename=fname + '.h5')
 p.drain()

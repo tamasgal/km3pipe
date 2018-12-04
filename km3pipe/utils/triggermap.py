@@ -28,7 +28,7 @@ __status__ = "Development"
 from docopt import docopt
 import matplotlib
 # Force matplotlib to not use any Xwindows backend.
-matplotlib.use('Agg')  # noqa
+matplotlib.use('Agg')    # noqa
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 import numpy as np
@@ -56,7 +56,8 @@ class TriggerMap(kp.Module):
         self.hit_counts = []
 
     def process(self, blob):
-        hits = blob['Hits'].triggered_hits
+        hits = blob['Hits']
+        hits = hits[hits.triggered.astype(bool)]
         dom_ids = np.unique(hits.dom_id)
         hit_counts = np.zeros(self.n_dus * self.n_doms)
         for dom_id in dom_ids:
@@ -81,16 +82,23 @@ class TriggerMap(kp.Module):
         ax.grid(True)
         ax.set_axisbelow(True)
         hit_mat = np.array([np.array(x) for x in self.hit_counts]).transpose()
-        im = ax.matshow(hit_mat,
-                        interpolation='nearest', filternorm=None,
-                        cmap='plasma', aspect='auto', origin='lower', zorder=3,
-                        norm=LogNorm(vmin=1, vmax=np.amax(hit_mat)))
+        im = ax.matshow(
+            hit_mat,
+            interpolation='nearest',
+            filternorm=None,
+            cmap='plasma',
+            aspect='auto',
+            origin='lower',
+            zorder=3,
+            norm=LogNorm(vmin=1, vmax=np.amax(hit_mat))
+        )
         yticks = np.arange(self.n_doms * self.n_dus)
         ytick_label_templ = "DOM{1:02d}" if self.du else "DU{0:.0f}-DOM{1:02d}"
-        ytick_labels = [ytick_label_templ
-                        .format(np.ceil((y + 1) / self.n_doms),
-                                y % (self.n_doms) + 1)
-                        for y in yticks]
+        ytick_labels = [
+            ytick_label_templ.format(
+                np.ceil((y + 1) / self.n_doms), y % (self.n_doms) + 1
+            ) for y in yticks
+        ]
         ax.set_yticks(yticks)
         ax.set_yticklabels(ytick_labels)
         ax.tick_params(labelbottom=True)
@@ -111,13 +119,15 @@ def main():
     det_id = int(args['-d'])
     det = kp.hardware.Detector(det_id=det_id)
     pipe = kp.Pipeline()
-    pipe.attach(kp.io.jpp.EventPump, filename=args['FILENAME'])
+    pipe.attach(kp.io.aanet.AanetPump, filename=args['FILENAME'])
     pipe.attach(StatusBar, every=2500)
-    pipe.attach(TriggerMap,
-                detector=det,
-                du=du,
-                plot_filename=args['-p'],
-                subtitle=args['FILENAME'])
+    pipe.attach(
+        TriggerMap,
+        detector=det,
+        du=du,
+        plot_filename=args['-p'],
+        subtitle=args['FILENAME']
+    )
     pipe.drain()
 
 

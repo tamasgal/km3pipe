@@ -1,5 +1,8 @@
 # Filename: test_core.py
 # pylint: disable=C0111,E1003,R0904,C0103,R0201,C0102
+from __future__ import unicode_literals
+
+import tempfile
 from io import StringIO
 
 from km3pipe.testing import TestCase, MagicMock
@@ -192,10 +195,10 @@ class TestPipeline(TestCase):
     def test_ctrl_c_handling(self):
         pl = Pipeline()
         self.assertFalse(pl._stop)
-        pl._handle_ctrl_c()  # first KeyboardInterrupt
+        pl._handle_ctrl_c()    # first KeyboardInterrupt
         self.assertTrue(pl._stop)
         with self.assertRaises(SystemExit):
-            pl._handle_ctrl_c()  # second KeyboardInterrupt
+            pl._handle_ctrl_c()    # second KeyboardInterrupt
 
     def test_attaching_a_pump_allows_first_param_to_be_passed_as_fname(self):
         class APump(Pump):
@@ -242,6 +245,99 @@ class TestPipeline(TestCase):
         pl.drain(5)
 
 
+class TestPipelineConfigurationViaFile(TestCase):
+    """Auto-configuration of pipelines using TOML files"""
+
+    def test_configuration(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = str(fobj.name)
+        Pipeline(configfile=fname)
+        fobj.close()
+
+    def test_configuration_with_config_for_a_module(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fobj.write(b"[A]\na = 1")
+        fobj.flush()
+        fname = str(fobj.name)
+
+        class A(Module):
+            def process(self, blob):
+                assert 1 == self.a
+                return blob
+
+        pipe = Pipeline(configfile=fname)
+        pipe.attach(A)
+        pipe.drain(1)
+
+        fobj.close()
+
+    def test_configuration_with_config_for_multiple_modules(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fobj.write(b"[A]\na = 1\nb = 2\n[B]\nc='d'")
+        fobj.flush()
+        fname = str(fobj.name)
+
+        class A(Module):
+            def process(self, blob):
+                assert 1 == self.a
+                assert 2 == self.b
+                return blob
+
+        class B(Module):
+            def process(self, blob):
+                assert 'd' == self.c
+                return blob
+
+        pipe = Pipeline(configfile=fname)
+        pipe.attach(A)
+        pipe.attach(B)
+        pipe.drain(1)
+
+        fobj.close()
+
+    def test_configuration_with_named_modules(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fobj.write(b"[X]\na = 1\nb = 2\n[Y]\nc='d'")
+        fobj.flush()
+        fname = str(fobj.name)
+
+        class A(Module):
+            def process(self, blob):
+                assert 1 == self.a
+                assert 2 == self.b
+                return blob
+
+        class B(Module):
+            def process(self, blob):
+                assert 'd' == self.c
+                return blob
+
+        pipe = Pipeline(configfile=fname)
+        pipe.attach(A, 'X')
+        pipe.attach(B, 'Y')
+        pipe.drain(1)
+
+        fobj.close()
+
+    def test_configuration_precedence_over_kwargs(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fobj.write(b"[A]\na = 1\nb = 2")
+        fobj.flush()
+        fname = str(fobj.name)
+
+        class A(Module):
+            def process(self, blob):
+                assert 1 == self.a
+                assert 2 == self.b
+                return blob
+
+        pipe = Pipeline(configfile=fname)
+        pipe.attach(A, b='foo')
+        pipe.drain(1)
+
+        fobj.close()
+
+
 class TestModule(TestCase):
     """Tests for the pipeline module"""
 
@@ -276,6 +372,7 @@ class TestModule(TestCase):
             def __init__(self, **context):
                 super(self.__class__, self).__init__(**context)
                 self.foo = self.get('foo') or 'default_foo'
+
         module = Foo()
         self.assertEqual('default_foo', module.foo)
         module = Foo(foo='overwritten')
@@ -334,3 +431,125 @@ class TestServices(TestCase):
         self.pl.attach(Service)
         self.pl.attach(UseService)
         self.pl.drain(1)
+
+    def test_service_usable_in_configure_when_attached_before(self):
+        return
+
+        class Service(Module):
+            def configure(self):
+                self.expose(23, "foo")
+                self.expose(self.whatever, "whatever")
+
+            def whatever(self, x):
+                return x * 2
+
+        class UseService(Module):
+            def configure(self):
+                assert 23 == self.services["foo"]
+                assert 2 == self.services["whatever"](1)
+
+        self.pl.attach(Service)
+        self.pl.attach(UseService)
+        self.pl.drain(1)
+
+    def test_required_service(self):
+        class AService(Module):
+            def configure(self):
+                self.expose(self.a_function, 'a_function')
+
+            def a_function(self, b='c'):
+                return b + 'd'
+
+        class AModule(Module):
+            def configure(self):
+                self.require_service('a_function', why='because')
+
+            def process(self, blob):
+                assert 'ed' == self.services['a_function']("e")
+
+        self.pl.attach(AService)
+        self.pl.attach(AModule)
+        self.pl.drain(2)
+
+    def test_required_service_not_present(self):
+        self.pl.log = MagicMock()
+
+        class AModule(Module):
+            def configure(self):
+                self.require_service('a_function', why='because')
+
+            def process(self, blob):
+                assert False    # make sure that process is not called
+
+        self.pl.attach(AModule)
+        self.pl.drain(1)
+
+        self.pl.log.critical.assert_called_with(
+            'Following services are required and missing: a_function'
+        )
+
+    def test_required_service_not_present_in_multiple_modules(self):
+        self.pl.log = MagicMock()
+
+        class AModule(Module):
+            def configure(self):
+                self.require_service('a_function', why='because')
+                self.require_service('b_function', why='because')
+
+            def process(self, blob):
+                assert False    # make sure that process is not called
+
+        class BModule(Module):
+            def configure(self):
+                self.require_service('c_function', why='because')
+
+            def process(self, blob):
+                assert False    # make sure that process is not called
+
+        self.pl.attach(AModule)
+        self.pl.attach(BModule)
+        self.pl.drain(1)
+
+        self.pl.log.critical.assert_called_with(
+            'Following services are required and missing: '
+            'a_function, b_function, c_function'
+        )
+
+    def test_required_service_not_present_but_some_are_present(self):
+        self.pl.log = MagicMock()
+
+        class AModule(Module):
+            def configure(self):
+                self.expose(self.d_function, 'd_function')
+                self.require_service('a_function', why='because')
+                self.require_service('b_function', why='because')
+
+            def d_function(self):
+                pass
+
+            def process(self, blob):
+                assert False    # make sure that process is not called
+
+        class BModule(Module):
+            def configure(self):
+                self.require_service('c_function', why='because')
+
+            def process(self, blob):
+                assert False    # make sure that process is not called
+
+        class CModule(Module):
+            def configure(self):
+                self.require_service('d_function', why='because')
+
+            def process(self, blob):
+                assert False    # make sure that process is not called
+
+        self.pl.attach(AModule)
+        self.pl.attach(BModule)
+        self.pl.attach(CModule)
+        self.pl.drain(1)
+
+        self.pl.log.critical.assert_called_with(
+            'Following services are required and missing: '
+            'a_function, b_function, c_function'
+        )

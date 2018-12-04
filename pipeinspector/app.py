@@ -75,9 +75,12 @@ def main():
     pump = get_pump(input_file)
     main_frame = MainFrame(pump)
     #main_frame.header.set_text("Inspecting {0}".format(input_file))
-    loop = urwid.MainLoop(main_frame, UI.palette,
-                          input_filter=filter_input,
-                          unhandled_input=handle_input)
+    loop = urwid.MainLoop(
+        main_frame,
+        UI.palette,
+        input_filter=filter_input,
+        unhandled_input=handle_input
+    )
     loop.run()
 
 

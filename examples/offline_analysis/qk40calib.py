@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # vim: ts=4 sw=4 et
 """
 ================================
@@ -27,6 +28,8 @@ Standalone job submitter for K40 offline calibrations with KM3Pipe.
         -h --help    Show this screen.
 
 """
+from __future__ import absolute_import, print_function, division
+
 import os
 import re
 from glob import glob
@@ -41,7 +44,7 @@ def main():
 
     DET_ID = int(args['-d'])
     TMAX = int(args['-t'])
-    ET_PER_RUN = int(args['-e']) * 60  # [s]
+    ET_PER_RUN = int(args['-e']) * 60    # [s]
     RUNS_PER_JOB = int(args['-n'])
     VMEM = args['-m']
     CWD = os.getcwd()
@@ -58,9 +61,10 @@ def main():
     run_table = db.run_table(det_id=DET_ID)
     phys_run_table = run_table[run_table.RUNSETUPNAME.str.contains(RUN_SUBSTR)]
     phys_runs = set(phys_run_table.RUN)
-    processed_runs = set(int(re.search("_\\d{8}_(\\d{8})", s).group(1))
-                         for s in
-                         glob(os.path.join(CALIB_PATH, '*.k40_cal.p')))
+    processed_runs = set(
+        int(re.search("_\\d{8}_(\\d{8})", s).group(1))
+        for s in glob(os.path.join(CALIB_PATH, '*.k40_cal.p'))
+    )
     remaining_runs = list(phys_runs - processed_runs)
     print("Remaining runs: {}".format(remaining_runs))
     s = Script()
@@ -68,8 +72,11 @@ def main():
     for job_id, runs_chunk in enumerate(kp.tools.chunks(remaining_runs,
                                                         RUNS_PER_JOB)):
         n_runs = len(runs_chunk)
-        print("Preparing batch script for a chunk of {} runs."
-              .format(len(runs_chunk)))
+        print(
+            "Preparing batch script for a chunk of {} runs.".format(
+                len(runs_chunk)
+            )
+        )
         s.add("cd $TMPDIR; mkdir -p $USER; cd $USER")
         for run in runs_chunk:
             s.add("echo Processing {}:".format(run))
@@ -77,10 +84,15 @@ def main():
             root_filename = os.path.basename(irods_path)
             calib_filename = root_filename + '.k40_cal.p'
             s.add("iget -v {}".format(irods_path))
-            s.add("CTMIN=$(JPrint -f {}|grep '^ctMin'|awk '{{print $2}}')"
-                  .format(root_filename))
-            s.add("k40calib {} {} -t {} -c $CTMIN -o {}"
-                  .format(root_filename, DET_ID, TMAX, calib_filename))
+            s.add(
+                "CTMIN=$(JPrint -f {}|grep '^ctMin'|awk '{{print $2}}')".
+                format(root_filename)
+            )
+            s.add(
+                "k40calib {} {} -t {} -c $CTMIN -o {}".format(
+                    root_filename, DET_ID, TMAX, calib_filename
+                )
+            )
             s.add("cp {} {}".format(calib_filename, CALIB_PATH))
             s.add("rm -f {}".format(root_filename))
             s.add("rm -f {}".format(calib_filename))
@@ -88,9 +100,15 @@ def main():
             s.add("echo " + 42 * "=")
 
         walltime = time.strftime('%H:%M:%S', time.gmtime(ET_PER_RUN * n_runs))
-        qsub(s, '{}_{}'.format(JOB_NAME, job_id), walltime=walltime,
-             vmem=VMEM, log_path=LOG_PATH, irods=True, platform='sl6',
-             dryrun=DRYRUN)
+        qsub(
+            s,
+            '{}_{}'.format(JOB_NAME, job_id),
+            walltime=walltime,
+            vmem=VMEM,
+            log_path=LOG_PATH,
+            irods=True,
+            dryrun=DRYRUN
+        )
 
         if DRYRUN:
             break

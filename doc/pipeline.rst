@@ -93,3 +93,33 @@ a list of dictionaries and "io" one blob after another on each
 .. literalinclude:: ../examples/nogallery/module_workflow.py
    :pyobject: DummyPump
    :linenos:
+
+
+Logging and Printing
+--------------------
+
+Every module inheriting from the ``Module`` class has a fancy logger and a
+printer available to produce output which is unique (an actual colour code
+is generated using a hash of the module name).
+
+Inside any method of the module, use ``self.log`` to access the logger, which
+comes with the usual functions like ``self.log.debug()``, ``self.log.info()``,
+``self.log.warning()``, ``self.log.error()`` or ``self.log.critical()``.
+
+The ``self.print`` function can be used to print messages which are colour
+coded with the same colours used for the logger.
+
+
+Configuring the Pipeline using Configuration Files
+--------------------------------------------------
+
+The pipeline and all the attached modules can be configured by a TOML formatted
+file, sitting at the current working directory (where the initial script is
+invoked to launch the pipeline). The default filename is ``pipeline.toml``
+but a different filename can be chosen when creating the ``Pipeline`` instance
+using ``Pipeline(configfile='your_desired_filename.toml')``.
+
+Here is an example of the file:
+
+.. literalinclude:: ../examples/nogallery/pipeline.toml
+   :linenos:

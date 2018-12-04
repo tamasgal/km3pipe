@@ -1,7 +1,6 @@
 # Filename: test_mc.py
 # pylint: disable=locally-disabled,C0111,R0904,C0103
 
-
 from km3pipe.testing import TestCase
 from km3pipe.mc import geant2pdg, pdg2name
 

@@ -10,8 +10,7 @@ import re
 
 import pyinotify
 
-from pyslack import SlackClient  # pip install pyslack-real
-
+from pyslack import SlackClient    # pip install pyslack-real
 
 wm = pyinotify.WatchManager()
 mask = pyinotify.IN_CLOSE_WRITE
@@ -67,9 +66,12 @@ class ElogEntry(object):
             return "Unknown"
 
     def __repr__(self):
-        return ("ELOG entry from *{0.author}* in *{0.logbook}* (_{0.type}_):\n"
-                "*{0.subject}*\n{1}...\n<{0.url}>"
-                .format(self, self.content[:150]))
+        return (
+            "ELOG entry from *{0.author}* in *{0.logbook}* (_{0.type}_):\n"
+            "*{0.subject}*\n{1}...\n<{0.url}>".format(
+                self, self.content[:150]
+            )
+        )
 
 
 class ElogEntryBundle(object):
@@ -124,12 +126,14 @@ class EventHandler(pyinotify.ProcessEvent):
         try:
             destination = DESTINATIONS[elog_entry.logbook]
         except KeyError:
-            print("No destination for logbook '{0}'. Using only default..."
-                  .format(elog_entry.logbook))
+            print(
+                "No destination for logbook '{0}'. Using only default...".
+                format(elog_entry.logbook)
+            )
             destination = None
         finally:
             if elog_entry.id in self.logged_ids:
-                return  # For now skip, since it often duplicates!
+                return    # For now skip, since it often duplicates!
                 pre = 'Updated '
             else:
                 pre = ''
@@ -142,13 +146,11 @@ class EventHandler(pyinotify.ProcessEvent):
             print(message)
             print(42 * "/")
             if destination:
-                slack.chat_post_message(destination,
-                                        message,
-                                        username=BOTNAME)
+                slack.chat_post_message(destination, message, username=BOTNAME)
             # else:
-            slack.chat_post_message(DEFAULT_DESTINATION,
-                                    message,
-                                    username=BOTNAME)
+            slack.chat_post_message(
+                DEFAULT_DESTINATION, message, username=BOTNAME
+            )
 
     def _is_valid_filetype(self, path):
         return path.endswith('.log')

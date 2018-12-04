@@ -7,35 +7,45 @@ KM3Pipe setup script.
 
 from setuptools import setup
 
-import builtins
+try:
+    import builtins
+except ImportError:
+    import __builtin__ as builtins
 # so we can detect in __init__.py that it's called from setup.py
 builtins.__KM3PIPE_SETUP__ = True
 
-from km3pipe import version     # noqa
+from pkg_resources import get_distribution, DistributionNotFound
 
 with open('requirements.txt') as fobj:
     requirements = [l.strip() for l in fobj.readlines()]
 
-
 setup(
     name='km3pipe',
-    version=version,
     url='http://github.com/tamasgal/km3pipe/',
     description='An analysis framework for KM3NeT',
     author='Tamas Gal and Moritz Lotze',
     author_email='tgal@km3net.de',
-    packages=['km3pipe', 'km3pipe.io', 'km3pipe.utils',
-              'km3modules', 'pipeinspector'],
+    packages=[
+        'km3pipe', 'km3pipe.io', 'km3pipe.utils', 'km3modules', 'pipeinspector'
+    ],
     include_package_data=True,
     platforms='any',
-    setup_requires=['pip>=10.0.1', 'setuptools>=39.0', 'numpy>=1.12', ],
+    setup_requires=[
+        'numpy>=1.12',
+        'setuptools_scm',
+    ],
+    use_scm_version={
+        'write_to': 'km3pipe/version.txt',
+        'tag_regex': r'^(?P<prefix>v)?(?P<version>[^\+]+)(?P<suffix>.*)?$',
+    },
     install_requires=requirements,
-    python_requires='>=3.5',
+    python_requires='>=2.7',
     entry_points={
         'console_scripts': [
             'km3pipe=km3pipe.cmd:main',
             'km3srv=km3pipe.srv:main',
             'tohdf5=km3pipe.utils.tohdf5:main',
+            'qtohdf5=km3pipe.utils.qtohdf5:main',
             'hdf2root=km3pipe.utils.hdf2root:main',
             'pipeinspector=pipeinspector.app:main',
             'rtree=km3pipe.utils.rtree:main',
@@ -61,6 +71,8 @@ setup(
             'ligiermirror=km3pipe.utils.ligiermirror:main',
             'runtable=km3pipe.utils.runtable:main',
             'runinfo=km3pipe.utils.runinfo:main',
+            'qrunprocessor=km3pipe.utils.qrunprocessor:main',
+            'wtd=km3pipe.utils.wtd:main',
         ],
     },
     classifiers=[

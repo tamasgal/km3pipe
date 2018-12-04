@@ -34,8 +34,8 @@ class CoincidenceFinder(Module):
     def process(self, blob):
         hits = blob['TimesliceFrames'][808447091]
         hits.sort(key=lambda x: x[1])
-        coinces = mongincidence([t for (_, t, _) in hits], [
-                                t for (t, _, _) in hits])
+        coinces = mongincidence([t for (_, t, _) in hits],
+                                [t for (t, _, _) in hits])
 
         combs = list(combinations(range(31), 2))
         for pmt_pair, t in coinces:
@@ -72,11 +72,14 @@ class Dumper(Module):
 
 
 pipe = Pipeline()
-pipe.attach(CHPump, host='172.16.65.58',
-            port=5553,
-            tags='IO_TSL',
-            timeout=60 * 60 * 24,
-            max_queue=42)
+pipe.attach(
+    CHPump,
+    host='172.16.65.58',
+    port=5553,
+    tags='IO_TSL',
+    timeout=60 * 60 * 24,
+    max_queue=42
+)
 # pipe.attach(Dumper)
 pipe.attach(TimesliceParser)
 # pipe.attach(printer)

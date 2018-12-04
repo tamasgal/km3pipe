@@ -1,14 +1,17 @@
 # Filename: test_tools.py
 # pylint: disable=locally-disabled,C0111,R0904,C0103
+from __future__ import unicode_literals
+
 from io import StringIO
 
 import numpy as np
 
-from km3pipe.testing import TestCase
+from km3pipe.testing import TestCase, patch
 from km3pipe.tools import (
     unpack_nfirst, split, namedtuple_with_defaults, remain_file_pointer,
-    decamelise, camelise, issorted, lstrip, chunks, is_coherent,
-    istype)
+    decamelise, camelise, issorted, lstrip, chunks, is_coherent, istype,
+    get_jpp_revision
+)
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -21,11 +24,8 @@ __status__ = "Development"
 
 class TestTools(TestCase):
     def setUp(self):
-        self.vecs = np.array([[0., 1., 5.],
-                              [1., 1., 4.],
-                              [2., 1., 3.],
-                              [3., 1., 2.],
-                              [4., 1., 1.]])
+        self.vecs = np.array([[0., 1., 5.], [1., 1., 4.], [2., 1., 3.],
+                              [3., 1., 2.], [4., 1., 1.]])
         self.v = (1, 2, 3)
         self.unit_v = np.array([0.26726124, 0.53452248, 0.80178373])
         self.unit_vecs = np.array([[0., 0.19611614, 0.98058068],
@@ -77,7 +77,6 @@ class TestTools(TestCase):
 
 
 class TestRemainFilePointer(TestCase):
-
     def test_remains_file_pointer_in_function(self):
         dummy_file = StringIO('abcdefg')
 
@@ -105,7 +104,6 @@ class TestRemainFilePointer(TestCase):
         self.assertEqual(1, return_value)
 
     def test_remains_file_pointer_in_class_method(self):
-
         class FileSeekerClass(object):
             def __init__(self):
                 self.dummy_file = StringIO('abcdefg')
@@ -121,7 +119,6 @@ class TestRemainFilePointer(TestCase):
         self.assertEqual(2, fileseeker.dummy_file.tell())
 
     def test_remains_file_pointer_and_return_value_in_class_method(self):
-
         class FileSeekerClass(object):
             def __init__(self):
                 self.dummy_file = StringIO('abcdefg')
@@ -186,10 +183,8 @@ class TestLstrip(TestCase):
 class TestChunks(TestCase):
     def test_chunks(self):
         l = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        self.assertEqual([[1, 2, 3], [4, 5, 6], [7, 8, 9]],
-                         list(chunks(l, 3)))
-        self.assertEqual([[1, 2, 3, 4], [5, 6, 7, 8], [9]],
-                         list(chunks(l, 4)))
+        self.assertEqual([[1, 2, 3], [4, 5, 6], [7, 8, 9]], list(chunks(l, 3)))
+        self.assertEqual([[1, 2, 3, 4], [5, 6, 7, 8], [9]], list(chunks(l, 4)))
 
 
 class TestIstype(TestCase):
@@ -199,4 +194,17 @@ class TestIstype(TestCase):
 
     def test_another_type(self):
         b = 'string'
-        assert istype(b, 'str')
+        if isinstance(b, str):
+            assert istype(b, 'str')
+        else:
+            assert istype(b, 'unicode')
+
+
+class TestJppRevision(TestCase):
+    @patch('subprocess.check_output')
+    def test_revision(self, co_mock):
+        co_mock.return_value = b'version:    8519\nname space: KM3NET\n'
+        assert '8519' == get_jpp_revision()
+
+    def test_revision(self):
+        assert get_jpp_revision(via_command='a_non_existing_command') is None

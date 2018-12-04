@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 """
+
 ==================
 Colormap pitfalls.
 ==================
@@ -7,13 +9,13 @@ Choosing the right colormap is important. A bad colormap like ``jet``
 (standard in ROOT and matplotlib < 2.0) fools you into seeing structure
 where there isn't any.
 """
+from __future__ import absolute_import, print_function, division
 
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import km3pipe.style
 km3pipe.style.use("km3pipe")
-
 
 x = np.linspace(-np.pi, np.pi, 300)
 xx, yy = np.meshgrid(x, x)

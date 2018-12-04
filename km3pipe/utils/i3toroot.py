@@ -16,7 +16,7 @@ Options:
 from docopt import docopt
 
 # order of these imports is crucial!!!
-from icecube import icetray, dataio     # noqa
+from icecube import icetray, dataio    # noqa
 from I3Tray import I3Tray
 from icecube.tableio import I3TableWriter
 from icecube.rootwriter import I3ROOTTableService

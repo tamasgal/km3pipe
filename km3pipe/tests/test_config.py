@@ -3,6 +3,8 @@
 Test suite for configuration related functions and classes.
 
 """
+from __future__ import unicode_literals
+
 from io import StringIO
 
 from km3pipe.testing import TestCase
@@ -16,13 +18,14 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-
-CONFIGURATION = StringIO("\n".join((
-    "[DB]",
-    "username=foo",
-    "password=narf",
-    "timeout=10",
-)))
+CONFIGURATION = StringIO(
+    "\n".join((
+        "[DB]",
+        "username=foo",
+        "password=narf",
+        "timeout=10",
+    ))
+)
 
 
 class TestConfig(TestCase):

@@ -1,9 +1,11 @@
 # Filename: k40.py
+# -*- coding: utf-8 -*-
 # pylint: disable=locally-disabled
 """
 A collection of k40 related functions and modules.
 
 """
+from __future__ import absolute_import, print_function, division
 
 import os
 from itertools import combinations
@@ -25,10 +27,10 @@ __author__ = "Jonas Reubelt"
 __email__ = "jreubelt@km3net.de"
 __status__ = "Development"
 
-log = kp.logger.get_logger(__name__)  # pylint: disable=C0103
+log = kp.logger.get_logger(__name__)    # pylint: disable=C0103
 # log.setLevel(logging.DEBUG)
 
-TIMESLICE_LENGTH = 0.1  # [s]
+TIMESLICE_LENGTH = 0.1    # [s]
 MC_ANG_DIST = np.array([-0.72337394, 2.59196335, -0.43594182, 1.10514914])
 
 
@@ -54,7 +56,9 @@ class K40BackgroundSubtractor(kp.Module):
     def process(self, blob):
         if self.mode != 'online':
             return blob
-        self.print('Subtracting random background calculated from single rates')
+        self.print(
+            'Subtracting random background calculated from single rates'
+        )
         corrected_counts = self.subtract_background()
         blob['CorrectedTwofoldCounts'] = corrected_counts
 
@@ -73,8 +77,9 @@ class K40BackgroundSubtractor(kp.Module):
             try:
                 pmt_rates = mean_rates[dom_id]
             except KeyError:
-                log.warning("Skipping BG correction for DOM {}."
-                            .format(dom_id))
+                log.warning(
+                    "Skipping BG correction for DOM {}.".format(dom_id)
+                )
                 corrected_counts[dom_id] = counts[dom_id]
                 continue
             livetime = livetimes[dom_id]
@@ -82,8 +87,8 @@ class K40BackgroundSubtractor(kp.Module):
             bg_rates = []
             for c in self.combs:
                 bg_rates.append(pmt_rates[c[0]] * pmt_rates[c[1]] * 1e-9)
-            corrected_counts[dom_id] = (k40_rates.T -
-                                        np.array(bg_rates)).T * livetime
+            corrected_counts[
+                dom_id] = (k40_rates.T - np.array(bg_rates)).T * livetime
         return corrected_counts
 
     def finish(self):
@@ -93,9 +98,10 @@ class K40BackgroundSubtractor(kp.Module):
 
     def dump(self, mean_rates, corrected_counts, livetime):
         pickle.dump(mean_rates, open('mean_rates.p', 'wb'))
-        pickle.dump({'data': corrected_counts,
-                     'livetime': livetime},
-                    open("k40_counts_bg_sub.p", "wb"))
+        pickle.dump({
+            'data': corrected_counts,
+            'livetime': livetime
+        }, open("k40_counts_bg_sub.p", "wb"))
 
 
 class IntraDOMCalibrator(kp.Module):
@@ -143,8 +149,9 @@ class IntraDOMCalibrator(kp.Module):
             twofold_counts = self.services['TwofoldCounts']
             fit_background = True
 
-        blob['IntraDOMCalibration'] = self.calibrate(twofold_counts,
-                                                     fit_background)
+        blob['IntraDOMCalibration'] = self.calibrate(
+            twofold_counts, fit_background
+        )
         return blob
 
     def calibrate(self, twofold_counts, fit_background=False):
@@ -155,11 +162,15 @@ class IntraDOMCalibrator(kp.Module):
             self.print(" calibrating DOM '{0}'".format(dom_id))
             try:
                 livetime = self.services['GetLivetime']()[dom_id]
-                calib = calibrate_dom(dom_id, data,
-                                      self.detector,
-                                      livetime=livetime,
-                                      fit_background=fit_background,
-                                      ad_fit_shape='exp', ctmin=self.ctmin)
+                calib = calibrate_dom(
+                    dom_id,
+                    data,
+                    self.detector,
+                    livetime=livetime,
+                    fit_background=fit_background,
+                    ad_fit_shape='exp',
+                    ctmin=self.ctmin
+                )
             except RuntimeError:
                 log.error(" skipping DOM '{0}'.".format(dom_id))
             else:
@@ -178,10 +189,12 @@ class IntraDOMCalibrator(kp.Module):
                 self.print("Using uncorrected twofold counts")
                 twofold_counts = self.services['TwofoldCounts']
                 fit_background = True
-            calibration = self.calibrate(twofold_counts,
-                                         fit_background=fit_background)
-            self.print("Dumping calibration to '{}'."
-                       .format(self.calib_filename))
+            calibration = self.calibrate(
+                twofold_counts, fit_background=fit_background
+            )
+            self.print(
+                "Dumping calibration to '{}'.".format(self.calib_filename)
+            )
             with open(self.calib_filename, 'wb') as f:
                 pickle.dump(calibration, f)
 
@@ -235,8 +248,10 @@ class TwofoldCounter(kp.Module):
         self.n_timeslices = defaultdict(int)
 
     def get_livetime(self):
-        return {dom_id: n * TIMESLICE_LENGTH
-                for dom_id, n in self.n_timeslices.items()}
+        return {
+            dom_id: n * TIMESLICE_LENGTH
+            for dom_id, n in self.n_timeslices.items()
+        }
 
     def process(self, blob):
         log.debug("Processing timeslice")
@@ -255,18 +270,21 @@ class TwofoldCounter(kp.Module):
             times = hits.time[mask]
             channel_ids = hits.channel_id[mask]
             sort_idc = np.argsort(times, kind='quicksort')
-            add_to_twofold_matrix(times[sort_idc],
-                                  channel_ids[sort_idc],
-                                  self.counts[dom_id],
-                                  tmax=self.tmax)
+            add_to_twofold_matrix(
+                times[sort_idc],
+                channel_ids[sort_idc],
+                self.counts[dom_id],
+                tmax=self.tmax
+            )
         return blob
 
     def dump(self):
         """Write coincidence counts into a Python pickle"""
         self.print("Dumping data to {}".format(self.dump_filename))
-        pickle.dump({'data': self.counts,
-                     'livetime': self.get_livetime()},
-                    open(self.dump_filename, "wb"))
+        pickle.dump({
+            'data': self.counts,
+            'livetime': self.get_livetime()
+        }, open(self.dump_filename, "wb"))
 
 
 class HRVFIFOTimesliceFilter(kp.Module):
@@ -328,7 +346,12 @@ class MedianPMTRatesService(kp.Module):
         self.expose(self.get_median_rates, 'GetMedianPMTRates')
 
     def process(self, blob):
-        tmch_data = TMCHData(io.BytesIO(blob['CHData']))
+        try:
+            tmch_data = TMCHData(io.BytesIO(blob['CHData']))
+        except ValueError as e:
+            self.log.error(e)
+            self.log.error("Skipping corrupt monitoring channel packet.")
+            return
         dom_id = tmch_data.dom_id
         for channel_id, rate in enumerate(tmch_data.pmt_rates):
             self.rates[dom_id][channel_id].append(rate)
@@ -337,8 +360,9 @@ class MedianPMTRatesService(kp.Module):
         self.print("Calculating median PMT rates.")
         median_rates = {}
         for dom_id in self.rates.keys():
-            median_rates[dom_id] = [np.median(self.rates[dom_id][c])
-                                    for c in range(31)]
+            median_rates[dom_id] = [
+                np.median(self.rates[dom_id][c]) for c in range(31)
+            ]
         self.rates = defaultdict(lambda: defaultdict(list))
         return median_rates
 
@@ -353,9 +377,17 @@ class ResetTwofoldCounts(kp.Module):
         return blob
 
 
-def calibrate_dom(dom_id, data, detector, livetime=None, fit_ang_dist=False,
-                  scale_mc_to_data=True, ad_fit_shape='pexp',
-                  fit_background=True, ctmin=-1.):
+def calibrate_dom(
+        dom_id,
+        data,
+        detector,
+        livetime=None,
+        fit_ang_dist=False,
+        scale_mc_to_data=True,
+        ad_fit_shape='pexp',
+        fit_background=True,
+        ctmin=-1.
+):
     """Calibrate intra DOM PMT time offsets, efficiencies and sigmas
 
         Parameters
@@ -374,8 +406,10 @@ def calibrate_dom(dom_id, data, detector, livetime=None, fit_ang_dist=False,
 
     if isinstance(data, str):
         filename = data
-        loaders = {'.h5': load_k40_coincidences_from_hdf5,
-                   '.root': load_k40_coincidences_from_rootfile}
+        loaders = {
+            '.h5': load_k40_coincidences_from_hdf5,
+            '.root': load_k40_coincidences_from_rootfile
+        }
         try:
             loader = loaders[os.path.splitext(filename)[1]]
         except KeyError:
@@ -401,10 +435,9 @@ def calibrate_dom(dom_id, data, detector, livetime=None, fit_ang_dist=False,
     # mean_errors = np.array([np.diag(pc)[0] for pc in pcovs])
     scale_factor = None
     if fit_ang_dist:
-        fit_res = fit_angular_distribution(angles,
-                                           rates,
-                                           rate_errors,
-                                           shape=ad_fit_shape)
+        fit_res = fit_angular_distribution(
+            angles, rates, rate_errors, shape=ad_fit_shape
+        )
         fitted_rates, exp_popts, exp_pcov = fit_res
     else:
         mc_fitted_rates = exponential_polinomial(np.cos(angles), *MC_ANG_DIST)
@@ -430,32 +463,36 @@ def calibrate_dom(dom_id, data, detector, livetime=None, fit_ang_dist=False,
     opt_qes = minimize_qes(fitted_rates, rates, minimize_weights, combs)
     corrected_means = correct_means(means, opt_t0s.x, combs)
     corrected_rates = correct_rates(rates, opt_qes.x, combs)
-    rms_means, rms_corrected_means = calculate_rms_means(means,
-                                                         corrected_means)
-    rms_rates, rms_corrected_rates = calculate_rms_rates(rates, fitted_rates,
-                                                         corrected_rates)
+    rms_means, rms_corrected_means = calculate_rms_means(
+        means, corrected_means
+    )
+    rms_rates, rms_corrected_rates = calculate_rms_rates(
+        rates, fitted_rates, corrected_rates
+    )
     cos_angles = np.cos(angles)
-    return_data = {'opt_t0s': opt_t0s,
-                   'opt_qes': opt_qes,
-                   'data': data,
-                   'means': means,
-                   'rates': rates,
-                   'fitted_rates': fitted_rates,
-                   'angles': angles,
-                   'corrected_means': corrected_means,
-                   'corrected_rates': corrected_rates,
-                   'rms_means': rms_means,
-                   'rms_corrected_means': rms_corrected_means,
-                   'rms_rates': rms_rates,
-                   'rms_corrected_rates': rms_corrected_rates,
-                   'gaussian_popts': popts,
-                   'livetime': livetime,
-                   'exp_popts': exp_popts,
-                   'exp_pcov': exp_pcov,
-                   'scale_factor': scale_factor,
-                   'opt_sigmas': opt_sigmas,
-                   'sigmas': sigmas,
-                   'combs': combs}
+    return_data = {
+        'opt_t0s': opt_t0s,
+        'opt_qes': opt_qes,
+        'data': data,
+        'means': means,
+        'rates': rates,
+        'fitted_rates': fitted_rates,
+        'angles': angles,
+        'corrected_means': corrected_means,
+        'corrected_rates': corrected_rates,
+        'rms_means': rms_means,
+        'rms_corrected_means': rms_corrected_means,
+        'rms_rates': rms_rates,
+        'rms_corrected_rates': rms_corrected_rates,
+        'gaussian_popts': popts,
+        'livetime': livetime,
+        'exp_popts': exp_popts,
+        'exp_pcov': exp_pcov,
+        'scale_factor': scale_factor,
+        'opt_sigmas': opt_sigmas,
+        'sigmas': sigmas,
+        'combs': combs
+    }
     return return_data
 
 
@@ -565,19 +602,21 @@ def fit_delta_ts(data, livetime, fit_background=True):
         mean0 = np.argmax(combination) + start
         try:
             if fit_background:
-                popt, pcov = optimize.curve_fit(gaussian,
-                                                xs,
-                                                combination,
-                                                p0=[mean0, 4., 5., 0.1],
-                                                bounds=([start, 0, 0, 0],
-                                                        [end, 10, 10, 1]))
+                popt, pcov = optimize.curve_fit(
+                    gaussian,
+                    xs,
+                    combination,
+                    p0=[mean0, 4., 5., 0.1],
+                    bounds=([start, 0, 0, 0], [end, 10, 10, 1])
+                )
             else:
-                popt, pcov = optimize.curve_fit(gaussian_wo_offset,
-                                                xs,
-                                                combination,
-                                                p0=[mean0, 4., 5.],
-                                                bounds=([start, 0, 0],
-                                                        [end, 10, 10]))
+                popt, pcov = optimize.curve_fit(
+                    gaussian_wo_offset,
+                    xs,
+                    combination,
+                    p0=[mean0, 4., 5.],
+                    bounds=([start, 0, 0], [end, 10, 10])
+                )
         except RuntimeError:
             popt = (0, 0, 0, 0)
         rates.append(popt[2])
@@ -585,11 +624,10 @@ def fit_delta_ts(data, livetime, fit_background=True):
         sigmas.append(popt[1])
         popts.append(popt)
         pcovs.append(pcov)
-    return (np.array(rates),
-            np.array(means),
-            np.array(sigmas),
-            np.array(popts),
-            np.array(pcovs))
+    return (
+        np.array(rates), np.array(means), np.array(sigmas), np.array(popts),
+        np.array(pcovs)
+    )
 
 
 def calculate_angles(detector, combs):
@@ -609,8 +647,11 @@ def calculate_angles(detector, combs):
     angles = []
     pmt_angles = detector.pmt_angles
     for first, second in combs:
-        angles.append(kp.math.angle_between(np.array(pmt_angles[first]),
-                                            np.array(pmt_angles[second])))
+        angles.append(
+            kp.math.angle_between(
+                np.array(pmt_angles[first]), np.array(pmt_angles[second])
+            )
+        )
     return np.array(angles)
 
 
@@ -667,12 +708,14 @@ def minimize_t0s(means, weights, combs):
     opt_t0s: optimal t0 values for all PMTs
 
     """
+
     def make_quality_function(means, weights, combs):
         def quality_function(t0s):
             sq_sum = 0
             for mean, comb, weight in zip(means, combs, weights):
                 sq_sum += ((mean - (t0s[comb[1]] - t0s[comb[0]])) * weight)**2
             return sq_sum
+
         return quality_function
 
     qfunc = make_quality_function(means, weights, combs)
@@ -697,6 +740,7 @@ def minimize_sigmas(sigmas, weights, combs):
     opt_sigmas: optimal sigma values for all PMTs
 
     """
+
     def make_quality_function(sigmas, weights, combs):
         def quality_function(s):
             sq_sum = 0
@@ -704,6 +748,7 @@ def minimize_sigmas(sigmas, weights, combs):
                 sigma_sqsum = np.sqrt(s[comb[1]]**2 + s[comb[0]]**2)
                 sq_sum += ((sigma - sigma_sqsum) * weight)**2
             return sq_sum
+
         return quality_function
 
     qfunc = make_quality_function(sigmas, weights, combs)
@@ -729,14 +774,16 @@ def minimize_qes(fitted_rates, rates, weights, combs):
     opt_qes: optimal qe values for all PMTs
 
     """
+
     def make_quality_function(fitted_rates, rates, weights, combs):
         def quality_function(qes):
             sq_sum = 0
             for fitted_rate, comb, rate, weight  \
                     in zip(fitted_rates, combs, rates, weights):
-                sq_sum += ((rate / qes[comb[0]] / qes[comb[1]] -
-                            fitted_rate) * weight)**2
+                sq_sum += ((rate / qes[comb[0]] / qes[comb[1]] - fitted_rate) *
+                           weight)**2
             return sq_sum
+
         return quality_function
 
     qfunc = make_quality_function(fitted_rates, rates, weights, combs)
@@ -762,8 +809,8 @@ def correct_means(means, opt_t0s, combs):
     corrected_means: numpy array of corrected gaussian means for all PMT combs
 
     """
-    corrected_means = np.array([(opt_t0s[comb[1]] - opt_t0s[comb[0]]) -
-                               mean for mean, comb in zip(means, combs)])
+    corrected_means = np.array([(opt_t0s[comb[1]] - opt_t0s[comb[0]]) - mean
+                                for mean, comb in zip(means, combs)])
     return corrected_means
 
 
@@ -783,8 +830,10 @@ def correct_rates(rates, opt_qes, combs):
     corrected_rates: numpy array of corrected rates for all PMT combinations
     """
 
-    corrected_rates = np.array([rate / opt_qes[comb[0]] / opt_qes[comb[1]]
-                                for rate, comb in zip(rates, combs)])
+    corrected_rates = np.array([
+        rate / opt_qes[comb[0]] / opt_qes[comb[1]]
+        for rate, comb in zip(rates, combs)
+    ])
     return corrected_rates
 
 
@@ -846,8 +895,8 @@ def add_to_twofold_matrix(times, tdcs, mat, tmax=10):
     mat: coincidence matrix (np.array((465, tmax * 2 + 1)))
 
     """
-    h_idx = 0  # index of initial hit
-    c_idx = 0  # index of coincident candidate hit
+    h_idx = 0    # index of initial hit
+    c_idx = 0    # index of coincident candidate hit
     n_hits = len(times)
     multiplicity = 0
     while h_idx <= n_hits:

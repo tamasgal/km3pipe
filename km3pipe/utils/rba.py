@@ -19,7 +19,6 @@ from cmd import Cmd
 import km3pipe as kp
 from km3pipe.srv import srv_event
 
-
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
@@ -49,9 +48,9 @@ class RBAPrompt(Cmd):
 
         Despite the claims in the Cmd documentaion, Cmd.preloop() is not a stub
         """
-        Cmd.preloop(self)  # sets up command completion
-        self._hist = []  # No history yet
-        self._locals = {}  # Initialize execution namespace for user
+        Cmd.preloop(self)    # sets up command completion
+        self._hist = []    # No history yet
+        self._locals = {}    # Initialize execution namespace for user
         self._globals = {}
 
     def default(self, line):
@@ -84,7 +83,7 @@ class RBAPrompt(Cmd):
 
     def srv_event(self, event):
         print("Serving event #{0}".format(event))
-        hits = self.cal.apply(self.pump[event]["Hits"].triggered_hits)
+        hits = self.cal.apply(self.pump[event]["Hits"].triggered_rows)
         srv_event(self.token, hits)
         self.current_idx = event
 
