@@ -99,6 +99,7 @@ coverage:
         paths:
             - reports/coverage
 
+
 pages:
     stage: doc
     script:
@@ -126,6 +127,17 @@ docker:
   only:
     - tags
     - master
+
+pypi:
+    image: docker.km3net.de/base/python:3
+    stage: release
+    cache: {}
+    script:
+        - pip install -U numpy
+        - python setup.py sdist
+        - twine upload dist/*
+    only:
+        - tags
 
 release-image:
   image: docker:stable
