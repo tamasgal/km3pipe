@@ -184,9 +184,9 @@ def get_jpp_env(jpp_dir):
     env = {
         v[0]: ''.join(v[1:])
         for v in [
-            l.split('=') for l in
-            os.popen("source {0}/setenv.sh {0} && env"
-                     .format(jpp_dir)).read().split('\n') if '=' in l
+            l.split('=') for l in os.popen(
+                "source {0}/setenv.sh {0} && env".format(jpp_dir)
+            ).read().split('\n') if '=' in l
         ]
     }
     return env

@@ -127,8 +127,8 @@ class EventHandler(pyinotify.ProcessEvent):
             destination = DESTINATIONS[elog_entry.logbook]
         except KeyError:
             print(
-                "No destination for logbook '{0}'. Using only default..."
-                .format(elog_entry.logbook)
+                "No destination for logbook '{0}'. Using only default...".
+                format(elog_entry.logbook)
             )
             destination = None
         finally:

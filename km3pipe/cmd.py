@@ -37,7 +37,7 @@ import sys
 import os
 from datetime import datetime
 
-from . import version, get_git_revision_hash
+from . import version
 from .tools import irods_filepath
 from .db import DBManager
 from .hardware import Detector
@@ -65,8 +65,8 @@ def update_km3pipe(git_branch=''):
     if git_branch == '' or git_branch is None:
         git_branch = 'master'
     os.system(
-        "pip install -U git+http://git.km3net.de/km3py/km3pipe.git@{0}"
-        .format(git_branch)
+        "pip install -U git+http://git.km3net.de/km3py/km3pipe.git@{0}".
+        format(git_branch)
     )
 
 
@@ -144,12 +144,7 @@ def print_git_short_revision():
 
 def main():
     from docopt import docopt
-    args = docopt(
-        __doc__,
-        version="KM3Pipe {} - git: {}".format(
-            version, get_git_revision_hash()
-        )
-    )
+    args = docopt(__doc__, version="KM3Pipe {}".format(version, ))
 
     if args['test']:
         run_tests()

@@ -39,7 +39,7 @@ km3pipe.style.use("km3pipe")
 # ``KM3Pipe``.
 #
 # You can find the documentation here:
-# http://km3pipe.readthedocs.io/en/latest/cmd.html#tohdf
+# https://km3py.pages.km3net.de/km3pipe/cmd.html#tohdf
 
 #####################################################
 # Note for Lyon Users

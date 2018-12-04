@@ -238,6 +238,19 @@ class HDF5Sink(Module):
         else:
             tab = self._tables[h5loc]
 
+        h5_colnames = set(tab.colnames)
+        tab_colnames = set(arr.dtype.names)
+        if h5_colnames != tab_colnames:
+            missing_cols = h5_colnames - tab_colnames
+            if missing_cols:
+                self.log.warning(
+                    "Missing columns in table: {}, trying to append NaNs".
+                    format(', '.join(missing_cols))
+                )
+                arr = arr.append_columns(
+                    missing_cols, np.full((len(missing_cols), len(arr)),
+                                          np.nan)
+                )
         tab.append(arr)
 
         if (level < 4):

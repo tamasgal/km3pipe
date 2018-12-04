@@ -9,7 +9,7 @@ import threading
 
 import matplotlib
 # Force matplotlib to not use any Xwindows backend.
-matplotlib.use('Agg')  # noqa
+matplotlib.use('Agg')    # noqa
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import matplotlib.dates as md
@@ -20,7 +20,6 @@ from km3pipe.calib import Calibration
 from km3pipe.io import CHPump
 from km3pipe.io.daq import DAQProcessor
 import km3pipe.style
-
 
 km3pipe.style.use('km3pipe')
 
@@ -49,7 +48,7 @@ class ZTPlot(Module):
         cal.apply(hits)
         e_info = blob['EventInfo']
 
-        if len(np.unique(hits[hits.triggered == True].du)) < 2:  # noqa
+        if len(np.unique(hits[hits.triggered == True].du)) < 2:    # noqa
             print("Skipping...")
             return blob
 
@@ -76,16 +75,24 @@ class ZTPlot(Module):
         n_plots = len(dus)
         n_cols = int(np.ceil(np.sqrt(n_plots)))
         n_rows = int(n_plots / n_cols) + (n_plots % n_cols > 0)
-        fig, axes = plt.subplots(ncols=n_cols, nrows=n_rows,
-                                 sharex=True, sharey=True, figsize=(16, 8))
+        fig, axes = plt.subplots(
+            ncols=n_cols,
+            nrows=n_rows,
+            sharex=True,
+            sharey=True,
+            figsize=(16, 8)
+        )
 
         for ax, (du, du_hits) in zip(axes.flat, hits.groupby("du")):
-            trig_hits = du_hits[du_hits.triggered == True]  # noqa
+            trig_hits = du_hits[du_hits.triggered == True]    # noqa
 
-            ax.scatter(du_hits.time, du_hits.pos_z,
-                       c='#09A9DE', label='hit')
-            ax.scatter(trig_hits.time, trig_hits.pos_z,
-                       c='#FF6363', label='triggered hit')
+            ax.scatter(du_hits.time, du_hits.pos_z, c='#09A9DE', label='hit')
+            ax.scatter(
+                trig_hits.time,
+                trig_hits.pos_z,
+                c='#FF6363',
+                label='triggered hit'
+            )
             ax.set_title('DU{0}'.format(du), fontsize=16, fontweight='bold')
 
         for ax in axes.flat:
@@ -95,14 +102,16 @@ class ZTPlot(Module):
             for label in xlabels:
                 label.set_rotation(45)
 
-        plt.suptitle("FrameIndex {0}, TriggerCounter {1}\n{2} UTC"
-                     .format(e_info.frame_index,
-                             e_info.trigger_counter,
-                             datetime.utcfromtimestamp(e_info.utc_seconds)),
-                     fontsize=16)
+        plt.suptitle(
+            "FrameIndex {0}, TriggerCounter {1}\n{2} UTC".format(
+                e_info.frame_index, e_info.trigger_counter,
+                datetime.utcfromtimestamp(e_info.utc_seconds)
+            ),
+            fontsize=16
+        )
         fig.text(0.5, 0.01, 'time [ns]', ha='center')
         fig.text(0.08, 0.5, 'z [m]', va='center', rotation='vertical')
-#        plt.tight_layout()
+        #        plt.tight_layout()
 
         filename = 'ztplot'
         f = os.path.join(PLOTS_PATH, filename + '.png')
@@ -118,11 +127,13 @@ class ZTPlot(Module):
 
 
 pipe = Pipeline()
-pipe.attach(CHPump,
-            host='127.0.0.1',
-            tags='IO_EVT, IO_SUM',
-            timeout=60 * 60 * 24 * 7,
-            max_queue=2000)
+pipe.attach(
+    CHPump,
+    host='127.0.0.1',
+    tags='IO_EVT, IO_SUM',
+    timeout=60 * 60 * 24 * 7,
+    max_queue=2000
+)
 pipe.attach(DAQProcessor)
 pipe.attach(ZTPlot)
 pipe.drain()

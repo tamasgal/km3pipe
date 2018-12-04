@@ -32,7 +32,7 @@ class MonitorRates(kp.Module):
 
         data = blob['CHData']
         data_io = BytesIO(data)
-        preamble = kp.io.daq.DAQPreamble(file_obj=data_io)  # noqa
+        preamble = kp.io.daq.DAQPreamble(file_obj=data_io)    # noqa
         summaryslice = kp.io.daq.DAQSummaryslice(file_obj=data_io)
         for dom_id, rates in summaryslice.summary_frames.iteritems():
             du, dom, _ = detector.doms[dom_id]
@@ -46,21 +46,31 @@ class MonitorRates(kp.Module):
         print(self.__class__.__name__ + ": updating plot.")
 
         filename = os.path.join(PLOTS_PATH, 'dom_rates.png')
-        plot_dom_parameters(self.rates, detector, filename,
-                            'rate [kHz]',
-                            "DOM Rates",
-                            vmin=190, vmax=230,
-                            cmap='coolwarm', missing='black',
-                            under='darkorchid', over='deeppink')
+        plot_dom_parameters(
+            self.rates,
+            detector,
+            filename,
+            'rate [kHz]',
+            "DOM Rates",
+            vmin=190,
+            vmax=230,
+            cmap='coolwarm',
+            missing='black',
+            under='darkorchid',
+            over='deeppink'
+        )
         print("done")
 
 
 pipe = kp.Pipeline()
-pipe.attach(kp.io.ch.CHPump, host='127.0.0.1',
-            port=5553,
-            tags='IO_SUM',
-            timeout=60 * 60 * 24 * 7,
-            max_queue=2000)
+pipe.attach(
+    kp.io.ch.CHPump,
+    host='127.0.0.1',
+    port=5553,
+    tags='IO_SUM',
+    timeout=60 * 60 * 24 * 7,
+    max_queue=2000
+)
 pipe.attach(kp.io.daq.DAQProcessor)
 pipe.attach(MonitorRates)
 pipe.drain()

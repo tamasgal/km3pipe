@@ -16,11 +16,12 @@ import sys
 import os
 from datetime import date
 import sphinx_rtd_theme
+from pkg_resources import get_distribution
 
 # what is this?
 # sys.path.append('../')
 
-import km3pipe  # noqa
+import km3pipe    # noqa
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -48,7 +49,6 @@ extensions = [
 
 autosummary_generate = True
 
-
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -64,10 +64,10 @@ master_doc = 'index'
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-# The short X.Y version.
-version = '.'.join(km3pipe.__version__.split('.')[:2])
 # The full version, including alpha/beta/rc tags.
-release = km3pipe.__version__
+release = get_distribution('km3pipe').version
+# The short X.Y version.
+version = '.'.join(release.split('.')[:2])
 
 # General information about the project.
 project = "KM3Pipe {}".format(km3pipe.__version__)
@@ -112,13 +112,11 @@ pygments_style = 'sphinx'
 # If true, keep warnings as "system message" paragraphs in the built documents.
 # keep_warnings = False
 
-
 # -- Options for HTML output ----------------------------------------------
 
 html_theme = 'sphinx_rtd_theme'
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # html_theme_options = {}
-
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -159,7 +157,6 @@ html_sidebars = {
     '**': ['globaltoc.html', 'searchbox.html'],
 }
 
-
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
 # html_additional_pages = {}
@@ -193,7 +190,6 @@ html_sidebars = {
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'KM3Pipedoc'
 
-
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
@@ -211,8 +207,10 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    ('index', 'KM3Pipe.tex', u'KM3Pipe Documentation',
-     u'Tamás Gál and Moritz Lotze', 'manual'),
+    (
+        'index', 'KM3Pipe.tex', u'KM3Pipe Documentation',
+        u'Tamás Gál and Moritz Lotze', 'manual'
+    ),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -235,19 +233,17 @@ latex_documents = [
 # If false, no module index is generated.
 # latex_domain_indices = True
 
-
 # -- Options for manual page output ---------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    ('index', 'km3pipe', u'KM3Pipe Documentation',
-     [u'Tamás Gál and Moritz Lotze'], 1)
-]
+man_pages = [(
+    'index', 'km3pipe', u'KM3Pipe Documentation',
+    [u'Tamás Gál and Moritz Lotze'], 1
+)]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False
-
 
 # -- Options for Texinfo output -------------------------------------------
 
@@ -255,10 +251,11 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    ('index', 'KM3Pipe', u'KM3Pipe Documentation',
-     u'Tamás Gál and Moritz Lotze', 'KM3Pipe',
-     'An analysis framework for KM3NeT data.',
-     'Miscellaneous'),
+    (
+        'index', 'KM3Pipe', u'KM3Pipe Documentation',
+        u'Tamás Gál and Moritz Lotze', 'KM3Pipe',
+        'An analysis framework for KM3NeT data.', 'Miscellaneous'
+    ),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -272,7 +269,6 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 # texinfo_no_detailmenu = False
-
 
 # -- Options for Example Gallery ------------------------------------------
 sphinx_gallery_conf = {

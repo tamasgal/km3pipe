@@ -18,7 +18,6 @@ __status__ = "Development"
 
 
 class TestBlobWidget(TestCase):
-
     def test_make_scale_labels(self):
         blobs = BlobWidget()
         blobs.width = 25

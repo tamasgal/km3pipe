@@ -8,6 +8,7 @@ variables:
   DOCKER_DRIVER: overlay2
   CONTAINER_TEST_IMAGE: docker.km3net.de/test/km3pipe:$CI_COMMIT_REF_SLUG
   CONTAINER_RELEASE_IMAGE: docker.km3net.de/test/km3pipe:$CI_COMMIT_TAG
+  CONTAINER_LATEST_IMAGE: docker.km3net.de/test/km3pipe:latest
 
 
 # Pip's cache doesn't store the python packages
@@ -19,6 +20,7 @@ cache:
   paths:
     - .cache/pip
     - venv/
+  key: "$CI_COMMIT_REF_SLUG"
 
 stages:
   - test
@@ -76,6 +78,14 @@ test-py3.7:
         - make test-km3modules
     <<: *junit_definition
 
+code-style:
+    image: docker.km3net.de/base/python:3.7
+    stage: test
+    script:
+        - *virtualenv_definition
+        - yapf -r -d -e "venv" .
+    allow_failure: true
+
 coverage:
     image: docker.km3net.de/base/python:3.6
     stage: coverage
@@ -125,6 +135,10 @@ release-image:
   script:
     - docker pull $CONTAINER_TEST_IMAGE
     - docker tag $CONTAINER_TEST_IMAGE $CONTAINER_RELEASE_IMAGE
+    - docker tag $CONTAINER_TEST_IMAGE $CONTAINER_LATEST_IMAGE
     - docker push $CONTAINER_RELEASE_IMAGE
+    - docker push $CONTAINER_LATEST_IMAGE
+  tags:
+    - docker
   only:
     - tags
