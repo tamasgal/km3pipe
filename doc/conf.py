@@ -16,6 +16,7 @@ import sys
 import os
 from datetime import date
 import sphinx_rtd_theme
+from pkg_resources import get_distribution
 
 # what is this?
 # sys.path.append('../')
@@ -63,10 +64,10 @@ master_doc = 'index'
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-# The short X.Y version.
-version = '.'.join(km3pipe.__version__.split('.')[:2])
 # The full version, including alpha/beta/rc tags.
-release = km3pipe.__version__
+release = get_distribution('km3pipe').version
+# The short X.Y version.
+version = '.'.join(release.split('.')[:2])
 
 # General information about the project.
 project = "KM3Pipe {}".format(km3pipe.__version__)

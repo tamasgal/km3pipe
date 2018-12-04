@@ -14,14 +14,20 @@ except ImportError:
 # so we can detect in __init__.py that it's called from setup.py
 builtins.__KM3PIPE_SETUP__ = True
 
-from km3pipe import version    # noqa
+from pkg_resources import get_distribution, DistributionNotFound
 
 with open('requirements.txt') as fobj:
     requirements = [l.strip() for l in fobj.readlines()]
 
+from pkg_resources import get_distribution, DistributionNotFound
+try:
+    __version__ = get_distribution(__name__).version
+except DistributionNotFound:
+    # package is not installed
+    pass
+
 setup(
     name='km3pipe',
-    version=version,
     url='http://github.com/tamasgal/km3pipe/',
     description='An analysis framework for KM3NeT',
     author='Tamas Gal and Moritz Lotze',
@@ -32,8 +38,9 @@ setup(
     include_package_data=True,
     platforms='any',
     setup_requires=[
-        'numpy>=1.12',
+        'numpy>=1.12', 'setuptools_scm',
     ],
+    use_scm_version=True,
     install_requires=requirements,
     python_requires='>=2.7',
     entry_points={
