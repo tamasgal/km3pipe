@@ -26,7 +26,7 @@ from .tools import AnyBar
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
-__credits__ = ["Thomas Heid"]
+__credits__ = ["Thomas Heid", "Johannes Schumann"]
 __license__ = "MIT"
 __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
@@ -38,12 +38,53 @@ log = get_logger(__name__)    # pylint: disable=C0103
 STAT_LIMIT = 100000
 MODULE_CONFIGURATION = 'pipeline.toml'
 
-
-if sys.version_info >= (3,3):
+if sys.version_info >= (3, 3):
     process_time = time.process_time
 else:
     process_time = time.clock
 
+
+class ServiceManager(object):
+    """
+    Main service manager
+    """
+
+    def __init__(self):
+        self._services = {}
+
+    def register(self, name, service):
+        """
+        Service registration
+
+        Args:
+            name: Name of the provided service
+            service: Reference to the service
+        """
+        self._services[name] = service
+
+    def get_missing_services(self, services):
+        """
+        Check if all required services are provided
+
+        Args:
+            services: List with the service names which are required
+        Returns:
+            List with missing services
+        """
+        required_services = set(services)
+        provided_services = set(self._services.keys())
+        missing_services = required_services.difference(provided_services)
+
+        return sorted(missing_services)
+
+    def __getitem__(self, name):
+        return self._services[name]
+
+    def __getattr__(self, name):
+        return self._service[name]
+
+    def __contains__(self, name):
+        return name in self._services
 
 
 class Pipeline(object):
@@ -92,7 +133,8 @@ class Pipeline(object):
         self.init_timer.start()
 
         self.modules = []
-        self.services = {}
+        self.services = ServiceManager()
+        self.required_services = {}
         self.calibration = None
         self.blob = blob or Blob()
         self.timeit = timeit
@@ -121,9 +163,14 @@ class Pipeline(object):
                 name == 'GenericPump':
             log.debug("Attaching as regular module")
             module = fac(name=name, **kwargs)
-            if hasattr(module, "services"):
-                for service_name, obj in module.services.items():
-                    self.services[service_name] = obj
+            if hasattr(module, "provided_services"):
+                for service_name, obj in module.provided_services.items():
+                    self.services.register(service_name, obj)
+            if hasattr(module, "required_services"):
+                updated_required_services = {}
+                updated_required_services.update(self.required_services)
+                updated_required_services.update(module.required_services)
+                self.required_services = updated_required_services
             module.services = self.services
             module.pipeline = self
         else:
@@ -161,6 +208,19 @@ class Pipeline(object):
         }
 
         if hasattr(module, 'get_detector'):    # Calibration-like module
+            self.log.deprecation(
+                "Calibration-like modules will not be supported in future "
+                "versions of KM3Pipe. Please use services instead.\n"
+                "If you are attaching the `calib.Calibration` as a module, "
+                "switch to `calib.CalibrationService` and use the "
+                "`self.services['calibrate']()` method in your modules "
+                "to apply calibration.\n\n"
+                "This means:\n\n"
+                "    pipe.attach(kp.calib.CalibrationService, ...)\n\n"
+                "And inside the attached modules, you can apply the "
+                "calibration with e.g.:\n\n"
+                "    cal_hits = self.services['calibrate'](blob['Hits'])\n"
+            )
             self.calibration = module
             if module._should_apply:
                 self.modules.append(module)
@@ -202,8 +262,9 @@ class Pipeline(object):
                 for module in self.modules:
                     if self.blob is None:
                         log.debug(
-                            "Skipping {0}, due to empty blob."
-                            .format(module.name)
+                            "Skipping {0}, due to empty blob.".format(
+                                module.name
+                            )
                         )
                         continue
                     if module.only_if is not None and \
@@ -216,8 +277,9 @@ class Pipeline(object):
 
                     if (self._cycle_count + 1) % module.every != 0:
                         log.debug(
-                            "Skipping {0} (every {1} iterations)."
-                            .format(module.name, module.every)
+                            "Skipping {0} (every {1} iterations).".format(
+                                module.name, module.every
+                            )
                         )
                         continue
 
@@ -231,8 +293,9 @@ class Pipeline(object):
                         self._timeit[module]['process_cpu'] \
                             .append(process_time() - start_cpu)
                 self._timeit['cycles'].append(timer() - cycle_start)
-                self._timeit['cycles_cpu'
-                             ].append(process_time() - cycle_start_cpu)
+                self._timeit['cycles_cpu'].append(
+                    process_time() - cycle_start_cpu
+                )
                 self._cycle_count += 1
                 if cycles and self._cycle_count >= cycles:
                     raise StopIteration
@@ -240,10 +303,27 @@ class Pipeline(object):
             log.info("Nothing left to pump through.")
         return self.finish()
 
+    def _check_service_requirements(self):
+        """Final comparison of provided and required modules"""
+        missing = self.services.get_missing_services(
+            self.required_services.keys()
+        )
+        if missing:
+            self.log.critical(
+                "Following services are required and missing: {}".format(
+                    ', '.join(missing)
+                )
+            )
+            return False
+        return True
+
     def drain(self, cycles=None):
         """Execute _drain while trapping KeyboardInterrupt"""
-        if self.anybar: self.anybar.change("orange")
+        if not self._check_service_requirements():
+            self.init_timer.stop()
+            return self.finish()
 
+        if self.anybar: self.anybar.change("orange")
         self.init_timer.stop()
         log.info("Trapping CTRL+C and starting to drain.")
         signal.signal(signal.SIGINT, self._handle_ctrl_c)
@@ -323,15 +403,15 @@ class Pipeline(object):
 
         print(60 * '=')
         print(
-            "{0} cycles drained in {1} (CPU {2}). Memory peak: {3:.2f} MB"
-            .format(
+            "{0} cycles drained in {1} (CPU {2}). Memory peak: {3:.2f} MB".
+            format(
                 self._cycle_count, timef(overall), timef(overall_cpu), memory
             )
         )
         if self._cycle_count > n_cycles:
             print(
-                "Statistics are based on the last {0} cycles."
-                .format(n_cycles)
+                "Statistics are based on the last {0} cycles.".
+                format(n_cycles)
             )
         if cycles:
             print(statsf('wall', calc_stats(cycles)))
@@ -382,7 +462,9 @@ class Module(object):
             'finish': 0,
             'finish_cpu': 0
         }
-        self.services = {}
+        self.services = ServiceManager()
+        self.provided_services = {}
+        self.required_services = {}
         self.configure()
 
     def configure(self):
@@ -391,7 +473,7 @@ class Module(object):
 
     def expose(self, obj, name):
         """Expose an object as a service to the Pipeline"""
-        self.services[name] = obj
+        self.provided_services[name] = obj
 
     @property
     def name(self):
@@ -419,6 +501,9 @@ class Module(object):
                 )
             )
         return value
+
+    def require_service(self, name, why=''):
+        self.required_services[name] = why
 
     def process(self, blob):    # pylint: disable=R0201
         """Knead the blob and return it"""

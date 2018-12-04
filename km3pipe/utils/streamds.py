@@ -65,8 +65,8 @@ def get_data(stream, parameters, fmt):
             if '=' not in parameter:
                 log.error(
                     "Invalid parameter syntax '{}'\n"
-                    "The correct syntax is 'parameter=value'"
-                    .format(parameter)
+                    "The correct syntax is 'parameter=value'".
+                    format(parameter)
                 )
                 continue
             key, value = parameter.split('=')

@@ -34,7 +34,7 @@ class UI(object):
         'up': ('up', 'k'),
         'down': ('down', 'j'),
         'home': ('0', '^'),
-        'end': ('$',),
+        'end': ('$', ),
         'goto': ('g', 'G'),
-        'help': ('?',),
+        'help': ('?', ),
     }

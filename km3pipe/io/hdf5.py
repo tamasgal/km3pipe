@@ -258,6 +258,19 @@ class HDF5Sink(Module):
         else:
             tab = self._tables[h5loc]
 
+        h5_colnames = set(tab.colnames)
+        tab_colnames = set(arr.dtype.names)
+        if h5_colnames != tab_colnames:
+            missing_cols = h5_colnames - tab_colnames
+            if missing_cols:
+                self.log.warning(
+                    "Missing columns in table: {}, trying to append NaNs".
+                    format(', '.join(missing_cols))
+                )
+                arr = arr.append_columns(
+                    missing_cols, np.full((len(missing_cols), len(arr)),
+                                          np.nan)
+                )
         tab.append(arr)
 
         if (level < 4):
@@ -416,7 +429,7 @@ class HDF5Sink(Module):
                 try:
                     tab.cols.event_id.create_index()
                 except NotImplementedError:
-                    log.warn(
+                    log.warning(
                         "Table '{}' has an uint64 column, "
                         "not indexing...".format(tab._v_name)
                     )
@@ -424,7 +437,7 @@ class HDF5Sink(Module):
                 try:
                     tab.cols.group_id.create_index()
                 except NotImplementedError:
-                    log.warn(
+                    log.warning(
                         "Table '{}' has an uint64 column, "
                         "not indexing...".format(tab._v_name)
                     )
@@ -486,7 +499,7 @@ class HDF5Pump(Pump):
         self._n_each = OrderedDict()
         for fn in self.filenames:
             self._inspect_infile(fn)
-        self._n_events = np.sum((v for k, v in self._n_each.items()))
+        self._n_events = np.sum([v for k, v in self._n_each.items()])
         self.minmax = OrderedDict()
         n_read = 0
         for fn, n in self._n_each.items():
@@ -740,7 +753,7 @@ class HDF5MetaData(Module):
 def convert_header_dict_to_table(header_dict):
     """Converts a header dictionary (usually from aanet) to a Table"""
     if not header_dict:
-        log.warn("Can't convert empty header dict to table, skipping...")
+        log.warning("Can't convert empty header dict to table, skipping...")
         return
     tab_dict = defaultdict(list)
     log.debug("Param:   field_names    field_values    dtype")

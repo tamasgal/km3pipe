@@ -101,8 +101,9 @@ class PMTRates(kp.Module):
         fig, ax = plt.subplots(figsize=(10, 6))
         ax.imshow(m, origin='lower')
         ax.set_title(
-            "Mean PMT Rates for DU{} (colours from 5kHz to 15kHz)\n{}"
-            .format(self.du, datetime.utcnow())
+            "Mean PMT Rates for DU{} (colours from 5kHz to 15kHz)\n{}".format(
+                self.du, datetime.utcnow()
+            )
         )
         ax.set_xlabel("UTC time [{}s/px]".format(interval))
         plt.yticks([i * 31 for i in range(18)],

@@ -6,6 +6,8 @@ Dataclasses for internal use. Heavily based on Numpy arrays.
 """
 from __future__ import absolute_import, print_function, division
 
+import itertools
+
 import numpy as np
 from numpy.lib import recfunctions as rfn
 
@@ -403,6 +405,74 @@ class Table(np.recarray):
     def from_dataframe(cls, df, **kwargs):
         rec = df.to_records(index=False)
         return cls(rec, **kwargs)
+
+    @classmethod
+    def merge(cls, tables, fillna=False):
+        """Merge a list of tables"""
+        cols = set(itertools.chain(*[table.dtype.descr for table in tables]))
+
+        tables_to_merge = []
+        for table in tables:
+            missing_cols = cols - set(table.dtype.descr)
+
+            if missing_cols:
+                if fillna:
+                    n = len(table)
+                    n_cols = len(missing_cols)
+                    col_names = []
+                    for col_name, col_dtype in missing_cols:
+                        if 'f' not in col_dtype:
+                            raise ValueError(
+                                "Cannot create NaNs for non-float"
+                                " type column '{}'".format(col_name)
+                            )
+                        col_names.append(col_name)
+
+                    table = table.append_columns(
+                        col_names, np.full((n_cols, n), np.nan)
+                    )
+                else:
+                    raise ValueError(
+                        "Table columns do not match. Use fill_na=True"
+                        " if you want to append missing values with NaNs"
+                    )
+            tables_to_merge.append(table)
+
+        first_table = tables_to_merge[0]
+
+        merged_table = sum(tables_to_merge[1:], first_table)
+
+        merged_table.h5loc = first_table.h5loc
+        merged_table.h5singleton = first_table.h5singleton
+        merged_table.split_h5 = first_table.split_h5
+        merged_table.name = first_table.name
+
+        return merged_table
+
+    def __add__(self, other):
+        cols1 = set(self.dtype.descr)
+        cols2 = set(other.dtype.descr)
+        if len(cols1 ^ cols2) != 0:
+            cols1 = set(self.dtype.names)
+            cols2 = set(other.dtype.names)
+            if len(cols1 ^ cols2) == 0:
+                raise NotImplementedError
+            else:
+                raise TypeError("Table columns do not match")
+        col_order = list(self.dtype.names)
+        ret = self.copy()
+        len_self = len(self)
+        len_other = len(other)
+        final_length = len_self + len_other
+        ret.resize(final_length, refcheck=False)
+        ret[len_self:] = other[col_order]
+        return Table(
+            ret,
+            h5loc=self.h5loc,
+            h5singleton=self.h5singleton,
+            split_h5=self.split_h5,
+            name=self.name
+        )
 
     def __str__(self):
         name = self.name

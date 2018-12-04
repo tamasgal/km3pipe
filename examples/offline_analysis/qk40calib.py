@@ -85,8 +85,8 @@ def main():
             calib_filename = root_filename + '.k40_cal.p'
             s.add("iget -v {}".format(irods_path))
             s.add(
-                "CTMIN=$(JPrint -f {}|grep '^ctMin'|awk '{{print $2}}')"
-                .format(root_filename)
+                "CTMIN=$(JPrint -f {}|grep '^ctMin'|awk '{{print $2}}')".
+                format(root_filename)
             )
             s.add(
                 "k40calib {} {} -t {} -c $CTMIN -o {}".format(

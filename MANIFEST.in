@@ -1,7 +1,7 @@
 include README.md
 include LICENSE
 include requirements.txt
-include km3pipe/.git_revision*
+include km3pipe/version.txt
 
 recursive-include doc *
 recursive-include km3pipe/tests *.py

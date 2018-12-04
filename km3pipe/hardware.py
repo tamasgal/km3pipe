@@ -223,7 +223,7 @@ class Detector(object):
     @property
     def xy_positions(self):
         """XY positions of the DUs, given by the DOMs on floor 1."""
-        if self._xy_positions == []:
+        if self._xy_positions is None or len(self._xy_positions) == 0:
             xy_pos = []
             for dom_id, pos in self.dom_positions.items():
                 if self.domid2floor(dom_id) == 1:

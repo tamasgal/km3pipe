@@ -67,8 +67,9 @@ class TriggerContributionCalculator(kp.Module):
         dom_ids = set(det.doms.keys())
         if self.dus is not None:
             log.warning(
-                "Showing only DOMs which are on the following DUs: {}"
-                .format(', '.join(str(du) for du in self.dus))
+                "Showing only DOMs which are on the following DUs: {}".format(
+                    ', '.join(str(du) for du in self.dus)
+                )
             )
             dom_ids = set(d for d in dom_ids if det.doms[d][0] in self.dus)
 

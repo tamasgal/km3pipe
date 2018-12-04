@@ -5,7 +5,7 @@ The extemporary KM3NeT analysis framework.
 """
 from __future__ import absolute_import, print_function, division
 
-from .__version__ import version, VERSION_INFO, get_git_revision_hash
+from .__version__ import version
 
 try:
     __KM3PIPE_SETUP__

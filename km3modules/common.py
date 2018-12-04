@@ -81,8 +81,9 @@ class Keep(Module):
     """
 
     def configure(self):
-        self.keys = self.get('keys') or set()
-        key = self.get('key') or None
+        self.keys = self.get('keys', default=set())
+        key = self.get('key', default=None)
+        self.h5locs = self.get('h5locs', default=set())
         if key and not self.keys:
             self.keys = [key]
 
@@ -90,6 +91,9 @@ class Keep(Module):
         out = Blob()
         for key in blob.keys():
             if key in self.keys:
+                out[key] = blob[key]
+            elif hasattr(blob[key], 'h5loc') and blob[key].h5loc.startswith(
+                    tuple(self.h5locs)):
                 out[key] = blob[key]
         return out
 

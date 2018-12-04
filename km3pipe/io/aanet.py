@@ -11,6 +11,7 @@ your pull request is more than welcome!
 from __future__ import absolute_import, print_function, division
 
 from collections import defaultdict
+import itertools
 import subprocess
 import os.path
 
@@ -179,6 +180,13 @@ RECO2NUM = {
     'KM3DeltaPos': 10000,
 }
 
+JHIST_CHAINS = {
+    'JMUON': [
+        'JMUONGANDALF', 'JMUONENERGY', 'JMUONPREFIT', 'JMUONSIMPLEX',
+        'JMUONSTART'
+    ]
+}
+
 FITINF2NAME = {v: k for k, v in FITINF2NUM.items()}
 FITINFDUSJ2NAME = {v: k for k, v in FITINFDUSJ2NUM.items()}
 RECO2NAME = {v: k for k, v in RECO2NUM.items()}
@@ -309,17 +317,17 @@ class AanetPump(Pump):
 
     def _parse_tracks(self, tracks):
         log.info("Reading Tracks...")
-        out = defaultdict(list)
+        track_dict = defaultdict(list)
         # iterating empty ROOT vector causes segfaults!
         if len(tracks) == 0:
             self.log.debug("Found empty tracks, skipping...")
-            return out
+            return {}
+
         for i, trk in enumerate(tracks):
             self.log.debug('Reading Track #{}...'.format(i))
             trk_dict = self._read_track(trk)
             # set name + h5loc later, if the name is not available, we need
             # the dtype to make a new name
-            tab = Table(trk_dict)
 
             trk_type = trk.rec_type
             try:
@@ -332,65 +340,51 @@ class AanetPump(Pump):
                 # If that is not available, enumerate the tracks by their
                 # dtypes (since they have no other tagging)
                 if len(trk.rec_stages) == 0:
-                    self.log.info(
-                        "Unknown Reconstruction type & no history available!"
-                    )
-                    trk_name = self._handle_generic(tab.dtype)
+                    self.log.error("Unknown reco type & no history!")
+                    trk_name = "UnknownTrack{}".format(i)
                 else:
-                    self.log.info(
-                        "Unknown Reconstruction type! Using history..."
-                    )
-                    # iteration in reverse order segfaults, whyever...
-                    stages = [k for k in trk.rec_stages]
-                    trk_name = '__'.join([RECO2NAME[k] for k in stages[::-1]])
-                    trk_name = 'JHIST__' + trk_name
+                    self.log.info("Unknown recoo type! Using history...")
+                    stages = [RECO2NAME[s] for s in trk.rec_stages]
+                    # TODO: make this more generic (using JHIST_CHAINS)
+                    if 'JMUONPREFIT' in stages:
+                        self.log.info("Found JMuon, adding stage flags")
+                        trk_name = 'JMuon'
+                        default_stages = JHIST_CHAINS['JMUON']
+                        for stage in default_stages:
+                            if stage in stages:
+                                trk_dict[stage] = True
+                            else:
+                                trk_dict[stage] = False
+                    else:
+                        self.log.info("Unknown chain, using stages as name")
+                        trk_name = '__'.join([s for s in stages[::-1]])
+                        trk_name = 'JHIST__' + trk_name
 
-            tab.name = trk_name
-            tab.h5loc = '/reco/{}'.format(trk_name.lower())
-            out[trk_name].append(tab)
+            # tab.h5loc = '/reco/{}'.format(trk_name.lower())
+            track_dict[trk_name].append(trk_dict)
+
+        return self._merge_tracks(track_dict)
+
+    def _merge_tracks(self, track_dict):
         log.info("Merging tracks into table...")
-        for key in out:
-            log.debug("Merging '{}'...".format(key))
-            name = out[key][0].name
-            h5loc = out[key][0].h5loc
-            out[key] = Table(
-                np.concatenate(out[key]),
-                name=name,
-                h5loc=h5loc,
+        out = {}
+        for track_name, tracks in track_dict.items():
+            self.log.debug("Merging '{}'...".format(track_name))
+            cols = set(itertools.chain(*[t.keys() for t in tracks]))
+            track_data = defaultdict(list)
+            for track in tracks:
+                for col in cols:
+                    if col in track:
+                        track_data[col].append(track[col])
+                    else:
+                        track_data[col].append(np.nan)
+
+            out[track_name] = Table(
+                track_data,
+                h5loc='/reco/{}'.format(track_name.lower()),
+                name=track_name
             )
-        self.log.debug(out)
         return out
-
-    # sometimes the reco name/tag is not correctly written
-    # which means that multiple different fits with
-    # different dtypes have the same name.
-    # Keep track of the dtypes from unnamed tracks and just enumerate them
-    # this is problematic since 2 unnamed tracks with same length
-    # (e.g. fit A and B just write pos_x, pos_y, pos_z)
-    # would get merged -- they would be thrown into a table containing
-    # both A and B.
-    # This needs to be fixed upstream obviously, so here we should just make
-    # noise about it
-
-    def _handle_generic(self, dt):
-        pref = "GENERIC_TRACK"
-        if dt in self._generic_dtypes_avail:
-            nam = self._generic_dtypes_avail[dt]
-            return nam
-        cnt = len(self._generic_dtypes_avail)
-        nam = '{}_{}'.format(pref, cnt)
-        self.log.warn(
-            "Unknown Reconstruction type! "
-            "Setting to '{}'. This may lead to "
-            "unrelated fit getting merged -- which is very likely not "
-            "what you want! The only way to fix this is to put the "
-            "proper numbers into the `rec_type` of your input file! "
-            "For now, we will just count + enumerate all different "
-            "datastructures but I do not have any information to tell "
-            "them apart!".format(nam)
-        )
-        self._generic_dtypes_avail[dt] = nam
-        return nam
 
     def _read_track(self, trk):
         out = {}
