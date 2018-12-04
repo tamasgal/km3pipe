@@ -3,8 +3,8 @@ Contact Us
 Join the KM3Pipe channel here: https://chat.km3net.de/channel/km3pipe
 
 
-Filing Bugs
------------
+Filing Bugs or Feature Requests
+-------------------------------
 
 Please **always** create an issue when you encounter any bugs, problems or
 need a new feature. Emails and private messages are not meant to communicate
