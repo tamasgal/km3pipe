@@ -111,7 +111,7 @@ pages:
             - public
     only:
         - tags
-        - develop
+        - master
 
 docker:
   image: docker:stable
@@ -125,7 +125,7 @@ docker:
     - docker
   only:
     - tags
-    - develop
+    - master
 
 release-image:
   image: docker:stable
