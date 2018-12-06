@@ -5,7 +5,7 @@ from km3pipe.testing import TestCase, MagicMock, patch
 
 from km3pipe.db import (
     DBManager, DOMContainer, we_are_in_lyon, read_csv, make_empty_dataset,
-    StreamDS
+    StreamDS, CLBMap
 )
 from km3pipe.logger import get_logger
 
@@ -126,9 +126,8 @@ class TestDataSetFunctions(TestCase):
 
 
 class TestStreamDS(TestCase):
-    @patch('km3pipe.db.DBManager._get_content')
     @patch('km3pipe.db.DBManager')
-    def setUp(self, db_manager_mock, get_content_mock):
+    def setUp(self, db_manager_mock):
         with open(STREAMDS_META, 'r') as fobj:
             streamds_meta = fobj.read()
         db_manager_mock_obj = db_manager_mock.return_value
@@ -168,3 +167,26 @@ class TestStreamDS(TestCase):
 
     def test_print_streams(self):
         self.sds.print_streams()
+
+
+class TestCLBMap(TestCase):
+    @patch('km3pipe.db.StreamDS')
+    def test_call_with_det_id(self, streamds_mock):
+        streamds_mock_obj = streamds_mock.return_value
+        with open(join(TEST_DATA_DIR, 'db/clbmap.txt'), 'r') as fobj:
+            streamds_mock_obj.clbmap.return_value = read_csv(fobj.read())
+        self.clbmap = CLBMap(1)
+        streamds_mock_obj.clbmap.assert_called_with(detoid=1)
+
+    @patch('km3pipe.db.StreamDS')
+    def setUp(self, streamds_mock):
+        streamds_mock_obj = streamds_mock.return_value
+        with open(join(TEST_DATA_DIR, 'db/clbmap.txt'), 'r') as fobj:
+            streamds_mock_obj.clbmap.return_value = read_csv(fobj.read())
+        self.clbmap = CLBMap(1)
+
+    def test_length(self):
+        assert 57 == len(self.clbmap)
+
+    def test_clb_by_upi(self):
+        assert 1 == self.clbmap.upi['3.4.3.2/V2-2-1/2.161'].dom_id

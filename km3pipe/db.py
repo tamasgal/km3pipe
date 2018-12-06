@@ -12,7 +12,7 @@ import io
 import json
 import re
 import pytz
-from collections import defaultdict, OrderedDict
+from collections import defaultdict, OrderedDict, namedtuple
 try:
     from inspect import Signature, Parameter
     SKIP_SIGNATURE_HINTS = False
@@ -841,3 +841,22 @@ def show_ahrs_calibration(clb_upi, version='3'):
         values = [[i.text for i in c] for c in root.findall(".//Values")]
         for name, value in zip(names, values):
             print("{}: {}".format(name, value))
+
+
+class CLBMap(object):
+    def __init__(self, det_oid):
+        self.det_oid = det_oid
+        sds = StreamDS()
+        self._data = sds.clbmap(detoid=det_oid)
+
+    def __len__(self):
+        return len(self._data)
+
+    @property
+    def upi(self):
+        return dict({'3.4.3.2/V2-2-1/2.161': 1})
+
+
+CLB = namedtuple(
+    'CLB', ['det_oid', 'floor', 'du', 'serial_number', 'upi', 'dom_id']
+)
