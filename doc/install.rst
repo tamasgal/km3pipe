@@ -75,9 +75,9 @@ It might be advisable to use:::
 
 on Windows.
 
-To get the development version, use:::
+To get the latest version, use:::
 
-    $ pip install git+http://git.km3net.de/km3py/km3pipe.git@develop
+    $ pip install git+http://git.km3net.de/km3py/km3pipe.git
 
 
 Install from Source
@@ -89,7 +89,7 @@ To install KM3Pipe from source, clone the git repository::
 
 check out your desired branch::
 
-    $ git checkout master  # or develop for the latest development version 
+    $ git checkout master  # or any other branch you are interested in
 
 and run::
 
@@ -128,7 +128,7 @@ Or you can of course use `pip`::
 
 To get the latest developer version::
 
-    $ km3pipe update develop
+    $ km3pipe update master
 
 If you installed KM3Pipe from source via `make install-dev`,
 you simply pull the changes from git and rebuild it::

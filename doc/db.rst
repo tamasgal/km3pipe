@@ -439,5 +439,13 @@ you have parameters which refer to DOMs. If you have a column which refers to
 the whole run, use the string ``"run"`` in the source column e.g. for a 
 parameter which refers to a DU, you can set it to ``"du1"`` etc.
 
+Here is an example of a CSV file::
+
+    det_id  run_id  source     n_active_doms highest_rate
+    29      523     whole_run  18            230042
+    29      523     du1        3             123000
+    29      524     whole_run  17            500023
+
 Please note that the whole file will be rejected if there is
 even a single row of data which is already present in the database.
+

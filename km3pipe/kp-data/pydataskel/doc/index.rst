@@ -1,7 +1,5 @@
 .. pydataskel documentation master file
 
-.. include:: version.txt
-
 SOME DESCRIPTION
 
 Contents

@@ -184,7 +184,9 @@ JHIST_CHAINS = {
     'JMUON': [
         'JMUONGANDALF', 'JMUONENERGY', 'JMUONPREFIT', 'JMUONSIMPLEX',
         'JMUONSTART'
-    ]
+    ],
+    'JSHOWER': ['JSHOWERPREFIT', 'JSHOWERPOSITIONFIT', 'JSHOWERCOMPLETEFIT'],
+    'JDUSJ': ['JDUSJPREFIT', 'JDUSJPOSITIONFIT', 'JDUSJCOMPLETEFIT'],
 }
 
 FITINF2NAME = {v: k for k, v in FITINF2NUM.items()}
@@ -344,18 +346,27 @@ class AanetPump(Pump):
                     trk_name = "UnknownTrack{}".format(i)
                 else:
                     self.log.info("Unknown recoo type! Using history...")
-                    stages = [RECO2NAME[s] for s in trk.rec_stages]
-                    # TODO: make this more generic (using JHIST_CHAINS)
-                    if 'JMUONPREFIT' in stages:
-                        self.log.info("Found JMuon, adding stage flags")
-                        trk_name = 'JMuon'
-                        default_stages = JHIST_CHAINS['JMUON']
-                        for stage in default_stages:
-                            if stage in stages:
-                                trk_dict[stage] = True
-                            else:
-                                trk_dict[stage] = False
-                    else:
+                    stages_num = [s for s in trk.rec_stages]
+                    stages = [RECO2NAME[s] for s in stages_num]
+
+                    is_chain = False
+                    for chain, default_stages in JHIST_CHAINS.items():
+                        # chain is something like JMUON
+                        if (RECO2NUM[chain + 'BEGIN'] < min(stages_num)) and (
+                                RECO2NUM[chain + 'END'] > max(stages_num)):
+                            self.log.info(
+                                "Found {}, adding stage flags".format(chain)
+                            )
+                            trk_name = chain
+                            for stage in default_stages:
+                                if stage in stages:
+                                    trk_dict[stage] = True
+                                else:
+                                    trk_dict[stage] = False
+                            is_chain = True
+                            break
+
+                    if not is_chain:
                         self.log.info("Unknown chain, using stages as name")
                         trk_name = '__'.join([s for s in stages[::-1]])
                         trk_name = 'JHIST__' + trk_name

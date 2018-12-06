@@ -220,6 +220,27 @@ class TestKeep(TestCase):
         pipe.attach(Observer)
         pipe.drain(5)
 
+    def test_major_hdf5_group_nested(self):
+        class APump(kp.Pump):
+            def process(self, blob):
+                blob['A'] = kp.Table({'a': 0}, h5loc='/foo/bar/a')
+                blob['B'] = kp.Table({'b': 1}, h5loc='/foo/bar/baz/b')
+                blob['C'] = kp.Table({'c': 2}, h5loc='/foo/bar/baz/fjord/c')
+                return blob
+
+        class Observer(kp.Module):
+            def process(self, blob):
+                assert 'A' not in blob
+                assert 'B' in blob
+                assert 'C' in blob
+                return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(APump)
+        pipe.attach(Keep, h5locs=['/foo/bar/baz'])
+        pipe.attach(Observer)
+        pipe.drain(5)
+
 
 class TestDelete(TestCase):
     def test_delete_a_single_key(self):

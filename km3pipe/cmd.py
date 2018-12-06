@@ -64,6 +64,19 @@ def run_tests():
 def update_km3pipe(git_branch=''):
     if git_branch == '' or git_branch is None:
         git_branch = 'master'
+    if git_branch == 'develop':
+        import time
+        log.deprecation(
+            "The 'develop' branch has been moved to 'master', please "
+            "use the command \n\n"
+            "    km3pipe update\n\n"
+            "to get the latest development version and \n\n"
+            "    pip install -U km3pipe\n\n"
+            "to install the latest release.\n"
+            "Proceeding with the 'master' branch in 15 seconds..."
+        )
+        time.sleep(15)
+        git_branch = 'master'
     os.system(
         "pip install -U git+http://git.km3net.de/km3py/km3pipe.git@{0}".
         format(git_branch)

@@ -75,22 +75,20 @@ using the ``upstream/...`` prefix::
 
     $ git fetch upstream
     From git.km3net.de:km3py/km3pipe
-     * [new branch]        develop                -> upstream/develop
-     * [new branch]        feature/8.0-dev        -> upstream/feature/8.0-dev
      * [new branch]        gitlab_jenkins_ci_test -> upstream/gitlab_jenkins_ci_test
      * [new branch]        legacy                 -> upstream/legacy
      * [new branch]        master                 -> upstream/master
 
 
-If you want to update for example your **own** ``develop`` branch
-to contain all the changes on the official ``develop`` branch of KM3Pipe,
+If you want to update for example your **own** ``master`` branch
+to contain all the changes on the official ``master`` branch of KM3Pipe,
 switch to it first with::
 
-    git checkout develop
+    git checkout master
 
-and then merge the ``upstream/develop`` into it::
+and then merge the ``upstream/master`` into it::
 
-    git merge upstream/develop
+    git merge upstream/master
 
 Make sure to regularly ``git fetch upstream`` and merge changes to your own branches.
 
@@ -115,7 +113,7 @@ imported km3pipe before  you made the changes.
 Go to your own fork folder (as described above) and check out the branch you
 want to work on::
 
-    git checkout develop  # the main development branch (should always be stable)
+    git checkout master  # the main development branch (should always be stable)
     make install-dev
 
 
@@ -166,28 +164,11 @@ Time to Code
 ~~~~~~~~~~~~
 
 We develop new features and fix bugs on separate branches and merge them
-back to ``develop`` when they are stable.
+back to ``master`` when they are stable. Merge requests (see below) are also
+pointing towards this branch.
 
-You can however stay on your develop branch if you want to, although we
-recommend working on a separate branch.
-
-We now assume that you thrust us and keep going on with creating a new branch.
-**While on the ``develop`` branch**, create a feature branch::
-
-    git checkout develop
-    git checkout -b my_cool_new_class
-
-Don't forget to push it to your fork regularly. Also keep in mind that the first
-time you push a newly created branch, you will be prompted to set the target
-branch on your fork. The command is then displayed, but for the sake of
-completeness::
-
-    git push --set-upstream origin my_cool_new_class
-
-Once you set the upstream, you can push your latest commits any time you want with::
-
-    git push
-
+If you are working on your own fork, you can stay on your own ``master`` branch
+and create merge requests from that.
 
 Create a Merge Request (aka Pull Request)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
