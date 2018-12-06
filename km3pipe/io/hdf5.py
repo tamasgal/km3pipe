@@ -523,12 +523,14 @@ class HDF5Pump(Pump):
                 )
                 raise SystemExit
             elif '/group_info' in h5file:
-                self.print("Reading group information from '/group_info'.")
+                self.log.info("Reading group information from '/group_info'.")
                 group_info = h5file.get_node('/', 'group_info')
                 self.group_ids[fn] = group_info.cols.group_id[:]
                 self._n_each[fn] = len(self.group_ids[fn])
             elif '/event_info' in h5file:
-                self.print("Reading group information from '/event_info'.")
+                self.log.deprecation(
+                    "Reading group information from '/event_info'."
+                )
                 event_info = h5file.get_node('/', 'event_info')
                 try:
                     self.group_ids[fn] = event_info.cols.group_id[:]
