@@ -11,6 +11,6 @@ at http://km3py.pages.km3net.de/km3pipe
 
 ### What is the current workaround to achieve the same functionality?
 
-(Is there already a way to ge the job done?)
+(Is there already a way to get the job done?)
 
 /label ~enhancement

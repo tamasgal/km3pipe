@@ -1,15 +1,20 @@
 Unreleased changes
 ------------------
 
+
+Version 8
+---------
+
+8.6.0 / 2018-12-05
+~~~~~~~~~~~~~~~~~~
 * ``qtohdf5`` can now be used to convert multiple files using the batch farm
   use the ``-i`` option to indicate that the input path is an IRODS path if you
   convert files from IRODS to SPS for example
 * ``wtd`` is the "what the DOM???" command line utility, which will print
   information (like DU and floor) for a given DOM (and DOM [O]ID).
+* ``JHIST__XXX`` is now parsed using reconstruction chains defined in
+  ``io/aanet.py``
 
-
-Version 8
----------
 8.5.0 / 2018-11-21
 ~~~~~~~~~~~~~~~~~~
 * ``Module`` can now require services with the

@@ -73,7 +73,9 @@ def get_data(stream, parameters, fmt):
             params[key] = value
     data = sds.get(stream, fmt, **params)
     if data is not None:
-        print(data)
+        with pd.option_context('display.max_rows', None, 'display.max_columns',
+                               None):
+            print(data)
     else:
         sds.help(stream)
 
