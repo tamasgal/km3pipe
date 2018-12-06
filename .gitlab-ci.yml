@@ -126,7 +126,6 @@ docker:
     - docker
   only:
     - tags
-    - master
 
 pypi:
     image: docker.km3net.de/base/python:3
