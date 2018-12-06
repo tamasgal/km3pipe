@@ -44,9 +44,8 @@ JSON_DOMS = [{
 
 log = get_logger('db')
 
-STREAMDS_META = join(
-    dirname(__file__), "../kp-data/test_data/streamds_output.txt"
-)
+TEST_DATA_DIR = join(dirname(__file__), '../kp-data/test_data')
+STREAMDS_META = join(TEST_DATA_DIR, "db/streamds_output.txt")
 
 
 class TestDBManager(TestCase):
