@@ -99,25 +99,36 @@ class Detector(object):
         """Create the file handler"""
         self._det_file = open(filename, 'r')
 
+    def _readline(self, ignore_comments=True):
+        """The next line of the DETX file, optionally ignores comments"""
+        if not ignore_comments:
+            return self._det_file.readline()
+        else:
+            while True:
+                line = self._det_file.readline()
+                if line.strip().startswith('#'):
+                    continue
+                return line
+
     def _parse_header(self):
         """Extract information from the header of the detector file"""
         self.print("Parsing the DETX header")
         self._det_file.seek(0, 0)
-        first_line = self._det_file.readline()
+        first_line = self._readline()
         try:
             self.det_id, self.n_doms = split(first_line, int)
             self.version = 'v1'
         except ValueError:
             det_id, self.version = first_line.split()
             self.det_id = int(det_id)
-            validity = self._det_file.readline().strip()
+            validity = self._readline().strip()
             self.valid_from, self.valid_until = split(validity, float)
-            raw_utm_info = self._det_file.readline().strip().split(' ')
+            raw_utm_info = self._readline().strip().split(' ')
             try:
                 self.utm_info = UTMInfo(*raw_utm_info[1:])
             except TypeError:
                 log.warning("Missing UTM information.")
-            n_doms = self._det_file.readline()
+            n_doms = self._readline()
             self.n_doms = int(n_doms)
 
     # pylint: disable=C0103
@@ -125,11 +136,11 @@ class Detector(object):
         """Extract dom information from detector file"""
         self.print("Reading PMT information...")
         self._det_file.seek(0, 0)
-        self._det_file.readline()
+        self._readline()
         pmts = defaultdict(list)
         pmt_index = 0
         while True:
-            line = self._det_file.readline()
+            line = self._readline()
 
             if line == '':
                 self.print("Done.")
@@ -170,7 +181,7 @@ class Detector(object):
                 )
 
             for i in range(n_pmts):
-                raw_pmt_info = self._det_file.readline()
+                raw_pmt_info = self._readline()
                 pmt_info = raw_pmt_info.split()
                 pmt_id, x, y, z, rest = unpack_nfirst(pmt_info, 4)
                 dx, dy, dz, t0, rest = unpack_nfirst(rest, 4)
