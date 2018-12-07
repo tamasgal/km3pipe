@@ -815,7 +815,7 @@ class TriggerSetup(object):
 
 def clbupi2ahrsupi(clb_upi):
     """Generate AHRS UPI from CLB UPI."""
-    return re.sub('.*/.*/2\.', '3.4.3.4/AHRS/1.', clb_upi)
+    return re.sub('.*/.*/2.', '3.4.3.4/AHRS/1.', clb_upi)
 
 
 def show_ahrs_calibration(clb_upi, version='3'):
@@ -844,17 +844,36 @@ def show_ahrs_calibration(clb_upi, version='3'):
 
 
 class CLBMap(object):
+    par_map = {'DETOID': 'det_oid', 'UPI': 'upi', 'DOMID': 'dom_id'}
+
     def __init__(self, det_oid):
         self.det_oid = det_oid
         sds = StreamDS()
         self._data = sds.clbmap(detoid=det_oid)
+        self._by = {}
 
     def __len__(self):
         return len(self._data)
 
     @property
     def upi(self):
-        return dict({'3.4.3.2/V2-2-1/2.161': 1})
+        parameter = 'UPI'
+        if parameter not in self._by:
+            self._populate(by=parameter)
+        return self._by[parameter]
+
+    def _populate(self, by):
+        data = {}
+        for _, row in self._data.iterrows():
+            data[row[by]] = CLB(
+                det_oid=row['DETOID'],
+                floor=row['FLOORID'],
+                du=row['DUID'],
+                serial_number=row['SERIALNUMBER'],
+                upi=row['UPI'],
+                dom_id=row['DOMID']
+            )
+        self._by[by] = data
 
 
 CLB = namedtuple(

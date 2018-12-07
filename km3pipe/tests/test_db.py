@@ -5,7 +5,7 @@ from km3pipe.testing import TestCase, MagicMock, patch
 
 from km3pipe.db import (
     DBManager, DOMContainer, we_are_in_lyon, read_csv, make_empty_dataset,
-    StreamDS, CLBMap
+    StreamDS, CLBMap, clbupi2ahrsupi
 )
 from km3pipe.logger import get_logger
 
@@ -169,6 +169,11 @@ class TestStreamDS(TestCase):
         self.sds.print_streams()
 
 
+class TestCLBUPI2AHRSUPI(TestCase):
+    def test_conversion(self):
+        assert '3.4.3.4/AHRS/1.161' == clbupi2ahrsupi('3.4.3.2/V2-2-1/2.161')
+
+
 class TestCLBMap(TestCase):
     @patch('km3pipe.db.StreamDS')
     def test_call_with_det_id(self, streamds_mock):
@@ -189,4 +194,15 @@ class TestCLBMap(TestCase):
         assert 57 == len(self.clbmap)
 
     def test_clb_by_upi(self):
-        assert 1 == self.clbmap.upi['3.4.3.2/V2-2-1/2.161'].dom_id
+        assert 806487231 == self.clbmap.upi['3.4.3.2/V2-2-1/2.570'].dom_id
+        assert 808964852 == self.clbmap.upi['3.4.3.2/V2-2-1/2.100'].dom_id
+        assert 808982547 == self.clbmap.upi['3.4.3.2/V2-2-1/2.121'].dom_id
+        assert 808961480 == self.clbmap.upi['3.4.3.2/V2-2-1/2.94'].dom_id
+
+        assert 13 == self.clbmap.upi['3.4.3.2/V2-2-1/2.570'].floor
+        assert 3 == self.clbmap.upi['3.4.3.2/V2-2-1/2.100'].du
+        assert 121 == self.clbmap.upi['3.4.3.2/V2-2-1/2.121'].serial_number
+        assert 'D_ORCA003' == self.clbmap.upi['3.4.3.2/V2-2-1/2.94'].det_oid
+
+        for upi in self.clbmap.upi.keys():
+            assert upi == self.clbmap.upi[upi].upi
