@@ -283,9 +283,33 @@ class TestDetector(TestCase):
         assert -2425.0 == det.utm_info.z
         assert 1500000000.1 == det.valid_from
         assert 9999999999.0 == det.valid_until
-        assert 'v2' == det.version
+        assert 'v3' == det.version
         self.assertListEqual([1.1, 1.2, 1.3], list(det.pmts.pos[0]))
         self.assertListEqual([3.4, 3.5, 3.6], list(det.pmts.pos[7]))
+
+    def test_detx_format_comments(self):
+        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v1.detx'))
+        assert len(det.comments) == 0
+
+        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v2.detx'))
+        assert len(det.comments) == 0
+
+        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v3.detx'))
+        assert len(det.comments) == 2
+        assert " a comment line" == det.comments[0]
+        assert " another comment line starting with '#'" == det.comments[1]
+
+    def test_comments_are_written(self):
+        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v3.detx'))
+        det.add_comment("foo")
+        assert 3 == len(det.comments)
+        assert det.comments[2] == "foo"
+        assert "# foo" == det.ascii.splitlines()[2]
+
+    def test_detx_v3_is_the_same_ascii(self):
+        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v3.detx'))
+        with open(join(TEST_DATA_DIR, 'detx_v3.detx'), 'r') as fobj:
+            assert fobj.read() == det.ascii
 
     def test_translate_detector(self):
         self.det._parse_doms()
