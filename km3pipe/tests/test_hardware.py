@@ -16,6 +16,7 @@ dom_id line_id floor_id npmts
 from __future__ import unicode_literals
 
 from copy import deepcopy
+from os.path import join, dirname
 from io import StringIO
 
 import numpy as np
@@ -87,6 +88,8 @@ EXAMPLE_DETX_RADIAL = StringIO(
         " 10 0 0 -1 0 0 -1 100",
     ))
 )
+
+TEST_DATA_DIR = join(dirname(__file__), "../kp-data/test_data")
 
 
 class TestDetector(TestCase):
@@ -248,6 +251,65 @@ class TestDetector(TestCase):
         self.det._parse_header()
         self.det._parse_doms()
         assert detx_string == self.det.ascii
+
+    def test_detx_format_version_2(self):
+        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v2.detx'))
+        assert 3 == det.n_doms
+        assert 3 == det.n_pmts_per_dom
+        assert 256500.0 == det.utm_info.easting
+        assert 4743000.0 == det.utm_info.northing
+        assert 'WGS84' == det.utm_info.ellipsoid
+        assert '32N' == det.utm_info.grid
+        assert -2425.0 == det.utm_info.z
+        assert 1500000000.1 == det.valid_from
+        assert 9999999999.0 == det.valid_until
+        assert 'v2' == det.version
+        self.assertListEqual([1.1, 1.2, 1.3], list(det.pmts.pos[0]))
+        self.assertListEqual([3.4, 3.5, 3.6], list(det.pmts.pos[7]))
+
+    def test_detx_v2_is_the_same_ascii(self):
+        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v2.detx'))
+        with open(join(TEST_DATA_DIR, 'detx_v2.detx'), 'r') as fobj:
+            assert fobj.read() == det.ascii
+
+    def test_detx_format_version_3(self):
+        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v3.detx'))
+        assert 3 == det.n_doms
+        assert 3 == det.n_pmts_per_dom
+        assert 256500.0 == det.utm_info.easting
+        assert 4743000.0 == det.utm_info.northing
+        assert 'WGS84' == det.utm_info.ellipsoid
+        assert '32N' == det.utm_info.grid
+        assert -2425.0 == det.utm_info.z
+        assert 1500000000.1 == det.valid_from
+        assert 9999999999.0 == det.valid_until
+        assert 'v3' == det.version
+        self.assertListEqual([1.1, 1.2, 1.3], list(det.pmts.pos[0]))
+        self.assertListEqual([3.4, 3.5, 3.6], list(det.pmts.pos[7]))
+
+    def test_detx_format_comments(self):
+        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v1.detx'))
+        assert len(det.comments) == 0
+
+        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v2.detx'))
+        assert len(det.comments) == 0
+
+        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v3.detx'))
+        assert len(det.comments) == 2
+        assert " a comment line" == det.comments[0]
+        assert " another comment line starting with '#'" == det.comments[1]
+
+    def test_comments_are_written(self):
+        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v3.detx'))
+        det.add_comment("foo")
+        assert 3 == len(det.comments)
+        assert det.comments[2] == "foo"
+        assert "# foo" == det.ascii.splitlines()[2]
+
+    def test_detx_v3_is_the_same_ascii(self):
+        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v3.detx'))
+        with open(join(TEST_DATA_DIR, 'detx_v3.detx'), 'r') as fobj:
+            assert fobj.read() == det.ascii
 
     def test_translate_detector(self):
         self.det._parse_doms()

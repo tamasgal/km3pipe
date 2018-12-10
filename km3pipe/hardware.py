@@ -58,6 +58,7 @@ class Detector(object):
         self.valid_from = None
         self.valid_until = None
         self.utm_info = None
+        self._comments = []
         self._dom_ids = []
         self._pmt_index_by_omkey = OrderedDict()
         self._pmt_index_by_pmt_id = OrderedDict()
@@ -91,6 +92,7 @@ class Detector(object):
         if not filename.endswith("detx"):
             raise NotImplementedError('Only the detx format is supported.')
         self._open_file(filename)
+        self._extract_comments()
         self._parse_header()
         self._parse_doms()
         self._det_file.close()
@@ -99,25 +101,43 @@ class Detector(object):
         """Create the file handler"""
         self._det_file = open(filename, 'r')
 
+    def _readline(self, ignore_comments=True):
+        """The next line of the DETX file, optionally ignores comments"""
+        while True:
+            line = self._det_file.readline().strip()
+            if line.startswith('#'):
+                if not ignore_comments:
+                    return line
+            else:
+                return line
+
+    def _extract_comments(self):
+        """Retrieve all comments from the file"""
+        self._det_file.seek(0, 0)
+        for line in self._det_file.readlines():
+            line = line.strip()
+            if line.startswith('#'):
+                self.add_comment(line[1:])
+
     def _parse_header(self):
         """Extract information from the header of the detector file"""
         self.print("Parsing the DETX header")
         self._det_file.seek(0, 0)
-        first_line = self._det_file.readline()
+        first_line = self._readline()
         try:
             self.det_id, self.n_doms = split(first_line, int)
             self.version = 'v1'
         except ValueError:
             det_id, self.version = first_line.split()
             self.det_id = int(det_id)
-            validity = self._det_file.readline().strip()
+            validity = self._readline().strip()
             self.valid_from, self.valid_until = split(validity, float)
-            raw_utm_info = self._det_file.readline().strip().split(' ')
+            raw_utm_info = self._readline().strip().split(' ')
             try:
                 self.utm_info = UTMInfo(*raw_utm_info[1:])
             except TypeError:
                 log.warning("Missing UTM information.")
-            n_doms = self._det_file.readline()
+            n_doms = self._readline()
             self.n_doms = int(n_doms)
 
     # pylint: disable=C0103
@@ -125,11 +145,11 @@ class Detector(object):
         """Extract dom information from detector file"""
         self.print("Reading PMT information...")
         self._det_file.seek(0, 0)
-        self._det_file.readline()
+        self._readline()
         pmts = defaultdict(list)
         pmt_index = 0
         while True:
-            line = self._det_file.readline()
+            line = self._readline()
 
             if line == '':
                 self.print("Done.")
@@ -170,12 +190,10 @@ class Detector(object):
                 )
 
             for i in range(n_pmts):
-                raw_pmt_info = self._det_file.readline()
+                raw_pmt_info = self._readline()
                 pmt_info = raw_pmt_info.split()
                 pmt_id, x, y, z, rest = unpack_nfirst(pmt_info, 4)
                 dx, dy, dz, t0, rest = unpack_nfirst(rest, 4)
-                if rest:
-                    log.warning("Unexpected PMT values: {0}".format(rest))
                 pmt_id = int(pmt_id)
                 omkey = (du, floor, i)
                 pmts['pmt_id'].append(int(pmt_id))
@@ -190,6 +208,11 @@ class Detector(object):
                 pmts['floor'].append(int(floor))
                 pmts['channel_id'].append(int(i))
                 pmts['dom_id'].append(int(dom_id))
+                if self.version == 'v3' and rest:
+                    status, rest = unpack_nfirst(rest, 1)
+                    pmts['status'].append(int(status))
+                if rest:
+                    log.warning("Unexpected PMT values: {0}".format(rest))
                 self._pmt_index_by_omkey[omkey] = pmt_index
                 self._pmt_index_by_pmt_id[pmt_id] = pmt_index
                 pmt_index += 1
@@ -201,6 +224,14 @@ class Detector(object):
         self._dom_positions = OrderedDict()
         self._xy_positions = []
         self._pmt_angles = []
+
+    def add_comment(self, comment):
+        """Add a comment which will be prefixed with a '#'"""
+        self._comments.append(comment)
+
+    @property
+    def comments(self):
+        return self._comments
 
     @property
     def dom_ids(self):
@@ -295,6 +326,13 @@ class Detector(object):
     @property
     def ascii(self):
         """The ascii representation of the detector"""
+        comments = ''
+        if self.version == 'v3':
+            for comment in self.comments:
+                if not comment.startswith(' '):
+                    comment = ' ' + comment
+                comments += "#" + comment + "\n"
+
         if self.version == 'v1':
             header = "{det.det_id} {det.n_doms}".format(det=self)
         else:
@@ -309,11 +347,14 @@ class Detector(object):
             for channel_id in range(n_pmts):
                 pmt_idx = self._pmt_index_by_omkey[(line, floor, channel_id)]
                 pmt = self.pmts[pmt_idx]
-                doms += " {0} {1} {2} {3} {4} {5} {6} {7}\n".format(
+                doms += " {0} {1} {2} {3} {4} {5} {6} {7}".format(
                     pmt.pmt_id, pmt.pos_x, pmt.pos_y, pmt.pos_z, pmt.dir_x,
                     pmt.dir_y, pmt.dir_z, pmt.t0
                 )
-        return header + "\n" + doms
+                if self.version == 'v3':
+                    doms += " {0}".format(pmt.status)
+                doms += "\n"
+        return comments + header + "\n" + doms
 
     def write(self, filename):
         """Save detx file."""
