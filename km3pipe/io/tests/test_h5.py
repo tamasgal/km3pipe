@@ -234,6 +234,36 @@ class TestH5Sink(TestCase):
 
         fobj.close()
 
+    def test_writing_of_n_dim_arrays_in_nested_group(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                blob['foo'] = NDArray(
+                    arr + self.index * 10, h5loc='/foo/bar/baz'
+                )
+                self.index += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(3)
+
+        with tb.File(fname) as f:
+            foo = f.get_node("/foo/bar/baz")
+            print(foo)
+            assert 3 == foo[0, 1, 0]
+            assert 4 == foo[0, 1, 1]
+
+        fobj.close()
+
 
 class TestH5SinkConsistency(TestCase):
     def test_h5_consistency_for_tables_without_group_id(self):

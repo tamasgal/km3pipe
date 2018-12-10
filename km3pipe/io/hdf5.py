@@ -216,8 +216,12 @@ class HDF5Sink(Module):
         if h5loc not in self._ndarrays:
             loc, tabname = os.path.split(h5loc)
             ndarr = self.h5file.create_earray(
-                loc, tabname, tb.Atom.from_dtype(arr.dtype),
-                (0, ) + arr.shape[1:]
+                loc,
+                tabname,
+                tb.Atom.from_dtype(arr.dtype),
+                (0, ) + arr.shape[1:],
+                filters=self.filters,
+                createparents=True,
             )
             self._ndarrays[h5loc] = ndarr
         else:
