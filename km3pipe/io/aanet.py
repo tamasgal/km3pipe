@@ -354,6 +354,11 @@ class AanetPump(Pump):
                         # chain is something like JMUON
                         if (RECO2NUM[chain + 'BEGIN'] < min(stages_num)) and (
                                 RECO2NUM[chain + 'END'] > max(stages_num)):
+                            if chain == "JDUSJ":
+                                self.log.info("Adding missing Dusj parameters")
+                                for dusj_param in FITINFDUSJ2NUM:
+                                    if dusj_param not in trk_dict:
+                                        trk_dict[dusj_param] = np.nan
                             self.log.info(
                                 "Found {}, adding stage flags".format(chain)
                             )
