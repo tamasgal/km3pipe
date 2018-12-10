@@ -571,6 +571,23 @@ class Table(np.recarray):
         return self[self.triggered.astype(bool)]
 
 
+class NDArray(np.ndarray):
+    """Array with HDF5 metadata."""
+
+    def __new__(cls, array, dtype=None, order=None, **kwargs):
+        obj = np.asarray(array, dtype=dtype, order=order).view(cls)
+        if 'h5loc' in kwargs:
+            h5loc = kwargs['h5loc']
+        else:
+            h5loc = '/misc'
+        obj.h5loc = h5loc
+        return obj
+
+    def __array_finalize__(self, obj):
+        if obj is None: return
+        self.h5loc = getattr(obj, 'h5loc', None)
+
+
 class Vec3(object):
     def __init__(self, x, y, z):
         self.x = x
