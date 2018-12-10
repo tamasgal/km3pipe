@@ -16,7 +16,7 @@ import tables as tb
 
 import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
-from km3pipe.dataclasses import Table, DEFAULT_H5LOC
+from km3pipe.dataclasses import Table, NDArray, DEFAULT_H5LOC
 from km3pipe.logger import get_logger
 from km3pipe.tools import decamelise, camelise, split, istype, get_jpp_revision
 
@@ -190,6 +190,7 @@ class HDF5Sink(Module):
             complevel=5, shuffle=True, fletcher32=True, complib='zlib'
         )
         self._tables = OrderedDict()
+        self._ndarrays = OrderedDict()
 
     def _to_array(self, data, name=None):
         if data is None:
@@ -210,7 +211,21 @@ class HDF5Sink(Module):
             data = Table.from_dataframe(data)
         return data
 
-    def _write_array(self, h5loc, arr, title):
+    def _write_ndarray(self, arr):
+        h5loc = arr.h5loc
+        if h5loc not in self._ndarrays:
+            loc, tabname = os.path.split(h5loc)
+            ndarr = self.h5file.create_earray(
+                loc, tabname, tb.Atom.from_dtype(arr.dtype),
+                (0, ) + arr.shape[1:]
+            )
+            self._ndarrays[h5loc] = ndarr
+        else:
+            ndarr = self._ndarrays[h5loc]
+
+        ndarr.append(arr)
+
+    def _write_table(self, h5loc, arr, title):
         level = len(h5loc.split('/'))
 
         if h5loc not in self._tables:
@@ -307,6 +322,9 @@ class HDF5Sink(Module):
         if data is None or not hasattr(data, 'dtype'):
             self.log.debug("Conversion failed. moving on...")
             return
+        if isinstance(data, NDArray):
+            self._write_ndarray(data)
+            return data
         try:
             self.log.debug("Looking for h5loc...")
             h5loc = entry.h5loc
@@ -341,7 +359,7 @@ class HDF5Sink(Module):
             self._write_separate_columns(h5loc, entry, title=title)
         else:
             self.log.debug("Writing into single Table...")
-            self._write_array(h5loc, data, title=title)
+            self._write_table(h5loc, data, title=title)
 
         if hasattr(entry, 'h5singleton') and entry.h5singleton:
             self._singletons_written[entry.h5loc] = True
@@ -388,7 +406,7 @@ class HDF5Sink(Module):
                 "n_items": data["n_items"]
             },
                             h5loc=h5loc)
-            self._write_array(
+            self._write_table(
                 h5loc,
                 self._to_array(indices),
                 title='Indices',

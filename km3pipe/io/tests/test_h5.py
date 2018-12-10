@@ -8,7 +8,7 @@ import numpy as np
 import tables as tb
 
 from km3pipe import Blob, Module, Pipeline, Pump, version
-from km3pipe.dataclasses import Table
+from km3pipe.dataclasses import Table, NDArray
 from km3pipe.io.hdf5 import (
     HDF5Pump, HDF5Sink, HDF5Header, convert_header_dict_to_table,
     FORMAT_VERSION
@@ -203,6 +203,34 @@ class TestH5Sink(TestCase):
             assert version == h5file.root._v_attrs.km3pipe.decode()
             assert tb.__version__ == h5file.root._v_attrs.pytables.decode()
             assert FORMAT_VERSION == h5file.root._v_attrs.format_version
+
+        fobj.close()
+
+    def test_writing_of_n_dim_arrays(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                blob['foo'] = NDArray(arr + self.index * 10, h5loc='/foo')
+                self.index += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(3)
+
+        with tb.File(fname) as f:
+            foo = f.get_node("/foo")
+            print(foo)
+            assert 3 == foo[0, 1, 0]
+            assert 4 == foo[0, 1, 1]
 
         fobj.close()
 
