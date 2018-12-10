@@ -1,6 +1,8 @@
 Unreleased changes
 ------------------
 
+* ``io.pandas`` has been removed
+
 
 Version 8
 ---------
