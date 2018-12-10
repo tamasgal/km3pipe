@@ -6,7 +6,7 @@ import tables
 
 from km3pipe.tools import istype
 from km3pipe.testing import TestCase, patch, Mock
-from km3pipe.io import GenericPump, read_calibration, read_hdf5
+from km3pipe.io import GenericPump, read_calibration
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2018, Tamas Gal and the KM3NeT collaboration."
@@ -95,9 +95,3 @@ class TestReadCalibration(TestCase):
         det_id = -1
         read_calibration(det_id=det_id)
         mock_calibration.assert_not_called()
-
-
-class TestReadHDF5(TestCase):
-    @patch('pandas.HDFStore')
-    def test_call(self, mock_hdfstore):
-        read_hdf5('foo')

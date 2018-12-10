@@ -111,35 +111,3 @@ def read_calibration(
             return None
         return Calibration(det_id=det_id)
     return None
-
-
-def read_hdf5(filename, detx=None, det_id=None, det_from_file=False):
-    """Open HDF5 file and retrieve all relevant information.
-
-    Optionally, a detector calibration can read by passing a detector file,
-    or retrieved from the database by passing a detector ID, or by reading
-    the detector id from the event info in the file.
-    """
-    import pandas as pd
-    from km3pipe.core import Run
-    from km3pipe.io.pandas import read_group
-
-    h5 = pd.HDFStore(filename, mode='r')
-    opts = {}
-    opts['event_info'] = h5.get('event_info')
-    optional_keys = {'hits', 'mc_hits', 'mc_tracks'}    # noqa
-    for k in optional_keys:
-        try:
-            opts[k] = h5.get(k)
-        except KeyError:
-            continue
-    try:
-        opts['reco'] = read_group(h5.root.reco)
-    except (KeyError, ValueError):
-        pass
-    run = Run(**opts)
-
-    det_id_table = opts['event_info']['det_id']
-    run.calibration = read_calibration(
-        detx, det_id, det_from_file, det_id_table=det_id_table
-    )
