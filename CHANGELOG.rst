@@ -2,6 +2,10 @@ Unreleased changes
 ------------------
 
 * ``io.pandas`` has been removed
+* DETX v3 supported (including the ability to
+  ``kp.hardware.Detector.add_comment()`` which are preserved when writing
+* DUSJ readout fixed, now every parameter is written by default (with NaNs
+  if missing)
 
 
 Version 8
