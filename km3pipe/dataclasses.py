@@ -576,16 +576,16 @@ class NDArray(np.ndarray):
 
     def __new__(cls, array, dtype=None, order=None, **kwargs):
         obj = np.asarray(array, dtype=dtype, order=order).view(cls)
-        if 'h5loc' in kwargs:
-            h5loc = kwargs['h5loc']
-        else:
-            h5loc = '/misc'
+        h5loc = kwargs.get('h5loc', '/misc')
+        title = kwargs.get('title', 'Unnamed NDArray')
         obj.h5loc = h5loc
+        obj.title = title
         return obj
 
     def __array_finalize__(self, obj):
         if obj is None: return
         self.h5loc = getattr(obj, 'h5loc', None)
+        self.title = getattr(obj, 'title', None)
 
 
 class Vec3(object):
