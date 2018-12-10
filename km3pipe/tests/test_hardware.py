@@ -252,9 +252,25 @@ class TestDetector(TestCase):
         self.det._parse_doms()
         assert detx_string == self.det.ascii
 
+    def test_detx_format_version_1(self):
+        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v1.detx'))
+        assert 2 == det.n_dus
+        assert 6 == det.n_doms
+        assert 3 == det.n_pmts_per_dom
+        assert 'v1' == det.version
+        self.assertListEqual([1.1, 1.2, 1.3], list(det.pmts.pos[0]))
+        self.assertListEqual([3.4, 3.5, 3.6], list(det.pmts.pos[7]))
+        self.assertListEqual([23.4, 23.5, 23.6], list(det.pmts.pos[16]))
+
+    def test_detx_v1_is_the_same_ascii(self):
+        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v1.detx'))
+        with open(join(TEST_DATA_DIR, 'detx_v1.detx'), 'r') as fobj:
+            assert fobj.read() == det.ascii
+
     def test_detx_format_version_2(self):
         det = Detector(filename=join(TEST_DATA_DIR, 'detx_v2.detx'))
-        assert 3 == det.n_doms
+        assert 2 == det.n_dus
+        assert 6 == det.n_doms
         assert 3 == det.n_pmts_per_dom
         assert 256500.0 == det.utm_info.easting
         assert 4743000.0 == det.utm_info.northing
@@ -266,6 +282,7 @@ class TestDetector(TestCase):
         assert 'v2' == det.version
         self.assertListEqual([1.1, 1.2, 1.3], list(det.pmts.pos[0]))
         self.assertListEqual([3.4, 3.5, 3.6], list(det.pmts.pos[7]))
+        self.assertListEqual([23.4, 23.5, 23.6], list(det.pmts.pos[16]))
 
     def test_detx_v2_is_the_same_ascii(self):
         det = Detector(filename=join(TEST_DATA_DIR, 'detx_v2.detx'))
@@ -274,7 +291,8 @@ class TestDetector(TestCase):
 
     def test_detx_format_version_3(self):
         det = Detector(filename=join(TEST_DATA_DIR, 'detx_v3.detx'))
-        assert 3 == det.n_doms
+        assert 2 == det.n_dus
+        assert 6 == det.n_doms
         assert 3 == det.n_pmts_per_dom
         assert 256500.0 == det.utm_info.easting
         assert 4743000.0 == det.utm_info.northing
@@ -286,6 +304,11 @@ class TestDetector(TestCase):
         assert 'v3' == det.version
         self.assertListEqual([1.1, 1.2, 1.3], list(det.pmts.pos[0]))
         self.assertListEqual([3.4, 3.5, 3.6], list(det.pmts.pos[7]))
+        self.assertListEqual([23.4, 23.5, 23.6], list(det.pmts.pos[16]))
+
+    def test_detector_repr(self):
+        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v3.detx'))
+        assert "Detector id: '23', n_doms: 6, dus: [1, 2]" == repr(det)
 
     def test_detx_format_comments(self):
         det = Detector(filename=join(TEST_DATA_DIR, 'detx_v1.detx'))
