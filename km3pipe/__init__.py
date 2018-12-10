@@ -16,7 +16,7 @@ if not __KM3PIPE_SETUP__:
     from . import logger    # noqa
     from .core import (Pipeline, Module, Pump, Blob, Run)    # noqa
     from . import core    # noqa
-    from .dataclasses import Table    # noqa
+    from .dataclasses import Table, NDArray    # noqa
     from . import dataclasses    # noqa
     from . import calib    # noqa
     from . import cmd    # noqa
