@@ -104,7 +104,12 @@ class Detector(object):
     def _readline(self, ignore_comments=True):
         """The next line of the DETX file, optionally ignores comments"""
         while True:
-            line = self._det_file.readline().strip()
+            line = self._det_file.readline()
+            if line == '':
+                return line    # To conform the EOF behaviour of .readline()
+            line = line.strip()
+            if line == '':
+                continue    # white-space-only line
             if line.startswith('#'):
                 if not ignore_comments:
                     return line
