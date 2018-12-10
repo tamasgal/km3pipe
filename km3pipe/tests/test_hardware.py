@@ -310,6 +310,23 @@ class TestDetector(TestCase):
         det = Detector(filename=join(TEST_DATA_DIR, 'detx_v3.detx'))
         assert "Detector id: '23', n_doms: 6, dus: [1, 2]" == repr(det)
 
+    def test_detx_format_version_3_with_whitespace(self):
+        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v3_whitespace.detx'))
+        assert 2 == det.n_dus
+        assert 6 == det.n_doms
+        assert 3 == det.n_pmts_per_dom
+        assert 256500.0 == det.utm_info.easting
+        assert 4743000.0 == det.utm_info.northing
+        assert 'WGS84' == det.utm_info.ellipsoid
+        assert '32N' == det.utm_info.grid
+        assert -2425.0 == det.utm_info.z
+        assert 1500000000.1 == det.valid_from
+        assert 9999999999.0 == det.valid_until
+        assert 'v3' == det.version
+        self.assertListEqual([1.1, 1.2, 1.3], list(det.pmts.pos[0]))
+        self.assertListEqual([3.4, 3.5, 3.6], list(det.pmts.pos[7]))
+        self.assertListEqual([23.4, 23.5, 23.6], list(det.pmts.pos[16]))
+
     def test_detx_format_comments(self):
         det = Detector(filename=join(TEST_DATA_DIR, 'detx_v1.detx'))
         assert len(det.comments) == 0
