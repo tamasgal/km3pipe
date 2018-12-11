@@ -606,9 +606,8 @@ class HDF5Pump(Pump):
             self._set_next_file()
         fname = self.current_file
         h5file = self.h5file
-        evt_ids = self.group_ids[fname]
         local_index = self._translate_index(fname, index)
-        group_id = evt_ids[local_index]
+        group_id = self.group_ids[fname][local_index]
         if self.cut_masks is not None:
             self.log.debug('Cut masks found, applying...')
             mask = self.cut_masks[fname]
@@ -619,18 +618,26 @@ class HDF5Pump(Pump):
         # skip groups with separate columns
         # and deal with them later
         # this should be solved using hdf5 attributes in near future
-        split_locs = []
+        split_table_locs = []
+        ndarray_locs = []
         for tab in h5file.walk_nodes(classname="Table"):
             h5loc = tab._v_pathname
             loc, tabname = os.path.split(h5loc)
-            if loc in split_locs:
+            if loc in split_table_locs:
                 self.log.info("get_blob: '%s' is noted, skip..." % h5loc)
                 continue
             if tabname == "_indices":
                 self.log.debug("get_blob: found index table '%s'" % h5loc)
-                split_locs.append(loc)
-                self.indices[loc] = h5file.get_node(loc + '/' + '_indices')
+                split_table_locs.append(loc)
+                self.indices[loc] = h5file.get_node(h5loc)
                 continue
+            if tabname.endswith("_indices"):
+                self.log.debug(
+                    "get_blob: found index table '%s' for NDArray" % h5loc
+                )
+                ndarr_loc = h5loc.replace("_indices", '')
+                ndarray_locs.append(ndarr_loc)
+                self.indices[ndarr_loc] = h5file.get_node(h5loc)
             tabname = camelise(tabname)
 
             index_column = None
@@ -682,7 +689,7 @@ class HDF5Pump(Pump):
         # skipped locs are now column wise datasets (usually hits)
         # currently hardcoded, in future using hdf5 attributes
         # to get the right constructor
-        for loc in split_locs:
+        for loc in split_table_locs:
             # if some events are missing (group_id not continuous),
             # this does not work as intended
             # idx, n_items = self.indices[loc][group_id]
@@ -700,6 +707,9 @@ class HDF5Pump(Pump):
         if fname in self.headers:
             header = self.headers[fname]
             blob['Header'] = header
+
+        for ndarr_loc in ndarray_locs:
+            self.log.warning("Reading %s" % ndarr_loc)
 
         return blob
 
