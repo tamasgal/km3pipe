@@ -137,6 +137,22 @@ class HDF5Header(object):
         return cls(data)
 
 
+class HDF5IndexTable(object):
+    def __init__(self, h5loc):
+        self.h5loc = h5loc
+        self._data = defaultdict(list)
+        self._index = 0
+
+    def append(self, n_items):
+        self._data['indices'].append(self._index)
+        self._data['n_items'].append(n_items)
+        self._index += n_items
+
+    @property
+    def data(self):
+        return self._data
+
+
 class HDF5Sink(Module):
     """Write KM3NeT-formatted HDF5 files, event-by-event.
 
@@ -166,7 +182,7 @@ class HDF5Sink(Module):
         self.pytab_file_args = self.get('pytab_file_args') or dict()
         self.file_mode = 'a' if self.get('append') else 'w'
         self.keep_open = self.get('keep_open')
-        self.indices = {}
+        self.indices = {}    # to store HDF5IndexTables for each h5loc
         self._singletons_written = {}
         # magic 10000: this is the default of the "expectedrows" arg
         # from the tables.File.create_table() function
@@ -228,6 +244,12 @@ class HDF5Sink(Module):
             self._ndarrays[h5loc] = ndarr
         else:
             ndarr = self._ndarrays[h5loc]
+
+        idx_table_h5loc = h5loc + '_indices'
+        if idx_table_h5loc not in self.indices:
+            self.indices[idx_table_h5loc] = HDF5IndexTable(idx_table_h5loc)
+        idx_tab = self.indices[idx_table_h5loc]
+        idx_tab.append(len(arr))
 
         ndarr.append(arr)
 
@@ -303,15 +325,9 @@ class HDF5Sink(Module):
 
         # create index table
         if where not in self.indices:
-            self.indices[where] = {}
-            self.indices[where]["index"] = 0
-            self.indices[where]["indices"] = []
-            self.indices[where]["n_items"] = []
-        d = self.indices[where]
-        n_items = len(obj)
-        d["indices"].append(d["index"])
-        d["n_items"].append(n_items)
-        d["index"] += n_items
+            self.indices[where] = HDF5IndexTable(where + '/_indices')
+        idx_tab = self.indices[where]
+        idx_tab.append(len(data))
 
     def _process_entry(self, key, entry):
         self.log.debug("Inspecting {}".format(key))
@@ -404,12 +420,13 @@ class HDF5Sink(Module):
         self.h5file.root._v_attrs.jpp = np.string_(get_jpp_revision())
         self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
         self.log.info("Adding index tables.")
-        for where, data in self.indices.items():
-            h5loc = where + "/_indices"
+        for where, idx_tab in self.indices.items():
+            self.log.debug("Creating index table for '%s'" % where)
+            h5loc = idx_tab.h5loc
             self.log.info("  -> {0}".format(h5loc))
             indices = Table({
-                "index": data["indices"],
-                "n_items": data["n_items"]
+                "index": idx_tab.data["indices"],
+                "n_items": idx_tab.data["n_items"]
             },
                             h5loc=h5loc)
             self._write_table(
@@ -638,6 +655,7 @@ class HDF5Pump(Pump):
                 ndarr_loc = h5loc.replace("_indices", '')
                 ndarray_locs.append(ndarr_loc)
                 self.indices[ndarr_loc] = h5file.get_node(h5loc)
+                continue
             tabname = camelise(tabname)
 
             index_column = None
@@ -710,6 +728,14 @@ class HDF5Pump(Pump):
 
         for ndarr_loc in ndarray_locs:
             self.log.warning("Reading %s" % ndarr_loc)
+            idx = self.indices[ndarr_loc].col('index')[local_index]
+            n_items = self.indices[ndarr_loc].col('n_items')[local_index]
+            end = idx + n_items
+            ndarr = h5file.get_node(ndarr_loc)
+            ndarr_name = camelise(ndarr_loc.split('/')[-1])
+            blob[ndarr_name] = NDArray(
+                ndarr[idx:end], h5loc=ndarr_loc, title=ndarr.title
+            )
 
         return blob
 

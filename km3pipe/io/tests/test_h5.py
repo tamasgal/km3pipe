@@ -230,6 +230,9 @@ class TestNDArrayHandling(TestCase):
             assert 4 == foo[0, 1, 1]
             assert 'Unnamed NDArray' == foo.title
             indices = f.get_node('/misc_indices')
+            self.assertTupleEqual((0, 2), tuple(indices[0]))
+            self.assertTupleEqual((2, 2), tuple(indices[1]))
+            self.assertTupleEqual((4, 2), tuple(indices[2]))
 
         fobj.close()
 
@@ -323,40 +326,49 @@ class TestNDArrayHandling(TestCase):
 
         fobj.close()
 
-    # def test_reading_of_n_dim_arrays(self):
-    #     fobj = tempfile.NamedTemporaryFile(delete=True)
-    #     fname = fobj.name
-    #
-    #     arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
-    #
-    #     class DummyPump(Pump):
-    #         def configure(self):
-    #             self.index = 0
-    #
-    #         def process(self, blob):
-    #             blob['foo'] = NDArray(
-    #                 arr + self.index * 10, h5loc='/foo', title='Yep'
-    #             )
-    #             self.index += 1
-    #             return blob
-    #
-    #     pipe = Pipeline()
-    #     pipe.attach(DummyPump)
-    #     pipe.attach(HDF5Sink, filename=fname)
-    #     pipe.drain(3)
-    #
-    #     class Observer(Module):
-    #         def process(self, blob):
-    #             print(blob)
-    #             assert 'foo' in blob
-    #             return blob
-    #
-    #     pipe = Pipeline()
-    #     pipe.attach(HDF5Pump, filename=fname)
-    #     pipe.attach(Observer)
-    #     pipe.drain()
-    #
-    #     fobj.close()
+    def test_reading_of_n_dim_arrays(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                blob['Foo'] = NDArray(
+                    arr + self.index * 10, h5loc='/foo', title='Yep'
+                )
+                self.index += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(3)
+
+        class Observer(Module):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                assert 'Foo' in blob
+                foo = blob['Foo']
+                print(self.index)
+                assert self.index * 10 + 1 == foo[0, 0, 0]
+                assert self.index * 10 + 8 == foo[1, 1, 1]
+                assert self.index * 10 + 3 == foo[0, 1, 0]
+                assert self.index * 10 + 6 == foo[1, 0, 1]
+                self.index += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(HDF5Pump, filename=fname)
+        pipe.attach(Observer)
+        pipe.drain()
+
+        fobj.close()
 
 
 class TestH5SinkConsistency(TestCase):
