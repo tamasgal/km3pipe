@@ -16,7 +16,7 @@ import tables as tb
 
 import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
-from km3pipe.dataclasses import Table, DEFAULT_H5LOC
+from km3pipe.dataclasses import Table, NDArray, DEFAULT_H5LOC
 from km3pipe.logger import get_logger
 from km3pipe.tools import decamelise, camelise, split, istype, get_jpp_revision
 
@@ -137,6 +137,22 @@ class HDF5Header(object):
         return cls(data)
 
 
+class HDF5IndexTable(object):
+    def __init__(self, h5loc):
+        self.h5loc = h5loc
+        self._data = defaultdict(list)
+        self._index = 0
+
+    def append(self, n_items):
+        self._data['indices'].append(self._index)
+        self._data['n_items'].append(n_items)
+        self._index += n_items
+
+    @property
+    def data(self):
+        return self._data
+
+
 class HDF5Sink(Module):
     """Write KM3NeT-formatted HDF5 files, event-by-event.
 
@@ -166,7 +182,7 @@ class HDF5Sink(Module):
         self.pytab_file_args = self.get('pytab_file_args') or dict()
         self.file_mode = 'a' if self.get('append') else 'w'
         self.keep_open = self.get('keep_open')
-        self.indices = {}
+        self.indices = {}    # to store HDF5IndexTables for each h5loc
         self._singletons_written = {}
         # magic 10000: this is the default of the "expectedrows" arg
         # from the tables.File.create_table() function
@@ -190,6 +206,7 @@ class HDF5Sink(Module):
             complevel=5, shuffle=True, fletcher32=True, complib='zlib'
         )
         self._tables = OrderedDict()
+        self._ndarrays = OrderedDict()
 
     def _to_array(self, data, name=None):
         if data is None:
@@ -210,7 +227,33 @@ class HDF5Sink(Module):
             data = Table.from_dataframe(data)
         return data
 
-    def _write_array(self, h5loc, arr, title):
+    def _write_ndarray(self, arr):
+        h5loc = arr.h5loc
+        title = arr.title
+        if h5loc not in self._ndarrays:
+            loc, tabname = os.path.split(h5loc)
+            ndarr = self.h5file.create_earray(
+                loc,
+                tabname,
+                tb.Atom.from_dtype(arr.dtype),
+                (0, ) + arr.shape[1:],
+                title=title,
+                filters=self.filters,
+                createparents=True,
+            )
+            self._ndarrays[h5loc] = ndarr
+        else:
+            ndarr = self._ndarrays[h5loc]
+
+        idx_table_h5loc = h5loc + '_indices'
+        if idx_table_h5loc not in self.indices:
+            self.indices[idx_table_h5loc] = HDF5IndexTable(idx_table_h5loc)
+        idx_tab = self.indices[idx_table_h5loc]
+        idx_tab.append(len(arr))
+
+        ndarr.append(arr)
+
+    def _write_table(self, h5loc, arr, title):
         level = len(h5loc.split('/'))
 
         if h5loc not in self._tables:
@@ -282,15 +325,9 @@ class HDF5Sink(Module):
 
         # create index table
         if where not in self.indices:
-            self.indices[where] = {}
-            self.indices[where]["index"] = 0
-            self.indices[where]["indices"] = []
-            self.indices[where]["n_items"] = []
-        d = self.indices[where]
-        n_items = len(obj)
-        d["indices"].append(d["index"])
-        d["n_items"].append(n_items)
-        d["index"] += n_items
+            self.indices[where] = HDF5IndexTable(where + '/_indices')
+        idx_tab = self.indices[where]
+        idx_tab.append(len(data))
 
     def _process_entry(self, key, entry):
         self.log.debug("Inspecting {}".format(key))
@@ -307,6 +344,9 @@ class HDF5Sink(Module):
         if data is None or not hasattr(data, 'dtype'):
             self.log.debug("Conversion failed. moving on...")
             return
+        if isinstance(data, NDArray):
+            self._write_ndarray(data)
+            return data
         try:
             self.log.debug("Looking for h5loc...")
             h5loc = entry.h5loc
@@ -341,7 +381,7 @@ class HDF5Sink(Module):
             self._write_separate_columns(h5loc, entry, title=title)
         else:
             self.log.debug("Writing into single Table...")
-            self._write_array(h5loc, data, title=title)
+            self._write_table(h5loc, data, title=title)
 
         if hasattr(entry, 'h5singleton') and entry.h5singleton:
             self._singletons_written[entry.h5loc] = True
@@ -380,15 +420,16 @@ class HDF5Sink(Module):
         self.h5file.root._v_attrs.jpp = np.string_(get_jpp_revision())
         self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
         self.log.info("Adding index tables.")
-        for where, data in self.indices.items():
-            h5loc = where + "/_indices"
+        for where, idx_tab in self.indices.items():
+            self.log.debug("Creating index table for '%s'" % where)
+            h5loc = idx_tab.h5loc
             self.log.info("  -> {0}".format(h5loc))
             indices = Table({
-                "index": data["indices"],
-                "n_items": data["n_items"]
+                "index": idx_tab.data["indices"],
+                "n_items": idx_tab.data["n_items"]
             },
                             h5loc=h5loc)
-            self._write_array(
+            self._write_table(
                 h5loc,
                 self._to_array(indices),
                 title='Indices',
@@ -582,9 +623,8 @@ class HDF5Pump(Pump):
             self._set_next_file()
         fname = self.current_file
         h5file = self.h5file
-        evt_ids = self.group_ids[fname]
         local_index = self._translate_index(fname, index)
-        group_id = evt_ids[local_index]
+        group_id = self.group_ids[fname][local_index]
         if self.cut_masks is not None:
             self.log.debug('Cut masks found, applying...')
             mask = self.cut_masks[fname]
@@ -595,17 +635,26 @@ class HDF5Pump(Pump):
         # skip groups with separate columns
         # and deal with them later
         # this should be solved using hdf5 attributes in near future
-        split_locs = []
+        split_table_locs = []
+        ndarray_locs = []
         for tab in h5file.walk_nodes(classname="Table"):
             h5loc = tab._v_pathname
             loc, tabname = os.path.split(h5loc)
-            if loc in split_locs:
+            if loc in split_table_locs:
                 self.log.info("get_blob: '%s' is noted, skip..." % h5loc)
                 continue
             if tabname == "_indices":
                 self.log.debug("get_blob: found index table '%s'" % h5loc)
-                split_locs.append(loc)
-                self.indices[loc] = h5file.get_node(loc + '/' + '_indices')
+                split_table_locs.append(loc)
+                self.indices[loc] = h5file.get_node(h5loc)
+                continue
+            if tabname.endswith("_indices"):
+                self.log.debug(
+                    "get_blob: found index table '%s' for NDArray" % h5loc
+                )
+                ndarr_loc = h5loc.replace("_indices", '')
+                ndarray_locs.append(ndarr_loc)
+                self.indices[ndarr_loc] = h5file.get_node(h5loc)
                 continue
             tabname = camelise(tabname)
 
@@ -658,7 +707,7 @@ class HDF5Pump(Pump):
         # skipped locs are now column wise datasets (usually hits)
         # currently hardcoded, in future using hdf5 attributes
         # to get the right constructor
-        for loc in split_locs:
+        for loc in split_table_locs:
             # if some events are missing (group_id not continuous),
             # this does not work as intended
             # idx, n_items = self.indices[loc][group_id]
@@ -676,6 +725,17 @@ class HDF5Pump(Pump):
         if fname in self.headers:
             header = self.headers[fname]
             blob['Header'] = header
+
+        for ndarr_loc in ndarray_locs:
+            self.log.warning("Reading %s" % ndarr_loc)
+            idx = self.indices[ndarr_loc].col('index')[local_index]
+            n_items = self.indices[ndarr_loc].col('n_items')[local_index]
+            end = idx + n_items
+            ndarr = h5file.get_node(ndarr_loc)
+            ndarr_name = camelise(ndarr_loc.split('/')[-1])
+            blob[ndarr_name] = NDArray(
+                ndarr[idx:end], h5loc=ndarr_loc, title=ndarr.title
+            )
 
         return blob
 

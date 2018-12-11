@@ -8,7 +8,7 @@ import numpy as np
 import tables as tb
 
 from km3pipe import Blob, Module, Pipeline, Pump, version
-from km3pipe.dataclasses import Table
+from km3pipe.dataclasses import Table, NDArray
 from km3pipe.io.hdf5 import (
     HDF5Pump, HDF5Sink, HDF5Header, convert_header_dict_to_table,
     FORMAT_VERSION
@@ -203,6 +203,170 @@ class TestH5Sink(TestCase):
             assert version == h5file.root._v_attrs.km3pipe.decode()
             assert tb.__version__ == h5file.root._v_attrs.pytables.decode()
             assert FORMAT_VERSION == h5file.root._v_attrs.format_version
+
+        fobj.close()
+
+
+class TestNDArrayHandling(TestCase):
+    def test_writing_of_n_dim_arrays_with_defaults(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+
+        class DummyPump(Pump):
+            def process(self, blob):
+                blob['foo'] = NDArray(arr)
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(3)
+
+        with tb.File(fname) as f:
+            foo = f.get_node('/misc')
+            assert 3 == foo[0, 1, 0]
+            assert 4 == foo[0, 1, 1]
+            assert 'Unnamed NDArray' == foo.title
+            indices = f.get_node('/misc_indices')
+            self.assertTupleEqual((0, 2), tuple(indices[0]))
+            self.assertTupleEqual((2, 2), tuple(indices[1]))
+            self.assertTupleEqual((4, 2), tuple(indices[2]))
+
+        fobj.close()
+
+    def test_writing_of_n_dim_arrays(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                blob['foo'] = NDArray(
+                    arr + self.index * 10, h5loc='/foo', title='Yep'
+                )
+                self.index += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(3)
+
+        with tb.File(fname) as f:
+            foo = f.get_node("/foo")
+            assert 3 == foo[0, 1, 0]
+            assert 4 == foo[0, 1, 1]
+            assert "Yep" == foo.title
+
+        fobj.close()
+
+    def test_writing_of_n_dim_arrays_in_nested_group(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                blob['foo'] = NDArray(
+                    arr + self.index * 10, h5loc='/foo/bar/baz'
+                )
+                self.index += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(3)
+
+        with tb.File(fname) as f:
+            foo = f.get_node("/foo/bar/baz")
+            print(foo)
+            assert 3 == foo[0, 1, 0]
+            assert 4 == foo[0, 1, 1]
+
+        fobj.close()
+
+    def test_writing_of_n_dim_arrays(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                blob['foo'] = NDArray(
+                    arr + self.index * 10, h5loc='/foo', title='Yep'
+                )
+                self.index += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(3)
+
+        with tb.File(fname) as f:
+            foo = f.get_node("/foo")
+            assert 3 == foo[0, 1, 0]
+            assert 4 == foo[0, 1, 1]
+            assert "Yep" == foo.title
+
+        fobj.close()
+
+    def test_reading_of_n_dim_arrays(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                blob['Foo'] = NDArray(
+                    arr + self.index * 10, h5loc='/foo', title='Yep'
+                )
+                self.index += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(3)
+
+        class Observer(Module):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                assert 'Foo' in blob
+                foo = blob['Foo']
+                print(self.index)
+                assert self.index * 10 + 1 == foo[0, 0, 0]
+                assert self.index * 10 + 8 == foo[1, 1, 1]
+                assert self.index * 10 + 3 == foo[0, 1, 0]
+                assert self.index * 10 + 6 == foo[1, 0, 1]
+                self.index += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(HDF5Pump, filename=fname)
+        pipe.attach(Observer)
+        pipe.drain()
 
         fobj.close()
 

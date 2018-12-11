@@ -12,7 +12,7 @@ import pytest
 
 from km3pipe.testing import TestCase, skip    # noqa
 from km3pipe.dataclasses import (
-    Table, Vec3, inflate_dtype, has_structured_dt, is_structured,
+    Table, NDArray, Vec3, inflate_dtype, has_structured_dt, is_structured,
     DEFAULT_H5LOC, DEFAULT_NAME, DEFAULT_SPLIT
 )
 
@@ -1073,6 +1073,21 @@ class TestTableFancyAttributes(TestCase):
         with pytest.raises(KeyError):
             triggered_hits = hits.triggered_rows
             assert triggered_hits is not None
+
+
+class TestNDArray(TestCase):
+    def test_init(self):
+        arr = np.random.random((2, 3, 4))
+        ndarr = NDArray(arr)
+
+    def test_init_array(self):
+        arr = np.random.random((2, 3, 4))
+        arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+        ndarr = NDArray(arr)
+        assert 1 == ndarr[0, 0, 0]
+        assert 6 == ndarr[1, 0, 1]
+        assert 7 == ndarr[1, 1, 0]
+        assert "/misc" == ndarr.h5loc
 
 
 class TestVec3(TestCase):
