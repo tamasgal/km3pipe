@@ -337,54 +337,34 @@ class HDF5Sink(Module):
                 entry.h5loc
             )
             return
-        self.log.debug("Converting to numpy array...")
-        data = self._to_array(entry, name=key)
-        if data is None or not hasattr(data, 'dtype'):
-            self.log.debug("Conversion failed. moving on...")
+        if not hasattr(entry, 'h5loc'):
+            self.log.debug("Ignoring '%s': no h5loc attribute" % key)
             return
-        if isinstance(data, NDArray):
-            self._write_ndarray(data)
-            return data
-        try:
-            self.log.debug("Looking for h5loc...")
-            h5loc = entry.h5loc
-        except AttributeError:
-            self.log.debug(
-                "h5loc not found. setting to '{}'...".format(DEFAULT_H5LOC)
-            )
-            h5loc = DEFAULT_H5LOC
-        if data.dtype.names is None:
-            self.log.debug(
-                "Array has no named dtype. "
-                "using blob key as h5 column name"
-            )
-            dt = np.dtype((data.dtype, [(key, data.dtype)]))
-            data = data.view(dt)
-        # where = os.path.join(h5loc, tabname)
+        if isinstance(entry, NDArray):
+            self._write_ndarray(entry)
+            return entry
         try:
             title = entry.name
         except AttributeError:
             title = key
 
-        if isinstance(data, Table) and not data.h5singleton:
-            if 'group_id' not in data:
-                data = data.append_columns('group_id', self.index)
+        if isinstance(entry, Table) and not entry.h5singleton:
+            if 'group_id' not in entry:
+                entry = entry.append_columns('group_id', self.index)
 
-        # assert 'group_id' in data.dtype.names
-
-        self.log.debug("h5l: '{}', title '{}'".format(h5loc, title))
+        self.log.debug("h5l: '{}', title '{}'".format(entry.h5loc, title))
 
         if hasattr(entry, 'split_h5') and entry.split_h5:
             self.log.debug("Writing into separate columns...")
-            self._write_separate_columns(h5loc, entry, title=title)
+            self._write_separate_columns(entry.h5loc, entry, title=title)
         else:
             self.log.debug("Writing into single Table...")
-            self._write_table(h5loc, data, title=title)
+            self._write_table(entry.h5loc, entry, title=title)
 
         if hasattr(entry, 'h5singleton') and entry.h5singleton:
             self._singletons_written[entry.h5loc] = True
 
-        return data
+        return entry
 
     def process(self, blob):
         written_blob = Blob()
@@ -427,11 +407,7 @@ class HDF5Sink(Module):
                 "n_items": idx_tab.data["n_items"]
             },
                             h5loc=h5loc)
-            self._write_table(
-                h5loc,
-                self._to_array(indices),
-                title='Indices',
-            )
+            self._write_table(h5loc, indices, title='Indices')
         self.log.info(
             "Creating pytables index tables. "
             "This may take a few minutes..."

@@ -139,6 +139,9 @@ class TestH5Pump(TestCase):
         p.attach(Printer)
         p.drain()
 
+    def test_reading_multiple_files(self):
+        pass
+
 
 class TestH5Sink(TestCase):
     def setUp(self):
@@ -164,27 +167,6 @@ class TestH5Sink(TestCase):
         p.attach(HDF5Pump, filename=self.fname)
         p.attach(HDF5Sink, h5file=self.out)
         p.drain()
-
-    def test_scalars(self):
-        out = tb.open_file(
-            'foobar_scalar',
-            "a",
-            driver="H5FD_CORE",
-            driver_core_backing_store=0
-        )
-
-        def pu(blob):
-            return {'foo': 42.0}
-
-        p = Pipeline()
-        p.attach(pu)
-        p.attach(HDF5Sink, h5file=out, keep_open=True)
-        p.drain(2)
-        node = out.root.misc
-        assert node is not None
-        assert node.cols is not None
-        assert 'foo' in set(node.cols._v_colnames)
-        out.close()
 
     def test_h5info(self):
         fobj = tempfile.NamedTemporaryFile(delete=True)
