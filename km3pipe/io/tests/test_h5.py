@@ -577,6 +577,42 @@ class TestHDF5PumpConsistency(TestCase):
         fobj.close()
 
 
+class TestHDF5Shuffle(TestCase):
+    def test_shuffle(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.count = 0
+
+            def process(self, blob):
+                blob['Tab'] = Table({'a': self.count}, h5loc='/tab')
+                self.count += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        class Observer(Module):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                assert 'Tab' in blob
+                self.index += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(HDF5Pump, filename=fname, shuffle=True)
+        pipe.attach(Observer)
+        pipe.drain()
+
+        fobj.close()
+
+
 class TestHDF5Header(TestCase):
     def setUp(self):
         # self.hdict = OrderedDict([

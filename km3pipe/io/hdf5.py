@@ -177,9 +177,9 @@ class HDF5Sink(Module):
     """
 
     def configure(self):
-        self.filename = self.get('filename') or 'dump.h5'
-        self.ext_h5file = self.get('h5file') or None
-        self.pytab_file_args = self.get('pytab_file_args') or dict()
+        self.filename = self.get('filename', default='dump.h5')
+        self.ext_h5file = self.get('h5file')
+        self.pytab_file_args = self.get('pytab_file_args', default=dict())
         self.file_mode = 'a' if self.get('append') else 'w'
         self.keep_open = self.get('keep_open')
         self.indices = {}    # to store HDF5IndexTables for each h5loc
@@ -466,16 +466,19 @@ class HDF5Pump(Pump):
         H5 Node path to a boolean cut mask. If specified, use the boolean array
         found at this node as a mask. ``False`` means "skip this event".
         Example: ``cut_mask="/pid/survives_precut"``
+    shuffle: bool, optional [default: False]
+        Shuffle the group_ids, so that the blobs are mixed up.
     """
 
     def configure(self):
-        self.filename = self.get('filename') or None
-        self.filenames = self.get('filenames') or []
-        self.skip_version_check = bool(self.get('skip_version_check')) or False
+        self.filename = self.get('filename')
+        self.filenames = self.get('filenames', default=[])
+        self.skip_version_check = self.get('skip_version_check', default=False)
         self.verbose = bool(self.get('verbose'))
         self.ignore_hits = bool(self.get('ignore_hits'))
-        self.cut_mask_node = self.get('cut_mask') or None
+        self.cut_mask_node = self.get('cut_mask')
         self.cut_masks = defaultdict(list)
+        self.shufle = self.get('shuffle', default=False)
         self.indices = {}
         self._singletons = {}
         if not self.filename and not self.filenames:
