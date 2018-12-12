@@ -191,9 +191,7 @@ class HDF5Sink(Module):
         self.n_rows_expected = self.get('n_rows_expected') or 10000
         self.index = 0
 
-        if self.filename != 'dump.h5' and self.ext_h5file is not None:
-            raise IOError("Can't specify both filename and file object!")
-        elif self.filename == 'dump.h5' and self.ext_h5file is not None:
+        if self.ext_h5file is not None:
             self.h5file = self.ext_h5file
         else:
             self.h5file = tb.open_file(
