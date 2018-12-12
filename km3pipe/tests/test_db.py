@@ -180,7 +180,7 @@ class TestCLBMap(TestCase):
         streamds_mock_obj = streamds_mock.return_value
         with open(join(TEST_DATA_DIR, 'db/clbmap.txt'), 'r') as fobj:
             streamds_mock_obj.clbmap.return_value = read_csv(fobj.read())
-        self.clbmap = CLBMap(1)
+        self.clbmap = CLBMap('a')
         streamds_mock_obj.clbmap.assert_called_with(detoid=1)
 
     @patch('km3pipe.db.StreamDS')
@@ -188,7 +188,7 @@ class TestCLBMap(TestCase):
         streamds_mock_obj = streamds_mock.return_value
         with open(join(TEST_DATA_DIR, 'db/clbmap.txt'), 'r') as fobj:
             streamds_mock_obj.clbmap.return_value = read_csv(fobj.read())
-        self.clbmap = CLBMap(1)
+        self.clbmap = CLBMap('a')
 
     def test_length(self):
         assert 57 == len(self.clbmap)
