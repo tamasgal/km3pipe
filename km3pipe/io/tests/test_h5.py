@@ -208,9 +208,8 @@ class TestNDArrayHandling(TestCase):
             assert 4 == foo[0, 1, 1]
             assert 'Unnamed NDArray' == foo.title
             indices = f.get_node('/misc_indices')
-            self.assertTupleEqual((0, 2), tuple(indices[0]))
-            self.assertTupleEqual((2, 2), tuple(indices[1]))
-            self.assertTupleEqual((4, 2), tuple(indices[2]))
+            self.assertTupleEqual((0, 2, 4), tuple(indices.cols.index[:]))
+            self.assertTupleEqual((2, 2, 2), tuple(indices.cols.n_items[:]))
 
         fobj.close()
 
