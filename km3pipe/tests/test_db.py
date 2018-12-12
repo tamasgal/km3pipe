@@ -231,3 +231,11 @@ class TestCLBMap(TestCase):
 
         for dom_id in self.clbmap.dom_id.keys():
             assert dom_id == self.clbmap.dom_id[dom_id].dom_id
+
+    def test_get_base(self):
+        assert 0 == self.clbmap.base(1).floor
+        assert 0 == self.clbmap.base(3).floor
+        assert 0 == self.clbmap.base(4).floor
+        assert 808476701 == self.clbmap.base(1).dom_id
+        assert 808981515 == self.clbmap.base(3).dom_id
+        assert 808967761 == self.clbmap.base(4).dom_id

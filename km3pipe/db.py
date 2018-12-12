@@ -852,8 +852,8 @@ class CLBMap(object):
         if isinstance(det_oid, numbers.Integral):
             self.log.warning(
                 "Det ID ('%s') provided instead of det OID "
-                "(string representation). Trying to get the OID instead..."
-                % det_oid
+                "(string representation). Trying to get the OID instead..." %
+                det_oid
             )
             db = DBManager()
             _det_oid = db.get_det_oid(det_oid)
@@ -873,6 +873,7 @@ class CLBMap(object):
 
     @property
     def upi(self):
+        """A dict of CLBs with UPI as key"""
         parameter = 'UPI'
         if parameter not in self._by:
             self._populate(by=parameter)
@@ -880,10 +881,21 @@ class CLBMap(object):
 
     @property
     def dom_id(self):
+        """A dict of CLBs with DOM ID as key"""
         parameter = 'DOMID'
         if parameter not in self._by:
             self._populate(by=parameter)
         return self._by[parameter]
+
+    def base(self, du):
+        """Return the base CLB for a given DU"""
+        parameter = 'base'
+        if parameter not in self._by:
+            self._by[parameter] = {}
+            for clb in self.upi.values():
+                if clb.floor == 0:
+                    self._by[parameter][clb.du] = clb
+        return self._by[parameter][du]
 
     def _populate(self, by):
         data = {}
