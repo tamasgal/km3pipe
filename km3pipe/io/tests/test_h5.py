@@ -158,10 +158,6 @@ class TestH5Sink(TestCase):
         self.out.close()
         self.fobj.close()
 
-    # def test_init_has_to_be_explicit(self):
-    #     with self.assertRaises(TypeError):
-    #         HDF5Sink(self.out)
-
     def test_pipe(self):
         p = Pipeline()
         p.attach(HDF5Pump, filename=self.fname)
@@ -666,6 +662,64 @@ class TestHDF5Header(TestCase):
         assert 0 == header.coord_origin.y
         assert 0 == header.coord_origin.z
         self.assertTupleEqual((0, 0, 0), header.coord_origin)
+
+    def test_multiple_files_readout(self):
+        class DummyPump(Pump):
+            def configure(self):
+                self.i = self.require('i')
+
+            def process(self, blob):
+                blob['Tab'] = Table({'a': self.i}, h5loc='tab')
+                self.i += 1
+                return blob
+
+        filenames = []
+        fobjs = []
+        for i in range(3):
+            fobj = tempfile.NamedTemporaryFile(delete=True)
+            fname = fobj.name
+            filenames.append(fname)
+            fobjs.append(fobj)
+            pipe = Pipeline()
+            pipe.attach(DummyPump, i=i)
+            pipe.attach(HDF5Sink, filename=fname)
+            pipe.drain(i + 3)
+
+        class Observer(Module):
+            def configure(self):
+                self._blob_lengths = []
+                self._a = []
+                self._group_ids = []
+                self.index = 0
+
+            def process(self, blob):
+                self._blob_lengths.append(len(blob))
+                self._a.append(blob['Tab'].a[0])
+                self._group_ids.append(blob['GroupInfo'].group_id[0])
+                self.index += 1
+                return blob
+
+            def finish(self):
+                return {
+                    'blob_lengths': self._blob_lengths,
+                    'a': self._a,
+                    'group_ids': self._group_ids
+                }
+
+        pipe = Pipeline()
+        pipe.attach(HDF5Pump, filenames=filenames)
+        pipe.attach(Observer)
+        results = pipe.drain()
+        summary = results['Observer']
+        assert 12 == len(summary['blob_lengths'])
+        assert all(x == 2 for x in summary['blob_lengths'])
+        self.assertListEqual([0, 1, 2, 1, 2, 3, 4, 2, 3, 4, 5, 6],
+                             summary['a'])
+        self.assertListEqual([0, 1, 2, 0, 1, 2, 3, 0, 1, 2, 3, 4],
+                             summary['group_ids'])
+
+        for fobj in fobjs:
+            fobj.close()
 
 
 class TestConvertHeaderDictToTable(TestCase):
