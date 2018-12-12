@@ -111,8 +111,33 @@ Don't be confused about the left column, those are the actual indices of the
 rows in the original pandas ``DataFrame``.
 
 
+CLBs
+~~~~
+
+The ``CLBMap`` class is a convenient tool to check the CLB parameters like
+UPI, floor, DU or just to find out a base for a given DU::
+
+    >>> import km3pipe as kp
+    >>> clbmap = kp.db.CLBMap("D_ORCA003")  # use the det OID
+    >>> clbmap.base(1)
+    CLB(
+        det_oid='D_ORCA003',
+        floor=0,
+        du=1,
+        serial_number=267,
+        upi='3.4.3.2/V2-2-1/2.267',
+        dom_id=808476701
+    )
+    >>> clbmap.upi['3.4.3.2/V2-2-1/2.267'].dom_id
+    808476701
+    >>> clbmap.dom_id[808959411].floor
+    5
+
 Fun with DOMs
 ~~~~~~~~~~~~~
+**Important note: the following method will be deprecated soon and replaced
+by the `CLBMap` as described in the previous subsection.**
+
 To retrieve information about DOMs, the ``DBManager`` provides a handy
 ``DOMContainer`` class, which can be access via::
 
