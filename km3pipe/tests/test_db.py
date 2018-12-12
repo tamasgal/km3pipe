@@ -176,12 +176,23 @@ class TestCLBUPI2AHRSUPI(TestCase):
 
 class TestCLBMap(TestCase):
     @patch('km3pipe.db.StreamDS')
-    def test_call_with_det_id(self, streamds_mock):
+    def test_call_with_det_oid(self, streamds_mock):
         streamds_mock_obj = streamds_mock.return_value
         with open(join(TEST_DATA_DIR, 'db/clbmap.txt'), 'r') as fobj:
             streamds_mock_obj.clbmap.return_value = read_csv(fobj.read())
         self.clbmap = CLBMap('a')
-        streamds_mock_obj.clbmap.assert_called_with(detoid=1)
+        streamds_mock_obj.clbmap.assert_called_with(detoid='a')
+
+    @patch('km3pipe.db.DBManager')
+    @patch('km3pipe.db.StreamDS')
+    def test_call_with_det_id(self, streamds_mock, dbmanager_mock):
+        streamds_mock_obj = streamds_mock.return_value
+        dbmanager_mock_obj = dbmanager_mock.return_value
+        dbmanager_mock_obj.get_det_oid.return_value = 'a'
+        with open(join(TEST_DATA_DIR, 'db/clbmap.txt'), 'r') as fobj:
+            streamds_mock_obj.clbmap.return_value = read_csv(fobj.read())
+        self.clbmap = CLBMap(1)
+        streamds_mock_obj.clbmap.assert_called_with(detoid='a')
 
     @patch('km3pipe.db.StreamDS')
     def setUp(self, streamds_mock):
