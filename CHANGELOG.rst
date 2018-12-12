@@ -6,6 +6,8 @@ Unreleased changes
   ``kp.hardware.Detector.add_comment()`` which are preserved when writing
 * DUSJ readout fixed, now every parameter is written by default (with NaNs
   if missing)
+* HDF5Sink now only writes instances of ``Table`` and ``NDArray`` to simplify
+  the implementation and avoid future bugs
 
 
 Version 8
