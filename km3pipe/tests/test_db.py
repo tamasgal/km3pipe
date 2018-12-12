@@ -206,3 +206,17 @@ class TestCLBMap(TestCase):
 
         for upi in self.clbmap.upi.keys():
             assert upi == self.clbmap.upi[upi].upi
+
+    def test_clb_by_dom_id(self):
+        assert '3.4.3.2/V2-2-1/2.570' == self.clbmap.dom_id[806487231].upi
+        assert '3.4.3.2/V2-2-1/2.100' == self.clbmap.dom_id[808964852].upi
+        assert '3.4.3.2/V2-2-1/2.121' == self.clbmap.dom_id[808982547].upi
+        assert '3.4.3.2/V2-2-1/2.94' == self.clbmap.dom_id[808961480].upi
+
+        assert 13 == self.clbmap.dom_id[806487231].floor
+        assert 3 == self.clbmap.dom_id[808964852].du
+        assert 121 == self.clbmap.dom_id[808982547].serial_number
+        assert 'D_ORCA003' == self.clbmap.dom_id[808961480].det_oid
+
+        for dom_id in self.clbmap.dom_id.keys():
+            assert dom_id == self.clbmap.dom_id[dom_id].dom_id

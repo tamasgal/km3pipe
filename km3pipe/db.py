@@ -7,6 +7,7 @@ Database utilities.
 from __future__ import absolute_import, print_function, division
 
 from datetime import datetime
+import numbers
 import ssl
 import io
 import json
@@ -847,6 +848,21 @@ class CLBMap(object):
     par_map = {'DETOID': 'det_oid', 'UPI': 'upi', 'DOMID': 'dom_id'}
 
     def __init__(self, det_oid):
+        self.log = get_logger('CLBMap')
+        if isinstance(det_oid, numbers.Integral):
+            self.log.warning(
+                "Det ID ('%s') provided instead of det OID "
+                "(string representation). Trying to get the OID instead..."
+                % det_oid
+            )
+            db = DBManager()
+            _det_oid = db.get_det_oid(det_oid)
+            if _det_oid is not None:
+                self.log.warning(
+                    "This is the det OID for det ID '%s', please use "
+                    "that in future: %s" % (det_oid, _det_oid)
+                )
+                det_oid = _det_oid
         self.det_oid = det_oid
         sds = StreamDS()
         self._data = sds.clbmap(detoid=det_oid)
@@ -858,6 +874,13 @@ class CLBMap(object):
     @property
     def upi(self):
         parameter = 'UPI'
+        if parameter not in self._by:
+            self._populate(by=parameter)
+        return self._by[parameter]
+
+    @property
+    def dom_id(self):
+        parameter = 'DOMID'
         if parameter not in self._by:
             self._populate(by=parameter)
         return self._by[parameter]
