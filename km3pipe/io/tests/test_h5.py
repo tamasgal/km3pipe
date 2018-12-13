@@ -731,6 +731,7 @@ class TestHDF5Header(TestCase):
                 self._blob_lengths.append(len(blob))
                 self._a.append(blob['Tab'].a[0])
                 self._group_ids.append(blob['GroupInfo'].group_id[0])
+                print(blob)
                 self.index += 1
                 return blob
 
@@ -747,6 +748,7 @@ class TestHDF5Header(TestCase):
         results = pipe.drain()
         summary = results['Observer']
         assert 12 == len(summary['blob_lengths'])
+        print(summary)
         assert all(x == 2 for x in summary['blob_lengths'])
         self.assertListEqual([0, 1, 2, 1, 2, 3, 4, 2, 3, 4, 5, 6],
                              summary['a'])
