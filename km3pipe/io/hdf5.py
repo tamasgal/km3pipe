@@ -471,6 +471,8 @@ class HDF5Pump(Pump):
         Shuffle the group_ids, so that the blobs are mixed up.
     shuffle_function: function, optional [default: np.random.shuffle
         The function to be used to shuffle the group IDs.
+    reset_index: bool, optional [default: False]
+        Reset the group ID - start to count the group_id by 0
     """
 
     def configure(self):
@@ -484,6 +486,7 @@ class HDF5Pump(Pump):
         self.shuffle_function = self.get(
             'shuffle_function', default=np.random.shuffle
         )
+        self.reset_index = self.get('reset_index', default=False)
 
         self.h5file = None
         self.cut_mask = None
@@ -674,9 +677,10 @@ class HDF5Pump(Pump):
                 continue
 
             self.log.debug("h5loc: '{}'".format(h5loc))
-            blob[tabname] = Table(
-                arr, h5loc=h5loc, split_h5=False, name=tabname
-            )
+            tab = Table(arr, h5loc=h5loc, split_h5=False, name=tabname)
+            if self.reset_index:
+                tab.group_id[:] = self.index
+            blob[tabname] = tab
 
         # skipped locs are now column wise datasets (usually hits)
         # currently hardcoded, in future using hdf5 attributes
@@ -706,9 +710,12 @@ class HDF5Pump(Pump):
             end = idx + n_items
             ndarr = self.h5file.get_node(ndarr_loc)
             ndarr_name = camelise(ndarr_loc.split('/')[-1])
-            blob[ndarr_name] = NDArray(
+            _ndarr = NDArray(
                 ndarr[idx:end], h5loc=ndarr_loc, title=ndarr.title
             )
+            if self.reset_index:
+                _ndarr.group_id[:] = self.index + 1
+            blob[ndarr_name] = _ndarr
 
         return blob
 
