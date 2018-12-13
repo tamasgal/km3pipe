@@ -38,13 +38,14 @@ class H5VersionError(Exception):
     pass
 
 
-def check_version(h5file, filename):
+def check_version(h5file):
     try:
         version = np.string_(h5file.root._v_attrs.format_version)
     except AttributeError:
         log.error(
             "Could not determine HDF5 format version: '%s'."
-            "You may encounter unexpected errors! Good luck..." % filename
+            "You may encounter unexpected errors! Good luck..." %
+            h5file.filename
         )
         return
     if split(version, int, np.string_('.')) < \
@@ -52,7 +53,7 @@ def check_version(h5file, filename):
         raise H5VersionError(
             "HDF5 format version {0} or newer required!\n"
             "'{1}' has HDF5 format version {2}.".format(
-                MINIMUM_FORMAT_VERSION.decode("utf-8"), filename,
+                MINIMUM_FORMAT_VERSION.decode("utf-8"), h5file.filename,
                 version.decode("utf-8")
             )
         )
@@ -475,9 +476,16 @@ class HDF5Pump(Pump):
         self.verbose = bool(self.get('verbose'))
         self.ignore_hits = bool(self.get('ignore_hits'))
         self.cut_mask_node = self.get('cut_mask') or None
-        self.cut_masks = defaultdict(list)
+
+        self.h5file = None
+        self.cut_mask = None
         self.indices = {}
         self._singletons = {}
+        self.header = None
+        self.group_ids = None
+        self._n_groups = None
+        self.index = 0
+
         if not self.filename and not self.filenames:
             raise ValueError("No filename(s) defined")
 
@@ -485,124 +493,105 @@ class HDF5Pump(Pump):
             self.filenames.append(self.filename)
 
         self.filequeue = list(self.filenames)
-        self.h5file = None
-        self._set_next_file()
 
-        self.headers = OrderedDict()
-        self.group_ids = OrderedDict()
-        self._n_each = OrderedDict()
-        for fn in self.filenames:
-            self._inspect_infile(fn)
-        self._n_events = np.sum([v for k, v in self._n_each.items()])
-        self.minmax = OrderedDict()
-        n_read = 0
-        for fn, n in self._n_each.items():
-            min = n_read
-            max = n_read + n - 1
-            n_read += n
-            self.minmax[fn] = (min, max)
-        self.index = None
-        self._reset_index()
+        self._load_next_file()
 
-    def _inspect_infile(self, fn):
-        # Open all files before reading any events
-        # So we can raise version mismatches etc before reading anything
-        self.log.debug(fn)
-        if os.path.isfile(fn):
-            if not self.skip_version_check:
-                with tb.open_file(fn, 'r') as h5file:
-                    check_version(h5file, fn)
-        else:
-            raise IOError("No such file or directory: '{0}'".format(fn))
-
-        self._read_group_info(fn)
-
+    def _load_next_file(self):
+        self._reset_state()
+        self._open_next_file()
+        if not self.skip_version_check:
+            check_version(self.h5file)
+        self._read_group_info()
         if self.cut_mask_node is not None:
-            if not self.cut_mask_node.startswith('/'):
-                self.cut_mask_node = '/' + self.cut_mask_node
-            with tb.open_file(fn, 'r') as h5file:
-                self.cut_masks[fn] = h5file.get_node(self.cut_mask_node)[:]
-            self.log.debug(self.cut_masks[fn])
-            mask = self.cut_masks[fn]
-            if not mask.shape[0] == self.group_ids[fn].shape[0]:
-                raise ValueError("Cut mask length differs from event ids!")
-        else:
-            self.cut_masks = None
+            self._read_cut_mask()
 
-    def _read_group_info(self, fn):
-        with tb.open_file(fn, 'r') as h5file:
-            if '/event_info' not in h5file and '/group_info' not in h5file:
-                self.log.critical(
-                    "Missing /event_info or /group_info "
-                    "in '%s', aborting..." % fn
+    def _reset_state(self):
+        self._close_h5file()
+        self.h5file = None
+        self.cut_mask = None
+        self.indices = {}
+        self._singletons = {}
+        self.header = None
+        self.group_ids = None
+        self._n_groups = None
+        self.index = 0
+
+    def _read_cut_mask(self):
+        if not self.cut_mask_node.startswith('/'):
+            self.cut_mask_node = '/' + self.cut_mask_node
+        self.cut_mask = self.h5file.get_node(self.cut_mask_node)[:]
+        mask = self.cut_mask
+        if not mask.shape[0] == self.group_ids.shape[0]:
+            raise ValueError("Cut mask length differs from event ids!")
+
+    def _read_group_info(self):
+        h5file = self.h5file
+        if '/event_info' not in h5file and '/group_info' not in h5file:
+            self.log.critical(
+                "Missing /event_info or /group_info "
+                "in '%s', aborting..." % h5file.filename
+            )
+            raise SystemExit
+        elif '/group_info' in h5file:
+            self.log.info("Reading group information from '/group_info'.")
+            group_info = h5file.get_node('/', 'group_info')
+            self.group_ids = group_info.cols.group_id[:]
+            self._n_groups = len(self.group_ids)
+        elif '/event_info' in h5file:
+            self.log.deprecation(
+                "Reading group information from '/event_info'."
+            )
+            event_info = h5file.get_node('/', 'event_info')
+            try:
+                self.group_ids = event_info.cols.group_id[:]
+            except AttributeError:
+                self.group_ids = event_info.cols.event_id[:]
+            self._n_groups = len(self.group_ids)
+        if '/raw_header' in h5file:
+            try:
+                self.header = HDF5Header.from_pytable(
+                    h5file.get_node('/raw_header')
                 )
-                raise SystemExit
-            elif '/group_info' in h5file:
-                self.log.info("Reading group information from '/group_info'.")
-                group_info = h5file.get_node('/', 'group_info')
-                self.group_ids[fn] = group_info.cols.group_id[:]
-                self._n_each[fn] = len(self.group_ids[fn])
-            elif '/event_info' in h5file:
-                self.log.deprecation(
-                    "Reading group information from '/event_info'."
-                )
-                event_info = h5file.get_node('/', 'event_info')
-                try:
-                    self.group_ids[fn] = event_info.cols.group_id[:]
-                except AttributeError:
-                    self.group_ids[fn] = event_info.cols.event_id[:]
-                self._n_each[fn] = len(self.group_ids[fn])
-            if '/raw_header' in h5file:
-                try:
-                    self.headers[fn] = HDF5Header.from_pytable(
-                        h5file.get_node('/raw_header')
-                    )
-                except TypeError:
-                    self.log.error("Could not parse the raw header, skipping!")
+            except TypeError:
+                self.log.error("Could not parse the raw header, skipping!")
 
     def process(self, blob):
         try:
             blob = self.get_blob(self.index)
         except KeyError:
-            self._reset_index()
+            self._reset_iteration()
             raise StopIteration
         self.index += 1
         return blob
 
     def _need_next(self, index):
-        fname = self.current_file
-        min, max = self.minmax[fname]
-        return (index < min) or (index > max)
+        if index >= self._n_groups:
+            return True
 
-    def _set_next_file(self):
+    def _open_next_file(self):
         if not self.filequeue:
-            raise IndexError('No more files available!')
+            raise StopIteration("No more files available")
         if self.h5file:
             self.h5file.close()
-        self.current_file = self.filequeue.pop(0)
-        self.h5file = tb.open_file(self.current_file, 'r')
+        self.filename = self.filequeue.pop(0)
+        self.h5file = tb.open_file(self.filename, 'r')
         if self.verbose:
-            ("Reading %s..." % self.current_file)
-
-    def _translate_index(self, fname, index):
-        min, _ = self.minmax[fname]
-        return index - min
+            ("Reading %s..." % self.filename)
+        return True
 
     def get_blob(self, index):
-        if self.index >= self._n_events:
-            self._reset_index()
-            raise StopIteration
+        if self.index >= self._n_groups:
+            self._reset_iteration()
+            if self.filenames:
+                self._load_next_file()
+            else:
+                raise KeyError
         blob = Blob()
-        if self._need_next(index):
-            self._set_next_file()
-        fname = self.current_file
-        h5file = self.h5file
-        local_index = self._translate_index(fname, index)
-        group_id = self.group_ids[fname][local_index]
-        if self.cut_masks is not None:
+        group_id = self.group_ids[self.index]
+        if self.cut_mask is not None:
             self.log.debug('Cut masks found, applying...')
-            mask = self.cut_masks[fname]
-            if not mask[local_index]:
+            mask = self.cut_mask
+            if not mask[self.index]:
                 self.log.info('Cut mask blacklists this event, skipping...')
                 return
 
@@ -611,7 +600,7 @@ class HDF5Pump(Pump):
         # this should be solved using hdf5 attributes in near future
         split_table_locs = []
         ndarray_locs = []
-        for tab in h5file.walk_nodes(classname="Table"):
+        for tab in self.h5file.walk_nodes(classname="Table"):
             h5loc = tab._v_pathname
             loc, tabname = os.path.split(h5loc)
             if loc in split_table_locs:
@@ -620,7 +609,7 @@ class HDF5Pump(Pump):
             if tabname == "_indices":
                 self.log.debug("get_blob: found index table '%s'" % h5loc)
                 split_table_locs.append(loc)
-                self.indices[loc] = h5file.get_node(h5loc)
+                self.indices[loc] = self.h5file.get_node(h5loc)
                 continue
             if tabname.endswith("_indices"):
                 self.log.debug(
@@ -628,7 +617,7 @@ class HDF5Pump(Pump):
                 )
                 ndarr_loc = h5loc.replace("_indices", '')
                 ndarray_locs.append(ndarr_loc)
-                self.indices[ndarr_loc] = h5file.get_node(h5loc)
+                self.indices[ndarr_loc] = self.h5file.get_node(h5loc)
                 continue
             tabname = camelise(tabname)
 
@@ -685,27 +674,26 @@ class HDF5Pump(Pump):
             # if some events are missing (group_id not continuous),
             # this does not work as intended
             # idx, n_items = self.indices[loc][group_id]
-            idx = self.indices[loc].col('index')[local_index]
-            n_items = self.indices[loc].col('n_items')[local_index]
+            idx = self.indices[loc].col('index')[self.index]
+            n_items = self.indices[loc].col('n_items')[self.index]
             end = idx + n_items
-            node = h5file.get_node(loc)
+            node = self.h5file.get_node(loc)
             columns = (c for c in node._v_children if c != '_indices')
             data = {}
-            for column in columns:
-                data[column] = h5file.get_node(loc + '/' + column)[idx:end]
+            for col in columns:
+                data[col] = self.h5file.get_node(loc + '/' + col)[idx:end]
             tabname = camelise(loc.split('/')[-1])
             blob[tabname] = Table(data, h5loc=loc, split_h5=True, name=tabname)
 
-        if fname in self.headers:
-            header = self.headers[fname]
-            blob['Header'] = header
+        if self.header is not None:
+            blob['Header'] = self.header
 
         for ndarr_loc in ndarray_locs:
             self.log.warning("Reading %s" % ndarr_loc)
-            idx = self.indices[ndarr_loc].col('index')[local_index]
-            n_items = self.indices[ndarr_loc].col('n_items')[local_index]
+            idx = self.indices[ndarr_loc].col('index')[self.index]
+            n_items = self.indices[ndarr_loc].col('n_items')[self.index]
             end = idx + n_items
-            ndarr = h5file.get_node(ndarr_loc)
+            ndarr = self.h5file.get_node(ndarr_loc)
             ndarr_name = camelise(ndarr_loc.split('/')[-1])
             blob[ndarr_name] = NDArray(
                 ndarr[idx:end], h5loc=ndarr_loc, title=ndarr.title
@@ -713,19 +701,19 @@ class HDF5Pump(Pump):
 
         return blob
 
-    def _reset_index(self):
+    def _reset_iteration(self):
         """Reset index to default value"""
         self.index = 0
 
     def __len__(self):
-        return self._n_events
+        return self._n_groups
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        if self.index >= self._n_events:
-            self._reset_index()
+        if self.index >= self._n_groups:
+            self._reset_iteration()
             raise StopIteration
         blob = self.get_blob(self.index)
         self.index += 1
@@ -745,10 +733,14 @@ class HDF5Pump(Pump):
         for i in range(start, stop, step):
             yield self.get_blob(i)
 
-        self.current_file = None
+        self.filename = None
+
+    def _close_h5file(self):
+        if self.h5file:
+            self.h5file.close()
 
     def finish(self):
-        self.h5file.close()
+        self._close_h5file()
 
 
 class HDF5MetaData(Module):
