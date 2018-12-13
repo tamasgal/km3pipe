@@ -9,10 +9,12 @@ import numpy as np
 from numpy.testing import (assert_array_equal, assert_allclose)
 import pytest
 
-from km3pipe import Table, Blob, Pipeline
+from km3pipe import Table, Blob, Pipeline, Module
 from km3pipe.testing import TestCase
 
-from km3modules.mc import convert_mc_times_to_jte_times, MCTimeCorrector
+from km3modules.mc import (
+    convert_mc_times_to_jte_times, MCTimeCorrector, RandomState
+)
 
 __author__ = "Moritz Lotze, Michael Moser"
 __copyright__ = "Copyright 2018, Tamas Gal and the KM3NeT collaboration."
@@ -73,3 +75,23 @@ class TestMCConvert(TestCase):
         assert newblob['mc_tracks'] is not None
         assert np.allclose(newblob['mc_hits'].time, 49999810.79)
         assert np.allclose(newblob['mc_tracks'].time, 49999781)
+
+
+class TestRandomState(TestCase):
+    def test_default_random_state(self):
+        assertAlmostEqual = self.assertAlmostEqual
+
+        class Observer(Module):
+            def configure(self):
+                self.i = 0
+                self.x = [0.3745401188, 0.950714306, 0.7319939418]
+
+            def process(self, blob):
+                assertAlmostEqual(self.x[self.i], np.random.rand())
+                self.i += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(RandomState)
+        pipe.attach(Observer)
+        pipe.drain(3)
