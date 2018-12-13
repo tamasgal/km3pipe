@@ -1,10 +1,10 @@
 KM3Pipe
 =======
 
-.. image:: https://git.km3net.de/km3py/km3pipe/badges/develop/build.svg
+.. image:: https://git.km3net.de/km3py/km3pipe/badges/master/build.svg
     :target: https://git.km3net.de/km3py/km3pipe/pipelines
 
-.. image:: https://git.km3net.de/km3py/km3pipe/badges/develop/coverage.svg
+.. image:: https://git.km3net.de/km3py/km3pipe/badges/master/coverage.svg
     :target: https://km3py.pages.km3net.de/km3pipe/coverage
 
 .. image:: https://examples.pages.km3net.de/km3badges/docs-latest-brightgreen.svg
