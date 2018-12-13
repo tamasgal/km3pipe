@@ -595,19 +595,38 @@ class TestHDF5Shuffle(TestCase):
         pipe.attach(HDF5Sink, filename=fname)
         pipe.drain(5)
 
+        shuffled_group_ids = [2, 1, 0, 3, 4]
+
+        def shuffle(x):
+            for i in range(len(x)):
+                x[i] = shuffled_group_ids[i]
+
         class Observer(Module):
             def configure(self):
-                self.index = 0
+                self.group_ids = []
+                self.a = []
 
             def process(self, blob):
-                assert 'Tab' in blob
-                self.index += 1
+                group_id = blob['Tab'].group_id[0]
+                assert blob['GroupInfo'].group_id[0] == group_id
+                self.group_ids.append(blob['Tab'].group_id[0])
+                self.a.append(blob['Tab'].a[0])
                 return blob
 
+            def finish(self):
+                return {'group_ids': self.group_ids, 'a': self.a}
+
         pipe = Pipeline()
-        pipe.attach(HDF5Pump, filename=fname, shuffle=True)
+        pipe.attach(
+            HDF5Pump, filename=fname, shuffle=True, shuffle_function=shuffle
+        )
         pipe.attach(Observer)
-        pipe.drain()
+        results = pipe.drain()
+
+        self.assertListEqual(
+            results['Observer']['group_ids'], shuffled_group_ids
+        )
+        self.assertListEqual(results['Observer']['a'], shuffled_group_ids)
 
         fobj.close()
 

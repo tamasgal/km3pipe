@@ -469,6 +469,8 @@ class HDF5Pump(Pump):
         Example: ``cut_mask="/pid/survives_precut"``
     shuffle: bool, optional [default: False]
         Shuffle the group_ids, so that the blobs are mixed up.
+    shuffle_function: function, optional [default: np.random.shuffle
+        The function to be used to shuffle the group IDs.
     """
 
     def configure(self):
@@ -478,7 +480,10 @@ class HDF5Pump(Pump):
         self.verbose = bool(self.get('verbose'))
         self.ignore_hits = bool(self.get('ignore_hits'))
         self.cut_mask_node = self.get('cut_mask')
-        self.shufle = self.get('shuffle', default=False)
+        self.shuffle = self.get('shuffle', default=False)
+        self.shuffle_function = self.get(
+            'shuffle_function', default=np.random.shuffle
+        )
 
         self.h5file = None
         self.cut_mask = None
@@ -557,6 +562,8 @@ class HDF5Pump(Pump):
                 )
             except TypeError:
                 self.log.error("Could not parse the raw header, skipping!")
+        if self.shuffle:
+            self.shuffle_function(self.group_ids)
 
     def process(self, blob):
         try:
