@@ -506,6 +506,7 @@ class HDF5Pump(Pump):
             self._read_cut_mask()
 
     def _reset_state(self):
+        self._close_h5file()
         self.h5file = None
         self.cut_mask = None
         self.indices = {}
@@ -564,26 +565,28 @@ class HDF5Pump(Pump):
         return blob
 
     def _need_next(self, index):
-        if index > self._n_groups:
+        if index >= self._n_groups:
             return True
 
     def _open_next_file(self):
         if not self.filequeue:
-            raise StopIteration('No more files available!')
+            raise StopIteration("No more files available")
         if self.h5file:
             self.h5file.close()
         self.filename = self.filequeue.pop(0)
         self.h5file = tb.open_file(self.filename, 'r')
         if self.verbose:
             ("Reading %s..." % self.filename)
+        return True
 
     def get_blob(self, index):
         if self.index >= self._n_groups:
             self._reset_iteration()
-            raise StopIteration
+            if self.filenames:
+                self._load_next_file()
+            else:
+                raise KeyError
         blob = Blob()
-        if self._need_next(index):
-            self._open_next_file()
         group_id = self.group_ids[self.index]
         if self.cut_mask is not None:
             self.log.debug('Cut masks found, applying...')
@@ -682,7 +685,8 @@ class HDF5Pump(Pump):
             tabname = camelise(loc.split('/')[-1])
             blob[tabname] = Table(data, h5loc=loc, split_h5=True, name=tabname)
 
-        blob['Header'] = self.header
+        if self.header is not None:
+            blob['Header'] = self.header
 
         for ndarr_loc in ndarray_locs:
             self.log.warning("Reading %s" % ndarr_loc)
@@ -731,8 +735,12 @@ class HDF5Pump(Pump):
 
         self.filename = None
 
+    def _close_h5file(self):
+        if self.h5file:
+            self.h5file.close()
+
     def finish(self):
-        self.h5file.close()
+        self._close_h5file()
 
 
 class HDF5MetaData(Module):
