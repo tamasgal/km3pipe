@@ -6,8 +6,14 @@ Unreleased changes
   ``kp.hardware.Detector.add_comment()`` which are preserved when writing
 * DUSJ readout fixed, now every parameter is written by default (with NaNs
   if missing)
-* HDF5Sink now only writes instances of ``Table`` and ``NDArray`` to simplify
-  the implementation and avoid future bugs
+* ``HDF5Sink`` now only writes instances of ``Table`` and ``NDArray`` to
+  simplify the implementation and avoid future bugs
+* ``HDF5Sink`` now can shuffle the blobs when ``shuffle=True``, additionally
+  a ``shuffle_function`` can be defined to have more control (mutating).
+* ``km3modules.mc.RandomState`` can be used to set the global random seed
+  of numpy to be able to create reproducible pipelines
+* In ``HDF5Pump`` when reading multiple files, each file is only opened when
+  needed to avoid unneeded memory and computational overhead
 
 
 Version 8
