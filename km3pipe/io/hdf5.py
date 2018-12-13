@@ -585,6 +585,7 @@ class HDF5Pump(Pump):
             self.h5file.close()
         self.filename = self.filequeue.pop(0)
         self.h5file = tb.open_file(self.filename, 'r')
+        self.print("Opening {0}".format(self.filename))
         if self.verbose:
             ("Reading %s..." % self.filename)
         return True
@@ -659,7 +660,7 @@ class HDF5Pump(Pump):
                     continue
             else:
                 if h5loc not in self._singletons:
-                    self.print(
+                    log.info(
                         "Caching H5 singleton: {} ({})".format(tabname, h5loc)
                     )
                     self._singletons[h5loc] = Table(
