@@ -5,6 +5,9 @@ Unreleased changes
 
 Version 8
 ---------
+8.8.1 / 2018-12-13
+~~~~~~~~~~~~~~~~~~
+* Minor changes in Dockerfile and docs
 
 8.8.0 / 2018-12-13
 ~~~~~~~~~~~~~~~~~~
