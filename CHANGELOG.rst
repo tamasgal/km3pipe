@@ -1,6 +1,13 @@
 Unreleased changes
 ------------------
 
+
+
+Version 8
+---------
+
+8.8.0 / 2018-12-13
+~~~~~~~~~~~~~~~~~~
 * ``io.pandas`` has been removed
 * DETX v3 supported (including the ability to
   ``kp.hardware.Detector.add_comment()`` which are preserved when writing
@@ -14,10 +21,6 @@ Unreleased changes
   of numpy to be able to create reproducible pipelines
 * In ``HDF5Pump`` when reading multiple files, each file is only opened when
   needed to avoid unneeded memory and computational overhead
-
-
-Version 8
----------
 
 8.6.0 / 2018-12-05
 ~~~~~~~~~~~~~~~~~~
