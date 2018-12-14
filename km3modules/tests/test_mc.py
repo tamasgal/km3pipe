@@ -116,14 +116,14 @@ class TestGlobalRandomState(TestCase):
 
     def test_without_pipeline_and_default_state(self):
         GlobalRandomState()
-        numbers = np.arange(1, 50) 
+        numbers = np.arange(1, 50)
         np.random.shuffle(numbers)
         lotto_numbers = sorted(numbers[:6])
         self.assertListEqual([14, 18, 28, 45, 46, 48], lotto_numbers)
 
     def test_without_pipeline_with_custom_seed(self):
         GlobalRandomState(seed=23)
-        numbers = np.arange(1, 50) 
+        numbers = np.arange(1, 50)
         np.random.shuffle(numbers)
         lotto_numbers = sorted(numbers[:6])
         self.assertListEqual([14, 15, 18, 19, 33, 44], lotto_numbers)
