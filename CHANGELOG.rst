@@ -2,9 +2,13 @@ Unreleased changes
 ------------------
 
 
-
 Version 8
 ---------
+8.8.2 / 2018-12-13
+~~~~~~~~~~~~~~~~~~
+* The ``RandomState`` is dead, long live the ``GlobalRandomState``!
+  (We renamed it...)
+
 8.8.1 / 2018-12-13
 ~~~~~~~~~~~~~~~~~~
 * Minor changes in Dockerfile and docs

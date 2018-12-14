@@ -23,7 +23,7 @@ NEUTRINOS = {
 }
 
 
-class RandomState(Module):
+class GlobalRandomState(Module):
     """Sets the global random seed of the numpy random generator
 
     KM3Pipe uses numpy routines exclusively to generate randomness. Setting a

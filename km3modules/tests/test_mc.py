@@ -13,7 +13,7 @@ from km3pipe import Table, Blob, Pipeline, Module
 from km3pipe.testing import TestCase
 
 from km3modules.mc import (
-    convert_mc_times_to_jte_times, MCTimeCorrector, RandomState
+    convert_mc_times_to_jte_times, MCTimeCorrector, GlobalRandomState
 )
 
 __author__ = "Moritz Lotze, Michael Moser"
@@ -77,7 +77,7 @@ class TestMCConvert(TestCase):
         assert np.allclose(newblob['mc_tracks'].time, 49999781)
 
 
-class TestRandomState(TestCase):
+class TestGlobalRandomState(TestCase):
     def test_default_random_state(self):
         assertAlmostEqual = self.assertAlmostEqual
 
@@ -92,6 +92,38 @@ class TestRandomState(TestCase):
                 return blob
 
         pipe = Pipeline()
-        pipe.attach(RandomState)
+        pipe.attach(GlobalRandomState)
         pipe.attach(Observer)
         pipe.drain(3)
+
+    def test_custom_random_state(self):
+        assertAlmostEqual = self.assertAlmostEqual
+
+        class Observer(Module):
+            def configure(self):
+                self.i = 0
+                self.x = [0.221993171, 0.870732306, 0.206719155]
+
+            def process(self, blob):
+                assertAlmostEqual(self.x[self.i], np.random.rand())
+                self.i += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(GlobalRandomState, seed=5)
+        pipe.attach(Observer)
+        pipe.drain(3)
+
+    def test_without_pipeline_and_default_state(self):
+        GlobalRandomState()
+        numbers = np.arange(1, 50) 
+        np.random.shuffle(numbers)
+        lotto_numbers = sorted(numbers[:6])
+        self.assertListEqual([14, 18, 28, 45, 46, 48], lotto_numbers)
+
+    def test_without_pipeline_with_custom_seed(self):
+        GlobalRandomState(seed=23)
+        numbers = np.arange(1, 50) 
+        np.random.shuffle(numbers)
+        lotto_numbers = sorted(numbers[:6])
+        self.assertListEqual([14, 15, 18, 19, 33, 44], lotto_numbers)
