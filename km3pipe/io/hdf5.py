@@ -471,8 +471,9 @@ class HDF5Pump(Pump):
         Shuffle the group_ids, so that the blobs are mixed up.
     shuffle_function: function, optional [default: np.random.shuffle
         The function to be used to shuffle the group IDs.
-    reset_index: bool, optional [default: False]
-        Reset the group ID - start to count the group_id by 0
+    reset_index: bool, optional [default: True]
+        When shuffle is set to true, reset the group ID - start to count
+        the group_id by 0.
     """
 
     def configure(self):
@@ -678,7 +679,7 @@ class HDF5Pump(Pump):
 
             self.log.debug("h5loc: '{}'".format(h5loc))
             tab = Table(arr, h5loc=h5loc, split_h5=False, name=tabname)
-            if self.reset_index:
+            if self.shuffle and self.reset_index:
                 tab.group_id[:] = self.index
             blob[tabname] = tab
 
@@ -716,7 +717,7 @@ class HDF5Pump(Pump):
                 title=ndarr.title,
                 group_id=group_id
             )
-            if self.reset_index:
+            if self.shuffle and self.reset_index:
                 _ndarr.group_id = self.index
             blob[ndarr_name] = _ndarr
 

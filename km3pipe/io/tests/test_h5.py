@@ -627,7 +627,7 @@ class TestHDF5PumpConsistency(TestCase):
 
 
 class TestHDF5Shuffle(TestCase):
-    def test_shuffle(self):
+    def test_shuffle_without_reset_index(self):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = fobj.name
 
@@ -682,7 +682,11 @@ class TestHDF5Shuffle(TestCase):
 
         pipe = Pipeline()
         pipe.attach(
-            HDF5Pump, filename=fname, shuffle=True, shuffle_function=shuffle
+            HDF5Pump,
+            filename=fname,
+            shuffle=True,
+            shuffle_function=shuffle,
+            reset_index=False
         )
         pipe.attach(Observer)
         results = pipe.drain()
