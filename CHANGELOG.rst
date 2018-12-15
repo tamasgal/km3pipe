@@ -1,6 +1,8 @@
 Unreleased changes
 ------------------
-
+* A new standard parameter called ``blob_keys=['list', 'of', 'blob', 'keys']``
+  can now be used to filter the blob keys before passing it to a module
+  during the cycle
 
 Version 8
 ---------
