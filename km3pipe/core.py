@@ -195,6 +195,11 @@ class Pipeline(object):
         else:
             module.only_if = None
 
+        if 'blob_keys' in kwargs:
+            module.blob_keys = kwargs['blob_keys']
+        else:
+            module.blob_keys = None
+
         if 'every' in kwargs:
             module.every = kwargs['every']
         else:
@@ -283,15 +288,32 @@ class Pipeline(object):
                         )
                         continue
 
+                    if module.blob_keys is not None:
+                        blob_to_send = Blob({
+                            k: self.blob[k]
+                            for k in module.blob_keys
+                            if k in self.blob
+                        })
+                    else:
+                        blob_to_send = self.blob
+
                     log.debug("Processing {0} ".format(module.name))
                     start = timer()
                     start_cpu = process_time()
-                    self.blob = module(self.blob)
+                    new_blob = module(blob_to_send)
                     if self.timeit or module.timeit:
                         self._timeit[module]['process'] \
                             .append(timer() - start)
                         self._timeit[module]['process_cpu'] \
                             .append(process_time() - start_cpu)
+
+                    if module.blob_keys is not None:
+                        if new_blob is not None:
+                            for key, item in new_blob.items():
+                                self.blob[key] = new_blob[key]
+                    else:
+                        self.blob = new_blob
+
                 self._timeit['cycles'].append(timer() - cycle_start)
                 self._timeit['cycles_cpu'].append(
                     process_time() - cycle_start_cpu
@@ -593,6 +615,8 @@ class Blob(OrderedDict):
     """A simple (ordered) dict with a fancy name. This should hold the data."""
 
     def __str__(self):
+        if len(self) == 0:
+            return "Empty blob"
         padding = max(len(k) for k in self.keys()) + 3
         s = ["Blob ({} entries):".format(len(self))]
         for key, value in self.items():
