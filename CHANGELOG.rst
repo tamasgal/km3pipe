@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 8
 ---------
+8.9.1 / 2018-12-15
+~~~~~~~~~~~~~~~~~~
+* Fixed read-in of split tables when shuffling in ``HDF5Pump``
+
 8.9.0 / 2018-12-15
 ~~~~~~~~~~~~~~~~~~
 * A new standard parameter called ``blob_keys=['list', 'of', 'blob', 'keys']``
