@@ -1,11 +1,14 @@
 Unreleased changes
 ------------------
+
+Version 8
+---------
+8.9.0 / 2018-12-15
+~~~~~~~~~~~~~~~~~~
 * A new standard parameter called ``blob_keys=['list', 'of', 'blob', 'keys']``
   can now be used to filter the blob keys before passing it to a module
   during the cycle
 
-Version 8
----------
 8.8.2 / 2018-12-13
 ~~~~~~~~~~~~~~~~~~
 * The ``RandomState`` is dead, long live the ``GlobalRandomState``!
