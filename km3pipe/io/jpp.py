@@ -57,6 +57,7 @@ class EventPump(Pump):
 
         self.event_reader = jppy.PyJDAQEventReader(self.filename.encode())
         self.blobs = self.blob_generator()
+        self._current_blob = Blob()
 
     def _resize_buffers(self, buf_size):
         log.info("Resizing hit buffers to {}.".format(buf_size))
@@ -77,7 +78,7 @@ class EventPump(Pump):
         raise StopIteration
 
     def extract_event(self):
-        blob = Blob()
+        blob = self._current_blob
         r = self.event_reader
         r.retrieve_next_event()    # do it at the beginning!
 
@@ -126,13 +127,15 @@ class EventPump(Pump):
         return blob
 
     def process(self, blob):
+        self._current_blob = blob
         return next(self.blobs)
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        return next(self.blobs)
+        self._current_blob = next(self.blobs)
+        return self._current_blob
 
 
 class TimeslicePump(Pump):
@@ -147,7 +150,7 @@ class TimeslicePump(Pump):
 
     def configure(self):
         fname = self.require('filename')
-        stream = self.get('stream', default='L1')
+        self.stream = self.get('stream', default='L1')
         self.blobs = self.timeslice_generator()
         try:
             import jppy    # noqa
@@ -157,7 +160,7 @@ class TimeslicePump(Pump):
                 "\nMake sure you source the JPP environmanet "
                 "and have jppy installed"
             )
-        stream = 'JDAQTimeslice' + stream
+        stream = 'JDAQTimeslice' + self.stream
         self.r = jppy.daqtimeslicereader.PyJDAQTimesliceReader(
             fname.encode(), stream.encode()
         )
@@ -170,7 +173,13 @@ class TimeslicePump(Pump):
         self._tots = np.zeros(self.buf_size, dtype='i')
         self._triggereds = np.zeros(self.buf_size, dtype=bool)    # dummy
 
+        self._current_blob = Blob()
+        self._hits_blob_key = '{}Hits'.format(
+            self.stream if self.stream else 'TS'
+        )
+
     def process(self, blob):
+        self._current_blob = blob
         return next(self.blobs)
 
     def timeslice_generator(self):
@@ -183,7 +192,7 @@ class TimeslicePump(Pump):
 
     def get_blob(self, index):
         """Index is slice ID"""
-        blob = Blob()
+        blob = self._current_blob
         self.r.retrieve_timeslice(index)
         timeslice_info = Table.from_template({
             'frame_index': self.r.frame_index,
@@ -195,7 +204,7 @@ class TimeslicePump(Pump):
         hits = self._extract_hits()
         hits.group_id = index
         blob['TimesliceInfo'] = timeslice_info
-        blob['TSHits'] = hits
+        blob[self._hits_blob_key] = hits
         return blob
 
     def _extract_hits(self):
@@ -237,7 +246,7 @@ class TimeslicePump(Pump):
         blob = Blob()
         self.r.retrieve_timeslice_at_frame_index(frame_index)
         hits = self._extract_hits()
-        blob['TSHits'] = hits
+        blob[self._hits_blob_key] = hits
         return blob
 
     def __len__(self):
@@ -247,7 +256,8 @@ class TimeslicePump(Pump):
         return self
 
     def __next__(self):
-        return next(self.blobs)
+        self._current_blob = next(self.blobs)
+        return self._current_blob
 
     def __getitem__(self, index):
         if isinstance(index, int):
