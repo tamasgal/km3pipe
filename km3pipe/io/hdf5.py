@@ -704,17 +704,20 @@ class HDF5Pump(Pump):
             blob['Header'] = self.header
 
         for ndarr_loc in ndarray_locs:
-            self.log.warning("Reading %s" % ndarr_loc)
-            idx = self.indices[ndarr_loc].col('index')[self.index]
-            n_items = self.indices[ndarr_loc].col('n_items')[self.index]
+            self.log.info("Reading %s" % ndarr_loc)
+            idx = self.indices[ndarr_loc].col('index')[group_id]
+            n_items = self.indices[ndarr_loc].col('n_items')[group_id]
             end = idx + n_items
             ndarr = self.h5file.get_node(ndarr_loc)
             ndarr_name = camelise(ndarr_loc.split('/')[-1])
             _ndarr = NDArray(
-                ndarr[idx:end], h5loc=ndarr_loc, title=ndarr.title
+                ndarr[idx:end],
+                h5loc=ndarr_loc,
+                title=ndarr.title,
+                group_id=group_id
             )
             if self.reset_index:
-                _ndarr.group_id[:] = self.index + 1
+                _ndarr.group_id = self.index
             blob[ndarr_name] = _ndarr
 
         return blob
