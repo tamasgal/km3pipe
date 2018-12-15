@@ -565,7 +565,57 @@ class TestHDF5PumpConsistency(TestCase):
                 assert 'Tab' in blob
                 assert self.index - 1 == blob['GroupInfo'].group_id
                 assert self.index * 10 == blob['Tab']['a']
-                assert 1 == blob['Tab']['b'] == 1
+                assert 1 == blob['Tab']['b']
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(HDF5Pump, filename=fname)
+        pipe.attach(BlobTester)
+        pipe.drain()
+
+        fobj.close()
+
+    def test_hdf5_readout_split_tables_in_same_group(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.count = 0
+
+            def process(self, blob):
+                self.count += 1
+                tab_a = Table({
+                    'a': self.count * 10,
+                },
+                              h5loc='/tabs/tab_a',
+                              split_h5=True)
+                tab_b = Table({
+                    'b': self.count * 100,
+                },
+                              h5loc='/tabs/tab_b',
+                              split_h5=True)
+                blob['TabA'] = tab_a
+                blob['TabB'] = tab_b
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        class BlobTester(Module):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                self.index += 1
+                assert 'GroupInfo' in blob
+                assert 'TabA' in blob
+                assert 'TabB' in blob
+                assert self.index - 1 == blob['GroupInfo'].group_id
+                assert self.index * 10 == blob['TabA']['a']
+                assert self.index * 100 == blob['TabB']['b']
                 return blob
 
         pipe = Pipeline()

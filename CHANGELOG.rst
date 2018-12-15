@@ -1,17 +1,38 @@
 Unreleased changes
 ------------------
 
+Version 8
+---------
+8.9.0 / 2018-12-15
+~~~~~~~~~~~~~~~~~~
+* A new standard parameter called ``blob_keys=['list', 'of', 'blob', 'keys']``
+  can now be used to filter the blob keys before passing it to a module
+  during the cycle
+
+8.8.2 / 2018-12-13
+~~~~~~~~~~~~~~~~~~
+* The ``RandomState`` is dead, long live the ``GlobalRandomState``!
+  (We renamed it...)
+
+8.8.1 / 2018-12-13
+~~~~~~~~~~~~~~~~~~
+* Minor changes in Dockerfile and docs
+
+8.8.0 / 2018-12-13
+~~~~~~~~~~~~~~~~~~
 * ``io.pandas`` has been removed
 * DETX v3 supported (including the ability to
   ``kp.hardware.Detector.add_comment()`` which are preserved when writing
 * DUSJ readout fixed, now every parameter is written by default (with NaNs
   if missing)
-* HDF5Sink now only writes instances of ``Table`` and ``NDArray`` to simplify
-  the implementation and avoid future bugs
-
-
-Version 8
----------
+* ``HDF5Sink`` now only writes instances of ``Table`` and ``NDArray`` to
+  simplify the implementation and avoid future bugs
+* ``HDF5Sink`` now can shuffle the blobs when ``shuffle=True``, additionally
+  a ``shuffle_function`` can be defined to have more control (mutating).
+* ``km3modules.mc.RandomState`` can be used to set the global random seed
+  of numpy to be able to create reproducible pipelines
+* In ``HDF5Pump`` when reading multiple files, each file is only opened when
+  needed to avoid unneeded memory and computational overhead
 
 8.6.0 / 2018-12-05
 ~~~~~~~~~~~~~~~~~~
