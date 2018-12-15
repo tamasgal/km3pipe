@@ -1088,6 +1088,21 @@ class TestNDArray(TestCase):
         assert 6 == ndarr[1, 0, 1]
         assert 7 == ndarr[1, 1, 0]
         assert "/misc" == ndarr.h5loc
+        assert "Unnamed NDArray" == ndarr.title
+        assert ndarr.group_id is None
+
+    def test_attributes(self):
+        ndarr = NDArray([1], h5loc='/foo', title='Foo', group_id=23)
+        assert '/foo' == ndarr.h5loc
+        assert 'Foo' == ndarr.title
+        assert 23 == ndarr.group_id
+
+    def test_slicing_preserves_attribute(self):
+        ndarr = NDArray([1, 2, 3], h5loc='/foo', title='Foo', group_id=23)
+        a = ndarr[:1]
+        assert '/foo' == a.h5loc
+        assert 'Foo' == a.title
+        assert 23 == a.group_id
 
 
 class TestVec3(TestCase):

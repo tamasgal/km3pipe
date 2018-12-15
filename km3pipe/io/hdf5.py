@@ -471,6 +471,9 @@ class HDF5Pump(Pump):
         Shuffle the group_ids, so that the blobs are mixed up.
     shuffle_function: function, optional [default: np.random.shuffle
         The function to be used to shuffle the group IDs.
+    reset_index: bool, optional [default: True]
+        When shuffle is set to true, reset the group ID - start to count
+        the group_id by 0.
     """
 
     def configure(self):
@@ -484,6 +487,7 @@ class HDF5Pump(Pump):
         self.shuffle_function = self.get(
             'shuffle_function', default=np.random.shuffle
         )
+        self.reset_index = self.get('reset_index', default=False)
 
         self.h5file = None
         self.cut_mask = None
@@ -674,9 +678,10 @@ class HDF5Pump(Pump):
                 continue
 
             self.log.debug("h5loc: '{}'".format(h5loc))
-            blob[tabname] = Table(
-                arr, h5loc=h5loc, split_h5=False, name=tabname
-            )
+            tab = Table(arr, h5loc=h5loc, split_h5=False, name=tabname)
+            if self.shuffle and self.reset_index:
+                tab.group_id[:] = self.index
+            blob[tabname] = tab
 
         # skipped locs are now column wise datasets (usually hits)
         # currently hardcoded, in future using hdf5 attributes
@@ -700,15 +705,21 @@ class HDF5Pump(Pump):
             blob['Header'] = self.header
 
         for ndarr_loc in ndarray_locs:
-            self.log.warning("Reading %s" % ndarr_loc)
-            idx = self.indices[ndarr_loc].col('index')[self.index]
-            n_items = self.indices[ndarr_loc].col('n_items')[self.index]
+            self.log.info("Reading %s" % ndarr_loc)
+            idx = self.indices[ndarr_loc].col('index')[group_id]
+            n_items = self.indices[ndarr_loc].col('n_items')[group_id]
             end = idx + n_items
             ndarr = self.h5file.get_node(ndarr_loc)
             ndarr_name = camelise(ndarr_loc.split('/')[-1])
-            blob[ndarr_name] = NDArray(
-                ndarr[idx:end], h5loc=ndarr_loc, title=ndarr.title
+            _ndarr = NDArray(
+                ndarr[idx:end],
+                h5loc=ndarr_loc,
+                title=ndarr.title,
+                group_id=group_id
             )
+            if self.shuffle and self.reset_index:
+                _ndarr.group_id = self.index
+            blob[ndarr_name] = _ndarr
 
         return blob
 

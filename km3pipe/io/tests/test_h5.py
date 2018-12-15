@@ -627,17 +627,18 @@ class TestHDF5PumpConsistency(TestCase):
 
 
 class TestHDF5Shuffle(TestCase):
-    def test_shuffle(self):
+    def test_shuffle_without_reset_index(self):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = fobj.name
 
         class DummyPump(Pump):
             def configure(self):
-                self.count = 0
+                self.i = 0
 
             def process(self, blob):
-                blob['Tab'] = Table({'a': self.count}, h5loc='/tab')
-                self.count += 1
+                blob['Tab'] = Table({'a': self.i}, h5loc='/tab')
+                blob['Arr'] = NDArray(np.arange(self.i + 1), h5loc='/arr')
+                self.i += 1
                 return blob
 
         pipe = Pipeline()
@@ -653,30 +654,130 @@ class TestHDF5Shuffle(TestCase):
 
         class Observer(Module):
             def configure(self):
-                self.group_ids = []
+                self.group_ids_tab = []
+                self.group_ids_arr = []
                 self.a = []
+                self.b = []
 
             def process(self, blob):
-                group_id = blob['Tab'].group_id[0]
-                assert blob['GroupInfo'].group_id[0] == group_id
-                self.group_ids.append(blob['Tab'].group_id[0])
+                print(blob)
+                print(blob['Arr'])
+                group_id_tab = blob['Tab'].group_id[0]
+                group_id_arr = blob['Arr'].group_id
+                assert blob['GroupInfo'].group_id[0] == group_id_tab
+                assert blob['GroupInfo'].group_id[0] == group_id_arr
+                self.group_ids_tab.append(blob['Tab'].group_id[0])
+                self.group_ids_arr.append(blob['Arr'].group_id)
                 self.a.append(blob['Tab'].a[0])
+                self.b.append(len(blob['Arr']) - 1)
                 return blob
 
             def finish(self):
-                return {'group_ids': self.group_ids, 'a': self.a}
+                return {
+                    'group_ids_tab': self.group_ids_tab,
+                    'group_ids_arr': self.group_ids_arr,
+                    'a': self.a,
+                    'b': self.b
+                }
 
         pipe = Pipeline()
         pipe.attach(
-            HDF5Pump, filename=fname, shuffle=True, shuffle_function=shuffle
+            HDF5Pump,
+            filename=fname,
+            shuffle=True,
+            shuffle_function=shuffle,
+            reset_index=False
         )
         pipe.attach(Observer)
         results = pipe.drain()
 
         self.assertListEqual(
-            results['Observer']['group_ids'], shuffled_group_ids
+            results['Observer']['group_ids_tab'], shuffled_group_ids
+        )
+        self.assertListEqual(
+            results['Observer']['group_ids_arr'], shuffled_group_ids
         )
         self.assertListEqual(results['Observer']['a'], shuffled_group_ids)
+        # a small hack: we store the length of the array in 'b', which is
+        # then equal to the shuffled group IDs (since those were generated
+        # using the group_id
+        self.assertListEqual(results['Observer']['b'], shuffled_group_ids)
+
+        fobj.close()
+
+    def test_shuffle_reset_index(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.i = 0
+
+            def process(self, blob):
+                blob['Tab'] = Table({'a': self.i}, h5loc='/tab')
+                blob['Arr'] = NDArray(np.arange(self.i + 1), h5loc='/arr')
+                self.i += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        shuffled_group_ids = [2, 1, 0, 3, 4]
+
+        def shuffle(x):
+            for i in range(len(x)):
+                x[i] = shuffled_group_ids[i]
+
+        class Observer(Module):
+            def configure(self):
+                self.group_ids_tab = []
+                self.group_ids_arr = []
+                self.a = []
+                self.b = []
+
+            def process(self, blob):
+                group_id_tab = blob['Tab'].group_id[0]
+                group_id_arr = blob['Arr'].group_id
+                assert blob['GroupInfo'].group_id[0] == group_id_tab
+                assert blob['GroupInfo'].group_id[0] == group_id_arr
+                self.group_ids_tab.append(group_id_tab)
+                self.group_ids_arr.append(group_id_arr)
+                self.a.append(blob['Tab'].a[0])
+                self.b.append(len(blob['Arr']) - 1)
+                return blob
+
+            def finish(self):
+                return {
+                    'group_ids_tab': self.group_ids_tab,
+                    'group_ids_arr': self.group_ids_arr,
+                    'a': self.a,
+                    'b': self.b
+                }
+
+        pipe = Pipeline()
+        pipe.attach(
+            HDF5Pump,
+            filename=fname,
+            shuffle=True,
+            shuffle_function=shuffle,
+            reset_index=True
+        )
+        pipe.attach(Observer)
+        results = pipe.drain()
+
+        self.assertListEqual(
+            results['Observer']['group_ids_tab'], [0, 1, 2, 3, 4]
+        )
+        self.assertListEqual(
+            results['Observer']['group_ids_arr'], [0, 1, 2, 3, 4]
+        )
+        self.assertListEqual(results['Observer']['a'], [2, 1, 0, 3, 4])
+        # a small hack: we store the length of the array in 'b', which is
+        # then equal to the shuffled group IDs (since those were generated
+        # using the group_id
+        self.assertListEqual(results['Observer']['b'], [2, 1, 0, 3, 4])
 
         fobj.close()
 

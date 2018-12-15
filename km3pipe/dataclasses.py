@@ -578,14 +578,17 @@ class NDArray(np.ndarray):
         obj = np.asarray(array, dtype=dtype, order=order).view(cls)
         h5loc = kwargs.get('h5loc', '/misc')
         title = kwargs.get('title', 'Unnamed NDArray')
+        group_id = kwargs.get('group_id', None)
         obj.h5loc = h5loc
         obj.title = title
+        obj.group_id = group_id
         return obj
 
     def __array_finalize__(self, obj):
         if obj is None: return
         self.h5loc = getattr(obj, 'h5loc', None)
         self.title = getattr(obj, 'title', None)
+        self.group_id = getattr(obj, 'group_id', None)
 
 
 class Vec3(object):
