@@ -690,8 +690,8 @@ class HDF5Pump(Pump):
             # if some events are missing (group_id not continuous),
             # this does not work as intended
             # idx, n_items = self.indices[loc][group_id]
-            idx = self.indices[loc].col('index')[self.index]
-            n_items = self.indices[loc].col('n_items')[self.index]
+            idx = self.indices[loc].col('index')[group_id]
+            n_items = self.indices[loc].col('n_items')[group_id]
             end = idx + n_items
             node = self.h5file.get_node(loc)
             columns = (c for c in node._v_children if c != '_indices')
@@ -699,7 +699,10 @@ class HDF5Pump(Pump):
             for col in columns:
                 data[col] = self.h5file.get_node(loc + '/' + col)[idx:end]
             tabname = camelise(loc.split('/')[-1])
-            blob[tabname] = Table(data, h5loc=loc, split_h5=True, name=tabname)
+            s_tab = Table(data, h5loc=loc, split_h5=True, name=tabname)
+            if self.shuffle and self.reset_index:
+                s_tab.group_id[:] = self.index
+            blob[tabname] = s_tab
 
         if self.header is not None:
             blob['Header'] = self.header

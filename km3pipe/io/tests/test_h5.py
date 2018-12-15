@@ -641,7 +641,7 @@ class TestHDF5Shuffle(TestCase):
                     'b': self.i
                 },
                                          h5loc='/split_tab',
-                                         split=True)
+                                         split_h5=True)
                 blob['Arr'] = NDArray(np.arange(self.i + 1), h5loc='/arr')
                 self.i += 1
                 return blob
@@ -736,7 +736,7 @@ class TestHDF5Shuffle(TestCase):
                     'b': self.i
                 },
                                          h5loc='/split_tab',
-                                         split=True)
+                                         split_h5=True)
                 blob['Arr'] = NDArray(np.arange(self.i + 1), h5loc='/arr')
                 self.i += 1
                 return blob
