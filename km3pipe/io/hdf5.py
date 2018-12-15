@@ -301,7 +301,6 @@ class HDF5Sink(Module):
         f = self.h5file
         loc, group_name = os.path.split(where)
         if where not in f:
-            print(where)
             group = f.create_group(loc, group_name, title, createparents=True)
             group._v_attrs.datatype = title
         else:
