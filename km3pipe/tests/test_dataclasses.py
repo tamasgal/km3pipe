@@ -889,6 +889,12 @@ class TestTable(TestCase):
         assert np.isnan(merged_tab.b[2])
         assert np.isnan(merged_tab.b[3])
 
+    def test_init_with_different_dicts_but_same_content(self):
+        t1 = Table({'a': [1, 2], 'b': [3, 4], 'c': [5, 6]})
+        t2 = Table({'c': [1, 2], 'a': [3, 4], 'b': [5, 6]})
+
+        assert t1.dtype == t2.dtype
+
 
 class TestTableFancyAttributes(TestCase):
     def setUp(self):
