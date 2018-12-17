@@ -1,5 +1,8 @@
 Unreleased changes
 ------------------
+* ``Table`` can now be instantiated with ``fillna=True`` when created from
+  ``dict`` and ``dtype`` where keys in the ``dict`` are missing. Those will
+  be filled with NaNs.
 
 Version 8
 ---------
