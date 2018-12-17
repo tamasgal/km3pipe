@@ -217,7 +217,7 @@ class Table(np.recarray):
         """
         # i hope order of keys == order or values
         if dtype is None:
-            names = list(arr_dict.keys())
+            names = sorted(list(arr_dict.keys()))
         else:
             dtype = np.dtype(dtype)
             dt_names = [f for f in dtype.names]
