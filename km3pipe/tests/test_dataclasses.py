@@ -181,6 +181,11 @@ class TestTable(TestCase):
         assert np.allclose([3, 4], tab.c)
         assert np.allclose([5, 6], tab.a)
 
+    def test_from_dict_with_fillna(self):
+        data = {'a': [1, 2], 'b': [3, 4]}
+        dt = [('a', float), ('b', float), ('c', float)]
+        tab = Table.from_dict(data, dtype=dt, fillna=True)
+
     def test_fromcolumns(self):
         n = 5
         dlist = [

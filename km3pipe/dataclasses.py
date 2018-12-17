@@ -222,7 +222,8 @@ class Table(np.recarray):
             dtype = np.dtype(dtype)
             dt_names = [f for f in dtype.names]
             dict_names = [k for k in arr_dict.keys()]
-            if not set(dt_names) == set(dict_names):
+            missing_names = set(dt_names) - set(dict_names)
+            if missing_names:
                 raise KeyError(
                     'Dictionary keys and dtype fields do not match!'
                 )
