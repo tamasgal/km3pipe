@@ -185,6 +185,15 @@ class TestTable(TestCase):
         data = {'a': [1, 2], 'b': [3, 4]}
         dt = [('a', float), ('b', float), ('c', float)]
         tab = Table.from_dict(data, dtype=dt, fillna=True)
+        assert np.isnan(tab.c[0])
+        assert np.isnan(tab.c[1])
+
+    def test_init_implicitly_from_dict_with_fillna(self):
+        data = {'a': [1, 2], 'b': [3, 4]}
+        dt = [('a', float), ('b', float), ('c', float)]
+        tab = Table(data, dtype=dt, fillna=True)
+        assert np.isnan(tab.c[0])
+        assert np.isnan(tab.c[1])
 
     def test_fromcolumns(self):
         n = 5
