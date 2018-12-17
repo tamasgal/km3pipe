@@ -292,6 +292,12 @@ class HDF5Sink(Module):
                     missing_cols, np.full((len(missing_cols), len(arr)),
                                           np.nan)
                 )
+                if (arr.dtype != tab.dtype):
+                    self.log.error(
+                        "Differing dtypes after appending "
+                        "missing columns to the table! Skipping..."
+                    )
+                    return
         tab.append(arr)
 
         if (level < 4):
