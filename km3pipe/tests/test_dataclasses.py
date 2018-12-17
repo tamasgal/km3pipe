@@ -889,8 +889,36 @@ class TestTable(TestCase):
         assert np.isnan(merged_tab.b[2])
         assert np.isnan(merged_tab.b[3])
 
+    def test_init_with_different_dicts_but_same_content(self):
+        t1 = Table({'a': [1, 2], 'b': [3, 4], 'c': [5, 6]})
+        t2 = Table({'c': [1, 2], 'a': [3, 4], 'b': [5, 6]})
 
-class TestTableFancyAttributes(TestCase):
+        assert t1.dtype == t2.dtype
+
+    def test_init_from_template_with_differently_ordered_dicts(self):
+        t1 = Table.from_template({
+            'frame_index': 1,
+            'slice_id': 2,
+            'timestamp': 3,
+            'nanoseconds': 4,
+            'n_frames': 5,
+        }, 'TimesliceInfo')
+        t2 = Table.from_template({
+            'n_frames': 5,
+            'timestamp': 3,
+            'nanoseconds': 4,
+            'slice_id': 2,
+            'frame_index': 1,
+        }, 'TimesliceInfo')
+        assert t1.dtype == t2.dtype
+        assert t1.frame_index[0] == t2.frame_index[0]
+        assert t1.slice_id[0] == t2.slice_id[0]
+        assert t1.nanoseconds[0] == t2.nanoseconds[0]
+        assert t1.n_frames[0] == t2.n_frames[0]
+        assert t1.timestamp[0] == t2.timestamp[0]
+
+
+class TestTableFancaAttributes(TestCase):
     def setUp(self):
         self.arr_bare = Table({
             'a': [1, 2, 3],
