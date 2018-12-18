@@ -116,6 +116,46 @@ class TestPipeline(TestCase):
         self.assertEqual(0, pl.modules[1].process.call_count)
         self.assertEqual(1, pl.modules[2].process.call_count)
 
+    def test_conditional_module_not_called_if_multiple_keys_not_in_blob(self):
+        pl = Pipeline(blob=1)
+
+        to_be_called = MagicMock()
+        not_to_be_called = MagicMock()
+
+        class DummyPump(Pump):
+            def process(self, blob):
+                blob['foo'] = 1
+                blob['bar'] = 2
+                return blob
+
+        class ConditionalModule(Module):
+            def process(self, blob):
+                print(self.only_if)
+                print(blob)
+                not_to_be_called()
+                assert False
+                return blob
+
+        class Module1(Module):
+            def process(self, blob):
+                to_be_called()
+                return blob
+
+        class Module2(Module):
+            def process(self, blob):
+                to_be_called()
+                return blob
+
+        pl.attach(DummyPump)
+        pl.attach(Module1)
+        pl.attach(ConditionalModule, only_if=['foo', 'narf'])
+        pl.attach(ConditionalModule, only_if=['narf', 'bar'])
+        pl.attach(Module2)
+
+        pl.drain(3)
+        assert 6 == to_be_called.call_count
+        assert 0 == not_to_be_called.call_count
+
     def test_conditional_module_called_if_key_in_blob(self):
         pl = Pipeline(blob=1)
 
@@ -124,6 +164,23 @@ class TestPipeline(TestCase):
         pl.attach(Module, 'module3')
 
         pl.modules[0].process = MagicMock(return_value={'foo': 23})
+        pl.modules[1].process = MagicMock(return_value={})
+        pl.modules[2].process = MagicMock(return_value={})
+
+        pl.drain(1)
+
+        self.assertEqual(1, pl.modules[0].process.call_count)
+        self.assertEqual(1, pl.modules[1].process.call_count)
+        self.assertEqual(1, pl.modules[2].process.call_count)
+
+    def test_conditional_module_called_if_multiple_keys_in_blob(self):
+        pl = Pipeline(blob=1)
+
+        pl.attach(Module, 'module1')
+        pl.attach(Module, 'module2', only_if=['foo', 'bar'])
+        pl.attach(Module, 'module3')
+
+        pl.modules[0].process = MagicMock(return_value={'foo': 23, 'bar': 5})
         pl.modules[1].process = MagicMock(return_value={})
         pl.modules[2].process = MagicMock(return_value={})
 

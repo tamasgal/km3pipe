@@ -191,9 +191,12 @@ class Pipeline(object):
 
         # Special parameters
         if 'only_if' in kwargs:
-            module.only_if = kwargs['only_if']
+            required_keys = kwargs['only_if']
+            if isinstance(required_keys, str):
+                required_keys = [required_keys]
+            module.only_if = set(required_keys)
         else:
-            module.only_if = None
+            module.only_if = set()
 
         if 'blob_keys' in kwargs:
             module.blob_keys = kwargs['blob_keys']
@@ -272,8 +275,8 @@ class Pipeline(object):
                             )
                         )
                         continue
-                    if module.only_if is not None and \
-                            module.only_if not in self.blob:
+                    if module.only_if and not module.only_if.issubset(set(
+                            self.blob.keys())):
                         log.debug(
                             "Skipping {0}, due to missing required key"
                             "'{1}'.".format(module.name, module.only_if)
@@ -467,7 +470,7 @@ class Module(object):
         log.debug("Initialising {0}".format(name))
         self._name = name
         self.parameters = parameters
-        self.only_if = None
+        self.only_if = set()
         self.every = 1
         self.detector = None
         if self.__module__ == '__main__':
