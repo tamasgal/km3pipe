@@ -281,7 +281,7 @@ class HDF5Sink(Module):
                 tab = self.h5file.create_table(
                     loc,
                     tabname,
-                    chunkshape=self.chunksize
+                    chunkshape=self.chunksize,
                     description=dtype,
                     title=title,
                     filters=self.filters,
