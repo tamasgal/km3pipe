@@ -214,7 +214,10 @@ class HDF5Sink(Module):
                 **self.pytab_file_args
             )
         self.filters = tb.Filters(
-            complevel=self.complevel, shuffle=True, fletcher32=True, complib=self.complib
+            complevel=self.complevel,
+            shuffle=True,
+            fletcher32=True,
+            complib=self.complib
         )
         self._tables = OrderedDict()
         self._ndarrays = OrderedDict()
