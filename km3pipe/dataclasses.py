@@ -212,20 +212,26 @@ class Table(np.recarray):
         return arr_dict
 
     @classmethod
-    def from_dict(cls, arr_dict, dtype=None, **kwargs):
+    def from_dict(cls, arr_dict, dtype=None, fillna=False, **kwargs):
         """Generate a table from a dictionary of arrays.
         """
         # i hope order of keys == order or values
         if dtype is None:
-            names = list(arr_dict.keys())
+            names = sorted(list(arr_dict.keys()))
         else:
             dtype = np.dtype(dtype)
             dt_names = [f for f in dtype.names]
             dict_names = [k for k in arr_dict.keys()]
-            if not set(dt_names) == set(dict_names):
-                raise KeyError(
-                    'Dictionary keys and dtype fields do not match!'
-                )
+            missing_names = set(dt_names) - set(dict_names)
+            if missing_names:
+                if fillna:
+                    dict_names = dt_names
+                    for missing_name in missing_names:
+                        arr_dict[missing_name] = np.nan
+                else:
+                    raise KeyError(
+                        'Dictionary keys and dtype fields do not match!'
+                    )
             names = list(dtype.names)
 
         arr_dict = cls._expand_scalars(arr_dict)
