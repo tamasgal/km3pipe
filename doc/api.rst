@@ -408,6 +408,22 @@ KM3Modules: Pipeline Segments
   MemoryObserver
   Siphon
 
+``km3modules.ahrs``: AHRS calibration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: km3modules.ahrs
+  :no-members:
+  :no-inherited-members:
+
+.. currentmodule:: km3modules.ahrs
+
+.. autosummary::
+  :toctree: api
+
+  AHRSCalibrator
+  fit_ahrs
+  get_latest_ahrs_calibration
+
+
 ``km3modules.k40``: K40 calibration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. automodule:: km3modules.k40
