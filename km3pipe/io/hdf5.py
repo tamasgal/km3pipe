@@ -241,6 +241,8 @@ class HDF5Sink(Module):
     def _write_ndarray(self, arr):
         h5loc = arr.h5loc
         title = arr.title
+        chunkshape = (self.chunksize,) + arr.shape[1:] if self.chunksize is not\
+                                                       None else None
         if h5loc not in self._ndarrays:
             loc, tabname = os.path.split(h5loc)
             ndarr = self.h5file.create_earray(
@@ -248,7 +250,7 @@ class HDF5Sink(Module):
                 tabname,
                 tb.Atom.from_dtype(arr.dtype),
                 (0, ) + arr.shape[1:],
-                chunkshape= (self.chunksize, ) + arr.shape[1:],
+                chunkshape=chunkshape,
                 title=title,
                 filters=self.filters,
                 createparents=True,
