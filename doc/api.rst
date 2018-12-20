@@ -161,7 +161,6 @@ KM3Pipe: Main Framework
   EventPump
   PicklePump
   read_calibration
-  read_hdf5
 
 
 ``km3pipe.logger``
