@@ -166,15 +166,15 @@ class HDF5Sink(Module):
 
     Parameters
     ----------
-    filename: str, optional (default: 'dump.h5')
+    filename: str, optional [default: 'dump.h5']
         Where to store the events.
-    h5file: pytables.File instance, optional (default: None)
+    h5file: pytables.File instance, optional [default: None]
         Opened file to write to. This is mutually exclusive with filename.
-    complib : str (default: zlib)
+    complib : str [default: zlib]
         Compression library that should be used.
         'zlib', 'lzf', 'blosc' and all other PyTables filters
-        are available. (default: zlib)
-    complevel : int (default: 5)
+        are available.
+    complevel : int [default: 5]
         Compression level. 
     chunksize : int [optional]
         Chunksize that should be used for saving along the first axis
@@ -189,8 +189,8 @@ class HDF5Sink(Module):
     def configure(self):
         self.filename = self.get('filename', default='dump.h5')
         self.ext_h5file = self.get('h5file')
-        self.complib = self.get('complib') or 'zlib'
-        self.complevel = self.get('complevel') or 5
+        self.complib = self.get('complib', default='zlib')
+        self.complevel = self.get('complevel', default=5)
         self.chunksize = self.get('chunksize')
         self.pytab_file_args = self.get('pytab_file_args', default=dict())
         self.file_mode = 'a' if self.get('append') else 'w'
@@ -201,7 +201,7 @@ class HDF5Sink(Module):
         # from the tables.File.create_table() function
         # at least according to the docs
         # might be able to set to `None`, I don't know...
-        self.n_rows_expected = self.get('n_rows_expected') or 10000
+        self.n_rows_expected = self.get('n_rows_expected', default=10000)
         self.index = 0
 
         if self.ext_h5file is not None:
