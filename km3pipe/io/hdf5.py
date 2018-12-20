@@ -22,7 +22,7 @@ from km3pipe.tools import decamelise, camelise, split, istype, get_jpp_revision
 
 log = get_logger(__name__)    # pylint: disable=C0103
 
-__author__ = "Tamas Gal and Moritz Lotze"
+__author__ = "Tamas Gal and Moritz Lotze and Michael Moser"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
 __license__ = "MIT"
@@ -170,6 +170,15 @@ class HDF5Sink(Module):
         Where to store the events.
     h5file: pytables.File instance, optional (default: None)
         Opened file to write to. This is mutually exclusive with filename.
+    complib : str (default: zlib)
+        Compression library that should be used.
+        'zlib', 'lzf', 'blosc' and all other PyTables filters
+        are available. (default: zlib)
+    complevel : int (default: 5)
+        Compression level. 
+    chunksize : int [optional]
+        Chunksize that should be used for saving along the first axis
+        of the input array.
     pytab_file_args: dict [optional]
         pass more arguments to the pytables File init
     n_rows_expected = int, optional [default: 10000]
@@ -180,6 +189,9 @@ class HDF5Sink(Module):
     def configure(self):
         self.filename = self.get('filename', default='dump.h5')
         self.ext_h5file = self.get('h5file')
+        self.complib = self.get('complib') or 'zlib'
+        self.complevel = self.get('complevel') or 5
+        self.chunksize = self.get('chunksize')
         self.pytab_file_args = self.get('pytab_file_args', default=dict())
         self.file_mode = 'a' if self.get('append') else 'w'
         self.keep_open = self.get('keep_open')
@@ -202,7 +214,7 @@ class HDF5Sink(Module):
                 **self.pytab_file_args
             )
         self.filters = tb.Filters(
-            complevel=5, shuffle=True, fletcher32=True, complib='zlib'
+            complevel=self.complevel, shuffle=True, fletcher32=True, complib=self.complib
         )
         self._tables = OrderedDict()
         self._ndarrays = OrderedDict()
@@ -236,6 +248,7 @@ class HDF5Sink(Module):
                 tabname,
                 tb.Atom.from_dtype(arr.dtype),
                 (0, ) + arr.shape[1:],
+                chunkshape= (self.chunksize, ) + arr.shape[1:],
                 title=title,
                 filters=self.filters,
                 createparents=True,
@@ -268,6 +281,7 @@ class HDF5Sink(Module):
                 tab = self.h5file.create_table(
                     loc,
                     tabname,
+                    chunkshape=self.chunksize
                     description=dtype,
                     title=title,
                     filters=self.filters,
