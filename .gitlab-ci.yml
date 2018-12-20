@@ -110,6 +110,7 @@ pages:
     artifacts:
         paths:
             - public
+    cache: {}
     only:
         - tags
         - master
