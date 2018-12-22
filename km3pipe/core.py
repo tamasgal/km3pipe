@@ -43,6 +43,12 @@ if sys.version_info >= (3, 3):
 else:
     process_time = time.clock
 
+# Consistent `isistance(..., basestring)` for Python 2 and 3
+try:
+    basestring
+except NameError:
+    basestring = str
+
 
 class ServiceManager(object):
     """
@@ -192,7 +198,7 @@ class Pipeline(object):
         # Special parameters
         if 'only_if' in kwargs:
             required_keys = kwargs['only_if']
-            if isinstance(required_keys, str):
+            if isinstance(required_keys, basestring):
                 required_keys = [required_keys]
             module.only_if = set(required_keys)
         else:
