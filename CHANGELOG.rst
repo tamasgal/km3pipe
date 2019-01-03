@@ -1,13 +1,17 @@
 Unreleased changes
 ------------------
+
+Version 8
+---------
+8.9.2 / 2019-01-03
+~~~~~~~~~~~~~~~~~~
 * ``Table`` can now be instantiated with ``fillna=True`` when created from
   ``dict`` and ``dtype`` where keys in the ``dict`` are missing. Those will
   be filled with NaNs.
 * The ``Module.only_if`` parameter now also accepts a list of keys, which has
   to be present in the blob, otherwise the ``process`` method is not called.
+* The ``HDF5Sink`` now also accepts "chunksize", "complib" and "complevel as arguments."
 
-Version 8
----------
 8.9.1 / 2018-12-15
 ~~~~~~~~~~~~~~~~~~
 * Fixed read-in of split tables when shuffling in ``HDF5Pump``
