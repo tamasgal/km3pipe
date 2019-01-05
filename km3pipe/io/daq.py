@@ -537,7 +537,7 @@ class DAQEvent(object):
 class TMCHData(object):
     """Monitoring Channel data."""
 
-    def __init__(self, file_obj):
+    def __init__(self, file_obj, version=None):
         f = file_obj
 
         data_type = f.read(4)
@@ -560,9 +560,12 @@ class TMCHData(object):
         self.flags = unpack('>I', f.read(4))[0]
         # flags:
         # bit 0: AHRS valid
-        # bit 3-1: structure version
-        #          000 - 1, 001 - 2, 010 - unused, 011 - 3
-        self.version = int(bin((self.flags >> 1) & 7), 2) + 1
+        if version is None:
+            # bit 3-1: structure version
+            #          000 - 1, 001 - 2, 010 - unused, 011 - 3
+            self.version = int(bin((self.flags >> 1) & 7), 2) + 1
+        else:
+            self.version = version
         self.yaw, self.pitch, self.roll = unpack('>fff', f.read(12))
         self.A = unpack('>fff', f.read(12))    # AHRS: Ax, Ay, Az
         self.G = unpack('>fff', f.read(12))    # AHRS: Gx, Gy, Gz
