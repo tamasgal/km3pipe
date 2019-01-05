@@ -594,6 +594,7 @@ class TMCHRepump(Pump):
 
     def configure(self):
         filename = self.require("filename")
+        self.format_version = self.get("format_version", default=None)
         self.fobj = open(filename, "rb")
         self.blobs = self.blob_generator()
 
@@ -608,7 +609,9 @@ class TMCHRepump(Pump):
                 raise StopIteration
             if datatype == b'TMCH':
                 self.fobj.seek(-4, 1)
-                blob['TMCHData'] = TMCHData(self.fobj)
+                blob['TMCHData'] = TMCHData(
+                    self.fobj, version=self.format_version
+                )
                 yield blob
 
     def finish(self):
