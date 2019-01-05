@@ -4,11 +4,15 @@ Unreleased changes
 Version 8
 ---------
 
+8.9.4 / 2019-01-05
+~~~~~~~~~~~~~~~~~~
+* ``TMCHRepump`` now accepts a ``version=...`` parameter to force a specific
+  version just like for ``TMCHData``.
+
 8.9.3 / 2019-01-04
 ~~~~~~~~~~~~~~~~~~
 * ``TMCHData`` now accepts a ``version=...`` parameter to force a specific
   version.
-
 
 8.9.2 / 2019-01-03
 ~~~~~~~~~~~~~~~~~~
