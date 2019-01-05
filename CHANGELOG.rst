@@ -3,6 +3,13 @@ Unreleased changes
 
 Version 8
 ---------
+
+8.9.3 / 2019-01-04
+~~~~~~~~~~~~~~~~~~
+* ``TMCHData`` now accepts a ``version=...`` parameter to force a specific
+  version.
+
+
 8.9.2 / 2019-01-03
 ~~~~~~~~~~~~~~~~~~
 * ``Table`` can now be instantiated with ``fillna=True`` when created from
