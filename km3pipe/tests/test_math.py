@@ -7,7 +7,7 @@ import pytest
 
 from km3pipe.testing import TestCase
 from km3pipe.math import (
-    angle_between, pld3, com, zenith, azimuth, Polygon, IrregularPrism,
+    angle_between, dist, pld3, com, zenith, azimuth, Polygon, IrregularPrism,
     rotation_matrix, SparseCone, space_angle, hsin, phi, theta, unit_vector,
     innerprod_1d, log_b, qeuler, qrot, qrot_yaw, intersect_3d
 )
@@ -423,3 +423,13 @@ class TestIntersect3D(TestCase):
         p2 = np.array([(-1, 10, 0), (0, 10, -1)])
         intersection = intersect_3d(p1, p2)
         assert np.allclose([0, 10, 0], intersection)
+
+
+class TestDist(TestCase):
+    def test_dist_to_many_points(self):
+        assert np.allclose([1, 1, 0, 1.73205081],
+                           dist(
+                               np.array([0, 0, 0]),
+                               np.array([[0, 0, 1], [0, 0, 1], [0, 0, 0],
+                                         [1, 1, 1]])
+                           ))
