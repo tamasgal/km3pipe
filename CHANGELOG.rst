@@ -1,11 +1,14 @@
 Unreleased changes
 ------------------
-* ``kp.hardware.Detector`` now provides a ``Table`` with DOM information via
-  its ``.dom_table`` property.
-
 
 Version 8
 ---------
+
+8.9.5 / 2019-01-08
+~~~~~~~~~~~~~~~~~~
+* ``kp.hardware.Detector`` now provides a ``Table`` with DOM information via
+  its ``.dom_table`` property.
+* ``kp.math.dist`` is fixed, it had no return statement.
 
 8.9.4 / 2019-01-05
 ~~~~~~~~~~~~~~~~~~
