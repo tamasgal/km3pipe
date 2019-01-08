@@ -65,6 +65,7 @@ class Detector(object):
         self._current_du = None
 
         self._dom_positions = None
+        self._dom_table = None
         self._pmt_angles = None
         self._xy_positions = None
         self.reset_caches()
@@ -227,6 +228,7 @@ class Detector(object):
     def reset_caches(self):
         log.debug('Resetting caches.')
         self._dom_positions = OrderedDict()
+        self._dom_table = None
         self._xy_positions = []
         self._pmt_angles = []
 
@@ -255,6 +257,22 @@ class Detector(object):
                 centre = intersect_3d(pmt_pos, pmt_pos - pmt_dir * 10)
                 self._dom_positions[dom_id] = centre
         return self._dom_positions
+
+    @property
+    def dom_table(self):
+        """A `Table` containing DOM attributes"""
+        if self._dom_table is None:
+            data = defaultdict(list)
+            for dom_id, (du, floor, _) in self.doms.items():
+                data['dom_id'].append(dom_id)
+                data['du'].append(du)
+                data['floor'].append(floor)
+                dom_position = self.dom_positions[dom_id]
+                data['pos_x'].append(dom_position[0])
+                data['pos_y'].append(dom_position[1])
+                data['pos_z'].append(dom_position[2])
+            self._dom_table = Table(data, name='DOMs', h5loc='/dom_table')
+        return self._dom_table
 
     @property
     def xy_positions(self):

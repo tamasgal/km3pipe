@@ -430,3 +430,28 @@ class TestDetector(TestCase):
         self.det.rescale(scale_factor)
         for dom_id, dom_pos in self.det.dom_positions.items():
             assert np.allclose(dom_pos, dom_positions[dom_id] * scale_factor)
+
+    def test_dom_table(self):
+        self.det._parse_doms()
+        dt = self.det.dom_table
+        assert 3 == len(dt)
+        assert np.allclose([1, 2, 3], dt.dom_id)
+        assert np.allclose([1, 1, 1], dt.du)
+        assert np.allclose([1, 2, 3], dt.floor)
+        assert np.allclose([1.49992331, 2.49992331, 3.49992331], dt.pos_x)
+        assert np.allclose([1.51893187, 2.51893187, 3.51893187], dt.pos_y)
+        assert np.allclose([1.44185513, 2.44185513, 3.44185513], dt.pos_z)
+
+    def test_dom_table_with_another_detx(self):
+        det = Detector()
+        det._det_file = EXAMPLE_DETX_RADIAL
+        det._parse_doms()
+
+        dt = det.dom_table
+        assert 4 == len(dt)
+        assert np.allclose([1, 2, 3, 4], dt.dom_id)
+        assert np.allclose([1, 1, 1, 2], dt.du)
+        assert np.allclose([1, 2, 3, 1], dt.floor)
+        assert np.allclose([0, 0, 0, 0], dt.pos_x)
+        assert np.allclose([0, 0, 0, 0], dt.pos_y)
+        assert np.allclose([0, 0, 0, 0], dt.pos_z)

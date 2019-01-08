@@ -1,5 +1,8 @@
 Unreleased changes
 ------------------
+* ``kp.hardware.Detector`` now provides a ``Table`` with DOM information via
+  its ``.dom_table`` property.
+
 
 Version 8
 ---------
