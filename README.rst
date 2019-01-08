@@ -37,6 +37,10 @@ be extended to support any kind of data formats. The core functionality is
 written in a general way and is applicable to all kinds of data processing
 workflows.
 
+To start off, run::
+
+    pip install km3pipe
+
 If you have Docker (https://www.docker.com) installed, you can start using
 KM3Pipe immediately by typing::
 
@@ -55,3 +59,4 @@ subpackage and of course the documentation if you’re interested!
 Read the docs at https://km3py.pages.km3net.de/km3pipe (updated on each push)
 
 KM3NeT public project homepage http://www.km3net.org
+
