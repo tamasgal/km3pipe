@@ -18,7 +18,6 @@
     user_guide
     contribute
     examples
-    api
     changelog
 
     Code Coverage <http://km3py.pages.km3net.de/km3pipe/coverage>

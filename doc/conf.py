@@ -297,7 +297,5 @@ sphinx_gallery_conf = {
     'show_memory': True,
 }
 
-autosummary_generate = ["api.rst"]
-
 # don't show the method summary twice
 numpydoc_show_class_members = False
