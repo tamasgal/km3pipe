@@ -104,7 +104,7 @@ pages:
     stage: doc
     script:
         - *virtualenv_definition
-        - cd doc && make html
+        - cd doc && make clean && make html
         - mv _build/html ../public/
         - cd .. && mv reports/coverage public/coverage
     artifacts:
