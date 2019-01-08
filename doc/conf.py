@@ -42,12 +42,22 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.imgmath',
     'sphinx.ext.viewcode',
+    'autoapi.extension',
     'numpydoc',
     'sphinx_gallery.gen_gallery',
     'sphinxcontrib.programoutput',
 ]
 
 autosummary_generate = True
+
+# Document Python Code
+autoapi_type = 'python'
+autoapi_dirs = ['../km3pipe', '../km3modules']
+autoapi_options = [
+    'members', 'undoc-members'
+    # , 'private-members', 'special-members'
+]
+autoapi_ignore = ["*test_*.py", "*/doc/conf.py", "*/pydataskel*"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
