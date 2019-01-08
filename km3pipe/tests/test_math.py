@@ -426,6 +426,15 @@ class TestIntersect3D(TestCase):
 
 
 class TestDist(TestCase):
+    def test_dist_between_two_2D_points(self):
+        self.assertAlmostEqual(1, dist(np.array([0, 0]), np.array([1, 0])))
+        self.assertAlmostEqual(
+            np.sqrt(2), dist(np.array([0, 1]), np.array([1, 0]))
+        )
+        self.assertAlmostEqual(
+            2 * np.sqrt(2), dist(np.array([1, 2]), np.array([3, 4]))
+        )
+
     def test_dist_between_two_3D_points(self):
         self.assertAlmostEqual(
             1, dist(np.array([0, 0, 0]), np.array([1, 0, 0]))
