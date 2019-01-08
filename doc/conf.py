@@ -58,6 +58,7 @@ autoapi_options = [
     # , 'private-members', 'special-members'
 ]
 autoapi_ignore = ["*test_*.py", "*/doc/conf.py", "*/pydataskel*"]
+autoapi_include_summaries = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
