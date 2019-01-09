@@ -635,6 +635,14 @@ class Blob(OrderedDict):
             )
         return "\n".join(s)
 
+    def __getitem__(self, key):
+        try:
+            val = OrderedDict.__getitem__(self, key)
+        except KeyError:
+            print("c")
+            raise
+        return val
+
 
 class Run(object):
     """A simple container for event info, hits, tracks and calibration.
