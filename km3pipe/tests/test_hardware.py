@@ -455,3 +455,17 @@ class TestDetector(TestCase):
         assert np.allclose([0, 0, 0, 0], dt.pos_x)
         assert np.allclose([0, 0, 0, 0], dt.pos_y)
         assert np.allclose([0, 0, 0, 0], dt.pos_z)
+
+    def test_center_of_mass(self):
+        det = Detector()
+        det._det_file = EXAMPLE_DETX
+        det._parse_doms()
+
+        assert np.allclose([2.4, 2.5, 2.6], det.com)
+
+    def test_center_of_mass_with_another_detx(self):
+        det = Detector()
+        det._det_file = EXAMPLE_DETX_RADIAL
+        det._parse_doms()
+
+        assert np.allclose([-0.2, 0., 0.2], det.com)
