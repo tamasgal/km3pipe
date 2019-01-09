@@ -116,6 +116,46 @@ class TestPipeline(TestCase):
         self.assertEqual(0, pl.modules[1].process.call_count)
         self.assertEqual(1, pl.modules[2].process.call_count)
 
+    def test_conditional_module_not_called_if_multiple_keys_not_in_blob(self):
+        pl = Pipeline(blob=1)
+
+        to_be_called = MagicMock()
+        not_to_be_called = MagicMock()
+
+        class DummyPump(Pump):
+            def process(self, blob):
+                blob['foo'] = 1
+                blob['bar'] = 2
+                return blob
+
+        class ConditionalModule(Module):
+            def process(self, blob):
+                print(self.only_if)
+                print(blob)
+                not_to_be_called()
+                assert False
+                return blob
+
+        class Module1(Module):
+            def process(self, blob):
+                to_be_called()
+                return blob
+
+        class Module2(Module):
+            def process(self, blob):
+                to_be_called()
+                return blob
+
+        pl.attach(DummyPump)
+        pl.attach(Module1)
+        pl.attach(ConditionalModule, only_if=['foo', 'narf'])
+        pl.attach(ConditionalModule, only_if=['narf', 'bar'])
+        pl.attach(Module2)
+
+        pl.drain(3)
+        assert 6 == to_be_called.call_count
+        assert 0 == not_to_be_called.call_count
+
     def test_conditional_module_called_if_key_in_blob(self):
         pl = Pipeline(blob=1)
 
@@ -124,6 +164,23 @@ class TestPipeline(TestCase):
         pl.attach(Module, 'module3')
 
         pl.modules[0].process = MagicMock(return_value={'foo': 23})
+        pl.modules[1].process = MagicMock(return_value={})
+        pl.modules[2].process = MagicMock(return_value={})
+
+        pl.drain(1)
+
+        self.assertEqual(1, pl.modules[0].process.call_count)
+        self.assertEqual(1, pl.modules[1].process.call_count)
+        self.assertEqual(1, pl.modules[2].process.call_count)
+
+    def test_conditional_module_called_if_multiple_keys_in_blob(self):
+        pl = Pipeline(blob=1)
+
+        pl.attach(Module, 'module1')
+        pl.attach(Module, 'module2', only_if=['foo', 'bar'])
+        pl.attach(Module, 'module3')
+
+        pl.modules[0].process = MagicMock(return_value={'foo': 23, 'bar': 5})
         pl.modules[1].process = MagicMock(return_value={})
         pl.modules[2].process = MagicMock(return_value={})
 
@@ -157,6 +214,132 @@ class TestPipeline(TestCase):
         self.assertEqual(0, pl.modules[3].process.call_count)
         self.assertEqual(9, pl.modules[4].process.call_count)
         self.assertEqual(2, func_module.call_count)
+
+    def test_selective_blob_keys(self):
+        class DummyPump(Pump):
+            def process(self, blob):
+                return Blob({'a': 1, 'b': 2, 'c': 3})
+
+        class Observer(Module):
+            def configure(self):
+                self.needed_key = self.require('needed_key')
+
+            def process(self, blob):
+                print(blob)
+                assert 1 == len(blob)
+                assert self.needed_key in blob
+                return blob
+
+        pl = Pipeline()
+        pl.attach(DummyPump)
+        pl.attach(Observer, needed_key='a', blob_keys=['a'])
+        pl.attach(Observer, needed_key='b', blob_keys=['b'])
+        pl.attach(Observer, needed_key='c', blob_keys=['c'])
+        pl.drain(3)
+
+    def test_selective_blob_keys_with_multiple_keys(self):
+        n_cycles = 3
+        mock_to_be_called = MagicMock()
+
+        class DummyPump(Pump):
+            def process(self, blob):
+                return Blob({'a': 1, 'b': 2, 'c': 3})
+
+        class Observer(Module):
+            def process(self, blob):
+                assert 2 == len(blob)
+                assert 'a' in blob
+                assert 'b' in blob
+                mock_to_be_called()
+                return blob
+
+        class OtherObserver(Module):
+            def process(self, blob):
+                assert 3 == len(blob)
+                assert 'a' in blob
+                assert 'b' in blob
+                assert 'c' in blob
+                mock_to_be_called()
+                return blob
+
+        pl = Pipeline()
+        pl.attach(DummyPump)
+        pl.attach(Observer, blob_keys=['a', 'b'])
+        pl.attach(OtherObserver)
+        pl.drain(n_cycles)
+
+        assert 2 * n_cycles == mock_to_be_called.call_count
+
+    def test_selective_blob_keys_with_missing_key(self):
+        n_cycles = 3
+        mock_to_be_called = MagicMock()
+
+        class DummyPump(Pump):
+            def process(self, blob):
+                return Blob({'a': 1, 'b': 2, 'c': 3})
+
+        class Observer(Module):
+            def process(self, blob):
+                assert 0 == len(blob)
+                mock_to_be_called()
+                return blob
+
+        pl = Pipeline()
+        pl.attach(DummyPump)
+        pl.attach(Observer, blob_keys=['x'])
+        pl.drain(n_cycles)
+
+        assert n_cycles == mock_to_be_called.call_count
+
+    def test_selective_blob_keys_mutating_the_blob(self):
+        class DummyPump(Pump):
+            def process(self, blob):
+                return Blob({'a': 1, 'b': 2, 'c': 3})
+
+        class Mutator(Module):
+            def process(self, blob):
+                assert 1 == len(blob)
+                blob['d'] = 4
+                return blob
+
+        class Observer(Module):
+            def process(self, blob):
+                print(blob)
+                assert 4 == len(blob)
+                assert 'd' in blob
+                assert 4 == blob['d']
+                return blob
+
+        pl = Pipeline()
+        pl.attach(DummyPump)
+        pl.attach(Mutator, needed_key='a', blob_keys=['a'])
+        pl.attach(Observer)
+        pl.drain(3)
+
+    def test_selective_blob_keys_returning_nothing_doesnt_stop_the_cycle(self):
+        mock_to_be_called = MagicMock()
+
+        class DummyPump(Pump):
+            def process(self, blob):
+                return Blob({'a': 1, 'b': 2, 'c': 3})
+
+        class NoStopper(Module):
+            def process(self, blob):
+                return
+
+        class Observer(Module):
+            def process(self, blob):
+                mock_to_be_called()
+                assert 3 == len(blob)
+                return blob
+
+        pl = Pipeline()
+        pl.attach(DummyPump)
+        pl.attach(NoStopper, blob_keys=['a'])
+        pl.attach(Observer)
+        pl.drain(3)
+
+        assert 3 == mock_to_be_called.call_count
 
     def test_drain_calls_function_modules(self):
         pl = Pipeline(blob=1)
@@ -407,6 +590,10 @@ class TestBlob(TestCase):
         blob = Blob()
         blob['foo'] = 1
         self.assertEqual(1, blob['foo'])
+
+    def test_print_empty_blob(self):
+        blob = Blob()
+        assert "Empty blob" == str(blob)
 
 
 class TestServices(TestCase):

@@ -16,13 +16,13 @@ import tables as tb
 
 import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
-from km3pipe.dataclasses import Table, DEFAULT_H5LOC
+from km3pipe.dataclasses import Table, NDArray, DEFAULT_H5LOC
 from km3pipe.logger import get_logger
 from km3pipe.tools import decamelise, camelise, split, istype, get_jpp_revision
 
 log = get_logger(__name__)    # pylint: disable=C0103
 
-__author__ = "Tamas Gal and Moritz Lotze"
+__author__ = "Tamas Gal and Moritz Lotze and Michael Moser"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
 __license__ = "MIT"
@@ -38,13 +38,14 @@ class H5VersionError(Exception):
     pass
 
 
-def check_version(h5file, filename):
+def check_version(h5file):
     try:
         version = np.string_(h5file.root._v_attrs.format_version)
     except AttributeError:
         log.error(
             "Could not determine HDF5 format version: '%s'."
-            "You may encounter unexpected errors! Good luck..." % filename
+            "You may encounter unexpected errors! Good luck..." %
+            h5file.filename
         )
         return
     if split(version, int, np.string_('.')) < \
@@ -52,7 +53,7 @@ def check_version(h5file, filename):
         raise H5VersionError(
             "HDF5 format version {0} or newer required!\n"
             "'{1}' has HDF5 format version {2}.".format(
-                MINIMUM_FORMAT_VERSION.decode("utf-8"), filename,
+                MINIMUM_FORMAT_VERSION.decode("utf-8"), h5file.filename,
                 version.decode("utf-8")
             )
         )
@@ -137,6 +138,22 @@ class HDF5Header(object):
         return cls(data)
 
 
+class HDF5IndexTable(object):
+    def __init__(self, h5loc):
+        self.h5loc = h5loc
+        self._data = defaultdict(list)
+        self._index = 0
+
+    def append(self, n_items):
+        self._data['indices'].append(self._index)
+        self._data['n_items'].append(n_items)
+        self._index += n_items
+
+    @property
+    def data(self):
+        return self._data
+
+
 class HDF5Sink(Module):
     """Write KM3NeT-formatted HDF5 files, event-by-event.
 
@@ -149,10 +166,19 @@ class HDF5Sink(Module):
 
     Parameters
     ----------
-    filename: str, optional (default: 'dump.h5')
+    filename: str, optional [default: 'dump.h5']
         Where to store the events.
-    h5file: pytables.File instance, optional (default: None)
+    h5file: pytables.File instance, optional [default: None]
         Opened file to write to. This is mutually exclusive with filename.
+    complib : str [default: zlib]
+        Compression library that should be used.
+        'zlib', 'lzf', 'blosc' and all other PyTables filters
+        are available.
+    complevel : int [default: 5]
+        Compression level. 
+    chunksize : int [optional]
+        Chunksize that should be used for saving along the first axis
+        of the input array.
     pytab_file_args: dict [optional]
         pass more arguments to the pytables File init
     n_rows_expected = int, optional [default: 10000]
@@ -163,35 +189,31 @@ class HDF5Sink(Module):
         Compression level, passed through as HDF5 filter.
     shuffle: bool, optional [default: True]
         Shuffle the data for compression.
-    fletcher32: bool, optional [default: True]
-        HDF5 compression option
     complib: str, optional [default: 'zlib']
         Compression method to be used
 
     """
 
     def configure(self):
-        self.filename = self.get('filename') or 'dump.h5'
-        self.ext_h5file = self.get('h5file') or None
-        self.pytab_file_args = self.get('pytab_file_args') or dict()
+        self.filename = self.get('filename', default='dump.h5')
+        self.ext_h5file = self.get('h5file')
+        self.complib = self.get('complib', default='zlib')
+        self.complevel = self.get('complevel', default=5)
+        self.chunksize = self.get('chunksize')
+        shuffle = self.get('shuffle', default=True)
+        self.pytab_file_args = self.get('pytab_file_args', default=dict())
         self.file_mode = 'a' if self.get('append') else 'w'
         self.keep_open = self.get('keep_open', default=False)
-        complevel = self.get('complevel', default=5)
-        shuffle = self.get('shuffle', default=True)
-        fletcher32 = self.get('fletcher32', default=True)
-        complib = self.get('complib', default='zlib')
-        self.indices = {}
+        self.indices = {}    # to store HDF5IndexTables for each h5loc
         self._singletons_written = {}
         # magic 10000: this is the default of the "expectedrows" arg
         # from the tables.File.create_table() function
         # at least according to the docs
         # might be able to set to `None`, I don't know...
-        self.n_rows_expected = self.get('n_rows_expected') or 10000
+        self.n_rows_expected = self.get('n_rows_expected', default=10000)
         self.index = 0
 
-        if self.filename != 'dump.h5' and self.ext_h5file is not None:
-            raise IOError("Can't specify both filename and file object!")
-        elif self.filename == 'dump.h5' and self.ext_h5file is not None:
+        if self.ext_h5file is not None:
             self.h5file = self.ext_h5file
         else:
             self.h5file = tb.open_file(
@@ -201,12 +223,13 @@ class HDF5Sink(Module):
                 **self.pytab_file_args
             )
         self.filters = tb.Filters(
-            complevel=complevel,
+            complevel=self.complevel,
             shuffle=shuffle,
-            fletcher32=fletcher32,
-            complib=complib
+            fletcher32=True,
+            complib=self.complib
         )
         self._tables = OrderedDict()
+        self._ndarrays = OrderedDict()
 
         if self.file_mode == 'a' and '/group_info' in self.h5file:
             self._tables['/group_info'] = self.h5file.get_node('/group_info')
@@ -230,7 +253,36 @@ class HDF5Sink(Module):
             data = Table.from_dataframe(data)
         return data
 
-    def _write_array(self, h5loc, arr, title):
+    def _write_ndarray(self, arr):
+        h5loc = arr.h5loc
+        title = arr.title
+        chunkshape = (self.chunksize,) + arr.shape[1:] if self.chunksize is not\
+                                                       None else None
+        if h5loc not in self._ndarrays:
+            loc, tabname = os.path.split(h5loc)
+            ndarr = self.h5file.create_earray(
+                loc,
+                tabname,
+                tb.Atom.from_dtype(arr.dtype),
+                (0, ) + arr.shape[1:],
+                chunkshape=chunkshape,
+                title=title,
+                filters=self.filters,
+                createparents=True,
+            )
+            self._ndarrays[h5loc] = ndarr
+        else:
+            ndarr = self._ndarrays[h5loc]
+
+        idx_table_h5loc = h5loc + '_indices'
+        if idx_table_h5loc not in self.indices:
+            self.indices[idx_table_h5loc] = HDF5IndexTable(idx_table_h5loc)
+        idx_tab = self.indices[idx_table_h5loc]
+        idx_tab.append(len(arr))
+
+        ndarr.append(arr)
+
+    def _write_table(self, h5loc, arr, title):
         level = len(h5loc.split('/'))
 
         if h5loc not in self._tables:
@@ -246,6 +298,7 @@ class HDF5Sink(Module):
                 tab = self.h5file.create_table(
                     loc,
                     tabname,
+                    chunkshape=self.chunksize,
                     description=dtype,
                     title=title,
                     filters=self.filters,
@@ -270,6 +323,12 @@ class HDF5Sink(Module):
                     missing_cols, np.full((len(missing_cols), len(arr)),
                                           np.nan)
                 )
+                if (arr.dtype != tab.dtype):
+                    self.log.error(
+                        "Differing dtypes after appending "
+                        "missing columns to the table! Skipping..."
+                    )
+                    return
         tab.append(arr)
 
         if (level < 4):
@@ -279,7 +338,7 @@ class HDF5Sink(Module):
         f = self.h5file
         loc, group_name = os.path.split(where)
         if where not in f:
-            group = f.create_group(loc, group_name, title)
+            group = f.create_group(loc, group_name, title, createparents=True)
             group._v_attrs.datatype = title
         else:
             group = f.get_node(where)
@@ -302,15 +361,9 @@ class HDF5Sink(Module):
 
         # create index table
         if where not in self.indices:
-            self.indices[where] = {}
-            self.indices[where]["index"] = 0
-            self.indices[where]["indices"] = []
-            self.indices[where]["n_items"] = []
-        d = self.indices[where]
-        n_items = len(obj)
-        d["indices"].append(d["index"])
-        d["n_items"].append(n_items)
-        d["index"] += n_items
+            self.indices[where] = HDF5IndexTable(where + '/_indices')
+        idx_tab = self.indices[where]
+        idx_tab.append(len(data))
 
     def _process_entry(self, key, entry):
         self.log.debug("Inspecting {}".format(key))
@@ -322,51 +375,34 @@ class HDF5Sink(Module):
                 entry.h5loc
             )
             return
-        self.log.debug("Converting to numpy array...")
-        data = self._to_array(entry, name=key)
-        if data is None or not hasattr(data, 'dtype'):
-            self.log.debug("Conversion failed. moving on...")
+        if not hasattr(entry, 'h5loc'):
+            self.log.debug("Ignoring '%s': no h5loc attribute" % key)
             return
-        try:
-            self.log.debug("Looking for h5loc...")
-            h5loc = entry.h5loc
-        except AttributeError:
-            self.log.debug(
-                "h5loc not found. setting to '{}'...".format(DEFAULT_H5LOC)
-            )
-            h5loc = DEFAULT_H5LOC
-        if data.dtype.names is None:
-            self.log.debug(
-                "Array has no named dtype. "
-                "using blob key as h5 column name"
-            )
-            dt = np.dtype((data.dtype, [(key, data.dtype)]))
-            data = data.view(dt)
-        # where = os.path.join(h5loc, tabname)
+        if isinstance(entry, NDArray):
+            self._write_ndarray(entry)
+            return entry
         try:
             title = entry.name
         except AttributeError:
             title = key
 
-        if isinstance(data, Table) and not data.h5singleton:
-            if 'group_id' not in data:
-                data = data.append_columns('group_id', self.index)
+        if isinstance(entry, Table) and not entry.h5singleton:
+            if 'group_id' not in entry:
+                entry = entry.append_columns('group_id', self.index)
 
-        # assert 'group_id' in data.dtype.names
-
-        self.log.debug("h5l: '{}', title '{}'".format(h5loc, title))
+        self.log.debug("h5l: '{}', title '{}'".format(entry.h5loc, title))
 
         if hasattr(entry, 'split_h5') and entry.split_h5:
             self.log.debug("Writing into separate columns...")
-            self._write_separate_columns(h5loc, entry, title=title)
+            self._write_separate_columns(entry.h5loc, entry, title=title)
         else:
             self.log.debug("Writing into single Table...")
-            self._write_array(h5loc, data, title=title)
+            self._write_table(entry.h5loc, entry, title=title)
 
         if hasattr(entry, 'h5singleton') and entry.h5singleton:
             self._singletons_written[entry.h5loc] = True
 
-        return data
+        return entry
 
     def process(self, blob):
         written_blob = Blob()
@@ -400,19 +436,16 @@ class HDF5Sink(Module):
         self.h5file.root._v_attrs.jpp = np.string_(get_jpp_revision())
         self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
         self.log.info("Adding index tables.")
-        for where, data in self.indices.items():
-            h5loc = where + "/_indices"
+        for where, idx_tab in self.indices.items():
+            self.log.debug("Creating index table for '%s'" % where)
+            h5loc = idx_tab.h5loc
             self.log.info("  -> {0}".format(h5loc))
             indices = Table({
-                "index": data["indices"],
-                "n_items": data["n_items"]
+                "index": idx_tab.data["indices"],
+                "n_items": idx_tab.data["n_items"]
             },
                             h5loc=h5loc)
-            self._write_array(
-                h5loc,
-                self._to_array(indices),
-                title='Indices',
-            )
+            self._write_table(h5loc, indices, title='Indices')
         self.log.info(
             "Creating pytables index tables. "
             "This may take a few minutes..."
@@ -471,18 +504,37 @@ class HDF5Pump(Pump):
         H5 Node path to a boolean cut mask. If specified, use the boolean array
         found at this node as a mask. ``False`` means "skip this event".
         Example: ``cut_mask="/pid/survives_precut"``
+    shuffle: bool, optional [default: False]
+        Shuffle the group_ids, so that the blobs are mixed up.
+    shuffle_function: function, optional [default: np.random.shuffle
+        The function to be used to shuffle the group IDs.
+    reset_index: bool, optional [default: True]
+        When shuffle is set to true, reset the group ID - start to count
+        the group_id by 0.
     """
 
     def configure(self):
-        self.filename = self.get('filename') or None
-        self.filenames = self.get('filenames') or []
-        self.skip_version_check = bool(self.get('skip_version_check')) or False
+        self.filename = self.get('filename')
+        self.filenames = self.get('filenames', default=[])
+        self.skip_version_check = self.get('skip_version_check', default=False)
         self.verbose = bool(self.get('verbose'))
         self.ignore_hits = bool(self.get('ignore_hits'))
-        self.cut_mask_node = self.get('cut_mask') or None
-        self.cut_masks = defaultdict(list)
+        self.cut_mask_node = self.get('cut_mask')
+        self.shuffle = self.get('shuffle', default=False)
+        self.shuffle_function = self.get(
+            'shuffle_function', default=np.random.shuffle
+        )
+        self.reset_index = self.get('reset_index', default=False)
+
+        self.h5file = None
+        self.cut_mask = None
         self.indices = {}
         self._singletons = {}
+        self.header = None
+        self.group_ids = None
+        self._n_groups = None
+        self.index = 0
+
         if not self.filename and not self.filenames:
             raise ValueError("No filename(s) defined")
 
@@ -490,140 +542,134 @@ class HDF5Pump(Pump):
             self.filenames.append(self.filename)
 
         self.filequeue = list(self.filenames)
-        self.h5file = None
-        self._set_next_file()
 
-        self.headers = OrderedDict()
-        self.group_ids = OrderedDict()
-        self._n_each = OrderedDict()
-        for fn in self.filenames:
-            self._inspect_infile(fn)
-        self._n_events = np.sum([v for k, v in self._n_each.items()])
-        self.minmax = OrderedDict()
-        n_read = 0
-        for fn, n in self._n_each.items():
-            min = n_read
-            max = n_read + n - 1
-            n_read += n
-            self.minmax[fn] = (min, max)
-        self.index = None
-        self._reset_index()
+        self._load_next_file()
 
-    def _inspect_infile(self, fn):
-        # Open all files before reading any events
-        # So we can raise version mismatches etc before reading anything
-        self.log.debug(fn)
-        if os.path.isfile(fn):
-            if not self.skip_version_check:
-                with tb.open_file(fn, 'r') as h5file:
-                    check_version(h5file, fn)
-        else:
-            raise IOError("No such file or directory: '{0}'".format(fn))
-
-        self._read_group_info(fn)
-
+    def _load_next_file(self):
+        self._reset_state()
+        self._open_next_file()
+        if not self.skip_version_check:
+            check_version(self.h5file)
+        self._read_group_info()
         if self.cut_mask_node is not None:
-            if not self.cut_mask_node.startswith('/'):
-                self.cut_mask_node = '/' + self.cut_mask_node
-            with tb.open_file(fn, 'r') as h5file:
-                self.cut_masks[fn] = h5file.get_node(self.cut_mask_node)[:]
-            self.log.debug(self.cut_masks[fn])
-            mask = self.cut_masks[fn]
-            if not mask.shape[0] == self.group_ids[fn].shape[0]:
-                raise ValueError("Cut mask length differs from event ids!")
-        else:
-            self.cut_masks = None
+            self._read_cut_mask()
 
-    def _read_group_info(self, fn):
-        with tb.open_file(fn, 'r') as h5file:
-            if '/event_info' not in h5file and '/group_info' not in h5file:
-                self.log.critical(
-                    "Missing /event_info or /group_info "
-                    "in '%s', aborting..." % fn
+    def _reset_state(self):
+        self._close_h5file()
+        self.h5file = None
+        self.cut_mask = None
+        self.indices = {}
+        self._singletons = {}
+        self.header = None
+        self.group_ids = None
+        self._n_groups = None
+        self.index = 0
+
+    def _read_cut_mask(self):
+        if not self.cut_mask_node.startswith('/'):
+            self.cut_mask_node = '/' + self.cut_mask_node
+        self.cut_mask = self.h5file.get_node(self.cut_mask_node)[:]
+        mask = self.cut_mask
+        if not mask.shape[0] == self.group_ids.shape[0]:
+            raise ValueError("Cut mask length differs from event ids!")
+
+    def _read_group_info(self):
+        h5file = self.h5file
+        if '/event_info' not in h5file and '/group_info' not in h5file:
+            self.log.critical(
+                "Missing /event_info or /group_info "
+                "in '%s', aborting..." % h5file.filename
+            )
+            raise SystemExit
+        elif '/group_info' in h5file:
+            self.log.info("Reading group information from '/group_info'.")
+            group_info = h5file.get_node('/', 'group_info')
+            self.group_ids = group_info.cols.group_id[:]
+            self._n_groups = len(self.group_ids)
+        elif '/event_info' in h5file:
+            self.log.deprecation(
+                "Reading group information from '/event_info'."
+            )
+            event_info = h5file.get_node('/', 'event_info')
+            try:
+                self.group_ids = event_info.cols.group_id[:]
+            except AttributeError:
+                self.group_ids = event_info.cols.event_id[:]
+            self._n_groups = len(self.group_ids)
+        if '/raw_header' in h5file:
+            try:
+                self.header = HDF5Header.from_pytable(
+                    h5file.get_node('/raw_header')
                 )
-                raise SystemExit
-            elif '/group_info' in h5file:
-                self.print("Reading group information from '/group_info'.")
-                group_info = h5file.get_node('/', 'group_info')
-                self.group_ids[fn] = group_info.cols.group_id[:]
-                self._n_each[fn] = len(self.group_ids[fn])
-            elif '/event_info' in h5file:
-                self.print("Reading group information from '/event_info'.")
-                event_info = h5file.get_node('/', 'event_info')
-                try:
-                    self.group_ids[fn] = event_info.cols.group_id[:]
-                except AttributeError:
-                    self.group_ids[fn] = event_info.cols.event_id[:]
-                self._n_each[fn] = len(self.group_ids[fn])
-            if '/raw_header' in h5file:
-                try:
-                    self.headers[fn] = HDF5Header.from_pytable(
-                        h5file.get_node('/raw_header')
-                    )
-                except TypeError:
-                    self.log.error("Could not parse the raw header, skipping!")
+            except TypeError:
+                self.log.error("Could not parse the raw header, skipping!")
+        if self.shuffle:
+            self.shuffle_function(self.group_ids)
 
     def process(self, blob):
         try:
             blob = self.get_blob(self.index)
         except KeyError:
-            self._reset_index()
+            self._reset_iteration()
             raise StopIteration
         self.index += 1
         return blob
 
     def _need_next(self, index):
-        fname = self.current_file
-        min, max = self.minmax[fname]
-        return (index < min) or (index > max)
+        if index >= self._n_groups:
+            return True
 
-    def _set_next_file(self):
+    def _open_next_file(self):
         if not self.filequeue:
-            raise IndexError('No more files available!')
+            raise StopIteration("No more files available")
         if self.h5file:
             self.h5file.close()
-        self.current_file = self.filequeue.pop(0)
-        self.h5file = tb.open_file(self.current_file, 'r')
+        self.filename = self.filequeue.pop(0)
+        self.h5file = tb.open_file(self.filename, 'r')
+        self.print("Opening {0}".format(self.filename))
         if self.verbose:
-            ("Reading %s..." % self.current_file)
-
-    def _translate_index(self, fname, index):
-        min, _ = self.minmax[fname]
-        return index - min
+            ("Reading %s..." % self.filename)
+        return True
 
     def get_blob(self, index):
-        if self.index >= self._n_events:
-            self._reset_index()
-            raise StopIteration
+        if self.index >= self._n_groups:
+            self._reset_iteration()
+            if self.filenames:
+                self._load_next_file()
+            else:
+                raise KeyError
         blob = Blob()
-        if self._need_next(index):
-            self._set_next_file()
-        fname = self.current_file
-        h5file = self.h5file
-        evt_ids = self.group_ids[fname]
-        local_index = self._translate_index(fname, index)
-        group_id = evt_ids[local_index]
-        if self.cut_masks is not None:
+        group_id = self.group_ids[self.index]
+        if self.cut_mask is not None:
             self.log.debug('Cut masks found, applying...')
-            mask = self.cut_masks[fname]
-            if not mask[local_index]:
+            mask = self.cut_mask
+            if not mask[self.index]:
                 self.log.info('Cut mask blacklists this event, skipping...')
                 return
 
         # skip groups with separate columns
         # and deal with them later
         # this should be solved using hdf5 attributes in near future
-        split_locs = []
-        for tab in h5file.walk_nodes(classname="Table"):
+        split_table_locs = []
+        ndarray_locs = []
+        for tab in self.h5file.walk_nodes(classname="Table"):
             h5loc = tab._v_pathname
             loc, tabname = os.path.split(h5loc)
-            if loc in split_locs:
+            if loc in split_table_locs:
                 self.log.info("get_blob: '%s' is noted, skip..." % h5loc)
                 continue
             if tabname == "_indices":
                 self.log.debug("get_blob: found index table '%s'" % h5loc)
-                split_locs.append(loc)
-                self.indices[loc] = h5file.get_node(loc + '/' + '_indices')
+                split_table_locs.append(loc)
+                self.indices[loc] = self.h5file.get_node(h5loc)
+                continue
+            if tabname.endswith("_indices"):
+                self.log.debug(
+                    "get_blob: found index table '%s' for NDArray" % h5loc
+                )
+                ndarr_loc = h5loc.replace("_indices", '')
+                ndarray_locs.append(ndarr_loc)
+                self.indices[ndarr_loc] = self.h5file.get_node(h5loc)
                 continue
             tabname = camelise(tabname)
 
@@ -655,7 +701,7 @@ class HDF5Pump(Pump):
                     continue
             else:
                 if h5loc not in self._singletons:
-                    self.print(
+                    log.info(
                         "Caching H5 singleton: {} ({})".format(tabname, h5loc)
                     )
                     self._singletons[h5loc] = Table(
@@ -669,47 +715,67 @@ class HDF5Pump(Pump):
                 continue
 
             self.log.debug("h5loc: '{}'".format(h5loc))
-            blob[tabname] = Table(
-                arr, h5loc=h5loc, split_h5=False, name=tabname
-            )
+            tab = Table(arr, h5loc=h5loc, split_h5=False, name=tabname)
+            if self.shuffle and self.reset_index:
+                tab.group_id[:] = self.index
+            blob[tabname] = tab
 
         # skipped locs are now column wise datasets (usually hits)
         # currently hardcoded, in future using hdf5 attributes
         # to get the right constructor
-        for loc in split_locs:
+        for loc in split_table_locs:
             # if some events are missing (group_id not continuous),
             # this does not work as intended
             # idx, n_items = self.indices[loc][group_id]
-            idx = self.indices[loc].col('index')[local_index]
-            n_items = self.indices[loc].col('n_items')[local_index]
+            idx = self.indices[loc].col('index')[group_id]
+            n_items = self.indices[loc].col('n_items')[group_id]
             end = idx + n_items
-            node = h5file.get_node(loc)
+            node = self.h5file.get_node(loc)
             columns = (c for c in node._v_children if c != '_indices')
             data = {}
-            for column in columns:
-                data[column] = h5file.get_node(loc + '/' + column)[idx:end]
+            for col in columns:
+                data[col] = self.h5file.get_node(loc + '/' + col)[idx:end]
             tabname = camelise(loc.split('/')[-1])
-            blob[tabname] = Table(data, h5loc=loc, split_h5=True, name=tabname)
+            s_tab = Table(data, h5loc=loc, split_h5=True, name=tabname)
+            if self.shuffle and self.reset_index:
+                s_tab.group_id[:] = self.index
+            blob[tabname] = s_tab
 
-        if fname in self.headers:
-            header = self.headers[fname]
-            blob['Header'] = header
+        if self.header is not None:
+            blob['Header'] = self.header
+
+        for ndarr_loc in ndarray_locs:
+            self.log.info("Reading %s" % ndarr_loc)
+            idx = self.indices[ndarr_loc].col('index')[group_id]
+            n_items = self.indices[ndarr_loc].col('n_items')[group_id]
+            end = idx + n_items
+            ndarr = self.h5file.get_node(ndarr_loc)
+            ndarr_name = camelise(ndarr_loc.split('/')[-1])
+            _ndarr = NDArray(
+                ndarr[idx:end],
+                h5loc=ndarr_loc,
+                title=ndarr.title,
+                group_id=group_id
+            )
+            if self.shuffle and self.reset_index:
+                _ndarr.group_id = self.index
+            blob[ndarr_name] = _ndarr
 
         return blob
 
-    def _reset_index(self):
+    def _reset_iteration(self):
         """Reset index to default value"""
         self.index = 0
 
     def __len__(self):
-        return self._n_events
+        return self._n_groups
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        if self.index >= self._n_events:
-            self._reset_index()
+        if self.index >= self._n_groups:
+            self._reset_iteration()
             raise StopIteration
         blob = self.get_blob(self.index)
         self.index += 1
@@ -729,10 +795,14 @@ class HDF5Pump(Pump):
         for i in range(start, stop, step):
             yield self.get_blob(i)
 
-        self.current_file = None
+        self.filename = None
+
+    def _close_h5file(self):
+        if self.h5file:
+            self.h5file.close()
 
     def finish(self):
-        self.h5file.close()
+        self._close_h5file()
 
 
 class HDF5MetaData(Module):

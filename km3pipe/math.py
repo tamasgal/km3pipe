@@ -204,8 +204,12 @@ def lpnorm(x, p=2):
     return np.power(np.sum(np.power(x, p)), 1 / p)
 
 
-def dist(x1, x2):
-    np.linalg.norm(x2 - x1, axis=1)
+def dist(x1, x2, axis=0):
+    """Return the distance between two points.
+    
+    Set axis=1 if x1 is a vector and x2 a matrix to get a vector of distances.
+    """
+    return np.linalg.norm(x2 - x1, axis=axis)
 
 
 def com(points, masses=None):

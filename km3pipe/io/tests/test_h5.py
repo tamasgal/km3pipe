@@ -8,7 +8,7 @@ import numpy as np
 import tables as tb
 
 from km3pipe import Blob, Module, Pipeline, Pump, version
-from km3pipe.dataclasses import Table
+from km3pipe.dataclasses import Table, NDArray
 from km3pipe.io.hdf5 import (
     HDF5Pump, HDF5Sink, HDF5Header, convert_header_dict_to_table,
     FORMAT_VERSION
@@ -139,6 +139,9 @@ class TestH5Pump(TestCase):
         p.attach(Printer)
         p.drain()
 
+    def test_reading_multiple_files(self):
+        pass
+
 
 class TestH5Sink(TestCase):
     def setUp(self):
@@ -155,36 +158,11 @@ class TestH5Sink(TestCase):
         self.out.close()
         self.fobj.close()
 
-    # def test_init_has_to_be_explicit(self):
-    #     with self.assertRaises(TypeError):
-    #         HDF5Sink(self.out)
-
     def test_pipe(self):
         p = Pipeline()
         p.attach(HDF5Pump, filename=self.fname)
         p.attach(HDF5Sink, h5file=self.out)
         p.drain()
-
-    def test_scalars(self):
-        out = tb.open_file(
-            'foobar_scalar',
-            "a",
-            driver="H5FD_CORE",
-            driver_core_backing_store=0
-        )
-
-        def pu(blob):
-            return {'foo': 42.0}
-
-        p = Pipeline()
-        p.attach(pu)
-        p.attach(HDF5Sink, h5file=out, keep_open=True)
-        p.drain(2)
-        node = out.root.misc
-        assert node is not None
-        assert node.cols is not None
-        assert 'foo' in set(node.cols._v_colnames)
-        out.close()
 
     def test_h5info(self):
         fobj = tempfile.NamedTemporaryFile(delete=True)
@@ -248,6 +226,169 @@ class TestH5Sink(TestCase):
             assert blob['TabB'].b[0] == drain_count - 1 + 100
 
         assert 10 == drain_count
+
+        fobj.close()
+
+
+class TestNDArrayHandling(TestCase):
+    def test_writing_of_n_dim_arrays_with_defaults(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+
+        class DummyPump(Pump):
+            def process(self, blob):
+                blob['foo'] = NDArray(arr)
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(3)
+
+        with tb.File(fname) as f:
+            foo = f.get_node('/misc')
+            assert 3 == foo[0, 1, 0]
+            assert 4 == foo[0, 1, 1]
+            assert 'Unnamed NDArray' == foo.title
+            indices = f.get_node('/misc_indices')
+            self.assertTupleEqual((0, 2, 4), tuple(indices.cols.index[:]))
+            self.assertTupleEqual((2, 2, 2), tuple(indices.cols.n_items[:]))
+
+        fobj.close()
+
+    def test_writing_of_n_dim_arrays(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                blob['foo'] = NDArray(
+                    arr + self.index * 10, h5loc='/foo', title='Yep'
+                )
+                self.index += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(3)
+
+        with tb.File(fname) as f:
+            foo = f.get_node("/foo")
+            assert 3 == foo[0, 1, 0]
+            assert 4 == foo[0, 1, 1]
+            assert "Yep" == foo.title
+
+        fobj.close()
+
+    def test_writing_of_n_dim_arrays_in_nested_group(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                blob['foo'] = NDArray(
+                    arr + self.index * 10, h5loc='/foo/bar/baz'
+                )
+                self.index += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(3)
+
+        with tb.File(fname) as f:
+            foo = f.get_node("/foo/bar/baz")
+            print(foo)
+            assert 3 == foo[0, 1, 0]
+            assert 4 == foo[0, 1, 1]
+
+        fobj.close()
+
+    def test_writing_of_n_dim_arrays(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                blob['foo'] = NDArray(
+                    arr + self.index * 10, h5loc='/foo', title='Yep'
+                )
+                self.index += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(3)
+
+        with tb.File(fname) as f:
+            foo = f.get_node("/foo")
+            assert 3 == foo[0, 1, 0]
+            assert 4 == foo[0, 1, 1]
+            assert "Yep" == foo.title
+
+        fobj.close()
+
+    def test_reading_of_n_dim_arrays(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                blob['Foo'] = NDArray(
+                    arr + self.index * 10, h5loc='/foo', title='Yep'
+                )
+                self.index += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(3)
+
+        class Observer(Module):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                assert 'Foo' in blob
+                foo = blob['Foo']
+                print(self.index)
+                assert self.index * 10 + 1 == foo[0, 0, 0]
+                assert self.index * 10 + 8 == foo[1, 1, 1]
+                assert self.index * 10 + 3 == foo[0, 1, 0]
+                assert self.index * 10 + 6 == foo[1, 0, 1]
+                self.index += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(HDF5Pump, filename=fname)
+        pipe.attach(Observer)
+        pipe.drain()
 
         fobj.close()
 
@@ -469,13 +610,255 @@ class TestHDF5PumpConsistency(TestCase):
                 assert 'Tab' in blob
                 assert self.index - 1 == blob['GroupInfo'].group_id
                 assert self.index * 10 == blob['Tab']['a']
-                assert 1 == blob['Tab']['b'] == 1
+                assert 1 == blob['Tab']['b']
                 return blob
 
         pipe = Pipeline()
         pipe.attach(HDF5Pump, filename=fname)
         pipe.attach(BlobTester)
         pipe.drain()
+
+        fobj.close()
+
+    def test_hdf5_readout_split_tables_in_same_group(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.count = 0
+
+            def process(self, blob):
+                self.count += 1
+                tab_a = Table({
+                    'a': self.count * 10,
+                },
+                              h5loc='/tabs/tab_a',
+                              split_h5=True)
+                tab_b = Table({
+                    'b': self.count * 100,
+                },
+                              h5loc='/tabs/tab_b',
+                              split_h5=True)
+                blob['TabA'] = tab_a
+                blob['TabB'] = tab_b
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        class BlobTester(Module):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                self.index += 1
+                assert 'GroupInfo' in blob
+                assert 'TabA' in blob
+                assert 'TabB' in blob
+                assert self.index - 1 == blob['GroupInfo'].group_id
+                assert self.index * 10 == blob['TabA']['a']
+                assert self.index * 100 == blob['TabB']['b']
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(HDF5Pump, filename=fname)
+        pipe.attach(BlobTester)
+        pipe.drain()
+
+        fobj.close()
+
+
+class TestHDF5Shuffle(TestCase):
+    def test_shuffle_without_reset_index(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.i = 0
+
+            def process(self, blob):
+                blob['Tab'] = Table({'a': self.i}, h5loc='/tab')
+                blob['SplitTab'] = Table({
+                    'b': self.i
+                },
+                                         h5loc='/split_tab',
+                                         split_h5=True)
+                blob['Arr'] = NDArray(np.arange(self.i + 1), h5loc='/arr')
+                self.i += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        shuffled_group_ids = [2, 1, 0, 3, 4]
+
+        def shuffle(x):
+            for i in range(len(x)):
+                x[i] = shuffled_group_ids[i]
+
+        class Observer(Module):
+            def configure(self):
+                self.group_ids_tab = []
+                self.group_ids_split_tab = []
+                self.group_ids_arr = []
+                self.a = []
+                self.b = []
+                self.arr_len = []
+
+            def process(self, blob):
+                group_id_tab = blob['Tab'].group_id[0]
+                group_id_split_tab = blob['SplitTab'].group_id[0]
+                group_id_arr = blob['Arr'].group_id
+                assert blob['GroupInfo'].group_id[0] == group_id_tab
+                assert blob['GroupInfo'].group_id[0] == group_id_split_tab
+                assert blob['GroupInfo'].group_id[0] == group_id_arr
+                self.group_ids_tab.append(blob['Tab'].group_id[0])
+                self.group_ids_split_tab.append(blob['SplitTab'].group_id[0])
+                self.group_ids_arr.append(blob['Arr'].group_id)
+                self.a.append(blob['Tab'].a[0])
+                self.b.append(blob['SplitTab'].b[0])
+                self.arr_len.append(len(blob['Arr']) - 1)
+                return blob
+
+            def finish(self):
+                return {
+                    'group_ids_tab': self.group_ids_tab,
+                    'group_ids_split_tab': self.group_ids_split_tab,
+                    'group_ids_arr': self.group_ids_arr,
+                    'a': self.a,
+                    'b': self.b,
+                    'arr_len': self.arr_len
+                }
+
+        pipe = Pipeline()
+        pipe.attach(
+            HDF5Pump,
+            filename=fname,
+            shuffle=True,
+            shuffle_function=shuffle,
+            reset_index=False
+        )
+        pipe.attach(Observer)
+        results = pipe.drain()
+
+        self.assertListEqual(
+            results['Observer']['group_ids_tab'], shuffled_group_ids
+        )
+        self.assertListEqual(
+            results['Observer']['group_ids_split_tab'], shuffled_group_ids
+        )
+        self.assertListEqual(
+            results['Observer']['group_ids_arr'], shuffled_group_ids
+        )
+        self.assertListEqual(results['Observer']['a'], shuffled_group_ids)
+        self.assertListEqual(results['Observer']['b'], shuffled_group_ids)
+        # a small hack: we store the length of the array in 'b', which is
+        # then equal to the shuffled group IDs (since those were generated
+        # using the group_id
+        self.assertListEqual(
+            results['Observer']['arr_len'], shuffled_group_ids
+        )
+
+        fobj.close()
+
+    def test_shuffle_with_reset_index(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.i = 0
+
+            def process(self, blob):
+                blob['Tab'] = Table({'a': self.i}, h5loc='/tab')
+                blob['SplitTab'] = Table({
+                    'b': self.i
+                },
+                                         h5loc='/split_tab',
+                                         split_h5=True)
+                blob['Arr'] = NDArray(np.arange(self.i + 1), h5loc='/arr')
+                self.i += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        shuffled_group_ids = [2, 1, 0, 3, 4]
+
+        def shuffle(x):
+            for i in range(len(x)):
+                x[i] = shuffled_group_ids[i]
+
+        class Observer(Module):
+            def configure(self):
+                self.group_ids_tab = []
+                self.group_ids_split_tab = []
+                self.group_ids_arr = []
+                self.a = []
+                self.b = []
+                self.arr_len = []
+
+            def process(self, blob):
+                group_id_tab = blob['Tab'].group_id[0]
+                group_id_split_tab = blob['SplitTab'].group_id[0]
+                group_id_arr = blob['Arr'].group_id
+                assert blob['GroupInfo'].group_id[0] == group_id_tab
+                assert blob['GroupInfo'].group_id[0] == group_id_split_tab
+                assert blob['GroupInfo'].group_id[0] == group_id_arr
+                self.group_ids_tab.append(blob['Tab'].group_id[0])
+                self.group_ids_split_tab.append(blob['SplitTab'].group_id[0])
+                self.group_ids_arr.append(blob['Arr'].group_id)
+                self.a.append(blob['Tab'].a[0])
+                self.b.append(blob['SplitTab'].b[0])
+                self.arr_len.append(len(blob['Arr']) - 1)
+                return blob
+
+            def finish(self):
+                return {
+                    'group_ids_tab': self.group_ids_tab,
+                    'group_ids_split_tab': self.group_ids_split_tab,
+                    'group_ids_arr': self.group_ids_arr,
+                    'a': self.a,
+                    'b': self.b,
+                    'arr_len': self.arr_len
+                }
+
+        pipe = Pipeline()
+        pipe.attach(
+            HDF5Pump,
+            filename=fname,
+            shuffle=True,
+            shuffle_function=shuffle,
+            reset_index=True
+        )
+        pipe.attach(Observer)
+        results = pipe.drain()
+
+        self.assertListEqual(
+            results['Observer']['group_ids_tab'], [0, 1, 2, 3, 4]
+        )
+        self.assertListEqual(
+            results['Observer']['group_ids_split_tab'], [0, 1, 2, 3, 4]
+        )
+        self.assertListEqual(
+            results['Observer']['group_ids_arr'], [0, 1, 2, 3, 4]
+        )
+        self.assertListEqual(results['Observer']['a'], shuffled_group_ids)
+        self.assertListEqual(results['Observer']['b'], shuffled_group_ids)
+        # a small hack: we store the length of the array in 'b', which is
+        # then equal to the shuffled group IDs (since those were generated
+        # using the group_id
+        self.assertListEqual(
+            results['Observer']['arr_len'], shuffled_group_ids
+        )
 
         fobj.close()
 
@@ -565,6 +948,66 @@ class TestHDF5Header(TestCase):
         assert 0 == header.coord_origin.y
         assert 0 == header.coord_origin.z
         self.assertTupleEqual((0, 0, 0), header.coord_origin)
+
+    def test_multiple_files_readout(self):
+        class DummyPump(Pump):
+            def configure(self):
+                self.i = self.require('i')
+
+            def process(self, blob):
+                blob['Tab'] = Table({'a': self.i}, h5loc='tab')
+                self.i += 1
+                return blob
+
+        filenames = []
+        fobjs = []
+        for i in range(3):
+            fobj = tempfile.NamedTemporaryFile(delete=True)
+            fname = fobj.name
+            filenames.append(fname)
+            fobjs.append(fobj)
+            pipe = Pipeline()
+            pipe.attach(DummyPump, i=i)
+            pipe.attach(HDF5Sink, filename=fname)
+            pipe.drain(i + 3)
+
+        class Observer(Module):
+            def configure(self):
+                self._blob_lengths = []
+                self._a = []
+                self._group_ids = []
+                self.index = 0
+
+            def process(self, blob):
+                self._blob_lengths.append(len(blob))
+                self._a.append(blob['Tab'].a[0])
+                self._group_ids.append(blob['GroupInfo'].group_id[0])
+                print(blob)
+                self.index += 1
+                return blob
+
+            def finish(self):
+                return {
+                    'blob_lengths': self._blob_lengths,
+                    'a': self._a,
+                    'group_ids': self._group_ids
+                }
+
+        pipe = Pipeline()
+        pipe.attach(HDF5Pump, filenames=filenames)
+        pipe.attach(Observer)
+        results = pipe.drain()
+        summary = results['Observer']
+        assert 12 == len(summary['blob_lengths'])
+        print(summary)
+        assert all(x == 2 for x in summary['blob_lengths'])
+        self.assertListEqual([0, 1, 2, 1, 2, 3, 4, 2, 3, 4, 5, 6],
+                             summary['a'])
+        self.assertListEqual([0, 1, 2, 0, 1, 2, 3, 0, 1, 2, 3, 4],
+                             summary['group_ids'])
+
+        for fobj in fobjs:
+            fobj.close()
 
 
 class TestConvertHeaderDictToTable(TestCase):

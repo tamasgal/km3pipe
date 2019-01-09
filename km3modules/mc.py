@@ -23,6 +23,32 @@ NEUTRINOS = {
 }
 
 
+class GlobalRandomState(Module):
+    """Sets the global random seed of the numpy random generator
+
+    KM3Pipe uses numpy routines exclusively to generate randomness. Setting a
+    seed to a specific value will create a fully reproducible pipeline as long
+    as your own modules also utilise numpy for random numbers.
+
+    Parameters
+    ----------
+    seed: int, default=42
+    
+    """
+
+    def configure(self):
+        self.seed = self.get('seed', default=42)
+
+        from numpy.random.mtrand import _rand as global_randstate
+        global_randstate.seed(self.seed)
+
+        self._random_state = np.random.RandomState(self.seed)
+
+    @property
+    def random_state(self):
+        return self._random_state
+
+
 class McTruth(Module):
     """Extract MC info of 1st MC track.
 

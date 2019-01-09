@@ -1,0 +1,20 @@
+We need this file otherwise we get an error from sphinx (autoapi) like this:
+
+...
+...
+[AutoAPI] Ignoring /km3pipe/km3modules/tests/test_common.py
+[AutoAPI] Ignoring /km3pipe/km3modules/tests/test_mc.py
+[AutoAPI] Reading files... [100%] /km3pipe/km3modules/hardware.py
+/usr/local/lib/python3.6/site-packages/autoapi/extension.py:96: RemovedInSphinx20Warning: app.info() is now deprecated. Use sphinx.util.logging instead.
+  app.info(bold('[AutoAPI] ') + darkgreen('Mapping Data'))
+[AutoAPI] Mapping Data
+
+Exception occurred:
+  File "/usr/local/lib/python3.6/site-packages/sphinx_gallery/gen_gallery.py", line 257, in touch_empty_backreferences
+    open(examples_path, 'w').close()
+FileNotFoundError: [Errno 2] No such file or directory: '/km3pipe/doc/modules/generated/km3pipe.calib.examples'
+The full traceback has been saved in /tmp/sphinx-err-_i42cm23.log, if you want to report the issue to the developers.
+Please also report this if it was a user error, so that a better error message can be provided next time.
+A bug report can be filed in the tracker at <https://github.com/sphinx-doc/sphinx/issues>. Thanks!
+Makefile:62: recipe for target 'html' failed
+make: *** [html] Error 2

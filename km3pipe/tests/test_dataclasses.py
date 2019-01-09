@@ -12,7 +12,7 @@ import pytest
 
 from km3pipe.testing import TestCase, skip    # noqa
 from km3pipe.dataclasses import (
-    Table, Vec3, inflate_dtype, has_structured_dt, is_structured,
+    Table, NDArray, Vec3, inflate_dtype, has_structured_dt, is_structured,
     DEFAULT_H5LOC, DEFAULT_NAME, DEFAULT_SPLIT
 )
 
@@ -180,6 +180,20 @@ class TestTable(TestCase):
         assert np.allclose([1, 2], tab.b)
         assert np.allclose([3, 4], tab.c)
         assert np.allclose([5, 6], tab.a)
+
+    def test_from_dict_with_fillna(self):
+        data = {'a': [1, 2], 'b': [3, 4]}
+        dt = [('a', float), ('b', float), ('c', float)]
+        tab = Table.from_dict(data, dtype=dt, fillna=True)
+        assert np.isnan(tab.c[0])
+        assert np.isnan(tab.c[1])
+
+    def test_init_implicitly_from_dict_with_fillna(self):
+        data = {'a': [1, 2], 'b': [3, 4]}
+        dt = [('a', float), ('b', float), ('c', float)]
+        tab = Table(data, dtype=dt, fillna=True)
+        assert np.isnan(tab.c[0])
+        assert np.isnan(tab.c[1])
 
     def test_fromcolumns(self):
         n = 5
@@ -889,8 +903,36 @@ class TestTable(TestCase):
         assert np.isnan(merged_tab.b[2])
         assert np.isnan(merged_tab.b[3])
 
+    def test_init_with_different_dicts_but_same_content(self):
+        t1 = Table({'a': [1, 2], 'b': [3, 4], 'c': [5, 6]})
+        t2 = Table({'c': [1, 2], 'a': [3, 4], 'b': [5, 6]})
 
-class TestTableFancyAttributes(TestCase):
+        assert t1.dtype == t2.dtype
+
+    def test_init_from_template_with_differently_ordered_dicts(self):
+        t1 = Table.from_template({
+            'frame_index': 1,
+            'slice_id': 2,
+            'timestamp': 3,
+            'nanoseconds': 4,
+            'n_frames': 5,
+        }, 'TimesliceInfo')
+        t2 = Table.from_template({
+            'n_frames': 5,
+            'timestamp': 3,
+            'nanoseconds': 4,
+            'slice_id': 2,
+            'frame_index': 1,
+        }, 'TimesliceInfo')
+        assert t1.dtype == t2.dtype
+        assert t1.frame_index[0] == t2.frame_index[0]
+        assert t1.slice_id[0] == t2.slice_id[0]
+        assert t1.nanoseconds[0] == t2.nanoseconds[0]
+        assert t1.n_frames[0] == t2.n_frames[0]
+        assert t1.timestamp[0] == t2.timestamp[0]
+
+
+class TestTableFancaAttributes(TestCase):
     def setUp(self):
         self.arr_bare = Table({
             'a': [1, 2, 3],
@@ -1073,6 +1115,36 @@ class TestTableFancyAttributes(TestCase):
         with pytest.raises(KeyError):
             triggered_hits = hits.triggered_rows
             assert triggered_hits is not None
+
+
+class TestNDArray(TestCase):
+    def test_init(self):
+        arr = np.random.random((2, 3, 4))
+        ndarr = NDArray(arr)
+
+    def test_init_array(self):
+        arr = np.random.random((2, 3, 4))
+        arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+        ndarr = NDArray(arr)
+        assert 1 == ndarr[0, 0, 0]
+        assert 6 == ndarr[1, 0, 1]
+        assert 7 == ndarr[1, 1, 0]
+        assert "/misc" == ndarr.h5loc
+        assert "Unnamed NDArray" == ndarr.title
+        assert ndarr.group_id is None
+
+    def test_attributes(self):
+        ndarr = NDArray([1], h5loc='/foo', title='Foo', group_id=23)
+        assert '/foo' == ndarr.h5loc
+        assert 'Foo' == ndarr.title
+        assert 23 == ndarr.group_id
+
+    def test_slicing_preserves_attribute(self):
+        ndarr = NDArray([1, 2, 3], h5loc='/foo', title='Foo', group_id=23)
+        a = ndarr[:1]
+        assert '/foo' == a.h5loc
+        assert 'Foo' == a.title
+        assert 23 == a.group_id
 
 
 class TestVec3(TestCase):

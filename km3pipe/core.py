@@ -43,6 +43,12 @@ if sys.version_info >= (3, 3):
 else:
     process_time = time.clock
 
+# Consistent `isistance(..., basestring)` for Python 2 and 3
+try:
+    basestring
+except NameError:
+    basestring = str
+
 
 class ServiceManager(object):
     """
@@ -191,9 +197,17 @@ class Pipeline(object):
 
         # Special parameters
         if 'only_if' in kwargs:
-            module.only_if = kwargs['only_if']
+            required_keys = kwargs['only_if']
+            if isinstance(required_keys, basestring):
+                required_keys = [required_keys]
+            module.only_if = set(required_keys)
         else:
-            module.only_if = None
+            module.only_if = set()
+
+        if 'blob_keys' in kwargs:
+            module.blob_keys = kwargs['blob_keys']
+        else:
+            module.blob_keys = None
 
         if 'every' in kwargs:
             module.every = kwargs['every']
@@ -267,8 +281,8 @@ class Pipeline(object):
                             )
                         )
                         continue
-                    if module.only_if is not None and \
-                            module.only_if not in self.blob:
+                    if module.only_if and not module.only_if.issubset(set(
+                            self.blob.keys())):
                         log.debug(
                             "Skipping {0}, due to missing required key"
                             "'{1}'.".format(module.name, module.only_if)
@@ -283,15 +297,32 @@ class Pipeline(object):
                         )
                         continue
 
+                    if module.blob_keys is not None:
+                        blob_to_send = Blob({
+                            k: self.blob[k]
+                            for k in module.blob_keys
+                            if k in self.blob
+                        })
+                    else:
+                        blob_to_send = self.blob
+
                     log.debug("Processing {0} ".format(module.name))
                     start = timer()
                     start_cpu = process_time()
-                    self.blob = module(self.blob)
+                    new_blob = module(blob_to_send)
                     if self.timeit or module.timeit:
                         self._timeit[module]['process'] \
                             .append(timer() - start)
                         self._timeit[module]['process_cpu'] \
                             .append(process_time() - start_cpu)
+
+                    if module.blob_keys is not None:
+                        if new_blob is not None:
+                            for key, item in new_blob.items():
+                                self.blob[key] = new_blob[key]
+                    else:
+                        self.blob = new_blob
+
                 self._timeit['cycles'].append(timer() - cycle_start)
                 self._timeit['cycles_cpu'].append(
                     process_time() - cycle_start_cpu
@@ -445,7 +476,7 @@ class Module(object):
         log.debug("Initialising {0}".format(name))
         self._name = name
         self.parameters = parameters
-        self.only_if = None
+        self.only_if = set()
         self.every = 1
         self.detector = None
         if self.__module__ == '__main__':
@@ -593,6 +624,8 @@ class Blob(OrderedDict):
     """A simple (ordered) dict with a fancy name. This should hold the data."""
 
     def __str__(self):
+        if len(self) == 0:
+            return "Empty blob"
         padding = max(len(k) for k in self.keys()) + 3
         s = ["Blob ({} entries):".format(len(self))]
         for key, value in self.items():

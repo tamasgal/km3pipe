@@ -212,20 +212,26 @@ class Table(np.recarray):
         return arr_dict
 
     @classmethod
-    def from_dict(cls, arr_dict, dtype=None, **kwargs):
+    def from_dict(cls, arr_dict, dtype=None, fillna=False, **kwargs):
         """Generate a table from a dictionary of arrays.
         """
         # i hope order of keys == order or values
         if dtype is None:
-            names = list(arr_dict.keys())
+            names = sorted(list(arr_dict.keys()))
         else:
             dtype = np.dtype(dtype)
             dt_names = [f for f in dtype.names]
             dict_names = [k for k in arr_dict.keys()]
-            if not set(dt_names) == set(dict_names):
-                raise KeyError(
-                    'Dictionary keys and dtype fields do not match!'
-                )
+            missing_names = set(dt_names) - set(dict_names)
+            if missing_names:
+                if fillna:
+                    dict_names = dt_names
+                    for missing_name in missing_names:
+                        arr_dict[missing_name] = np.nan
+                else:
+                    raise KeyError(
+                        'Dictionary keys and dtype fields do not match!'
+                    )
             names = list(dtype.names)
 
         arr_dict = cls._expand_scalars(arr_dict)
@@ -569,6 +575,26 @@ class Table(np.recarray):
         if not hasattr(self, 'triggered'):
             raise KeyError("Table has no 'triggered' column!")
         return self[self.triggered.astype(bool)]
+
+
+class NDArray(np.ndarray):
+    """Array with HDF5 metadata."""
+
+    def __new__(cls, array, dtype=None, order=None, **kwargs):
+        obj = np.asarray(array, dtype=dtype, order=order).view(cls)
+        h5loc = kwargs.get('h5loc', '/misc')
+        title = kwargs.get('title', 'Unnamed NDArray')
+        group_id = kwargs.get('group_id', None)
+        obj.h5loc = h5loc
+        obj.title = title
+        obj.group_id = group_id
+        return obj
+
+    def __array_finalize__(self, obj):
+        if obj is None: return
+        self.h5loc = getattr(obj, 'h5loc', None)
+        self.title = getattr(obj, 'title', None)
+        self.group_id = getattr(obj, 'group_id', None)
 
 
 class Vec3(object):

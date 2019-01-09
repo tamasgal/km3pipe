@@ -7,12 +7,13 @@ Database utilities.
 from __future__ import absolute_import, print_function, division
 
 from datetime import datetime
+import numbers
 import ssl
 import io
 import json
 import re
 import pytz
-from collections import defaultdict, OrderedDict
+from collections import defaultdict, OrderedDict, namedtuple
 try:
     from inspect import Signature, Parameter
     SKIP_SIGNATURE_HINTS = False
@@ -815,7 +816,7 @@ class TriggerSetup(object):
 
 def clbupi2ahrsupi(clb_upi):
     """Generate AHRS UPI from CLB UPI."""
-    return re.sub('.*/.*/2\.', '3.4.3.4/AHRS/1.', clb_upi)
+    return re.sub('.*/.*/2.', '3.4.3.4/AHRS/1.', clb_upi)
 
 
 def show_ahrs_calibration(clb_upi, version='3'):
@@ -841,3 +842,75 @@ def show_ahrs_calibration(clb_upi, version='3'):
         values = [[i.text for i in c] for c in root.findall(".//Values")]
         for name, value in zip(names, values):
             print("{}: {}".format(name, value))
+
+
+class CLBMap(object):
+    par_map = {'DETOID': 'det_oid', 'UPI': 'upi', 'DOMID': 'dom_id'}
+
+    def __init__(self, det_oid):
+        self.log = get_logger('CLBMap')
+        if isinstance(det_oid, numbers.Integral):
+            self.log.warning(
+                "Det ID ('%s') provided instead of det OID "
+                "(string representation). Trying to get the OID instead..." %
+                det_oid
+            )
+            db = DBManager()
+            _det_oid = db.get_det_oid(det_oid)
+            if _det_oid is not None:
+                self.log.warning(
+                    "This is the det OID for det ID '%s', please use "
+                    "that in future: %s" % (det_oid, _det_oid)
+                )
+                det_oid = _det_oid
+        self.det_oid = det_oid
+        sds = StreamDS()
+        self._data = sds.clbmap(detoid=det_oid)
+        self._by = {}
+
+    def __len__(self):
+        return len(self._data)
+
+    @property
+    def upi(self):
+        """A dict of CLBs with UPI as key"""
+        parameter = 'UPI'
+        if parameter not in self._by:
+            self._populate(by=parameter)
+        return self._by[parameter]
+
+    @property
+    def dom_id(self):
+        """A dict of CLBs with DOM ID as key"""
+        parameter = 'DOMID'
+        if parameter not in self._by:
+            self._populate(by=parameter)
+        return self._by[parameter]
+
+    def base(self, du):
+        """Return the base CLB for a given DU"""
+        parameter = 'base'
+        if parameter not in self._by:
+            self._by[parameter] = {}
+            for clb in self.upi.values():
+                if clb.floor == 0:
+                    self._by[parameter][clb.du] = clb
+        return self._by[parameter][du]
+
+    def _populate(self, by):
+        data = {}
+        for _, row in self._data.iterrows():
+            data[row[by]] = CLB(
+                det_oid=row['DETOID'],
+                floor=row['FLOORID'],
+                du=row['DUID'],
+                serial_number=row['SERIALNUMBER'],
+                upi=row['UPI'],
+                dom_id=row['DOMID']
+            )
+        self._by[by] = data
+
+
+CLB = namedtuple(
+    'CLB', ['det_oid', 'floor', 'du', 'serial_number', 'upi', 'dom_id']
+)
