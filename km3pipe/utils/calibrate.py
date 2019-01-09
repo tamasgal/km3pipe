@@ -4,7 +4,7 @@
 Apply geometry and time calibration from a DETX to an HDF5 file.
 
 Usage:
-    calibrate [-c CHUNK_SIZE] DETXFILE HDF5FILE
+    calibrate [options] DETXFILE HDF5FILE
     calibrate (-h | --help)
     calibrate --version
 
@@ -127,7 +127,7 @@ def main():
 
     with tb.File(args['HDF5FILE'], "a") as f:
         try:
-            kp.io.hdf5.check_version(f, args['HDF5FILE'])
+            kp.io.hdf5.check_version(f)
         except kp.io.hdf5.H5VersionError as e:
             log.critical(e)
             raise SystemExit
