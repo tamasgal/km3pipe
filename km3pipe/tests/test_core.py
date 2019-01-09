@@ -427,6 +427,56 @@ class TestPipeline(TestCase):
         pl.attach(CheckBlob)
         pl.drain(5)
 
+    def test_attached_module_gets_a_parameter_passed_which_is_ignored(self):
+        pl = Pipeline()
+
+        log_mock = MagicMock()
+
+        class A(Module):
+            def configure(self):
+                a = self.get('a')
+                self.log = log_mock
+
+        pl.attach(A, a=1, b=2)
+        pl.drain(1)
+
+        args, kwargs = log_mock.warning.call_args_list[0]
+        assert 'The following parameters were ignored: b' == args[0]
+
+    def test_attached_module_gets_multiple_parameters_passed_which_are_ignored(
+            self
+    ):
+        pl = Pipeline()
+
+        log_mock = MagicMock()
+
+        class A(Module):
+            def configure(self):
+                a = self.get('a')
+                self.log = log_mock
+
+        pl.attach(A, a=1, b=2, c=3)
+        pl.drain(1)
+
+        args, kwargs = log_mock.warning.call_args_list[0]
+        assert 'The following parameters were ignored: b, c' == args[0]
+
+    def test_attached_module_does_not_warn_for_reserverd_parameters(self):
+        pl = Pipeline()
+
+        log_mock = MagicMock()
+
+        class A(Module):
+            def configure(self):
+                a = self.get('a')
+                self.log = log_mock
+
+        pl.attach(A, a=1, b=2, only_if='a', every=10)
+        pl.drain(1)
+
+        args, kwargs = log_mock.warning.call_args_list[0]
+        assert 'The following parameters were ignored: b' == args[0]
+
 
 class TestPipelineConfigurationViaFile(TestCase):
     """Auto-configuration of pipelines using TOML files"""

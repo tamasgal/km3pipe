@@ -37,6 +37,7 @@ log = get_logger(__name__)    # pylint: disable=C0103
 
 STAT_LIMIT = 100000
 MODULE_CONFIGURATION = 'pipeline.toml'
+RESERVED_ARGS = set(['every', 'only_if'])
 
 if sys.version_info >= (3, 3):
     process_time = time.process_time
@@ -476,6 +477,7 @@ class Module(object):
         log.debug("Initialising {0}".format(name))
         self._name = name
         self.parameters = parameters
+        self._processed_parameters = []
         self.only_if = set()
         self.every = 1
         self.detector = None
@@ -497,6 +499,7 @@ class Module(object):
         self.provided_services = {}
         self.required_services = {}
         self.configure()
+        self._check_unused_parameters()
 
     def configure(self):
         """Configure module, like instance variables etc."""
@@ -518,6 +521,7 @@ class Module(object):
     def get(self, name, default=None):
         """Return the value of the requested parameter or `default` if None."""
         value = self.parameters.get(name)
+        self._processed_parameters.append(name)
         if value is None:
             return default
         return value
@@ -525,6 +529,7 @@ class Module(object):
     def require(self, name):
         """Return the value of the requested parameter or raise an error."""
         value = self.get(name)
+        self._processed_parameters.append(name)
         if value is None:
             raise TypeError(
                 "{0} requires the parameter '{1}'.".format(
@@ -547,6 +552,19 @@ class Module(object):
     def pre_finish(self):
         """Do the last few things before calling finish()"""
         return self.finish()
+
+    def _check_unused_parameters(self):
+        """Check if any of the parameters passed in are ignored"""
+        all_params = set(self.parameters.keys())
+        processed_params = set(self._processed_parameters)
+        unused_params = all_params - processed_params - RESERVED_ARGS
+
+        if unused_params:
+            self.log.warning(
+                "The following parameters were ignored: {}".format(
+                    ', '.join(sorted(unused_params))
+                )
+            )
 
     def __call__(self, *args, **kwargs):
         """Run process if directly called."""
