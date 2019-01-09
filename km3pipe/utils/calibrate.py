@@ -10,6 +10,7 @@ Usage:
 
 Options:
     -c CHUNK_SIZE   Size of the chunk to load into memory [default: 200000].
+    --verbose       Shows a progress bar during calibration.
     -h --help       Show this screen.
 """
 import os
@@ -30,7 +31,7 @@ cprint = kp.logger.get_printer(os.path.basename(__file__))
 log = kp.logger.get_logger(os.path.basename(__file__))
 
 
-def calibrate_hits(f, cal, chunk_size, h5group):
+def calibrate_hits(f, cal, chunk_size, h5group, is_verbose):
     if h5group + "/pmt_id" in f:
         cprint("Found MC hits in '{}'".format(h5group))
         is_mc = True
@@ -48,8 +49,13 @@ def calibrate_hits(f, cal, chunk_size, h5group):
 
     idx = 0
 
-    chunks = kp.tools.chunks(range(n_hits), chunk_size)
-    for chunk in tqdm(chunks, total=(n_hits // chunk_size)):
+    if is_verbose:
+        chunks = kp.tools.chunks(range(n_hits), chunk_size)
+        chunks = tqdm(chunks, total=(n_hits // chunk_size))
+    else:
+        chunks = kp.tools.chunks(range(n_hits), chunk_size)
+
+    for chunk in chunks:
         n = len(chunk)
         calib = np.empty((n, 9), dtype='f4')
 
@@ -117,6 +123,7 @@ def main():
     from docopt import docopt
 
     args = docopt(__doc__)
+    is_verbose = bool(args['--verbose'])
 
     with tb.File(args['HDF5FILE'], "a") as f:
         try:
@@ -137,7 +144,7 @@ def main():
             if h5group in f:
                 initialise_arrays(h5group, f)
                 cprint("Calibrating hits in '{}'".format(h5group))
-                calibrate_hits(f, cal, int(args['-c']), h5group)
+                calibrate_hits(f, cal, int(args['-c']), h5group, is_verbose)
 
         cprint("Done.")
 
