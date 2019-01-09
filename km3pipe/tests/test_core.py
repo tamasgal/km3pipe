@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import tempfile
 from io import StringIO
 
-from km3pipe.testing import TestCase, MagicMock
+from km3pipe.testing import TestCase, MagicMock, patch
 from km3pipe.core import Pipeline, Module, Pump, Blob
 
 __author__ = "Tamas Gal"
@@ -594,6 +594,25 @@ class TestBlob(TestCase):
     def test_print_empty_blob(self):
         blob = Blob()
         assert "Empty blob" == str(blob)
+
+    def test_accessing_non_existing_key_raises_keyerror(self):
+        blob = Blob()
+        with self.assertRaises(KeyError):
+            blob['a']
+
+    def test_accessing_non_existing_key_prints_available_keys(self):
+        blob = Blob()
+        blob['key_a'] = 1
+        blob['key_b'] = 2
+        blob.log = MagicMock()
+
+        with self.assertRaises(KeyError):
+            blob['key_c']
+
+        args, kwargs = blob.log.error.call_args_list[0]
+        assert "No key named 'key_c'" in args[0]
+        for key in blob.keys():
+            assert key in args[0]
 
 
 class TestServices(TestCase):
