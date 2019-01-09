@@ -623,6 +623,10 @@ class Pump(Module):
 class Blob(OrderedDict):
     """A simple (ordered) dict with a fancy name. This should hold the data."""
 
+    def __init__(self, *args, **kwargs):
+        OrderedDict.__init__(self, *args, **kwargs)
+        self.log = get_logger("Blob")
+
     def __str__(self):
         if len(self) == 0:
             return "Empty blob"
@@ -639,7 +643,10 @@ class Blob(OrderedDict):
         try:
             val = OrderedDict.__getitem__(self, key)
         except KeyError:
-            print("c")
+            self.log.error(
+                "No key named '{}' found in Blob. \n"
+                "Available keys: {}".format(key, ', '.join(self.keys()))
+            )
             raise
         return val
 

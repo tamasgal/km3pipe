@@ -600,16 +600,19 @@ class TestBlob(TestCase):
         with self.assertRaises(KeyError):
             blob['a']
 
-    @patch('sys.stdout', new_callable=StringIO)
-    def test_accessing_non_existing_key_prints_available_keys(
-            self, mock_stdout
-    ):
+    def test_accessing_non_existing_key_prints_available_keys(self):
         blob = Blob()
-        blob['a'] = 1
-        blob['b'] = 2
+        blob['key_a'] = 1
+        blob['key_b'] = 2
+        blob.log = MagicMock()
+
         with self.assertRaises(KeyError):
-            blob['c']
-        assert 'c' in mock_stdout.getvalue()
+            blob['key_c']
+
+        args, kwargs = blob.log.error.call_args_list[0]
+        assert "No key named 'key_c'" in args[0]
+        for key in blob.keys():
+            assert key in args[0]
 
 
 class TestServices(TestCase):
