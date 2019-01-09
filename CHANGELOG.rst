@@ -1,6 +1,8 @@
 Unreleased changes
 ------------------
 
+* Add verbosity argument to calibrate tool.
+
 Version 8
 ---------
 
