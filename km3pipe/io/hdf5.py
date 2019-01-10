@@ -179,6 +179,9 @@ class HDF5Sink(Module):
     chunksize : int [optional]
         Chunksize that should be used for saving along the first axis
         of the input array.
+    flush_frequency: int, optional [default: 500]
+        The number of iterations to cache tables and arrays before
+        dumping to disk.
     pytab_file_args: dict [optional]
         pass more arguments to the pytables File init
     n_rows_expected = int, optional [default: 10000]
@@ -192,6 +195,7 @@ class HDF5Sink(Module):
         self.complib = self.get('complib', default='zlib')
         self.complevel = self.get('complevel', default=5)
         self.chunksize = self.get('chunksize')
+        self.flush_frequency = self.get('flush_frequency', default=500)
         self.pytab_file_args = self.get('pytab_file_args', default=dict())
         self.file_mode = 'a' if self.get('append') else 'w'
         self.keep_open = self.get('keep_open')
@@ -221,6 +225,7 @@ class HDF5Sink(Module):
         )
         self._tables = OrderedDict()
         self._ndarrays = OrderedDict()
+        self._ndarrays_cache = defaultdict(list)
 
     def _to_array(self, data, name=None):
         if data is None:
@@ -241,34 +246,45 @@ class HDF5Sink(Module):
             data = Table.from_dataframe(data)
         return data
 
-    def _write_ndarray(self, arr):
-        h5loc = arr.h5loc
-        title = arr.title
-        chunkshape = (self.chunksize,) + arr.shape[1:] if self.chunksize is not\
-                                                       None else None
-        if h5loc not in self._ndarrays:
-            loc, tabname = os.path.split(h5loc)
-            ndarr = self.h5file.create_earray(
-                loc,
-                tabname,
-                tb.Atom.from_dtype(arr.dtype),
-                (0, ) + arr.shape[1:],
-                chunkshape=chunkshape,
-                title=title,
-                filters=self.filters,
-                createparents=True,
-            )
-            self._ndarrays[h5loc] = ndarr
-        else:
-            ndarr = self._ndarrays[h5loc]
+    def _cache_ndarray(self, arr):
+        self._ndarrays_cache[arr.h5loc].append(arr)
 
-        idx_table_h5loc = h5loc + '_indices'
-        if idx_table_h5loc not in self.indices:
-            self.indices[idx_table_h5loc] = HDF5IndexTable(idx_table_h5loc)
-        idx_tab = self.indices[idx_table_h5loc]
-        idx_tab.append(len(arr))
+    def _write_ndarrays_cache_to_disk(self):
+        """Writes all the cached NDArrays to disk and empties the cache"""
+        for h5loc, arrs in self._ndarrays_cache.items():
+            title = arrs[0].title
+            chunkshape = (self.chunksize,) + arrs[0].shape[1:] if self.chunksize is not\
+                                                           None else None
 
-        ndarr.append(arr)
+            arr = NDArray(np.concatenate(arrs), h5loc=h5loc, title=title)
+
+            if h5loc not in self._ndarrays:
+                loc, tabname = os.path.split(h5loc)
+                ndarr = self.h5file.create_earray(
+                    loc,
+                    tabname,
+                    tb.Atom.from_dtype(arr.dtype),
+                    (0, ) + arr.shape[1:],
+                    chunkshape=chunkshape,
+                    title=title,
+                    filters=self.filters,
+                    createparents=True,
+                )
+                self._ndarrays[h5loc] = ndarr
+            else:
+                ndarr = self._ndarrays[h5loc]
+
+            idx_table_h5loc = h5loc + '_indices'
+            if idx_table_h5loc not in self.indices:
+                self.indices[idx_table_h5loc] = HDF5IndexTable(idx_table_h5loc)
+            idx_tab = self.indices[idx_table_h5loc]
+
+            for arr_length in (len(a) for a in arrs):
+                idx_tab.append(arr_length)
+
+            ndarr.append(arr)
+
+        self._ndarrays_cache = defaultdict(list)
 
     def _write_table(self, h5loc, arr, title):
         level = len(h5loc.split('/'))
@@ -367,7 +383,7 @@ class HDF5Sink(Module):
             self.log.debug("Ignoring '%s': no h5loc attribute" % key)
             return
         if isinstance(entry, NDArray):
-            self._write_ndarray(entry)
+            self._cache_ndarray(entry)
             return entry
         try:
             title = entry.name
@@ -410,15 +426,21 @@ class HDF5Sink(Module):
             )
             self._process_entry('GroupInfo', gi)
 
-        if not self.index % 1000:
-            self.log.info('Flushing tables to disk...')
-            for tab in self._tables.values():
-                tab.flush()
+        if not self.index % self.flush_frequency:
+            self.flush()
 
         self.index += 1
         return blob
 
+    def flush(self):
+        """Flush tables and arrays to disk"""
+        self.log.info('Flushing tables and arrays to disk...')
+        for tab in self._tables.values():
+            tab.flush()
+        self._write_ndarrays_cache_to_disk()
+
     def finish(self):
+        self.flush()
         self.h5file.root._v_attrs.km3pipe = np.string_(kp.__version__)
         self.h5file.root._v_attrs.pytables = np.string_(tb.__version__)
         self.h5file.root._v_attrs.jpp = np.string_(get_jpp_revision())
