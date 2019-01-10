@@ -179,6 +179,9 @@ class HDF5Sink(Module):
     chunksize : int [optional]
         Chunksize that should be used for saving along the first axis
         of the input array.
+    flush_frequency: int, optional [default: 500]
+        The number of iterations to cache tables and arrays before
+        dumping to disk.
     pytab_file_args: dict [optional]
         pass more arguments to the pytables File init
     n_rows_expected = int, optional [default: 10000]
@@ -192,6 +195,7 @@ class HDF5Sink(Module):
         self.complib = self.get('complib', default='zlib')
         self.complevel = self.get('complevel', default=5)
         self.chunksize = self.get('chunksize')
+        self.flush_frequency = self.get('flush_frequency', default=500)
         self.pytab_file_args = self.get('pytab_file_args', default=dict())
         self.file_mode = 'a' if self.get('append') else 'w'
         self.keep_open = self.get('keep_open')
@@ -422,7 +426,7 @@ class HDF5Sink(Module):
             )
             self._process_entry('GroupInfo', gi)
 
-        if not self.index % 1000:
+        if not self.index % self.flush_frequency:
             self.flush()
 
         self.index += 1
