@@ -566,6 +566,7 @@ class HDF5Pump(Pump):
 
     def _reset_state(self):
         self._close_h5file()
+
         self.h5file = None
         self.cut_mask = None
         self.indices = {}
@@ -575,13 +576,19 @@ class HDF5Pump(Pump):
         self._n_groups = None
         self.index = 0
 
-    def _read_cut_mask(self):
-        if not self.cut_mask_node.startswith('/'):
-            self.cut_mask_node = '/' + self.cut_mask_node
-        self.cut_mask = self.h5file.get_node(self.cut_mask_node)[:]
-        mask = self.cut_mask
-        if not mask.shape[0] == self.group_ids.shape[0]:
-            raise ValueError("Cut mask length differs from event ids!")
+    def _open_next_file(self):
+        self.log.info("Opening next file")
+        if not self.filequeue:
+            self.log.info("No more files available, raising StopIteration.")
+            raise StopIteration
+        if self.h5file:
+            self.h5file.close()
+        self.filename = self.filequeue.pop(0)
+        self.h5file = tb.open_file(self.filename, 'r')
+        self.print("Opening {0}".format(self.filename))
+        if self.verbose:
+            self.print("Reading %s..." % self.filename)
+        return True
 
     def _read_group_info(self):
         h5file = self.h5file
@@ -607,6 +614,7 @@ class HDF5Pump(Pump):
                 self.group_ids = event_info.cols.event_id[:]
             self._n_groups = len(self.group_ids)
         if '/raw_header' in h5file:
+            self.log.info("Reading /raw_header")
             try:
                 self.header = HDF5Header.from_pytable(
                     h5file.get_node('/raw_header')
@@ -614,40 +622,32 @@ class HDF5Pump(Pump):
             except TypeError:
                 self.log.error("Could not parse the raw header, skipping!")
         if self.shuffle:
+            self.log.info("Shuffling group IDs")
             self.shuffle_function(self.group_ids)
 
+    def _read_cut_mask(self):
+        if not self.cut_mask_node.startswith('/'):
+            self.cut_mask_node = '/' + self.cut_mask_node
+        self.cut_mask = self.h5file.get_node(self.cut_mask_node)[:]
+        mask = self.cut_mask
+        if not mask.shape[0] == self.group_ids.shape[0]:
+            raise ValueError("Cut mask length differs from event ids!")
+
     def process(self, blob):
-        try:
-            blob = self.get_blob(self.index)
-        except KeyError:
-            self._reset_iteration()
-            raise StopIteration
-        self.index += 1
-        return blob
-
-    def _need_next(self, index):
-        if index >= self._n_groups:
-            return True
-
-    def _open_next_file(self):
-        if not self.filequeue:
-            raise StopIteration("No more files available")
-        if self.h5file:
-            self.h5file.close()
-        self.filename = self.filequeue.pop(0)
-        self.h5file = tb.open_file(self.filename, 'r')
-        self.print("Opening {0}".format(self.filename))
-        if self.verbose:
-            ("Reading %s..." % self.filename)
-        return True
-
-    def get_blob(self, index):
-        if index >= self._n_groups:
+        self.log.info("Reading blob at index %s" % self.index)
+        if self.index >= self._n_groups:
+            self.log.info("All groups are read, switching to the next file")
             self._reset_iteration()
             if self.filenames:
                 self._load_next_file()
             else:
-                raise KeyError
+                self.log.info("No more files left to drain")
+                raise StopIteration
+        blob = self.get_blob(self.index)
+        self.index += 1
+        return blob
+
+    def get_blob(self, index):
         blob = Blob()
         group_id = self.group_ids[index]
         if self.cut_mask is not None:
@@ -775,6 +775,7 @@ class HDF5Pump(Pump):
 
     def _reset_iteration(self):
         """Reset index to default value"""
+        self.log.info("Resetting iteration")
         self.index = 0
 
     def __len__(self):
