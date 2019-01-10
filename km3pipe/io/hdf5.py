@@ -243,7 +243,6 @@ class HDF5Sink(Module):
         return data
 
     def _cache_ndarray(self, arr):
-        print("caching: ", arr)
         self._ndarrays_cache[arr.h5loc].append(arr)
 
     def _write_ndarrays_cache_to_disk(self):
@@ -253,9 +252,7 @@ class HDF5Sink(Module):
             chunkshape = (self.chunksize,) + arrs[0].shape[1:] if self.chunksize is not\
                                                            None else None
 
-            print("in cache: ", arrs)
             arr = NDArray(np.concatenate(arrs), h5loc=h5loc, title=title)
-            print("concatted: ", arr)
 
             if h5loc not in self._ndarrays:
                 loc, tabname = os.path.split(h5loc)
