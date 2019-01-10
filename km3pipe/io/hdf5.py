@@ -642,18 +642,18 @@ class HDF5Pump(Pump):
         return True
 
     def get_blob(self, index):
-        if self.index >= self._n_groups:
+        if index >= self._n_groups:
             self._reset_iteration()
             if self.filenames:
                 self._load_next_file()
             else:
                 raise KeyError
         blob = Blob()
-        group_id = self.group_ids[self.index]
+        group_id = self.group_ids[index]
         if self.cut_mask is not None:
             self.log.debug('Cut masks found, applying...')
             mask = self.cut_mask
-            if not mask[self.index]:
+            if not mask[index]:
                 self.log.info('Cut mask blacklists this event, skipping...')
                 return
 
@@ -727,7 +727,7 @@ class HDF5Pump(Pump):
             self.log.debug("h5loc: '{}'".format(h5loc))
             tab = Table(arr, h5loc=h5loc, split_h5=False, name=tabname)
             if self.shuffle and self.reset_index:
-                tab.group_id[:] = self.index
+                tab.group_id[:] = index
             blob[tabname] = tab
 
         # skipped locs are now column wise datasets (usually hits)
@@ -748,7 +748,7 @@ class HDF5Pump(Pump):
             tabname = camelise(loc.split('/')[-1])
             s_tab = Table(data, h5loc=loc, split_h5=True, name=tabname)
             if self.shuffle and self.reset_index:
-                s_tab.group_id[:] = self.index
+                s_tab.group_id[:] = index
             blob[tabname] = s_tab
 
         if self.header is not None:
@@ -768,7 +768,7 @@ class HDF5Pump(Pump):
                 group_id=group_id
             )
             if self.shuffle and self.reset_index:
-                _ndarr.group_id = self.index
+                _ndarr.group_id = index
             blob[ndarr_name] = _ndarr
 
         return blob
