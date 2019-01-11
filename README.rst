@@ -19,7 +19,7 @@ access to detectors and databases, parsers for different file formats and an
 easy to use framework for batch processing.
 
 The main Git repository, where issues and merge requests are managed can be
-found at https://git.km3net.de/km3pipe/km3pipe.git
+found at https://git.km3net.de/km3py/km3pipe.git
 
 The framework tries to standardise the way the data is processed by providing
 a Pipeline-class, which can be used to put together different built-in or user
