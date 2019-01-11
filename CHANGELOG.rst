@@ -5,6 +5,7 @@ Unreleased changes
 * Massive improvement of ``HDF5Sink`` when writing ``NDArrays``
 * Add ``flush_frequency=...`` option to ``HDF5Sink`` to set the number of
   iterations to wait before the internal cache is dumped to the disk
+* Fixes consistency when reusing the ``HDF5Pump`` with multiple files.
 
 Version 8
 ---------
