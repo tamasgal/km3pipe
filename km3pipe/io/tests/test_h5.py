@@ -147,7 +147,9 @@ class TestH5Pump(TestCase):
         assert 179 == len(pump[2]['McTracks'])
         assert 55 == len(pump[3]['McTracks'])
 
-    def test_multiple_files_readout(self):
+
+class TestHDF5PumpMultiFileReadout(TestCase):
+    def setUp(self):
         class DummyPump(Pump):
             def configure(self):
                 self.i = self.require('i')
@@ -157,18 +159,46 @@ class TestH5Pump(TestCase):
                 self.i += 1
                 return blob
 
-        filenames = []
-        fobjs = []
+        self.filenames = []
+        self.fobjs = []
         for i in range(3):
             fobj = tempfile.NamedTemporaryFile(delete=True)
             fname = fobj.name
-            filenames.append(fname)
-            fobjs.append(fobj)
+            self.filenames.append(fname)
+            self.fobjs.append(fobj)
             pipe = Pipeline()
             pipe.attach(DummyPump, i=i)
             pipe.attach(HDF5Sink, filename=fname)
             pipe.drain(i + 3)
 
+    def tearDown(self):
+        for fobj in self.fobjs:
+            fobj.close()
+
+    def test_multiple_files_readout_using_the_pump_iterator_called_multiple_times(
+            self
+    ):
+        p = HDF5Pump(filenames=self.filenames)
+
+        assert 3 + 4 + 5 == len([b for b in p])
+        assert 3 + 4 + 5 == len([b for b in p])
+        assert 3 + 4 + 5 == len([b for b in p])
+
+    def test_multiple_files_readout_using_the_pump_iterator(self):
+        p = HDF5Pump(filenames=self.filenames)
+
+        assert 3 + 4 + 5 == len(p)
+
+        tab_a_expected = [0, 1, 2, 1, 2, 3, 4, 2, 3, 4, 5, 6]
+        group_ids_expected = [0, 1, 2, 0, 1, 2, 3, 0, 1, 2, 3, 4]
+
+        tab_a = [b['Tab'].a[0] for b in p]
+        group_ids = [b['Tab'].group_id[0] for b in p]
+
+        self.assertListEqual(tab_a_expected, tab_a)
+        self.assertListEqual(group_ids_expected, group_ids)
+
+    def test_multiple_files_readout_using_the_pipeline(self):
         class Observer(Module):
             def configure(self):
                 self._blob_lengths = []
@@ -192,7 +222,7 @@ class TestH5Pump(TestCase):
                 }
 
         pipe = Pipeline()
-        pipe.attach(HDF5Pump, filenames=filenames)
+        pipe.attach(HDF5Pump, filenames=self.filenames)
         pipe.attach(Observer)
         results = pipe.drain()
         summary = results['Observer']
@@ -203,9 +233,6 @@ class TestH5Pump(TestCase):
                              summary['a'])
         self.assertListEqual([0, 1, 2, 0, 1, 2, 3, 0, 1, 2, 3, 4],
                              summary['group_ids'])
-
-        for fobj in fobjs:
-            fobj.close()
 
 
 class TestH5Sink(TestCase):

@@ -556,6 +556,7 @@ class HDF5Pump(Pump):
         self._load_next_file()
 
     def _load_next_file(self):
+        self._reset_iteration()
         self._reset_state()
         self._open_next_file()
         if not self.skip_version_check:
@@ -580,6 +581,7 @@ class HDF5Pump(Pump):
         self.log.info("Opening next file")
         if not self.filequeue:
             self.log.info("No more files available, raising StopIteration.")
+            self.filequeue = list(self.filenames)
             raise StopIteration
         if self.h5file:
             self.h5file.close()
@@ -637,8 +639,7 @@ class HDF5Pump(Pump):
         self.log.info("Reading blob at index %s" % self.index)
         if self.index >= self._n_groups:
             self.log.info("All groups are read, switching to the next file")
-            self._reset_iteration()
-            if self.filenames:
+            if self.filequeue:
                 self._load_next_file()
             else:
                 self.log.info("No more files left to drain")
@@ -779,15 +780,29 @@ class HDF5Pump(Pump):
         self.index = 0
 
     def __len__(self):
-        return self._n_groups
+        self.log.info("Opening all HDF5 files to check the number of groups")
+        n_groups = 0
+        for filename in self.filenames:
+            with tb.open_file(filename, 'r') as h5file:
+                group_info = h5file.get_node('/', 'group_info')
+                self.group_ids = group_info.cols.group_id[:]
+                n_groups += len(self.group_ids)
+        return n_groups
 
     def __iter__(self):
         return self
 
     def __next__(self):
+        # TODO: wrap that in self._check_if_next_file_is_needed(self.index)
         if self.index >= self._n_groups:
-            self._reset_iteration()
-            raise StopIteration
+            self.log.info("All groups are read, switching to the next file")
+            if self.filequeue:
+                self._load_next_file()
+            else:
+                self.log.info("No more files left to drain, resetting")
+                self.filequeue = list(self.filenames)
+                self._load_next_file()
+                raise StopIteration
         blob = self.get_blob(self.index)
         self.index += 1
         return blob
