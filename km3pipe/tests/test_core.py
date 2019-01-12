@@ -494,6 +494,9 @@ class TestPipelineConfigurationViaFile(TestCase):
         fname = str(fobj.name)
 
         class A(Module):
+            def configure(self):
+                self.a = self.get('a')
+
             def process(self, blob):
                 assert 1 == self.a
                 return blob
@@ -511,12 +514,19 @@ class TestPipelineConfigurationViaFile(TestCase):
         fname = str(fobj.name)
 
         class A(Module):
+            def configure(self):
+                self.a = self.get('a')
+                self.b = self.get('b')
+
             def process(self, blob):
                 assert 1 == self.a
                 assert 2 == self.b
                 return blob
 
         class B(Module):
+            def configure(self):
+                self.c = self.get('c')
+
             def process(self, blob):
                 assert 'd' == self.c
                 return blob
@@ -535,12 +545,19 @@ class TestPipelineConfigurationViaFile(TestCase):
         fname = str(fobj.name)
 
         class A(Module):
+            def configure(self):
+                self.a = self.get('a')
+                self.b = self.get('b')
+
             def process(self, blob):
                 assert 1 == self.a
                 assert 2 == self.b
                 return blob
 
         class B(Module):
+            def configure(self):
+                self.c = self.get('c')
+
             def process(self, blob):
                 assert 'd' == self.c
                 return blob
@@ -559,6 +576,10 @@ class TestPipelineConfigurationViaFile(TestCase):
         fname = str(fobj.name)
 
         class A(Module):
+            def configure(self):
+                self.a = self.get('a')
+                self.b = self.get('b')
+
             def process(self, blob):
                 assert 1 == self.a
                 assert 2 == self.b
@@ -568,6 +589,64 @@ class TestPipelineConfigurationViaFile(TestCase):
         pipe.attach(A, b='foo')
         pipe.drain(1)
 
+        fobj.close()
+
+    def test_configuration_precedence_over_kwargs_when_get_is_used(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fobj.write(b"[A]\na = 1\n b = 2")
+        fobj.flush()
+        fname = str(fobj.name)
+
+        class A(Module):
+            def configure(self):
+                self.b = self.get('a')
+                self.a = self.get('b')
+
+            def process(self, blob):
+                assert 2 == self.a
+                return 1 == self.b
+
+        pipe = Pipeline(configfile=fname)
+        pipe.attach(A)
+        pipe.drain(1)
+        fobj.close()
+
+    def test_configuration_precedence_over_kwargs_when_require_is_used(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fobj.write(b"[A]\na = 1\n b = 'abc'")
+        fobj.flush()
+        fname = str(fobj.name)
+
+        class A(Module):
+            def configure(self):
+                self.xyz = self.require('a')
+                self.b = self.require('b')
+
+            def process(self, blob):
+                assert 1 == self.xyz
+                return 2 == self.b
+
+        pipe = Pipeline(configfile=fname)
+        pipe.attach(A)
+        pipe.drain(1)
+        fobj.close()
+
+    def test_parameter_with_differing_name(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fobj.write(b"[A]\na = 'abc'")
+        fobj.flush()
+        fname = str(fobj.name)
+
+        class A(Module):
+            def configure(self):
+                self.the_a = self.get('a')
+
+            def process(self, blob):
+                return 'abc' == self.the_a
+
+        pipe = Pipeline(configfile=fname)
+        pipe.attach(A)
+        pipe.drain(1)
         fobj.close()
 
 
