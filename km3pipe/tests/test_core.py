@@ -572,7 +572,7 @@ class TestPipelineConfigurationViaFile(TestCase):
 
     def test_configuration_precedence_over_kwargs_when_get_is_used(self):
         fobj = tempfile.NamedTemporaryFile(delete=True)
-        fobj.write("[A]\na = 1\n b = 2")
+        fobj.write(b"[A]\na = 1\n b = 2")
         fobj.flush()
         fname = str(fobj.name)
 
@@ -592,7 +592,7 @@ class TestPipelineConfigurationViaFile(TestCase):
 
     def test_configuration_precedence_over_kwargs_when_require_is_used(self):
         fobj = tempfile.NamedTemporaryFile(delete=True)
-        fobj.write("[A]\na = 1\n b = 'abc'")
+        fobj.write(b"[A]\na = 1\n b = 'abc'")
         fobj.flush()
         fname = str(fobj.name)
 
@@ -612,7 +612,7 @@ class TestPipelineConfigurationViaFile(TestCase):
 
     def test_unicode_parameters(self):
         fobj = tempfile.NamedTemporaryFile(delete=True)
-        fobj.write("[A]\na = 'abc'")
+        fobj.write(b"[A]\na = 'abc'")
         fobj.flush()
         fname = str(fobj.name)
 
