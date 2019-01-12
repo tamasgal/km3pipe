@@ -570,6 +570,62 @@ class TestPipelineConfigurationViaFile(TestCase):
 
         fobj.close()
 
+    def test_configuration_precedence_over_kwargs_when_get_is_used(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fobj.write("[A]\na = 1\n b = 2")
+        fobj.flush()
+        fname = str(fobj.name)
+
+        class A(Module):
+            def configure(self):
+                self.b = self.get('a')
+                self.a = self.get('b')
+
+            def process(self, blob):
+                assert 2 == self.a
+                return 1 == self.b
+
+        pipe = Pipeline(configfile=fname)
+        pipe.attach(A)
+        pipe.drain(1)
+        fobj.close()
+
+    def test_configuration_precedence_over_kwargs_when_require_is_used(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fobj.write("[A]\na = 1\n b = 'abc'")
+        fobj.flush()
+        fname = str(fobj.name)
+
+        class A(Module):
+            def configure(self):
+                self.xyz = self.require('a')
+                self.b = 2
+
+            def process(self, blob):
+                assert 1 == self.xyz
+                return 2 == self.b
+
+        pipe = Pipeline(configfile=fname)
+        pipe.attach(A)
+        pipe.drain(1)
+        fobj.close()
+
+    def test_unicode_parameters(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fobj.write("[A]\na = 'abc'")
+        fobj.flush()
+        fname = str(fobj.name)
+
+        class A(Module):
+            def process(self, blob):
+                assert type(self.a) is str
+                return 'abc' == self.a
+
+        pipe = Pipeline(configfile=fname)
+        pipe.attach(A)
+        pipe.drain(1)
+        fobj.close()
+
 
 class TestModule(TestCase):
     """Tests for the pipeline module"""
