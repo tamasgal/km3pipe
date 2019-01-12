@@ -169,6 +169,13 @@ class Pipeline(object):
         if (inspect.isclass(fac) and issubclass(fac, Module)) or \
                 name == 'GenericPump':
             log.debug("Attaching as regular module")
+            if name in self.module_configuration:
+                log.debug(
+                    "Adding configuration from TOML file for module '%s'" %
+                    name
+                )
+                for key, value in self.module_configuration[name].items():
+                    kwargs[key] = value
             module = fac(name=name, **kwargs)
             if hasattr(module, "provided_services"):
                 for service_name, obj in module.provided_services.items():
@@ -191,10 +198,6 @@ class Pipeline(object):
             module = fac
             module.name = name
             module.timeit = self.timeit
-
-        if name in self.module_configuration:
-            for key, value in self.module_configuration[name].items():
-                setattr(module, key, value)
 
         # Special parameters
         if 'only_if' in kwargs:
@@ -529,7 +532,6 @@ class Module(object):
     def require(self, name):
         """Return the value of the requested parameter or raise an error."""
         value = self.get(name)
-        self._processed_parameters.append(name)
         if value is None:
             raise TypeError(
                 "{0} requires the parameter '{1}'.".format(

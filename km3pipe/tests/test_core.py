@@ -494,6 +494,9 @@ class TestPipelineConfigurationViaFile(TestCase):
         fname = str(fobj.name)
 
         class A(Module):
+            def configure(self):
+                self.a = self.get('a')
+
             def process(self, blob):
                 assert 1 == self.a
                 return blob
@@ -511,12 +514,19 @@ class TestPipelineConfigurationViaFile(TestCase):
         fname = str(fobj.name)
 
         class A(Module):
+            def configure(self):
+                self.a = self.get('a')
+                self.b = self.get('b')
+
             def process(self, blob):
                 assert 1 == self.a
                 assert 2 == self.b
                 return blob
 
         class B(Module):
+            def configure(self):
+                self.c = self.get('c')
+
             def process(self, blob):
                 assert 'd' == self.c
                 return blob
@@ -535,12 +545,19 @@ class TestPipelineConfigurationViaFile(TestCase):
         fname = str(fobj.name)
 
         class A(Module):
+            def configure(self):
+                self.a = self.get('a')
+                self.b = self.get('b')
+
             def process(self, blob):
                 assert 1 == self.a
                 assert 2 == self.b
                 return blob
 
         class B(Module):
+            def configure(self):
+                self.c = self.get('c')
+
             def process(self, blob):
                 assert 'd' == self.c
                 return blob
@@ -559,6 +576,10 @@ class TestPipelineConfigurationViaFile(TestCase):
         fname = str(fobj.name)
 
         class A(Module):
+            def configure(self):
+                self.a = self.get('a')
+                self.b = self.get('b')
+
             def process(self, blob):
                 assert 1 == self.a
                 assert 2 == self.b
@@ -599,7 +620,7 @@ class TestPipelineConfigurationViaFile(TestCase):
         class A(Module):
             def configure(self):
                 self.xyz = self.require('a')
-                self.b = 2
+                self.b = self.require('b')
 
             def process(self, blob):
                 assert 1 == self.xyz
@@ -610,16 +631,18 @@ class TestPipelineConfigurationViaFile(TestCase):
         pipe.drain(1)
         fobj.close()
 
-    def test_unicode_parameters(self):
+    def test_parameter_with_differing_name(self):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fobj.write(b"[A]\na = 'abc'")
         fobj.flush()
         fname = str(fobj.name)
 
         class A(Module):
+            def configure(self):
+                self.the_a = self.get('a')
+
             def process(self, blob):
-                assert type(self.a) is str
-                return 'abc' == self.a
+                return 'abc' == self.the_a
 
         pipe = Pipeline(configfile=fname)
         pipe.attach(A)
