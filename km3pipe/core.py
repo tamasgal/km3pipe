@@ -171,10 +171,15 @@ class Pipeline(object):
             log.debug("Attaching as regular module")
             if name in self.module_configuration:
                 log.debug(
-                    "Adding configuration from TOML file for module '%s'" %
+                    "Applying pipeline configuration file for module '%s'" %
                     name
                 )
                 for key, value in self.module_configuration[name].items():
+                    if key in kwargs:
+                        self.log.info(
+                            "Overwriting parameter '%s' in module '%s' from "
+                            "the pipeline configuration file." % (key, name)
+                        )
                     kwargs[key] = value
             module = fac(name=name, **kwargs)
             if hasattr(module, "provided_services"):
