@@ -626,7 +626,10 @@ class MetaParser(object):
         self.meta = []
         if filename is not None:
             string = subprocess.check_output(['JPrintMeta', '-f', filename])
-            self.parse_string(string)
+            try:
+                self.parse_string(string)
+            except IndexError:
+                self.log.error("The Jpp metadata could not be parsed.")
 
     def parse_string(self, string):
         """Parse ASCII output of JPrintMeta"""
