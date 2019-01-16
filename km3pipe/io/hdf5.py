@@ -539,6 +539,7 @@ class HDF5Pump(Pump):
         self.h5file = None
         self.cut_mask = None
         self.indices = {}
+        self._tab_indices = {}
         self._singletons = {}
         self.header = None
         self.group_ids = None
@@ -571,6 +572,7 @@ class HDF5Pump(Pump):
         self.h5file = None
         self.cut_mask = None
         self.indices = {}
+        self._tab_indices = {}
         self._singletons = {}
         self.header = None
         self.group_ids = None
@@ -692,7 +694,12 @@ class HDF5Pump(Pump):
 
             if index_column is not None:
                 try:
-                    arr = tab.read_where('%s == %d' % (index_column, group_id))
+                    if h5loc not in self._tab_indices:
+                        self._read_tab_indices(h5loc)
+                    print(self._tab_indices)
+                    tab_idx_start = self._tab_indices[h5loc][0][group_id]
+                    tab_n_items = self._tab_indices[h5loc][1][group_id]
+                    arr = tab[tab_idx_start:tab_idx_start + tab_n_items]
                 except NotImplementedError:
                     # 64-bit unsigned integer columns like ``group_id``
                     # are not yet supported in conditions
@@ -773,6 +780,44 @@ class HDF5Pump(Pump):
             blob[ndarr_name] = _ndarr
 
         return blob
+
+    def _read_tab_indices(self, h5loc):
+        self.print("Reading table indices for '{}'".format(h5loc))
+        self.print(h5loc)
+        # group_ids = self.h5file.get_node(h5loc).cols.group_id[:]
+        node = self.h5file.get_node(h5loc)
+        group_ids = None
+        if 'group_id' in node.dtype.names:
+            group_ids = self.h5file.get_node(h5loc).cols.group_id[:]
+        elif 'event_id' in node.dtype.names:
+            group_ids = self.h5file.get_node(h5loc).cols.event_id[:]
+        else:
+            self.log.error("No data found in '{}'".format(h5loc))
+            return
+
+        max_group_id = np.max(group_ids)
+
+        start_idx_arr = np.full(max_group_id + 1, 0)
+        n_items_arr = np.full(max_group_id + 1, 0)
+
+        current_group_id = group_ids[0]
+        current_idx = 0
+        item_count = 0
+
+        for group_id in group_ids:
+            if group_id != current_group_id:
+                
+                start_idx_arr[current_group_id] = current_idx
+                n_items_arr[current_group_id] = item_count
+                current_idx += item_count
+                item_count = 0
+                current_group_id = group_id
+            item_count += 1
+        else:
+            start_idx_arr[current_group_id] = current_idx
+            n_items_arr[current_group_id] = item_count
+
+        self._tab_indices[h5loc] = (start_idx_arr, n_items_arr)
 
     def _reset_iteration(self):
         """Reset index to default value"""
