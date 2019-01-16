@@ -696,7 +696,6 @@ class HDF5Pump(Pump):
                 try:
                     if h5loc not in self._tab_indices:
                         self._read_tab_indices(h5loc)
-                    print(self._tab_indices)
                     tab_idx_start = self._tab_indices[h5loc][0][group_id]
                     tab_n_items = self._tab_indices[h5loc][1][group_id]
                     arr = tab[tab_idx_start:tab_idx_start + tab_n_items]
@@ -783,7 +782,6 @@ class HDF5Pump(Pump):
 
     def _read_tab_indices(self, h5loc):
         self.print("Reading table indices for '{}'".format(h5loc))
-        self.print(h5loc)
         # group_ids = self.h5file.get_node(h5loc).cols.group_id[:]
         node = self.h5file.get_node(h5loc)
         group_ids = None
