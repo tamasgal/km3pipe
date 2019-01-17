@@ -641,7 +641,18 @@ class TMCHRepump(Pump):
 
 
 class DMMonitor(object):
-    """A class which provides access to the Detector Manager parameters"""
+    """A class which provides access to the Detector Manager parameters.
+    
+    Example
+    -------
+
+    >>> import km3pipe as kp
+    >>> dmm = kp.io.daq.DMMonitor('192.168.0.120', base='clb/outparams')
+    >>> session = dmm.start_session('test', ['wr_mu/1/0','wr_mu/1/1'])
+    >>> for values in session:
+            print(values)
+    
+    """
 
     def __init__(self, host, port=1302, base=''):
         self._host = host
