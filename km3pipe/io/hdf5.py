@@ -781,7 +781,7 @@ class HDF5Pump(Pump):
         return blob
 
     def _read_tab_indices(self, h5loc):
-        self.print("Reading table indices for '{}'".format(h5loc))
+        self.log.info("Reading table indices for '{}'".format(h5loc))
         # group_ids = self.h5file.get_node(h5loc).cols.group_id[:]
         node = self.h5file.get_node(h5loc)
         group_ids = None
