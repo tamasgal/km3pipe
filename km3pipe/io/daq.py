@@ -661,7 +661,7 @@ class DMMonitor(object):
         return self._available_parameters
 
     def _get_available_parameters(self):
-        self.available_parameters = json.loads(urlopen(self._url).read())
+        self._available_parameters = json.loads(urlopen(self._url).read())
 
     def start_session(self, name, paths, interval=10):
         self.print("Starting session '{}'".format(name))
