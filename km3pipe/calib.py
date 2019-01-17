@@ -167,8 +167,8 @@ class Calibration(Module):
                                        pos_y, pos_z, t0
                                    ],
                                    dtypes=[
-                                       '<f8', '<f8', '<f8', '<u2', '<u2', '<f8',
-                                       '<f8', '<f8', '<f8'
+                                       '<f8', '<f8', '<f8', '<u2', '<u2',
+                                       '<f8', '<f8', '<f8', '<f8'
                                    ])
 
     def _apply_to_mchits(self, hits):
@@ -199,8 +199,8 @@ class Calibration(Module):
                                        pos_y, pos_z, t0
                                    ],
                                    dtypes=[
-                                       '<f8', '<f8', '<f8', '<u2', '<u2', '<f8',
-                                       '<f8', '<f8', '<f8'
+                                       '<f8', '<f8', '<f8', '<u2', '<u2',
+                                       '<f8', '<f8', '<f8', '<f8'
                                    ])
 
     def _create_dom_channel_lookup(self):
