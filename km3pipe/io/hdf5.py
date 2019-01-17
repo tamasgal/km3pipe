@@ -804,7 +804,7 @@ class HDF5Pump(Pump):
 
         for group_id in group_ids:
             if group_id != current_group_id:
-                
+
                 start_idx_arr[current_group_id] = current_idx
                 n_items_arr[current_group_id] = item_count
                 current_idx += item_count
