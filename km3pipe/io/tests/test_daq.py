@@ -7,7 +7,9 @@ Tests for KM3NeT binary formats readout.
 from os.path import dirname, join
 
 from km3pipe.testing import TestCase
-from km3pipe.io.daq import (DAQPump, DAQPreamble, DAQHeader, DAQSummaryslice)
+from km3pipe.io.daq import (
+    DAQPump, DAQPreamble, DAQHeader, DAQSummaryslice, DMMonitor
+)
 
 TEST_DATA_DIR = join(dirname(__file__), "../../kp-data/test_data")
 IO_SUM_FILE = join(TEST_DATA_DIR, "IO_SUM.dat")
@@ -62,3 +64,14 @@ class TestDAQPump(TestCase):
         event = blob['DAQEvent']
         assert 6 == event.n_triggered_hits
         assert 17 == event.n_snapshot_hits
+
+
+class TestDMMonitor(TestCase):
+    def test_init(self):
+        dmm = DMMonitor('a')
+        assert 'http://a:1302/mon/' == dmm._url
+
+    def test_available_parameters(self):
+        dmm = DMMonitor('a')
+        dmm._available_parameters = ['b', 'c']
+        self.assertListEqual(['b', 'c'], dmm.available_parameters)

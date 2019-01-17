@@ -7,17 +7,33 @@ Pumps for the DAQ data formats.
 from __future__ import absolute_import, print_function, division
 
 from io import BytesIO
+import json
 import math
 import struct
 from struct import unpack
+import time
 import pprint
+try:
+    from urllib.parse import urlencode, unquote
+    from urllib.request import (
+        Request, build_opener, urlopen, HTTPCookieProcessor, HTTPHandler
+    )
+    from urllib.error import URLError, HTTPError
+    from io import StringIO
+    from http.client import IncompleteRead
+except ImportError:
+    from urllib import urlencode, unquote
+    from urllib2 import (
+        Request, build_opener, urlopen, HTTPCookieProcessor, HTTPHandler,
+        URLError, HTTPError
+    )
 
 import numpy as np
 
 from km3pipe.core import Pump, Module, Blob
 from km3pipe.dataclasses import Table
 from km3pipe.sys import ignored
-from km3pipe.logger import get_logger
+from km3pipe.logger import get_logger, get_printer
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -622,6 +638,48 @@ class TMCHRepump(Pump):
 
     def __next__(self):
         return next(self.blobs)
+
+
+class DMMonitor(object):
+    """A class which provides access to the Detector Manager parameters"""
+
+    def __init__(self, host, port=1302, base=''):
+        self._host = host
+        self._port = port
+        self._base = base
+        self._url = "http://{}:{}/mon/{}".format(
+            self._host, self._port, self._base
+        )
+        self._available_parameters = []
+        self.log = get_logger(self.__class__.__name__)
+        self.print = get_printer(self.__class__.__name__)
+
+    @property
+    def available_parameters(self):
+        if not self._available_parameters:
+            self._get_available_parameters()
+        return self._available_parameters
+
+    def _get_available_parameters(self):
+        self.available_parameters = json.loads(urlopen(self._url).read())
+
+    def start_session(self, name, paths, interval=10):
+        self.print("Starting session '{}'".format(name))
+        ret = urlopen(
+            "http://{}:{}/monshortdef?name={}&paths={}".format(
+                self._host, self._port, name, ','.join(paths)
+            )
+        ).read()
+        if ret != b'OK':
+            self.log.error("Could not start session")
+            return []
+        return self._session(name, interval)
+
+    def _session(self, name, interval):
+        url = "http://{}:{}/monshort/{}".format(self._host, self._port, name)
+        while True:
+            yield json.loads(urlopen(url).read())
+            time.sleep(interval)
 
 
 def is_3dshower(trigger_mask):
