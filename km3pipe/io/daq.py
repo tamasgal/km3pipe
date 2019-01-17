@@ -674,6 +674,15 @@ class DMMonitor(object):
     def _get_available_parameters(self):
         self._available_parameters = json.loads(urlopen(self._url).read())
 
+    def get(self, path):
+        return json.loads(
+            urlopen(
+                "http://{}:{}/mon/{}/{}".format(
+                    self._host, self._port, self._base, path
+                )
+            )
+        )
+
     def start_session(self, name, paths, interval=10):
         self.print("Starting session '{}'".format(name))
         ret = urlopen(
