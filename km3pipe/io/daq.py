@@ -680,7 +680,7 @@ class DMMonitor(object):
                 "http://{}:{}/mon/{}/{}".format(
                     self._host, self._port, self._base, path
                 )
-            )
+            ).read()
         )
 
     def start_session(self, name, paths, interval=10):
