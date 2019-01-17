@@ -667,7 +667,8 @@ class DMMonitor(object):
         self.print("Starting session '{}'".format(name))
         ret = urlopen(
             "http://{}:{}/monshortdef?name={}&paths={}".format(
-                self._host, self._port, name, ','.join(paths)
+                self._host, self._port, name,
+                ','.join(['/mon/{}/{}'.format(self._base, p) for p in paths])
             )
         ).read()
         if ret != b'OK':
