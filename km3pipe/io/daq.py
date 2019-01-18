@@ -14,19 +14,9 @@ from struct import unpack
 import time
 import pprint
 try:
-    from urllib.parse import urlencode, unquote
-    from urllib.request import (
-        Request, build_opener, urlopen, HTTPCookieProcessor, HTTPHandler
-    )
-    from urllib.error import URLError, HTTPError
-    from io import StringIO
-    from http.client import IncompleteRead
+    from urllib.request import urlopen
 except ImportError:
-    from urllib import urlencode, unquote
-    from urllib2 import (
-        Request, build_opener, urlopen, HTTPCookieProcessor, HTTPHandler,
-        URLError, HTTPError
-    )
+    from urllib2 import urlopen
 
 import numpy as np
 
