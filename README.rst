@@ -19,7 +19,7 @@ access to detectors and databases, parsers for different file formats and an
 easy to use framework for batch processing.
 
 The main Git repository, where issues and merge requests are managed can be
-found at https://git.km3net.de/km3pipe/km3pipe.git
+found at https://git.km3net.de/km3py/km3pipe.git
 
 The framework tries to standardise the way the data is processed by providing
 a Pipeline-class, which can be used to put together different built-in or user
@@ -36,6 +36,10 @@ Although it is mainly designed for the KM3NeT neutrino detectors, it can easily
 be extended to support any kind of data formats. The core functionality is
 written in a general way and is applicable to all kinds of data processing
 workflows.
+
+To start off, run::
+
+    pip install km3pipe
 
 If you have Docker (https://www.docker.com) installed, you can start using
 KM3Pipe immediately by typing::
@@ -55,3 +59,4 @@ subpackage and of course the documentation if you’re interested!
 Read the docs at https://km3py.pages.km3net.de/km3pipe (updated on each push)
 
 KM3NeT public project homepage http://www.km3net.org
+

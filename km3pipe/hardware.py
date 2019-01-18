@@ -63,6 +63,7 @@ class Detector(object):
         self._pmt_index_by_omkey = OrderedDict()
         self._pmt_index_by_pmt_id = OrderedDict()
         self._current_du = None
+        self._com = None
 
         self._dom_positions = None
         self._dom_table = None
@@ -231,6 +232,7 @@ class Detector(object):
         self._dom_table = None
         self._xy_positions = []
         self._pmt_angles = []
+        self._com = None
 
     def add_comment(self, comment):
         """Add a comment which will be prefixed with a '#'"""
@@ -273,6 +275,13 @@ class Detector(object):
                 data['pos_z'].append(dom_position[2])
             self._dom_table = Table(data, name='DOMs', h5loc='/dom_table')
         return self._dom_table
+
+    @property
+    def com(self):
+        """Center of mass, calculated from the mean of the PMT positions"""
+        if self._com is None:
+            self._com = np.mean(self.pmts.pos, axis=0)
+        return self._com
 
     @property
     def xy_positions(self):

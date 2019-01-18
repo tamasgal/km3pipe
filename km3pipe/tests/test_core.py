@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import tempfile
 from io import StringIO
 
-from km3pipe.testing import TestCase, MagicMock
+from km3pipe.testing import TestCase, MagicMock, patch
 from km3pipe.core import Pipeline, Module, Pump, Blob
 
 __author__ = "Tamas Gal"
@@ -427,6 +427,56 @@ class TestPipeline(TestCase):
         pl.attach(CheckBlob)
         pl.drain(5)
 
+    def test_attached_module_gets_a_parameter_passed_which_is_ignored(self):
+        pl = Pipeline()
+
+        log_mock = MagicMock()
+
+        class A(Module):
+            def configure(self):
+                a = self.get('a')
+                self.log = log_mock
+
+        pl.attach(A, a=1, b=2)
+        pl.drain(1)
+
+        args, kwargs = log_mock.warning.call_args_list[0]
+        assert 'The following parameters were ignored: b' == args[0]
+
+    def test_attached_module_gets_multiple_parameters_passed_which_are_ignored(
+            self
+    ):
+        pl = Pipeline()
+
+        log_mock = MagicMock()
+
+        class A(Module):
+            def configure(self):
+                a = self.get('a')
+                self.log = log_mock
+
+        pl.attach(A, a=1, b=2, c=3)
+        pl.drain(1)
+
+        args, kwargs = log_mock.warning.call_args_list[0]
+        assert 'The following parameters were ignored: b, c' == args[0]
+
+    def test_attached_module_does_not_warn_for_reserverd_parameters(self):
+        pl = Pipeline()
+
+        log_mock = MagicMock()
+
+        class A(Module):
+            def configure(self):
+                a = self.get('a')
+                self.log = log_mock
+
+        pl.attach(A, a=1, b=2, only_if='a', every=10)
+        pl.drain(1)
+
+        args, kwargs = log_mock.warning.call_args_list[0]
+        assert 'The following parameters were ignored: b' == args[0]
+
 
 class TestPipelineConfigurationViaFile(TestCase):
     """Auto-configuration of pipelines using TOML files"""
@@ -444,6 +494,9 @@ class TestPipelineConfigurationViaFile(TestCase):
         fname = str(fobj.name)
 
         class A(Module):
+            def configure(self):
+                self.a = self.get('a')
+
             def process(self, blob):
                 assert 1 == self.a
                 return blob
@@ -461,12 +514,19 @@ class TestPipelineConfigurationViaFile(TestCase):
         fname = str(fobj.name)
 
         class A(Module):
+            def configure(self):
+                self.a = self.get('a')
+                self.b = self.get('b')
+
             def process(self, blob):
                 assert 1 == self.a
                 assert 2 == self.b
                 return blob
 
         class B(Module):
+            def configure(self):
+                self.c = self.get('c')
+
             def process(self, blob):
                 assert 'd' == self.c
                 return blob
@@ -485,12 +545,19 @@ class TestPipelineConfigurationViaFile(TestCase):
         fname = str(fobj.name)
 
         class A(Module):
+            def configure(self):
+                self.a = self.get('a')
+                self.b = self.get('b')
+
             def process(self, blob):
                 assert 1 == self.a
                 assert 2 == self.b
                 return blob
 
         class B(Module):
+            def configure(self):
+                self.c = self.get('c')
+
             def process(self, blob):
                 assert 'd' == self.c
                 return blob
@@ -509,6 +576,10 @@ class TestPipelineConfigurationViaFile(TestCase):
         fname = str(fobj.name)
 
         class A(Module):
+            def configure(self):
+                self.a = self.get('a')
+                self.b = self.get('b')
+
             def process(self, blob):
                 assert 1 == self.a
                 assert 2 == self.b
@@ -518,6 +589,64 @@ class TestPipelineConfigurationViaFile(TestCase):
         pipe.attach(A, b='foo')
         pipe.drain(1)
 
+        fobj.close()
+
+    def test_configuration_precedence_over_kwargs_when_get_is_used(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fobj.write(b"[A]\na = 1\n b = 2")
+        fobj.flush()
+        fname = str(fobj.name)
+
+        class A(Module):
+            def configure(self):
+                self.b = self.get('a')
+                self.a = self.get('b')
+
+            def process(self, blob):
+                assert 2 == self.a
+                return 1 == self.b
+
+        pipe = Pipeline(configfile=fname)
+        pipe.attach(A)
+        pipe.drain(1)
+        fobj.close()
+
+    def test_configuration_precedence_over_kwargs_when_require_is_used(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fobj.write(b"[A]\na = 1\n b = 'abc'")
+        fobj.flush()
+        fname = str(fobj.name)
+
+        class A(Module):
+            def configure(self):
+                self.xyz = self.require('a')
+                self.b = self.require('b')
+
+            def process(self, blob):
+                assert 1 == self.xyz
+                return 2 == self.b
+
+        pipe = Pipeline(configfile=fname)
+        pipe.attach(A)
+        pipe.drain(1)
+        fobj.close()
+
+    def test_parameter_with_differing_name(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fobj.write(b"[A]\na = 'abc'")
+        fobj.flush()
+        fname = str(fobj.name)
+
+        class A(Module):
+            def configure(self):
+                self.the_a = self.get('a')
+
+            def process(self, blob):
+                return 'abc' == self.the_a
+
+        pipe = Pipeline(configfile=fname)
+        pipe.attach(A)
+        pipe.drain(1)
         fobj.close()
 
 
@@ -594,6 +723,25 @@ class TestBlob(TestCase):
     def test_print_empty_blob(self):
         blob = Blob()
         assert "Empty blob" == str(blob)
+
+    def test_accessing_non_existing_key_raises_keyerror(self):
+        blob = Blob()
+        with self.assertRaises(KeyError):
+            blob['a']
+
+    def test_accessing_non_existing_key_prints_available_keys(self):
+        blob = Blob()
+        blob['key_a'] = 1
+        blob['key_b'] = 2
+        blob.log = MagicMock()
+
+        with self.assertRaises(KeyError):
+            blob['key_c']
+
+        args, kwargs = blob.log.error.call_args_list[0]
+        assert "No key named 'key_c'" in args[0]
+        for key in blob.keys():
+            assert key in args[0]
 
 
 class TestServices(TestCase):

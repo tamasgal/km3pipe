@@ -8,7 +8,7 @@ from os.path import dirname, join
 
 from km3pipe.testing import TestCase
 from km3pipe.io.daq import (
-    DAQPump, DAQPreamble, DAQHeader, DAQSummaryslice, TMCHRepump
+    DAQPump, DAQPreamble, DAQHeader, DAQSummaryslice, DMMonitor, TMCHRepump
 )
 
 TEST_DATA_DIR = join(dirname(__file__), "../../kp-data/test_data")
@@ -70,3 +70,14 @@ class TestDAQPump(TestCase):
 class TestTMCHRepump(TestCase):
     def test_init(self):
         TMCHRepump(filename=IO_MONIT_FILE)
+
+
+class TestDMMonitor(TestCase):
+    def test_init(self):
+        dmm = DMMonitor('a')
+        assert 'http://a:1302/mon/' == dmm._url
+
+    def test_available_parameters(self):
+        dmm = DMMonitor('a')
+        dmm._available_parameters = ['b', 'c']
+        self.assertListEqual(['b', 'c'], dmm.available_parameters)

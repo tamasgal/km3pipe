@@ -37,6 +37,7 @@ log = get_logger(__name__)    # pylint: disable=C0103
 
 STAT_LIMIT = 100000
 MODULE_CONFIGURATION = 'pipeline.toml'
+RESERVED_ARGS = set(['every', 'only_if'])
 
 if sys.version_info >= (3, 3):
     process_time = time.process_time
@@ -168,6 +169,18 @@ class Pipeline(object):
         if (inspect.isclass(fac) and issubclass(fac, Module)) or \
                 name == 'GenericPump':
             log.debug("Attaching as regular module")
+            if name in self.module_configuration:
+                log.debug(
+                    "Applying pipeline configuration file for module '%s'" %
+                    name
+                )
+                for key, value in self.module_configuration[name].items():
+                    if key in kwargs:
+                        self.log.info(
+                            "Overwriting parameter '%s' in module '%s' from "
+                            "the pipeline configuration file." % (key, name)
+                        )
+                    kwargs[key] = value
             module = fac(name=name, **kwargs)
             if hasattr(module, "provided_services"):
                 for service_name, obj in module.provided_services.items():
@@ -190,10 +203,6 @@ class Pipeline(object):
             module = fac
             module.name = name
             module.timeit = self.timeit
-
-        if name in self.module_configuration:
-            for key, value in self.module_configuration[name].items():
-                setattr(module, key, value)
 
         # Special parameters
         if 'only_if' in kwargs:
@@ -476,6 +485,7 @@ class Module(object):
         log.debug("Initialising {0}".format(name))
         self._name = name
         self.parameters = parameters
+        self._processed_parameters = []
         self.only_if = set()
         self.every = 1
         self.detector = None
@@ -483,6 +493,8 @@ class Module(object):
             self.logger_name = self.__class__.__name__
         else:
             self.logger_name = self.__module__ + '.' + self.__class__.__name__
+        if name is not None:
+            self.logger_name += '.{}'.format(name)
         log.debug("Setting up logger '{}'".format(self.logger_name))
         self.log = get_logger(self.logger_name)
         self.print = get_printer(self.logger_name)
@@ -497,6 +509,7 @@ class Module(object):
         self.provided_services = {}
         self.required_services = {}
         self.configure()
+        self._check_unused_parameters()
 
     def configure(self):
         """Configure module, like instance variables etc."""
@@ -518,6 +531,7 @@ class Module(object):
     def get(self, name, default=None):
         """Return the value of the requested parameter or `default` if None."""
         value = self.parameters.get(name)
+        self._processed_parameters.append(name)
         if value is None:
             return default
         return value
@@ -547,6 +561,19 @@ class Module(object):
     def pre_finish(self):
         """Do the last few things before calling finish()"""
         return self.finish()
+
+    def _check_unused_parameters(self):
+        """Check if any of the parameters passed in are ignored"""
+        all_params = set(self.parameters.keys())
+        processed_params = set(self._processed_parameters)
+        unused_params = all_params - processed_params - RESERVED_ARGS
+
+        if unused_params:
+            self.log.warning(
+                "The following parameters were ignored: {}".format(
+                    ', '.join(sorted(unused_params))
+                )
+            )
 
     def __call__(self, *args, **kwargs):
         """Run process if directly called."""
@@ -623,6 +650,10 @@ class Pump(Module):
 class Blob(OrderedDict):
     """A simple (ordered) dict with a fancy name. This should hold the data."""
 
+    def __init__(self, *args, **kwargs):
+        OrderedDict.__init__(self, *args, **kwargs)
+        self.log = get_logger("Blob")
+
     def __str__(self):
         if len(self) == 0:
             return "Empty blob"
@@ -634,6 +665,17 @@ class Blob(OrderedDict):
                 " => {}".format(repr(value))
             )
         return "\n".join(s)
+
+    def __getitem__(self, key):
+        try:
+            val = OrderedDict.__getitem__(self, key)
+        except KeyError:
+            self.log.error(
+                "No key named '{}' found in Blob. \n"
+                "Available keys: {}".format(key, ', '.join(self.keys()))
+            )
+            raise
+        return val
 
 
 class Run(object):

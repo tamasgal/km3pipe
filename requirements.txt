@@ -30,6 +30,7 @@ statsmodels
 tables>=3.4.2
 toml
 tornado
+tqdm
 twine
 urwid
 websocket-client

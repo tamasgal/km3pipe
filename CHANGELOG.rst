@@ -1,8 +1,20 @@
 Unreleased changes
 ------------------
 
+* Changed dtype of ``du`` and ``floor`` of calibrated hits from ``<f8`` to
+  ``<u2``
+
+
 Version 8
 ---------
+
+8.9.6 / 2019-01-13
+~~~~~~~~~~~~~~~~~~
+* Add verbosity argument to calibrate tool.
+* Massive improvement of ``HDF5Sink`` when writing ``NDArrays``
+* Add ``flush_frequency=...`` option to ``HDF5Sink`` to set the number of
+  iterations to wait before the internal cache is dumped to the disk
+* Fixes consistency when reusing the ``HDF5Pump`` with multiple files.
 
 8.9.5 / 2019-01-08
 ~~~~~~~~~~~~~~~~~~
