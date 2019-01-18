@@ -5,8 +5,22 @@ Unreleased changes
   ``<u2``
 
 
+
 Version 8
 ---------
+
+8.10.0 / 2019-01-18
+~~~~~~~~~~~~~~~~~~
+* A new class ``kp.io.daq.DMMonitor``` to able to communicate with the
+  Detector Manager. It can be used to monitor e.g. CLB parameters in real time
+  before they are put into the KM3NeT database
+* Performance improvement of the ``HDF5Pump`` when reading in lots of
+  ``Table``
+* Minor bug fixes
+
+8.9.7 / 2019-01-14
+~~~~~~~~~~~~~~~~~~
+* Bugfixes
 
 8.9.6 / 2019-01-13
 ~~~~~~~~~~~~~~~~~~
@@ -15,6 +29,8 @@ Version 8
 * Add ``flush_frequency=...`` option to ``HDF5Sink`` to set the number of
   iterations to wait before the internal cache is dumped to the disk
 * Fixes consistency when reusing the ``HDF5Pump`` with multiple files.
+
+
 
 8.9.5 / 2019-01-08
 ~~~~~~~~~~~~~~~~~~
