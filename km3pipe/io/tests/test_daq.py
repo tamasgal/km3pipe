@@ -7,11 +7,14 @@ Tests for KM3NeT binary formats readout.
 from os.path import dirname, join
 
 from km3pipe.testing import TestCase
-from km3pipe.io.daq import (DAQPump, DAQPreamble, DAQHeader, DAQSummaryslice)
+from km3pipe.io.daq import (
+    DAQPump, DAQPreamble, DAQHeader, DAQSummaryslice, TMCHRepump
+)
 
 TEST_DATA_DIR = join(dirname(__file__), "../../kp-data/test_data")
 IO_SUM_FILE = join(TEST_DATA_DIR, "IO_SUM.dat")
 IO_EVT_FILE = join(TEST_DATA_DIR, "IO_EVT.dat")
+IO_MONIT_FILE = join(TEST_DATA_DIR, "IO_MONIT.dat")
 
 
 class TestDAQPump(TestCase):
@@ -62,3 +65,8 @@ class TestDAQPump(TestCase):
         event = blob['DAQEvent']
         assert 6 == event.n_triggered_hits
         assert 17 == event.n_snapshot_hits
+
+
+class TestTMCHRepump(TestCase):
+    def test_init(self):
+        TMCHRepump(filename=IO_MONIT_FILE)
