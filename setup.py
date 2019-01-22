@@ -14,8 +14,6 @@ except ImportError:
 # so we can detect in __init__.py that it's called from setup.py
 builtins.__KM3PIPE_SETUP__ = True
 
-from pkg_resources import get_distribution, DistributionNotFound
-
 with open('requirements.txt') as fobj:
     requirements = [l.strip() for l in fobj.readlines()]
 
