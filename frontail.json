@@ -1,0 +1,12 @@
+{
+    "words": {
+        "ERROR": "color: #CC0C28;",
+        "STATUS": "color: #2F76CC;",
+        "DataFilter": "color: #138799",
+        "DataWriter": "color: #86FFCC",
+        "DataQueue": "color: #CC578F"
+    },
+    "lines": {
+        "ERROR": "font-weight: bold;"
+    }
+}
