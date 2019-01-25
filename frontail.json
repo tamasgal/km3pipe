@@ -3,7 +3,7 @@
         "ERROR": "color: #CC0C28;",
         "STATUS": "color: #2F76CC;",
         "DataFilter": "color: #138799",
-        "DataWriter": "color: #86FFCC",
+        "DataWriter": "color: #FFD400",
         "DataQueue": "color: #CC578F"
     },
     "lines": {
