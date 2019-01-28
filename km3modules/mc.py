@@ -110,7 +110,7 @@ def convert_mc_times_to_jte_times(times_mc, evt_timestamp_in_ns, evt_mc_time):
 
 class MCTimeCorrector(Module):
     """
-    Module that converts JTE hit times to MC times.
+    Module that converts MC hit times to JTE times.
     Thus, the following tables need to be converted:
     - mc_tracks
     - mc_hits
