@@ -109,8 +109,9 @@ class CHPump(Pump):
                 # self.performance_warn()
                 log.debug("{0} bytes received from network.".format(len(data)))
             except EOFError:
-                log.warning("EOF from Ligier, aborting...")
-                break
+                log.warning("EOF from Ligier, trying again in 30 seconds...")
+                time.sleep(30)
+                continue
             except BufferError:
                 log.error("Buffer error in Ligier stream, aborting...")
                 break
