@@ -14,6 +14,11 @@ import warnings
 import numpy as np
 import tables as tb
 
+try:
+    from numba import jit
+except ImportError:
+    jit = lambda f: f
+
 import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
 from km3pipe.dataclasses import Table, NDArray, DEFAULT_H5LOC
@@ -806,29 +811,7 @@ class HDF5Pump(Pump):
             self.log.error("No data found in '{}'".format(h5loc))
             return
 
-        max_group_id = np.max(group_ids)
-
-        start_idx_arr = np.full(max_group_id + 1, 0)
-        n_items_arr = np.full(max_group_id + 1, 0)
-
-        current_group_id = group_ids[0]
-        current_idx = 0
-        item_count = 0
-
-        for group_id in group_ids:
-            if group_id != current_group_id:
-
-                start_idx_arr[current_group_id] = current_idx
-                n_items_arr[current_group_id] = item_count
-                current_idx += item_count
-                item_count = 0
-                current_group_id = group_id
-            item_count += 1
-        else:
-            start_idx_arr[current_group_id] = current_idx
-            n_items_arr[current_group_id] = item_count
-
-        self._tab_indices[h5loc] = (start_idx_arr, n_items_arr)
+        self._tab_indices[h5loc] = create_index_tuple(group_ids)
 
     def _reset_iteration(self):
         """Reset index to default value"""
@@ -885,6 +868,33 @@ class HDF5Pump(Pump):
 
     def finish(self):
         self._close_h5file()
+
+
+@jit
+def create_index_tuple(group_ids):
+    """An helper function to create index tuples for fast lookup in HDF5Pump"""
+    max_group_id = np.max(group_ids)
+
+    start_idx_arr = np.full(max_group_id + 1, 0)
+    n_items_arr = np.full(max_group_id + 1, 0)
+
+    current_group_id = group_ids[0]
+    current_idx = 0
+    item_count = 0
+
+    for group_id in group_ids:
+        if group_id != current_group_id:
+            start_idx_arr[current_group_id] = current_idx
+            n_items_arr[current_group_id] = item_count
+            current_idx += item_count
+            item_count = 0
+            current_group_id = group_id
+        item_count += 1
+    else:
+        start_idx_arr[current_group_id] = current_idx
+        n_items_arr[current_group_id] = item_count
+
+    return (start_idx_arr, n_items_arr)
 
 
 class HDF5MetaData(Module):
