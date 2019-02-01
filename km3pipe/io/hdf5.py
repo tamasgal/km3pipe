@@ -685,6 +685,12 @@ class HDF5Pump(Pump):
                 )
                 ndarr_loc = h5loc.replace("_indices", '')
                 ndarray_locs.append(ndarr_loc)
+                if ndarr_loc in self.indices:
+                    self.log.info(
+                        "index table for NDArray '%s' already read, skip..." %
+                        ndarr_loc
+                    )
+                    continue
                 _index_table = self.h5file.get_node(h5loc)
                 self.indices[ndarr_loc] = {
                     "index": _index_table.col('index')[:],
