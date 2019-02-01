@@ -668,6 +668,9 @@ class HDF5Pump(Pump):
         for tab in self.h5file.walk_nodes(classname="Table"):
             h5loc = tab._v_pathname
             loc, tabname = os.path.split(h5loc)
+            if tabname in self.indices:
+                self.log.info("index table '%s' already read, skip..." % h5loc)
+                continue
             if loc in split_table_locs:
                 self.log.info("get_blob: '%s' is noted, skip..." % h5loc)
                 continue
