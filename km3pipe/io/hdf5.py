@@ -682,7 +682,11 @@ class HDF5Pump(Pump):
                 )
                 ndarr_loc = h5loc.replace("_indices", '')
                 ndarray_locs.append(ndarr_loc)
-                self.indices[ndarr_loc] = self.h5file.get_node(h5loc)
+                _index_table = self.h5file.get_node(h5loc)
+                self.indices[ndarr_loc] = {
+                    "index": _index_table.col('index')[:],
+                    "n_items": _index_table.col('n_items')[:]
+                }
                 continue
             tabname = camelise(tabname)
 
@@ -763,8 +767,8 @@ class HDF5Pump(Pump):
 
         for ndarr_loc in ndarray_locs:
             self.log.info("Reading %s" % ndarr_loc)
-            idx = self.indices[ndarr_loc].col('index')[group_id]
-            n_items = self.indices[ndarr_loc].col('n_items')[group_id]
+            idx = self.indices[ndarr_loc]['index'][group_id]
+            n_items = self.indices[ndarr_loc]['n_items'][group_id]
             end = idx + n_items
             ndarr = self.h5file.get_node(ndarr_loc)
             ndarr_name = camelise(ndarr_loc.split('/')[-1])
