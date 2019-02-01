@@ -1,14 +1,15 @@
 Unreleased changes
 ------------------
 
-* Changed dtype of ``du`` and ``floor`` of calibrated hits from ``<f8`` to
-  ``<u2``
-* Major performance upgrade for large HDF5 when reading with the ``HDF5Pump``
-
-
 
 Version 8
 ---------
+
+8.10.1 / 2019-02-01
+~~~~~~~~~~~~~~~~~~
+* Changed dtype of ``du`` and ``floor`` of calibrated hits from ``<f8`` to
+  ``<u2``
+* Major performance upgrade for large HDF5 when reading with the ``HDF5Pump``
 
 8.10.0 / 2019-01-18
 ~~~~~~~~~~~~~~~~~~
@@ -18,6 +19,7 @@ Version 8
 * Performance improvement of the ``HDF5Pump`` when reading in lots of
   ``Table``
 * Minor bug fixes
+
 
 8.9.7 / 2019-01-14
 ~~~~~~~~~~~~~~~~~~
