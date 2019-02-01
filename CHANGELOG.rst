@@ -3,6 +3,7 @@ Unreleased changes
 
 * Changed dtype of ``du`` and ``floor`` of calibrated hits from ``<f8`` to
   ``<u2``
+* Major performance upgrade for large HDF5 when reading with the ``HDF5Pump``
 
 
 

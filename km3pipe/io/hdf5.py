@@ -14,6 +14,11 @@ import warnings
 import numpy as np
 import tables as tb
 
+try:
+    from numba import jit
+except ImportError:
+    jit = lambda f: f
+
 import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
 from km3pipe.dataclasses import Table, NDArray, DEFAULT_H5LOC
@@ -668,6 +673,9 @@ class HDF5Pump(Pump):
         for tab in self.h5file.walk_nodes(classname="Table"):
             h5loc = tab._v_pathname
             loc, tabname = os.path.split(h5loc)
+            if tabname in self.indices:
+                self.log.info("index table '%s' already read, skip..." % h5loc)
+                continue
             if loc in split_table_locs:
                 self.log.info("get_blob: '%s' is noted, skip..." % h5loc)
                 continue
@@ -682,7 +690,17 @@ class HDF5Pump(Pump):
                 )
                 ndarr_loc = h5loc.replace("_indices", '')
                 ndarray_locs.append(ndarr_loc)
-                self.indices[ndarr_loc] = self.h5file.get_node(h5loc)
+                if ndarr_loc in self.indices:
+                    self.log.info(
+                        "index table for NDArray '%s' already read, skip..." %
+                        ndarr_loc
+                    )
+                    continue
+                _index_table = self.h5file.get_node(h5loc)
+                self.indices[ndarr_loc] = {
+                    "index": _index_table.col('index')[:],
+                    "n_items": _index_table.col('n_items')[:]
+                }
                 continue
             tabname = camelise(tabname)
 
@@ -763,8 +781,8 @@ class HDF5Pump(Pump):
 
         for ndarr_loc in ndarray_locs:
             self.log.info("Reading %s" % ndarr_loc)
-            idx = self.indices[ndarr_loc].col('index')[group_id]
-            n_items = self.indices[ndarr_loc].col('n_items')[group_id]
+            idx = self.indices[ndarr_loc]['index'][group_id]
+            n_items = self.indices[ndarr_loc]['n_items'][group_id]
             end = idx + n_items
             ndarr = self.h5file.get_node(ndarr_loc)
             ndarr_name = camelise(ndarr_loc.split('/')[-1])
@@ -793,29 +811,7 @@ class HDF5Pump(Pump):
             self.log.error("No data found in '{}'".format(h5loc))
             return
 
-        max_group_id = np.max(group_ids)
-
-        start_idx_arr = np.full(max_group_id + 1, 0)
-        n_items_arr = np.full(max_group_id + 1, 0)
-
-        current_group_id = group_ids[0]
-        current_idx = 0
-        item_count = 0
-
-        for group_id in group_ids:
-            if group_id != current_group_id:
-
-                start_idx_arr[current_group_id] = current_idx
-                n_items_arr[current_group_id] = item_count
-                current_idx += item_count
-                item_count = 0
-                current_group_id = group_id
-            item_count += 1
-        else:
-            start_idx_arr[current_group_id] = current_idx
-            n_items_arr[current_group_id] = item_count
-
-        self._tab_indices[h5loc] = (start_idx_arr, n_items_arr)
+        self._tab_indices[h5loc] = create_index_tuple(group_ids)
 
     def _reset_iteration(self):
         """Reset index to default value"""
@@ -872,6 +868,33 @@ class HDF5Pump(Pump):
 
     def finish(self):
         self._close_h5file()
+
+
+@jit
+def create_index_tuple(group_ids):
+    """An helper function to create index tuples for fast lookup in HDF5Pump"""
+    max_group_id = np.max(group_ids)
+
+    start_idx_arr = np.full(max_group_id + 1, 0)
+    n_items_arr = np.full(max_group_id + 1, 0)
+
+    current_group_id = group_ids[0]
+    current_idx = 0
+    item_count = 0
+
+    for group_id in group_ids:
+        if group_id != current_group_id:
+            start_idx_arr[current_group_id] = current_idx
+            n_items_arr[current_group_id] = item_count
+            current_idx += item_count
+            item_count = 0
+            current_group_id = group_id
+        item_count += 1
+    else:
+        start_idx_arr[current_group_id] = current_idx
+        n_items_arr[current_group_id] = item_count
+
+    return (start_idx_arr, n_items_arr)
 
 
 class HDF5MetaData(Module):
