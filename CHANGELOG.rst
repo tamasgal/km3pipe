@@ -2,8 +2,13 @@ Unreleased changes
 ------------------
 
 
+
 Version 8
 ---------
+
+8.10.2 / 2019-02-06
+~~~~~~~~~~~~~~~~~~~
+* Fixes ``IndexError`` when reading sparsely written ``Tables`` to HDF5
 
 8.10.1 / 2019-02-01
 ~~~~~~~~~~~~~~~~~~
