@@ -716,7 +716,12 @@ class HDF5Pump(Pump):
                         self._read_tab_indices(h5loc)
                     tab_idx_start = self._tab_indices[h5loc][0][group_id]
                     tab_n_items = self._tab_indices[h5loc][1][group_id]
+                    if tab_n_items == 0:
+                        continue
                     arr = tab[tab_idx_start:tab_idx_start + tab_n_items]
+                except IndexError:
+                    self.log.debug("No data for h5loc '%s'" % h5loc)
+                    continue
                 except NotImplementedError:
                     # 64-bit unsigned integer columns like ``group_id``
                     # are not yet supported in conditions
@@ -781,8 +786,11 @@ class HDF5Pump(Pump):
 
         for ndarr_loc in ndarray_locs:
             self.log.info("Reading %s" % ndarr_loc)
-            idx = self.indices[ndarr_loc]['index'][group_id]
-            n_items = self.indices[ndarr_loc]['n_items'][group_id]
+            try:
+                idx = self.indices[ndarr_loc]['index'][group_id]
+                n_items = self.indices[ndarr_loc]['n_items'][group_id]
+            except IndexError:
+                continue
             end = idx + n_items
             ndarr = self.h5file.get_node(ndarr_loc)
             ndarr_name = camelise(ndarr_loc.split('/')[-1])

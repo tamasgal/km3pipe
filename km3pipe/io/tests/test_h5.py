@@ -717,6 +717,86 @@ class TestHDF5PumpConsistency(TestCase):
 
         fobj.close()
 
+    def test_sparse_table(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class Dummy(Module):
+            def configure(self):
+                self.i = 0
+
+            def process(self, blob):
+                self.i += 1
+
+                if self.i == 5:
+                    blob['Tab'] = Table({'a': 23}, h5loc='/tab')
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(Dummy)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(10)
+
+        class Observer(Module):
+            def configure(self):
+                self.i = 0
+
+            def process(self, blob):
+                self.i += 1
+
+                if self.i == 5:
+                    assert 23 == blob['Tab'].a[0]
+                else:
+                    assert 'Tab' not in blob
+
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(HDF5Pump, filename=fname)
+        pipe.attach(Observer)
+        pipe.drain()
+
+    # TODO: This will fail due to ugly indexing of NDArrays
+    # def test_sparse_ndarray(self):
+    #     fobj = tempfile.NamedTemporaryFile(delete=True)
+    #     fname = fobj.name
+    #
+    #     class Dummy(Module):
+    #         def configure(self):
+    #             self.i = 0
+    #
+    #         def process(self, blob):
+    #             self.i += 1
+    #
+    #             if self.i == 5:
+    #                 blob['Arr'] = NDArray([1, 2, 3], h5loc='/arr')
+    #             return blob
+    #
+    #     pipe = Pipeline()
+    #     pipe.attach(Dummy)
+    #     pipe.attach(HDF5Sink, filename=fname)
+    #     pipe.drain(10)
+    #
+    #     class Observer(Module):
+    #         def configure(self):
+    #             self.i = 0
+    #
+    #         def process(self, blob):
+    #             self.i += 1
+    #
+    #             print(blob)
+    #             if self.i == 5:
+    #                 assert 6 == np.sum(blob['Arr'])
+    #             # else:
+    #             #     assert 'Arr' not in blob
+    #
+    #             return blob
+    #
+    #     pipe = Pipeline()
+    #     pipe.attach(HDF5Pump, filename=fname)
+    #     pipe.attach(Observer)
+    #     pipe.drain()
+
 
 class TestHDF5Shuffle(TestCase):
     def test_shuffle_without_reset_index(self):
