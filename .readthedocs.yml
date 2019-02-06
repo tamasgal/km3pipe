@@ -1,11 +1,8 @@
-version: 2
-
 conda:
-  file: .rtd-environment.yml
+    file: .rtd-environment.yml
 
 python:
-  version: 3.7
-  install:
-    - requirements: requirements.txt
-    - method: pip
-        path: .
+  version: 3.5
+  pip_install: true
+
+formats: []
