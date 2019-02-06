@@ -1,5 +1,8 @@
 version: 2
 
+conda:
+  file: .rtd-environment.yml
+
 python:
   version: 3.7
   install:
