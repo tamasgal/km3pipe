@@ -6,7 +6,7 @@ channels:
 
 dependencies:
   - python=3.5*
-  - hdf5=1.8.17=1
-  - numpy>=1.12
+  - hdf5
+  - numpy
   - pip:
     - "-r .rtd-requirements.txt"
