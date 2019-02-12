@@ -13,11 +13,6 @@ KM3Pipe is preinstalled on the Lyon computing centre. Put this into your
 
     source $KM3NET_THRONG_DIR/src/python/pyenv.sh
 
-If you see the following warnings, just ignore them::
-
-    pyenv: cannot rehash: /pbs/throng/km3net/src/python/python_env/shims isn't writable
-    pyenv: no such command `virtualenv-init'
-
 To test if everything is working, run the following command::
 
     km3pipe test
@@ -151,3 +146,4 @@ Here is an example configuration::
 
     [DB]
     cookie=sid_fooman_123.34.56.78_
+
