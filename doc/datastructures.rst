@@ -11,10 +11,20 @@ chain is being utilised to cycle through the events. Each module within
 the chain recieves the original, unaltered data from the pump and
 further also additional information created by the preceeding modules.
 
-The class used in KM3Pipe to represent any datastructure is called ``Table``.
-It is basically a numpy ndarray (``np.recarray`` 
-subclasse), but you can also iterate through it (including slicing) 
-and get subtables.
+The class used in KM3Pipe to represent almost any kinds of datastructures
+which are written to or read from the disk or network connections is called
+``Table``. It is a two-dimensional numpy ndarray (``np.recarray`` subclass),
+where each "column" (1D array) is accessible using its specific attribute.
+
+The ``Table`` is designed to work together with the ``HDF5Sink``, which
+dumps the table data into a given location (``Table.h5loc`` attribute)
+in an HDF5 file.
+
+``Tables`` written using the ``HDF5Sink`` can be read bye the ``HDF5Pump``,
+which will retrieve them in pieces (groups), just like they were written
+during a pipeline. However, the HDF5 files containing ``Table`` data can also
+be read by any other package since it uses only native HDF5 data structures
+(``HDF5Compund``, for the experts).
 
 Hits and McHits
 ---------------
