@@ -26,16 +26,14 @@ from km3modules.common import StatusBar
 import km3pipe.style
 km3pipe.style.use("km3pipe")
 
-filename = "data/km3net_jul13_90m_muatm50T655.km3_v5r1.JTE_r2356.root.0-499.h5"
-cal = kp.calib.Calibration(
-    filename="data/km3net_jul13_90m_r1494_corrected.detx"
-)
+filename = "data/atmospheric_muons_sample.h5"
+cal = kp.calib.Calibration(filename="data/KM3NeT_-00000001_20171212.detx")
 
 
 def filter_muons(blob):
     """Write all muons from McTracks to Muons."""
     tracks = blob['McTracks']
-    muons = tracks[tracks.type == 5]
+    muons = tracks[tracks.type == -13]  # PDG particle code
     blob["Muons"] = Table(muons)
     return blob
 
