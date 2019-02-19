@@ -55,8 +55,7 @@ def diag(ax=None, linecolor='0.0', linestyle='--', **kwargs):
     ax = get_ax(ax)
     xy_min = np.min((ax.get_xlim(), ax.get_ylim()))
     xy_max = np.max((ax.get_ylim(), ax.get_xlim()))
-    return ax.plot([xy_min, xy_max],
-                   [xy_min, xy_max],
+    return ax.plot([xy_min, xy_max], [xy_min, xy_max],
                    ls=linestyle,
                    c=linecolor,
                    **kwargs)

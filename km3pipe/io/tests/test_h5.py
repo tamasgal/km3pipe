@@ -809,9 +809,7 @@ class TestHDF5Shuffle(TestCase):
 
             def process(self, blob):
                 blob['Tab'] = Table({'a': self.i}, h5loc='/tab')
-                blob['SplitTab'] = Table({
-                    'b': self.i
-                },
+                blob['SplitTab'] = Table({'b': self.i},
                                          h5loc='/split_tab',
                                          split_h5=True)
                 blob['Arr'] = NDArray(np.arange(self.i + 1), h5loc='/arr')
@@ -904,9 +902,7 @@ class TestHDF5Shuffle(TestCase):
 
             def process(self, blob):
                 blob['Tab'] = Table({'a': self.i}, h5loc='/tab')
-                blob['SplitTab'] = Table({
-                    'b': self.i
-                },
+                blob['SplitTab'] = Table({'b': self.i},
                                          h5loc='/split_tab',
                                          split_h5=True)
                 blob['Arr'] = NDArray(np.arange(self.i + 1), h5loc='/arr')

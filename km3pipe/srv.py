@@ -354,18 +354,16 @@ def main():
 
     application = tornado.web.Application([
         (
-            r"/test", EchoWebSocket,
-            {
+            r"/test", EchoWebSocket, {
                 'client_manager': client_manager,
                 'server_status': server_status,
                 'data_path': data_path,
                 'lock': lock
             }
         ),
-        (r"/message", MessageProvider,
-         {
-             'client_manager': client_manager
-         }),
+        (r"/message", MessageProvider, {
+            'client_manager': client_manager
+        }),
     ], **settings)
 
     try:

@@ -33,7 +33,7 @@ cal = kp.calib.Calibration(filename="data/KM3NeT_-00000001_20171212.detx")
 def filter_muons(blob):
     """Write all muons from McTracks to Muons."""
     tracks = blob['McTracks']
-    muons = tracks[tracks.type == -13]  # PDG particle code
+    muons = tracks[tracks.type == -13]    # PDG particle code
     blob["Muons"] = Table(muons)
     return blob
 

@@ -23,24 +23,22 @@ JSON_DOMS = [{
     'Floor': 10,
     'CLBUPI': '100',
     'DetOID': DET_ID
-},
-             {
-                 'DOMId': 2,
-                 'Floor': 20,
-                 'CLBUPI': '200',
-                 'DetOID': DET_ID
-             },
-             {
-                 'DOMId': 3,
-                 'Floor': 30,
-                 'CLBUPI': '300',
-                 'DetOID': DET_ID
-             }, {
-                 'DOMId': 4,
-                 'Floor': 40,
-                 'CLBUPI': '400',
-                 'DetOID': 'det_id2'
-             }]
+}, {
+    'DOMId': 2,
+    'Floor': 20,
+    'CLBUPI': '200',
+    'DetOID': DET_ID
+}, {
+    'DOMId': 3,
+    'Floor': 30,
+    'CLBUPI': '300',
+    'DetOID': DET_ID
+}, {
+    'DOMId': 4,
+    'Floor': 40,
+    'CLBUPI': '400',
+    'DetOID': 'det_id2'
+}]
 
 log = get_logger('db')
 

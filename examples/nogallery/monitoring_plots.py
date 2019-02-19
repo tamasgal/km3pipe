@@ -410,14 +410,12 @@ class ZTPlot(Module):
             trig_hits = HitSeries([h for h in _hits if h.triggered])
 
             ax.scatter(
-                du_hits.time,
-                [z for (x, y, z) in du_hits.pos],
+                du_hits.time, [z for (x, y, z) in du_hits.pos],
                 c='#09A9DE',
                 label='hit'
             )
             ax.scatter(
-                trig_hits.time,
-                [z for (x, y, z) in trig_hits.pos],
+                trig_hits.time, [z for (x, y, z) in trig_hits.pos],
                 c='#FF6363',
                 label='triggered hit'
             )

@@ -105,11 +105,9 @@ class PMTRates(kp.Module):
         plt.yticks([i * 31 for i in range(18)],
                    ["Floor {}".format(f) for f in range(1, 19)])
         xtics_int = range(0, max_x, int(max_x / 10))
-        plt.xticks([i for i in xtics_int],
-                   [
-                       xlabel_func(now - (max_x - i) * interval)
-                       for i in xtics_int
-                   ])
+        plt.xticks([i for i in xtics_int], [
+            xlabel_func(now - (max_x - i) * interval) for i in xtics_int
+        ])
         fig.tight_layout()
         plt.savefig(self.plot_path)
         plt.close('all')

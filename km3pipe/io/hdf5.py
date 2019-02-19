@@ -78,8 +78,7 @@ class HDF5Header(object):
                 field_names, field_values = zip(*data.items())
                 sorted_indices = np.argsort(field_names)
                 attr = namedtuple(
-                    parameter,
-                    [field_names[i] for i in sorted_indices]
+                    parameter, [field_names[i] for i in sorted_indices]
                 )
                 setattr(
                     self, parameter,
@@ -237,9 +236,7 @@ class HDF5Sink(Module):
             return
         if np.isscalar(data):
             self.log.debug('toarray: is a scalar')
-            return Table({
-                name: np.asarray(data).reshape((1, ))
-            },
+            return Table({name: np.asarray(data).reshape((1, ))},
                          h5loc='/misc/{}'.format(decamelise(name)),
                          name=name)
         if hasattr(data, 'len') and len(data) <= 0:    # a bit smelly ;)

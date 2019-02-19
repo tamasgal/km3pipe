@@ -161,11 +161,7 @@ class Calibration(Module):
         return hits.append_columns([
             'dir_x', 'dir_y', 'dir_z', 'du', 'floor', 'pos_x', 'pos_y',
             'pos_z', 't0'
-        ],
-                                   [
-                                       dir_x, dir_y, dir_z, du, floor, pos_x,
-                                       pos_y, pos_z, t0
-                                   ],
+        ], [dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0],
                                    dtypes=[
                                        '<f8', '<f8', '<f8', '<u2', '<u2',
                                        '<f8', '<f8', '<f8', '<f8'
@@ -193,11 +189,7 @@ class Calibration(Module):
         return hits.append_columns([
             'dir_x', 'dir_y', 'dir_z', 'du', 'floor', 'pos_x', 'pos_y',
             'pos_z', 't0'
-        ],
-                                   [
-                                       dir_x, dir_y, dir_z, du, floor, pos_x,
-                                       pos_y, pos_z, t0
-                                   ],
+        ], [dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0],
                                    dtypes=[
                                        '<f8', '<f8', '<f8', '<u2', '<u2',
                                        '<f8', '<f8', '<f8', '<f8'

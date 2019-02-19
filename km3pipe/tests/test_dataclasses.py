@@ -712,9 +712,7 @@ class TestTable(TestCase):
         assert np.allclose(tab.a, [4, 5, 3])
 
     def test_slice_keeps_metadata(self):
-        tab = Table({
-            'a': [1, 2, 3]
-        },
+        tab = Table({'a': [1, 2, 3]},
                     h5loc='/lala',
                     split_h5=True,
                     name='bla',
@@ -725,9 +723,7 @@ class TestTable(TestCase):
         assert tab[:2].split_h5
 
     def test_mask_keeps_metadata(self):
-        tab = Table({
-            'a': [1, 2, 3]
-        },
+        tab = Table({'a': [1, 2, 3]},
                     h5loc='/lala',
                     split_h5=True,
                     name='bla',
@@ -739,9 +735,7 @@ class TestTable(TestCase):
         assert tab[m].split_h5
 
     def test_indexing_keeps_metadata(self):
-        tab = Table({
-            'a': [1, 2, 3]
-        },
+        tab = Table({'a': [1, 2, 3]},
                     h5loc='/lala',
                     split_h5=True,
                     name='bla',
@@ -805,9 +799,7 @@ class TestTable(TestCase):
         self.assertListEqual([100, 200, 300, 400, 500], list(added_tab.b))
 
     def test_adding_preserves_metadata(self):
-        tab1 = Table({
-            'a': [1, 2]
-        },
+        tab1 = Table({'a': [1, 2]},
                      h5loc='/a',
                      h5singleton=True,
                      split_h5=True,
