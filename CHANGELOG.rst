@@ -6,9 +6,14 @@ Unreleased changes
 Version 8
 ---------
 
+8.10.3 / 2019-02-19
+~~~~~~~~~~~~~~~~~~~
+* Changes dtype of time of Timeslice hits from integer to double
+
 8.10.2 / 2019-02-06
 ~~~~~~~~~~~~~~~~~~~
 * Fixes ``IndexError`` when reading sparsely written ``Tables`` to HDF5
+
 
 8.10.1 / 2019-02-01
 ~~~~~~~~~~~~~~~~~~
@@ -237,6 +242,8 @@ Version 8
   If you want to use aanet to read or convert ROOT files, use the legacy
   version
 * a lot of bug fixes and performance improvements!
+
+
 
 
 Version 7
