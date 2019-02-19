@@ -173,6 +173,8 @@ class IntraDOMCalibrator(kp.Module):
                 )
             except RuntimeError:
                 log.error(" skipping DOM '{0}'.".format(dom_id))
+            except KeyError:
+                log.error(" skipping DOM '{0}', no livetime".format(dom_id))
             else:
                 calibration[dom_id] = calib
 
