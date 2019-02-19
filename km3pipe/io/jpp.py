@@ -224,7 +224,7 @@ class TimeslicePump(Pump):
             {
                 'channel_id': self._channel_ids[:total_hits],
                 'dom_id': self._dom_ids[:total_hits],
-                'time': self._times[:total_hits],
+                'time': self._times[:total_hits].astype('f8'),
                 'tot': self._tots[:total_hits],
         # 'triggered': self._triggereds[:total_hits],  # dummy
                 'group_id': group_id,    # slice_id will be set afterwards

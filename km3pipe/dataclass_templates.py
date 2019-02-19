@@ -66,7 +66,7 @@ TEMPLATES = {
         'dtype': np.dtype([
             ('channel_id', 'u1'),
             ('dom_id', '<u4'),
-            ('time', '<i4'),
+            ('time', '<f8'),
             ('tot', 'u1'),
             ('group_id', '<u4'),
         ]),
