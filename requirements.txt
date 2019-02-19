@@ -34,4 +34,4 @@ tqdm
 twine
 urwid
 websocket-client
-yapf>=0.24
+yapf>=0.26
