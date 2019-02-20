@@ -1,6 +1,7 @@
 Unreleased changes
 ------------------
 
+* ``kp.toos.timed_cache()`` now can be used to created LRU caches with timeout
 
 
 Version 8
@@ -9,6 +10,7 @@ Version 8
 8.10.3 / 2019-02-19
 ~~~~~~~~~~~~~~~~~~~
 * Changes dtype of time of Timeslice hits from integer to double
+
 
 8.10.2 / 2019-02-06
 ~~~~~~~~~~~~~~~~~~~
