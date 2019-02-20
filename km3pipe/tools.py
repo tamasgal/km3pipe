@@ -8,6 +8,8 @@ from __future__ import absolute_import, print_function, division
 
 import base64
 import collections
+from datetime import datetime, timedelta
+import functools
 import os
 import re
 import socket
@@ -362,3 +364,40 @@ def get_jpp_revision(via_command='JPrint'):
         return None
     revision = output.decode().split('\n')[0].split()[1].strip()
     return revision
+
+
+def timed_cache(**timed_cache_kwargs):
+    """LRU cache decorator with timeout.
+    
+    Parameters
+    ----------
+    days: int
+    seconds: int
+    microseconds: int
+    milliseconds: int
+    minutes: int
+    hours: int
+    weeks: int
+    maxsise: int [default: 128]
+    typed: bool [default: False]
+    """
+
+    def _wrapper(f):
+        maxsize = timed_cache_kwargs.pop('maxsize', 128)
+        typed = timed_cache_kwargs.pop('typed', False)
+        update_delta = timedelta(**timed_cache_kwargs)
+        next_update = datetime.utcnow() - update_delta
+        f = functools.lru_cache(maxsize=maxsize, typed=typed)(f)
+
+        @functools.wraps(f)
+        def _wrapped(*args, **kwargs):
+            nonlocal next_update
+            now = datetime.utcnow()
+            if now >= next_update:
+                f.cache_clear()
+                next_update = now + update_delta
+            return f(*args, **kwargs)
+
+        return _wrapped
+
+    return _wrapper
