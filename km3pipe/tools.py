@@ -386,16 +386,27 @@ def timed_cache(**timed_cache_kwargs):
         maxsize = timed_cache_kwargs.pop('maxsize', 128)
         typed = timed_cache_kwargs.pop('typed', False)
         update_delta = timedelta(**timed_cache_kwargs)
-        next_update = datetime.utcnow() - update_delta
-        f = functools.lru_cache(maxsize=maxsize, typed=typed)(f)
+        # nonlocal workaround to support Python 2
+        # https://technotroph.wordpress.com/2012/10/01/python-closures-and-the-python-2-7-nonlocal-solution/
+        d = {'next_update': datetime.utcnow() - update_delta}
+        try:
+            f = functools.lru_cache(maxsize=maxsize, typed=typed)(f)
+        except AttributeError:
+            print(
+                "LRU caching is not available in Pyton 2.7, "
+                "this will have no effect!"
+            )
+            pass
 
         @functools.wraps(f)
         def _wrapped(*args, **kwargs):
-            nonlocal next_update
             now = datetime.utcnow()
-            if now >= next_update:
-                f.cache_clear()
-                next_update = now + update_delta
+            if now >= d['next_update']:
+                try:
+                    f.cache_clear()
+                except AttributeError:
+                    pass
+                d['next_update'] = now + update_delta
             return f(*args, **kwargs)
 
         return _wrapped
