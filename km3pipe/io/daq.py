@@ -689,7 +689,13 @@ class DMMonitor(object):
     def _session(self, name, interval):
         url = "http://{}:{}/monshort/{}".format(self._host, self._port, name)
         while True:
-            yield json.loads(urlopen(url).read())
+            try:
+                yield json.loads(urlopen(url).read())
+            except urllib.error.URLError as e:
+                self.log.error(
+                    "Error when trying to connect to the DM: %s\n"
+                    "Retry in %d seconds..." % (e, interval)
+                )
             time.sleep(interval)
 
 
