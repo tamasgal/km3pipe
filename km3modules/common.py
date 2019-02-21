@@ -121,7 +121,7 @@ class HitCalibrator(Module):
             self.log.warn("No hits found in key '{}'.".format(self.input_key))
             return blob
         hits = blob[self.input_key]
-        chits = self.calibration.apply(hits)
+        chits = self.services['calibrate'](hits)
         blob[self.output_key] = chits
         return blob
 
