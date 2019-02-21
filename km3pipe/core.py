@@ -11,6 +11,7 @@ import inspect
 import signal
 import gzip
 import os
+import multiprocessing as mp
 import sys
 import time
 from timeit import default_timer as timer
@@ -110,8 +111,17 @@ class Pipeline(object):
         for attached modules.
     """
 
-    def __init__(self, blob=None, timeit=False, configfile=None, anybar=False):
+    def __init__(
+            self,
+            blob=None,
+            timeit=False,
+            configfile=None,
+            anybar=False,
+            processes=1
+    ):
         self.log = get_logger(self.__class__.__name__)
+        self.processes = processes
+        self.pool = mp.Pool(self.processes)
         self.print = get_printer(self.__class__.__name__)
 
         if anybar:
