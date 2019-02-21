@@ -147,33 +147,6 @@ def gen_job(
     return job_string
 
 
-def hppsgrab(irod_path, method='irods'):
-    """Generate command to download file from HPSS.
-
-    Parameters
-    ==========
-    hpss_path: string
-        Full path to resource, starting with ``"/in2p3.fr/group/km3net/"``
-    method: string, optional [default: 'irods']
-        Downloader client (``"irods"`` or ``"xrootd"``).
-    """
-    METHODS = {
-        'irods': {
-            'getter': 'iget -K -P -N0 -f ',
-            'prefix': '',
-        },
-        'xrootd': {
-            'getter': 'xrdcp -f ',
-            'prefix': 'root://ccxroot.in2p3.fr:1999//hpss',
-        }
-    }
-    meth = METHODS[method]
-    getter = meth['getter']
-    prefix = meth['prefix']
-    cmd = getter + prefix
-    return cmd
-
-
 def get_jpp_env(jpp_dir):
     """Return the environment dict of a loaded Jpp env.
 
