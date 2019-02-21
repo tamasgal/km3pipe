@@ -142,7 +142,6 @@ class Pipeline(object):
         self.modules = []
         self.services = ServiceManager()
         self.required_services = {}
-        self.blob = blob or Blob()
         self.timeit = timeit
         self._timeit = {
             'init': timer(),
@@ -255,10 +254,10 @@ class Pipeline(object):
                 cycle_start_cpu = process_time()
 
                 log.debug("Pumping blob #{0}".format(self._cycle_count))
-                self.blob = Blob()
+                blob = Blob()
 
                 for module in self.modules:
-                    if self.blob is None:
+                    if blob is None:
                         log.debug(
                             "Skipping {0}, due to empty blob.".format(
                                 module.name
@@ -266,7 +265,7 @@ class Pipeline(object):
                         )
                         continue
                     if module.only_if and not module.only_if.issubset(set(
-                            self.blob.keys())):
+                            blob.keys())):
                         log.debug(
                             "Skipping {0}, due to missing required key"
                             "'{1}'.".format(module.name, module.only_if)
@@ -283,12 +282,12 @@ class Pipeline(object):
 
                     if module.blob_keys is not None:
                         blob_to_send = Blob({
-                            k: self.blob[k]
+                            k: blob[k]
                             for k in module.blob_keys
-                            if k in self.blob
+                            if k in blob
                         })
                     else:
-                        blob_to_send = self.blob
+                        blob_to_send = blob
 
                     log.debug("Processing {0} ".format(module.name))
                     start = timer()
@@ -303,9 +302,9 @@ class Pipeline(object):
                     if module.blob_keys is not None:
                         if new_blob is not None:
                             for key, item in new_blob.items():
-                                self.blob[key] = new_blob[key]
+                                blob[key] = new_blob[key]
                     else:
-                        self.blob = new_blob
+                        blob = new_blob
 
                 self._timeit['cycles'].append(timer() - cycle_start)
                 self._timeit['cycles_cpu'].append(
