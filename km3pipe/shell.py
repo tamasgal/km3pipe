@@ -222,9 +222,34 @@ class Script(object):
         """Add a new 'mkdir -p' instruction"""
         self.add('mkdir -p "{}"'.format(folder_path))
 
-    def iget(self, irods_path):
-        """Add an iget command to retrieve a file from iRODS."""
-        self.add('iget -v "{}"'.format(irods_path))
+    def iget(self, irods_path, attempts=1, pause=15):
+        """Add an iget command to retrieve a file from iRODS.
+
+        Parameters
+        ----------
+            irods_path: str
+                Filepath which should be fetched using iget
+            attempts: int (default: 1)
+                Number of retries, if iRODS access fails
+            pause: int (default: 15)
+                Pause between two access attempts in seconds
+        """
+        if attempts > 1:
+            cmd = """   for i in {{1..{0}}}; do
+                            ret=$(iget -v {1} 2>&1)
+                            echo $ret
+                            if [[ $ret == *"ERROR"* ]]; then
+                                echo "Attempt $i failed"
+                            else
+                                break
+                            fi
+                            sleep {2}s
+                        done """
+            cmd = lstrip(cmd)
+            cmd = cmd.format(attempts, irods_path, pause)
+            self.add(cmd)
+        else:
+            self.add('iget -v "{}"'.format(irods_path))
 
     def _add_two_argument_command(self, command, arg1, arg2):
         """Helper function for two-argument commands"""
