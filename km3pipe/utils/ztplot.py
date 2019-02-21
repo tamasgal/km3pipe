@@ -74,6 +74,8 @@ def main():
 
         if n_cols == 1 and n_rows == 1:
             axes = (axes, )
+        else:
+            axes = axes.flatten()
 
         for ax, du in zip(axes, dus):
             du_hits = hits[hits.du == du]
