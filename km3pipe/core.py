@@ -260,72 +260,81 @@ class Pipeline(object):
 
         try:
             while not self._stop:
-                cycle_start = timer()
-                cycle_start_cpu = process_time()
-
-                log.debug("Pumping blob #{0}".format(self._cycle_count))
-                blob = Blob()
-
-                for module in self.modules:
-                    if blob is None:
-                        log.debug(
-                            "Skipping {0}, due to empty blob.".format(
-                                module.name
-                            )
-                        )
-                        continue
-                    if module.only_if and not module.only_if.issubset(set(
-                            blob.keys())):
-                        log.debug(
-                            "Skipping {0}, due to missing required key"
-                            "'{1}'.".format(module.name, module.only_if)
-                        )
-                        continue
-
-                    if (self._cycle_count + 1) % module.every != 0:
-                        log.debug(
-                            "Skipping {0} (every {1} iterations).".format(
-                                module.name, module.every
-                            )
-                        )
-                        continue
-
-                    if module.blob_keys is not None:
-                        blob_to_send = Blob({
-                            k: blob[k]
-                            for k in module.blob_keys
-                            if k in blob
-                        })
-                    else:
-                        blob_to_send = blob
-
-                    log.debug("Processing {0} ".format(module.name))
-                    start = timer()
-                    start_cpu = process_time()
-                    new_blob = module(blob_to_send)
-                    if self.timeit or module.timeit:
-                        self._timeit[module]['process'] \
-                            .append(timer() - start)
-                        self._timeit[module]['process_cpu'] \
-                            .append(process_time() - start_cpu)
-
-                    if module.blob_keys is not None:
-                        if new_blob is not None:
-                            for key, item in new_blob.items():
-                                blob[key] = new_blob[key]
-                    else:
-                        blob = new_blob
-
-                self._timeit['cycles'].append(timer() - cycle_start)
-                self._timeit['cycles_cpu'].append(
-                    process_time() - cycle_start_cpu
-                )
-                self._cycle_count += 1
-                if cycles and self._cycle_count >= cycles:
-                    raise StopIteration
+                processes = []
+                for i in range(self.processes):
+                    print("Starting subprocess %d!" % i)
+                    p = mp.Process(target=self._execute_one_cycle)
+                    p.start()
+                    processes.append(p)
+                    self._cycle_count += 1
+                    if cycles and self._cycle_count >= cycles:
+                        break
+                for process in processes:
+                    p.join()
+                    if cycles and self._cycle_count >= cycles:
+                        raise StopIteration
         except StopIteration:
             log.info("Nothing left to pump through.")
         return self.finish()
+
+    def _execute_one_cycle(self):
+        """Execute a single cycle"""
+        cycle_start = timer()
+        cycle_start_cpu = process_time()
+
+        log.debug("Pumping blob #{0}".format(self._cycle_count))
+        blob = Blob()
+
+        for module in self.modules:
+            if blob is None:
+                log.debug(
+                    "Skipping {0}, due to empty blob.".format(module.name)
+                )
+                continue
+            if module.only_if and not module.only_if.issubset(set(blob.keys())
+                                                              ):
+                log.debug(
+                    "Skipping {0}, due to missing required key"
+                    "'{1}'.".format(module.name, module.only_if)
+                )
+                continue
+
+            if (self._cycle_count + 1) % module.every != 0:
+                log.debug(
+                    "Skipping {0} (every {1} iterations).".format(
+                        module.name, module.every
+                    )
+                )
+                continue
+
+            if module.blob_keys is not None:
+                blob_to_send = Blob({
+                    k: blob[k]
+                    for k in module.blob_keys
+                    if k in blob
+                })
+            else:
+                blob_to_send = blob
+
+            log.debug("Processing {0} ".format(module.name))
+            start = timer()
+            start_cpu = process_time()
+            new_blob = module(blob_to_send)
+            if self.timeit or module.timeit:
+                self._timeit[module]['process'] \
+                    .append(timer() - start)
+                self._timeit[module]['process_cpu'] \
+                    .append(process_time() - start_cpu)
+
+            if module.blob_keys is not None:
+                if new_blob is not None:
+                    for key, item in new_blob.items():
+                        blob[key] = new_blob[key]
+            else:
+                blob = new_blob
+
+        self._timeit['cycles'].append(timer() - cycle_start)
+        self._timeit['cycles_cpu'].append(process_time() - cycle_start_cpu)
 
     def _check_service_requirements(self):
         """Final comparison of provided and required modules"""
@@ -394,7 +403,7 @@ class Pipeline(object):
             self._stop = True
 
     def _print_timeit_statistics(self):
-
+        self.log.info("Printing timeit statistics")
         if self._cycle_count < 1:
             return
 
