@@ -285,7 +285,9 @@ class Pipeline(object):
         log.debug("Pumping blob #{0}".format(self._cycle_count))
         blob = Blob()
 
+        print(self.modules)
         for module in self.modules:
+            print(module)
             if blob is None:
                 log.debug(
                     "Skipping {0}, due to empty blob.".format(module.name)
@@ -319,7 +321,10 @@ class Pipeline(object):
             log.debug("Processing {0} ".format(module.name))
             start = timer()
             start_cpu = process_time()
+            print(blob_to_send)
             new_blob = module(blob_to_send)
+            print(module.__dict__)
+            print(new_blob)
             if self.timeit or module.timeit:
                 self._timeit[module]['process'] \
                     .append(timer() - start)
