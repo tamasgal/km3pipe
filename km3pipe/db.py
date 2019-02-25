@@ -766,6 +766,10 @@ class DOM(object):
             json["DetOID"], json["Floor"]
         )
 
+    @property
+    def omkey(self):
+        return (self.du, self.floor)
+
     def __str__(self):
         return "DU{0}-DOM{1}".format(self.du, self.floor)
 
