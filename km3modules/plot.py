@@ -173,8 +173,8 @@ class IntraDOMCalibrationPlotter(kp.Module):
         )
         sorted_dom_ids = sorted(
             calibration.keys(),
-            key=lambda d:
-            str(self.db.doms.via_dom_id(dom_id=d, det_id=self.det_oid))
+            key=lambda d: self.db.doms.
+            via_dom_id(dom_id=d, det_id=self.det_oid).omkey
         )    # by DU and FLOOR, note that DET OID is needed!
         for ax, dom_id in zip(axes.flatten(), sorted_dom_ids):
             calib = calibration[dom_id]
