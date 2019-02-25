@@ -171,7 +171,13 @@ class IntraDOMCalibrationPlotter(kp.Module):
         fig, axes = plt.subplots(
             6, 3, figsize=(16, 20), sharex=True, sharey=True
         )
-        for ax, (dom_id, calib) in zip(axes.flatten(), calibration.items()):
+        sorted_dom_ids = sorted(
+            calibration.keys(),
+            key=lambda d:
+            str(self.db.doms.via_dom_id(dom_id=d, det_id=self.det_oid))
+        )    # by DU and FLOOR, note that DET OID is needed!
+        for ax, dom_id in zip(axes.flatten(), sorted_dom_ids):
+            calib = calibration[dom_id]
             ax.plot(np.cos(calib['angles']), calib["means"], '.')
             ax.plot(np.cos(calib['angles']), calib["corrected_means"], '.')
             ax.set_title(
@@ -189,7 +195,8 @@ class IntraDOMCalibrationPlotter(kp.Module):
         fig, axes = plt.subplots(
             6, 3, figsize=(16, 20), sharex=True, sharey=True
         )
-        for ax, (dom_id, calib) in zip(axes.flatten(), calibration.items()):
+        for ax, dom_id in zip(axes.flatten(), sorted_dom_ids):
+            calib = calibration[dom_id]
             ax.plot(np.cos(calib['angles']), calib["rates"], '.')
             ax.plot(np.cos(calib['angles']), calib["corrected_rates"], '.')
             ax.set_title(
