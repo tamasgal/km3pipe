@@ -139,6 +139,7 @@ def make_dom_map(pmt_directions, values, nside=512, d=0.2, smoothing=0.1):
 
     The output can be used to call the `healpy.mollview` function.
     """
+    import healpy as hp
     discs = [hp.query_disc(nside, dir, 0.2) for dir in pmt_directions]
     npix = hp.nside2npix(nside)
     pixels = np.zeros(npix)
