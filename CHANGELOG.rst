@@ -13,10 +13,15 @@ Version 8
 * Fixed a missing import (``healpy``) in ``km3modules.plot.make_dom_plot``
 
 
+
 8.10.3 / 2019-02-19
 ~~~~~~~~~~~~~~~~~~~
 * Changes dtype of time of Timeslice hits from integer to double
 
+8.10.4 / 2019-02-16
+~~~~~~~~~~~~~~~~~~~
+
+* Bugfixes
 
 
 8.10.2 / 2019-02-06
@@ -251,6 +256,8 @@ Version 8
   If you want to use aanet to read or convert ROOT files, use the legacy
   version
 * a lot of bug fixes and performance improvements!
+
+
 
 
 
