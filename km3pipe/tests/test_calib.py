@@ -110,6 +110,15 @@ class TestCalibration(TestCase):
         # TimesliceHits is using int4 for times, so it's truncated when we pass in float64
         assert np.allclose([50.1, 91.2, 102.3], c_tshits.time, atol=0.1)
 
+    def test_apply_without_affecting_primary_hit_table(self):
+        calib = Calibration(filename=DETX_FILENAME)
+        hits = Table({'pmt_id': [1, 2, 1], 'time': [10.1, 11.2, 12.3]})
+        hits_compare = hits.copy()
+        calib.apply(hits)
+
+        for t_primary, t_calib in zip(hits_compare, hits):
+            self.assertAlmostEqual(t_primary, t_calib)
+
 
 class TestCalibrationService(TestCase):
     def test_apply_to_hits_with_dom_id_and_channel_id(self):
