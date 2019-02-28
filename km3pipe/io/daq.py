@@ -341,17 +341,17 @@ class DAQProcessor(Module):
         preamble = DAQPreamble(file_obj=data_io)    # noqa
         _data = unpack('<iiiQI', data_io.read(4 + 4 + 4 + 8 + 4))
         det_id, run_id, frame_index, trigger_counter, utc_seconds = _data
-        print(det_id, run_id, frame_index, trigger_counter, utc_seconds)
         shower_reco = unpack('9d', data_io.read(9 * 8))
         shower_meta = unpack('3i', data_io.read(12))
         track_reco = unpack('9d', data_io.read(9 * 8))
         track_meta = unpack('3i', data_io.read(12))
         print(
-            "x/y/z/dx/dy/dz/E/Q/t (type/status/ndf): ", shower_reco,
+            "Shower: x/y/z/dx/dy/dz/E/Q/t (type/status/ndf): ", shower_reco,
             shower_meta
         )
         print(
-            "x/y/z/dx/dy/dz/E/Q/t (type/status/ndf): ", track_reco, track_meta
+            "Track: x/y/z/dx/dy/dz/E/Q/t (type/status/ndf): ", track_reco,
+            track_meta
         )
         blob['ReconstructionInfo'] = Table({
             'det_id': det_id,
