@@ -118,6 +118,7 @@ class Calibration(Module):
         """Add x, y, z, t0 (and du, floor if DataFrame) columns to the hits.
 
         """
+        hits = hits.copy()
         if istype(hits, 'DataFrame'):
             # do we ever see McHits here?
             hits = Table.from_template(hits, 'Hits')
