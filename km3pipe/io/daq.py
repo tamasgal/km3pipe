@@ -363,10 +363,12 @@ class DAQProcessor(Module):
                                            h5loc='reco',
                                            split_h5=True,
                                            name='Reconstructions')
-        blob['RecoTrack'] = RecoTrack(*track_reco)
+        blob['RecoTrack'] = RecoTrack(*track_reco, *track_meta)
+        blob['RecoShower'] = RecoShower(*shower_reco, *shower_meta)
 
 
 RecoTrack = namedtuple('RecoTrack', 'x y z dx dy dz E Q t type status ndf')
+RecoShower = namedtuple('RecoShower', 'x y z dx dy dz E Q t type status ndf')
 
 
 class DAQPreamble(object):
