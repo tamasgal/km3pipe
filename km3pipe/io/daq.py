@@ -6,6 +6,7 @@ Pumps for the DAQ data formats.
 """
 from __future__ import absolute_import, print_function, division
 
+from colletions import namedtuple
 from io import BytesIO
 import json
 import math
@@ -352,6 +353,20 @@ class DAQProcessor(Module):
         print(
             "x/y/z/dx/dy/dz/E/Q/t (type/status/ndf): ", track_reco, track_meta
         )
+        blob['ReconstructionInfo'] = Table({
+            'det_id': det_id,
+            'run_id': run_id,
+            'frame_index': frame_index,
+            'trigger_counter': trigger_counter,
+            'utc_seconds': utc_seconds
+        },
+                                           h5loc='reco',
+                                           split_h5=True,
+                                           name='Reconstructions')
+        blob['RecoTrack'] = RecoTrack(*track_reco)
+
+
+RecoTrack = namedtuple('RecoTrack', 'x y z dx dy dz E Q t type status ndf')
 
 
 class DAQPreamble(object):
