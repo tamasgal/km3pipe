@@ -338,11 +338,20 @@ class DAQProcessor(Module):
     def process_online_reco(self, data, blob):
         data_io = BytesIO(data)
         preamble = DAQPreamble(file_obj=data_io)    # noqa
-        _data = unpack('<iiiQI', data_io.read(4+4+4+8+4))
+        _data = unpack('<iiiQI', data_io.read(4 + 4 + 4 + 8 + 4))
         det_id, run_id, frame_index, trigger_counter, utc_seconds = _data
         print(det_id, run_id, frame_index, trigger_counter, utc_seconds)
-        x, y, z, dx, dy, dz = unpack('6f', data_io.read(6 * 4))
-        print("x/y/z/dx/dy/dz: ", x, y, z, dx, dy, dz)
+        shower_reco = unpack('9f', data_io.read(9 * 4))
+        shower_meta = unpack('3i', data_io.read(12))
+        track_reco = unpack('9f', data_io.read(9 * 4))
+        track_meta = unpack('3i', data_io.read(12))
+        print(
+            "x/y/z/dx/dy/dz/E/Q/t (type/status/ndf): ", shower_reco,
+            shower_meta
+        )
+        print(
+            "x/y/z/dx/dy/dz/E/Q/t (type/status/ndf): ", track_reco, track_meta
+        )
 
 
 class DAQPreamble(object):
