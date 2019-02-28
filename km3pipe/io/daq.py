@@ -261,6 +261,13 @@ class DAQProcessor(Module):
                     "Corrupt summary slice data received. "
                     "Skipping..."
                 )
+        if tag == 'IO_OLINE':
+            try:
+                self.process_online_reco(data, blob)
+            except struct.error:
+                self.log.error(
+                    "Corrupt online reco data received. Skipping..."
+                )
 
         return blob
 
@@ -327,6 +334,11 @@ class DAQProcessor(Module):
         preamble = DAQPreamble(file_obj=data_io)    # noqa
         summaryslice = DAQSummaryslice(file_obj=data_io)
         blob["RawSummaryslice"] = summaryslice
+
+    def process_online_reco(self, data, blob):
+        data_io = BytesIO(data)
+        preamble = DAQPreamble(file_obj=data_io)    # noqa
+        print(preamble)
 
 
 class DAQPreamble(object):
