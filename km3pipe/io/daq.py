@@ -6,7 +6,7 @@ Pumps for the DAQ data formats.
 """
 from __future__ import absolute_import, print_function, division
 
-from colletions import namedtuple
+from collections import namedtuple
 from io import BytesIO
 import json
 import math
