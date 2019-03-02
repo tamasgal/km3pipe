@@ -218,6 +218,7 @@ class AanetPump(Pump):
 
     def configure(self):
         self.filename = self.require('filename')
+        self.filenames = self.get('filenames', default=[])
         self.ignore_hits = bool(self.get('ignore_hits'))
         self.bare = self.get('bare', default=False)
         self.raw_header = None
@@ -225,6 +226,37 @@ class AanetPump(Pump):
         self.blobs = self.blob_generator()
         self.group_id = 0
         self._generic_dtypes_avail = {}
+        
+        if not self.filename and not self.filenames:
+            raise ValueError("No filename(s) defined")
+
+        if self.filename:
+            self.filenames.append(self.filename)
+
+        self.filequeue = list(self.filenames)
+        self._load_next_file()
+        
+    def _open_next_file(self):
+        self.log.info("Opening next file")
+        if not self.filequeue:
+            self.log.info("No more files available, raising StopIteration.")
+            self.filequeue = list(self.filenames)
+            raise StopIteration
+        self.filename = self.filequeue.pop(0)
+        self.print("Opening {0}".format(self.filename))
+        if self.verbose:
+            self.print("Reading %s..." % self.filename)
+        return True        
+        
+    def _load_next_file(self):
+        self._reset_iteration()
+        self._reset_state()
+        self._open_next_file()
+        if not self.skip_version_check:
+            check_version(self.h5file)
+        self._read_group_info()
+        if self.cut_mask_node is not None:
+            self._read_cut_mask()
 
     def get_blob(self, index):
         NotImplementedError("Aanet currently does not support indexing.")
@@ -235,7 +267,12 @@ class AanetPump(Pump):
         import aa    # pylint: disablF0401        # noqa
         from ROOT import EventFile    # pylint: disable F0401
 
-        filename = self.filename
+        if not self.filename and not self.filenames:
+            raise ValueError("No filename(s) defined")
+
+        if self.filename:
+            self.filenames.append(self.filename)
+            
         log.info("Reading from file: {0}".format(filename))
         if not os.path.exists(filename):
             log.warning(filename + " not available: continue without it")
@@ -608,14 +645,37 @@ class AanetPump(Pump):
         blob.update(self._parse_tracks(event.trks))
         return blob
 
-    def process(self, blob=None):
-        return next(self.blobs)
+
+    def process(self, blob):
+        self.log.info("Reading blob at index %s" % self.index)
+        if self.index >= self._n_groups:
+            self.log.info("All groups are read, switching to the next file")
+            if self.filequeue:
+                self._load_next_file()
+            else:
+                self.log.info("No more files left to drain")
+                raise StopIteration
+        blob = self.get_blob(self.index)
+        self.index += 1
+        return blob
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        return next(self.blobs)
+        # TODO: wrap that in self._check_if_next_file_is_needed(self.index)
+        if self.index >= self._n_groups:
+            self.log.info("All groups are read, switching to the next file")
+            if self.filequeue:
+                self._load_next_file()
+            else:
+                self.log.info("No more files left to drain, resetting")
+                self.filequeue = list(self.filenames)
+                self._load_next_file()
+                raise StopIteration
+        blob = self.get_blob(self.index)
+        self.index += 1
+        return blob
 
 
 class MetaParser(object):
