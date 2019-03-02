@@ -363,8 +363,10 @@ class DAQProcessor(Module):
                                            h5loc='reco',
                                            split_h5=True,
                                            name='Reconstructions')
-        blob['RecoTrack'] = RecoTrack(*track_reco, *track_meta)
-        blob['RecoShower'] = RecoShower(*shower_reco, *shower_meta)
+        args = list(track_reco).extend(track_meta)
+        blob['RecoTrack'] = RecoTrack(*args)
+        args = list(shower_reco).extend(shower_meta)
+        blob['RecoShower'] = RecoShower(*args)
 
 
 RecoTrack = namedtuple('RecoTrack', 'x y z dx dy dz E Q t type status ndf')
@@ -674,7 +676,7 @@ class TMCHRepump(Pump):
 
 class DMMonitor(object):
     """A class which provides access to the Detector Manager parameters.
-    
+
     Example
     -------
 
@@ -683,7 +685,7 @@ class DMMonitor(object):
     >>> session = dmm.start_session('test', ['wr_mu/1/0','wr_mu/1/1'])
     >>> for values in session:
             print(values)
-    
+
     """
 
     def __init__(self, host, port=1302, base=''):
