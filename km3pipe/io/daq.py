@@ -6,6 +6,7 @@ Pumps for the DAQ data formats.
 """
 from __future__ import absolute_import, print_function, division
 
+from collections import namedtuple
 from io import BytesIO
 import json
 import math
@@ -261,6 +262,13 @@ class DAQProcessor(Module):
                     "Corrupt summary slice data received. "
                     "Skipping..."
                 )
+        if tag == 'IO_OLINE':
+            try:
+                self.process_online_reco(data, blob)
+            except struct.error:
+                self.log.error(
+                    "Corrupt online reco data received. Skipping..."
+                )
 
         return blob
 
@@ -327,6 +335,42 @@ class DAQProcessor(Module):
         preamble = DAQPreamble(file_obj=data_io)    # noqa
         summaryslice = DAQSummaryslice(file_obj=data_io)
         blob["RawSummaryslice"] = summaryslice
+
+    def process_online_reco(self, data, blob):
+        data_io = BytesIO(data)
+        preamble = DAQPreamble(file_obj=data_io)    # noqa
+        _data = unpack('<iiiQI', data_io.read(4 + 4 + 4 + 8 + 4))
+        det_id, run_id, frame_index, trigger_counter, utc_seconds = _data
+        shower_reco = unpack('9d', data_io.read(9 * 8))
+        shower_meta = unpack('3i', data_io.read(12))
+        track_reco = unpack('9d', data_io.read(9 * 8))
+        track_meta = unpack('3i', data_io.read(12))
+        print(
+            "Shower: x/y/z/dx/dy/dz/E/Q/t (type/status/ndf): ", shower_reco,
+            shower_meta
+        )
+        print(
+            "Track: x/y/z/dx/dy/dz/E/Q/t (type/status/ndf): ", track_reco,
+            track_meta
+        )
+        blob['ReconstructionInfo'] = Table({
+            'det_id': det_id,
+            'run_id': run_id,
+            'frame_index': frame_index,
+            'trigger_counter': trigger_counter,
+            'utc_seconds': utc_seconds
+        },
+                                           h5loc='reco',
+                                           split_h5=True,
+                                           name='Reconstructions')
+        args = list(track_reco).extend(track_meta)
+        blob['RecoTrack'] = RecoTrack(*args)
+        args = list(shower_reco).extend(shower_meta)
+        blob['RecoShower'] = RecoShower(*args)
+
+
+RecoTrack = namedtuple('RecoTrack', 'x y z dx dy dz E Q t type status ndf')
+RecoShower = namedtuple('RecoShower', 'x y z dx dy dz E Q t type status ndf')
 
 
 class DAQPreamble(object):
@@ -632,7 +676,7 @@ class TMCHRepump(Pump):
 
 class DMMonitor(object):
     """A class which provides access to the Detector Manager parameters.
-    
+
     Example
     -------
 
@@ -641,7 +685,7 @@ class DMMonitor(object):
     >>> session = dmm.start_session('test', ['wr_mu/1/0','wr_mu/1/1'])
     >>> for values in session:
             print(values)
-    
+
     """
 
     def __init__(self, host, port=1302, base=''):
