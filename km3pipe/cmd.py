@@ -97,9 +97,13 @@ def retrieve(run_id, det_id, outfile=None):
 def detx(det_id, calibration='', t0set='', filename=None):
     now = datetime.now()
     if filename is None:
-        filename = "KM3NeT_{0}{1:08d}_{2}.detx" \
-                   .format('-' if det_id < 0 else '', abs(det_id),
-                           now.strftime("%d%m%Y"))
+        filename = "KM3NeT_{0}{1:08d}_{2}{3}{4}.detx" \
+                   .format('-' if det_id < 0 else '',
+                           abs(det_id),
+                           now.strftime("%d%m%Y"),
+                           '_t0set-%s' % t0set if t0set else '',
+                           '_calib-%s' % calibration if calibration else '',
+                           )
     det = Detector(det_id=det_id, t0set=t0set, calibration=calibration)
     if det.n_doms > 0:
         det.write(filename)
