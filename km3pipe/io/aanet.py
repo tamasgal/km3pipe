@@ -236,6 +236,7 @@ class AanetPump(Pump):
 
         self.filequeue = list(self.filenames)
         self._load_next_file()
+        print("TEST oneone")
         
     def _open_next_file(self):
         self.log.info("Opening next file")
