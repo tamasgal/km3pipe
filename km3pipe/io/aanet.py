@@ -316,6 +316,7 @@ class AanetPump(Pump):
             if not hdr:
                 log.info("Empty header dict found, skipping...")
                 self.raw_header = None
+                self._n_groups = 0
             else:
                 log.info("Converting Header dict to Table...")
                 self.raw_header = self._convert_header_dict_to_table(hdr)
