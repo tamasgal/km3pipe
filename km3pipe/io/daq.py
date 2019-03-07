@@ -15,9 +15,9 @@ from struct import unpack
 import time
 import pprint
 try:
-    from urllib.request import urlopen
+    from urllib.request import urlopen, URLError
 except ImportError:
-    from urllib2 import urlopen
+    from urllib2 import urlopen, URLError
 
 import numpy as np
 
@@ -735,7 +735,7 @@ class DMMonitor(object):
         while True:
             try:
                 yield json.loads(urlopen(url).read())
-            except urllib.error.URLError as e:
+            except URLError as e:
                 self.log.error(
                     "Error when trying to connect to the DM: %s\n"
                     "Retry in %d seconds..." % (e, interval)
