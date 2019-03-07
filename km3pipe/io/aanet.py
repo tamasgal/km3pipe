@@ -218,8 +218,7 @@ class AanetPump(Pump):
 
     def configure(self):
         self.filenames = self.get('filenames', default=[])
-        if not self.filenames:
-            self.filename = self.require('filename')
+        self.filename = self.get('filename', default=[])
         self.ignore_hits = bool(self.get('ignore_hits'))
         self.bare = self.get('bare', default=False)
         self.raw_header = None
