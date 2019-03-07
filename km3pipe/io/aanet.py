@@ -270,6 +270,7 @@ class AanetPump(Pump):
         self._reset_iteration()
         self._reset_state()
         self._open_next_file()
+        self._read_event()
 
     def get_blob(self, index):
         NotImplementedError("Aanet currently does not support indexing.")
@@ -654,6 +655,7 @@ class AanetPump(Pump):
         blob['McTracks'] = self._parse_mctracks(event.mc_trks)
         self.log.debug('Reading EventInfo...')
         blob['EventInfo'] = self._parse_eventinfo(event)
+        self._n_groups = len(blob['EventInfo']['group_id'])
         self.log.debug('Reading Tracks...')
         blob.update(self._parse_tracks(event.trks))
         return blob
