@@ -253,6 +253,17 @@ class AanetPump(Pump):
         self.log.info("Resetting iteration")
         self.index = 0
 
+    def _reset_state(self):
+
+        self.cut_mask = None
+        self.indices = {}
+        self._tab_indices = {}
+        self._singletons = {}
+        self.header = None
+        self.group_ids = None
+        self._n_groups = None
+        self.index = 0
+        
         
     def _load_next_file(self):
         self._reset_iteration()
