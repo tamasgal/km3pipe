@@ -235,7 +235,6 @@ class AanetPump(Pump):
 
         self.filequeue = list(self.filenames)
         self._load_next_file()
-        print("TEST oneone")
         
     def _open_next_file(self):
         self.log.info("Opening next file")
@@ -248,6 +247,12 @@ class AanetPump(Pump):
         if self.verbose:
             self.print("Reading %s..." % self.filename)
         return True        
+
+    def _reset_iteration(self):
+        """Reset index to default value"""
+        self.log.info("Resetting iteration")
+        self.index = 0
+
         
     def _load_next_file(self):
         self._reset_iteration()
