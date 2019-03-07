@@ -270,7 +270,7 @@ class AanetPump(Pump):
         self._reset_iteration()
         self._reset_state()
         self._open_next_file()
-        self._read_group_info()
+        #self._read_group_info()
         if self.cut_mask_node is not None:
             self._read_cut_mask()
 
