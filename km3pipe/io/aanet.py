@@ -270,7 +270,7 @@ class AanetPump(Pump):
         self._reset_iteration()
         self._reset_state()
         self._open_next_file()
-        self._read_event()
+        #self._read_event()
 
     def get_blob(self, index):
         NotImplementedError("Aanet currently does not support indexing.")
@@ -327,6 +327,7 @@ class AanetPump(Pump):
                 log.debug('Reading header...')
                 blob["RawHeader"] = self.raw_header
                 blob["Header"] = self.header
+                self._n_groups = len(blob['EventInfo'])
 
                 if meta is not None:
                     blob['Meta'] = meta
@@ -655,7 +656,6 @@ class AanetPump(Pump):
         blob['McTracks'] = self._parse_mctracks(event.mc_trks)
         self.log.debug('Reading EventInfo...')
         blob['EventInfo'] = self._parse_eventinfo(event)
-        self._n_groups = len(blob['EventInfo']['group_id'])
         self.log.debug('Reading Tracks...')
         blob.update(self._parse_tracks(event.trks))
         return blob
