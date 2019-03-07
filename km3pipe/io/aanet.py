@@ -221,7 +221,7 @@ class AanetPump(Pump):
         self.filename = self.get('filename', default=[])
         self.ignore_hits = bool(self.get('ignore_hits'))
         self.bare = self.get('bare', default=False)
-        self.verbose = bool(self.get('verbose'), default=False)
+        self.verbose = bool(self.get('verbose', default=False))
         self.raw_header = None
         self.header = None
         self.blobs = self.blob_generator()
