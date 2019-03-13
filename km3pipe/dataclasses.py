@@ -173,9 +173,10 @@ class Table(np.recarray):
                         "requested dtype: %s" % (data.dtype, dtype)
                     )
                     raise ValueError("dtype mismatch")
-                log.info(
+                log.once(
                     "dtype mismatch, but matching field names and types. "
-                    "Rordering input data..."
+                    "Rordering input data...",
+                    identifier=h5loc
                 )
                 data = Table({f: data[f] for f in dtype_names}, dtype=dtype)
             else:
