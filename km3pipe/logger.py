@@ -46,7 +46,7 @@ def once(self, message, *args, **kws):
     """
     # TODO: after py2 support drop, put this into
     # function signature: identifier=None (between *args and **kws)
-    identifier = kws.get('identifier')
+    identifier = kws.pop('identifier', None)
 
     if identifier is None:
         caller = getframeinfo(stack()[1][0])
