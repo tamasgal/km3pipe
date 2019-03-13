@@ -1,7 +1,11 @@
 Unreleased changes
 ------------------
 
-
+* Adds a workaround for converting aanet ROOT files when the dtype dict is
+  mixed up
+* ``[self.]log.once`` can now be used to print a log message exactly once!
+* Fixes a problem where hit times could be overwritten by applying the 
+  calibration more than once.
 
 
 Version 8
@@ -11,6 +15,7 @@ Version 8
 ~~~~~~~~~~~~~~~~~~~
 * ``kp.toos.timed_cache()`` now can be used to created LRU caches with timeout
 * Fixed a missing import (``healpy``) in ``km3modules.plot.make_dom_plot``
+
 
 
 
