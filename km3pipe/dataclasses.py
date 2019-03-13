@@ -12,6 +12,7 @@ import numpy as np
 from numpy.lib import recfunctions as rfn
 
 from .dataclass_templates import TEMPLATES
+from .logger import get_logger
 from .tools import istype
 
 __author__ = "Tamas Gal and Moritz Lotze"
@@ -27,6 +28,8 @@ DEFAULT_H5LOC = '/misc'
 DEFAULT_NAME = 'Generic Table'
 DEFAULT_SPLIT = False
 DEFAULT_H5SINGLETON = False
+
+log = get_logger(__name__)
 
 
 def has_structured_dt(arr):
@@ -157,6 +160,33 @@ class Table(np.recarray):
             dtype = data.dtype
 
         assert is_structured(dtype)
+
+        if dtype != data.dtype:
+            dtype_names = set(dtype.names)
+            data_dtype_names = set(data.dtype.names)
+            if dtype_names == data_dtype_names:
+                if not all(dtype[f] == data.dtype[f] for f in dtype_names):
+                    log.critical(
+                        "dtype mismatch! Matching field names but differing "
+                        "field types, no chance to reorder.\n"
+                        "dtype of data:   %s\n"
+                        "requested dtype: %s" % (data.dtype, dtype)
+                    )
+                    raise ValueError("dtype mismatch")
+                log.info(
+                    "dtype mismatch, but matching field names and types. "
+                    "Rordering input data..."
+                )
+                data = Table({f: data[f] for f in dtype_names}, dtype=dtype)
+            else:
+                log.critical(
+                    "dtype mismatch, no chance to reorder due to differing "
+                    "fields!\n"
+                    "dtype of data:   %s\n"
+                    "requested dtype: %s" % (data.dtype, dtype)
+                )
+                raise ValueError("dtype mismatch")
+
         obj = np.asanyarray(data, dtype=dtype).view(cls)
         obj.h5loc = h5loc
         obj.split_h5 = split_h5

@@ -923,6 +923,38 @@ class TestTable(TestCase):
         assert t1.n_frames[0] == t2.n_frames[0]
         assert t1.timestamp[0] == t2.timestamp[0]
 
+    def test_reorder_dtypes(self):
+        dtype = np.dtype([('a', '<i8'), ('c', '<i8'), ('b', '<f8')])
+        dtype_reordered = np.dtype([('b', '<f8'), ('c', '<i8'), ('a', '<i8')])
+
+        tab = Table({"a": 1, "b": 2.5, "c": 3}, dtype=dtype)
+        assert tab.dtype == dtype
+        assert 1 == tab.a[0]
+        assert 2.5 == tab.b[0]
+        assert 3 == tab.c[0]
+
+        tab_reordered = Table(tab, dtype=dtype_reordered)
+        assert tab_reordered.dtype == dtype_reordered
+        assert 1 == tab_reordered.a[0]
+        assert 2.5 == tab_reordered.b[0]
+        assert 3 == tab_reordered.c[0]
+
+    def test_reorder_dtypes_with_differing_names_raises(self):
+        dtype = np.dtype([('a', '<i8'), ('c', '<i8'), ('b', '<f8')])
+        dtype_reordered = np.dtype([('b', '<f8'), ('a', '<i8')])
+        tab = Table({"a": 1, "b": 2.5, "c": 3}, dtype=dtype)
+
+        with self.assertRaises(ValueError):
+            tab2 = Table(tab, dtype=dtype_reordered)
+
+    def test_reorder_dtypes_w_matching_names_but_different_types_raise(self):
+        dtype = np.dtype([('a', '<i8'), ('c', '<i8'), ('b', '<f8')])
+        dtype_reordered = np.dtype([('a', '<f8'), ('c', '<i8'), ('b', '<f8')])
+        tab = Table({"a": 1, "b": 2.5, "c": 3}, dtype=dtype)
+
+        with self.assertRaises(ValueError):
+            tab2 = Table(tab, dtype=dtype_reordered)
+
 
 class TestTableFancaAttributes(TestCase):
     def setUp(self):
