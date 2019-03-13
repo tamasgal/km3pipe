@@ -337,13 +337,16 @@ class HDF5Sink(Module):
                     return
 
         if arr.dtype != tab.dtype:
-            self.log.critical(
-                "Cannot write a table to '%s' since its dtype is different "
-                "compared to the previous table with the same HDF5 location, "
-                "which was used to fix the dtype of the HDF5 compund type" %
-                h5loc
-            )
-            raise ValueError
+            try:
+                arr = Table(arr, tab.dtype)
+            except ValueError:
+                self.log.critical(
+                    "Cannot write a table to '%s' since its dtype is "
+                    "different compared to the previous table with the same "
+                    "HDF5 location, which was used to fix the dtype of the "
+                    "HDF5 compund type." % h5loc
+                )
+                raise
 
         tab.append(arr)
 
