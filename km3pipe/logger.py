@@ -35,7 +35,7 @@ def deprecation(self, message, *args, **kws):
     self._log(DEPRECATION, message, args, **kws)
 
 
-def once(self, message, *args, identifier=None, **kws):
+def once(self, message, *args, **kws):
     """Show a message only once, determined by position in source or identifer.
 
     This will not work in IPython or Jupyter notebooks if no identifier is
@@ -44,6 +44,10 @@ def once(self, message, *args, identifier=None, **kws):
     Set a unique identifier, otherwise the message will be printed every
     time.
     """
+    # TODO: after py2 support drop, put this into
+    # function signature: identifier=None (between *args and **kws)
+    identifier = kws.get('identifier')
+
     if identifier is None:
         caller = getframeinfo(stack()[1][0])
         identifier = "%s:%d" % (caller.filename, caller.lineno)
