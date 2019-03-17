@@ -217,60 +217,29 @@ class AanetPump(Pump):
     """
 
     def configure(self):
+        self.filename = self.get('filename', default=None)
         self.filenames = self.get('filenames', default=[])
-        self.filename = self.get('filename', default=[])
+        self.index_start = self.get('index_start', default=1)
         self.ignore_hits = bool(self.get('ignore_hits'))
         self.bare = self.get('bare', default=False)
-        self.verbose = bool(self.get('verbose', default=False))
         self.raw_header = None
         self.header = None
-        self.blobs = self.blob_generator()
+
         self.group_id = 0
         self._generic_dtypes_avail = {}
-        
+        self.file_index = int(self.index_start)
+
+        if self.filenames:
+            self.filename = self.filenames[self.file_index - 1]
+            self.index_stop = len(self.filenames)
+        else:
+            self.index_stop = self.get('index_stop', default=1)
+
         if not self.filename and not self.filenames:
-            raise ValueError("No filename(s) defined")
+            self.log.warning("No file- or basename(s) defined!")
 
-        if self.filename:
-            self.filenames.append(self.filename)
+        self.blobs = self.blob_generator()
 
-        self.filequeue = list(self.filenames)
-        self._load_next_file()
-        
-    def _open_next_file(self):
-        self.log.info("Opening next file")
-        if not self.filequeue:
-            self.log.info("No more files available, raising StopIteration.")
-            self.filequeue = list(self.filenames)
-            raise StopIteration
-        self.filename = self.filequeue.pop(0)
-        self.print("Opening {0}".format(self.filename))
-        if self.verbose:
-            self.print("Reading %s..." % self.filename)
-        return True        
-
-    def _reset_iteration(self):
-        """Reset index to default value"""
-        self.log.info("Resetting iteration")
-        self.index = 0
-
-    def _reset_state(self):
-
-        self.cut_mask = None
-        self.indices = {}
-        self._tab_indices = {}
-        self._singletons = {}
-        self.header = None
-        self.group_ids = None
-        self._n_groups = None
-        self.index = 0
-        
-        
-    def _load_next_file(self):
-        self._reset_iteration()
-        self._reset_state()
-        self._open_next_file()
-        #self._read_event()
 
     def get_blob(self, index):
         NotImplementedError("Aanet currently does not support indexing.")
@@ -281,12 +250,7 @@ class AanetPump(Pump):
         import aa    # pylint: disablF0401        # noqa
         from ROOT import EventFile    # pylint: disable F0401
 
-        if not self.filename and not self.filenames:
-            raise ValueError("No filename(s) defined")
-
-        if self.filename:
-            self.filenames.append(self.filename)
-            
+        filename = self.filename
         log.info("Reading from file: {0}".format(filename))
         if not os.path.exists(filename):
             log.warning(filename + " not available: continue without it")
@@ -316,7 +280,6 @@ class AanetPump(Pump):
             if not hdr:
                 log.info("Empty header dict found, skipping...")
                 self.raw_header = None
-                self._n_groups = 0
             else:
                 log.info("Converting Header dict to Table...")
                 self.raw_header = self._convert_header_dict_to_table(hdr)
@@ -328,7 +291,6 @@ class AanetPump(Pump):
                 log.debug('Reading header...')
                 blob["RawHeader"] = self.raw_header
                 blob["Header"] = self.header
-                self._n_groups = len(blob['EventInfo'])
 
                 if meta is not None:
                     blob['Meta'] = meta
@@ -661,37 +623,21 @@ class AanetPump(Pump):
         blob.update(self._parse_tracks(event.trks))
         return blob
 
-
-    def process(self, blob):
-        self.log.info("Reading blob at index %s" % self.index)
-        if self.index >= self._n_groups:
-            self.log.info("All groups are read, switching to the next file")
-            if self.filequeue:
-                self._load_next_file()
-            else:
-                self.log.info("No more files left to drain")
-                raise StopIteration
-        blob = self.get_blob(self.index)
-        self.index += 1
-        return blob
+    def process(self, blob=None):
+        if self.filenames and self.file_index < self.index_stop:
+            self.file_index += 1
+            self.log.info("Now at file_index={}".format(self.file_index))
+            self.filename = self.filenames[self.file_index - 1]
+            self.log.info("Next filename: {}".format(self.filename))
+            self.print("Opening {0}".format(self.filename))
+            self.blobs = self.blob_generator()
+        return next(self.blobs)
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        # TODO: wrap that in self._check_if_next_file_is_needed(self.index)
-        if self.index >= self._n_groups:
-            self.log.info("All groups are read, switching to the next file")
-            if self.filequeue:
-                self._load_next_file()
-            else:
-                self.log.info("No more files left to drain, resetting")
-                self.filequeue = list(self.filenames)
-                self._load_next_file()
-                raise StopIteration
-        blob = self.get_blob(self.index)
-        self.index += 1
-        return blob
+        return next(self.blobs)
 
 
 class MetaParser(object):
@@ -735,7 +681,7 @@ class MetaParser(object):
 
     def _record_app_data(self, data):
         """Parse raw metadata output for a single application
-        
+
         The usual output is:
         ApplicationName RevisionNumber
         ApplicationName ROOT_Version
@@ -762,7 +708,7 @@ class MetaParser(object):
         """Convert metadata to a KM3Pipe Table.
 
         Returns `None` if there is no data.
-        
+
         Each column's dtype will be set to a fixed size string (numpy.string_)
         with the length of the longest entry, since writing variable length
         strings does not fit the current scheme.
