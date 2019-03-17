@@ -3,6 +3,9 @@ Unreleased changes
 
 Version 8
 ---------
+8.12.1 / 2019-03-17
+~~~~~~~~~~~~~~~~~~~
+* Minor changes in ``setup.py``
 
 8.12.0 / 2019-03-17
 ~~~~~~~~~~~~~~~~~~~
