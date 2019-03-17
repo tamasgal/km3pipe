@@ -26,7 +26,7 @@ loggers = {}    # this holds all the registered loggers
 
 DEPRECATION = 45
 logging.addLevelName(DEPRECATION, "DEPRECATION")
-ONCE = 45
+ONCE = 46
 logging.addLevelName(ONCE, "ONCE")
 
 
