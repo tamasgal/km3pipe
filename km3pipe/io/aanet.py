@@ -22,6 +22,9 @@ from km3pipe.io.hdf5 import HDF5Header
 from km3pipe.dataclasses import Table
 from km3pipe.logger import get_logger
 
+import aa    # pylint: disablF0401        # noqa
+from ROOT import EventFile    # pylint: disable F0401
+
 log = get_logger(__name__)    # pylint: disable=C0103
 
 __author__ = "Moritz Lotze and Tamas Gal"
@@ -224,10 +227,12 @@ class AanetPump(Pump):
         self.bare = self.get('bare', default=False)
         self.raw_header = None
         self.header = None
+        self.no_blobs=0
 
         self.group_id = 0
         self._generic_dtypes_avail = {}
         self.file_index = int(self.index_start)
+
 
         if self.filenames:
             self.filename = self.filenames[self.file_index - 1]
@@ -238,17 +243,33 @@ class AanetPump(Pump):
         if not self.filename and not self.filenames:
             self.log.warning("No file- or basename(s) defined!")
 
+        self.log.info("Next filename: {}".format(self.filename))
+        self.print("Opening {0}".format(self.filename))
         self.blobs = self.blob_generator()
+        self.no_blobs = self.blob_counter()
 
 
     def get_blob(self, index):
         NotImplementedError("Aanet currently does not support indexing.")
 
+    def blob_counter(self):
+        """Create a blob counter."""
+
+        try:
+            event_file = EventFile(self.filename)
+        except Exception:
+            raise SystemExit("Could not open file")
+
+        no_blobs=0
+        for event in event_file:
+            no_blobs+=1
+
+        return no_blobs
+
     def blob_generator(self):
         """Create a blob generator."""
+
         # pylint: disable:F0401,W0612
-        import aa    # pylint: disablF0401        # noqa
-        from ROOT import EventFile    # pylint: disable F0401
 
         filename = self.filename
         log.info("Reading from file: {0}".format(filename))
@@ -274,6 +295,7 @@ class AanetPump(Pump):
             log.info("Skipping data conversion, only passing bare aanet data")
             for event in event_file:
                 yield Blob({'evt': event, 'event_file': event_file})
+
         else:
             log.info("Unpacking aanet header into dictionary...")
             hdr = self._parse_header(event_file.header)
@@ -297,6 +319,8 @@ class AanetPump(Pump):
 
                 self.group_id += 1
                 yield blob
+
+        #self.print("LIZ DUPE PEDALE",self.no_blobs)
         del event_file
 
     def _parse_eventinfo(self, event):
@@ -624,14 +648,26 @@ class AanetPump(Pump):
         return blob
 
     def process(self, blob=None):
-        if self.filenames and self.file_index < self.index_stop:
+        self.print(self.no_blobs)
+        if self.no_blobs>0:
+            self.no_blobs-=1
+            return next(self.blobs)
+        elif self.filenames and (self.file_index < self.index_stop and self.no_blobs==0):
             self.file_index += 1
             self.log.info("Now at file_index={}".format(self.file_index))
             self.filename = self.filenames[self.file_index - 1]
             self.log.info("Next filename: {}".format(self.filename))
             self.print("Opening {0}".format(self.filename))
             self.blobs = self.blob_generator()
-        return next(self.blobs)
+            self.no_blobs = self.blob_counter()
+
+        if self.no_blobs<0:
+            raise StopIteration
+            self.log.info("negative number of blobs!.")
+
+        if self.file_index == self.index_stop:
+            raise StopIteration
+            self.log.info("No more files available, raising StopIteration.")
 
     def __iter__(self):
         return self
