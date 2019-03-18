@@ -66,7 +66,7 @@ figure.facecolor: ffffff
 figure.subplot.wspace: 0.3
 figure.subplot.hspace: 0.4
 figure.figsize: 8.0, 5.5
-figure.autolayout: True
+figure.autolayout: False
 
 # Tableau colorblind 10 palette
 axes.prop_cycle: cycler('color', ['006BA4', 'FF800E', 'ABABAB', '595959', '5F9ED1', 'C85200', '898989', 'A2C8EC', 'FFBC79', 'CFCFCF'])
