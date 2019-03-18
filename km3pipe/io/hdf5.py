@@ -179,7 +179,7 @@ class HDF5Sink(Module):
         'zlib', 'lzf', 'blosc' and all other PyTables filters
         are available.
     complevel : int [default: 5]
-        Compression level. 
+        Compression level.
     chunksize : int [optional]
         Chunksize that should be used for saving along the first axis
         of the input array.

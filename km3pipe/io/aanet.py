@@ -659,7 +659,7 @@ class MetaParser(object):
 
     def _record_app_data(self, data):
         """Parse raw metadata output for a single application
-        
+
         The usual output is:
         ApplicationName RevisionNumber
         ApplicationName ROOT_Version
@@ -686,7 +686,7 @@ class MetaParser(object):
         """Convert metadata to a KM3Pipe Table.
 
         Returns `None` if there is no data.
-        
+
         Each column's dtype will be set to a fixed size string (numpy.string_)
         with the length of the longest entry, since writing variable length
         strings does not fit the current scheme.

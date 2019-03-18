@@ -36,7 +36,7 @@ class Timer(object):
     def __enter__(self):
         self.start()
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exit_type, value, traceback):
         self.stop()
 
     def start(self):

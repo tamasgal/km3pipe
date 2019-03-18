@@ -37,10 +37,10 @@ def count_multiplicities(times, tmax=20):
         Hit times for n hits
     dt: int [default: 20]
         Time window of a coincidence
-        
+
     Returns
     -------
-    (array[int]), array[int]), shape=(n,) 
+    (array[int]), array[int]), shape=(n,)
 
     """
     n = times.shape[0]

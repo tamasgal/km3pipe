@@ -144,7 +144,7 @@ class Client(object):
         self._connect()
         return self
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exit_type, value, traceback):
         self._disconnect()
 
 

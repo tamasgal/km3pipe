@@ -384,7 +384,7 @@ def get_jpp_revision(via_command='JPrint'):
 
 def timed_cache(**timed_cache_kwargs):
     """LRU cache decorator with timeout.
-    
+
     Parameters
     ----------
     days: int
