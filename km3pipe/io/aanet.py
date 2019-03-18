@@ -648,7 +648,6 @@ class AanetPump(Pump):
         return blob
 
     def process(self, blob=None):
-        self.print(self.no_blobs)
         if self.no_blobs>0:
             self.no_blobs-=1
             return next(self.blobs)
