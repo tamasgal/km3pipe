@@ -81,7 +81,7 @@ class TimesliceParser(Module):
             _channel_ids = []
             _times = []
             _tots = []
-            for i in range(n_frames):
+            for _ in range(n_frames):
                 frame_size, datatype = unpack('<ii', data.read(8))
                 det_id, run, sqnr = unpack('<iii', data.read(12))
                 timestamp, ns_ticks, dom_id = unpack('<iii', data.read(12))

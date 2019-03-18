@@ -17,7 +17,9 @@ import numpy as np
 import scipy.stats
 import seaborn as sns
 
-import km3pipe.style.moritz    # noqa
+import km3pipe.style
+
+km3pipe.style.use('moritz')
 
 #####################################################
 # Load the histogram from a file.

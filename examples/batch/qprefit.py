@@ -90,7 +90,7 @@ def main():
             s.add("echo '" + 42 * "=" + "'")
             s.add("echo Processing {}:".format(fname))
             s.add("{} {}".format(FITTER, fpath))
-            s.add("cp {} {}".format(oname, OUTPUT_PATH))
+            s.add("cp {} {}".format(oname, opath))
             s.add("echo File '{}' fitted.".format(fname))
             s.add("echo '" + 42 * "=" + "'")
 

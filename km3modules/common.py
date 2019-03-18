@@ -15,8 +15,6 @@ import km3pipe as kp
 from km3pipe import Module, Blob
 from km3pipe.tools import prettyln
 from km3pipe.sys import peak_memory_usage
-from km3pipe.math import zenith, azimuth
-from km3pipe.dataclasses import Table
 
 log = kp.logger.get_logger(__name__)
 

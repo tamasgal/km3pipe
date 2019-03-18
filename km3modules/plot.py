@@ -20,11 +20,6 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt    # noqa
 from matplotlib import pylab    # noqa
 
-try:
-    import healpy as hp
-except ImportError:
-    pass
-
 import km3pipe as kp    # noqa
 import km3pipe.style    # noqa
 
