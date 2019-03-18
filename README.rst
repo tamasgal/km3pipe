@@ -7,6 +7,10 @@ KM3Pipe
 .. image:: https://git.km3net.de/km3py/km3pipe/badges/master/coverage.svg
     :target: https://km3py.pages.km3net.de/km3pipe/coverage
 
+.. image:: https://api.codacy.com/project/badge/Grade/9df4849cb9f840289bf883de0dc8e28f
+   :alt: Codacy Badge
+   :target: https://app.codacy.com/app/tamasgal/km3pipe?utm_source=github.com&utm_medium=referral&utm_content=tamasgal/km3pipe&utm_campaign=Badge_Grade_Settings
+
 .. image:: https://examples.pages.km3net.de/km3badges/docs-latest-brightgreen.svg
     :target: https://km3py.pages.km3net.de/km3pipe
 
