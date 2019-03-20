@@ -19,6 +19,11 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
+try:
+    clock = time.process_time
+except AttributeError:
+    clock = time.clock
+
 
 def total_seconds(td):
     """Convert the timedelta to seconds."""
@@ -41,11 +46,11 @@ class Timer(object):
 
     def start(self):
         self.__start = timer()
-        self.__start_cpu = time.clock()
+        self.__start_cpu = clock()
 
     def stop(self):
         self.__finish = timer()
-        self.__finish_cpu = time.clock()
+        self.__finish_cpu = clock()
         if self.callback is not None:
             self.log()
         return self.seconds
