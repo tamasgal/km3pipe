@@ -251,6 +251,8 @@ class AanetPump(Pump):
 
     def blob_counter(self):
         """Create a blob counter."""
+        import aa    # pylint: disablF0401        # noqa
+        from ROOT import EventFile    # pylint: disable F0401
 
         try:
             event_file = EventFile(self.filename)
