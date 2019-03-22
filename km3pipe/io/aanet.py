@@ -22,9 +22,6 @@ from km3pipe.io.hdf5 import HDF5Header
 from km3pipe.dataclasses import Table
 from km3pipe.logger import get_logger
 
-import aa    # pylint: disablF0401        # noqa
-from ROOT import EventFile    # pylint: disable F0401
-
 log = get_logger(__name__)    # pylint: disable=C0103
 
 __author__ = "Moritz Lotze and Tamas Gal"
@@ -270,6 +267,8 @@ class AanetPump(Pump):
         """Create a blob generator."""
 
         # pylint: disable:F0401,W0612
+        import aa    # pylint: disablF0401        # noqa
+        from ROOT import EventFile    # pylint: disable F0401
 
         filename = self.filename
         log.info("Reading from file: {0}".format(filename))
@@ -320,7 +319,6 @@ class AanetPump(Pump):
                 self.group_id += 1
                 yield blob
 
-        #self.print("LIZ DUPE PEDALE",self.no_blobs)
         del event_file
 
     def _parse_eventinfo(self, event):
