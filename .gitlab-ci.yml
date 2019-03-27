@@ -87,6 +87,7 @@ test-jpp:
         - source /Jpp/setenv.sh /Jpp
         - *virtualenv_definition
         - make test
+    cache: {}
     <<: *junit_definition
 
 code-style:
