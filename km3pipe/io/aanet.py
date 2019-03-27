@@ -224,7 +224,7 @@ class AanetPump(Pump):
         self.bare = self.get('bare', default=False)
         self.raw_header = None
         self.header = None
-        self.no_blobs=0
+        self.no_blobs = 0
 
         self.group_id = 0
         self._generic_dtypes_avail = {}
@@ -245,7 +245,6 @@ class AanetPump(Pump):
         self.blobs = self.blob_generator()
         self.no_blobs = self.blob_counter()
 
-
     def get_blob(self, index):
         NotImplementedError("Aanet currently does not support indexing.")
 
@@ -259,9 +258,9 @@ class AanetPump(Pump):
         except Exception:
             raise SystemExit("Could not open file")
 
-        no_blobs=0
+        no_blobs = 0
         for event in event_file:
-            no_blobs+=1
+            no_blobs += 1
 
         return no_blobs
 
@@ -648,10 +647,11 @@ class AanetPump(Pump):
         return blob
 
     def process(self, blob=None):
-        if self.no_blobs>0:
-            self.no_blobs-=1
+        if self.no_blobs > 0:
+            self.no_blobs -= 1
             return next(self.blobs)
-        elif self.filenames and (self.file_index < self.index_stop and self.no_blobs==0):
+        elif self.filenames and (self.file_index < self.index_stop 
+                                and self.no_blobs==0):
             self.file_index += 1
             self.log.info("Now at file_index={}".format(self.file_index))
             self.filename = self.filenames[self.file_index - 1]
@@ -660,7 +660,7 @@ class AanetPump(Pump):
             self.blobs = self.blob_generator()
             self.no_blobs = self.blob_counter()
 
-        if self.no_blobs<0:
+        if self.no_blobs < 0:
             raise StopIteration
             self.log.info("negative number of blobs!.")
 
