@@ -111,14 +111,15 @@ class TestAanetPump(TestCase):
         aanet_pump = AanetPump(
             filenames=[
                 join(TEST_DATA_DIR, 'sea_data.root'),
-                join(TEST_DATA_DIR, 'mupage.root')
+                join(TEST_DATA_DIR, 'mupage.root'),
+                join(TEST_DATA_DIR, 'sea_data.root')
             ]
         )
         blob_counter = 0
         for blob in aanet_pump:
             blob_counter += 1
 
-        assert 8 == blob_counter
+        assert 13 == blob_counter
 
 
 class TestMetaParser(TestCase):
