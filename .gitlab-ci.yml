@@ -92,7 +92,11 @@ test-jpp:
         - source /Jpp/setenv.sh /Jpp
         - *virtualenv_definition
         - make test
-    cache: {}
+    cache:
+      paths:
+        - .cache/pip
+        - venv/
+      key: "JPP_BUILD_$CI_COMMIT_REF_SLUG"
     <<: *junit_definition
 
 code-style:
