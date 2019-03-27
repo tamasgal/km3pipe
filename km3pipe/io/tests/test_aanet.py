@@ -134,6 +134,23 @@ class TestAanetPump(TestCase):
             blob_counter += 1
 
         assert 6 == blob_counter
+        
+    def test_reading_hits_from_multiple_corsika_files(self):
+        # never mix files like this, but it's OK for a test ;)
+        aanet_pump = AanetPump(
+            filenames=[
+                join(TEST_DATA_DIR, 'mcv5.0.DAT004340.propa.sirene.jte.jchain.aanet.4340.root'),
+                join(TEST_DATA_DIR, 'mcv5.0.DAT004340.propa.sirene.jte.jchain.aanet.4340.root')
+            ]
+        )
+        blob_counter = 0
+        for blob in aanet_pump:
+            blob_counter += 1
+
+        assert 6 == blob_counter
+        
+        
+        
 
 
 class TestMetaParser(TestCase):
