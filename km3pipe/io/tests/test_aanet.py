@@ -46,12 +46,15 @@ class TestAanetPump(TestCase):
             'channel_id_sums': [556, 958, 372, 593, 433]
         }
 
+        blob_counter = 0
         for idx, blob in enumerate(self.pump):
+            blob_counter += 1
             hits = blob['Hits']
             assert len(hits) == data['hit_lengths'][idx]
             self.assertAlmostEqual(data['mean_times'][idx], np.mean(hits.time))
             assert data['tot_sums'][idx] == np.sum(hits.tot)
             assert data['channel_id_sums'][idx] == np.sum(hits.channel_id)
+        assert 5 == blob_counter
 
     def test_event_info(self):
         data = {
@@ -63,12 +66,15 @@ class TestAanetPump(TestCase):
             ],
             'nanoseconds': [0, 100000000, 0, 100000000, 0]
         }
+        blob_counter = 0
         for idx, blob in enumerate(self.pump):
+            blob_counter += 1
             ei = blob['EventInfo'][0]
             assert data['run_ids'][idx] == ei.run_id
             assert data['event_ids'][idx] == ei.event_id
             assert data['mc_ids'][idx] == ei.mc_id
             assert data['timestamps'][idx] == ei.timestamp
+        assert 5 == blob_counter
 
     def test_aanet_and_hdf5_conformity_with_converted_files(self):
         aanet_pump = AanetPump(filename=join(TEST_DATA_DIR, 'mupage.root'))
@@ -76,8 +82,9 @@ class TestAanetPump(TestCase):
             filename=join(TEST_DATA_DIR, 'mupage.root.h5')
         )
 
+        blob_counter = 0
         for aanet_blob, hdf5_blob in zip(aanet_pump, hdf5_pump):
-            print("=" * 23)
+            blob_counter += 1
             keys = ['Hits', 'McHits', 'McTracks', 'EventInfo', 'RawHeader']
             for key in keys:
                 aanet_data = aanet_blob[key]
@@ -97,6 +104,21 @@ class TestAanetPump(TestCase):
                         continue
                     # otherwise just compare them
                     assert np.allclose(aanet_data[attr], hdf5_data[attr])
+        assert 3 == blob_counter
+
+    def test_reading_hits_from_multiple_files(self):
+        # never mix files like this, but it's OK for a test ;)
+        aanet_pump = AanetPump(
+            filenames=[
+                join(TEST_DATA_DIR, 'sea_data.root'),
+                join(TEST_DATA_DIR, 'mupage.root')
+            ]
+        )
+        blob_counter = 0
+        for blob in aanet_pump:
+            blob_counter += 1
+
+        assert 8 == blob_counter
 
 
 class TestMetaParser(TestCase):
