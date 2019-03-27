@@ -179,7 +179,7 @@ class HDF5Sink(Module):
         'zlib', 'lzf', 'blosc' and all other PyTables filters
         are available.
     complevel : int [default: 5]
-        Compression level. 
+        Compression level.
     chunksize : int [optional]
         Chunksize that should be used for saving along the first axis
         of the input array.
@@ -335,6 +335,19 @@ class HDF5Sink(Module):
                         "missing columns to the table! Skipping..."
                     )
                     return
+
+        if arr.dtype != tab.dtype:
+            try:
+                arr = Table(arr, tab.dtype)
+            except ValueError:
+                self.log.critical(
+                    "Cannot write a table to '%s' since its dtype is "
+                    "different compared to the previous table with the same "
+                    "HDF5 location, which was used to fix the dtype of the "
+                    "HDF5 compund type." % h5loc
+                )
+                raise
+
         tab.append(arr)
 
         if (level < 4):

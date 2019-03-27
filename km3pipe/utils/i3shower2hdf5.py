@@ -18,7 +18,7 @@ import pandas as pd
 # 'from icecube import icetray' secretly loads stuff behind the scenes, it seems        # noqa
 # very un-pythonic, but eh
 # see also http://software.icecube.wisc.edu/documentation/projects/dataclasses/faq-common-probs.html#runtimeerror-extension-class-wrapper-for-base-class-i3frameobject-has-not-been-created-yet     # noqa
-from icecube import icetray, dataio    # noqa
+from icecube import icetray
 from icecube.icetray import I3Module, I3Bool, I3Int
 from icecube.dataclasses import I3Double
 from I3Tray import I3Tray

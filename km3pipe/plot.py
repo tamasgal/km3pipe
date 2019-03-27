@@ -11,7 +11,6 @@ try:
 except ImportError:
     import matplotlib
     matplotlib.use('agg')
-import matplotlib as mpl    # noqa
 import matplotlib.pyplot as plt
 import numpy as np
 try:

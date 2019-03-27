@@ -17,10 +17,14 @@ builtins.__KM3PIPE_SETUP__ = True
 with open('requirements.txt') as fobj:
     requirements = [l.strip() for l in fobj.readlines()]
 
+with open("README.rst", "r") as fh:
+    long_description = fh.read()
+
 setup(
     name='km3pipe',
-    url='http://github.com/tamasgal/km3pipe/',
+    url='http://git.km3net.de/km3py/km3pipe',
     description='An analysis framework for KM3NeT',
+    long_description=long_description,
     author='Tamas Gal and Moritz Lotze',
     author_email='tgal@km3net.de',
     packages=[
@@ -74,7 +78,6 @@ setup(
         ],
     },
     classifiers=[
-        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
         'Programming Language :: Python',

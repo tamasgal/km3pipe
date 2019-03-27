@@ -10,7 +10,7 @@ from __future__ import absolute_import, print_function, division
 import io
 from collections import defaultdict
 import time
-from functools import lru_cache
+from km3pipe.tools import timed_cache
 import xml.etree.ElementTree as ET
 
 import numpy as np
@@ -155,7 +155,7 @@ def fit_ahrs(A, H, Aoff, Arot, Hoff, Hrot):
     return yaw, pitch, roll
 
 
-@lru_cache(maxsize=None, typed=False)
+@timed_cache(hours=1, maxsize=None, typed=False)
 def get_latest_ahrs_calibration(clb_upi, max_version=3, db=None):
     """Retrieve the latest AHRS calibration data for a given CLB
 

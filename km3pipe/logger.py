@@ -7,6 +7,7 @@ The logging facility.
 from __future__ import absolute_import, print_function, division
 
 from hashlib import sha256
+from inspect import getframeinfo, stack
 import socket
 import logging
 
@@ -25,13 +26,41 @@ loggers = {}    # this holds all the registered loggers
 
 DEPRECATION = 45
 logging.addLevelName(DEPRECATION, "DEPRECATION")
+ONCE = 46
+logging.addLevelName(ONCE, "ONCE")
 
 
 def deprecation(self, message, *args, **kws):
+    """Show a deprecation warning."""
     self._log(DEPRECATION, message, args, **kws)
 
 
+def once(self, message, *args, **kws):
+    """Show a message only once, determined by position in source or identifer.
+
+    This will not work in IPython or Jupyter notebooks if no identifier is
+    specified, since then the determined position in source contains the
+    execution number of the input (cell), which changes every time.
+    Set a unique identifier, otherwise the message will be printed every
+    time.
+    """
+    # TODO: after py2 support drop, put this into
+    # function signature: identifier=None (between *args and **kws)
+    identifier = kws.pop('identifier', None)
+
+    if identifier is None:
+        caller = getframeinfo(stack()[1][0])
+        identifier = "%s:%d" % (caller.filename, caller.lineno)
+    if not hasattr(self, 'once_dict'):
+        self.once_dict = {}
+    if identifier in self.once_dict:
+        return
+    self.once_dict[identifier] = True
+    self._log(ONCE, message, args, **kws)
+
+
 logging.Logger.deprecation = deprecation
+logging.Logger.once = once
 
 if supports_color():
     logging.addLevelName(
@@ -55,6 +84,7 @@ if supports_color():
         "\033[1;101m%s\033[1;0m" % logging.getLevelName(logging.CRITICAL)
     )
     logging.addLevelName(DEPRECATION, "\033[1;35m%s\033[1;0m" % 'DEPRECATION')
+    logging.addLevelName(ONCE, "\033[1;36m%s\033[1;0m" % 'ONCE')
 
 
 class LogIO(object):
@@ -103,6 +133,8 @@ def get_logger(name):
     ch.setFormatter(formatter)
     logger.addHandler(ch)
     loggers[name] = logger
+
+    logger.once_dict = {}
 
     return logger
 

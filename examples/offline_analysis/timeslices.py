@@ -36,11 +36,19 @@ Here is an example with split timeslice streams::
     KM3NET_EVENT         KM3NETDAQ::JDAQEvent          21445     24 [MB]
     KM3NET_SUMMARYSLICE  KM3NETDAQ::JDAQSummaryslice  107910    109 [MB]
 
+
+To access the Supernova Timeslice hits, you pass ``stream=SN`` to the
+``TimeslicePump``, as seen here:
+
 """
 
 ROOT_FILENAME = "KM3NeT_00000014_00004451.root"
 
 import km3pipe as kp
+
+pump = kp.io.jpp.TimeslicePump(filename=ROOT_FILENAME, stream='SN')
+for blob in pump:
+    hits = blob['TSHits']
 
 ####################################################################
 # The timeslice pump is used to convert the timeslice objects in

@@ -180,7 +180,7 @@ def bootstrap_params(rv_cont, data, n_iter=5, **kwargs):
         Number of bootstrap iterations.
     """
     fit_res = []
-    for i in range(n_iter):
+    for _ in range(n_iter):
         params = rv_cont.fit(resample_1d(data, **kwargs))
         fit_res.append(params)
     fit_res = np.array(fit_res)

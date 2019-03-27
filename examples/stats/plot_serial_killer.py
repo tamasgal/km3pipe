@@ -19,7 +19,9 @@ from statsmodels.distributions.empirical_distribution import ECDF
 import matplotlib.pyplot as plt
 
 from km3pipe.stats import bootstrap_fit
-import km3pipe.style.moritz    # noqa
+import km3pipe.style
+
+km3pipe.style.use('moritz')
 
 ######################################################################
 # The data (times of killings) are in a text file, let's write a small

@@ -206,7 +206,7 @@ def lpnorm(x, p=2):
 
 def dist(x1, x2, axis=0):
     """Return the distance between two points.
-    
+
     Set axis=1 if x1 is a vector and x2 a matrix to get a vector of distances.
     """
     return np.linalg.norm(x2 - x1, axis=axis)

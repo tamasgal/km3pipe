@@ -9,7 +9,7 @@ at http://km3py.pages.km3net.de/km3pipe
 
 (Summarise the feature and try to provide a usage example.)
 
-### What is the current workaround to achieve the same functionality?
+### Describe a possible workaround to achieve the same functionality
 
 (Is there already a way to get the job done?)
 

@@ -339,8 +339,24 @@ def istype(obj, typename):
     return type(obj).__name__ == typename
 
 
+def isnotebook():
+    """Check if running within a Jupyter notebook"""
+    try:
+        shell = get_ipython().__class__.__name__
+        if shell == 'ZMQInteractiveShell':
+            return True    # Jupyter notebook or qtconsole
+        elif shell == 'TerminalInteractiveShell':
+            return False    # Terminal running IPython
+        else:
+            return False    # Other type (?)
+    except NameError:
+        return False
+
+
 def supports_color():
     """Checks if the terminal supports color."""
+    if isnotebook():
+        return True
     supported_platform = sys.platform != 'win32' or 'ANSICON' in os.environ
     is_a_tty = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
 
@@ -368,7 +384,7 @@ def get_jpp_revision(via_command='JPrint'):
 
 def timed_cache(**timed_cache_kwargs):
     """LRU cache decorator with timeout.
-    
+
     Parameters
     ----------
     days: int

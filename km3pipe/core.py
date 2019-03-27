@@ -327,7 +327,7 @@ class Pipeline(object):
 
                     if module.blob_keys is not None:
                         if new_blob is not None:
-                            for key, item in new_blob.items():
+                            for key in new_blob.keys():
                                 self.blob[key] = new_blob[key]
                     else:
                         self.blob = new_blob
@@ -493,7 +493,7 @@ class Module(object):
             self.logger_name = self.__class__.__name__
         else:
             self.logger_name = self.__module__ + '.' + self.__class__.__name__
-        if name is not None:
+        if name != self.logger_name:
             self.logger_name += '.{}'.format(name)
         log.debug("Setting up logger '{}'".format(self.logger_name))
         self.log = get_logger(self.logger_name)

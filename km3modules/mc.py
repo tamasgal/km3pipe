@@ -33,7 +33,7 @@ class GlobalRandomState(Module):
     Parameters
     ----------
     seed: int, default=42
-    
+
     """
 
     def configure(self):
