@@ -162,8 +162,8 @@ class TestAanetPump(TestCase):
                 
         pipe = Pipeline(timeit=False)
         pipe.attach(AanetPump, filenames = [
-            os.path.join(TEST_DATA_DIR, 'mcv5.0.DAT004340.propa.sirene.jte.jchain.aanet.4340.root'),
-            os.path.join(TEST_DATA_DIR, 'mcv5.0.DAT004340.propa.sirene.jte.jchain.aanet.4340.root')
+            join(TEST_DATA_DIR, 'mcv5.0.DAT004340.propa.sirene.jte.jchain.aanet.4340.root'),
+            join(TEST_DATA_DIR, 'mcv5.0.DAT004340.propa.sirene.jte.jchain.aanet.4340.root')
         ])
         pipe.attach(Tester)
         pipe.drain()
