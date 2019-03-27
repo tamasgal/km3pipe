@@ -70,6 +70,34 @@ class TestAanetPump(TestCase):
             assert data['mc_ids'][idx] == ei.mc_id
             assert data['timestamps'][idx] == ei.timestamp
 
+    def test_aanet_and_hdf5_conformity_with_converted_files(self):
+        aanet_pump = AanetPump(filename=join(TEST_DATA_DIR, 'mupage.root'))
+        hdf5_pump = kp.io.HDF5Pump(
+            filename=join(TEST_DATA_DIR, 'mupage.root.h5')
+        )
+
+        for aanet_blob, hdf5_blob in zip(aanet_pump, hdf5_pump):
+            print("=" * 23)
+            keys = ['Hits', 'McHits', 'McTracks', 'EventInfo', 'RawHeader']
+            for key in keys:
+                aanet_data = aanet_blob[key]
+                hdf5_data = hdf5_blob[key]
+                assert aanet_data.dtype == hdf5_data.dtype
+
+                for attr in aanet_data.dtype.names:
+                    # special case for RawHeader, since everything is a string
+                    if key == 'RawHeader':
+                        self.assertTupleEqual(
+                            tuple(aanet_data[attr]), tuple(hdf5_data[attr])
+                        )
+                        continue
+                    # special case for arrays which are all NaNs
+                    if np.all(np.isnan(aanet_data[attr])):
+                        assert np.all(np.isnan(hdf5_data[attr]))
+                        continue
+                    # otherwise just compare them
+                    assert np.allclose(aanet_data[attr], hdf5_data[attr])
+
 
 class TestMetaParser(TestCase):
     def test_init(self):
