@@ -120,6 +120,20 @@ class TestAanetPump(TestCase):
             blob_counter += 1
 
         assert 13 == blob_counter
+        
+    def test_reading_hits_from_multiple_mupage_files(self):
+        # never mix files like this, but it's OK for a test ;)
+        aanet_pump = AanetPump(
+            filenames=[
+                join(TEST_DATA_DIR, 'mupage.root'),
+                join(TEST_DATA_DIR, 'mupage.root')
+            ]
+        )
+        blob_counter = 0
+        for blob in aanet_pump:
+            blob_counter += 1
+
+        assert 6 == blob_counter
 
 
 class TestMetaParser(TestCase):
