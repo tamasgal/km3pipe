@@ -122,7 +122,6 @@ class TestAanetPump(TestCase):
         assert 13 == blob_counter
         
     def test_reading_hits_from_multiple_mupage_files(self):
-        # never mix files like this, but it's OK for a test ;)
         aanet_pump = AanetPump(
             filenames=[
                 join(TEST_DATA_DIR, 'mupage.root'),
@@ -136,7 +135,6 @@ class TestAanetPump(TestCase):
         assert 6 == blob_counter
         
     def test_reading_hits_from_multiple_corsika_files(self):
-        # never mix files like this, but it's OK for a test ;)
         aanet_pump = AanetPump(
             filenames=[
                 join(TEST_DATA_DIR, 'mcv5.0.DAT004340.propa.sirene.jte.jchain.aanet.4340.root'),
@@ -148,10 +146,26 @@ class TestAanetPump(TestCase):
             blob_counter += 1
 
         assert 6 == blob_counter
-        
-        
-        
 
+    def test_reading_multiple_corsika_files_pipeline(self):
+        
+        class Tester(kp.Module):
+            def configure(self):
+                self.counter = 0
+            def process(self, blob):
+                self.counter = self.counter + 1
+                print(self.counter)
+                return blob
+            def finish(self):
+                assert(self.counter == 6)
+                
+        pipe = Pipeline(timeit=False)
+        pipe.attach(AanetPump, filenames = [
+            os.path.join(TEST_DATA_DIR, 'mcv5.0.DAT004340.propa.sirene.jte.jchain.aanet.4340.root'),
+            os.path.join(TEST_DATA_DIR, 'mcv5.0.DAT004340.propa.sirene.jte.jchain.aanet.4340.root')
+        ])
+        pipe.attach(Tester)
+        pipe.drain()
 
 class TestMetaParser(TestCase):
     def test_init(self):
