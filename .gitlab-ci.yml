@@ -34,6 +34,7 @@ stages:
   pip install virtualenv
   virtualenv venv
   source venv/bin/activate
+  pip install -U pip setuptools
   make install
 
 .junit_template: &junit_definition
