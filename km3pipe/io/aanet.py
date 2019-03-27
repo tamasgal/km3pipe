@@ -663,7 +663,7 @@ class AanetPump(Pump):
             raise StopIteration
             self.log.info("negative number of blobs!.")
 
-        if self.file_index == self.index_stop:
+        if self.file_index == self.index_stop and self.no_blobs == 0:
             raise StopIteration
             self.log.info("No more files available, raising StopIteration.")
 
