@@ -230,7 +230,6 @@ class AanetPump(Pump):
         self._generic_dtypes_avail = {}
         self.file_index = int(self.index_start)
 
-
         if self.filenames:
             self.filename = self.filenames[self.file_index - 1]
             self.index_stop = len(self.filenames)
@@ -651,7 +650,7 @@ class AanetPump(Pump):
             self.no_blobs -= 1
             return next(self.blobs)
         elif self.filenames and (self.file_index < self.index_stop 
-                                and self.no_blobs==0):
+                                 and self.no_blobs==0):
             self.file_index += 1
             self.log.info("Now at file_index={}".format(self.file_index))
             self.filename = self.filenames[self.file_index - 1]
