@@ -650,7 +650,7 @@ class AanetPump(Pump):
             self.no_blobs -= 1
             return next(self.blobs)
         elif self.filenames and (self.file_index < self.index_stop 
-                                 and self.no_blobs==0):
+                                 and self.no_blobs == 0):
             self.file_index += 1
             self.log.info("Now at file_index={}".format(self.file_index))
             self.filename = self.filenames[self.file_index - 1]
