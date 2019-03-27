@@ -85,6 +85,10 @@ test-jpp:
     script:
         - yum install -y epel-release
         - yum install -y python-pip python-devel
+        - _CWD=$(pwd) && cd /usr/local/root && source bin/thisroot.sh && cd $_CWD
+        - which -a root
+        - which -a python
+        - python -c "import ROOT"
         - source /Jpp/setenv.sh /Jpp
         - *virtualenv_definition
         - make test
