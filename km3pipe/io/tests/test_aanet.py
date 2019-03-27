@@ -8,6 +8,9 @@ import km3pipe as kp
 from km3pipe.testing import TestCase, patch, Mock, skipif
 from km3pipe.io.aanet import AanetPump, MetaParser
 
+import ROOT
+import aa
+
 try:
     import ROOT
     import aa
