@@ -14,6 +14,8 @@ from collections import defaultdict
 import itertools
 import subprocess
 import os.path
+import pdb
+pdb.set_trace()
 
 import numpy as np
 
@@ -21,6 +23,7 @@ from km3pipe.core import Pump, Blob
 from km3pipe.io.hdf5 import HDF5Header
 from km3pipe.dataclasses import Table
 from km3pipe.logger import get_logger
+
 
 log = get_logger(__name__)    # pylint: disable=C0103
 
