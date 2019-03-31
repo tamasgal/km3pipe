@@ -60,7 +60,8 @@ also some very specialised project internal binary data formats, which on the
 other hand can act as templates for your own ones. Just have a look at the io
 subpackage and of course the documentation if you’re interested!
 
-Read the docs at https://km3py.pages.km3net.de/km3pipe (updated on each push)
+Read the docs at https://km3py.pages.km3net.de/km3pipe or
+(https://km3pipe.readthedocs.org), both updated on each push.
 
 KM3NeT public project homepage http://www.km3net.org
 
