@@ -152,12 +152,13 @@ class Calibration(Module):
 
         t0 = cal[:, 6]
 
-        if hits.time.dtype != t0.dtype:
-            time = hits.time.astype('f4') + t0.astype('f4')
-            hits = hits.drop_columns(['time'])
-            hits = hits.append_columns(['time'], [time])
-        else:
-            hits.time += t0
+        if hasattr(hits, 'time'):
+            if hits.time.dtype != t0.dtype:
+                time = hits.time.astype('f4') + t0.astype('f4')
+                hits = hits.drop_columns(['time'])
+                hits = hits.append_columns(['time'], [time])
+            else:
+                hits.time += t0
 
         return hits.append_columns([
             'dir_x', 'dir_y', 'dir_z', 'du', 'floor', 'pos_x', 'pos_y',
