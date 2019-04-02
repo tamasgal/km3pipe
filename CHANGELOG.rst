@@ -1,10 +1,15 @@
 Unreleased changes
 ------------------
 
-* Massive speed-up of the calibration procedure using ``numba.typed.Dict``
 
 Version 8
 ---------
+
+8.13.0 / 2019-04-02
+~~~~~~~~~~~~~~~~~~~
+* Massive speed-up of the calibration procedure using ``numba.typed.Dict``
+  numba v0.43 or later is required
+
 8.12.1 / 2019-03-17
 ~~~~~~~~~~~~~~~~~~~
 * Minor changes in ``setup.py``
