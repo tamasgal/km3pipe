@@ -12,6 +12,7 @@ from .core import Module
 from .hardware import Detector
 from .dataclasses import Table
 from .tools import istype
+from .logger import get_logger
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -21,10 +22,15 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
+log = get_logger(__name__)
+
 try:
     import numba as nb
 except (ImportError, OSError):
     HAVE_NUMBA = False
+    log.warning(
+        "No numba detected, consider `pip install numba` for more speed!"
+    )
 else:
     HAVE_NUMBA = True
 
