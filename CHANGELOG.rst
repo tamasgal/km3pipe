@@ -1,6 +1,8 @@
 Unreleased changes
 ------------------
 
+* Massive speed-up of the calibration procedure using ``numba.typed.Dict``
+
 Version 8
 ---------
 8.12.1 / 2019-03-17
