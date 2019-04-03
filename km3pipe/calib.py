@@ -129,11 +129,12 @@ class Calibration(Module):
             hits.time += cal
         return hits
 
-    def apply(self, hits):
+    def apply(self, hits, no_copy=False):
         """Add x, y, z, t0 (and du, floor if DataFrame) columns to the hits.
 
         """
-        hits = hits.copy()
+        if not no_copy:
+            hits = hits.copy()
         if istype(hits, 'DataFrame'):
             # do we ever see McHits here?
             hits = Table.from_template(hits, 'Hits')
