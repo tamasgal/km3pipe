@@ -35,7 +35,7 @@ except (ImportError, OSError):
 else:
     try:
         from numba.typed import Dict
-    except ModuleNotFoundError:
+    except:  # TODO: Python 2.7 compat, otherwise ModuleNotFoundError
         log.warning("Please update numba (0.43+) to have dictionary support!")
         HAVE_NUMBA = False
         jit = lambda f: f
