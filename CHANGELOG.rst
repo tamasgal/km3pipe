@@ -4,6 +4,9 @@ Unreleased changes
 
 Version 8
 ---------
+8.13.1 / 2019-04-04
+~~~~~~~~~~~~~~~~~~~
+* Fix ``ModuleNotFoundError`` exception in Python 2.7
 
 8.13.0 / 2019-04-02
 ~~~~~~~~~~~~~~~~~~~
