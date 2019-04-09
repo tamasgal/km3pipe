@@ -1,6 +1,9 @@
 Unreleased changes
 ------------------
 
+* ``kp.io.aanet.AanetPump`` now reads multiple files when ``filenames=...``
+  is provided.
+
 
 Version 8
 ---------
