@@ -26,9 +26,9 @@ log = get_logger(__name__)    # pylint: disable=C0103
 
 __author__ = "Moritz Lotze and Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
-__credits__ = "Thomas Heid, Liam Quinn, Javier Barrios Martí"
+__credits__ = "Thomas Heid, Liam Quinn, Javier Barrios Martí, Piotr Kalaczynski"
 __license__ = "MIT"
-__maintainer__ = "Moritz Lotze and Tamas Gal"
+__maintainer__ = "Tamas Gal and Piotr Kalaczynski"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
