@@ -251,8 +251,9 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [(
-    'index', 'km3pipe', u'KM3Pipe Documentation',
-    [u'Tamás Gál and Moritz Lotze'], 1
+    'index', 'km3pipe', u'KM3Pipe Documentation', [
+        u'Tamás Gál and Moritz Lotze'
+    ], 1
 )]
 
 # If true, show URL addresses after external links.
