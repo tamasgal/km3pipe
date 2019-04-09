@@ -412,8 +412,8 @@ def g_parameter(time_residual):
 
 def gold_parameter(time_residual):
     """stolen from thomas"""
-    gold = np.exp(-1 * time_residual * time_residual / (2 * 1.5 * 1.5)
-                  ) / len(time_residual)
+    gold = np.exp(-1 * time_residual * time_residual /
+                  (2 * 1.5 * 1.5)) / len(time_residual)
     gold = np.sum(gold)
 
 
