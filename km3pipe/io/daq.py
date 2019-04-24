@@ -363,9 +363,9 @@ class DAQProcessor(Module):
                                            h5loc='reco',
                                            split_h5=True,
                                            name='Reconstructions')
-        args = list(track_reco).extend(track_meta)
+        args = track_reco + track_meta
         blob['RecoTrack'] = RecoTrack(*args)
-        args = list(shower_reco).extend(shower_meta)
+        args = shower_reco + shower_meta
         blob['RecoShower'] = RecoShower(*args)
 
 
