@@ -17,7 +17,7 @@ builtins.__KM3PIPE_SETUP__ = True
 with open('requirements.txt') as fobj:
     requirements = [l.strip() for l in fobj.readlines()]
 
-with open("README.rst", "r") as fh:
+with open("README.rst") as fh:
     long_description = fh.read()
 
 setup(
