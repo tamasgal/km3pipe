@@ -207,8 +207,7 @@ class AanetPump(Pump):
     Parameters
     ----------
     filename: str, optional
-        Name of the file to open. If this parameter is not given, ``filenames``
-        needs to be specified instead.
+        Name of the file to open.
     ignore_hits: bool, optional [default=False]
         If true, don't read our the hits/mchits.
     bare: bool, optional [default=False]
@@ -218,48 +217,24 @@ class AanetPump(Pump):
 
     def configure(self):
         self.filename = self.get('filename', default=None)
-        self.filenames = self.get('filenames', default=[])
         self.index_start = self.get('index_start', default=1)
         self.ignore_hits = bool(self.get('ignore_hits'))
         self.bare = self.get('bare', default=False)
         self.raw_header = None
         self.header = None
-        self.num_blobs = 0
 
         self.group_id = 0
         self._generic_dtypes_avail = {}
         self.file_index = int(self.index_start)
 
-        if self.filenames:
-            self.filequeue = iter(self.filenames)
-            self.filename = next(self.filequeue)
-
         if not self.filename and not self.filenames:
             self.log.warning("No file- or basename(s) defined!")
 
-        self.log.info("Next filename: {}".format(self.filename))
         self.print("Opening {0}".format(self.filename))
         self.blobs = self.blob_generator()
-        self.num_blobs = self.blob_counter()
 
     def get_blob(self, index):
         NotImplementedError("Aanet currently does not support indexing.")
-
-    def blob_counter(self):
-        """Create a blob counter."""
-        import aa    # pylint: disablF0401        # noqa
-        from ROOT import EventFile    # pylint: disable F0401
-
-        try:
-            event_file = EventFile(self.filename)
-        except Exception:
-            raise SystemExit("Could not open file")
-
-        num_blobs = 0
-        for event in event_file:
-            num_blobs += 1
-
-        return num_blobs
 
     def blob_generator(self):
         """Create a blob generator."""
@@ -271,12 +246,9 @@ class AanetPump(Pump):
         filename = self.filename
         log.info("Reading from file: {0}".format(filename))
         if not os.path.exists(filename):
-            log.warning(filename + " not available: continue without it")
+            log.critical(filename + " not found!")
 
-        try:
-            event_file = EventFile(filename)
-        except Exception:
-            raise SystemExit("Could not open file")
+        event_file = EventFile(filename)
 
         log.info("Generating blobs through new aanet API...")
 
@@ -644,35 +616,12 @@ class AanetPump(Pump):
         return blob
 
     def process(self, blob=None):
-        if self.num_blobs > 0:
-            self.num_blobs -= 1
-            return next(self.blobs)
-        if self.filenames and self.num_blobs == 0:
-            self.filename = next(self.filequeue)
-            self.log.info("Next filename: {}".format(self.filename))
-            self.print("Opening {0}".format(self.filename))
-            self.blobs = self.blob_generator()
-            self.num_blobs = self.blob_counter()
-
-        if self.num_blobs < 0:
-            raise StopIteration
-            self.log.info("negative number of blobs!.")
+        return next(self.blobs)
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        if self.num_blobs == 0:
-            if self.filenames:
-                self.log.info("All blobs are read, switching to the next file")
-                self.filename = next(self.filequeue)
-                self.print("Opening {0}".format(self.filename))
-                self.blobs = self.blob_generator()
-                self.num_blobs = self.blob_counter()
-            else:
-                self.log.info("No more files left")
-                raise StopIteration
-        self.num_blobs -= 1
         return next(self.blobs)
 
 

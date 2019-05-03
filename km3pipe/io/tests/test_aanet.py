@@ -5,7 +5,7 @@ from os.path import join, dirname
 import numpy as np
 
 import km3pipe as kp
-from km3pipe.testing import TestCase, patch, Mock, skipif
+from km3pipe.testing import TestCase, patch, Mock, skipif, skip
 from km3pipe.io.aanet import AanetPump, MetaParser
 from km3pipe.core import Pipeline, Module, Pump
 
@@ -108,6 +108,7 @@ class TestAanetPump(TestCase):
                     assert np.allclose(aanet_data[attr], hdf5_data[attr])
         assert 3 == blob_counter
 
+    @skip(reason="Multiple file support is removed")
     def test_reading_hits_from_multiple_files(self):
         # never mix files like this, but it's OK for a test ;)
         aanet_pump = AanetPump(
@@ -123,6 +124,7 @@ class TestAanetPump(TestCase):
 
         assert 13 == blob_counter
 
+    @skip(reason="Multiple file support is removed")
     def test_reading_hits_from_multiple_mupage_files(self):
         aanet_pump = AanetPump(
             filenames=[
@@ -136,6 +138,7 @@ class TestAanetPump(TestCase):
 
         assert 6 == blob_counter
 
+    @skip(reason="Multiple file support is removed")
     def test_reading_hits_from_multiple_corsika_files(self):
         aanet_pump = AanetPump(
             filenames=[
@@ -155,6 +158,7 @@ class TestAanetPump(TestCase):
 
         assert 6 == blob_counter
 
+    @skip(reason="Multiple file support is removed")
     def test_reading_multiple_corsika_files_pipeline(self):
         class Tester(kp.Module):
             def configure(self):
