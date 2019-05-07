@@ -1,12 +1,20 @@
 Unreleased changes
 ------------------
 
-* ``kp.io.aanet.AanetPump`` now reads multiple files when ``filenames=...``
-  is provided.
 
 
 Version 8
 ---------
+8.14.0 / 2019-05-07
+~~~~~~~~~~~~~~~~~~~
+* Multiple filereadout with ``kp.io.aanet.AanetPump`` removed due to multiple
+  issues (``tohdf5`` freeze, header mixup and group ID problems)
+
+8.13.3 / 2019-04-14
+~~~~~~~~~~~~~~~~~~~
+* ``kp.io.aanet.AanetPump`` now reads multiple files when ``filenames=...``
+  is provided.
+
 8.13.1 / 2019-04-04
 ~~~~~~~~~~~~~~~~~~~
 * Fix ``ModuleNotFoundError`` exception in Python 2.7
