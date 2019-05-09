@@ -17,8 +17,11 @@ builtins.__KM3PIPE_SETUP__ = True
 with open('requirements.txt') as fobj:
     requirements = [l.strip() for l in fobj.readlines()]
 
-with open("README.rst") as fh:
-    long_description = fh.read().decode()
+try:
+    with open("README.rst") as fh:
+        long_description = fh.read()
+except UnicodeDecodeError:
+    long_description = "KM3Pipe"
 
 setup(
     name='km3pipe',
