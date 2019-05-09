@@ -94,7 +94,7 @@ def upload_runsummary(csv_filename, dryrun=False):
         log.critical("{} -> file not found.".format(csv_filename))
         return
     try:
-        df = pd.read_csv(csv_filename, sep='\t')
+        df = pd.read_csv(csv_filename, delim_whitespace=True)
     except pd.errors.EmptyDataError as e:
         log.error(e)
         return
@@ -129,11 +129,12 @@ def upload_runsummary(csv_filename, dryrun=False):
         prefix = "TEST_"
     else:
         prefix = ""
+    db = kp.db.DBManager()    # noqa
+    df['det_id'] = df['det_id'].apply(db.to_det_oid)
     data = convert_runsummary_to_json(df, prefix=prefix)
     print("We have {:.3f} MB to upload.".format(len(data) / 1024**2))
 
     print("Requesting database session.")
-    db = kp.db.DBManager()    # noqa
     if kp.db.we_are_in_lyon():
         session_cookie = "sid=_kmcprod_134.158_lyo7783844001343100343mcprod1223user"    # noqa
     else:
@@ -180,7 +181,7 @@ def convert_runsummary_to_json(
             })
 
             parameter_dict = {}
-            for row in run_data.itertuples():
+            for row in run_data.iterrows():
                 for parameter_name in run_data.columns:
                     if parameter_name in REQUIRED_COLUMNS:
                         continue
@@ -188,13 +189,16 @@ def convert_runsummary_to_json(
                     if parameter_name not in parameter_dict:
                         entry = {'Name': prefix + parameter_name, 'Data': []}
                         parameter_dict[parameter_name] = entry
-                    data_value = getattr(row, parameter_name)
+                    data_value = getattr(row[1], parameter_name)
                     try:
                         data_value = float(data_value)
                     except ValueError as e:
                         log.critical("Data values has to be floats!")
                         raise ValueError(e)
-                    value = {'S': str(getattr(row, 'source')), 'D': data_value}
+                    value = {
+                        'S': str(getattr(row[1], 'source')),
+                        'D': data_value
+                    }
                     parameter_dict[parameter_name]['Data'].append(value)
             for parameter_data in parameter_dict.values():
                 parameters_field.append(parameter_data)
