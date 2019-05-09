@@ -18,7 +18,7 @@ with open('requirements.txt') as fobj:
     requirements = [l.strip() for l in fobj.readlines()]
 
 with open("README.rst") as fh:
-    long_description = fh.read()
+    long_description = fh.read().decode()
 
 setup(
     name='km3pipe',
