@@ -5,6 +5,11 @@ Unreleased changes
 
 Version 8
 ---------
+8.14.1 / 2019-05-09
+~~~~~~~~~~~~~~~~~~~
+* Fixes an issue (which only happened on Lyon) where a ``UnicodeDecodeError``
+  was raised during installation
+
 8.14.0 / 2019-05-07
 ~~~~~~~~~~~~~~~~~~~
 * Multiple filereadout with ``kp.io.aanet.AanetPump`` removed due to multiple
