@@ -12,7 +12,7 @@ Usage:
 
 Options:
     STREAM      Name of the stream.
-    CSV_FILE    Tab separated data for the runsummary tables.
+    CSV_FILE    Whitespace separated data for the runsummary tables.
     PARAMETERS  List of parameters separated by space (e.g. detid=29).
     -f FORMAT   Usually 'txt' for ASCII or 'text' for UTF-8 [default: txt].
     -q          Dryrun! This will upload the parameters with a TEST_ prefix.
