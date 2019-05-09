@@ -5,6 +5,10 @@ Unreleased changes
 
 Version 8
 ---------
+8.14.2 / 2019-05-09
+~~~~~~~~~~~~~~~~~~~
+* Improved error handling in streamds runsummary upload 
+
 8.14.1 / 2019-05-09
 ~~~~~~~~~~~~~~~~~~~
 * Fixes an issue (which only happened on Lyon) where a ``UnicodeDecodeError``
