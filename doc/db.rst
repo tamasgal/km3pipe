@@ -445,7 +445,7 @@ interact with the database directly from the shell::
 
     Options:
         STREAM      Name of the stream.
-        CSV_FILE    Tab separated data for the runsummary tables.
+        CSV_FILE    Whitespace separated data for the runsummary tables.
         PARAMETERS  List of parameters separated by space (e.g. detid=29).
         -h --help   Show this screen.
 
@@ -466,10 +466,10 @@ parameter which refers to a DU, you can set it to ``"du1"`` etc.
 
 Here is an example of a CSV file::
 
-    det_id  run_id  source     n_active_doms highest_rate
-    29      523     whole_run  18            230042
-    29      523     du1        3             123000
-    29      524     whole_run  17            500023
+    det_id     run     source     n_active_doms highest_rate
+    D_ARCA001  523     whole_run  18            230042
+    D_ARCA001  523     du1        3             123000
+    D_ARCA001  524     whole_run  17            500023
 
 Please note that the whole file will be rejected if there is
 even a single row of data which is already present in the database.
