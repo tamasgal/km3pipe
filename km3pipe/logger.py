@@ -117,17 +117,17 @@ class LogIO(object):
         self.sock.connect((self.url, self.port))
 
 
-def get_logger(name, filename=None, file_only=False):
+def get_logger(
+        name, filename=None, stream_loglevel="WARNING", file_loglevel="DEBUG"
+):
     """Helper function to get a logger"""
     if name in loggers:
         return loggers[name]
     logger = logging.getLogger(name)
     logger.propagate = False
 
-    if filename is None:
-        with_color = supports_color()
-    else:
-        with_color = False
+    with_color = supports_color()
+
     pre1, suf1 = hash_coloured_escapes(name) if with_color else ('', '')
     pre2, suf2 = hash_coloured_escapes(name +
                                        'salt') if with_color else ('', '')
@@ -139,12 +139,13 @@ def get_logger(name, filename=None, file_only=False):
         ch_file = logging.handlers.RotatingFileHandler(
             filename, maxBytes=5 * 1024 * 1024, backupCount=10
         )
+        ch_file.setLevel(file_loglevel)
         ch_file.setFormatter(formatter)
         logger.addHandler(ch_file)
-    if not file_only:
-        ch = logging.StreamHandler()
-        ch.setFormatter(formatter)
-        logger.addHandler(ch)
+    ch = logging.StreamHandler()
+    ch.setLevel(stream_loglevel)
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
 
     loggers[name] = logger
 

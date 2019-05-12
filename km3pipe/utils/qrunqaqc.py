@@ -46,16 +46,14 @@ class QAQCAnalyser(object):
     def __init__(self, det_id, log_file="qrunqaqc.log"):
         self.det_id = det_id
 
-        self.log = kp.logger.get_logger(
-            "qrunqaqc", filename=log_file, file_only=True
-        )
+        self.log = kp.logger.get_logger("qrunqaqc", filename=log_file)
 
         self.log.info("QAQC analysis started for detector ID %s", det_id)
 
         self.jpp_dir = os.environ.get("JPP_DIR")
 
         if not self.jpp_dir:
-            print("Please load a Jpp environment")
+            self.log.critical("Please load a Jpp environment")
             raise SystemExit()
 
         self.sds = kp.db.StreamDS()
