@@ -9,6 +9,8 @@ Version 8
 * A new command line utility called ``qrunqaqc`` was added which processes
   runs to determine the quality parameters using ``JQAQC.sh`` and submits
   the results to the runsummarynumbers table of the KM3NeT database.
+* New option to directly log to a file for example via
+  ``kp.logger.get_logger("foo", filename="bar.log")``
 * Added ``kp.too.isize`` to look up the size of a file on iRODS
 
 8.14.2 / 2019-05-09
