@@ -26,6 +26,8 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
+XROOTD_BASE = "root://ccxroot:1999"
+
 
 def ifiles(irods_path):
     """Return a list of filenames for given iRODS path (recursively)"""
@@ -61,7 +63,21 @@ def isize(irods_path):
     try:
         return int(raw_output.decode('ascii').strip())
     except ValueError:
-        raise IOError("File not found or iRODS an error occured.")
+        raise IOError("File not found or an iRODS error occured.")
+
+
+def xrdsize(xrootd_path):
+    """Returns the size in bytes of the file"""
+    raw_output = subprocess.check_output(
+        "xrdfs {} stat {} | awk '{{print $2}}'".format(
+            XROOTD_BASE, xrootd_path
+        ),
+        shell=True
+    )
+    try:
+        return int(raw_output.decode('ascii').strip())
+    except ValueError:
+        raise IOError("File not found or an xrootd error occured.")
 
 
 def xrootd_path(det_id, run_id):
