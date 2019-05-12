@@ -52,6 +52,18 @@ def iexists(irods_path):
         return False
 
 
+def isize(irods_path):
+    """Returns the size in bytes of the most recent version of the file"""
+    raw_output = subprocess.check_output(
+        "ils -l {} | tail -n1 |awk '{{print $4}}'".format(irods_path),
+        shell=True
+    )
+    try:
+        return int(raw_output.decode('ascii').strip())
+    except ValueError:
+        raise IOError("File not found or iRODS an error occured.")
+
+
 def token_urlsafe(nbytes=32):
     """Return a random URL-safe text string, in Base64 encoding.
 

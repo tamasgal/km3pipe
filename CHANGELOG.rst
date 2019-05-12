@@ -1,7 +1,7 @@
 Unreleased changes
 ------------------
 
-
+* Added ``kp.too.isize`` to look up the size of a file on iRODS
 
 Version 8
 ---------
