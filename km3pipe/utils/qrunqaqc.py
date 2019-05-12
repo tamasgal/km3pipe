@@ -160,10 +160,12 @@ class QAQCAnalyser(object):
         run_id_chunks = kp.tools.chunks(run_ids_to_process, batch_size)
 
         self.pbar_runs = tqdm(
-            total=len(run_ids_to_process), desc="Runs", unit='run'
+            total=len(run_ids_to_process),
+            desc="Investigating the selected runs",
+            unit='run'
         )
 
-        for run_ids in tqdm(run_id_chunks, desc="Jobs", unit='job'):
+        for run_ids in tqdm(run_id_chunks, desc="Jobs"):
 
             self.submit_batch(run_ids, dryrun=dryrun)
             self.stats['Number of submitted runs'] += 1
@@ -174,6 +176,7 @@ class QAQCAnalyser(object):
 
     def print_stats(self):
         """Print a summary of the collected statistics"""
+        print("\n\n")
         print("Summary:")
         for key, value in self.stats.items():
             print("{}: {}".format(key, value))
