@@ -105,8 +105,8 @@ class QAQCAnalyser(object):
             already_processed_runs_ids = self.sds.get(
                 "runsummarynumbers",
                 detid=self.det_oid,
-                minrun=run_id,
-                maxrun=run_id,
+                minrun=min(run_ids),
+                maxrun=max(run_ids),
                 parameter_name="livetime_s"
             ).RUN.values
         except AttributeError:
