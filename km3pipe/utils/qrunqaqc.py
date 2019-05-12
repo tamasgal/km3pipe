@@ -190,7 +190,8 @@ class QAQCAnalyser(object):
 
         s = kp.shell.Script()
         for run_id in run_ids:
-            root_filename = kp.tools.xrootd_path(self.det_id, run_id)
+            xrootd_path = kp.tools.xrootd_path(self.det_id, run_id)
+            root_filename = os.path.basename(xrootd_path)
 
             out_filename = os.path.join(
                 self.outdir, "{}_{}_qparams.csv".format(self.det_id, run_id)
@@ -204,6 +205,7 @@ class QAQCAnalyser(object):
             s.add("Processing run {}".format(run_id))
             s.separator('-')
             s.add("km3pipe detx {} -t {} -o d.detx".format(self.det_id, t0set))
+            s.add("xrdcp {} {}".format(xrootd_path, root_filename))
             s.add("echo '{}'> {}".format(" ".join(self.columns), out_filename))
             s.add(
                 "$JPP_DIR/examples/JGizmo/JQAQC.sh d.detx {} "
@@ -213,6 +215,7 @@ class QAQCAnalyser(object):
             )
             s.add("echo ' whole_run' >> {}".format(out_filename))
             s.add("streamds upload {}".format(out_filename))
+            s.add("rm -f {}".format(root_filename))
 
         walltime = time.strftime(
             '%H:%M:%S', time.gmtime(ESTIMATED_TIME_PER_RUN * len(run_ids))
@@ -222,7 +225,7 @@ class QAQCAnalyser(object):
             s,
             "QAQC_{}_{}".format(self.det_id, run_ids[0]),
             vmem='4G',
-            fsize='100M',
+            fsize='8G',    # TODO: remove when xroot works for Jpp getLivetime
             xrootd=True,
             walltime=walltime,
             silent=True,
