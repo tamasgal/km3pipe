@@ -1,10 +1,16 @@
 Unreleased changes
 ------------------
 
-* Added ``kp.too.isize`` to look up the size of a file on iRODS
 
 Version 8
 ---------
+8.15.0 / 2019-05-12
+~~~~~~~~~~~~~~~~~~~
+* A new command line utility called ``qrunqaqc`` was added which processes
+  runs to determine the quality parameters using ``JQAQC.sh`` and submits
+  the results to the runsummarynumbers table of the KM3NeT database.
+* Added ``kp.too.isize`` to look up the size of a file on iRODS
+
 8.14.2 / 2019-05-09
 ~~~~~~~~~~~~~~~~~~~
 * Improved error handling in streamds runsummary upload 

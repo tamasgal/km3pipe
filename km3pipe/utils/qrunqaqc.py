@@ -1,0 +1,263 @@
+#!/usr/bin/env python
+# coding=utf-8
+# Filename: qrunqaqc.py
+# Author: Tamas Gal <tgal@km3net.de>
+"""
+Submits jobs which analyse a batch of runs with ``JQAQC.sh`` to retrieve the
+quality parameters. The obtained data is then uploaded to the runsummarynumbers
+table of the KM3NeT database.
+
+Usage:
+    qrunqaqc [options] DET_ID
+    qrunqaqc (-h | --help)
+
+Options:
+    -b BATCH_SIZE  Number of runs to process in a single job [default: 20].
+    -j MAX_JOBS    Maximum number of jobs to submit [default: 200].
+    -q             Dryrun, don't submit the jobs.
+    -h --help      Show this screen.
+
+"""
+from collections import defaultdict
+import os
+import subprocess
+import time
+
+import numpy as np
+from tqdm import tqdm
+import km3pipe as kp
+
+kp.logger.get_logger('km3pipe.db').setLevel('CRITICAL')
+log = kp.logger.get_logger(__file__)
+
+ESTIMATED_TIME_PER_RUN = 60 * 10    # [s]
+
+
+class QAQCAnalyser(object):
+    def __init__(self, det_id):
+        self.det_id = det_id
+
+        self.jpp_dir = os.environ.get("JPP_DIR")
+
+        if not self.jpp_dir:
+            print("Please load a Jpp environment")
+            raise SystemExit()
+
+        self.sds = kp.db.StreamDS()
+        self.db = kp.db.DBManager()
+        self.det_oid = self.db.get_det_oid(det_id)
+
+        self.runtable = self.sds.get("runs", detid=self.det_id)
+
+        self.workdir = os.path.dirname(os.path.realpath(__file__))
+        self.outdir = os.path.join(self.workdir, "qparams")
+        self.blacklist = os.path.join(
+            self.workdir, "blacklist_{}.txt".format(self.det_id)
+        )
+
+        self.stats = defaultdict(int)
+
+        self._qparams = None
+        self._columns = None
+        self._blacklisted_run_ids = None
+
+    def add_to_blacklist(self, run_id):
+        """Put the run_id into a det_id specific blacklist"""
+        with open(self.blacklist, "a") as fobj:
+            fobj.write("{}\n".format(run_id))
+
+    @property
+    def blacklisted_run_ids(self):
+        """The blacklisted run_ids"""
+        if self._blacklisted_run_ids is None:
+            if os.path.exists(self.blacklist):
+                self._blacklisted_run_ids = set(
+                    np.loadtxt(self.blacklist).astype(int)
+                )
+            else:
+                self._blacklisted_run_ids = set()
+        return self._blacklisted_run_ids
+
+    def run(self, batch_size, max_jobs, dryrun):
+        """Walk through the runtable and submit batches of runs"""
+
+        run_ids = self.runtable.RUN.values
+        print("{} runs in total".format(len(run_ids)))
+
+        if self.blacklisted_run_ids:
+            print(
+                "Skipping {} runs due to reasons.".format(
+                    len(self.blacklisted_run_ids)
+                )
+            )
+
+        n_jobs = 0
+
+        self.pbar_jobs = tqdm(total=max_jobs, desc="Jobs", unit='job')
+        self.pbar_runs = tqdm(
+            total=max_jobs * batch_size, desc="Runs", unit='run'
+        )
+
+        run_ids_to_process = []
+
+        for run_id in sorted(set(run_ids) - self.blacklisted_run_ids,
+                             reverse=True):
+            if n_jobs >= max_jobs:
+                break
+            log.info("Checking run '{}'".format(run_id))
+            rsn = self.sds.get(
+                "runsummarynumbers",
+                detid=self.det_oid,
+                minrun=run_id,
+                maxrun=run_id
+            )
+
+            if rsn is not None:
+                available_qparams = set(rsn.PARAMETER_NAME)
+                missing_qparams = set(self.qparams) - available_qparams
+            else:
+                missing_qparams = set(self.qparams)
+
+            log.info(
+                "-> missing parameters: {}".format(','.join(missing_qparams))
+            )
+
+            if len(missing_qparams) == len(self.qparams):
+                irods_filepath = kp.tools.irods_filepath(self.det_id, run_id)
+                if kp.tools.iexists(irods_filepath):
+                    self.stats['Number of submitted runs'] += 1
+                    self.add_to_blacklist(run_id)
+                    run_ids_to_process.append(run_id)
+                    self.pbar_runs.update(1)
+                    if len(run_ids_to_process) >= batch_size:
+                        self.submit_batch(run_ids_to_process, dryrun=dryrun)
+                        run_ids_to_process = []
+                        n_jobs += 1
+                    continue
+                else:
+                    log.info(
+                        "-> no file found on iRODS for run {}".format(run_id)
+                    )
+                    self.stats['Missing data or iRODS error'] += 1
+                    continue
+            else:
+                log.info(
+                    "-> skipping run, since it was already processed by "
+                    "an older version of JQAQC.sh"
+                )
+                self.stats['Already processed runs'] += 1
+                continue
+
+        log.info("Checking for remaining runs in last batch")
+        if run_ids_to_process:
+            self.submit_batch(run_ids_to_process, dryrun=dryrun)
+            self.stats['Number of submitted jobs'] += 1
+            run_ids_to_process = []
+
+        self.pbar_jobs.close()
+        self.pbar_runs.close()
+
+        self.print_stats()
+
+    def print_stats(self):
+        """Print a summary of the collected statistics"""
+        print("Summary:")
+        for key, value in self.stats.items():
+            print("{}: {}".format(key, value))
+
+    def submit_batch(self, run_ids, dryrun):
+        """Submit a QAQC.sh job for a given list of run IDs"""
+
+        file_sizes = []
+
+        s = kp.shell.Script()
+        for run_id in run_ids:
+            irods_filepath = kp.tools.irods_filepath(self.det_id, run_id)
+            file_sizes.append(kp.tools.isize(irods_filepath))
+
+            root_filename = os.path.basename(irods_filepath)
+            out_filename = os.path.join(
+                self.outdir, "{}_{}_qparams.csv".format(self.det_id, run_id)
+            )
+            t0set = self.runtable[self.runtable.RUN == run_id
+                                  ].T0_CALIBSETID.values[0]
+
+            log.info(
+                "Job entry for run '{}' with t0set '{}'".format(
+                    irods_filepath, t0set
+                )
+            )
+
+            s.separator()
+            s.add("Processing run {}".format(run_id))
+            s.separator('-')
+            s.add("km3pipe detx {} -t {} -o d.detx".format(self.det_id, t0set))
+            s.iget(irods_filepath)
+            s.add("echo '{}'> {}".format(" ".join(self.columns), out_filename))
+            s.add(
+                "$JPP_DIR/examples/JGizmo/JQAQC.sh d.detx {} "
+                "| awk '{{$1=$1;print}}' | tr '\\n' ' ' >> {}".format(
+                    root_filename, out_filename
+                )
+            )
+            s.add("echo ' whole_run' >> {}".format(out_filename))
+            s.add("streamds upload {}".format(out_filename))
+            s.add("rm -f {}".format(root_filename))
+
+        fsize = int(max(file_sizes) / 1024 / 1024 * 1.1)    # [MB]
+        walltime = time.strftime(
+            '%H:%M:%S', time.gmtime(ESTIMATED_TIME_PER_RUN * len(run_ids))
+        )
+
+        kp.shell.qsub(
+            s,
+            "QAQC_{}_{}".format(self.det_id, run_ids[0]),
+            vmem='4G',
+            fsize='{}M'.format(fsize),
+            irods=True,
+            walltime=walltime,
+            silent=True,
+            dryrun=dryrun
+        )
+        self.pbar_jobs.update(1)
+        if dryrun:
+            self.stats['Number of dryrun jobs'] += 1
+        else:
+            self.stats['Number of submitted jobs'] += 1
+
+    @property
+    def qparams(self):
+        """Returns a list of quality parameters determined by JQAQC.sh"""
+        if self._qparams is None:
+            command = os.path.join(self.jpp_dir, "examples/JGizmo/JQAQC.sh -h")
+            try:
+                qparams = subprocess.getoutput(command)
+            except AttributeError:
+                qparams = subprocess.check_output(
+                    command.split(), stderr=subprocess.STDOUT
+                )
+            self._qparams = qparams.split('\n')[1].split()[2:]
+        return self._qparams
+
+    @property
+    def columns(self):
+        """Get the ordered columns for the quality parameter output"""
+        if self._columns is None:
+            self._columns = ["det_id", "run"] + self.qparams + ["source"]
+        return self._columns
+
+
+def main():
+    from docopt import docopt
+    args = docopt(__doc__)
+
+    qaqc = QAQCAnalyser(det_id=int(args['DET_ID']))
+    qaqc.run(
+        batch_size=int(args['-b']),
+        max_jobs=int(args['-j']),
+        dryrun=bool(args['-q'])
+    )
+
+
+if __name__ == '__main__':
+    main()

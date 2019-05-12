@@ -78,6 +78,7 @@ setup(
             'runinfo=km3pipe.utils.runinfo:main',
             'qrunprocessor=km3pipe.utils.qrunprocessor:main',
             'wtd=km3pipe.utils.wtd:main',
+            'qrunqaqc=km3pipe.utils.qrunqaqc:main',
         ],
     },
     classifiers=[
