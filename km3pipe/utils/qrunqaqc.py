@@ -36,14 +36,21 @@ from tqdm import tqdm
 import km3pipe as kp
 
 kp.logger.get_logger('km3pipe.db').setLevel('CRITICAL')
-log = kp.logger.get_logger(__file__)
 
 ESTIMATED_TIME_PER_RUN = 60 * 10    # [s]
 
 
 class QAQCAnalyser(object):
-    def __init__(self, det_id):
+    """Determines  run quality parameters and uploads them to the DB"""
+
+    def __init__(self, det_id, log_file="qrunqaqc.log"):
         self.det_id = det_id
+
+        self.log = kp.logger.get_logger(
+            "qrunqaqc", filename=log_file, file_only=True
+        )
+
+        self.log.info("QAQC analysis started for detector ID %s", det_id)
 
         self.jpp_dir = os.environ.get("JPP_DIR")
 
@@ -112,7 +119,7 @@ class QAQCAnalyser(object):
                              reverse=True):
             if n_jobs >= max_jobs:
                 break
-            log.info("Checking run '{}'".format(run_id))
+            self.log.info("Checking run '{}'".format(run_id))
             rsn = self.sds.get(
                 "runsummarynumbers",
                 detid=self.det_oid,
@@ -126,8 +133,10 @@ class QAQCAnalyser(object):
             else:
                 missing_qparams = set(self.qparams)
 
-            log.info(
-                "-> missing parameters: {}".format(','.join(missing_qparams))
+            self.log.info(
+                "  -> missing parameters: {}".format(
+                    ','.join(missing_qparams)
+                )
             )
 
             if len(missing_qparams) == len(self.qparams):
@@ -143,20 +152,21 @@ class QAQCAnalyser(object):
                         n_jobs += 1
                     continue
                 else:
-                    log.info(
-                        "-> no file found on iRODS for run {}".format(run_id)
+                    self.log.info(
+                        "  -> no file found on iRODS or an iRODS error "
+                        "occured for run {}".format(run_id)
                     )
                     self.stats['Missing data or iRODS error'] += 1
                     continue
             else:
-                log.info(
-                    "-> skipping run, since it was already processed by "
+                self.log.info(
+                    "  -> skipping run, since it was already processed by "
                     "an older version of JQAQC.sh"
                 )
                 self.stats['Already processed runs'] += 1
                 continue
 
-        log.info("Checking for remaining runs in last batch")
+        self.log.info("Checking for remaining runs in last batch")
         if run_ids_to_process:
             self.submit_batch(run_ids_to_process, dryrun=dryrun)
             self.stats['Number of submitted jobs'] += 1
@@ -190,8 +200,8 @@ class QAQCAnalyser(object):
             t0set = self.runtable[self.runtable.RUN == run_id
                                   ].T0_CALIBSETID.values[0]
 
-            log.info(
-                "Job entry for run '{}' with t0set '{}'".format(
+            self.log.info(
+                "    creating job entry for run '{}' with t0set '{}'".format(
                     irods_filepath, t0set
                 )
             )
@@ -227,6 +237,7 @@ class QAQCAnalyser(object):
             silent=True,
             dryrun=dryrun
         )
+        self.log.info("  => job with %s runs submitted", len(run_ids))
         self.pbar_jobs.update(1)
         if dryrun:
             self.stats['Number of dryrun jobs'] += 1
