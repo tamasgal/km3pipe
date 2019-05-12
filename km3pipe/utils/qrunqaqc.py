@@ -64,6 +64,9 @@ class QAQCAnalyser(object):
 
         self.workdir = os.path.dirname(os.path.realpath(__file__))
         self.outdir = os.path.join(self.workdir, "qparams")
+        if not os.path.exists(self.outdir):
+            os.makedirs(self.outdir)
+
         self.blacklist = os.path.join(
             self.workdir, "blacklist_{}.txt".format(self.det_id)
         )
