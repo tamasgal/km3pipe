@@ -10,6 +10,7 @@ from hashlib import sha256
 from inspect import getframeinfo, stack
 import socket
 import logging
+import logging.handlers
 
 from .tools import colored, supports_color
 
@@ -116,22 +117,35 @@ class LogIO(object):
         self.sock.connect((self.url, self.port))
 
 
-def get_logger(name):
+def get_logger(name, filename=None, file_only=False):
     """Helper function to get a logger"""
     if name in loggers:
         return loggers[name]
     logger = logging.getLogger(name)
     logger.propagate = False
-    pre1, suf1 = hash_coloured_escapes(name) if supports_color() else ('', '')
-    pre2, suf2 = hash_coloured_escapes(name + 'salt')  \
-                 if supports_color() else ('', '')
+
+    if filename is None:
+        with_color = supports_color()
+    else:
+        with_color = False
+    pre1, suf1 = hash_coloured_escapes(name) if with_color else ('', '')
+    pre2, suf2 = hash_coloured_escapes(name +
+                                       'salt') if with_color else ('', '')
     formatter = logging.Formatter(
         '%(levelname)s {}+{}+{} '
         '%(name)s: %(message)s'.format(pre1, pre2, suf1)
     )
-    ch = logging.StreamHandler()
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
+    if filename is not None:
+        ch_file = logging.handlers.RotatingFileHandler(
+            filename, maxBytes=5 * 1024 * 1024, backupCount=10
+        )
+        ch_file.setFormatter(formatter)
+        logger.addHandler(ch_file)
+    if not file_only:
+        ch = logging.StreamHandler()
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
+
     loggers[name] = logger
 
     logger.once_dict = {}
