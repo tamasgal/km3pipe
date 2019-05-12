@@ -68,10 +68,10 @@ def isize(irods_path):
 
 def xrdsize(xrootd_path):
     """Returns the size in bytes of the file"""
+    base, path = re.search(r'(root://.*:[0-9]*)(/.*)', xrootd_path).groups()
+
     raw_output = subprocess.check_output(
-        "xrdfs {} stat {} | grep Size | awk '{{print $2}}'".format(
-            XROOTD_BASE, xrootd_path
-        ),
+        "xrdfs {} stat {} | grep Size | awk '{{print $2}}'".format(base, path),
         shell=True
     )
     try:
