@@ -137,6 +137,10 @@ class QAQCAnalyser(object):
 
         for run_id in tqdm(run_ids_to_check):
             if n_jobs >= max_jobs:
+                self.log.warning(
+                    "Maximum number of jobs reached (%s), "
+                    "proceeding with batch submission", max_jobs
+                )
                 break
             self.log.info("Checking run '{}'".format(run_id))
 
