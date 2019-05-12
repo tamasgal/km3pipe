@@ -12,6 +12,11 @@ import subprocess
 from .tools import lstrip
 from .logger import get_logger
 
+try:
+    from subprocess import DEVNULL    # py3k
+except ImportError:
+    DEVNULL = open(os.devnull, 'wb')
+
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
@@ -63,9 +68,10 @@ JOB_TEMPLATE = lstrip(
 )
 
 
-def qsub(script, job_name, dryrun=False, *args, **kwargs):
+def qsub(script, job_name, dryrun=False, silent=False, *args, **kwargs):
     """Submit a job via qsub."""
-    print("Preparing job script...")
+    if not silent:
+        print("Preparing job script...")
     job_string = gen_job(script=script, job_name=job_name, *args, **kwargs)
     env = os.environ.copy()
     if dryrun:
@@ -75,9 +81,17 @@ def qsub(script, job_name, dryrun=False, *args, **kwargs):
         )
         print(job_string)
     else:
-        print("Calling qsub with the generated job script.")
+        if not silent:
+            print("Calling qsub with the generated job script.")
+            out_pipe = subprocess.STDOUT
+        else:
+            out_pipe = DEVNULL
         p = subprocess.Popen(
-            'qsub -V', stdin=subprocess.PIPE, env=env, shell=True
+            'qsub -V',
+            stdin=subprocess.PIPE,
+            env=env,
+            shell=True,
+            stdout=out_pipe
         )
         p.communicate(input=bytes(job_string.encode('ascii')))
 
