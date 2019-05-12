@@ -103,7 +103,7 @@ class QAQCAnalyser(object):
 
         if self.blacklisted_run_ids:
             print(
-                "Skipping {} runs due to reasons.".format(
+                "Skipping {} runs since they were already submitted.".format(
                     len(self.blacklisted_run_ids)
                 )
             )
