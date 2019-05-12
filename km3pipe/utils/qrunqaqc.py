@@ -192,8 +192,12 @@ class QAQCAnalyser(object):
 
         s = kp.shell.Script()
         for run_id in run_ids:
+            self.log.info("adding run %s (det_id %s", run_id, self.det_id)
             xrootd_path = kp.tools.xrootd_path(self.det_id, run_id)
-            filesizes.append(kp.tools.xrdsize(xrootd_path))
+            self.log.info("xrootd path: %s", xrootd_path)
+            size = kp.tools.xrdsize(xrootd_path)
+            self.log.info("filesize: %s (bytes)", size)
+            filesizes.append(size)
 
             root_filename = os.path.basename(xrootd_path)
 
