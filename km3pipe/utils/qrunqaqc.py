@@ -128,72 +128,42 @@ class QAQCAnalyser(object):
             )
 
         n_jobs = 0
-
-        self.pbar_jobs = tqdm(total=max_jobs, desc="Jobs", unit='job')
-        self.pbar_runs = tqdm(
-            total=max_jobs * batch_size, desc="Runs", unit='run'
+        run_ids_to_process = []
+        run_ids_to_check = sorted(
+            set(run_ids) - set(already_processed_runs_ids) -
+            self.blacklisted_run_ids,
+            reverse=True
         )
 
-        run_ids_to_process = []
-
-        for run_id in sorted(set(run_ids) - set(already_processed_runs_ids) -
-                             self.blacklisted_run_ids, reverse=True):
+        for run_id in tqdm(run_ids_to_check):
             if n_jobs >= max_jobs:
                 break
             self.log.info("Checking run '{}'".format(run_id))
-            rsn = self.sds.get(
-                "runsummarynumbers",
-                detid=self.det_oid,
-                minrun=run_id,
-                maxrun=run_id
-            )
 
-            if rsn is not None:
-                available_qparams = set(rsn.PARAMETER_NAME)
-                missing_qparams = set(self.qparams) - available_qparams
-            else:
-                missing_qparams = set(self.qparams)
-
-            self.log.info(
-                "  -> missing parameters: {}".format(
-                    ','.join(missing_qparams)
-                )
-            )
-
-            if len(missing_qparams) == len(self.qparams):
-                irods_filepath = kp.tools.irods_filepath(self.det_id, run_id)
-                if kp.tools.iexists(irods_filepath):
-                    self.stats['Number of submitted runs'] += 1
-                    self.add_to_blacklist(run_id)
-                    run_ids_to_process.append(run_id)
-                    self.pbar_runs.update(1)
-                    if len(run_ids_to_process) >= batch_size:
-                        self.submit_batch(run_ids_to_process, dryrun=dryrun)
-                        run_ids_to_process = []
-                        n_jobs += 1
-                    continue
-                else:
-                    self.log.info(
-                        "  -> no file found on iRODS or an iRODS error "
-                        "occured for run {}".format(run_id)
-                    )
-                    self.stats['Missing data or iRODS error'] += 1
-                    continue
+            irods_filepath = kp.tools.irods_filepath(self.det_id, run_id)
+            if kp.tools.iexists(irods_filepath):
+                run_ids_to_process.append(run_id)
+                if len(run_ids_to_process) % batch_size == 0:
+                    n_jobs += 1
+                continue
             else:
                 self.log.info(
-                    "  -> skipping run, since it was already processed by "
-                    "an older version of JQAQC.sh"
+                    "  -> no file found on iRODS or an iRODS error "
+                    "occured for run {}".format(run_id)
                 )
-                self.stats['Already processed runs'] += 1
-                continue
+                self.stats['Missing data or iRODS error'] += 1
 
-        self.log.info("Checking for remaining runs in last batch")
-        if run_ids_to_process:
-            self.submit_batch(run_ids_to_process, dryrun=dryrun)
-            self.stats['Number of submitted jobs'] += 1
-            run_ids_to_process = []
+        run_id_chunks = kp.tools.chunks(run_ids_to_process, batch_size)
 
-        self.pbar_jobs.close()
+        self.pbar_runs = tqdm(
+            total=len(run_ids_to_process), desc="Runs", unit='run'
+        )
+
+        for run_ids in tqdm(run_id_chunks, desc="Jobs", unit='job'):
+
+            self.submit_batch(run_ids, dryrun=dryrun)
+            self.stats['Number of submitted runs'] += 1
+
         self.pbar_runs.close()
 
         self.print_stats()
@@ -243,6 +213,9 @@ class QAQCAnalyser(object):
             s.add("echo ' whole_run' >> {}".format(out_filename))
             s.add("streamds upload {}".format(out_filename))
             s.add("rm -f {}".format(root_filename))
+
+            self.add_to_blacklist(run_id)
+            self.pbar_runs.update(1)
 
         walltime = time.strftime(
             '%H:%M:%S', time.gmtime(ESTIMATED_TIME_PER_RUN * len(run_ids))
