@@ -101,9 +101,28 @@ class QAQCAnalyser(object):
         run_ids = self.runtable.RUN.values
         print("{} runs in total".format(len(run_ids)))
 
+        try:
+            already_processed_runs_ids = self.sds.get(
+                "runsummarynumbers",
+                detid=self.det_oid,
+                minrun=run_id,
+                maxrun=run_id,
+                parameter_name="livetime_s"
+            ).RUN.values
+        except AttributeError:
+            already_processed_runs_ids = set()
+        else:
+            print(
+                "{} runs are already processed and available in the DB".format(
+                    len(already_processed_runs_ids)
+                )
+            )
+
         if self.blacklisted_run_ids:
             print(
-                "Skipping {} runs since they were already submitted.".format(
+                "Skipping {} runs since they were already submitted "
+                "and may be in the job queue. Delete the blacklist file "
+                "to resubmit them next time this script is ran.".format(
                     len(self.blacklisted_run_ids)
                 )
             )
@@ -117,8 +136,8 @@ class QAQCAnalyser(object):
 
         run_ids_to_process = []
 
-        for run_id in sorted(set(run_ids) - self.blacklisted_run_ids,
-                             reverse=True):
+        for run_id in sorted(set(run_ids) - set(already_processed_runs_ids) -
+                             self.blacklisted_run_ids, reverse=True):
             if n_jobs >= max_jobs:
                 break
             self.log.info("Checking run '{}'".format(run_id))
