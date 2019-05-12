@@ -64,6 +64,15 @@ def isize(irods_path):
         raise IOError("File not found or iRODS an error occured.")
 
 
+def xrootd_path(det_id, run_id):
+    """Return the xrootd path of a data file"""
+    base = "root://ccxroot:1999//hpss/in2p3.fr/group/km3net/data/raw/sea"
+    suffix = "KM3NeT_{:08d}/{}/KM3NeT_{:08d}_{:08d}.root".format(
+        det_id, int(run_id / 1000), det_id, run_id
+    )
+    return os.path.join(base, suffix)
+
+
 def token_urlsafe(nbytes=32):
     """Return a random URL-safe text string, in Base64 encoding.
 
