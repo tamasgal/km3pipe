@@ -195,12 +195,7 @@ class QAQCAnalyser(object):
             self.log.info("adding run %s (det_id %s", run_id, self.det_id)
             xrootd_path = kp.tools.xrootd_path(self.det_id, run_id)
             self.log.info("xrootd path: %s", xrootd_path)
-            try:
-                size = kp.tools.xrdsize(xrootd_path)
-            except OSError:
-                size = kp.tools.isize(
-                    kp.tools.irods_filepath(self.det_id, run_id)
-                )
+            size = kp.tools.isize(kp.tools.irods_filepath(self.det_id, run_id))
             self.log.info("filesize: %s (bytes)", size)
             filesizes.append(size)
 
