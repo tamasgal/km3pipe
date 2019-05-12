@@ -11,7 +11,8 @@ Version 8
   the results to the runsummarynumbers table of the KM3NeT database.
 * New option to directly log to a file for example via
   ``kp.logger.get_logger("foo", filename="bar.log")``
-* Added ``kp.too.isize`` to look up the size of a file on iRODS
+* Added ``kp.tools.isize`` and ``kp.tools.xrdsize`` to look up the size of a
+  file on iRODS or via xrootd respectively
 
 8.14.2 / 2019-05-09
 ~~~~~~~~~~~~~~~~~~~
