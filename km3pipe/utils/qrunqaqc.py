@@ -238,7 +238,6 @@ class QAQCAnalyser(object):
             dryrun=dryrun
         )
         self.log.info("  => job with %s runs submitted", len(run_ids))
-        self.pbar_jobs.update(1)
         if dryrun:
             self.stats['Number of dryrun jobs'] += 1
         else:
