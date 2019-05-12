@@ -188,31 +188,22 @@ class QAQCAnalyser(object):
     def submit_batch(self, run_ids, dryrun):
         """Submit a QAQC.sh job for a given list of run IDs"""
 
-        file_sizes = []
-
         s = kp.shell.Script()
         for run_id in run_ids:
-            irods_filepath = kp.tools.irods_filepath(self.det_id, run_id)
-            file_sizes.append(kp.tools.isize(irods_filepath))
+            root_filename = kp.tools.xrootd_path(self.det_id, run_id)
 
-            root_filename = os.path.basename(irods_filepath)
             out_filename = os.path.join(
                 self.outdir, "{}_{}_qparams.csv".format(self.det_id, run_id)
             )
             t0set = self.runtable[self.runtable.RUN == run_id
                                   ].T0_CALIBSETID.values[0]
 
-            self.log.info(
-                "    creating job entry for run '{}' with t0set '{}'".format(
-                    irods_filepath, t0set
-                )
-            )
+            self.log.info("adding run '%s' with t0set '%s'", run_id, t0set)
 
             s.separator()
             s.add("Processing run {}".format(run_id))
             s.separator('-')
             s.add("km3pipe detx {} -t {} -o d.detx".format(self.det_id, t0set))
-            s.iget(irods_filepath)
             s.add("echo '{}'> {}".format(" ".join(self.columns), out_filename))
             s.add(
                 "$JPP_DIR/examples/JGizmo/JQAQC.sh d.detx {} "
@@ -222,9 +213,7 @@ class QAQCAnalyser(object):
             )
             s.add("echo ' whole_run' >> {}".format(out_filename))
             s.add("streamds upload {}".format(out_filename))
-            s.add("rm -f {}".format(root_filename))
 
-        fsize = int(max(file_sizes) / 1024 / 1024 * 1.1)    # [MB]
         walltime = time.strftime(
             '%H:%M:%S', time.gmtime(ESTIMATED_TIME_PER_RUN * len(run_ids))
         )
@@ -233,8 +222,8 @@ class QAQCAnalyser(object):
             s,
             "QAQC_{}_{}".format(self.det_id, run_ids[0]),
             vmem='4G',
-            fsize='{}M'.format(fsize),
-            irods=True,
+            fsize='100M',
+            xrootd=True,
             walltime=walltime,
             silent=True,
             dryrun=dryrun
