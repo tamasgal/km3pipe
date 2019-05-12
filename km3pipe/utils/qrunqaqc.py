@@ -161,14 +161,13 @@ class QAQCAnalyser(object):
 
         self.pbar_runs = tqdm(
             total=len(run_ids_to_process),
-            desc="Investigating the selected runs",
+            desc="Submitting runs",
             unit='run'
         )
 
         for run_ids in tqdm(run_id_chunks, desc="Jobs"):
 
             self.submit_batch(run_ids, dryrun=dryrun)
-            self.stats['Number of submitted runs'] += 1
 
         self.pbar_runs.close()
 
@@ -176,10 +175,11 @@ class QAQCAnalyser(object):
 
     def print_stats(self):
         """Print a summary of the collected statistics"""
-        print("\n\n")
-        print("Summary:")
+        print("\n\n\n")
+        print("Summary")
+        print("=======")
         for key, value in self.stats.items():
-            print("{}: {}".format(key, value))
+            print("  {}: {}".format(key, value))
 
     def submit_batch(self, run_ids, dryrun):
         """Submit a QAQC.sh job for a given list of run IDs"""
@@ -223,6 +223,7 @@ class QAQCAnalyser(object):
 
             self.add_to_blacklist(run_id)
             self.pbar_runs.update(1)
+            self.stats['Number of submitted runs'] += 1
 
         walltime = time.strftime(
             '%H:%M:%S', time.gmtime(ESTIMATED_TIME_PER_RUN * len(run_ids))
