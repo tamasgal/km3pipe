@@ -7,6 +7,14 @@ Submits jobs which analyse a batch of runs with ``JQAQC.sh`` to retrieve the
 quality parameters. The obtained data is then uploaded to the runsummarynumbers
 table of the KM3NeT database.
 
+The submitted run IDs are logged in ``BLACKLIST_{DET_ID}.txt`` and skipped
+upon subsequential runs. The temporary quality parameters are stored in
+the folder ``qparams`` and the job logs can be found in ``qlogs``.
+
+To start from scratch, delete the above mentioned files. Runs which are were
+already processed and present in the runsummarynumbers table are always
+skipped.
+
 Usage:
     qrunqaqc [options] DET_ID
     qrunqaqc (-h | --help)
