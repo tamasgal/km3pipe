@@ -188,9 +188,13 @@ class QAQCAnalyser(object):
     def submit_batch(self, run_ids, dryrun):
         """Submit a QAQC.sh job for a given list of run IDs"""
 
+        filesizes = []
+
         s = kp.shell.Script()
         for run_id in run_ids:
             xrootd_path = kp.tools.xrootd_path(self.det_id, run_id)
+            filesizes.append(kp.tools.xrdsize(xrootd_path))
+
             root_filename = os.path.basename(xrootd_path)
 
             out_filename = os.path.join(
@@ -221,11 +225,13 @@ class QAQCAnalyser(object):
             '%H:%M:%S', time.gmtime(ESTIMATED_TIME_PER_RUN * len(run_ids))
         )
 
+        fsize = int(max(filesizes) / 1024 / 1024 * 1.1)
+
         kp.shell.qsub(
             s,
             "QAQC_{}_{}".format(self.det_id, run_ids[0]),
             vmem='4G',
-            fsize='8G',    # TODO: remove when xroot works for Jpp getLivetime
+            fsize='{}M'.format(fsize),
             xrootd=True,
             walltime=walltime,
             silent=True,
