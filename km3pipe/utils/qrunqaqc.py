@@ -32,7 +32,6 @@ import os
 import subprocess
 import time
 
-import numpy as np
 from tqdm import tqdm
 import km3pipe as kp
 
@@ -95,9 +94,10 @@ class QAQCAnalyser(object):
         """The blacklisted run_ids"""
         if self._blacklisted_run_ids is None:
             if os.path.exists(self.blacklist):
-                self._blacklisted_run_ids = set(
-                    np.loadtxt(self.blacklist).astype(int)
-                )
+                with open(self.blacklist) as fobj:
+                    self._blacklisted_run_ids = set(
+                        int(l) for l in fobj.readlines()
+                    )
             else:
                 self._blacklisted_run_ids = set()
         return self._blacklisted_run_ids
