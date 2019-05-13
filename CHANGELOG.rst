@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 
+* ``CalibrationService`` -> ``detector`` has been deprecated, use
+  ``get_detector()`` instead
+* ``CalibrationService`` now also adds ``load_calibration`` to update the
+  calibration data during runtime
 
 Version 8
 ---------
