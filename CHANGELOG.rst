@@ -4,6 +4,10 @@ Unreleased changes
 
 Version 8
 ---------
+8.15.1 / 2019-05-13
+~~~~~~~~~~~~~~~~~~~
+* ``qrunqaqc`` now needs ``-u`` to automatically upload data to the DB
+
 8.15.0 / 2019-05-12
 ~~~~~~~~~~~~~~~~~~~
 * A new command line utility called ``qrunqaqc`` was added which processes
