@@ -158,8 +158,8 @@ class TestCalibrationService(TestCase):
     def test_provided_detector_data(self):
         class DetectorReader(Module):
             def process(self, blob):
-                assert 'detector' in self.services
-                det = self.services['detector']
+                assert 'get_detector' in self.services
+                det = self.services['get_detector']()
                 assert isinstance(det, Detector)
 
         pipe = Pipeline()

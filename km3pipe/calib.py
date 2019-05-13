@@ -340,22 +340,55 @@ class CalibrationService(Module):
     name = 'Calibration'
 
     def configure(self):
-        filename = self.get('filename')
-        det_id = self.get('det_id')
-        t0set = self.get('t0set')
-        calibset = self.get('calibset')
-        detector = self.get('detector')
+        self.filename = self.get('filename')
+        self.det_id = self.get('det_id')
+        self.t0set = self.get('t0set')
+        self.calibset = self.get('calibset')
 
-        self._calibration = Calibration(
-            filename=filename,
-            det_id=det_id,
-            t0set=t0set,
-            calibset=calibset,
-            detector=detector
-        )
+        self._detector = self.get('detector')
+
+        if self._detector is not None:
+            self._calibration = Calibration(detector=self._detector)
+
+        self._calibration = None
 
         self.expose(self.calibrate, "calibrate")
-        self.expose(self._calibration.detector, "detector")
+        self.expose(self.get_detector, "get_detector")
+        self.expose(self.get_calibration, "get_calibration")
+
+        self.expose(self.detector_deprecation, "detector")
+
+    @property
+    def detector_deprecation(self):
+        self.log.deprecation(
+            "The service 'detector' of the CalibrationService has been "
+            "deprecated. Please use 'get_detector()' instead in future."
+        )
 
     def calibrate(self, hits):
-        return self._calibration.apply(hits)
+        return self.calibration.apply(hits)
+
+    @property
+    def detector(self):
+        if self._detector is None:
+            self._detector = self.calibration.detector
+        return self._detector
+
+    def get_detector(self):
+        """Extra getter to be as lazy as possible (expose triggers otherwise"""
+        return self.detector
+
+    @property
+    def calibration(self):
+        if self._calibration is None:
+            self._calibration = Calibration(
+                filename=self.filename,
+                det_id=self.det_id,
+                t0set=self.t0set,
+                calibset=self.calibset
+            )
+        return self._calibration
+
+    def get_calibration(self):
+        """Extra getter to be as lazy as possible (expose triggers otherwise"""
+        return self.calibration
