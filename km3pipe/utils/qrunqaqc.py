@@ -4,8 +4,8 @@
 # Author: Tamas Gal <tgal@km3net.de>
 """
 Submits jobs which analyse a batch of runs with ``JQAQC.sh`` to retrieve the
-quality parameters. The obtained data is then uploaded to the runsummarynumbers
-table of the KM3NeT database.
+quality parameters. The obtained data is then optionally uploaded to the
+runsummarynumbers table of the KM3NeT database.
 
 The submitted run IDs are logged in ``BLACKLIST_{DET_ID}.txt`` and skipped
 upon subsequential runs. The temporary quality parameters are stored in
@@ -22,6 +22,7 @@ Usage:
 Options:
     -b BATCH_SIZE  Number of runs to process in a single job [default: 20].
     -j MAX_JOBS    Maximum number of jobs to submit [default: 200].
+    -u             Upload summary data to the database automatically.
     -q             Dryrun, don't submit the jobs.
     -h --help      Show this screen.
 
@@ -43,13 +44,19 @@ ESTIMATED_TIME_PER_RUN = 60 * 10    # [s]
 class QAQCAnalyser(object):
     """Determines  run quality parameters and uploads them to the DB"""
 
-    def __init__(self, det_id, log_file="qrunqaqc.log"):
+    def __init__(self, det_id, should_upload_to_db, log_file="qrunqaqc.log"):
         self.det_id = det_id
+        self.should_upload_to_db = should_upload_to_db
 
         self.log = kp.logger.get_logger("qrunqaqc", filename=log_file)
         self.log.setLevel("DEBUG")
 
         self.log.info("QAQC analysis started for detector ID %s", det_id)
+        if should_upload_to_db:
+            self.log.info(
+                "The acquired data will be automatically updloaded to "
+                "the database after each successful run processing."
+            )
 
         self.jpp_dir = os.environ.get("JPP_DIR")
 
@@ -160,9 +167,7 @@ class QAQCAnalyser(object):
         run_id_chunks = kp.tools.chunks(run_ids_to_process, batch_size)
 
         self.pbar_runs = tqdm(
-            total=len(run_ids_to_process),
-            desc="Submitting runs",
-            unit='run'
+            total=len(run_ids_to_process), desc="Submitting runs", unit='run'
         )
 
         for run_ids in tqdm(run_id_chunks, desc="Jobs"):
@@ -218,7 +223,8 @@ class QAQCAnalyser(object):
                 )
             )
             s.add("echo ' whole_run' >> {}".format(out_filename))
-            s.add("streamds upload {}".format(out_filename))
+            if self.should_upload_to_db:
+                s.add("streamds upload {}".format(out_filename))
             s.add("rm -f {}".format(root_filename))
 
             self.add_to_blacklist(run_id)
@@ -273,7 +279,9 @@ def main():
     from docopt import docopt
     args = docopt(__doc__)
 
-    qaqc = QAQCAnalyser(det_id=int(args['DET_ID']))
+    qaqc = QAQCAnalyser(
+        det_id=int(args['DET_ID']), should_upload_to_db=args['-u']
+    )
     qaqc.run(
         batch_size=int(args['-b']),
         max_jobs=int(args['-j']),
