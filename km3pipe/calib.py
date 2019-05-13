@@ -355,8 +355,20 @@ class CalibrationService(Module):
         self.expose(self.calibrate, "calibrate")
         self.expose(self.get_detector, "get_detector")
         self.expose(self.get_calibration, "get_calibration")
+        self.expose(self.load_calibration, "load_calibration")
 
         self.expose(self.detector_deprecation, "detector")
+
+    def load_calibration(
+            self, filename=None, det_id=None, t0set=None, calibset=None
+    ):
+        """Load another calibration"""
+        self.filename = filename
+        self.det_id = det_id
+        self.t0set = t0set
+        self.calibset = calibset
+        self._detector = None
+        self._calibration = None
 
     @property
     def detector_deprecation(self):
