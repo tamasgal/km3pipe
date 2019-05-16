@@ -83,7 +83,7 @@ def qsub(script, job_name, dryrun=False, silent=False, *args, **kwargs):
     else:
         if not silent:
             print("Calling qsub with the generated job script.")
-            out_pipe = subprocess.STDOUT
+            out_pipe = subprocess.PIPE
         else:
             out_pipe = DEVNULL
         p = subprocess.Popen(
