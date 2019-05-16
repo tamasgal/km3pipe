@@ -7,6 +7,8 @@ Pump for the jpp file read through aanet interface.
 """
 from __future__ import absolute_import, print_function, division
 
+import subprocess
+
 import numpy as np
 
 from km3pipe.core import Pump, Blob
@@ -22,6 +24,22 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
+
+
+def get_jpp_version():
+    """Return the Jpp version or None if not available."""
+    command = "JPrint -v"
+    try:
+        out = subprocess.getoutput(command)
+    except AttributeError:    # TODO: python 2.7
+        out = subprocess.check_output(
+            command.split(), stderr=subprocess.STDOUT
+        )
+    if "version" not in out:
+        return None
+
+    jpp_version = out.split('\n')[0].split(':')[1].strip()
+    return jpp_version
 
 
 class EventPump(Pump):
