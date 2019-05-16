@@ -57,11 +57,16 @@ class QAQCAnalyser(object):
                 "the database after each successful run processing."
             )
 
-        self.jpp_dir = os.environ.get("JPP_DIR")
-
-        if not self.jpp_dir:
+        self.jpp_version = kp.io.jpp.get_jpp_version()
+        if self.jpp_version is None:
             self.log.critical("Please load a Jpp environment")
             raise SystemExit()
+        else:
+            print(
+                "Run quality determination using Jpp '{}'".format(
+                    self.jpp_version
+                )
+            )
 
         self.sds = kp.db.StreamDS()
         self.db = kp.db.DBManager()
@@ -114,11 +119,13 @@ class QAQCAnalyser(object):
                 detid=self.det_oid,
                 minrun=min(run_ids),
                 maxrun=max(run_ids),
-                parameter_name="livetime_s"
+                source_name=self.jpp_version,
+                parameter_name="livetime_s"    # to lower the request size
             ).RUN.values
         except AttributeError:
             already_processed_runs_ids = set()
         else:
+            print(already_processed_runs_ids)
             print(
                 "{} runs are already processed and available in the DB".format(
                     len(already_processed_runs_ids)
@@ -217,12 +224,11 @@ class QAQCAnalyser(object):
             s.add("xrdcp {} {}".format(xrootd_path, root_filename))
             s.add("echo '{}'> {}".format(" ".join(self.columns), out_filename))
             s.add(
-                "$JPP_DIR/examples/JGizmo/JQAQC.sh d.detx {} "
+                "JQAQC.sh d.detx {} "
                 "| awk '{{$1=$1;print}}' | tr '\\n' ' ' >> {}".format(
                     root_filename, out_filename
                 )
             )
-            s.add("echo ' whole_run' >> {}".format(out_filename))
             if self.should_upload_to_db:
                 s.add("streamds upload {}".format(out_filename))
             s.add("rm -f {}".format(root_filename))
@@ -253,25 +259,28 @@ class QAQCAnalyser(object):
         else:
             self.stats['Number of submitted jobs'] += 1
 
-    @property
-    def qparams(self):
+    def retrieve_qparams(self):
         """Returns a list of quality parameters determined by JQAQC.sh"""
-        if self._qparams is None:
-            command = os.path.join(self.jpp_dir, "examples/JGizmo/JQAQC.sh -h")
-            try:
-                qparams = subprocess.getoutput(command)
-            except AttributeError:
-                qparams = subprocess.check_output(
-                    command.split(), stderr=subprocess.STDOUT
-                )
-            self._qparams = qparams.split('\n')[1].split()[2:]
-        return self._qparams
+        command = "JQAQC.sh -h"
+        try:
+            qparams = subprocess.getoutput(command)
+        except AttributeError:
+            qparams = subprocess.check_output(
+                command.split(), stderr=subprocess.STDOUT
+            )
+        return qparams.split('\n')[1].split()
 
     @property
     def columns(self):
         """Get the ordered columns for the quality parameter output"""
         if self._columns is None:
-            self._columns = ["det_id", "run"] + self.qparams + ["source"]
+            qparams = self.retrieve_qparams()
+            # Adapting to runsummarynumbers naming convention
+            # Warning: for retrieving data, it's called "source_name"
+            qparams[qparams.index('GIT')] = "source"
+            qparams[qparams.index('detector')] = "det_id"
+
+            self._columns = qparams
         return self._columns
 
 
