@@ -1,6 +1,11 @@
 Unreleased changes
 ------------------
 
+
+Version 8
+---------
+8.15.2 / 2019-05-17
+~~~~~~~~~~~~~~~~~~~
 * ``CalibrationService`` -> ``detector`` has been deprecated, use
   ``get_detector()`` instead
 * ``CalibrationService`` now also adds ``load_calibration`` to update the
@@ -8,8 +13,6 @@ Unreleased changes
 * ``kp.db.CLBMap.upi`` and ``.dom_id`` are deprecated, use ``.upis`` and
   ``.dom_ids`` instead
 
-Version 8
----------
 8.15.1 / 2019-05-13
 ~~~~~~~~~~~~~~~~~~~
 * ``qrunqaqc`` now needs ``-u`` to automatically upload data to the DB
