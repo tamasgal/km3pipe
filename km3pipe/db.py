@@ -883,6 +883,11 @@ class CLBMap(object):
 
     @property
     def upi(self):
+        self.log.deprecation("Please use .upis instead of .upi!")
+        return self.upis
+
+    @property
+    def upis(self):
         """A dict of CLBs with UPI as key"""
         parameter = 'UPI'
         if parameter not in self._by:
@@ -891,6 +896,11 @@ class CLBMap(object):
 
     @property
     def dom_id(self):
+        self.log.deprecation("Please use .dom_ids instead of .dom_id!")
+        return self.upis
+
+    @property
+    def dom_ids(self):
         """A dict of CLBs with DOM ID as key"""
         parameter = 'DOMID'
         if parameter not in self._by:
