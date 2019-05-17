@@ -4,6 +4,12 @@ Unreleased changes
 
 Version 8
 ---------
+8.15.3 / 2019-05-17
+~~~~~~~~~~~~~~~~~~~
+
+* ``-b`` in ``qrunqaqc`` is now optional and it will process all runs
+  distributed over the maximum number of jobs if not specified
+
 8.15.2 / 2019-05-17
 ~~~~~~~~~~~~~~~~~~~
 * ``CalibrationService`` -> ``detector`` has been deprecated, use
