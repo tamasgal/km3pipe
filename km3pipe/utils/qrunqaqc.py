@@ -150,6 +150,7 @@ class QAQCAnalyser(object):
             reverse=True
         )
 
+        print("Checking runs")
         for run_id in tqdm(run_ids_to_check):
             if n_jobs >= max_jobs:
                 self.log.warning(
@@ -198,7 +199,7 @@ class QAQCAnalyser(object):
 
                 self.submit_batch(run_ids, dryrun=dryrun)
 
-        self.pbar_runs.close()
+            self.pbar_runs.close()
 
         self.print_stats()
 
