@@ -5,6 +5,8 @@ Unreleased changes
   ``get_detector()`` instead
 * ``CalibrationService`` now also adds ``load_calibration`` to update the
   calibration data during runtime
+* ``kp.db.CLBMap.upi`` and ``.dom_id`` are deprecated, use ``.upis`` and
+  ``.dom_ids`` instead
 
 Version 8
 ---------
