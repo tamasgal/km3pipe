@@ -142,7 +142,6 @@ class Pipeline(object):
         self.modules = []
         self.services = ServiceManager()
         self.required_services = {}
-        self.calibration = None
         self.blob = blob or Blob()
         self.timeit = timeit
         self._timeit = {
@@ -230,26 +229,7 @@ class Pipeline(object):
             'finish_cpu': 0
         }
 
-        if hasattr(module, 'get_detector'):    # Calibration-like module
-            self.log.deprecation(
-                "Calibration-like modules will not be supported in future "
-                "versions of KM3Pipe. Please use services instead.\n"
-                "If you are attaching the `calib.Calibration` as a module, "
-                "switch to `calib.CalibrationService` and use the "
-                "`self.services['calibrate']()` method in your modules "
-                "to apply calibration.\n\n"
-                "This means:\n\n"
-                "    pipe.attach(kp.calib.CalibrationService, ...)\n\n"
-                "And inside the attached modules, you can apply the "
-                "calibration with e.g.:\n\n"
-                "    cal_hits = self.services['calibrate'](blob['Hits'])\n"
-            )
-            self.calibration = module
-            if module._should_apply:
-                self.modules.append(module)
-        else:    # normal module
-            module.calibration = self.calibration
-            self.modules.append(module)
+        self.modules.append(module)
 
     def attach_bundle(self, modules):
         for mod in modules:
@@ -268,11 +248,6 @@ class Pipeline(object):
         log.info("Now draining...")
         if not cycles:
             log.info("No cycle count, the pipeline may be drained forever.")
-
-        if self.calibration:
-            log.info("Setting up the detector calibration.")
-            for module in self.modules:
-                module.detector = self.calibration.get_detector()
 
         try:
             while not self._stop:
@@ -488,7 +463,6 @@ class Module(object):
         self._processed_parameters = []
         self.only_if = set()
         self.every = 1
-        self.detector = None
         if self.__module__ == '__main__':
             self.logger_name = self.__class__.__name__
         else:
