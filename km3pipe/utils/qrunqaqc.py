@@ -174,23 +174,29 @@ class QAQCAnalyser(object):
 
         total_runs_to_process = len(run_ids_to_process)
 
-        if batch_size is None:
-            batch_size = math.ceil(total_runs_to_process / max_jobs)
+        if total_runs_to_process == 0:
+            print("No runs to process.")
+        else:
 
-        print(
-            "Proceeding with {} runs distributed over {} jobs ({} runs/job)".
-            format(total_runs_to_process, max_jobs, batch_size)
-        )
+            if batch_size is None:
+                batch_size = math.ceil(total_runs_to_process / max_jobs)
 
-        run_id_chunks = kp.tools.chunks(run_ids_to_process, batch_size)
+            print(
+                "Proceeding with {} runs distributed over {} jobs, {} runs/job"
+                .format(total_runs_to_process, max_jobs, batch_size)
+            )
 
-        self.pbar_runs = tqdm(
-            total=len(run_ids_to_process), desc="Submitting runs", unit='run'
-        )
+            run_id_chunks = kp.tools.chunks(run_ids_to_process, batch_size)
 
-        for run_ids in tqdm(run_id_chunks, desc="Jobs"):
+            self.pbar_runs = tqdm(
+                total=len(run_ids_to_process),
+                desc="Submitting runs",
+                unit='run'
+            )
 
-            self.submit_batch(run_ids, dryrun=dryrun)
+            for run_ids in tqdm(run_id_chunks, desc="Jobs"):
+
+                self.submit_batch(run_ids, dryrun=dryrun)
 
         self.pbar_runs.close()
 
