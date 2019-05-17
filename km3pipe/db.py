@@ -96,6 +96,8 @@ class DBManager(object):
         self._opener = None
         self._temporary = temporary
 
+        self.log = get_logger(self.__class__.__name__)
+
         from .config import Config
         config = Config()
 
@@ -142,12 +144,12 @@ class DBManager(object):
         data = urlencode(values)
         content = self._get_content('streamds/datalognumbers.txt?' + data)
         if content.startswith('ERROR'):
-            log.error(content)
+            self.log.error(content)
             return None
         try:
             dataframe = read_csv(content)
         except ValueError:
-            log.warning(
+            self.log.warning(
                 "Empty dataset"
             )    # ...probably. Waiting for more info
             return make_empty_dataset()
@@ -156,7 +158,7 @@ class DBManager(object):
             try:
                 self._add_converted_units(dataframe, parameter)
             except KeyError:
-                log.warning(
+                self.log.warning(
                     "Could not add converted units for {0}".format(parameter)
                 )
             return dataframe
@@ -167,7 +169,7 @@ class DBManager(object):
         try:
             df = read_csv(content)
         except ValueError:
-            log.warning("Empty dataset")
+            self.log.warning("Empty dataset")
             return None
         else:
             timestamp_column = 'UNIXSTARTTIME'
@@ -179,10 +181,10 @@ class DBManager(object):
         """Add an additional DATA_VALUE column with converted VALUEs"""
         convert_unit = self.parameters.get_converter(parameter)
         try:
-            log.debug("Adding unit converted DATA_VALUE to the data")
+            self.log.debug("Adding unit converted DATA_VALUE to the data")
             dataframe[key] = dataframe['DATA_VALUE'].apply(convert_unit)
         except KeyError:
-            log.warning("Missing 'VALUE': no unit conversion.")
+            self.log.warning("Missing 'VALUE': no unit conversion.")
         else:
             dataframe.unit = self.parameters.unit(parameter)
 
@@ -197,7 +199,7 @@ class DBManager(object):
         try:
             dataframe = read_csv(content)
         except ValueError:
-            log.warning("Empty dataset")
+            self.log.warning("Empty dataset")
             return make_empty_dataset()
         else:
             return dataframe
@@ -208,7 +210,7 @@ class DBManager(object):
             return self.detectors[self.detectors.OID == det_oid
                                   ].SERIALNUMBER.iloc[0]
         except IndexError:
-            log.critical("No det ID found for OID '{}'".format(det_oid))
+            self.log.critical("No det ID found for OID '{}'".format(det_oid))
             return None
 
     def get_det_oid(self, det_id):
@@ -217,7 +219,7 @@ class DBManager(object):
             return self.detectors[self.detectors.SERIALNUMBER == det_id
                                   ].OID.iloc[0]
         except IndexError:
-            log.critical("No OID found for det ID '{}'".format(det_id))
+            self.log.critical("No OID found for det ID '{}'".format(det_id))
             return None
 
     def to_det_id(self, det_id_or_det_oid):
@@ -261,7 +263,7 @@ class DBManager(object):
         )
         data = json.loads(r)['Data']
         if not data:
-            log.error("Empty dataset.")
+            self.log.error("Empty dataset.")
             return
         raw_setup = data[0]
         det_id = raw_setup['DetID']
@@ -340,12 +342,12 @@ class DBManager(object):
         data = urlencode(values)
         content = self._get_content('streamds/ahrs.txt?' + data)
         if content.startswith('ERROR'):
-            log.error(content)
+            self.log.error(content)
             return None
         try:
             dataframe = read_csv(content)
         except ValueError:
-            log.warning(
+            self.log.warning(
                 "Empty dataset"
             )    # ...probably. Waiting for more info
             return make_empty_dataset()
@@ -360,59 +362,60 @@ class DBManager(object):
             json_content = json.loads(content.decode())
         except AttributeError:
             json_content = json.loads(content)
-        if json_content['Comment']:
-            log.warning(json_content['Comment'])
+        if json_content.get('Comment') is not None:
+            self.log.warning(json_content['Comment'])
         if json_content['Result'] != 'OK':
-            raise ValueError('Error while retrieving the parameter list.')
+            self.log.critical("Error from DB: %s", json_content.get('Data'))
+            raise ValueError("Error while retrieving the parameter list.")
         return json_content['Data']
 
     def _get_content(self, url):
         "Get HTML content"
         target_url = self._db_url + '/' + unquote(url)    # .encode('utf-8'))
-        log.debug("Opening '{0}'".format(target_url))
+        self.log.debug("Opening '{0}'".format(target_url))
         try:
             f = self.opener.open(target_url)
         except HTTPError as e:
-            log.error("HTTP error, your session may be expired.")
-            log.error(e)
+            self.log.error("HTTP error, your session may be expired.")
+            self.log.error(e)
             if input("Request new permanent session and retry? (y/n)") in 'yY':
                 self.request_permanent_session()
                 return self._get_content(url)
             else:
                 return None
-        log.debug("Accessing '{0}'".format(target_url))
+        self.log.debug("Accessing '{0}'".format(target_url))
         try:
             content = f.read()
         except IncompleteRead as icread:
-            log.critical(
+            self.log.critical(
                 "Incomplete data received from the DB, " +
                 "the data could be corrupted."
             )
             content = icread.partial
-        log.debug("Got {0} bytes of data.".format(len(content)))
+        self.log.debug("Got {0} bytes of data.".format(len(content)))
         return content.decode('utf-8')
 
     @property
     def opener(self):
         "A reusable connection manager"
         if self._opener is None:
-            log.debug("Creating connection handler")
+            self.log.debug("Creating connection handler")
             opener = build_opener()
             if self._cookies:
-                log.debug("Appending cookies")
+                self.log.debug("Appending cookies")
             else:
-                log.debug("No cookies to append")
+                self.log.debug("No cookies to append")
             for cookie in self._cookies:
                 cookie_str = cookie.name + '=' + cookie.value
                 opener.addheaders.append(('Cookie', cookie_str))
             self._opener = opener
         else:
-            log.debug("Reusing connection manager")
+            self.log.debug("Reusing connection manager")
         return self._opener
 
     def request_sid_cookie(self, username, password):
         """Request cookie for permanent session token."""
-        log.debug("Requesting SID cookie")
+        self.log.debug("Requesting SID cookie")
         target_url = self._login_url + '?usr={0}&pwd={1}&persist=y'.format(
             username, password
         )
@@ -421,53 +424,55 @@ class DBManager(object):
 
     def restore_session(self, cookie):
         """Establish databse connection using permanent session cookie"""
-        log.debug("Restoring session from cookie: {}".format(cookie))
+        self.log.debug("Restoring session from cookie: {}".format(cookie))
         opener = build_opener()
         opener.addheaders.append(('Cookie', cookie))
         self._opener = opener
 
     def request_permanent_session(self, username=None, password=None):
-        log.debug("Requesting permanent session")
+        self.log.debug("Requesting permanent session")
 
         from .config import Config
         config = Config()
 
         if username is None and password is None:
-            log.debug("Checking configuration file for DB credentials")
+            self.log.debug("Checking configuration file for DB credentials")
             username, password = config.db_credentials
         cookie = self.request_sid_cookie(username, password)
         try:
             cookie_str = str(cookie, 'utf-8')    # Python 3
         except TypeError:
             cookie_str = str(cookie)    # Python 2
-        log.debug("Session cookie: {0}".format(cookie_str))
-        log.debug("Storing cookie in configuration file")
+        self.log.debug("Session cookie: {0}".format(cookie_str))
+        self.log.debug("Storing cookie in configuration file")
         config.set('DB', 'session_cookie', cookie_str)
         # self._cookies = [cookie]
         self.restore_session(cookie)
 
     def login(self, username, password):
         "Login to the database and store cookies for upcoming requests."
-        log.debug("Logging in to the DB")
+        self.log.debug("Logging in to the DB")
         opener = self._build_opener()
         values = {'usr': username, 'pwd': password}
         req = self._make_request(self._login_url, values)
         try:
-            log.debug("Sending login request")
+            self.log.debug("Sending login request")
             f = opener.open(req)
         except URLError as e:
-            log.error("Failed to connect to the database -> probably down!")
-            log.error("Error from database server:\n    {0}".format(e))
+            self.log.error(
+                "Failed to connect to the database -> probably down!"
+            )
+            self.log.error("Error from database server:\n    {0}".format(e))
             return False
         html = f.read()
         failed_auth_message = 'Bad username or password'
         if failed_auth_message in str(html):
-            log.error(failed_auth_message)
+            self.log.error(failed_auth_message)
             return False
         return True
 
     def _build_opener(self):
-        log.debug("Building opener.")
+        self.log.debug("Building opener.")
         try:
             from http.cookiejar import CookieJar
         except ImportError:
@@ -596,6 +601,7 @@ class StreamDS(object):
         """Get the data for a given stream manually"""
         sel = ''.join(["&{0}={1}".format(k, v) for (k, v) in kwargs.items()])
         url = "streamds/{0}.{1}?{2}".format(stream, fmt, sel[1:])
+        print(url)
         data = self._db._get_content(url)
         if not data:
             log.error("No data found at URL '%s'." % url)
