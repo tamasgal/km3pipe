@@ -897,7 +897,7 @@ class CLBMap(object):
     @property
     def dom_id(self):
         self.log.deprecation("Please use .dom_ids instead of .dom_id!")
-        return self.upis
+        return self.dom_ids
 
     @property
     def dom_ids(self):
@@ -907,12 +907,24 @@ class CLBMap(object):
             self._populate(by=parameter)
         return self._by[parameter]
 
+    @property
+    def omkeys(self):
+        """A dict of CLBs with the OMKey tuple (DU, floor) as key"""
+        parameter = 'omkey'
+        if parameter not in self._by:
+            self._by[parameter] = {}
+            for clb in self.upis.values():
+                omkey = (clb.du, clb.floor)
+                self._by[parameter][omkey] = clb
+            pass
+        return self._by[parameter]
+
     def base(self, du):
         """Return the base CLB for a given DU"""
         parameter = 'base'
         if parameter not in self._by:
             self._by[parameter] = {}
-            for clb in self.upi.values():
+            for clb in self.upis.values():
                 if clb.floor == 0:
                     self._by[parameter][clb.du] = clb
         return self._by[parameter][du]
