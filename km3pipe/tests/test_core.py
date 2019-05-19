@@ -487,6 +487,24 @@ class TestPipelineConfigurationViaFile(TestCase):
         Pipeline(configfile=fname)
         fobj.close()
 
+    def test_configuration_variable_extraction(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fobj.write(
+            b"[VARIABLES]\n"
+            b"FOO = 1\n"
+            b"[Narf]\n"
+            b"bar = 'FOO'\n"
+            b"fjoord = 2"
+        )
+        fobj.flush()
+        fname = str(fobj.name)
+
+        pipe = Pipeline(configfile=fname)
+
+        assert 1 == pipe.module_configuration['Narf']['bar']
+        assert 2 == pipe.module_configuration['Narf']['fjoord']
+        assert 'VARIABLES' not in pipe.module_configuration
+
     def test_configuration_with_config_for_a_module(self):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fobj.write(b"[A]\na = 1")
