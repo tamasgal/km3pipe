@@ -15,7 +15,7 @@ pytest-flake8
 pytest-pylint
 pytest-watch
 requests
-scipy>=0.19
+scipy=1.2.1
 seaborn
 sklearn
 sphinx-gallery>=0.1.12
