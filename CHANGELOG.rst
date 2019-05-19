@@ -1,6 +1,9 @@
 Unreleased changes
 ------------------
 
+* Pipeline configuration files can now have a ``[VARIABLES]`` section
+  where values can be defined to be reused in other sections
+
 
 Version 8
 ---------
