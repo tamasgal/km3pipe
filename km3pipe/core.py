@@ -144,6 +144,7 @@ class Pipeline(object):
         self._finished = False
 
     def load_configuration(self, configfile):
+        """Reads the pipeline configuration file"""
         if configfile is not None:
             self.print(
                 "Reading module configuration from '{}'".format(configfile)
