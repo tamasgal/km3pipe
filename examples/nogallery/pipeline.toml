@@ -1,3 +1,7 @@
+[VARIABLES]  # optional section to define variables
+TIMEOUT = 123
+DEBUG = False
+
 [StatusBar]
 every = 1000
 
@@ -5,6 +9,9 @@ every = 1000
 some_parameter = "foo"
 other_parameter = 23
 a_list = [1, 2, 3, 23]
+sleep = "TIMEOUT"  # this will be replaced with the value in [VARIABLES]
+debug = "DEBUG"    # this either...
 
 [BModule]
 bar = 42
+sleep = "TIMEOUT"  # this will be replaced with the value in [VARIABLES]

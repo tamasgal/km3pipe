@@ -119,6 +119,9 @@ invoked to launch the pipeline). The default filename is ``pipeline.toml``
 but a different filename can be chosen when creating the ``Pipeline`` instance
 using ``Pipeline(configfile='your_desired_filename.toml')``.
 
+TOML does not support variables, but a section called ``[VARIABLES]`` can be
+defined and those will be substituted when used in other (module) sections.
+
 Here is an example of the file:
 
 .. literalinclude:: ../examples/nogallery/pipeline.toml
