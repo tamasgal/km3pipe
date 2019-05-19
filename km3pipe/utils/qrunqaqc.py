@@ -20,14 +20,15 @@ Usage:
     qrunqaqc (-h | --help)
 
 Options:
-    -b BATCH_SIZE  Number of runs to process in a single job [default: 20].
-    -j MAX_JOBS    Maximum number of jobs to submit [default: 200].
+    -b BATCH_SIZE  Number of runs to process in a single job.
+    -j MAX_JOBS    Maximum number of jobs to submit [default: 100].
     -u             Upload summary data to the database automatically.
     -q             Dryrun, don't submit the jobs.
     -h --help      Show this screen.
 
 """
 from collections import defaultdict
+import math
 import os
 import subprocess
 import time
@@ -149,6 +150,7 @@ class QAQCAnalyser(object):
             reverse=True
         )
 
+        print("Checking runs")
         for run_id in tqdm(run_ids_to_check):
             if n_jobs >= max_jobs:
                 self.log.warning(
@@ -161,7 +163,7 @@ class QAQCAnalyser(object):
             irods_filepath = kp.tools.irods_filepath(self.det_id, run_id)
             if kp.tools.iexists(irods_filepath):
                 run_ids_to_process.append(run_id)
-                if len(run_ids_to_process) % batch_size == 0:
+                if batch_size and len(run_ids_to_process) % batch_size == 0:
                     n_jobs += 1
                 continue
             else:
@@ -171,17 +173,33 @@ class QAQCAnalyser(object):
                 )
                 self.stats['Missing data or iRODS error'] += 1
 
-        run_id_chunks = kp.tools.chunks(run_ids_to_process, batch_size)
+        total_runs_to_process = len(run_ids_to_process)
 
-        self.pbar_runs = tqdm(
-            total=len(run_ids_to_process), desc="Submitting runs", unit='run'
-        )
+        if total_runs_to_process == 0:
+            print("No runs to process.")
+        else:
 
-        for run_ids in tqdm(run_id_chunks, desc="Jobs"):
+            if batch_size is None:
+                batch_size = math.ceil(total_runs_to_process / max_jobs)
 
-            self.submit_batch(run_ids, dryrun=dryrun)
+            print(
+                "Proceeding with {} runs distributed over {} jobs, {} runs/job"
+                .format(total_runs_to_process, max_jobs, batch_size)
+            )
 
-        self.pbar_runs.close()
+            run_id_chunks = kp.tools.chunks(run_ids_to_process, batch_size)
+
+            self.pbar_runs = tqdm(
+                total=len(run_ids_to_process),
+                desc="Submitting runs",
+                unit='run'
+            )
+
+            for run_ids in tqdm(run_id_chunks, desc="Jobs"):
+
+                self.submit_batch(run_ids, dryrun=dryrun)
+
+            self.pbar_runs.close()
 
         self.print_stats()
 
@@ -288,11 +306,16 @@ def main():
     from docopt import docopt
     args = docopt(__doc__)
 
+    try:
+        batch_size = int(args['-b'])
+    except TypeError:
+        batch_size = None
+
     qaqc = QAQCAnalyser(
         det_id=int(args['DET_ID']), should_upload_to_db=args['-u']
     )
     qaqc.run(
-        batch_size=int(args['-b']),
+        batch_size=batch_size,
         max_jobs=int(args['-j']),
         dryrun=bool(args['-q'])
     )

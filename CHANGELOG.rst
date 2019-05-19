@@ -1,6 +1,25 @@
 Unreleased changes
 ------------------
 
+
+Version 8
+---------
+8.15.5 / 2019-05-17
+~~~~~~~~~~~~~~~~~~~
+* Minor fixes
+
+8.15.4 / 2019-05-17
+~~~~~~~~~~~~~~~~~~~
+* Minor fixes
+
+8.15.3 / 2019-05-17
+~~~~~~~~~~~~~~~~~~~
+
+* ``-b`` in ``qrunqaqc`` is now optional and it will process all runs
+  distributed over the maximum number of jobs if not specified
+
+8.15.2 / 2019-05-17
+~~~~~~~~~~~~~~~~~~~
 * ``CalibrationService`` -> ``detector`` has been deprecated, use
   ``get_detector()`` instead
 * ``CalibrationService`` now also adds ``load_calibration`` to update the
@@ -8,8 +27,6 @@ Unreleased changes
 * ``kp.db.CLBMap.upi`` and ``.dom_id`` are deprecated, use ``.upis`` and
   ``.dom_ids`` instead
 
-Version 8
----------
 8.15.1 / 2019-05-13
 ~~~~~~~~~~~~~~~~~~~
 * ``qrunqaqc`` now needs ``-u`` to automatically upload data to the DB
