@@ -159,7 +159,6 @@ class Pipeline(object):
             if variables is not None:
                 for section, entries in config.items():
                     for key, value in entries.items():
-                        print(key, value)
                         if value in variables:
                             entries[key] = variables[value]
         else:
