@@ -132,8 +132,9 @@ def get_logger(
     pre2, suf2 = hash_coloured_escapes(name +
                                        'salt') if with_color else ('', '')
     formatter = logging.Formatter(
-        '%(levelname)s {}+{}+{} '
-        '%(name)s: %(message)s'.format(pre1, pre2, suf1)
+        '%(asctime)s %(levelname)s {}+{}+{} '
+        '%(name)s: %(message)s'.format(pre1, pre2, suf1),
+        datefmt='%Y-%m-%d %H:%M:%S'
     )
     if filename is not None:
         ch_file = logging.handlers.RotatingFileHandler(
