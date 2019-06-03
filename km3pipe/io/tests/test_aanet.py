@@ -113,7 +113,7 @@ class TestAanetPump(TestCase):
 
         aanet_pump = AanetPump(filename=join(TEST_DATA_DIR, 'mupage.root'))
         assert 10 > (time.time() - start_time)
-    
+
     def test_reading_hits_from_multiple_files(self):
         # never mix files like this, but it's OK for a test ;)
         aanet_pump = AanetPump(
