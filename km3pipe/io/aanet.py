@@ -655,9 +655,8 @@ class AanetPump(Pump):
 	            self.blobs = self.blob_generator()
 	            self.num_blobs = self.blob_counter()
 	        elif self.filename:
-	        	raise StopIteration
-            	self.log.info("Only 1 file to process")
-
+	            raise StopIteration
+	            self.log.info("Only 1 file to process")
         if self.num_blobs < 0:
             raise StopIteration
             self.log.info("negative number of blobs!.")
