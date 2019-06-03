@@ -1,7 +1,7 @@
 # Filename: test_aanet.py
 # pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
 from os.path import join, dirname
-
+import time
 import numpy as np
 
 import km3pipe as kp
@@ -108,7 +108,18 @@ class TestAanetPump(TestCase):
                     assert np.allclose(aanet_data[attr], hdf5_data[attr])
         assert 3 == blob_counter
 
-    @skip(reason="Multiple file support is removed")
+    def test_against_single_file_freeze(self):
+        start_time = time.time()
+        
+        
+        aanet_pump = AanetPump(
+            filename=[
+                join(TEST_DATA_DIR, 'mupage.root')
+            ]
+        )
+
+        assert 10 > time.time() - start_time
+    
     def test_reading_hits_from_multiple_files(self):
         # never mix files like this, but it's OK for a test ;)
         aanet_pump = AanetPump(
@@ -124,7 +135,6 @@ class TestAanetPump(TestCase):
 
         assert 13 == blob_counter
 
-    @skip(reason="Multiple file support is removed")
     def test_reading_hits_from_multiple_mupage_files(self):
         aanet_pump = AanetPump(
             filenames=[
@@ -138,7 +148,6 @@ class TestAanetPump(TestCase):
 
         assert 6 == blob_counter
 
-    @skip(reason="Multiple file support is removed")
     def test_reading_hits_from_multiple_corsika_files(self):
         aanet_pump = AanetPump(
             filenames=[
@@ -158,7 +167,6 @@ class TestAanetPump(TestCase):
 
         assert 6 == blob_counter
 
-    @skip(reason="Multiple file support is removed")
     def test_reading_multiple_corsika_files_pipeline(self):
         class Tester(kp.Module):
             def configure(self):
