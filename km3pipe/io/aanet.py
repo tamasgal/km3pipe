@@ -22,7 +22,7 @@ from km3pipe.io.hdf5 import HDF5Header
 from km3pipe.dataclasses import Table
 from km3pipe.logger import get_logger
 
-log = get_logger(__name__)  # pylint: disable=C0103
+log = get_logger(__name__)    # pylint: disable=C0103
 
 __author__ = "Moritz Lotze and Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -194,10 +194,10 @@ FITINFDUSJ2NAME = {v: k for k, v in FITINFDUSJ2NUM.items()}
 RECO2NAME = {v: k for k, v in RECO2NUM.items()}
 
 IS_CC = {
-    3: 0,   # False,
-    2: 1,   # True,
-    1: 0,   # False,
-    0: 1,   # True,
+    3: 0,    # False,
+    2: 1,    # True,
+    1: 0,    # False,
+    0: 1,    # True,
 }
 
 
@@ -648,16 +648,16 @@ class AanetPump(Pump):
             self.num_blobs -= 1
             return next(self.blobs)
         if self.num_blobs == 0:
-        	if self.filenames:
-	            self.filename = next(self.filequeue)
-	            self.log.info("Next filename: {}".format(self.filename))
-	            self.print("Opening {0}".format(self.filename))
-	            self.blobs = self.blob_generator()
-	            self.num_blobs = self.blob_counter()
-	        elif self.filename:
-	            raise StopIteration
-	            self.log.info("Only 1 file to process")
-        if self.num_blobs < 0:
+            if self.filenames:
+                self.filename = next(self.filequeue)
+                self.log.info("Next filename: {}".format(self.filename))
+                self.print("Opening {0}".format(self.filename))
+                self.blobs = self.blob_generator()
+                self.num_blobs = self.blob_counter()
+            elif self.filename:
+                raise StopIteration
+                self.log.info("Only 1 file to process")
+        elif self.num_blobs < 0:
             raise StopIteration
             self.log.info("negative number of blobs!.")
 
