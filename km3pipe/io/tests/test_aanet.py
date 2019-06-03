@@ -113,9 +113,7 @@ class TestAanetPump(TestCase):
         
         
         aanet_pump = AanetPump(
-            filename=[
-                join(TEST_DATA_DIR, 'mupage.root')
-            ]
+            filename = join(TEST_DATA_DIR, 'mupage.root')
         )
 
         assert 10 > time.time() - start_time
