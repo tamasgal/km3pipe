@@ -110,13 +110,10 @@ class TestAanetPump(TestCase):
 
     def test_against_single_file_freeze(self):
         start_time = time.time()
-        
-        
-        aanet_pump = AanetPump(
-            filename = join(TEST_DATA_DIR, 'mupage.root')
-        )
 
-        assert 10 > time.time() - start_time
+        aanet_pump = AanetPump(filename = join(TEST_DATA_DIR, 'mupage.root'))
+
+        assert 10 > (time.time() - start_time)
     
     def test_reading_hits_from_multiple_files(self):
         # never mix files like this, but it's OK for a test ;)
