@@ -118,7 +118,7 @@ class LogIO(object):
 
 
 def get_logger(
-        name, filename=None, stream_loglevel="WARNING", file_loglevel="DEBUG"
+        name, filename=None, stream_loglevel="INFO", file_loglevel="DEBUG"
 ):
     """Helper function to get a logger"""
     if name in loggers:
