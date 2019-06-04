@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 8
 ---------
+8.17.0 / 2019-06-04
+~~~~~~~~~~~~~~~~~~~
+* ``AanetPump`` now accepts ``filenames`` (again ;)
+
 8.16.2 / 2019-06-04
 ~~~~~~~~~~~~~~~~~~~
 * Fix unit tests for aanet readout
