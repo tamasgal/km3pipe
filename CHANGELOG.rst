@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 8
 ---------
+8.16.2 / 2019-06-04
+~~~~~~~~~~~~~~~~~~~
+* Fix unit tests for aanet readout
+
 8.16.1 / 2019-06-04
 ~~~~~~~~~~~~~~~~~~~
 * Fixes bug in the ``AanetPump`` where not all event information was
