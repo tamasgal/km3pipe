@@ -3,6 +3,11 @@ Unreleased changes
 
 Version 8
 ---------
+8.16.1 / 2019-06-04
+~~~~~~~~~~~~~~~~~~~
+* Fixes bug in the ``AanetPump`` where not all event information was
+  extracted and added to the ``EventInfo``
+
 8.16.0 / 2019-05-22
 ~~~~~~~~~~~~~~~~~~~
 * Pipeline configuration files can now have a ``[VARIABLES]`` section
