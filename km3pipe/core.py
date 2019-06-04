@@ -142,6 +142,7 @@ class Pipeline(object):
         self._cycle_count = 0
         self._stop = False
         self._finished = False
+        self.was_interrupted = False
 
     def load_configuration(self, configfile):
         """Reads the pipeline configuration file"""
@@ -377,7 +378,6 @@ class Pipeline(object):
         self._timeit['finish_cpu'] = process_time()
         self._print_timeit_statistics()
         self._finished = True
-        self.was_interrupted = False
 
         if self.anybar: self.anybar.change("green")
         return finish_blob
