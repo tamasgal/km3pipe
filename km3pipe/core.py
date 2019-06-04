@@ -142,6 +142,7 @@ class Pipeline(object):
         self._cycle_count = 0
         self._stop = False
         self._finished = False
+        self.was_interrupted = False
 
     def load_configuration(self, configfile):
         """Reads the pipeline configuration file"""
@@ -394,6 +395,7 @@ class Pipeline(object):
                 '\n' + hline + "\nGot CTRL+C, waiting for current cycle...\n"
                 "Press CTRL+C again if you're in hurry!\n" + hline
             )
+            self.was_interrupted = True
             self._stop = True
 
     def _print_timeit_statistics(self):
