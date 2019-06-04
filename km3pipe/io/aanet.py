@@ -292,23 +292,25 @@ class AanetPump(Pump):
         del event_file
 
     def _parse_eventinfo(self, event):
-        event_id = event.frame_index
-        mc_id = event.frame_index - 1
-        # run_id = self._get_run_id()
         wgt1, wgt2, wgt3, wgt4 = self._parse_wgts(event.w)
         tab_data = {
-            'event_id': event_id,
-            'mc_id': mc_id,
+            'event_id': event.id,
             'run_id': event.run_id,    # TODO: this may segfault in aanet
             'weight_w1': wgt1,
             'weight_w2': wgt2,
             'weight_w3': wgt3,
             'weight_w4': wgt4,
+            'timestamp': event.t.GetSec(),
+            'nanoseconds': event.t.GetNanoSec(),
+            'mc_time': event.mc_t,
+            'trigger_mask': event.trigger_mask,
+            'trigger_counter': event.trigger_counter,
+            'overlays': event.overlays,
+            'det_id': event.det_id,
+            'frame_index': event.frame_index,
+            'mc_run_id': event.mc_run_id,
             'group_id': self.group_id,
         }
-        tab_data['timestamp'] = event.t.GetSec()
-        tab_data['nanoseconds'] = event.t.GetNanoSec()
-        tab_data['mc_time'] = event.mc_t
         info = Table(tab_data, h5loc='/event_info', name='EventInfo')
         return info
 
