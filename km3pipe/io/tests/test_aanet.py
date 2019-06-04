@@ -61,12 +61,16 @@ class TestAanetPump(TestCase):
     def test_event_info(self):
         data = {
             'run_ids': [4143] * 5,
-            'event_ids': [60, 41, 80, 61, 110],
+            'event_ids': [0, 1, 2, 3, 4],
+            'frame_indices': [60, 41, 80, 61, 110],
             'mc_ids': [59, 40, 79, 60, 109],
             'timestamps': [
                 1551549606, 1551549604, 1551549608, 1551549606, 1551549611
             ],
-            'nanoseconds': [0, 100000000, 0, 100000000, 0]
+            'nanoseconds': [0, 100000000, 0, 100000000, 0],
+            'trigger_counters': [0, 0, 1, 1, 2],
+            'trigger_masks': [22, 22, 6, 22, 6],
+            'overlays': [6, 14, 2, 6, 3],
         }
         blob_counter = 0
         for idx, blob in enumerate(self.pump):
@@ -74,8 +78,12 @@ class TestAanetPump(TestCase):
             ei = blob['EventInfo'][0]
             assert data['run_ids'][idx] == ei.run_id
             assert data['event_ids'][idx] == ei.event_id
-            assert data['mc_ids'][idx] == ei.mc_id
+            assert data['frame_indices'][idx] == ei.frame_index
             assert data['timestamps'][idx] == ei.timestamp
+            assert data['trigger_counters'][idx] == ei.trigger_counter
+            assert data['overlays'][idx] == ei.overlays
+            assert data['trigger_masks'][idx] == ei.trigger_mask
+            assert data['nanoseconds'][idx] == ei.nanoseconds
         assert 5 == blob_counter
 
     def test_aanet_and_hdf5_conformity_with_converted_files(self):
