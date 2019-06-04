@@ -7,7 +7,7 @@ The core of the KM3Pipe framework.
 from __future__ import absolute_import, print_function, division
 
 import gzip
-from thepipe import Module
+from thepipe import Module, Blob, Pipeline
 
 from .logger import get_logger
 
