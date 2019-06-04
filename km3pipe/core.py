@@ -377,6 +377,7 @@ class Pipeline(object):
         self._timeit['finish_cpu'] = process_time()
         self._print_timeit_statistics()
         self._finished = True
+        self.was_interrupted = False
 
         if self.anybar: self.anybar.change("green")
         return finish_blob
@@ -394,6 +395,7 @@ class Pipeline(object):
                 '\n' + hline + "\nGot CTRL+C, waiting for current cycle...\n"
                 "Press CTRL+C again if you're in hurry!\n" + hline
             )
+            self.was_interrupted = True
             self._stop = True
 
     def _print_timeit_statistics(self):
