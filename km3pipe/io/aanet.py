@@ -240,12 +240,12 @@ class AanetPump(Pump):
         self.log.info("Next filename: {}".format(self.filename))
         self.print("Opening {0}".format(self.filename))
         self.blobs = self.blob_generator()
-        self.num_blobs = self.blob_counter()
+        self.num_blobs = self.get_number_of_blobs()
 
     def get_blob(self, index):
         NotImplementedError("Aanet currently does not support indexing.")
 
-    def blob_counter(self):
+    def get_number_of_blobs(self):
         """Create a blob counter."""
         import aa    # pylint: disablF0401        # noqa
         from ROOT import EventFile    # pylint: disable F0401
@@ -653,7 +653,7 @@ class AanetPump(Pump):
                 self.log.info("Next filename: {}".format(self.filename))
                 self.print("Opening {0}".format(self.filename))
                 self.blobs = self.blob_generator()
-                self.num_blobs = self.blob_counter()
+                self.num_blobs = self.get_number_of_blobs()
             elif self.filename:
                 raise StopIteration
                 self.log.info("Only 1 file to process")
@@ -671,7 +671,7 @@ class AanetPump(Pump):
                 self.filename = next(self.filequeue)
                 self.print("Opening {0}".format(self.filename))
                 self.blobs = self.blob_generator()
-                self.num_blobs = self.blob_counter()
+                self.num_blobs = self.get_number_of_blobs()
             else:
                 self.log.info("No more files left")
                 raise StopIteration
