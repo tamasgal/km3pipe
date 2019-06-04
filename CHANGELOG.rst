@@ -3,6 +3,11 @@ Unreleased changes
 
 Version 8
 ---------
+8.17.1 / 2019-06-04
+~~~~~~~~~~~~~~~~~~~
+* Fixes an issue of setting log levels below ``WARNING``, which had
+  no effect after the recent update of the logging facility
+
 8.17.0 / 2019-06-04
 ~~~~~~~~~~~~~~~~~~~
 * ``AanetPump`` now accepts ``filenames`` (again ;)
