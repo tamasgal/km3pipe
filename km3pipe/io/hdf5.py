@@ -431,7 +431,7 @@ class HDF5Sink(Module):
         for key, entry in sorted(blob.items()):
             if self.keys and key not in self.keys:
                 self.log.info("Skipping blob, since it's not in the keys list")
-                return blob
+                continue
             data = self._process_entry(key, entry)
             if data is not None:
                 written_blob[key] = data
