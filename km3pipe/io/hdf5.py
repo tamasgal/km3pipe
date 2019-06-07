@@ -174,6 +174,8 @@ class HDF5Sink(Module):
         Where to store the events.
     h5file: pytables.File instance, optional [default: None]
         Opened file to write to. This is mutually exclusive with filename.
+    keys: list of strings, optional
+        List of Blob-keys to write, everything else is ignored.
     complib : str [default: zlib]
         Compression library that should be used.
         'zlib', 'lzf', 'blosc' and all other PyTables filters
@@ -196,6 +198,7 @@ class HDF5Sink(Module):
     def configure(self):
         self.filename = self.get('filename', default='dump.h5')
         self.ext_h5file = self.get('h5file')
+        self.keys = self.get('keys', default=[])
         self.complib = self.get('complib', default='zlib')
         self.complevel = self.get('complevel', default=5)
         self.chunksize = self.get('chunksize')
@@ -426,6 +429,9 @@ class HDF5Sink(Module):
     def process(self, blob):
         written_blob = Blob()
         for key, entry in sorted(blob.items()):
+            if self.keys and key not in self.keys:
+                self.log.info("Skipping blob, since it's not in the keys list")
+                return blob
             data = self._process_entry(key, entry)
             if data is not None:
                 written_blob[key] = data
