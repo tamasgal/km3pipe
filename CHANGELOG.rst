@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* ``HDF5Sink`` now accepts ``keys=['BlobKey1', 'BlobKey2']`` which can be
+  used to selectively write the keys. All other keys will be ignored
 
 Version 8
 ---------
