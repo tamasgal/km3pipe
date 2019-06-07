@@ -276,6 +276,76 @@ class TestH5Sink(TestCase):
 
         fobj.close()
 
+    def test_filtered_writing(self):
+        fobjs = []
+        for i in range(3):
+            fobj = tempfile.NamedTemporaryFile(delete=True)
+            fobjs.append(fobj)
+
+        fobj_all = tempfile.NamedTemporaryFile(delete=True)
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.i = 0
+
+            def process(self, blob):
+                blob['A'] = Table({'a': self.i}, name="A", h5loc="tab_a")
+                blob['B'] = Table({'b': self.i}, name="B", h5loc="tab_b")
+                blob['C'] = Table({'c': self.i}, name="C", h5loc="tab_c")
+                self.i += 1
+                return blob
+
+        keys = "ABC"
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        for fobj, key in zip(fobjs, keys):
+            pipe.attach(HDF5Sink, filename=fobj.name, keys=[key])
+        pipe.attach(HDF5Sink, filename=fobj_all.name)
+        pipe.drain(5)
+
+        for fobj, key in zip(fobjs, keys):
+            with tb.File(fobj.name, 'r') as f:
+                assert "/tab_" + key.lower() in f
+                for _key in set(keys) - set(key):
+                    assert "/tab_" + _key.lower() not in f
+
+        for key in keys:
+            with tb.File(fobj_all.name, 'r') as f:
+                assert "/tab_" + key.lower() in f
+
+        for fobj in fobjs:
+            fobj.close()
+        fobj_all.close()
+
+    def test_filtered_writing_of_multiple_keys(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+
+        class DummyPump(Pump):
+            def configure(self):
+                self.i = 0
+
+            def process(self, blob):
+                blob['A'] = Table({'a': self.i}, name="A", h5loc="tab_a")
+                blob['B'] = Table({'b': self.i}, name="B", h5loc="tab_b")
+                blob['C'] = Table({'c': self.i}, name="C", h5loc="tab_c")
+                self.i += 1
+                return blob
+
+        keys = ["A", "B"]
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(HDF5Sink, filename=fobj.name, keys=keys)
+        pipe.drain(5)
+
+        with tb.File(fobj.name, 'r') as f:
+            assert "/tab_a" in f
+            assert "/tab_b" in f
+            assert "/tab_c" not in f
+
+        fobj.close()
+
 
 class TestNDArrayHandling(TestCase):
     def test_writing_of_n_dim_arrays_with_defaults(self):
