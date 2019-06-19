@@ -222,6 +222,7 @@ class AanetPump(Pump):
         self.index_start = self.get('index_start', default=1)
         self.ignore_hits = bool(self.get('ignore_hits'))
         self.bare = self.get('bare', default=False)
+        self.just_first_event = self.get('just_first_event', default=False)
         self.raw_header = None
         self.header = None
         self.num_blobs = 0
@@ -652,7 +653,7 @@ class AanetPump(Pump):
         if self.num_blobs > 0:
             self.num_blobs -= 1
             self.file_start_id += 1
-            if self.only_header:
+            if self.just_first_event:
             	if self.file_start_id == 0:
             		return next(self.blobs)
             	else:
