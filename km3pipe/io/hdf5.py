@@ -411,6 +411,8 @@ class HDF5Sink(Module):
         if isinstance(entry, Table) and not entry.h5singleton:
             if 'group_id' not in entry:
                 entry = entry.append_columns('group_id', self.index)
+            if 'file_start_id' not in entry:
+                entry = entry.append_columns('file_start_id', self.file_start_id)
 
         self.log.debug("h5l: '{}', title '{}'".format(entry.h5loc, title))
 
@@ -566,6 +568,7 @@ class HDF5Pump(Pump):
         self.group_ids = None
         self._n_groups = None
         self.index = 0
+        self.file_start_id = -1
 
         if not self.filename and not self.filenames:
             raise ValueError("No filename(s) defined")
@@ -664,11 +667,13 @@ class HDF5Pump(Pump):
             self.log.info("All groups are read, switching to the next file")
             if self.filequeue:
                 self._load_next_file()
+                self.file_start_id = -1
             else:
                 self.log.info("No more files left to drain")
                 raise StopIteration
         blob = self.get_blob(self.index)
         self.index += 1
+        self.file_start_id += 1
         return blob
 
     def get_blob(self, index):
