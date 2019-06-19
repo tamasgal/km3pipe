@@ -233,7 +233,9 @@ class AanetPump(Pump):
         self.file_index = int(self.index_start)
 
         if self.filenames:
-            self.log.warning("Using multiple filenames. Be careful with the id's!")
+            self.log.warning(
+                "Using multiple filenames. Be careful with the id's!"
+            )
             self.filequeue = iter(self.filenames)
             self.filename = next(self.filequeue)
 
@@ -654,12 +656,12 @@ class AanetPump(Pump):
             self.num_blobs -= 1
             self.file_start_id += 1
             if self.just_first_event:
-            	if self.file_start_id == 0:
-            		return next(self.blobs)
-            	else:
-            		self.num_blobs = 0
+                if self.file_start_id == 0:
+                    return next(self.blobs)
+                else:
+                    self.num_blobs = 0
             else:
-            	return next(self.blobs)
+                return next(self.blobs)
         if self.num_blobs == 0:
             if self.filenames:
                 self.filename = next(self.filequeue)
