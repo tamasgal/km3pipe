@@ -343,7 +343,6 @@ class AanetPump(Pump):
             'frame_index': event.frame_index,
             'mc_run_id': event.mc_run_id,
             'group_id': self.group_id,
-            'file_start_id': self.file_start_id,
         }
         info = Table(tab_data, h5loc='/event_info', name='EventInfo')
         return info
