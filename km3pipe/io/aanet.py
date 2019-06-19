@@ -227,15 +227,17 @@ class AanetPump(Pump):
         self.num_blobs = 0
 
         self.group_id = 0
+        self.file_start_id = -1
         self._generic_dtypes_avail = {}
         self.file_index = int(self.index_start)
 
         if self.filenames:
+            self.log.warning("Using multiple filenames. Be careful with the id's!")
             self.filequeue = iter(self.filenames)
             self.filename = next(self.filequeue)
 
         if not self.filename and not self.filenames:
-            self.log.warning("No file- or basename(s) defined!")
+            self.log.warning("No file- or filename(s) defined!")
 
         self.log.info("Next filename: {}".format(self.filename))
         self.print("Opening {0}".format(self.filename))
@@ -338,6 +340,7 @@ class AanetPump(Pump):
             'frame_index': event.frame_index,
             'mc_run_id': event.mc_run_id,
             'group_id': self.group_id,
+            'file_start_id': self.file_start_id,
         }
         info = Table(tab_data, h5loc='/event_info', name='EventInfo')
         return info
@@ -648,7 +651,14 @@ class AanetPump(Pump):
     def process(self, blob=None):
         if self.num_blobs > 0:
             self.num_blobs -= 1
-            return next(self.blobs)
+            self.file_start_id += 1
+            if self.only_header:
+            	if self.file_start_id == 0:
+            		return next(self.blobs)
+            	else:
+            		self.num_blobs = 0
+            else:
+            	return next(self.blobs)
         if self.num_blobs == 0:
             if self.filenames:
                 self.filename = next(self.filequeue)
@@ -656,6 +666,7 @@ class AanetPump(Pump):
                 self.print("Opening {0}".format(self.filename))
                 self.blobs = self.blob_generator()
                 self.num_blobs = self.get_number_of_blobs()
+                self.file_start_id = -1
             elif self.filename:
                 raise StopIteration
                 self.log.info("Only 1 file to process")
