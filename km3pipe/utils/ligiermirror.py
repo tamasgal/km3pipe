@@ -14,7 +14,7 @@ Options:
     -p PORT         Source port [default: 5553].
     -q PORT         Target port [default: 5553].
     -m TAGS         Comma separated message tags [default: IO_EVT, IO_SUM].
-    -s QUEUE        Maximum queue size for messages [default: 2000].
+    -s QUEUE        Maximum queue size for messages [default: 20000].
     -x TIMEOUT      Connection timeout in seconds [default: 604800].
     -d DEBUG_LEVEL  Debug level (DEBUG, INFO, WARNING, ...) [default: WARNING].
     -h --help       Show this screen.
@@ -55,7 +55,8 @@ def main():
         port=int(args['-p']),
         tags=args['-m'],
         timeout=int(args['-x']),
-        max_queue=int(args['-s'])
+        max_queue=int(args['-s']),
+        show_statistics=True
     )
     pipe.attach(LigierSender, target_ip=args['-t'], port=int(args['-q']))
     pipe.drain()
