@@ -46,12 +46,10 @@ class CHPump(Pump):
         self.subscription_mode = self.get('subscription_mode', default='wait')
         self.show_statistics = self.get('show_statistics', default=False)
         self.cuckoo_warn = Cuckoo(60 * 5, log.warning)
-        self.performance_warn = Cuckoo(60, self.show_performance_statistics)
+        self.performance_warn = Cuckoo(30, self.show_performance_statistics)
 
-        self.process_dt = deque(maxlen=1000)
-        self.process_timer = time.time()
-        self.packet_dt = deque(maxlen=1000)
-        self.packet_timer = time.time()
+        self.idle_dt = deque(maxlen=1000)
+        self.idle_timer = time.time()
 
         self.loop_cycle = 0
         self.queue = Queue()
@@ -105,8 +103,9 @@ class CHPump(Pump):
             self.loop_cycle += 1
             try:
                 log.debug("Waiting for data from network...")
-                self._add_packet_dt()
                 prefix, data = self.client.get_message()
+                self._add_idle_dt()
+                self._set_idle_timer()
                 self.performance_warn()
                 log.debug("{0} bytes received from network.".format(len(data)))
             except EOFError:
@@ -136,11 +135,11 @@ class CHPump(Pump):
             else:
                 log.debug("Filling data into queue.")
                 self.queue.put((prefix, data))
+            self._set_idle_timer()
         log.debug("Quitting the main loop.")
 
     def process(self, blob):
         """Wait for the next packet and put it in the blob"""
-        self._add_process_dt()
         try:
             log.debug("Waiting for queue items.")
             prefix, data = self.queue.get(timeout=self.timeout)
@@ -157,23 +156,22 @@ class CHPump(Pump):
     def show_performance_statistics(self):
         if not self.show_statistics:
             return
-        dt = np.mean(self.packet_dt) - np.mean(self.process_dt)
+        dt = np.median(self.idle_dt)
         current_qsize = self.queue.qsize()
-        log_func = self.print if dt > 0 else self.log.warning
+        log_func = self.print
+        if dt < 0 or current_qsize > 0:
+            log_func = self.log.warning
         log_func(
-            "Average idle time per packet: {0:.3f}us (current queue size: {1})"
+            "Median idle time per packet: {0:.3f} us (current queue size: {1})"
             .format(dt * 1e6, current_qsize)
         )
 
-    def _add_process_dt(self):
-        now = time.time()
-        self.process_dt.append(now - self.process_timer)
-        self.process_timer = now
+    def _set_idle_timer(self):
+        self.idle_timer = time.time()
 
-    def _add_packet_dt(self):
+    def _add_idle_dt(self):
         now = time.time()
-        self.packet_dt.append(now - self.packet_timer)
-        self.packet_timer = now
+        self.idle_dt.append(now - self.idle_timer)
 
     def finish(self):
         """Clean up the JLigier controlhost connection"""
