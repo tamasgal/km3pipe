@@ -44,12 +44,13 @@ class CHPump(Pump):
         self.key_for_data = self.get('key_for_data') or 'CHData'
         self.key_for_prefix = self.get('key_for_prefix') or 'CHPrefix'
         self.subscription_mode = self.get('subscription_mode', default='wait')
+        self.show_statistics = self.get('show_statistics', default=False)
         self.cuckoo_warn = Cuckoo(60 * 5, log.warning)
-        self.performance_warn = Cuckoo(10, self.show_performance_statistics)
+        self.performance_warn = Cuckoo(60, self.show_performance_statistics)
 
-        self.process_dt = deque(maxlen=100)
+        self.process_dt = deque(maxlen=1000)
         self.process_timer = time.time()
-        self.packet_dt = deque(maxlen=100)
+        self.packet_dt = deque(maxlen=1000)
         self.packet_timer = time.time()
 
         self.loop_cycle = 0
@@ -104,9 +105,9 @@ class CHPump(Pump):
             self.loop_cycle += 1
             try:
                 log.debug("Waiting for data from network...")
-                # self._add_packet_dt()
+                self._add_packet_dt()
                 prefix, data = self.client.get_message()
-                # self.performance_warn()
+                self.performance_warn()
                 log.debug("{0} bytes received from network.".format(len(data)))
             except EOFError:
                 log.warning("EOF from Ligier, trying again in 30 seconds...")
@@ -139,7 +140,7 @@ class CHPump(Pump):
 
     def process(self, blob):
         """Wait for the next packet and put it in the blob"""
-        # self._add_process_dt()
+        self._add_process_dt()
         try:
             log.debug("Waiting for queue items.")
             prefix, data = self.queue.get(timeout=self.timeout)
@@ -154,13 +155,14 @@ class CHPump(Pump):
         return blob
 
     def show_performance_statistics(self):
+        if not self.show_statistics:
+            return
         dt = np.mean(self.packet_dt) - np.mean(self.process_dt)
         current_qsize = self.queue.qsize()
-        log_func = print if dt > 0 else log.warning
+        log_func = self.print if dt > 0 else self.log.warning
         log_func(
-            "Average idle time per packet: {0:.3f}us (queue size: {1})".format(
-                dt * 1e6, current_qsize
-            )
+            "Average idle time per packet: {0:.3f}us (current queue size: {1})"
+            .format(dt * 1e6, current_qsize)
         )
 
     def _add_process_dt(self):
