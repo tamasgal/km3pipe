@@ -1,13 +1,17 @@
 Unreleased changes
 ------------------
+
+Version 8
+---------
+
+8.18.0 / 2019-06-24
+~~~~~~~~~~~~~~~~~~~
 * ``HDF5Sink`` now accepts ``keys=['BlobKey1', 'BlobKey2']`` which can be
   used to selectively write the keys. All other keys will be ignored
 * The ``io.ch.CHPump`` now accepts the ``show_statistics=True/False`` parameter
   which will print queue size and idle time
 * ``ligiermirror`` now prints performance statistics by default
 
-Version 8
----------
 8.17.1 / 2019-06-04
 ~~~~~~~~~~~~~~~~~~~
 * Fixes an issue of setting log levels below ``WARNING``, which had
