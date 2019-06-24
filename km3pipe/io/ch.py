@@ -45,11 +45,15 @@ class CHPump(Pump):
         self.key_for_prefix = self.get('key_for_prefix') or 'CHPrefix'
         self.subscription_mode = self.get('subscription_mode', default='wait')
         self.show_statistics = self.get('show_statistics', default=False)
+        self.statistics_interval = self.get('statistics_interval', default=30)
         self.cuckoo_warn = Cuckoo(60 * 5, log.warning)
-        self.performance_warn = Cuckoo(30, self.show_performance_statistics)
+        self.performance_warn = Cuckoo(
+            self.statistics_interval, self.show_performance_statistics
+        )
 
         self.idle_dt = deque(maxlen=1000)
         self.idle_timer = time.time()
+        self.message_count = 0
 
         self.loop_cycle = 0
         self.queue = Queue()
@@ -104,6 +108,7 @@ class CHPump(Pump):
             try:
                 log.debug("Waiting for data from network...")
                 prefix, data = self.client.get_message()
+                self.message_count += 1
                 self._add_idle_dt()
                 self._set_idle_timer()
                 self.performance_warn()
@@ -162,9 +167,13 @@ class CHPump(Pump):
         if dt < 0 or current_qsize > 0:
             log_func = self.log.warning
         log_func(
-            "Median idle time per packet: {0:.3f} us (current queue size: {1})"
-            .format(dt * 1e6, current_qsize)
+            "Message rate: {0:.1f} Hz, median idle time per message: "
+            "{1:.3f} us (current queue size: {2})".format(
+                self.message_count / self.statistics_interval, dt * 1e6,
+                current_qsize
+            )
         )
+        self.message_count = 0
 
     def _set_idle_timer(self):
         self.idle_timer = time.time()
