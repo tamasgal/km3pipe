@@ -4,7 +4,7 @@ ipython
 ipywidgets
 matplotlib>=2.2.0
 mock
-numpy>=1.12
+numpy==1.16.2
 numpydoc>=0.7.0
 pandas
 pillow
