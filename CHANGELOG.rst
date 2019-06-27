@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 8
 ---------
+8.18.1 / 2019-06-27
+~~~~~~~~~~~~~~~~~~~
+* Fixed numpy version requirement to 1.16.2 due to a memory leak in recarray:
+  https://github.com/numpy/numpy/issues/13853
 
 8.18.0 / 2019-06-24
 ~~~~~~~~~~~~~~~~~~~
