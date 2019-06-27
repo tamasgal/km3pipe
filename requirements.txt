@@ -27,7 +27,7 @@ sphinxcontrib-websupport>=1.0.1
 sphinx-autoapi
 setuptools>=40.6.2
 setuptools_scm
-statsmodels
+statsmodels==0.9.0
 tables>=3.4.2
 toml
 tornado
