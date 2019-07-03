@@ -1,16 +1,23 @@
 # Filename: test_calib.py
 # pylint: disable=C0111,E1003,R0904,C0103,R0201,C0102
 from os.path import dirname, join
+import functools
+import operator
+import shutil
+import tempfile
 
 from km3pipe.core import Module, Pipeline
 from km3pipe.dataclasses import Table
 from km3pipe.hardware import Detector
+from km3pipe.io.hdf5 import HDF5Sink
 from km3pipe.testing import TestCase, MagicMock, patch, skip
 from km3pipe.calib import Calibration, CalibrationService
+from km3pipe.utils import calibrate
 
 from .test_hardware import EXAMPLE_DETX
 
 import numpy as np
+import tables as tb
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -166,3 +173,66 @@ class TestCalibrationService(TestCase):
         pipe.attach(CalibrationService, filename=DETX_FILENAME)
         pipe.attach(DetectorReader)
         pipe.drain(1)
+
+
+class TestCalibrationUtility(TestCase):
+    def test_consistency(self):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            outfile = join(tmpdirname, "out.h5")
+
+            class DummyPump(Module):
+                def configure(self):
+                    self.n_total_hits = 0
+                    self.original_times = []
+
+                def process(self, blob):
+                    n_hits = np.random.randint(10, 20)
+                    times = np.random.rand(n_hits) * 1000
+                    blob['Hits'] = Table({
+                        "dom_id": np.random.randint(1, 7, n_hits),
+                        "channel_id": np.random.randint(0, 3, n_hits),
+                        "time": times
+                    },
+                                         h5loc="/hits",
+                                         split_h5=True)
+                    self.n_total_hits += n_hits
+                    self.original_times.append(times)
+                    return blob
+
+                def finish(self):
+                    return {
+                        "n_total_hits": self.n_total_hits,
+                        "original_times": self.original_times
+                    }
+
+            pipe = Pipeline()
+            pipe.attach(DummyPump)
+            pipe.attach(HDF5Sink, filename=outfile)
+            result = pipe.drain(10)
+
+            n_total_hits = result['DummyPump']["n_total_hits"]
+            original_times = functools.reduce(
+                operator.iconcat, result['DummyPump']["original_times"], []
+            )
+
+            detx = join(DATA_DIR, 'detx_v3.detx')
+
+            h5group = '/hits'
+            cal = Calibration(filename=detx)
+
+            with tb.File(outfile, "a") as f:
+                calibrate.initialise_arrays(h5group, f)
+                calibrate.calibrate_hits(f, cal, 90, h5group, False)
+
+            with tb.File(outfile, "r") as f:
+                for i in range(n_total_hits):
+                    channel_id = f.get_node('/hits/channel_id')[i]
+                    dom_id = f.get_node('/hits/dom_id')[i]
+                    time = f.get_node('/hits/time')[i]
+                    t0 = f.get_node('/hits/t0')[i]
+
+                    original_time = original_times[i]
+
+                    pmt = cal.detector.get_pmt(dom_id, channel_id)
+                    self.assertAlmostEqual(t0, pmt.t0, 4)
+                    self.assertAlmostEqual(t0, time - original_time)
