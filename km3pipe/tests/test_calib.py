@@ -4,13 +4,14 @@ from os.path import dirname, join
 import functools
 import operator
 import shutil
+import sys
 import tempfile
 
 from km3pipe.core import Module, Pipeline
 from km3pipe.dataclasses import Table
 from km3pipe.hardware import Detector
 from km3pipe.io.hdf5 import HDF5Sink
-from km3pipe.testing import TestCase, MagicMock, patch, skip
+from km3pipe.testing import TestCase, MagicMock, patch, skip, skipif
 from km3pipe.calib import Calibration, CalibrationService
 from km3pipe.utils import calibrate
 
@@ -175,6 +176,10 @@ class TestCalibrationService(TestCase):
         pipe.drain(1)
 
 
+@skipif(
+    sys.version_info < (3, 2),
+    reason="TemporaryDirectory context manager not available in Python <3.2"
+)
 class TestCalibrationUtility(TestCase):
     def test_consistency(self):
         with tempfile.TemporaryDirectory() as tmpdirname:

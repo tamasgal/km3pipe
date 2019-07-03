@@ -8,6 +8,11 @@ from __future__ import absolute_import, print_function, division
 
 import base64
 import collections
+try:
+    # Python 3.8+
+    from collections.abc import Mapping
+except ImportError:
+    from collections import Mapping
 from datetime import datetime, timedelta
 import functools
 import os
@@ -180,7 +185,7 @@ def namedtuple_with_defaults(typename, field_names, default_values=[]):
     """
     the_tuple = collections.namedtuple(typename, field_names)
     the_tuple.__new__.__defaults__ = (None, ) * len(the_tuple._fields)
-    if isinstance(default_values, collections.abc.Mapping):
+    if isinstance(default_values, Mapping):
         prototype = the_tuple(**default_values)
     else:
         prototype = the_tuple(*default_values)
