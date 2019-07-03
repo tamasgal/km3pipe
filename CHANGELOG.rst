@@ -3,6 +3,11 @@ Unreleased changes
 
 Version 8
 ---------
+8.18.2 / 2019-07-03
+~~~~~~~~~~~~~~~~~~~
+* Fixed a bug in the command line tool ``calibrate`` where the t0s were
+  not added to the hit times in real data files
+
 8.18.1 / 2019-06-27
 ~~~~~~~~~~~~~~~~~~~
 * Fixed numpy version requirement to 1.16.2 due to a memory leak in recarray:
