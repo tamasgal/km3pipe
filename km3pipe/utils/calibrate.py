@@ -65,8 +65,6 @@ def calibrate_hits(f, cal, chunk_size, h5group, is_verbose):
             _dom_ids = dom_ids[idx:idx + n]
             _channel_ids = channel_ids[idx:idx + n]
 
-        idx += n
-
         for i in range(n):
             if is_mc:
                 pmt_id = _pmt_ids[i]
@@ -76,7 +74,9 @@ def calibrate_hits(f, cal, chunk_size, h5group, is_verbose):
                 channel_id = _channel_ids[i]
                 calib[i] = cal._calib_by_dom_and_channel[dom_id][channel_id]
 
-        write_calibration(calib, f, h5group)
+        write_calibration(calib, f, h5group, idx_offset=idx, n_items=n)
+
+        idx += n
 
     if is_mc:
         f.get_node(h5group)._v_attrs.datatype = "CMcHitSeries"
@@ -84,7 +84,7 @@ def calibrate_hits(f, cal, chunk_size, h5group, is_verbose):
         f.get_node(h5group)._v_attrs.datatype = "CRawHitSeries"
 
 
-def write_calibration(calib, f, loc):
+def write_calibration(calib, f, loc, idx_offset, n_items):
     """Write calibration set to file"""
     for i, node in enumerate(
         [p + '_' + s for p in ['pos', 'dir'] for s in 'xyz']):
@@ -103,9 +103,7 @@ def write_calibration(calib, f, loc):
 
     if loc == "/hits":
         time = f.get_node(loc + "/time")
-        offset = len(time)
-        chunk_size = len(calib)
-        time[offset - chunk_size:offset] += calib[:, 6]
+        time[idx_offset:idx_offset + n_items] += calib[:, 6]
 
 
 def initialise_arrays(group, f):
