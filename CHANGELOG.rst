@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 8
 ---------
+8.18.3 / 2019-07-03
+~~~~~~~~~~~~~~~~~~~
+* Python 2.7 compatibility fixes
+
 8.18.2 / 2019-07-03
 ~~~~~~~~~~~~~~~~~~~
 * Fixed a bug in the command line tool ``calibrate`` where the t0s were
