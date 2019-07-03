@@ -180,7 +180,7 @@ def namedtuple_with_defaults(typename, field_names, default_values=[]):
     """
     the_tuple = collections.namedtuple(typename, field_names)
     the_tuple.__new__.__defaults__ = (None, ) * len(the_tuple._fields)
-    if isinstance(default_values, collections.Mapping):
+    if isinstance(default_values, collections.abc.Mapping):
         prototype = the_tuple(**default_values)
     else:
         prototype = the_tuple(*default_values)
