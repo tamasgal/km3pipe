@@ -138,7 +138,7 @@ class TestAanetPump(TestCase):
 
         assert 13 == blob_counter
         
-    def test_reading_only_n_first_blobs_per_file)(self):
+    def test_reading_only_n_first_blobs_per_file(self):
         # never mix files like this, but it's OK for a test ;)
         pump = km.common.MultiFilePump(
             pump=AanetPump,
