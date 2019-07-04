@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* Added a module to process multiple files with a given pump:
+  ``km3modules.common.MultiFilePump``.
 
 Version 8
 ---------
