@@ -68,11 +68,26 @@ def calibrate_hits(f, cal, chunk_size, h5group, is_verbose):
         for i in range(n):
             if is_mc:
                 pmt_id = _pmt_ids[i]
-                calib[i] = cal._calib_by_pmt_id[pmt_id]
+                try:
+                    calib[i] = cal._calib_by_pmt_id[pmt_id]
+                except KeyError:
+                    log.critical(
+                        "Could not find calibration info for PMT with "
+                        "PMT ID {}. Wrong DETX provided?".format(pmt_id)
+                    )
+                    raise SystemExit
             else:
                 dom_id = _dom_ids[i]
                 channel_id = _channel_ids[i]
-                calib[i] = cal._calib_by_dom_and_channel[dom_id][channel_id]
+                try:
+                    calib[i] = cal._calib_by_dom_and_channel[dom_id][channel_id]
+                except KeyError:
+                    log.critical(
+                        "Could not find calibration info for PMT with "
+                        "DOM ID {} and channel ID {}. Wrong DETX provided?".
+                        format(dom_id, channel_id)
+                    )
+                    raise SystemExit
 
         write_calibration(calib, f, h5group, idx_offset=idx, n_items=n)
 
