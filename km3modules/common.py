@@ -210,3 +210,42 @@ class Siphon(Module):
                 log.debug("Flushing the siphon.")
                 self.blob_count = 0
             return blob
+
+
+class MultiFilePump(kp.Module):
+    """Use the given pump to iterate through a list of files.
+
+    Parameters
+    ----------
+    pump: Pump
+      The pump to be used to generate the blobs.
+    filenames: iterable(str)
+      List of filenames.
+    
+    """
+
+    def configure(self):
+        self.pump = self.require('pump')
+        self.filenames = self.require('filenames')
+        self.blobs = self.blob_generator()
+        self.print("Iterating through {} files.".format(len(self.filenames)))
+        self.n_processed = 0
+
+    def blob_generator(self):
+        for filename in self.filenames:
+            self.print("Current file: {}".format(filename))
+            pump = self.pump(filename=filename)
+            for blob in pump:
+                blob['Filename'] = filename
+                yield blob
+            self.n_processed += 1
+
+    def process(self, blob):
+        return next(self.blobs)
+
+    def finish(self):
+        self.print(
+            "Processed {} out of {} files.".format(
+                self.n_processed, len(self.filenames)
+            )
+        )
