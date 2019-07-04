@@ -2,6 +2,8 @@ Unreleased changes
 ------------------
 * Added a module to process multiple files with a given pump:
   ``km3modules.common.MultiFilePump``.
+* Improved error message when calibrating with wrong DETX using the
+  ``calibrate`` command line utility.
 
 Version 8
 ---------
