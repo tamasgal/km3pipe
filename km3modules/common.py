@@ -227,6 +227,7 @@ class MultiFilePump(kp.Module):
     def configure(self):
         self.pump = self.require('pump')
         self.filenames = self.require('filenames')
+        self.n_blobs_per_file = self.get('n_blobs_per_file', default=False)
         self.blobs = self.blob_generator()
         self.print("Iterating through {} files.".format(len(self.filenames)))
         self.n_processed = 0
@@ -234,7 +235,10 @@ class MultiFilePump(kp.Module):
     def blob_generator(self):
         for filename in self.filenames:
             self.print("Current file: {}".format(filename))
-            pump = self.pump(filename=filename)
+            if self.n_blobs_per_file:
+                pump = [self.pump(filename=filename).next() for i in range(n_blobs_per_file)]
+            else:
+                pump = self.pump(filename=filename)
             for blob in pump:
                 blob['Filename'] = filename
                 yield blob
