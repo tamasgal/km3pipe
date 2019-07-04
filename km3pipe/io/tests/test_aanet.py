@@ -8,6 +8,7 @@ import km3pipe as kp
 from km3pipe.testing import TestCase, patch, Mock, skipif, skip
 from km3pipe.io.aanet import AanetPump, MetaParser
 from km3pipe.core import Pipeline, Module, Pump
+from km3modules.common import MultiFilePump
 
 try:
     import aa
@@ -124,7 +125,7 @@ class TestAanetPump(TestCase):
 
     def test_reading_hits_from_multiple_files(self):
         # never mix files like this, but it's OK for a test ;)
-        pump = km.common.MultiFilePump(
+        pump = MultiFilePump(
             pump=AanetPump,
             filenames=[
                 join(TEST_DATA_DIR, 'sea_data.root'),
@@ -140,7 +141,7 @@ class TestAanetPump(TestCase):
         
     def test_reading_only_n_first_blobs_per_file(self):
         # never mix files like this, but it's OK for a test ;)
-        pump = km.common.MultiFilePump(
+        pump = MultiFilePump(
             pump=AanetPump,
             filenames=[
                 join(TEST_DATA_DIR, 'sea_data.root'),
