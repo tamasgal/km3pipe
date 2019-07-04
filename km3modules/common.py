@@ -236,7 +236,10 @@ class MultiFilePump(kp.Module):
         for filename in self.filenames:
             self.print("Current file: {}".format(filename))
             if self.n_blobs_per_file:
-                pump = [self.pump(filename=filename).next() for i in range(n_blobs_per_file)]
+                pump = [
+                    self.pump(filename=filename).next() 
+                    for i in range(n_blobs_per_file)
+                ]
             else:
                 pump = self.pump(filename=filename)
             for blob in pump:
