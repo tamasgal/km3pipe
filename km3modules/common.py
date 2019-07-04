@@ -231,7 +231,7 @@ class MultiFilePump(kp.Module):
     def configure(self):
         self.pump = self.require('pump')
         self.filenames = self.require('filenames')
-        self.reindex = self.get('reindex', default=False)
+        self.reindex = self.get('reindex', default=True)
         self.blobs = self.blob_generator()
         self.print("Iterating through {} files.".format(len(self.filenames)))
         self.n_processed = 0
