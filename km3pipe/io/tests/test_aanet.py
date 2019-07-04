@@ -124,6 +124,39 @@ class TestAanetPump(TestCase):
 
     def test_reading_hits_from_multiple_files(self):
         # never mix files like this, but it's OK for a test ;)
+        pump = km.common.MultiFilePump(
+            pump=AanetPump,
+            filenames=[
+                join(TEST_DATA_DIR, 'sea_data.root'),
+                join(TEST_DATA_DIR, 'mupage.root'),
+                join(TEST_DATA_DIR, 'sea_data.root')
+            ]
+        )
+        blob_counter = 0
+        for blob in pump:
+            blob_counter += 1
+
+        assert 13 == blob_counter
+        
+    def test_reading_only_n_first_blobs_per_file)(self):
+        # never mix files like this, but it's OK for a test ;)
+        pump = km.common.MultiFilePump(
+            pump=AanetPump,
+            filenames=[
+                join(TEST_DATA_DIR, 'sea_data.root'),
+                join(TEST_DATA_DIR, 'mupage.root'),
+                join(TEST_DATA_DIR, 'sea_data.root')
+            ],
+            n_blobs_per_file = 2
+        )
+        blob_counter = 0
+        for blob in pump:
+            blob_counter += 1
+
+        assert 6 == blob_counter
+
+    def test_reading_hits_from_multiple_files_old_functionality(self):
+        # never mix files like this, but it's OK for a test ;)
         aanet_pump = AanetPump(
             filenames=[
                 join(TEST_DATA_DIR, 'sea_data.root'),
