@@ -221,24 +221,41 @@ class MultiFilePump(kp.Module):
       The pump to be used to generate the blobs.
     filenames: iterable(str)
       List of filenames.
+    reindex: boolean
+      Reindex the group_id by counting from 0 and increasing it continuously,
+      this makes sure that the group_id is unique for each blob, otherwise
+      the pump will usually reset it to 0 for every new file.
     
     """
 
     def configure(self):
         self.pump = self.require('pump')
         self.filenames = self.require('filenames')
+        self.reindex = self.get('reindex', default=False)
         self.blobs = self.blob_generator()
         self.print("Iterating through {} files.".format(len(self.filenames)))
         self.n_processed = 0
+        self.group_id = 0
 
     def blob_generator(self):
         for filename in self.filenames:
             self.print("Current file: {}".format(filename))
             pump = self.pump(filename=filename)
             for blob in pump:
+                if self.reindex:
+                    self._set_group_id(blob)
                 blob['Filename'] = filename
                 yield blob
+                self.group_id += 1
             self.n_processed += 1
+
+    def _set_group_id(self, blob):
+        for key, entry in blob.items():
+            if isinstance(entry, kp.Table):
+                if hasattr(entry, "group_id"):
+                    entry.group_id = self.group_id
+                else:
+                    blob[key] = entry.append_columns("group_id", self.group_id)
 
     def process(self, blob):
         return next(self.blobs)
