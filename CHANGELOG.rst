@@ -1,5 +1,10 @@
 Unreleased changes
 ------------------
+
+Version 8
+---------
+8.19.0 / 2019-07-09
+~~~~~~~~~~~~~~~~~~~
 * Added a module to process multiple files with a given pump:
   ``km3modules.common.MultiFilePump``.
 * Improved error message when calibrating with wrong DETX using the
@@ -7,8 +12,6 @@ Unreleased changes
 * Added a function to calculate the time slewing of a PMT response in
   ``km3modules.mc.slew``
 
-Version 8
----------
 8.18.3 / 2019-07-03
 ~~~~~~~~~~~~~~~~~~~
 * Python 2.7 compatibility fixes
