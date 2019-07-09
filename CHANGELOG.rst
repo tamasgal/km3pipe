@@ -4,6 +4,8 @@ Unreleased changes
   ``km3modules.common.MultiFilePump``.
 * Improved error message when calibrating with wrong DETX using the
   ``calibrate`` command line utility.
+* Added a function to calculate the time slewing of a PMT response in
+  ``km3modules.mc.slew``
 
 Version 8
 ---------
