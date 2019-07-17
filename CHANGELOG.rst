@@ -1,8 +1,13 @@
 Unreleased changes
 ------------------
 
+
 Version 8
 ---------
+8.19.1 / 2019-07-17
+~~~~~~~~~~~~~~~~~~~
+* ``runinfo`` now also prints the iRODS and xroot paths
+
 8.19.0 / 2019-07-09
 ~~~~~~~~~~~~~~~~~~~
 * Added a module to process multiple files with a given pump:
