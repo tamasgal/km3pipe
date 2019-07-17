@@ -68,4 +68,4 @@ def main():
     from docopt import docopt
     args = docopt(__doc__, version=kp.version)
 
-    runinfo(int(args['RUN']), args['DET_ID'], args['-t'])
+    runinfo(int(args['RUN']), int(args['DET_ID']), args['-t'])
