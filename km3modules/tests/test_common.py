@@ -5,7 +5,7 @@ import km3pipe as kp
 from km3pipe.dataclasses import Table
 from km3modules.common import (
     Siphon, Delete, Keep, Dump, StatusBar, TickTock, MemoryObserver,
-    BlobIndexer
+    BlobIndexer, MultiFilePump
 )
 from km3pipe.testing import TestCase, MagicMock
 from km3pipe.tools import istype
@@ -430,3 +430,26 @@ class TestBlobIndexer(TestCase):
         pipe.attach(BlobIndexer)
         pipe.attach(Observer)
         pipe.drain(4)
+
+
+class TestMultiFilePump(TestCase):
+    def test_iteration(self):
+        class DummyPump(kp.Module):
+            def configure(self):
+                self.idx = 0
+                self.max_iterations = self.get("max_iterations", default=5)
+
+            def process(self, blob):
+                if self.idx >= self.max_iterations:
+                    raise StopIteration
+                blob['index'] = self.idx
+                self.idx += 1
+                return blob
+
+            def finish(self):
+                return self.idx
+
+        pipe = kp.Pipeline()
+        pipe.attach(MultiFilePump, filenames=['a', 'b', 'c'])
+        pipe.attach(Module)
+        pipe.drain()
