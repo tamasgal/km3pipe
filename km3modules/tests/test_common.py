@@ -16,6 +16,7 @@ from km3modules.common import (
     MemoryObserver,
     BlobIndexer,
     LocalDBService,
+    MultiFilePump,
 )
 from km3pipe.testing import TestCase, MagicMock
 from km3pipe.tools import istype
@@ -422,6 +423,7 @@ class TestBlobIndexer(TestCase):
         pipe.drain(4)
 
 
+<<<<<<< HEAD
 class TestLocalDBService(TestCase):
     def test_create_table(self):
         fobj = tempfile.NamedTemporaryFile(delete=True)
@@ -458,3 +460,26 @@ class TestLocalDBService(TestCase):
         assert "42" == data[0][1]
         assert 5 == data[1][0]
         assert "hello" == data[1][1]
+=======
+class TestMultiFilePump(TestCase):
+    def test_iteration(self):
+        class DummyPump(kp.Module):
+            def configure(self):
+                self.idx = 0
+                self.max_iterations = self.get("max_iterations", default=5)
+
+            def process(self, blob):
+                if self.idx >= self.max_iterations:
+                    raise StopIteration
+                blob['index'] = self.idx
+                self.idx += 1
+                return blob
+
+            def finish(self):
+                return self.idx
+
+        pipe = kp.Pipeline()
+        pipe.attach(MultiFilePump, filenames=['a', 'b', 'c'])
+        pipe.attach(Module)
+        pipe.drain()
+>>>>>>> Add first test
