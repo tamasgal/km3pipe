@@ -24,6 +24,7 @@ import numpy as np
 from km3pipe.core import Pump, Module, Blob
 from km3pipe.dataclasses import Table
 from km3pipe.sys import ignored
+from km3pipe.io.ch import CHPump
 from km3pipe.logger import get_logger, get_printer
 
 __author__ = "Tamas Gal"
@@ -741,6 +742,25 @@ class DMMonitor(object):
                     "Retry in %d seconds..." % (e, interval)
                 )
             time.sleep(interval)
+
+
+class DAQPump(Module):
+    def configure(self):
+        self.host = self.get("host", default="127.0.0.1")
+        self.port = self.get("port", default=5553)
+        self.tags = self.require("tags")
+        self.pump = CHPump(self.host, self.port, self.tags)
+        self.blobs = self.blob_generator()
+
+    def blob_generator(self):
+        for blob in self.pump:
+            yield blob
+
+    def process(self, blob):
+        return next(self.blobs)
+
+    def finish(self):
+        self.pump.finish()
 
 
 def is_3dshower(trigger_mask):
