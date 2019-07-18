@@ -18,7 +18,8 @@ import urwid
 
 from pipeinspector.gui import MainFrame
 from pipeinspector.settings import UI
-from km3pipe.io import EvtPump, DAQPump, AanetPump, CLBPump, HDF5Pump
+from km3pipe.io import EvtPump, AanetPump, CLBPump, HDF5Pump
+from km3pipe.io.daq import BinaryPump
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -56,7 +57,7 @@ def get_pump(input_file):
     if extension == 'evt':
         pump = EvtPump(filename=input_file, cache_enabled=True)
     elif extension == 'dat':
-        pump = DAQPump(filename=input_file)
+        pump = BinaryPump(filename=input_file)
     elif extension == 'dqd':
         pump = CLBPump(filename=input_file, cache_enabled=True)
     elif extension == 'root':

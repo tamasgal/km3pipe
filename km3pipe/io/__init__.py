@@ -10,7 +10,7 @@ import os.path
 import numpy as np
 
 from .evt import EvtPump    # noqa
-from .daq import DAQPump    # noqa
+from .daq import BinaryPump    # noqa
 from .clb import CLBPump    # noqa
 from .aanet import AanetPump    # noqa
 from .jpp import EventPump    # noqa
@@ -56,7 +56,7 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
         '.evt': EvtPump,
         '.h5': HDF5Pump,
         '.root': EventPump if use_jppy else AanetPump,
-        '.dat': DAQPump,
+        '.dat': BinaryPump,
         '.dqd': CLBPump,
     }
 

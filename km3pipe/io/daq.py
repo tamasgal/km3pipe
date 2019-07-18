@@ -125,7 +125,7 @@ class TimesliceParser(Module):
             return blob
 
 
-class DAQPump(Pump):
+class BinaryPump(Pump):
     """A pump for binary DAQ files."""
 
     def configure(self):
