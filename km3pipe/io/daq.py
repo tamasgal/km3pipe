@@ -745,11 +745,26 @@ class DMMonitor(object):
 
 
 class DAQPump(Module):
+    """A general pump which connects to a Ligier and reads messages
+
+    Parameters
+    ----------
+    host: str
+      The hostname or IP address of the Ligier
+    port: int
+      The port to connect to the Ligier
+    tags: iterable(str)
+      List of tags (like ["IO_EVT", "IO_SUM"])
+
+    """
+
     def configure(self):
         self.host = self.get("host", default="127.0.0.1")
         self.port = self.get("port", default=5553)
         self.tags = self.require("tags")
-        self.pump = CHPump(self.host, self.port, self.tags)
+        self.pump = CHPump(
+            host=self.host, port=self.port, tags=','.join(self.tags)
+        )
         self.blobs = self.blob_generator()
 
     def blob_generator(self):
@@ -757,10 +772,88 @@ class DAQPump(Module):
             yield blob
 
     def process(self, blob):
-        return next(self.blobs)
+        blob = next(self.blobs)
+
+        tag = str(blob['CHPrefix'].tag)
+
+        if tag not in self.tags:
+            return blob
+
+        data = blob['CHData']
+
+        if tag == 'IO_EVT':
+            blob.update(parse_event(data))
+        if tag == 'IO_SUM':
+            blob.update(parse_summaryslice(data))
+
+        del blob['CHData']
+        return blob
 
     def finish(self):
         self.pump.finish()
+
+
+def parse_summaryslice(data):
+    blob = {}
+    data_io = BytesIO(data)
+    preamble = DAQPreamble(file_obj=data_io)    # noqa
+    summaryslice = DAQSummaryslice(file_obj=data_io)
+    blob["RawSummaryslice"] = summaryslice
+    return blob
+
+
+def parse_event(data):
+    """Parse event data and create a blob out of it"""
+    blob = {}
+
+    data_io = BytesIO(data)
+    preamble = DAQPreamble(file_obj=data_io)    # noqa
+    event = DAQEvent(file_obj=data_io)
+    header = event.header
+
+    event_info = Table(
+        {
+            'det_id': header.det_id,
+            'frame_index': header.time_slice,
+            'overlays': event.overlays,
+            'trigger_counter': event.trigger_counter,
+            'trigger_mask': event.trigger_mask,
+            'utc_nanoseconds': header.ticks * 16,
+            'utc_seconds': header.time_stamp,
+            'run_id': header.run,    # run id
+        },
+        h5loc="/event_info",
+        name="EventInfo"
+    )
+    blob['EventInfo'] = event_info
+
+    hits = event.snapshot_hits
+    n_hits = event.n_snapshot_hits
+
+    if n_hits == 0:
+        return blob
+
+    dom_ids, channel_ids, times, tots = zip(*hits)
+    triggereds = np.zeros(n_hits)
+    triggered_map = {}
+    for triggered_hit in event.triggered_hits:
+        dom_id, pmt_id, time, tot, _ = triggered_hit
+        triggered_map[(dom_id, pmt_id, time, tot)] = True
+    for idx, hit in enumerate(hits):
+        triggereds[idx] = hit in triggered_map
+
+    hit_series = Table({
+        'channel_id': channel_ids,
+        'dom_id': dom_ids,
+        'time': times,
+        'tot': tots,
+        'triggered': triggereds,
+    },
+                       h5loc="/hits",
+                       name='Hits')
+
+    blob['Hits'] = hit_series
+    return blob
 
 
 def is_3dshower(trigger_mask):

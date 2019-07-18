@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* ``kp.io.daq.DAQPump`` was renamed to ``kp.io.daq.BinaryPump``
+* ``kp.io.daq.DAQPump`` is now a universal pump for accessing online data
 
 
 Version 8

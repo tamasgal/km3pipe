@@ -10,7 +10,7 @@ import os.path
 import numpy as np
 
 from .evt import EvtPump    # noqa
-from .daq import BinaryPump    # noqa
+from .daq import BinaryPump, DAQPump    # noqa
 from .clb import CLBPump    # noqa
 from .aanet import AanetPump    # noqa
 from .jpp import EventPump    # noqa
