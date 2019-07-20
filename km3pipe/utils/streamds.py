@@ -16,7 +16,7 @@ Options:
     PARAMETERS  List of parameters separated by space (e.g. detid=29).
     -f FORMAT   Usually 'txt' for ASCII or 'text' for UTF-8 [default: txt].
     -q          Dryrun! This will upload the parameters with a TEST_ prefix.
-    -x          Do not verify the SSL certificate [default: False].
+    -x          Do not verify the SSL certificate.
     -h --help   Show this screen.
 
 """
@@ -131,6 +131,7 @@ def upload_runsummary(csv_filename, dryrun=False, verify=False):
     else:
         prefix = ""
     db = kp.db.DBManager()    # noqa
+    print(df)
     df['det_id'] = df['det_id'].apply(db.to_det_oid)
     data = convert_runsummary_to_json(df, prefix=prefix)
     print("We have {:.3f} MB to upload.".format(len(data) / 1024**2))
