@@ -4,7 +4,7 @@ Access the KM3NeT StreamDS DataBase service.
 Usage:
     streamds
     streamds list
-    streamds upload [-q] CSV_FILE
+    streamds upload [options] CSV_FILE
     streamds info STREAM
     streamds get [-f FORMAT] STREAM [PARAMETERS...]
     streamds (-h | --help)
@@ -16,6 +16,7 @@ Options:
     PARAMETERS  List of parameters separated by space (e.g. detid=29).
     -f FORMAT   Usually 'txt' for ASCII or 'text' for UTF-8 [default: txt].
     -q          Dryrun! This will upload the parameters with a TEST_ prefix.
+    -x          Do not verify the SSL certificate [default: False].
     -h --help   Show this screen.
 
 """
@@ -87,7 +88,7 @@ def available_streams():
     print(', '.join(sorted(sds.streams)))
 
 
-def upload_runsummary(csv_filename, dryrun=False):
+def upload_runsummary(csv_filename, dryrun=False, verify=False):
     """Reads the CSV file and uploads its contents to the runsummary table"""
     print("Checking '{}' for consistency.".format(csv_filename))
     if not os.path.exists(csv_filename):
@@ -145,7 +146,10 @@ def upload_runsummary(csv_filename, dryrun=False):
     cookie_key, sid = session_cookie.split('=')
     print("Uploading the data to the database.")
     r = requests.post(
-        RUNSUMMARY_URL, cookies={cookie_key: sid}, files={'datafile': data}
+        RUNSUMMARY_URL,
+        cookies={cookie_key: sid},
+        files={'datafile': data},
+        verify=verify
     )
     if r.status_code == 200:
         log.debug("POST request status code: {}".format(r.status_code))
@@ -216,7 +220,7 @@ def main():
     elif args['list']:
         print_streams()
     elif args['upload']:
-        upload_runsummary(args['CSV_FILE'], args['-q'])
+        upload_runsummary(args['CSV_FILE'], args['-q'], args['-x'])
     elif args['get']:
         get_data(args['STREAM'], args['PARAMETERS'], fmt=args['-f'])
     else:
