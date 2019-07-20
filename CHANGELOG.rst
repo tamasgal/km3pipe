@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* ``streamds upload`` now allows the option ``-x`` which will disable the
+  SSL certificate verification
 
 
 Version 8
