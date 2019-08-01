@@ -62,6 +62,8 @@ class Client(object):
 
     def _update_subscriptions(self):
         log.debug("Subscribing to tags: {0}".format(self.tags))
+        if not self.socket:
+            self._connect()
         tags = ''.join(self.tags).encode("ascii")
         message = Message(b'_Subscri', tags)
         self.socket.send(message.data)
