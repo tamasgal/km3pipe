@@ -1,11 +1,16 @@
 Unreleased changes
 ------------------
-* ``streamds upload`` now allows the option ``-x`` which will disable the
-  SSL certificate verification
 
 
 Version 8
 ---------
+8.20.0 / 2019-08-01
+~~~~~~~~~~~~~~~~~~~
+* ``kp.controlhost.Client`` now has ``put_message(tag, data)`` to send
+  messages to the Ligier
+* ``streamds upload`` now allows the option ``-x`` which will disable the
+  SSL certificate verification
+
 8.19.1 / 2019-07-17
 ~~~~~~~~~~~~~~~~~~~
 * ``runinfo`` now also prints the iRODS and xroot paths
