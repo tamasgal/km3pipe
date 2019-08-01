@@ -161,6 +161,14 @@ class Message(object):
     """The representation of a ControlHost message."""
 
     def __init__(self, tag, message=b''):
+        try:
+            message = message.encode()
+        except AttributeError:
+            pass
+        try:
+            tag = tag.encode()
+        except AttributeError:
+            pass
         self.prefix = Prefix(tag, len(message))
         self.message = message
 
