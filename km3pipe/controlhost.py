@@ -68,6 +68,13 @@ class Client(object):
         message = Message(b'_Always')
         self.socket.send(message.data)
 
+    def put_message(self, tag, data):
+        """Send data to the ligier with a given tag"""
+        if not self.socket:
+            self._connect()
+        msg = Message(tag, data)
+        self.socket.send(msg.data)
+
     def get_message(self):
         while True:
             log.info("     Waiting for control host Prefix")
