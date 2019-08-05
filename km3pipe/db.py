@@ -70,6 +70,17 @@ def we_are_in_lyon():
     return ip.startswith("134.158.")
 
 
+def we_are_on_jupyterhub():
+    """Check if we are on the JupyterHub machine"""
+    import socket
+    try:
+        hostname = socket.gethostname()
+        ip = socket.gethostbyname(hostname)
+    except socket.gaierror:
+        return False
+    return ip == socket.gethostbyname("jupyter.km3net.de")
+
+
 def read_csv(text, sep="\t"):
     """Create a DataFrame from CSV text"""
     import pandas as pd    # no top level load to make a faster import of db
@@ -108,10 +119,16 @@ class DBManager(object):
 
         self._login_url = self._db_url + '/home.htm'
 
-        if not temporary and we_are_in_lyon():
-            self.restore_session(
-                "sid=_kmcprod_134.158_lyo7783844001343100343mcprod1223user"
-            )
+        if not temporary:
+            if we_are_in_lyon():
+                self.restore_session(
+                    "sid=_kmcprod_134.158_lyo7783844001343100343mcprod1223user"
+                )
+            if we_are_on_jupyterhub():
+                self.restore_session(
+                    "sid=_jupyter-km3net_131.188.161.143_"
+                    "d9fe89a1568a49a5ac03bdf15d93d799"
+                )
             return
 
         if username is not None and password is not None:
