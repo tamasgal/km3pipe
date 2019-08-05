@@ -1,10 +1,13 @@
 Unreleased changes
 ------------------
-* Added plotting style for Johannes
-* Session cookie is now available on [jupyter.km3net.de], no auth needed there
 
 Version 8
 ---------
+8.20.1 / 2019-08-05
+~~~~~~~~~~~~~~~~~~~
+* Added plotting style for Johannes
+* Session cookie is now available on [jupyter.km3net.de], no auth needed there
+
 8.20.0 / 2019-08-01
 ~~~~~~~~~~~~~~~~~~~
 * ``kp.controlhost.Client`` now has ``put_message(tag, data)`` to send
