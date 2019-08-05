@@ -1,6 +1,7 @@
 Unreleased changes
 ------------------
-
+* Added plotting style for Johannes
+* Session cookie is now available on [jupyter.km3net.de], no auth needed there
 
 Version 8
 ---------
