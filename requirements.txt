@@ -2,7 +2,7 @@ docopt
 h5py
 ipython
 ipywidgets
-matplotlib>=3.1.0
+matplotlib>=2.0.0
 mock
 numpy>=1.17.0
 numpydoc>=0.7.0
