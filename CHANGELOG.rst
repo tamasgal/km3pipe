@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 8
 ---------
+8.21.2 / 2019-08-19
+~~~~~~~~~~~~~~~~~~~
+* Remove strict lib requirements for a couple of Python 2.7 incompatible libs
+
 8.21.1 / 2019-08-19
 ~~~~~~~~~~~~~~~~~~~
 * Downgrade Matplotlib requirement to v2 due to Python 2.7 and 3.5 compat
