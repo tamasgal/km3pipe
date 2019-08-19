@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 8
 ---------
+8.21.1 / 2019-08-19
+~~~~~~~~~~~~~~~~~~~
+* Downgrade Matplotlib requirement to v2 due to Python 2.7 and 3.5 compat
+
 8.21.0 / 2019-08-19
 ~~~~~~~~~~~~~~~~~~~
 * Updated requirements (especially numpy>=1.17 which has fixed its memory leak)
