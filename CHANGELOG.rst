@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 8
 ---------
+8.21.0 / 2019-08-19
+~~~~~~~~~~~~~~~~~~~
+* Updated requirements (especially numpy>=1.17 which has fixed its memory leak)
+
 8.20.1 / 2019-08-05
 ~~~~~~~~~~~~~~~~~~~
 * Added plotting style for Johannes
