@@ -12,7 +12,6 @@ class Dummy(Module):
     """Dummy base class.
 
     """
-
     def __init__(self, **kwargs):
         super(Dummy, self).__init__(**kwargs)
         self.hit_sel = self.get('hit_sel') or 'Hits'
@@ -30,7 +29,6 @@ class SubDummy(Dummy):
     """Primitive Sub-Subclass
 
     """
-
     def __init__(self, **kwargs):
         super(SubDummy, self).__init__(**kwargs)
         self.hit_sel = self.get('hit_sel') or 'Hits'

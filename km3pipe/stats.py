@@ -27,7 +27,6 @@ log = get_logger(__name__)    # pylint: disable=C0103
 
 class loguniform(rv_continuous):
     """Loguniform Distributon"""
-
     def __init__(self, low=0.1, high=1, base=10, *args, **kwargs):
         super(loguniform, self).__init__(*args, **kwargs)
         self._log_low = log_b(low, base=base)
@@ -49,7 +48,6 @@ class rv_kde(rv_continuous):
 
     Automatic bandwidth,  either from the statsmodels or scipy implementation.
     """
-
     def __init__(
             self, data, bw=None, bw_method=None, bw_statsmodels=False,
             **kde_args
@@ -243,7 +241,6 @@ def bootstrap_fit(
 
 class hist2d(rv_continuous):
     """Simple implementation of a 2d histogram."""
-
     def __init__(self, H2D, *args, **kwargs):
         H, xlims, ylims = H2D
         self.H = H

@@ -49,7 +49,6 @@ MAXIMAL_RATE_HZ = 2.0e6
 
 class TimesliceParser(Module):
     """Preliminary parser for DAQTimeslice"""
-
     def _get_raw_data(self, blob):
         if 'CHPrefix' in blob:
             if not str(blob['CHPrefix'].tag).startswith('IO_TS'):
@@ -127,7 +126,6 @@ class TimesliceParser(Module):
 
 class DAQPump(Pump):
     """A pump for binary DAQ files."""
-
     def configure(self):
         self.filename = self.get('filename')
         self.frame_positions = []
@@ -485,7 +483,6 @@ class DAQSummaryslice(object):
       dom_rates (dict): The overall DOM rate for each DOM.
 
     """
-
     def __init__(self, file_obj):
         self.header = DAQHeader(file_obj=file_obj)
         self.n_summary_frames = unpack('<i', file_obj.read(4))[0]
@@ -538,7 +535,6 @@ class DAQEvent(object):
         (dom_id, pmt_id, tdc_time, tot)
 
     """
-
     def __init__(self, file_obj):
         self.header = DAQHeader(file_obj=file_obj)
         self.trigger_counter = unpack('<Q', file_obj.read(8))[0]
@@ -586,7 +582,6 @@ class DAQEvent(object):
 
 class TMCHData(object):
     """Monitoring Channel data."""
-
     def __init__(self, file_obj, version=None):
         f = file_obj
 
@@ -641,7 +636,6 @@ class TMCHData(object):
 
 class TMCHRepump(Pump):
     """Takes a IO_MONIT raw dump and replays it."""
-
     def configure(self):
         filename = self.require("filename")
         self.format_version = self.get("format_version", default=None)
@@ -687,7 +681,6 @@ class DMMonitor(object):
             print(values)
 
     """
-
     def __init__(self, host, port=1302, base=''):
         self._host = host
         self._port = port

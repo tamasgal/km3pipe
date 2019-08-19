@@ -32,7 +32,6 @@ def total_seconds(td):
 
 class Timer(object):
     """A very simple, accurate and easy to use timer context"""
-
     def __init__(self, message='It', precision=3, callback=print):
         self.message = message
         self.precision = precision

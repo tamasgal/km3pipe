@@ -95,7 +95,6 @@ def make_empty_dataset():
 
 class DBManager(object):
     """A wrapper for the KM3NeT Web DB"""
-
     def __init__(
             self, username=None, password=None, url=None, temporary=False
     ):
@@ -512,7 +511,6 @@ def add_datetime(dataframe, timestamp_key='UNIXTIME'):
 
     This currently manipulates the incoming DataFrame!
     """
-
     def convert_data(timestamp):
         return datetime.fromtimestamp(float(timestamp) / 1e3, UTC_TZ)
 
@@ -526,7 +524,6 @@ def add_datetime(dataframe, timestamp_key='UNIXTIME'):
 
 class StreamDS(object):
     """Access to the streamds data stored in the KM3NeT database."""
-
     def __init__(
             self, username=None, password=None, url=None, temporary=False
     ):
@@ -632,7 +629,6 @@ class StreamDS(object):
 
 class ParametersContainer(object):
     """Provides easy access to parameters"""
-
     def __init__(self, parameters):
         self._parameters = parameters
         self._converters = {}
@@ -700,7 +696,6 @@ class ParametersContainer(object):
 
 class DOMContainer(object):
     """Provides easy access to DOM parameters stored in the DB."""
-
     def __init__(self, doms):
         self._json = doms
         self._ids = []
@@ -772,7 +767,6 @@ class DOMContainer(object):
 
 class DOM(object):
     """Represents a DOM"""
-
     def __init__(self, clb_upi, dom_id, dom_upi, du, det_oid, floor):
         self.clb_upi = clb_upi
         self.dom_id = dom_id

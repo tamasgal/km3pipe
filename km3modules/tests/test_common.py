@@ -21,7 +21,6 @@ __status__ = "Development"
 
 class InfinitePump(kp.Pump):
     """A pump which just infinetly spits out indexed blobs"""
-
     def configure(self):
         self.i = 0
 

@@ -48,7 +48,6 @@ class surrogate(object):
             from sys.my.cool import module1
             from sys.my.cool import module2
     """
-
     def __init__(self, path):
         self.path = path
         self.elements = self.path.split('.')

@@ -19,7 +19,6 @@ __status__ = "Development"
 
 class TestPipeline(TestCase):
     """Tests for the main pipeline"""
-
     def setUp(self):
         self.pl = Pipeline()
 
@@ -480,7 +479,6 @@ class TestPipeline(TestCase):
 
 class TestPipelineConfigurationViaFile(TestCase):
     """Auto-configuration of pipelines using TOML files"""
-
     def test_configuration(self):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = str(fobj.name)
@@ -670,7 +668,6 @@ class TestPipelineConfigurationViaFile(TestCase):
 
 class TestModule(TestCase):
     """Tests for the pipeline module"""
-
     def test_name_can_be_set_on_init(self):
         name = 'foo'
         module = Module(name=name)
@@ -715,7 +712,6 @@ class TestModule(TestCase):
 
 class TestPump(TestCase):
     """Tests for the pump"""
-
     def test_rewind_file(self):
         pump = Pump()
         test_file = StringIO("Some content")
@@ -732,7 +728,6 @@ class TestPump(TestCase):
 
 class TestBlob(TestCase):
     """Tests for the blob holding the data"""
-
     def test_field_can_be_added(self):
         blob = Blob()
         blob['foo'] = 1

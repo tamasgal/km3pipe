@@ -41,7 +41,6 @@ km3pipe.style.use('km3pipe')
 
 class TriggerMap(kp.Module):
     """Creates a plot to show the number of triggered hits for each DOM."""
-
     def configure(self):
         self.det = self.require('detector')
         self.plot_filename = self.require('plot_filename')

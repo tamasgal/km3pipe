@@ -43,7 +43,6 @@ ESTIMATED_TIME_PER_RUN = 60 * 10    # [s]
 
 class QAQCAnalyser(object):
     """Determines  run quality parameters and uploads them to the DB"""
-
     def __init__(self, det_id, should_upload_to_db, log_file="qrunqaqc.log"):
         self.det_id = det_id
         self.should_upload_to_db = should_upload_to_db

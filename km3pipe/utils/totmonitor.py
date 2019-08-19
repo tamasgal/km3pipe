@@ -40,7 +40,6 @@ GMM = mixture.GaussianMixture(n_components=1)
 
 class TimesliceCreator(Module):
     """Create `TimesliceHitSeries` from raw timeslice hits."""
-
     def configure(self):
         self.dom_id = self.require("dom_id")
 

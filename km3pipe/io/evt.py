@@ -74,7 +74,6 @@ class EvtPump(Pump):    # pylint: disable:R0902
         cause parse errors)
 
     """
-
     def configure(self):
         self.filename = self.get('filename', default=None)
         self.filenames = self.get('filenames', default=[])
@@ -352,7 +351,6 @@ class Parser(object):
     the value is tuple of "target blob-key" and "numpy dtype".
 
     """
-
     def __init__(self, tag_description):
         self.tag_description = tag_description
 

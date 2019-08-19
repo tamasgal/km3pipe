@@ -35,7 +35,6 @@ class GlobalRandomState(Module):
     seed: int, default=42
 
     """
-
     def configure(self):
         self.seed = self.get('seed', default=42)
 
@@ -56,7 +55,6 @@ class McTruth(Module):
     ----------
     most_energetic_primary: bool, default=True
     """
-
     def configure(self):
         self.most_energetic_primary = bool(
             self.get('most_energetic_primary')
@@ -124,7 +122,6 @@ class MCTimeCorrector(Module):
     event_info_key : str, optional
         Name of the event_info to store this in (default: 'EventInfo').
     """
-
     def configure(self):
         # get event_info, hits and mc_tracks key ; define conversion func
         self.event_info_key = self.get('event_info_key', default='EventInfo')

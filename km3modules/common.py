@@ -29,7 +29,6 @@ class Dump(Module):
     full: bool, default=False
         Print blob values too, not just the keys?
     """
-
     def configure(self):
         self.keys = self.get('keys') or None
         self.full = self.get('full') or False
@@ -56,7 +55,6 @@ class Delete(Module):
     keys: collection(string), optional
         Keys to remove.
     """
-
     def configure(self):
         self.keys = self.get('keys') or set()
         key = self.get('key') or None
@@ -77,7 +75,6 @@ class Keep(Module):
     keys: collection(string), optional
         Keys to keep. Everything else is removed.
     """
-
     def configure(self):
         self.keys = self.get('keys', default=set())
         key = self.get('key', default=None)
@@ -98,7 +95,6 @@ class Keep(Module):
 
 class HitCounter(Module):
     """Prints the number of hits"""
-
     def process(self, blob):
         try:
             self.print("Number of hits: {0}".format(len(blob['Hit'])))
@@ -109,7 +105,6 @@ class HitCounter(Module):
 
 class HitCalibrator(Module):
     """A very basic hit calibrator, which requires a `Calibration` module."""
-
     def configure(self):
         self.input_key = self.get('input_key', default='Hits')
         self.output_key = self.get('output_key', default='CalibHits')
@@ -126,7 +121,6 @@ class HitCalibrator(Module):
 
 class BlobIndexer(Module):
     """Puts an incremented index in each blob for the key 'blob_index'"""
-
     def configure(self):
         self.blob_index = 0
 
@@ -138,7 +132,6 @@ class BlobIndexer(Module):
 
 class StatusBar(Module):
     """Displays the current blob number."""
-
     def configure(self):
         self.iteration = 1
 
@@ -159,7 +152,6 @@ class TickTock(Module):
     every: int, optional [default=1]
         Number of iterations between printout.
     """
-
     def configure(self):
         self.t0 = time()
 
@@ -177,7 +169,6 @@ class MemoryObserver(Module):
     every: int, optional [default=1]
         Number of iterations between printout.
     """
-
     def process(self, blob):
         memory = peak_memory_usage()
         prettyln("Memory peak: {0:.3f} MB".format(memory))
@@ -195,7 +186,6 @@ class Siphon(Module):
       discard blobs after accumulation
 
     """
-
     def configure(self):
         self.volume = self.require('volume')    # [blobs]
         self.flush = self.get('flush', default=False)
@@ -227,7 +217,6 @@ class MultiFilePump(kp.Module):
       the pump will usually reset it to 0 for every new file.
     
     """
-
     def configure(self):
         self.pump = self.require('pump')
         self.filenames = self.require('filenames')

@@ -55,7 +55,6 @@ class ServiceManager(object):
     """
     Main service manager
     """
-
     def __init__(self):
         self._services = {}
 
@@ -109,7 +108,6 @@ class Pipeline(object):
         Path to a configuration file (TOML format) which contains parameters
         for attached modules.
     """
-
     def __init__(self, blob=None, timeit=False, configfile=None, anybar=False):
         self.log = get_logger(self.__class__.__name__)
         self.print = get_printer(self.__class__.__name__)
@@ -469,7 +467,6 @@ class Pipeline(object):
 
 class Module(object):
     """The module which can be attached to the pipeline"""
-
     def __init__(self, name=None, **parameters):
         log.debug("Initialising {0}".format(name))
         self._name = name
@@ -571,7 +568,6 @@ class Module(object):
 
 class Pump(Module):
     """The pump with basic file or socket handling."""
-
     def __init__(self, *args, **kwargs):
         self.blob_file = None
         if args:
@@ -637,7 +633,6 @@ class Pump(Module):
 
 class Blob(OrderedDict):
     """A simple (ordered) dict with a fancy name. This should hold the data."""
-
     def __init__(self, *args, **kwargs):
         OrderedDict.__init__(self, *args, **kwargs)
         self.log = get_logger("Blob")
@@ -669,7 +664,6 @@ class Blob(OrderedDict):
 class Run(object):
     """A simple container for event info, hits, tracks and calibration.
     """
-
     def __init__(self, **tables):
         for key, val in tables.items():
             setattr(self, key, val)

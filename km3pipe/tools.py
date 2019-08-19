@@ -199,7 +199,6 @@ def remain_file_pointer(function):
     This decorator assumes that the last argument is the file handler.
 
     """
-
     def wrapper(*args, **kwargs):
         """Wrap the function and remain its parameters and return values"""
         file_obj = args[-1]
@@ -227,7 +226,6 @@ def decamelise(text):
 
 def camelise(text, capital_first=True):
     """Convert lower_underscore to CamelCase."""
-
     def camelcase():
         if not capital_first:
             yield str.lower
@@ -361,7 +359,6 @@ def is_coherent(seq):
 
 class AnyBar():
     """A lightweight interface to the AnyBar macOS app."""
-
     def __init__(self, port=1738, address='localhost'):
         self.port = port
         self.address = address
@@ -439,7 +436,6 @@ def timed_cache(**timed_cache_kwargs):
     maxsise: int [default: 128]
     typed: bool [default: False]
     """
-
     def _wrapper(f):
         maxsize = timed_cache_kwargs.pop('maxsize', 128)
         typed = timed_cache_kwargs.pop('typed', False)

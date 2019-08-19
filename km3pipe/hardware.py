@@ -43,7 +43,6 @@ class Detector(object):
     calibration: optional
         calibration (when retrieving from database).
     """
-
     def __init__(
             self, filename=None, det_id=None, t0set=None, calibration=None
     ):
@@ -429,7 +428,6 @@ class Detector(object):
 
 class UTMInfo(object):
     """The UTM information"""
-
     def __init__(self, ellipsoid, grid, easting, northing, z):
         self.ellipsoid = ellipsoid
         self.grid = grid
@@ -458,7 +456,6 @@ class PMT(object):
     channel_id: int
     omkey: int
     """
-
     def __init__(self, id, pos, dir, t0, channel_id, omkey):
         self.id = id
         self.pos = pos

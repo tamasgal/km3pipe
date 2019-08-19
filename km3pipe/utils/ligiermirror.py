@@ -27,7 +27,6 @@ import km3pipe as kp
 
 class LigierSender(kp.Module):
     """Forwards a message to another ligier"""
-
     def configure(self):
         target_ip = self.get("target_ip", default="127.0.0.1")
         port = self.get("port", default=5553)

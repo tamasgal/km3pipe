@@ -44,7 +44,6 @@ class AHRSCalibrator(kp.Module):
         dict: key=dom_id, value=tuple: (timestamp, du, floor, yaw, pitch, roll)
 
     """
-
     def configure(self):
         det_id = self.require('det_id')
         self.interval = self.get('interval') or 10    # in sec

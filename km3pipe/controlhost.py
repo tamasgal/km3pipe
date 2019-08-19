@@ -26,7 +26,6 @@ BUFFER_SIZE = 1024
 
 class Client(object):
     """The ControlHost client"""
-
     def __init__(self, host, port=5553):
         self.host = host
         self.port = port
@@ -159,7 +158,6 @@ class Client(object):
 
 class Message(object):
     """The representation of a ControlHost message."""
-
     def __init__(self, tag, message=b''):
         try:
             message = message.encode()

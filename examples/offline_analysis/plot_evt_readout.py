@@ -30,7 +30,6 @@ detx = "../data/km3net_jul13_90m_r1494_corrected.detx"
 
 class VertexHitDistanceCalculator(Module):
     """Calculate vertex-hit-distances"""
-
     def configure(self):
         self.distances = []
 

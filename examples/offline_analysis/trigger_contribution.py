@@ -30,7 +30,6 @@ log = kp.logger.get_logger('TriggerContribution')
 
 class TriggerContributionCalculator(kp.Module):
     """Shows the mean trigger contribution for each DOM"""
-
     def configure(self):
         self.dus = self.get("dus")    # only select DOMs on these DUs
         self.trigger_contributions = defaultdict(list)

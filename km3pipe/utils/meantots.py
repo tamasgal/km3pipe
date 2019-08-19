@@ -40,7 +40,6 @@ km3pipe.style.use('km3pipe')
 
 class MeanToTPlotter(kp.Module):
     """Create a plot of mean ToTs for each PMT."""
-
     def configure(self):
         self.tot_data = defaultdict(list)
         self.plotfilename = self.get("plotfilename") or "meantots.pdf"
@@ -74,7 +73,6 @@ class FastMeanToTPlotter(kp.Module):
 
     This module is under development.
     """
-
     def configure(self):
         self.tot_data = defaultdict(list)
         self.plotfilename = self.get("plotfilename") or "meantots.pdf"

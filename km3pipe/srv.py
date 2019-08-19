@@ -74,7 +74,6 @@ RBA_URL = Config().rba_url
 class ClientManager(object):
     """Manage km3srv clients.
     """
-
     def __init__(self):
         self._clients = {}
         threading.Thread(target=self.heartbeat).start()
@@ -147,7 +146,6 @@ class MessageProvider(tornado.websocket.WebSocketHandler):
 
 class EchoWebSocket(tornado.websocket.WebSocketHandler):
     """An echo handler for client/server messaging and debugging"""
-
     def __init__(self, *args, **kwargs):
         log.warning("EchoWebSocket created!")
         self.client_manager = kwargs.pop('client_manager')

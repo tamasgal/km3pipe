@@ -157,7 +157,6 @@ class USBTMC(object):
 
 class Agilent33220A(object):
     """Controller for the Arbitrary Waveform Generator"""
-
     def __init__(self, path):
         self.tmc = USBTMC(path)
         self._output = False

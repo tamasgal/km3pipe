@@ -112,7 +112,6 @@ class Table(np.recarray):
     from_columns(list_of_columns, **kwargs)
         Instantiate from an array-like with shape (n_columns, n_rows).
     """
-
     def __new__(
             cls,
             data,
@@ -610,7 +609,6 @@ class Table(np.recarray):
 
 class NDArray(np.ndarray):
     """Array with HDF5 metadata."""
-
     def __new__(cls, array, dtype=None, order=None, **kwargs):
         obj = np.asarray(array, dtype=dtype, order=order).view(cls)
         h5loc = kwargs.get('h5loc', '/misc')

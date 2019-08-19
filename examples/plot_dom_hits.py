@@ -40,7 +40,6 @@ def filter_muons(blob):
 
 class DOMHits(kp.Module):
     """Create histogram with n_hits and distance of hit to track."""
-
     def configure(self):
         self.hit_statistics = defaultdict(list)
 

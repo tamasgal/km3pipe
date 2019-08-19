@@ -215,7 +215,6 @@ class AanetPump(Pump):
         Do not create KM3Pipe specific data, just wrap the bare aanet API.
         This will only give you ``blob['evt']``.
     """
-
     def configure(self):
         self.filename = self.get('filename', default=None)
         self.filenames = self.get('filenames', default=[])
@@ -683,7 +682,6 @@ class AanetPump(Pump):
 
 class MetaParser(object):
     """A class which parses the JPrintMeta output for a given filename"""
-
     def __init__(self, filename=None, string=None):
         self.log = get_logger(__name__ + '.' + self.__class__.__name__)
         self.meta = []

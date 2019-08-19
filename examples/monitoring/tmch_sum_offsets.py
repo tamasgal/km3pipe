@@ -40,7 +40,6 @@ log = kp.logger.get_logger("tmch_sum_offsets")
 
 class MonitoringChannelPicker(kp.Module):
     """Picks a monitoring channel packet with no HRV for a given DOM"""
-
     def configure(self):
         self.dom_id = self.require("dom_id")
 

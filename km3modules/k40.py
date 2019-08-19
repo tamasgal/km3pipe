@@ -46,7 +46,6 @@ class K40BackgroundSubtractor(kp.Module):
     'K40Counts': dict, Corrected K40 counts
 
     """
-
     def configure(self):
         self.combs = list(combinations(range(31), 2))
         self.mode = self.get("mode", default='online')
@@ -128,7 +127,6 @@ class IntraDOMCalibrator(kp.Module):
     'IntraDOMCalibration': dict (key=dom_id, value=calibration)
 
     """
-
     def configure(self):
         det_id = self.get("det_id") or 14
         self.detector = kp.hardware.Detector(det_id=det_id)
@@ -223,7 +221,6 @@ class TwofoldCounter(kp.Module):
     'DumpTwofoldCounts': Writes twofold counts into 'dump_filename'
 
     """
-
     def configure(self):
         self.tmax = self.get("tmax") or 20
         self.dump_filename = self.get("dump_filename")
@@ -292,7 +289,6 @@ class TwofoldCounter(kp.Module):
 class HRVFIFOTimesliceFilter(kp.Module):
     """Creat a frame index lookup table which holds DOM IDs of frames with
     at least one PMT in HRV."""
-
     def configure(self):
         filename = self.require('filename')
         filter_hrv = self.get('filter_hrv', default=False)
@@ -710,7 +706,6 @@ def minimize_t0s(means, weights, combs):
     opt_t0s: optimal t0 values for all PMTs
 
     """
-
     def make_quality_function(means, weights, combs):
         def quality_function(t0s):
             sq_sum = 0
@@ -742,7 +737,6 @@ def minimize_sigmas(sigmas, weights, combs):
     opt_sigmas: optimal sigma values for all PMTs
 
     """
-
     def make_quality_function(sigmas, weights, combs):
         def quality_function(s):
             sq_sum = 0
@@ -776,7 +770,6 @@ def minimize_qes(fitted_rates, rates, weights, combs):
     opt_qes: optimal qe values for all PMTs
 
     """
-
     def make_quality_function(fitted_rates, rates, weights, combs):
         def quality_function(qes):
             sq_sum = 0

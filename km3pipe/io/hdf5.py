@@ -66,7 +66,6 @@ def check_version(h5file):
 
 class HDF5Header(object):
     """Wrapper class for the `/raw_header` table in KM3HDF5"""
-
     def __init__(self, data):
         self._data = data
         self._set_attributes()
@@ -194,7 +193,6 @@ class HDF5Sink(Module):
     append: bool, optional [default: False]
 
     """
-
     def configure(self):
         self.filename = self.get('filename', default='dump.h5')
         self.ext_h5file = self.get('h5file')
@@ -543,7 +541,6 @@ class HDF5Pump(Pump):
         When shuffle is set to true, reset the group ID - start to count
         the group_id by 0.
     """
-
     def configure(self):
         self.filename = self.get('filename')
         self.filenames = self.get('filenames', default=[])
@@ -929,7 +926,6 @@ class HDF5MetaData(Module):
     data: dict
 
     """
-
     def configure(self):
         self.data = self.require("data")
         self.expose(self.data, "HDF5MetaData")

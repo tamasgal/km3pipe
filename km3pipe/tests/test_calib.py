@@ -34,7 +34,6 @@ DETX_FILENAME = join(DATA_DIR, 'detx_v1.detx')
 
 class TestCalibration(TestCase):
     """Tests for the Calibration class"""
-
     def test_init_with_wrong_file_extension(self):
         with self.assertRaises(NotImplementedError):
             Calibration(filename='foo')
