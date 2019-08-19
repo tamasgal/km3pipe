@@ -6,6 +6,7 @@ KM3Pipe setup script.
 """
 
 from setuptools import setup
+import sys
 
 try:
     import builtins
@@ -16,6 +17,15 @@ builtins.__KM3PIPE_SETUP__ = True
 
 with open('requirements.txt') as fobj:
     requirements = [l.strip() for l in fobj.readlines()]
+    if sys.version_info < (3, 5):
+        # Take just the latest available versions if running with Python <3.5
+        for lib in ["numpy", "scipy"]:
+            idx = [
+                requirements.index(r)
+                for r in requirements
+                if r.startswith("{}>=".format(lib))
+            ][0]
+            requirements[idx] = lib
 
 try:
     with open("README.rst") as fh:
