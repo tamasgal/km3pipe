@@ -17,7 +17,6 @@ class MainFrame(urwid.Frame):
     Represents the main GUI
 
     """
-
     def __init__(self, pump):
         self.header = urwid.AttrWrap(
             urwid.Text("PipeInspector", align='center'), 'header'
