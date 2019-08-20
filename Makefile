@@ -61,6 +61,7 @@ yapf:
 	yapf -i -r km3pipe
 	yapf -i -r km3modules
 	yapf -i -r examples
+	yapf -i -r pipeinspector
 	yapf -i doc/conf.py
 	yapf -i setup.py
 
