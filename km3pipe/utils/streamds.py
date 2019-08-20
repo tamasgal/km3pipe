@@ -131,8 +131,12 @@ def upload_runsummary(csv_filename, dryrun=False, verify=False):
     else:
         prefix = ""
     db = kp.db.DBManager()    # noqa
-    print(df)
+    det_id_zero_mask = df['det_id'] == 0
+    if sum(det_id_zero_mask) > 0:
+        log.warning("Entries with 'det_id=0' found, removing them.")
+        df = df[~det_id_zero_mask]
     df['det_id'] = df['det_id'].apply(db.to_det_oid)
+    print(df)
     data = convert_runsummary_to_json(df, prefix=prefix)
     print("We have {:.3f} MB to upload.".format(len(data) / 1024**2))
 
