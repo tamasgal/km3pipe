@@ -236,7 +236,7 @@ class QAQCAnalyser(object):
             self.log.info("adding run '%s' with t0set '%s'", run_id, t0set)
 
             s.separator()
-            s.add("Processing run {}".format(run_id))
+            s.echo("Processing run {}".format(run_id))
             s.separator('-')
             s.add("km3pipe detx {} -t {} -o d.detx".format(self.det_id, t0set))
             s.add("xrdcp {} {}".format(xrootd_path, root_filename))
