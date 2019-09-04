@@ -392,8 +392,11 @@ class DBManager(object):
         try:
             f = self.opener.open(target_url)
         except HTTPError as e:
-            self.log.error("HTTP error, your session may be expired.")
-            self.log.error(e)
+            self.log.error(
+                "HTTP error, your session may be expired.\n"
+                "Original HTTP error: {}\n"
+                "Target URL: {}".format(e, target_url)
+            )
             if input("Request new permanent session and retry? (y/n)") in 'yY':
                 self.request_permanent_session()
                 return self._get_content(url)
