@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 8
 ---------
+8.21.5 / 2019-09-04
+~~~~~~~~~~~~~~~~~~~
+* Fixed Jpp version determination due to changed output of JApplications
+
 8.21.4 / 2019-09-04
 ~~~~~~~~~~~~~~~~~~~
 * Fixed persistent DB connections
