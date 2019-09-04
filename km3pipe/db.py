@@ -510,13 +510,13 @@ class DBManager(object):
         pass
 
 
-def add_datetime(dataframe, timestamp_key='UNIXTIME'):
+def add_datetime(dataframe, timestamp_key='UNIXTIME', scale_factor=1e3):
     """Add an additional DATETIME column with standar datetime format.
 
     This currently manipulates the incoming DataFrame!
     """
     def convert_data(timestamp):
-        return datetime.fromtimestamp(float(timestamp) / 1e3, UTC_TZ)
+        return datetime.fromtimestamp(float(timestamp) / scale_factor, UTC_TZ)
 
     try:
         log.debug("Adding DATETIME column to the data")
