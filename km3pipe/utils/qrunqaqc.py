@@ -178,7 +178,9 @@ class QAQCAnalyser(object):
         else:
 
             if batch_size is None:
-                batch_size = int(math.ceil(total_runs_to_process / max_jobs))
+                batch_size = int(
+                    math.ceil(total_runs_to_process / float(max_jobs))
+                )
 
             print(
                 "Proceeding with {} runs distributed over {} jobs, {} runs/job"
