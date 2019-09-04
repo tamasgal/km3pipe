@@ -28,18 +28,20 @@ __status__ = "Development"
 
 def get_jpp_version():
     """Return the Jpp version or None if not available."""
-    command = "JPrint -v | grep version:"
+    command = "JPrint -v"
     try:
         out = subprocess.getoutput(command)
     except AttributeError:    # TODO: python 2.7
         out = subprocess.check_output(
             command.split(), stderr=subprocess.STDOUT
         )
-    if "version" not in out:
-        return None
 
-    jpp_version = out.split('\n')[0].split(':')[1].strip()
-    return jpp_version
+    for line in out.split('\n'):
+        if line.startswith("version:"):
+            jpp_version = line.split(':')[1].strip()
+            return jpp_version
+
+    return None
 
 
 class EventPump(Pump):
