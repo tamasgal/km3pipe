@@ -3,6 +3,11 @@ Unreleased changes
 
 Version 8
 ---------
+8.21.3 / 2019-09-04
+~~~~~~~~~~~~~~~~~~~
+* Fixed small bug which prevented ``qrunqaqc`` to run properly under Python 2.7
+  when set a max job count
+
 8.21.2 / 2019-08-19
 ~~~~~~~~~~~~~~~~~~~
 * Remove strict lib requirements for a couple of Python 2.7 incompatible libs
