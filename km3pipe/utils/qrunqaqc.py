@@ -48,7 +48,6 @@ class QAQCAnalyser(object):
         self.should_upload_to_db = should_upload_to_db
 
         self.log = kp.logger.get_logger("qrunqaqc", filename=log_file)
-        self.log.setLevel("INFO")
 
         self.log.info("QAQC analysis started for detector ID %s", det_id)
         if should_upload_to_db:
