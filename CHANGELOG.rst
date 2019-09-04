@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 8
 ---------
+8.21.4 / 2019-09-04
+~~~~~~~~~~~~~~~~~~~
+* Fixed persistent DB connections
+
 8.21.3 / 2019-09-04
 ~~~~~~~~~~~~~~~~~~~
 * Fixed small bug which prevented ``qrunqaqc`` to run properly under Python 2.7
