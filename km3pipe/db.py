@@ -123,12 +123,13 @@ class DBManager(object):
                 self.restore_session(
                     "sid=_kmcprod_134.158_lyo7783844001343100343mcprod1223user"
                 )
+                return
             if we_are_on_jupyterhub():
                 self.restore_session(
                     "sid=_jupyter-km3net_131.188.161.143_"
                     "d9fe89a1568a49a5ac03bdf15d93d799"
                 )
-            return
+                return
 
         if username is not None and password is not None:
             self.login(username, password)
