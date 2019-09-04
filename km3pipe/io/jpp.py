@@ -28,7 +28,7 @@ __status__ = "Development"
 
 def get_jpp_version():
     """Return the Jpp version or None if not available."""
-    command = "JPrint -v"
+    command = "JPrint -v | grep version:"
     try:
         out = subprocess.getoutput(command)
     except AttributeError:    # TODO: python 2.7
