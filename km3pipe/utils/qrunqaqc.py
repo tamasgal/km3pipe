@@ -314,18 +314,6 @@ class QAQCAnalyser(object):
         return self._columns
 
 
-def get_available_run_files(det_id, minrun, maxrun):
-    """Get a list of filepaths for a given run range"""
-    min_suffix = int(minrun / 1000)
-    max_suffix = int(maxrun / 1000)
-    files = []
-    for suffix in range(min_suffix, max_suffix + 1):
-        files += kp.tools.ifiles(
-            "data/raw/sea/KM3NeT_{:08d}/{:d}".format(det_id, suffix)
-        )
-    return files
-
-
 def main():
     from docopt import docopt
     args = docopt(__doc__)
