@@ -148,7 +148,12 @@ class QAQCAnalyser(object):
             reverse=True
         )
 
-        print("Checking runs")
+        print("Checking runs, retrieving file list from iRODS...")
+
+        available_run_files = get_available_run_files(
+            self.det_id, min(run_ids_to_check), max(run_ids_to_check)
+        )
+
         for run_id in tqdm(run_ids_to_check):
             if n_jobs >= max_jobs:
                 self.log.warning(
@@ -159,7 +164,7 @@ class QAQCAnalyser(object):
             self.log.info("Checking run '{}'".format(run_id))
 
             irods_filepath = kp.tools.irods_filepath(self.det_id, run_id)
-            if kp.tools.iexists(irods_filepath):
+            if irods_filepath in available_run_files:
                 run_ids_to_process.append(run_id)
                 if batch_size and len(run_ids_to_process) % batch_size == 0:
                     n_jobs += 1
@@ -300,6 +305,18 @@ class QAQCAnalyser(object):
 
             self._columns = qparams
         return self._columns
+
+
+def get_available_run_files(det_id, minrun, maxrun):
+    """Get a list of filepaths for a given run range"""
+    min_suffix = int(minrun)
+    max_suffix = int(maxrun)
+    files = []
+    for suffix in range(min_suffix, max_suffix + 1):
+        files += kp.tools.ifiles(
+            "data/raw/sea/KM3NeT_{:08d}/{:d}".format(det_id, suffix)
+        )
+    return files
 
 
 def main():
