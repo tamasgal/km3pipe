@@ -124,7 +124,6 @@ class QAQCAnalyser(object):
         except AttributeError:
             already_processed_runs_ids = set()
         else:
-            print(already_processed_runs_ids)
             print(
                 "{} runs are already processed and available in the DB".format(
                     len(already_processed_runs_ids)
