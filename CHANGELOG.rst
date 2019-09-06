@@ -3,6 +3,13 @@ Unreleased changes
 
 Version 8
 ---------
+8.22.0 / 2019-09-06
+~~~~~~~~~~~~~~~~~~~
+* Improved ``qrunqaqc``, which now runs much faster
+* ``kp.tools.ifiles`` now returns a list of ``kp.tools.File``, a named tuple
+  with the fields ``path`` and ``size`` (in bytes) instead of a plain list
+  of filepaths
+
 8.21.5 / 2019-09-04
 ~~~~~~~~~~~~~~~~~~~
 * Fixed Jpp version determination due to changed output of JApplications
