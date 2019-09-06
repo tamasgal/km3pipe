@@ -73,6 +73,8 @@ class QAQCAnalyser(object):
 
         self.runtable = self.sds.get("runs", detid=self.det_id)
 
+        self.available_run_files = []
+
         cwd = os.getcwd()
         self.outdir = os.path.join(cwd, "qparams")
         if not os.path.exists(self.outdir):
@@ -105,6 +107,12 @@ class QAQCAnalyser(object):
             else:
                 self._blacklisted_run_ids = set()
         return self._blacklisted_run_ids
+
+    def retrieve_available_runs(self):
+        files = kp.tools.ifiles(
+            "data/raw/sea/KM3NeT_{:08d}".format(self.det_id)
+        )
+        self.available_run_files = {f.path: f.size for f in files}
 
     def run(self, batch_size, max_jobs, dryrun):
         """Walk through the runtable and submit batches of runs"""
@@ -149,9 +157,7 @@ class QAQCAnalyser(object):
 
         print("Checking runs, retrieving file list from iRODS...")
 
-        available_run_files = get_available_run_files(
-            self.det_id, min(run_ids_to_check), max(run_ids_to_check)
-        )
+        self.retrieve_available_runs()
 
         for run_id in tqdm(run_ids_to_check):
             if n_jobs >= max_jobs:
@@ -163,7 +169,7 @@ class QAQCAnalyser(object):
             self.log.info("Checking run '{}'".format(run_id))
 
             irods_filepath = kp.tools.irods_filepath(self.det_id, run_id)
-            if irods_filepath in available_run_files:
+            if irods_filepath in self.available_run_files.keys():
                 run_ids_to_process.append(run_id)
                 if batch_size and len(run_ids_to_process) % batch_size == 0:
                     n_jobs += 1
@@ -225,7 +231,9 @@ class QAQCAnalyser(object):
             self.log.info("adding run %s (det_id %s", run_id, self.det_id)
             xrootd_path = kp.tools.xrootd_path(self.det_id, run_id)
             self.log.info("xrootd path: %s", xrootd_path)
-            size = kp.tools.isize(kp.tools.irods_filepath(self.det_id, run_id))
+            size = self.available_run_files[kp.tools.irods_filepath(
+                self.det_id, run_id
+            )]
             self.log.info("filesize: %s (bytes)", size)
             filesizes.append(size)
 
@@ -308,8 +316,8 @@ class QAQCAnalyser(object):
 
 def get_available_run_files(det_id, minrun, maxrun):
     """Get a list of filepaths for a given run range"""
-    min_suffix = int(minrun/1000)
-    max_suffix = int(maxrun/1000)
+    min_suffix = int(minrun / 1000)
+    max_suffix = int(maxrun / 1000)
     files = []
     for suffix in range(min_suffix, max_suffix + 1):
         files += kp.tools.ifiles(

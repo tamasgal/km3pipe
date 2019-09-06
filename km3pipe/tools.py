@@ -33,23 +33,38 @@ __status__ = "Development"
 
 XROOTD_BASE = "root://ccxroot:1999"
 
+File = collections.namedtuple("File", field_names=["path", "size"])
+
 
 def ifiles(irods_path):
-    """Return a list of filepaths for the given iRODS path (recursively).
+    """Return a list of File instances for the given iRODS path (recursively).
 
-    The full path of the files are returned. An empty list is returned when the
-    destination does not exist.
+    The File instances offer `.path` and `.size` attributes.
     """
     if not iexists(irods_path):
         return []
     raw_output = subprocess.check_output(
-        "ils -r --bundle {0}"
-        "    | grep 'Bundle file:'"
-        "    | awk '{{print $3}}'".format(irods_path),
-        shell=True
+        "ils -lr {0}".format(irods_path), shell=True
     )
-    filenames = raw_output.decode('ascii').strip().split("\n")
-    return filenames
+    filenames = {}
+    base = irods_path
+    for line in raw_output.splitlines():
+        split_line = line.decode('ascii').strip().split()
+        if len(split_line) == 1 and split_line[0].endswith(':'):
+            base = split_line[0][:-1]    # remove trailing ':'
+            continue
+        if len(split_line) == 2 and split_line[0] == 'C-':
+            base = split_line[1]
+            continue
+        try:
+            fsize = int(split_line[3])
+            fname = split_line[6]
+        except IndexError:
+            import pdb
+            pdb.set_trace()
+        fpath = os.path.join(base, fname)
+        filenames[fpath] = File(path=fpath, size=fsize)
+    return list(filenames.values())
 
 
 def iexists(irods_path):
