@@ -309,8 +309,8 @@ class QAQCAnalyser(object):
 
 def get_available_run_files(det_id, minrun, maxrun):
     """Get a list of filepaths for a given run range"""
-    min_suffix = int(minrun)
-    max_suffix = int(maxrun)
+    min_suffix = int(minrun/1000)
+    max_suffix = int(maxrun/1000)
     files = []
     for suffix in range(min_suffix, max_suffix + 1):
         files += kp.tools.ifiles(
