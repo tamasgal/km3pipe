@@ -35,7 +35,13 @@ XROOTD_BASE = "root://ccxroot:1999"
 
 
 def ifiles(irods_path):
-    """Return a list of filenames for given iRODS path (recursively)"""
+    """Return a list of filepaths for the given iRODS path (recursively).
+
+    The full path of the files are returned. An empty list is returned when the
+    destination does not exist.
+    """
+    if not iexists(irods_path):
+        return []
     raw_output = subprocess.check_output(
         "ils -r --bundle {0}"
         "    | grep 'Bundle file:'"
