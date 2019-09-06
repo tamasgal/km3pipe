@@ -73,7 +73,7 @@ def main():
     mkdir(OUTPUT_PATH)
 
     mupage_files = kp.tools.ifiles(args['IRODS_PATH'])
-    files = [basename(f) for f in mupage_files if SUBSTRING in f]
+    files = [basename(f.path) for f in mupage_files if SUBSTRING in f.path]
     conv_files = [basename(f)[:-3] for f in glob(join(OUTPUT_PATH, '*.h5'))]
     rem_files = list(set(files) - set(conv_files))
 

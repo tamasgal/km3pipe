@@ -74,7 +74,7 @@ def main():
     mkdir(OUTPUT_PATH)
 
     if USE_IRODS:
-        all_files = kp.tools.ifiles(args['INPUT_PATH'])
+        all_files = [f.path for f in kp.tools.ifiles(args['INPUT_PATH'])]
     else:
         all_files = glob(join(args['INPUT_PATH'], '*'))
     files = [basename(f) for f in all_files if SUBSTRING in f]
