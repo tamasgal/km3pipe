@@ -209,7 +209,7 @@ class QAQCAnalyser(object):
 
     def print_stats(self):
         """Print a summary of the collected statistics"""
-        print("\n\n\n")
+        print("\n")
         print("Summary")
         print("=======")
         for key, value in self.stats.items():
