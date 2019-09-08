@@ -128,9 +128,9 @@ UPI, floor, DU or just to find out a base for a given DU::
         upi='3.4.3.2/V2-2-1/2.267',
         dom_id=808476701
     )
-    >>> clbmap.upi['3.4.3.2/V2-2-1/2.267'].dom_id
+    >>> clbmap.upis['3.4.3.2/V2-2-1/2.267'].dom_id
     808476701
-    >>> clbmap.dom_id[808959411].floor
+    >>> clbmap.dom_ids[808959411].floor
     5
 
 Fun with DOMs
