@@ -77,8 +77,10 @@ class QAQCAnalyser(object):
 
         cwd = os.getcwd()
         self.outdir = os.path.join(cwd, "qparams")
-        if not os.path.exists(self.outdir):
-            os.makedirs(self.outdir)
+        self.jobdir = os.path.join(cwd, "qjobs")
+        for path in [self.outdir, self.jobdir]:
+            if not os.path.exists(path):
+                os.makedirs(path)
 
         self.blacklist = os.path.join(
             cwd, "blacklist_{}.txt".format(self.det_id)
@@ -273,9 +275,13 @@ class QAQCAnalyser(object):
 
         fsize = int(max(filesizes) / 1024 / 1024 * 1.1)
 
+        identifier = "QAQC_{}_{}-{}".format(
+            self.det_id, run_ids[0], run_ids[-1]
+        )
+
         kp.shell.qsub(
             s,
-            "QAQC_{}_{}".format(self.det_id, run_ids[0]),
+            identifier,
             vmem='4G',
             fsize='{}M'.format(fsize),
             xrootd=True,
@@ -284,6 +290,11 @@ class QAQCAnalyser(object):
             dryrun=dryrun
         )
         self.log.info("  => job with %s runs submitted", len(run_ids))
+
+        jobfile = os.path.join(self.jobdir, identifier + ".sh")
+        with open(jobfile, 'w') as fobj:
+            fobj.write(str(s))
+        self.log.info("     job file have been saved to {}".format(jobfile))
         if dryrun:
             self.stats['Number of dryrun jobs'] += 1
         else:
