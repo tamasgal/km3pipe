@@ -70,8 +70,8 @@ JOB_TEMPLATE = lstrip(
 
 def qsub(script, job_name, dryrun=False, silent=False, *args, **kwargs):
     """Submit a job via qsub.
-    
-    
+
+
     Returns the job script as string.
     """
     if not silent:
