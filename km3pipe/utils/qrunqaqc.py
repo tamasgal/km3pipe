@@ -273,7 +273,7 @@ class QAQCAnalyser(object):
             '%H:%M:%S', time.gmtime(ESTIMATED_TIME_PER_RUN * len(run_ids))
         )
 
-        fsize = int(max(filesizes) / 1024 / 1024 * 1.1)
+        fsize = int(max(filesizes) / 1024 / 1024 * 1.1 + 100)
 
         identifier = "QAQC_{}_{}-{}".format(
             self.det_id, run_ids[0], run_ids[-1]
