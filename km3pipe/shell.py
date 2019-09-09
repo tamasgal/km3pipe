@@ -69,7 +69,11 @@ JOB_TEMPLATE = lstrip(
 
 
 def qsub(script, job_name, dryrun=False, silent=False, *args, **kwargs):
-    """Submit a job via qsub."""
+    """Submit a job via qsub.
+    
+    
+    Returns the job script as string.
+    """
     if not silent:
         print("Preparing job script...")
     job_string = gen_job(script=script, job_name=job_name, *args, **kwargs)
@@ -94,6 +98,8 @@ def qsub(script, job_name, dryrun=False, silent=False, *args, **kwargs):
             stdout=out_pipe
         )
         p.communicate(input=bytes(job_string.encode('ascii')))
+
+    return job_string
 
 
 def gen_job(
