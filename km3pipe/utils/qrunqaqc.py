@@ -279,7 +279,7 @@ class QAQCAnalyser(object):
             self.det_id, run_ids[0], run_ids[-1]
         )
 
-        kp.shell.qsub(
+        job_script = kp.shell.qsub(
             s,
             identifier,
             vmem='4G',
@@ -293,7 +293,7 @@ class QAQCAnalyser(object):
 
         jobfile = os.path.join(self.jobdir, identifier + ".sh")
         with open(jobfile, 'w') as fobj:
-            fobj.write(str(s))
+            fobj.write(job_script)
         self.log.info("     job file have been saved to {}".format(jobfile))
         if dryrun:
             self.stats['Number of dryrun jobs'] += 1
