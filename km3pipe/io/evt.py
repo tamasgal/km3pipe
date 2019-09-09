@@ -182,7 +182,7 @@ class EvtPump(Pump):    # pylint: disable:R0902
                 tag, value = str(line).split(':')
             except ValueError:
                 continue
-            raw_header[tag].append(str(value).split())
+            raw_header[tag] = str(value).split()
             if line.startswith(str('end_event:')):
                 self._record_offset()
                 if self._auto_parse and 'physics' in raw_header:
