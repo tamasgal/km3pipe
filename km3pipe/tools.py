@@ -20,6 +20,8 @@ import re
 import socket
 import subprocess
 import sys
+import smtplib
+import getpass
 
 import numpy as np
 
@@ -487,3 +489,11 @@ def timed_cache(**timed_cache_kwargs):
         return _wrapped
 
     return _wrapper
+
+
+def sendmail(to, msg):
+    """Send an email"""
+    sender = "{}@{}".format(getpass.getuser(), socket.gethostname())
+    s = smtplib.SMTP('localhost')
+    s.sendmail(sender, to, msg)
+    s.quit()
