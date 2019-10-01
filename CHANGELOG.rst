@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 8
 ---------
+8.23.0 / 2019-10-01
+~~~~~~~~~~~~~~~~~~~
+* Added ``kp.tools.sendmail`` which can be used to send mails.
+
 8.22.0 / 2019-09-06
 ~~~~~~~~~~~~~~~~~~~
 * Improved ``qrunqaqc``, which now runs much faster
