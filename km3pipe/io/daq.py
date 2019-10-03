@@ -84,7 +84,8 @@ class TimesliceParser(Module):
                 frame_size, datatype = unpack('<ii', data.read(8))
                 det_id, run, sqnr = unpack('<iii', data.read(12))
                 timestamp, ns_ticks, dom_id = unpack('<iii', data.read(12))
-                dom_status = unpack('<iiiii', data.read(5 * 4))
+                dataqueue_status = unpack('<i', data.read(4))[0]
+                dom_status = unpack('<iiii', data.read(4 * 4))
                 n_hits = unpack('<i', data.read(4))[0]
                 ts_frameinfos[dom_id] = Table.from_template({
                     'det_id': det_id,
@@ -93,6 +94,7 @@ class TimesliceParser(Module):
                     'timestamp': timestamp,
                     'nanoseconds': ns_ticks * 16,
                     'dom_id': dom_id,
+                    'dataqueue_status': dataqueue_status,
                     'dom_status': dom_status,
                     'n_hits': n_hits,
                 }, 'TimesliceFrameInfo')

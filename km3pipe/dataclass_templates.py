@@ -245,6 +245,7 @@ TEMPLATES = {
             ('timestamp', '<u4'),
             ('nanoseconds', '<u4'),
             ('dom_id', '<u4'),
+            ('dataqueue_status', '<u4'),
             ('dom_status', '<u4'),
             ('n_hits', '<u4'),
         ]),
