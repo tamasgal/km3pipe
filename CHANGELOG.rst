@@ -3,6 +3,13 @@ Unreleased changes
 
 Version 8
 ---------
+8.23.3 / 2019-10-08
+~~~~~~~~~~~~~~~~~~~
+* ``kp.io.hdf5.HDF5Sink`` is changed to try to convert dtypes when the original
+  table is defined and the data has the same names but slightly different
+  field types. This only occured so far when using Python 3 with aanet, where
+  aanet returns unicode strings in the raw_header instead of bytes.
+
 8.23.2 / 2019-10-08
 ~~~~~~~~~~~~~~~~~~~
 * ``kp.io.evt.EvtPump`` now allows read-in of entries which has additional
