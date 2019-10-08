@@ -428,14 +428,13 @@ def supports_color():
     return True
 
 
-def get_jpp_version():
+def get_jpp_version(via_command="JPrint -v"):
     """Return the Jpp version or None if not available."""
-    command = "JPrint -v"
     try:
-        out = subprocess.getoutput(command)
+        out = subprocess.getoutput(via_command)
     except AttributeError:    # TODO: python 2.7
         out = subprocess.check_output(
-            command.split(), stderr=subprocess.STDOUT
+            via_command.split(), stderr=subprocess.STDOUT
         )
     print(out)
 

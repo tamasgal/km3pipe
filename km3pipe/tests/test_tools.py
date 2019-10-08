@@ -10,7 +10,7 @@ from km3pipe.testing import TestCase, patch
 from km3pipe.tools import (
     unpack_nfirst, split, namedtuple_with_defaults, remain_file_pointer,
     decamelise, camelise, issorted, lstrip, chunks, is_coherent, istype,
-    get_jpp_revision
+    get_jpp_version
 )
 
 __author__ = "Tamas Gal"
@@ -202,9 +202,9 @@ class TestIstype(TestCase):
 
 class TestJppRevision(TestCase):
     @patch('subprocess.check_output')
-    def test_revision(self, co_mock):
+    def test_version(self, co_mock):
         co_mock.return_value = b'version:    8519\nname space: KM3NET\n'
-        assert '8519' == get_jpp_revision()
+        assert '8519' == get_jpp_version()
 
-    def test_revision(self):
-        assert get_jpp_revision(via_command='a_non_existing_command') is None
+    def test_version(self):
+        assert get_jpp_version(via_command='a_non_existing_command') is None

@@ -462,7 +462,7 @@ class HDF5Sink(Module):
         self.flush()
         self.h5file.root._v_attrs.km3pipe = np.string_(kp.__version__)
         self.h5file.root._v_attrs.pytables = np.string_(tb.__version__)
-        self.h5file.root._v_attrs.jpp = np.string_(get_jpp_revision())
+        self.h5file.root._v_attrs.jpp = np.string_(get_jpp_version())
         self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
         self.log.info("Adding index tables.")
         for where, idx_tab in self.indices.items():
