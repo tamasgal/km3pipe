@@ -433,10 +433,12 @@ def get_jpp_version(via_command="JPrint -v"):
     try:
         out = subprocess.getoutput(via_command)
     except AttributeError:    # TODO: python 2.7
-        out = subprocess.check_output(
-            via_command.split(), stderr=subprocess.STDOUT
-        )
-    print(out)
+        try:
+            out = subprocess.check_output(
+                via_command.split(), stderr=subprocess.STDOUT
+            )
+        except OSError:
+            return None
 
     for line in out.split('\n'):
         if line.startswith("version:"):
