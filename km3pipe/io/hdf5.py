@@ -339,7 +339,7 @@ class HDF5Sink(Module):
 
         if arr.dtype != tab.dtype:
             try:
-                arr = Table(arr.astype(tab.dtype))
+                arr = Table(arr, dtype=tab.dtype)
             except ValueError:
                 self.log.critical(
                     "Cannot write a table to '%s' since its dtype is "
