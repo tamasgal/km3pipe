@@ -294,6 +294,9 @@ class HDF5Sink(Module):
 
         if h5loc not in self._tables:
             dtype = arr.dtype
+            if any('U' in str(dtype.fields[f][0]) for f in dtype.fields):
+                self.log.error("Cannot write data to '{}'. Unicode strings are not supported!".format(h5loc))
+                return
             loc, tabname = os.path.split(h5loc)
             self.log.debug(
                 "h5loc '{}', Loc '{}', tabname '{}'".format(
