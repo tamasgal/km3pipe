@@ -428,20 +428,23 @@ def supports_color():
     return True
 
 
-def get_jpp_revision(via_command='JPrint'):
-    """Retrieves the Jpp revision number"""
+def get_jpp_version():
+    """Return the Jpp version or None if not available."""
+    command = "JPrint -v"
     try:
-        output = subprocess.check_output([via_command, '-v'],
-                                         stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as e:
-        if e.returncode == 1:
-            output = e.output
-        else:
-            return None
-    except OSError:
-        return None
-    revision = output.decode().split('\n')[0].split()[1].strip()
-    return revision
+        out = subprocess.getoutput(command)
+    except AttributeError:    # TODO: python 2.7
+        out = subprocess.check_output(
+            command.split(), stderr=subprocess.STDOUT
+        )
+    print(out)
+
+    for line in out.split('\n'):
+        if line.startswith("version:"):
+            jpp_version = line.split(':')[1].strip()
+            return jpp_version
+
+    return None
 
 
 def timed_cache(**timed_cache_kwargs):

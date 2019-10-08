@@ -26,24 +26,6 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-def get_jpp_version():
-    """Return the Jpp version or None if not available."""
-    command = "JPrint -v"
-    try:
-        out = subprocess.getoutput(command)
-    except AttributeError:    # TODO: python 2.7
-        out = subprocess.check_output(
-            command.split(), stderr=subprocess.STDOUT
-        )
-
-    for line in out.split('\n'):
-        if line.startswith("version:"):
-            jpp_version = line.split(':')[1].strip()
-            return jpp_version
-
-    return None
-
-
 class EventPump(Pump):
     """A pump for DAQEvents in JPP files.
 

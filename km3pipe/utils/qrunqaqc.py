@@ -56,7 +56,7 @@ class QAQCAnalyser(object):
                 "the database after each successful run processing."
             )
 
-        self.jpp_version = kp.io.jpp.get_jpp_version()
+        self.jpp_version = kp.tools.get_jpp_version()
         if self.jpp_version is None:
             self.log.critical("Please load a Jpp environment")
             raise SystemExit()
