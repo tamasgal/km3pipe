@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 8
 ---------
+8.23.1 / 2019-10-08
+~~~~~~~~~~~~~~~~~~~
+* Bugfixes
+
 8.23.0 / 2019-10-01
 ~~~~~~~~~~~~~~~~~~~
 * Added ``kp.tools.sendmail`` which can be used to send mails.
