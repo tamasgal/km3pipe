@@ -3,6 +3,11 @@ Unreleased changes
 
 Version 8
 ---------
+8.23.2 / 2019-10-08
+~~~~~~~~~~~~~~~~~~~
+* ``kp.io.evt.EvtPump`` now allows read-in of entries which has additional
+  undefined fields (those are simply ignored)
+
 8.23.1 / 2019-10-08
 ~~~~~~~~~~~~~~~~~~~
 * Bugfixes
