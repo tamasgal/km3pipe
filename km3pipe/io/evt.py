@@ -360,7 +360,7 @@ class Parser(object):
             if key in self.tag_description.keys():
                 data = blob[key]
                 out_key, dtype = self.tag_description[key]
-                arr = np.array(data, dtype)
+                arr = np.array([d[:len(dtype)] for d in data], dtype)
                 tab = Table(arr, name=out_key)
                 blob[out_key] = tab
 
