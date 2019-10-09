@@ -1150,9 +1150,9 @@ class TestHDF5Header(TestCase):
             "parameter": [b"foo", b"bar"]
         })
         header = HDF5Header.from_aanet(table)
-        self.assertAlmostEqual(1.2, header.foo.a)
+        self.assertAlmostEqual(1.2, header.foo.a, places=2)
         assert "ab" == header.foo.b
-        self.assertAlmostEqual(3.4, header.bar.c)
+        self.assertAlmostEqual(3.4, header.bar.c, places=2)
 
 
 class TestConvertHeaderDictToTable(TestCase):
