@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 8
 ---------
+8.23.4 / 2019-10-09
+~~~~~~~~~~~~~~~~~~~
+* The header readout is now fixed for ROOT6+Py3+aanetv1
+
 8.23.3 / 2019-10-08
 ~~~~~~~~~~~~~~~~~~~
 * ``kp.io.hdf5.HDF5Sink`` is changed to try to convert dtypes when the original
