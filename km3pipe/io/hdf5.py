@@ -111,6 +111,32 @@ class HDF5Header(object):
         return cls(data)
 
     @classmethod
+    def from_aanet(cls, table):
+        data = OrderedDict()
+        for i in range(len(table)):
+            parameter = table['parameter'][i].astype(str)
+            field_names = [n.decode() for n in table['field_names'][i].split()]
+            field_values = [
+                n.decode() for n in table['field_values'][i].split()
+            ]
+            if field_values in [[b''], []]:
+                log.info(
+                    "No value for parameter '{}'! Skipping...".
+                    format(parameter)
+                )
+                continue
+            dtypes = table['dtype'][i]
+            dtyped_values = []
+            for dtype, value in zip(dtypes.split(), field_values):
+                if dtype.startswith(b'a'):
+                    dtyped_values.append(value)
+                else:
+                    value = np.fromstring(value, dtype=dtype, sep=' ')[0]
+                    dtyped_values.append(value)
+            data[parameter] = OrderedDict(zip(field_names, dtyped_values))
+        return cls(data)
+
+    @classmethod
     def from_hdf5(cls, filename):
         with tb.open_file(filename, 'r') as f:
             table = f.get_node('/raw_header')
@@ -295,7 +321,10 @@ class HDF5Sink(Module):
         if h5loc not in self._tables:
             dtype = arr.dtype
             if any('U' in str(dtype.fields[f][0]) for f in dtype.fields):
-                self.log.error("Cannot write data to '{}'. Unicode strings are not supported!".format(h5loc))
+                self.log.error(
+                    "Cannot write data to '{}'. Unicode strings are not supported!"
+                    .format(h5loc)
+                )
                 return
             loc, tabname = os.path.split(h5loc)
             self.log.debug(
