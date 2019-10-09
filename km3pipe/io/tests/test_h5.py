@@ -1142,14 +1142,17 @@ class TestHDF5Header(TestCase):
         assert 0 == header.coord_origin.z
         self.assertTupleEqual((0, 0, 0), header.coord_origin)
 
-    # def test_header_from_table_with_bytes(self):
-    #     table = Table({
-    #         "dtype": [b"f4 a2", b"f4"],
-    #         "field_names": [b"a b", b"c"],
-    #         "field_values": [b"1.2 ab", b"3.4"],
-    #         "parameter": [b"foo", b"bar"]
-    #     })
-    #     header = HDF5Header.from_table(table)
+    def test_header_from_table_with_bytes(self):
+        table = Table({
+            "dtype": [b"f4 a2", b"f4"],
+            "field_names": [b"a b", b"c"],
+            "field_values": [b"1.2 ab", b"3.4"],
+            "parameter": [b"foo", b"bar"]
+        })
+        header = HDF5Header.from_aanet(table)
+        self.assertAlmostEqual(1.2, header.foo.a)
+        assert "ab" == header.foo.b
+        self.assertAlmostEqual(3.4, header.bar.c)
 
 
 class TestConvertHeaderDictToTable(TestCase):
