@@ -302,7 +302,7 @@ class AanetPump(Pump):
                 log.info("Converting Header dict to Table...")
                 self.raw_header = self._convert_header_dict_to_table(hdr)
                 log.info("Creating HDF5Header")
-                self.header = HDF5Header.from_table(self.raw_header)
+                self.header = HDF5Header.from_aanet(self.raw_header)
             for event in event_file:
                 log.debug('Reading event...')
                 blob = self._read_event(event, filename)
@@ -591,7 +591,6 @@ class AanetPump(Pump):
                 out[key][elem_name] = elem
         return out
 
-    # TODO: delete this method and use the function in io/hdf5.py
     @staticmethod
     def _convert_header_dict_to_table(header_dict):
         if not header_dict:
@@ -600,6 +599,8 @@ class AanetPump(Pump):
         tab_dict = defaultdict(list)
         log.debug("Param:   field_names    field_values    dtype")
         for parameter, data in header_dict.items():
+            if not data:
+                continue
             fields = []
             values = []
             types = []
@@ -611,10 +612,10 @@ class AanetPump(Pump):
                     types.append('f4')
                 except ValueError:
                     types.append('a{}'.format(len(field_value)))
-            tab_dict['parameter'].append(parameter)
-            tab_dict['field_names'].append(' '.join(fields))
-            tab_dict['field_values'].append(' '.join(values))
-            tab_dict['dtype'].append(' '.join(types))
+            tab_dict['parameter'].append(parameter.encode())
+            tab_dict['field_names'].append(' '.join(fields).encode())
+            tab_dict['field_values'].append(' '.join(values).encode())
+            tab_dict['dtype'].append(' '.join(types).encode())
             log.debug(
                 "{}: {} {} {}".format(
                     tab_dict['parameter'][-1],
