@@ -95,25 +95,39 @@ class TestAanetPump(TestCase):
         blob_counter = 0
         for aanet_blob, hdf5_blob in zip(aanet_pump, hdf5_pump):
             blob_counter += 1
-            keys = ['Hits', 'McHits', 'McTracks', 'EventInfo', 'RawHeader']
+            keys = ['Hits', 'McHits', 'McTracks', 'EventInfo']
             for key in keys:
                 aanet_data = aanet_blob[key]
                 hdf5_data = hdf5_blob[key]
                 assert aanet_data.dtype == hdf5_data.dtype
 
                 for attr in aanet_data.dtype.names:
-                    # special case for RawHeader, since everything is a string
-                    if key == 'RawHeader':
-                        self.assertTupleEqual(
-                            tuple(aanet_data[attr]), tuple(hdf5_data[attr])
-                        )
-                        continue
                     # special case for arrays which are all NaNs
                     if np.all(np.isnan(aanet_data[attr])):
                         assert np.all(np.isnan(hdf5_data[attr]))
                         continue
                     # otherwise just compare them
                     assert np.allclose(aanet_data[attr], hdf5_data[attr])
+
+            aanet_header = aanet_blob['Header']
+            hdf5_header = hdf5_blob['Header']
+            self.assertTupleEqual(aanet_header.seed, hdf5_header.seed)
+            self.assertTupleEqual(aanet_header.norma, hdf5_header.norma)
+            self.assertTupleEqual(
+                aanet_header.coord_origin, hdf5_header.coord_origin
+            )
+            self.assertTupleEqual(aanet_header.physics, hdf5_header.physics)
+            self.assertTupleEqual(aanet_header.propag, hdf5_header.propag)
+            self.assertTupleEqual(aanet_header.livetime, hdf5_header.livetime)
+            self.assertTupleEqual(aanet_header.cut_in, hdf5_header.cut_in)
+            self.assertTupleEqual(aanet_header.can, hdf5_header.can)
+            self.assertTupleEqual(
+                aanet_header.seabottom, hdf5_header.seabottom
+            )
+            self.assertTupleEqual(
+                aanet_header.start_run, hdf5_header.start_run
+            )
+            self.assertTupleEqual(aanet_header.simul, hdf5_header.simul)
         assert 3 == blob_counter
 
     def test_against_single_file_freeze(self):
