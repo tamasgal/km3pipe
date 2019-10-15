@@ -692,7 +692,7 @@ class DMMonitor(object):
         )
         self._available_parameters = []
         self.log = get_logger(self.__class__.__name__)
-        self.print = get_printer(self.__class__.__name__)
+        self.cprint = get_printer(self.__class__.__name__)
 
     @property
     def available_parameters(self):

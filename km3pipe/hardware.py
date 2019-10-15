@@ -70,7 +70,7 @@ class Detector(object):
         self._xy_positions = None
         self.reset_caches()
 
-        self.print = get_printer(self.__class__.__name__)
+        self.cprint = get_printer(self.__class__.__name__)
 
         if filename:
             self._init_from_file(filename)

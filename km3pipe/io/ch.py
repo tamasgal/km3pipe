@@ -162,7 +162,7 @@ class CHPump(Pump):
             return
         dt = np.median(self.idle_dt)
         current_qsize = self.queue.qsize()
-        log_func = self.print
+        log_func = self.cprint
         if dt < 0 or current_qsize > 0:
             log_func = self.log.warning
         log_func(
