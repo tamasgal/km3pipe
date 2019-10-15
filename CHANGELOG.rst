@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* ``Module.print`` and ``Pipeline.print`` have been deprecated, please use
+  ``*.cprint`` from now on (the black formatter has issues with ``self.print``)
 
 Version 8
 ---------
