@@ -92,7 +92,9 @@ class K40BackgroundSubtractor(kp.Module):
 
     def finish(self):
         if self.mode == 'offline':
-            self.cprint('Subtracting background calculated from summaryslices.')
+            self.cprint(
+                'Subtracting background calculated from summaryslices.'
+            )
             self.corrected_counts = self.subtract_background()
 
     def dump(self, mean_rates, corrected_counts, livetime):
