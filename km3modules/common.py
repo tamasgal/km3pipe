@@ -97,7 +97,7 @@ class HitCounter(Module):
     """Prints the number of hits"""
     def process(self, blob):
         try:
-            self.print("Number of hits: {0}".format(len(blob['Hit'])))
+            self.cprint("Number of hits: {0}".format(len(blob['Hit'])))
         except KeyError:
             pass
         return blob
@@ -222,13 +222,13 @@ class MultiFilePump(kp.Module):
         self.filenames = self.require('filenames')
         self.reindex = self.get('reindex', default=True)
         self.blobs = self.blob_generator()
-        self.print("Iterating through {} files.".format(len(self.filenames)))
+        self.cprint("Iterating through {} files.".format(len(self.filenames)))
         self.n_processed = 0
         self.group_id = 0
 
     def blob_generator(self):
         for filename in self.filenames:
-            self.print("Current file: {}".format(filename))
+            self.cprint("Current file: {}".format(filename))
             pump = self.pump(filename=filename)
             for blob in pump:
                 if self.reindex:
@@ -250,7 +250,7 @@ class MultiFilePump(kp.Module):
         return next(self.blobs)
 
     def finish(self):
-        self.print(
+        self.cprint(
             "Processed {} out of {} files.".format(
                 self.n_processed, len(self.filenames)
             )

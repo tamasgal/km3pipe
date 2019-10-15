@@ -237,7 +237,7 @@ class AanetPump(Pump):
             self.log.warning("No file- or basename(s) defined!")
 
         self.log.info("Next filename: {}".format(self.filename))
-        self.print("Opening {0}".format(self.filename))
+        self.cprint("Opening {0}".format(self.filename))
         self.blobs = self.blob_generator()
         self.num_blobs = self.get_number_of_blobs()
 
@@ -279,7 +279,7 @@ class AanetPump(Pump):
 
         log.info("Generating blobs through new aanet API...")
 
-        self.print("Reading metadata using 'JPrintMeta'")
+        self.cprint("Reading metadata using 'JPrintMeta'")
         meta_parser = MetaParser(filename=filename)
         meta = meta_parser.get_table()
         if meta is None:
@@ -653,7 +653,7 @@ class AanetPump(Pump):
             if self.filenames:
                 self.filename = next(self.filequeue)
                 self.log.info("Next filename: {}".format(self.filename))
-                self.print("Opening {0}".format(self.filename))
+                self.cprint("Opening {0}".format(self.filename))
                 self.blobs = self.blob_generator()
                 self.num_blobs = self.get_number_of_blobs()
             elif self.filename:
@@ -671,7 +671,7 @@ class AanetPump(Pump):
             if self.filenames:
                 self.log.info("All blobs are read, switching to the next file")
                 self.filename = next(self.filequeue)
-                self.print("Opening {0}".format(self.filename))
+                self.cprint("Opening {0}".format(self.filename))
                 self.blobs = self.blob_generator()
                 self.num_blobs = self.get_number_of_blobs()
             else:

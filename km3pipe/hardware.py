@@ -76,7 +76,7 @@ class Detector(object):
             self._init_from_file(filename)
 
         if det_id is not None:
-            self.print(
+            self.cprint(
                 "Retrieving DETX with detector ID {0} "
                 "from the database...".format(det_id)
             )
@@ -127,7 +127,7 @@ class Detector(object):
 
     def _parse_header(self):
         """Extract information from the header of the detector file"""
-        self.print("Parsing the DETX header")
+        self.cprint("Parsing the DETX header")
         self._det_file.seek(0, 0)
         first_line = self._readline()
         try:
@@ -149,7 +149,7 @@ class Detector(object):
     # pylint: disable=C0103
     def _parse_doms(self):
         """Extract dom information from detector file"""
-        self.print("Reading PMT information...")
+        self.cprint("Reading PMT information...")
         self._det_file.seek(0, 0)
         self._readline()
         pmts = defaultdict(list)
@@ -158,7 +158,7 @@ class Detector(object):
             line = self._readline()
 
             if line == '':
-                self.print("Done.")
+                self.cprint("Done.")
                 break
 
             try:
@@ -391,7 +391,7 @@ class Detector(object):
         """Save detx file."""
         with open(filename, 'w') as f:
             f.write(self.ascii)
-        self.print("Detector file saved as '{0}'".format(filename))
+        self.cprint("Detector file saved as '{0}'".format(filename))
 
     def pmt_with_id(self, pmt_id):
         """Get PMT with global pmt_id"""

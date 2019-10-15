@@ -544,7 +544,7 @@ class HDF5Sink(Module):
 
         if not self.keep_open:
             self.h5file.close()
-        self.print("HDF5 file written to: {}".format(self.filename))
+        self.cprint("HDF5 file written to: {}".format(self.filename))
 
 
 class HDF5Pump(Pump):
@@ -639,9 +639,9 @@ class HDF5Pump(Pump):
             self.h5file.close()
         self.filename = self.filequeue.pop(0)
         self.h5file = tb.open_file(self.filename, 'r')
-        self.print("Opening {0}".format(self.filename))
+        self.cprint("Opening {0}".format(self.filename))
         if self.verbose:
-            self.print("Reading %s..." % self.filename)
+            self.cprint("Reading %s..." % self.filename)
         return True
 
     def _read_group_info(self):

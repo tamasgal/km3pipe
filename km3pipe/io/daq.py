@@ -713,7 +713,7 @@ class DMMonitor(object):
         )
 
     def start_session(self, name, paths, interval=10):
-        self.print("Starting session '{}'".format(name))
+        self.cprint("Starting session '{}'".format(name))
         ret = urlopen(
             "http://{}:{}/monshortdef?name={}&paths={}".format(
                 self._host, self._port, name,

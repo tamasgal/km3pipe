@@ -110,7 +110,7 @@ class Pipeline(object):
     """
     def __init__(self, blob=None, timeit=False, configfile=None, anybar=False):
         self.log = get_logger(self.__class__.__name__)
-        self.print = get_printer(self.__class__.__name__)
+        self.cprint = get_printer(self.__class__.__name__)
 
         if anybar:
             self.anybar = AnyBar()
@@ -145,7 +145,7 @@ class Pipeline(object):
     def load_configuration(self, configfile):
         """Reads the pipeline configuration file"""
         if configfile is not None:
-            self.print(
+            self.cprint(
                 "Reading module configuration from '{}'".format(configfile)
             )
             self.log.warning(
@@ -482,7 +482,7 @@ class Module(object):
             self.logger_name += '.{}'.format(name)
         log.debug("Setting up logger '{}'".format(self.logger_name))
         self.log = get_logger(self.logger_name)
-        self.print = get_printer(self.logger_name)
+        self.cprint = get_printer(self.logger_name)
         self.timeit = self.get('timeit') or False
         self._timeit = {
             'process': deque(maxlen=STAT_LIMIT),
@@ -495,6 +495,12 @@ class Module(object):
         self.required_services = {}
         self.configure()
         self._check_unused_parameters()
+
+    def print(self, *args, **kwargs):
+        self.log.deprecation(
+            "`Module.print` has been deprecated, please use `cprint` instead!"
+        )
+        self.cprint(*args, **kwargs)
 
     def configure(self):
         """Configure module, like instance variables etc."""
