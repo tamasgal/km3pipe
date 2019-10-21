@@ -271,7 +271,7 @@ ATTRIBUTES = dict(
 )
 del ATTRIBUTES['']
 
-ATTRIBUTES_RE = r'\033\[(?:%s)m' % '|'  \
+ATTRIBUTES_RE = '\033\[(?:%s)m' % '|'  \
                 .join(['%d' % v for v in ATTRIBUTES.values()])
 
 HIGHLIGHTS = dict(
@@ -283,7 +283,7 @@ HIGHLIGHTS = dict(
     )
 )
 
-HIGHLIGHTS_RE = r'\033\[(?:%s)m' % '|'  \
+HIGHLIGHTS_RE = '\033\[(?:%s)m' % '|'  \
                 .join(['%d' % v for v in HIGHLIGHTS.values()])
 
 COLORS = dict(
@@ -301,10 +301,10 @@ COLORS = dict(
     )
 )
 
-COLORS_RE = r'\033\[(?:%s)m' % '|'.join(['%d' % v for v in COLORS.values()])
+COLORS_RE = '\033\[(?:%s)m' % '|'.join(['%d' % v for v in COLORS.values()])
 
-RESET = r'\033[0m'
-RESET_RE = r'\033\[0m'
+RESET = '\033[0m'
+RESET_RE = '\033\[0m'
 
 
 def colored(text, color=None, on_color=None, attrs=None, ansi_code=None):
