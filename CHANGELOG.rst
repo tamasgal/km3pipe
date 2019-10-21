@@ -1,11 +1,14 @@
 Unreleased changes
 ------------------
+Version 8
+---------
+
+8.23.5 / 2019-10-21
+~~~~~~~~~~~~~~~~~~~
 * ``Module.print`` and ``Pipeline.print`` have been deprecated, please use
   ``*.cprint`` from now on (the black formatter has issues with ``self.print``)
 * Fixes coloured output for e.g. ``streamds``
 
-Version 8
----------
 8.23.4 / 2019-10-09
 ~~~~~~~~~~~~~~~~~~~
 * The header readout is now fixed for ROOT6+Py3+aanetv1
