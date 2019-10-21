@@ -19,7 +19,7 @@ with open('requirements.txt') as fobj:
     requirements = [l.strip() for l in fobj.readlines()]
     if sys.version_info < (3, 5):
         # Take just the latest available versions if running with Python <3.5
-        for lib in ["numpy", "scipy", "matplotlib"]:
+        for lib in ["numpy", "scipy", "matplotlib", "tables"]:
             idx = [
                 requirements.index(r)
                 for r in requirements
