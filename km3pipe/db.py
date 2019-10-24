@@ -896,22 +896,12 @@ class CLBMap(object):
         return len(self._data)
 
     @property
-    def upi(self):
-        self.log.deprecation("Please use .upis instead of .upi!")
-        return self.upis
-
-    @property
     def upis(self):
         """A dict of CLBs with UPI as key"""
         parameter = 'UPI'
         if parameter not in self._by:
             self._populate(by=parameter)
         return self._by[parameter]
-
-    @property
-    def dom_id(self):
-        self.log.deprecation("Please use .dom_ids instead of .dom_id!")
-        return self.dom_ids
 
     @property
     def dom_ids(self):
