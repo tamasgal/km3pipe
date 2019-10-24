@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* Removed deprecated properties from ``CLBMap``
 Version 8
 ---------
 
