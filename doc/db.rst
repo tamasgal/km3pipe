@@ -133,86 +133,13 @@ UPI, floor, DU or just to find out a base for a given DU::
     >>> clbmap.dom_ids[808959411].floor
     5
 
-Fun with DOMs
-~~~~~~~~~~~~~
-**Important note: the following method will be deprecated soon and replaced
-by the `CLBMap` as described in the previous subsection.**
-
-To retrieve information about DOMs, the ``DBManager`` provides a handy
-``DOMContainer`` class, which can be access via::
-
-    >>> db.doms
-    <km3pipe.db.DOMContainer object at 0x110daea10>
-
-You can take a look at the docstring of the class using Pythons ``help``
-function::
-
-    >>> help(db.doms)
-    class DOMContainer(__builtin__.object)
-     |  Provides easy access to DOM parameters stored in the DB.
-     |
-     |  Methods defined here:
-     |
-     |  __init__(self, doms)
-     |
-     |  clbupi2domid(self, clb_upi, det_id)
-     |      Return DOM ID for given CLB UPI and detector
-     |
-     |  clbupi2floor(self, clb_upi, det_id)
-     |      Return Floor ID for given CLB UPI and detector
-     |
-     |  domid2floor(self, dom_id, det_id)
-     |      Return Floor ID for given DOM ID and detector
-     |
-     |  ids(self, det_id)
-     |      Return a list of DOM IDs for given detector
-     |
-     |  via_clb_upi(self, clb_upi)
-     |      return DOM for given CLB UPI
-     |
-     |  via_dom_id(self, dom_id)
-     |      Return DOM for given dom_id
-     |
-     |  via_omkey(self, omkey, det_id)
-     |      Return DOM for given OMkey (DU, floor)
-
-The most important methods are probablly ``via_clb_upi``, ``via_dom_id`` and
-``via_omkey``. All of them will return an instance of ``DOM`` which is
-basically a struct, holding the usual DOM information.
-The ``via_omkey`` method takes a tuple ``(DU, floor)`` and also requires the
-detector OID.
-Here are some examples how to use these methods::
-
-    >>> a_dom = db.doms.via_omkey((2, 16), "D_ARCA003")
-    >>> a_dom
-    DU2-DOM16 - DOM ID: 809548782
-       DOM UPI: 3.4/CH25H/1.60
-       CLB UPI: 3.4.3.2/V2-2-1/2.594
-       DET OID: D_ARCA003
-
-    >>> print(a_dom)
-    DU2-DOM16
-    >>> a_dom.clb_upi
-    '3.4.3.2/V2-2-1/2.594'
-    >>> a_dom.floor
-    16
-    >>> a_dom.du
-    2
-
-    >>> another_dom = db.doms.via_clb_upi("3.4.3.2/V2-2-1/2.296")
-    >>> print(another_dom)
-    DU2-DOM9
-    >>> another_dom
-    DU2-DOM9 - DOM ID: 808951763
-       DOM UPI: 3.4/CH39H/1.53
-       CLB UPI: 3.4.3.2/V2-2-1/2.296
-       DET OID: D_ARCA003
-
 
 Datalogs
 ~~~~~~~~
 This is probably the most interesting part of the database. The datalogs
 is a meta table which provides access to hundreds of different parameter types.
+Please note that you can also use the ``StreamDS`` class to access datalogs,
+see the section below.
 
 Parameters
 ^^^^^^^^^^
