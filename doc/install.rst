@@ -11,15 +11,18 @@ Important Note for Users of the CC-IN3P3 in Lyon
 KM3Pipe is preinstalled on the Lyon computing centre. Put this into your
 `~/.bashrc` or `~/.zshenv` (or whatever login script you prefer):::
 
-    source $KM3NET_THRONG_DIR/src/python/pyenv.sh
+    export KM3NET_THRONG_DIR=/pbs/throng/km3net  # if not already set!
+    export MODULEPATH=$KM3NET_THRONG_DIR/modulefiles
+    module load python/3.5.7
+
+Alternatively, if you need the old Python 2 version, you can load it with::
+
+    module load python/2.7.17
 
 To test if everything is working, run the following command::
 
     km3pipe test
 
-And you are ready to go! This will work on both Scientific Linux 6 and Cent OS
-machines as the ``$KM3NET_THRONG_DIR``, set by your group environment, is
-pointing to different directories.
 The Python environment also contains the latest versions of all important and
 commonly used scientific packages like scipy, numpy, scikit-learn, pandas etc.
 
