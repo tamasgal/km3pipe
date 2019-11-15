@@ -1025,27 +1025,6 @@ class TestTableFancaAttributes(TestCase):
         tab.pos = new_pos
         assert np.allclose(new_pos, tab.pos)
 
-    def test_same_shape_pos(self):
-        with pytest.raises(AttributeError):
-            p = self.arr_bare.pos
-        p = self.arr_wpos.pos
-        self.arr_wpos.pos = p
-        assert p is not None
-        # assert p.shape[1] == 3
-        with pytest.raises(ValueError):
-            self.arr_bare.dir = p
-
-    def test_same_shape_dir(self):
-        with pytest.raises(AttributeError):
-            p = self.arr_bare.dir
-        p = self.arr_wpos.dir
-        self.arr_wpos.dir = p
-        assert p is not None
-        # assert p.shape[1] == 3
-        a2 = self.arr_bare.copy()
-        with pytest.raises(ValueError):
-            self.arr_bare.dir = p
-
     def test_phi(self):
         tab = Table({
             'dir_x': [1, 0, 0],
@@ -1081,16 +1060,6 @@ class TestTableFancaAttributes(TestCase):
         })
         p = tab.azimuth
         assert p is not None
-
-    def test_pos_setter_if_pos_x_y_z_are_not_present_raises(self):
-        tab = Table({'a': 1})
-        with pytest.raises(ValueError):
-            tab.pos = [[1], [2], [3]]
-
-    def test_dir_setter_if_dir_x_y_z_are_not_present_raises(self):
-        tab = Table({'a': 1})
-        with pytest.raises(ValueError):
-            tab.dir = [[1], [2], [3]]
 
     def test_triggered_keeps_attrs(self):
         n = 5

@@ -536,17 +536,6 @@ class Table(np.recarray):
 
     @pos.setter
     def pos(self, arr):
-        try:
-            self.pos_x
-            self.pos_y
-            self.pos_z
-        except AttributeError:
-            raise ValueError(
-                "Table has no existing 'pos_{x,y,z}' entries. If you'd like "
-                "to append positions to this table, please use the "
-                "`.append_columns(['dir_x', 'dir_y', 'dir_z'], "
-                "[pos_x, pos_y, pos_z])` method."
-            )
         arr = np.atleast_2d(arr)
         assert arr.shape[1] == 3
         assert len(arr) == len(self)
@@ -560,17 +549,6 @@ class Table(np.recarray):
 
     @dir.setter
     def dir(self, arr):
-        try:
-            self.dir_x
-            self.dir_y
-            self.dir_z
-        except AttributeError:
-            raise ValueError(
-                "Table has no existing 'dir_{x,y,z}' entries. If you'd like "
-                "to append directions to this table, please use the "
-                "`.append_columns(['dir_x', 'dir_y', 'dir_z'], "
-                "[dir_x, dir_y, dir_z])` method."
-            )
         arr = np.atleast_2d(arr)
         assert arr.shape[1] == 3
         assert len(arr) == len(self)
