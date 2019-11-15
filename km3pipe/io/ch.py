@@ -192,7 +192,6 @@ class CHPump(Pump):
 
     def __next__(self):
         return self.process(Blob())
-        return blob
 
     def next(self):
         return self.__next__()
