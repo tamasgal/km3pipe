@@ -7,8 +7,6 @@ Pump for the jpp file read through aanet interface.
 """
 from __future__ import absolute_import, print_function, division
 
-import subprocess
-
 import numpy as np
 
 from km3pipe.core import Pump, Blob

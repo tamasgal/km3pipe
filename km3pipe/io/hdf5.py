@@ -21,7 +21,7 @@ except ImportError:
 
 import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
-from km3pipe.dataclasses import Table, NDArray, DEFAULT_H5LOC
+from km3pipe.dataclasses import Table, NDArray
 from km3pipe.logger import get_logger
 from km3pipe.tools import decamelise, camelise, split, istype, get_jpp_version
 
