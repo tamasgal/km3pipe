@@ -30,7 +30,6 @@ setuptools_scm
 statsmodels>=0.10.1
 tables>=3.4.2
 toml
-tornado
 tqdm
 twine
 urwid

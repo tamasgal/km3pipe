@@ -58,7 +58,6 @@ setup(
     entry_points={
         'console_scripts': [
             'km3pipe=km3pipe.cmd:main',
-            'km3srv=km3pipe.srv:main',
             'tohdf5=km3pipe.utils.tohdf5:main',
             'qtohdf5=km3pipe.utils.qtohdf5:main',
             'hdf2root=km3pipe.utils.hdf2root:main',
@@ -74,7 +73,6 @@ setup(
             'k40calib=km3pipe.utils.k40calib:main',
             'totmonitor=km3pipe.utils.totmonitor:main',
             'calibrate=km3pipe.utils.calibrate:main',
-            'rba=km3pipe.utils.rba:main',
             'i3toroot=km3pipe.utils.i3toroot:main',
             'i3root2hdf5=km3pipe.utils.i3root2hdf5:main',
             'i3shower2hdf5=km3pipe.utils.i3shower2hdf5:main',
