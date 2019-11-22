@@ -21,7 +21,7 @@ from pkg_resources import get_distribution
 # what is this?
 # sys.path.append('../')
 
-import km3pipe    # noqa
+# import km3pipe    # noqa
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -44,7 +44,6 @@ extensions = [
     'sphinx.ext.viewcode',
     'autoapi.extension',
     'numpydoc',
-    'sphinx_gallery.gen_gallery',
     'sphinxcontrib.programoutput',
 ]
 
@@ -78,12 +77,9 @@ master_doc = 'index'
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 # The full version, including alpha/beta/rc tags.
-release = get_distribution('km3pipe').version
-# The short X.Y version.
-version = '.'.join(release.split('.')[:2])
-
 # General information about the project.
-project = "KM3Pipe {}".format(km3pipe.__version__)
+
+project = "KM3Pipe"
 
 copyright = u'{0}, Tamás Gál and Moritz Lotze'.format(date.today().year)
 
@@ -133,7 +129,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = "KM3Pipe {}".format(km3pipe.__version__)
+html_title = "KM3Pipe (obsolete documentation)"
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 # html_short_title = 'Home'
@@ -285,20 +281,5 @@ texinfo_documents = [
 # texinfo_no_detailmenu = False
 
 # -- Options for Example Gallery ------------------------------------------
-sphinx_gallery_conf = {
-    # path to store the module using example template
-    'backreferences_dir': 'modules/generated',
-    'doc_module': ('km3pipe', ),
-    'default_thumb_file': '_static/default_gallery_thumbnail.png',
-    'examples_dirs': ['../examples'],
-    'gallery_dirs': ['auto_examples'],
-    'reference_url': {
-        'km3pipe': None,
-    },
-    'expected_failing_examples': [],
-    'abort_on_example_effor': False,
-    'show_memory': True,
-}
-
 # don't show the method summary twice
 numpydoc_show_class_members = False
