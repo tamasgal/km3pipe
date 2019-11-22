@@ -274,7 +274,8 @@ class LocalDBService(kp.Module):
         """Insert a row into the table with a given list of values"""
         cursor = self.connection.cursor()
         query = 'INSERT INTO {} ({}) VALUES ({})'.format(
-            table, ', '.join(column_names), ','.join("'"+str(v)+"'" for v in values)
+            table, ', '.join(column_names),
+            ','.join("'" + str(v) + "'" for v in values)
         )
         print(query)
         cursor.execute(query)

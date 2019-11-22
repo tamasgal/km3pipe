@@ -7,7 +7,7 @@ Common Plotting utils.
 from __future__ import absolute_import, print_function, division
 
 try:
-    import _tkinter  # noqa
+    import _tkinter    # noqa
 except ImportError:
     import matplotlib
     matplotlib.use('agg')
