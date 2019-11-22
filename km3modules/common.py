@@ -7,6 +7,7 @@ A collection of commonly used modules.
 """
 from __future__ import absolute_import, print_function, division
 
+import sqlite3
 from time import time
 
 import numpy as np
@@ -255,3 +256,65 @@ class MultiFilePump(kp.Module):
                 self.n_processed, len(self.filenames)
             )
         )
+
+
+class LocalDBService(kp.Module):
+    """Provides a local sqlite3 based database service to store information"""
+    def configure(self):
+        self.filename = self.require("filename")
+        self.connection = None
+
+        self.expose(self.create_table, 'create_table')
+        self.expose(self.table_exists, 'table_exists')
+        self.expose(self.insert_row, 'insert_row')
+
+        self._create_connection()
+
+    def insert_row(self, table, column_names, values):
+        """Insert a row into the table with a given list of values"""
+        cursor = self.connection.cursor()
+        query = 'INSERT INTO {} ({}) VALUES ({})'.format(
+            table, ', '.join(column_names), ','.join("'"+str(v)+"'" for v in values)
+        )
+        print(query)
+        cursor.execute(query)
+        self.connection.commit()
+
+    def create_table(self, name, columns, types, overwrite=False):
+        """Create a table with given columns and types, overwrite if specified
+
+
+        The `types` should be a list of SQL types, like ["INT", "TEXT", "INT"]
+        """
+        cursor = self.connection.cursor()
+        if overwrite:
+            cursor.execute('DROP TABLE IF EXISTS {}'.format(name))
+
+        cursor.execute(
+            'CREATE TABLE {} ({})'.format(
+                name,
+                ', '.join(['{} {}'.format(*c) for c in zip(columns, types)])
+            )
+        )
+        self.connection.commit()
+
+    def table_exists(self, name):
+        """Check if a table exists in the database"""
+        cursor = self.connection.cursor()
+        cursor.execute(
+            "SELECT count(name) FROM sqlite_master "
+            "WHERE type='table' AND name='{}'".format(name)
+        )
+        return cursor.fetchone()[0] == 1
+
+    def _create_connection(self):
+        """Create database connection"""
+        try:
+            self.connection = sqlite3.connect(self.filename)
+            self.cprint(sqlite3.version)
+        except sqlite3.Error as exception:
+            self.log.error(exception)
+
+    def finish(self):
+        if self.connection:
+            self.connection.close()
