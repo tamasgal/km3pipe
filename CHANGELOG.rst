@@ -1,12 +1,17 @@
 Unreleased changes
 ------------------
-* Removed deprecated properties from ``CLBMap``
-* Added ``km3modules.LocalDBService`` which provides an easy to use interface
-  to local sqlite3 databases.
-
 
 Version 8
 ---------
+
+8.24.0 / 2019-10-23
+~~~~~~~~~~~~~~~~~~~
+* Removed deprecated properties from ``CLBMap``
+* Added ``km3modules.LocalDBService`` which provides an easy to use interface
+  to local sqlite3 databases.
+* ``km3modules.plot.ztplot`` can now be used to recreate the zt-plots shown
+  by the online monitoring
+
 
 8.23.5 / 2019-10-21
 ~~~~~~~~~~~~~~~~~~~
