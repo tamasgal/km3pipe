@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 * Removed deprecated properties from ``CLBMap``
+* Added ``km3modules.LocalDBService`` which provides an easy to use interface
+  to local sqlite3 databases.
+
+
 Version 8
 ---------
 
