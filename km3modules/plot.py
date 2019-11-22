@@ -7,6 +7,7 @@ A collection of plotting functions and modules.
 """
 from __future__ import absolute_import, print_function, division
 
+from km3modules.hits import count_multiplicities
 from datetime import datetime
 import os
 import multiprocessing as mp
@@ -227,3 +228,123 @@ class IntraDOMCalibrationPlotter(kp.Module):
             })
             store.append('t0s', df, format='table', data_columns=True)
         store.close()
+
+
+def ztplot(event_info, hits, max_z=None, ytick_distance=200):
+    """Creates a ztplot like shown in the online monitoring"""
+    dus = set(hits.du)
+    doms = set(hits.dom_id)
+    fontsize = 16
+
+    hits = hits.append_columns('multiplicity',
+                               np.ones(len(hits))).sorted(by='time')
+
+    if max_z is None:
+        max_z = int(np.ceil(np.max(hits.pos_z) / 100.0)) * 100
+
+    for dom in doms:
+        dom_hits = hits[hits.dom_id == dom]
+        mltps, m_ids = count_multiplicities(dom_hits.time)
+        hits['multiplicity'][hits.dom_id == dom] = mltps
+
+    time_offset = np.min(hits[hits.triggered == True].time)
+    hits.time -= time_offset
+
+    n_plots = len(dus)
+    n_cols = int(np.ceil(np.sqrt(n_plots)))
+    n_rows = int(n_plots / n_cols) + (n_plots % n_cols > 0)
+    marker_fig, marker_axes = plt.subplots()    # for the marker size hack...
+    fig, axes = plt.subplots(
+        ncols=n_cols,
+        nrows=n_rows,
+        sharex=True,
+        sharey=True,
+        figsize=(16, 8),
+        constrained_layout=True
+    )
+
+    axes = [axes] if n_plots == 1 else axes.flatten()
+
+    for ax, du in zip(axes, dus):
+        du_hits = hits[hits.du == du]
+        trig_hits = du_hits[du_hits.triggered == True]
+
+        ax.scatter(
+            du_hits.time,
+            du_hits.pos_z,
+            s=du_hits.multiplicity * 30,
+            c='#09A9DE',
+            label='hit',
+            alpha=0.5
+        )
+        ax.scatter(
+            trig_hits.time,
+            trig_hits.pos_z,
+            s=trig_hits.multiplicity * 30,
+            alpha=0.8,
+            marker="+",
+            c='#FF6363',
+            label='triggered hit'
+        )
+        ax.set_title(
+            'DU{0}'.format(int(du)), fontsize=fontsize, fontweight='bold'
+        )
+
+        # The only way I could create a legend with matching marker sizes
+        max_multiplicity = int(np.max(du_hits.multiplicity))
+        markers = list(
+            range(
+                0, max_multiplicity,
+                np.ceil(max_multiplicity / 10).astype(int)
+            )
+        )
+        custom_markers = [
+            marker_axes.
+            scatter([], [], s=mult * 30, color='#09A9DE', lw=0, alpha=0.5)
+            for mult in markers
+        ] + [marker_axes.scatter([], [], s=30, marker="+", c='#FF6363')]
+        ax.legend(
+            custom_markers,
+            ['multiplicity'] + ["       %d" % m
+                                for m in markers[1:]] + ['triggered'],
+            scatterpoints=1,
+            markerscale=1,
+            loc='upper left',
+            frameon=True,
+            framealpha=0.7
+        )
+
+    for idx, ax in enumerate(axes):
+        ax.set_ylim(0, max_z)
+        ax.tick_params(labelsize=fontsize)
+        ax.yaxis.set_major_locator(ticker.MultipleLocator(ytick_distance))
+        xlabels = ax.get_xticklabels()
+        for label in xlabels:
+            label.set_rotation(45)
+
+        if idx % n_cols == 0:
+            ax.set_ylabel('z [m]', fontsize=fontsize)
+        if idx >= len(axes) - n_cols:
+            ax.set_xlabel('time [ns]', fontsize=fontsize)
+
+    trigger_params = ' '.join([
+        trig for trig, trig_check in (("MX", kp.io.daq.is_mxshower),
+                                      ("3DM", kp.io.daq.is_3dmuon),
+                                      ("3DS", kp.io.daq.is_3dshower))
+        if trig_check(int(event_info.trigger_mask[0]))
+    ])
+
+    plt.suptitle(
+        "z-t-Plot for DetID-{0} (t0set: {1}), Run {2}, FrameIndex {3}, "
+        "TriggerCounter {4}, Overlays {5}, Trigger: {8}"
+        "\n{7} UTC (time offset: {6} ns)".format(
+            event_info.det_id[0], t0set, event_info.run_id[0],
+            event_info.frame_index[0], event_info.trigger_counter[0],
+            event_info.overlays[0], time_offset,
+            datetime.utcfromtimestamp(event_info.utc_seconds), trigger_params
+        ),
+        fontsize=fontsize,
+        y=1.05
+    )
+
+    return fig
