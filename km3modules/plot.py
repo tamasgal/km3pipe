@@ -7,7 +7,7 @@ A collection of plotting functions and modules.
 """
 from __future__ import absolute_import, print_function, division
 
-from km3modules.hits import count_multiplicities
+from collections import Counter
 from datetime import datetime
 import os
 import multiprocessing as mp
@@ -19,10 +19,13 @@ import matplotlib
 # Force matplotlib to not use any Xwindows backend.
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt    # noqa
+import matplotlib.ticker as ticker
 from matplotlib import pylab    # noqa
 
 import km3pipe as kp    # noqa
 import km3pipe.style    # noqa
+
+from km3modules.hits import count_multiplicities
 
 
 def plot_dom_parameters(
@@ -230,17 +233,33 @@ class IntraDOMCalibrationPlotter(kp.Module):
         store.close()
 
 
-def ztplot(event_info, hits, max_z=None, ytick_distance=200):
+def ztplot(
+        hits,
+        title=None,
+        max_z=None,
+        figsize=(16, 8),
+        n_dus=4,
+        ytick_distance=200,
+        max_multiplicity_entries=10,
+        grid_lines=[]
+):
     """Creates a ztplot like shown in the online monitoring"""
-    dus = set(hits.du)
-    doms = set(hits.dom_id)
     fontsize = 16
+
+    dus = set(hits.du)
+
+    if n_dus is not None:
+        dus = [c[0] for c in Counter(hits.du).most_common(n_dus)]
+        mask = [du in dus for du in hits.du]
+        hits = hits[mask]
+
+    doms = set(hits.dom_id)
 
     hits = hits.append_columns('multiplicity',
                                np.ones(len(hits))).sorted(by='time')
 
     if max_z is None:
-        max_z = int(np.ceil(np.max(hits.pos_z) / 100.0)) * 100
+        max_z = int(np.ceil(np.max(hits.pos_z) / 100.0)) * 100 * 1.05
 
     for dom in doms:
         dom_hits = hits[hits.dom_id == dom]
@@ -253,13 +272,14 @@ def ztplot(event_info, hits, max_z=None, ytick_distance=200):
     n_plots = len(dus)
     n_cols = int(np.ceil(np.sqrt(n_plots)))
     n_rows = int(n_plots / n_cols) + (n_plots % n_cols > 0)
-    marker_fig, marker_axes = plt.subplots()    # for the marker size hack...
+    marker_fig, marker_axes = plt.subplots()
+    # for the marker size hack...
     fig, axes = plt.subplots(
         ncols=n_cols,
         nrows=n_rows,
         sharex=True,
         sharey=True,
-        figsize=(16, 8),
+        figsize=figsize,
         constrained_layout=True
     )
 
@@ -267,6 +287,8 @@ def ztplot(event_info, hits, max_z=None, ytick_distance=200):
 
     for ax, du in zip(axes, dus):
         du_hits = hits[hits.du == du]
+        for grid_line in grid_lines:
+            ax.axhline(grid_line, lw=1, color='b', ls='--', alpha=0.15)
         trig_hits = du_hits[du_hits.triggered == True]
 
         ax.scatter(
@@ -295,7 +317,8 @@ def ztplot(event_info, hits, max_z=None, ytick_distance=200):
         markers = list(
             range(
                 0, max_multiplicity,
-                np.ceil(max_multiplicity / 10).astype(int)
+                np.ceil(max_multiplicity / max_multiplicity_entries
+                        ).astype(int)
             )
         )
         custom_markers = [
@@ -327,24 +350,7 @@ def ztplot(event_info, hits, max_z=None, ytick_distance=200):
         if idx >= len(axes) - n_cols:
             ax.set_xlabel('time [ns]', fontsize=fontsize)
 
-    trigger_params = ' '.join([
-        trig for trig, trig_check in (("MX", kp.io.daq.is_mxshower),
-                                      ("3DM", kp.io.daq.is_3dmuon),
-                                      ("3DS", kp.io.daq.is_3dshower))
-        if trig_check(int(event_info.trigger_mask[0]))
-    ])
-
-    plt.suptitle(
-        "z-t-Plot for DetID-{0} (t0set: {1}), Run {2}, FrameIndex {3}, "
-        "TriggerCounter {4}, Overlays {5}, Trigger: {8}"
-        "\n{7} UTC (time offset: {6} ns)".format(
-            event_info.det_id[0], t0set, event_info.run_id[0],
-            event_info.frame_index[0], event_info.trigger_counter[0],
-            event_info.overlays[0], time_offset,
-            datetime.utcfromtimestamp(event_info.utc_seconds), trigger_params
-        ),
-        fontsize=fontsize,
-        y=1.05
-    )
+    if title is not None:
+        fig.suptitle(title, fontsize=fontsize, y=1.05)
 
     return fig
