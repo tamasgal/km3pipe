@@ -469,6 +469,8 @@ class Module(object):
     """The module which can be attached to the pipeline"""
     def __init__(self, name=None, **parameters):
         log.debug("Initialising {0}".format(name))
+        if name is None:
+            name = self.__class__.__name__
         self._name = name
         self.parameters = parameters
         self._processed_parameters = []
