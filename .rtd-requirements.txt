@@ -1,6 +1,0 @@
-pydocstyle
-sphinx-rtd-theme
-sphinx
-sphinxcontrib-napoleon
-sphinxcontrib-programoutput
-sphinxcontrib-websupport
