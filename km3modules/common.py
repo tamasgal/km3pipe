@@ -262,6 +262,7 @@ class LocalDBService(kp.Module):
     """Provides a local sqlite3 based database service to store information"""
     def configure(self):
         self.filename = self.require("filename")
+        self.thread_safety = self.get('thread_safety', default=True)
         self.connection = None
 
         self.expose(self.create_table, 'create_table')
@@ -270,6 +271,16 @@ class LocalDBService(kp.Module):
         self.expose(self.query, 'query')
 
         self._create_connection()
+
+    def _create_connection(self):
+        """Create database connection"""
+        try:
+            self.connection = sqlite3.connect(
+                self.filename, check_same_thread=self.thread_safety
+            )
+            self.cprint(sqlite3.version)
+        except sqlite3.Error as exception:
+            self.log.error(exception)
 
     def query(self, query):
         """Execute a SQL query and return the result of fetchall()"""
@@ -314,14 +325,6 @@ class LocalDBService(kp.Module):
             "WHERE type='table' AND name='{}'".format(name)
         )
         return cursor.fetchone()[0] == 1
-
-    def _create_connection(self):
-        """Create database connection"""
-        try:
-            self.connection = sqlite3.connect(self.filename)
-            self.cprint(sqlite3.version)
-        except sqlite3.Error as exception:
-            self.log.error(exception)
 
     def finish(self):
         if self.connection:
