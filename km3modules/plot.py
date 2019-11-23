@@ -351,6 +351,6 @@ def ztplot(
             ax.set_xlabel('time [ns]', fontsize=fontsize)
 
     if title is not None:
-        fig.suptitle(title, fontsize=fontsize, y=1.05)
+        plt.suptitle(title, fontsize=fontsize, y=1.05)
 
     return fig
