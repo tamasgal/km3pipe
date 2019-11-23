@@ -353,6 +353,13 @@ class Pipeline(object):
         self.init_timer.stop()
         log.info("Trapping CTRL+C and starting to drain.")
         signal.signal(signal.SIGINT, self._handle_ctrl_c)
+
+        self.log.info("Preparing modules to process")
+        for module in self.modules:
+            if hasattr(module, 'prepare'):
+                log.info("Preparing {0}".format(module.name))
+                module.prepare()
+
         with ignored(KeyboardInterrupt):
             return self._drain(cycles)
 
@@ -542,6 +549,10 @@ class Module(object):
 
     def require_service(self, name, why=''):
         self.required_services[name] = why
+
+    def prepare(self):
+        """Prepare! Executed between configure and the first process"""
+        return
 
     def process(self, blob):    # pylint: disable=R0201
         """Knead the blob and return it"""
