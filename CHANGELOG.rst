@@ -1,5 +1,10 @@
 Unreleased changes
 ------------------
+* ``km3modules.hits.count_multiplicities`` now supports the latest numba
+  version (and is fast again)
+* ``km3modules.plot.ztplot`` improved
+* ``km3modules.common.LocalDBService`` has now an option to disable thread
+  safety
 
 Version 8
 ---------
