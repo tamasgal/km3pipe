@@ -235,6 +235,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
 
 def ztplot(
         hits,
+        filename=None,
         title=None,
         max_z=None,
         figsize=(16, 8),
@@ -352,5 +353,7 @@ def ztplot(
 
     if title is not None:
         plt.suptitle(title, fontsize=fontsize, y=1.05)
+    if filename is not None:
+        plt.savefig(filename, dpi=120, bbox_inches="tight")
 
     return fig
