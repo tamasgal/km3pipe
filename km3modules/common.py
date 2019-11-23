@@ -216,7 +216,7 @@ class MultiFilePump(kp.Module):
       Reindex the group_id by counting from 0 and increasing it continuously,
       this makes sure that the group_id is unique for each blob, otherwise
       the pump will usually reset it to 0 for every new file.
-    
+
     """
     def configure(self):
         self.pump = self.require('pump')
@@ -267,8 +267,15 @@ class LocalDBService(kp.Module):
         self.expose(self.create_table, 'create_table')
         self.expose(self.table_exists, 'table_exists')
         self.expose(self.insert_row, 'insert_row')
+        self.expose(self.query, 'query')
 
         self._create_connection()
+
+    def query(self, query):
+        """Execute a SQL query and return the result of fetchall()"""
+        cursor = self.connection.cursor()
+        cursor.execute(query)
+        return cursor.fetchall()
 
     def insert_row(self, table, column_names, values):
         """Insert a row into the table with a given list of values"""
