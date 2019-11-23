@@ -295,7 +295,6 @@ class LocalDBService(kp.Module):
             table, ', '.join(column_names),
             ','.join("'" + str(v) + "'" for v in values)
         )
-        print(query)
         cursor.execute(query)
         self.connection.commit()
 
