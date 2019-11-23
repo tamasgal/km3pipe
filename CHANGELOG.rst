@@ -1,13 +1,19 @@
 Unreleased changes
 ------------------
+
+Version 8
+---------
+
+8.24.3 / 2019-10-23
+~~~~~~~~~~~~~~~~~~~
+
 * ``km3modules.hits.count_multiplicities`` now supports the latest numba
   version (and is fast again)
 * ``km3modules.plot.ztplot`` improved
 * ``km3modules.common.LocalDBService`` has now an option to disable thread
   safety
-
-Version 8
----------
+* ``statsmodels`` version was fixed to 0.10.1 due to Python 2.7 compat, which
+  will drop by the end of 2019
 
 8.24.0 / 2019-10-23
 ~~~~~~~~~~~~~~~~~~~
