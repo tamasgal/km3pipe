@@ -1,6 +1,9 @@
 Unreleased changes
 ------------------
 
+* ``km3modules.communication.ELOGService`` has been added to talk to the ELOG
+  server
+
 Version 8
 ---------
 
