@@ -1,11 +1,13 @@
 Unreleased changes
 ------------------
 
-* ``km3modules.communication.ELOGService`` has been added to talk to the ELOG
-  server
-
 Version 8
 ---------
+
+8.25.0 / 2019-10-25
+~~~~~~~~~~~~~~~~~~~
+* ``km3modules.communication.ELOGService`` has been added to talk to the ELOG
+  server
 
 8.24.3 / 2019-10-23
 ~~~~~~~~~~~~~~~~~~~
