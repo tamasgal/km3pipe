@@ -21,7 +21,7 @@ except ImportError:
 
 import numpy as np
 
-from km3pipe.core import Pump, Module, Blob
+from km3pipe.core import Module, Blob
 from km3pipe.dataclasses import Table
 from km3pipe.sys import ignored
 from km3pipe.logger import get_logger, get_printer
@@ -126,7 +126,7 @@ class TimesliceParser(Module):
             return blob
 
 
-class DAQPump(Pump):
+class DAQPump(Module):
     """A pump for binary DAQ files."""
     def configure(self):
         self.filename = self.get('filename')
@@ -636,7 +636,7 @@ class TMCHData(object):
         return self.__str__()
 
 
-class TMCHRepump(Pump):
+class TMCHRepump(Module):
     """Takes a IO_MONIT raw dump and replays it."""
     def configure(self):
         filename = self.require("filename")

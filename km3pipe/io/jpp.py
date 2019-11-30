@@ -9,7 +9,7 @@ from __future__ import absolute_import, print_function, division
 
 import numpy as np
 
-from km3pipe.core import Pump, Blob
+from km3pipe.core import Blob, Module
 from km3pipe.dataclasses import Table
 from km3pipe.logger import get_logger
 
@@ -24,7 +24,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-class EventPump(Pump):
+class EventPump(Module):
     """A pump for DAQEvents in JPP files.
 
     Parameters
@@ -137,7 +137,7 @@ class EventPump(Pump):
         return self._current_blob
 
 
-class TimeslicePump(Pump):
+class TimeslicePump(Module):
     """A pump to read and extract timeslices. Currently only hits are read.
 
     Required Parameters
@@ -272,7 +272,7 @@ class TimeslicePump(Pump):
             yield self.get_blob(i)
 
 
-class SummaryslicePump(Pump):
+class SummaryslicePump(Module):
     """Preliminary Summaryslice reader"""
     def configure(self):
         filename = self.require('filename')
@@ -333,7 +333,7 @@ class SummaryslicePump(Pump):
         return next(self.blobs)
 
 
-class FitPump(Pump):
+class FitPump(Module):
     """A pump for JFit objects in JPP files.
 
     Parameters

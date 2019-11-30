@@ -2,10 +2,10 @@
 
 __author__ = 'tamasgal'
 
-from km3pipe.core import Pipeline, Module, Pump
+import km3pipe as kp
 
 
-class DummyPump(Pump):
+class DummyPump(kp.Module):
     """A pump demonstration with a dummy list as data."""
     def configure(self):
         self.data = [{'nr': 1}, {'nr': 2}]
@@ -20,7 +20,7 @@ class DummyPump(Pump):
             yield blob
 
 
-class Foo(Module):
+class Foo(kp.Module):
     """A dummy module with optional and required parameters"""
     def configure(self):
         self.foo = self.get('foo', default='default_foo')    # optional
@@ -44,13 +44,13 @@ def moo(blob):
     return blob
 
 
-class PrintBlob(Module):
+class PrintBlob(kp.Module):
     def process(self, blob):
         print(blob)
         return blob
 
 
-pipe = Pipeline()
+pipe = kp.Pipeline()
 pipe.attach(DummyPump, 'the_pump')
 pipe.attach(Foo, bar='dummybar', baz=69)
 pipe.attach(moo)

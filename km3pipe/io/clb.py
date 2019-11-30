@@ -12,7 +12,7 @@ from collections import namedtuple
 import datetime
 import pytz
 
-from km3pipe.core import Pump
+from km3pipe.core import Module
 from km3pipe.sys import ignored
 from km3pipe.logger import get_logger
 
@@ -29,7 +29,7 @@ log = get_logger(__name__)    # pylint: disable=C0103
 UTC_TZ = pytz.timezone('UTC')
 
 
-class CLBPump(Pump):
+class CLBPump(Module):
     """A pump for binary CLB files."""
     def configure(self):
         self.filename = self.get('filename')

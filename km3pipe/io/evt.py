@@ -11,7 +11,7 @@ import sys
 
 import numpy as np
 
-from km3pipe.core import Pump, Blob
+from km3pipe.core import Blob, Module
 from km3pipe.dataclasses import Table
 from km3pipe.logger import get_logger
 from km3pipe.tools import split
@@ -35,7 +35,7 @@ def try_decode_string(text):
         return text
 
 
-class EvtPump(Pump):    # pylint: disable:R0902
+class EvtPump(Module):    # pylint: disable:R0902
     """Provides a pump for EVT-files.
 
     Parameters

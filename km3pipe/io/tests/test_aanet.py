@@ -7,7 +7,7 @@ import numpy as np
 import km3pipe as kp
 from km3pipe.testing import TestCase, patch, Mock, skipif, skip
 from km3pipe.io.aanet import AanetPump, MetaParser
-from km3pipe.core import Pipeline, Module, Pump
+from km3pipe.core import Pipeline, Module
 
 try:
     import aa

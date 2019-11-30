@@ -20,7 +20,7 @@ except ImportError:
     jit = lambda f: f
 
 import km3pipe as kp
-from km3pipe.core import Pump, Module, Blob
+from km3pipe.core import Module, Blob
 from km3pipe.dataclasses import Table, NDArray
 from km3pipe.logger import get_logger
 from km3pipe.tools import decamelise, camelise, split, istype, get_jpp_version
@@ -547,7 +547,7 @@ class HDF5Sink(Module):
         self.cprint("HDF5 file written to: {}".format(self.filename))
 
 
-class HDF5Pump(Pump):
+class HDF5Pump(Module):
     """Read KM3NeT-formatted HDF5 files, event-by-event.
 
     Parameters
