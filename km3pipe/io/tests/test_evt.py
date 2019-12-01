@@ -267,7 +267,7 @@ class TestEvtFilePump(TestCase):
         pump.finish()
 
     def test_context(self):
-        with EvtPump(self.fname) as ef:
+        with EvtPump(filename=self.fname) as ef:
             self.assertEqual(self.fname, ef.filename)
             assert ef[0] is not None
             for blob in ef:

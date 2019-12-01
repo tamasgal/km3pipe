@@ -342,7 +342,8 @@ class EvtPump(Module):    # pylint: disable:R0902
 
     def finish(self):
         """Clean everything up"""
-        self.fobj.close()
+        if self.fobj:
+            self.fobj.close()
 
 
 class Parser(object):
