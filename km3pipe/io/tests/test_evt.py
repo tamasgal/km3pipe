@@ -23,30 +23,6 @@ TEST_DATA_DIR = join(dirname(__file__), '../../kp-data/test_data/')
 
 class TestEvtPump(TestCase):
     def setUp(self):
-        self.valid_evt_header = "\n".join((
-            "start_run: 1", "cut_nu: 0.100E+03 0.100E+09-0.100E+01 0.100E+01",
-            "spectrum: -1.40", "physics: gSeaGen 4.1 180126  165142",
-            "physics: GENIE 2.10.2 180126  165142", "end_event:",
-            "start_event: 12 1",
-            "track_in: 1 -389.951 213.427 516 -0.204562 -0.60399 -0.770293" +
-            " 9.092 0 5 40.998", "hit: 1 44675 1 1170.59 5 2 1 1170.59",
-            "end_event:", "start_event: 13 1",
-            "track_in:  1 272.695 -105.613 516 -0.425451 -0.370522 -0.825654" +
-            " 2431.47 0 5 -1380",
-            "track_in:  2 272.348 -106.292 516 -0.425451 -0.370522 -0.825654" +
-            " 24670.7 1.33 5 -1484",
-            "track_in:  3 279.47 -134.999 516 -0.425451 -0.370522 -0.825654" +
-            " 164.586 26.7 5 601.939", "hit: 1 20140 1 1140.06 5 1 1 1140.06",
-            "hit: 2 20159 1 1177.14 5 1 1 1177.14",
-            "hit: 3 20164 1 1178.19 5 1 1 1178.19",
-            "hit: 4 20170 1 1177.23 5 1 1 1177.23",
-            "hit: 5 20171 2 1177.25 5 1 2 1177.25", "end_event:",
-            "start_event: 14 1",
-            "track_in:  1 40.256 -639.888 516 0.185998 0.476123 -0.859483" +
-            " 10016.1 0 5 -1668", "hit: 1 33788 1 2202.81 5 1 1 2202.81",
-            "hit: 2 33801 1 2248.95 5 1 1 2248.95",
-            "hit: 3 33814 1 2249.2 5 1 1 2249.2", "end_event:"
-        ))
         self.no_evt_header = "\n".join((
             "start_event: 12 1",
             "track_in: 1 -389.951 213.427 516 -0.204562 -0.60399 -0.770293" +
@@ -73,8 +49,9 @@ class TestEvtPump(TestCase):
             ("start_event: 1 1", "corrupt line", "end_event:")
         )
 
-        self.pump = EvtPump(parsers=[])
-        self.pump.blob_file = StringIO(self.valid_evt_header)
+        self.pump = EvtPump(
+            filename=join(TEST_DATA_DIR, "evt_valid_header.evt"), parsers=[]
+        )
 
     def tearDown(self):
         self.pump.blob_file.close()
@@ -91,15 +68,6 @@ class TestEvtPump(TestCase):
         self.assertAlmostEqual(1, len(raw_header['spectrum']))
         assert 'gSeaGen' == raw_header['physics'][0][0]
         assert 'GENIE' == raw_header['physics'][1][0]
-
-
-#    def test_incomplete_header_raises_value_error(self):
-#        temp_file = StringIO(self.corrupt_evt_header)
-#        pump = EvtPump()
-#        pump.blob_file = temp_file
-#        with self.assertRaises(ValueError):
-#            pump.extract_header()
-#        temp_file.close()
 
     def test_record_offset_saves_correct_offset(self):
         self.pump.blob_file = StringIO('a' * 42)
@@ -228,31 +196,34 @@ class TestEvtPump(TestCase):
         self.pump.get_blob(0)
 
     def test_parsers_are_ignored_if_not_valid(self):
-        self.pump = EvtPump(parsers=['a', 'b'])
-        self.pump.blob_file = StringIO(self.valid_evt_header)
+        self.pump = EvtPump(
+            filename=join(TEST_DATA_DIR, "evt_valid_header.evt"),
+            parsers=['a', 'b']
+        )
         assert 'a' not in self.pump.parsers
         assert 'b' not in self.pump.parsers
 
     def test_parsers_are_added(self):
-        self.pump = EvtPump(parsers=['km3sim'])
-        self.pump.blob_file = StringIO(self.valid_evt_header)
+        self.pump = EvtPump(
+            join(TEST_DATA_DIR, "evt_valid_header.evt"), parsers=['km3sim']
+        )
         assert EVT_PARSERS['km3sim'] in self.pump.parsers
 
     def test_custom_parser(self):
         def a_parser(blob):
             blob['foo'] = 23
 
-        self.pump = EvtPump(parsers=[a_parser])
-        self.pump.blob_file = StringIO(self.valid_evt_header)
-        self.pump.extract_header()
-        self.pump.prepare_blobs()
+        self.pump = EvtPump(
+            join(TEST_DATA_DIR, "evt_valid_header.evt"), parsers=[a_parser]
+        )
         blob = self.pump[0]
 
         assert 23 == blob['foo']
 
     def test_auto_parser_finds_all_physics_parsers(self):
-        self.pump = EvtPump(parsers='auto')
-        self.pump.blob_file = StringIO(self.valid_evt_header)
+        self.pump = EvtPump(
+            join(TEST_DATA_DIR, "evt_valid_header.evt"), parsers='auto'
+        )
         self.pump.extract_header()
         assert EVT_PARSERS['gseagen'] in self.pump.parsers
 
@@ -302,6 +273,7 @@ class TestPropa(TestCase):
         assert 'track_in' in blob
         pump.finish()
 
+    @skip
     def test_filenames(self):
         pump = EvtPump(filenames=self.fnames, parsers=['propa'])
         assert EVT_PARSERS['propa'] in pump.parsers

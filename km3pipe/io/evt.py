@@ -53,41 +53,15 @@ class EvtPump(Module):    # pylint: disable:R0902
         If enabled, a cache of the event indices is created when loading
         the file. Enable it if you want to jump around and inspect the
         events non-consecutively. [default: False]
-    basename: str
-        The common part of the filenames if you want to process multiple
-        files e.g. file1.evt, file2.evt and file3.evt. During processing,
-        the files will be concatenated behind the scenes.
-        You need to specify the `index_stop` and `index_start`
-        (1 and 3 for the example).
-    suffix: str
-        A string to append to each filename (before ".evt"), when basename
-        is given. [default: '']
-    index_start: int
-        The starting index if you process multiple files at once. [default: 1]
-    index_stop: int
-        The last index if you process multiple files at once. [default: 1]
-    n_digits: int or None
-        The number of digits for indexing multiple files. [default: None]
-        `None` means no leading zeros.
     exclude_tags: list of strings
         The tags in the EVT file, which should be ignored (e.g. if they
         cause parse errors)
 
     """
     def configure(self):
-        self.filename = self.get('filename', default=None)
-        self.filenames = self.get('filenames', default=[])
+        self.filename = self.require('filename')
         parsers = self.get('parsers', default='auto')
         self.cache_enabled = self.get('cache_enabled', default=False)
-        self.basename = self.get('basename', default=None)
-        self.suffix = self.get('suffix', default='')
-        self.index_start = self.get('index_start', default=1)
-        if self.filenames:
-            self.filename = self.filenames[0]
-            self.index_stop = len(self.filenames)
-        else:
-            self.index_stop = self.get('index_stop', default=1)
-        self.n_digits = self.get('n_digits', default=None)
         self.exclude_tags = self.get('exclude_tags')
         if self.exclude_tags is None:
             self.exclude_tags = []
@@ -100,9 +74,6 @@ class EvtPump(Module):    # pylint: disable:R0902
         self._auto_parse = False
         self.fobj = None
 
-        if not self.filename and not self.filenames and not self.basename:
-            print("No file- or basename(s) defined!")
-
         if parsers:
             if parsers == 'auto':
                 self.cprint("Automatic tag parsing enabled.")
@@ -113,24 +84,9 @@ class EvtPump(Module):    # pylint: disable:R0902
                     parsers = [parsers]
                 self._register_parsers(parsers)
 
-        self.file_index = int(self.index_start)
-        if self.filenames:
-            self.filename = self.filenames[self.file_index - 1]
-        elif self.basename:
-            self.log.info(
-                "Got a basename ({}), constructing the first "
-                "filename.".format(self.basename)
-            )
-            file_index = self._get_file_index_str()
-
-            self.filename = "{}{}{}.evt"  \
-                            .format(self.basename, file_index, self.suffix)
-            self.log.info("Constructed filename: {}".format(self.filename))
-
-        if self.filename:
-            self.cprint("Opening {0}".format(self.filename))
-            self.fobj = open(self.filename, "r")
-            self.prepare_blobs()
+        self.cprint("Opening {0}".format(self.filename))
+        self.fobj = open(self.filename, "r")
+        self.prepare_blobs()
 
     def _register_parsers(self, parsers):
         self.log.info("Found parsers {}".format(parsers))
@@ -152,13 +108,6 @@ class EvtPump(Module):    # pylint: disable:R0902
         self.raw_header = None
         self.event_offsets = []
         self.index = 0
-
-    def _get_file_index_str(self):
-        """Create a string out of the current file_index"""
-        file_index = str(self.file_index)
-        if self.n_digits is not None:
-            file_index = file_index.zfill(self.n_digits)
-        return file_index
 
     def prepare_blobs(self):
         """Populate the blobs"""
@@ -214,38 +163,8 @@ class EvtPump(Module):    # pylint: disable:R0902
         """Pump the next blob to the modules"""
         try:
             blob = self.get_blob(self.index)
-
         except IndexError:
-            self.log.info("Got an IndexError, trying the next file")
-            if (self.basename
-                    or self.filenames) and self.file_index < self.index_stop:
-                self.file_index += 1
-                self.log.info("Now at file_index={}".format(self.file_index))
-                self._reset()
-                self.fobj.close()
-                self.log.info("Resetting blob index to 0")
-                self.index = 0
-                file_index = self._get_file_index_str()
-                if self.filenames:
-                    self.filename = self.filenames[self.file_index - 1]
-                elif self.basename:
-                    self.filename = "{}{}{}.evt"  \
-                                    .format(self.basename, file_index, self.suffix)
-                self.log.info("Next filename: {}".format(self.filename))
-                self.cprint("Opening {0}".format(self.filename))
-                self.fobj = open(self.filename, "r")
-                self.prepare_blobs()
-                try:
-                    blob = self.get_blob(self.index)
-                except IndexError:
-                    self.log.warning(
-                        "No blob found in file {}".format(self.filename)
-                    )
-                else:
-                    return blob
-            self.log.info("No files left, terminating the pipeline")
             raise StopIteration
-
         self.index += 1
         return blob
 
@@ -282,7 +201,7 @@ class EvtPump(Module):    # pylint: disable:R0902
 
     def _create_blob(self):
         """Parse the next event from the current file position"""
-        blob = None
+        blob = Blob()
         for line in self.fobj:
             line = try_decode_string(line)
             line = line.strip()
