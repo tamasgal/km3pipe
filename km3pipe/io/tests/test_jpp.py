@@ -2,7 +2,7 @@
 # pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
 from km3pipe.testing import TestCase, surrogate, patch
 
-from km3pipe.io.jpp import EventPump, TimeslicePump, SummaryslicePump, FitPump
+from km3pipe.io.jpp import EventPump, TimeslicePump, SummaryslicePump
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2018, Tamas Gal and the KM3NeT collaboration."
@@ -69,23 +69,3 @@ class TestSummaryslicePump(TestCase):
         filename = 'a.root'
         SummaryslicePump(filename)
         reader_mock.assert_called_with(filename.encode())
-
-
-class TestFitPump(TestCase):
-    @surrogate('jppy.PyJFitReader')
-    @patch('jppy.PyJFitReader')
-    def test_init(self, reader_mock):
-        filename = 'a.root'
-        FitPump(filename)
-        reader_mock.assert_called_with(filename.encode())
-
-    @surrogate('jppy.PyJFitReader')
-    @patch('jppy.PyJFitReader')
-    def test_resize_buffers(self, reader_mock):
-        filename = 'a.root'
-        pump = FitPump(filename)
-        assert len(pump._pos_xs) == pump.buf_size
-        new_buf_size = 8000
-        pump._resize_buffers(new_buf_size)
-        assert pump.buf_size == new_buf_size
-        assert len(pump._pos_xs) == new_buf_size
