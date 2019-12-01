@@ -98,6 +98,7 @@ class EvtPump(Module):    # pylint: disable:R0902
         self.whole_file_cached = False
         self.parsers = []
         self._auto_parse = False
+        self.fobj = None
 
         if not self.filename and not self.filenames and not self.basename:
             print("No file- or basename(s) defined!")
@@ -128,7 +129,7 @@ class EvtPump(Module):    # pylint: disable:R0902
 
         if self.filename:
             self.cprint("Opening {0}".format(self.filename))
-            self.open_file(self.filename)
+            self.fobj = open(self.filename, "r")
             self.prepare_blobs()
 
     def _register_parsers(self, parsers):
@@ -169,13 +170,13 @@ class EvtPump(Module):    # pylint: disable:R0902
         """Create a dictionary with the EVT header information"""
         self.log.info("Extracting the header")
         raw_header = self.raw_header = defaultdict(list)
-        first_line = self.blob_file.readline()
+        first_line = self.fobj.readline()
         first_line = try_decode_string(first_line)
-        self.blob_file.seek(0, 0)
+        self.fobj.seek(0, 0)
         if not first_line.startswith(str('start_run')):
             self.log.warning("No header found.")
             return raw_header
-        for line in iter(self.blob_file.readline, ''):
+        for line in iter(self.fobj.readline, ''):
             line = try_decode_string(line)
             line = line.strip()
             try:
@@ -197,7 +198,7 @@ class EvtPump(Module):    # pylint: disable:R0902
         if index > len(self.event_offsets) - 1:
             self.log.info("Index not in cache, caching offsets")
             self._cache_offsets(index, verbose=False)
-        self.blob_file.seek(self.event_offsets[index], 0)
+        self.fobj.seek(self.event_offsets[index], 0)
         blob = self._create_blob()
         if blob is None:
             self.log.info("Empty blob created...")
@@ -221,7 +222,7 @@ class EvtPump(Module):    # pylint: disable:R0902
                 self.file_index += 1
                 self.log.info("Now at file_index={}".format(self.file_index))
                 self._reset()
-                self.blob_file.close()
+                self.fobj.close()
                 self.log.info("Resetting blob index to 0")
                 self.index = 0
                 file_index = self._get_file_index_str()
@@ -232,7 +233,7 @@ class EvtPump(Module):    # pylint: disable:R0902
                                     .format(self.basename, file_index, self.suffix)
                 self.log.info("Next filename: {}".format(self.filename))
                 self.cprint("Opening {0}".format(self.filename))
-                self.open_file(self.filename)
+                self.fobj = open(self.filename, "r")
                 self.prepare_blobs()
                 try:
                     blob = self.get_blob(self.index)
@@ -253,13 +254,13 @@ class EvtPump(Module):    # pylint: disable:R0902
         if not up_to_index:
             if verbose:
                 self.cprint("Caching event file offsets, this may take a bit.")
-            self.blob_file.seek(0, 0)
+            self.fobj.seek(0, 0)
             self.event_offsets = []
             if not self.raw_header:
                 self.event_offsets.append(0)
         else:
-            self.blob_file.seek(self.event_offsets[-1], 0)
-        for line in iter(self.blob_file.readline, ''):
+            self.fobj.seek(self.event_offsets[-1], 0)
+        for line in iter(self.fobj.readline, ''):
             line = try_decode_string(line)
             if line.startswith('end_event:'):
                 self._record_offset()
@@ -276,13 +277,13 @@ class EvtPump(Module):    # pylint: disable:R0902
 
     def _record_offset(self):
         """Stores the current file pointer position"""
-        offset = self.blob_file.tell()
+        offset = self.fobj.tell()
         self.event_offsets.append(offset)
 
     def _create_blob(self):
         """Parse the next event from the current file position"""
         blob = None
-        for line in self.blob_file:
+        for line in self.fobj:
             line = try_decode_string(line)
             line = line.strip()
             if line == '':
@@ -341,7 +342,7 @@ class EvtPump(Module):    # pylint: disable:R0902
 
     def finish(self):
         """Clean everything up"""
-        self.blob_file.close()
+        self.fobj.close()
 
 
 class Parser(object):

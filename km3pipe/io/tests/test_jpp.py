@@ -18,14 +18,14 @@ class TestEventPump(TestCase):
     @patch('jppy.PyJDAQEventReader')
     def test_init(self, reader_mock):
         filename = 'a.root'
-        EventPump(filename)
+        EventPump(filename=filename)
         reader_mock.assert_called_with(filename.encode())
 
     @surrogate('jppy.PyJDAQEventReader')
     @patch('jppy.PyJDAQEventReader')
     def test_resize_buffers(self, reader_mock):
         filename = 'a.root'
-        pump = EventPump(filename)
+        pump = EventPump(filename=filename)
         assert len(pump._channel_ids) == pump.buf_size
         new_buf_size = 8000
         pump._resize_buffers(new_buf_size)
@@ -38,23 +38,23 @@ class TestTimeslicePump(TestCase):
     @patch('jppy.daqtimeslicereader.PyJDAQTimesliceReader')
     def test_init(self, reader_mock):
         filename = 'a.root'
-        TimeslicePump(filename)
+        TimeslicePump(filename=filename)
         reader_mock.assert_called_with(filename.encode(), b'JDAQTimesliceL1')
 
     @surrogate('jppy.daqtimeslicereader.PyJDAQTimesliceReader')
     @patch('jppy.daqtimeslicereader.PyJDAQTimesliceReader')
     def test_init_with_specific_stream(self, reader_mock):
         filename = 'a.root'
-        TimeslicePump(filename, stream='L0')
+        TimeslicePump(filename=filename, stream='L0')
         reader_mock.assert_called_with(filename.encode(), b'JDAQTimesliceL0')
-        TimeslicePump(filename, stream='SN')
+        TimeslicePump(filename=filename, stream='SN')
         reader_mock.assert_called_with(filename.encode(), b'JDAQTimesliceSN')
 
     @surrogate('jppy.daqtimeslicereader.PyJDAQTimesliceReader')
     @patch('jppy.daqtimeslicereader.PyJDAQTimesliceReader')
     def test_resize_buffers(self, reader_mock):
         filename = 'a.root'
-        pump = TimeslicePump(filename)
+        pump = TimeslicePump(filename=filename)
         assert len(pump._channel_ids) == pump.buf_size
         new_buf_size = 8000
         pump._resize_buffers(new_buf_size)
@@ -67,5 +67,5 @@ class TestSummaryslicePump(TestCase):
     @patch('jppy.daqsummaryslicereader.PyJDAQSummarysliceReader')
     def test_init(self, reader_mock):
         filename = 'a.root'
-        SummaryslicePump(filename)
+        SummaryslicePump(filename=filename)
         reader_mock.assert_called_with(filename.encode())
