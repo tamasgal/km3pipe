@@ -1,6 +1,9 @@
 Unreleased changes
 ------------------
 
+* ``km3pipe.io.jpp.FitPump`` has been removed
+* KM3Pipe now uses ``thepipe``
+
 Version 8
 ---------
 
