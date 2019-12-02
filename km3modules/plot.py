@@ -247,13 +247,14 @@ def ztplot(
     """Creates a ztplot like shown in the online monitoring"""
     fontsize = 16
 
-    dus = sorted(set(hits.du))
+    dus = set(hits.du)
 
     if n_dus is not None:
         dus = [c[0] for c in Counter(hits.du).most_common(n_dus)]
         mask = [du in dus for du in hits.du]
         hits = hits[mask]
 
+    dus = sorted(dus)
     doms = set(hits.dom_id)
 
     hits = hits.append_columns('multiplicity',
