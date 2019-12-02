@@ -247,7 +247,7 @@ def ztplot(
     """Creates a ztplot like shown in the online monitoring"""
     fontsize = 16
 
-    dus = set(hits.du)
+    dus = sorted(set(hits.du))
 
     if n_dus is not None:
         dus = [c[0] for c in Counter(hits.du).most_common(n_dus)]
