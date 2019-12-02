@@ -284,7 +284,7 @@ def ztplot(
         constrained_layout=True
     )
 
-    axes = [axes] if n_plots == 1 else axes.flatten()
+    axes = [axes] if n_plots == 1 else trim_axes(axes, n_plots)
 
     for ax, du in zip(axes, dus):
         du_hits = hits[hits.du == du]
@@ -357,3 +357,11 @@ def ztplot(
         plt.savefig(filename, dpi=120, bbox_inches="tight")
 
     return fig
+
+
+def trim_axes(axes, n):
+    """little helper to massage the axes list to have correct length..."""
+    axes = axes.flat
+    for ax in axes[n:]:
+        ax.remove()
+    return axes[:n]
