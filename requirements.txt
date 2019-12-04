@@ -7,7 +7,7 @@ mock
 numpy>=1.17.0
 numpydoc>=0.7.0
 pandas
-particle
+particle>=0.8.0
 passlib
 pillow
 pydocstyle
