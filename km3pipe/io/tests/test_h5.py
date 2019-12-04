@@ -346,6 +346,25 @@ class TestH5Sink(TestCase):
 
         fobj.close()
 
+    def test_write_table_service(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+
+        class Foo(Module):
+            def prepare(self):
+                self.services['write_table'](
+                    Table({'a': 1}, name="A", h5loc="tab_a")
+                )
+
+        pipe = Pipeline()
+        pipe.attach(Foo)
+        pipe.attach(HDF5Sink, filename=fobj.name)
+        pipe.drain(5)
+
+        with tb.File(fobj.name, 'r') as f:
+            assert "/tab_a" in f
+
+        fobj.close()
+
 
 class TestNDArrayHandling(TestCase):
     def test_writing_of_n_dim_arrays_with_defaults(self):
