@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 
+* ``kp.io.HDF5Sink`` now offers ``write_table()`` as service, which takes
+  a ``kp.Table`` and writes it to the HDF5 location defined by its ``h5loc``
+  attribute
+
 Version 8
 ---------
 
