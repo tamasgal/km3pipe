@@ -218,6 +218,11 @@ class HDF5Sink(Module):
     n_rows_expected = int, optional [default: 10000]
     append: bool, optional [default: False]
 
+    Services
+    --------
+    write_table: Table
+        The table to write, with "h5loc" set
+
     """
     def configure(self):
         self.filename = self.get('filename', default='dump.h5')
@@ -238,6 +243,8 @@ class HDF5Sink(Module):
         # might be able to set to `None`, I don't know...
         self.n_rows_expected = self.get('n_rows_expected', default=10000)
         self.index = 0
+
+        self.expose(self.write_table, "write_table")
 
         if self.ext_h5file is not None:
             self.h5file = self.ext_h5file
@@ -314,6 +321,10 @@ class HDF5Sink(Module):
             ndarr.append(arr)
 
         self._ndarrays_cache = defaultdict(list)
+
+    def write_table(self, table):
+        """Write a single table to the HDF5 file, exposed as a service"""
+        self._write_table(table.h5loc, table, table.name)
 
     def _write_table(self, h5loc, arr, title):
         level = len(h5loc.split('/'))

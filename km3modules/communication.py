@@ -33,13 +33,13 @@ class ELOGService(kp.Module):
         self.expose(self.post_elog, "post_elog")
 
     def post_elog(
-            self,
-            logbook,
-            subject,
-            message,
-            author,
-            message_type="Comment",
-            files=None
+        self,
+        logbook,
+        subject,
+        message,
+        author,
+        message_type="Comment",
+        files=None
     ):
         """Post an ELOG entry
 

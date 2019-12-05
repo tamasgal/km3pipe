@@ -29,20 +29,20 @@ from km3modules.hits import count_multiplicities
 
 
 def plot_dom_parameters(
-        data,
-        detector,
-        filename,
-        label,
-        title,
-        vmin=0.0,
-        vmax=10.0,
-        cmap='RdYlGn_r',
-        under='deepskyblue',
-        over='deeppink',
-        underfactor=1.0,
-        overfactor=1.0,
-        missing='lightgray',
-        hide_limits=False
+    data,
+    detector,
+    filename,
+    label,
+    title,
+    vmin=0.0,
+    vmax=10.0,
+    cmap='RdYlGn_r',
+    under='deepskyblue',
+    over='deeppink',
+    underfactor=1.0,
+    overfactor=1.0,
+    missing='lightgray',
+    hide_limits=False
 ):
     """Creates a plot in the classical monitoring.km3net.de style.
 
@@ -234,15 +234,15 @@ class IntraDOMCalibrationPlotter(kp.Module):
 
 
 def ztplot(
-        hits,
-        filename=None,
-        title=None,
-        max_z=None,
-        figsize=(16, 8),
-        n_dus=4,
-        ytick_distance=200,
-        max_multiplicity_entries=10,
-        grid_lines=[]
+    hits,
+    filename=None,
+    title=None,
+    max_z=None,
+    figsize=(16, 8),
+    n_dus=4,
+    ytick_distance=200,
+    max_multiplicity_entries=10,
+    grid_lines=[]
 ):
     """Creates a ztplot like shown in the online monitoring"""
     fontsize = 16
@@ -254,6 +254,7 @@ def ztplot(
         mask = [du in dus for du in hits.du]
         hits = hits[mask]
 
+    dus = sorted(dus)
     doms = set(hits.dom_id)
 
     hits = hits.append_columns('multiplicity',
@@ -284,7 +285,7 @@ def ztplot(
         constrained_layout=True
     )
 
-    axes = [axes] if n_plots == 1 else axes.flatten()
+    axes = [axes] if n_plots == 1 else trim_axes(axes, n_plots)
 
     for ax, du in zip(axes, dus):
         du_hits = hits[hits.du == du]
@@ -357,3 +358,11 @@ def ztplot(
         plt.savefig(filename, dpi=120, bbox_inches="tight")
 
     return fig
+
+
+def trim_axes(axes, n):
+    """little helper to massage the axes list to have correct length..."""
+    axes = axes.flat
+    for ax in axes[n:]:
+        ax.remove()
+    return axes[:n]

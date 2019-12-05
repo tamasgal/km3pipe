@@ -848,7 +848,7 @@ class TestTable(TestCase):
             merged_tab = Table.merge([tab1, tab2, tab3])
 
     def test_merge_different_columns_with_no_nan_compatible_dtype_even_if_fillna(
-            self
+        self
     ):
         tab1 = Table({'a': [1]}, h5loc='/a', h5singleton=True)
         tab2 = Table({'b': [2]})

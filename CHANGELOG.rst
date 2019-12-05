@@ -7,6 +7,12 @@ Unreleased changes
 Version 8
 ---------
 
+8.26.0 / 2019-12-04
+~~~~~~~~~~~~~~~~~~~
+* ``kp.io.HDF5Sink`` now offers ``write_table()`` as service, which takes
+  a ``kp.Table`` and writes it to the HDF5 location defined by its ``h5loc``
+  attribute
+
 8.25.0 / 2019-10-25
 ~~~~~~~~~~~~~~~~~~~
 * ``km3modules.communication.ELOGService`` has been added to talk to the ELOG

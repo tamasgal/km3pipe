@@ -61,7 +61,7 @@ def diag(ax=None, linecolor='0.0', linestyle='--', **kwargs):
 
 
 def automeshgrid(
-        x, y, step=0.02, xstep=None, ystep=None, pad=0.5, xpad=None, ypad=None
+    x, y, step=0.02, xstep=None, ystep=None, pad=0.5, xpad=None, ypad=None
 ):
     """Make a meshgrid, inferred from data."""
     if xpad is None:

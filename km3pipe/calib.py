@@ -360,7 +360,7 @@ class CalibrationService(Module):
         self.expose(self.detector_deprecation, "detector")
 
     def load_calibration(
-            self, filename=None, det_id=None, t0set=None, calibset=None
+        self, filename=None, det_id=None, t0set=None, calibset=None
     ):
         """Load another calibration"""
         self.filename = filename

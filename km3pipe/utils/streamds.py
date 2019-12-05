@@ -173,7 +173,7 @@ def upload_runsummary(csv_filename, dryrun=False, verify=False):
 
 
 def convert_runsummary_to_json(
-        df, comment='Uploaded via km3pipe.StreamDS', prefix='TEST_'
+    df, comment='Uploaded via km3pipe.StreamDS', prefix='TEST_'
 ):
     """Convert a Pandas DataFrame with runsummary to JSON for DB upload"""
     data_field = []

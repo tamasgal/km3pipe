@@ -87,7 +87,7 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
 
 
 def read_calibration(
-        detx=None, det_id=None, from_file=False, det_id_table=None
+    detx=None, det_id=None, from_file=False, det_id_table=None
 ):
     """Retrive calibration from file, the DB."""
     from km3pipe.calib import Calibration    # noqa

@@ -25,7 +25,7 @@ log = get_logger(__name__)    # pylint: disable=C0103
 def geant2pdg(geant_code):
     """Convert GEANT particle ID to PDG"""
     try:
-        return particle.GeantID(geant_code).to_pdgid()
+        return particle.Geant3ID(geant_code).to_pdgid()
     except KeyError:
         return 0
 
