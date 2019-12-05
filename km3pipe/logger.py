@@ -92,7 +92,7 @@ class LogIO(object):
     """Read/write logging information.
     """
     def __init__(
-            self, node, stream, url='pi2089.physik.uni-erlangen.de', port=28777
+        self, node, stream, url='pi2089.physik.uni-erlangen.de', port=28777
     ):
         self.node = node
         self.stream = stream
@@ -117,7 +117,7 @@ class LogIO(object):
 
 
 def get_logger(
-        name, filename=None, stream_loglevel="INFO", file_loglevel="DEBUG"
+    name, filename=None, stream_loglevel="INFO", file_loglevel="DEBUG"
 ):
     """Helper function to get a logger"""
     if name in loggers:

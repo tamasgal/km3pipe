@@ -49,8 +49,7 @@ class rv_kde(rv_continuous):
     Automatic bandwidth,  either from the statsmodels or scipy implementation.
     """
     def __init__(
-            self, data, bw=None, bw_method=None, bw_statsmodels=False,
-            **kde_args
+        self, data, bw=None, bw_method=None, bw_statsmodels=False, **kde_args
     ):
         from sklearn.neighbors import KernelDensity
         from sklearn.utils import check_array
@@ -195,7 +194,7 @@ def param_describe(params, quant=95, axis=0):
 
 
 def bootstrap_fit(
-        rv_cont, data, n_iter=10, quant=95, print_params=True, **kwargs
+    rv_cont, data, n_iter=10, quant=95, print_params=True, **kwargs
 ):
     """Bootstrap a distribution fit + get confidence intervals for the params.
 

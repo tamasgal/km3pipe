@@ -113,14 +113,14 @@ class Table(np.recarray):
         Instantiate from an array-like with shape (n_columns, n_rows).
     """
     def __new__(
-            cls,
-            data,
-            h5loc=DEFAULT_H5LOC,
-            dtype=None,
-            split_h5=DEFAULT_SPLIT,
-            name=DEFAULT_NAME,
-            h5singleton=DEFAULT_H5SINGLETON,
-            **kwargs
+        cls,
+        data,
+        h5loc=DEFAULT_H5LOC,
+        dtype=None,
+        split_h5=DEFAULT_SPLIT,
+        name=DEFAULT_NAME,
+        h5singleton=DEFAULT_H5SINGLETON,
+        **kwargs
     ):
         if isinstance(data, dict):
             return cls.from_dict(

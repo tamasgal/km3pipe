@@ -456,7 +456,7 @@ class TestPipeline(TestCase):
         assert 'The following parameters were ignored: b' == args[0]
 
     def test_attached_module_gets_multiple_parameters_passed_which_are_ignored(
-            self
+        self
     ):
         pl = Pipeline()
 

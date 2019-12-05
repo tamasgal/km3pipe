@@ -44,7 +44,7 @@ class Detector(object):
         calibration (when retrieving from database).
     """
     def __init__(
-            self, filename=None, det_id=None, t0set=None, calibration=None
+        self, filename=None, det_id=None, t0set=None, calibration=None
     ):
         self._det_file = None
         self.det_id = None

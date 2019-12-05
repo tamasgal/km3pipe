@@ -96,7 +96,7 @@ def make_empty_dataset():
 class DBManager(object):
     """A wrapper for the KM3NeT Web DB"""
     def __init__(
-            self, username=None, password=None, url=None, temporary=False
+        self, username=None, password=None, url=None, temporary=False
     ):
         "Create database connection"
         self._cookies = []
@@ -529,7 +529,7 @@ def add_datetime(dataframe, timestamp_key='UNIXTIME', scale_factor=1e3):
 class StreamDS(object):
     """Access to the streamds data stored in the KM3NeT database."""
     def __init__(
-            self, username=None, password=None, url=None, temporary=False
+        self, username=None, password=None, url=None, temporary=False
     ):
         self._db = DBManager(username, password, url, temporary)
         self._stream_df = None
@@ -807,8 +807,7 @@ class DOM(object):
 
 class TriggerSetup(object):
     def __init__(
-            self, runsetup_oid, name, det_id, description, optical_df,
-            acoustic_df
+        self, runsetup_oid, name, det_id, description, optical_df, acoustic_df
     ):
         self.runsetup_oid = runsetup_oid
         self.name = name
