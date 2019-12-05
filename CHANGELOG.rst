@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 
+* KM3Pipe v8.x will be the last version to support Python 2. v8.26.0 was
+  branched out to ``v8`` and will only receive bug fixes. The ``master``
+  branch is now the pre-v9 with ``thepipe`` integration and Python 3.6+
+
 Version 8
 ---------
 
