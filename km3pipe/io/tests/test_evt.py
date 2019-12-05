@@ -266,15 +266,6 @@ class TestEvtFilePump(TestCase):
         next(pump)
         pump.finish()
 
-    def test_context(self):
-        with EvtPump(self.fname) as ef:
-            self.assertEqual(self.fname, ef.filename)
-            assert ef[0] is not None
-            for blob in ef:
-                print(blob)
-                assert blob is not None
-                break
-
 
 class TestCorsika(TestCase):
     def setUp(self):
