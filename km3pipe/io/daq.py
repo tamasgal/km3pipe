@@ -129,18 +129,12 @@ class TimesliceParser(Module):
 class DAQPump(Pump):
     """A pump for binary DAQ files."""
     def configure(self):
-        self.filename = self.get('filename')
+        self.filename = self.require('filename')
         self.frame_positions = []
         self.index = 0
 
-        if self.filename:
-            self.open_file(self.filename)
-            self.determine_frame_positions()
-        else:
-            log.warning(
-                "No filename specified. "
-                "Take care of the file handling!"
-            )
+        self.blob_file = self.open_file(self.filename)
+        self.determine_frame_positions()
 
     def next_blob(self):
         """Get the next frame from file"""
@@ -190,14 +184,14 @@ class DAQPump(Pump):
 
     def determine_frame_positions(self):
         """Record the file pointer position of each frame"""
-        self.rewind_file()
+        self.blob_file.seek(0, 0)
         with ignored(struct.error):
             while True:
                 pointer_position = self.blob_file.tell()
                 length = struct.unpack('<i', self.blob_file.read(4))[0]
                 self.blob_file.seek(length - 4, 1)
                 self.frame_positions.append(pointer_position)
-        self.rewind_file()
+        self.blob_file.seek(0, 0)
         log.info("Found {0} frames.".format(len(self.frame_positions)))
 
     def process(self, blob):
