@@ -45,14 +45,14 @@ class CLBPump(Pump):
     def determine_packet_positions(self):
         """Record the file pointer position of each frame"""
         print("Analysing file...")
-        self.rewind_file()
+        self.blob_file.seek(0, 0)
         with ignored(struct.error):
             while True:
                 pointer_position = self.blob_file.tell()
                 length = struct.unpack('<i', self.blob_file.read(4))[0]
                 self.packet_positions.append(pointer_position)
                 self.blob_file.seek(length, 1)
-        self.rewind_file()
+        self.blob_file.seek(0, 0)
         print("Found {0} CLB UDP packets.".format(len(self.packet_positions)))
 
     def seek_to_packet(self, index):

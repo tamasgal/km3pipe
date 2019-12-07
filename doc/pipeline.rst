@@ -4,22 +4,29 @@ Pipeline Workflow
 .. contents:: :local:
 
 KM3Pipe is a lightweight framework which tries to give you a lose structure and
-workflow for data analysis. It has a simple, yet powerful module system
+workflow for data analysis. It uses the simple, yet powerful module system
+of the `thepipe <https://github.com/tamasgal/thepipe>`_ Python module,
 which allows you to organise and reuse code.
+
+In this section, a few examples are shown how to work the with
+pipeline, but it is recommended to check the `documentation of thepipe
+<https://thepipe.readthedocs.io/en/latest/?badge=latest>`_ since the features
+will change in future.
 
 The main structure is a ``Pipeline`` which is meant to hold everything
 together. The building blocks are simply called Modules and are either
-basic Python functions or instances of the class ``Module``.
+basic Python functions or instances of the class ``Module``. These classes
+are simply imported from ``thepipe`` package and can also be used directly
+from that.
 
 To setup a workflow, you first create a pipeline, attach the modules to it
 and to fire up the analysis chain, you call ``.drain()`` on your pipeline
 and let the flow go.
 
-
-The following script shows the module system of KM3Pipe.
-There is a ``Pump`` which is in this case a dummy data generator. The other
-Modules do some modifications on the data and pass them through to the next
-module in the pipeline.
+The following script shows the module system of KM3Pipe. There is a
+``DummyPump`` which is in this case a dummy data generator. The other Modules
+do some modifications on the data and pass them through to the next module in
+the pipeline.
 
 .. literalinclude:: ../examples/nogallery/module_workflow.py
    :language: python
@@ -70,13 +77,12 @@ the ``attach()`` method of the pipeline will care about the initialisation::
 Pumps / Sinks
 -------------
 
-The pump and sink are special types of ``Module`` and are usually the
+The pump and sink are special kinds of ``Module`` and are usually the
 first and last ones to be attached to a pipeline. They are responsible
 for reading and writing data to/from files, or streams from socket
-connections.
+connections. Note that you still derive from ``Module``.
 
-``Pump`` and ``Sink`` inherits from the ``Module`` class. The
-``__init__()`` method should be used to set up the file or socket
+``configure()`` method should be used to set up the file or socket
 handler and the ``finish()`` has to close them. The actual data is
 passed via the ``process()`` method. A data chunk is internally called
 ``Blob`` and usually represents an event.

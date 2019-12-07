@@ -31,6 +31,7 @@ setuptools>=40.6.2
 setuptools_scm
 statsmodels==0.10.1
 tables>=3.4.2
+thepipe>=1.1.0
 toml
 tqdm
 twine

@@ -128,7 +128,7 @@ class EvtPump(Pump):    # pylint: disable:R0902
 
         if self.filename:
             self.cprint("Opening {0}".format(self.filename))
-            self.open_file(self.filename)
+            self.blob_file = self.open_file(self.filename)
             self.prepare_blobs()
 
     def _register_parsers(self, parsers):
@@ -232,7 +232,7 @@ class EvtPump(Pump):    # pylint: disable:R0902
                                     .format(self.basename, file_index, self.suffix)
                 self.log.info("Next filename: {}".format(self.filename))
                 self.cprint("Opening {0}".format(self.filename))
-                self.open_file(self.filename)
+                self.blob_file = self.open_file(self.filename)
                 self.prepare_blobs()
                 try:
                     blob = self.get_blob(self.index)
@@ -340,8 +340,8 @@ class EvtPump(Pump):    # pylint: disable:R0902
             yield self.get_blob(i)
 
     def finish(self):
-        """Clean everything up"""
-        self.blob_file.close()
+        if self.blob_file:
+            self.blob_file.close()
 
 
 class Parser(object):

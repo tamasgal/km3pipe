@@ -43,24 +43,6 @@ stages:
         junit: "reports/junit*.xml"
 
 
-test-py2:
-    image: docker.km3net.de/base/python:2
-    stage: test
-    script:
-        - *virtualenv_definition
-        - make test
-        - make test-km3modules
-    <<: *junit_definition
-
-test-py3.5:
-    image: docker.km3net.de/base/python:3.5
-    stage: test
-    script:
-        - *virtualenv_definition
-        - make test
-        - make test-km3modules
-    <<: *junit_definition
-
 test-py3.6:
     image: docker.km3net.de/base/python:3.6
     stage: test
@@ -77,26 +59,6 @@ test-py3.7:
         - *virtualenv_definition
         - make test
         - make test-km3modules
-    <<: *junit_definition
-
-test-jpp:
-    image: docker.km3net.de/jpp
-    stage: test
-    script:
-        - yum install -y epel-release
-        - yum install -y python-pip python-devel
-        - _CWD=$(pwd) && cd /usr/local/root && source bin/thisroot.sh && cd $_CWD
-        - which -a root
-        - which -a python
-        - python -c "import ROOT"
-        - source /Jpp/setenv.sh /Jpp
-        - *virtualenv_definition
-        - make test
-    cache:
-      paths:
-        - .cache/pip
-        - venv/
-      key: "JPP_BUILD_$CI_COMMIT_REF_SLUG"
     <<: *junit_definition
 
 code-style:
