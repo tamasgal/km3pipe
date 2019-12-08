@@ -687,7 +687,14 @@ class MetaParser(object):
         self.log = get_logger(__name__ + '.' + self.__class__.__name__)
         self.meta = []
         if filename is not None:
-            string = subprocess.check_output(['JPrintMeta', '-f', filename])
+            try:
+                string = subprocess.check_output([
+                    'JPrintMeta', '-f', filename
+                ])
+            except IOError:
+                self.log.error(
+                    "Could not access meta information. Is Jpp loaded?"
+                )
             try:
                 self.parse_string(string)
             except IndexError:
