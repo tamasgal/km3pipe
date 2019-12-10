@@ -309,6 +309,8 @@ class AanetPump(Pump):
                 log.debug('Reading header...')
                 blob["RawHeader"] = self.raw_header
                 blob["Header"] = self.header
+                blob['evt'] = event
+                blob['event_file'] = event_file
 
                 if meta is not None:
                     blob['Meta'] = meta
