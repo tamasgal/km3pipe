@@ -1,7 +1,7 @@
 __author__ = 'tamasgal'
 
 from km3pipe import Pipeline, Module
-from km3pipe.io import DAQPump
+from km3pipe.io.daq import DATPump
 
 
 class DAQEventPrinter(Module):
@@ -60,7 +60,7 @@ class MeanRates(Module):
 
 
 pipeline = Pipeline()
-pipeline.attach(DAQPump, 'daq_pump', filename='dump.dat')
+pipeline.attach(DATPump, 'daq_pump', filename='dump.dat')
 # pipeline.attach(DAQEventPrinter, 'moo')
 # pipeline.attach(DAQSummaryslicePrinter, 'summaryslice_printer')
 # pipeline.attach(MeanRates, 'mean_rates')

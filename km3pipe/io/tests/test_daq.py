@@ -10,7 +10,7 @@ import numpy as np
 
 from km3pipe.testing import TestCase
 from km3pipe.io.daq import (
-    DAQPump, DAQPreamble, DAQHeader, DAQSummaryslice, DMMonitor, TMCHRepump
+    DATPump, DAQPreamble, DAQHeader, DAQSummaryslice, DMMonitor, TMCHRepump
 )
 
 TEST_DATA_DIR = join(dirname(__file__), "../../kp-data/test_data")
@@ -19,24 +19,24 @@ IO_EVT_FILE = join(TEST_DATA_DIR, "IO_EVT.dat")
 IO_MONIT_FILE = join(TEST_DATA_DIR, "IO_MONIT.dat")
 
 
-class TestDAQPump(TestCase):
+class TestDATPump(TestCase):
     def test_init_with_filename(self):
-        DAQPump(filename=IO_SUM_FILE)
+        DATPump(filename=IO_SUM_FILE)
 
     def test_frame_positions_in_io_sum(self):
-        p = DAQPump(filename=IO_SUM_FILE)
+        p = DATPump(filename=IO_SUM_FILE)
         assert 81 == len(p.frame_positions)
         self.assertListEqual([0, 656, 1312], p.frame_positions[:3])
         self.assertListEqual([50973, 51629, 52285], p.frame_positions[-3:])
 
     def test_frame_positions_in_io_evt(self):
-        p = DAQPump(filename=IO_EVT_FILE)
+        p = DATPump(filename=IO_EVT_FILE)
         assert 38 == len(p.frame_positions)
         self.assertListEqual([0, 570, 986], p.frame_positions[:3])
         self.assertListEqual([13694, 14016, 14360], p.frame_positions[-3:])
 
     def test_blob_in_io_sum(self):
-        p = DAQPump(filename=IO_SUM_FILE)
+        p = DATPump(filename=IO_SUM_FILE)
         blob = p.next_blob()
         assert 'DAQSummaryslice' in blob.keys()
         assert 'DAQPreamble' in blob.keys()
@@ -44,7 +44,7 @@ class TestDAQPump(TestCase):
         assert 16 == blob['DAQSummaryslice'].n_summary_frames
 
     def test_blob_in_io_evt(self):
-        p = DAQPump(filename=IO_EVT_FILE)
+        p = DATPump(filename=IO_EVT_FILE)
         blob = p.next_blob()
         assert 'DAQEvent' in blob.keys()
         assert 'DAQPreamble' in blob.keys()
@@ -54,12 +54,12 @@ class TestDAQPump(TestCase):
         assert 28 == event.n_snapshot_hits
 
     def test_blob_iteration(self):
-        p = DAQPump(filename=IO_EVT_FILE)
+        p = DATPump(filename=IO_EVT_FILE)
         for blob in p:
             pass
 
     def test_get_item(self):
-        p = DAQPump(filename=IO_EVT_FILE)
+        p = DATPump(filename=IO_EVT_FILE)
         blob = p[4]
         event = blob['DAQEvent']
         assert 6 == event.n_triggered_hits
