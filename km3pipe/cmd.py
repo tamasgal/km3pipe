@@ -91,13 +91,17 @@ def retrieve(run_id, det_id, outfile=None):
         pass
     ipath = irods_filepath(det_id, run_id)
     filename = os.path.basename(ipath)
+    if outfile is None:
+        outfile = filename
+
+    if not we_are_in_lyon():
+        os.system("iget -Pv {0} {1}".format(ipath, outfile))
+        return
+
     subfolder = os.path.join(*ipath.split("/")[-3:-1])
     cached_subfolder = os.path.join(SPS_CACHE, subfolder)
     cached_filepath = os.path.join(cached_subfolder, filename)
     lock_file = cached_filepath + ".in_progress"
-
-    if outfile is None:
-        outfile = filename
 
     if os.path.exists(lock_file):
         print("File is already requested, waiting for the download to finish.")
