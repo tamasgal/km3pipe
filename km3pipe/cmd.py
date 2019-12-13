@@ -34,10 +34,11 @@ import re
 import sys
 import os
 from datetime import datetime
+import time
 
 from . import version
 from .tools import irods_filepath
-from .db import DBManager
+from .db import DBManager, we_are_in_lyon
 from .hardware import Detector
 
 from km3pipe.logger import get_logger
@@ -51,6 +52,8 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
+
+SPS_CACHE = "/sps/km3net/repo/data/cache"
 
 
 def run_tests():
@@ -87,21 +90,60 @@ def retrieve(run_id, det_id, outfile=None):
         det_id = int(det_id)
     except ValueError:
         pass
-    path = irods_filepath(det_id, run_id)
-    suffix = '' if outfile is None else outfile
-    os.system("iget -Pv {0} {1}".format(path, suffix))
+    ipath = irods_filepath(det_id, run_id)
+    filename = os.path.basename(ipath)
+    if outfile is None:
+        outfile = filename
+
+    if not we_are_in_lyon():
+        os.system("iget -Pv {0} {1}".format(ipath, outfile))
+        return
+
+    subfolder = os.path.join(*ipath.split("/")[-3:-1])
+    cached_subfolder = os.path.join(SPS_CACHE, subfolder)
+    cached_filepath = os.path.join(cached_subfolder, filename)
+    lock_file = cached_filepath + ".in_progress"
+
+    if os.path.exists(lock_file):
+        print("File is already requested, waiting for the download to finish.")
+        for _ in range(6 * 15):    # 15 minute timeout
+            time.sleep(10)
+            if not os.path.exists(lock_file):
+                break
+        else:
+            print(
+                "Timeout reached. Deleting the lock file and initiating a "
+                "new download."
+            )
+            os.remove(lock_file)
+
+    if not os.path.exists(cached_filepath):
+        print("Downloading file to local SPS cache...")
+        os.makedirs(cached_subfolder, exist_ok=True)
+        os.system(
+            "touch {lock_file} && chmod g+w {lock_file}".format(
+                lock_file=lock_file
+            )
+        )
+        os.system("iget -Pv {0} {1}".format(ipath, outfile))
+        os.system("chmod g+w {}".format(outfile))
+        os.system("cp -p {} {}".format(outfile, cached_filepath))
+        os.system("rm {}".format(outfile))
+        os.remove(lock_file)
+
+    os.system("ln -s {} {}".format(cached_filepath, outfile))
 
 
 def detx(det_id, calibration='', t0set='', filename=None):
     now = datetime.now()
     if filename is None:
-        filename = "KM3NeT_{0}{1:08d}_{2}{3}{4}.detx" \
-                   .format('-' if det_id < 0 else '',
-                           abs(det_id),
-                           now.strftime("%d%m%Y"),
-                           '_t0set-%s' % t0set if t0set else '',
-                           '_calib-%s' % calibration if calibration else '',
-                           )
+        filename = "KM3NeT_{0}{1:08d}_{2}{3}{4}.detx".format(
+            '-' if det_id < 0 else '',
+            abs(det_id),
+            now.strftime("%d%m%Y"),
+            '_t0set-%s' % t0set if t0set else '',
+            '_calib-%s' % calibration if calibration else '',
+        )
     det = Detector(det_id=det_id, t0set=t0set, calibration=calibration)
     if det.n_doms > 0:
         det.write(filename)
