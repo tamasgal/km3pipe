@@ -119,7 +119,7 @@ def retrieve(run_id, det_id, outfile=None):
 
     if not os.path.exists(cached_filepath):
         print("Downloading file to local SPS cache...")
-        if not os.path.exist(cached_subfolder):
+        if not os.path.exists(cached_subfolder):
             os.makedirs(cached_subfolder)
         os.system(
             "touch {lock_file} && chmod g+w {lock_file}".format(
