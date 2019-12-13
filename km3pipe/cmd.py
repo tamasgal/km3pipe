@@ -34,6 +34,7 @@ import re
 import sys
 import os
 from datetime import datetime
+import time
 
 from . import version
 from .tools import irods_filepath
@@ -116,7 +117,7 @@ def retrieve(run_id, det_id, outfile=None):
             )
             os.remove(lock_file)
 
-    if not os.path.exists(cached_filename):
+    if not os.path.exists(cached_filepath):
         print("Downloading file to local SPS cache...")
         os.makedirs(cached_subfolder, exist_ok=True)
         os.system(
