@@ -1,12 +1,27 @@
 Unreleased changes
 ------------------
 
+Version 9
+---------
+
+9.0.0-alpha.3 / 2019-12-13
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+* ``km3pipe retrieve DET_ID RUN`` will now use a local cache in Lyon and
+  create symbolic links to save space. 
+
+
+Version 8
+---------
+
 * KM3Pipe v8.x will be the last version to support Python 2. v8.26.0 was
   branched out to ``v8`` and will only receive bug fixes. The ``master``
   branch is now the pre-v9 with ``thepipe`` integration and Python 3.6+
 
-Version 8
----------
+
+8.26.3 / 2019-12-13
+~~~~~~~~~~~~~~~~~~~
+* ``km3pipe retrieve DET_ID RUN`` will now use a local cache in Lyon and
+  create symbolic links to save space. 
 
 8.26.0 / 2019-12-04
 ~~~~~~~~~~~~~~~~~~~
