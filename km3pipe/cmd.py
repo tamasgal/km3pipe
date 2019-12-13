@@ -30,7 +30,6 @@ Options:
 """
 from __future__ import absolute_import, print_function, division
 
-import pathlib
 import re
 import sys
 import os
@@ -120,7 +119,8 @@ def retrieve(run_id, det_id, outfile=None):
 
     if not os.path.exists(cached_filepath):
         print("Downloading file to local SPS cache...")
-        pathlib.Path(cached_subfolder).mkdir(parents=True, exist_ok=True)
+        if not os.path.exist(cached_subfolder):
+            os.makedirs(cached_subfolder)
         os.system(
             "touch {lock_file} && chmod g+w {lock_file}".format(
                 lock_file=lock_file
