@@ -127,7 +127,8 @@ def retrieve(run_id, det_id, outfile=None):
         )
         os.system("iget -Pv {0} {1}".format(ipath, outfile))
         os.system("chmod g+w {}".format(outfile))
-        os.system("mv {} {}".format(outfile, cached_filepath))
+        os.system("cp -p {} {}".format(outfile, cached_filepath))
+        os.system("rm {}".format(outfile))
         os.remove(lock_file)
 
     os.system("ln -s {} {}".format(cached_filepath, outfile))
