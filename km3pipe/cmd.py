@@ -91,7 +91,7 @@ def retrieve(run_id, det_id, outfile=None):
         pass
     ipath = irods_filepath(det_id, run_id)
     filename = os.path.basename(ipath)
-    subfolder = os.path.join(*path.split("/")[-3:-1])
+    subfolder = os.path.join(*ipath.split("/")[-3:-1])
     cached_subfolder = os.path.join(SPS_CACHE, subfolder)
     cached_filepath = os.path.join(cached_subfolder, filename)
     lock_file = cached_filepath + ".in_progress"
