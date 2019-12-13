@@ -121,7 +121,9 @@ def retrieve(run_id, det_id, outfile=None):
         print("Downloading file to local SPS cache...")
         os.makedirs(cached_subfolder, exist_ok=True)
         os.system(
-            "touch {lock_file} && chmod g+w {lock_file}".format(lock_file)
+            "touch {lock_file} && chmod g+w {lock_file}".format(
+                lock_file=lock_file
+            )
         )
         os.system("iget -Pv {0} {1}".format(ipath, outfile))
         os.system("chmod g+w {}".format(outfile))
