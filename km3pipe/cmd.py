@@ -101,20 +101,23 @@ def retrieve(run_id, det_id, outfile=None):
 
     if os.path.exists(lock_file):
         print("File is already requested, waiting for the download to finish.")
-        for _ in range(6*15):  # 15 minute timeout
+        for _ in range(6 * 15):    # 15 minute timeout
             time.sleep(10)
             if not os.path.exists(lock_file):
                 break
         else:
-            print("Timeout reached. Deleting the lock file and initiating a "
-                  "new download.")
+            print(
+                "Timeout reached. Deleting the lock file and initiating a "
+                "new download."
+            )
             os.remove(lock_file)
 
     if not os.path.exists(cached_filename):
         print("Downloading file to local SPS cache...")
         os.makedirs(cached_subfolder, exist_ok=True)
         os.system(
-            "touch {lock_file} && chmod g+w {lock_file}".format(lock_file))
+            "touch {lock_file} && chmod g+w {lock_file}".format(lock_file)
+        )
         os.system("iget -Pv {0} {1}".format(ipath, outfile))
         os.system("chmod g+w {}".format(outfile))
         os.system("mv {} {}".format(outfile, cached_filepath))
@@ -126,13 +129,13 @@ def retrieve(run_id, det_id, outfile=None):
 def detx(det_id, calibration='', t0set='', filename=None):
     now = datetime.now()
     if filename is None:
-        filename = "KM3NeT_{0}{1:08d}_{2}{3}{4}.detx"
-        .format('-' if det_id < 0 else '',
-                abs(det_id),
-                now.strftime("%d%m%Y"),
-                '_t0set-%s' % t0set if t0set else '',
-                '_calib-%s' % calibration if calibration else '',
-                )
+        filename = "KM3NeT_{0}{1:08d}_{2}{3}{4}.detx".format(
+            '-' if det_id < 0 else '',
+            abs(det_id),
+            now.strftime("%d%m%Y"),
+            '_t0set-%s' % t0set if t0set else '',
+            '_calib-%s' % calibration if calibration else '',
+        )
     det = Detector(det_id=det_id, t0set=t0set, calibration=calibration)
     if det.n_doms > 0:
         det.write(filename)
