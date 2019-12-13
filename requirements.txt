@@ -9,6 +9,7 @@ numpydoc>=0.7.0
 pandas
 particle>=0.8.0
 passlib
+pathlib
 pillow
 pydocstyle
 pytest
