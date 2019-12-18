@@ -413,6 +413,14 @@ class TestTable(TestCase):
         with pytest.raises(KeyError):
             tab = Table(dmap, dtype=bad_dt)
 
+    def test_from_record(self):
+        t = Table({'a': [0,1,2], 'b': [10, 20, 30]})
+        t2 = Table(t[1])
+        assert 1 == t2[0].a
+        assert 1 == t2.a[0]
+        assert 20 == t2[0].b
+        assert 20 == t2.b[0]
+
     def test_append_columns(self):
         tab = Table(self.arr)
         print(tab)
@@ -848,7 +856,7 @@ class TestTable(TestCase):
             merged_tab = Table.merge([tab1, tab2, tab3])
 
     def test_merge_different_columns_with_no_nan_compatible_dtype_even_if_fillna(
-            self
+        self
     ):
         tab1 = Table({'a': [1]}, h5loc='/a', h5singleton=True)
         tab2 = Table({'b': [2]})

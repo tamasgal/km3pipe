@@ -309,6 +309,8 @@ class AanetPump(Pump):
                 log.debug('Reading header...')
                 blob["RawHeader"] = self.raw_header
                 blob["Header"] = self.header
+                blob['evt'] = event
+                blob['event_file'] = event_file
 
                 if meta is not None:
                     blob['Meta'] = meta
@@ -687,7 +689,14 @@ class MetaParser(object):
         self.log = get_logger(__name__ + '.' + self.__class__.__name__)
         self.meta = []
         if filename is not None:
-            string = subprocess.check_output(['JPrintMeta', '-f', filename])
+            try:
+                string = subprocess.check_output([
+                    'JPrintMeta', '-f', filename
+                ])
+            except IOError:
+                self.log.error(
+                    "Could not access meta information. Is Jpp loaded?"
+                )
             try:
                 self.parse_string(string)
             except IndexError:

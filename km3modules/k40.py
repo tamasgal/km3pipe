@@ -378,15 +378,15 @@ class ResetTwofoldCounts(kp.Module):
 
 
 def calibrate_dom(
-        dom_id,
-        data,
-        detector,
-        livetime=None,
-        fit_ang_dist=False,
-        scale_mc_to_data=True,
-        ad_fit_shape='pexp',
-        fit_background=True,
-        ctmin=-1.
+    dom_id,
+    data,
+    detector,
+    livetime=None,
+    fit_ang_dist=False,
+    scale_mc_to_data=True,
+    ad_fit_shape='pexp',
+    fit_background=True,
+    ctmin=-1.
 ):
     """Calibrate intra DOM PMT time offsets, efficiencies and sigmas
 

@@ -103,27 +103,27 @@ def qsub(script, job_name, dryrun=False, silent=False, *args, **kwargs):
 
 
 def gen_job(
-        script,
-        job_name,
-        log_path='qlogs',
-        group='km3net',
-        platform='cl7',
-        walltime='00:10:00',
-        vmem='8G',
-        fsize='8G',
-        shell=None,
-        email=None,
-        send_mail='n',
-        job_array_start=1,
-        job_array_stop=None,
-        job_array_step=1,
-        irods=False,
-        sps=True,
-        hpss=False,
-        xrootd=False,
-        dcache=False,
-        oracle=False,
-        split_array_logs=False
+    script,
+    job_name,
+    log_path='qlogs',
+    group='km3net',
+    platform='cl7',
+    walltime='00:10:00',
+    vmem='8G',
+    fsize='8G',
+    shell=None,
+    email=None,
+    send_mail='n',
+    job_array_start=1,
+    job_array_stop=None,
+    job_array_step=1,
+    irods=False,
+    sps=True,
+    hpss=False,
+    xrootd=False,
+    dcache=False,
+    oracle=False,
+    split_array_logs=False
 ):
     """Generate a job script."""
     if shell is None:

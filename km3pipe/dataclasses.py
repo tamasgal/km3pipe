@@ -113,14 +113,14 @@ class Table(np.recarray):
         Instantiate from an array-like with shape (n_columns, n_rows).
     """
     def __new__(
-            cls,
-            data,
-            h5loc=DEFAULT_H5LOC,
-            dtype=None,
-            split_h5=DEFAULT_SPLIT,
-            name=DEFAULT_NAME,
-            h5singleton=DEFAULT_H5SINGLETON,
-            **kwargs
+        cls,
+        data,
+        h5loc=DEFAULT_H5LOC,
+        dtype=None,
+        split_h5=DEFAULT_SPLIT,
+        name=DEFAULT_NAME,
+        h5singleton=DEFAULT_H5SINGLETON,
+        **kwargs
     ):
         if isinstance(data, dict):
             return cls.from_dict(
@@ -147,6 +147,9 @@ class Table(np.recarray):
                 "Lists/tuples are not supported! "
                 "Please use the `from_rows` or `from_columns` method instead!"
             )
+        if isinstance(data, np.record):
+            # single record from recarrary/kp.Tables, let's blow it up
+            data = data[np.newaxis]
         if not has_structured_dt(data):
             # flat (nonstructured) dtypes fail miserably!
             # default to `|V8` whyever

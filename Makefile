@@ -1,7 +1,6 @@
 PKGNAME=km3pipe
 ALLNAMES = $(PKGNAME)
 ALLNAMES += km3modules 
-ALLNAMES += pipeinspector
 
 default: build
 

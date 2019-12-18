@@ -61,11 +61,11 @@ class EventPump(Pump):
     def _resize_buffers(self, buf_size):
         log.info("Resizing hit buffers to {}.".format(buf_size))
         self.buf_size = buf_size
-        self._channel_ids.resize(buf_size)
-        self._dom_ids.resize(buf_size)
-        self._times.resize(buf_size)
-        self._tots.resize(buf_size)
-        self._triggereds.resize(buf_size)
+        self._channel_ids.resize(buf_size, refcheck=False)
+        self._dom_ids.resize(buf_size, refcheck=False)
+        self._times.resize(buf_size, refcheck=False)
+        self._tots.resize(buf_size, refcheck=False)
+        self._triggereds.resize(buf_size, refcheck=False)
 
     def blob_generator(self):
         while self.event_reader.has_next:
@@ -234,11 +234,11 @@ class TimeslicePump(Pump):
     def _resize_buffers(self, buf_size):
         log.info("Resizing hit buffers to {}.".format(buf_size))
         self.buf_size = buf_size
-        self._channel_ids.resize(buf_size)
-        self._dom_ids.resize(buf_size)
-        self._times.resize(buf_size)
-        self._tots.resize(buf_size)
-        self._triggereds.resize(buf_size)    # dummy
+        self._channel_ids.resize(buf_size, refcheck=False)
+        self._dom_ids.resize(buf_size, refcheck=False)
+        self._times.resize(buf_size, refcheck=False)
+        self._tots.resize(buf_size, refcheck=False)
+        self._triggereds.resize(buf_size, refcheck=False)    # dummy
 
     def get_by_frame_index(self, frame_index):
         blob = Blob()
@@ -373,16 +373,16 @@ class FitPump(Pump):
     def _resize_buffers(self, buf_size):
         log.info("Resizing hit buffers to {}.".format(buf_size))
         self.buf_size = buf_size
-        self._pos_xs.resize(buf_size)
-        self._pos_ys.resize(buf_size)
-        self._pos_zs.resize(buf_size)
-        self._dir_xs.resize(buf_size)
-        self._dir_ys.resize(buf_size)
-        self._dir_zs.resize(buf_size)
-        self._ndfs.resize(buf_size)
-        self._times.resize(buf_size)
-        self._qualities.resize(buf_size)
-        self._energies.resize(buf_size)
+        self._pos_xs.resize(buf_size, refcheck=False)
+        self._pos_ys.resize(buf_size, refcheck=False)
+        self._pos_zs.resize(buf_size, refcheck=False)
+        self._dir_xs.resize(buf_size, refcheck=False)
+        self._dir_ys.resize(buf_size, refcheck=False)
+        self._dir_zs.resize(buf_size, refcheck=False)
+        self._ndfs.resize(buf_size, refcheck=False)
+        self._times.resize(buf_size, refcheck=False)
+        self._qualities.resize(buf_size, refcheck=False)
+        self._energies.resize(buf_size, refcheck=False)
 
     def blob_generator(self):
         while self.event_reader.has_next:

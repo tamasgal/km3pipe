@@ -7,6 +7,7 @@ A collection of commonly used modules.
 """
 from __future__ import absolute_import, print_function, division
 
+import sqlite3
 from time import time
 
 import numpy as np
@@ -215,7 +216,7 @@ class MultiFilePump(kp.Module):
       Reindex the group_id by counting from 0 and increasing it continuously,
       this makes sure that the group_id is unique for each blob, otherwise
       the pump will usually reset it to 0 for every new file.
-    
+
     """
     def configure(self):
         self.pump = self.require('pump')
@@ -255,3 +256,75 @@ class MultiFilePump(kp.Module):
                 self.n_processed, len(self.filenames)
             )
         )
+
+
+class LocalDBService(kp.Module):
+    """Provides a local sqlite3 based database service to store information"""
+    def configure(self):
+        self.filename = self.require("filename")
+        self.thread_safety = self.get('thread_safety', default=True)
+        self.connection = None
+
+        self.expose(self.create_table, 'create_table')
+        self.expose(self.table_exists, 'table_exists')
+        self.expose(self.insert_row, 'insert_row')
+        self.expose(self.query, 'query')
+
+        self._create_connection()
+
+    def _create_connection(self):
+        """Create database connection"""
+        try:
+            self.connection = sqlite3.connect(
+                self.filename, check_same_thread=self.thread_safety
+            )
+            self.cprint(sqlite3.version)
+        except sqlite3.Error as exception:
+            self.log.error(exception)
+
+    def query(self, query):
+        """Execute a SQL query and return the result of fetchall()"""
+        cursor = self.connection.cursor()
+        cursor.execute(query)
+        return cursor.fetchall()
+
+    def insert_row(self, table, column_names, values):
+        """Insert a row into the table with a given list of values"""
+        cursor = self.connection.cursor()
+        query = 'INSERT INTO {} ({}) VALUES ({})'.format(
+            table, ', '.join(column_names),
+            ','.join("'" + str(v) + "'" for v in values)
+        )
+        cursor.execute(query)
+        self.connection.commit()
+
+    def create_table(self, name, columns, types, overwrite=False):
+        """Create a table with given columns and types, overwrite if specified
+
+
+        The `types` should be a list of SQL types, like ["INT", "TEXT", "INT"]
+        """
+        cursor = self.connection.cursor()
+        if overwrite:
+            cursor.execute('DROP TABLE IF EXISTS {}'.format(name))
+
+        cursor.execute(
+            'CREATE TABLE {} ({})'.format(
+                name,
+                ', '.join(['{} {}'.format(*c) for c in zip(columns, types)])
+            )
+        )
+        self.connection.commit()
+
+    def table_exists(self, name):
+        """Check if a table exists in the database"""
+        cursor = self.connection.cursor()
+        cursor.execute(
+            "SELECT count(name) FROM sqlite_master "
+            "WHERE type='table' AND name='{}'".format(name)
+        )
+        return cursor.fetchone()[0] == 1
+
+    def finish(self):
+        if self.connection:
+            self.connection.close()

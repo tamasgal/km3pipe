@@ -84,6 +84,19 @@ class TestPipeline(TestCase):
         for module in pl.modules:
             self.assertEqual(n, module.process.call_count)
 
+    def test_drain_calls_prepare_once_on_each_attached_module(self):
+        pl = Pipeline(blob=1)
+
+        pl.attach(Module, 'module1')
+        pl.attach(Module, 'module2')
+        pl.attach(Module, 'module3')
+        for module in pl.modules:
+            module.prepare = MagicMock(return_value={})
+
+        pl.drain(5)
+        for module in pl.modules:
+            self.assertEqual(1, module.prepare.call_count)
+
     def test_drain_doesnt_call_process_if_blob_is_none(self):
         pl = Pipeline(blob=1)
 
@@ -443,7 +456,7 @@ class TestPipeline(TestCase):
         assert 'The following parameters were ignored: b' == args[0]
 
     def test_attached_module_gets_multiple_parameters_passed_which_are_ignored(
-            self
+        self
     ):
         pl = Pipeline()
 

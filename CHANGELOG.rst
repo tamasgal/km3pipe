@@ -1,8 +1,39 @@
 Unreleased changes
 ------------------
-* Removed deprecated properties from ``CLBMap``
+
 Version 8
 ---------
+
+8.26.0 / 2019-12-04
+~~~~~~~~~~~~~~~~~~~
+* ``kp.io.HDF5Sink`` now offers ``write_table()`` as service, which takes
+  a ``kp.Table`` and writes it to the HDF5 location defined by its ``h5loc``
+  attribute
+
+8.25.0 / 2019-10-25
+~~~~~~~~~~~~~~~~~~~
+* ``km3modules.communication.ELOGService`` has been added to talk to the ELOG
+  server
+
+8.24.3 / 2019-10-23
+~~~~~~~~~~~~~~~~~~~
+
+* ``km3modules.hits.count_multiplicities`` now supports the latest numba
+  version (and is fast again)
+* ``km3modules.plot.ztplot`` improved
+* ``km3modules.common.LocalDBService`` has now an option to disable thread
+  safety
+* ``statsmodels`` version was fixed to 0.10.1 due to Python 2.7 compat, which
+  will drop by the end of 2019
+
+8.24.0 / 2019-10-23
+~~~~~~~~~~~~~~~~~~~
+* Removed deprecated properties from ``CLBMap``
+* Added ``km3modules.LocalDBService`` which provides an easy to use interface
+  to local sqlite3 databases.
+* ``km3modules.plot.ztplot`` can now be used to recreate the zt-plots shown
+  by the online monitoring
+
 
 8.23.5 / 2019-10-21
 ~~~~~~~~~~~~~~~~~~~

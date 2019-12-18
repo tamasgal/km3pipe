@@ -1,11 +1,14 @@
 # Filename: test_time.py
 # pylint: disable=locally-disabled,C0111,R0904,C0103
 
+import sqlite3
+import tempfile
+
 import km3pipe as kp
 from km3pipe.dataclasses import Table
 from km3modules.common import (
     Siphon, Delete, Keep, Dump, StatusBar, TickTock, MemoryObserver,
-    BlobIndexer
+    BlobIndexer, LocalDBService
 )
 from km3pipe.testing import TestCase, MagicMock
 from km3pipe.tools import istype
@@ -429,3 +432,41 @@ class TestBlobIndexer(TestCase):
         pipe.attach(BlobIndexer)
         pipe.attach(Observer)
         pipe.drain(4)
+
+
+class TestLocalDBService(TestCase):
+    def test_create_table(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        dbs = LocalDBService(filename=fobj.name)
+        dbs.create_table("foo", ["a", "b"], ["INT", "TEXT"])
+        assert dbs.table_exists("foo")
+
+    def test_create_table_does_not_overwrite_by_default(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        dbs = LocalDBService(filename=fobj.name)
+        dbs.create_table("foo", ["a", "b"], ["INT", "TEXT"])
+        with self.assertRaises(sqlite3.OperationalError):
+            dbs.create_table("foo", ["a", "b"], ["INT", "TEXT"])
+
+    def test_create_table_allows_overwrite(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        dbs = LocalDBService(filename=fobj.name)
+        dbs.create_table("foo", ["a", "b"], ["INT", "TEXT"])
+        dbs.create_table("foo", ["a", "b"], ["INT", "TEXT"], overwrite=True)
+
+    def test_insert_row(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        dbs = LocalDBService(filename=fobj.name)
+        dbs.create_table("foo", ["a", "b"], ["INT", "TEXT"])
+
+        dbs.insert_row("foo", ["a", "b"], (23, "42"))
+        dbs.insert_row("foo", ["a", "b"], (5, "hello"))
+
+        cur = dbs.connection.cursor()
+        cur.execute("SELECT * FROM foo")
+        data = cur.fetchall()
+        assert 2 == len(data)
+        assert 23 == data[0][0]
+        assert "42" == data[0][1]
+        assert 5 == data[1][0]
+        assert "hello" == data[1][1]

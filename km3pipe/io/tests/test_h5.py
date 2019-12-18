@@ -176,7 +176,7 @@ class TestHDF5PumpMultiFileReadout(TestCase):
             fobj.close()
 
     def test_multiple_files_readout_using_the_pump_iterator_called_multiple_times(
-            self
+        self
     ):
         p = HDF5Pump(filenames=self.filenames)
 
@@ -343,6 +343,25 @@ class TestH5Sink(TestCase):
             assert "/tab_a" in f
             assert "/tab_b" in f
             assert "/tab_c" not in f
+
+        fobj.close()
+
+    def test_write_table_service(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+
+        class Foo(Module):
+            def prepare(self):
+                self.services['write_table'](
+                    Table({'a': 1}, name="A", h5loc="tab_a")
+                )
+
+        pipe = Pipeline()
+        pipe.attach(Foo)
+        pipe.attach(HDF5Sink, filename=fobj.name)
+        pipe.drain(5)
+
+        with tb.File(fobj.name, 'r') as f:
+            assert "/tab_a" in f
 
         fobj.close()
 
@@ -539,7 +558,7 @@ class TestH5SinkConsistency(TestCase):
         fobj.close()
 
     def test_h5_consistency_for_tables_without_group_id_and_multiple_keys(
-            self
+        self
     ):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = fobj.name

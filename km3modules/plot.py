@@ -7,6 +7,7 @@ A collection of plotting functions and modules.
 """
 from __future__ import absolute_import, print_function, division
 
+from collections import Counter
 from datetime import datetime
 import os
 import multiprocessing as mp
@@ -18,27 +19,30 @@ import matplotlib
 # Force matplotlib to not use any Xwindows backend.
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt    # noqa
+import matplotlib.ticker as ticker
 from matplotlib import pylab    # noqa
 
 import km3pipe as kp    # noqa
 import km3pipe.style    # noqa
 
+from km3modules.hits import count_multiplicities
+
 
 def plot_dom_parameters(
-        data,
-        detector,
-        filename,
-        label,
-        title,
-        vmin=0.0,
-        vmax=10.0,
-        cmap='RdYlGn_r',
-        under='deepskyblue',
-        over='deeppink',
-        underfactor=1.0,
-        overfactor=1.0,
-        missing='lightgray',
-        hide_limits=False
+    data,
+    detector,
+    filename,
+    label,
+    title,
+    vmin=0.0,
+    vmax=10.0,
+    cmap='RdYlGn_r',
+    under='deepskyblue',
+    over='deeppink',
+    underfactor=1.0,
+    overfactor=1.0,
+    missing='lightgray',
+    hide_limits=False
 ):
     """Creates a plot in the classical monitoring.km3net.de style.
 
@@ -227,3 +231,138 @@ class IntraDOMCalibrationPlotter(kp.Module):
             })
             store.append('t0s', df, format='table', data_columns=True)
         store.close()
+
+
+def ztplot(
+    hits,
+    filename=None,
+    title=None,
+    max_z=None,
+    figsize=(16, 8),
+    n_dus=4,
+    ytick_distance=200,
+    max_multiplicity_entries=10,
+    grid_lines=[]
+):
+    """Creates a ztplot like shown in the online monitoring"""
+    fontsize = 16
+
+    dus = set(hits.du)
+
+    if n_dus is not None:
+        dus = [c[0] for c in Counter(hits.du).most_common(n_dus)]
+        mask = [du in dus for du in hits.du]
+        hits = hits[mask]
+
+    dus = sorted(dus)
+    doms = set(hits.dom_id)
+
+    hits = hits.append_columns('multiplicity',
+                               np.ones(len(hits))).sorted(by='time')
+
+    if max_z is None:
+        max_z = int(np.ceil(np.max(hits.pos_z) / 100.0)) * 100 * 1.05
+
+    for dom in doms:
+        dom_hits = hits[hits.dom_id == dom]
+        mltps, m_ids = count_multiplicities(dom_hits.time)
+        hits['multiplicity'][hits.dom_id == dom] = mltps
+
+    time_offset = np.min(hits[hits.triggered == True].time)
+    hits.time -= time_offset
+
+    n_plots = len(dus)
+    n_cols = int(np.ceil(np.sqrt(n_plots)))
+    n_rows = int(n_plots / n_cols) + (n_plots % n_cols > 0)
+    marker_fig, marker_axes = plt.subplots()
+    # for the marker size hack...
+    fig, axes = plt.subplots(
+        ncols=n_cols,
+        nrows=n_rows,
+        sharex=True,
+        sharey=True,
+        figsize=figsize,
+        constrained_layout=True
+    )
+
+    axes = [axes] if n_plots == 1 else trim_axes(axes, n_plots)
+
+    for ax, du in zip(axes, dus):
+        du_hits = hits[hits.du == du]
+        for grid_line in grid_lines:
+            ax.axhline(grid_line, lw=1, color='b', ls='--', alpha=0.15)
+        trig_hits = du_hits[du_hits.triggered == True]
+
+        ax.scatter(
+            du_hits.time,
+            du_hits.pos_z,
+            s=du_hits.multiplicity * 30,
+            c='#09A9DE',
+            label='hit',
+            alpha=0.5
+        )
+        ax.scatter(
+            trig_hits.time,
+            trig_hits.pos_z,
+            s=trig_hits.multiplicity * 30,
+            alpha=0.8,
+            marker="+",
+            c='#FF6363',
+            label='triggered hit'
+        )
+        ax.set_title(
+            'DU{0}'.format(int(du)), fontsize=fontsize, fontweight='bold'
+        )
+
+        # The only way I could create a legend with matching marker sizes
+        max_multiplicity = int(np.max(du_hits.multiplicity))
+        markers = list(
+            range(
+                0, max_multiplicity,
+                np.ceil(max_multiplicity / max_multiplicity_entries
+                        ).astype(int)
+            )
+        )
+        custom_markers = [
+            marker_axes.
+            scatter([], [], s=mult * 30, color='#09A9DE', lw=0, alpha=0.5)
+            for mult in markers
+        ] + [marker_axes.scatter([], [], s=30, marker="+", c='#FF6363')]
+        ax.legend(
+            custom_markers,
+            ['multiplicity'] + ["       %d" % m
+                                for m in markers[1:]] + ['triggered'],
+            scatterpoints=1,
+            markerscale=1,
+            loc='upper left',
+            frameon=True,
+            framealpha=0.7
+        )
+
+    for idx, ax in enumerate(axes):
+        ax.set_ylim(0, max_z)
+        ax.tick_params(labelsize=fontsize)
+        ax.yaxis.set_major_locator(ticker.MultipleLocator(ytick_distance))
+        xlabels = ax.get_xticklabels()
+        for label in xlabels:
+            label.set_rotation(45)
+
+        if idx % n_cols == 0:
+            ax.set_ylabel('z [m]', fontsize=fontsize)
+        if idx >= len(axes) - n_cols:
+            ax.set_xlabel('time [ns]', fontsize=fontsize)
+
+    if title is not None:
+        plt.suptitle(title, fontsize=fontsize, y=1.05)
+    if filename is not None:
+        plt.savefig(filename, dpi=120, bbox_inches="tight")
+
+    return fig
+
+
+def trim_axes(axes, n):
+    """little helper to massage the axes list to have correct length..."""
+    axes = axes.flat
+    for ax in axes[n:]:
+        ax.remove()
+    return axes[:n]
