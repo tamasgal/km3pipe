@@ -43,6 +43,10 @@ class I3Pump(kp.Module):
         self._hit_buffer = np.empty((10000, 14))
         self._mchit_buffer = np.empty((10000, 12))
 
+        self._is_cc = 0
+        if "CC" in self.filename:
+            self._is_cc = 1
+
     def process(self, blob):
         """
 
@@ -50,7 +54,6 @@ class I3Pump(kp.Module):
         ----------
         blob : dict
             Empty dictionary.
-
 
         Returns
         -------
@@ -76,13 +79,24 @@ class I3Pump(kp.Module):
 
             blob['McInfo'] = weights
 
-            nu = self.get_mc_primary(frame)
+            primary = self.get_mc_primary(frame)
+            primary_pdgencoding = primary.GetPdgEncoding()
             muon = self.get_mc_highest_energy_muon(frame)
+            electron = self.get_mc_highest_energy_electron(frame)
+            tau = self.get_mc_highest_energy_tau(frame)
 
-            if nu is not None:
-                blob['NuInfo'] = self._read_particle_info(nu, "/nu")
-            if muon is not None:
-                blob['MuonInfo'] = self._read_particle_info(muon, "/muon")
+            if primary is not None:
+                if np.abs(primary_pdgencoding) == 12 or np.abs(primary_pdgencoding) == 14 \
+                        or np.abs(primary_pdgencoding) == 16:
+                    blob['NuInfo'] = self._read_particle_info(primary, "/nu", is_cc=self._is_cc)
+                    if self._is_cc and np.abs(primary_pdgencoding) == 14 and muon is not None:
+                        blob['ChargedLeptonInfo'] = self._read_particle_info(muon, "/charged_lepton")
+                    if self._is_cc and np.abs(primary_pdgencoding) == 12 and electron is not None:
+                        blob['ChargedLeptonInfo'] = self._read_particle_info(electron, "/charged_lepton")
+                    if self._is_cc and np.abs(primary_pdgencoding) == 16 and tau is not None:
+                        blob['ChargedLeptonInfo'] = self._read_particle_info(tau, "/charged_lepton")
+                elif np.abs(primary_pdgencoding) == 13:
+                    blob['MuonInfo'] = self._read_particle_info(primary, "/muon")
 
         # MC HITS
         if 'MCHits' in frame:
@@ -163,11 +177,12 @@ class I3Pump(kp.Module):
         return event_info
 
     @staticmethod
-    def _read_particle_info(particle, h5loc):
+    def _read_particle_info(particle, h5loc, is_cc=None):
         """
         Reads particle information of the I3 file and returns it as dict.
-
         """
+        if is_cc is None:
+            is_cc = np.nan
         particle_mc = kp.Table({'dir_x': particle.GetDir().GetX(),
                                 'dir_y': particle.GetDir().GetY(),
                                 'dir_z': particle.GetDir().GetZ(),
@@ -175,7 +190,8 @@ class I3Pump(kp.Module):
                                 'pos_y': particle.GetPos().Y,
                                 'pos_z': particle.GetPos().Z,
                                 'energy': particle.GetEnergy(),
-                                'pdgencoding': particle.GetPdgEncoding()},
+                                'pdgencoding': particle.GetPdgEncoding(),
+                                'is_CC': is_cc},
                                h5loc=h5loc)
         return particle_mc
 
@@ -357,6 +373,9 @@ class I3Pump(kp.Module):
 
     @staticmethod
     def get_mc_highest_energy_muon(frame):
+        """
+        Gets MC highest energy muon.
+        """
         mctree = frame.Get("AntMCTree")
         mctracksinice = mctree.GetInIce()
         mctrack = None
@@ -372,7 +391,42 @@ class I3Pump(kp.Module):
         return mctrack
 
     @staticmethod
+    def get_mc_highest_energy_electron(frame):
+        mctree = frame.Get("AntMCTree")
+        mctracksinice = mctree.GetInIce()
+        mctrack = None
+        highest_energy = -1.
+
+        for track in mctracksinice:
+            if (track.GetType() == dataclasses.I3Particle.ParticleType.EPlus) or \
+                    (track.GetType() == dataclasses.I3Particle.ParticleType.EMinus):
+                if track.GetEnergy() > highest_energy:
+                    highest_energy = track.GetEnergy()
+                    mctrack = track
+
+        return mctrack
+
+    @staticmethod
+    def get_mc_highest_energy_tau(frame):
+        mctree = frame.Get("AntMCTree")
+        mctracksinice = mctree.GetInIce()
+        mctrack = None
+        highest_energy = -1.
+
+        for track in mctracksinice:
+            if (track.GetType() == dataclasses.I3Particle.ParticleType.TauPlus) or \
+                    (track.GetType() == dataclasses.I3Particle.ParticleType.TauMinus):
+                if track.GetEnergy() > highest_energy:
+                    highest_energy = track.GetEnergy()
+                    mctrack = track
+
+        return mctrack
+
+    @staticmethod
     def get_mc_primary(frame):
+        """
+        Gets MC primary.
+        """
         mctree = frame.Get("AntMCTree")
         primaries = mctree.GetPrimaries()
         p = None
