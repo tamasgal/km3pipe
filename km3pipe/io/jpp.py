@@ -151,19 +151,15 @@ class TimeslicePump(Pump):
         self.stream = self.get('stream', default='L1')
         self.blobs = self.timeslice_generator()
         try:
-            import jppy    # noqa
+            import km3io
         except ImportError:
             raise ImportError(
-                "\nEither Jpp or jppy could not be found."
-                "\nMake sure you source the JPP environmanet "
-                "and have jppy installed"
+                "\nKM3iopackage could not be found."
+                "\n Make sure the km3io package is installed"
             )
-        stream = 'JDAQTimeslice' + self.stream
-        self.r = jppy.daqtimeslicereader.PyJDAQTimesliceReader(
-            fname.encode(), stream.encode()
-        )
-        self.n_timeslices = self.r.n_timeslices
-
+        self.r = km3io.DAQReader(fname)
+        self.timeslice_info = self.create_timeslice_info()
+        self.n_timeslices = len(self.timeslice_info)
         self.buf_size = 5000
         self._channel_ids = np.zeros(self.buf_size, dtype='i')
         self._dom_ids = np.zeros(self.buf_size, dtype='i')
@@ -176,6 +172,21 @@ class TimeslicePump(Pump):
             self.stream if self.stream else 'TS'
         )
 
+    def create_timeslice_info(self):
+        header = self.r.timeslices.stream(self.stream, 0).header
+        frame_ids = header['frame_index'].array()
+        number_of_frames = len(frame_ids)
+        timestamps = header['timeslice_start.UTC_seconds'].array()
+        nanoseconds = header['timeslice_start.UTC_16nanosecondcycles'].array()
+        timeslice_info = Table.from_template({
+            'frame_index': frame_ids,
+            'slice_id': range(number_of_frames),
+            'timestamp': timestamps,
+            'nanoseconds': nanoseconds,
+            'n_frames': number_of_frames * np.ones(number_of_frames),
+        }, 'TimesliceInfo')
+        return timeslice_info
+
     def process(self, blob):
         self._current_blob = blob
         return next(self.blobs)
@@ -183,67 +194,48 @@ class TimeslicePump(Pump):
     def timeslice_generator(self):
         """Uses slice ID as iterator"""
         slice_id = 0
-        while slice_id < self.n_timeslices:
+        try:
             blob = self.get_blob(slice_id)
             yield blob
             slice_id += 1
+        except IndexError:
+            pass
 
     def get_blob(self, index):
         """Index is slice ID"""
         blob = self._current_blob
-        self.r.retrieve_timeslice(index)
-        timeslice_info = Table.from_template({
-            'frame_index': self.r.frame_index,
-            'slice_id': index,
-            'timestamp': self.r.utc_seconds,
-            'nanoseconds': self.r.utc_nanoseconds,
-            'n_frames': self.r.n_frames,
-        }, 'TimesliceInfo')
-        hits = self._extract_hits()
+        hits = self._extract_hits(index)
         hits.group_id = index
-        blob['TimesliceInfo'] = timeslice_info
+        blob['TimesliceInfo'] = self.timeslice_info[index:index + 1]
         blob[self._hits_blob_key] = hits
         return blob
 
-    def _extract_hits(self):
-        total_hits = self.r.number_of_hits
+    def _extract_hits(self, index):
+        timeslice = self.r.timeslices.stream(self.stream, index)
+        raw_hits = {
+            "dom_id": [],
+            "channel_id": [],
+            "time": [],
+            "tot": [],
+            "group_id": []
+        }
 
-        if total_hits > self.buf_size:
-            buf_size = int(total_hits * 3 / 2)
-            self._resize_buffers(buf_size)
+        for dom_id, frame in timeslice.frames.items():
+            raw_hits['channel_id'].extend(frame.pmt)
+            raw_hits['time'].extend(frame.tdc)
+            raw_hits['tot'].extend(frame.tot)
+            raw_hits['dom_id'].extend(len(frame.pmt) * [dom_id])
+            raw_hits['group_id'].extend(len(frame.pmt) * [0])
 
-        self.r.get_hits(
-            self._channel_ids, self._dom_ids, self._times, self._tots
-        )
-
-        group_id = 0 if total_hits > 0 else []
-
-        hits = Table.from_template(
-            {
-                'channel_id': self._channel_ids[:total_hits],
-                'dom_id': self._dom_ids[:total_hits],
-                'time': self._times[:total_hits].astype('f8'),
-                'tot': self._tots[:total_hits],
-        # 'triggered': self._triggereds[:total_hits],  # dummy
-                'group_id': group_id,    # slice_id will be set afterwards
-            },
-            'TimesliceHits'
-        )
+        hits = Table.from_template(raw_hits, 'TimesliceHits')
         return hits
-
-    def _resize_buffers(self, buf_size):
-        log.info("Resizing hit buffers to {}.".format(buf_size))
-        self.buf_size = buf_size
-        self._channel_ids.resize(buf_size, refcheck=False)
-        self._dom_ids.resize(buf_size, refcheck=False)
-        self._times.resize(buf_size, refcheck=False)
-        self._tots.resize(buf_size, refcheck=False)
-        self._triggereds.resize(buf_size, refcheck=False)    # dummy
 
     def get_by_frame_index(self, frame_index):
         blob = Blob()
-        self.r.retrieve_timeslice_at_frame_index(frame_index)
-        hits = self._extract_hits()
+        ts_info = self.timeslice_info[self.timeslice_info.frame_index ==
+                                      frame_index][0]
+        slice_id = ts_info.slice_id
+        hits = self._extract_hits(slice_id)
         blob[self._hits_blob_key] = hits
         return blob
 
