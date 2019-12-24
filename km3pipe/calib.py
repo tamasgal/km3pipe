@@ -360,7 +360,7 @@ class CalibrationService(Module):
         self.expose(self.detector_deprecation, "detector")
 
     def load_calibration(
-            self, filename=None, det_id=None, t0set=None, calibset=None
+        self, filename=None, det_id=None, t0set=None, calibset=None
     ):
         """Load another calibration"""
         self.filename = filename
@@ -404,3 +404,30 @@ class CalibrationService(Module):
     def get_calibration(self):
         """Extra getter to be as lazy as possible (expose triggers otherwise"""
         return self.calibration
+
+
+def tot_to_mean_npe(tot):
+    """
+    Calculate the (mean) received number of photo electrons from the measured
+    time over threshold value
+
+    Parameters
+    ----------
+    tot: Time over threshold in nano seconds
+    """
+    # Fit values from lab measurement provided by Jonas Reubelt
+    m1 = 5.36470148
+    m2 = 2.43489828
+    m3 = 0.33090585
+    t1 = 22.90102009
+    t2 = 72.51545459
+    t3 = 166.67288399
+    step1 = m1 * 17.0 + t1
+    step2 = m2 * 45.0 + t2
+    line1 = 1 / m1 * tot - t1 / m1
+    line2 = 1 / m2 * tot - t2 / m2
+    line3 = 1 / m3 * tot - t3 / m3
+    res = (tot <= step1) * line1
+    res += ((tot > step1) & (tot <= step2)) * line2
+    res += (tot > step2) * line3
+    return res
