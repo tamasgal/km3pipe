@@ -194,12 +194,11 @@ class TimeslicePump(Pump):
     def timeslice_generator(self):
         """Uses slice ID as iterator"""
         slice_id = 0
-        try:
+        while slice_id < self.n_timeslices:
             blob = self.get_blob(slice_id)
             yield blob
             slice_id += 1
-        except IndexError:
-            pass
+            
 
     def get_blob(self, index):
         """Index is slice ID"""
