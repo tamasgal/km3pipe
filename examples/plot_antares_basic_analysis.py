@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-======================
+==============================
 ANTARES Basic Analysis Example
 ==============================
 
