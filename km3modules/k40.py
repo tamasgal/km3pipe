@@ -636,7 +636,7 @@ def calculate_angles(detector, combs):
 
     Parameters
     ----------
-    detector_file: file from which to read the PMT positions (.detx)
+    detector: detector description (kp.hardware.Detector)
     combs: pmt combinations
 
     Returns
