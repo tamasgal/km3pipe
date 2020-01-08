@@ -1,10 +1,12 @@
 Unreleased changes
 ------------------
 
-* New ``kp.io.i3.I3Pump`` to read ANTARES I3 files
 
 Version 8
 ---------
+8.27.0 / 2020-01-08
+~~~~~~~~~~~~~~~~~~~
+* New ``kp.io.i3.I3Pump`` to read ANTARES I3 files
 
 8.26.0 / 2019-12-04
 ~~~~~~~~~~~~~~~~~~~
