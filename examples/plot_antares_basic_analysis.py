@@ -8,7 +8,7 @@ ANTARES Basic Analysis Example
 """
 from __future__ import absolute_import, print_function, division
 
-# Authors: Tamás Gál <tgal@km3net.de>, Moritz Lotze <mlotze@km3net.de>
+# Author: Nicole Geisselbrecht <ngeisselbrecht@km3net.de>
 # License: BSD-3
 # Date: 2017-10-10
 # Status: Under construction...
