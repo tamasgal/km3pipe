@@ -298,19 +298,23 @@ class DBManager(object):
                 val = param['Val']
             optical_df[pname] = val
 
-        _acoustic_df = raw_setup['ConfGroups'][1]
-        acoustic_df = {
-            'Name': _acoustic_df['Name'],
-            'Desc': _acoustic_df['Desc']
-        }
-        for param in _acoustic_df['Params']:
-            pname = self.parameters.oid2name(param['OID']).replace('DAQ_', '')
-            try:
-                dtype = float if '.' in param['Val'] else int
-                val = dtype(param['Val'])
-            except ValueError:
-                val = param['Val']
-            acoustic_df[pname] = val
+        if len(raw_setup['ConfGroups']) > 1:
+            _acoustic_df = raw_setup['ConfGroups'][1]
+            acoustic_df = {
+                'Name': _acoustic_df['Name'],
+                'Desc': _acoustic_df['Desc']
+            }
+            for param in _acoustic_df['Params']:
+                pname = self.parameters.oid2name(param['OID']
+                                                 ).replace('DAQ_', '')
+                try:
+                    dtype = float if '.' in param['Val'] else int
+                    val = dtype(param['Val'])
+                except ValueError:
+                    val = param['Val']
+                acoustic_df[pname] = val
+        else:
+            acoustic_df = {'Not available': None}
 
         return TriggerSetup(
             runsetup_oid, name, det_id, description, optical_df, acoustic_df
