@@ -310,7 +310,7 @@ class SummaryslicePump(Pump):
             summary_slice = {}
             for dom_id in raw_summaryslice.dom_id:
                 frame = raw_summaryslice[raw_summaryslice.dom_id == dom_id]
-                raw_rates = [getattr(frame, 'ch%d' % i)[0] for i in range(30)]
+                raw_rates = [getattr(frame, 'ch%d' % i)[0] for i in range(31)]
                 rates = km3io.daq.get_rate(raw_rates).astype(np.float64)
                 hrvs = km3io.daq.get_channel_flags(frame.hrv)
                 fifos = km3io.daq.get_channel_flags(frame.fifo)
