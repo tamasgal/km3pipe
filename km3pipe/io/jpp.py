@@ -198,7 +198,6 @@ class TimeslicePump(Pump):
             blob = self.get_blob(slice_id)
             yield blob
             slice_id += 1
-            
 
     def get_blob(self, index):
         """Index is slice ID"""
@@ -269,52 +268,69 @@ class SummaryslicePump(Pump):
         filename = self.require('filename')
         self.blobs = self.summaryslice_generator()
         try:
-            from jppy.daqsummaryslicereader import PyJDAQSummarysliceReader
+            import km3io
         except ImportError:
             raise ImportError(
-                "\nEither Jpp or jppy could not be found."
-                "\nMake sure you source the JPP environmanet "
-                "and have jppy installed"
+                "\nKM3iopackage could not be found."
+                "\n Make sure the km3io package is installed"
             )
-        self.r = PyJDAQSummarysliceReader(filename.encode())
+        self.r = km3io.DAQReader(filename)
+        self.n_summaryslices = len(self.r.summaryslices.slices)
+        self.summaryslice_info = self._create_summaryslice_info()
 
     def process(self, blob):
         return next(self.blobs)
 
+    def _create_summaryslice_info(self):
+        header = self.r.summaryslices.headers
+        frame_ids = np.array(header["frame_index"])
+        timestamps = np.array(header["UTC_seconds"])
+        nanoseconds = np.array(header["UTC_16nanosecondcycles"])
+        summaryslice_info = Table.from_template({
+            'frame_index': frame_ids,
+            'slice_id': range(self.n_summaryslices),
+            'timestamp': timestamps,
+            'nanoseconds': nanoseconds,
+            'n_frames': [len(v) for v in self.r.summaryslices.slices.dom_id],
+        }, 'SummarysliceInfo')
+        return summaryslice_info
+
     def summaryslice_generator(self):
-        slice_id = 0
-        while self.r.has_next:
-            summary_slice = {}
-            self.r.retrieve_next_summaryslice()
+        try:
+            import km3io
+        except ImportError:
+            raise ImportError(
+                "\nKM3iopackage could not be found."
+                "\n Make sure the km3io package is installed"
+            )
+        for i in range(self.n_summaryslices):
             blob = Blob()
-            summaryslice_info = Table.from_template({
-                'frame_index': self.r.frame_index,
-                'slice_id': slice_id,
-                'timestamp': self.r.utc_seconds,
-                'nanoseconds': self.r.utc_nanoseconds,
-                'n_frames': self.r.n_frames,
-            }, 'SummarysliceInfo')
-            blob['SummarysliceInfo'] = summaryslice_info
-            while self.r.has_next_frame:
-                rates = np.zeros(31, dtype='f8')
-                hrvs = np.zeros(31, dtype='i4')
-                fifos = np.zeros(31, dtype='i4')
-                self.r.get_rates(rates)
-                self.r.get_hrvs(hrvs)
-                self.r.get_fifos(fifos)
-                summary_slice[self.r.dom_id] = {
+            blob['SummarysliceInfo'] = self.summaryslice_info[i:i + 1]
+            raw_summaryslice = self.r.summaryslices.slices[i]
+            summary_slice = {}
+            for dom_id in raw_summaryslice.dom_id:
+                frame = raw_summaryslice[raw_summaryslice.dom_id == dom_id]
+                raw_rates = [getattr(frame, 'ch%d' % i)[0] for i in range(30)]
+                rates = km3io.daq.get_rate(raw_rates).astype(np.float64)
+                hrvs = km3io.daq.get_channel_flags(frame.hrv)
+                fifos = km3io.daq.get_channel_flags(frame.fifo)
+                udp_packets = km3io.daq.get_number_udp_packets(frame.dq_status)
+                max_sequence_number = km3io.daq.get_udp_max_sequence_number(
+                    frame.dq_status
+                )
+                has_udp_trailer = km3io.daq.has_udp_trailer(frame.fifo)
+                fifo_status = km3io.daq.get_fifo_status(frame.fifo)
+                summary_slice[dom_id] = {
                     'rates': rates,
-                    'hrvs': hrvs.astype(bool),
-                    'fifos': fifos.astype(bool),
-                    'n_udp_packets': self.r.number_of_received_packets,
-                    'max_sequence_number': self.r.max_sequence_number,
-                    'has_udp_trailer': self.r.has_udp_trailer,
-                    'high_rate_veto': self.r.high_rate_veto,
-                    'fifo_status': self.r.fifo_status,
+                    'hrvs': hrvs,
+                    'fifos': fifos,
+                    'n_udp_packets': udp_packets,
+                    'max_sequence_number': max_sequence_number,
+                    'has_udp_trailer': has_udp_trailer,
+                    'high_rate_veto': np.any(hrvs),
+                    'fifo_status': fifo_status,
                 }
-                self.r.retrieve_next_frame()
             blob['Summaryslice'] = summary_slice
-            slice_id += 1
             yield blob
 
     def __iter__(self):
