@@ -13,7 +13,7 @@ KM3Pipe is preinstalled on the Lyon computing centre. Put this into your
 
     export KM3NET_THRONG_DIR=/pbs/throng/km3net  # if not already set!
     export MODULEPATH=$KM3NET_THRONG_DIR/modulefiles
-    module load python/3.5.7
+    module load python/3.7.5
 
 Alternatively, if you need the old Python 2 version, you can load it with::
 
