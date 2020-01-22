@@ -2,6 +2,8 @@ Unreleased changes
 ------------------
 
 * New ``kp.io.i3.I3Pump`` to read ANTARES I3 files
+* ``km3pipe retrieve`` now uses XROOTD instead of iRODS for better speed
+  (https://git.km3net.de/km3py/km3pipe/issues/200)
 
 Version 9
 ---------
