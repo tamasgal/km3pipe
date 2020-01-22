@@ -319,7 +319,6 @@ class SummaryslicePump(Pump):
                     frame.dq_status
                 )
                 has_udp_trailer = km3io.daq.has_udp_trailer(frame.fifo)
-                fifo_status = km3io.daq.get_fifo_status(frame.fifo)
                 summary_slice[dom_id] = {
                     'rates': rates,
                     'hrvs': hrvs,
@@ -328,7 +327,7 @@ class SummaryslicePump(Pump):
                     'max_sequence_number': max_sequence_number,
                     'has_udp_trailer': has_udp_trailer,
                     'high_rate_veto': np.any(hrvs),
-                    'fifo_status': fifo_status,
+                    'fifo_status': np.any(fifos),
                 }
             blob['Summaryslice'] = summary_slice
             yield blob
