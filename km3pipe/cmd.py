@@ -6,10 +6,10 @@ Usage:
     km3pipe test
     km3pipe update [GIT_BRANCH]
     km3pipe createconf [--overwrite] [--dump]
-    km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID] [-o OUTFILE]
+    km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID] [-o OUT]
     km3pipe detectors [-s REGEX] [--temporary]
     km3pipe rundetsn [--temporary] RUN DETECTOR
-    km3pipe retrieve DET_ID RUN [-o OUTFILE]
+    km3pipe retrieve DET_ID RUN [-i -o OUTFILE]
     km3pipe (-h | --help)
     km3pipe --version
 
@@ -17,7 +17,8 @@ Options:
     -h --help           Show this screen.
     -m                  Get the MC detector file (flips the sign of DET_ID).
     -c CALIBR_ID        Geometrical calibration ID (eg. A01466417)
-    -o OUTFILE          Output filename.
+    -i                  Use iRODS instead of xrootd to retrieve files.
+    -o OUT              Output folder or filename.
     -t T0_SET           Time calibration ID (eg. A01466431)
     -s REGEX            Regular expression to filter the runsetup name/id.
     --temporary         Use a temporary session. [default: False]
@@ -37,7 +38,7 @@ from datetime import datetime
 import time
 
 from . import version
-from .tools import irods_filepath
+from .tools import irods_filepath, xrootd_path
 from .db import DBManager, we_are_in_lyon
 from .hardware import Detector
 
@@ -84,22 +85,33 @@ def update_km3pipe(git_branch=''):
     )
 
 
-def retrieve(run_id, det_id, outfile=None):
+def retrieve(run_id, det_id, use_irods=False, out=None):
     """Retrieve run from iRODS for a given detector (O)ID"""
-    try:
-        det_id = int(det_id)
-    except ValueError:
-        pass
-    ipath = irods_filepath(det_id, run_id)
-    filename = os.path.basename(ipath)
-    if outfile is None:
+    det_id = int(det_id)
+
+    if use_irods:
+        rpath = irods_filepath(det_id, run_id)
+        cmd = "iget -Pv"
+    else:
+        rpath = xrootd_path(det_id, run_id)
+        cmd = "xrdcp"
+
+    filename = os.path.basename(rpath)
+
+    if out is not None and os.path.isdir(out):
+        outfile = os.path.join(out, filename)
+    elif out is None:
         outfile = filename
+    else:
+        outfile = out
+
+    cmd += " {0} {1}".format(rpath, outfile)
 
     if not we_are_in_lyon():
-        os.system("iget -Pv {0} {1}".format(ipath, outfile))
+        os.system(cmd)
         return
 
-    subfolder = os.path.join(*ipath.split("/")[-3:-1])
+    subfolder = os.path.join(*rpath.split("/")[-3:-1])
     cached_subfolder = os.path.join(SPS_CACHE, subfolder)
     cached_filepath = os.path.join(cached_subfolder, filename)
     lock_file = cached_filepath + ".in_progress"
@@ -109,6 +121,7 @@ def retrieve(run_id, det_id, outfile=None):
         for _ in range(6 * 15):    # 15 minute timeout
             time.sleep(10)
             if not os.path.exists(lock_file):
+                print("Done.")
                 break
         else:
             print(
@@ -125,7 +138,7 @@ def retrieve(run_id, det_id, outfile=None):
                 lock_file=lock_file
             )
         )
-        os.system("iget -Pv {0} {1}".format(ipath, outfile))
+        os.system(cmd)
         os.system("chmod g+w {}".format(outfile))
         os.system("cp -p {} {}".format(outfile, cached_filepath))
         os.system("rm {}".format(outfile))
@@ -210,7 +223,7 @@ def main():
         )
 
     if args['retrieve']:
-        retrieve(int(args['RUN']), args['DET_ID'], args['-o'])
+        retrieve(int(args['RUN']), args['DET_ID'], use_irods=args['-i'], out=args['-o'])
 
     if args['detx']:
         t0set = args['-t']
