@@ -4,7 +4,11 @@ Unreleased changes
 
 Version 8
 ---------
-8.27.0 / 2020-01-08
+8.27.2 / 2020-01-22
+~~~~~~~~~~~~~~~~~~~
+* ``km3pipe retrieve`` now uses XROOTD instead of iRODS
+
+8.27.1 / 2020-01-08
 ~~~~~~~~~~~~~~~~~~~
 * Fixed ``triggersetup ...`` and ``runinfo -t ...`` which crashed when no
   ADF data is available
