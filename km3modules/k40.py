@@ -22,6 +22,7 @@ import numba as nb
 
 import km3pipe as kp
 from km3pipe.io.daq import TMCHData
+import km3io
 
 __author__ = "Jonas Reubelt"
 __email__ = "jreubelt@km3net.de"
@@ -313,8 +314,13 @@ class SummaryMedianPMTRateService(kp.Module):
     def configure(self):
         self.expose(self.get_median_rates, "GetMedianPMTRates")
         self.filename = self.require('filename')
+        self.down_sampling = self.get('downsampling', default=1)
+        self.median_rates = None
 
     def get_median_rates(self):
+        if self.median_rates is not None:
+            return self.median_rates
+
         rates = defaultdict(list)
 
         if 'GetSkippedFrames' in self.services:
@@ -322,22 +328,26 @@ class SummaryMedianPMTRateService(kp.Module):
         else:
             skipped_frames = None
 
-        p = kp.io.jpp.SummaryslicePump(filename=self.filename)
-        for b in p:
-            sum_info = b['SummarysliceInfo']
-            frame_index = sum_info.frame_index
-            summary = b['Summaryslice']
-            for dom_id in summary.keys():
-                if skipped_frames is not None and \
-                        dom_id in skipped_frames[frame_index]:
-                    continue
-                rates[dom_id].append(summary[dom_id]['rates'])
-
-        median_rates = {}
+        reader = km3io.DAQReader(self.filename)
+        n_slices = len(reader.summaryslices.slices)
+        indices = np.random.choice(
+            n_slices, n_slices // self.down_sampling, replace=False
+        )
+        for i in indices:
+            raw_slice = reader.summaryslices.slices[i]
+            if skipped_frames is not None:
+                raw_slice = raw_slice[np.logical_not(
+                    np.isin(raw_slice.dom_id, skipped_frames)
+                )]
+            raw_rates = [getattr(raw_slice, 'ch%d' % i) for i in range(31)]
+            tmp_rates = km3io.daq.get_rate(raw_rates).astype(np.float64)
+            for i, dom_id in enumerate(raw_slice.dom_id):
+                rates[dom_id].append(tmp_rates[:, i])
+        self.median_rates = {}
         for dom_id in rates.keys():
-            median_rates[dom_id] = np.median(rates[dom_id], axis=0)
+            self.median_rates[dom_id] = np.median(rates[dom_id], axis=0)
 
-        return median_rates
+        return self.median_rates
 
 
 class MedianPMTRatesService(kp.Module):
