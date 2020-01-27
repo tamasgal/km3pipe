@@ -85,6 +85,8 @@ class Calibration(Module):
                         .format(self.det_id, self.run))
             raw_detx = DBManager().detx_for_run(self.det_id, self.run)
             self.detector = Detector(string=raw_detx)
+            self._create_dom_channel_lookup()
+            self._create_pmt_id_lookup()
             return
 
         # TODO: deprecation
