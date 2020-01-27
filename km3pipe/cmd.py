@@ -7,6 +7,7 @@ Usage:
     km3pipe update [GIT_BRANCH]
     km3pipe createconf [--overwrite] [--dump]
     km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID] [-o OUT]
+    km3pipe detx DET_ID RUN
     km3pipe detectors [-s REGEX] [--temporary]
     km3pipe rundetsn [--temporary] RUN DETECTOR
     km3pipe retrieve DET_ID RUN [-i -o OUTFILE]
@@ -161,6 +162,14 @@ def detx(det_id, calibration='', t0set='', filename=None):
     if det.n_doms > 0:
         det.write(filename)
 
+def detx_for_run(det_id, run, temporary=False):
+    """Retrieve the calibrated detx for a given det_id and run"""
+    db =  DBManager(temporary=temporary)
+    raw_detx = db.detx_for_run(det_id, run)
+    filename = "KM3NeT_{0:08d}_{1:08d}.detx".format(det_id, run)
+    with open(filename, "w") as fobj:
+        fobj.write(raw_detx)
+    print("File saved as '{}'".format(filename))
 
 def detectors(regex=None, sep='\t', temporary=False):
     """Print the detectors table"""
@@ -226,11 +235,16 @@ def main():
         retrieve(int(args['RUN']), args['DET_ID'], use_irods=args['-i'], out=args['-o'])
 
     if args['detx']:
-        t0set = args['-t']
-        calibration = args['-c']
-        outfile = args['-o']
-        det_id = int(('-' if args['-m'] else '') + args['DET_ID'])
-        detx(det_id, calibration, t0set, outfile)
+        if args['RUN'] and args['DET_ID']:
+            det_id = int(args['DET_ID'])
+            run = int(args['RUN'])
+            detx_for_run(det_id, run, temporary=args['--temporary'])
+        else:
+            t0set = args['-t']
+            calibration = args['-c']
+            outfile = args['-o']
+            det_id = int(('-' if args['-m'] else '') + args['DET_ID'])
+            detx(det_id, calibration, t0set, outfile)
 
     if args['detectors']:
         detectors(regex=args['-s'], temporary=args["--temporary"])

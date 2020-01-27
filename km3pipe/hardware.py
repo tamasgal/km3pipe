@@ -44,7 +44,12 @@ class Detector(object):
         calibration (when retrieving from database).
     """
     def __init__(
-        self, filename=None, det_id=None, t0set=None, calibration=None
+        self,
+        filename=None,
+        det_id=None,
+        t0set=None,
+        calibration=None,
+        string=None
     ):
         self._det_file = None
         self.det_id = None
@@ -72,6 +77,9 @@ class Detector(object):
 
         self.cprint = get_printer(self.__class__.__name__)
 
+        if string:
+            self._init_from_string(string)
+
         if filename:
             self._init_from_file(filename)
 
@@ -87,6 +95,14 @@ class Detector(object):
             self._parse_doms()
             if self.n_doms < 1:
                 log.error("No data found for detector ID %s." % det_id)
+
+    def _init_from_string(self, string):
+        # TODO this is ugly, refactor me please
+        self._det_file = StringIO(string)
+        self._extract_comments()
+        self._parse_header()
+        self._parse_doms()
+        self._det_file.close()
 
     def _init_from_file(self, filename):
         """Create detector from detx file."""

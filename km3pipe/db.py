@@ -345,6 +345,24 @@ class DBManager(object):
         detx = self._get_content(url)
         return detx
 
+    def detx_for_run(self, det_id, run):
+        """Retrieve the calibrate detector file for given run"""
+        run_table = self.run_table(det_id)
+        try:
+            run_info = run_table[run_table.RUN == run].iloc[0]
+        except IndexError:
+            self.log.error(
+                "Run {} not found for detector {}".format(run, det_id))
+
+        url = 'detx/{det_id}?tcal={tcal}&pcal={pcal}&rcal={rcal}'.format(
+            det_id=det_id,
+            tcal=run_info.T0_CALIBSETID,
+            pcal=run_info.POS_CALIBSETID,
+            rcal=run_info.ROT_CALIBSETID)
+
+        detx = self._get_content(url)
+        return detx
+
     def ahrs(self, run, maxrun=None, clbupi=None, det_id='D_ARCA001'):
         "Retrieve AHRS values for given run(s) (optionally CLBs) and detector"
         if maxrun is None:
