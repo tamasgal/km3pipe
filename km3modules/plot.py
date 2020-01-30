@@ -334,7 +334,7 @@ def ztplot(
                                 for m in markers[1:]] + ['triggered'],
             scatterpoints=1,
             markerscale=1,
-            loc='upper left',
+            loc='lower right',
             frameon=True,
             framealpha=0.7
         )
