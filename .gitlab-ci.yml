@@ -127,15 +127,13 @@ pages:
     script:
         - *virtualenv_definition
         - cd doc && make clean && make html
-        - mv _build/html ../public/
-        - cd .. && mv reports/coverage public/coverage
+        - mv _build/html ../public/v8
+        - cd .. && mv reports/coverage public/v8/coverage
     artifacts:
         paths:
             - public
     cache: {}
-    only:
-        - tags
-        - master
+
 
 docker:
   image: docker:stable
