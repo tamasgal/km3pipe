@@ -4,6 +4,10 @@ Unreleased changes
 
 Version 8
 ---------
+8.27.3 / 2020-02-05
+~~~~~~~~~~~~~~~~~~~
+* statsmodels is now unfreezed in the dependencies
+
 8.27.2 / 2020-01-22
 ~~~~~~~~~~~~~~~~~~~
 * ``km3pipe retrieve`` now uses XROOTD instead of iRODS
