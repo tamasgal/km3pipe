@@ -126,6 +126,7 @@ pages:
     stage: doc
     script:
         - *virtualenv_definition
+        - mkdir public
         - cd doc && make clean && make html
         - mv _build/html ../public/v8
         - cd .. && mv reports/coverage public/v8/coverage
