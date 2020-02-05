@@ -4,7 +4,7 @@ ipython
 ipywidgets
 matplotlib==2.2.5
 mock
-numpy>=1.17.0
+numpy==1.16.6
 numpydoc>=0.7.0
 pandas
 particle>=0.8.0
