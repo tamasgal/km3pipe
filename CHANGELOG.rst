@@ -4,6 +4,11 @@ Unreleased changes
 
 Version 8
 ---------
+8.27.5 / 2020-02-06
+~~~~~~~~~~~~~~~~~~~
+* Quite a few python packages needed to be frozen to make it work with
+  Python 2.7. We hope this is the last v8 patch
+
 8.27.4 / 2020-02-05
 ~~~~~~~~~~~~~~~~~~~
 * statsmodels is now frozen at 0.9
