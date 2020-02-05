@@ -4,6 +4,10 @@ Unreleased changes
 
 Version 8
 ---------
+8.27.4 / 2020-02-05
+~~~~~~~~~~~~~~~~~~~
+* statsmodels is now frozen at 0.9
+
 8.27.3 / 2020-02-05
 ~~~~~~~~~~~~~~~~~~~
 * statsmodels is now unfreezed in the dependencies
