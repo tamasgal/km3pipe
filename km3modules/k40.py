@@ -18,16 +18,26 @@ from scipy import optimize
 import numpy as np
 import h5py
 import pickle
-import numba as nb
 
 import km3pipe as kp
 from km3pipe.io.daq import TMCHData
+
+log = kp.logger.get_logger(__name__)    # pylint: disable=C0103
+try:
+    from numba import jit
+except ImportError:
+    log.warning(
+        "This module requires `numba` to be installed, otherwise "
+        "the functions and Modules imported from this module can "
+        "be painfully slow."
+    )
+    jit = lambda f: f
+
 
 __author__ = "Jonas Reubelt"
 __email__ = "jreubelt@km3net.de"
 __status__ = "Development"
 
-log = kp.logger.get_logger(__name__)    # pylint: disable=C0103
 # log.setLevel(logging.DEBUG)
 
 TIMESLICE_LENGTH = 0.1    # [s]
@@ -870,13 +880,13 @@ def calculate_rms_rates(rates, fitted_rates, corrected_rates):
     return rms_rates, rms_corrected_rates
 
 
-@nb.jit
+@jit
 def get_comb_index(i, j):
     """Return the index of PMT pair combinations"""
     return i * 30 - i * (i + 1) // 2 + j - 1
 
 
-@nb.jit
+@jit
 def add_to_twofold_matrix(times, tdcs, mat, tmax=10):
     """Add counts to twofold coincidences for a given `tmax`.
 
