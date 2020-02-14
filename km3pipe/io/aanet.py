@@ -516,7 +516,7 @@ class AanetPump(Pump):
             out['type'].append(trk.type)
             out['id'].append(trk.id)
             out['length'].append(trk.len)
-            out['bjorkeny'].append(trk.getusr('by'))
+            out['bjorkeny'].append(trk.getusr('by', default=np.nan))
             out['interaction_channel'].append(trk.getusr('ichan'))
             try:
                 is_cc = IS_CC[trk.getusr('cc')]
