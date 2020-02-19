@@ -81,8 +81,11 @@ class Calibration(Module):
         self._lookup_tables = None    # for Numba
 
         if self.det_id and self.run:
-            self.cprint("Grabbing the calibration for Det ID {} and run {}"
-                        .format(self.det_id, self.run))
+            self.cprint(
+                "Grabbing the calibration for Det ID {} and run {}".format(
+                    self.det_id, self.run
+                )
+            )
             raw_detx = DBManager().detx_for_run(self.det_id, self.run)
             self.detector = Detector(string=raw_detx)
             self._create_dom_channel_lookup()

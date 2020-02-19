@@ -414,7 +414,7 @@ class TestTable(TestCase):
             tab = Table(dmap, dtype=bad_dt)
 
     def test_from_record(self):
-        t = Table({'a': [0,1,2], 'b': [10, 20, 30]})
+        t = Table({'a': [0, 1, 2], 'b': [10, 20, 30]})
         t2 = Table(t[1])
         assert 1 == t2[0].a
         assert 1 == t2.a[0]

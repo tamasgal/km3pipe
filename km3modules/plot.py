@@ -384,8 +384,14 @@ def cumulative_run_livetime(qtable, kind='runs'):
     fig, ax = plt.subplots()
 
     options = {
-        'runs': {'xlabel': 'run', 'xs': qtable.index},
-        'timeline': {'xlabel': None, 'xs': qtable.datetime}
+        'runs': {
+            'xlabel': 'run',
+            'xs': qtable.index
+        },
+        'timeline': {
+            'xlabel': None,
+            'xs': qtable.datetime
+        }
     }
 
     actual_livetime = np.cumsum(qtable['livetime_s'])

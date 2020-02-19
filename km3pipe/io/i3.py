@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 I3Pump for ANTARES DATA.
 """
@@ -32,7 +31,6 @@ class I3Pump(kp.Module):
             Path to the input I3 file.
 
     """
-
     def configure(self):
         self.filename = self.require("filename")
         self.fobj = dataio.I3File(self.filename)
@@ -69,9 +67,11 @@ class I3Pump(kp.Module):
         # MC INFO
         if 'AntMCTree' and 'I3MCWeightDict' in frame:
 
-            weights = kp.Table({'w2': self.get_antares_w2(frame),
-                                'w3': self.get_antares_w3(frame),
-                                'nb_gen_events': self.get_nb_generated_events(frame)},
+            weights = kp.Table({
+                'w2': self.get_antares_w2(frame),
+                'w3': self.get_antares_w3(frame),
+                'nb_gen_events': self.get_nb_generated_events(frame)
+            },
                                h5loc="/mc_info")
 
             blob['McInfo'] = weights
@@ -103,7 +103,9 @@ class I3Pump(kp.Module):
                 if 'BBFitTChi2' in frame:
                     bbfit_track_chi2 = frame['BBFitTChi2']
 
-                blob['BbfitTrackInfo'] = self._read_bbfit(bbfit_track, bbfit_track_chi2, "/reco/bbfit_track")
+                blob['BbfitTrackInfo'] = self._read_bbfit(
+                    bbfit_track, bbfit_track_chi2, "/reco/bbfit_track"
+                )
 
         if 'BBFitBright' in frame:
             bbfit_bright = frame['BBFitBright']
@@ -112,13 +114,17 @@ class I3Pump(kp.Module):
                 if 'BBFitBChi2' in frame:
                     bbfit_bright_chi2 = frame['BBFitBChi2']
 
-                blob['BbfitBrightInfo'] = self._read_bbfit(bbfit_bright, bbfit_bright_chi2, "/reco/bbfit_bright")
+                blob['BbfitBrightInfo'] = self._read_bbfit(
+                    bbfit_bright, bbfit_bright_chi2, "/reco/bbfit_bright"
+                )
 
         # GRIDFIT
         if 'GridFit_FinalFitResult' in frame:
             gridfit = frame['GridFit_FinalFitResult']
             if gridfit.fit_status == dataclasses.I3Particle.FitStatus.OK:
-                blob['GridFitInfo'] = self._read_gridfit(gridfit, "/reco/gridfit")
+                blob['GridFitInfo'] = self._read_gridfit(
+                    gridfit, "/reco/gridfit"
+                )
 
         # HIT INFO
         if 'CalibratedPulses' in frame:
@@ -139,26 +145,42 @@ class I3Pump(kp.Module):
 
         triggermask = 0
         if 'AntTriggerHierarchy' in frame:
-            trigger_types = {'ANT_TRIGGER_3D': 1, 'ANT_TRIGGER_1D': 2, 'ANT_TRIGGER_1D_WITH_PREFIT': 3,
-                             'ANT_TRIGGER_1D_MIXED': 4, 'ANT_TRIGGER_1D_MIXED_WITH_PREFIT': 5,
-                             'ANT_TRIGGER_3D_SCAN': 6, 'ANT_TRIGGER_3D_RECURSIVE': 7,
-                             'ANT_TRIGGER_OB': 8, 'ANT_TRIGGER_MINIMUM_BIAS': 9, 'ANT_TRIGGER_1S': 10,
-                             'ANT_TRIGGER_3S': 11, 'ANT_TRIGGER_3S_SCAN': 12,
-                             'ANT_TRIGGER_TIMESTAMP_0': 13, 'ANT_TRIGGER_T3': 14,
-                             'ANT_TRIGGER_T2': 15, 'ANT_TRIGGER_TQ': 16,
-                             'ANT_TRIGGER_GC': 30, 'ANT_MERGED': 32}
+            trigger_types = {
+                'ANT_TRIGGER_3D': 1,
+                'ANT_TRIGGER_1D': 2,
+                'ANT_TRIGGER_1D_WITH_PREFIT': 3,
+                'ANT_TRIGGER_1D_MIXED': 4,
+                'ANT_TRIGGER_1D_MIXED_WITH_PREFIT': 5,
+                'ANT_TRIGGER_3D_SCAN': 6,
+                'ANT_TRIGGER_3D_RECURSIVE': 7,
+                'ANT_TRIGGER_OB': 8,
+                'ANT_TRIGGER_MINIMUM_BIAS': 9,
+                'ANT_TRIGGER_1S': 10,
+                'ANT_TRIGGER_3S': 11,
+                'ANT_TRIGGER_3S_SCAN': 12,
+                'ANT_TRIGGER_TIMESTAMP_0': 13,
+                'ANT_TRIGGER_T3': 14,
+                'ANT_TRIGGER_T2': 15,
+                'ANT_TRIGGER_TQ': 16,
+                'ANT_TRIGGER_GC': 30,
+                'ANT_MERGED': 32
+            }
             tree = frame['AntTriggerHierarchy']
             for item in tree:
                 trig_type = str(item.Key.Type)
                 if trig_type in trigger_types:
-                    triggermask = triggermask + 2 ** (trigger_types[trig_type] - 1)
+                    triggermask = triggermask + 2**(
+                        trigger_types[trig_type] - 1
+                    )
 
-        event_info = kp.Table({'runID': header.RunID,
-                               'eventID': header.EventID,
-                               'triggercounter': triggercounter,
-                               'startTimeUnix': str(header.StartTime.GetUnixTime()),
-                               'startTime': str(header.StartTime),
-                               'triggermask': triggermask},
+        event_info = kp.Table({
+            'runID': header.RunID,
+            'eventID': header.EventID,
+            'triggercounter': triggercounter,
+            'startTimeUnix': str(header.StartTime.GetUnixTime()),
+            'startTime': str(header.StartTime),
+            'triggermask': triggermask
+        },
                               h5loc="/event_info")
         return event_info
 
@@ -168,14 +190,16 @@ class I3Pump(kp.Module):
         Reads particle information of the I3 file and returns it as dict.
 
         """
-        particle_mc = kp.Table({'dir_x': particle.GetDir().GetX(),
-                                'dir_y': particle.GetDir().GetY(),
-                                'dir_z': particle.GetDir().GetZ(),
-                                'pos_x': particle.GetPos().X,
-                                'pos_y': particle.GetPos().Y,
-                                'pos_z': particle.GetPos().Z,
-                                'energy': particle.GetEnergy(),
-                                'pdgencoding': particle.GetPdgEncoding()},
+        particle_mc = kp.Table({
+            'dir_x': particle.GetDir().GetX(),
+            'dir_y': particle.GetDir().GetY(),
+            'dir_z': particle.GetDir().GetZ(),
+            'pos_x': particle.GetPos().X,
+            'pos_y': particle.GetPos().Y,
+            'pos_z': particle.GetPos().Z,
+            'energy': particle.GetEnergy(),
+            'pdgencoding': particle.GetPdgEncoding()
+        },
                                h5loc=h5loc)
         return particle_mc
 
@@ -197,14 +221,16 @@ class I3Pump(kp.Module):
         aafit_pos = aafit.GetPos()
         aafit_dir = aafit.GetDir()
 
-        aafit_info = kp.Table({'dir_x': aafit_dir.GetX(),
-                               'dir_y': aafit_dir.GetY(),
-                               'dir_z': aafit_dir.GetZ(),
-                               'pos_x': aafit_pos.X,
-                               'pos_y': aafit_pos.Y,
-                               'pos_z': aafit_pos.Z,
-                               'lambda': lambda_value,
-                               'beta': beta_value},
+        aafit_info = kp.Table({
+            'dir_x': aafit_dir.GetX(),
+            'dir_y': aafit_dir.GetY(),
+            'dir_z': aafit_dir.GetZ(),
+            'pos_x': aafit_pos.X,
+            'pos_y': aafit_pos.Y,
+            'pos_z': aafit_pos.Z,
+            'lambda': lambda_value,
+            'beta': beta_value
+        },
                               h5loc="/reco/aafit")
         return aafit_info
 
@@ -216,13 +242,15 @@ class I3Pump(kp.Module):
         bbfit_pos = bbfit.GetPos()
         bbfit_dir = bbfit.GetDir()
 
-        bbfit_info = kp.Table({'dir_x': bbfit_dir.GetX(),
-                               'dir_y': bbfit_dir.GetY(),
-                               'dir_z': bbfit_dir.GetZ(),
-                               'pos_x': bbfit_pos.X,
-                               'pos_y': bbfit_pos.Y,
-                               'pos_z': bbfit_pos.Z,
-                               'chi2': bbfit_chi2.value},
+        bbfit_info = kp.Table({
+            'dir_x': bbfit_dir.GetX(),
+            'dir_y': bbfit_dir.GetY(),
+            'dir_z': bbfit_dir.GetZ(),
+            'pos_x': bbfit_pos.X,
+            'pos_y': bbfit_pos.Y,
+            'pos_z': bbfit_pos.Z,
+            'chi2': bbfit_chi2.value
+        },
                               h5loc=h5loc)
         return bbfit_info
 
@@ -233,13 +261,15 @@ class I3Pump(kp.Module):
         """
         gridfit_pos = gridfit.GetPos()
         gridfit_dir = gridfit.GetDir()
-        gridfit_info = kp.Table({'dir_x': gridfit_dir.GetX(),
-                                 'dir_y': gridfit_dir.GetY(),
-                                 'dir_z': gridfit_dir.GetZ(),
-                                 'pos_x': gridfit_pos.X,
-                                 'pos_y': gridfit_pos.Y,
-                                 'pos_z': gridfit_pos.Z,
-                                 'lik': gridfit.GetLik()},
+        gridfit_info = kp.Table({
+            'dir_x': gridfit_dir.GetX(),
+            'dir_y': gridfit_dir.GetY(),
+            'dir_z': gridfit_dir.GetZ(),
+            'pos_x': gridfit_pos.X,
+            'pos_y': gridfit_pos.Y,
+            'pos_z': gridfit_pos.Z,
+            'lik': gridfit.GetLik()
+        },
                                 h5loc=h5loc)
         return gridfit_info
 
@@ -275,21 +305,24 @@ class I3Pump(kp.Module):
 
             buf = self._hit_buffer[:idx]
 
-            hits = kp.Table({'id': buf[:, 0].astype(int),
-                             'line': buf[:, 1].astype(np.uint8),
-                             'floor': buf[:, 2].astype(np.uint8),
-                             'pmt': buf[:, 3].astype(np.uint32),
-                             'x': buf[:, 4],
-                             'y': buf[:, 5],
-                             'z': buf[:, 6],
-                             'dx': buf[:, 7],
-                             'dy': buf[:, 8],
-                             'dz': buf[:, 9],
-                             'time': buf[:, 10].astype(np.float32),
-                             'charge': buf[:, 11],
-                             'rate': buf[:, 12],
-                             'triggered': buf[:, 13]},
-                            h5loc="/hits", split_h5=True)
+            hits = kp.Table({
+                'id': buf[:, 0].astype(int),
+                'line': buf[:, 1].astype(np.uint8),
+                'floor': buf[:, 2].astype(np.uint8),
+                'pmt': buf[:, 3].astype(np.uint32),
+                'x': buf[:, 4],
+                'y': buf[:, 5],
+                'z': buf[:, 6],
+                'dx': buf[:, 7],
+                'dy': buf[:, 8],
+                'dz': buf[:, 9],
+                'time': buf[:, 10].astype(np.float32),
+                'charge': buf[:, 11],
+                'rate': buf[:, 12],
+                'triggered': buf[:, 13]
+            },
+                            h5loc="/hits",
+                            split_h5=True)
             return hits
 
     def increase_hits_buffer_size(self):
@@ -330,19 +363,22 @@ class I3Pump(kp.Module):
 
             mcbuf = self._mchit_buffer[:idx]
 
-            mchits = kp.Table({'id': mcbuf[:, 0].astype(int),
-                               'line': mcbuf[:, 1].astype(np.uint8),
-                               'floor': mcbuf[:, 2].astype(np.uint8),
-                               'pmt': mcbuf[:, 3].astype(np.uint32),
-                               'x': mcbuf[:, 4],
-                               'y': mcbuf[:, 5],
-                               'z': mcbuf[:, 6],
-                               'dx': mcbuf[:, 7],
-                               'dy': mcbuf[:, 8],
-                               'dz': mcbuf[:, 9],
-                               'time': mcbuf[:, 10].astype(np.float32),
-                               'rate': mcbuf[:, 11]},
-                              h5loc="/mchits", split_h5=True)
+            mchits = kp.Table({
+                'id': mcbuf[:, 0].astype(int),
+                'line': mcbuf[:, 1].astype(np.uint8),
+                'floor': mcbuf[:, 2].astype(np.uint8),
+                'pmt': mcbuf[:, 3].astype(np.uint32),
+                'x': mcbuf[:, 4],
+                'y': mcbuf[:, 5],
+                'z': mcbuf[:, 6],
+                'dx': mcbuf[:, 7],
+                'dy': mcbuf[:, 8],
+                'dz': mcbuf[:, 9],
+                'time': mcbuf[:, 10].astype(np.float32),
+                'rate': mcbuf[:, 11]
+            },
+                              h5loc="/mchits",
+                              split_h5=True)
             return mchits
 
     def increase_mchits_buffer_size(self):
@@ -392,7 +428,9 @@ class I3Pump(kp.Module):
         """
         kgen_hen_year = 3.156E7
         weight_dict = frame.Get("I3MCWeightDict")
-        w3 = weight_dict['GlobalWeight'] * (kgen_hen_year * icetray.I3Units.second)  # [1/yr]
+        w3 = weight_dict['GlobalWeight'] * (
+            kgen_hen_year * icetray.I3Units.second
+        )    # [1/yr]
         return w3
 
     @staticmethod
@@ -404,9 +442,11 @@ class I3Pump(kp.Module):
         weight_dict = frame.Get("I3MCWeightDict")
         # from OneWeight in units: [GeV.cm^2.s.sr]
         # to W2 in Antares units:  [GeV.m^2.(s/yr).sr]
-        w2 = (weight_dict['OneWeight'] *
-              (icetray.I3Units.centimeter2 / icetray.I3Units.meter2) *
-              kgen_hen_year)
+        w2 = (
+            weight_dict['OneWeight'] *
+            (icetray.I3Units.centimeter2 / icetray.I3Units.meter2) *
+            kgen_hen_year
+        )
         return w2
 
     @staticmethod

@@ -33,7 +33,6 @@ except ImportError:
     )
     jit = lambda f: f
 
-
 __author__ = "Jonas Reubelt"
 __email__ = "jreubelt@km3net.de"
 __status__ = "Development"

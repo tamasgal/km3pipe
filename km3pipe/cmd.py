@@ -162,14 +162,16 @@ def detx(det_id, calibration='', t0set='', filename=None):
     if det.n_doms > 0:
         det.write(filename)
 
+
 def detx_for_run(det_id, run, temporary=False):
     """Retrieve the calibrated detx for a given det_id and run"""
-    db =  DBManager(temporary=temporary)
+    db = DBManager(temporary=temporary)
     raw_detx = db.detx_for_run(det_id, run)
     filename = "KM3NeT_{0:08d}_{1:08d}.detx".format(det_id, run)
     with open(filename, "w") as fobj:
         fobj.write(raw_detx)
     print("File saved as '{}'".format(filename))
+
 
 def detectors(regex=None, sep='\t', temporary=False):
     """Print the detectors table"""
@@ -232,7 +234,12 @@ def main():
         )
 
     if args['retrieve']:
-        retrieve(int(args['RUN']), args['DET_ID'], use_irods=args['-i'], out=args['-o'])
+        retrieve(
+            int(args['RUN']),
+            args['DET_ID'],
+            use_irods=args['-i'],
+            out=args['-o']
+        )
 
     if args['detx']:
         if args['RUN'] and args['DET_ID']:
