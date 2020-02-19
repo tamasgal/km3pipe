@@ -357,26 +357,26 @@ class DBManager(object):
             )
 
         tcal = run_info.T0_CALIBSETID
-        try:
-            pcal = int(run_info.POS_CALIBSETID)
-        except ValueError:
-            pcal = 0
-        rcal = run_info.ROT_CALIBSETID
-
-        if not tcal or np.isnan(tcal):
+        if str(tcal) == 'nan':
             self.log.warning(
                 "No time calibration found for run {} (detector {})".format(
                     run, det_id
                 )
             )
             tcal = 0
-        if not pcal or np.isnan(pcal):
+
+        try:
+            pcal = int(run_info.POS_CALIBSETID)
+        except ValueError:
             self.log.warning(
                 "No position calibration found for run {} (detector {})".
                 format(run, det_id)
             )
             pcal = 0
-        if not rcal or np.isnan(rcal):
+
+        try:
+            rcal = int(run_info.ROT_CALIBSETID)
+        except ValueError:
             self.log.warning(
                 "No rotation calibration found for run {} (detector {})".
                 format(run, det_id)
