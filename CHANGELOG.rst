@@ -4,6 +4,11 @@ Unreleased changes
 
 Version 8
 ---------
+8.27.6 / 2020-02-19
+~~~~~~~~~~~~~~~~~~~
+* ``is_cc`` is now defaulting to ``0`` if there is a lookup error in aanet
+* ``by`` (Bjorken-y) defaults to ``np.nan`` in case of a lookup error in aanet
+
 8.27.5 / 2020-02-06
 ~~~~~~~~~~~~~~~~~~~
 * Quite a few python packages needed to be frozen to make it work with
