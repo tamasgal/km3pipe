@@ -358,7 +358,7 @@ class DBManager(object):
 
         tcal = run_info.T0_CALIBSETID
         try:
-            pcal = run_info.POS_CALIBSETID
+            pcal = int(run_info.POS_CALIBSETID)
         except ValueError:
             pcal = 0
         rcal = run_info.ROT_CALIBSETID
