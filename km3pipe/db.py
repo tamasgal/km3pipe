@@ -373,7 +373,7 @@ class DBManager(object):
                 format(run, det_id)
             )
             pcal = ""
-        if np.isnan(rcal):
+        if not rcal:
             self.log.warning(
                 "No rotation calibration found for run {} (detector {})".
                 format(run, det_id)
