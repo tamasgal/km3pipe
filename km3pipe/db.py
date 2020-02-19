@@ -367,7 +367,7 @@ class DBManager(object):
                 )
             )
             tcal = 0
-        if not pcal:
+        if not pcal or np.isnan(pcal):
             self.log.warning(
                 "No position calibration found for run {} (detector {})".
                 format(run, det_id)
