@@ -198,6 +198,7 @@ IS_CC = {
     2: 1,    # True,
     1: 0,    # False,
     0: 1,    # True,
+    -1: 0,   # False (lookup error in Aanet)
 }
 
 
@@ -518,20 +519,7 @@ class AanetPump(Pump):
             out['length'].append(trk.len)
             out['bjorkeny'].append(trk.getusr('by', default=np.nan))
             out['interaction_channel'].append(trk.getusr('ichan'))
-            try:
-                is_cc = IS_CC[trk.getusr('cc')]
-            except KeyError:
-                # see git.km3net.de/km3py/km3pipe/issues/112
-                # and http://trac.km3net.de/ticket/222
-                self.log.error(
-                    "Invalid value ({}) for the 'cc' usr-parameter in the "
-                    "MC track. 'is_cc' is now set to 0 (False).".format(
-                        trk.getusr('cc')
-                    )
-                )
-                is_cc = 0
-            finally:
-                out['is_cc'].append(is_cc)
+            out['is_cc'].append(IS_CC[trk.getusr('cc', default=-1)])
         out['group_id'] = self.group_id
         return Table(out, name='McTracks', h5loc='/mc_tracks')
 
