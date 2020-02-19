@@ -378,7 +378,7 @@ class DBManager(object):
                 "No rotation calibration found for run {} (detector {})".
                 format(run, det_id)
             )
-            rcal = 0
+            rcal = ""
 
         url = 'detx/{det_id}?tcal={tcal}&pcal={pcal}&rcal={rcal}'.format(
             det_id=det_id, tcal=tcal, pcal=pcal, rcal=rcal
