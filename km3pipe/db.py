@@ -360,7 +360,7 @@ class DBManager(object):
         pcal = run_info.POS_CALIBSETID
         rcal = run_info.ROT_CALIBSETID
 
-        if not tcal:
+        if not tcal or np.isnan(tcal):
             self.log.warning(
                 "No time calibration found for run {} (detector {})".format(
                     run, det_id
