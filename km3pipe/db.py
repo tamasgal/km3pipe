@@ -13,6 +13,7 @@ import io
 import json
 import re
 import pytz
+import numpy as np
 from collections import defaultdict, OrderedDict, namedtuple
 try:
     from inspect import Signature, Parameter
@@ -352,13 +353,39 @@ class DBManager(object):
             run_info = run_table[run_table.RUN == run].iloc[0]
         except IndexError:
             self.log.error(
-                "Run {} not found for detector {}".format(run, det_id))
+                "Run {} not found for detector {}".format(run, det_id)
+            )
+
+        tcal = run_info.T0_CALIBSETID
+        if str(tcal) == 'nan':
+            self.log.warning(
+                "No time calibration found for run {} (detector {})".format(
+                    run, det_id
+                )
+            )
+            tcal = 0
+
+        try:
+            pcal = int(run_info.POS_CALIBSETID)
+        except ValueError:
+            self.log.warning(
+                "No position calibration found for run {} (detector {})".
+                format(run, det_id)
+            )
+            pcal = 0
+
+        try:
+            rcal = int(run_info.ROT_CALIBSETID)
+        except ValueError:
+            self.log.warning(
+                "No rotation calibration found for run {} (detector {})".
+                format(run, det_id)
+            )
+            rcal = 0
 
         url = 'detx/{det_id}?tcal={tcal}&pcal={pcal}&rcal={rcal}'.format(
-            det_id=det_id,
-            tcal=run_info.T0_CALIBSETID,
-            pcal=run_info.POS_CALIBSETID,
-            rcal=run_info.ROT_CALIBSETID)
+            det_id=det_id, tcal=tcal, pcal=pcal, rcal=rcal
+        )
 
         detx = self._get_content(url)
         return detx
