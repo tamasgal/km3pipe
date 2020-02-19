@@ -31,6 +31,7 @@ stages:
 
 .virtualenv_template: &virtualenv_definition |
   python -V
+  pip install -U pip setuptools
   pip install virtualenv
   virtualenv venv
   source venv/bin/activate
@@ -98,7 +99,6 @@ test-jpp:
         - venv/
       key: "JPP_BUILD_$CI_COMMIT_REF_SLUG"
     <<: *junit_definition
-    allow_failure: true
 
 code-style:
     image: docker.km3net.de/base/python:3.7
