@@ -98,6 +98,7 @@ test-jpp:
         - venv/
       key: "JPP_BUILD_$CI_COMMIT_REF_SLUG"
     <<: *junit_definition
+    allow_failure: true
 
 code-style:
     image: docker.km3net.de/base/python:3.7
