@@ -357,7 +357,10 @@ class DBManager(object):
             )
 
         tcal = run_info.T0_CALIBSETID
-        pcal = run_info.POS_CALIBSETID
+        try:
+            pcal = run_info.POS_CALIBSETID
+        except ValueError:
+            pcal = 0
         rcal = run_info.ROT_CALIBSETID
 
         if not tcal or np.isnan(tcal):
