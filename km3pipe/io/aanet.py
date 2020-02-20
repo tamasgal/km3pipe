@@ -518,7 +518,7 @@ class AanetPump(Pump):
             out['id'].append(trk.id)
             out['length'].append(trk.len)
             out['bjorkeny'].append(trk.getusr('by', default=np.nan))
-            out['interaction_channel'].append(trk.getusr('ichan'))
+            out['interaction_channel'].append(trk.getusr('ichan', default=np.nan))
             out['is_cc'].append(IS_CC[trk.getusr('cc', default=-1)])
         out['group_id'] = self.group_id
         return Table(out, name='McTracks', h5loc='/mc_tracks')
