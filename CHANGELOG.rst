@@ -4,6 +4,10 @@ Unreleased changes
 
 Version 8
 ---------
+8.27.7 / 2020-02-20
+~~~~~~~~~~~~~~~~~~~
+* ``interaction_channel`` defaults to ``np.nan`` in case of a lookup error in aanet
+
 8.27.6 / 2020-02-19
 ~~~~~~~~~~~~~~~~~~~
 * ``is_cc`` is now defaulting to ``0`` if there is a lookup error in aanet
