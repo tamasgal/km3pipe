@@ -1,8 +1,11 @@
 # Filename: test_jpp.py
 # pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
 from km3pipe.testing import TestCase, surrogate, patch
-
+import random
+import numpy as np
 from km3pipe.io.jpp import EventPump, TimeslicePump, SummaryslicePump, FitPump
+from km3pipe.io.hdf5 import HDF5Pump
+from os.path import join, dirname
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2018, Tamas Gal and the KM3NeT collaboration."
@@ -14,61 +17,69 @@ __status__ = "Development"
 
 
 class TestEventPump(TestCase):
-    @surrogate('jppy.PyJDAQEventReader')
-    @patch('jppy.PyJDAQEventReader')
-    def test_init(self, reader_mock):
-        filename = 'a.root'
-        EventPump(filename=filename)
-        reader_mock.assert_called_with(filename.encode())
+    def setUp(self):
+        jpp_fname = join(dirname(__file__), 'a.root')
+        h5_fname = join(dirname(__file__), 'a.h5')
+        self.jpp_pump = EventPump(filename=jpp_fname)
+        self.h5_pump = HDF5Pump(filename=h5_fname)
 
-    @surrogate('jppy.PyJDAQEventReader')
-    @patch('jppy.PyJDAQEventReader')
-    def test_resize_buffers(self, reader_mock):
-        filename = 'a.root'
-        pump = EventPump(filename=filename)
-        assert len(pump._channel_ids) == pump.buf_size
-        new_buf_size = 8000
-        pump._resize_buffers(new_buf_size)
-        assert pump.buf_size == new_buf_size
-        assert len(pump._channel_ids) == new_buf_size
+    def test_event_info(self):
+        n = self.jpp_pump.n_events
+        for i in range(n):
+            h5blob = self.h5_pump[i]
+            jppblob = self.jpp_pump[i]
+            for k in h5blob["EventInfo"].dtype.names:
+                if k not in jppblob["EventInfo"].dtype.names:
+                    continue
+                ref_value = h5blob["EventInfo"][k][0]
+                test_value = jppblob["EventInfo"][k][0]
+                if isinstance(ref_value, float):
+                    if np.isnan(ref_value):
+                        assert np.isnan(test_value) == np.isnan(ref_value)
+                    else:
+                        self.assertAlmostEqual(test_value, ref_value)
+                else:
+                    assert ref_value == test_value
+
+    def test_hit_info(self):
+        n = self.jpp_pump.n_events
+        for i in range(n):
+            h5blob = self.h5_pump[i]
+            jppblob = self.jpp_pump[i]
+            for k in h5blob["Hits"].dtype.names:
+                ref_value = h5blob["Hits"][k][0]
+                test_value = jppblob["Hits"][k][0]
+                if isinstance(ref_value, float):
+                    if np.isnan(ref_value):
+                        assert np.isnan(test_value)
+                    else:
+                        self.assertAlmostEqual(test_value, ref_value)
+                else:
+                    assert ref_value == test_value
 
 
 class TestTimeslicePump(TestCase):
-    @surrogate('jppy.daqtimeslicereader.PyJDAQTimesliceReader')
-    @patch('jppy.daqtimeslicereader.PyJDAQTimesliceReader')
-    def test_init(self, reader_mock):
-        filename = 'a.root'
-        TimeslicePump(filename=filename)
-        reader_mock.assert_called_with(filename.encode(), b'JDAQTimesliceL1')
+    def setUp(self):
+        self.jpp_fname = join(dirname(__file__), 'a.root')
 
-    @surrogate('jppy.daqtimeslicereader.PyJDAQTimesliceReader')
-    @patch('jppy.daqtimeslicereader.PyJDAQTimesliceReader')
-    def test_init_with_specific_stream(self, reader_mock):
-        filename = 'a.root'
-        TimeslicePump(filename=filename, stream='L0')
-        reader_mock.assert_called_with(filename.encode(), b'JDAQTimesliceL0')
-        TimeslicePump(filename=filename, stream='SN')
-        reader_mock.assert_called_with(filename.encode(), b'JDAQTimesliceSN')
-
-    @surrogate('jppy.daqtimeslicereader.PyJDAQTimesliceReader')
-    @patch('jppy.daqtimeslicereader.PyJDAQTimesliceReader')
-    def test_resize_buffers(self, reader_mock):
-        filename = 'a.root'
-        pump = TimeslicePump(filename=filename)
-        assert len(pump._channel_ids) == pump.buf_size
-        new_buf_size = 8000
-        pump._resize_buffers(new_buf_size)
-        assert pump.buf_size == new_buf_size
-        assert len(pump._channel_ids) == new_buf_size
+    def test_header(self):
+        timeslice_pump = TimeslicePump(filename=self.jpp_fname, stream="L1")
+        blob = timeslice_pump[0]
+        tsinfo = blob["TimesliceInfo"]
+        assert tsinfo.frame_index == 366
+        assert tsinfo.slice_id == 0
+        assert tsinfo.timestamp == 1575979236
+        assert tsinfo.nanoseconds == 600000000
+        assert tsinfo.n_frames == 69
 
 
-class TestSummaryslicePump(TestCase):
-    @surrogate('jppy.daqsummaryslicereader.PyJDAQSummarysliceReader')
-    @patch('jppy.daqsummaryslicereader.PyJDAQSummarysliceReader')
-    def test_init(self, reader_mock):
-        filename = 'a.root'
-        SummaryslicePump(filename=filename)
-        reader_mock.assert_called_with(filename.encode())
+# class TestSummaryslicePump(TestCase):
+#     @surrogate('jppy.daqsummaryslicereader.PyJDAQSummarysliceReader')
+#     @patch('jppy.daqsummaryslicereader.PyJDAQSummarysliceReader')
+#     def test_init(self, reader_mock):
+#         filename = 'a.root'
+#         SummaryslicePump(filename=filename)
+#         reader_mock.assert_called_with(filename.encode())
 
 
 class TestFitPump(TestCase):
