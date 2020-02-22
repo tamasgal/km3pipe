@@ -13,6 +13,7 @@ import io
 import json
 import re
 import pytz
+import numpy as np
 from collections import defaultdict, OrderedDict, namedtuple
 try:
     from inspect import Signature, Parameter
@@ -298,19 +299,23 @@ class DBManager(object):
                 val = param['Val']
             optical_df[pname] = val
 
-        _acoustic_df = raw_setup['ConfGroups'][1]
-        acoustic_df = {
-            'Name': _acoustic_df['Name'],
-            'Desc': _acoustic_df['Desc']
-        }
-        for param in _acoustic_df['Params']:
-            pname = self.parameters.oid2name(param['OID']).replace('DAQ_', '')
-            try:
-                dtype = float if '.' in param['Val'] else int
-                val = dtype(param['Val'])
-            except ValueError:
-                val = param['Val']
-            acoustic_df[pname] = val
+        if len(raw_setup['ConfGroups']) > 1:
+            _acoustic_df = raw_setup['ConfGroups'][1]
+            acoustic_df = {
+                'Name': _acoustic_df['Name'],
+                'Desc': _acoustic_df['Desc']
+            }
+            for param in _acoustic_df['Params']:
+                pname = self.parameters.oid2name(param['OID']
+                                                 ).replace('DAQ_', '')
+                try:
+                    dtype = float if '.' in param['Val'] else int
+                    val = dtype(param['Val'])
+                except ValueError:
+                    val = param['Val']
+                acoustic_df[pname] = val
+        else:
+            acoustic_df = {'Not available': None}
 
         return TriggerSetup(
             runsetup_oid, name, det_id, description, optical_df, acoustic_df
@@ -337,6 +342,50 @@ class DBManager(object):
             url += '&t0set=' + t0set
         if calibration is not None:
             url += '&calibrid=' + calibration
+
+        detx = self._get_content(url)
+        return detx
+
+    def detx_for_run(self, det_id, run):
+        """Retrieve the calibrate detector file for given run"""
+        run_table = self.run_table(det_id)
+        try:
+            run_info = run_table[run_table.RUN == run].iloc[0]
+        except IndexError:
+            self.log.error(
+                "Run {} not found for detector {}".format(run, det_id)
+            )
+
+        tcal = run_info.T0_CALIBSETID
+        if str(tcal) == 'nan':
+            self.log.warning(
+                "No time calibration found for run {} (detector {})".format(
+                    run, det_id
+                )
+            )
+            tcal = 0
+
+        try:
+            pcal = int(run_info.POS_CALIBSETID)
+        except ValueError:
+            self.log.warning(
+                "No position calibration found for run {} (detector {})".
+                format(run, det_id)
+            )
+            pcal = 0
+
+        try:
+            rcal = int(run_info.ROT_CALIBSETID)
+        except ValueError:
+            self.log.warning(
+                "No rotation calibration found for run {} (detector {})".
+                format(run, det_id)
+            )
+            rcal = 0
+
+        url = 'detx/{det_id}?tcal={tcal}&pcal={pcal}&rcal={rcal}'.format(
+            det_id=det_id, tcal=tcal, pcal=pcal, rcal=rcal
+        )
 
         detx = self._get_content(url)
         return detx

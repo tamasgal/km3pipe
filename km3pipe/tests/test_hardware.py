@@ -252,6 +252,26 @@ class TestDetector(TestCase):
         self.det._parse_doms()
         assert detx_string == self.det.ascii
 
+    def test_init_from_string(self):
+        detx_string = "\n".join((
+            "1 3",
+            "8 1 1 3",
+            " 1 1.1 1.2 1.3 1.1 2.1 3.1 10.0",
+            " 2 1.4 1.5 1.6 4.1 5.1 6.1 20.0",
+            " 3 1.7 1.8 1.9 7.1 8.1 9.1 30.0",
+            "4 1 2 3",
+            " 4 2.1 2.2 2.3 1.2 2.2 3.2 40.0",
+            " 5 2.4 2.5 2.6 4.2 5.2 6.2 50.0",
+            " 6 2.7 2.8 2.9 7.2 8.2 9.2 60.0",
+            "9 1 3 3",
+            " 7 3.1 3.2 3.3 1.3 2.3 3.3 70.0",
+            " 8 3.4 3.5 3.6 4.3 5.3 6.3 80.0",
+            " 9 3.7 3.8 3.9 7.3 8.3 9.3 90.0\n",
+        ))
+        det = Detector(string=detx_string)
+        assert 1 == det.n_dus
+        assert 3 == det.n_doms
+
     def test_detx_format_version_1(self):
         det = Detector(filename=join(TEST_DATA_DIR, 'detx_v1.detx'))
         assert 2 == det.n_dus

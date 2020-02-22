@@ -8,6 +8,7 @@ from __future__ import absolute_import, print_function, division
 
 import numpy as np
 
+from .db import DBManager
 from .core import Module
 from .hardware import Detector
 from .dataclasses import Table
@@ -67,6 +68,7 @@ class Calibration(Module):
         self._should_apply = self.get('apply', default=True)
         self.filename = self.get('filename')
         self.det_id = self.get('det_id')
+        self.run = self.get('run')
         self.t0set = self.get('t0set')
         self.calibset = self.get('calibset')
         self.detector = self.get('detector')
@@ -77,6 +79,18 @@ class Calibration(Module):
         self._dir_pmt_id = None
         self._t0_pmt_id = None
         self._lookup_tables = None    # for Numba
+
+        if self.det_id and self.run:
+            self.cprint(
+                "Grabbing the calibration for Det ID {} and run {}".format(
+                    self.det_id, self.run
+                )
+            )
+            raw_detx = DBManager().detx_for_run(self.det_id, self.run)
+            self.detector = Detector(string=raw_detx)
+            self._create_dom_channel_lookup()
+            self._create_pmt_id_lookup()
+            return
 
         # TODO: deprecation
         if self.get('calibration'):
