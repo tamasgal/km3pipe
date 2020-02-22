@@ -45,7 +45,7 @@ class EventPump(Pump):
         self.event_index = self.get('index') or 0
         self.filename = self.require('filename')
 
-        self.event_reader = km3io.OfflineReader(self.filename.encode())
+        self.event_reader = km3io.DAQReader(self.filename.encode())
         self.blobs = self.blob_generator()
         self.n_events = len(self.event_reader.events)
         self._current_blob = Blob()
@@ -59,38 +59,58 @@ class EventPump(Pump):
 
         raise StopIteration
 
+    def __getitem__(self, index):
+        if index >= self.n_events:
+            raise IndexError
+        return self.extract_event(index)
+
+    def _get_trigger_mask(self, snapshot_hits, triggered_hits):
+        s = np.array([
+            snapshot_hits.time, snapshot_hits.channel_id, snapshot_hits.dom_id
+        ]).transpose()
+        t = np.array([
+            triggered_hits.time, triggered_hits.channel_id,
+            triggered_hits.dom_id
+        ]).transpose()
+        cmp_mask = (s == t[:, None])
+        trg_mask = np.any(np.all(cmp_mask, axis=2), axis=0)
+        return trg_mask
+
     def extract_event(self, event_number):
         blob = self._current_blob
         r = self.event_reader
-        hits = r.hits[event_number]
-        event = r.events[event_number]
+        hits = r.events.snapshot_hits[event_number]
+        trg_hits = r.events.triggered_hits[event_number]
+        raw_event_info = r.events.headers[event_number]
+
+        trigger_mask = self._get_trigger_mask(hits, trg_hits)
 
         hit_series = Table.from_template({
             'channel_id': hits.channel_id,
             'dom_id': hits.dom_id,
-            'time': hits.tdc,
+            'time': hits.time,
             'tot': hits.tot,
-            'triggered': hits.trig,
+            'triggered': np.array(trigger_mask, dtype=int),
             'group_id': self.event_index,
         }, 'Hits')
 
         event_info = Table.from_template({
-            'det_id': event.det_id,
-            'frame_index': event.frame_index,
+            'det_id': raw_event_info["detector_id"],
+            'frame_index': raw_event_info["frame_index"],
             'livetime_sec': 0,
             'mc_id': 0,
             'mc_t': 0,
             'n_events_gen': 0,
             'n_files_gen': 0,
-            'overlays': event.overlays,
-            'trigger_counter': event.trigger_counter,
-            'trigger_mask': event.trigger_mask,
-            'utc_nanoseconds': events.t_fNanoSec,
-            'utc_seconds': events.t_fSec,
+            'overlays': raw_event_info["overlays"],
+            'trigger_counter': raw_event_info["trigger_counter"],
+            'trigger_mask': raw_event_info["trigger_mask"],
+            'utc_nanoseconds': raw_event_info["UTC_16nanosecondcycles"] * 16.0,
+            'utc_seconds': raw_event_info["UTC_seconds"],
             'weight_w1': np.nan,
             'weight_w2': np.nan,
             'weight_w3': np.nan,
-            'run_id': event.run_id,
+            'run_id': raw_event_info["run"],
             'group_id': self.event_index,
         }, 'EventInfo')
 
