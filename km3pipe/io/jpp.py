@@ -34,89 +34,63 @@ class EventPump(Pump):
 
     """
     def configure(self):
-
         try:
-            import jppy    # noqa
+            import km3io
         except ImportError:
             raise ImportError(
-                "\nEither Jpp or jppy could not be found."
-                "\nMake sure you source the JPP environmanet "
-                "and have jppy installed"
+                "\nKM3iopackage could not be found."
+                "\n Make sure the km3io package is installed"
             )
 
         self.event_index = self.get('index') or 0
         self.filename = self.require('filename')
 
-        self.buf_size = 5000
-        self._channel_ids = np.zeros(self.buf_size, dtype='i')
-        self._dom_ids = np.zeros(self.buf_size, dtype='i')
-        self._times = np.zeros(self.buf_size, dtype='i')
-        self._tots = np.zeros(self.buf_size, dtype='i')
-        self._triggereds = np.zeros(self.buf_size, dtype='i')
-
-        self.event_reader = jppy.PyJDAQEventReader(self.filename.encode())
+        self.event_reader = km3io.OfflineReader(self.filename.encode())
         self.blobs = self.blob_generator()
+        self.n_events = len(self.event_reader.events)
         self._current_blob = Blob()
 
-    def _resize_buffers(self, buf_size):
-        log.info("Resizing hit buffers to {}.".format(buf_size))
-        self.buf_size = buf_size
-        self._channel_ids.resize(buf_size, refcheck=False)
-        self._dom_ids.resize(buf_size, refcheck=False)
-        self._times.resize(buf_size, refcheck=False)
-        self._tots.resize(buf_size, refcheck=False)
-        self._triggereds.resize(buf_size, refcheck=False)
-
     def blob_generator(self):
-        while self.event_reader.has_next:
+        for i in range(self.n_events):
             try:
-                yield self.extract_event()
+                yield self.extract_event(i)
             except IndexError:
                 pass
 
         raise StopIteration
 
-    def extract_event(self):
+    def extract_event(self, event_number):
         blob = self._current_blob
         r = self.event_reader
-        r.retrieve_next_event()    # do it at the beginning!
-
-        n = r.number_of_snapshot_hits
-
-        if n > self.buf_size:
-            self._resize_buffers(int(n * 3 / 2))
-
-        r.get_hits(
-            self._channel_ids, self._dom_ids, self._times, self._tots,
-            self._triggereds
-        )
+        hits = r.hits[event_number]
+        event = r.events[event_number]
 
         hit_series = Table.from_template({
-            'channel_id': self._channel_ids[:n],
-            'dom_id': self._dom_ids[:n],
-            'time': self._times[:n],
-            'tot': self._tots[:n],
-            'triggered': self._triggereds[:n],
+            'channel_id': hits.channel_id,
+            'dom_id': hits.dom_id,
+            'time': hits.tdc,
+            'tot': hits.tot,
+            'triggered': hits.trig,
             'group_id': self.event_index,
         }, 'Hits')
 
         event_info = Table.from_template({
-            'det_id': r.det_id,
-            'frame_index': r.frame_index,
+            'det_id': event.det_id,
+            'frame_index': event.frame_index,
             'livetime_sec': 0,
             'mc_id': 0,
             'mc_t': 0,
             'n_events_gen': 0,
             'n_files_gen': 0,
-            'overlays': r.overlays,
-            'trigger_counter': r.trigger_counter,
-            'trigger_mask': r.trigger_mask,
-            'utc_nanoseconds': r.utc_nanoseconds,
-            'utc_seconds': r.utc_seconds,
+            'overlays': event.overlays,
+            'trigger_counter': event.trigger_counter,
+            'trigger_mask': event.trigger_mask,
+            'utc_nanoseconds': events.t_fNanoSec,
+            'utc_seconds': events.t_fSec,
             'weight_w1': np.nan,
             'weight_w2': np.nan,
             'weight_w3': np.nan,
-            'run_id': 0,
+            'run_id': event.run_id,
             'group_id': self.event_index,
         }, 'EventInfo')
 
