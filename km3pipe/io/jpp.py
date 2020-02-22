@@ -154,12 +154,6 @@ class TimeslicePump(Pump):
         self.r = km3io.DAQReader(fname)
         self.timeslice_info = self.create_timeslice_info()
         self.n_timeslices = len(self.timeslice_info)
-        self.buf_size = 5000
-        self._channel_ids = np.zeros(self.buf_size, dtype='i')
-        self._dom_ids = np.zeros(self.buf_size, dtype='i')
-        self._times = np.zeros(self.buf_size, dtype='i')
-        self._tots = np.zeros(self.buf_size, dtype='i')
-        self._triggereds = np.zeros(self.buf_size, dtype=bool)    # dummy
 
         self._current_blob = Blob()
         self._hits_blob_key = '{}Hits'.format(
@@ -168,16 +162,17 @@ class TimeslicePump(Pump):
 
     def create_timeslice_info(self):
         header = self.r.timeslices.stream(self.stream, 0).header
-        frame_ids = header['frame_index'].array()
-        number_of_frames = len(frame_ids)
+        slice_ids = header['frame_index'].array()
         timestamps = header['timeslice_start.UTC_seconds'].array()
-        nanoseconds = header['timeslice_start.UTC_16nanosecondcycles'].array()
+        number_of_slices = len(slice_ids)
+        nanoseconds = header['timeslice_start.UTC_16nanosecondcycles'].array(
+        ) * 16
         timeslice_info = Table.from_template({
-            'frame_index': frame_ids,
-            'slice_id': range(number_of_frames),
+            'frame_index': slice_ids,
+            'slice_id': range(number_of_slices),
             'timestamp': timestamps,
             'nanoseconds': nanoseconds,
-            'n_frames': number_of_frames * np.ones(number_of_frames),
+            'n_frames': np.zeros(len(slice_ids)),
         }, 'TimesliceInfo')
         return timeslice_info
 
@@ -199,8 +194,15 @@ class TimeslicePump(Pump):
         hits = self._extract_hits(index)
         hits.group_id = index
         blob['TimesliceInfo'] = self.timeslice_info[index:index + 1]
+        blob['TimesliceInfo']['n_frames'] = self._extract_number_of_frames(
+            index
+        )
         blob[self._hits_blob_key] = hits
         return blob
+
+    def _extract_number_of_frames(self, index):
+        timeslice = self.r.timeslices.stream(self.stream, index)
+        return len(timeslice.frames)
 
     def _extract_hits(self, index):
         timeslice = self.r.timeslices.stream(self.stream, index)
