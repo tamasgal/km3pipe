@@ -1,11 +1,11 @@
 # Filename: test_jpp.py
 # pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
 from km3pipe.testing import TestCase, surrogate, patch
-import random
+import sys
 import numpy as np
 from km3pipe.io.jpp import EventPump, TimeslicePump, SummaryslicePump, FitPump
 from km3pipe.io.hdf5 import HDF5Pump
-from os.path import join, dirname
+from os.path import join, dirname, abspath
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2018, Tamas Gal and the KM3NeT collaboration."
@@ -15,11 +15,13 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
+TESTDATA_DIR = abspath(join(dirname(__file__), "../../kp-data/test_data"))
+
 
 class TestEventPump(TestCase):
     def setUp(self):
-        jpp_fname = join(dirname(__file__), 'a.root')
-        h5_fname = join(dirname(__file__), 'a.h5')
+        jpp_fname = join(TESTDATA_DIR, 'a.root')
+        h5_fname = join(TESTDATA_DIR, 'a.h5')
         self.jpp_pump = EventPump(filename=jpp_fname)
         self.h5_pump = HDF5Pump(filename=h5_fname)
 
@@ -60,7 +62,7 @@ class TestEventPump(TestCase):
 
 class TestTimeslicePump(TestCase):
     def setUp(self):
-        self.jpp_fname = join(dirname(__file__), 'a.root')
+        self.jpp_fname = join(TESTDATA_DIR, 'a.root')
 
     def test_header(self):
         timeslice_pump = TimeslicePump(filename=self.jpp_fname, stream="L1")
