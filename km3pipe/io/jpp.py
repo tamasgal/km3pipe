@@ -65,6 +65,7 @@ class EventPump(Pump):
         return self.extract_event(index)
 
     def _get_trigger_mask(self, snapshot_hits, triggered_hits):
+        trg_mask = np.zeros(len(snapshot_hits))
         s = np.array([
             snapshot_hits.time, snapshot_hits.channel_id, snapshot_hits.dom_id
         ]).transpose()
@@ -73,7 +74,8 @@ class EventPump(Pump):
             triggered_hits.dom_id
         ]).transpose()
         cmp_mask = (s == t[:, None])
-        trg_mask = np.any(np.all(cmp_mask, axis=2), axis=0)
+        trg_map = np.argwhere(np.all(cmp_mask, axis=2))[:, 1]
+        trg_mask[trg_map] = triggered_hits.trigger_mask
         return trg_mask
 
     def extract_event(self, event_number):
@@ -84,15 +86,14 @@ class EventPump(Pump):
         raw_event_info = r.events.headers[event_number]
 
         trigger_mask = self._get_trigger_mask(hits, trg_hits)
-
-        hit_series = Table.from_template({
+        hit_series = Table({
             'channel_id': hits.channel_id,
             'dom_id': hits.dom_id,
             'time': hits.time,
             'tot': hits.tot,
-            'triggered': np.array(trigger_mask, dtype=int),
+            'triggered': trigger_mask,
             'group_id': self.event_index,
-        }, 'Hits')
+        })
 
         event_info = Table.from_template({
             'det_id': raw_event_info["detector_id"],
