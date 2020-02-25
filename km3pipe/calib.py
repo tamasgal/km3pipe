@@ -143,82 +143,24 @@ class Calibration(Module):
             hits.time += cal
         return hits
 
-    def apply(self, hits, no_copy=False):
+    def apply(self, hits, no_copy=False, correct_slewing=False):
         """Add x, y, z, t0 (and du, floor if DataFrame) columns to the hits.
 
         """
         if not no_copy:
             hits = hits.copy()
+
         if istype(hits, 'DataFrame'):
             # do we ever see McHits here?
             hits = Table.from_template(hits, 'Hits')
+
         if hasattr(hits, 'dom_id') and hasattr(hits, 'channel_id'):
             dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0 = _get_calibration_for_hits(
                 hits, self._calib_by_dom_and_channel
             )
-
-            if hasattr(hits, 'time'):
-                if hits.time.dtype != t0.dtype:
-                    time = hits.time.astype('f4') + t0.astype('f4')
-                    hits = hits.drop_columns(['time'])
-                    hits = hits.append_columns(['time'], [time])
-                else:
-                    hits.time += t0
-
-            hits_data = {}
-            for colname in hits.dtype.names:
-                hits_data[colname] = hits[colname]
-            calib = {
-                'dir_x': dir_x,
-                'dir_y': dir_y,
-                'dir_z': dir_z,
-                'du': du.astype(np.uint8),
-                'floor': du.astype(np.uint8),
-                'pos_x': pos_x,
-                'pos_y': pos_y,
-                'pos_z': pos_z,
-                't0': t0,
-            }
-            hits_data.update(calib)
-            return Table(
-                hits_data,
-                h5loc=hits.h5loc,
-                split_h5=hits.split_h5,
-                name=hits.name
-            )
-
         elif hasattr(hits, 'pmt_id'):
             dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0 = _get_calibration_for_mchits(
                 hits, self._calib_by_pmt_id
-            )
-            if hasattr(hits, 'time'):
-                if hits.time.dtype != t0.dtype:
-                    time = hits.time.astype('f4') + t0.astype('f4')
-                    hits = hits.drop_columns(['time'])
-                    hits = hits.append_columns(['time'], [time])
-                else:
-                    hits.time += t0
-
-            hits_data = {}
-            for colname in hits.dtype.names:
-                hits_data[colname] = hits[colname]
-            calib = {
-                'dir_x': dir_x,
-                'dir_y': dir_y,
-                'dir_z': dir_z,
-                'du': du.astype(np.uint8),
-                'floor': du.astype(np.uint8),
-                'pos_x': pos_x,
-                'pos_y': pos_y,
-                'pos_z': pos_z,
-                't0': t0,
-            }
-            hits_data.update(calib)
-            return Table(
-                hits_data,
-                h5loc=hits.h5loc,
-                split_h5=hits.split_h5,
-                name=hits.name
             )
         else:
             raise TypeError(
@@ -226,6 +168,39 @@ class Calibration(Module):
                 "We need at least 'dom_id' and 'channel_id', or "
                 "'pmt_id'.".format(hits.name)
             )
+
+        if hasattr(hits, 'time'):
+            if hits.time.dtype != t0.dtype:
+                time = hits.time.astype('f4') + t0.astype('f4')
+                hits = hits.drop_columns(['time'])
+                hits = hits.append_columns(['time'], [time])
+            else:
+                hits.time += t0
+
+        hits_data = {}
+        for colname in hits.dtype.names:
+            hits_data[colname] = hits[colname]
+        calib = {
+            'dir_x': dir_x,
+            'dir_y': dir_y,
+            'dir_z': dir_z,
+            'du': du.astype(np.uint8),
+            'floor': du.astype(np.uint8),
+            'pos_x': pos_x,
+            'pos_y': pos_y,
+            'pos_z': pos_z,
+            't0': t0,
+        }
+        hits_data.update(calib)
+        if correct_slewing:
+            hits_data['time'] += slew(hits_data['tot'])
+        return Table(
+            hits_data,
+            h5loc=hits.h5loc,
+            split_h5=hits.split_h5,
+            name=hits.name
+        )
+
 
     def _create_dom_channel_lookup(self):
         if HAVE_NUMBA:
@@ -370,6 +345,7 @@ class CalibrationService(Module):
         self.expose(self.get_detector, "get_detector")
         self.expose(self.get_calibration, "get_calibration")
         self.expose(self.load_calibration, "load_calibration")
+        self.expose(self.correct_slewing, "correct_slewing")
 
         self.expose(self.detector_deprecation, "detector")
 
@@ -418,3 +394,36 @@ class CalibrationService(Module):
     def get_calibration(self):
         """Extra getter to be as lazy as possible (expose triggers otherwise"""
         return self.calibration
+
+    def correct_slewing(self, hits):
+        """Apply time slewing correction to the hit times"""
+        hits.time += slew(hits.tot)
+
+
+def slew(tot):
+    """Calculate the time slewing of a PMT response for a given ToT
+
+
+    Parameters
+    ----------
+    tot: int or np.array(int)
+      Time over threshold value of a hit
+
+    Returns
+    -------
+    time: int or np.array(int)
+      Time slewing, which has to be added to the original hit time.
+    """
+
+    #p0 = 7.70824
+    #p1 = 0.00879447
+    #p2 = -0.0621101
+    #p3 = -1.90226
+
+    p0 =  13.6488662517;
+    p1 =  -0.128744123166;
+    p2 =  -0.0174837749244;
+    p3 =  -4.47119633965;
+
+    corr = p0 * np.exp(p1 * np.sqrt(tot) + p2 * tot) + p3
+    return corr
