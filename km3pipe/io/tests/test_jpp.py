@@ -82,23 +82,3 @@ class TestTimeslicePump(TestCase):
 #         filename = 'a.root'
 #         SummaryslicePump(filename=filename)
 #         reader_mock.assert_called_with(filename.encode())
-
-
-class TestFitPump(TestCase):
-    @surrogate('jppy.PyJFitReader')
-    @patch('jppy.PyJFitReader')
-    def test_init(self, reader_mock):
-        filename = 'a.root'
-        FitPump(filename=filename)
-        reader_mock.assert_called_with(filename.encode())
-
-    @surrogate('jppy.PyJFitReader')
-    @patch('jppy.PyJFitReader')
-    def test_resize_buffers(self, reader_mock):
-        filename = 'a.root'
-        pump = FitPump(filename=filename)
-        assert len(pump._pos_xs) == pump.buf_size
-        new_buf_size = 8000
-        pump._resize_buffers(new_buf_size)
-        assert pump.buf_size == new_buf_size
-        assert len(pump._pos_xs) == new_buf_size
