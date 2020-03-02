@@ -42,14 +42,8 @@ setup(
     ],
     include_package_data=True,
     platforms='any',
-    setup_requires=[
-        'numpy>=1.12',
-        'setuptools_scm',
-    ],
-    use_scm_version={
-        'write_to': 'km3pipe/version.txt',
-        'tag_regex': r'^(?P<prefix>v)?(?P<version>[^\+]+)(?P<suffix>.*)?$',
-    },
+    setup_requires=['numpy>=1.12', 'setuptools_scm'],
+    use_scm_version=True,
     install_requires=requirements,
     python_requires='>=2.7',
     entry_points={
