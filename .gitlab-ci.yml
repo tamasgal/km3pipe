@@ -29,13 +29,20 @@ stages:
   - docker
   - release
 
+.cache_paths_template: &cache_paths_definition |
+  .cache/pip
+  venv
+
 .virtualenv_template: &virtualenv_definition |
   python -V
-  pip install virtualenv
-  virtualenv venv
+  make venv
   source venv/bin/activate
   pip install -U pip setuptools
   make install
+
+.test_template: &test_definition |
+  make test
+  make test-km3modules
 
 .junit_template: &junit_definition
     artifacts:
@@ -43,23 +50,53 @@ stages:
         junit: "reports/junit*.xml"
 
 
+test-py3.5:
+    image: docker.km3net.de/base/python:3.5
+    stage: test
+    script:
+        - *virtualenv_definition
+        - *test_definition
+    <<: *junit_definition
+    cache:
+      paths:
+        - *cache_paths_definition
+      key: "test-py35-$CI_COMMIT_REF_SLUG"
+
 test-py3.6:
     image: docker.km3net.de/base/python:3.6
     stage: test
     script:
         - *virtualenv_definition
-        - make test
-        - make test-km3modules
+        - *test_definition
     <<: *junit_definition
+    cache:
+      paths:
+        - *cache_paths_definition
+      key: "test-py36-$CI_COMMIT_REF_SLUG"
 
 test-py3.7:
     image: docker.km3net.de/base/python:3.7
     stage: test
     script:
         - *virtualenv_definition
-        - make test
-        - make test-km3modules
+        - *test_definition
     <<: *junit_definition
+    cache:
+      paths:
+        - *cache_paths_definition
+      key: "test-py37-$CI_COMMIT_REF_SLUG"
+
+test-py3.8:
+    image: docker.km3net.de/base/python:3.8
+    stage: test
+    script:
+        - *virtualenv_definition
+        - *test_definition
+    <<: *junit_definition
+    cache:
+      paths:
+        - *cache_paths_definition
+      key: "test-py38-$CI_COMMIT_REF_SLUG"
 
 code-style:
     image: docker.km3net.de/base/python:3.7

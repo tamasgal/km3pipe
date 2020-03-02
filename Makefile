@@ -24,6 +24,10 @@ clean:
 	rm -f -r build/
 	rm -f $(PKGNAME)/*.so
 
+venv:
+	pip install -U pip setuptools wheel
+	python -m venv venv
+
 test: 
 	py.test --junitxml=./reports/junit.xml -o junit_suite_name=$(PKGNAME) $(PKGNAME)
 
