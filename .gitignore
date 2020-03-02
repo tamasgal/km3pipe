@@ -6,13 +6,8 @@ __pycache__/
 # C extensions
 *.so
 
-# Temporary Cython *.c files
-km3pipe/core.c
-km3pipe/dataclasses.c
-km3pipe/tools.c
-
 # Version info for PyPI
-km3pipe/version.txt
+km3pipe/version.py
 
 # Distribution / packaging
 .Python
