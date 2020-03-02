@@ -3,8 +3,6 @@
 The extemporary KM3NeT analysis framework.
 
 """
-from __future__ import absolute_import, print_function, division
-
 from .__version__ import version
 
 try:

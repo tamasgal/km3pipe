@@ -3,8 +3,6 @@
 A set of classes and tools wich uses the ControlHost protocol.
 
 """
-from __future__ import absolute_import, print_function, division
-
 import socket
 import struct
 import time

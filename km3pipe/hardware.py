@@ -4,8 +4,6 @@
 Classes representing KM3NeT hardware.
 
 """
-from __future__ import absolute_import, print_function, division
-
 from collections import OrderedDict, defaultdict
 from io import StringIO
 

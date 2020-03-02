@@ -6,7 +6,6 @@ Histograms
 
 Load a histogram from a file, plot it, draw random samples.
 """
-from __future__ import absolute_import, print_function, division
 
 # Author: Moritz Lotze <mlotze@km3net.de>
 # License: BSD-3

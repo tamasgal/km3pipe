@@ -9,7 +9,6 @@ Live Event Dumper
 Recieves triggered events from the detector and dumps them to a file.
 
 """
-from __future__ import absolute_import, print_function, division
 
 from km3pipe import Pipeline, Module
 from km3pipe.io.ch import CHPump

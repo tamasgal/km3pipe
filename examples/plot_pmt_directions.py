@@ -8,7 +8,6 @@ PMT Directions
 Plot the PMT directions for a given DOM.
 
 """
-from __future__ import absolute_import, print_function, division
 
 # Author: Tamas Gal <tgal@km3net.de>
 # License: BSD-3

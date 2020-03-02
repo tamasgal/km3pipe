@@ -11,7 +11,6 @@ MSG reader
 This application demonstrates how to access MSGs from Ligier.
 
 """
-from __future__ import absolute_import, print_function, division
 
 import io
 import km3pipe as kp
