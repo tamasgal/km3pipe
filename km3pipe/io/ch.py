@@ -15,10 +15,7 @@ import socket
 import time
 import numpy as np
 from collections import deque
-try:
-    from Queue import Queue, Empty
-except ImportError:
-    from queue import Queue, Empty
+from queue import Queue, Empty
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
