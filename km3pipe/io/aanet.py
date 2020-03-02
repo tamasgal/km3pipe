@@ -8,7 +8,6 @@ This is undoubtedly the ugliest module in the entire framework.
 If you have a way to read aanet files via the Jpp interface,
 your pull request is more than welcome!
 """
-from __future__ import absolute_import, print_function, division
 
 from collections import defaultdict
 import itertools

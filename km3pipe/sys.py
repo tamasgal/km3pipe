@@ -4,8 +4,6 @@
 Some unsorted, frequently used logic.
 
 """
-from __future__ import absolute_import, print_function, division
-
 try:
     import resource    # linux/macos
 except ImportError:

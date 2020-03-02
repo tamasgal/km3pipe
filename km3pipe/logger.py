@@ -4,8 +4,6 @@
 The logging facility.
 
 """
-from __future__ import absolute_import, print_function, division
-
 from hashlib import sha256
 from inspect import getframeinfo, stack
 import socket

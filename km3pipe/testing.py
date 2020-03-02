@@ -3,8 +3,6 @@
 Common unit testing support for km3pipe.
 
 """
-from __future__ import absolute_import, print_function, division
-
 import sys
 from functools import wraps
 from unittest import TestCase    # noqa

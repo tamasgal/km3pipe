@@ -4,15 +4,9 @@
 Some unsorted, frequently used logic.
 
 """
-from __future__ import absolute_import, print_function, division
-
 import base64
 import collections
-try:
-    # Python 3.8+
-    from collections.abc import Mapping
-except ImportError:
-    from collections import Mapping
+from collections.abc import Mapping
 from datetime import datetime, timedelta
 import functools
 import os

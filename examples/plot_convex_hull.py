@@ -9,7 +9,6 @@ Convex hull of a set of points, representing Dom x-y positions.
 
 Derived from ``scipy.spatial.qhull.pyx``.
 """
-from __future__ import absolute_import, print_function, division
 
 import numpy as np
 from scipy.spatial import ConvexHull

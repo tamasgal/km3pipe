@@ -4,7 +4,6 @@
 Pumps for the DAQ data formats.
 
 """
-from __future__ import absolute_import, print_function, division
 
 from collections import namedtuple
 from io import BytesIO

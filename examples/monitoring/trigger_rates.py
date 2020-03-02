@@ -9,7 +9,6 @@ Trigger Rate Monitor
 A (messy) script to monitor the trigger rates.
 
 """
-from __future__ import absolute_import, print_function, division
 
 from datetime import datetime
 from collections import defaultdict, deque, OrderedDict
