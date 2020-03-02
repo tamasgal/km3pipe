@@ -5,7 +5,6 @@
 Pump for the jpp file read through aanet interface.
 
 """
-from __future__ import absolute_import, print_function, division
 
 from km3pipe.core import Pump, Blob
 from km3pipe.controlhost import Client

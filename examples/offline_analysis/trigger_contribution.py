@@ -11,7 +11,6 @@ This script can be used to easily identify DOMs in a run, which are out
 of sync.
 
 """
-from __future__ import absolute_import, print_function, division
 
 from collections import defaultdict
 import sys

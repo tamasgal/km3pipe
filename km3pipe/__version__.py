@@ -9,8 +9,6 @@ Pep 386 compliant version info.
     (1, 2, 0, 'beta', 2) => "1.2b2"
 
 """
-from __future__ import absolute_import, print_function, division
-
 from os.path import dirname, realpath, join
 
 from setuptools_scm import get_version

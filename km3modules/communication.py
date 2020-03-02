@@ -5,7 +5,6 @@
 Talk to the ELOG, interact with the Chat server etc.
 
 """
-from __future__ import absolute_import, print_function, division
 
 import builtins
 import os

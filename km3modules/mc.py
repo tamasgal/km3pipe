@@ -3,7 +3,6 @@
 # vim:set ts=4 sts=4 sw=4 et:
 """MC Helpers.
 """
-from __future__ import absolute_import, print_function, division
 
 import numpy as np
 

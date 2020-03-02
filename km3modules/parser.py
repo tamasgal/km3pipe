@@ -5,7 +5,6 @@
 A collection of parsers.
 
 """
-from __future__ import absolute_import, print_function, division
 
 from km3pipe import Module
 from km3pipe.io.daq import DAQPreamble, DAQSummaryslice, DAQEvent

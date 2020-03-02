@@ -9,7 +9,6 @@ Monitoring Channel
 This application demonstrates how to access monitoring channel data.
 
 """
-from __future__ import absolute_import, print_function, division
 
 # Author: Tamas Gal <tgal@km3net.de>
 # License: MIT
