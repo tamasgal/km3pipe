@@ -13,10 +13,7 @@ import struct
 from struct import unpack
 import time
 import pprint
-try:
-    from urllib.request import urlopen, URLError
-except ImportError:
-    from urllib2 import urlopen, URLError
+from urllib.request import urlopen, URLError
 
 import numpy as np
 
