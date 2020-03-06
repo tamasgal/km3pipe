@@ -5,7 +5,6 @@
 A collection of k40 related functions and modules.
 
 """
-from __future__ import absolute_import, print_function, division
 
 import os
 from itertools import combinations

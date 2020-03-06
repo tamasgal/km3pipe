@@ -1,6 +1,5 @@
 # Filename: test_tools.py
 # pylint: disable=locally-disabled,C0111,R0904,C0103
-from __future__ import unicode_literals
 
 from io import StringIO
 

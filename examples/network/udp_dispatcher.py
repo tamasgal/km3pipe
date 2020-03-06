@@ -15,7 +15,6 @@ This application is used to forward monitoring channel data from Ligier
 to a given UDP address.
 
 """
-from __future__ import absolute_import, print_function, division
 
 import socket
 import sys

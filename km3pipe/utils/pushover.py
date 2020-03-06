@@ -16,12 +16,8 @@ Options:
 from km3pipe.config import Config
 from km3pipe import version
 
-try:
-    import http.client as httplib
-    from urllib.parse import urlencode
-except ImportError:
-    import httplib
-    from urllib import urlencode
+import http.client as httplib
+from urllib.parse import urlencode
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2017, Tamas Gal and the KM3NeT collaboration."

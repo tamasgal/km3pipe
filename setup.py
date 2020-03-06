@@ -8,24 +8,12 @@ KM3Pipe setup script.
 from setuptools import setup
 import sys
 
-try:
-    import builtins
-except ImportError:
-    import __builtin__ as builtins
+import builtins
 # so we can detect in __init__.py that it's called from setup.py
 builtins.__KM3PIPE_SETUP__ = True
 
 with open('requirements.txt') as fobj:
     requirements = [l.strip() for l in fobj.readlines()]
-    if sys.version_info < (3, 5):
-        # Take just the latest available versions if running with Python <3.5
-        for lib in ["numpy", "scipy", "matplotlib", "tables"]:
-            idx = [
-                requirements.index(r)
-                for r in requirements
-                if r.startswith("{}>=".format(lib))
-            ][0]
-            requirements[idx] = lib
 
 try:
     with open("README.rst") as fh:
@@ -45,14 +33,8 @@ setup(
     ],
     include_package_data=True,
     platforms='any',
-    setup_requires=[
-        'numpy>=1.12',
-        'setuptools_scm',
-    ],
-    use_scm_version={
-        'write_to': 'km3pipe/version.txt',
-        'tag_regex': r'^(?P<prefix>v)?(?P<version>[^\+]+)(?P<suffix>.*)?$',
-    },
+    setup_requires=['numpy>=1.12', 'setuptools_scm'],
+    use_scm_version=True,
     install_requires=requirements,
     python_requires='>=2.7',
     entry_points={

@@ -28,7 +28,6 @@ Standalone job submitter for K40 offline calibrations with KM3Pipe.
         -h --help    Show this screen.
 
 """
-from __future__ import absolute_import, print_function, division
 
 import os
 import re

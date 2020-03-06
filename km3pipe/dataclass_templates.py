@@ -4,8 +4,6 @@
 """
 Dataclasses for internal use. Heavily based on Numpy arrays.
 """
-from __future__ import absolute_import, print_function, division
-
 import numpy as np
 
 __author__ = "Tamas Gal and Moritz Lotze"

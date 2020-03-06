@@ -4,6 +4,7 @@
 """
 Read and write Vanilla ROOT files.
 """
+
 import numpy as np
 
 from km3pipe.logger import get_logger

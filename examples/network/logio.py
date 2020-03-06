@@ -8,7 +8,6 @@ Log.io Module
 
 A module to send live log messages to a log.io server.
 """
-from __future__ import absolute_import, print_function, division
 
 # Author: Tamas Gal <tgal@km3net.de>
 # License: MIT

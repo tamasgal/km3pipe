@@ -6,7 +6,6 @@ Basic Analysis Example
 ======================
 
 """
-from __future__ import absolute_import, print_function, division
 
 # Authors: Tamás Gál <tgal@km3net.de>, Moritz Lotze <mlotze@km3net.de>
 # License: BSD-3

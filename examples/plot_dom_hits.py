@@ -6,7 +6,6 @@ DOM hits.
 
 Estimate track/DOM distances using the number of hits per DOM.
 """
-from __future__ import absolute_import, print_function, division
 
 # Author: Tamas Gal <tgal@km3net.de>
 # License: BSD-3

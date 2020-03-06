@@ -4,19 +4,12 @@
 Tools for global configuration.
 
 """
-from __future__ import absolute_import, print_function, division
-
 import os
 import pytz
 from configparser import ConfigParser, Error, NoOptionError, NoSectionError
 import getpass
 
 from .logger import get_logger
-
-try:
-    input = raw_input
-except NameError:
-    pass
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

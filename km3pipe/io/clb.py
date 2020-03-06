@@ -3,7 +3,6 @@
 Pumps for the CLB data formats.
 
 """
-from __future__ import absolute_import, print_function, division
 
 from io import BytesIO
 import struct

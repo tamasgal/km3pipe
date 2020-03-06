@@ -4,7 +4,6 @@
 Pumps for the DAQ data formats.
 
 """
-from __future__ import absolute_import, print_function, division
 
 from collections import namedtuple
 from io import BytesIO
@@ -14,10 +13,7 @@ import struct
 from struct import unpack
 import time
 import pprint
-try:
-    from urllib.request import urlopen, URLError
-except ImportError:
-    from urllib2 import urlopen, URLError
+from urllib.request import urlopen, URLError
 
 import numpy as np
 

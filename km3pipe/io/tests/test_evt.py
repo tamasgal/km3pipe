@@ -1,6 +1,5 @@
 # Filename: test_evt.py
 # pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
-from __future__ import unicode_literals
 
 from io import StringIO
 from os.path import join, dirname

@@ -10,7 +10,6 @@ blogpost <http://bactra.org/weblog/857.html>`__ with scipy.
 First, import things
 
 """
-from __future__ import absolute_import, print_function, division
 
 import numpy as np
 import pandas as pd
