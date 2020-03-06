@@ -90,7 +90,7 @@ class HDF5Header(object):
     def from_km3io(cls, header):
         if not isinstance(header, Header):
             raise TypeError(
-                "The given header object is not an instance of km3io.header"
+                "The given header object is not an instance of km3io.offline.Header"
             )
         h5header = cls({})
         for attribute, value in header._data.items():

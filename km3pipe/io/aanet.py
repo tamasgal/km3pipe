@@ -221,7 +221,7 @@ FIELDNAMES = {
 }
 
 
-class AanetPump(Pump):
+class OfflinePump(Pump):
     """A pump for binary Aanet files.
 
     Parameters
@@ -254,8 +254,11 @@ class AanetPump(Pump):
                 "No metadata found, this means no data provenance!"
             )
         # Header
-        self.header = HDF5Header.from_km3io(self.r.header)
-        self.raw_header = self._generate_raw_header()
+        self.header = None
+        self.raw_header = None
+        if self.r.header is not None:
+            self.header = HDF5Header.from_km3io(self.r.header)
+            self.raw_header = self._generate_raw_header()
         self._generic_dtypes_avail = {}
         self.file_index = int(self.index_start)
         self.blobs = self.blob_generator()
@@ -313,7 +316,7 @@ class AanetPump(Pump):
         wgt1, wgt2, wgt3, wgt4 = self._parse_wgts(event.w)
         tab_data = {
             'event_id': event.id,
-            'run_id': event.run_id,    # TODO: this may segfault in aanet
+            'run_id': event.run_id,
             'weight_w1': wgt1,
             'weight_w2': wgt2,
             'weight_w3': wgt3,
@@ -538,12 +541,11 @@ class AanetPump(Pump):
         if len(hits.id) == 0:
             self.log.debug("Found empty hits, skipping...")
             return out
-        for hit in hits:
-            out['channel_id'].append(hit.channel_id)
-            out['dom_id'].append(hit.dom_id)
-            out['time'].append(hit.t)
-            out['tot'].append(hit.tot)
-            out['triggered'].append(hit.trig)
+        out['channel_id'] = hits.channel_id
+        out['dom_id'] = hits.dom_id
+        out['time'] = hits.t
+        out['tot'] = hits.tot
+        out['triggered'] = hits.trig
         out['group_id'] = self.group_id
         return Table(out, name='Hits', h5loc='/hits', split_h5=True)
 
