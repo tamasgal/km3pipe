@@ -20,6 +20,7 @@ except ImportError:
     jit = lambda f: f
 
 import km3pipe as kp
+from km3io.offline import Header
 from km3pipe.core import Pump, Module, Blob
 from km3pipe.dataclasses import Table, NDArray
 from km3pipe.logger import get_logger
@@ -85,6 +86,17 @@ class HDF5Header(object):
                 )
             else:
                 setattr(self, parameter, data)
+
+    @classmethod
+    def from_km3io(cls, header):
+        if not isinstance(header, Header):
+            raise TypeError(
+                "The given header object is not an instance of km3io.header"
+            )
+        h5header = cls({})
+        for attribute, value in header._data.items():
+            setattr(h5header, attribute, value)
+        return h5header
 
     @classmethod
     def from_table(cls, table):
