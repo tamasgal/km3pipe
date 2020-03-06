@@ -2,7 +2,6 @@
 """Read & dump events through the CH Pump.
 
 """
-from __future__ import absolute_import, print_function, division
 
 from km3pipe import Pipeline, Module
 from km3pipe.io import CHPump

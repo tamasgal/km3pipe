@@ -5,8 +5,6 @@
 A collection of plotting functions and modules.
 
 """
-from __future__ import absolute_import, print_function, division
-
 from collections import Counter
 from datetime import datetime
 import os

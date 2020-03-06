@@ -18,10 +18,7 @@ from datetime import date
 import sphinx_rtd_theme
 from pkg_resources import get_distribution
 
-# what is this?
-# sys.path.append('../')
-
-import km3pipe    # noqa
+# -- Project information -----------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -74,16 +71,10 @@ source_suffix = '.rst'
 # The master toctree document.
 master_doc = 'index'
 
-# The version info for the project you're documenting, acts as replacement for
-# |version| and |release|, also used in various other places throughout the
-# built documents.
-# The full version, including alpha/beta/rc tags.
-release = get_distribution('km3pipe').version
-# The short X.Y version.
-version = '.'.join(release.split('.')[:2])
-
 # General information about the project.
-project = "KM3Pipe {}".format(km3pipe.__version__)
+version = get_distribution('km3pipe').version
+short_version = '.'.join(version.split('.')[:2])
+project = 'KM3Pipe {}'.format(short_version)
 
 copyright = u'{0}, Tamás Gál and Moritz Lotze'.format(date.today().year)
 
@@ -133,7 +124,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = "KM3Pipe {}".format(km3pipe.__version__)
+html_title = "KM3Pipe {}".format(version)
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 # html_short_title = 'Home'

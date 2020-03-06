@@ -5,7 +5,6 @@
 A collection of commonly used modules.
 
 """
-from __future__ import absolute_import, print_function, division
 
 import sqlite3
 from time import time

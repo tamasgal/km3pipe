@@ -23,7 +23,6 @@ in a CSV file.
         -h --help        Show this screen.
 
 """
-from __future__ import absolute_import, print_function, division
 
 import io
 import os

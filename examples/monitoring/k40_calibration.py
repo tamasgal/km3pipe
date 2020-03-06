@@ -9,7 +9,6 @@ K40 Intra-DOM Calibration
 The following script calculates the PMT time offsets using K40 coincidences
 
 """
-from __future__ import absolute_import, print_function, division
 
 # Author: Jonas Reubelt <jreubelt@km3net.de> and Tamas Gal <tgal@km3net.de>
 # License: MIT

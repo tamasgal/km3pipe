@@ -12,7 +12,7 @@ from km3pipe.dataclasses import Table
 from km3pipe.hardware import Detector
 from km3pipe.io.hdf5 import HDF5Sink
 from km3pipe.testing import TestCase, MagicMock, patch, skip, skipif
-from km3pipe.calib import Calibration, CalibrationService
+from km3pipe.calib import Calibration, CalibrationService, slew
 from km3pipe.utils import calibrate
 
 from .test_hardware import EXAMPLE_DETX
@@ -102,6 +102,29 @@ class TestCalibration(TestCase):
         t0 = a_hit.t0
         self.assertAlmostEqual(11.2 + t0, a_hit.time)
 
+    def test_time_slewing_correction(self):
+        calib = Calibration(filename=DETX_FILENAME)
+
+        hits = Table({
+            'dom_id': [2, 3, 3],
+            'channel_id': [0, 1, 2],
+            'time': [10.1, 11.2, 12.3],
+            'tot': [0, 10, 255]
+        })
+
+        chits = calib.apply(hits, correct_slewing=True)
+
+        assert len(hits) == len(chits)
+
+        a_hit = chits[0]
+        self.assertAlmostEqual(10.1 + a_hit.t0 + slew(a_hit.tot), a_hit.time)
+
+        a_hit = chits[1]
+        self.assertAlmostEqual(11.2 + a_hit.t0 + slew(a_hit.tot), a_hit.time)
+
+        a_hit = chits[2]
+        self.assertAlmostEqual(12.3 + a_hit.t0 + slew(a_hit.tot), a_hit.time)
+
     def test_apply_to_timeslice_hits(self):
         tshits = Table.from_template({
             'channel_id': [0, 1, 2],
@@ -155,6 +178,33 @@ class TestCalibrationService(TestCase):
                 tester.assertAlmostEqual(80, a_hit.t0)
                 t0 = a_hit.t0
                 tester.assertAlmostEqual(11.2 + t0, a_hit.time)
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(CalibrationService, filename=DETX_FILENAME)
+        pipe.attach(HitCalibrator)
+        pipe.drain(1)
+
+    def test_correct_slewing(self):
+
+        hits = Table({
+            'dom_id': [2, 3, 3],
+            'channel_id': [0, 1, 2],
+            'time': [10.1, 11.2, 12.3],
+            'tot': [0, 10, 255]
+        })
+
+        tester = self
+
+        class HitCalibrator(Module):
+            def process(self, blob):
+                self.services['correct_slewing'](hits)
+
+                a_hit = hits[0]
+                tester.assertAlmostEqual(10.1 + slew(a_hit.tot), a_hit.time)
+
+                a_hit = hits[1]
+                tester.assertAlmostEqual(11.2 + slew(a_hit.tot), a_hit.time)
                 return blob
 
         pipe = Pipeline()
@@ -240,3 +290,22 @@ class TestCalibrationUtility(TestCase):
                     pmt = cal.detector.get_pmt(dom_id, channel_id)
                     self.assertAlmostEqual(t0, pmt.t0, 4)
                     self.assertAlmostEqual(t0, time - original_time)
+
+
+class TestSlew(TestCase):
+    def test_slew(self):
+        self.assertAlmostEqual(9.1776699, slew(0))
+        self.assertAlmostEqual(4.9067141, slew(5))
+        self.assertAlmostEqual(0.4526722, slew(23))
+        self.assertAlmostEqual(-1.62785288, slew(42))
+        self.assertAlmostEqual(-4.45096626, slew(255))
+
+    def test_slew_vectorised(self):
+        self.assertAlmostEqual(9.1776699, slew(0))
+        self.assertAlmostEqual(4.9067141, slew(5))
+        self.assertAlmostEqual(0.4526722, slew(23))
+        self.assertAlmostEqual(-1.62785288, slew(42))
+        self.assertAlmostEqual(-4.45096626, slew(255))
+
+        assert np.allclose([9.17766991,  4.90671413,  0.45267221, -1.62785288],
+                           slew(np.array([0, 5, 23, 42])))

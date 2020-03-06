@@ -5,7 +5,6 @@
 Read and write KM3NeT-formatted HDF5 files.
 
 """
-from __future__ import absolute_import, print_function, division
 
 from collections import OrderedDict, defaultdict, namedtuple
 import os.path

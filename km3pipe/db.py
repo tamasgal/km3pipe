@@ -4,8 +4,6 @@
 Database utilities.
 
 """
-from __future__ import absolute_import, print_function, division
-
 from datetime import datetime
 import numbers
 import ssl
@@ -15,28 +13,15 @@ import re
 import pytz
 import numpy as np
 from collections import defaultdict, OrderedDict, namedtuple
-try:
-    from inspect import Signature, Parameter
-    SKIP_SIGNATURE_HINTS = False
-except ImportError:
-    SKIP_SIGNATURE_HINTS = True
-try:
-    from urllib.parse import urlencode, unquote
-    from urllib.request import (
-        Request, build_opener, urlopen, HTTPCookieProcessor, HTTPHandler
-    )
-    from urllib.error import URLError, HTTPError
-    from io import StringIO
-    from http.client import IncompleteRead
-except ImportError:
-    from urllib import urlencode, unquote
-    from urllib2 import (
-        Request, build_opener, urlopen, HTTPCookieProcessor, HTTPHandler,
-        URLError, HTTPError
-    )
-    from StringIO import StringIO
-    from httplib import IncompleteRead
-    input = raw_input
+from inspect import Signature, Parameter
+from http.cookiejar import CookieJar
+from urllib.parse import urlencode, unquote
+from urllib.request import (
+    Request, build_opener, urlopen, HTTPCookieProcessor, HTTPHandler
+)
+from urllib.error import URLError, HTTPError
+from io import StringIO
+from http.client import IncompleteRead
 
 from .tools import cprint
 from .time import Timer
@@ -508,10 +493,7 @@ class DBManager(object):
             self.log.debug("Checking configuration file for DB credentials")
             username, password = config.db_credentials
         cookie = self.request_sid_cookie(username, password)
-        try:
-            cookie_str = str(cookie, 'utf-8')    # Python 3
-        except TypeError:
-            cookie_str = str(cookie)    # Python 2
+        cookie_str = str(cookie, 'utf-8')    # Python 3
         self.log.debug("Session cookie: {0}".format(cookie_str))
         self.log.debug("Storing cookie in configuration file")
         config.set('DB', 'session_cookie', cookie_str)
@@ -542,10 +524,6 @@ class DBManager(object):
 
     def _build_opener(self):
         self.log.debug("Building opener.")
-        try:
-            from http.cookiejar import CookieJar
-        except ImportError:
-            from cookielib import CookieJar
         cj = CookieJar()
         self._cookies = cj
         opener = build_opener(HTTPCookieProcessor(cj), HTTPHandler())
@@ -606,18 +584,17 @@ class StreamDS(object):
 
         func.__doc__ = self._stream_parameter(stream, "DESCRIPTION")
 
-        if not SKIP_SIGNATURE_HINTS:
-            sig_dict = OrderedDict()
-            for sel in self.mandatory_selectors(stream):
-                if sel == '-':
-                    continue
-                sig_dict[Parameter(sel,
-                                   Parameter.POSITIONAL_OR_KEYWORD)] = None
-            for sel in self.optional_selectors(stream):
-                if sel == '-':
-                    continue
-                sig_dict[Parameter(sel, Parameter.KEYWORD_ONLY)] = None
-            func.__signature__ = Signature(parameters=sig_dict)
+        sig_dict = OrderedDict()
+        for sel in self.mandatory_selectors(stream):
+            if sel == '-':
+                continue
+            sig_dict[Parameter(sel,
+                                Parameter.POSITIONAL_OR_KEYWORD)] = None
+        for sel in self.optional_selectors(stream):
+            if sel == '-':
+                continue
+            sig_dict[Parameter(sel, Parameter.KEYWORD_ONLY)] = None
+        func.__signature__ = Signature(parameters=sig_dict)
 
         return func
 
