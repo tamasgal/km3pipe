@@ -3,7 +3,7 @@
 from km3pipe.testing import TestCase, surrogate, patch
 import sys
 import numpy as np
-from km3pipe.io.jpp import EventPump, TimeslicePump, SummaryslicePump, FitPump
+from km3pipe.io.jpp import EventPump, TimeslicePump, SummaryslicePump
 from km3pipe.io.hdf5 import HDF5Pump
 from os.path import join, dirname, abspath
 
