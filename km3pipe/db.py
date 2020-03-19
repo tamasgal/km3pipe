@@ -272,39 +272,9 @@ class DBManager(object):
         det_id = raw_setup['DetID']
         name = raw_setup['Name']
         description = raw_setup['Desc']
-
-        _optical_df = raw_setup['ConfGroups'][0]
-        optical_df = {'Name': _optical_df['Name'], 'Desc': _optical_df['Desc']}
-        for param in _optical_df['Params']:
-            pname = self.parameters.oid2name(param['OID']).replace('DAQ_', '')
-            try:
-                dtype = float if '.' in param['Val'] else int
-                val = dtype(param['Val'])
-            except ValueError:
-                val = param['Val']
-            optical_df[pname] = val
-
-        if len(raw_setup['ConfGroups']) > 1:
-            _acoustic_df = raw_setup['ConfGroups'][1]
-            acoustic_df = {
-                'Name': _acoustic_df['Name'],
-                'Desc': _acoustic_df['Desc']
-            }
-            for param in _acoustic_df['Params']:
-                pname = self.parameters.oid2name(param['OID']
-                                                 ).replace('DAQ_', '')
-                try:
-                    dtype = float if '.' in param['Val'] else int
-                    val = dtype(param['Val'])
-                except ValueError:
-                    val = param['Val']
-                acoustic_df[pname] = val
-        else:
-            acoustic_df = {'Not available': None}
-
+        configuration_groups = raw_setup['ConfGroups']
         return TriggerSetup(
-            runsetup_oid, name, det_id, description, optical_df, acoustic_df
-        )
+            runsetup_oid, name, det_id, description, configuration_groups)
 
     @property
     def doms(self):
@@ -833,14 +803,13 @@ class DOM(object):
 
 class TriggerSetup(object):
     def __init__(
-        self, runsetup_oid, name, det_id, description, optical_df, acoustic_df
+        self, runsetup_oid, name, det_id, description, configuration_groups
     ):
         self.runsetup_oid = runsetup_oid
         self.name = name
         self.det_id = det_id
         self.description = description
-        self.optical_df = optical_df
-        self.acoustic_df = acoustic_df
+        self.configuration_groups = configuration_groups
 
     def __str__(self):
         text = (
@@ -851,10 +820,20 @@ class TriggerSetup(object):
                 self.runsetup_oid, self.name, self.det_id, self.description
             )
         )
-        for df, parameters in zip(["Optical", "Acoustic"],
-                                  [self.optical_df, self.acoustic_df]):
-            text += "{} Datafilter:\n".format(df)
-            for parameter, value in parameters.items():
+        if self.configuration_groups:
+            text += "Configuration groups:\n"
+        for configuration_group in self.configuration_groups:
+            for parameter, value in configuration_group.items():
+                if parameter == 'Params':
+                    for param in value:
+                        pname = self.parameters.oid2name(param['OID'])
+                        try:
+                            dtype = float if '.' in param['Val'] else int
+                            val = dtype(param['Val'])
+                        except ValueError:
+                            val = param['Val']
+                        text += "    {}: {}".format(pname, val)
+                    continue
                 text += "  {}: {}\n".format(parameter, value)
             text += "\n"
         return text
