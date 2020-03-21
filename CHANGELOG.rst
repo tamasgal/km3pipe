@@ -1,12 +1,12 @@
 Unreleased changes
 ------------------
 
-* New ``kp.io.i3.I3Pump`` to read ANTARES I3 files
-* ``km3pipe retrieve`` now uses XROOTD instead of iRODS for better speed
-  (https://git.km3net.de/km3py/km3pipe/issues/200)
-
 Version 9
 ---------
+
+9.0.0-alpha.7 / 2020-03-21
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+* Updated time slewing to use the latest lookup table from Jpp
 
 9.0.0-alpha.3 / 2019-12-13
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -21,6 +21,41 @@ Version 8
   branched out to ``v8`` and will only receive bug fixes. The ``master``
   branch is now the pre-v9 with ``thepipe`` integration and Python 3.6+
 
+
+8.27.7 / 2020-02-20
+~~~~~~~~~~~~~~~~~~~
+* ``interaction_channel`` defaults to ``np.nan`` in case of a lookup error in aanet
+
+8.27.6 / 2020-02-19
+~~~~~~~~~~~~~~~~~~~
+* ``is_cc`` is now defaulting to ``0`` if there is a lookup error in aanet
+* ``by`` (Bjorken-y) defaults to ``np.nan`` in case of a lookup error in aanet
+
+8.27.5 / 2020-02-06
+~~~~~~~~~~~~~~~~~~~
+* Quite a few python packages needed to be frozen to make it work with
+  Python 2.7. We hope this is the last v8 patch
+
+8.27.4 / 2020-02-05
+~~~~~~~~~~~~~~~~~~~
+* statsmodels is now frozen at 0.9
+
+8.27.3 / 2020-02-05
+~~~~~~~~~~~~~~~~~~~
+* statsmodels is now unfreezed in the dependencies
+
+8.27.2 / 2020-01-22
+~~~~~~~~~~~~~~~~~~~
+* ``km3pipe retrieve`` now uses XROOTD instead of iRODS
+
+8.27.1 / 2020-01-08
+~~~~~~~~~~~~~~~~~~~
+* Fixed ``triggersetup ...`` and ``runinfo -t ...`` which crashed when no
+  ADF data is available
+
+8.27.0 / 2020-01-08
+~~~~~~~~~~~~~~~~~~~
+* New ``kp.io.i3.I3Pump`` to read ANTARES I3 files
 
 8.26.3 / 2019-12-13
 ~~~~~~~~~~~~~~~~~~~
