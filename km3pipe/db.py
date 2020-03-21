@@ -588,8 +588,7 @@ class StreamDS(object):
         for sel in self.mandatory_selectors(stream):
             if sel == '-':
                 continue
-            sig_dict[Parameter(sel,
-                                Parameter.POSITIONAL_OR_KEYWORD)] = None
+            sig_dict[Parameter(sel, Parameter.POSITIONAL_OR_KEYWORD)] = None
         for sel in self.optional_selectors(stream):
             if sel == '-':
                 continue

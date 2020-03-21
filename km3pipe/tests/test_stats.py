@@ -218,7 +218,10 @@ class TestHist2D(TestCase):
             self.sample[:, 0], self.sample[:, 1], density=True, bins=self.bins
         )
         hist2 = np.histogram2d(
-            self.sample[:, 0], self.sample[:, 1], density=False, bins=self.bins
+            self.sample[:, 0],
+            self.sample[:, 1],
+            density=False,
+            bins=self.bins
         )
         h1 = hist2d(hist1)
         h2 = hist2d(hist2)

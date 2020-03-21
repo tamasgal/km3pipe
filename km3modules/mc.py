@@ -152,16 +152,16 @@ class MCTimeCorrector(Module):
 
 def slew(tot):
     """Calculate the time slewing of a PMT response for a given ToT"""
-    
+
     #p0 = 7.70824
     #p1 = 0.00879447
     #p2 = -0.0621101
     #p3 = -1.90226
-   
-    p0 =  13.6488662517;
-    p1 =  -0.128744123166;
-    p2 =  -0.0174837749244;
-    p3 =  -4.47119633965;
-    
+
+    p0 = 13.6488662517
+    p1 = -0.128744123166
+    p2 = -0.0174837749244
+    p3 = -4.47119633965
+
     corr = p0 * np.exp(p1 * np.sqrt(tot) + p2 * tot) + p3
     return corr

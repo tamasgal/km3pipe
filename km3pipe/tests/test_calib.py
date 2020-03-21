@@ -294,18 +294,9 @@ class TestCalibrationUtility(TestCase):
 
 class TestSlew(TestCase):
     def test_slew(self):
-        self.assertAlmostEqual(9.1776699, slew(0))
-        self.assertAlmostEqual(4.9067141, slew(5))
-        self.assertAlmostEqual(0.4526722, slew(23))
-        self.assertAlmostEqual(-1.62785288, slew(42))
-        self.assertAlmostEqual(-4.45096626, slew(255))
+        self.assertAlmostEqual(7.52, slew(0))
+        self.assertAlmostEqual(0.41, slew(23))
+        self.assertAlmostEqual(-9.04, slew(255))
 
     def test_slew_vectorised(self):
-        self.assertAlmostEqual(9.1776699, slew(0))
-        self.assertAlmostEqual(4.9067141, slew(5))
-        self.assertAlmostEqual(0.4526722, slew(23))
-        self.assertAlmostEqual(-1.62785288, slew(42))
-        self.assertAlmostEqual(-4.45096626, slew(255))
-
-        assert np.allclose([9.17766991,  4.90671413,  0.45267221, -1.62785288],
-                           slew(np.array([0, 5, 23, 42])))
+        assert np.allclose([7.52, 0.41, -9.04], slew(np.array([0, 23, 255])))

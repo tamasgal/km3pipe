@@ -199,7 +199,6 @@ class Calibration(Module):
             name=hits.name
         )
 
-
     def _create_dom_channel_lookup(self):
         if HAVE_NUMBA:
             from numba.typed import Dict
