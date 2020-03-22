@@ -4,6 +4,10 @@ Unreleased changes
 Version 9
 ---------
 
+9.0.0-alpha.8 / 2020-03-22
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+* Fixed time slewing
+
 9.0.0-alpha.7 / 2020-03-21
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 * Updated time slewing to use the latest lookup table from Jpp
