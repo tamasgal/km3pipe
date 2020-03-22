@@ -117,13 +117,13 @@ class TestCalibration(TestCase):
         assert len(hits) == len(chits)
 
         a_hit = chits[0]
-        self.assertAlmostEqual(10.1 + a_hit.t0 + slew(a_hit.tot), a_hit.time)
+        self.assertAlmostEqual(10.1 + a_hit.t0 - slew(a_hit.tot), a_hit.time)
 
         a_hit = chits[1]
-        self.assertAlmostEqual(11.2 + a_hit.t0 + slew(a_hit.tot), a_hit.time)
+        self.assertAlmostEqual(11.2 + a_hit.t0 - slew(a_hit.tot), a_hit.time)
 
         a_hit = chits[2]
-        self.assertAlmostEqual(12.3 + a_hit.t0 + slew(a_hit.tot), a_hit.time)
+        self.assertAlmostEqual(12.3 + a_hit.t0 - slew(a_hit.tot), a_hit.time)
 
     def test_apply_to_timeslice_hits(self):
         tshits = Table.from_template({

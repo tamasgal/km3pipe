@@ -191,7 +191,7 @@ class Calibration(Module):
         }
         hits_data.update(calib)
         if correct_slewing:
-            hits_data['time'] += slew(hits_data['tot'])
+            hits_data['time'] -= slew(hits_data['tot'])
         return Table(
             hits_data,
             h5loc=hits.h5loc,
