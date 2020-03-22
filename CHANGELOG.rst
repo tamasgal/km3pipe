@@ -4,6 +4,10 @@ Unreleased changes
 Version 9
 ---------
 
+9.0.0-alpha.9 / 2020-03-22
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+* Fixed time slewing
+
 9.0.0-alpha.8 / 2020-03-22
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 * Fixed time slewing
