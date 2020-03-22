@@ -201,10 +201,10 @@ class TestCalibrationService(TestCase):
                 self.services['correct_slewing'](hits)
 
                 a_hit = hits[0]
-                tester.assertAlmostEqual(10.1 + slew(a_hit.tot), a_hit.time)
+                tester.assertAlmostEqual(10.1 - slew(a_hit.tot), a_hit.time)
 
                 a_hit = hits[1]
-                tester.assertAlmostEqual(11.2 + slew(a_hit.tot), a_hit.time)
+                tester.assertAlmostEqual(11.2 - slew(a_hit.tot), a_hit.time)
                 return blob
 
         pipe = Pipeline()
@@ -294,9 +294,9 @@ class TestCalibrationUtility(TestCase):
 
 class TestSlew(TestCase):
     def test_slew(self):
-        self.assertAlmostEqual(7.52, slew(0))
-        self.assertAlmostEqual(0.41, slew(23))
+        self.assertAlmostEqual(8.01, slew(0))
+        self.assertAlmostEqual(0.60, slew(23))
         self.assertAlmostEqual(-9.04, slew(255))
 
     def test_slew_vectorised(self):
-        assert np.allclose([7.52, 0.41, -9.04], slew(np.array([0, 23, 255])))
+        assert np.allclose([8.01, 0.60, -9.04], slew(np.array([0, 23, 255])))
