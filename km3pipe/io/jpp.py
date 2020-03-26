@@ -7,6 +7,7 @@ Pump for the jpp file read through aanet interface.
 """
 
 import numpy as np
+import km3io
 
 from km3pipe.core import Pump, Blob
 from km3pipe.dataclasses import Table
@@ -35,14 +36,6 @@ class EventPump(Pump):
 
     """
     def configure(self):
-        try:
-            import km3io
-        except ImportError:
-            raise ImportError(
-                "\nKM3iopackage could not be found."
-                "\n Make sure the km3io package is installed"
-            )
-
         self.event_index = self.get('index') or 0
         self.filename = self.require('filename')
 
@@ -146,13 +139,6 @@ class TimeslicePump(Pump):
         fname = self.require('filename')
         self.stream = self.get('stream', default='L1')
         self.blobs = self.timeslice_generator()
-        try:
-            import km3io
-        except ImportError:
-            raise ImportError(
-                "\nKM3iopackage could not be found."
-                "\n Make sure the km3io package is installed"
-            )
         self.r = km3io.DAQReader(fname)
         self.timeslice_info = self.create_timeslice_info()
         self.n_timeslices = len(self.timeslice_info)
@@ -265,13 +251,6 @@ class SummaryslicePump(Pump):
     def configure(self):
         filename = self.require('filename')
         self.blobs = self.summaryslice_generator()
-        try:
-            import km3io
-        except ImportError:
-            raise ImportError(
-                "\nKM3iopackage could not be found."
-                "\n Make sure the km3io package is installed"
-            )
         self.r = km3io.DAQReader(filename)
         self.n_summaryslices = len(self.r.summaryslices.slices)
         self.summaryslice_info = self._create_summaryslice_info()
@@ -293,45 +272,58 @@ class SummaryslicePump(Pump):
         }, 'SummarysliceInfo')
         return summaryslice_info
 
-    def summaryslice_generator(self):
-        try:
-            import km3io
-        except ImportError:
-            raise ImportError(
-                "\nKM3iopackage could not be found."
-                "\n Make sure the km3io package is installed"
+    def get_blob(self, i):
+        blob = Blob()
+        blob['SummarysliceInfo'] = self.summaryslice_info[i:i + 1]
+        raw_summaryslice = self.r.summaryslices.slices[i]
+        summary_slice = {}
+        for dom_id in raw_summaryslice.dom_id:
+            frame = raw_summaryslice[raw_summaryslice.dom_id == dom_id]
+            raw_rates = [getattr(frame, 'ch%d' % i)[0] for i in range(31)]
+            rates = km3io.daq.get_rate(raw_rates).astype(np.float64)
+            hrvs = km3io.daq.get_channel_flags(frame.hrv)
+            fifos = km3io.daq.get_channel_flags(frame.fifo)
+            udp_packets = km3io.daq.get_number_udp_packets(frame.dq_status)
+            max_sequence_number = km3io.daq.get_udp_max_sequence_number(
+                frame.dq_status
             )
+            has_udp_trailer = km3io.daq.has_udp_trailer(frame.fifo)
+            summary_slice[dom_id] = {
+                'rates': rates,
+                'hrvs': hrvs[0],
+                'fifos': fifos[0],
+                'n_udp_packets': udp_packets,
+                'max_sequence_number': max_sequence_number,
+                'has_udp_trailer': has_udp_trailer,
+                'high_rate_veto': np.any(hrvs),
+                'fifo_status': np.any(fifos),
+            }
+        blob['Summaryslice'] = summary_slice
+        return blob
+
+    def _slice_generator(self, index):
+        """A simple slice generator for iterations"""
+        start, stop, step = index.indices(len(self))
+        for i in range(start, stop, step):
+            yield self.get_blob(i)
+
+    def summaryslice_generator(self):
         for i in range(self.n_summaryslices):
-            blob = Blob()
-            blob['SummarysliceInfo'] = self.summaryslice_info[i:i + 1]
-            raw_summaryslice = self.r.summaryslices.slices[i]
-            summary_slice = {}
-            for dom_id in raw_summaryslice.dom_id:
-                frame = raw_summaryslice[raw_summaryslice.dom_id == dom_id]
-                raw_rates = [getattr(frame, 'ch%d' % i)[0] for i in range(31)]
-                rates = km3io.daq.get_rate(raw_rates).astype(np.float64)
-                hrvs = km3io.daq.get_channel_flags(frame.hrv)
-                fifos = km3io.daq.get_channel_flags(frame.fifo)
-                udp_packets = km3io.daq.get_number_udp_packets(frame.dq_status)
-                max_sequence_number = km3io.daq.get_udp_max_sequence_number(
-                    frame.dq_status
-                )
-                has_udp_trailer = km3io.daq.has_udp_trailer(frame.fifo)
-                summary_slice[dom_id] = {
-                    'rates': rates,
-                    'hrvs': hrvs,
-                    'fifos': fifos,
-                    'n_udp_packets': udp_packets,
-                    'max_sequence_number': max_sequence_number,
-                    'has_udp_trailer': has_udp_trailer,
-                    'high_rate_veto': np.any(hrvs),
-                    'fifo_status': np.any(fifos),
-                }
-            blob['Summaryslice'] = summary_slice
-            yield blob
+            yield self.get_blob(i)
 
     def __iter__(self):
         return self
 
     def __next__(self):
         return next(self.blobs)
+
+    def __len__(self):
+        return self.n_summaryslices
+
+    def __getitem__(self, index):
+        if isinstance(index, int):
+            return self.get_blob(index)
+        elif isinstance(index, slice):
+            return self._slice_generator(index)
+        else:
+            raise TypeError("index must be int or slice")
