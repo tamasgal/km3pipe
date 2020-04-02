@@ -130,21 +130,27 @@ def retrieve(run_id, det_id, use_irods=False, out=None):
             os.remove(lock_file)
 
     if not os.path.exists(cached_filepath):
-        print("Downloading file to local SPS cache...")
-        os.makedirs(cached_subfolder, exist_ok=True)
-        os.system(
-            "touch {lock_file} && chmod g+w {lock_file}".format(
-                lock_file=lock_file
+        print("Downloading file to local SPS cache ({}).".format(SPS_CACHE))
+        try:
+            os.makedirs(cached_subfolder, exist_ok=True)
+            os.system(
+                "touch {lock_file} && chmod g+w {lock_file}".format(
+                    lock_file=lock_file
+                )
             )
-        )
-        os.system(cmd)
-        os.system("chmod g+w {}".format(outfile))
-        os.system("cp -p {} {}".format(outfile, cached_filepath))
-        os.system("rm {}".format(outfile))
-        os.remove(lock_file)
-
-    os.system("ln -s {} {}".format(cached_filepath, outfile))
-
+            os.system(cmd)
+            os.system("chmod g+w {}".format(outfile))
+            os.system("cp -p {} {}".format(outfile, cached_filepath))
+            os.system("ln -s {} {}".format(cached_filepath, outfile))
+        except KeyboardInterrupt:
+            print("Aborting...")
+        except OSError as e:
+            print("Something went wrong: {}".format(e))
+        finally:
+            for f in [outfile, lock_file, cached_filepath]:
+                os.system("rm -f {}".format(f))
+    else:
+        os.system("ln -s {} {}".format(cached_filepath, outfile))
 
 def detx(det_id, calibration='', t0set='', filename=None):
     now = datetime.now()
