@@ -32,6 +32,7 @@ Options:
 """
 import re
 import sys
+import subprocess
 import os
 from datetime import datetime
 import time
@@ -104,10 +105,14 @@ def retrieve(run_id, det_id, use_irods=False, out=None):
     else:
         outfile = out
 
+    if os.path.exists(outfile):
+        print("Output file '{}' already exists.".format(outfile))
+        return
+
     cmd += " {0} {1}".format(rpath, outfile)
 
     if not we_are_in_lyon():
-        os.system(cmd)
+        subprocess.call(cmd.split())
         return
 
     subfolder = os.path.join(*rpath.split("/")[-3:-1])
@@ -133,24 +138,22 @@ def retrieve(run_id, det_id, use_irods=False, out=None):
         print("Downloading file to local SPS cache ({}).".format(SPS_CACHE))
         try:
             os.makedirs(cached_subfolder, exist_ok=True)
-            os.system(
-                "touch {lock_file} && chmod g+w {lock_file}".format(
-                    lock_file=lock_file
-                )
-            )
-            os.system(cmd)
-            os.system("chmod g+w {}".format(outfile))
-            os.system("cp -p {} {}".format(outfile, cached_filepath))
-            os.system("ln -s {} {}".format(cached_filepath, outfile))
-        except KeyboardInterrupt:
-            print("Aborting...")
-        except OSError as e:
-            print("Something went wrong: {}".format(e))
-        finally:
+            subprocess.call(["touch", lock_file])
+            subprocess.call(["chmod", "g+w", lock_file])
+            subprocess.call(cmd.split())
+            subprocess.call(["chmod", "g+w", outfile])
+            subprocess.call(["cp", "-p", outfile, cached_filepath])
+        except (OSError, KeyboardInterrupt) as e:
+            print("\nAborting... {}".format(e))
             for f in [outfile, lock_file, cached_filepath]:
-                os.system("rm -f {}".format(f))
-    else:
-        os.system("ln -s {} {}".format(cached_filepath, outfile))
+                subprocess.call(["rm", "-f", f])
+            return
+        finally:
+            for f in [outfile, lock_file]:
+                subprocess.call(["rm", "-f", f])
+
+    subprocess.call(["ln", "-s", cached_filepath, outfile])
+
 
 def detx(det_id, calibration='', t0set='', filename=None):
     now = datetime.now()
