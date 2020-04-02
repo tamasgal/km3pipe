@@ -4,6 +4,10 @@ Unreleased changes
 
 Version 8
 ---------
+8.27.8 / 2020-04-02
+~~~~~~~~~~~~~~~~~~~
+* Improved error handling in ``km3pipe retrieve`` (CTRL+C etc.)
+
 8.27.7 / 2020-02-20
 ~~~~~~~~~~~~~~~~~~~
 * ``interaction_channel`` defaults to ``np.nan`` in case of a lookup error in aanet
