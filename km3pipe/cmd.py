@@ -36,6 +36,7 @@ import sys
 import os
 from datetime import datetime
 import time
+import subprocess
 
 from . import version
 from .tools import irods_filepath, xrootd_path
@@ -105,10 +106,14 @@ def retrieve(run_id, det_id, use_irods=False, out=None):
     else:
         outfile = out
 
+    if os.path.exists(outfile):
+        print("Output file '{}' already exists.".format(outfile))
+        return
+
     cmd += " {0} {1}".format(rpath, outfile)
 
     if not we_are_in_lyon():
-        os.system(cmd)
+        subprocess.call(cmd.split())
         return
 
     subfolder = os.path.join(*rpath.split("/")[-3:-1])
@@ -131,21 +136,24 @@ def retrieve(run_id, det_id, use_irods=False, out=None):
             os.remove(lock_file)
 
     if not os.path.exists(cached_filepath):
-        print("Downloading file to local SPS cache...")
-        if not os.path.exists(cached_subfolder):
-            os.makedirs(cached_subfolder)
-        os.system(
-            "touch {lock_file} && chmod g+w {lock_file}".format(
-                lock_file=lock_file
-            )
-        )
-        os.system(cmd)
-        os.system("chmod g+w {}".format(outfile))
-        os.system("cp -p {} {}".format(outfile, cached_filepath))
-        os.system("rm {}".format(outfile))
-        os.remove(lock_file)
+        print("Downloading file to local SPS cache ({}).".format(SPS_CACHE))
+        try:
+            os.makedirs(cached_subfolder, exist_ok=True)
+            subprocess.call(["touch", lock_file])
+            subprocess.call(["chmod", "g+w", lock_file])
+            subprocess.call(cmd.split())
+            subprocess.call(["chmod", "g+w", outfile])
+            subprocess.call(["cp", "-p", outfile, cached_filepath])
+        except (OSError, KeyboardInterrupt) as e:
+            print("\nAborting... {}".format(e))
+            for f in [outfile, lock_file, cached_filepath]:
+                subprocess.call(["rm", "-f", f])
+            return
+        finally:
+            for f in [outfile, lock_file]:
+                subprocess.call(["rm", "-f", f])
 
-    os.system("ln -s {} {}".format(cached_filepath, outfile))
+    subprocess.call(["ln", "-s", cached_filepath, outfile])
 
 
 def detx(det_id, calibration='', t0set='', filename=None):
@@ -224,7 +232,12 @@ def main():
         )
 
     if args['retrieve']:
-        retrieve(int(args['RUN']), args['DET_ID'], use_irods=args['-i'], out=args['-o'])
+        retrieve(
+            int(args['RUN']),
+            args['DET_ID'],
+            use_irods=args['-i'],
+            out=args['-o']
+        )
 
     if args['detx']:
         t0set = args['-t']
