@@ -1,6 +1,9 @@
 Unreleased changes
 ------------------
 
+* ``kp.io.offine.EventPump`` added, which is a preliminary offline event reader
+  based on km3io
+
 Version 9
 ---------
 
