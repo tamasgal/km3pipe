@@ -18,6 +18,7 @@ from .hdf5 import HDF5Pump    # noqa
 from .hdf5 import HDF5Sink    # noqa
 from .hdf5 import HDF5MetaData    # noqa
 from .pickle import PicklePump    # noqa
+from .offline import EventPump
 
 from km3pipe.logger import get_logger
 
