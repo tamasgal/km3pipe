@@ -20,7 +20,7 @@ class EventPump(Module):
 
         self.header = None
         self.raw_header = None
-        if not self._skip_header:
+        if not self.skip_header:
             if self._reader.header is not None:
                 self.header = HDF5Header.from_km3io(self._reader.header)
                 self.raw_header = self._generate_raw_header()
