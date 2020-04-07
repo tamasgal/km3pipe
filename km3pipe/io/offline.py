@@ -14,14 +14,16 @@ class EventPump(Module):
         self.skip_hits = self.get("skip_hits", default=False)
         self.skip_mc_hits = self.get("skip_mc_hits", default=False)
         self.skip_mc_tracks = self.get("skip_mc_tracks", default=False)
+        self.skip_header = self.get("skip_header", default=False)
 
         self._reader = km3io.OfflineReader(self._filename)
 
         self.header = None
         self.raw_header = None
-        if self._reader.header is not None:
-            self.header = HDF5Header.from_km3io(self._reader.header)
-            self.raw_header = self._generate_raw_header()
+        if not self._skip_header:
+            if self._reader.header is not None:
+                self.header = HDF5Header.from_km3io(self._reader.header)
+                self.raw_header = self._generate_raw_header()
 
         self.blobs = self._blob_generator()
 
