@@ -220,21 +220,23 @@ def _extract_calibration(xroot):
     """
     names = [c.text for c in xroot.findall(".//Name")]
     val = [[i.text for i in c] for c in xroot.findall(".//Values")]
+    print("Names: ", names)
+    print("Values: ", val)
 
     # The fields has to be reindeced, these are the index mappings
-    col_ic = [int(v) for v in val[names.index("AHRS_Matrix_Column(-)")]]
+    col_ic = [int(v) for v in val[names.index("AHRS_Matrix_Column")]]
     try:
-        row_ic = [int(v) for v in val[names.index("AHRS_Matrix_Row(-)")]]
+        row_ic = [int(v) for v in val[names.index("AHRS_Matrix_Row")]]
     except ValueError:
         row_ic = [2, 2, 2, 1, 1, 1, 0, 0, 0]
     try:
-        vec_ic = [int(v) for v in val[names.index("AHRS_Vector_Index(-)")]]
+        vec_ic = [int(v) for v in val[names.index("AHRS_Vector_Index")]]
     except ValueError:
         vec_ic = [2, 1, 0]
 
-    Aoff_ix = names.index("AHRS_Acceleration_Offset(g/ms^2-)")
-    Arot_ix = names.index("AHRS_Acceleration_Rotation(-)")
-    Hrot_ix = names.index("AHRS_Magnetic_Rotation(-)")
+    Aoff_ix = names.index("AHRS_Acceleration_Offset")
+    Arot_ix = names.index("AHRS_Acceleration_Rotation")
+    Hrot_ix = names.index("AHRS_Magnetic_Rotation")
 
     Aoff = np.array(val[Aoff_ix])[vec_ic].astype(float)
     Arot = np.array(val[Arot_ix]).reshape(3, 3)[col_ic, row_ic] \
@@ -246,7 +248,7 @@ def _extract_calibration(xroot):
     for q in 'XYZ':
         values = []
         for t in ('Min', 'Max'):
-            ix = names.index("AHRS_Magnetic_{}{}(G-)".format(q, t))
+            ix = names.index("AHRS_Magnetic_{}{}".format(q, t))
             values.append(float(val[ix][0]))
         Hoff.append(sum(values) / 2.)
     Hoff = np.array(Hoff)
