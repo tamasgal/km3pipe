@@ -220,8 +220,6 @@ def _extract_calibration(xroot):
     """
     names = [c.text for c in xroot.findall(".//Name")]
     val = [[i.text for i in c] for c in xroot.findall(".//Values")]
-    print("Names: ", names)
-    print("Values: ", val)
 
     # The fields has to be reindeced, these are the index mappings
     col_ic = [int(v) for v in val[names.index("AHRS_Matrix_Column")]]
