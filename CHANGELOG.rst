@@ -1,11 +1,18 @@
 Unreleased changes
 ------------------
 
-* ``kp.io.offine.EventPump`` added, which is a preliminary offline event reader
-  based on km3io
-
 Version 9
 ---------
+
+9.0.0-alpha.11 / 2020-04-15
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* ``kp.io.daq.TimesliceParser`` is fixed, it crashed before when
+  no hits were present
+
+9.0.0-alpha.10 / 2020-04-01
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* ``kp.io.offine.EventPump`` added, which is a preliminary offline event reader
+  based on km3io
 
 9.0.0-alpha.9 / 2020-03-22
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
