@@ -108,7 +108,7 @@ class TimesliceParser(Module):
                     'time': np.array(_times),
                     'tot': np.array(_tots),
                 },
-                'TimesliceHits', h5loc='/timeslice_hits', split_h5=True
+                name='TimesliceHits', h5loc='/timeslice_hits', split_h5=True
             )
             blob['TSHits'] = tshits
             blob['TimesliceInfo'] = ts_info
