@@ -76,7 +76,6 @@ class TimesliceParser(Module):
             _channel_ids = []
             _times = []
             _tots = []
-            total_hits = 0
             for _ in range(n_frames):
                 frame_size, datatype = unpack('<ii', data.read(8))
                 det_id, run, sqnr = unpack('<iii', data.read(12))
@@ -84,7 +83,6 @@ class TimesliceParser(Module):
                 dataqueue_status = unpack('<i', data.read(4))[0]
                 dom_status = unpack('<iiii', data.read(4 * 4))
                 n_hits = unpack('<i', data.read(4))[0]
-                total_hits += n_hits
                 ts_frameinfos[dom_id] = Table.from_template({
                     'det_id': det_id,
                     'run_id': run,
@@ -103,17 +101,16 @@ class TimesliceParser(Module):
                     _times.append(hit[1])
                     _tots.append(hit[2])
 
-            if total_hits > 0:
-                tshits = Table(
-                    {
-                        'channel_id': np.array(_channel_ids),
-                        'dom_id': np.array(_dom_ids),
-                        'time': np.array(_times),
-                        'tot': np.array(_tots),
-                    },
-                    'TimesliceHits', h5loc='/timeslice_hits', split_h5=True
-                )
-                blob['TSHits'] = tshits
+            tshits = Table(
+                {
+                    'channel_id': np.array(_channel_ids),
+                    'dom_id': np.array(_dom_ids),
+                    'time': np.array(_times),
+                    'tot': np.array(_tots),
+                },
+                'TimesliceHits', h5loc='/timeslice_hits', split_h5=True
+            )
+            blob['TSHits'] = tshits
             blob['TimesliceInfo'] = ts_info
             blob['TimesliceFrameInfos'] = ts_frameinfos
         except struct.error:
