@@ -59,67 +59,69 @@ class TimesliceParser(Module):
         if data is None:
             return blob
         try:
-            tsl_size, datatype = unpack('<ii', data.read(8))
-            det_id, run, sqnr = unpack('<iii', data.read(12))
-            timestamp, ns_ticks, n_frames = unpack('<iii', data.read(12))
-
-            ts_info = Table.from_template({
-                'frame_index': sqnr,
-                'slice_id': 0,
-                'timestamp': timestamp,
-                'nanoseconds': ns_ticks * 16,
-                'n_frames': n_frames
-            }, 'TimesliceInfo')
-            ts_frameinfos = {}
-
-            _dom_ids = []
-            _channel_ids = []
-            _times = []
-            _tots = []
-            for _ in range(n_frames):
-                frame_size, datatype = unpack('<ii', data.read(8))
-                det_id, run, sqnr = unpack('<iii', data.read(12))
-                timestamp, ns_ticks, dom_id = unpack('<iii', data.read(12))
-                dataqueue_status = unpack('<i', data.read(4))[0]
-                dom_status = unpack('<iiii', data.read(4 * 4))
-                n_hits = unpack('<i', data.read(4))[0]
-                ts_frameinfos[dom_id] = Table.from_template({
-                    'det_id': det_id,
-                    'run_id': run,
-                    'sqnr': sqnr,
-                    'timestamp': timestamp,
-                    'nanoseconds': ns_ticks * 16,
-                    'dom_id': dom_id,
-                    'dataqueue_status': dataqueue_status,
-                    'dom_status': dom_status,
-                    'n_hits': n_hits,
-                }, 'TimesliceFrameInfo')
-                for j in range(n_hits):
-                    hit = unpack('!BlB', data.read(6))
-                    _dom_ids.append(dom_id)
-                    _channel_ids.append(hit[0])
-                    _times.append(hit[1])
-                    _tots.append(hit[2])
-
-            tshits = Table.from_template(
-                {
-                    'channel_id': np.array(_channel_ids),
-                    'dom_id': np.array(_dom_ids),
-                    'time': np.array(_times),
-                    'tot': np.array(_tots),
-                    'triggered': np.zeros(len(_tots)),    # triggered
-                    'group_id': 0    # event_id
-                },
-                'Hits'
-            )
-            blob['TimesliceInfo'] = ts_info
-            blob['TimesliceFrameInfos'] = ts_frameinfos
-            blob['TSHits'] = tshits
+            ts_info, ts_frameinfos, ts_hits = self._parse_timeslice(data)
         except struct.error:
             log.error("Could not parse Timeslice")
             log.error(blob.keys())
         else:
+            blob['TSHits'] = ts_hits
+            blob['TimesliceInfo'] = ts_info
+            blob['TimesliceFrameInfos'] = ts_frameinfos
             return blob
+
+    def _parse_timeslice(self, data):
+        tsl_size, datatype = unpack('<ii', data.read(8))
+        det_id, run, sqnr = unpack('<iii', data.read(12))
+        timestamp, ns_ticks, n_frames = unpack('<iii', data.read(12))
+
+        ts_info = Table.from_template({
+            'frame_index': sqnr,
+            'slice_id': 0,
+            'timestamp': timestamp,
+            'nanoseconds': ns_ticks * 16,
+            'n_frames': n_frames
+        }, 'TimesliceInfo')
+        ts_frameinfos = {}
+
+        _dom_ids = []
+        _channel_ids = []
+        _times = []
+        _tots = []
+        for _ in range(n_frames):
+            frame_size, datatype = unpack('<ii', data.read(8))
+            det_id, run, sqnr = unpack('<iii', data.read(12))
+            timestamp, ns_ticks, dom_id = unpack('<iii', data.read(12))
+            dataqueue_status = unpack('<i', data.read(4))[0]
+            dom_status = unpack('<iiii', data.read(4 * 4))
+            n_hits = unpack('<i', data.read(4))[0]
+            ts_frameinfos[dom_id] = Table.from_template({
+                'det_id': det_id,
+                'run_id': run,
+                'sqnr': sqnr,
+                'timestamp': timestamp,
+                'nanoseconds': ns_ticks * 16,
+                'dom_id': dom_id,
+                'dataqueue_status': dataqueue_status,
+                'dom_status': dom_status,
+                'n_hits': n_hits,
+            }, 'TimesliceFrameInfo')
+            for j in range(n_hits):
+                hit = unpack('!BlB', data.read(6))
+                _dom_ids.append(dom_id)
+                _channel_ids.append(hit[0])
+                _times.append(hit[1])
+                _tots.append(hit[2])
+
+        ts_hits = Table(
+            {
+                'channel_id': np.array(_channel_ids),
+                'dom_id': np.array(_dom_ids),
+                'time': np.array(_times),
+                'tot': np.array(_tots),
+            },
+            name='TimesliceHits', h5loc='/timeslice_hits', split_h5=True
+        )
+        return ts_info, ts_frameinfos, ts_hits
 
 
 class DAQPump(Pump):
