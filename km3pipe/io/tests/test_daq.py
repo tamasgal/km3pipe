@@ -10,13 +10,17 @@ import numpy as np
 
 from km3pipe.testing import TestCase
 from km3pipe.io.daq import (
-    DAQPump, DAQPreamble, DAQHeader, DAQSummaryslice, DMMonitor, TMCHRepump
+    DAQPump, DAQPreamble, DAQHeader, DAQSummaryslice, DMMonitor, TMCHRepump,
+    TimesliceParser
 )
 
 TEST_DATA_DIR = join(dirname(__file__), "../../kp-data/test_data")
 IO_SUM_FILE = join(TEST_DATA_DIR, "IO_SUM.dat")
 IO_EVT_FILE = join(TEST_DATA_DIR, "IO_EVT.dat")
 IO_MONIT_FILE = join(TEST_DATA_DIR, "IO_MONIT.dat")
+IO_TSL0 = join(TEST_DATA_DIR, "daq", "IO_TSL0.dat")
+IO_TSL1 = join(TEST_DATA_DIR, "daq", "IO_TSL1.dat")
+IO_TSL2 = join(TEST_DATA_DIR, "daq", "IO_TSL2.dat")
 
 
 class TestDAQPump(TestCase):
@@ -116,3 +120,25 @@ class TestDMMonitor(TestCase):
         dmm = DMMonitor('a')
         dmm._available_parameters = ['b', 'c']
         self.assertListEqual(['b', 'c'], dmm.available_parameters)
+
+
+class TestTimesliceParser(TestCase):
+    def test_l0(self):
+        with open(IO_TSL0, 'rb') as fobj:
+            ts_info, ts_frameinfos, ts_hits = TimesliceParser()._parse_timeslice(fobj)
+        assert 200 == len(ts_hits)
+        assert 25 == ts_hits[0].tot
+        assert 808447031 == ts_hits[23].dom_id
+        assert 232 == ts_info[0].frame_index
+
+    def test_l1(self):
+        with open(IO_TSL1, 'rb') as fobj:
+            ts_info, ts_frameinfos, ts_hits = TimesliceParser()._parse_timeslice(fobj)
+        assert 0 == len(ts_hits)
+        assert 4873 == ts_info[0].frame_index
+
+    def test_l2(self):
+        with open(IO_TSL2, 'rb') as fobj:
+            ts_info, ts_frameinfos, ts_hits = TimesliceParser()._parse_timeslice(fobj)
+        assert 0 == len(ts_hits)
+        assert 4872 == ts_info[0].frame_index
