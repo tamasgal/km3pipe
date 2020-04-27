@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* All the aanet/Jpp/ROOT/pickle stuff has been removed. Preparing for v9.
 
 Version 9
 ---------
