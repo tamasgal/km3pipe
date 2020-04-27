@@ -11,13 +11,8 @@ import numpy as np
 from .evt import EvtPump    # noqa
 from .daq import DAQPump    # noqa
 from .clb import CLBPump    # noqa
-from .aanet import AanetPump    # noqa
-from .jpp import EventPump    # noqa
 from .ch import CHPump    # noqa
-from .hdf5 import HDF5Pump    # noqa
-from .hdf5 import HDF5Sink    # noqa
-from .hdf5 import HDF5MetaData    # noqa
-from .pickle import PicklePump    # noqa
+from .hdf5 import HDF5Pump, HDF5Sink, HDF5MetaData    # noqa
 from .offline import EventPump
 
 from km3pipe.logger import get_logger
@@ -33,7 +28,7 @@ __status__ = "Development"
 log = get_logger(__name__)
 
 
-def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
+def GenericPump(filenames, name="GenericPump", **kwargs):
     """A generic pump which utilises the appropriate pump."""
     if isinstance(filenames, str):
         filenames = [filenames]
@@ -55,7 +50,7 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
     io = {
         '.evt': EvtPump,
         '.h5': HDF5Pump,
-        '.root': EventPump if use_jppy else AanetPump,
+        '.root': EventPump,
         '.dat': DAQPump,
         '.dqd': CLBPump,
     }
