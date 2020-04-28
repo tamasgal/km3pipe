@@ -4,6 +4,8 @@ Unreleased changes
 * ``kp.db.DBManager().doms`` is now removed after a deprecation period.
   Please use ``kp.db.CLBMap(det_oid)`` instead (see the User Guide
   in the docs)
+* ``km.ahrs.get_latest_ahrs_calibration()`` now chooses the latest AHRS
+  calibration set by the ``EndTime`` parameter (the latest one)
 
 Version 9
 ---------

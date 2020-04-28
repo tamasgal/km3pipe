@@ -9,6 +9,7 @@ A collection of commonly used modules.
 from .common import Dump, Keep, Delete, StatusBar
 from .mc import GlobalRandomState
 
+from . import ahrs
 from . import common
 from . import communication
 from . import fit
