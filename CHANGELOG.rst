@@ -1,14 +1,17 @@
 Unreleased changes
 ------------------
+
+Version 9
+---------
+
+9.0.0-alpha.12 / 2020-04-29
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 * All the aanet/Jpp/ROOT/pickle stuff has been removed. Preparing for v9.
 * ``kp.db.DBManager().doms`` is now removed after a deprecation period.
   Please use ``kp.db.CLBMap(det_oid)`` instead (see the User Guide
   in the docs)
 * ``km.ahrs.get_latest_ahrs_calibration()`` now chooses the latest AHRS
   calibration set by the ``EndTime`` parameter (the latest one)
-
-Version 9
----------
 
 9.0.0-alpha.11 / 2020-04-15
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
