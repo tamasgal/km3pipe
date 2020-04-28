@@ -9,6 +9,8 @@ omit =
     */tests/*
     */*/tests/*
     km3pipe/utils/*
+    km3pipe/__version__.py
+    km3pipe/io/i3.py
     km3modules/ahrs.py
     km3modules/dummy.py
     km3modules/fit.py
