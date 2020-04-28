@@ -5,6 +5,7 @@ ipywidgets
 km3io>=0.13.0
 matplotlib>=3.0.0
 mock
+numba>=0.49.0
 numpy>=1.17.0
 numpydoc>=0.7.0
 pandas
