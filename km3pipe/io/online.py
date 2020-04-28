@@ -28,7 +28,7 @@ __status__ = "Development"
 
 
 class EventPump(Pump):
-    """A pump for DAQEvents in online files.
+    """A pump for DAQ (triggered) events in online files.
 
     Parameters
     ----------
@@ -40,7 +40,7 @@ class EventPump(Pump):
         self.event_index = self.get('index') or 0
         self.filename = self.require('filename')
 
-        self.event_reader = km3io.DAQReader(self.filename.encode())
+        self.event_reader = km3io.OnlineReader(self.filename.encode())
         self.blobs = self.blob_generator()
         self.n_events = len(self.event_reader.events)
         self._current_blob = Blob()
@@ -140,7 +140,7 @@ class TimeslicePump(Pump):
         fname = self.require('filename')
         self.stream = self.get('stream', default='L1')
         self.blobs = self.timeslice_generator()
-        self.r = km3io.DAQReader(fname)
+        self.r = km3io.OnlineReader(fname)
         self.timeslice_info = self.create_timeslice_info()
         self.n_timeslices = len(self.timeslice_info)
 
@@ -252,7 +252,7 @@ class SummaryslicePump(Pump):
     def configure(self):
         filename = self.require('filename')
         self.blobs = self.summaryslice_generator()
-        self.r = km3io.DAQReader(filename)
+        self.r = km3io.OnlineReader(filename)
         self.n_summaryslices = len(self.r.summaryslices.slices)
         self.summaryslice_info = self._create_summaryslice_info()
 
@@ -281,14 +281,14 @@ class SummaryslicePump(Pump):
         for dom_id in raw_summaryslice.dom_id:
             frame = raw_summaryslice[raw_summaryslice.dom_id == dom_id]
             raw_rates = [getattr(frame, 'ch%d' % i)[0] for i in range(31)]
-            rates = km3io.daq.get_rate(raw_rates).astype(np.float64)
-            hrvs = km3io.daq.get_channel_flags(frame.hrv)
-            fifos = km3io.daq.get_channel_flags(frame.fifo)
-            udp_packets = km3io.daq.get_number_udp_packets(frame.dq_status)
-            max_sequence_number = km3io.daq.get_udp_max_sequence_number(
+            rates = km3io.online.get_rate(raw_rates).astype(np.float64)
+            hrvs = km3io.online.get_channel_flags(frame.hrv)
+            fifos = km3io.online.get_channel_flags(frame.fifo)
+            udp_packets = km3io.online.get_number_udp_packets(frame.dq_status)
+            max_sequence_number = km3io.online.get_udp_max_sequence_number(
                 frame.dq_status
             )
-            has_udp_trailer = km3io.daq.has_udp_trailer(frame.fifo)
+            has_udp_trailer = km3io.online.has_udp_trailer(frame.fifo)
             summary_slice[dom_id] = {
                 'rates': rates,
                 'hrvs': hrvs[0],
