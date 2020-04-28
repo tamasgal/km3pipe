@@ -306,17 +306,6 @@ class DBManager(object):
             runsetup_oid, name, det_id, description, optical_df, acoustic_df
         )
 
-    @property
-    def doms(self):
-        if self._doms is None:
-            self._load_doms()
-        return self._doms
-
-    def _load_doms(self):
-        "Retrieve DOM information from the database"
-        doms = self._get_json('domclbupiid/s')
-        self._doms = DOMContainer(doms)
-
     def detx(self, det_id, t0set=None, calibration=None):
         """Retrieve the detector file for given detector id
 
@@ -723,77 +712,6 @@ class ParametersContainer(object):
             raise KeyError("Could not find alternative for '{0}'".format(name))
 
 
-class DOMContainer(object):
-    """Provides easy access to DOM parameters stored in the DB."""
-    def __init__(self, doms):
-        self._json = doms
-        self._ids = []
-
-    def ids(self, det_id):
-        """Return a list of DOM IDs for given detector"""
-        return [dom['DOMId'] for dom in self._json if dom['DetOID'] == det_id]
-
-    def clbupi2domid(self, clb_upi, det_id):
-        """Return DOM ID for given CLB UPI and detector"""
-        return self._json_list_lookup('CLBUPI', clb_upi, 'DOMId', det_id)
-
-    def clbupi2floor(self, clb_upi, det_id):
-        """Return Floor ID for given CLB UPI and detector"""
-        return self._json_list_lookup('CLBUPI', clb_upi, 'Floor', det_id)
-
-    def domid2floor(self, dom_id, det_id):
-        """Return Floor ID for given DOM ID and detector"""
-        return self._json_list_lookup('DOMId', dom_id, 'Floor', det_id)
-
-    def via_omkey(self, omkey, det_id):
-        """Return DOM for given OMkey (DU, floor)"""
-        du, floor = omkey
-        try:
-            return DOM.from_json([
-                d for d in self._json if d["DU"] == du and d["Floor"] == floor
-                and d["DetOID"] == det_id
-            ][0])
-        except IndexError:
-            log.critical(
-                "No DOM found for OMKey '{0}' and DetOID '{1}'.".format(
-                    omkey, det_id
-                )
-            )
-
-    def via_dom_id(self, dom_id, det_id):
-        """Return DOM for given dom_id"""
-        try:
-            return DOM.from_json([
-                d for d in self._json
-                if d["DOMId"] == dom_id and d["DetOID"] == det_id
-            ][0])
-        except IndexError:
-            log.critical("No DOM found for DOM ID '{0}'".format(dom_id))
-
-    def via_clb_upi(self, clb_upi, det_id):
-        """return DOM for given CLB UPI"""
-        try:
-            return DOM.from_json([
-                d for d in self._json
-                if d["CLBUPI"] == clb_upi and d["DetOID"] == det_id
-            ][0])
-        except IndexError:
-            log.critical("No DOM found for CLB UPI '{0}'".format(clb_upi))
-
-    def _json_list_lookup(self, from_key, value, target_key, det_id):
-        lookup = [
-            dom[target_key]
-            for dom in self._json
-            if dom[from_key] == value and dom['DetOID'] == det_id
-        ]
-        if len(lookup) > 1:
-            log.warning(
-                "Multiple entries found: {0}".format(lookup) + "\n" +
-                "Returning the first one."
-            )
-        return lookup[0]
-
-
 class DOM(object):
     """Represents a DOM"""
     def __init__(self, clb_upi, dom_id, dom_upi, du, det_oid, floor):
@@ -898,18 +816,9 @@ class CLBMap(object):
     def __init__(self, det_oid):
         self.log = get_logger('CLBMap')
         if isinstance(det_oid, numbers.Integral):
-            self.log.warning(
-                "Det ID ('%s') provided instead of det OID "
-                "(string representation). Trying to get the OID instead..." %
-                det_oid
-            )
             db = DBManager()
             _det_oid = db.get_det_oid(det_oid)
             if _det_oid is not None:
-                self.log.warning(
-                    "This is the det OID for det ID '%s', please use "
-                    "that in future: %s" % (det_oid, _det_oid)
-                )
                 det_oid = _det_oid
         self.det_oid = det_oid
         sds = StreamDS()

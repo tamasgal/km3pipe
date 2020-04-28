@@ -1,6 +1,9 @@
 Unreleased changes
 ------------------
 * All the aanet/Jpp/ROOT/pickle stuff has been removed. Preparing for v9.
+* ``kp.db.DBManager().doms`` is now removed after a deprecation period.
+  Please use ``kp.db.CLBMap(det_oid)`` instead (see the User Guide
+  in the docs)
 
 Version 9
 ---------

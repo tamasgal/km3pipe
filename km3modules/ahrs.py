@@ -49,7 +49,7 @@ class AHRSCalibrator(kp.Module):
         self.A = defaultdict(list)
         self.H = defaultdict(list)
         self.detector = kp.hardware.Detector(det_id=det_id)
-        self.db = self.get('dbmanager') or kp.db.DBManager()
+        self.clbmap = kp.db.CLBMap(det_id)
         self.timestamp = time.time()
 
     def process(self, blob):
@@ -91,7 +91,7 @@ class AHRSCalibrator(kp.Module):
         calibrations = {}
         for dom_id in dom_ids:
             print("Calibrating DOM ID {}".format(dom_id))
-            clb_upi = self.db.doms.via_dom_id(dom_id).clb_upi
+            clb_upi = self.clbmap.doms_ids[dom_id].clb_upi
             ahrs_calib = get_latest_ahrs_calibration(clb_upi)
             if ahrs_calib is None:
                 log.warning("AHRS calibration missing for '{}'".format(dom_id))

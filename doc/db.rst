@@ -1,5 +1,5 @@
-DBManager
-=========
+Database access
+===============
 
 .. contents:: :local:
 
