@@ -4,6 +4,11 @@ Unreleased changes
 
 Version 8
 ---------
+8.27.9 / 2020-04-29
+~~~~~~~~~~~~~~~~~~~
+* ``km.ahrs.get_latest_ahrs_calibration()`` now chooses the latest AHRS
+  calibration set by the ``EndTime`` parameter (the latest one)
+
 8.27.8 / 2020-04-02
 ~~~~~~~~~~~~~~~~~~~
 * Improved error handling in ``km3pipe retrieve`` (CTRL+C etc.)
