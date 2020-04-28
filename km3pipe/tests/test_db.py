@@ -4,7 +4,7 @@ from os.path import dirname, join
 from km3pipe.testing import TestCase, MagicMock, patch
 
 from km3pipe.db import (
-    DBManager, DOMContainer, we_are_in_lyon, read_csv, make_empty_dataset,
+    DBManager, we_are_in_lyon, read_csv, make_empty_dataset,
     StreamDS, CLBMap, clbupi2ahrsupi
 )
 from km3pipe.logger import get_logger
@@ -69,31 +69,6 @@ class TestDBManager(TestCase):
         call_args = db._make_request.call_args[0]
         self.assertEqual(db._login_url, call_args[0])
         self.assertDictEqual({'usr': 'a', 'pwd': 'b'}, call_args[1])
-
-
-class TestDOMContainer(TestCase):
-    def test_init(self):
-        DOMContainer(None)
-
-    def setUp(self):
-        self.dc = DOMContainer(JSON_DOMS)
-
-    def test_ids_returns_dom_ids(self):
-        self.assertListEqual([1, 2, 3], self.dc.ids(DET_ID))
-
-    def test_json_list_lookup(self):
-        lookup = self.dc._json_list_lookup('DOMId', 1, 'Floor', DET_ID)
-        self.assertEqual(10, lookup)
-
-    def test_clbupi2floor(self):
-        self.assertEqual(10, self.dc.clbupi2floor('100', DET_ID))
-        self.assertEqual(20, self.dc.clbupi2floor('200', DET_ID))
-        self.assertEqual(30, self.dc.clbupi2floor('300', DET_ID))
-
-    def test_clbupi2domid(self):
-        self.assertEqual(1, self.dc.clbupi2domid('100', DET_ID))
-        self.assertEqual(2, self.dc.clbupi2domid('200', DET_ID))
-        self.assertEqual(3, self.dc.clbupi2domid('300', DET_ID))
 
 
 class TestWeAreInLyon(TestCase):
