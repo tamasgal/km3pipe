@@ -180,7 +180,7 @@ def get_latest_ahrs_calibration(clb_upi, max_version=3, db=None):
         db = kp.db.DBManager()
 
     for version in range(max_version, 0, -1):
-        raw_data = ""
+        datasets = []
         for n in range(1, 100):
             log.debug("Iteration #{} to get the calib data".format(n))
             url = "show_product_test.htm?upi={0}&" \
@@ -191,16 +191,25 @@ def get_latest_ahrs_calibration(clb_upi, max_version=3, db=None):
             log.debug("What I got back as AHRS calib: {}".format(_raw_data))
             if len(_raw_data) == 0:
                 break
+            try:
+                xroot = ET.parse(io.StringIO(_raw_data)).getroot()
+            except ET.ParseError:
+                continue
             else:
-                raw_data = _raw_data
-        try:
-            xroot = ET.parse(io.StringIO(raw_data)).getroot()
-        except ET.ParseError:
+                datasets.append(xroot)
+
+        if len(datasets) == 0:
             continue
-        else:
-            return _extract_calibration(xroot)
+        latest_dataset = _get_latest_dataset(datasets)
+
+        return _extract_calibration(latest_dataset)
 
     return None
+
+
+def _get_latest_dataset(datasets):
+    """Find the latest valid AHRS calibration dataset"""
+    return sorted(datasets, key=lambda d: d.findall(".//EndTime")[0].text)[-1]
 
 
 def _extract_calibration(xroot):
