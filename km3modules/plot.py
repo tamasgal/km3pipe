@@ -150,7 +150,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
         self.plots_path = self.get('plots_path', default=os.getcwd())
         self.data_path = self.get('data_path', default=os.getcwd())
         self.det_oid = self.require('det_oid')
-        self.db = kp.db.DBManager()
+        self.clbmap = kp.db.CLBMap(self.det_oid)
 
     def process(self, blob):
         calibration = blob["IntraDOMCalibration"]
@@ -168,16 +168,18 @@ class IntraDOMCalibrationPlotter(kp.Module):
         )
         sorted_dom_ids = sorted(
             calibration.keys(),
-            key=lambda d: self.db.doms.
-            via_dom_id(dom_id=d, det_id=self.det_oid).omkey
+            key=lambda d: (self.clbmap.dom_ids[d].du,
+                           self.clbmap.dom_ids[d].floor)
         )    # by DU and FLOOR, note that DET OID is needed!
         for ax, dom_id in zip(axes.flatten(), sorted_dom_ids):
             calib = calibration[dom_id]
             ax.plot(np.cos(calib['angles']), calib["means"], '.')
             ax.plot(np.cos(calib['angles']), calib["corrected_means"], '.')
+            du = self.clbmap.dom_ids[dom_id].du
+            floor = self.clbmap.dom_ids[dom_id].floor
             ax.set_title(
                 "{0} - {1}".format(
-                    self.db.doms.via_dom_id(dom_id, self.det_oid), dom_id
+                    "DU{}-DOM{}".format(du, floor), dom_id
                 )
             )
             ax.set_ylim((-10, 10))
@@ -194,9 +196,11 @@ class IntraDOMCalibrationPlotter(kp.Module):
             calib = calibration[dom_id]
             ax.plot(np.cos(calib['angles']), calib["rates"], '.')
             ax.plot(np.cos(calib['angles']), calib["corrected_rates"], '.')
+            du = self.clbmap.dom_ids[dom_id].du
+            floor = self.clbmap.dom_ids[dom_id].floor
             ax.set_title(
                 "{0} - {1}".format(
-                    self.db.doms.via_dom_id(dom_id, self.det_oid), dom_id
+                    "DU{}-DOM{}".format(du, floor), dom_id
                 )
             )
             ax.set_ylim((0, 10))
