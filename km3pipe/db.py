@@ -898,18 +898,9 @@ class CLBMap(object):
     def __init__(self, det_oid):
         self.log = get_logger('CLBMap')
         if isinstance(det_oid, numbers.Integral):
-            self.log.warning(
-                "Det ID ('%s') provided instead of det OID "
-                "(string representation). Trying to get the OID instead..." %
-                det_oid
-            )
             db = DBManager()
             _det_oid = db.get_det_oid(det_oid)
             if _det_oid is not None:
-                self.log.warning(
-                    "This is the det OID for det ID '%s', please use "
-                    "that in future: %s" % (det_oid, _det_oid)
-                )
                 det_oid = _det_oid
         self.det_oid = det_oid
         sds = StreamDS()
