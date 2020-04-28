@@ -2,7 +2,7 @@ docopt
 h5py
 ipython
 ipywidgets
-km3io>=0.10.0
+km3io>=0.13.0
 matplotlib>=3.0.0
 mock
 numpy>=1.17.0
