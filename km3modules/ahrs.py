@@ -178,8 +178,8 @@ def get_latest_ahrs_calibration(clb_upi, max_version=3, db=None):
     if db is None:
         db = kp.db.DBManager()
 
+    datasets = []
     for version in range(max_version, 0, -1):
-        datasets = []
         for n in range(1, 100):
             log.debug("Iteration #{} to get the calib data".format(n))
             url = "show_product_test.htm?upi={0}&" \
@@ -197,13 +197,11 @@ def get_latest_ahrs_calibration(clb_upi, max_version=3, db=None):
             else:
                 datasets.append(xroot)
 
-        if len(datasets) == 0:
-            continue
-        latest_dataset = _get_latest_dataset(datasets)
+    if len(datasets) == 0:
+        return None
 
-        return _extract_calibration(latest_dataset)
-
-    return None
+    latest_dataset = _get_latest_dataset(datasets)
+    return _extract_calibration(latest_dataset)
 
 
 def _get_latest_dataset(datasets):
