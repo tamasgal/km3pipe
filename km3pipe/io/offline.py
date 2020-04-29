@@ -5,6 +5,10 @@ from ..dataclasses import Table
 from .hdf5 import HDF5Header
 
 import km3io
+import numpy as np
+from collections import defaultdict
+
+USR_KEYS = [b'energy_lost_in_can', b'bx', b'by', b'ichan', b'cc']
 
 
 class EventPump(Module):
@@ -119,8 +123,20 @@ class EventPump(Module):
             wgt1 = wgt2 = wgt3 = wgt4 = np.nan
         return wgt1, wgt2, wgt3, wgt4
 
+    def _parse_usr_to_dct(self, mc_tracks):
+        dct = defaultdict(list)
+        for k in USR_KEYS:
+            dec_key = k.decode('utf_8')
+            for i in range(mc_tracks.usr_names.shape[0]):
+                value = np.nan
+                if k in mc_tracks.usr_names[i]:
+                    mask = mc_tracks.usr_names[i] == k
+                    value = mc_tracks.usr[i][mask][0]
+                dct[dec_key].append(value)
+        return dct
+
     def _parse_mc_tracks(self, mc_tracks):
-        return Table({
+        dct = {
             'dir_x': mc_tracks.dir_x,
             'dir_y': mc_tracks.dir_y,
             'dir_z': mc_tracks.dir_z,
@@ -132,9 +148,9 @@ class EventPump(Module):
             'type': mc_tracks.type,
             'id': mc_tracks.id,
             'length': mc_tracks.len
-        },
-                     name='McTracks',
-                     h5loc='/mc_tracks')
+        }
+        dct.update(self._parse_usr_to_dct(mc_tracks))
+        return Table(dct, name='McTracks', h5loc='/mc_tracks')
 
     def _parse_mc_hits(self, mc_hits):
         return Table({
