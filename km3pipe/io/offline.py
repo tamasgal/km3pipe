@@ -125,7 +125,7 @@ class EventPump(Module):
 
     def _parse_usr_to_dct(self, mc_tracks):
         dct = defaultdict(list)
-        for k in USR_KEYS:
+        for k in USR_MC_TRACKS_KEYS:
             dec_key = k.decode('utf_8')
             for i in range(mc_tracks.usr_names.shape[0]):
                 value = np.nan
