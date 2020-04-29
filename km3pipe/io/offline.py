@@ -8,7 +8,7 @@ import km3io
 import numpy as np
 from collections import defaultdict
 
-USR_KEYS = [b'energy_lost_in_can', b'bx', b'by', b'ichan', b'cc']
+USR_MC_TRACKS_KEYS = [b'energy_lost_in_can', b'bx', b'by', b'ichan', b'cc']
 
 
 class EventPump(Module):
