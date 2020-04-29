@@ -4,6 +4,11 @@ Unreleased changes
 
 Version 8
 ---------
+8.27.10 / 2020-04-29
+~~~~~~~~~~~~~~~~~~~~
+* ``km.ahrs.get_latest_ahrs_calibration()`` now takes the newest one,
+  regardless of the version number
+
 8.27.9 / 2020-04-29
 ~~~~~~~~~~~~~~~~~~~
 * ``km.ahrs.get_latest_ahrs_calibration()`` now chooses the latest AHRS
