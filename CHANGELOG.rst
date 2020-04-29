@@ -1,10 +1,12 @@
 Unreleased changes
 ------------------
-* ``km.ahrs.get_latest_ahrs_calibration()`` now takes the newest one,
-  regardless of the version number
 
 Version 9
 ---------
+9.0.0-alpha.13 / 2020-04-29
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* ``km.ahrs.get_latest_ahrs_calibration()`` now takes the newest one,
+  regardless of the version number
 
 9.0.0-alpha.12 / 2020-04-29
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
