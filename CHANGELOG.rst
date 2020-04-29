@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* ``km.ahrs.get_latest_ahrs_calibration()`` now takes the newest one,
+  regardless of the version number
 
 Version 9
 ---------
