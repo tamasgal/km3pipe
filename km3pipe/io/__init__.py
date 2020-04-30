@@ -13,7 +13,8 @@ from .daq import DAQPump    # noqa
 from .clb import CLBPump    # noqa
 from .ch import CHPump    # noqa
 from .hdf5 import HDF5Pump, HDF5Sink, HDF5MetaData    # noqa
-from .offline import EventPump
+from .offline import EventPump as OfflineEventPump
+from .online import EventPump as OnlineEventPump
 
 from km3pipe.logger import get_logger
 
@@ -50,7 +51,7 @@ def GenericPump(filenames, name="GenericPump", **kwargs):
     io = {
         '.evt': EvtPump,
         '.h5': HDF5Pump,
-        '.root': EventPump,
+        '.root': None,
         '.dat': DAQPump,
         '.dqd': CLBPump,
     }
@@ -60,6 +61,15 @@ def GenericPump(filenames, name="GenericPump", **kwargs):
             "No pump found for file extension '{0}'".format(extension)
         )
         raise ValueError("Unknown filetype")
+
+    if extension == ".root":
+        if kwargs['data_format'] == "offline-events":
+            Pump = OfflineEventPump
+        if kwargs['data_format'] == "online-events":
+            Pump = OnlineEventPump
+    else:
+        Pump = io[extension]
+
 
     missing_files = [fn for fn in filenames if not os.path.exists(fn)]
     if missing_files:
@@ -77,9 +87,9 @@ def GenericPump(filenames, name="GenericPump", **kwargs):
     input_files = set(filenames) - set(missing_files)
 
     if len(input_files) == 1:
-        return io[extension](filename=filenames[0], name=name, **kwargs)
+        return Pump(filename=filenames[0], name=name, **kwargs)
     else:
-        return io[extension](filenames=filenames, name=name, **kwargs)
+        return Pump(filenames=filenames, name=name, **kwargs)
 
 
 def read_calibration(

@@ -150,7 +150,7 @@ class EventPump(Module):
             'length': mc_tracks.len
         }
         dct.update(self._parse_usr_to_dct(mc_tracks))
-        return Table(dct, name='McTracks', h5loc='/mc_tracks')
+        return Table(dct, name='McTracks', h5loc='/mc_tracks', split_h5=True)
 
     def _parse_mc_hits(self, mc_hits):
         return Table({

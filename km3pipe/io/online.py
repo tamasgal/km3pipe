@@ -87,10 +87,9 @@ class EventPump(Pump):
             'time': hits.time,
             'tot': hits.tot,
             'triggered': trigger_mask,
-            'group_id': self.event_index,
-        })
+        }, name='Hits', h5loc='/hits', split_h5=True)
 
-        event_info = Table.from_template({
+        event_info = Table({
             'det_id': raw_event_info["detector_id"],
             'frame_index': raw_event_info["frame_index"],
             'livetime_sec': 0,
@@ -107,8 +106,7 @@ class EventPump(Pump):
             'weight_w2': np.nan,
             'weight_w3': np.nan,
             'run_id': raw_event_info["run"],
-            'group_id': self.event_index,
-        }, 'EventInfo')
+        }, name='EventInfo', h5loc='/event_info')
 
         self.event_index += 1
         blob['EventInfo'] = event_info
