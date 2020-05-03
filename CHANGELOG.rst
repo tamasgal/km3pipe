@@ -1,6 +1,12 @@
 Unreleased changes
 ------------------
 
+* The DAQ structures (``DAQEvent``, ``JDAQSumaryslice`` and ``JDAQTimeslice``)
+  now have a version field in Jpp v13 and were updated in ``kp.io.daq``
+  accordingly. There is no backwards compatibility for this change. If you
+  see "corrupt data" errors, either downgrade km3pipe to 9.0.0-alpha.13 or
+  less, or update Jpp to v13+ (recommended).
+
 Version 9
 ---------
 9.0.0-beta.5 / 2020-10-21
