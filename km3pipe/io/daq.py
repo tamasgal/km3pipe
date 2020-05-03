@@ -71,20 +71,23 @@ class TimesliceParser(Module):
             return blob
 
     def _parse_timeslice(self, data):
-        tsl_size, datatype = unpack("<ii", data.read(8))
-        det_id, run, sqnr = unpack("<iii", data.read(12))
-        timestamp, ns_ticks, n_frames = unpack("<iii", data.read(12))
+        tsl_size, datatype, version = unpack('<iih', data.read(10))
+        if version > 1:
+            log.warn(
+                "Unsupported DAQTimeslice version ({}) or legacy DAQ. "
+                "Make sure Jpp v13+ is used.".format(version)
+            )
+        det_id, run, sqnr = unpack('<iii', data.read(12))
+        timestamp, ns_ticks, n_frames = unpack('<iii', data.read(12))
 
-        ts_info = Table.from_template(
-            {
-                "frame_index": sqnr,
-                "slice_id": 0,
-                "timestamp": timestamp,
-                "nanoseconds": ns_ticks * 16,
-                "n_frames": n_frames,
-            },
-            "TimesliceInfo",
-        )
+        ts_info = Table.from_template({
+            'frame_index': sqnr,
+            'slice_id': 0,
+            'timestamp': timestamp,
+            'nanoseconds': ns_ticks * 16,
+            'n_frames': n_frames
+        }, 'TimesliceInfo')
+
         ts_frameinfos = {}
 
         _dom_ids = []
@@ -501,6 +504,14 @@ class DAQSummaryslice(object):
     """
 
     def __init__(self, file_obj):
+        self.version = unpack('<h', file_obj.read(2))[0]
+        if self.version > 6:
+            log.warn(
+                "Unsupported {} version ({}) or legacy DAQ. "
+                "Make sure Jpp v13+ is used.".format(
+                    self.__class__.__name__, self.version
+                )
+            )
         self.header = DAQHeader(file_obj=file_obj)
         self.n_summary_frames = unpack("<i", file_obj.read(4))[0]
         self.summary_frames = {}
@@ -563,6 +574,14 @@ class DAQEvent(object):
     """
 
     def __init__(self, file_obj):
+        self.version = unpack('<h', file_obj.read(2))[0]
+        if self.version > 4:
+            log.warn(
+                "Unsupported {} version ({}) or legacy DAQ. "
+                "Update Jpp to v13+.".format(
+                    self.__class__.__name__, self.version
+                )
+            )
         self.header = DAQHeader(file_obj=file_obj)
         self.trigger_counter = unpack("<Q", file_obj.read(8))[0]
         self.trigger_mask = unpack("<Q", file_obj.read(8))[0]
