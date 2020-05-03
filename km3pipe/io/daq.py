@@ -70,7 +70,12 @@ class TimesliceParser(Module):
             return blob
 
     def _parse_timeslice(self, data):
-        tsl_size, datatype = unpack('<ii', data.read(8))
+        tsl_size, datatype, version = unpack('<iih', data.read(10))
+        if version > 1:
+            log.warn(
+                "Unsupported DAQTimeslice version ({}) or legacy DAQ. "
+                "Make sure Jpp v13+ is used.".format(version)
+            )
         det_id, run, sqnr = unpack('<iii', data.read(12))
         timestamp, ns_ticks, n_frames = unpack('<iii', data.read(12))
 
@@ -112,15 +117,15 @@ class TimesliceParser(Module):
                 _times.append(hit[1])
                 _tots.append(hit[2])
 
-        ts_hits = Table(
-            {
-                'channel_id': np.array(_channel_ids),
-                'dom_id': np.array(_dom_ids),
-                'time': np.array(_times),
-                'tot': np.array(_tots),
-            },
-            name='TimesliceHits', h5loc='/timeslice_hits', split_h5=True
-        )
+        ts_hits = Table({
+            'channel_id': np.array(_channel_ids),
+            'dom_id': np.array(_dom_ids),
+            'time': np.array(_times),
+            'tot': np.array(_tots),
+        },
+                        name='TimesliceHits',
+                        h5loc='/timeslice_hits',
+                        split_h5=True)
         return ts_info, ts_frameinfos, ts_hits
 
 
@@ -266,6 +271,9 @@ class DAQProcessor(Module):
 
     def process_event(self, data, blob):
         data_io = BytesIO(data)
+
+        # import ipdb
+        # ipdb.set_trace(context=5)
         preamble = DAQPreamble(file_obj=data_io)    # noqa
         event = DAQEvent(file_obj=data_io)
         header = event.header
@@ -478,6 +486,14 @@ class DAQSummaryslice(object):
 
     """
     def __init__(self, file_obj):
+        self.version = unpack('<h', file_obj.read(2))[0]
+        if self.version > 6:
+            log.warn(
+                "Unsupported {} version ({}) or legacy DAQ. "
+                "Make sure Jpp v13+ is used.".format(
+                    self.__class__.__name__, self.version
+                )
+            )
         self.header = DAQHeader(file_obj=file_obj)
         self.n_summary_frames = unpack('<i', file_obj.read(4))[0]
         self.summary_frames = {}
@@ -530,6 +546,14 @@ class DAQEvent(object):
 
     """
     def __init__(self, file_obj):
+        self.version = unpack('<h', file_obj.read(2))[0]
+        if self.version > 4:
+            log.warn(
+                "Unsupported {} version ({}) or legacy DAQ. "
+                "Update Jpp to v13+.".format(
+                    self.__class__.__name__, self.version
+                )
+            )
         self.header = DAQHeader(file_obj=file_obj)
         self.trigger_counter = unpack('<Q', file_obj.read(8))[0]
         self.trigger_mask = unpack('<Q', file_obj.read(8))[0]
