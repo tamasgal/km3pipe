@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* ``kp.io.clb.CLBPump`` has been modernised and is now return ``kp.Table``
+  instances
 
 Version 9
 ---------
