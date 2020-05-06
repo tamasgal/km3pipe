@@ -4,19 +4,14 @@ Pumps for the CLB data formats.
 
 """
 
-from io import BytesIO
 import struct
 from struct import unpack
-from collections import namedtuple
-import datetime
-import pytz
 
 import numpy as np
 
 from km3pipe.dataclasses import Table
 from km3pipe.core import Blob, Pump
 from km3pipe.sys import ignored
-from km3pipe.logger import get_logger
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -26,13 +21,16 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = get_logger(__name__)    # pylint: disable=C0103
-
-UTC_TZ = pytz.timezone('UTC')
-
 
 class CLBPump(Pump):
-    """A pump for binary CLB files."""
+    """A pump for binary CLB files.
+
+    Parameters
+    ----------
+    file: str
+        filename or file-like object.
+
+    """
     pmt_dt = np.dtype([('channel_id', np.uint8), ('time', '>i'),
                        ('tot', np.uint8)])
 
@@ -48,12 +46,12 @@ class CLBPump(Pump):
 
     def _determine_packet_positions(self):
         """Record the file pointer position of each frame"""
-        self.cprint("Scanning UDB packets...")
+        self.cprint("Scanning UDP packets...")
         self.file.seek(0, 0)
         with ignored(struct.error):
             while True:
                 pointer_position = self.file.tell()
-                length = struct.unpack('<i', self.file.read(4))[0]
+                length = unpack('<i', self.file.read(4))[0]
                 self._packet_positions.append(pointer_position)
                 self.file.seek(length, 1)
         self.file.seek(0, 0)
@@ -73,7 +71,7 @@ class CLBPump(Pump):
 
     def extract_blob(self):
         try:
-            length = struct.unpack('<i', self.file.read(4))[0]
+            length = unpack('<i', self.file.read(4))[0]
         except struct.error:
             raise StopIteration
 
