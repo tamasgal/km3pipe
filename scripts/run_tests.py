@@ -39,7 +39,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 TESTS_DIR = sys.argv[1]
-JUNIT_XML = 'reports/junit_benchmark_{}.xml'.format(os.path.basename(TESTS_DIR))
+JUNIT_XML = 'reports/junit_{}.xml'.format(os.path.basename(TESTS_DIR))
 
 if hasattr(sys.stdout, 'isatty') and sys.stdout.isatty():
     INFO = '\033[94m'  # blue
