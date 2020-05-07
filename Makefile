@@ -10,11 +10,11 @@ build:
 	@echo "No need to build anymore :)"
 
 install: 
-	pip install -U numpy
+	pip install numpy
 	pip install .
 
 install-dev:
-	pip install -U numpy
+	pip install numpy
 	pip install -e .
 
 clean:
@@ -55,8 +55,8 @@ lint:
 	py.test --pylint km3modules
 
 dependencies:
-	pip install -U numpy
-	pip install -Ur requirements.txt
+	pip install numpy
+	pip install -r requirements.txt
 
 .PHONY: yapf
 yapf:
