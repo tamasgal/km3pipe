@@ -30,6 +30,9 @@ test:
 test-km3modules: 
 	py.test --junitxml=./reports/junit_km3modules.xml -o junit_suite_name=km3modules km3modules
 
+benchmark:
+	scripts/run_tests.py benchmarks
+
 test-cov:
 	py.test --cov ./ --cov-report term-missing --cov-report xml:reports/coverage.xml --cov-report html:reports/coverage $(ALLNAMES)
 
@@ -64,4 +67,4 @@ yapf:
 	yapf -i doc/conf.py
 	yapf -i setup.py
 
-.PHONY: all clean build install install-dev test test-km3modules test-nocov flake8 pep8 dependencies docstyle
+.PHONY: all clean build install install-dev test test-cov test-loop benchmark test-km3modules flake8 pep8 dependencies docstyle
