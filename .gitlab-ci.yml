@@ -66,7 +66,7 @@ benchmarks:
     stage: test
     script:
         - *virtualenv_definition
-        - make benchmarks
+        - make benchmark
     <<: *junit_definition
     allow_failure: true
 
