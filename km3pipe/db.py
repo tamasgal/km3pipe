@@ -8,9 +8,11 @@ from datetime import datetime
 import numbers
 import ssl
 import io
+import os
 import json
 import re
 import pytz
+import sys
 import numpy as np
 from collections import defaultdict, OrderedDict, namedtuple
 from inspect import Signature, Parameter
@@ -121,6 +123,13 @@ class DBManager(object):
             self.login(username, password)
         elif config.db_session_cookie not in (None, ''):
             self.restore_session(config.db_session_cookie)
+        elif all(v in os.environ for v in ['KM3NET_DB_USERNAME',
+                                           'KM3NET_DB_PASSWORD']):
+            login_ok = self.login(os.environ['KM3NET_DB_USERNAME'],
+                                  os.environ['KM3NET_DB_PASSWORD'])
+            if not login_ok:
+                self.log.critical("Login failed with credentail from ENV")
+                sys.exit(1)
         else:
             username, password = config.db_credentials
             login_ok = self.login(username, password)
