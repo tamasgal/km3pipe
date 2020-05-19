@@ -251,7 +251,7 @@ class MultiFilePump(kp.Module):
 
     def finish(self):
         self.cprint(
-            "Processed {} out of {} files.".format(
+            "Fully processed {} out of {} files.".format(
                 self.n_processed, len(self.filenames)
             )
         )
