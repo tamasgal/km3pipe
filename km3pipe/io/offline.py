@@ -17,8 +17,10 @@ class EventPump(Module):
         self._split_hits = self.get("split_hits", default=True)
         self.skip_hits = self.get("skip_hits", default=False)
         self.skip_mc_hits = self.get("skip_mc_hits", default=False)
+        self.skip_tracks = self.get("skip_tracks", default=False)
         self.skip_mc_tracks = self.get("skip_mc_tracks", default=False)
         self.skip_header = self.get("skip_header", default=False)
+        self.skip_event_info = self.get("skip_event_info", default=False)
 
         self._read_usr_data = self.get("read_usr_data", default=False)
         if self._read_usr_data:
@@ -64,14 +66,17 @@ class EventPump(Module):
     def _parse_event(self, event, blob):
         blob["RawHeader"] = self.raw_header
         blob["Header"] = self.header
-
         blob['Event'] = event
         if not self.skip_hits and event.n_hits > 0:
             blob['Hits'] = self._parse_hits(event.hits)
         if not self.skip_mc_hits and event.n_mc_hits > 0:
             blob['McHits'] = self._parse_mc_hits(event.mc_hits)
+        if not self.skip_tracks and event.n_tracks > 0:
+            blob['Tracks'] = self._parse_tracks(event.tracks)
         if not self.skip_mc_tracks and event.n_mc_tracks > 0:
             blob['McTracks'] = self._parse_mc_tracks(event.mc_tracks)
+        if not self.skip_event_info:
+            blob['EventInfo'] = self._parse_eventinfo(event)
         return blob
 
     def _generate_raw_header(self):
@@ -157,6 +162,25 @@ class EventPump(Module):
         if self._read_usr_data:
             dct.update(self._parse_usr_to_dct(mc_tracks))
         return Table(dct, name='McTracks', h5loc='/mc_tracks', split_h5=True)
+
+    def _parse_tracks(self, tracks):
+        dct = {
+            'dir_x': tracks.dir_x,
+            'dir_y': tracks.dir_y,
+            'dir_z': tracks.dir_z,
+            'pos_x': tracks.pos_x,
+            'pos_y': tracks.pos_y,
+            'pos_z': tracks.pos_z,
+            'id': tracks.id,
+            'energy': tracks.E,
+            'time': tracks.t,
+            'length': tracks.len,
+            'likelihood': track.lik,
+            'rec_type': track.rec_type,
+            'rec_stages': track.rec_stages,
+            'hit_ids': track.hit_ids
+        }
+        return Table(dct, name='Tracks', h5loc='/tracks', split_h5=True)
 
     def _parse_mc_hits(self, mc_hits):
         return Table({
