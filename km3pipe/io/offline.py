@@ -175,11 +175,10 @@ class EventPump(Module):
             'energy': tracks.E,
             'time': tracks.t,
             'length': tracks.len,
-            'likelihood': track.lik,
-            'rec_type': track.rec_type,
-            'rec_stages': track.rec_stages,
-            'hit_ids': track.hit_ids
-        }
+            'likelihood': tracks.lik,
+            'rec_type': tracks.rec_type,
+            'rec_stages': tracks.rec_stages,
+            'hit_ids': tracks.hit_ids
         return Table(dct, name='Tracks', h5loc='/tracks', split_h5=True)
 
     def _parse_mc_hits(self, mc_hits):
