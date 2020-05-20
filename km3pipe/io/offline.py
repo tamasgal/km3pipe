@@ -20,6 +20,12 @@ class EventPump(Module):
         self.skip_mc_tracks = self.get("skip_mc_tracks", default=False)
         self.skip_header = self.get("skip_header", default=False)
 
+        self._read_usr_data = self.get("read_usr_data", default=False)
+        if self._read_usr_data:
+            self.log.warning(
+                "Reading usr-data will massively decrease the performance."
+            )
+
         self._reader = km3io.OfflineReader(self._filename)
 
         self.header = None
@@ -148,7 +154,8 @@ class EventPump(Module):
             'id': mc_tracks.id,
             'length': mc_tracks.len
         }
-        dct.update(self._parse_usr_to_dct(mc_tracks))
+        if self._read_usr_data:
+            dct.update(self._parse_usr_to_dct(mc_tracks))
         return Table(dct, name='McTracks', h5loc='/mc_tracks', split_h5=True)
 
     def _parse_mc_hits(self, mc_hits):
