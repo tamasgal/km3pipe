@@ -11,6 +11,46 @@ from collections import defaultdict
 USR_MC_TRACKS_KEYS = [b'energy_lost_in_can', b'bx', b'by', b'ichan', b'cc']
 
 
+class OfflinePump(Module):
+    def configure(self):
+        self._filename = self.get("filename")
+
+        self._reader = km3io.OfflineReader(self._filename)
+        self.header = self._reader.header
+        self.blobs = self._blob_generator()
+
+    def process(self, blob=None):
+        return next(self.blobs)
+
+    def finish(self):
+        self._reader.close()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return next(self.blobs)
+
+    def __getitem__(self, item):
+        if not isinstance(item, int):
+            raise TypeError("Only integer indices are supported.")
+        return Blob({
+            'event': self._reader.events[item],
+            'header': self.header
+            })
+
+    def get_number_of_blobs(self):
+        return len(self._reader.events)
+
+    def _blob_generator(self):
+        for event in self._reader.events:
+            blob = Blob({
+                'event': event,
+                'header': self.header
+            })
+            yield blob
+
+
 class EventPump(Module):
     def configure(self):
         self._filename = self.require("filename")

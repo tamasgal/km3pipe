@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 from os.path import join, dirname
 
+import km3pipe as kp
 from km3pipe.testing import TestCase
-from km3pipe.io.offline import EventPump
+from km3pipe.io.offline import EventPump, OfflinePump
 
 DATA_DIR = join(dirname(__file__), '../../kp-data/test_data/')
 
@@ -62,3 +63,51 @@ class TestEventPump(TestCase):
 
         self.assertListEqual([0, 1000000000.0, -1, -0.052],
                              list(blob['Header'].cut_in))
+
+
+class TestOfflinePump(TestCase):
+    def setUp(self):
+        self.pump = OfflinePump(
+            filename=join(
+                DATA_DIR,
+                "mcv5.0.DAT004340.propa.sirene.jte.jchain.aanet.4340.root"
+            )
+        )
+
+    def test_offline_pump_iteration(self):
+        i = 0
+        for blob in self.pump:
+            i += 1
+        assert 3 == i
+
+    def test_offline_pump_has_header(self):
+        for blob in self.pump:
+            assert 'header' in blob
+
+    def test_offline_pump_in_pipeline(self):
+
+        class Observer(kp.Module):
+            def configure(self):
+                self.i = 0
+
+            def process(self, blob):
+                assert 'header' in blob
+                assert 'event' in blob
+                self.i += 1
+                return blob
+
+            def finish(self):
+                return {"n_events": self.i}
+
+        pipe = kp.Pipeline()
+        pipe.attach(
+            OfflinePump,
+            filename=join(
+                DATA_DIR,
+                "mcv5.0.DAT004340.propa.sirene.jte.jchain.aanet.4340.root"
+            )
+        )
+        pipe.attach(Observer)
+        results = pipe.drain()
+
+        assert 3 == results["Observer"]["n_events"]
