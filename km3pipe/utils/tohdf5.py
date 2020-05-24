@@ -43,13 +43,7 @@ cprint = logger.get_printer('tohdf5')
 io_log = logger.get_logger('km3pipe.io')
 
 
-def tohdf5(
-        input_files,
-        output_file,
-        n_events,
-        conv_times_to_jte,
-        **kwargs
-        ):
+def tohdf5(input_files, output_file, n_events, conv_times_to_jte, **kwargs):
     """Convert Any file to HDF5 file"""
     if len(input_files) > 1:
         cprint(

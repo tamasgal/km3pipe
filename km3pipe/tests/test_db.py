@@ -4,8 +4,8 @@ from os.path import dirname, join
 from km3pipe.testing import TestCase, MagicMock, patch
 
 from km3pipe.db import (
-    DBManager, we_are_in_lyon, read_csv, make_empty_dataset,
-    StreamDS, CLBMap, clbupi2ahrsupi
+    DBManager, we_are_in_lyon, read_csv, make_empty_dataset, StreamDS, CLBMap,
+    clbupi2ahrsupi
 )
 from km3pipe.logger import get_logger
 

@@ -125,7 +125,8 @@ class TestDMMonitor(TestCase):
 class TestTimesliceParser(TestCase):
     def test_l0(self):
         with open(IO_TSL0, 'rb') as fobj:
-            ts_info, ts_frameinfos, ts_hits = TimesliceParser()._parse_timeslice(fobj)
+            ts_info, ts_frameinfos, ts_hits = TimesliceParser(
+            )._parse_timeslice(fobj)
         assert 200 == len(ts_hits)
         assert 25 == ts_hits[0].tot
         assert 808447031 == ts_hits[23].dom_id
@@ -133,12 +134,14 @@ class TestTimesliceParser(TestCase):
 
     def test_l1(self):
         with open(IO_TSL1, 'rb') as fobj:
-            ts_info, ts_frameinfos, ts_hits = TimesliceParser()._parse_timeslice(fobj)
+            ts_info, ts_frameinfos, ts_hits = TimesliceParser(
+            )._parse_timeslice(fobj)
         assert 0 == len(ts_hits)
         assert 4873 == ts_info[0].frame_index
 
     def test_l2(self):
         with open(IO_TSL2, 'rb') as fobj:
-            ts_info, ts_frameinfos, ts_hits = TimesliceParser()._parse_timeslice(fobj)
+            ts_info, ts_frameinfos, ts_hits = TimesliceParser(
+            )._parse_timeslice(fobj)
         assert 0 == len(ts_hits)
         assert 4872 == ts_info[0].frame_index

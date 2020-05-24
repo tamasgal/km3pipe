@@ -85,7 +85,6 @@ class TestOfflinePump(TestCase):
             assert 'header' in blob
 
     def test_offline_pump_in_pipeline(self):
-
         class Observer(kp.Module):
             def configure(self):
                 self.i = 0

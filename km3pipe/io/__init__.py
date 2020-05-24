@@ -70,7 +70,6 @@ def GenericPump(filenames, name="GenericPump", **kwargs):
     else:
         Pump = io[extension]
 
-
     missing_files = [fn for fn in filenames if not os.path.exists(fn)]
     if missing_files:
         if len(missing_files) == len(filenames):

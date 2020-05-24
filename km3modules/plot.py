@@ -168,8 +168,8 @@ class IntraDOMCalibrationPlotter(kp.Module):
         )
         sorted_dom_ids = sorted(
             calibration.keys(),
-            key=lambda d: (self.clbmap.dom_ids[d].du,
-                           self.clbmap.dom_ids[d].floor)
+            key=lambda d:
+            (self.clbmap.dom_ids[d].du, self.clbmap.dom_ids[d].floor)
         )    # by DU and FLOOR, note that DET OID is needed!
         for ax, dom_id in zip(axes.flatten(), sorted_dom_ids):
             calib = calibration[dom_id]
@@ -178,9 +178,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
             du = self.clbmap.dom_ids[dom_id].du
             floor = self.clbmap.dom_ids[dom_id].floor
             ax.set_title(
-                "{0} - {1}".format(
-                    "DU{}-DOM{}".format(du, floor), dom_id
-                )
+                "{0} - {1}".format("DU{}-DOM{}".format(du, floor), dom_id)
             )
             ax.set_ylim((-10, 10))
         plt.suptitle("{0} UTC".format(datetime.utcnow().strftime("%c")))
@@ -199,9 +197,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
             du = self.clbmap.dom_ids[dom_id].du
             floor = self.clbmap.dom_ids[dom_id].floor
             ax.set_title(
-                "{0} - {1}".format(
-                    "DU{}-DOM{}".format(du, floor), dom_id
-                )
+                "{0} - {1}".format("DU{}-DOM{}".format(du, floor), dom_id)
             )
             ax.set_ylim((0, 10))
         plt.suptitle("{0} UTC".format(datetime.utcnow().strftime("%c")))

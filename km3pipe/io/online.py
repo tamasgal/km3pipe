@@ -87,7 +87,10 @@ class EventPump(Pump):
             'time': hits.time,
             'tot': hits.tot,
             'triggered': trigger_mask,
-        }, name='Hits', h5loc='/hits', split_h5=True)
+        },
+                           name='Hits',
+                           h5loc='/hits',
+                           split_h5=True)
 
         event_info = Table({
             'det_id': raw_event_info["detector_id"],
@@ -106,7 +109,9 @@ class EventPump(Pump):
             'weight_w2': np.nan,
             'weight_w3': np.nan,
             'run_id': raw_event_info["run"],
-        }, name='EventInfo', h5loc='/event_info')
+        },
+                           name='EventInfo',
+                           h5loc='/event_info')
 
         self.event_index += 1
         blob['EventInfo'] = event_info

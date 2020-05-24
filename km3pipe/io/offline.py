@@ -37,17 +37,14 @@ class OfflinePump(Module):
         return Blob({
             'event': self._reader.events[item],
             'header': self.header
-            })
+        })
 
     def get_number_of_blobs(self):
         return len(self._reader.events)
 
     def _blob_generator(self):
         for event in self._reader.events:
-            blob = Blob({
-                'event': event,
-                'header': self.header
-            })
+            blob = Blob({'event': event, 'header': self.header})
             yield blob
 
 

@@ -112,15 +112,15 @@ class TimesliceParser(Module):
                 _times.append(hit[1])
                 _tots.append(hit[2])
 
-        ts_hits = Table(
-            {
-                'channel_id': np.array(_channel_ids),
-                'dom_id': np.array(_dom_ids),
-                'time': np.array(_times),
-                'tot': np.array(_tots),
-            },
-            name='TimesliceHits', h5loc='/timeslice_hits', split_h5=True
-        )
+        ts_hits = Table({
+            'channel_id': np.array(_channel_ids),
+            'dom_id': np.array(_dom_ids),
+            'time': np.array(_times),
+            'tot': np.array(_tots),
+        },
+                        name='TimesliceHits',
+                        h5loc='/timeslice_hits',
+                        split_h5=True)
         return ts_info, ts_frameinfos, ts_hits
 
 

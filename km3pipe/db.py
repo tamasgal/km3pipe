@@ -123,10 +123,12 @@ class DBManager(object):
             self.login(username, password)
         elif config.db_session_cookie not in (None, ''):
             self.restore_session(config.db_session_cookie)
-        elif all(v in os.environ for v in ['KM3NET_DB_USERNAME',
-                                           'KM3NET_DB_PASSWORD']):
-            login_ok = self.login(os.environ['KM3NET_DB_USERNAME'],
-                                  os.environ['KM3NET_DB_PASSWORD'])
+        elif all(v in os.environ
+                 for v in ['KM3NET_DB_USERNAME', 'KM3NET_DB_PASSWORD']):
+            login_ok = self.login(
+                os.environ['KM3NET_DB_USERNAME'],
+                os.environ['KM3NET_DB_PASSWORD']
+            )
             if not login_ok:
                 self.log.critical("Login failed with credentail from ENV")
                 sys.exit(1)
