@@ -6,10 +6,11 @@ Usage:
     km3pipe test
     km3pipe update [GIT_BRANCH]
     km3pipe createconf [--overwrite] [--dump]
-    km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID] [-o OUTFILE]
+    km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID] [-o OUT]
+    km3pipe detx DET_ID RUN
     km3pipe detectors [-s REGEX] [--temporary]
     km3pipe rundetsn [--temporary] RUN DETECTOR
-    km3pipe retrieve DET_ID RUN [-o OUTFILE]
+    km3pipe retrieve DET_ID RUN [-i -o OUTFILE]
     km3pipe (-h | --help)
     km3pipe --version
 
@@ -17,7 +18,8 @@ Options:
     -h --help           Show this screen.
     -m                  Get the MC detector file (flips the sign of DET_ID).
     -c CALIBR_ID        Geometrical calibration ID (eg. A01466417)
-    -o OUTFILE          Output filename.
+    -i                  Use iRODS instead of xrootd to retrieve files.
+    -o OUT              Output folder or filename.
     -t T0_SET           Time calibration ID (eg. A01466431)
     -s REGEX            Regular expression to filter the runsetup name/id.
     --temporary         Use a temporary session. [default: False]
@@ -28,16 +30,16 @@ Options:
     RUN                 Run number.
 
 """
-from __future__ import absolute_import, print_function, division
-
 import re
 import sys
+import subprocess
 import os
 from datetime import datetime
+import time
 
 from . import version
-from .tools import irods_filepath
-from .db import DBManager
+from .tools import irods_filepath, xrootd_path
+from .db import DBManager, we_are_in_lyon
 from .hardware import Detector
 
 from km3pipe.logger import get_logger
@@ -51,6 +53,8 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
+
+SPS_CACHE = "/sps/km3net/repo/data/cache"
 
 
 def run_tests():
@@ -81,30 +85,99 @@ def update_km3pipe(git_branch=''):
     )
 
 
-def retrieve(run_id, det_id, outfile=None):
+def retrieve(run_id, det_id, use_irods=False, out=None):
     """Retrieve run from iRODS for a given detector (O)ID"""
-    try:
-        det_id = int(det_id)
-    except ValueError:
-        pass
-    path = irods_filepath(det_id, run_id)
-    suffix = '' if outfile is None else outfile
-    os.system("iget -Pv {0} {1}".format(path, suffix))
+    det_id = int(det_id)
+
+    if use_irods:
+        rpath = irods_filepath(det_id, run_id)
+        cmd = "iget -Pv"
+    else:
+        rpath = xrootd_path(det_id, run_id)
+        cmd = "xrdcp"
+
+    filename = os.path.basename(rpath)
+
+    if out is not None and os.path.isdir(out):
+        outfile = os.path.join(out, filename)
+    elif out is None:
+        outfile = filename
+    else:
+        outfile = out
+
+    if os.path.exists(outfile):
+        print("Output file '{}' already exists.".format(outfile))
+        return
+
+    cmd += " {0} {1}".format(rpath, outfile)
+
+    if not we_are_in_lyon():
+        subprocess.call(cmd.split())
+        return
+
+    subfolder = os.path.join(*rpath.split("/")[-3:-1])
+    cached_subfolder = os.path.join(SPS_CACHE, subfolder)
+    cached_filepath = os.path.join(cached_subfolder, filename)
+    lock_file = cached_filepath + ".in_progress"
+
+    if os.path.exists(lock_file):
+        print("File is already requested, waiting for the download to finish.")
+        for _ in range(6 * 15):    # 15 minute timeout
+            time.sleep(10)
+            if not os.path.exists(lock_file):
+                print("Done.")
+                break
+        else:
+            print(
+                "Timeout reached. Deleting the lock file and initiating a "
+                "new download."
+            )
+            os.remove(lock_file)
+
+    if not os.path.exists(cached_filepath):
+        print("Downloading file to local SPS cache ({}).".format(SPS_CACHE))
+        try:
+            os.makedirs(cached_subfolder, exist_ok=True)
+            subprocess.call(["touch", lock_file])
+            subprocess.call(["chmod", "g+w", lock_file])
+            subprocess.call(cmd.split())
+            subprocess.call(["chmod", "g+w", outfile])
+            subprocess.call(["cp", "-p", outfile, cached_filepath])
+        except (OSError, KeyboardInterrupt) as e:
+            print("\nAborting... {}".format(e))
+            for f in [outfile, lock_file, cached_filepath]:
+                subprocess.call(["rm", "-f", f])
+            return
+        finally:
+            for f in [outfile, lock_file]:
+                subprocess.call(["rm", "-f", f])
+
+    subprocess.call(["ln", "-s", cached_filepath, outfile])
 
 
 def detx(det_id, calibration='', t0set='', filename=None):
     now = datetime.now()
     if filename is None:
-        filename = "KM3NeT_{0}{1:08d}_{2}{3}{4}.detx" \
-                   .format('-' if det_id < 0 else '',
-                           abs(det_id),
-                           now.strftime("%d%m%Y"),
-                           '_t0set-%s' % t0set if t0set else '',
-                           '_calib-%s' % calibration if calibration else '',
-                           )
+        filename = "KM3NeT_{0}{1:08d}_{2}{3}{4}.detx".format(
+            '-' if det_id < 0 else '',
+            abs(det_id),
+            now.strftime("%d%m%Y"),
+            '_t0set-%s' % t0set if t0set else '',
+            '_calib-%s' % calibration if calibration else '',
+        )
     det = Detector(det_id=det_id, t0set=t0set, calibration=calibration)
     if det.n_doms > 0:
         det.write(filename)
+
+
+def detx_for_run(det_id, run, temporary=False):
+    """Retrieve the calibrated detx for a given det_id and run"""
+    db = DBManager(temporary=temporary)
+    raw_detx = db.detx_for_run(det_id, run)
+    filename = "KM3NeT_{0:08d}_{1:08d}.detx".format(det_id, run)
+    with open(filename, "w") as fobj:
+        fobj.write(raw_detx)
+    print("File saved as '{}'".format(filename))
 
 
 def detectors(regex=None, sep='\t', temporary=False):
@@ -168,14 +241,24 @@ def main():
         )
 
     if args['retrieve']:
-        retrieve(int(args['RUN']), args['DET_ID'], args['-o'])
+        retrieve(
+            int(args['RUN']),
+            args['DET_ID'],
+            use_irods=args['-i'],
+            out=args['-o']
+        )
 
     if args['detx']:
-        t0set = args['-t']
-        calibration = args['-c']
-        outfile = args['-o']
-        det_id = int(('-' if args['-m'] else '') + args['DET_ID'])
-        detx(det_id, calibration, t0set, outfile)
+        if args['RUN'] and args['DET_ID']:
+            det_id = int(args['DET_ID'])
+            run = int(args['RUN'])
+            detx_for_run(det_id, run, temporary=args['--temporary'])
+        else:
+            t0set = args['-t']
+            calibration = args['-c']
+            outfile = args['-o']
+            det_id = int(('-' if args['-m'] else '') + args['DET_ID'])
+            detx(det_id, calibration, t0set, outfile)
 
     if args['detectors']:
         detectors(regex=args['-s'], temporary=args["--temporary"])

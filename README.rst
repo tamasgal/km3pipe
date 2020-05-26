@@ -1,7 +1,7 @@
 KM3Pipe
 =======
 
-.. image:: https://git.km3net.de/km3py/km3pipe/badges/master/build.svg
+.. image:: https://git.km3net.de/km3py/km3pipe/badges/master/pipeline.svg
     :target: https://git.km3net.de/km3py/km3pipe/pipelines
 
 .. image:: https://git.km3net.de/km3py/km3pipe/badges/master/coverage.svg

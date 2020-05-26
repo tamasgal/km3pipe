@@ -9,21 +9,21 @@ Usage:
     tohdf5 --version
 
 Options:
-    -h --help                       Show this screen.
-    --verbose                       Print more output.
-    --debug                         Print everything.
-    -n EVENTS                       Number of events/runs.
-    -o OUTFILE                      Output file (only if one file is converted).
-    -j --jppy                       (Jpp): Use jppy (not aanet) for Jpp readout.
-    --ignore-hits                   Don't read the hits.
-    -e --expected-rows NROWS        Approximate number of events.  Providing a
-                                    rough estimate for this (100, 1000000, ...)
-                                    will greatly improve reading/writing speed
-                                    and memory usage.
-                                    Strongly recommended if the table/array
-                                    size is >= 100 MB. [default: 10000]
-    -t --conv-times-to-jte          Converts all MC times in the file to JTE
-                                    times.
+    -h --help                 Show this screen.
+    --verbose                 Print more output.
+    --debug                   Print everything.
+    -n EVENTS                 Number of events/runs.
+    -o OUTFILE                Output file (only if one file is converted).
+    -d DATA_FORMAT            ROOT data format [default: offline-events].
+    --ignore-hits             Don't read the hits.
+    -e --expected-rows NROWS  Approximate number of events.  Providing a
+                              rough estimate for this (100, 1000000, ...)
+                              will greatly improve reading/writing speed
+                              and memory usage.
+                              Strongly recommended if the table/array
+                              size is >= 100 MB. [default: 10000]
+    -t --conv-times-to-jte    Converts all MC times in the file to JTE
+                              times.
 """
 
 from km3modules.common import StatusBar
@@ -93,7 +93,6 @@ def main():
         outfile = None
 
     n_rows_expected = int(args['--expected-rows'])
-    use_jppy_pump = args['--jppy']
     is_verbose = bool(args['--verbose'])
     if is_verbose:
         io_log.setLevel('INFO')
@@ -107,9 +106,9 @@ def main():
         output_file=outfile,
         n_events=n,
         conv_times_to_jte=conv_times_to_jte,
-        use_jppy=use_jppy_pump,
         n_rows_expected=n_rows_expected,
         ignore_hits=bool(ignore_hits_arg),
+        data_format=args['-d']
     )
 
 

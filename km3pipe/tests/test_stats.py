@@ -205,7 +205,7 @@ class TestHist2D(TestCase):
 
     def test_pdf(self):
         hist = np.histogram2d(
-            self.sample[:, 0], self.sample[:, 1], normed=True, bins=self.bins
+            self.sample[:, 0], self.sample[:, 1], density=True, bins=self.bins
         )
         h = hist2d(hist)
         assert h.H.shape == (2, 2)
@@ -215,10 +215,13 @@ class TestHist2D(TestCase):
 
     def test_norm(self):
         hist1 = np.histogram2d(
-            self.sample[:, 0], self.sample[:, 1], normed=True, bins=self.bins
+            self.sample[:, 0], self.sample[:, 1], density=True, bins=self.bins
         )
         hist2 = np.histogram2d(
-            self.sample[:, 0], self.sample[:, 1], normed=False, bins=self.bins
+            self.sample[:, 0],
+            self.sample[:, 1],
+            density=False,
+            bins=self.bins
         )
         h1 = hist2d(hist1)
         h2 = hist2d(hist2)

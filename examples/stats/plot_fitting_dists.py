@@ -6,7 +6,6 @@ Fitting Distributions
 
 Histograms, PDF fits, Kernel Density.
 """
-from __future__ import absolute_import, print_function, division
 
 # Author: Moritz Lotze <mlotze@km3net.de>
 # License: BSD-3
@@ -45,7 +44,7 @@ x = np.linspace(5, 35, 3 * N + 1)
 #
 # 15 bins, spaced from ``data.min()`` to ``data.max()``.
 
-plt.hist(data, bins=15, alpha=.5, normed=True)
+plt.hist(data, bins=15, alpha=.5, density=True)
 
 ##############################################################################
 # Auto Binning (recommended)
@@ -53,7 +52,7 @@ plt.hist(data, bins=15, alpha=.5, normed=True)
 #
 # Use builtin (numpy's) heuristics to figure out best binning.
 
-plt.hist(data, bins='auto', alpha=.5, normed=True)
+plt.hist(data, bins='auto', alpha=.5, density=True)
 
 ##############################################################################
 # Bayesian Blocks
@@ -80,7 +79,7 @@ mu, sig = norm.fit(data)
 plt.fill_between(x, norm(mu, sig).pdf(x), alpha=.5, label='Fitted')
 plt.legend()
 print('Unimodal Gaussian Fit:  Mean {:.4}, stdev {:.4}'.format(mu, sig))
-plt.hist(data, bins='auto', alpha=.3, normed=True)
+plt.hist(data, bins='auto', alpha=.3, density=True)
 
 ##############################################################################
 # As expected, the result is rather silly, since we are only fitting *one*
@@ -107,7 +106,7 @@ print(
 '''.format(mu1, var1, wgt1, mu2, var2, wgt2)
 )
 
-plt.hist(data, bins='auto', alpha=.3, normed=True)
+plt.hist(data, bins='auto', alpha=.3, density=True)
 plt.vlines((mu1, mu2), ymin=0, ymax=0.35, label='Fitted Means')
 plt.plot(x, norm.pdf(x, mu1, np.sqrt(var1)))
 plt.plot(x, norm.pdf(x, mu2, np.sqrt(var2)))
@@ -134,7 +133,7 @@ dens.fit()
 
 kde_sm = dens.evaluate(x)
 plt.fill_between(x, kde_sm, alpha=.5, label='KDE')
-plt.hist(data, bins='auto', alpha=.3, normed=True)
+plt.hist(data, bins='auto', alpha=.3, density=True)
 
 ##############################################################################
 # in scikit-learn
@@ -149,7 +148,7 @@ print("best bandwidth: {0}".format(grid.best_estimator_.bandwidth))
 kde_best = grid.best_estimator_
 kde_sk = np.exp(kde_best.score_samples(x[:, np.newaxis]))
 plt.fill_between(x, kde_sk, alpha=.5, label='KDE')
-plt.hist(data, bins='auto', alpha=.3, normed=True)
+plt.hist(data, bins='auto', alpha=.3, density=True)
 
 ##############################################################################
 # References

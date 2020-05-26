@@ -2,8 +2,10 @@ docopt
 h5py
 ipython
 ipywidgets
+km3io>=0.14.1
 matplotlib>=3.0.0
 mock
+numba>=0.49.0
 numpy>=1.17.0
 numpydoc>=0.7.0
 pandas
@@ -29,7 +31,7 @@ sphinxcontrib-websupport>=1.0.1
 sphinx-autoapi
 setuptools>=40.6.2
 setuptools_scm
-statsmodels==0.10.1
+statsmodels
 tables>=3.4.2
 thepipe>=1.1.0
 toml
@@ -37,4 +39,4 @@ tqdm
 twine
 urwid
 websocket-client
-yapf>=0.28
+yapf>=0.30

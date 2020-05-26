@@ -4,8 +4,6 @@
 """
 Dataclasses for internal use. Heavily based on Numpy arrays.
 """
-from __future__ import absolute_import, print_function, division
-
 import itertools
 
 import numpy as np
@@ -147,6 +145,9 @@ class Table(np.recarray):
                 "Lists/tuples are not supported! "
                 "Please use the `from_rows` or `from_columns` method instead!"
             )
+        if isinstance(data, np.record):
+            # single record from recarrary/kp.Tables, let's blow it up
+            data = data[np.newaxis]
         if not has_structured_dt(data):
             # flat (nonstructured) dtypes fail miserably!
             # default to `|V8` whyever

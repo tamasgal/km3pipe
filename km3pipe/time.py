@@ -4,8 +4,6 @@
 Manipulating time and so...
 
 """
-from __future__ import absolute_import, print_function, division
-
 from datetime import datetime
 import numpy as np
 import time
@@ -18,11 +16,6 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
-
-try:
-    clock = time.process_time
-except AttributeError:
-    clock = time.clock
 
 
 def total_seconds(td):
@@ -45,11 +38,11 @@ class Timer(object):
 
     def start(self):
         self.__start = timer()
-        self.__start_cpu = clock()
+        self.__start_cpu = time.process_time()
 
     def stop(self):
         self.__finish = timer()
-        self.__finish_cpu = clock()
+        self.__finish_cpu = time.process_time()
         if self.callback is not None:
             self.log()
         return self.seconds

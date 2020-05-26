@@ -5,7 +5,6 @@
 Read and write KM3NeT-formatted HDF5 files.
 
 """
-from __future__ import absolute_import, print_function, division
 
 from collections import OrderedDict, defaultdict, namedtuple
 import os.path
@@ -13,6 +12,7 @@ import warnings
 
 import numpy as np
 import tables as tb
+import km3io
 
 try:
     from numba import jit
@@ -109,6 +109,17 @@ class HDF5Header(object):
                     dtyped_values.append(value)
             data[parameter] = OrderedDict(zip(field_names, dtyped_values))
         return cls(data)
+
+    @classmethod
+    def from_km3io(cls, header):
+        if not isinstance(header, km3io.offline.Header):
+            raise TypeError(
+                "The given header object is not an instance of km3io.offline.Header"
+            )
+        h5header = cls({})
+        for attribute, value in header._data.items():
+            setattr(h5header, attribute, value)
+        return h5header
 
     @classmethod
     def from_aanet(cls, table):

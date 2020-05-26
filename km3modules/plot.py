@@ -5,8 +5,6 @@
 A collection of plotting functions and modules.
 
 """
-from __future__ import absolute_import, print_function, division
-
 from collections import Counter
 from datetime import datetime
 import os
@@ -15,9 +13,6 @@ import time
 
 import pandas as pd
 import numpy as np
-import matplotlib
-# Force matplotlib to not use any Xwindows backend.
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt    # noqa
 import matplotlib.ticker as ticker
 from matplotlib import pylab    # noqa
@@ -155,7 +150,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
         self.plots_path = self.get('plots_path', default=os.getcwd())
         self.data_path = self.get('data_path', default=os.getcwd())
         self.det_oid = self.require('det_oid')
-        self.db = kp.db.DBManager()
+        self.clbmap = kp.db.CLBMap(self.det_oid)
 
     def process(self, blob):
         calibration = blob["IntraDOMCalibration"]
@@ -173,17 +168,17 @@ class IntraDOMCalibrationPlotter(kp.Module):
         )
         sorted_dom_ids = sorted(
             calibration.keys(),
-            key=lambda d: self.db.doms.
-            via_dom_id(dom_id=d, det_id=self.det_oid).omkey
+            key=lambda d:
+            (self.clbmap.dom_ids[d].du, self.clbmap.dom_ids[d].floor)
         )    # by DU and FLOOR, note that DET OID is needed!
         for ax, dom_id in zip(axes.flatten(), sorted_dom_ids):
             calib = calibration[dom_id]
             ax.plot(np.cos(calib['angles']), calib["means"], '.')
             ax.plot(np.cos(calib['angles']), calib["corrected_means"], '.')
+            du = self.clbmap.dom_ids[dom_id].du
+            floor = self.clbmap.dom_ids[dom_id].floor
             ax.set_title(
-                "{0} - {1}".format(
-                    self.db.doms.via_dom_id(dom_id, self.det_oid), dom_id
-                )
+                "{0} - {1}".format("DU{}-DOM{}".format(du, floor), dom_id)
             )
             ax.set_ylim((-10, 10))
         plt.suptitle("{0} UTC".format(datetime.utcnow().strftime("%c")))
@@ -199,10 +194,10 @@ class IntraDOMCalibrationPlotter(kp.Module):
             calib = calibration[dom_id]
             ax.plot(np.cos(calib['angles']), calib["rates"], '.')
             ax.plot(np.cos(calib['angles']), calib["corrected_rates"], '.')
+            du = self.clbmap.dom_ids[dom_id].du
+            floor = self.clbmap.dom_ids[dom_id].floor
             ax.set_title(
-                "{0} - {1}".format(
-                    self.db.doms.via_dom_id(dom_id, self.det_oid), dom_id
-                )
+                "{0} - {1}".format("DU{}-DOM{}".format(du, floor), dom_id)
             )
             ax.set_ylim((0, 10))
         plt.suptitle("{0} UTC".format(datetime.utcnow().strftime("%c")))
@@ -334,7 +329,7 @@ def ztplot(
                                 for m in markers[1:]] + ['triggered'],
             scatterpoints=1,
             markerscale=1,
-            loc='upper left',
+            loc='lower right',
             frameon=True,
             framealpha=0.7
         )
@@ -366,3 +361,44 @@ def trim_axes(axes, n):
     for ax in axes[n:]:
         ax.remove()
     return axes[:n]
+
+
+def cumulative_run_livetime(qtable, kind='runs'):
+    """Create a figure which plots the cumulative livetime of runs
+
+    Parameters
+    ----------
+    qtable: pandas.DataFrame
+        A table which has the run number as index and columns for
+        'livetime_s', 'timestamp' and 'datetime' (pandas datetime).
+    kind: str
+        'runs' to plot for each run or 'timeline' to plot based
+        on the actual run time.
+
+    Returns
+    -------
+    matplotlib.Figure
+    """
+    fig, ax = plt.subplots()
+
+    options = {
+        'runs': {
+            'xlabel': 'run',
+            'xs': qtable.index
+        },
+        'timeline': {
+            'xlabel': None,
+            'xs': qtable.datetime
+        }
+    }
+
+    actual_livetime = np.cumsum(qtable['livetime_s'])
+    optimal_livetime = np.cumsum(qtable.timestamp.diff())
+
+    ax.plot(options[kind]['xs'], actual_livetime, label='actual livetime')
+    ax.plot(options[kind]['xs'], optimal_livetime, label='100% livetime')
+    ax.set_xlabel(options[kind]['xlabel'])
+    ax.set_ylabel('time / s')
+    ax.legend()
+
+    return fig

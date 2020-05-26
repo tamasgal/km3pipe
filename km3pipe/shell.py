@@ -4,18 +4,13 @@
 Some shell helpers
 
 """
-from __future__ import absolute_import, print_function, division
-
 import os
 import subprocess
 
 from .tools import lstrip
 from .logger import get_logger
 
-try:
-    from subprocess import DEVNULL    # py3k
-except ImportError:
-    DEVNULL = open(os.devnull, 'wb')
+from subprocess import DEVNULL    # py3k
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

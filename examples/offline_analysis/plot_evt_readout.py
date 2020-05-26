@@ -7,7 +7,6 @@ Reading and Parsing EVT files
 This example shows how to read and parse EVT files, which are used in our
 Monte Carlo productions.
 """
-from __future__ import absolute_import, print_function, division
 
 # Author: Tamas Gal <tgal@km3net.de>, Moritz Lotze >mlotze@km3net.de>
 # License: BSD-3

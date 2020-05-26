@@ -5,7 +5,6 @@
 A collection of commonly used modules.
 
 """
-from __future__ import absolute_import, print_function, division
 
 import sqlite3
 from time import time
@@ -252,7 +251,7 @@ class MultiFilePump(kp.Module):
 
     def finish(self):
         self.cprint(
-            "Processed {} out of {} files.".format(
+            "Fully processed {} out of {} files.".format(
                 self.n_processed, len(self.filenames)
             )
         )

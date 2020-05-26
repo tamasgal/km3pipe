@@ -30,7 +30,6 @@ def use(style='km3pipe'):
               style):
         if exists(s):
             plt.style.use(s)
-            print("Loading style definitions from '{0}'".format(s))
             return
     print("Could not find style: '{0}'".format(style))
 

@@ -11,8 +11,6 @@ ToHDF5 Pipeline example
 # Date: 2018-07-12
 # Status: Under construction...
 
-from __future__ import absolute_import, print_function, division
-
 import tables as tb
 
 from km3pipe import Pipeline

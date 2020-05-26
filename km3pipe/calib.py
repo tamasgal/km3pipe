@@ -4,10 +4,9 @@
 Calibration.
 
 """
-from __future__ import absolute_import, print_function, division
-
 import numpy as np
 
+from .db import DBManager
 from .core import Module
 from .hardware import Detector
 from .dataclasses import Table
@@ -67,6 +66,7 @@ class Calibration(Module):
         self._should_apply = self.get('apply', default=True)
         self.filename = self.get('filename')
         self.det_id = self.get('det_id')
+        self.run = self.get('run')
         self.t0set = self.get('t0set')
         self.calibset = self.get('calibset')
         self.detector = self.get('detector')
@@ -77,6 +77,18 @@ class Calibration(Module):
         self._dir_pmt_id = None
         self._t0_pmt_id = None
         self._lookup_tables = None    # for Numba
+
+        if self.det_id and self.run:
+            self.cprint(
+                "Grabbing the calibration for Det ID {} and run {}".format(
+                    self.det_id, self.run
+                )
+            )
+            raw_detx = DBManager().detx_for_run(self.det_id, self.run)
+            self.detector = Detector(string=raw_detx)
+            self._create_dom_channel_lookup()
+            self._create_pmt_id_lookup()
+            return
 
         # TODO: deprecation
         if self.get('calibration'):
@@ -129,82 +141,24 @@ class Calibration(Module):
             hits.time += cal
         return hits
 
-    def apply(self, hits, no_copy=False):
+    def apply(self, hits, no_copy=False, correct_slewing=False):
         """Add x, y, z, t0 (and du, floor if DataFrame) columns to the hits.
 
         """
         if not no_copy:
             hits = hits.copy()
+
         if istype(hits, 'DataFrame'):
             # do we ever see McHits here?
             hits = Table.from_template(hits, 'Hits')
+
         if hasattr(hits, 'dom_id') and hasattr(hits, 'channel_id'):
             dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0 = _get_calibration_for_hits(
                 hits, self._calib_by_dom_and_channel
             )
-
-            if hasattr(hits, 'time'):
-                if hits.time.dtype != t0.dtype:
-                    time = hits.time.astype('f4') + t0.astype('f4')
-                    hits = hits.drop_columns(['time'])
-                    hits = hits.append_columns(['time'], [time])
-                else:
-                    hits.time += t0
-
-            hits_data = {}
-            for colname in hits.dtype.names:
-                hits_data[colname] = hits[colname]
-            calib = {
-                'dir_x': dir_x,
-                'dir_y': dir_y,
-                'dir_z': dir_z,
-                'du': du.astype(np.uint8),
-                'floor': du.astype(np.uint8),
-                'pos_x': pos_x,
-                'pos_y': pos_y,
-                'pos_z': pos_z,
-                't0': t0,
-            }
-            hits_data.update(calib)
-            return Table(
-                hits_data,
-                h5loc=hits.h5loc,
-                split_h5=hits.split_h5,
-                name=hits.name
-            )
-
         elif hasattr(hits, 'pmt_id'):
             dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0 = _get_calibration_for_mchits(
                 hits, self._calib_by_pmt_id
-            )
-            if hasattr(hits, 'time'):
-                if hits.time.dtype != t0.dtype:
-                    time = hits.time.astype('f4') + t0.astype('f4')
-                    hits = hits.drop_columns(['time'])
-                    hits = hits.append_columns(['time'], [time])
-                else:
-                    hits.time += t0
-
-            hits_data = {}
-            for colname in hits.dtype.names:
-                hits_data[colname] = hits[colname]
-            calib = {
-                'dir_x': dir_x,
-                'dir_y': dir_y,
-                'dir_z': dir_z,
-                'du': du.astype(np.uint8),
-                'floor': du.astype(np.uint8),
-                'pos_x': pos_x,
-                'pos_y': pos_y,
-                'pos_z': pos_z,
-                't0': t0,
-            }
-            hits_data.update(calib)
-            return Table(
-                hits_data,
-                h5loc=hits.h5loc,
-                split_h5=hits.split_h5,
-                name=hits.name
             )
         else:
             raise TypeError(
@@ -212,6 +166,38 @@ class Calibration(Module):
                 "We need at least 'dom_id' and 'channel_id', or "
                 "'pmt_id'.".format(hits.name)
             )
+
+        if hasattr(hits, 'time'):
+            if hits.time.dtype != t0.dtype:
+                time = hits.time.astype('f4') + t0.astype('f4')
+                hits = hits.drop_columns(['time'])
+                hits = hits.append_columns(['time'], [time])
+            else:
+                hits.time += t0
+
+        hits_data = {}
+        for colname in hits.dtype.names:
+            hits_data[colname] = hits[colname]
+        calib = {
+            'dir_x': dir_x,
+            'dir_y': dir_y,
+            'dir_z': dir_z,
+            'du': du.astype(np.uint8),
+            'floor': du.astype(np.uint8),
+            'pos_x': pos_x,
+            'pos_y': pos_y,
+            'pos_z': pos_z,
+            't0': t0,
+        }
+        hits_data.update(calib)
+        if correct_slewing:
+            hits_data['time'] -= slew(hits_data['tot'])
+        return Table(
+            hits_data,
+            h5loc=hits.h5loc,
+            split_h5=hits.split_h5,
+            name=hits.name
+        )
 
     def _create_dom_channel_lookup(self):
         if HAVE_NUMBA:
@@ -356,6 +342,7 @@ class CalibrationService(Module):
         self.expose(self.get_detector, "get_detector")
         self.expose(self.get_calibration, "get_calibration")
         self.expose(self.load_calibration, "load_calibration")
+        self.expose(self.correct_slewing, "correct_slewing")
 
         self.expose(self.detector_deprecation, "detector")
 
@@ -404,3 +391,69 @@ class CalibrationService(Module):
     def get_calibration(self):
         """Extra getter to be as lazy as possible (expose triggers otherwise"""
         return self.calibration
+
+    def correct_slewing(self, hits):
+        """Apply time slewing correction to the hit times"""
+        hits.time -= slew(hits.tot)
+
+
+@jit
+def slew(tot):
+    """Calculate the time slewing of a PMT response for a given ToT
+
+
+    Parameters
+    ----------
+    tot: int or np.array(int)
+      Time over threshold value of a hit
+
+    Returns
+    -------
+    time: int or np.array(int)
+      Time slewing, which has to be subtracted from the original hit time.
+    """
+
+    # First parametrisation
+    #p0 = 7.70824
+    #p1 = 0.00879447
+    #p2 = -0.0621101
+    #p3 = -1.90226
+
+    # Second parametrisation
+    # p0 =  13.6488662517;
+    # p1 =  -0.128744123166;
+    # p2 =  -0.0174837749244;
+    # p3 =  -4.47119633965;
+
+    # corr = p0 * np.exp(p1 * np.sqrt(tot) + p2 * tot) + p3
+    #      this->push_back(  8.01,     #
+    # return corr
+    corr = np.array([
+        8.01, 7.52, 7.05, 6.59, 6.15, 5.74, 5.33, 4.95, 4.58, 4.22, 3.89, 3.56,
+        3.25, 2.95, 2.66, 2.39, 2.12, 1.87, 1.63, 1.40, 1.19, 0.98, 0.78, 0.60,
+        0.41, 0.24, 0.07, -0.10, -0.27, -0.43, -0.59, -0.75, -0.91, -1.08,
+        -1.24, -1.41, -1.56, -1.71, -1.85, -1.98, -2.11, -2.23, -2.35, -2.47,
+        -2.58, -2.69, -2.79, -2.89, -2.99, -3.09, -3.19, -3.28, -3.37, -3.46,
+        -3.55, -3.64, -3.72, -3.80, -3.88, -3.96, -4.04, -4.12, -4.20, -4.27,
+        -4.35, -4.42, -4.49, -4.56, -4.63, -4.70, -4.77, -4.84, -4.90, -4.97,
+        -5.03, -5.10, -5.16, -5.22, -5.28, -5.34, -5.40, -5.46, -5.52, -5.58,
+        -5.63, -5.69, -5.74, -5.80, -5.85, -5.91, -5.96, -6.01, -6.06, -6.11,
+        -6.16, -6.21, -6.26, -6.31, -6.36, -6.41, -6.45, -6.50, -6.55, -6.59,
+        -6.64, -6.68, -6.72, -6.77, -6.81, -6.85, -6.89, -6.93, -6.98, -7.02,
+        -7.06, -7.09, -7.13, -7.17, -7.21, -7.25, -7.28, -7.32, -7.36, -7.39,
+        -7.43, -7.46, -7.50, -7.53, -7.57, -7.60, -7.63, -7.66, -7.70, -7.73,
+        -7.76, -7.79, -7.82, -7.85, -7.88, -7.91, -7.94, -7.97, -7.99, -8.02,
+        -8.05, -8.07, -8.10, -8.13, -8.15, -8.18, -8.20, -8.23, -8.25, -8.28,
+        -8.30, -8.32, -8.34, -8.37, -8.39, -8.41, -8.43, -8.45, -8.47, -8.49,
+        -8.51, -8.53, -8.55, -8.57, -8.59, -8.61, -8.62, -8.64, -8.66, -8.67,
+        -8.69, -8.70, -8.72, -8.74, -8.75, -8.76, -8.78, -8.79, -8.81, -8.82,
+        -8.83, -8.84, -8.86, -8.87, -8.88, -8.89, -8.90, -8.92, -8.93, -8.94,
+        -8.95, -8.96, -8.97, -8.98, -9.00, -9.01, -9.02, -9.04, -9.04, -9.04,
+        -9.04, -9.04, -9.04, -9.04, -9.04, -9.04, -9.04, -9.04, -9.04, -9.04,
+        -9.04, -9.04, -9.04, -9.04, -9.04, -9.04, -9.04, -9.04, -9.04, -9.04,
+        -9.04, -9.04, -9.04, -9.04, -9.04, -9.04, -9.04, -9.04, -9.04, -9.04,
+        -9.04, -9.04, -9.04, -9.04, -9.04, -9.04, -9.04, -9.04, -9.04, -9.04,
+        -9.04, -9.04, -9.04, -9.04, -9.04, -9.04, -9.04, -9.04, -9.04, -9.04,
+        -9.04, -9.04
+    ])
+    return corr[tot]

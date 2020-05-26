@@ -6,7 +6,6 @@ DOM hits.
 
 Estimate track/DOM distances using the number of hits per DOM.
 """
-from __future__ import absolute_import, print_function, division
 
 # Author: Tamas Gal <tgal@km3net.de>
 # License: BSD-3
@@ -69,7 +68,7 @@ class DOMHits(kp.Module):
         df = pd.DataFrame(self.hit_statistics)
         print(df)
         sdf = df[(df['distance'] < 200) & (df['n_hits'] < 50)]
-        bins = (max(sdf['distance']) - 1, max(sdf['n_hits']) - 1)
+        bins = (int(max(sdf['distance'])) - 1, int(max(sdf['n_hits']) - 1))
         plt.hist2d(
             sdf['distance'],
             sdf['n_hits'],

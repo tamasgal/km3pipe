@@ -18,10 +18,7 @@ from datetime import date
 import sphinx_rtd_theme
 from pkg_resources import get_distribution
 
-# what is this?
-# sys.path.append('../')
-
-import km3pipe    # noqa
+# -- Project information -----------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -54,13 +51,12 @@ autosummary_generate = True
 autoapi_type = 'python'
 autoapi_dirs = ['../km3pipe', '../km3modules']
 autoapi_options = [
-    'members', 'undoc-members'
+    'members', 'undoc-members', 'show-module-summary'
     # , 'private-members', 'special-members'
 ]
 autoapi_ignore = [
     "*/tests/*", "*test_*.py", "*/doc/conf.py", "*/pydataskel*", "*/style/*"
 ]
-autoapi_include_summaries = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -74,16 +70,10 @@ source_suffix = '.rst'
 # The master toctree document.
 master_doc = 'index'
 
-# The version info for the project you're documenting, acts as replacement for
-# |version| and |release|, also used in various other places throughout the
-# built documents.
-# The full version, including alpha/beta/rc tags.
-release = get_distribution('km3pipe').version
-# The short X.Y version.
-version = '.'.join(release.split('.')[:2])
-
 # General information about the project.
-project = "KM3Pipe {}".format(km3pipe.__version__)
+version = get_distribution('km3pipe').version
+short_version = '.'.join(version.split('.')[:2])
+project = 'KM3Pipe {}'.format(short_version)
 
 copyright = u'{0}, Tamás Gál and Moritz Lotze'.format(date.today().year)
 
@@ -133,7 +123,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = "KM3Pipe {}".format(km3pipe.__version__)
+html_title = "KM3Pipe {}".format(version)
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 # html_short_title = 'Home'

@@ -4,38 +4,26 @@
 Database utilities.
 
 """
-from __future__ import absolute_import, print_function, division
-
 from datetime import datetime
 import numbers
 import ssl
 import io
+import os
 import json
 import re
 import pytz
+import sys
+import numpy as np
 from collections import defaultdict, OrderedDict, namedtuple
-try:
-    from inspect import Signature, Parameter
-    SKIP_SIGNATURE_HINTS = False
-except ImportError:
-    SKIP_SIGNATURE_HINTS = True
-try:
-    from urllib.parse import urlencode, unquote
-    from urllib.request import (
-        Request, build_opener, urlopen, HTTPCookieProcessor, HTTPHandler
-    )
-    from urllib.error import URLError, HTTPError
-    from io import StringIO
-    from http.client import IncompleteRead
-except ImportError:
-    from urllib import urlencode, unquote
-    from urllib2 import (
-        Request, build_opener, urlopen, HTTPCookieProcessor, HTTPHandler,
-        URLError, HTTPError
-    )
-    from StringIO import StringIO
-    from httplib import IncompleteRead
-    input = raw_input
+from inspect import Signature, Parameter
+from http.cookiejar import CookieJar
+from urllib.parse import urlencode, unquote
+from urllib.request import (
+    Request, build_opener, urlopen, HTTPCookieProcessor, HTTPHandler
+)
+from urllib.error import URLError, HTTPError
+from io import StringIO
+from http.client import IncompleteRead
 
 from .tools import cprint
 from .time import Timer
@@ -135,6 +123,15 @@ class DBManager(object):
             self.login(username, password)
         elif config.db_session_cookie not in (None, ''):
             self.restore_session(config.db_session_cookie)
+        elif all(v in os.environ
+                 for v in ['KM3NET_DB_USERNAME', 'KM3NET_DB_PASSWORD']):
+            login_ok = self.login(
+                os.environ['KM3NET_DB_USERNAME'],
+                os.environ['KM3NET_DB_PASSWORD']
+            )
+            if not login_ok:
+                self.log.critical("Login failed with credentail from ENV")
+                sys.exit(1)
         else:
             username, password = config.db_credentials
             login_ok = self.login(username, password)
@@ -298,34 +295,27 @@ class DBManager(object):
                 val = param['Val']
             optical_df[pname] = val
 
-        _acoustic_df = raw_setup['ConfGroups'][1]
-        acoustic_df = {
-            'Name': _acoustic_df['Name'],
-            'Desc': _acoustic_df['Desc']
-        }
-        for param in _acoustic_df['Params']:
-            pname = self.parameters.oid2name(param['OID']).replace('DAQ_', '')
-            try:
-                dtype = float if '.' in param['Val'] else int
-                val = dtype(param['Val'])
-            except ValueError:
-                val = param['Val']
-            acoustic_df[pname] = val
+        if len(raw_setup['ConfGroups']) > 1:
+            _acoustic_df = raw_setup['ConfGroups'][1]
+            acoustic_df = {
+                'Name': _acoustic_df['Name'],
+                'Desc': _acoustic_df['Desc']
+            }
+            for param in _acoustic_df['Params']:
+                pname = self.parameters.oid2name(param['OID']
+                                                 ).replace('DAQ_', '')
+                try:
+                    dtype = float if '.' in param['Val'] else int
+                    val = dtype(param['Val'])
+                except ValueError:
+                    val = param['Val']
+                acoustic_df[pname] = val
+        else:
+            acoustic_df = {'Not available': None}
 
         return TriggerSetup(
             runsetup_oid, name, det_id, description, optical_df, acoustic_df
         )
-
-    @property
-    def doms(self):
-        if self._doms is None:
-            self._load_doms()
-        return self._doms
-
-    def _load_doms(self):
-        "Retrieve DOM information from the database"
-        doms = self._get_json('domclbupiid/s')
-        self._doms = DOMContainer(doms)
 
     def detx(self, det_id, t0set=None, calibration=None):
         """Retrieve the detector file for given detector id
@@ -337,6 +327,50 @@ class DBManager(object):
             url += '&t0set=' + t0set
         if calibration is not None:
             url += '&calibrid=' + calibration
+
+        detx = self._get_content(url)
+        return detx
+
+    def detx_for_run(self, det_id, run):
+        """Retrieve the calibrate detector file for given run"""
+        run_table = self.run_table(det_id)
+        try:
+            run_info = run_table[run_table.RUN == run].iloc[0]
+        except IndexError:
+            self.log.error(
+                "Run {} not found for detector {}".format(run, det_id)
+            )
+
+        tcal = run_info.T0_CALIBSETID
+        if str(tcal) == 'nan':
+            self.log.warning(
+                "No time calibration found for run {} (detector {})".format(
+                    run, det_id
+                )
+            )
+            tcal = 0
+
+        try:
+            pcal = int(run_info.POS_CALIBSETID)
+        except ValueError:
+            self.log.warning(
+                "No position calibration found for run {} (detector {})".
+                format(run, det_id)
+            )
+            pcal = 0
+
+        try:
+            rcal = int(run_info.ROT_CALIBSETID)
+        except ValueError:
+            self.log.warning(
+                "No rotation calibration found for run {} (detector {})".
+                format(run, det_id)
+            )
+            rcal = 0
+
+        url = 'detx/{det_id}?tcal={tcal}&pcal={pcal}&rcal={rcal}'.format(
+            det_id=det_id, tcal=tcal, pcal=pcal, rcal=rcal
+        )
 
         detx = self._get_content(url)
         return detx
@@ -459,10 +493,7 @@ class DBManager(object):
             self.log.debug("Checking configuration file for DB credentials")
             username, password = config.db_credentials
         cookie = self.request_sid_cookie(username, password)
-        try:
-            cookie_str = str(cookie, 'utf-8')    # Python 3
-        except TypeError:
-            cookie_str = str(cookie)    # Python 2
+        cookie_str = str(cookie, 'utf-8')    # Python 3
         self.log.debug("Session cookie: {0}".format(cookie_str))
         self.log.debug("Storing cookie in configuration file")
         config.set('DB', 'session_cookie', cookie_str)
@@ -493,10 +524,6 @@ class DBManager(object):
 
     def _build_opener(self):
         self.log.debug("Building opener.")
-        try:
-            from http.cookiejar import CookieJar
-        except ImportError:
-            from cookielib import CookieJar
         cj = CookieJar()
         self._cookies = cj
         opener = build_opener(HTTPCookieProcessor(cj), HTTPHandler())
@@ -557,18 +584,16 @@ class StreamDS(object):
 
         func.__doc__ = self._stream_parameter(stream, "DESCRIPTION")
 
-        if not SKIP_SIGNATURE_HINTS:
-            sig_dict = OrderedDict()
-            for sel in self.mandatory_selectors(stream):
-                if sel == '-':
-                    continue
-                sig_dict[Parameter(sel,
-                                   Parameter.POSITIONAL_OR_KEYWORD)] = None
-            for sel in self.optional_selectors(stream):
-                if sel == '-':
-                    continue
-                sig_dict[Parameter(sel, Parameter.KEYWORD_ONLY)] = None
-            func.__signature__ = Signature(parameters=sig_dict)
+        sig_dict = OrderedDict()
+        for sel in self.mandatory_selectors(stream):
+            if sel == '-':
+                continue
+            sig_dict[Parameter(sel, Parameter.POSITIONAL_OR_KEYWORD)] = None
+        for sel in self.optional_selectors(stream):
+            if sel == '-':
+                continue
+            sig_dict[Parameter(sel, Parameter.KEYWORD_ONLY)] = None
+        func.__signature__ = Signature(parameters=sig_dict)
 
         return func
 
@@ -698,77 +723,6 @@ class ParametersContainer(object):
             raise KeyError("Could not find alternative for '{0}'".format(name))
 
 
-class DOMContainer(object):
-    """Provides easy access to DOM parameters stored in the DB."""
-    def __init__(self, doms):
-        self._json = doms
-        self._ids = []
-
-    def ids(self, det_id):
-        """Return a list of DOM IDs for given detector"""
-        return [dom['DOMId'] for dom in self._json if dom['DetOID'] == det_id]
-
-    def clbupi2domid(self, clb_upi, det_id):
-        """Return DOM ID for given CLB UPI and detector"""
-        return self._json_list_lookup('CLBUPI', clb_upi, 'DOMId', det_id)
-
-    def clbupi2floor(self, clb_upi, det_id):
-        """Return Floor ID for given CLB UPI and detector"""
-        return self._json_list_lookup('CLBUPI', clb_upi, 'Floor', det_id)
-
-    def domid2floor(self, dom_id, det_id):
-        """Return Floor ID for given DOM ID and detector"""
-        return self._json_list_lookup('DOMId', dom_id, 'Floor', det_id)
-
-    def via_omkey(self, omkey, det_id):
-        """Return DOM for given OMkey (DU, floor)"""
-        du, floor = omkey
-        try:
-            return DOM.from_json([
-                d for d in self._json if d["DU"] == du and d["Floor"] == floor
-                and d["DetOID"] == det_id
-            ][0])
-        except IndexError:
-            log.critical(
-                "No DOM found for OMKey '{0}' and DetOID '{1}'.".format(
-                    omkey, det_id
-                )
-            )
-
-    def via_dom_id(self, dom_id, det_id):
-        """Return DOM for given dom_id"""
-        try:
-            return DOM.from_json([
-                d for d in self._json
-                if d["DOMId"] == dom_id and d["DetOID"] == det_id
-            ][0])
-        except IndexError:
-            log.critical("No DOM found for DOM ID '{0}'".format(dom_id))
-
-    def via_clb_upi(self, clb_upi, det_id):
-        """return DOM for given CLB UPI"""
-        try:
-            return DOM.from_json([
-                d for d in self._json
-                if d["CLBUPI"] == clb_upi and d["DetOID"] == det_id
-            ][0])
-        except IndexError:
-            log.critical("No DOM found for CLB UPI '{0}'".format(clb_upi))
-
-    def _json_list_lookup(self, from_key, value, target_key, det_id):
-        lookup = [
-            dom[target_key]
-            for dom in self._json
-            if dom[from_key] == value and dom['DetOID'] == det_id
-        ]
-        if len(lookup) > 1:
-            log.warning(
-                "Multiple entries found: {0}".format(lookup) + "\n" +
-                "Returning the first one."
-            )
-        return lookup[0]
-
-
 class DOM(object):
     """Represents a DOM"""
     def __init__(self, clb_upi, dom_id, dom_upi, du, det_oid, floor):
@@ -873,18 +827,9 @@ class CLBMap(object):
     def __init__(self, det_oid):
         self.log = get_logger('CLBMap')
         if isinstance(det_oid, numbers.Integral):
-            self.log.warning(
-                "Det ID ('%s') provided instead of det OID "
-                "(string representation). Trying to get the OID instead..." %
-                det_oid
-            )
             db = DBManager()
             _det_oid = db.get_det_oid(det_oid)
             if _det_oid is not None:
-                self.log.warning(
-                    "This is the det OID for det ID '%s', please use "
-                    "that in future: %s" % (det_oid, _det_oid)
-                )
                 det_oid = _det_oid
         self.det_oid = det_oid
         sds = StreamDS()

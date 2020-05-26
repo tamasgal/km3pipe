@@ -10,7 +10,6 @@ Note: to fit the landau distribution, you need to have ROOT and the
 ``rootpy`` package installed.
 
 """
-from __future__ import absolute_import, print_function, division
 
 import h5py
 import matplotlib.pyplot as plt
@@ -92,7 +91,7 @@ if HAS_ROOT:
 
 fig, axes = plt.subplots(ncols=2, nrows=2, figsize=(6 * 2, 4 * 2))
 
-axes[0, 0].hist(resid, bins='auto', normed=True)
+axes[0, 0].hist(resid, bins='auto', density=True)
 axes[0, 0].plot(x, lg.pdf(x), label='Log Norm')
 axes[0, 0].plot(x, hc.pdf(x), label='Half Cauchy')
 if HAS_ROOT:
@@ -103,7 +102,7 @@ axes[0, 0].set_xlim(0, 0.3)
 axes[0, 0].set_ylabel('PDF(x)')
 axes[0, 0].legend()
 
-axes[0, 1].hist(resid, bins='auto', normed=True)
+axes[0, 1].hist(resid, bins='auto', density=True)
 axes[0, 1].plot(x, lg.pdf(x), label='Log Norm')
 axes[0, 1].plot(x, hc.pdf(x), label='Half Cauchy')
 if HAS_ROOT:

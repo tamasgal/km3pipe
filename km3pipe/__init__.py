@@ -3,9 +3,12 @@
 The extemporary KM3NeT analysis framework.
 
 """
-from __future__ import absolute_import, print_function, division
+from pkg_resources import get_distribution, DistributionNotFound
 
-from .__version__ import version
+try:
+    version = get_distribution(__name__).version
+except DistributionNotFound:
+    version = "unknown version"
 
 try:
     __KM3PIPE_SETUP__

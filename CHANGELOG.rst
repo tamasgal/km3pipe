@@ -1,12 +1,99 @@
 Unreleased changes
 ------------------
+* ``kp.io.clb.CLBPump`` has been modernised and is now return ``kp.Table``
+  instances
+
+Version 9
+---------
+9.0.0-alpha.13 / 2020-04-29
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* ``km.ahrs.get_latest_ahrs_calibration()`` now takes the newest one,
+  regardless of the version number
+
+9.0.0-alpha.12 / 2020-04-29
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* All the aanet/Jpp/ROOT/pickle stuff has been removed. Preparing for v9.
+* ``kp.db.DBManager().doms`` is now removed after a deprecation period.
+  Please use ``kp.db.CLBMap(det_oid)`` instead (see the User Guide
+  in the docs)
+* ``km.ahrs.get_latest_ahrs_calibration()`` now chooses the latest AHRS
+  calibration set by the ``EndTime`` parameter (the latest one)
+
+9.0.0-alpha.11 / 2020-04-15
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* ``kp.io.daq.TimesliceParser`` is fixed, it crashed before when
+  no hits were present
+
+9.0.0-alpha.10 / 2020-04-01
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* ``kp.io.offine.EventPump`` added, which is a preliminary offline event reader
+  based on km3io
+
+9.0.0-alpha.9 / 2020-03-22
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+* Fixed time slewing
+
+9.0.0-alpha.8 / 2020-03-22
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+* Fixed time slewing
+
+9.0.0-alpha.7 / 2020-03-21
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+* Updated time slewing to use the latest lookup table from Jpp
+
+9.0.0-alpha.3 / 2019-12-13
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+* ``km3pipe retrieve DET_ID RUN`` will now use a local cache in Lyon and
+  create symbolic links to save space. 
+
+
+Version 8
+---------
 
 * KM3Pipe v8.x will be the last version to support Python 2. v8.26.0 was
   branched out to ``v8`` and will only receive bug fixes. The ``master``
   branch is now the pre-v9 with ``thepipe`` integration and Python 3.6+
 
-Version 8
----------
+
+8.27.7 / 2020-02-20
+~~~~~~~~~~~~~~~~~~~
+* ``interaction_channel`` defaults to ``np.nan`` in case of a lookup error in aanet
+
+8.27.6 / 2020-02-19
+~~~~~~~~~~~~~~~~~~~
+* ``is_cc`` is now defaulting to ``0`` if there is a lookup error in aanet
+* ``by`` (Bjorken-y) defaults to ``np.nan`` in case of a lookup error in aanet
+
+8.27.5 / 2020-02-06
+~~~~~~~~~~~~~~~~~~~
+* Quite a few python packages needed to be frozen to make it work with
+  Python 2.7. We hope this is the last v8 patch
+
+8.27.4 / 2020-02-05
+~~~~~~~~~~~~~~~~~~~
+* statsmodels is now frozen at 0.9
+
+8.27.3 / 2020-02-05
+~~~~~~~~~~~~~~~~~~~
+* statsmodels is now unfreezed in the dependencies
+
+8.27.2 / 2020-01-22
+~~~~~~~~~~~~~~~~~~~
+* ``km3pipe retrieve`` now uses XROOTD instead of iRODS
+
+8.27.1 / 2020-01-08
+~~~~~~~~~~~~~~~~~~~
+* Fixed ``triggersetup ...`` and ``runinfo -t ...`` which crashed when no
+  ADF data is available
+
+8.27.0 / 2020-01-08
+~~~~~~~~~~~~~~~~~~~
+* New ``kp.io.i3.I3Pump`` to read ANTARES I3 files
+
+8.26.3 / 2019-12-13
+~~~~~~~~~~~~~~~~~~~
+* ``km3pipe retrieve DET_ID RUN`` will now use a local cache in Lyon and
+  create symbolic links to save space. 
 
 8.26.0 / 2019-12-04
 ~~~~~~~~~~~~~~~~~~~

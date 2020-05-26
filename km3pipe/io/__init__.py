@@ -3,7 +3,6 @@
 A collection of io for different kinds of data formats.
 
 """
-from __future__ import absolute_import, print_function, division
 
 import os.path
 
@@ -12,13 +11,10 @@ import numpy as np
 from .evt import EvtPump    # noqa
 from .daq import DAQPump    # noqa
 from .clb import CLBPump    # noqa
-from .aanet import AanetPump    # noqa
-from .jpp import EventPump    # noqa
 from .ch import CHPump    # noqa
-from .hdf5 import HDF5Pump    # noqa
-from .hdf5 import HDF5Sink    # noqa
-from .hdf5 import HDF5MetaData    # noqa
-from .pickle import PicklePump    # noqa
+from .hdf5 import HDF5Pump, HDF5Sink, HDF5MetaData    # noqa
+from .offline import EventPump as OfflineEventPump
+from .online import EventPump as OnlineEventPump
 
 from km3pipe.logger import get_logger
 
@@ -33,7 +29,7 @@ __status__ = "Development"
 log = get_logger(__name__)
 
 
-def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
+def GenericPump(filenames, name="GenericPump", **kwargs):
     """A generic pump which utilises the appropriate pump."""
     if isinstance(filenames, str):
         filenames = [filenames]
@@ -55,7 +51,7 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
     io = {
         '.evt': EvtPump,
         '.h5': HDF5Pump,
-        '.root': EventPump if use_jppy else AanetPump,
+        '.root': None,
         '.dat': DAQPump,
         '.dqd': CLBPump,
     }
@@ -65,6 +61,14 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
             "No pump found for file extension '{0}'".format(extension)
         )
         raise ValueError("Unknown filetype")
+
+    if extension == ".root":
+        if kwargs['data_format'] == "offline-events":
+            Pump = OfflineEventPump
+        if kwargs['data_format'] == "online-events":
+            Pump = OnlineEventPump
+    else:
+        Pump = io[extension]
 
     missing_files = [fn for fn in filenames if not os.path.exists(fn)]
     if missing_files:
@@ -82,9 +86,9 @@ def GenericPump(filenames, use_jppy=False, name="GenericPump", **kwargs):
     input_files = set(filenames) - set(missing_files)
 
     if len(input_files) == 1:
-        return io[extension](filename=filenames[0], name=name, **kwargs)
+        return Pump(filename=filenames[0], name=name, **kwargs)
     else:
-        return io[extension](filenames=filenames, name=name, **kwargs)
+        return Pump(filenames=filenames, name=name, **kwargs)
 
 
 def read_calibration(

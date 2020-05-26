@@ -6,7 +6,6 @@ Basic Analysis Example
 ======================
 
 """
-from __future__ import absolute_import, print_function, division
 
 # Authors: Tamás Gál <tgal@km3net.de>, Moritz Lotze <mlotze@km3net.de>
 # License: BSD-3
@@ -129,7 +128,7 @@ print(primaries.head(5))
 
 #####################################################
 #
-primaries.energy.hist(bins=100, log=True)
+plt.hist(primaries.energy, bins=100, log=True)
 plt.xlabel('energy [GeV]')
 plt.ylabel('number of events')
 plt.title('Energy Distribution')
@@ -200,10 +199,10 @@ gandalfs.columns
 
 #####################################################
 #
-plt.hist(gandalfs['lambda'], bins=50, log=True)
-plt.xlabel('lambda parameter')
-plt.ylabel('count')
-plt.title('Lambda Distribution of Reconstructed Events')
+# plt.hist(gandalfs['lambda'], bins=50, log=True)
+# plt.xlabel('lambda parameter')
+# plt.ylabel('count')
+# plt.title('Lambda Distribution of Reconstructed Events')
 
 #####################################################
 #
@@ -270,7 +269,7 @@ fwhm = 2 * c_gamma
 g_mu_bad, g_sigma_bad = norm.fit(residuals)
 g_mu, g_sigma = norm.fit(residuals[np.abs(residuals) < 10])
 
-plt.hist(residuals, bins='auto', label='Histogram', normed=True, alpha=.7)
+plt.hist(residuals, bins='auto', label='Histogram', density=True, alpha=.7)
 plt.plot(
     x,
     cauchy(c_loc, c_gamma).pdf(x),

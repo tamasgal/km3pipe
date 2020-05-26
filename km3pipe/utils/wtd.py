@@ -29,14 +29,9 @@ def main():
     from docopt import docopt
     args = docopt(__doc__, version=kp.version)
 
-    db = kp.db.DBManager()
-
     dom_id = int(args['DOM_ID'])
     det = args['DET_ID_OR_OID']
 
-    try:
-        det = int(det)
-    except ValueError:
-        pass
+    dom = kp.db.CLBMap(det).dom_ids[dom_id]
 
-    print(db.doms.via_dom_id(dom_id, det).__repr__())
+    print(dom)
