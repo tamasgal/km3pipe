@@ -51,13 +51,12 @@ autosummary_generate = True
 autoapi_type = 'python'
 autoapi_dirs = ['../km3pipe', '../km3modules']
 autoapi_options = [
-    'members', 'undoc-members'
+    'members', 'undoc-members', 'show-module-summary'
     # , 'private-members', 'special-members'
 ]
 autoapi_ignore = [
     "*/tests/*", "*test_*.py", "*/doc/conf.py", "*/pydataskel*", "*/style/*"
 ]
-autoapi_include_summaries = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
