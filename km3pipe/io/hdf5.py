@@ -233,6 +233,8 @@ class HDF5Sink(Module):
     --------
     write_table: Table
         The table to write, with "h5loc" set
+    write_blob: Blob
+        Write all tables within the given Blob
 
     """
     def configure(self):
@@ -256,6 +258,7 @@ class HDF5Sink(Module):
         self.index = 0
 
         self.expose(self.write_table, "write_table")
+        self.expose(self.write_blob, "write_blob")
 
         if self.ext_h5file is not None:
             self.h5file = self.ext_h5file
@@ -336,6 +339,26 @@ class HDF5Sink(Module):
     def write_table(self, table):
         """Write a single table to the HDF5 file, exposed as a service"""
         self._write_table(table.h5loc, table, table.name)
+
+    def write_blob(self, blob):
+        """Write all tables of the given Blob to the HDF5 file,
+           exposed as a service"""
+        if not isinstance(blob, Blob):
+            self.log.error("given blob is not a Blob")
+            return
+        if not self.h5file.isopen:
+            self.log.error("HDF5 file has been closed already")
+        self._write_blob(blob)
+
+    def _write_blob(self, item):
+        """Find all Tables in the given Blob recursively and write to disk"""
+        if isinstance(item, Table):
+            self.write_table(item)
+        elif isinstance(item, Blob):
+            for key, entry in sorted(item.items()):
+                self._write_blob(entry)
+        elif not item is None:
+            self.log.error("neither Table nor Blob encountered")
 
     def _write_table(self, h5loc, arr, title):
         level = len(h5loc.split('/'))
