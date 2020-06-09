@@ -11,7 +11,7 @@ Usage:
 Options:
     TAG             ControlHost TAG (e.g. IO_EVT).
     OUTFILE         Filename of the dump file.
-    -h LIGIER_HOST  IP of the Ligier [default: 127.0.0.1].
+    -i LIGIER_IP    IP of the Ligier [default: 127.0.0.1].
     -p LIGIER_PORT  Port of the Ligier [default: 5553].
     -n SAMPLES      Number of samples [default: 1].
     -h --help       Show this screen.
@@ -48,10 +48,10 @@ def main():
     tag = args['TAG']
     outfile = args['OUTFILE']
     port = int(args['-p'])
-    host = args['-h']
+    ip = args['-i']
     n = int(args['-n'])
 
     pipe = kp.Pipeline()
-    pipe.attach(kp.io.ch.CHPump, host=host, port=port, tags=tag)
+    pipe.attach(kp.io.ch.CHPump, host=ip, port=port, tags=tag)
     pipe.attach(Dumper, filename=outfile)
     pipe.drain(n)
