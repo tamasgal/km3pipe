@@ -2,6 +2,8 @@ Unreleased changes
 ------------------
 * ``kp.io.clb.CLBPump`` has been modernised and is now return ``kp.Table``
   instances
+* A new command line utility called ``daqsample`` has been added, which creates
+  dumps of a given DAQ stream.
 
 Version 9
 ---------
