@@ -1,12 +1,18 @@
 Unreleased changes
 ------------------
+Version 9
+---------
+9.0.0-alpha.15 / 2020-06-14
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 * ``kp.io.clb.CLBPump`` has been modernised and is now return ``kp.Table``
   instances
 * A new command line utility called ``daqsample`` has been added, which creates
   dumps of a given DAQ stream.
 
-Version 9
----------
+9.0.0-alpha.14 / 2020-06-08
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* minor fixes
+
 9.0.0-alpha.13 / 2020-04-29
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 * ``km.ahrs.get_latest_ahrs_calibration()`` now takes the newest one,
