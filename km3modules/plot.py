@@ -263,7 +263,7 @@ def ztplot(
         mltps, m_ids = count_multiplicities(dom_hits.time)
         hits['multiplicity'][hits.dom_id == dom] = mltps
 
-    time_offset = np.min(hits[hits.triggered == True].time)
+    time_offset = np.min(hits[hits.triggered > 0].time)
     hits.time -= time_offset
 
     n_plots = len(dus)
@@ -286,7 +286,7 @@ def ztplot(
         du_hits = hits[hits.du == du]
         for grid_line in grid_lines:
             ax.axhline(grid_line, lw=1, color='b', ls='--', alpha=0.15)
-        trig_hits = du_hits[du_hits.triggered == True]
+        trig_hits = du_hits[du_hits.triggered > 0]
 
         ax.scatter(
             du_hits.time,
