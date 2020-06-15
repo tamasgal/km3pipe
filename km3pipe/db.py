@@ -5,6 +5,7 @@ Database utilities.
 
 """
 from datetime import datetime
+import functools
 import numbers
 import ssl
 import io
@@ -791,9 +792,16 @@ class TriggerSetup(object):
         return str(self)
 
 
+@functools.lru_cache()
 def clbupi2ahrsupi(clb_upi):
     """Generate AHRS UPI from CLB UPI."""
-    return re.sub('.*/.*/2.', '3.4.3.4/AHRS/1.', clb_upi)
+    sds = StreamDS()
+    upis = sds.integration(container_upi=clb_upi).CONTENT_UPI.values
+    ahrs_upis = [upi for upi in upis if "AHRS" in upi]
+    if len(ahrs_upis) > 1:
+        log.warning("Multiple AHRS UPIs found for CLB UPI {}. "
+                    "Using the first entry.".format(clb_upi))
+    return ahrs_upis[0]
 
 
 def show_ahrs_calibration(clb_upi, version='3'):
