@@ -1,5 +1,8 @@
 Unreleased changes
 ------------------
+* ``kp.db.clbupi2ahrsupi`` has been updated to use the new method to find
+  the AHRS UPI for a given CLB UPI.
+
 Version 9
 ---------
 9.0.0-alpha.15 / 2020-06-14
