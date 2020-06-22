@@ -136,6 +136,7 @@ def main():
             tmp_fpath = join(OUTPUT_PATH, tmp_fname)
             s.add("{} {} -o {}".format(SCRIPT, fname, out_fname))
             s.cp(out_fname, tmp_fpath)
+            s.add("rm {}".format(out_fname))
             s.mv(tmp_fpath, out_fpath)
             s.echo("File '{}' processed.".format(fname))
             s.separator('-')
