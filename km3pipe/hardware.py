@@ -136,6 +136,7 @@ class Detector(object):
         except ValueError:
             det_id, self.version = first_line.split()
             self.det_id = int(det_id)
+            self.version = self.version.lower()
             validity = self._readline().strip()
             self.valid_from, self.valid_until = split(validity, float)
             raw_utm_info = self._readline().strip().split(' ')
