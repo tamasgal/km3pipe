@@ -4,6 +4,11 @@ Unreleased changes
 
 Version 8
 ---------
+8.27.11 / 2020-06-22
+~~~~~~~~~~~~~~~~~~~~
+* DETX format specifier can now also contain a capital ``V``, although it's
+  not compliant to the format specification
+
 8.27.10 / 2020-04-29
 ~~~~~~~~~~~~~~~~~~~~
 * ``km.ahrs.get_latest_ahrs_calibration()`` now takes the newest one,
