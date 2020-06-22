@@ -58,7 +58,9 @@ def main():
     try:
         from tqdm import tqdm
     except ImportError:
-        tqdm = lambda x: x
+
+        def tqdm(x):
+            return x
 
     cprint = kp.logger.get_printer('qrunprocessor')
     log = kp.logger.get_logger('qrunprocessor')
@@ -129,7 +131,8 @@ def main():
             s.add('pwd')
             s.iget(ipath)
             s.add('ls -al {}'.format(fname))
-            s.add('JPrintTree -f {}'.format(fname))
+            s.add('km3pipe --version')
+            s.add('KPrintTree -f {}'.format(fname))
             out_fname = fname + SUFFIX
             out_fpath = join(OUTPUT_PATH, out_fname)
             tmp_fname = out_fname + '.copying'
