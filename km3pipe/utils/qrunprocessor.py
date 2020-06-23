@@ -123,6 +123,8 @@ def main():
         n_files = len(file_chunk)
         s.add("echo Creating run summary for {} files".format(n_files))
         s.add("cd $TMPDIR; mkdir -p $USER; cd $USER")
+        if PYTHONVENV is not None:
+            s.add('. {}/bin/activate'.format(PYTHONVENV))
         s.add("echo")
 
         for ipath in file_chunk:
@@ -133,8 +135,6 @@ def main():
             s.add('pwd')
             s.iget(ipath)
             s.add('ls -al {}'.format(fname))
-            if PYTHONVENV is not None:
-                s.add('. {}/bin/activate'.format(PYTHONVENV))
             s.add('km3pipe --version')
             s.add('KPrintTree -f {}'.format(fname))
             out_fname = fname + SUFFIX
