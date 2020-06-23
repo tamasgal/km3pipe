@@ -799,8 +799,10 @@ def clbupi2ahrsupi(clb_upi):
     upis = sds.integration(container_upi=clb_upi).CONTENT_UPI.values
     ahrs_upis = [upi for upi in upis if "AHRS" in upi]
     if len(ahrs_upis) > 1:
-        log.warning("Multiple AHRS UPIs found for CLB UPI {}. "
-                    "Using the first entry.".format(clb_upi))
+        log.warning(
+            "Multiple AHRS UPIs found for CLB UPI {}. "
+            "Using the first entry.".format(clb_upi)
+        )
     return ahrs_upis[0]
 
 
