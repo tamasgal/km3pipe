@@ -35,10 +35,13 @@ JOB_TEMPLATE = lstrip(
     #$ -S {shell}
     {job_array_option}
     #
-    ## Walltime (HH:MM:SS)
+    ## Walltime (HH:MM:SS), for different batch systems (IN2P3, ECAP, ...)
     #$ -l ct={walltime}
+    #$ -l walltime={walltime}
+    #$ -l s_cpu={walltime}
     ## Memory (Units: G, M, K, B; Min 64M)
     #$ -l vmem={vmem}
+    #$ -l s_rss={vmem}
     ## Local scratch diskspace (at TMPDIR)
     #$ -l fsize={fsize}
     #
