@@ -69,7 +69,6 @@ JOB_TEMPLATES = {
         #PBS -o {log_path}/{job_name}{task_name}.out.log
         #PBS -e {log_path}/{job_name}{task_name}.err.log
         #PBS -l walltime={walltime}
-        #PBS -l fsize={fsize}
 
         echo "========================================================"
         echo "Job started on" $(date)
