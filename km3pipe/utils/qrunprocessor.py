@@ -34,6 +34,7 @@ to find files which have already been converted to avoid multiple conversions.
         -m VMEM        Estimated vmem for a job [default: 8G].
         -j JOBNAME     The name of the submitted jobs [default: qrunprocessor].
         -l LOG_PATH    Path of the job log files [default: qlogs].
+        -v PYTHONVENV  Path to the Python virtual env.
         -q             Dryrun: don't submit jobs, just print the job script.
         -h --help      Show this screen.
 
@@ -78,6 +79,7 @@ def main():
     LOG_PATH = args['-l']
     JOB_NAME = args['-j']
     DRYRUN = args['-q']
+    PYTHONVENV = args['-v']
 
     pathlib.Path(OUTPUT_PATH).mkdir(parents=True, exist_ok=True)
 
@@ -131,6 +133,8 @@ def main():
             s.add('pwd')
             s.iget(ipath)
             s.add('ls -al {}'.format(fname))
+            if PYTHONVENV is not None:
+                s.add('. {}/bin/activate'.format(PYTHONVENV))
             s.add('km3pipe --version')
             s.add('KPrintTree -f {}'.format(fname))
             out_fname = fname + SUFFIX
