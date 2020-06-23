@@ -35,6 +35,7 @@ to find files which have already been converted to avoid multiple conversions.
         -j JOBNAME     The name of the submitted jobs [default: qrunprocessor].
         -l LOG_PATH    Path of the job log files [default: qlogs].
         -v PYTHONVENV  Path to the Python virtual env.
+        -c CLUSTER     Cluster to run on (in2p3, woody, ...) [default: in2p3].
         -q             Dryrun: don't submit jobs, just print the job script.
         -h --help      Show this screen.
 
@@ -80,6 +81,7 @@ def main():
     JOB_NAME = args['-j']
     DRYRUN = args['-q']
     PYTHONVENV = args['-v']
+    CLUSTER = args['-c']
 
     pathlib.Path(OUTPUT_PATH).mkdir(parents=True, exist_ok=True)
 
@@ -160,6 +162,7 @@ def main():
             vmem=VMEM,
             log_path=LOG_PATH,
             irods=True,
+            cluster=CLUSTER,
             dryrun=DRYRUN
         )
 

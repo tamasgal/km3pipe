@@ -22,48 +22,67 @@ __status__ = "Development"
 
 log = get_logger(__name__)    # pylint: disable=C0103
 
-JOB_TEMPLATE = lstrip(
-    """
-    #$ -N {job_name}
-    #$ -M {email}
-    ## Send mail at: start (b), completion (e), never (n)
-    #$ -m {send_mail}
-    #$ -j y
-    #$ -o {log_path}/{job_name}{task_name}.log
-    #$ -l os={platform}
-    #$ -P P_{group}
-    #$ -S {shell}
-    {job_array_option}
-    #
-    ## Walltime (HH:MM:SS), for different batch systems (IN2P3, ECAP, ...)
-    #$ -l ct={walltime}
-    #$ -l walltime={walltime}
-    #$ -l s_cpu={walltime}
-    ## Memory (Units: G, M, K, B; Min 64M)
-    #$ -l vmem={vmem}
-    #$ -l s_rss={vmem}
-    ## Local scratch diskspace (at TMPDIR)
-    #$ -l fsize={fsize}
-    #
-    ## Extra Resources
-    #$ -l irods={irods:d}
-    #$ -l sps={sps:d}
-    #$ -l hpss={hpss:d}
-    #$ -l xrootd={xrootd:d}
-    #$ -l dcache={dcache:d}
-    #$ -l oracle={oracle:d}
+JOB_TEMPLATES = {
+    "in2p3": lstrip(
+        """
+        #$ -N {job_name}
+        #$ -M {email}
+        ## Send mail at: start (b), completion (e), never (n)
+        #$ -m {send_mail}
+        #$ -j y
+        #$ -o {log_path}/{job_name}{task_name}.log
+        #$ -l os={platform}
+        #$ -P P_{group}
+        #$ -S {shell}
+        {job_array_option}
+        #
+        ## Walltime (HH:MM:SS), for different batch systems (IN2P3, ECAP, ...)
+        #$ -l ct={walltime}
+        ## Memory (Units: G, M, K, B; Min 64M)
+        #$ -l vmem={vmem}
+        ## Local scratch diskspace (at TMPDIR)
+        #$ -l fsize={fsize}
+        #
+        ## Extra Resources
+        #$ -l irods={irods:d}
+        #$ -l sps={sps:d}
+        #$ -l hpss={hpss:d}
+        #$ -l xrootd={xrootd:d}
+        #$ -l dcache={dcache:d}
+        #$ -l oracle={oracle:d}
 
-    echo "========================================================"
-    echo "Job started on" $(date)
-    echo "========================================================"
+        echo "========================================================"
+        echo "Job started on" $(date)
+        echo "========================================================"
 
-    {script}
+        {script}
 
-    echo "========================================================"
-    echo "JAWOLLJA! Job exited on" $(date)
-    echo "========================================================"
-"""
-)
+        echo "========================================================"
+        echo "JAWOLLJA! Job exited on" $(date)
+        echo "========================================================"
+        """
+    ),
+    "woody": lstrip(
+        """
+        #PBS -N {job_name}
+        #PBS -M {email} -m a
+        #PBS -o {log_path}/{job_name}{task_name}.out.log
+        #PBS -e {log_path}/{job_name}{task_name}.err.log
+        #PBS -l walltime={walltime}
+        #PBS -l fsize={fsize}
+
+        echo "========================================================"
+        echo "Job started on" $(date)
+        echo "========================================================"
+
+        {script}
+
+        echo "========================================================"
+        echo "JAWOLLJA! Job exited on" $(date)
+        echo "========================================================"
+        """
+    ),
+}
 
 
 def qsub(script, job_name, dryrun=False, silent=False, *args, **kwargs):
@@ -107,6 +126,7 @@ def gen_job(
     group='km3net',
     platform='cl7',
     walltime='00:10:00',
+    cluster='in2p3',
     vmem='8G',
     fsize='8G',
     shell=None,
@@ -141,7 +161,7 @@ def gen_job(
         task_name = '_$TASK_ID'
     else:
         task_name = ''
-    job_string = JOB_TEMPLATE.format(
+    job_string = JOB_TEMPLATES[cluster].format(
         script=script,
         email=email,
         send_mail=send_mail,
