@@ -70,6 +70,13 @@ def we_are_on_jupyterhub():
     return ip == socket.gethostbyname("jupyter.km3net.de")
 
 
+def we_are_on_km3net_gitlab_ci():
+    """Check if we are on a GitLab CI runner server"""
+    import urllib.request
+    external_ip = urllib.request.urlopen('https://ident.me').read().decode('utf8')
+    return external_ip == '131.188.161.155'
+
+
 def read_csv(text, sep="\t"):
     """Create a DataFrame from CSV text"""
     import pandas as pd    # no top level load to make a faster import of db
@@ -119,6 +126,11 @@ class DBManager(object):
                     "d9fe89a1568a49a5ac03bdf15d93d799"
                 )
                 return
+            if we_are_on_km3net_gitlab_ci():
+                self.restore_session(
+                    "_gitlab-km3net_131.188.161.155_"
+                    "f835d56ca6d946efb38324d59e040761"
+                )
 
         if username is not None and password is not None:
             self.login(username, password)
