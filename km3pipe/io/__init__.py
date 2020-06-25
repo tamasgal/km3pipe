@@ -13,8 +13,8 @@ from .daq import DAQPump    # noqa
 from .clb import CLBPump    # noqa
 from .ch import CHPump    # noqa
 from .hdf5 import HDF5Pump, HDF5Sink, HDF5MetaData    # noqa
-from .offline import EventPump as OfflineEventPump
-from .online import EventPump as OnlineEventPump
+from .offline import OfflinePump
+from .online import OnlinePump
 
 from km3pipe.logger import get_logger
 
