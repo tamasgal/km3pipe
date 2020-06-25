@@ -79,7 +79,7 @@ def main():
     LOG_PATH = os.path.abspath(args['-l'])
     JOB_NAME = args['-j']
     DRYRUN = args['-q']
-    PYTHONVENV = args['-v']
+    PYTHONVENV = os.path.abspath(args['-v'])
     CLUSTER = args['-c']
 
     pathlib.Path(OUTPUT_PATH).mkdir(parents=True, exist_ok=True)
