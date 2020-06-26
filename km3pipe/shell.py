@@ -149,7 +149,7 @@ def gen_job(
         email = os.environ['USER'] + '@km3net.de'
     if isinstance(script, Script):
         script = str(script)
-    log_path = os.path.join(os.getcwd(), log_path)
+    log_path = os.path.abspath(log_path)
     if job_array_stop is not None:
         job_array_option = "#$ -t {}-{}:{}"  \
                            .format(job_array_start, job_array_stop,

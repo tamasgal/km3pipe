@@ -67,20 +67,19 @@ def main():
     cprint = kp.logger.get_printer('qrunprocessor')
     log = kp.logger.get_logger('qrunprocessor')
 
-    CWD = os.getcwd()
-    RUN_LIST = join(CWD, args['RUN_LIST'])
-    OUTPUT_PATH = join(CWD, args['OUTPUT_PATH'])
-    SCRIPT = abspath(args['SCRIPT'])
+    RUN_LIST = os.path.abspath(args['RUN_LIST'])
+    OUTPUT_PATH = os.path.abspath(args['OUTPUT_PATH'])
+    SCRIPT = os.path.abspath(args['SCRIPT'])
     SUFFIX = args['-s']
     DET_ID = int(args['DET_ID'])
     ET_PER_FILE = int(args['-e']) * 60    # [s]
     FILES_PER_JOB = int(args['-n'])
     FSIZE = args['-f']
     VMEM = args['-m']
-    LOG_PATH = args['-l']
+    LOG_PATH = os.path.abspath(args['-l'])
     JOB_NAME = args['-j']
     DRYRUN = args['-q']
-    PYTHONVENV = args['-v']
+    PYTHONVENV = os.path.abspath(args['-v'])
     CLUSTER = args['-c']
 
     pathlib.Path(OUTPUT_PATH).mkdir(parents=True, exist_ok=True)
