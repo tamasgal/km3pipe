@@ -17,11 +17,11 @@ hit `CTRL+C` once. The pipeline will continue executing  its current cycle and t
 proceeds with the finish procedure. This means that usually everything is
 cleaned up gracefully.
 
-Here is an example where the pipeline while converting
-a ROOT file to HDF5 is suddenly interrupted. The resulting file is still readable
+Here is an example where the pipeline while processing
+a ROOT file is suddenly interrupted. The resulting file is still readable
 and properly closed::
 
-    > tohdf5 JTE_muon-CC_3-100GeV_401.root -o test.h5
+    > analyse.py JTE_muon-CC_3-100GeV_401.root -o test.h5
     Pipeline and module initialisation took 0.008s (CPU 0.000s).
     loading root....  /afs/.in2p3.fr/system/amd64_sl7/usr/local/root/v5.34.23/
     loading aalib...  /pbs/throng/km3net/src/Jpp/v9.0.8454/externals/aanet//libaa.so
