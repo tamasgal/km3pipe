@@ -143,7 +143,7 @@ def prettyln(text, fill='-', align='^', prefix='[ ', suffix=' ]', length=69):
     )
 
 
-def irods_filepath(det_id, run_id):
+def irods_path(det_id, run_id):
     """Generate the iRODS filepath for given detector (O)ID and run ID"""
     data_path = "/in2p3/km3net/data/raw/sea"
     from km3pipe.db import DBManager

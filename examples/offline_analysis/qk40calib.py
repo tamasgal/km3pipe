@@ -79,7 +79,7 @@ def main():
         s.add("cd $TMPDIR; mkdir -p $USER; cd $USER")
         for run in runs_chunk:
             s.add("echo Processing {}:".format(run))
-            irods_path = kp.tools.irods_filepath(DET_ID, run)
+            irods_path = kp.tools.irods_path(DET_ID, run)
             root_filename = os.path.basename(irods_path)
             calib_filename = root_filename + '.k40_cal.p'
             s.add("iget -v {}".format(irods_path))

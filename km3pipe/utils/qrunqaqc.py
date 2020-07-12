@@ -170,8 +170,8 @@ class QAQCAnalyser(object):
                 break
             self.log.info("Checking run '{}'".format(run_id))
 
-            irods_filepath = kp.tools.irods_filepath(self.det_id, run_id)
-            if irods_filepath in self.available_run_files.keys():
+            irods_path = kp.tools.irods_path(self.det_id, run_id)
+            if irods_path in self.available_run_files.keys():
                 run_ids_to_process.append(run_id)
                 if batch_size and len(run_ids_to_process) % batch_size == 0:
                     n_jobs += 1
@@ -233,7 +233,7 @@ class QAQCAnalyser(object):
             self.log.info("adding run %s (det_id %s", run_id, self.det_id)
             xrootd_path = kp.tools.xrootd_path(self.det_id, run_id)
             self.log.info("xrootd path: %s", xrootd_path)
-            size = self.available_run_files[kp.tools.irods_filepath(
+            size = self.available_run_files[kp.tools.irods_path(
                 self.det_id, run_id
             )]
             self.log.info("filesize: %s (bytes)", size)

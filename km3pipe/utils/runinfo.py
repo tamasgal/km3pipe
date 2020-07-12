@@ -60,7 +60,7 @@ def runinfo(run_id, det_id, show_trigger=False):
             row['T0_CALIBSETID'].values[0]
         )
     )
-    print("iRODS path:  {}".format(kp.tools.irods_filepath(det_id, run_id)))
+    print("iRODS path:  {}".format(kp.tools.irods_path(det_id, run_id)))
     print("xrootd path: {}".format(kp.tools.xrootd_path(det_id, run_id)))
     if show_trigger:
         print(db.trigger_setup(row['RUNSETUPID'].values[0]))

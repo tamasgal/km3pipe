@@ -38,7 +38,7 @@ from datetime import datetime
 import time
 
 from . import version
-from .tools import irods_filepath, xrootd_path
+from .tools import irods_path, xrootd_path
 from .db import DBManager, we_are_in_lyon
 from .hardware import Detector
 
@@ -90,7 +90,7 @@ def retrieve(run_id, det_id, use_irods=False, out=None):
     det_id = int(det_id)
 
     if use_irods:
-        rpath = irods_filepath(det_id, run_id)
+        rpath = irods_path(det_id, run_id)
         cmd = "iget -Pv"
     else:
         rpath = xrootd_path(det_id, run_id)
