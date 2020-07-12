@@ -87,66 +87,56 @@ def main():
     with open(RUN_LIST, 'r') as fobj:
         run_numbers = [int(run) for run in fobj.read().split()]
 
-    irods_files = []
+    xrootd_files = []
     for run in run_numbers:
-        irods_path = kp.tools.irods_filepath(DET_ID, run)
-        irods_files.append(irods_path)
+        xrootd_path = kp.tools.xrootd_path(DET_ID, run)
+        xrootd_files.append(xrootd_path)
 
     processed_files = [
         basename(f) for f in glob(join(OUTPUT_PATH, '*{}'.format(SUFFIX)))
     ]
 
     rem_files = []
-    for irods_file in irods_files:
-        if basename(irods_file) + SUFFIX not in processed_files:
-            rem_files.append(irods_file)
-
-    cprint("Checking if files are accessible on iRODS")
-    missing_files_on_irods = 0
-    for rem_file in tqdm(rem_files):
-        if not iexists(rem_file):
-            log.error(
-                "Skipping file, since not found on iRODS: {}".format(rem_file)
-            )
-            rem_files.remove(rem_file)
-            missing_files_on_irods += 1
+    for xrootd_file in xrootd_files:
+        if basename(xrootd_file) + SUFFIX not in processed_files:
+            rem_files.append(xrootd_file)
 
     cprint(
-        "{} runs in total, {} already processed ({} missing on iRODS).".format(
-            len(irods_files), len(processed_files), missing_files_on_irods
+        "{} runs in total, {} already processed.".format(
+            len(xrootd_files), len(processed_files)
         )
     )
-    cprint("Proceeding with the remaining {} files.".format(len(rem_files)))
+    cprint(f"Proceeding with the remaining {len(rem_files)} files.")
 
     s = kp.shell.Script()
 
     for job_id, file_chunk in enumerate(chunks(rem_files, FILES_PER_JOB)):
         n_files = len(file_chunk)
-        s.add("echo Creating run summary for {} files".format(n_files))
+        s.add(f"echo Creating run summary for {n_files} files")
         s.add("cd $TMPDIR; mkdir -p $USER; cd $USER")
         if PYTHONVENV is not None:
             s.add('. {}/bin/activate'.format(PYTHONVENV))
         s.add("echo")
 
-        for ipath in file_chunk:
-            fname = basename(ipath)
+        for xpath in file_chunk:
+            fname = basename(xpath)
             s.separator(' ')
             s.separator('=')
-            s.echo("Processing {}:".format(fname))
-            s.add('pwd')
-            s.iget(ipath)
-            s.add('ls -al {}'.format(fname))
-            s.add('km3pipe --version')
-            s.add('KPrintTree -f {}'.format(fname))
+            s.echo(f"Processing {fname}:")
+            s.add("pwd")
+            s.add(f"xrdcp {xpath} {fname}")
+            s.add(f"ls -al {fname}")
+            s.add("km3pipe --version")
+            s.add(f"KPrintTree -f {fname}")
             out_fname = fname + SUFFIX
             out_fpath = join(OUTPUT_PATH, out_fname)
             tmp_fname = out_fname + '.copying'
             tmp_fpath = join(OUTPUT_PATH, tmp_fname)
-            s.add("{} {} -o {}".format(SCRIPT, fname, out_fname))
+            s.add(f"{SCRIPT} {fname} -o {out_fname}")
             s.cp(out_fname, tmp_fpath)
-            s.add("rm {}".format(out_fname))
+            s.add(f"rm {out_fname}")
             s.mv(tmp_fpath, out_fpath)
-            s.echo("File '{}' processed.".format(fname))
+            s.echo(f"File '{fname}' processed.")
             s.separator('-')
 
         walltime = time.strftime(
@@ -160,7 +150,7 @@ def main():
             fsize=FSIZE,
             vmem=VMEM,
             log_path=LOG_PATH,
-            irods=True,
+            xrootd=True,
             cluster=CLUSTER,
             dryrun=DRYRUN
         )
