@@ -1,4 +1,5 @@
 docopt
+h5py
 km3io>=0.14.1
 matplotlib>=3.0.0
 numba>=0.49.0
