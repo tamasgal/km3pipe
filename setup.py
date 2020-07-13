@@ -15,6 +15,9 @@ builtins.__KM3PIPE_SETUP__ = True
 with open('requirements.txt') as fobj:
     requirements = [l.strip() for l in fobj.readlines()]
 
+with open('requirements-dev.txt') as fobj:
+    requirements_dev = [l.strip() for l in fobj.readlines()]
+
 try:
     with open("README.rst") as fh:
         long_description = fh.read()
@@ -34,9 +37,10 @@ setup(
     include_package_data=True,
     platforms='any',
     setup_requires=['numpy>=1.12', 'setuptools_scm'],
-    use_scm_version=True,
     install_requires=requirements,
-    python_requires='>=2.7',
+    extras_require = {"dev": requirements_dev},
+    use_scm_version=True,
+    python_requires='>=3.5',
     entry_points={
         'console_scripts': [
             'km3pipe=km3pipe.cmd:main',
