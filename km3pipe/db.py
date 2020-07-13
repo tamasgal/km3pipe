@@ -128,9 +128,10 @@ class DBManager(object):
                 return
             if we_are_on_km3net_gitlab_ci():
                 self.restore_session(
-                    "_gitlab-km3net_131.188.161.155_"
+                    "sid=_gitlab-km3net_131.188.161.155_"
                     "f835d56ca6d946efb38324d59e040761"
                 )
+                return
 
         if username is not None and password is not None:
             self.login(username, password)
