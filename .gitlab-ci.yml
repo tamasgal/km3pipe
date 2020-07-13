@@ -36,6 +36,7 @@ stages:
   source venv/bin/activate
   pip install -U pip setuptools
   make install
+  make dependencies
 
 .junit_template: &junit_definition
     artifacts:
