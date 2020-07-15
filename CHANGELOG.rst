@@ -1,10 +1,26 @@
 Unreleased changes
 ------------------
-* ``kp.db.clbupi2ahrsupi`` has been updated to use the new method to find
-  the AHRS UPI for a given CLB UPI.
 
 Version 9
 ---------
+9.0.0-alpha.19 / 2020-07-15
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* Clean up deprecated tools and functions, including ``tohdf5``.
+* Updates in the documentation
+
+9.0.0-alpha.18 / 2020-07-13
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* Minor fixes
+
+9.0.0-alpha.17 / 2020-07-30
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* Minor changes
+
+9.0.0-alpha.16 / 2020-07-30
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* ``kp.db.clbupi2ahrsupi`` has been updated to use the new method to find
+  the AHRS UPI for a given CLB UPI.
+
 9.0.0-alpha.15 / 2020-06-14
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 * ``kp.io.clb.CLBPump`` has been modernised and is now return ``kp.Table``
