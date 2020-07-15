@@ -6,18 +6,11 @@ FAQ
 This section describes some more obscure things relevant to day-to-day
 data analysis, which are not really documented explicitly.
 
-AAnet formats (``tohdf5 --aa-format=...``)
-------------------------------------------
+Where is the ``tohdf5`` command in KM3Pipe v9?
+----------------------------------------------
 
-Ancient recolns (ORCA recolns):
-``tohdf5 --aa-format=ancient_recolns --aa-lib=${LIAM}/sandbox/aa-recoLNSlowE-prod2016/bin/reco_v0r9_standalone.so``
-
-Gandalf (orca MX and later):
-``tohdf5 --aa-format=gandalf_new``
-
-
-``AanetPump``/``tohdf5`` segfaults:
------------------------------------
-
-Might be the header:
-``tohdf5 --skip-header --aa-format=gandalf_new``
+It is gone. We no longer provide a fit-for-all conversion solution since
+we have too many different ROOT file versions and layouts. Pick your own
+data, put them into a ``kp.Table`` and use the ``kp.io.HDF5Sink`` in a
+``kp.Pipeline`` to write your own data extractors, as described in
+the User Guide (Storing Data).

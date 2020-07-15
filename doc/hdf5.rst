@@ -1,27 +1,62 @@
-HDF5
-====
+Storing Data (HDF5)
+===================
 
 .. contents:: :local:
 
 HDF5 files are the prefered input and primary output type in KM3Pipe.
-It is a general format for hierarchical storage of large amount of numerical
-data. Unlike e.g. ROOT, HDF5 is a general-purpose dataformat and not 
-specifically designed for HEP experiments. HDF5 also requires only a tiny
-library (hdf5lib) and is accessible with almost all popular programming
-languages (Python, C, C++, Java, Go, Julia, R, Matlab, Rust...).
+It is a generic format for hierarchical storage of large amount of numerical
+data. Unlike e.g. ROOT (the official KM3NeT data format),
+HDF5 is a general-purpose dataformat and not
+specifically designed for HEP experiments. The usual HDF5 structures are
+either groups of 1D arrays or 2D tables in contrast to ROOT which is
+optimised for nested jagged structures, specifically designed for HEP
+experiments where the events are stored in irregular tree-like structures.
+While ROOT files require a complete C++ framework, even for I/O
+(nowadays there are luckily alternatives, see
+`uproot <https://uproot.readthedocs.io/en/latest/>`_ which is also
+used in `km3io <https://km3py.pages.km3net.de/km3io/>`_ to access
+KM3NeT files without ROOT),
+HDF5 only requires a tiny library (hdf5lib) and is accessible from almost
+all popular programming languages (Python, Julia, C, C++, Java, Go, R,
+Matlab, Rust...).
 
-In KM3NeT, it is used to store event information like PMT hits, 
-reconstructed particles and all kind of other analysis results.
+In KM3NeT, HDF5 is often used to store intermediate results of an analysis
+or summary data, which is used to perform high-level analysis. HDF5 is also
+our main open data format.
 
+In the following, the usual (recommended) structure is described to store
+low level data. Note that there are no strict requirements how you structure
+your own data, but it is recommended to split compound structures into
+single arrays for easy access.
+
+The ``tohdf5`` command which was present in KM3Pipe until v8 is now removed
+due to the growing complexity of our ROOT files. To read those files,
+the `km3io <https://km3py.pages.km3net.de/km3io/>`_ package is recommended
+as mentioned above.
+
+
+The following sections describe how to read and write HDF5 data with KM3Pipe
+using the ``kp.io.HDF5Pump`` and ``kp.io.HDF5Sink`` modules.
+
+Writing HDF5 Data
+~~~~~~~~~~~~~~~~~
+
+The ``Pipeline``, ``Table`` and ``HDF5Pump``/``HDF5Sink`` classes are very
+good friends. In this document I'll demonstrate how to build a pipeline to
+analyse a file, store intermediate results using the ``Table`` and ``HDF5Sink``
+classes and then do some basic high level data analysis using the ``Pandas``
+(https://pandas.pydata.org) framework.
+
+(Work in progress)
 
 Data Hierarchy
---------------
+~~~~~~~~~~~~~~
 
 HDF5 has an internal structure line a Unix file system: There are groups 
 ("folders") containing tables ("files") which hold the data. Every 
 table/group is identified by a "filepath". This is the output of
 ``ptdump`` for a file which contains MUPAGE simulation data for the ORCA
-detector::
+detector and was converted with the now deprecated ``tohdf5`` command::
 
     / (RootGroup) 'KM3NeT'
     /event_info (Table(3476,), fletcher32, shuffle, zlib(5)) 'EventInfo'
@@ -90,13 +125,3 @@ instance which does this for you::
     p = km3pipe.io.hdf5.HDF5Pump(filename="path/to/file.h5")
     blob = p[23]
     hits = blob["Hits"]
-
-
-Conversion Utils
-----------------
-
-To convert a ROOT/EVT file to KM3NeT HDF5 use ``tohdf5`` which comes with KM3Pipe::
-
-    tohdf5 filename.root
-
-See the :ref:`h5cli` on how to convert & inspect HDF5 files from the shell.

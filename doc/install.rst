@@ -19,7 +19,12 @@ Alternatively, if you need the old Python 2 version, you can load it with::
 
     module load python/2.7.17
 
-To test if everything is working, run the following command::
+To test if everything is working, make sure to install all the additional
+requirements with::
+
+    pip install "km3pipe[dev]"
+
+and run the following command::
 
     km3pipe test
 
@@ -34,11 +39,6 @@ Requirements
 To install km3pipe, you need:
 
 - Python >= 3.5
-
-- pip (via ``$ easy_install pip``)
-
-- C compiler, e.g. ``gcc``.
-
 - HDF5 (the hdf5lib C library, e.g. `apt-get install hdf5` or `yum install hdf5`)
 
 (Recommended) PyEnv or Virtual Environments
@@ -143,9 +143,6 @@ API tokens, etc.) from a configuration file, which is expected to
 be `~/.km3net`.
 
 Here is an example configuration::
-
-    [General]
-    check_for_updates=no
 
     [DB]
     cookie=sid_fooman_123.34.56.78_
