@@ -153,7 +153,7 @@ class Detector(object):
             self.version = self.version.lower()
             validity = self._readline().strip()
             self.valid_from, self.valid_until = split(validity, float)
-            raw_utm_info = self._readline().strip().split(' ')
+            raw_utm_info = self._readline().strip().split()
             try:
                 self.utm_info = UTMInfo(*raw_utm_info[1:])
             except TypeError:
