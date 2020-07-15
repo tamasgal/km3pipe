@@ -13,7 +13,7 @@ install:
 	pip install numpy
 	pip install .
 
-install-dev:
+install-dev: dependencies
 	pip install numpy
 	pip install -e .
 
@@ -57,6 +57,7 @@ lint:
 dependencies:
 	pip install numpy
 	pip install -r requirements.txt
+	pip install -r requirements-dev.txt
 
 .PHONY: yapf
 yapf:
