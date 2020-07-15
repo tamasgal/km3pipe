@@ -246,10 +246,13 @@ class Table(np.recarray):
     def from_dict(cls, arr_dict, dtype=None, fillna=False, **kwargs):
         """Generate a table from a dictionary of arrays.
         """
-        sizes = {len(d) if hasattr(d, '__len__') else 1 for d in arr_dict.values()} - {1}
+        if any(len(c) == 0 for c in arr_dict.values() if hasattr(c, "__len__")):
+            raise ValueError("Cannot construct a Table with an empty array.")
+
+        sizes = {len(d) for d in arr_dict.values() if hasattr(d, '__len__')}
         if len(sizes) > 1:
-            raise ValueError("Cannot construct a Table with different array sizes.")
-        # i hope order of keys == order or values
+            raise ValueError("Cannot create a Table with different array sizes.")
+
         if dtype is None:
             names = sorted(list(arr_dict.keys()))
         else:

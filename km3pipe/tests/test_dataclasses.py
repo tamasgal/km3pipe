@@ -364,6 +364,22 @@ class TestTable(TestCase):
         with pytest.raises(KeyError):
             tab = Table.from_dict(dmap, dtype=bad_dt)
 
+    def test_from_dict_with_different_array_sizes_raises(self):
+        with self.assertRaises(ValueError):
+            Table({'a': [1, 2, 3], 'b': [1]})
+        with self.assertRaises(ValueError):
+            Table({'a': [1, 2, 3], 'b': [1, 2]})
+        with self.assertRaises(ValueError):
+            Table({'b': 1, 'a': [1, 2, 3], 'c': [1, 2]})
+
+    def test_from_dict_with_empty_array_sizes_raises(self):
+        with self.assertRaises(ValueError):
+            Table({'a': []})
+        with self.assertRaises(ValueError):
+            Table({'a': [], 'b': []})
+        with self.assertRaises(ValueError):
+            Table({'a': [], 'b': [1, 2]})
+
     def test_from_2d(self):
         l2d = [(0, 1), (2, 3), (4, 5), (6, 7), (8, 9)]
         names = ['a', 'origin', 'pmt_id', 'time', 'group_id']
