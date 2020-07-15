@@ -4,6 +4,10 @@ Unreleased changes
 
 Version 8
 ---------
+8.27.12 / 2020-07-15
+~~~~~~~~~~~~~~~~~~~~
+* Make UTM info readout in DETX more flexible
+
 8.27.11 / 2020-06-22
 ~~~~~~~~~~~~~~~~~~~~
 * DETX format specifier can now also contain a capital ``V``, although it's
