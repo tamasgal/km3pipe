@@ -143,8 +143,9 @@ pypi:
     stage: release
     cache: {}
     script:
-        - pip install -U twine
+        - pip install -U twine wheel
         - python setup.py sdist
+        - python setup.py bdist_wheel
         - twine upload dist/*
     only:
         - tags
