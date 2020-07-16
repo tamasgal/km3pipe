@@ -44,6 +44,15 @@ stages:
         junit: "reports/junit*.xml"
 
 
+test-py3.5:
+    image: docker.km3net.de/base/python:3.5
+    stage: test
+    script:
+        - *virtualenv_definition
+        - make test
+        - make test-km3modules
+    <<: *junit_definition
+
 test-py3.6:
     image: docker.km3net.de/base/python:3.6
     stage: test
