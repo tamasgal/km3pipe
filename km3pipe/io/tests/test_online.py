@@ -1,6 +1,6 @@
 # Filename: test_online.py
 # pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
-from km3pipe.testing import TestCase, surrogate, patch, skip
+from km3pipe.testing import TestCase, patch, skip
 import sys
 import numpy as np
 from km3pipe.io.online import EventPump, TimeslicePump, SummaryslicePump
