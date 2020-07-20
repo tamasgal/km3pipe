@@ -14,6 +14,7 @@ import numpy as np
 from scipy.spatial import ConvexHull
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D    # noqa
+from km3net_testdata import data_path
 
 from km3pipe.hardware import Detector
 from km3pipe.math import Polygon
