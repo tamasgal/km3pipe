@@ -1,6 +1,6 @@
 # Filename: test_online.py
 # pylint: disable=locally-disabled,C0111,R0904,C0301,C0103,W0212
-from km3pipe.testing import TestCase, patch, skip
+from km3pipe.testing import TestCase, patch, skip, data_path
 import sys
 import numpy as np
 from km3pipe.io.online import EventPump, TimeslicePump, SummaryslicePump
@@ -15,15 +15,15 @@ __maintainer__ = "Tamas Gal, Johannes Schumann"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-TESTDATA_DIR = abspath(join(dirname(__file__), "../../kp-data/test_data"))
-JPP_TESTFILE = join(TESTDATA_DIR, 'a.root')
-H5_TESTFILE = join(TESTDATA_DIR, 'a.h5')
+
+ONLINE_TEST_FILE = data_path("online/events_sample.root")
+ONLINE_TEST_FILE_H5 = data_path("online/events_sample.h5")
 
 
 class TestEventPump(TestCase):
     def setUp(self):
-        self.jpp_pump = EventPump(filename=JPP_TESTFILE)
-        self.h5_pump = HDF5Pump(filename=H5_TESTFILE)
+        self.jpp_pump = EventPump(filename=ONLINE_TEST_FILE)
+        self.h5_pump = HDF5Pump(filename=ONLINE_TEST_FILE_H5)
 
     def test_event_info(self):
         n = self.jpp_pump.n_events
@@ -63,7 +63,7 @@ class TestEventPump(TestCase):
 
 class TestTimeslicePump(TestCase):
     def setUp(self):
-        self.jpp_fname = JPP_TESTFILE
+        self.jpp_fname = ONLINE_TEST_FILE
         self.timeslice_pump = TimeslicePump(
             filename=self.jpp_fname, stream="L1"
         )
@@ -118,7 +118,7 @@ class TestTimeslicePump(TestCase):
 
 class TestSummaryslicePump(TestCase):
     def setUp(self):
-        self.pump = SummaryslicePump(filename=JPP_TESTFILE)
+        self.pump = SummaryslicePump(filename=ONLINE_TEST_FILE)
 
     def test_summaryslice_info(self):
         sum_slice_info = self.pump[0]['SummarysliceInfo']

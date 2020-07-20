@@ -11,7 +11,7 @@ from km3pipe.core import Module, Pipeline
 from km3pipe.dataclasses import Table
 from km3pipe.hardware import Detector
 from km3pipe.io.hdf5 import HDF5Sink
-from km3pipe.testing import TestCase, MagicMock, patch, skip, skipif
+from km3pipe.testing import TestCase, MagicMock, patch, skip, skipif, data_path
 from km3pipe.calib import Calibration, CalibrationService, slew
 
 from .test_hardware import EXAMPLE_DETX
@@ -26,10 +26,6 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
-
-DATA_DIR = join(dirname(__file__), '../kp-data/test_data/')
-DETX_FILENAME = join(DATA_DIR, 'detx_v1.detx')
-
 
 class TestCalibration(TestCase):
     """Tests for the Calibration class"""
@@ -52,11 +48,11 @@ class TestCalibration(TestCase):
         mock_detector.assert_called_with(t0set=3, calibration=2, det_id=1)
 
     def test_init_with_detector(self):
-        det = Detector(DETX_FILENAME)
+        det = Detector(data_path("detx/detx_v1.detx"))
         Calibration(detector=det)
 
     def test_apply_to_hits_with_pmt_id(self):
-        calib = Calibration(filename=DETX_FILENAME)
+        calib = Calibration(filename=data_path("detx/detx_v1.detx"))
 
         hits = Table({'pmt_id': [1, 2, 1], 'time': [10.1, 11.2, 12.3]})
 
@@ -77,7 +73,7 @@ class TestCalibration(TestCase):
         self.assertAlmostEqual(11.2 + t0, a_hit.time)
 
     def test_apply_to_hits_with_dom_id_and_channel_id(self):
-        calib = Calibration(filename=DETX_FILENAME)
+        calib = Calibration(filename=data_path("detx/detx_v1.detx"))
 
         hits = Table({
             'dom_id': [2, 3, 3],
@@ -102,7 +98,7 @@ class TestCalibration(TestCase):
         self.assertAlmostEqual(11.2 + t0, a_hit.time)
 
     def test_time_slewing_correction(self):
-        calib = Calibration(filename=DETX_FILENAME)
+        calib = Calibration(filename=data_path("detx/detx_v1.detx"))
 
         hits = Table({
             'dom_id': [2, 3, 3],
@@ -132,7 +128,7 @@ class TestCalibration(TestCase):
             'tot': np.ones(3, dtype=float),
             'group_id': 0,
         }, 'TimesliceHits')
-        calib = Calibration(filename=DETX_FILENAME)
+        calib = Calibration(filename=data_path("detx/detx_v1.detx"))
         c_tshits = calib.apply(tshits)
         assert len(c_tshits) == len(tshits)
         assert np.allclose([40, 80, 90], c_tshits.t0)
@@ -140,7 +136,7 @@ class TestCalibration(TestCase):
         assert np.allclose([50.1, 91.2, 102.3], c_tshits.time, atol=0.1)
 
     def test_apply_without_affecting_primary_hit_table(self):
-        calib = Calibration(filename=DETX_FILENAME)
+        calib = Calibration(filename=data_path("detx/detx_v1.detx"))
         hits = Table({'pmt_id': [1, 2, 1], 'time': [10.1, 11.2, 12.3]})
         hits_compare = hits.copy()
         calib.apply(hits)
@@ -180,7 +176,7 @@ class TestCalibrationService(TestCase):
                 return blob
 
         pipe = Pipeline()
-        pipe.attach(CalibrationService, filename=DETX_FILENAME)
+        pipe.attach(CalibrationService, filename=data_path("detx/detx_v1.detx"))
         pipe.attach(HitCalibrator)
         pipe.drain(1)
 
@@ -207,7 +203,7 @@ class TestCalibrationService(TestCase):
                 return blob
 
         pipe = Pipeline()
-        pipe.attach(CalibrationService, filename=DETX_FILENAME)
+        pipe.attach(CalibrationService, filename=data_path("detx/detx_v1.detx"))
         pipe.attach(HitCalibrator)
         pipe.drain(1)
 
@@ -219,7 +215,7 @@ class TestCalibrationService(TestCase):
                 assert isinstance(det, Detector)
 
         pipe = Pipeline()
-        pipe.attach(CalibrationService, filename=DETX_FILENAME)
+        pipe.attach(CalibrationService, filename=data_path("detx/detx_v1.detx"))
         pipe.attach(DetectorReader)
         pipe.drain(1)
 

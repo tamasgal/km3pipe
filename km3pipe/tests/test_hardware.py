@@ -20,7 +20,7 @@ from io import StringIO
 
 import numpy as np
 
-from km3pipe.testing import TestCase
+from km3pipe.testing import TestCase, data_path
 from km3pipe.hardware import Detector, PMT
 from km3pipe.math import qrot_yaw
 
@@ -87,8 +87,6 @@ EXAMPLE_DETX_RADIAL = StringIO(
         " 10 0 0 -1 0 0 -1 100",
     ))
 )
-
-TEST_DATA_DIR = join(dirname(__file__), "../kp-data/test_data")
 
 
 class TestDetector(TestCase):
@@ -272,7 +270,7 @@ class TestDetector(TestCase):
         assert 3 == det.n_doms
 
     def test_detx_format_version_1(self):
-        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v1.detx'))
+        det = Detector(filename=data_path('detx/detx_v1.detx'))
         assert 2 == det.n_dus
         assert 6 == det.n_doms
         assert 3 == det.n_pmts_per_dom
@@ -282,12 +280,12 @@ class TestDetector(TestCase):
         self.assertListEqual([23.4, 23.5, 23.6], list(det.pmts.pos[16]))
 
     def test_detx_v1_is_the_same_ascii(self):
-        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v1.detx'))
-        with open(join(TEST_DATA_DIR, 'detx_v1.detx'), 'r') as fobj:
+        det = Detector(filename=data_path('detx/detx_v1.detx'))
+        with open(data_path('detx/detx_v1.detx'), 'r') as fobj:
             assert fobj.read() == det.ascii
 
     def test_detx_format_version_2(self):
-        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v2.detx'))
+        det = Detector(filename=data_path('detx/detx_v2.detx'))
         assert 2 == det.n_dus
         assert 6 == det.n_doms
         assert 3 == det.n_pmts_per_dom
@@ -304,12 +302,12 @@ class TestDetector(TestCase):
         self.assertListEqual([23.4, 23.5, 23.6], list(det.pmts.pos[16]))
 
     def test_detx_v2_is_the_same_ascii(self):
-        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v2.detx'))
-        with open(join(TEST_DATA_DIR, 'detx_v2.detx'), 'r') as fobj:
+        det = Detector(filename=data_path('detx/detx_v2.detx'))
+        with open(data_path('detx/detx_v2.detx'), 'r') as fobj:
             assert fobj.read() == det.ascii
 
     def test_detx_format_version_3(self):
-        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v3.detx'))
+        det = Detector(filename=data_path('detx/detx_v3.detx'))
         assert 2 == det.n_dus
         assert 6 == det.n_doms
         assert 3 == det.n_pmts_per_dom
@@ -326,11 +324,11 @@ class TestDetector(TestCase):
         self.assertListEqual([23.4, 23.5, 23.6], list(det.pmts.pos[16]))
 
     def test_detector_repr(self):
-        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v3.detx'))
+        det = Detector(filename=data_path('detx/detx_v3.detx'))
         assert "Detector id: '23', n_doms: 6, dus: [1, 2]" == repr(det)
 
     def test_detx_format_version_3_with_whitespace(self):
-        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v3_whitespace.detx'))
+        det = Detector(filename=data_path('detx/detx_v3_whitespace.detx'))
         assert 2 == det.n_dus
         assert 6 == det.n_doms
         assert 3 == det.n_pmts_per_dom
@@ -347,27 +345,27 @@ class TestDetector(TestCase):
         self.assertListEqual([23.4, 23.5, 23.6], list(det.pmts.pos[16]))
 
     def test_detx_format_comments(self):
-        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v1.detx'))
+        det = Detector(filename=data_path('detx/detx_v1.detx'))
         assert len(det.comments) == 0
 
-        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v2.detx'))
+        det = Detector(filename=data_path('detx/detx_v2.detx'))
         assert len(det.comments) == 0
 
-        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v3.detx'))
+        det = Detector(filename=data_path('detx/detx_v3.detx'))
         assert len(det.comments) == 2
         assert " a comment line" == det.comments[0]
         assert " another comment line starting with '#'" == det.comments[1]
 
     def test_comments_are_written(self):
-        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v3.detx'))
+        det = Detector(filename=data_path('detx/detx_v3.detx'))
         det.add_comment("foo")
         assert 3 == len(det.comments)
         assert det.comments[2] == "foo"
         assert "# foo" == det.ascii.splitlines()[2]
 
     def test_detx_v3_is_the_same_ascii(self):
-        det = Detector(filename=join(TEST_DATA_DIR, 'detx_v3.detx'))
-        with open(join(TEST_DATA_DIR, 'detx_v3.detx'), 'r') as fobj:
+        det = Detector(filename=data_path('detx/detx_v3.detx'))
+        with open(data_path('detx/detx_v3.detx'), 'r') as fobj:
             assert fobj.read() == det.ascii
 
     def test_translate_detector(self):
@@ -491,7 +489,7 @@ class TestDetector(TestCase):
 
 
     def test_jdetectordb_output_with_detx_v3(self):
-        det = Detector(join(TEST_DATA_DIR, "D_ORCA006_t.A02181836.p.A02181837.r.A02182001.detx"))
+        det = Detector(data_path("detx/D_ORCA006_t.A02181836.p.A02181837.r.A02182001.detx"))
         assert det.utm_info is not None
         assert det.utm_info.ellipsoid == "WGS84"
         assert det.utm_info.grid == "32N"

@@ -2,19 +2,14 @@
 from os.path import join, dirname
 
 import km3pipe as kp
-from km3pipe.testing import TestCase
+from km3pipe.testing import TestCase, data_path
 from km3pipe.io.offline import EventPump, OfflinePump
-
-DATA_DIR = join(dirname(__file__), '../../kp-data/test_data/')
 
 
 class TestEventPump(TestCase):
     def setUp(self):
         self.pump = EventPump(
-            filename=join(
-                DATA_DIR,
-                "mcv5.0.DAT004340.propa.sirene.jte.jchain.aanet.4340.root"
-            )
+            filename=data_path("offline/mcv5.0.DAT004340.propa.sirene.jte.jchain.aanet.4340.root")
         )
 
     def test_iteration(self):
@@ -68,9 +63,8 @@ class TestEventPump(TestCase):
 class TestOfflinePump(TestCase):
     def setUp(self):
         self.pump = OfflinePump(
-            filename=join(
-                DATA_DIR,
-                "mcv5.0.DAT004340.propa.sirene.jte.jchain.aanet.4340.root"
+            filename=data_path(
+                "offline/mcv5.0.DAT004340.propa.sirene.jte.jchain.aanet.4340.root"
             )
         )
 
@@ -101,9 +95,8 @@ class TestOfflinePump(TestCase):
         pipe = kp.Pipeline()
         pipe.attach(
             OfflinePump,
-            filename=join(
-                DATA_DIR,
-                "mcv5.0.DAT004340.propa.sirene.jte.jchain.aanet.4340.root"
+            filename=data_path(
+                "offline/mcv5.0.DAT004340.propa.sirene.jte.jchain.aanet.4340.root"
             )
         )
         pipe.attach(Observer)

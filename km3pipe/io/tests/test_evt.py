@@ -6,7 +6,7 @@ from os.path import join, dirname
 
 import numpy as np
 
-from km3pipe.testing import TestCase, skip
+from km3pipe.testing import TestCase, skip, data_path
 from km3pipe.io.evt import EvtPump, EVT_PARSERS
 
 __author__ = "Tamas Gal"
@@ -16,8 +16,6 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
-
-TEST_DATA_DIR = join(dirname(__file__), '../../kp-data/test_data/')
 
 
 class TestEvtPump(TestCase):
@@ -258,7 +256,7 @@ class TestEvtPump(TestCase):
 
 class TestEvtFilePump(TestCase):
     def setUp(self):
-        self.fname = join(TEST_DATA_DIR, 'example_numuNC.evt')
+        self.fname = data_path("evt/example_numuNC.evt")
 
     def test_pipe(self):
         pump = EvtPump(filename=self.fname)
@@ -268,7 +266,7 @@ class TestEvtFilePump(TestCase):
 
 class TestCorsika(TestCase):
     def setUp(self):
-        self.fname = join(TEST_DATA_DIR, 'example_corant_propa.evt')
+        self.fname = data_path('evt/example_corant_propa.evt')
 
     def test_pipe(self):
         pump = EvtPump(filename=self.fname)
@@ -278,10 +276,10 @@ class TestCorsika(TestCase):
 
 class TestPropa(TestCase):
     def setUp(self):
-        self.fname = join(TEST_DATA_DIR, 'example_corant_propa.evt')
+        self.fname = data_path('evt/example_corant_propa.evt')
         self.fnames = []
         for i in [0, 1]:
-            self.fnames.append(join(TEST_DATA_DIR, 'example_corant_propa.evt'))
+            self.fnames.append(data_path('evt/example_corant_propa.evt'))
 
     def test_pipe(self):
         pump = EvtPump(filename=self.fname, parsers=['propa'])
@@ -319,7 +317,7 @@ class TestPropa(TestCase):
 
 class TestKM3Sim(TestCase):
     def setUp(self):
-        self.fname = join(TEST_DATA_DIR, 'KM3Sim.evt')
+        self.fname = data_path('evt/KM3Sim.evt')
 
     def test_pipe(self):
         pump = EvtPump(filename=self.fname, parsers=['km3sim'])
