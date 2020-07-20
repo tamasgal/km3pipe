@@ -387,13 +387,13 @@ Version 8
 
 
 8.10.1 / 2019-02-01
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 * Changed dtype of ``du`` and ``floor`` of calibrated hits from ``<f8`` to
   ``<u2``
 * Major performance upgrade for large HDF5 when reading with the ``HDF5Pump``
 
 8.10.0 / 2019-01-18
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 * A new class ``kp.io.daq.DMMonitor``` to able to communicate with the
   Detector Manager. It can be used to monitor e.g. CLB parameters in real time
   before they are put into the KM3NeT database
