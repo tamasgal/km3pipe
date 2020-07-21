@@ -16,7 +16,7 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-STYLE_DIR = join(dirname(dirname(__file__)), 'kp-data/stylelib')
+STYLE_DIR = join(dirname(dirname(__file__)), 'stylelib')
 
 
 def get_style_path(style):

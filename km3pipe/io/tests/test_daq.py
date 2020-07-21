@@ -8,39 +8,30 @@ from os.path import dirname, join
 
 import numpy as np
 
-from km3pipe.testing import TestCase
+from km3pipe.testing import TestCase, data_path
 from km3pipe.io.daq import (
     DAQPump, DAQPreamble, DAQHeader, DAQSummaryslice, DMMonitor, TMCHRepump,
     TimesliceParser
 )
 
-TEST_DATA_DIR = join(dirname(__file__), "../../kp-data/test_data")
-IO_SUM_FILE = join(TEST_DATA_DIR, "IO_SUM.dat")
-IO_EVT_FILE = join(TEST_DATA_DIR, "IO_EVT.dat")
-IO_MONIT_FILE = join(TEST_DATA_DIR, "IO_MONIT.dat")
-IO_TSL0 = join(TEST_DATA_DIR, "daq", "IO_TSL0.dat")
-IO_TSL1 = join(TEST_DATA_DIR, "daq", "IO_TSL1.dat")
-IO_TSL2 = join(TEST_DATA_DIR, "daq", "IO_TSL2.dat")
-
-
 class TestDAQPump(TestCase):
     def test_init_with_filename(self):
-        DAQPump(filename=IO_SUM_FILE)
+        DAQPump(filename=data_path("daq/IO_SUM.dat"))
 
     def test_frame_positions_in_io_sum(self):
-        p = DAQPump(filename=IO_SUM_FILE)
+        p = DAQPump(filename=data_path("daq/IO_SUM.dat"))
         assert 81 == len(p.frame_positions)
         self.assertListEqual([0, 656, 1312], p.frame_positions[:3])
         self.assertListEqual([50973, 51629, 52285], p.frame_positions[-3:])
 
     def test_frame_positions_in_io_evt(self):
-        p = DAQPump(filename=IO_EVT_FILE)
+        p = DAQPump(filename=data_path("daq/IO_EVT.dat"))
         assert 38 == len(p.frame_positions)
         self.assertListEqual([0, 570, 986], p.frame_positions[:3])
         self.assertListEqual([13694, 14016, 14360], p.frame_positions[-3:])
 
     def test_blob_in_io_sum(self):
-        p = DAQPump(filename=IO_SUM_FILE)
+        p = DAQPump(filename=data_path("daq/IO_SUM.dat"))
         blob = p.next_blob()
         assert 'DAQSummaryslice' in blob.keys()
         assert 'DAQPreamble' in blob.keys()
@@ -48,7 +39,7 @@ class TestDAQPump(TestCase):
         assert 16 == blob['DAQSummaryslice'].n_summary_frames
 
     def test_blob_in_io_evt(self):
-        p = DAQPump(filename=IO_EVT_FILE)
+        p = DAQPump(filename=data_path("daq/IO_EVT.dat"))
         blob = p.next_blob()
         assert 'DAQEvent' in blob.keys()
         assert 'DAQPreamble' in blob.keys()
@@ -58,12 +49,12 @@ class TestDAQPump(TestCase):
         assert 28 == event.n_snapshot_hits
 
     def test_blob_iteration(self):
-        p = DAQPump(filename=IO_EVT_FILE)
+        p = DAQPump(filename=data_path("daq/IO_EVT.dat"))
         for blob in p:
             pass
 
     def test_get_item(self):
-        p = DAQPump(filename=IO_EVT_FILE)
+        p = DAQPump(filename=data_path("daq/IO_EVT.dat"))
         blob = p[4]
         event = blob['DAQEvent']
         assert 6 == event.n_triggered_hits
@@ -72,7 +63,7 @@ class TestDAQPump(TestCase):
 
 class TestTMCHRepump(TestCase):
     def test_reading_version_2(self):
-        repump = TMCHRepump(filename=IO_MONIT_FILE)
+        repump = TMCHRepump(filename=data_path("daq/IO_MONIT.dat"))
         packets = [p['TMCHData'] for p in repump]
 
         p1 = packets[0]
@@ -124,7 +115,7 @@ class TestDMMonitor(TestCase):
 
 class TestTimesliceParser(TestCase):
     def test_l0(self):
-        with open(IO_TSL0, 'rb') as fobj:
+        with open(data_path("daq/IO_TSL0.dat"), 'rb') as fobj:
             ts_info, ts_frameinfos, ts_hits = TimesliceParser(
             )._parse_timeslice(fobj)
         assert 200 == len(ts_hits)
@@ -133,14 +124,14 @@ class TestTimesliceParser(TestCase):
         assert 232 == ts_info[0].frame_index
 
     def test_l1(self):
-        with open(IO_TSL1, 'rb') as fobj:
+        with open(data_path("daq/IO_TSL1.dat"), 'rb') as fobj:
             ts_info, ts_frameinfos, ts_hits = TimesliceParser(
             )._parse_timeslice(fobj)
         assert 0 == len(ts_hits)
         assert 4873 == ts_info[0].frame_index
 
     def test_l2(self):
-        with open(IO_TSL2, 'rb') as fobj:
+        with open(data_path("daq/IO_TSL2.dat"), 'rb') as fobj:
             ts_info, ts_frameinfos, ts_hits = TimesliceParser(
             )._parse_timeslice(fobj)
         assert 0 == len(ts_hits)

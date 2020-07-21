@@ -1,7 +1,7 @@
 # Filename: test_db.py
 # pylint: disable=C0111,E1003,R0904,C0103,R0201,C0102
 from os.path import dirname, join
-from km3pipe.testing import TestCase, MagicMock, patch
+from km3pipe.testing import TestCase, MagicMock, patch, data_path
 
 from km3pipe.db import (
     DBManager, we_are_in_lyon, read_csv, make_empty_dataset, StreamDS, CLBMap
@@ -40,9 +40,6 @@ JSON_DOMS = [{
 }]
 
 log = get_logger('db')
-
-TEST_DATA_DIR = join(dirname(__file__), '../kp-data/test_data')
-STREAMDS_META = join(TEST_DATA_DIR, "db/streamds_output.txt")
 
 
 class TestDBManager(TestCase):
@@ -100,7 +97,7 @@ class TestDataSetFunctions(TestCase):
 class TestStreamDS(TestCase):
     @patch('km3pipe.db.DBManager')
     def setUp(self, db_manager_mock):
-        with open(STREAMDS_META, 'r') as fobj:
+        with open(data_path("db/streamds_output.txt"), 'r') as fobj:
             streamds_meta = fobj.read()
         db_manager_mock_obj = db_manager_mock.return_value
         db_manager_mock_obj._get_content.return_value = streamds_meta
@@ -145,7 +142,7 @@ class TestCLBMap(TestCase):
     @patch('km3pipe.db.StreamDS')
     def test_call_with_det_oid(self, streamds_mock):
         streamds_mock_obj = streamds_mock.return_value
-        with open(join(TEST_DATA_DIR, 'db/clbmap.txt'), 'r') as fobj:
+        with open(data_path('db/clbmap.txt'), 'r') as fobj:
             streamds_mock_obj.clbmap.return_value = read_csv(fobj.read())
         self.clbmap = CLBMap('a')
         streamds_mock_obj.clbmap.assert_called_with(detoid='a')
@@ -156,7 +153,7 @@ class TestCLBMap(TestCase):
         streamds_mock_obj = streamds_mock.return_value
         dbmanager_mock_obj = dbmanager_mock.return_value
         dbmanager_mock_obj.get_det_oid.return_value = 'a'
-        with open(join(TEST_DATA_DIR, 'db/clbmap.txt'), 'r') as fobj:
+        with open(data_path('db/clbmap.txt'), 'r') as fobj:
             streamds_mock_obj.clbmap.return_value = read_csv(fobj.read())
         self.clbmap = CLBMap(1)
         streamds_mock_obj.clbmap.assert_called_with(detoid='a')
@@ -164,7 +161,7 @@ class TestCLBMap(TestCase):
     @patch('km3pipe.db.StreamDS')
     def setUp(self, streamds_mock):
         streamds_mock_obj = streamds_mock.return_value
-        with open(join(TEST_DATA_DIR, 'db/clbmap.txt'), 'r') as fobj:
+        with open(data_path('db/clbmap.txt'), 'r') as fobj:
             streamds_mock_obj.clbmap.return_value = read_csv(fobj.read())
         self.clbmap = CLBMap('a')
 

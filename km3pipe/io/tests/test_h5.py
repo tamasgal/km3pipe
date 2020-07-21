@@ -14,9 +14,7 @@ from km3pipe.io.hdf5 import (
     FORMAT_VERSION
 )
 from km3pipe.tools import insert_prefix_to_dtype
-from km3pipe.testing import TestCase
-
-DATA_DIR = join(dirname(__file__), '../../kp-data/test_data/')
+from km3pipe.testing import TestCase, data_path
 
 
 class TestMultiTable(TestCase):
@@ -84,7 +82,7 @@ class TestMultiTable(TestCase):
 
 class TestH5Pump(TestCase):
     def setUp(self):
-        self.fname = join(DATA_DIR, 'numu_cc_test.h5')
+        self.fname = data_path('hdf5/numu_cc_test.h5')
 
     def test_init_sets_filename_if_no_keyword_arg_is_passed(self):
         p = HDF5Pump(filename=self.fname)
@@ -102,7 +100,7 @@ class TestH5Pump(TestCase):
         p.drain()
 
     def test_event_info_is_not_empty(self):
-        self.fname = join(DATA_DIR, 'test_event_info.h5')
+        self.fname = data_path('hdf5/test_event_info.h5')
 
         class Printer(Module):
             def process(self, blob):
@@ -115,7 +113,7 @@ class TestH5Pump(TestCase):
         p.drain()
 
     def test_event_info_has_correct_group_id(self):
-        self.fname = join(DATA_DIR, 'test_event_info.h5')
+        self.fname = data_path('hdf5/test_event_info.h5')
 
         class Printer(Module):
             def configure(self):
@@ -132,7 +130,7 @@ class TestH5Pump(TestCase):
         p.drain()
 
     def test_get_blob(self):
-        fname = join(DATA_DIR, 'test_event_info.h5')
+        fname = data_path('hdf5/test_event_info.h5')
         pump = HDF5Pump(filename=fname)
         assert 44 == len(pump[0]['McTracks'])
         assert 3 == len(pump[1]['McTracks'])
@@ -229,7 +227,7 @@ class TestHDF5PumpMultiFileReadout(TestCase):
 
 class TestH5Sink(TestCase):
     def setUp(self):
-        self.fname = join(DATA_DIR, 'numu_cc_test.h5')
+        self.fname = data_path('hdf5/numu_cc_test.h5')
         self.fobj = tempfile.NamedTemporaryFile(delete=True)
         self.out = tb.open_file(
             self.fobj.name,
@@ -1142,7 +1140,7 @@ class TestHDF5Header(TestCase):
         self.assertTupleEqual((1, 2, 3), header.param_d)
 
     def test_header_from_hdf5_file(self):
-        header = HDF5Header.from_hdf5(join(DATA_DIR, 'raw_header.h5'))
+        header = HDF5Header.from_hdf5(data_path('hdf5/raw_header.h5'))
         assert 'MUSIC' == header.propag[0]
         assert 'seawater' == header.propag[1]
         assert 3450 == header.seabottom[0]

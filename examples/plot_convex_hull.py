@@ -14,14 +14,15 @@ import numpy as np
 from scipy.spatial import ConvexHull
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D    # noqa
+from km3net_testdata import data_path
 
 from km3pipe.hardware import Detector
 from km3pipe.math import Polygon
 import km3pipe.style
 km3pipe.style.use("km3pipe")
 
-filename = "data/orca_115strings_av23min20mhorizontal_18OMs_alt9mvertical_v1.detx"    # noqa
-detector = Detector(filename)
+detx = data_path('detx/orca_115strings_av23min20mhorizontal_18OMs_alt9mvertical_v1.detx')
+detector = Detector(detx)
 xy = detector.xy_positions
 hull = ConvexHull(xy)
 

@@ -7,10 +7,9 @@
 from io import StringIO
 from os.path import join, dirname
 
-from km3pipe.testing import TestCase
+from km3pipe.testing import TestCase, data_path
 from km3pipe.io.clb import CLBPump
 
-DATA_DIR = join(dirname(__file__), '../../kp-data/test_data/daq')
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -23,7 +22,7 @@ __status__ = "Development"
 
 class TestCLBPump(TestCase):
     def setUp(self):
-        self.pump = CLBPump(file=join(DATA_DIR, 'clb.dqd'))
+        self.pump = CLBPump(file=data_path('daq/clb.dqd'))
 
     def test_determine_packet_positions_finds_packets(self):
         self.assertListEqual([0, 1406, 2284], self.pump._packet_positions)

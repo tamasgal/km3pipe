@@ -14,14 +14,15 @@ Plot the PMT directions for a given DOM.
 from mpl_toolkits.mplot3d import axes3d
 import matplotlib.pyplot as plt
 
+from km3net_testdata import data_path
+
 import km3pipe as kp
 import km3pipe.style
 km3pipe.style.use('km3pipe')
 km3pipe.style.use('talk')
 
-DETX = 'data/orca_115strings_av23min20mhorizontal_18OMs_alt9mvertical_v1.detx'
-
-det = kp.hardware.Detector(DETX)
+detx = data_path('detx/orca_115strings_av23min20mhorizontal_18OMs_alt9mvertical_v1.detx')
+det = kp.hardware.Detector(detx)
 
 #####################################################
 # Alternatively, you can use the `det_id` to retrieve the geometry from the DB.
