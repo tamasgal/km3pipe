@@ -25,6 +25,10 @@ class TestEventPump(TestCase):
         self.jpp_pump = EventPump(filename=ONLINE_TEST_FILE)
         self.h5_pump = HDF5Pump(filename=ONLINE_TEST_FILE_H5)
 
+    def tearDown(self):
+        self.jpp_pump.finish()
+        self.h5_pump.finish()
+
     def test_event_info(self):
         n = self.jpp_pump.n_events
         for i in range(n):

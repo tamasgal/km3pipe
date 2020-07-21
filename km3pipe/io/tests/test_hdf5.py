@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """Tests for HDF5 stuff"""
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 import tempfile
 from os.path import join, dirname
 
@@ -13,76 +13,12 @@ from km3pipe.io.hdf5 import (
     HDF5Pump, HDF5Sink, HDF5Header, convert_header_dict_to_table,
     FORMAT_VERSION
 )
-from km3pipe.tools import insert_prefix_to_dtype
 from km3pipe.testing import TestCase, data_path
-
-
-class TestMultiTable(TestCase):
-    def setUp(self):
-        self.foo = np.array([
-            (1.0, 2.0, 3.0),
-            (4.0, 5.0, 6.0),
-        ],
-                            dtype=[
-                                ('a', '<f8'),
-                                ('b', '<f8'),
-                                ('c', '<f8'),
-                            ])
-        self.bar = np.array([
-            (10.0, 20.0, 30.0),
-            (40.0, 50.0, 60.0),
-        ],
-                            dtype=[
-                                ('aa', '<f8'),
-                                ('bb', '<f8'),
-                                ('cc', '<f8'),
-                            ])
-        self.tabs = {'foo': self.foo, 'bar': self.bar}
-        self.where = '/lala'
-        self.fobj = tempfile.NamedTemporaryFile(delete=True)
-        self.h5name = self.fobj.name
-        self.h5file = tb.open_file(
-        # create the file in memory only
-            self.h5name,
-            'w',
-            driver="H5FD_CORE",
-            driver_core_backing_store=0
-        )
-        for name, tab in self.tabs.items():
-            self.h5file.create_table(
-                self.where, name=name, obj=tab, createparents=True
-            )
-
-    def tearDown(self):
-        self.h5file.close()
-        self.fobj.close()
-
-    def test_name_insert(self):
-        exp_foo = ('foo_a', 'foo_b', 'foo_c')
-        exp_bar = ('bar_aa', 'bar_bb', 'bar_cc')
-        pref_foo = insert_prefix_to_dtype(self.tabs['foo'], 'foo')
-        pref_bar = insert_prefix_to_dtype(self.tabs['bar'], 'bar')
-        self.assertEqual(exp_foo, pref_foo.dtype.names)
-        self.assertEqual(exp_bar, pref_bar.dtype.names)
-
-    # def test_group_read(self):
-    #    tabs = read_group(self.h5file.root)
-    #    exp_cols = (
-    #        'bar_aa', 'bar_bb', 'bar_cc',
-    #        'foo_a', 'foo_b', 'foo_c',
-    #    )
-    #    exp_shape = (2, 6)
-    #    res_shape = tabs.shape
-    #    res_cols = tuple(tabs.columns)
-    #    print(exp_cols)
-    #    print(res_cols)
-    #    self.assertEqual(exp_shape, res_shape)
-    #    self.assertEqual(exp_cols, res_cols)
 
 
 class TestH5Pump(TestCase):
     def setUp(self):
-        self.fname = data_path('hdf5/numu_cc_test.h5')
+        self.fname = data_path('hdf5/mcv5.40.mupage_10G.sirene.jterbr00006060.962.root.h5')
 
     def test_init_sets_filename_if_no_keyword_arg_is_passed(self):
         p = HDF5Pump(filename=self.fname)
@@ -95,9 +31,28 @@ class TestH5Pump(TestCase):
         pump.finish()
 
     def test_pipe(self):
+        class Observer(Module):
+            def configure(self):
+                self.dump = defaultdict(list)
+
+            def process(self, blob):
+                for key, data in blob.items():
+                    if key == "Header":
+                        self.dump['headers'].append(data)
+                    else:
+                        self.dump[key].append(len(data))
+                return blob
+
+            def finish(self):
+                return self.dump
+
         p = Pipeline()
         p.attach(HDF5Pump, filename=self.fname)
-        p.drain()
+        p.attach(Observer)
+        results = p.drain()['Observer']
+        self.assertListEqual([147, 110, 70, 62, 59, 199, 130, 92, 296, 128], results['Hits'])
+        self.assertListEqual([315, 164, 100, 111, 123, 527, 359, 117, 984, 263], results['McHits'])
+        self.assertListEqual([1, 1, 1, 1, 1, 3, 2, 1, 2, 1], results['McTracks'])
 
     def test_event_info_is_not_empty(self):
         self.fname = data_path('hdf5/test_event_info.h5')
@@ -136,98 +91,12 @@ class TestH5Pump(TestCase):
         assert 3 == len(pump[1]['McTracks'])
         assert 179 == len(pump[2]['McTracks'])
         assert 55 == len(pump[3]['McTracks'])
-
-
-class TestHDF5PumpMultiFileReadout(TestCase):
-    def setUp(self):
-        class DummyPump(Pump):
-            def configure(self):
-                self.i = self.require('i')
-
-            def process(self, blob):
-                blob['Tab'] = Table({'a': self.i}, h5loc='tab')
-                self.i += 1
-                return blob
-
-        self.filenames = []
-        self.fobjs = []
-        for i in range(3):
-            fobj = tempfile.NamedTemporaryFile(delete=True)
-            fname = fobj.name
-            self.filenames.append(fname)
-            self.fobjs.append(fobj)
-            pipe = Pipeline()
-            pipe.attach(DummyPump, i=i)
-            pipe.attach(HDF5Sink, filename=fname)
-            pipe.drain(i + 3)
-
-    def tearDown(self):
-        for fobj in self.fobjs:
-            fobj.close()
-
-    def test_multiple_files_readout_using_the_pump_iterator_called_multiple_times(
-        self
-    ):
-        p = HDF5Pump(filenames=self.filenames)
-
-        assert 3 + 4 + 5 == len([b for b in p])
-        assert 3 + 4 + 5 == len([b for b in p])
-        assert 3 + 4 + 5 == len([b for b in p])
-
-    def test_multiple_files_readout_using_the_pump_iterator(self):
-        p = HDF5Pump(filenames=self.filenames)
-
-        assert 3 + 4 + 5 == len(p)
-
-        tab_a_expected = [0, 1, 2, 1, 2, 3, 4, 2, 3, 4, 5, 6]
-        group_ids_expected = [0, 1, 2, 0, 1, 2, 3, 0, 1, 2, 3, 4]
-
-        tab_a = [b['Tab'].a[0] for b in p]
-        group_ids = [b['Tab'].group_id[0] for b in p]
-
-        self.assertListEqual(tab_a_expected, tab_a)
-        self.assertListEqual(group_ids_expected, group_ids)
-
-    def test_multiple_files_readout_using_the_pipeline(self):
-        class Observer(Module):
-            def configure(self):
-                self._blob_lengths = []
-                self._a = []
-                self._group_ids = []
-                self.index = 0
-
-            def process(self, blob):
-                self._blob_lengths.append(len(blob))
-                self._a.append(blob['Tab'].a[0])
-                self._group_ids.append(blob['GroupInfo'].group_id[0])
-                print(blob)
-                self.index += 1
-                return blob
-
-            def finish(self):
-                return {
-                    'blob_lengths': self._blob_lengths,
-                    'a': self._a,
-                    'group_ids': self._group_ids
-                }
-
-        pipe = Pipeline()
-        pipe.attach(HDF5Pump, filenames=self.filenames)
-        pipe.attach(Observer)
-        results = pipe.drain()
-        summary = results['Observer']
-        assert 12 == len(summary['blob_lengths'])
-        print(summary)
-        assert all(x == 2 for x in summary['blob_lengths'])
-        self.assertListEqual([0, 1, 2, 1, 2, 3, 4, 2, 3, 4, 5, 6],
-                             summary['a'])
-        self.assertListEqual([0, 1, 2, 0, 1, 2, 3, 0, 1, 2, 3, 4],
-                             summary['group_ids'])
+        pump.finish()
 
 
 class TestH5Sink(TestCase):
     def setUp(self):
-        self.fname = data_path('hdf5/numu_cc_test.h5')
+        self.fname = data_path('hdf5/mcv5.40.mupage_10G.sirene.jterbr00006060.962.root.h5')
         self.fobj = tempfile.NamedTemporaryFile(delete=True)
         self.out = tb.open_file(
             self.fobj.name,
