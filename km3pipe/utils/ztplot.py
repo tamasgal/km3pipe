@@ -45,7 +45,7 @@ def main():
     except TypeError:
         pass
     else:
-        pump = kp.io.GenericPump(arguments['FILE'])
+        pump = kp.io.OfflinePump(arguments['FILE'])
         blob = pump[event_id]
         event_info = blob['EventInfo']
         hits = blob['Hits']
