@@ -639,7 +639,7 @@ class TestTable(TestCase):
         assert tab.h5loc == '/foo'
 
     def test_df(self):
-        from pandas.util.testing import assert_frame_equal
+        from pandas.testing import assert_frame_equal
         import pandas as pd
         dt = np.dtype([('a', int), ('b', float), ('c', int)])
         arr = np.array([
