@@ -127,12 +127,6 @@ def token_urlsafe(nbytes=32):
     return base64.urlsafe_b64encode(tok).rstrip(b'=').decode('ascii')
 
 
-def insert_prefix_to_dtype(arr, prefix):
-    new_cols = [prefix + '_' + col for col in arr.dtype.names]
-    arr.dtype.names = new_cols
-    return arr
-
-
 def prettyln(text, fill='-', align='^', prefix='[ ', suffix=' ]', length=69):
     """Wrap `text` in a pretty line with maximum length."""
     text = '{prefix}{0}{suffix}'.format(text, prefix=prefix, suffix=suffix)
