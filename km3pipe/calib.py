@@ -153,13 +153,21 @@ class Calibration(Module):
             hits = Table.from_template(hits, 'Hits')
 
         if hasattr(hits, 'dom_id') and hasattr(hits, 'channel_id'):
-            dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0 = _get_calibration_for_hits(
-                hits, self._calib_by_dom_and_channel
-            )
+            try:
+                dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0 = _get_calibration_for_hits(
+                    hits, self._calib_by_dom_and_channel
+                )
+            except KeyError as e:
+                self.log.critical("Wrong calibration (DETX) data provided.")
+                raise
         elif hasattr(hits, 'pmt_id'):
-            dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0 = _get_calibration_for_mchits(
-                hits, self._calib_by_pmt_id
-            )
+            try:
+                dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0 = _get_calibration_for_mchits(
+                    hits, self._calib_by_pmt_id
+                )
+            except KeyError as e:
+                self.log.critical("Wrong calibration (DETX) data provided.")
+                raise
         else:
             raise TypeError(
                 "Don't know how to apply calibration to '{0}'. "
