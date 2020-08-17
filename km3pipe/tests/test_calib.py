@@ -97,6 +97,26 @@ class TestCalibration(TestCase):
         t0 = a_hit.t0
         self.assertAlmostEqual(11.2 + t0, a_hit.time)
 
+    def test_apply_to_hits_with_pmt_id_with_wrong_calib_raises(self):
+        calib = Calibration(filename=data_path("detx/detx_v1.detx"))
+
+        hits = Table({'pmt_id': [999], 'time': [10.1]})
+
+        with self.assertRaises(KeyError):
+            calib.apply(hits)
+
+    def test_apply_to_hits_with_dom_id_and_channel_id_with_wrong_calib_raises(self):
+        calib = Calibration(filename=data_path("detx/detx_v1.detx"))
+
+        hits = Table({
+            'dom_id': [999],
+            'channel_id': [0],
+            'time': [10.1]
+        })
+
+        with self.assertRaises(KeyError):
+            calib.apply(hits)
+
     def test_time_slewing_correction(self):
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
 
