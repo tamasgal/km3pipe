@@ -354,6 +354,7 @@ class DBManager(object):
             self.log.error(
                 "Run {} not found for detector {}".format(run, det_id)
             )
+            return None
 
         tcal = run_info.T0_CALIBSETID
         if str(tcal) == 'nan':
