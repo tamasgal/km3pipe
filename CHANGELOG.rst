@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* ``runtable`` can now filter on job target (e.g. ``-t run``)
 
 Version 9
 ---------
