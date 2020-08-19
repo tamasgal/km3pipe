@@ -12,6 +12,7 @@ Options:
     -c                  Compact view.
     -n RUNS             Number of runs.
     -r FROM_RUN-TO_RUN  Range of runs (example: 3100-3200).
+    -t TARGET           Job target (run/on/off)
     -s REGEX            Regular expression to filter the runsetup name/id.
     DET_ID              Detector ID (eg. D_ARCA001).
 
@@ -32,7 +33,7 @@ __status__ = "Development"
 log = kp.logger.get_logger(__name__)
 
 
-def runtable(det_id, n=5, run_range=None, compact=False, sep='\t', regex=None):
+def runtable(det_id, n=5, run_range=None, target=None, compact=False, sep='\t', regex=None):
     """Print the run table of the last `n` runs for given detector"""
     db = kp.db.DBManager()
     df = db.run_table(det_id)
@@ -56,6 +57,9 @@ def runtable(det_id, n=5, run_range=None, compact=False, sep='\t', regex=None):
         df = df[df['RUNSETUPNAME'].str.contains(regex)
                 | df['RUNSETUPID'].str.contains(regex)]
 
+    if target is not None:
+        df = df[df['JOBTARGET'] == target.capitalize()]
+
     if n is not None:
         df = df.tail(n)
 
@@ -78,6 +82,7 @@ def main():
         args['DET_ID'],
         n=n,
         run_range=args['-r'],
+        target=args['-t'],
         regex=args['-s'],
         compact=args['-c']
     )
