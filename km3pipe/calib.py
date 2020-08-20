@@ -136,7 +136,7 @@ class Calibration(Module):
             hits.time += cal
         return hits
 
-    def apply(self, hits, no_copy=False, correct_slewing=False):
+    def apply(self, hits, no_copy=False, correct_slewing=False, slewing_variant=3):
         """Add x, y, z, t0 (and du, floor if DataFrame) columns to the hits.
 
         """
@@ -210,7 +210,7 @@ class Calibration(Module):
         }
         hits_data.update(calib)
         if correct_slewing:
-            hits_data["time"] -= slew(hits_data["tot"])
+            hits_data["time"] -= slew(hits_data["tot"], variant=slewing_variant)
         return Table(
             hits_data, h5loc=hits.h5loc, split_h5=hits.split_h5, name=hits.name
         )
