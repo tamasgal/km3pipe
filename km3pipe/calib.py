@@ -424,7 +424,7 @@ class CalibrationService(Module):
 
 
 @jit
-def slew(tot):
+def slew(tot, variant=3):
     """Calculate the time slewing of a PMT response for a given ToT
 
 
@@ -432,28 +432,32 @@ def slew(tot):
     ----------
     tot: int or np.array(int)
       Time over threshold value of a hit
+    variant: int, optional
+      The variant of the slew calculation.
+      1: The first parametrisation approach
+      2: Jannik's improvement of the parametrisation
+      3: The latest lookup table approach based on lab measurements,
+         also used in Jpp (v13).
 
     Returns
     -------
-    time: int or np.array(int)
+    time: int
       Time slewing, which has to be subtracted from the original hit time.
     """
 
-    # First parametrisation
-    # p0 = 7.70824
-    # p1 = 0.00879447
-    # p2 = -0.0621101
-    # p3 = -1.90226
-
-    # Second parametrisation
-    # p0 =  13.6488662517;
-    # p1 =  -0.128744123166;
-    # p2 =  -0.0174837749244;
-    # p3 =  -4.47119633965;
-
-    # corr = p0 * np.exp(p1 * np.sqrt(tot) + p2 * tot) + p3
-    #      this->push_back(  8.01,     #
-    # return corr
+    if variant < 3:
+        if variant == 1:
+            p0 = 7.70824
+            p1 = 0.00879447
+            p2 = -0.0621101
+            p3 = -1.90226
+        if variant == 2:
+            p0 =  13.6488662517
+            p1 =  -0.128744123166
+            p2 =  -0.0174837749244
+            p3 =  -4.47119633965
+        corr = p0 * np.exp(p1 * np.sqrt(tot) + p2 * tot) + p3
+        return corr
     corr = np.array(
         [
             8.01,
