@@ -1,6 +1,7 @@
 Unreleased changes
 ------------------
 * ``runtable`` can now filter on job target (e.g. ``-t run``)
+* Switch from yapf to black for code formatting
 
 Version 9
 ---------
