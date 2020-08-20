@@ -21,7 +21,9 @@ import km3pipe.style
 km3pipe.style.use('km3pipe')
 km3pipe.style.use('talk')
 
-detx = data_path('detx/orca_115strings_av23min20mhorizontal_18OMs_alt9mvertical_v1.detx')
+detx = data_path(
+    'detx/orca_115strings_av23min20mhorizontal_18OMs_alt9mvertical_v1.detx'
+)
 det = kp.hardware.Detector(detx)
 
 #####################################################

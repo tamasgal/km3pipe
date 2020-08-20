@@ -73,7 +73,8 @@ def we_are_on_jupyterhub():
 def we_are_on_km3net_gitlab_ci():
     """Check if we are on a GitLab CI runner server"""
     import urllib.request
-    external_ip = urllib.request.urlopen('https://ident.me').read().decode('utf8')
+    external_ip = urllib.request.urlopen('https://ident.me'
+                                         ).read().decode('utf8')
     return external_ip == '131.188.161.155'
 
 

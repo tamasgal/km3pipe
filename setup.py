@@ -38,7 +38,7 @@ setup(
     platforms='any',
     setup_requires=['numpy>=1.12', 'setuptools_scm'],
     install_requires=requirements,
-    extras_require = {"dev": requirements_dev},
+    extras_require={"dev": requirements_dev},
     use_scm_version=True,
     python_requires='>=3.5',
     entry_points={

@@ -14,6 +14,7 @@ from km3pipe.io.daq import (
     TimesliceParser
 )
 
+
 class TestDAQPump(TestCase):
     def test_init_with_filename(self):
         DAQPump(filename=data_path("daq/IO_SUM.dat"))

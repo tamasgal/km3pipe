@@ -15,7 +15,6 @@ __maintainer__ = "Tamas Gal, Johannes Schumann"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-
 ONLINE_TEST_FILE = data_path("online/events_sample.root")
 ONLINE_TEST_FILE_H5 = data_path("online/events_sample.h5")
 

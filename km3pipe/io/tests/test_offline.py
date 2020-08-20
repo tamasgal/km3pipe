@@ -9,7 +9,9 @@ from km3pipe.io.offline import EventPump, OfflinePump
 class TestEventPump(TestCase):
     def setUp(self):
         self.pump = EventPump(
-            filename=data_path("offline/mcv5.0.DAT004340.propa.sirene.jte.jchain.aanet.4340.root")
+            filename=data_path(
+                "offline/mcv5.0.DAT004340.propa.sirene.jte.jchain.aanet.4340.root"
+            )
         )
 
     def test_iteration(self):

@@ -33,7 +33,15 @@ __status__ = "Development"
 log = kp.logger.get_logger(__name__)
 
 
-def runtable(det_id, n=5, run_range=None, target=None, compact=False, sep='\t', regex=None):
+def runtable(
+    det_id,
+    n=5,
+    run_range=None,
+    target=None,
+    compact=False,
+    sep='\t',
+    regex=None
+):
     """Print the run table of the last `n` runs for given detector"""
     db = kp.db.DBManager()
     df = db.run_table(det_id)

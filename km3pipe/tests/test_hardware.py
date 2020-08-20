@@ -487,9 +487,12 @@ class TestDetector(TestCase):
 
         assert np.allclose([-0.2, 0., 0.2], det.com)
 
-
     def test_jdetectordb_output_with_detx_v3(self):
-        det = Detector(data_path("detx/D_ORCA006_t.A02181836.p.A02181837.r.A02182001.detx"))
+        det = Detector(
+            data_path(
+                "detx/D_ORCA006_t.A02181836.p.A02181837.r.A02182001.detx"
+            )
+        )
         assert det.utm_info is not None
         assert det.utm_info.ellipsoid == "WGS84"
         assert det.utm_info.grid == "32N"

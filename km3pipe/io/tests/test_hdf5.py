@@ -18,7 +18,9 @@ from km3pipe.testing import TestCase, data_path
 
 class TestH5Pump(TestCase):
     def setUp(self):
-        self.fname = data_path('hdf5/mcv5.40.mupage_10G.sirene.jterbr00006060.962.root.h5')
+        self.fname = data_path(
+            'hdf5/mcv5.40.mupage_10G.sirene.jterbr00006060.962.root.h5'
+        )
 
     def test_init_sets_filename_if_no_keyword_arg_is_passed(self):
         p = HDF5Pump(filename=self.fname)
@@ -50,9 +52,13 @@ class TestH5Pump(TestCase):
         p.attach(HDF5Pump, filename=self.fname)
         p.attach(Observer)
         results = p.drain()['Observer']
-        self.assertListEqual([147, 110, 70, 62, 59, 199, 130, 92, 296, 128], results['Hits'])
-        self.assertListEqual([315, 164, 100, 111, 123, 527, 359, 117, 984, 263], results['McHits'])
-        self.assertListEqual([1, 1, 1, 1, 1, 3, 2, 1, 2, 1], results['McTracks'])
+        self.assertListEqual([147, 110, 70, 62, 59, 199, 130, 92, 296, 128],
+                             results['Hits'])
+        self.assertListEqual([
+            315, 164, 100, 111, 123, 527, 359, 117, 984, 263
+        ], results['McHits'])
+        self.assertListEqual([1, 1, 1, 1, 1, 3, 2, 1, 2, 1],
+                             results['McTracks'])
 
     def test_event_info_is_not_empty(self):
         self.fname = data_path('hdf5/test_event_info.h5')
@@ -96,7 +102,9 @@ class TestH5Pump(TestCase):
 
 class TestH5Sink(TestCase):
     def setUp(self):
-        self.fname = data_path('hdf5/mcv5.40.mupage_10G.sirene.jterbr00006060.962.root.h5')
+        self.fname = data_path(
+            'hdf5/mcv5.40.mupage_10G.sirene.jterbr00006060.962.root.h5'
+        )
         self.fobj = tempfile.NamedTemporaryFile(delete=True)
         self.out = tb.open_file(
             self.fobj.name,

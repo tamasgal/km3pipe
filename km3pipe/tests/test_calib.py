@@ -27,6 +27,7 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
+
 class TestCalibration(TestCase):
     """Tests for the Calibration class"""
     def test_init_with_wrong_file_extension(self):
@@ -105,14 +106,12 @@ class TestCalibration(TestCase):
         with self.assertRaises(KeyError):
             calib.apply(hits)
 
-    def test_apply_to_hits_with_dom_id_and_channel_id_with_wrong_calib_raises(self):
+    def test_apply_to_hits_with_dom_id_and_channel_id_with_wrong_calib_raises(
+        self
+    ):
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
 
-        hits = Table({
-            'dom_id': [999],
-            'channel_id': [0],
-            'time': [10.1]
-        })
+        hits = Table({'dom_id': [999], 'channel_id': [0], 'time': [10.1]})
 
         with self.assertRaises(KeyError):
             calib.apply(hits)
@@ -196,7 +195,9 @@ class TestCalibrationService(TestCase):
                 return blob
 
         pipe = Pipeline()
-        pipe.attach(CalibrationService, filename=data_path("detx/detx_v1.detx"))
+        pipe.attach(
+            CalibrationService, filename=data_path("detx/detx_v1.detx")
+        )
         pipe.attach(HitCalibrator)
         pipe.drain(1)
 
@@ -223,7 +224,9 @@ class TestCalibrationService(TestCase):
                 return blob
 
         pipe = Pipeline()
-        pipe.attach(CalibrationService, filename=data_path("detx/detx_v1.detx"))
+        pipe.attach(
+            CalibrationService, filename=data_path("detx/detx_v1.detx")
+        )
         pipe.attach(HitCalibrator)
         pipe.drain(1)
 
@@ -235,7 +238,9 @@ class TestCalibrationService(TestCase):
                 assert isinstance(det, Detector)
 
         pipe = Pipeline()
-        pipe.attach(CalibrationService, filename=data_path("detx/detx_v1.detx"))
+        pipe.attach(
+            CalibrationService, filename=data_path("detx/detx_v1.detx")
+        )
         pipe.attach(DetectorReader)
         pipe.drain(1)
 

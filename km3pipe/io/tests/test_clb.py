@@ -10,7 +10,6 @@ from os.path import join, dirname
 from km3pipe.testing import TestCase, data_path
 from km3pipe.io.clb import CLBPump
 
-
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []
