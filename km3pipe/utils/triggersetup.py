@@ -26,7 +26,8 @@ __status__ = "Development"
 
 def main():
     from docopt import docopt
+
     args = docopt(__doc__, version=kp.version)
 
     db = kp.db.DBManager()
-    print(db.trigger_setup(args['RUNSETUP_OID']))
+    print(db.trigger_setup(args["RUNSETUP_OID"]))

@@ -40,24 +40,27 @@ GMM = mixture.GaussianMixture(n_components=1)
 
 class TimesliceCreator(Module):
     """Create `TimesliceHitSeries` from raw timeslice hits."""
+
     def configure(self):
         self.dom_id = self.require("dom_id")
 
     def process(self, blob):
-        hits = blob['TimesliceFrames'][self.dom_id]
+        hits = blob["TimesliceFrames"][self.dom_id]
         n_hits = len(hits)
         if n_hits == 0:
             return blob
         channel_ids, times, tots = zip(*hits)
-        ts_hits = Table({
-            'channel_id': np.array(channel_ids),
-            'dom_id': np.full(n_hits, self.dom_id),
-            'time': np.array(times),
-            'tot': np.array(tots),
-            'group_id': 0
-        })
-        blob['TimesliceHits'] = ts_hits
-        blob['DOM_ID'] = self.dom_id
+        ts_hits = Table(
+            {
+                "channel_id": np.array(channel_ids),
+                "dom_id": np.full(n_hits, self.dom_id),
+                "time": np.array(times),
+                "tot": np.array(tots),
+                "group_id": 0,
+            }
+        )
+        blob["TimesliceHits"] = ts_hits
+        blob["DOM_ID"] = self.dom_id
         return blob
 
 
@@ -86,7 +89,7 @@ class MeanTotDisplay(Module):
         return blob
 
     def update_display(self):
-        os.system('clear')
+        os.system("clear")
         self.print_header()
         for channel, tots in self.tots.items():
             if channel % 8 == 0:
@@ -96,16 +99,16 @@ class MeanTotDisplay(Module):
             # mean_tot = np.median(tots)
             if np.isnan(mean_tot):
                 mean_tot = 0
-            color = 'green'
+            color = "green"
             if mean_tot > self.optimal_tot + self.tolerance:
-                color = 'red'
+                color = "red"
             if mean_tot < self.optimal_tot - self.tolerance:
-                color = 'blue'
+                color = "blue"
             cprint(
                 "Channel {0:02d}: {1:.1f}ns    {2}".format(
-                    channel, mean_tot,
-                    int(mean_tot) * '|'
-                ), color
+                    channel, mean_tot, int(mean_tot) * "|"
+                ),
+                color,
             )
         self.print_scale()
         self.print_footer()
@@ -128,30 +131,31 @@ class MeanTotDisplay(Module):
         )
 
     def print_scale(self):
-        print("                     " + '|----+----' * 5)
+        print("                     " + "|----+----" * 5)
 
 
 def main():
     from docopt import docopt
     import km3pipe as kp
+
     args = docopt(__doc__)
     pipe = kp.Pipeline()
     pipe.attach(
         kp.io.ch.CHPump,
-        host=args['-l'],
-        port=int(args['-p']),
-        tags='IO_TSL',
+        host=args["-l"],
+        port=int(args["-p"]),
+        tags="IO_TSL",
         max_queue=100,
-        timeout=60 * 60 * 24
+        timeout=60 * 60 * 24,
     )
     pipe.attach(kp.io.daq.TimesliceParser)
-    pipe.attach(TimesliceCreator, dom_id=int(args['DOM_ID']))
+    pipe.attach(TimesliceCreator, dom_id=int(args["DOM_ID"]))
     pipe.attach(
         MeanTotDisplay,
         only_if="TimesliceHits",
-        optimal_tot=float(args['-o']),
-        update_frequency=float(args['-u']),
-        tolerance=float(args['-t'])
+        optimal_tot=float(args["-o"]),
+        update_frequency=float(args["-u"]),
+        tolerance=float(args["-t"]),
     )
     pipe.drain()
 

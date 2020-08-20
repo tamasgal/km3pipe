@@ -1,4 +1,4 @@
-__author__ = 'tamasgal'
+__author__ = "tamasgal"
 
 from km3pipe import Module, Pipeline
 from km3pipe.io import EvtPump
@@ -11,6 +11,6 @@ class PrintBlob(Module):
 
 
 pipeline = Pipeline()
-pipeline.attach(EvtPump, 'evtpump', filename='files/example_numuNC.evt')
-pipeline.attach(PrintBlob, 'printer')
+pipeline.attach(EvtPump, "evtpump", filename="files/example_numuNC.evt")
+pipeline.attach(PrintBlob, "printer")
 pipeline.drain(1)

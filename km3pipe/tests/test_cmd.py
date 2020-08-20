@@ -16,24 +16,22 @@ KM3PIPE_GIT = "http://git.km3net.de/km3py/km3pipe.git"
 
 
 class TestDetx(TestCase):
-    @patch('km3pipe.cmd.Detector')
+    @patch("km3pipe.cmd.Detector")
     def test_detector_called_with_correct_det_id(self, mock_detector):
         det = mock_detector.return_value
         det.n_doms = 0
         detx(1)
-        mock_detector.assert_called_with(t0set='', det_id=1, calibration='')
+        mock_detector.assert_called_with(t0set="", det_id=1, calibration="")
 
-    @patch('km3pipe.cmd.Detector')
+    @patch("km3pipe.cmd.Detector")
     def test_detector_write_called_with_correct_filename(self, mock_detector):
         det = mock_detector.return_value
         det.n_doms = 1
         detx(1)
-        self.assertTrue(
-            det.write.call_args[0][0].startswith("KM3NeT_00000001_")
-        )
+        self.assertTrue(det.write.call_args[0][0].startswith("KM3NeT_00000001_"))
         self.assertTrue(det.write.call_args[0][0].endswith(".detx"))
 
-    @patch('km3pipe.cmd.Detector')
+    @patch("km3pipe.cmd.Detector")
     def test_detector_called_with_correct_args(self, mock_detector):
         det = mock_detector.return_value
         det.n_doms = 1
@@ -42,21 +40,21 @@ class TestDetx(TestCase):
 
 
 class TestUpdateKm3pipe(TestCase):
-    @patch('km3pipe.cmd.os')
+    @patch("km3pipe.cmd.os")
     def test_update_without_args_updates_master(self, mock_os):
         update_km3pipe()
         expected = "pip install -U git+{0}@master".format(KM3PIPE_GIT)
         mock_os.system.assert_called_with(expected)
-        update_km3pipe('')
+        update_km3pipe("")
         expected = "pip install -U git+{0}@master".format(KM3PIPE_GIT)
         mock_os.system.assert_called_with(expected)
         update_km3pipe(None)
         expected = "pip install -U git+{0}@master".format(KM3PIPE_GIT)
         mock_os.system.assert_called_with(expected)
 
-    @patch('km3pipe.cmd.os')
+    @patch("km3pipe.cmd.os")
     def test_update_branch(self, mock_os):
-        branch = 'foo'
+        branch = "foo"
         update_km3pipe(branch)
         expected = "pip install -U git+{0}@{1}".format(KM3PIPE_GIT, branch)
         mock_os.system.assert_called_with(expected)

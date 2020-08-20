@@ -10,7 +10,7 @@ from km3pipe.io.daq import TimesliceParser
 
 
 def printer(blob):
-    print(blob['TimesliceFrames'][808447091])
+    print(blob["TimesliceFrames"][808447091])
     return blob
 
 
@@ -32,10 +32,9 @@ class CoincidenceFinder(Module):
         self.m = np.zeros(shape=(465, 41))
 
     def process(self, blob):
-        hits = blob['TimesliceFrames'][808447091]
+        hits = blob["TimesliceFrames"][808447091]
         hits.sort(key=lambda x: x[1])
-        coinces = mongincidence([t for (_, t, _) in hits],
-                                [t for (t, _, _) in hits])
+        coinces = mongincidence([t for (_, t, _) in hits], [t for (t, _, _) in hits])
 
         combs = list(combinations(range(31), 2))
         for pmt_pair, t in coinces:
@@ -58,15 +57,15 @@ class Dumper(Module):
 
     def process(self, blob):
         print("New blob:")
-        print(blob['CHPrefix'])
-        if 'CHData' in blob:
-            tag = str(blob['CHPrefix'].tag)
-            data = blob['CHData']
+        print(blob["CHPrefix"])
+        if "CHData" in blob:
+            tag = str(blob["CHPrefix"].tag)
+            data = blob["CHData"]
             self.dump(data, tag)
         return blob
 
     def dump(self, data, tag):
-        with open('{0}-{1:06}.dat'.format(tag, self.counter), 'bw') as f:
+        with open("{0}-{1:06}.dat".format(tag, self.counter), "bw") as f:
             self.counter += 1
             f.write(data)
 
@@ -74,11 +73,11 @@ class Dumper(Module):
 pipe = Pipeline()
 pipe.attach(
     CHPump,
-    host='172.16.65.58',
+    host="172.16.65.58",
     port=5553,
-    tags='IO_TSL',
+    tags="IO_TSL",
     timeout=60 * 60 * 24,
-    max_queue=42
+    max_queue=42,
 )
 # pipe.attach(Dumper)
 pipe.attach(TimesliceParser)

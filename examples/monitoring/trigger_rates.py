@@ -20,8 +20,9 @@ import time
 import threading
 
 import matplotlib
+
 # Force matplotlib to not use any Xwindows backend.
-matplotlib.use('Agg')    # noqa
+matplotlib.use("Agg")  # noqa
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 import matplotlib.ticker as ticker
@@ -29,28 +30,26 @@ import matplotlib.ticker as ticker
 import km3pipe as kp
 from km3pipe.config import Config
 from km3pipe.io import CHPump
-from km3pipe.io.daq import (DAQPreamble, DAQEvent)
+from km3pipe.io.daq import DAQPreamble, DAQEvent
 import km3pipe.style
-km3pipe.style.use('km3pipe')
+
+km3pipe.style.use("km3pipe")
 
 log = kp.logger.get_logger("trigger_rate")
 
-PLOTS_PATH = 'km3web/plots'
+PLOTS_PATH = "km3web/plots"
 
-xfmt = md.DateFormatter('%Y-%m-%d %H:%M')
+xfmt = md.DateFormatter("%Y-%m-%d %H:%M")
 lock = threading.Lock()
 
-general_style = dict(markersize=6, linestyle='None')
+general_style = dict(markersize=6, linestyle="None")
 styles = {
     "Overall": dict(
-        marker='D',
-        markerfacecolor='None',
-        markeredgecolor='tomato',
-        markeredgewidth=1
+        marker="D", markerfacecolor="None", markeredgecolor="tomato", markeredgewidth=1
     ),
-    "3DMuon": dict(marker='X', markerfacecolor='dodgerblue'),
-    "MXShower": dict(marker='v', markerfacecolor='orange'),
-    "3DShower": dict(marker='o', markerfacecolor='greenyellow'),
+    "3DMuon": dict(marker="X", markerfacecolor="dodgerblue"),
+    "MXShower": dict(marker="v", markerfacecolor="orange"),
+    "3DShower": dict(marker="o", markerfacecolor="greenyellow"),
 }
 
 
@@ -87,14 +86,14 @@ class TriggerRate(kp.Module):
         self.thread = threading.Thread(target=self.plot).start()
 
     def process(self, blob):
-        if not str(blob['CHPrefix'].tag) == 'IO_EVT':
+        if not str(blob["CHPrefix"].tag) == "IO_EVT":
             return blob
-        sys.stdout.write('.')
+        sys.stdout.write(".")
         sys.stdout.flush()
 
-        data = blob['CHData']
+        data = blob["CHData"]
         data_io = BytesIO(data)
-        preamble = DAQPreamble(file_obj=data_io)    # noqa
+        preamble = DAQPreamble(file_obj=data_io)  # noqa
         event = DAQEvent(file_obj=data_io)
         tm = event.trigger_mask
         with lock:
@@ -113,7 +112,7 @@ class TriggerRate(kp.Module):
             self.create_plot()
 
     def create_plot(self):
-        print('\n' + self.__class__.__name__ + ": updating plot.")
+        print("\n" + self.__class__.__name__ + ": updating plot.")
 
         timestamp = datetime.utcnow()
 
@@ -134,14 +133,12 @@ class TriggerRate(kp.Module):
                 **general_style,
                 label=trigger
             )
-        ax.set_title(
-            "Trigger Rates\n{0} UTC".format(datetime.utcnow().strftime("%c"))
-        )
+        ax.set_title("Trigger Rates\n{0} UTC".format(datetime.utcnow().strftime("%c")))
         ax.set_xlabel("time")
         ax.set_ylabel("trigger rate [Hz]")
         ax.xaxis.set_major_formatter(xfmt)
         ax.yaxis.set_major_locator(
-            ticker.LogLocator(base=10.0, subs=(1.0, ), numticks=100)
+            ticker.LogLocator(base=10.0, subs=(1.0,), numticks=100)
         )
         ax.grid(True)
         ax.minorticks_on()
@@ -149,24 +146,22 @@ class TriggerRate(kp.Module):
 
         fig.tight_layout()
 
-        filename = os.path.join(PLOTS_PATH, 'trigger_rates_lin_test.png')
-        filename_tmp = os.path.join(
-            PLOTS_PATH, 'trigger_rates_lin_test_tmp.png'
-        )
+        filename = os.path.join(PLOTS_PATH, "trigger_rates_lin_test.png")
+        filename_tmp = os.path.join(PLOTS_PATH, "trigger_rates_lin_test_tmp.png")
         plt.savefig(filename_tmp, dpi=120, bbox_inches="tight")
         shutil.move(filename_tmp, filename)
 
         try:
-            ax.set_yscale('log')
+            ax.set_yscale("log")
         except ValueError:
             pass
 
-        filename = os.path.join(PLOTS_PATH, 'trigger_rates_test.png')
-        filename_tmp = os.path.join(PLOTS_PATH, 'trigger_rates_test_tmp.png')
+        filename = os.path.join(PLOTS_PATH, "trigger_rates_test.png")
+        filename_tmp = os.path.join(PLOTS_PATH, "trigger_rates_test_tmp.png")
         plt.savefig(filename_tmp, dpi=120, bbox_inches="tight")
         shutil.move(filename_tmp, filename)
 
-        plt.close('all')
+        plt.close("all")
         print("Plot updated at '{}'.".format(filename))
 
     def finish(self):
@@ -178,11 +173,11 @@ class TriggerRate(kp.Module):
 pipe = kp.Pipeline()
 pipe.attach(
     CHPump,
-    host='127.0.0.1',
+    host="127.0.0.1",
     port=5553,
-    tags='IO_EVT',
+    tags="IO_EVT",
     timeout=60 * 60 * 24 * 7,
-    max_queue=200000
+    max_queue=200000,
 )
 pipe.attach(TriggerRate, interval=60)
 pipe.drain()

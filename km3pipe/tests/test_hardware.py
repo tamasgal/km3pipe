@@ -33,59 +33,65 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 EXAMPLE_DETX = StringIO(
-    "\n".join((
-        "1 3",
-        "1 1 1 3",
-        " 1 1.1 1.2 1.3 -1.1  0.2  0.3 10",
-        " 2 1.4 1.5 1.6  0.1 -1.2  0.3 20",
-        " 3 1.7 1.8 1.9  0.1  0.2 -1.3 30",
-        "2 1 2 3",
-        " 4 2.1 2.2 2.3 -1.1  0.2  0.3 40",
-        " 5 2.4 2.5 2.6  0.1 -1.2  0.3 50",
-        " 6 2.7 2.8 2.9  0.1  0.2 -1.3 60",
-        "3 1 3 3",
-        " 7 3.1 3.2 3.3 -1.1  0.2  0.3 70",
-        " 8 3.4 3.5 3.6  0.1 -1.2  0.3 80",
-        " 9 3.7 3.8 3.9  0.1  0.2 -1.3 90",
-    ))
+    "\n".join(
+        (
+            "1 3",
+            "1 1 1 3",
+            " 1 1.1 1.2 1.3 -1.1  0.2  0.3 10",
+            " 2 1.4 1.5 1.6  0.1 -1.2  0.3 20",
+            " 3 1.7 1.8 1.9  0.1  0.2 -1.3 30",
+            "2 1 2 3",
+            " 4 2.1 2.2 2.3 -1.1  0.2  0.3 40",
+            " 5 2.4 2.5 2.6  0.1 -1.2  0.3 50",
+            " 6 2.7 2.8 2.9  0.1  0.2 -1.3 60",
+            "3 1 3 3",
+            " 7 3.1 3.2 3.3 -1.1  0.2  0.3 70",
+            " 8 3.4 3.5 3.6  0.1 -1.2  0.3 80",
+            " 9 3.7 3.8 3.9  0.1  0.2 -1.3 90",
+        )
+    )
 )
 
 EXAMPLE_DETX_MIXED_IDS = StringIO(
-    "\n".join((
-        "1 3",
-        "8 1 1 3",
-        " 83 1.1 1.2 1.3 -1.1  0.2  0.3 10",
-        " 81 1.4 1.5 1.6  0.1 -1.2  0.3 20",
-        " 82 1.7 1.8 1.9  0.1  0.2 -1.3 30",
-        "7 1 2 3",
-        " 71 2.1 2.2 2.3 -1.1  0.2  0.3 40",
-        " 73 2.4 2.5 2.6  0.1 -1.2  0.3 50",
-        " 72 2.7 2.8 2.9  0.1  0.2 -1.3 60",
-        "6 1 3 3",
-        " 62 3.1 3.2 3.3 -1.1  0.2  0.3 70",
-        " 63 3.4 3.5 3.6  0.1 -1.2  0.3 80",
-        " 61 3.7 3.8 3.9  0.1  0.2 -1.3 90",
-    ))
+    "\n".join(
+        (
+            "1 3",
+            "8 1 1 3",
+            " 83 1.1 1.2 1.3 -1.1  0.2  0.3 10",
+            " 81 1.4 1.5 1.6  0.1 -1.2  0.3 20",
+            " 82 1.7 1.8 1.9  0.1  0.2 -1.3 30",
+            "7 1 2 3",
+            " 71 2.1 2.2 2.3 -1.1  0.2  0.3 40",
+            " 73 2.4 2.5 2.6  0.1 -1.2  0.3 50",
+            " 72 2.7 2.8 2.9  0.1  0.2 -1.3 60",
+            "6 1 3 3",
+            " 62 3.1 3.2 3.3 -1.1  0.2  0.3 70",
+            " 63 3.4 3.5 3.6  0.1 -1.2  0.3 80",
+            " 61 3.7 3.8 3.9  0.1  0.2 -1.3 90",
+        )
+    )
 )
 
 EXAMPLE_DETX_RADIAL = StringIO(
-    "\n".join((
-        "1 3",
-        "1 1 1 4",
-        " 1 1 0 0 1 0 0 10",
-        " 2 0 1 0 0 1 0 20",
-        " 3 -1 0 0 -1 0 0 30",
-        " 4 0 -1 0 0 -1 0 40",
-        "2 1 2 2",
-        " 5 0 0 1 0 0 1 50",
-        " 6 0 0 -1 0 0 -1 60",
-        "3 1 3 2",
-        " 7 1 2 3 1 2 3 70",
-        " 8 -3 -2 -1 -3 -2 -1 80",
-        "4 2 1 2",
-        " 9 0 0 1 0 0 1 90",
-        " 10 0 0 -1 0 0 -1 100",
-    ))
+    "\n".join(
+        (
+            "1 3",
+            "1 1 1 4",
+            " 1 1 0 0 1 0 0 10",
+            " 2 0 1 0 0 1 0 20",
+            " 3 -1 0 0 -1 0 0 30",
+            " 4 0 -1 0 0 -1 0 40",
+            "2 1 2 2",
+            " 5 0 0 1 0 0 1 50",
+            " 6 0 0 -1 0 0 -1 60",
+            "3 1 3 2",
+            " 7 1 2 3 1 2 3 70",
+            " 8 -3 -2 -1 -3 -2 -1 80",
+            "4 2 1 2",
+            " 9 0 0 1 0 0 1 90",
+            " 10 0 0 -1 0 0 -1 100",
+        )
+    )
 )
 
 
@@ -135,12 +141,15 @@ class TestDetector(TestCase):
 
     def test_dom_positions(self):
         self.det._parse_doms()
-        assert np.allclose([1.49992331, 1.51893187, 1.44185513],
-                           self.det.dom_positions[1])
-        assert np.allclose([2.49992331, 2.51893187, 2.44185513],
-                           self.det.dom_positions[2])
-        assert np.allclose([3.49992331, 3.51893187, 3.44185513],
-                           self.det.dom_positions[3])
+        assert np.allclose(
+            [1.49992331, 1.51893187, 1.44185513], self.det.dom_positions[1]
+        )
+        assert np.allclose(
+            [2.49992331, 2.51893187, 2.44185513], self.det.dom_positions[2]
+        )
+        assert np.allclose(
+            [3.49992331, 3.51893187, 3.44185513], self.det.dom_positions[3]
+        )
 
     def test_xy_positions(self):
         self.det._parse_doms()
@@ -154,8 +163,9 @@ class TestDetector(TestCase):
     def test_pmt_attributes(self):
         self.det._parse_doms()
         assert (1, 2, 3, 4, 5, 6, 7, 8, 9) == tuple(self.det.pmts.pmt_id)
-        assert np.allclose([1.1, 1.4, 1.7, 2.1, 2.4, 2.7, 3.1, 3.4, 3.7],
-                           self.det.pmts.pos_x)
+        assert np.allclose(
+            [1.1, 1.4, 1.7, 2.1, 2.4, 2.7, 3.1, 3.4, 3.7], self.det.pmts.pos_x
+        )
         assert np.allclose((1.7, 1.8, 1.9), self.det.pmts.pos[2])
         assert np.allclose((0.1, 0.2, -1.3), self.det.pmts.dir[8])
 
@@ -202,21 +212,23 @@ class TestDetector(TestCase):
         assert xy is not None
 
     def test_ascii(self):
-        detx_string = "\n".join((
-            "1 3",
-            "1 1 1 3",
-            " 1 1.1 1.2 1.3 1.1 2.1 3.1 10.0",
-            " 2 1.4 1.5 1.6 4.1 5.1 6.1 20.0",
-            " 3 1.7 1.8 1.9 7.1 8.1 9.1 30.0",
-            "2 1 2 3",
-            " 4 2.1 2.2 2.3 1.2 2.2 3.2 40.0",
-            " 5 2.4 2.5 2.6 4.2 5.2 6.2 50.0",
-            " 6 2.7 2.8 2.9 7.2 8.2 9.2 60.0",
-            "3 1 3 3",
-            " 7 3.1 3.2 3.3 1.3 2.3 3.3 70.0",
-            " 8 3.4 3.5 3.6 4.3 5.3 6.3 80.0",
-            " 9 3.7 3.8 3.9 7.3 8.3 9.3 90.0\n",
-        ))
+        detx_string = "\n".join(
+            (
+                "1 3",
+                "1 1 1 3",
+                " 1 1.1 1.2 1.3 1.1 2.1 3.1 10.0",
+                " 2 1.4 1.5 1.6 4.1 5.1 6.1 20.0",
+                " 3 1.7 1.8 1.9 7.1 8.1 9.1 30.0",
+                "2 1 2 3",
+                " 4 2.1 2.2 2.3 1.2 2.2 3.2 40.0",
+                " 5 2.4 2.5 2.6 4.2 5.2 6.2 50.0",
+                " 6 2.7 2.8 2.9 7.2 8.2 9.2 60.0",
+                "3 1 3 3",
+                " 7 3.1 3.2 3.3 1.3 2.3 3.3 70.0",
+                " 8 3.4 3.5 3.6 4.3 5.3 6.3 80.0",
+                " 9 3.7 3.8 3.9 7.3 8.3 9.3 90.0\n",
+            )
+        )
         detx_fob = StringIO(detx_string)
 
         self.det = Detector()
@@ -226,21 +238,23 @@ class TestDetector(TestCase):
         assert detx_string == self.det.ascii
 
     def test_ascii_with_mixed_dom_ids(self):
-        detx_string = "\n".join((
-            "1 3",
-            "8 1 1 3",
-            " 1 1.1 1.2 1.3 1.1 2.1 3.1 10.0",
-            " 2 1.4 1.5 1.6 4.1 5.1 6.1 20.0",
-            " 3 1.7 1.8 1.9 7.1 8.1 9.1 30.0",
-            "4 1 2 3",
-            " 4 2.1 2.2 2.3 1.2 2.2 3.2 40.0",
-            " 5 2.4 2.5 2.6 4.2 5.2 6.2 50.0",
-            " 6 2.7 2.8 2.9 7.2 8.2 9.2 60.0",
-            "9 1 3 3",
-            " 7 3.1 3.2 3.3 1.3 2.3 3.3 70.0",
-            " 8 3.4 3.5 3.6 4.3 5.3 6.3 80.0",
-            " 9 3.7 3.8 3.9 7.3 8.3 9.3 90.0\n",
-        ))
+        detx_string = "\n".join(
+            (
+                "1 3",
+                "8 1 1 3",
+                " 1 1.1 1.2 1.3 1.1 2.1 3.1 10.0",
+                " 2 1.4 1.5 1.6 4.1 5.1 6.1 20.0",
+                " 3 1.7 1.8 1.9 7.1 8.1 9.1 30.0",
+                "4 1 2 3",
+                " 4 2.1 2.2 2.3 1.2 2.2 3.2 40.0",
+                " 5 2.4 2.5 2.6 4.2 5.2 6.2 50.0",
+                " 6 2.7 2.8 2.9 7.2 8.2 9.2 60.0",
+                "9 1 3 3",
+                " 7 3.1 3.2 3.3 1.3 2.3 3.3 70.0",
+                " 8 3.4 3.5 3.6 4.3 5.3 6.3 80.0",
+                " 9 3.7 3.8 3.9 7.3 8.3 9.3 90.0\n",
+            )
+        )
         detx_fobj = StringIO(detx_string)
 
         self.det = Detector()
@@ -250,122 +264,124 @@ class TestDetector(TestCase):
         assert detx_string == self.det.ascii
 
     def test_init_from_string(self):
-        detx_string = "\n".join((
-            "1 3",
-            "8 1 1 3",
-            " 1 1.1 1.2 1.3 1.1 2.1 3.1 10.0",
-            " 2 1.4 1.5 1.6 4.1 5.1 6.1 20.0",
-            " 3 1.7 1.8 1.9 7.1 8.1 9.1 30.0",
-            "4 1 2 3",
-            " 4 2.1 2.2 2.3 1.2 2.2 3.2 40.0",
-            " 5 2.4 2.5 2.6 4.2 5.2 6.2 50.0",
-            " 6 2.7 2.8 2.9 7.2 8.2 9.2 60.0",
-            "9 1 3 3",
-            " 7 3.1 3.2 3.3 1.3 2.3 3.3 70.0",
-            " 8 3.4 3.5 3.6 4.3 5.3 6.3 80.0",
-            " 9 3.7 3.8 3.9 7.3 8.3 9.3 90.0\n",
-        ))
+        detx_string = "\n".join(
+            (
+                "1 3",
+                "8 1 1 3",
+                " 1 1.1 1.2 1.3 1.1 2.1 3.1 10.0",
+                " 2 1.4 1.5 1.6 4.1 5.1 6.1 20.0",
+                " 3 1.7 1.8 1.9 7.1 8.1 9.1 30.0",
+                "4 1 2 3",
+                " 4 2.1 2.2 2.3 1.2 2.2 3.2 40.0",
+                " 5 2.4 2.5 2.6 4.2 5.2 6.2 50.0",
+                " 6 2.7 2.8 2.9 7.2 8.2 9.2 60.0",
+                "9 1 3 3",
+                " 7 3.1 3.2 3.3 1.3 2.3 3.3 70.0",
+                " 8 3.4 3.5 3.6 4.3 5.3 6.3 80.0",
+                " 9 3.7 3.8 3.9 7.3 8.3 9.3 90.0\n",
+            )
+        )
         det = Detector(string=detx_string)
         assert 1 == det.n_dus
         assert 3 == det.n_doms
 
     def test_detx_format_version_1(self):
-        det = Detector(filename=data_path('detx/detx_v1.detx'))
+        det = Detector(filename=data_path("detx/detx_v1.detx"))
         assert 2 == det.n_dus
         assert 6 == det.n_doms
         assert 3 == det.n_pmts_per_dom
-        assert 'v1' == det.version
+        assert "v1" == det.version
         self.assertListEqual([1.1, 1.2, 1.3], list(det.pmts.pos[0]))
         self.assertListEqual([3.4, 3.5, 3.6], list(det.pmts.pos[7]))
         self.assertListEqual([23.4, 23.5, 23.6], list(det.pmts.pos[16]))
 
     def test_detx_v1_is_the_same_ascii(self):
-        det = Detector(filename=data_path('detx/detx_v1.detx'))
-        with open(data_path('detx/detx_v1.detx'), 'r') as fobj:
+        det = Detector(filename=data_path("detx/detx_v1.detx"))
+        with open(data_path("detx/detx_v1.detx"), "r") as fobj:
             assert fobj.read() == det.ascii
 
     def test_detx_format_version_2(self):
-        det = Detector(filename=data_path('detx/detx_v2.detx'))
+        det = Detector(filename=data_path("detx/detx_v2.detx"))
         assert 2 == det.n_dus
         assert 6 == det.n_doms
         assert 3 == det.n_pmts_per_dom
         assert 256500.0 == det.utm_info.easting
         assert 4743000.0 == det.utm_info.northing
-        assert 'WGS84' == det.utm_info.ellipsoid
-        assert '32N' == det.utm_info.grid
+        assert "WGS84" == det.utm_info.ellipsoid
+        assert "32N" == det.utm_info.grid
         assert -2425.0 == det.utm_info.z
         assert 1500000000.1 == det.valid_from
         assert 9999999999.0 == det.valid_until
-        assert 'v2' == det.version
+        assert "v2" == det.version
         self.assertListEqual([1.1, 1.2, 1.3], list(det.pmts.pos[0]))
         self.assertListEqual([3.4, 3.5, 3.6], list(det.pmts.pos[7]))
         self.assertListEqual([23.4, 23.5, 23.6], list(det.pmts.pos[16]))
 
     def test_detx_v2_is_the_same_ascii(self):
-        det = Detector(filename=data_path('detx/detx_v2.detx'))
-        with open(data_path('detx/detx_v2.detx'), 'r') as fobj:
+        det = Detector(filename=data_path("detx/detx_v2.detx"))
+        with open(data_path("detx/detx_v2.detx"), "r") as fobj:
             assert fobj.read() == det.ascii
 
     def test_detx_format_version_3(self):
-        det = Detector(filename=data_path('detx/detx_v3.detx'))
+        det = Detector(filename=data_path("detx/detx_v3.detx"))
         assert 2 == det.n_dus
         assert 6 == det.n_doms
         assert 3 == det.n_pmts_per_dom
         assert 256500.0 == det.utm_info.easting
         assert 4743000.0 == det.utm_info.northing
-        assert 'WGS84' == det.utm_info.ellipsoid
-        assert '32N' == det.utm_info.grid
+        assert "WGS84" == det.utm_info.ellipsoid
+        assert "32N" == det.utm_info.grid
         assert -2425.0 == det.utm_info.z
         assert 1500000000.1 == det.valid_from
         assert 9999999999.0 == det.valid_until
-        assert 'v3' == det.version
+        assert "v3" == det.version
         self.assertListEqual([1.1, 1.2, 1.3], list(det.pmts.pos[0]))
         self.assertListEqual([3.4, 3.5, 3.6], list(det.pmts.pos[7]))
         self.assertListEqual([23.4, 23.5, 23.6], list(det.pmts.pos[16]))
 
     def test_detector_repr(self):
-        det = Detector(filename=data_path('detx/detx_v3.detx'))
+        det = Detector(filename=data_path("detx/detx_v3.detx"))
         assert "Detector id: '23', n_doms: 6, dus: [1, 2]" == repr(det)
 
     def test_detx_format_version_3_with_whitespace(self):
-        det = Detector(filename=data_path('detx/detx_v3_whitespace.detx'))
+        det = Detector(filename=data_path("detx/detx_v3_whitespace.detx"))
         assert 2 == det.n_dus
         assert 6 == det.n_doms
         assert 3 == det.n_pmts_per_dom
         assert 256500.0 == det.utm_info.easting
         assert 4743000.0 == det.utm_info.northing
-        assert 'WGS84' == det.utm_info.ellipsoid
-        assert '32N' == det.utm_info.grid
+        assert "WGS84" == det.utm_info.ellipsoid
+        assert "32N" == det.utm_info.grid
         assert -2425.0 == det.utm_info.z
         assert 1500000000.1 == det.valid_from
         assert 9999999999.0 == det.valid_until
-        assert 'v3' == det.version
+        assert "v3" == det.version
         self.assertListEqual([1.1, 1.2, 1.3], list(det.pmts.pos[0]))
         self.assertListEqual([3.4, 3.5, 3.6], list(det.pmts.pos[7]))
         self.assertListEqual([23.4, 23.5, 23.6], list(det.pmts.pos[16]))
 
     def test_detx_format_comments(self):
-        det = Detector(filename=data_path('detx/detx_v1.detx'))
+        det = Detector(filename=data_path("detx/detx_v1.detx"))
         assert len(det.comments) == 0
 
-        det = Detector(filename=data_path('detx/detx_v2.detx'))
+        det = Detector(filename=data_path("detx/detx_v2.detx"))
         assert len(det.comments) == 0
 
-        det = Detector(filename=data_path('detx/detx_v3.detx'))
+        det = Detector(filename=data_path("detx/detx_v3.detx"))
         assert len(det.comments) == 2
         assert " a comment line" == det.comments[0]
         assert " another comment line starting with '#'" == det.comments[1]
 
     def test_comments_are_written(self):
-        det = Detector(filename=data_path('detx/detx_v3.detx'))
+        det = Detector(filename=data_path("detx/detx_v3.detx"))
         det.add_comment("foo")
         assert 3 == len(det.comments)
         assert det.comments[2] == "foo"
         assert "# foo" == det.ascii.splitlines()[2]
 
     def test_detx_v3_is_the_same_ascii(self):
-        det = Detector(filename=data_path('detx/detx_v3.detx'))
-        with open(data_path('detx/detx_v3.detx'), 'r') as fobj:
+        det = Detector(filename=data_path("detx/detx_v3.detx"))
+        with open(data_path("detx/detx_v3.detx"), "r") as fobj:
             assert fobj.read() == det.ascii
 
     def test_translate_detector(self):
@@ -404,8 +420,10 @@ class TestDetector(TestCase):
         assert np.allclose(
             pmt_dir_rot, det.pmts[det.pmts.dom_id == dom_id].dir[channel_id]
         )
-        assert np.allclose([0.92050485, 0.39073113, 0],
-                           det.pmts[det.pmts.dom_id == dom_id].pos[channel_id])
+        assert np.allclose(
+            [0.92050485, 0.39073113, 0],
+            det.pmts[det.pmts.dom_id == dom_id].pos[channel_id],
+        )
 
     def test_rotate_dom_set_by_step_by_360_degrees(self):
         det = Detector()
@@ -485,13 +503,11 @@ class TestDetector(TestCase):
         det._det_file = EXAMPLE_DETX_RADIAL
         det._parse_doms()
 
-        assert np.allclose([-0.2, 0., 0.2], det.com)
+        assert np.allclose([-0.2, 0.0, 0.2], det.com)
 
     def test_jdetectordb_output_with_detx_v3(self):
         det = Detector(
-            data_path(
-                "detx/D_ORCA006_t.A02181836.p.A02181837.r.A02182001.detx"
-            )
+            data_path("detx/D_ORCA006_t.A02181836.p.A02181837.r.A02182001.detx")
         )
         assert det.utm_info is not None
         assert det.utm_info.ellipsoid == "WGS84"

@@ -29,21 +29,22 @@ class Dump(Module):
     full: bool, default=False
         Print blob values too, not just the keys?
     """
+
     def configure(self):
-        self.keys = self.get('keys') or None
-        self.full = self.get('full') or False
-        key = self.get('key') or None
+        self.keys = self.get("keys") or None
+        self.full = self.get("full") or False
+        key = self.get("key") or None
         if key and not self.keys:
             self.keys = [key]
 
     def process(self, blob):
         keys = sorted(blob.keys()) if self.keys is None else self.keys
         for key in keys:
-            print(key + ':')
+            print(key + ":")
             if self.full:
                 print(blob[key].__repr__())
-            print('')
-        print('----------------------------------------\n')
+            print("")
+        print("----------------------------------------\n")
         return blob
 
 
@@ -55,9 +56,10 @@ class Delete(Module):
     keys: collection(string), optional
         Keys to remove.
     """
+
     def configure(self):
-        self.keys = self.get('keys') or set()
-        key = self.get('key') or None
+        self.keys = self.get("keys") or set()
+        key = self.get("key") or None
         if key and not self.keys:
             self.keys = [key]
 
@@ -75,10 +77,11 @@ class Keep(Module):
     keys: collection(string), optional
         Keys to keep. Everything else is removed.
     """
+
     def configure(self):
-        self.keys = self.get('keys', default=set())
-        key = self.get('key', default=None)
-        self.h5locs = self.get('h5locs', default=set())
+        self.keys = self.get("keys", default=set())
+        key = self.get("key", default=None)
+        self.h5locs = self.get("h5locs", default=set())
         if key and not self.keys:
             self.keys = [key]
 
@@ -87,17 +90,19 @@ class Keep(Module):
         for key in blob.keys():
             if key in self.keys:
                 out[key] = blob[key]
-            elif hasattr(blob[key], 'h5loc') and blob[key].h5loc.startswith(
-                    tuple(self.h5locs)):
+            elif hasattr(blob[key], "h5loc") and blob[key].h5loc.startswith(
+                tuple(self.h5locs)
+            ):
                 out[key] = blob[key]
         return out
 
 
 class HitCounter(Module):
     """Prints the number of hits"""
+
     def process(self, blob):
         try:
-            self.cprint("Number of hits: {0}".format(len(blob['Hit'])))
+            self.cprint("Number of hits: {0}".format(len(blob["Hit"])))
         except KeyError:
             pass
         return blob
@@ -105,9 +110,10 @@ class HitCounter(Module):
 
 class HitCalibrator(Module):
     """A very basic hit calibrator, which requires a `Calibration` module."""
+
     def configure(self):
-        self.input_key = self.get('input_key', default='Hits')
-        self.output_key = self.get('output_key', default='CalibHits')
+        self.input_key = self.get("input_key", default="Hits")
+        self.output_key = self.get("output_key", default="CalibHits")
 
     def process(self, blob):
         if self.input_key not in blob:
@@ -121,17 +127,19 @@ class HitCalibrator(Module):
 
 class BlobIndexer(Module):
     """Puts an incremented index in each blob for the key 'blob_index'"""
+
     def configure(self):
         self.blob_index = 0
 
     def process(self, blob):
-        blob['blob_index'] = self.blob_index
+        blob["blob_index"] = self.blob_index
         self.blob_index += 1
         return blob
 
 
 class StatusBar(Module):
     """Displays the current blob number."""
+
     def configure(self):
         self.iteration = 1
 
@@ -141,7 +149,7 @@ class StatusBar(Module):
         return blob
 
     def finish(self):
-        prettyln(".", fill='=')
+        prettyln(".", fill="=")
 
 
 class TickTock(Module):
@@ -152,6 +160,7 @@ class TickTock(Module):
     every: int, optional [default=1]
         Number of iterations between printout.
     """
+
     def configure(self):
         self.t0 = time()
 
@@ -169,6 +178,7 @@ class MemoryObserver(Module):
     every: int, optional [default=1]
         Number of iterations between printout.
     """
+
     def process(self, blob):
         memory = peak_memory_usage()
         prettyln("Memory peak: {0:.3f} MB".format(memory))
@@ -186,9 +196,10 @@ class Siphon(Module):
       discard blobs after accumulation
 
     """
+
     def configure(self):
-        self.volume = self.require('volume')    # [blobs]
-        self.flush = self.get('flush', default=False)
+        self.volume = self.require("volume")  # [blobs]
+        self.flush = self.get("flush", default=False)
 
         self.blob_count = 0
 
@@ -217,10 +228,11 @@ class MultiFilePump(kp.Module):
       the pump will usually reset it to 0 for every new file.
 
     """
+
     def configure(self):
-        self.pump = self.require('pump')
-        self.filenames = self.require('filenames')
-        self.reindex = self.get('reindex', default=True)
+        self.pump = self.require("pump")
+        self.filenames = self.require("filenames")
+        self.reindex = self.get("reindex", default=True)
         self.blobs = self.blob_generator()
         self.cprint("Iterating through {} files.".format(len(self.filenames)))
         self.n_processed = 0
@@ -233,7 +245,7 @@ class MultiFilePump(kp.Module):
             for blob in pump:
                 if self.reindex:
                     self._set_group_id(blob)
-                blob['Filename'] = filename
+                blob["Filename"] = filename
                 yield blob
                 self.group_id += 1
             self.n_processed += 1
@@ -259,15 +271,16 @@ class MultiFilePump(kp.Module):
 
 class LocalDBService(kp.Module):
     """Provides a local sqlite3 based database service to store information"""
+
     def configure(self):
         self.filename = self.require("filename")
-        self.thread_safety = self.get('thread_safety', default=True)
+        self.thread_safety = self.get("thread_safety", default=True)
         self.connection = None
 
-        self.expose(self.create_table, 'create_table')
-        self.expose(self.table_exists, 'table_exists')
-        self.expose(self.insert_row, 'insert_row')
-        self.expose(self.query, 'query')
+        self.expose(self.create_table, "create_table")
+        self.expose(self.table_exists, "table_exists")
+        self.expose(self.insert_row, "insert_row")
+        self.expose(self.query, "query")
 
         self._create_connection()
 
@@ -290,9 +303,8 @@ class LocalDBService(kp.Module):
     def insert_row(self, table, column_names, values):
         """Insert a row into the table with a given list of values"""
         cursor = self.connection.cursor()
-        query = 'INSERT INTO {} ({}) VALUES ({})'.format(
-            table, ', '.join(column_names),
-            ','.join("'" + str(v) + "'" for v in values)
+        query = "INSERT INTO {} ({}) VALUES ({})".format(
+            table, ", ".join(column_names), ",".join("'" + str(v) + "'" for v in values)
         )
         cursor.execute(query)
         self.connection.commit()
@@ -305,12 +317,11 @@ class LocalDBService(kp.Module):
         """
         cursor = self.connection.cursor()
         if overwrite:
-            cursor.execute('DROP TABLE IF EXISTS {}'.format(name))
+            cursor.execute("DROP TABLE IF EXISTS {}".format(name))
 
         cursor.execute(
-            'CREATE TABLE {} ({})'.format(
-                name,
-                ', '.join(['{} {}'.format(*c) for c in zip(columns, types)])
+            "CREATE TABLE {} ({})".format(
+                name, ", ".join(["{} {}".format(*c) for c in zip(columns, types)])
             )
         )
         self.connection.commit()

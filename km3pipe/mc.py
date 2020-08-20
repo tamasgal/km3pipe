@@ -17,7 +17,7 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = get_logger(__name__)    # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 
 def geant2pdg(geant_code):
@@ -44,7 +44,7 @@ def name2pdg(name):
 
 def most_energetic(df):
     """Grab most energetic particle from mc_tracks dataframe."""
-    idx = df.groupby(['event_id'])['energy'].transform(max) == df['energy']
+    idx = df.groupby(["event_id"])["energy"].transform(max) == df["energy"]
     return df[idx].reindex()
 
 
@@ -61,7 +61,7 @@ def leading_particle(df):
     if the first row is not unique (neutrinos are unique), it's a muon bundle
     grab the most energetic then
     """
-    leading = df.groupby('event_id', as_index=False).first()
+    leading = df.groupby("event_id", as_index=False).first()
     unique = leading.type.unique()
 
     if len(unique) == 1 and unique[0] == 0:
@@ -72,6 +72,7 @@ def leading_particle(df):
 def get_flavor(pdg_types):
     """Build a 'flavor' from the 'type' column."""
     import pandas as pd
+
     return pd.Series(pdg_types).apply(pdg2name)
 
 
@@ -86,10 +87,12 @@ def _p_eq_mu(pdg_type):
 def is_neutrino(pdg_types):
     """flavor string -> is_neutrino"""
     import pandas as pd
+
     return pd.Series(pdg_types).apply(_p_eq_nu)
 
 
 def is_muon(pdg_types):
     """flavor string -> is_neutrino"""
     import pandas as pd
+
     return pd.Series(pdg_types).apply(_p_eq_mu)

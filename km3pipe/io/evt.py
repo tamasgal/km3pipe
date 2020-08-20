@@ -15,7 +15,7 @@ from km3pipe.dataclasses import Table
 from km3pipe.logger import get_logger
 from km3pipe.tools import split
 
-log = get_logger(__name__)    # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -29,12 +29,12 @@ __status__ = "Development"
 def try_decode_string(text):
     """Decode string to ASCII if possible"""
     try:
-        return text.decode('ascii')
+        return text.decode("ascii")
     except AttributeError:
         return text
 
 
-class EvtPump(Pump):    # pylint: disable:R0902
+class EvtPump(Pump):  # pylint: disable:R0902
     """Provides a pump for EVT-files.
 
     Parameters
@@ -73,21 +73,22 @@ class EvtPump(Pump):    # pylint: disable:R0902
         cause parse errors)
 
     """
+
     def configure(self):
-        self.filename = self.get('filename', default=None)
-        self.filenames = self.get('filenames', default=[])
-        parsers = self.get('parsers', default='auto')
-        self.cache_enabled = self.get('cache_enabled', default=False)
-        self.basename = self.get('basename', default=None)
-        self.suffix = self.get('suffix', default='')
-        self.index_start = self.get('index_start', default=1)
+        self.filename = self.get("filename", default=None)
+        self.filenames = self.get("filenames", default=[])
+        parsers = self.get("parsers", default="auto")
+        self.cache_enabled = self.get("cache_enabled", default=False)
+        self.basename = self.get("basename", default=None)
+        self.suffix = self.get("suffix", default="")
+        self.index_start = self.get("index_start", default=1)
         if self.filenames:
             self.filename = self.filenames[0]
             self.index_stop = len(self.filenames)
         else:
-            self.index_stop = self.get('index_stop', default=1)
-        self.n_digits = self.get('n_digits', default=None)
-        self.exclude_tags = self.get('exclude_tags')
+            self.index_stop = self.get("index_stop", default=1)
+        self.n_digits = self.get("n_digits", default=None)
+        self.exclude_tags = self.get("exclude_tags")
         if self.exclude_tags is None:
             self.exclude_tags = []
 
@@ -102,7 +103,7 @@ class EvtPump(Pump):    # pylint: disable:R0902
             print("No file- or basename(s) defined!")
 
         if parsers:
-            if parsers == 'auto':
+            if parsers == "auto":
                 self.cprint("Automatic tag parsing enabled.")
                 self._auto_parse = True
             else:
@@ -121,8 +122,7 @@ class EvtPump(Pump):    # pylint: disable:R0902
             )
             file_index = self._get_file_index_str()
 
-            self.filename = "{}{}{}.evt"  \
-                            .format(self.basename, file_index, self.suffix)
+            self.filename = "{}{}{}.evt".format(self.basename, file_index, self.suffix)
             self.log.info("Constructed filename: {}".format(self.filename))
 
         if self.filename:
@@ -140,9 +140,7 @@ class EvtPump(Pump):    # pylint: disable:R0902
             if parser in EVT_PARSERS.keys():
                 self.parsers.append(EVT_PARSERS[parser])
             else:
-                self.log.warning(
-                    "Parser '{}' not found, ignoring...".format(parser)
-                )
+                self.log.warning("Parser '{}' not found, ignoring...".format(parser))
 
     def _reset(self):
         """Clear the cache."""
@@ -171,21 +169,21 @@ class EvtPump(Pump):    # pylint: disable:R0902
         first_line = self.blob_file.readline()
         first_line = try_decode_string(first_line)
         self.blob_file.seek(0, 0)
-        if not first_line.startswith(str('start_run')):
+        if not first_line.startswith(str("start_run")):
             self.log.warning("No header found.")
             return raw_header
-        for line in iter(self.blob_file.readline, ''):
+        for line in iter(self.blob_file.readline, ""):
             line = try_decode_string(line)
             line = line.strip()
             try:
-                tag, value = str(line).split(':')
+                tag, value = str(line).split(":")
             except ValueError:
                 continue
             raw_header[tag].append(str(value).split())
-            if line.startswith(str('end_event:')):
+            if line.startswith(str("end_event:")):
                 self._record_offset()
-                if self._auto_parse and 'physics' in raw_header:
-                    parsers = [p[0].lower() for p in raw_header['physics']]
+                if self._auto_parse and "physics" in raw_header:
+                    parsers = [p[0].lower() for p in raw_header["physics"]]
                     self._register_parsers(parsers)
                 return raw_header
         raise ValueError("Incomplete header, no 'end_event' tag found!")
@@ -215,8 +213,7 @@ class EvtPump(Pump):    # pylint: disable:R0902
 
         except IndexError:
             self.log.info("Got an IndexError, trying the next file")
-            if (self.basename
-                    or self.filenames) and self.file_index < self.index_stop:
+            if (self.basename or self.filenames) and self.file_index < self.index_stop:
                 self.file_index += 1
                 self.log.info("Now at file_index={}".format(self.file_index))
                 self._reset()
@@ -227,8 +224,9 @@ class EvtPump(Pump):    # pylint: disable:R0902
                 if self.filenames:
                     self.filename = self.filenames[self.file_index - 1]
                 elif self.basename:
-                    self.filename = "{}{}{}.evt"  \
-                                    .format(self.basename, file_index, self.suffix)
+                    self.filename = "{}{}{}.evt".format(
+                        self.basename, file_index, self.suffix
+                    )
                 self.log.info("Next filename: {}".format(self.filename))
                 self.cprint("Opening {0}".format(self.filename))
                 self.blob_file = self.open_file(self.filename)
@@ -236,9 +234,7 @@ class EvtPump(Pump):    # pylint: disable:R0902
                 try:
                     blob = self.get_blob(self.index)
                 except IndexError:
-                    self.log.warning(
-                        "No blob found in file {}".format(self.filename)
-                    )
+                    self.log.warning("No blob found in file {}".format(self.filename))
                 else:
                     return blob
             self.log.info("No files left, terminating the pipeline")
@@ -258,17 +254,17 @@ class EvtPump(Pump):    # pylint: disable:R0902
                 self.event_offsets.append(0)
         else:
             self.blob_file.seek(self.event_offsets[-1], 0)
-        for line in iter(self.blob_file.readline, ''):
+        for line in iter(self.blob_file.readline, ""):
             line = try_decode_string(line)
-            if line.startswith('end_event:'):
+            if line.startswith("end_event:"):
                 self._record_offset()
                 if len(self.event_offsets) % 100 == 0:
                     if verbose:
-                        print('.', end='')
+                        print(".", end="")
                     sys.stdout.flush()
             if up_to_index and len(self.event_offsets) >= up_to_index + 1:
                 return
-        self.event_offsets.pop()    # get rid of the last entry
+        self.event_offsets.pop()  # get rid of the last entry
         if not up_to_index:
             self.whole_file_cached = True
         self.cprint("\n{0} events indexed.".format(len(self.event_offsets)))
@@ -284,14 +280,14 @@ class EvtPump(Pump):    # pylint: disable:R0902
         for line in self.blob_file:
             line = try_decode_string(line)
             line = line.strip()
-            if line == '':
+            if line == "":
                 self.log.info("Ignoring empty line...")
                 continue
-            if line.startswith('end_event:') and blob:
-                blob['raw_header'] = self.raw_header
+            if line.startswith("end_event:") and blob:
+                blob["raw_header"] = self.raw_header
                 return blob
             try:
-                tag, values = line.split(':')
+                tag, values = line.split(":")
             except ValueError:
                 self.log.warning("Ignoring corrupt line: {}".format(line))
                 continue
@@ -299,7 +295,7 @@ class EvtPump(Pump):    # pylint: disable:R0902
                 values = tuple(split(values.strip(), callback=float))
             except ValueError:
                 self.log.info("Empty value: {}".format(values))
-            if line.startswith('start_event:'):
+            if line.startswith("start_event:"):
                 blob = Blob()
                 blob[tag] = tuple(int(v) for v in values)
                 continue
@@ -350,6 +346,7 @@ class Parser(object):
     the value is tuple of "target blob-key" and "numpy dtype".
 
     """
+
     def __init__(self, tag_description):
         self.tag_description = tag_description
 
@@ -359,124 +356,119 @@ class Parser(object):
             if key in self.tag_description.keys():
                 data = blob[key]
                 out_key, dtype = self.tag_description[key]
-                arr = np.array([d[:len(dtype)] for d in data], dtype)
+                arr = np.array([d[: len(dtype)] for d in data], dtype)
                 tab = Table(arr, name=out_key)
                 blob[out_key] = tab
 
 
 KM3SIM_TAGS = {
-    'hit': [
-        'KM3SimHits',
+    "hit": [
+        "KM3SimHits",
         [
-            ('id', 'f4'),
-            ('pmt_id', '<i4'),
-            ('pe', 'f4'),
-            ('time', 'f4'),
-            ('type', 'f4'),
-            ('n_photons', 'f4'),
-            ('track_in', 'f4'),
-            ('c_time', 'f4'),
-            ('unknown', 'f4'),
+            ("id", "f4"),
+            ("pmt_id", "<i4"),
+            ("pe", "f4"),
+            ("time", "f4"),
+            ("type", "f4"),
+            ("n_photons", "f4"),
+            ("track_in", "f4"),
+            ("c_time", "f4"),
+            ("unknown", "f4"),
         ],
     ],
 }
 
 GSEAGEN_TAGS = {
-    'neutrino': [
-        'Neutrinos',
+    "neutrino": [
+        "Neutrinos",
         [
-            ('id', '<i4'),
-            ('pos_x', 'f4'),
-            ('pos_y', 'f4'),
-            ('pos_z', 'f4'),
-            ('dir_x', 'f4'),
-            ('dir_y', 'f4'),
-            ('dir_z', 'f4'),
-            ('energy', 'f4'),
-            ('time', 'f4'),
-            ('bjorken_x', 'f4'),
-            ('bjorken_y', 'f4'),
-            ('scattering_type', '<i4'),
-            ('pdg_id', '<i4'),
-            ('interaction_type', '<i4'),
-        ]
+            ("id", "<i4"),
+            ("pos_x", "f4"),
+            ("pos_y", "f4"),
+            ("pos_z", "f4"),
+            ("dir_x", "f4"),
+            ("dir_y", "f4"),
+            ("dir_z", "f4"),
+            ("energy", "f4"),
+            ("time", "f4"),
+            ("bjorken_x", "f4"),
+            ("bjorken_y", "f4"),
+            ("scattering_type", "<i4"),
+            ("pdg_id", "<i4"),
+            ("interaction_type", "<i4"),
+        ],
     ],
-    'track_in': [
-        'TrackIns',
+    "track_in": [
+        "TrackIns",
         [
-            ('id', '<i4'),
-            ('pos_x', 'f4'),
-            ('pos_y', 'f4'),
-            ('pos_z', 'f4'),
-            ('dir_x', 'f4'),
-            ('dir_y', 'f4'),
-            ('dir_z', 'f4'),
-            ('energy', 'f4'),
-            ('time', 'f4'),
-            ('geant_id', 'f4'),
-        ]
+            ("id", "<i4"),
+            ("pos_x", "f4"),
+            ("pos_y", "f4"),
+            ("pos_z", "f4"),
+            ("dir_x", "f4"),
+            ("dir_y", "f4"),
+            ("dir_z", "f4"),
+            ("energy", "f4"),
+            ("time", "f4"),
+            ("geant_id", "f4"),
+        ],
     ],
-    'primary_lepton': [
-        'PrimaryLeptons',
+    "primary_lepton": [
+        "PrimaryLeptons",
         [
-            ('id', '<i4'),
-            ('pos_x', 'f4'),
-            ('pos_y', 'f4'),
-            ('pos_z', 'f4'),
-            ('dir_x', 'f4'),
-            ('dir_y', 'f4'),
-            ('dir_z', 'f4'),
-            ('energy', 'f4'),
-            ('time', 'f4'),
-            ('geant_id', 'f4'),
-        ]
-    ]
+            ("id", "<i4"),
+            ("pos_x", "f4"),
+            ("pos_y", "f4"),
+            ("pos_z", "f4"),
+            ("dir_x", "f4"),
+            ("dir_y", "f4"),
+            ("dir_z", "f4"),
+            ("energy", "f4"),
+            ("time", "f4"),
+            ("geant_id", "f4"),
+        ],
+    ],
 }
 
 KM3_TAGS = {
-    'neutrino': [
-        'Neutrinos',
+    "neutrino": [
+        "Neutrinos",
         [
-            ('id', '<i4'),
-            ('pos_x', 'f4'),
-            ('pos_y', 'f4'),
-            ('pos_z', 'f4'),
-            ('dir_x', 'f4'),
-            ('dir_y', 'f4'),
-            ('dir_z', 'f4'),
-            ('energy', 'f4'),
-            ('time', 'f4'),
-            ('bjorken_x', 'f4'),
-            ('bjorken_y', 'f4'),
-            ('scattering_type', '<i4'),
-            ('pdg_id', '<i4'),
-            ('interaction_type', '<i4'),
-        ]
+            ("id", "<i4"),
+            ("pos_x", "f4"),
+            ("pos_y", "f4"),
+            ("pos_z", "f4"),
+            ("dir_x", "f4"),
+            ("dir_y", "f4"),
+            ("dir_z", "f4"),
+            ("energy", "f4"),
+            ("time", "f4"),
+            ("bjorken_x", "f4"),
+            ("bjorken_y", "f4"),
+            ("scattering_type", "<i4"),
+            ("pdg_id", "<i4"),
+            ("interaction_type", "<i4"),
+        ],
     ],
-    'track_in': [
-        'TrackIns',
+    "track_in": [
+        "TrackIns",
         [
-            ('id', '<i4'),
-            ('pos_x', 'f4'),
-            ('pos_y', 'f4'),
-            ('pos_z', 'f4'),
-            ('dir_x', 'f4'),
-            ('dir_y', 'f4'),
-            ('dir_z', 'f4'),
-            ('energy', 'f4'),
-            ('time', 'f4'),
-            ('type', 'f4'),
-            ('something', '<i4'),
-        ]
+            ("id", "<i4"),
+            ("pos_x", "f4"),
+            ("pos_y", "f4"),
+            ("pos_z", "f4"),
+            ("dir_x", "f4"),
+            ("dir_y", "f4"),
+            ("dir_z", "f4"),
+            ("energy", "f4"),
+            ("time", "f4"),
+            ("type", "f4"),
+            ("something", "<i4"),
+        ],
     ],
-    'hit_raw': [
-        'Hits',
-        [
-            ('id', '<i4'),
-            ('pmt_id', '<i4'),
-            ('npe', '<i4'),
-            ('time', 'f4'),
-        ]
+    "hit_raw": [
+        "Hits",
+        [("id", "<i4"), ("pmt_id", "<i4"), ("npe", "<i4"), ("time", "f4"),],
     ],
 }
 
@@ -484,87 +476,96 @@ KM3_TAGS = {
 def parse_corant(blob):
     """Creates new blob entries for the given blob keys"""
 
-    if 'track_seamuon' in blob.keys():
+    if "track_seamuon" in blob.keys():
 
-        muon = blob['track_seamuon']
+        muon = blob["track_seamuon"]
 
-        blob['Muon'] = Table({
-            'id': np.array(muon)[:, 0].astype(int),
-            'pos_x': np.array(muon)[:, 1],
-            'pos_y': np.array(muon)[:, 2],
-            'pos_z': np.array(muon)[:, 3],
-            'dir_x': np.array(muon)[:, 4],
-            'dir_y': np.array(muon)[:, 5],
-            'dir_z': np.array(muon)[:, 6],
-            'energy': np.array(muon)[:, 7],
-            'time': np.array(muon)[:, 8],
-            'particle_id': np.array(muon)[:, 9].astype(int),
-            'is_charm': np.array(muon)[:, 10].astype(int),
-            'mother_pid': np.array(muon)[:, 11].astype(int),
-            'grandmother_pid': np.array(muon)[:, 11].astype(int),
-        },
-                             h5loc='muon')
+        blob["Muon"] = Table(
+            {
+                "id": np.array(muon)[:, 0].astype(int),
+                "pos_x": np.array(muon)[:, 1],
+                "pos_y": np.array(muon)[:, 2],
+                "pos_z": np.array(muon)[:, 3],
+                "dir_x": np.array(muon)[:, 4],
+                "dir_y": np.array(muon)[:, 5],
+                "dir_z": np.array(muon)[:, 6],
+                "energy": np.array(muon)[:, 7],
+                "time": np.array(muon)[:, 8],
+                "particle_id": np.array(muon)[:, 9].astype(int),
+                "is_charm": np.array(muon)[:, 10].astype(int),
+                "mother_pid": np.array(muon)[:, 11].astype(int),
+                "grandmother_pid": np.array(muon)[:, 11].astype(int),
+            },
+            h5loc="muon",
+        )
 
-        blob['MuonMultiplicity'] = Table({
-            'muon_multiplicity': len(np.array(muon)[:, 6])
-        },
-                                         h5loc='muon_multiplicity')
+        blob["MuonMultiplicity"] = Table(
+            {"muon_multiplicity": len(np.array(muon)[:, 6])}, h5loc="muon_multiplicity"
+        )
 
-    if 'track_seaneutrino' in blob.keys():
+    if "track_seaneutrino" in blob.keys():
 
-        nu = blob['track_seaneutrino']
+        nu = blob["track_seaneutrino"]
 
-        blob['Neutrino'] = Table({
-            'id': np.array(nu)[:, 0].astype(int),
-            'pos_x': np.array(nu)[:, 1],
-            'pos_y': np.array(nu)[:, 2],
-            'pos_z': np.array(nu)[:, 3],
-            'dir_x': np.array(nu)[:, 4],
-            'dir_y': np.array(nu)[:, 5],
-            'dir_z': np.array(nu)[:, 6],
-            'energy': np.array(nu)[:, 7],
-            'time': np.array(nu)[:, 8],
-            'particle_id': np.array(nu)[:, 9].astype(int),
-            'is_charm': np.array(nu)[:, 10].astype(int),
-            'mother_pid': np.array(nu)[:, 11].astype(int),
-            'grandmother_pid': np.array(nu)[:, 11].astype(int),
-        },
-                                 h5loc='nu')
-        blob['NeutrinoMultiplicity'] = Table({
-            'total': len(np.array(nu)[:, 6]),
-            'nue': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 66]),
-            'anue': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 67]),
-            'numu': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 68]),
-            'anumu': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 69]),
-        },
-                                             h5loc='nu_multiplicity')
+        blob["Neutrino"] = Table(
+            {
+                "id": np.array(nu)[:, 0].astype(int),
+                "pos_x": np.array(nu)[:, 1],
+                "pos_y": np.array(nu)[:, 2],
+                "pos_z": np.array(nu)[:, 3],
+                "dir_x": np.array(nu)[:, 4],
+                "dir_y": np.array(nu)[:, 5],
+                "dir_z": np.array(nu)[:, 6],
+                "energy": np.array(nu)[:, 7],
+                "time": np.array(nu)[:, 8],
+                "particle_id": np.array(nu)[:, 9].astype(int),
+                "is_charm": np.array(nu)[:, 10].astype(int),
+                "mother_pid": np.array(nu)[:, 11].astype(int),
+                "grandmother_pid": np.array(nu)[:, 11].astype(int),
+            },
+            h5loc="nu",
+        )
+        blob["NeutrinoMultiplicity"] = Table(
+            {
+                "total": len(np.array(nu)[:, 6]),
+                "nue": len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 66]),
+                "anue": len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 67]),
+                "numu": len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 68]),
+                "anumu": len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 69]),
+            },
+            h5loc="nu_multiplicity",
+        )
 
-    if ('track_seamuon' or 'track_seaneutrino') in blob.keys():
+    if ("track_seamuon" or "track_seaneutrino") in blob.keys():
 
-        blob['Weights'] = Table({
-            'w1': blob['weights'][0][0],
-            'w2': blob['weights'][0][1],
-            'w3': blob['weights'][0][2],
-        },
-                                h5loc='weights')
+        blob["Weights"] = Table(
+            {
+                "w1": blob["weights"][0][0],
+                "w2": blob["weights"][0][1],
+                "w3": blob["weights"][0][2],
+            },
+            h5loc="weights",
+        )
 
-    if 'track_primary' in blob.keys():
+    if "track_primary" in blob.keys():
 
-        primary = blob['track_primary']
+        primary = blob["track_primary"]
 
-        blob['Primary'] = Table({
-            'id': np.array(primary)[:, 0].astype(int),
-            'pos_x': np.array(primary)[:, 1],
-            'pos_y': np.array(primary)[:, 2],
-            'pos_z': np.array(primary)[:, 3],
-            'dir_x': np.array(primary)[:, 4],
-            'dir_y': np.array(primary)[:, 5],
-            'dir_z': np.array(primary)[:, 6],
-            'energy': np.array(primary)[:, 7],
-            'time': np.array(primary)[:, 8],
-            'particle_id': np.array(primary)[:, 9].astype(int)
-        },
-                                h5loc='primary')
+        blob["Primary"] = Table(
+            {
+                "id": np.array(primary)[:, 0].astype(int),
+                "pos_x": np.array(primary)[:, 1],
+                "pos_y": np.array(primary)[:, 2],
+                "pos_z": np.array(primary)[:, 3],
+                "dir_x": np.array(primary)[:, 4],
+                "dir_y": np.array(primary)[:, 5],
+                "dir_z": np.array(primary)[:, 6],
+                "energy": np.array(primary)[:, 7],
+                "time": np.array(primary)[:, 8],
+                "particle_id": np.array(primary)[:, 9].astype(int),
+            },
+            h5loc="primary",
+        )
 
     return blob
 
@@ -572,95 +573,104 @@ def parse_corant(blob):
 def parse_propa(blob):
     """Creates new blob entries for the given blob keys"""
 
-    if 'track_in' in blob.keys():
+    if "track_in" in blob.keys():
 
-        muon = blob['track_in']
+        muon = blob["track_in"]
 
-        blob['Muon'] = Table({
-            'id': np.array(muon)[:, 0].astype(int),
-            'pos_x': np.array(muon)[:, 1],
-            'pos_y': np.array(muon)[:, 2],
-            'pos_z': np.array(muon)[:, 3],
-            'dir_x': np.array(muon)[:, 4],
-            'dir_y': np.array(muon)[:, 5],
-            'dir_z': np.array(muon)[:, 6],
-            'energy': np.array(muon)[:, 7],
-            'time': np.array(muon)[:, 8],
-            'particle_id': np.array(muon)[:, 9].astype(int),
-            'is_charm': np.array(muon)[:, 10].astype(int),
-            'mother_pid': np.array(muon)[:, 11].astype(int),
-            'grandmother_pid': np.array(muon)[:, 11].astype(int),
-        },
-                             h5loc='muon')
+        blob["Muon"] = Table(
+            {
+                "id": np.array(muon)[:, 0].astype(int),
+                "pos_x": np.array(muon)[:, 1],
+                "pos_y": np.array(muon)[:, 2],
+                "pos_z": np.array(muon)[:, 3],
+                "dir_x": np.array(muon)[:, 4],
+                "dir_y": np.array(muon)[:, 5],
+                "dir_z": np.array(muon)[:, 6],
+                "energy": np.array(muon)[:, 7],
+                "time": np.array(muon)[:, 8],
+                "particle_id": np.array(muon)[:, 9].astype(int),
+                "is_charm": np.array(muon)[:, 10].astype(int),
+                "mother_pid": np.array(muon)[:, 11].astype(int),
+                "grandmother_pid": np.array(muon)[:, 11].astype(int),
+            },
+            h5loc="muon",
+        )
 
-        blob['MuonMultiplicity'] = Table({
-            'muon_multiplicity': len(np.array(muon)[:, 6])
-        },
-                                         h5loc='muon_multiplicity')
+        blob["MuonMultiplicity"] = Table(
+            {"muon_multiplicity": len(np.array(muon)[:, 6])}, h5loc="muon_multiplicity"
+        )
 
-    if 'neutrino' in blob.keys():
+    if "neutrino" in blob.keys():
 
-        nu = blob['neutrino']
+        nu = blob["neutrino"]
 
-        blob['Neutrino'] = Table({
-            'id': np.array(nu)[:, 0].astype(int),
-            'pos_x': np.array(nu)[:, 1],
-            'pos_y': np.array(nu)[:, 2],
-            'pos_z': np.array(nu)[:, 3],
-            'dir_x': np.array(nu)[:, 4],
-            'dir_y': np.array(nu)[:, 5],
-            'dir_z': np.array(nu)[:, 6],
-            'energy': np.array(nu)[:, 7],
-            'time': np.array(nu)[:, 8],
-            'particle_id': np.array(nu)[:, 9].astype(int),
-            'is_charm': np.array(nu)[:, 10].astype(int),
-            'mother_pid': np.array(nu)[:, 11].astype(int),
-            'grandmother_pid': np.array(nu)[:, 11].astype(int),
-        },
-                                 h5loc='nu')
-        blob['NeutrinoMultiplicity'] = Table({
-            'total': len(np.array(nu)[:, 6]),
-            'nue': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 12]),
-            'anue': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == -12]),
-            'numu': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 14]),
-            'anumu': len(np.array(nu)[:, 6][np.array(nu)[:, 9] == -14]),
-        },
-                                             h5loc='nu_multiplicity')
+        blob["Neutrino"] = Table(
+            {
+                "id": np.array(nu)[:, 0].astype(int),
+                "pos_x": np.array(nu)[:, 1],
+                "pos_y": np.array(nu)[:, 2],
+                "pos_z": np.array(nu)[:, 3],
+                "dir_x": np.array(nu)[:, 4],
+                "dir_y": np.array(nu)[:, 5],
+                "dir_z": np.array(nu)[:, 6],
+                "energy": np.array(nu)[:, 7],
+                "time": np.array(nu)[:, 8],
+                "particle_id": np.array(nu)[:, 9].astype(int),
+                "is_charm": np.array(nu)[:, 10].astype(int),
+                "mother_pid": np.array(nu)[:, 11].astype(int),
+                "grandmother_pid": np.array(nu)[:, 11].astype(int),
+            },
+            h5loc="nu",
+        )
+        blob["NeutrinoMultiplicity"] = Table(
+            {
+                "total": len(np.array(nu)[:, 6]),
+                "nue": len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 12]),
+                "anue": len(np.array(nu)[:, 6][np.array(nu)[:, 9] == -12]),
+                "numu": len(np.array(nu)[:, 6][np.array(nu)[:, 9] == 14]),
+                "anumu": len(np.array(nu)[:, 6][np.array(nu)[:, 9] == -14]),
+            },
+            h5loc="nu_multiplicity",
+        )
 
-    if ('track_in' or 'neutrino') in blob.keys():
+    if ("track_in" or "neutrino") in blob.keys():
 
-        blob['Weights'] = Table({
-            'w1': blob['weights'][0][0],
-            'w2': blob['weights'][0][1],
-            'w3': blob['weights'][0][2],
-        },
-                                h5loc='weights')
+        blob["Weights"] = Table(
+            {
+                "w1": blob["weights"][0][0],
+                "w2": blob["weights"][0][1],
+                "w3": blob["weights"][0][2],
+            },
+            h5loc="weights",
+        )
 
-    if 'track_primary' in blob.keys():
+    if "track_primary" in blob.keys():
 
-        primary = blob['track_primary']
+        primary = blob["track_primary"]
 
-        blob['Primary'] = Table({
-            'id': np.array(primary)[:, 0].astype(int),
-            'pos_x': np.array(primary)[:, 1],
-            'pos_y': np.array(primary)[:, 2],
-            'pos_z': np.array(primary)[:, 3],
-            'dir_x': np.array(primary)[:, 4],
-            'dir_y': np.array(primary)[:, 5],
-            'dir_z': np.array(primary)[:, 6],
-            'energy': np.array(primary)[:, 7],
-            'time': np.array(primary)[:, 8],
-            'particle_id': np.array(primary)[:, 9].astype(int)
-        },
-                                h5loc='primary')
+        blob["Primary"] = Table(
+            {
+                "id": np.array(primary)[:, 0].astype(int),
+                "pos_x": np.array(primary)[:, 1],
+                "pos_y": np.array(primary)[:, 2],
+                "pos_z": np.array(primary)[:, 3],
+                "dir_x": np.array(primary)[:, 4],
+                "dir_y": np.array(primary)[:, 5],
+                "dir_z": np.array(primary)[:, 6],
+                "energy": np.array(primary)[:, 7],
+                "time": np.array(primary)[:, 8],
+                "particle_id": np.array(primary)[:, 9].astype(int),
+            },
+            h5loc="primary",
+        )
 
     return blob
 
 
 EVT_PARSERS = {
-    'km3sim': Parser(KM3SIM_TAGS),
-    'gseagen': Parser(GSEAGEN_TAGS),
-    'km3': Parser(KM3_TAGS),
-    'propa': parse_propa,
-    'corant': parse_corant,
+    "km3sim": Parser(KM3SIM_TAGS),
+    "gseagen": Parser(GSEAGEN_TAGS),
+    "km3": Parser(KM3_TAGS),
+    "propa": parse_propa,
+    "corant": parse_corant,
 }

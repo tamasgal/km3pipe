@@ -1,3 +1,3 @@
 from ..style import use
 
-use('km3pipe')
+use("km3pipe")

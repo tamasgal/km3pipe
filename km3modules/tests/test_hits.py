@@ -6,7 +6,7 @@ Tests for Hit functions and Modules.
 """
 
 import numpy as np
-from numpy.testing import (assert_array_equal, assert_allclose)
+from numpy.testing import assert_array_equal, assert_allclose
 
 from km3modules.hits import count_multiplicities
 

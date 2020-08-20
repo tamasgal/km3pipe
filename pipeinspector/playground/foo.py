@@ -27,13 +27,13 @@ class PipeInspector(object):
         while True:
             try:
                 c = self.stdscr.getkey()
-                if c == 'q':
+                if c == "q":
                     raise SystemExit
             except curses.error:
                 self.refresh()
 
     def refresh(self):
-        #resize = curses.is_term_resized(self.max_row, self.max_col)
+        # resize = curses.is_term_resized(self.max_row, self.max_col)
         # if resize:
         #    self._update_dimensions()
         #    self.stdscr.clear()
@@ -75,7 +75,7 @@ class PipeInspector(object):
         for y in range(0, 100):
             for x in range(0, 100):
                 try:
-                    pad.addch(y, x, ord('a') + (x * x + y * y) % 26)
+                    pad.addch(y, x, ord("a") + (x * x + y * y) % 26)
                 except curses.error:
                     pass
         self._pads.append(pad)
@@ -87,5 +87,5 @@ def main(stdscr):
     pipe_inspector.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     curses.wrapper(main)

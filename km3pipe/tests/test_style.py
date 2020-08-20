@@ -16,16 +16,16 @@ __status__ = "Development"
 class TestStyle(TestCase):
     def test_get_style_path(self):
         gsp = get_style_path
-        self.assertTrue(gsp('km3pipe').endswith("stylelib/km3pipe.mplstyle"))
-        self.assertTrue(gsp('foo').endswith("/stylelib/foo.mplstyle"))
-        self.assertTrue(gsp('bar').endswith("/stylelib/bar.mplstyle"))
+        self.assertTrue(gsp("km3pipe").endswith("stylelib/km3pipe.mplstyle"))
+        self.assertTrue(gsp("foo").endswith("/stylelib/foo.mplstyle"))
+        self.assertTrue(gsp("bar").endswith("/stylelib/bar.mplstyle"))
 
 
 class TestColourCycler(TestCase):
     def test_available(self):
         cc = ColourCycler()
-        self.assertTrue('km3pipe' in cc.available)
-        self.assertTrue('classic' in cc.available)
+        self.assertTrue("km3pipe" in cc.available)
+        self.assertTrue("classic" in cc.available)
 
     def test_next(self):
         cc = ColourCycler()
@@ -43,104 +43,112 @@ class TestColourCycler(TestCase):
 
     def test_raise_keyerror_if_style_not_available(self):
         with self.assertRaises(KeyError):
-            cc = ColourCycler("foo")    # noqa
+            cc = ColourCycler("foo")  # noqa
 
 
 class TestStyles(TestCase):
-    @patch('matplotlib.pyplot')
+    @patch("matplotlib.pyplot")
     def test_non_existent_style(self, plt_mock):
-        use('non-existent')
+        use("non-existent")
         assert not plt_mock.style.use.called
 
-    @patch('matplotlib.pyplot')
+    @patch("matplotlib.pyplot")
     def test_km3pipe(self, plt_mock):
-        use('km3pipe')
-        self._assert_plt_imported(plt_mock, 'km3pipe.mplstyle')
+        use("km3pipe")
+        self._assert_plt_imported(plt_mock, "km3pipe.mplstyle")
 
-    @patch('matplotlib.pyplot')
+    @patch("matplotlib.pyplot")
     def test_noargs_load_km3pipe_style(self, plt_mock):
         use()
-        self._assert_plt_imported(plt_mock, 'km3pipe.mplstyle')
+        self._assert_plt_imported(plt_mock, "km3pipe.mplstyle")
 
-    @patch('matplotlib.pyplot')
+    @patch("matplotlib.pyplot")
     def test_poster_style(self, plt_mock):
-        use('poster')
-        self._assert_plt_imported(plt_mock, 'km3pipe-poster.mplstyle')
+        use("poster")
+        self._assert_plt_imported(plt_mock, "km3pipe-poster.mplstyle")
 
-    @patch('matplotlib.pyplot')
+    @patch("matplotlib.pyplot")
     def test_notebook_style(self, plt_mock):
-        use('notebook')
-        self._assert_plt_imported(plt_mock, 'km3pipe-notebook.mplstyle')
+        use("notebook")
+        self._assert_plt_imported(plt_mock, "km3pipe-notebook.mplstyle")
 
-    @patch('matplotlib.pyplot')
+    @patch("matplotlib.pyplot")
     def test_talk_style(self, plt_mock):
-        use('talk')
-        self._assert_plt_imported(plt_mock, 'km3pipe-talk.mplstyle')
+        use("talk")
+        self._assert_plt_imported(plt_mock, "km3pipe-talk.mplstyle")
 
-    @patch('matplotlib.pyplot')
+    @patch("matplotlib.pyplot")
     def test_alba_style(self, plt_mock):
-        use('alba')
-        self._assert_plt_imported(plt_mock, 'alba.mplstyle')
+        use("alba")
+        self._assert_plt_imported(plt_mock, "alba.mplstyle")
 
-    @patch('matplotlib.pyplot')
+    @patch("matplotlib.pyplot")
     def test_jonas_style(self, plt_mock):
-        use('jonas-phd')
-        self._assert_plt_imported(plt_mock, 'jonas-phd.mplstyle')
+        use("jonas-phd")
+        self._assert_plt_imported(plt_mock, "jonas-phd.mplstyle")
 
-    @patch('matplotlib.pyplot')
+    @patch("matplotlib.pyplot")
     def test_jvs_style(self, plt_mock):
-        use('jvs')
-        self._assert_plt_imported(plt_mock, 'jvs.mplstyle')
+        use("jvs")
+        self._assert_plt_imported(plt_mock, "jvs.mplstyle")
 
-    @patch('matplotlib.pyplot')
+    @patch("matplotlib.pyplot")
     def test_moritz_style(self, plt_mock):
-        use('moritz')
-        self._assert_plt_imported(plt_mock, 'moritz.mplstyle')
+        use("moritz")
+        self._assert_plt_imported(plt_mock, "moritz.mplstyle")
 
-    @patch('matplotlib.pyplot')
+    @patch("matplotlib.pyplot")
     def test_serifs_style(self, plt_mock):
-        use('serifs')
-        self._assert_plt_imported(plt_mock, 'serifs.mplstyle')
+        use("serifs")
+        self._assert_plt_imported(plt_mock, "serifs.mplstyle")
 
-    @patch('matplotlib.pyplot')
+    @patch("matplotlib.pyplot")
     def test_import_alba(self, plt_mock):
         import km3pipe.style.alba
-        self._assert_plt_imported(plt_mock, 'alba.mplstyle')
 
-    @patch('matplotlib.pyplot')
+        self._assert_plt_imported(plt_mock, "alba.mplstyle")
+
+    @patch("matplotlib.pyplot")
     def test_import_moritz(self, plt_mock):
         import km3pipe.style.moritz
-        self._assert_plt_imported(plt_mock, 'moritz.mplstyle')
 
-    @patch('matplotlib.pyplot')
+        self._assert_plt_imported(plt_mock, "moritz.mplstyle")
+
+    @patch("matplotlib.pyplot")
     def test_import_default(self, plt_mock):
         import km3pipe.style.default
-        self._assert_plt_imported(plt_mock, 'km3pipe.mplstyle')
 
-    @patch('matplotlib.pyplot')
+        self._assert_plt_imported(plt_mock, "km3pipe.mplstyle")
+
+    @patch("matplotlib.pyplot")
     def test_import_jonas_phd(self, plt_mock):
         import km3pipe.style.jonas_phd
-        self._assert_plt_imported(plt_mock, 'jonas-phd.mplstyle')
 
-    @patch('matplotlib.pyplot')
+        self._assert_plt_imported(plt_mock, "jonas-phd.mplstyle")
+
+    @patch("matplotlib.pyplot")
     def test_import_km3pipe(self, plt_mock):
         import km3pipe.style.km3pipe
-        self._assert_plt_imported(plt_mock, 'km3pipe.mplstyle')
 
-    @patch('matplotlib.pyplot')
+        self._assert_plt_imported(plt_mock, "km3pipe.mplstyle")
+
+    @patch("matplotlib.pyplot")
     def test_import_km3pipe_notebook(self, plt_mock):
         import km3pipe.style.km3pipe_notebook
-        self._assert_plt_imported(plt_mock, 'km3pipe-notebook.mplstyle')
 
-    @patch('matplotlib.pyplot')
+        self._assert_plt_imported(plt_mock, "km3pipe-notebook.mplstyle")
+
+    @patch("matplotlib.pyplot")
     def test_import_km3pipe_poster(self, plt_mock):
         import km3pipe.style.km3pipe_poster
-        self._assert_plt_imported(plt_mock, 'km3pipe-poster.mplstyle')
 
-    @patch('matplotlib.pyplot')
+        self._assert_plt_imported(plt_mock, "km3pipe-poster.mplstyle")
+
+    @patch("matplotlib.pyplot")
     def test_import_km3pipe_talk(self, plt_mock):
         import km3pipe.style.km3pipe_talk
-        self._assert_plt_imported(plt_mock, 'km3pipe-talk.mplstyle')
+
+        self._assert_plt_imported(plt_mock, "km3pipe-talk.mplstyle")
 
     def _assert_plt_imported(self, plt_mock, style_filename):
         args, kwargs = plt_mock.style.use.call_args_list[0]

@@ -29,7 +29,7 @@ __status__ = "Development"
 def h5header(h5name, raw=False):
     with tables.open_file(h5name) as h5:
         header_loc = "/header"
-        if not header_loc in h5:    # noqa
+        if not header_loc in h5:  # noqa
             print("Sorry, no header.")
             return
         header = h5.get_node(header_loc)
@@ -47,6 +47,7 @@ def h5header(h5name, raw=False):
 
 def main():
     from docopt import docopt
+
     arguments = docopt(__doc__)
 
-    h5header(arguments['FILE'], arguments['--raw'])
+    h5header(arguments["FILE"], arguments["--raw"])

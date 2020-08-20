@@ -10,7 +10,7 @@ from km3pipe.io import CHPump
 class CHPrinter(Module):
     def process(self, blob):
         print("New blob:")
-        print(blob['CHPrefix'])
+        print(blob["CHPrefix"])
         return blob
 
 
@@ -19,14 +19,14 @@ class Dumper(Module):
         self.counter = 0
 
     def process(self, blob):
-        if 'CHData' in blob:
-            tag = str(blob['CHPrefix'].tag)
-            data = blob['CHData']
+        if "CHData" in blob:
+            tag = str(blob["CHPrefix"].tag)
+            data = blob["CHData"]
             self.dump(data, tag)
         return blob
 
     def dump(self, data, tag):
-        with open('{0}-{1:06}.dat'.format(tag, self.counter), 'w') as f:
+        with open("{0}-{1:06}.dat".format(tag, self.counter), "w") as f:
             self.counter += 1
             f.write(data)
 
@@ -34,11 +34,11 @@ class Dumper(Module):
 pipe = Pipeline()
 pipe.attach(
     CHPump,
-    host='127.0.0.1',
+    host="127.0.0.1",
     port=5553,
-    tags='IO_EVT, IO_TSL, IO_SUM, TRG_PARS',
+    tags="IO_EVT, IO_TSL, IO_SUM, TRG_PARS",
     timeout=60 * 60 * 24,
-    max_queue=42
+    max_queue=42,
 )
 pipe.attach(CHPrinter)
 pipe.attach(Dumper)

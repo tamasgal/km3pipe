@@ -44,7 +44,7 @@ from .hardware import Detector
 
 from km3pipe.logger import get_logger
 
-log = get_logger(__name__)    # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -60,14 +60,16 @@ SPS_CACHE = "/sps/km3net/repo/data/cache"
 def run_tests():
     import pytest
     import km3pipe
+
     pytest.main([os.path.dirname(km3pipe.__file__)])
 
 
-def update_km3pipe(git_branch=''):
-    if git_branch == '' or git_branch is None:
-        git_branch = 'master'
-    if git_branch == 'develop':
+def update_km3pipe(git_branch=""):
+    if git_branch == "" or git_branch is None:
+        git_branch = "master"
+    if git_branch == "develop":
         import time
+
         log.deprecation(
             "The 'develop' branch has been moved to 'master', please "
             "use the command \n\n"
@@ -78,10 +80,11 @@ def update_km3pipe(git_branch=''):
             "Proceeding with the 'master' branch in 15 seconds..."
         )
         time.sleep(15)
-        git_branch = 'master'
+        git_branch = "master"
     os.system(
-        "pip install -U git+http://git.km3net.de/km3py/km3pipe.git@{0}".
-        format(git_branch)
+        "pip install -U git+http://git.km3net.de/km3py/km3pipe.git@{0}".format(
+            git_branch
+        )
     )
 
 
@@ -122,7 +125,7 @@ def retrieve(run_id, det_id, use_irods=False, out=None):
 
     if os.path.exists(lock_file):
         print("File is already requested, waiting for the download to finish.")
-        for _ in range(6 * 15):    # 15 minute timeout
+        for _ in range(6 * 15):  # 15 minute timeout
             time.sleep(10)
             if not os.path.exists(lock_file):
                 print("Done.")
@@ -155,15 +158,15 @@ def retrieve(run_id, det_id, use_irods=False, out=None):
     subprocess.call(["ln", "-s", cached_filepath, outfile])
 
 
-def detx(det_id, calibration='', t0set='', filename=None):
+def detx(det_id, calibration="", t0set="", filename=None):
     now = datetime.now()
     if filename is None:
         filename = "KM3NeT_{0}{1:08d}_{2}{3}{4}.detx".format(
-            '-' if det_id < 0 else '',
+            "-" if det_id < 0 else "",
             abs(det_id),
             now.strftime("%d%m%Y"),
-            '_t0set-%s' % t0set if t0set else '',
-            '_calib-%s' % calibration if calibration else '',
+            "_t0set-%s" % t0set if t0set else "",
+            "_calib-%s" % calibration if calibration else "",
         )
     det = Detector(det_id=det_id, t0set=t0set, calibration=calibration)
     if det.n_doms > 0:
@@ -180,7 +183,7 @@ def detx_for_run(det_id, run, temporary=False):
     print("File saved as '{}'".format(filename))
 
 
-def detectors(regex=None, sep='\t', temporary=False):
+def detectors(regex=None, sep="\t", temporary=False):
     """Print the detectors table"""
     db = DBManager(temporary=temporary)
     dt = db.detectors
@@ -190,7 +193,7 @@ def detectors(regex=None, sep='\t', temporary=False):
         except re.error:
             log.error("Invalid regex!")
             return
-        dt = dt[dt['OID'].str.contains(regex) | dt['CITY'].str.contains(regex)]
+        dt = dt[dt["OID"].str.contains(regex) | dt["CITY"].str.contains(regex)]
     dt.to_csv(sys.stdout, sep=sep)
 
 
@@ -207,58 +210,53 @@ def rundetsn(run_id, detector="ARCA", temporary=False):
 def createconf(overwrite=False, dump=False):
     import os.path
     from os import environ
-    defaultconf = '[General]\ncheck_for_updates=yes'
+
+    defaultconf = "[General]\ncheck_for_updates=yes"
     if dump:
         print("--------------\n" + defaultconf + "\n--------------")
-    fname = environ['HOME'] + '/.km3net'
+    fname = environ["HOME"] + "/.km3net"
     if not overwrite and os.path.exists(fname):
-        log.warn('Config exists, not overwriting')
+        log.warn("Config exists, not overwriting")
         return
-    with open(fname, 'w') as f:
+    with open(fname, "w") as f:
         f.write(defaultconf)
-    print('Wrote default config to ', fname)
+    print("Wrote default config to ", fname)
     os.chmod(fname, 0o600)
 
 
 def main():
     from docopt import docopt
-    args = docopt(__doc__, version="KM3Pipe {}".format(version, ))
 
-    if args['test']:
+    args = docopt(__doc__, version="KM3Pipe {}".format(version,))
+
+    if args["test"]:
         run_tests()
 
-    if args['update']:
-        update_km3pipe(args['GIT_BRANCH'])
+    if args["update"]:
+        update_km3pipe(args["GIT_BRANCH"])
 
-    if args['createconf']:
-        overwrite_conf = bool(args['--overwrite'])
-        dump = bool(args['--dump'])
+    if args["createconf"]:
+        overwrite_conf = bool(args["--overwrite"])
+        dump = bool(args["--dump"])
         createconf(overwrite_conf, dump)
 
-    if args['rundetsn']:
-        rundetsn(
-            int(args['RUN']), args['DETECTOR'], temporary=args["--temporary"]
-        )
+    if args["rundetsn"]:
+        rundetsn(int(args["RUN"]), args["DETECTOR"], temporary=args["--temporary"])
 
-    if args['retrieve']:
-        retrieve(
-            int(args['RUN']),
-            args['DET_ID'],
-            use_irods=args['-i'],
-            out=args['-o']
-        )
+    if args["retrieve"]:
+        retrieve(int(args["RUN"]), args["DET_ID"], use_irods=args["-i"], out=args["-o"])
 
-    if args['detx']:
-        if args['RUN'] and args['DET_ID']:
-            det_id = int(args['DET_ID'])
-            run = int(args['RUN'])
-            detx_for_run(det_id, run, temporary=args['--temporary'])
+    if args["detx"]:
+        if args["RUN"] and args["DET_ID"]:
+            det_id = int(args["DET_ID"])
+            run = int(args["RUN"])
+            detx_for_run(det_id, run, temporary=args["--temporary"])
         else:
-            t0set = args['-t']
-            calibration = args['-c']
-            outfile = args['-o']
-            det_id = int(('-' if args['-m'] else '') + args['DET_ID'])
+            t0set = args["-t"]
+            calibration = args["-c"]
+            outfile = args["-o"]
+            det_id = int(("-" if args["-m"] else "") + args["DET_ID"])
             detx(det_id, calibration, t0set, outfile)
 
-    if args['detectors']:
-        detectors(regex=args['-s'], temporary=args["--temporary"])
+    if args["detectors"]:
+        detectors(regex=args["-s"], temporary=args["--temporary"])

@@ -2,7 +2,7 @@ import km3pipe as kp
 import numpy as np
 import pandas as pd
 
-dt = np.dtype([('hi', int), ('there', float)])
+dt = np.dtype([("hi", int), ("there", float)])
 dat = np.ones(5, dtype=dt)
 df = pd.DataFrame.from_records(dat)
 

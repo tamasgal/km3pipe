@@ -5,9 +5,9 @@ Some unsorted, frequently used logic.
 
 """
 try:
-    import resource    # linux/macos
+    import resource  # linux/macos
 except ImportError:
-    import psutil    # windows
+    import psutil  # windows
 
 import sys
 from contextlib import contextmanager
@@ -38,12 +38,12 @@ def ignored(*exceptions):
 
 def peak_memory_usage():
     """Return peak memory usage in MB"""
-    if sys.platform.startswith('win'):
+    if sys.platform.startswith("win"):
         p = psutil.Process()
         return p.memory_info().peak_wset / 1024 / 1024
 
     mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     factor_mb = 1 / 1024
-    if sys.platform == 'darwin':
+    if sys.platform == "darwin":
         factor_mb = 1 / (1024 * 1024)
     return mem * factor_mb

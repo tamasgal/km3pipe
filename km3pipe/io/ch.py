@@ -25,22 +25,23 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = get_logger(__name__)    # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 
 class CHPump(Pump):
     """A pump for ControlHost data."""
+
     def configure(self):
-        self.host = self.get('host') or '127.0.0.1'
-        self.port = self.get('port') or 5553
-        self.tags = self.get('tags') or "MSG"
-        self.timeout = self.get('timeout') or 60 * 60 * 24
-        self.max_queue = self.get('max_queue') or 50
-        self.key_for_data = self.get('key_for_data') or 'CHData'
-        self.key_for_prefix = self.get('key_for_prefix') or 'CHPrefix'
-        self.subscription_mode = self.get('subscription_mode', default='wait')
-        self.show_statistics = self.get('show_statistics', default=False)
-        self.statistics_interval = self.get('statistics_interval', default=30)
+        self.host = self.get("host") or "127.0.0.1"
+        self.port = self.get("port") or 5553
+        self.tags = self.get("tags") or "MSG"
+        self.timeout = self.get("timeout") or 60 * 60 * 24
+        self.max_queue = self.get("max_queue") or 50
+        self.key_for_data = self.get("key_for_data") or "CHData"
+        self.key_for_prefix = self.get("key_for_prefix") or "CHPrefix"
+        self.subscription_mode = self.get("subscription_mode", default="wait")
+        self.show_statistics = self.get("show_statistics", default=False)
+        self.statistics_interval = self.get("statistics_interval", default=30)
         self.cuckoo_warn = Cuckoo(60 * 5, log.warning)
         self.performance_warn = Cuckoo(
             self.statistics_interval, self.show_performance_statistics
@@ -55,7 +56,7 @@ class CHPump(Pump):
         self.client = None
         self.thread = None
 
-        if self.subscription_mode == 'all':
+        if self.subscription_mode == "all":
             self.log.warning(
                 "You subscribed to the ligier in 'all'-mode! "
                 "If you are too slow with data processing, "
@@ -89,7 +90,7 @@ class CHPump(Pump):
         self.client = Client(self.host, self.port)
         self.client._connect()
         log.debug("Subscribing to tags: {0}".format(self.tags))
-        for tag in self.tags.split(','):
+        for tag in self.tags.split(","):
             self.client.subscribe(tag.strip(), mode=self.subscription_mode)
         log.debug("Controlhost initialisation done.")
 
@@ -117,8 +118,8 @@ class CHPump(Pump):
                 break
             if not data:
                 log.critical(
-                    "No data received, connection died.\n" +
-                    "Trying to reconnect in 30 seconds."
+                    "No data received, connection died.\n"
+                    + "Trying to reconnect in 30 seconds."
                 )
                 time.sleep(30)
                 try:
@@ -145,9 +146,7 @@ class CHPump(Pump):
             prefix, data = self.queue.get(timeout=self.timeout)
             log.debug("Got {0} bytes from queue.".format(len(data)))
         except Empty:
-            log.warning(
-                "ControlHost timeout ({0}s) reached".format(self.timeout)
-            )
+            log.warning("ControlHost timeout ({0}s) reached".format(self.timeout))
             raise StopIteration("ControlHost timeout reached.")
         blob[self.key_for_prefix] = prefix
         blob[self.key_for_data] = data
@@ -164,8 +163,7 @@ class CHPump(Pump):
         log_func(
             "Message rate: {0:.1f} Hz, median idle time per message: "
             "{1:.3f} us (current queue size: {2})".format(
-                self.message_count / self.statistics_interval, dt * 1e6,
-                current_qsize
+                self.message_count / self.statistics_interval, dt * 1e6, current_qsize
             )
         )
         self.message_count = 0
@@ -194,6 +192,6 @@ class CHPump(Pump):
 
 
 def CHTagger(blob):
-    tag = str(blob['CHPrefix'].tag)
+    tag = str(blob["CHPrefix"].tag)
     blob[tag] = True
     return blob

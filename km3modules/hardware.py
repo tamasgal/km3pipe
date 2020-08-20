@@ -15,13 +15,14 @@ __author__ = "Jonas Reubelt and Tamas Gal"
 __email__ = "jreubelt@km3net.de"
 __status__ = "Development"
 
-log = kp.logger.get_logger(__name__)    # pylint: disable=C0103
+log = kp.logger.get_logger(__name__)  # pylint: disable=C0103
 
 
 class PhidgetsController(kp.Module):
     def configure(self):
         from Phidgets.Devices.Stepper import Stepper
         from Phidgets.Devices.Encoder import Encoder
+
         self.current_limit = self.get("current_limit") or 2.5
         self.motor_id = self.get("motor_id") or 0
         self.stepper = Stepper()
@@ -39,8 +40,8 @@ class PhidgetsController(kp.Module):
         self.stepper.setAcceleration(motor_id, 5000)
         self.stepper.setCurrentLimit(motor_id, 2.5)
 
-        self.e = 13250.
-        self.s = 70500.
+        self.e = 13250.0
+        self.s = 70500.0
 
         self._stepper_dest = 0
         self._encoder_dest = 0
@@ -65,9 +66,7 @@ class PhidgetsController(kp.Module):
             self.log_offset()
             stepper_offset = round(self.offset / self.e * self.s)
             log.debug("Correcting stepper by {0}".format(stepper_offset))
-            log.debug(
-                "Stepper target pos: {0}".format(self.stepper_target_pos)
-            )
+            log.debug("Stepper target pos: {0}".format(self.stepper_target_pos))
             log.debug("Stepper pos: {0}".format(self.stepper_pos))
             self.stepper_target_pos = self.stepper_pos + stepper_offset
             self.wait_for_stepper()
@@ -127,8 +126,7 @@ class PhidgetsController(kp.Module):
     def log_positions(self, motor_id=0):
         log.info(
             "Stepper position: {0}\nEncoder position:{1}".format(
-                self.stepper_pos / self.s * 360,
-                self.encoder_pos / self.e * 360
+                self.stepper_pos / self.s * 360, self.encoder_pos / self.e * 360
             )
         )
 
@@ -156,6 +154,7 @@ class USBTMC(object):
 
 class Agilent33220A(object):
     """Controller for the Arbitrary Waveform Generator"""
+
     def __init__(self, path):
         self.tmc = USBTMC(path)
         self._output = False
@@ -201,12 +200,10 @@ class Agilent33220A(object):
 
     @mode.setter
     def mode(self, val):
-        valid_modes = ('sin', 'squ', 'ramp', 'puls', 'nois', 'dc', 'user')
+        valid_modes = ("sin", "squ", "ramp", "puls", "nois", "dc", "user")
         if val not in valid_modes:
             print(
-                "Not a valid mode: '{0}'. Valid modes are: {1}".format(
-                    val, valid_modes
-                )
+                "Not a valid mode: '{0}'. Valid modes are: {1}".format(val, valid_modes)
             )
             return
         self.tmc.write("FUNC {0}".format(val.upper()).encode())

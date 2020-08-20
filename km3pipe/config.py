@@ -19,9 +19,9 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = get_logger(__name__)    # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
-CONFIG_PATH = os.path.expanduser('~/.km3net')
+CONFIG_PATH = os.path.expanduser("~/.km3net")
 
 
 class Config(object):
@@ -52,7 +52,7 @@ class Config(object):
         if section not in self.config.sections():
             self.config.add_section(section)
         self.config.set(section, key, value)
-        with open(self._config_path, 'w') as f:
+        with open(self._config_path, "w") as f:
             self.config.write(f)
 
     def get(self, section, key, default=None):
@@ -76,16 +76,16 @@ class Config(object):
             )
             return
         try:
-            host = self.config.get('iRODS', 'host')
-            port = self.config.get('iRODS', 'port')
-            user = self.config.get('iRODS', 'user')
-            zone = self.config.get('iRODS', 'zone')
+            host = self.config.get("iRODS", "host")
+            port = self.config.get("iRODS", "port")
+            user = self.config.get("iRODS", "user")
+            zone = self.config.get("iRODS", "zone")
         except Error:
             log.error("iRODS connection details missing from ~/.km3net")
             return
 
         try:
-            password = self.config.get('iRODS', 'password')
+            password = self.config.get("iRODS", "password")
         except Error:
             password = input("Please enter your iRODS password: ")
 
@@ -97,8 +97,8 @@ class Config(object):
     def db_credentials(self):
         """Return username and password for the KM3NeT WebDB."""
         try:
-            username = self.config.get('DB', 'username')
-            password = self.config.get('DB', 'password')
+            username = self.config.get("DB", "username")
+            password = self.config.get("DB", "password")
         except Error:
             username = input("Please enter your KM3NeT DB username: ")
             password = getpass.getpass("Password: ")
@@ -107,14 +107,14 @@ class Config(object):
     @property
     def db_session_cookie(self):
         try:
-            return self.config.get('DB', 'session_cookie')
+            return self.config.get("DB", "session_cookie")
         except Error:
             return None
 
     @property
     def db_url(self):
         try:
-            return self.config.get('DB', 'url')
+            return self.config.get("DB", "url")
         except Error:
             return None
 
@@ -122,7 +122,7 @@ class Config(object):
     def slack_token(self):
         """Return slack token for chat bots."""
         try:
-            token = self.config.get('Slack', 'token')
+            token = self.config.get("Slack", "token")
         except Error:
             raise ValueError("No Slack token defined in configuration file.")
         else:
@@ -132,7 +132,7 @@ class Config(object):
     def rba_url(self):
         """Return the RainbowAlga URL."""
         try:
-            url = self.config.get('RainbowAlga', 'url')
+            url = self.config.get("RainbowAlga", "url")
         except Error:
             return None
         else:
@@ -141,7 +141,7 @@ class Config(object):
     @property
     def check_for_updates(self):
         try:
-            return self.config.getboolean('General', 'check_for_updates')
+            return self.config.getboolean("General", "check_for_updates")
         except Error:
             return True
 
@@ -149,8 +149,8 @@ class Config(object):
     def time_zone(self):
         if not self._time_zone:
             try:
-                time_zone = self.config.get('General', 'time_zone')
+                time_zone = self.config.get("General", "time_zone")
             except Error:
-                time_zone = 'UTC'
+                time_zone = "UTC"
             self._time_zone = pytz.timezone(time_zone)
         return self._time_zone

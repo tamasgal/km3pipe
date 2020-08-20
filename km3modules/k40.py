@@ -21,7 +21,7 @@ import pickle
 import km3pipe as kp
 from km3pipe.io.daq import TMCHData
 
-log = kp.logger.get_logger(__name__)    # pylint: disable=C0103
+log = kp.logger.get_logger(__name__)  # pylint: disable=C0103
 try:
     from numba import jit
 except ImportError:
@@ -38,7 +38,7 @@ __status__ = "Development"
 
 # log.setLevel(logging.DEBUG)
 
-TIMESLICE_LENGTH = 0.1    # [s]
+TIMESLICE_LENGTH = 0.1  # [s]
 MC_ANG_DIST = np.array([-0.72337394, 2.59196335, -0.43594182, 1.10514914])
 
 
@@ -54,20 +54,19 @@ class K40BackgroundSubtractor(kp.Module):
     'K40Counts': dict, Corrected K40 counts
 
     """
+
     def configure(self):
         self.combs = list(combinations(range(31), 2))
-        self.mode = self.get("mode", default='online')
-        self.expose(self.get_corrected_counts, 'GetCorrectedTwofoldCounts')
+        self.mode = self.get("mode", default="online")
+        self.expose(self.get_corrected_counts, "GetCorrectedTwofoldCounts")
         self.corrected_counts = None
 
     def process(self, blob):
-        if self.mode != 'online':
+        if self.mode != "online":
             return blob
-        self.cprint(
-            'Subtracting random background calculated from single rates'
-        )
+        self.cprint("Subtracting random background calculated from single rates")
         corrected_counts = self.subtract_background()
-        blob['CorrectedTwofoldCounts'] = corrected_counts
+        blob["CorrectedTwofoldCounts"] = corrected_counts
 
         return blob
 
@@ -75,18 +74,16 @@ class K40BackgroundSubtractor(kp.Module):
         return self.corrected_counts
 
     def subtract_background(self):
-        counts = self.services['TwofoldCounts']
+        counts = self.services["TwofoldCounts"]
         dom_ids = list(counts.keys())
-        mean_rates = self.services['GetMedianPMTRates']()
+        mean_rates = self.services["GetMedianPMTRates"]()
         corrected_counts = {}
-        livetimes = self.services['GetLivetime']()
+        livetimes = self.services["GetLivetime"]()
         for dom_id in dom_ids:
             try:
                 pmt_rates = mean_rates[dom_id]
             except KeyError:
-                log.warning(
-                    "Skipping BG correction for DOM {}.".format(dom_id)
-                )
+                log.warning("Skipping BG correction for DOM {}.".format(dom_id))
                 corrected_counts[dom_id] = counts[dom_id]
                 continue
             livetime = livetimes[dom_id]
@@ -94,23 +91,20 @@ class K40BackgroundSubtractor(kp.Module):
             bg_rates = []
             for c in self.combs:
                 bg_rates.append(pmt_rates[c[0]] * pmt_rates[c[1]] * 1e-9)
-            corrected_counts[
-                dom_id] = (k40_rates.T - np.array(bg_rates)).T * livetime
+            corrected_counts[dom_id] = (k40_rates.T - np.array(bg_rates)).T * livetime
         return corrected_counts
 
     def finish(self):
-        if self.mode == 'offline':
-            self.cprint(
-                'Subtracting background calculated from summaryslices.'
-            )
+        if self.mode == "offline":
+            self.cprint("Subtracting background calculated from summaryslices.")
             self.corrected_counts = self.subtract_background()
 
     def dump(self, mean_rates, corrected_counts, livetime):
-        pickle.dump(mean_rates, open('mean_rates.p', 'wb'))
-        pickle.dump({
-            'data': corrected_counts,
-            'livetime': livetime
-        }, open("k40_counts_bg_sub.p", "wb"))
+        pickle.dump(mean_rates, open("mean_rates.p", "wb"))
+        pickle.dump(
+            {"data": corrected_counts, "livetime": livetime},
+            open("k40_counts_bg_sub.p", "wb"),
+        )
 
 
 class IntraDOMCalibrator(kp.Module):
@@ -137,6 +131,7 @@ class IntraDOMCalibrator(kp.Module):
     'IntraDOMCalibration': dict (key=dom_id, value=calibration)
 
     """
+
     def configure(self):
         det_id = self.get("det_id") or 14
         self.detector = kp.hardware.Detector(det_id=det_id)
@@ -145,21 +140,19 @@ class IntraDOMCalibrator(kp.Module):
         self.calib_filename = self.get("calib_filename", default="k40_cal.p")
 
     def process(self, blob):
-        if self.mode != 'online':
+        if self.mode != "online":
             return blob
 
-        if 'CorrectedTwofoldCounts' in blob:
+        if "CorrectedTwofoldCounts" in blob:
             log.info("Using corrected twofold counts")
             fit_background = False
-            twofold_counts = blob['CorrectedTwofoldCounts']
+            twofold_counts = blob["CorrectedTwofoldCounts"]
         else:
             log.info("No corrected twofold counts found, fitting background.")
-            twofold_counts = self.services['TwofoldCounts']
+            twofold_counts = self.services["TwofoldCounts"]
             fit_background = True
 
-        blob['IntraDOMCalibration'] = self.calibrate(
-            twofold_counts, fit_background
-        )
+        blob["IntraDOMCalibration"] = self.calibrate(twofold_counts, fit_background)
         return blob
 
     def calibrate(self, twofold_counts, fit_background=False):
@@ -169,15 +162,15 @@ class IntraDOMCalibrator(kp.Module):
         for dom_id, data in twofold_counts.items():
             self.cprint(" calibrating DOM '{0}'".format(dom_id))
             try:
-                livetime = self.services['GetLivetime']()[dom_id]
+                livetime = self.services["GetLivetime"]()[dom_id]
                 calib = calibrate_dom(
                     dom_id,
                     data,
                     self.detector,
                     livetime=livetime,
                     fit_background=fit_background,
-                    ad_fit_shape='exp',
-                    ctmin=self.ctmin
+                    ad_fit_shape="exp",
+                    ctmin=self.ctmin,
                 )
             except RuntimeError:
                 log.error(" skipping DOM '{0}'.".format(dom_id))
@@ -189,23 +182,19 @@ class IntraDOMCalibrator(kp.Module):
         return calibration
 
     def finish(self):
-        if self.mode == 'offline':
+        if self.mode == "offline":
             self.cprint("Starting offline calibration")
-            if 'GetCorrectedTwofoldCounts' in self.services:
+            if "GetCorrectedTwofoldCounts" in self.services:
                 self.cprint("Using corrected twofold counts")
-                twofold_counts = self.services['GetCorrectedTwofoldCounts']()
+                twofold_counts = self.services["GetCorrectedTwofoldCounts"]()
                 fit_background = False
             else:
                 self.cprint("Using uncorrected twofold counts")
-                twofold_counts = self.services['TwofoldCounts']
+                twofold_counts = self.services["TwofoldCounts"]
                 fit_background = True
-            calibration = self.calibrate(
-                twofold_counts, fit_background=fit_background
-            )
-            self.cprint(
-                "Dumping calibration to '{}'.".format(self.calib_filename)
-            )
-            with open(self.calib_filename, 'wb') as f:
+            calibration = self.calibrate(twofold_counts, fit_background=fit_background)
+            self.cprint("Dumping calibration to '{}'.".format(self.calib_filename))
+            with open(self.calib_filename, "wb") as f:
                 pickle.dump(calibration, f)
 
 
@@ -231,6 +220,7 @@ class TwofoldCounter(kp.Module):
     'DumpTwofoldCounts': Writes twofold counts into 'dump_filename'
 
     """
+
     def configure(self):
         self.tmax = self.get("tmax") or 20
         self.dump_filename = self.get("dump_filename")
@@ -240,14 +230,14 @@ class TwofoldCounter(kp.Module):
         self.start_time = datetime.utcnow()
         self.reset()
 
-        self.expose(self.counts, 'TwofoldCounts')
-        self.expose(self.get_livetime, 'GetLivetime')
-        self.expose(self.reset, 'ResetTwofoldCounts')
+        self.expose(self.counts, "TwofoldCounts")
+        self.expose(self.get_livetime, "GetLivetime")
+        self.expose(self.reset, "ResetTwofoldCounts")
         if self.dump_filename is not None:
-            self.expose(self.dump, 'DumpTwofoldCounts')
+            self.expose(self.dump, "DumpTwofoldCounts")
 
-        if 'GetSkippedFrames' in self.services:
-            self.skipped_frames = self.services['GetSkippedFrames']()
+        if "GetSkippedFrames" in self.services:
+            self.skipped_frames = self.services["GetSkippedFrames"]()
         else:
             self.skipped_frames = None
 
@@ -257,16 +247,13 @@ class TwofoldCounter(kp.Module):
         self.n_timeslices = defaultdict(int)
 
     def get_livetime(self):
-        return {
-            dom_id: n * TIMESLICE_LENGTH
-            for dom_id, n in self.n_timeslices.items()
-        }
+        return {dom_id: n * TIMESLICE_LENGTH for dom_id, n in self.n_timeslices.items()}
 
     def process(self, blob):
         log.debug("Processing timeslice")
-        hits = blob['TSHits']
+        hits = blob["TSHits"]
 
-        frame_index = blob['TimesliceInfo'].frame_index
+        frame_index = blob["TimesliceInfo"].frame_index
         dom_ids = set(np.unique(hits.dom_id))
         if self.skipped_frames is not None:
             skipped_dom_ids = set(self.skipped_frames[frame_index])
@@ -278,39 +265,40 @@ class TwofoldCounter(kp.Module):
             mask = hits.dom_id == dom_id
             times = hits.time[mask]
             channel_ids = hits.channel_id[mask]
-            sort_idc = np.argsort(times, kind='quicksort')
+            sort_idc = np.argsort(times, kind="quicksort")
             add_to_twofold_matrix(
                 times[sort_idc],
                 channel_ids[sort_idc],
                 self.counts[dom_id],
-                tmax=self.tmax
+                tmax=self.tmax,
             )
         return blob
 
     def dump(self):
         """Write coincidence counts into a Python pickle"""
         self.cprint("Dumping data to {}".format(self.dump_filename))
-        pickle.dump({
-            'data': self.counts,
-            'livetime': self.get_livetime()
-        }, open(self.dump_filename, "wb"))
+        pickle.dump(
+            {"data": self.counts, "livetime": self.get_livetime()},
+            open(self.dump_filename, "wb"),
+        )
 
 
 class HRVFIFOTimesliceFilter(kp.Module):
     """Creat a frame index lookup table which holds DOM IDs of frames with
     at least one PMT in HRV."""
+
     def configure(self):
-        filename = self.require('filename')
-        filter_hrv = self.get('filter_hrv', default=False)
-        self.expose(self.get_skipped_frames, 'GetSkippedFrames')
+        filename = self.require("filename")
+        filter_hrv = self.get("filter_hrv", default=False)
+        self.expose(self.get_skipped_frames, "GetSkippedFrames")
         self.skipped_frames = defaultdict(list)
         p = kp.io.jpp.SummaryslicePump(filename=filename)
         for b in p:
-            sum_info = b['SummarysliceInfo']
+            sum_info = b["SummarysliceInfo"]
             frame_index = sum_info.frame_index
-            summaryslice = b['Summaryslice']
+            summaryslice = b["Summaryslice"]
             for dom_id, sf in summaryslice.items():
-                if not sf['fifo_status'] or (filter_hrv and any(sf['hrvs'])):
+                if not sf["fifo_status"] or (filter_hrv and any(sf["hrvs"])):
                     self.skipped_frames[frame_index].append(dom_id)
 
     def get_skipped_frames(self):
@@ -320,26 +308,25 @@ class HRVFIFOTimesliceFilter(kp.Module):
 class SummaryMedianPMTRateService(kp.Module):
     def configure(self):
         self.expose(self.get_median_rates, "GetMedianPMTRates")
-        self.filename = self.require('filename')
+        self.filename = self.require("filename")
 
     def get_median_rates(self):
         rates = defaultdict(list)
 
-        if 'GetSkippedFrames' in self.services:
-            skipped_frames = self.services['GetSkippedFrames']()
+        if "GetSkippedFrames" in self.services:
+            skipped_frames = self.services["GetSkippedFrames"]()
         else:
             skipped_frames = None
 
         p = kp.io.jpp.SummaryslicePump(filename=self.filename)
         for b in p:
-            sum_info = b['SummarysliceInfo']
+            sum_info = b["SummarysliceInfo"]
             frame_index = sum_info.frame_index
-            summary = b['Summaryslice']
+            summary = b["Summaryslice"]
             for dom_id in summary.keys():
-                if skipped_frames is not None and \
-                        dom_id in skipped_frames[frame_index]:
+                if skipped_frames is not None and dom_id in skipped_frames[frame_index]:
                     continue
-                rates[dom_id].append(summary[dom_id]['rates'])
+                rates[dom_id].append(summary[dom_id]["rates"])
 
         median_rates = {}
         for dom_id in rates.keys():
@@ -351,11 +338,11 @@ class SummaryMedianPMTRateService(kp.Module):
 class MedianPMTRatesService(kp.Module):
     def configure(self):
         self.rates = defaultdict(lambda: defaultdict(list))
-        self.expose(self.get_median_rates, 'GetMedianPMTRates')
+        self.expose(self.get_median_rates, "GetMedianPMTRates")
 
     def process(self, blob):
         try:
-            tmch_data = TMCHData(io.BytesIO(blob['CHData']))
+            tmch_data = TMCHData(io.BytesIO(blob["CHData"]))
         except ValueError as e:
             self.log.error(e)
             self.log.error("Skipping corrupt monitoring channel packet.")
@@ -368,20 +355,18 @@ class MedianPMTRatesService(kp.Module):
         self.cprint("Calculating median PMT rates.")
         median_rates = {}
         for dom_id in self.rates.keys():
-            median_rates[dom_id] = [
-                np.median(self.rates[dom_id][c]) for c in range(31)
-            ]
+            median_rates[dom_id] = [np.median(self.rates[dom_id][c]) for c in range(31)]
         self.rates = defaultdict(lambda: defaultdict(list))
         return median_rates
 
 
 class ResetTwofoldCounts(kp.Module):
     def process(self, blob):
-        if 'DumpTwofoldCounts' in self.services:
+        if "DumpTwofoldCounts" in self.services:
             self.cprint("Request twofold dump...")
-            self.services['DumpTwofoldCounts']()
+            self.services["DumpTwofoldCounts"]()
         self.cprint("Resetting twofold counts")
-        self.services['ResetTwofoldCounts']()
+        self.services["ResetTwofoldCounts"]()
         return blob
 
 
@@ -392,9 +377,9 @@ def calibrate_dom(
     livetime=None,
     fit_ang_dist=False,
     scale_mc_to_data=True,
-    ad_fit_shape='pexp',
+    ad_fit_shape="pexp",
     fit_background=True,
-    ctmin=-1.
+    ctmin=-1.0,
 ):
     """Calibrate intra DOM PMT time offsets, efficiencies and sigmas
 
@@ -415,13 +400,13 @@ def calibrate_dom(
     if isinstance(data, str):
         filename = data
         loaders = {
-            '.h5': load_k40_coincidences_from_hdf5,
-            '.root': load_k40_coincidences_from_rootfile
+            ".h5": load_k40_coincidences_from_hdf5,
+            ".root": load_k40_coincidences_from_rootfile,
         }
         try:
             loader = loaders[os.path.splitext(filename)[1]]
         except KeyError:
-            log.critical('File format not supported.')
+            log.critical("File format not supported.")
             raise IOError
         else:
             data, livetime = loader(filename, dom_id)
@@ -450,14 +435,15 @@ def calibrate_dom(
     else:
         mc_fitted_rates = exponential_polinomial(np.cos(angles), *MC_ANG_DIST)
         if scale_mc_to_data:
-            scale_factor = np.mean(rates[angles < 1.5]) /  \
-                np.mean(mc_fitted_rates[angles < 1.5])
+            scale_factor = np.mean(rates[angles < 1.5]) / np.mean(
+                mc_fitted_rates[angles < 1.5]
+            )
         else:
-            scale_factor = 1.
+            scale_factor = 1.0
         fitted_rates = mc_fitted_rates * scale_factor
         exp_popts = []
         exp_pcov = []
-        print('Using angular distribution from Monte Carlo')
+        print("Using angular distribution from Monte Carlo")
 
     # t0_weights = np.array([0. if a>1. else 1. for a in angles])
 
@@ -471,35 +457,33 @@ def calibrate_dom(
     opt_qes = minimize_qes(fitted_rates, rates, minimize_weights, combs)
     corrected_means = correct_means(means, opt_t0s.x, combs)
     corrected_rates = correct_rates(rates, opt_qes.x, combs)
-    rms_means, rms_corrected_means = calculate_rms_means(
-        means, corrected_means
-    )
+    rms_means, rms_corrected_means = calculate_rms_means(means, corrected_means)
     rms_rates, rms_corrected_rates = calculate_rms_rates(
         rates, fitted_rates, corrected_rates
     )
     cos_angles = np.cos(angles)
     return_data = {
-        'opt_t0s': opt_t0s,
-        'opt_qes': opt_qes,
-        'data': data,
-        'means': means,
-        'rates': rates,
-        'fitted_rates': fitted_rates,
-        'angles': angles,
-        'corrected_means': corrected_means,
-        'corrected_rates': corrected_rates,
-        'rms_means': rms_means,
-        'rms_corrected_means': rms_corrected_means,
-        'rms_rates': rms_rates,
-        'rms_corrected_rates': rms_corrected_rates,
-        'gaussian_popts': popts,
-        'livetime': livetime,
-        'exp_popts': exp_popts,
-        'exp_pcov': exp_pcov,
-        'scale_factor': scale_factor,
-        'opt_sigmas': opt_sigmas,
-        'sigmas': sigmas,
-        'combs': combs
+        "opt_t0s": opt_t0s,
+        "opt_qes": opt_qes,
+        "data": data,
+        "means": means,
+        "rates": rates,
+        "fitted_rates": fitted_rates,
+        "angles": angles,
+        "corrected_means": corrected_means,
+        "corrected_rates": corrected_rates,
+        "rms_means": rms_means,
+        "rms_corrected_means": rms_corrected_means,
+        "rms_rates": rms_rates,
+        "rms_corrected_rates": rms_corrected_rates,
+        "gaussian_popts": popts,
+        "livetime": livetime,
+        "exp_popts": exp_popts,
+        "exp_pcov": exp_pcov,
+        "scale_factor": scale_factor,
+        "opt_sigmas": opt_sigmas,
+        "sigmas": sigmas,
+        "combs": combs,
     }
     return return_data
 
@@ -524,9 +508,9 @@ def load_k40_coincidences_from_hdf5(filename, dom_id):
     livetime: duration of data-taking
     """
 
-    with h5py.File(filename, 'r') as h5f:
-        data = h5f['/k40counts/{0}'.format(dom_id)]
-        livetime = data.attrs['livetime']
+    with h5py.File(filename, "r") as h5f:
+        data = h5f["/k40counts/{0}".format(dom_id)]
+        livetime = data.attrs["livetime"]
         data = np.array(data)
 
     return data, livetime
@@ -547,6 +531,7 @@ def load_k40_coincidences_from_rootfile(filename, dom_id):
     """
 
     from ROOT import TFile
+
     root_file_monitor = TFile(filename, "READ")
     dom_name = str(dom_id) + ".2S"
     histo_2d_monitor = root_file_monitor.Get(dom_name)
@@ -558,7 +543,7 @@ def load_k40_coincidences_from_rootfile(filename, dom_id):
         data.append(combination)
 
     weights = {}
-    weights_histo = root_file_monitor.Get('weights_hist')
+    weights_histo = root_file_monitor.Get("weights_hist")
     try:
         for i in range(1, weights_histo.GetNbinsX() + 1):
             # we have to read all the entries, unfortunately
@@ -568,18 +553,21 @@ def load_k40_coincidences_from_rootfile(filename, dom_id):
         dom_weight = weights[str(dom_id)]
     except AttributeError:
         log.info("Weights histogram broken or not found, setting weight to 1.")
-        dom_weight = 1.
+        dom_weight = 1.0
     return np.array(data), dom_weight
 
 
 def gaussian(x, mean, sigma, rate, offset):
-    return rate / np.sqrt(2 * np.pi) /  \
-        sigma * np.exp(-0.5 * (x - mean)**2 / sigma**2) + offset
+    return (
+        rate / np.sqrt(2 * np.pi) / sigma * np.exp(-0.5 * (x - mean) ** 2 / sigma ** 2)
+        + offset
+    )
 
 
 def gaussian_wo_offset(x, mean, sigma, rate):
-    return rate / np.sqrt(2 * np.pi) / \
-        sigma * np.exp(-0.5 * (x - mean)**2 / sigma**2)
+    return (
+        rate / np.sqrt(2 * np.pi) / sigma * np.exp(-0.5 * (x - mean) ** 2 / sigma ** 2)
+    )
 
 
 def fit_delta_ts(data, livetime, fit_background=True):
@@ -614,16 +602,16 @@ def fit_delta_ts(data, livetime, fit_background=True):
                     gaussian,
                     xs,
                     combination,
-                    p0=[mean0, 4., 5., 0.1],
-                    bounds=([start, 0, 0, 0], [end, 10, 10, 1])
+                    p0=[mean0, 4.0, 5.0, 0.1],
+                    bounds=([start, 0, 0, 0], [end, 10, 10, 1]),
                 )
             else:
                 popt, pcov = optimize.curve_fit(
                     gaussian_wo_offset,
                     xs,
                     combination,
-                    p0=[mean0, 4., 5.],
-                    bounds=([start, 0, 0], [end, 10, 10])
+                    p0=[mean0, 4.0, 5.0],
+                    bounds=([start, 0, 0], [end, 10, 10]),
                 )
         except RuntimeError:
             popt = (0, 0, 0, 0)
@@ -633,8 +621,11 @@ def fit_delta_ts(data, livetime, fit_background=True):
         popts.append(popt)
         pcovs.append(pcov)
     return (
-        np.array(rates), np.array(means), np.array(sigmas), np.array(popts),
-        np.array(pcovs)
+        np.array(rates),
+        np.array(means),
+        np.array(sigmas),
+        np.array(popts),
+        np.array(pcovs),
     )
 
 
@@ -671,7 +662,7 @@ def exponential(x, a, b):
     return a * np.exp(b * x)
 
 
-def fit_angular_distribution(angles, rates, rate_errors, shape='pexp'):
+def fit_angular_distribution(angles, rates, rate_errors, shape="pexp"):
     """Fits angular distribution of rates.
 
     Parameters
@@ -689,10 +680,10 @@ def fit_angular_distribution(angles, rates, rate_errors, shape='pexp'):
     fitted_rates: numpy array of fitted rates (fit_function(angles, popt...))
 
     """
-    if shape == 'exp':
+    if shape == "exp":
         fit_function = exponential
         # p0 = [-0.91871169,  2.72224241, -1.19065965,  1.48054122]
-    if shape == 'pexp':
+    if shape == "pexp":
         fit_function = exponential_polinomial
         # p0 = [0.34921202, 2.8629577]
 
@@ -716,11 +707,12 @@ def minimize_t0s(means, weights, combs):
     opt_t0s: optimal t0 values for all PMTs
 
     """
+
     def make_quality_function(means, weights, combs):
         def quality_function(t0s):
             sq_sum = 0
             for mean, comb, weight in zip(means, combs, weights):
-                sq_sum += ((mean - (t0s[comb[1]] - t0s[comb[0]])) * weight)**2
+                sq_sum += ((mean - (t0s[comb[1]] - t0s[comb[0]])) * weight) ** 2
             return sq_sum
 
         return quality_function
@@ -728,7 +720,7 @@ def minimize_t0s(means, weights, combs):
     qfunc = make_quality_function(means, weights, combs)
     # t0s = np.zeros(31)
     t0s = np.random.rand(31)
-    bounds = [(0, 0)] + [(-10., 10.)] * 30
+    bounds = [(0, 0)] + [(-10.0, 10.0)] * 30
     opt_t0s = optimize.minimize(qfunc, t0s, bounds=bounds)
     return opt_t0s
 
@@ -747,12 +739,13 @@ def minimize_sigmas(sigmas, weights, combs):
     opt_sigmas: optimal sigma values for all PMTs
 
     """
+
     def make_quality_function(sigmas, weights, combs):
         def quality_function(s):
             sq_sum = 0
             for sigma, comb, weight in zip(sigmas, combs, weights):
-                sigma_sqsum = np.sqrt(s[comb[1]]**2 + s[comb[0]]**2)
-                sq_sum += ((sigma - sigma_sqsum) * weight)**2
+                sigma_sqsum = np.sqrt(s[comb[1]] ** 2 + s[comb[0]] ** 2)
+                sq_sum += ((sigma - sigma_sqsum) * weight) ** 2
             return sq_sum
 
         return quality_function
@@ -760,7 +753,7 @@ def minimize_sigmas(sigmas, weights, combs):
     qfunc = make_quality_function(sigmas, weights, combs)
     s = np.ones(31) * 2.5
     # s = np.random.rand(31)
-    bounds = [(0., 5.)] * 31
+    bounds = [(0.0, 5.0)] * 31
     opt_sigmas = optimize.minimize(qfunc, s, bounds=bounds)
     return opt_sigmas
 
@@ -780,20 +773,23 @@ def minimize_qes(fitted_rates, rates, weights, combs):
     opt_qes: optimal qe values for all PMTs
 
     """
+
     def make_quality_function(fitted_rates, rates, weights, combs):
         def quality_function(qes):
             sq_sum = 0
-            for fitted_rate, comb, rate, weight  \
-                    in zip(fitted_rates, combs, rates, weights):
-                sq_sum += ((rate / qes[comb[0]] / qes[comb[1]] - fitted_rate) *
-                           weight)**2
+            for fitted_rate, comb, rate, weight in zip(
+                fitted_rates, combs, rates, weights
+            ):
+                sq_sum += (
+                    (rate / qes[comb[0]] / qes[comb[1]] - fitted_rate) * weight
+                ) ** 2
             return sq_sum
 
         return quality_function
 
     qfunc = make_quality_function(fitted_rates, rates, weights, combs)
     qes = np.ones(31)
-    bounds = [(0.1, 2.)] * 31
+    bounds = [(0.1, 2.0)] * 31
     opt_qes = optimize.minimize(qfunc, qes, bounds=bounds)
     return opt_qes
 
@@ -814,8 +810,12 @@ def correct_means(means, opt_t0s, combs):
     corrected_means: numpy array of corrected gaussian means for all PMT combs
 
     """
-    corrected_means = np.array([(opt_t0s[comb[1]] - opt_t0s[comb[0]]) - mean
-                                for mean, comb in zip(means, combs)])
+    corrected_means = np.array(
+        [
+            (opt_t0s[comb[1]] - opt_t0s[comb[0]]) - mean
+            for mean, comb in zip(means, combs)
+        ]
+    )
     return corrected_means
 
 
@@ -835,10 +835,9 @@ def correct_rates(rates, opt_qes, combs):
     corrected_rates: numpy array of corrected rates for all PMT combinations
     """
 
-    corrected_rates = np.array([
-        rate / opt_qes[comb[0]] / opt_qes[comb[1]]
-        for rate, comb in zip(rates, combs)
-    ])
+    corrected_rates = np.array(
+        [rate / opt_qes[comb[0]] / opt_qes[comb[1]] for rate, comb in zip(rates, combs)]
+    )
     return corrected_rates
 
 
@@ -855,8 +854,8 @@ def calculate_rms_means(means, corrected_means):
     rms_means: RMS of means from zero
     rms_corrected_means: RMS of corrected_means from zero
     """
-    rms_means = np.sqrt(np.mean((means - 0)**2))
-    rms_corrected_means = np.sqrt(np.mean((corrected_means - 0)**2))
+    rms_means = np.sqrt(np.mean((means - 0) ** 2))
+    rms_corrected_means = np.sqrt(np.mean((corrected_means - 0) ** 2))
     return rms_means, rms_corrected_means
 
 
@@ -873,8 +872,8 @@ def calculate_rms_rates(rates, fitted_rates, corrected_rates):
     rms_rates: RMS of rates from fitted_rates
     rms_corrected_rates: RMS of corrected_ratesrates from fitted_rates
     """
-    rms_rates = np.sqrt(np.mean((rates - fitted_rates)**2))
-    rms_corrected_rates = np.sqrt(np.mean((corrected_rates - fitted_rates)**2))
+    rms_rates = np.sqrt(np.mean((rates - fitted_rates) ** 2))
+    rms_corrected_rates = np.sqrt(np.mean((corrected_rates - fitted_rates) ** 2))
     return rms_rates, rms_corrected_rates
 
 
@@ -900,8 +899,8 @@ def add_to_twofold_matrix(times, tdcs, mat, tmax=10):
     mat: coincidence matrix (np.array((465, tmax * 2 + 1)))
 
     """
-    h_idx = 0    # index of initial hit
-    c_idx = 0    # index of coincident candidate hit
+    h_idx = 0  # index of initial hit
+    c_idx = 0  # index of coincident candidate hit
     n_hits = len(times)
     multiplicity = 0
     while h_idx <= n_hits:

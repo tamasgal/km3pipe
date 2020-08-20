@@ -29,29 +29,29 @@ class TestScript(TestCase):
         s = Script()
         s.add("a")
         s.clear()
-        self.assertEqual('', str(s))
+        self.assertEqual("", str(s))
 
     def test_add_two_argument_command(self):
         s = Script()
         s._add_two_argument_command("command", "a", "b")
-        self.assertEqual('command a b', str(s))
+        self.assertEqual("command a b", str(s))
 
     def test_add_two_argument_command_multiple_times(self):
         s = Script()
         s._add_two_argument_command("cmd1", "a", "b")
         s._add_two_argument_command("cmd2", "c", "d")
         s._add_two_argument_command("cmd3", "e", "f")
-        self.assertEqual('cmd1 a b\ncmd2 c d\ncmd3 e f', str(s))
+        self.assertEqual("cmd1 a b\ncmd2 c d\ncmd3 e f", str(s))
 
     def test_cp(self):
         s = Script()
         s.cp("a", "b")
-        self.assertEqual('cp a b', str(s))
+        self.assertEqual("cp a b", str(s))
 
     def test_mv(self):
         s = Script()
         s.mv("a", "b")
-        self.assertEqual('mv a b', str(s))
+        self.assertEqual("mv a b", str(s))
 
     def test_echo(self):
         s = Script()

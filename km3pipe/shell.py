@@ -10,7 +10,7 @@ import subprocess
 from .tools import lstrip
 from .logger import get_logger
 
-from subprocess import DEVNULL    # py3k
+from subprocess import DEVNULL  # py3k
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -20,7 +20,7 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = get_logger(__name__)    # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 JOB_TEMPLATES = {
     "in2p3": lstrip(
@@ -107,13 +107,9 @@ def qsub(script, job_name, dryrun=False, silent=False, *args, **kwargs):
         else:
             out_pipe = DEVNULL
         p = subprocess.Popen(
-            'qsub -V',
-            stdin=subprocess.PIPE,
-            env=env,
-            shell=True,
-            stdout=out_pipe
+            "qsub -V", stdin=subprocess.PIPE, env=env, shell=True, stdout=out_pipe
         )
-        p.communicate(input=bytes(job_string.encode('ascii')))
+        p.communicate(input=bytes(job_string.encode("ascii")))
 
     return job_string
 
@@ -121,16 +117,16 @@ def qsub(script, job_name, dryrun=False, silent=False, *args, **kwargs):
 def gen_job(
     script,
     job_name,
-    log_path='qlogs',
-    group='km3net',
-    platform='cl7',
-    walltime='00:10:00',
-    cluster='in2p3',
-    vmem='8G',
-    fsize='8G',
+    log_path="qlogs",
+    group="km3net",
+    platform="cl7",
+    walltime="00:10:00",
+    cluster="in2p3",
+    vmem="8G",
+    fsize="8G",
     shell=None,
     email=None,
-    send_mail='n',
+    send_mail="n",
     job_array_start=1,
     job_array_stop=None,
     job_array_step=1,
@@ -140,26 +136,26 @@ def gen_job(
     xrootd=False,
     dcache=False,
     oracle=False,
-    split_array_logs=False
+    split_array_logs=False,
 ):
     """Generate a job script."""
     if shell is None:
-        shell = os.environ['SHELL']
+        shell = os.environ["SHELL"]
     if email is None:
-        email = os.environ['USER'] + '@km3net.de'
+        email = os.environ["USER"] + "@km3net.de"
     if isinstance(script, Script):
         script = str(script)
     log_path = os.path.abspath(log_path)
     if job_array_stop is not None:
-        job_array_option = "#$ -t {}-{}:{}"  \
-                           .format(job_array_start, job_array_stop,
-                                   job_array_step)
+        job_array_option = "#$ -t {}-{}:{}".format(
+            job_array_start, job_array_stop, job_array_step
+        )
     else:
         job_array_option = "#"
     if split_array_logs:
-        task_name = '_$TASK_ID'
+        task_name = "_$TASK_ID"
     else:
-        task_name = ''
+        task_name = ""
     job_string = JOB_TEMPLATES[cluster].format(
         script=script,
         email=email,
@@ -179,7 +175,7 @@ def gen_job(
         shell=shell,
         platform=platform,
         job_array_option=job_array_option,
-        task_name=task_name
+        task_name=task_name,
     )
     return job_string
 
@@ -192,11 +188,13 @@ def get_jpp_env(jpp_dir):
 
     """
     env = {
-        v[0]: ''.join(v[1:])
+        v[0]: "".join(v[1:])
         for v in [
-            l.split('=') for l in os.popen(
-                "source {0}/setenv.sh {0} && env".format(jpp_dir)
-            ).read().split('\n') if '=' in l
+            l.split("=")
+            for l in os.popen("source {0}/setenv.sh {0} && env".format(jpp_dir))
+            .read()
+            .split("\n")
+            if "=" in l
         ]
     }
     return env
@@ -204,6 +202,7 @@ def get_jpp_env(jpp_dir):
 
 class Script(object):
     """A shell script which can be built line by line for `qsub`."""
+
     def __init__(self):
         self.lines = []
 
@@ -215,17 +214,17 @@ class Script(object):
         """Add an echo command. The given text will be double qouted."""
         self.lines.append('echo "{}"'.format(text))
 
-    def separator(self, character='=', length=42):
+    def separator(self, character="=", length=42):
         """Add a visual separator."""
         self.echo(character * length)
 
     def cp(self, source, target):
         """Add a new copy instruction"""
-        self._add_two_argument_command('cp', source, target)
+        self._add_two_argument_command("cp", source, target)
 
     def mv(self, source, target):
         """Add a new move instruction"""
-        self._add_two_argument_command('mv', source, target)
+        self._add_two_argument_command("mv", source, target)
 
     def mkdir(self, folder_path):
         """Add a new 'mkdir -p' instruction"""
@@ -273,7 +272,7 @@ class Script(object):
         return new_script
 
     def __str__(self):
-        return '\n'.join(self.lines)
+        return "\n".join(self.lines)
 
     def __repr__(self):
         return "# Shell script\n" + str(self)

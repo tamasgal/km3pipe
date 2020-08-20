@@ -16,10 +16,10 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 # Detector related parameters
-arca_frame_duration = 0.1    # s
-orca_frame_duration = 0.1    # s
+arca_frame_duration = 0.1  # s
+orca_frame_duration = 0.1  # s
 
-c = 2.99792458e8    # m/s
+c = 2.99792458e8  # m/s
 
 n_water_antares_phase = 1.3499
 n_water_antares_group = 1.3797
@@ -35,5 +35,5 @@ pi = math.pi
 e = math.e
 
 # Default values for time residuals
-dt_window_l = -15    # ns
-dt_window_h = +25    # ns
+dt_window_l = -15  # ns
+dt_window_h = +25  # ns

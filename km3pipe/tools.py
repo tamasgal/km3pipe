@@ -39,17 +39,15 @@ def ifiles(irods_path):
     """
     if not iexists(irods_path):
         return []
-    raw_output = subprocess.check_output(
-        "ils -lr {0}".format(irods_path), shell=True
-    )
+    raw_output = subprocess.check_output("ils -lr {0}".format(irods_path), shell=True)
     filenames = {}
     base = irods_path
     for line in raw_output.splitlines():
-        split_line = line.decode('ascii').strip().split()
-        if len(split_line) == 1 and split_line[0].endswith(':'):
-            base = split_line[0][:-1]    # remove trailing ':'
+        split_line = line.decode("ascii").strip().split()
+        if len(split_line) == 1 and split_line[0].endswith(":"):
+            base = split_line[0][:-1]  # remove trailing ':'
             continue
-        if len(split_line) == 2 and split_line[0] == 'C-':
+        if len(split_line) == 2 and split_line[0] == "C-":
             base = split_line[1]
             continue
         try:
@@ -57,6 +55,7 @@ def ifiles(irods_path):
             fname = split_line[6]
         except IndexError:
             import pdb
+
             pdb.set_trace()
         fpath = os.path.join(base, fname)
         filenames[fpath] = File(path=fpath, size=fsize)
@@ -67,9 +66,7 @@ def iexists(irods_path):
     """Returns True of iRODS path exists, otherwise False"""
     try:
         subprocess.check_output(
-            'ils {}'.format(irods_path),
-            shell=True,
-            stderr=subprocess.PIPE,
+            "ils {}".format(irods_path), shell=True, stderr=subprocess.PIPE,
         )
         return True
     except subprocess.CalledProcessError:
@@ -79,25 +76,24 @@ def iexists(irods_path):
 def isize(irods_path):
     """Returns the size in bytes of the most recent version of the file"""
     raw_output = subprocess.check_output(
-        "ils -l {} | tail -n1 |awk '{{print $4}}'".format(irods_path),
-        shell=True
+        "ils -l {} | tail -n1 |awk '{{print $4}}'".format(irods_path), shell=True
     )
     try:
-        return int(raw_output.decode('ascii').strip())
+        return int(raw_output.decode("ascii").strip())
     except ValueError:
         raise IOError("File not found or an iRODS error occured.")
 
 
 def xrdsize(xrootd_path):
     """Returns the size in bytes of the file"""
-    base, path = re.search(r'(root://.*:[0-9]*)(/.*)', xrootd_path).groups()
+    base, path = re.search(r"(root://.*:[0-9]*)(/.*)", xrootd_path).groups()
 
     raw_output = subprocess.check_output(
         "xrdfs {} stat {} | grep Size | awk '{{print $2}}'".format(base, path),
-        shell=True
+        shell=True,
     )
     try:
-        return int(raw_output.decode('ascii').strip())
+        return int(raw_output.decode("ascii").strip())
     except ValueError:
         raise IOError("File not found or an xrootd error occured.")
 
@@ -124,16 +120,14 @@ def token_urlsafe(nbytes=32):
 
     """
     tok = os.urandom(nbytes)
-    return base64.urlsafe_b64encode(tok).rstrip(b'=').decode('ascii')
+    return base64.urlsafe_b64encode(tok).rstrip(b"=").decode("ascii")
 
 
-def prettyln(text, fill='-', align='^', prefix='[ ', suffix=' ]', length=69):
+def prettyln(text, fill="-", align="^", prefix="[ ", suffix=" ]", length=69):
     """Wrap `text` in a pretty line with maximum length."""
-    text = '{prefix}{0}{suffix}'.format(text, prefix=prefix, suffix=suffix)
+    text = "{prefix}{0}{suffix}".format(text, prefix=prefix, suffix=suffix)
     print(
-        "{0:{fill}{align}{length}}".format(
-            text, fill=fill, align=align, length=length
-        )
+        "{0:{fill}{align}{length}}".format(text, fill=fill, align=align, length=length)
     )
 
 
@@ -141,11 +135,13 @@ def irods_path(det_id, run_id):
     """Generate the iRODS filepath for given detector (O)ID and run ID"""
     data_path = "/in2p3/km3net/data/raw/sea"
     from km3pipe.db import DBManager
+
     if not isinstance(det_id, int):
         dts = DBManager().detectors
         det_id = int(dts[dts.OID == det_id].SERIALNUMBER.values[0])
-    return data_path + "/KM3NeT_{0:08}/{2}/KM3NeT_{0:08}_{1:08}.root" \
-           .format(det_id, run_id, run_id//1000)
+    return data_path + "/KM3NeT_{0:08}/{2}/KM3NeT_{0:08}_{1:08}.root".format(
+        det_id, run_id, run_id // 1000
+    )
 
 
 def unpack_nfirst(seq, nfirst):
@@ -195,7 +191,7 @@ def namedtuple_with_defaults(typename, field_names, default_values=[]):
     Node(val=4, left=None, right=7)
     """
     the_tuple = collections.namedtuple(typename, field_names)
-    the_tuple.__new__.__defaults__ = (None, ) * len(the_tuple._fields)
+    the_tuple.__new__.__defaults__ = (None,) * len(the_tuple._fields)
     if isinstance(default_values, Mapping):
         prototype = the_tuple(**default_values)
     else:
@@ -210,6 +206,7 @@ def remain_file_pointer(function):
     This decorator assumes that the last argument is the file handler.
 
     """
+
     def wrapper(*args, **kwargs):
         """Wrap the function and remain its parameters and return values"""
         file_obj = args[-1]
@@ -231,68 +228,70 @@ def iteritems(d):
 
 def decamelise(text):
     """Convert CamelCase to lower_and_underscore."""
-    s = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', text)
-    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s).lower()
+    s = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", text)
+    return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s).lower()
 
 
 def camelise(text, capital_first=True):
     """Convert lower_underscore to CamelCase."""
+
     def camelcase():
         if not capital_first:
             yield str.lower
         while True:
             yield str.capitalize
 
-    if istype(text, 'unicode'):
-        text = text.encode('utf8')
+    if istype(text, "unicode"):
+        text = text.encode("utf8")
     c = camelcase()
-    return "".join(next(c)(x) if x else '_' for x in text.split("_"))
+    return "".join(next(c)(x) if x else "_" for x in text.split("_"))
 
 
 ATTRIBUTES = dict(
     list(
-        zip([
-            'bold', 'dark', '', 'underline', 'blink', '', 'reverse',
-            'concealed'
-        ], list(range(1, 9)))
+        zip(
+            ["bold", "dark", "", "underline", "blink", "", "reverse", "concealed"],
+            list(range(1, 9)),
+        )
     )
 )
-del ATTRIBUTES['']
+del ATTRIBUTES[""]
 
-ATTRIBUTES_RE = r'\033\[(?:%s)m' % '|'  \
-                .join(['%d' % v for v in ATTRIBUTES.values()])
+ATTRIBUTES_RE = r"\033\[(?:%s)m" % "|".join(["%d" % v for v in ATTRIBUTES.values()])
 
 HIGHLIGHTS = dict(
     list(
-        zip([
-            'on_grey', 'on_red', 'on_green', 'on_yellow', 'on_blue',
-            'on_magenta', 'on_cyan', 'on_white'
-        ], list(range(40, 48)))
+        zip(
+            [
+                "on_grey",
+                "on_red",
+                "on_green",
+                "on_yellow",
+                "on_blue",
+                "on_magenta",
+                "on_cyan",
+                "on_white",
+            ],
+            list(range(40, 48)),
+        )
     )
 )
 
-HIGHLIGHTS_RE = r'\033\[(?:%s)m' % '|'  \
-                .join(['%d' % v for v in HIGHLIGHTS.values()])
+HIGHLIGHTS_RE = r"\033\[(?:%s)m" % "|".join(["%d" % v for v in HIGHLIGHTS.values()])
 
 COLORS = dict(
     list(
-        zip([
-            'grey',
-            'red',
-            'green',
-            'yellow',
-            'blue',
-            'magenta',
-            'cyan',
-            'white',
-        ], list(range(30, 38)))
+        zip(
+            ["grey", "red", "green", "yellow", "blue", "magenta", "cyan", "white",],
+            list(range(30, 38)),
+        )
     )
 )
 
-COLORS_RE = r'\033\[(?:%s)m' % '|'.join(['%d' % v for v in COLORS.values()])
+COLORS_RE = r"\033\[(?:%s)m" % "|".join(["%d" % v for v in COLORS.values()])
 
-RESET = r'\033[0m'
-RESET_RE = r'\033\[0m'
+RESET = r"\033[0m"
+RESET_RE = r"\033\[0m"
 
 
 def colored(text, color=None, on_color=None, attrs=None, ansi_code=None):
@@ -310,18 +309,18 @@ def colored(text, color=None, on_color=None, attrs=None, ansi_code=None):
         colored('Hello, World!', 'red', 'on_grey', ['blue', 'blink'])
         colored('Hello, World!', 'green')
     """
-    if os.getenv('ANSI_COLORS_DISABLED') is None:
+    if os.getenv("ANSI_COLORS_DISABLED") is None:
         if ansi_code is not None:
             return "\033[38;5;{}m{}\033[0m".format(ansi_code, text)
-        fmt_str = '\033[%dm%s'
+        fmt_str = "\033[%dm%s"
         if color is not None:
-            text = re.sub(COLORS_RE + '(.*?)' + RESET_RE, r'\1', text)
+            text = re.sub(COLORS_RE + "(.*?)" + RESET_RE, r"\1", text)
             text = fmt_str % (COLORS[color], text)
         if on_color is not None:
-            text = re.sub(HIGHLIGHTS_RE + '(.*?)' + RESET_RE, r'\1', text)
+            text = re.sub(HIGHLIGHTS_RE + "(.*?)" + RESET_RE, r"\1", text)
             text = fmt_str % (HIGHLIGHTS[on_color], text)
         if attrs is not None:
-            text = re.sub(ATTRIBUTES_RE + '(.*?)' + RESET_RE, r'\1', text)
+            text = re.sub(ATTRIBUTES_RE + "(.*?)" + RESET_RE, r"\1", text)
             for attr in attrs:
                 text = fmt_str % (ATTRIBUTES[attr], text)
         return text + RESET
@@ -346,13 +345,13 @@ def issorted(arr):
 
 def lstrip(text):
     """Remove leading whitespace from each line of a multiline string."""
-    return '\n'.join(l.lstrip() for l in text.lstrip().split('\n'))
+    return "\n".join(l.lstrip() for l in text.lstrip().split("\n"))
 
 
 def chunks(l, n):
     """Yield successive n-sized chunks from l."""
     for i in range(0, len(l), n):
-        yield l[i:i + n]
+        yield l[i : i + n]
 
 
 def is_coherent(seq):
@@ -368,20 +367,21 @@ def is_coherent(seq):
     return np.array_equal(seq, range(seq[0], int(seq[-1] + 1)))
 
 
-class AnyBar():
+class AnyBar:
     """A lightweight interface to the AnyBar macOS app."""
-    def __init__(self, port=1738, address='localhost'):
+
+    def __init__(self, port=1738, address="localhost"):
         self.port = port
         self.address = address
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def change(self, color):
-        self.sock.sendto(color.encode('utf-8'), (self.address, self.port))
+        self.sock.sendto(color.encode("utf-8"), (self.address, self.port))
 
 
 def zero_pad(m, n=1):
     """Pad a matrix with zeros, on all sides."""
-    return np.pad(m, (n, n), mode='constant', constant_values=[0])
+    return np.pad(m, (n, n), mode="constant", constant_values=[0])
 
 
 def istype(obj, typename):
@@ -393,12 +393,12 @@ def isnotebook():
     """Check if running within a Jupyter notebook"""
     try:
         shell = get_ipython().__class__.__name__
-        if shell == 'ZMQInteractiveShell':
-            return True    # Jupyter notebook or qtconsole
-        elif shell == 'TerminalInteractiveShell':
-            return False    # Terminal running IPython
+        if shell == "ZMQInteractiveShell":
+            return True  # Jupyter notebook or qtconsole
+        elif shell == "TerminalInteractiveShell":
+            return False  # Terminal running IPython
         else:
-            return False    # Other type (?)
+            return False  # Other type (?)
     except NameError:
         return False
 
@@ -407,8 +407,8 @@ def supports_color():
     """Checks if the terminal supports color."""
     if isnotebook():
         return True
-    supported_platform = sys.platform != 'win32' or 'ANSICON' in os.environ
-    is_a_tty = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
+    supported_platform = sys.platform != "win32" or "ANSICON" in os.environ
+    is_a_tty = hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
 
     if not supported_platform or not is_a_tty:
         return False
@@ -420,17 +420,15 @@ def get_jpp_version(via_command="JPrint -v"):
     """Return the Jpp version or None if not available."""
     try:
         out = subprocess.getoutput(via_command)
-    except AttributeError:    # TODO: python 2.7
+    except AttributeError:  # TODO: python 2.7
         try:
-            out = subprocess.check_output(
-                via_command.split(), stderr=subprocess.STDOUT
-            )
+            out = subprocess.check_output(via_command.split(), stderr=subprocess.STDOUT)
         except OSError:
             return None
 
-    for line in out.split('\n'):
+    for line in out.split("\n"):
         if line.startswith("version:"):
-            jpp_version = line.split(':')[1].strip()
+            jpp_version = line.split(":")[1].strip()
             return jpp_version
 
     return None
@@ -451,13 +449,14 @@ def timed_cache(**timed_cache_kwargs):
     maxsise: int [default: 128]
     typed: bool [default: False]
     """
+
     def _wrapper(f):
-        maxsize = timed_cache_kwargs.pop('maxsize', 128)
-        typed = timed_cache_kwargs.pop('typed', False)
+        maxsize = timed_cache_kwargs.pop("maxsize", 128)
+        typed = timed_cache_kwargs.pop("typed", False)
         update_delta = timedelta(**timed_cache_kwargs)
         # nonlocal workaround to support Python 2
         # https://technotroph.wordpress.com/2012/10/01/python-closures-and-the-python-2-7-nonlocal-solution/
-        d = {'next_update': datetime.utcnow() - update_delta}
+        d = {"next_update": datetime.utcnow() - update_delta}
         try:
             f = functools.lru_cache(maxsize=maxsize, typed=typed)(f)
         except AttributeError:
@@ -470,12 +469,12 @@ def timed_cache(**timed_cache_kwargs):
         @functools.wraps(f)
         def _wrapped(*args, **kwargs):
             now = datetime.utcnow()
-            if now >= d['next_update']:
+            if now >= d["next_update"]:
                 try:
                     f.cache_clear()
                 except AttributeError:
                     pass
-                d['next_update'] = now + update_delta
+                d["next_update"] = now + update_delta
             return f(*args, **kwargs)
 
         return _wrapped
@@ -486,6 +485,6 @@ def timed_cache(**timed_cache_kwargs):
 def sendmail(to, msg):
     """Send an email"""
     sender = "{}@{}".format(getpass.getuser(), socket.gethostname())
-    s = smtplib.SMTP('localhost')
+    s = smtplib.SMTP("localhost")
     s.sendmail(sender, to, msg)
     s.quit()

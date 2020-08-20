@@ -30,21 +30,20 @@ __status__ = "Development"
 
 class TestCalibration(TestCase):
     """Tests for the Calibration class"""
+
     def test_init_with_wrong_file_extension(self):
         with self.assertRaises(NotImplementedError):
-            Calibration(filename='foo')
+            Calibration(filename="foo")
 
-    @patch('km3pipe.calib.Detector')
+    @patch("km3pipe.calib.Detector")
     def test_init_with_filename(self, mock_detector):
-        Calibration(filename='foo.detx')
-        mock_detector.assert_called_with(filename='foo.detx')
+        Calibration(filename="foo.detx")
+        mock_detector.assert_called_with(filename="foo.detx")
 
-    @patch('km3pipe.calib.Detector')
+    @patch("km3pipe.calib.Detector")
     def test_init_with_det_id(self, mock_detector):
         Calibration(det_id=1)
-        mock_detector.assert_called_with(
-            t0set=None, calibration=None, det_id=1
-        )
+        mock_detector.assert_called_with(t0set=None, calibration=None, det_id=1)
         Calibration(det_id=1, calibration=2, t0set=3)
         mock_detector.assert_called_with(t0set=3, calibration=2, det_id=1)
 
@@ -55,7 +54,7 @@ class TestCalibration(TestCase):
     def test_apply_to_hits_with_pmt_id(self):
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
 
-        hits = Table({'pmt_id': [1, 2, 1], 'time': [10.1, 11.2, 12.3]})
+        hits = Table({"pmt_id": [1, 2, 1], "time": [10.1, 11.2, 12.3]})
 
         chits = calib.apply(hits)
 
@@ -76,11 +75,9 @@ class TestCalibration(TestCase):
     def test_apply_to_hits_with_dom_id_and_channel_id(self):
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
 
-        hits = Table({
-            'dom_id': [2, 3, 3],
-            'channel_id': [0, 1, 2],
-            'time': [10.1, 11.2, 12.3]
-        })
+        hits = Table(
+            {"dom_id": [2, 3, 3], "channel_id": [0, 1, 2], "time": [10.1, 11.2, 12.3]}
+        )
 
         chits = calib.apply(hits)
 
@@ -101,17 +98,15 @@ class TestCalibration(TestCase):
     def test_apply_to_hits_with_pmt_id_with_wrong_calib_raises(self):
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
 
-        hits = Table({'pmt_id': [999], 'time': [10.1]})
+        hits = Table({"pmt_id": [999], "time": [10.1]})
 
         with self.assertRaises(KeyError):
             calib.apply(hits)
 
-    def test_apply_to_hits_with_dom_id_and_channel_id_with_wrong_calib_raises(
-        self
-    ):
+    def test_apply_to_hits_with_dom_id_and_channel_id_with_wrong_calib_raises(self):
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
 
-        hits = Table({'dom_id': [999], 'channel_id': [0], 'time': [10.1]})
+        hits = Table({"dom_id": [999], "channel_id": [0], "time": [10.1]})
 
         with self.assertRaises(KeyError):
             calib.apply(hits)
@@ -119,12 +114,14 @@ class TestCalibration(TestCase):
     def test_time_slewing_correction(self):
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
 
-        hits = Table({
-            'dom_id': [2, 3, 3],
-            'channel_id': [0, 1, 2],
-            'time': [10.1, 11.2, 12.3],
-            'tot': [0, 10, 255]
-        })
+        hits = Table(
+            {
+                "dom_id": [2, 3, 3],
+                "channel_id": [0, 1, 2],
+                "time": [10.1, 11.2, 12.3],
+                "tot": [0, 10, 255],
+            }
+        )
 
         chits = calib.apply(hits, correct_slewing=True)
 
@@ -140,13 +137,16 @@ class TestCalibration(TestCase):
         self.assertAlmostEqual(12.3 + a_hit.t0 - slew(a_hit.tot), a_hit.time)
 
     def test_apply_to_timeslice_hits(self):
-        tshits = Table.from_template({
-            'channel_id': [0, 1, 2],
-            'dom_id': [2, 3, 3],
-            'time': [10.1, 11.2, 12.3],
-            'tot': np.ones(3, dtype=float),
-            'group_id': 0,
-        }, 'TimesliceHits')
+        tshits = Table.from_template(
+            {
+                "channel_id": [0, 1, 2],
+                "dom_id": [2, 3, 3],
+                "time": [10.1, 11.2, 12.3],
+                "tot": np.ones(3, dtype=float),
+                "group_id": 0,
+            },
+            "TimesliceHits",
+        )
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
         c_tshits = calib.apply(tshits)
         assert len(c_tshits) == len(tshits)
@@ -156,7 +156,7 @@ class TestCalibration(TestCase):
 
     def test_apply_without_affecting_primary_hit_table(self):
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
-        hits = Table({'pmt_id': [1, 2, 1], 'time': [10.1, 11.2, 12.3]})
+        hits = Table({"pmt_id": [1, 2, 1], "time": [10.1, 11.2, 12.3]})
         hits_compare = hits.copy()
         calib.apply(hits)
 
@@ -167,17 +167,15 @@ class TestCalibration(TestCase):
 class TestCalibrationService(TestCase):
     def test_apply_to_hits_with_dom_id_and_channel_id(self):
 
-        hits = Table({
-            'dom_id': [2, 3, 3],
-            'channel_id': [0, 1, 2],
-            'time': [10.1, 11.2, 12.3]
-        })
+        hits = Table(
+            {"dom_id": [2, 3, 3], "channel_id": [0, 1, 2], "time": [10.1, 11.2, 12.3]}
+        )
 
         tester = self
 
         class HitCalibrator(Module):
             def process(self, blob):
-                chits = self.services['calibrate'](hits)
+                chits = self.services["calibrate"](hits)
 
                 assert len(hits) == len(chits)
 
@@ -195,26 +193,26 @@ class TestCalibrationService(TestCase):
                 return blob
 
         pipe = Pipeline()
-        pipe.attach(
-            CalibrationService, filename=data_path("detx/detx_v1.detx")
-        )
+        pipe.attach(CalibrationService, filename=data_path("detx/detx_v1.detx"))
         pipe.attach(HitCalibrator)
         pipe.drain(1)
 
     def test_correct_slewing(self):
 
-        hits = Table({
-            'dom_id': [2, 3, 3],
-            'channel_id': [0, 1, 2],
-            'time': [10.1, 11.2, 12.3],
-            'tot': [0, 10, 255]
-        })
+        hits = Table(
+            {
+                "dom_id": [2, 3, 3],
+                "channel_id": [0, 1, 2],
+                "time": [10.1, 11.2, 12.3],
+                "tot": [0, 10, 255],
+            }
+        )
 
         tester = self
 
         class HitCalibrator(Module):
             def process(self, blob):
-                self.services['correct_slewing'](hits)
+                self.services["correct_slewing"](hits)
 
                 a_hit = hits[0]
                 tester.assertAlmostEqual(10.1 - slew(a_hit.tot), a_hit.time)
@@ -224,23 +222,19 @@ class TestCalibrationService(TestCase):
                 return blob
 
         pipe = Pipeline()
-        pipe.attach(
-            CalibrationService, filename=data_path("detx/detx_v1.detx")
-        )
+        pipe.attach(CalibrationService, filename=data_path("detx/detx_v1.detx"))
         pipe.attach(HitCalibrator)
         pipe.drain(1)
 
     def test_provided_detector_data(self):
         class DetectorReader(Module):
             def process(self, blob):
-                assert 'get_detector' in self.services
-                det = self.services['get_detector']()
+                assert "get_detector" in self.services
+                det = self.services["get_detector"]()
                 assert isinstance(det, Detector)
 
         pipe = Pipeline()
-        pipe.attach(
-            CalibrationService, filename=data_path("detx/detx_v1.detx")
-        )
+        pipe.attach(CalibrationService, filename=data_path("detx/detx_v1.detx"))
         pipe.attach(DetectorReader)
         pipe.drain(1)
 

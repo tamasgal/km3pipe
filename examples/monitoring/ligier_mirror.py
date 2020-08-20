@@ -38,11 +38,11 @@ class LigierSender(Module):
 pipe = Pipeline()
 pipe.attach(
     CHPump,
-    host='192.168.0.121',
+    host="192.168.0.121",
     port=5553,
-    tags='IO_EVT, IO_SUM, IO_TSL',
+    tags="IO_EVT, IO_SUM, IO_TSL",
     timeout=60 * 60 * 24 * 7,
-    max_queue=2000
+    max_queue=2000,
 )
 pipe.attach(LigierSender)
 pipe.drain()

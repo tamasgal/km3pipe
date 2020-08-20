@@ -22,8 +22,8 @@ class TestMc(TestCase):
         self.assertEqual(0, geant2pdg(-999))
 
     def test_pdg2name(self):
-        self.assertEqual('mu-', pdg2name(13))
-        self.assertEqual('nu(tau)~', pdg2name(-16))
+        self.assertEqual("mu-", pdg2name(13))
+        self.assertEqual("nu(tau)~", pdg2name(-16))
 
     def test_pdg2name_returns_NA_for_unknown_particle(self):
-        self.assertEqual('N/A', pdg2name(0))
+        self.assertEqual("N/A", pdg2name(0))

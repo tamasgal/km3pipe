@@ -59,13 +59,13 @@ dependencies:
 	pip install -r requirements.txt
 	pip install -r requirements-dev.txt
 
-.PHONY: yapf
-yapf:
-	yapf -i -r km3pipe
-	yapf -i -r km3modules
-	yapf -i -r examples
-	yapf -i -r pipeinspector
-	yapf -i doc/conf.py
-	yapf -i setup.py
+.PHONY: black
+black:
+	black km3pipe
+	black km3modules
+	black examples
+	black pipeinspector
+	black doc/conf.py
+	black setup.py
 
 .PHONY: all clean build install install-dev test test-cov test-loop benchmark test-km3modules flake8 pep8 dependencies docstyle

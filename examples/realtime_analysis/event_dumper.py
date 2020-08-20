@@ -14,7 +14,7 @@ from km3pipe import Pipeline, Module
 from km3pipe.io.ch import CHPump
 from km3pipe.io.daq import DAQProcessor
 
-__author__ = 'Tamas Gal <tgal@km3net.de>'
+__author__ = "Tamas Gal <tgal@km3net.de>"
 
 
 class Dumper(Module):
@@ -22,14 +22,14 @@ class Dumper(Module):
         self.counter = 0
 
     def process(self, blob):
-        tag = str(blob['CHPrefix'].tag)
-        data = blob['CHData']
+        tag = str(blob["CHPrefix"].tag)
+        data = blob["CHData"]
         self.dump(data, tag)
         print(blob["Hits"])
         return blob
 
     def dump(self, data, tag):
-        with open('{0}-{1:06}.dat'.format(tag, self.counter), 'bw') as f:
+        with open("{0}-{1:06}.dat".format(tag, self.counter), "bw") as f:
             self.counter += 1
             f.write(data)
 
@@ -37,11 +37,11 @@ class Dumper(Module):
 pipe = Pipeline()
 pipe.attach(
     CHPump,
-    host='xxx.xxx.xxx.xxx',
+    host="xxx.xxx.xxx.xxx",
     port=5553,
-    tags='IO_EVT',
+    tags="IO_EVT",
     timeout=60 * 60 * 24,
-    max_queue=42
+    max_queue=42,
 )
 pipe.attach(DAQProcessor)
 pipe.attach(Dumper)

@@ -39,7 +39,7 @@ __status__ = "Development"
 log = kp.logger.get_logger("streamds")
 
 RUNSUMMARY_URL = "https://km3netdbweb.in2p3.fr/jsonds/runsummarynumbers/i"
-REQUIRED_COLUMNS = set(['run', 'det_id', 'source'])
+REQUIRED_COLUMNS = set(["run", "det_id", "source"])
 
 
 def print_streams():
@@ -63,19 +63,17 @@ def get_data(stream, parameters, fmt):
     params = {}
     if parameters:
         for parameter in parameters:
-            if '=' not in parameter:
+            if "=" not in parameter:
                 log.error(
                     "Invalid parameter syntax '{}'\n"
-                    "The correct syntax is 'parameter=value'".
-                    format(parameter)
+                    "The correct syntax is 'parameter=value'".format(parameter)
                 )
                 continue
-            key, value = parameter.split('=')
+            key, value = parameter.split("=")
             params[key] = value
     data = sds.get(stream, fmt, **params)
     if data is not None:
-        with pd.option_context('display.max_rows', None, 'display.max_columns',
-                               None):
+        with pd.option_context("display.max_rows", None, "display.max_columns", None):
             print(data)
     else:
         sds.help(stream)
@@ -85,7 +83,7 @@ def available_streams():
     """Show a short list of available streams."""
     sds = kp.db.StreamDS()
     print("Available streams: ")
-    print(', '.join(sorted(sds.streams)))
+    print(", ".join(sorted(sds.streams)))
 
 
 def upload_runsummary(csv_filename, dryrun=False, verify=False):
@@ -105,7 +103,7 @@ def upload_runsummary(csv_filename, dryrun=False, verify=False):
     if not REQUIRED_COLUMNS.issubset(cols):
         log.error(
             "Missing columns: {}.".format(
-                ', '.join(str(c) for c in REQUIRED_COLUMNS - cols)
+                ", ".join(str(c) for c in REQUIRED_COLUMNS - cols)
             )
         )
         return
@@ -120,9 +118,7 @@ def upload_runsummary(csv_filename, dryrun=False, verify=False):
         return
 
     print(
-        "Found data for parameters: {}.".format(
-            ', '.join(str(c) for c in parameters)
-        )
+        "Found data for parameters: {}.".format(", ".join(str(c) for c in parameters))
     )
     print("Converting CSV data into JSON")
     if dryrun:
@@ -130,31 +126,33 @@ def upload_runsummary(csv_filename, dryrun=False, verify=False):
         prefix = "TEST_"
     else:
         prefix = ""
-    db = kp.db.DBManager()    # noqa
-    det_id_zero_mask = df['det_id'] == 0
+    db = kp.db.DBManager()  # noqa
+    det_id_zero_mask = df["det_id"] == 0
     if sum(det_id_zero_mask) > 0:
         log.warning("Entries with 'det_id=0' found, removing them.")
         df = df[~det_id_zero_mask]
-    df['det_id'] = df['det_id'].apply(db.to_det_oid)
+    df["det_id"] = df["det_id"].apply(db.to_det_oid)
     print(df)
     data = convert_runsummary_to_json(df, prefix=prefix)
-    print("We have {:.3f} MB to upload.".format(len(data) / 1024**2))
+    print("We have {:.3f} MB to upload.".format(len(data) / 1024 ** 2))
 
     print("Requesting database session.")
     if kp.db.we_are_in_lyon():
-        session_cookie = "sid=_kmcprod_134.158_lyo7783844001343100343mcprod1223user"    # noqa
+        session_cookie = (
+            "sid=_kmcprod_134.158_lyo7783844001343100343mcprod1223user"  # noqa
+        )
     else:
-        session_cookie = kp.config.Config().get('DB', 'session_cookie')
+        session_cookie = kp.config.Config().get("DB", "session_cookie")
         if session_cookie is None:
             raise SystemExit("Could not restore DB session.")
     log.debug("Using the session cookie: {}".format(session_cookie))
-    cookie_key, sid = session_cookie.split('=')
+    cookie_key, sid = session_cookie.split("=")
     print("Uploading the data to the database.")
     r = requests.post(
         RUNSUMMARY_URL,
         cookies={cookie_key: sid},
-        files={'datafile': data},
-        verify=verify
+        files={"datafile": data},
+        verify=verify,
     )
     if r.status_code == 200:
         log.debug("POST request status code: {}".format(r.status_code))
@@ -162,7 +160,7 @@ def upload_runsummary(csv_filename, dryrun=False, verify=False):
         db_answer = json.loads(r.text)
         for key, value in db_answer.items():
             print("  -> {}: {}".format(key, value))
-        if db_answer['Result'] == 'OK':
+        if db_answer["Result"] == "OK":
             print("Upload successful.")
         else:
             log.critical("Something went wrong.")
@@ -173,21 +171,18 @@ def upload_runsummary(csv_filename, dryrun=False, verify=False):
 
 
 def convert_runsummary_to_json(
-    df, comment='Uploaded via km3pipe.StreamDS', prefix='TEST_'
+    df, comment="Uploaded via km3pipe.StreamDS", prefix="TEST_"
 ):
     """Convert a Pandas DataFrame with runsummary to JSON for DB upload"""
     data_field = []
     comment += ", by {}".format(getpass.getuser())
-    for det_id, det_data in df.groupby('det_id'):
+    for det_id, det_data in df.groupby("det_id"):
         runs_field = []
         data_field.append({"DetectorId": det_id, "Runs": runs_field})
 
-        for run, run_data in det_data.groupby('run'):
+        for run, run_data in det_data.groupby("run"):
             parameters_field = []
-            runs_field.append({
-                "Run": int(run),
-                "Parameters": parameters_field
-            })
+            runs_field.append({"Run": int(run), "Parameters": parameters_field})
 
             parameter_dict = {}
             for row in run_data.iterrows():
@@ -196,7 +191,7 @@ def convert_runsummary_to_json(
                         continue
 
                     if parameter_name not in parameter_dict:
-                        entry = {'Name': prefix + parameter_name, 'Data': []}
+                        entry = {"Name": prefix + parameter_name, "Data": []}
                         parameter_dict[parameter_name] = entry
                     data_value = getattr(row[1], parameter_name)
                     try:
@@ -204,11 +199,8 @@ def convert_runsummary_to_json(
                     except ValueError as e:
                         log.critical("Data values has to be floats!")
                         raise ValueError(e)
-                    value = {
-                        'S': str(getattr(row[1], 'source')),
-                        'D': data_value
-                    }
-                    parameter_dict[parameter_name]['Data'].append(value)
+                    value = {"S": str(getattr(row[1], "source")), "D": data_value}
+                    parameter_dict[parameter_name]["Data"].append(value)
             for parameter_data in parameter_dict.values():
                 parameters_field.append(parameter_data)
     data_to_upload = {"Comment": comment, "Data": data_field}
@@ -218,15 +210,16 @@ def convert_runsummary_to_json(
 
 def main():
     from docopt import docopt
+
     args = docopt(__doc__)
 
-    if args['info']:
-        print_info(args['STREAM'])
-    elif args['list']:
+    if args["info"]:
+        print_info(args["STREAM"])
+    elif args["list"]:
         print_streams()
-    elif args['upload']:
-        upload_runsummary(args['CSV_FILE'], args['-q'], args['-x'])
-    elif args['get']:
-        get_data(args['STREAM'], args['PARAMETERS'], fmt=args['-f'])
+    elif args["upload"]:
+        upload_runsummary(args["CSV_FILE"], args["-q"], args["-x"])
+    elif args["get"]:
+        get_data(args["STREAM"], args["PARAMETERS"], fmt=args["-f"])
     else:
         available_streams()

@@ -15,6 +15,7 @@ __status__ = "Development"
 
 class TestPipeline(TestCase):
     """Tests for the main pipeline"""
+
     def setUp(self):
         pass
 

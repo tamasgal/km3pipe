@@ -26,32 +26,24 @@ class TestMAD(TestCase):
     def test_normal(self):
         np.random.seed(42)
         sample = np.random.normal(0, 1, 1000)
-        assert np.allclose(mad_std(sample), 1, atol=.1)
+        assert np.allclose(mad_std(sample), 1, atol=0.1)
 
 
 class TestPerc(TestCase):
     def test_settings(self):
-        arr = np.array([
-            -2.394,
-            0.293,
-            0.371,
-            0.384,
-            1.246,
-        ])
+        arr = np.array([-2.394, 0.293, 0.371, 0.384, 1.246,])
         assert np.allclose(perc(arr), [-2.1253, 1.1598])
-        assert np.allclose(
-            perc(arr, interpolation='nearest'), [arr[0], arr[-1]]
-        )
+        assert np.allclose(perc(arr, interpolation="nearest"), [arr[0], arr[-1]])
 
 
 class TestVariance(TestCase):
     def test_easy(self):
-        df = DataFrame({'a': [1, 2, 3], 'b': [1, 1, 1], 'c': [4, 4, 3]})
+        df = DataFrame({"a": [1, 2, 3], "b": [1, 1, 1], "c": [4, 4, 3]})
         df2 = drop_zero_variance(df)
         assert df.shape == (3, 3)
         assert df2.shape == (3, 2)
-        assert 'b' not in df2.columns
-        assert 'b' in df.columns
+        assert "b" not in df2.columns
+        assert "b" in df.columns
 
 
 class TestBins(TestCase):

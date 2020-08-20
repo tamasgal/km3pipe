@@ -27,10 +27,11 @@ __status__ = "Development"
 
 def main():
     from docopt import docopt
+
     args = docopt(__doc__, version=kp.version)
 
-    dom_id = int(args['DOM_ID'])
-    det = args['DET_ID_OR_OID']
+    dom_id = int(args["DOM_ID"])
+    det = args["DET_ID_OR_OID"]
 
     dom = kp.db.CLBMap(det).dom_ids[dom_id]
 

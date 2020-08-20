@@ -31,10 +31,10 @@ class UDPForwarder(kp.Module):
         self.counter = 0
 
     def process(self, blob):
-        if str(blob['CHPrefix'].tag) == 'IO_MONIT':
-            self.sock.sendto(blob['CHData'], ('127.0.0.1', 56017))
+        if str(blob["CHPrefix"].tag) == "IO_MONIT":
+            self.sock.sendto(blob["CHData"], ("127.0.0.1", 56017))
             if self.counter % 100 == 0:
-                sys.stdout.write('.')
+                sys.stdout.write(".")
                 sys.stdout.flush()
             self.counter += 1
         return blob
@@ -43,12 +43,12 @@ class UDPForwarder(kp.Module):
 pipe = kp.Pipeline()
 pipe.attach(
     kp.io.CHPump,
-    host='localhost',
+    host="localhost",
     port=5553,
-    tags='IO_MONIT',
+    tags="IO_MONIT",
     timeout=60 * 60 * 24 * 7,
     max_queue=1000,
-    timeit=True
+    timeit=True,
 )
 pipe.attach(UDPForwarder)
 pipe.drain()

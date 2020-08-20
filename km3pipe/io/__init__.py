@@ -8,11 +8,11 @@ import os.path
 
 import numpy as np
 
-from .evt import EvtPump    # noqa
-from .daq import DAQPump    # noqa
-from .clb import CLBPump    # noqa
-from .ch import CHPump    # noqa
-from .hdf5 import HDF5Pump, HDF5Sink, HDF5MetaData    # noqa
+from .evt import EvtPump  # noqa
+from .daq import DAQPump  # noqa
+from .clb import CLBPump  # noqa
+from .ch import CHPump  # noqa
+from .hdf5 import HDF5Pump, HDF5Sink, HDF5MetaData  # noqa
 from .offline import OfflinePump
 
 from km3pipe.logger import get_logger

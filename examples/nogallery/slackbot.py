@@ -11,17 +11,17 @@ from km3pipe.io.daq import DAQPreamble, DAQEvent
 class CHPrinter(Module):
     def process(self, blob):
         print("New blob:")
-        print(blob['CHPrefix'])
+        print(blob["CHPrefix"])
         return blob
 
 
 class SlackSender(Module):
     def configure(self):
-        self.client = SlackClient('YOUR_SLACK_API_TOKEN_HERE')
+        self.client = SlackClient("YOUR_SLACK_API_TOKEN_HERE")
         self.current_run = None
 
     def process(self, blob):
-        data = blob['CHData']
+        data = blob["CHData"]
         data_io = StringIO(data)
 
         preamble = DAQPreamble(file_obj=data_io)
@@ -37,7 +37,7 @@ class SlackSender(Module):
             self.client.chat_post_message(
                 "#du2-live",
                 "Run #{0} has started!".format(event.header.run),
-                username="slackbot"
+                username="slackbot",
             )
 
         return blob
@@ -46,11 +46,11 @@ class SlackSender(Module):
 pipe = Pipeline()
 pipe.attach(
     CHPump,
-    host='127.0.0.1',    # You'll need an SSH tunnel
+    host="127.0.0.1",  # You'll need an SSH tunnel
     port=5553,
-    tags='IO_EVT',
+    tags="IO_EVT",
     timeout=60 * 60 * 24,
-    max_queue=50
+    max_queue=50,
 )
 pipe.attach(SlackSender)
 pipe.attach(CHPrinter)

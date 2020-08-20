@@ -11,12 +11,12 @@ import numpy as np
 
 from .dataclasses import Table
 from .tools import unpack_nfirst, split
-from .math import intersect_3d, qrot_yaw    # , ignored
+from .math import intersect_3d, qrot_yaw  # , ignored
 from .db import DBManager
 
 from .logger import get_logger, get_printer
 
-log = get_logger(__name__)    # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -41,13 +41,9 @@ class Detector(object):
     calibration: optional
         calibration (when retrieving from database).
     """
+
     def __init__(
-        self,
-        filename=None,
-        det_id=None,
-        t0set=None,
-        calibration=None,
-        string=None
+        self, filename=None, det_id=None, t0set=None, calibration=None, string=None
     ):
         self._det_file = None
         self.det_id = None
@@ -105,7 +101,7 @@ class Detector(object):
     def _init_from_file(self, filename):
         """Create detector from detx file."""
         if not filename.endswith("detx"):
-            raise NotImplementedError('Only the detx format is supported.')
+            raise NotImplementedError("Only the detx format is supported.")
         self._open_file(filename)
         self._extract_comments()
         self._parse_header()
@@ -114,18 +110,18 @@ class Detector(object):
 
     def _open_file(self, filename):
         """Create the file handler"""
-        self._det_file = open(filename, 'r')
+        self._det_file = open(filename, "r")
 
     def _readline(self, ignore_comments=True):
         """The next line of the DETX file, optionally ignores comments"""
         while True:
             line = self._det_file.readline()
-            if line == '':
-                return line    # To conform the EOF behaviour of .readline()
+            if line == "":
+                return line  # To conform the EOF behaviour of .readline()
             line = line.strip()
-            if line == '':
-                continue    # white-space-only line
-            if line.startswith('#'):
+            if line == "":
+                continue  # white-space-only line
+            if line.startswith("#"):
                 if not ignore_comments:
                     return line
             else:
@@ -136,7 +132,7 @@ class Detector(object):
         self._det_file.seek(0, 0)
         for line in self._det_file.readlines():
             line = line.strip()
-            if line.startswith('#'):
+            if line.startswith("#"):
                 self.add_comment(line[1:])
 
     def _parse_header(self):
@@ -146,7 +142,7 @@ class Detector(object):
         first_line = self._readline()
         try:
             self.det_id, self.n_doms = split(first_line, int)
-            self.version = 'v1'
+            self.version = "v1"
         except ValueError:
             det_id, self.version = first_line.split()
             self.det_id = int(det_id)
@@ -172,7 +168,7 @@ class Detector(object):
         while True:
             line = self._readline()
 
-            if line == '':
+            if line == "":
                 self.cprint("Done.")
                 break
 
@@ -217,31 +213,31 @@ class Detector(object):
                 dx, dy, dz, t0, rest = unpack_nfirst(rest, 4)
                 pmt_id = int(pmt_id)
                 omkey = (du, floor, i)
-                pmts['pmt_id'].append(int(pmt_id))
-                pmts['pos_x'].append(float(x))
-                pmts['pos_y'].append(float(y))
-                pmts['pos_z'].append(float(z))
-                pmts['dir_x'].append(float(dx))
-                pmts['dir_y'].append(float(dy))
-                pmts['dir_z'].append(float(dz))
-                pmts['t0'].append(float(t0))
-                pmts['du'].append(int(du))
-                pmts['floor'].append(int(floor))
-                pmts['channel_id'].append(int(i))
-                pmts['dom_id'].append(int(dom_id))
-                if self.version == 'v3' and rest:
+                pmts["pmt_id"].append(int(pmt_id))
+                pmts["pos_x"].append(float(x))
+                pmts["pos_y"].append(float(y))
+                pmts["pos_z"].append(float(z))
+                pmts["dir_x"].append(float(dx))
+                pmts["dir_y"].append(float(dy))
+                pmts["dir_z"].append(float(dz))
+                pmts["t0"].append(float(t0))
+                pmts["du"].append(int(du))
+                pmts["floor"].append(int(floor))
+                pmts["channel_id"].append(int(i))
+                pmts["dom_id"].append(int(dom_id))
+                if self.version == "v3" and rest:
                     status, rest = unpack_nfirst(rest, 1)
-                    pmts['status'].append(int(status))
+                    pmts["status"].append(int(status))
                 if rest:
                     log.warning("Unexpected PMT values: {0}".format(rest))
                 self._pmt_index_by_omkey[omkey] = pmt_index
                 self._pmt_index_by_pmt_id[pmt_id] = pmt_index
                 pmt_index += 1
 
-        self.pmts = Table(pmts, name='PMT')
+        self.pmts = Table(pmts, name="PMT")
 
     def reset_caches(self):
-        log.debug('Resetting caches.')
+        log.debug("Resetting caches.")
         self._dom_positions = OrderedDict()
         self._dom_table = None
         self._xy_positions = []
@@ -280,14 +276,14 @@ class Detector(object):
         if self._dom_table is None:
             data = defaultdict(list)
             for dom_id, (du, floor, _) in self.doms.items():
-                data['dom_id'].append(dom_id)
-                data['du'].append(du)
-                data['floor'].append(floor)
+                data["dom_id"].append(dom_id)
+                data["du"].append(du)
+                data["floor"].append(floor)
                 dom_position = self.dom_positions[dom_id]
-                data['pos_x'].append(dom_position[0])
-                data['pos_y'].append(dom_position[1])
-                data['pos_z'].append(dom_position[2])
-            self._dom_table = Table(data, name='DOMs', h5loc='/dom_table')
+                data["pos_x"].append(dom_position[0])
+                data["pos_y"].append(dom_position[1])
+                data["pos_z"].append(dom_position[2])
+            self._dom_table = Table(data, name="DOMs", h5loc="/dom_table")
         return self._dom_table
 
     @property
@@ -342,7 +338,7 @@ class Detector(object):
 
     def rotate_du_by_yaw(self, du, heading):
         """Rotate all DOMs on DU by a given (yaw) heading."""
-        mask = (self.pmts.du == du)
+        mask = self.pmts.du == du
         dom_ids = np.unique(self.pmts.dom_id[mask])
         for dom_id in dom_ids:
             self.rotate_dom_by_yaw(dom_id, heading)
@@ -372,14 +368,14 @@ class Detector(object):
     @property
     def ascii(self):
         """The ascii representation of the detector"""
-        comments = ''
-        if self.version == 'v3':
+        comments = ""
+        if self.version == "v3":
             for comment in self.comments:
-                if not comment.startswith(' '):
-                    comment = ' ' + comment
+                if not comment.startswith(" "):
+                    comment = " " + comment
                 comments += "#" + comment + "\n"
 
-        if self.version == 'v1':
+        if self.version == "v1":
             header = "{det.det_id} {det.n_doms}".format(det=self)
         else:
             header = "{det.det_id} {det.version}".format(det=self)
@@ -394,17 +390,23 @@ class Detector(object):
                 pmt_idx = self._pmt_index_by_omkey[(line, floor, channel_id)]
                 pmt = self.pmts[pmt_idx]
                 doms += " {0} {1} {2} {3} {4} {5} {6} {7}".format(
-                    pmt.pmt_id, pmt.pos_x, pmt.pos_y, pmt.pos_z, pmt.dir_x,
-                    pmt.dir_y, pmt.dir_z, pmt.t0
+                    pmt.pmt_id,
+                    pmt.pos_x,
+                    pmt.pos_y,
+                    pmt.pos_z,
+                    pmt.dir_x,
+                    pmt.dir_y,
+                    pmt.dir_z,
+                    pmt.t0,
                 )
-                if self.version == 'v3':
+                if self.version == "v3":
                     doms += " {0}".format(pmt.status)
                 doms += "\n"
         return comments + header + "\n" + doms
 
     def write(self, filename):
         """Save detx file."""
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             f.write(self.ascii)
         self.cprint("Detector file saved as '{0}'".format(filename))
 
@@ -443,6 +445,7 @@ class Detector(object):
 
 class UTMInfo(object):
     """The UTM information"""
+
     def __init__(self, ellipsoid, grid, easting, northing, z):
         self.ellipsoid = ellipsoid
         self.grid = grid
@@ -451,9 +454,9 @@ class UTMInfo(object):
         self.z = float(z)
 
     def __str__(self):
-        return "UTM {} {} {} {} {}"  \
-               .format(self.ellipsoid, self.grid,
-                       self.easting, self.northing, self.z)
+        return "UTM {} {} {} {} {}".format(
+            self.ellipsoid, self.grid, self.easting, self.northing, self.z
+        )
 
     def __repr__(self):
         return "UTMInfo: {}".format(self)
@@ -471,6 +474,7 @@ class PMT(object):
     channel_id: int
     omkey: int
     """
+
     def __init__(self, id, pos, dir, t0, channel_id, omkey):
         self.id = id
         self.pos = pos
@@ -480,12 +484,42 @@ class PMT(object):
         self.omkey = omkey
 
     def __str__(self):
-        return "PMT id:{0}, pos: {1}, dir: dir{2}, t0: {3}, DAQ channel: {4}"\
-               .format(self.id, self.pos, self.dir, self.t0, self.channel_id)
+        return "PMT id:{0}, pos: {1}, dir: dir{2}, t0: {3}, DAQ channel: {4}".format(
+            self.id, self.pos, self.dir, self.t0, self.channel_id
+        )
 
 
 # PMT DAQ channel IDs ordered from top to bottom
 ORDERED_PMT_IDS = [
-    28, 23, 22, 21, 27, 29, 20, 30, 26, 25, 19, 24, 13, 7, 1, 14, 18, 12, 6, 2,
-    11, 8, 0, 15, 4, 3, 5, 17, 10, 9, 16
+    28,
+    23,
+    22,
+    21,
+    27,
+    29,
+    20,
+    30,
+    26,
+    25,
+    19,
+    24,
+    13,
+    7,
+    1,
+    14,
+    18,
+    12,
+    6,
+    2,
+    11,
+    8,
+    0,
+    15,
+    4,
+    3,
+    5,
+    17,
+    10,
+    9,
+    16,
 ]

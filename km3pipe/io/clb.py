@@ -31,11 +31,11 @@ class CLBPump(Pump):
         filename or file-like object.
 
     """
-    pmt_dt = np.dtype([('channel_id', np.uint8), ('time', '>i'),
-                       ('tot', np.uint8)])
+
+    pmt_dt = np.dtype([("channel_id", np.uint8), ("time", ">i"), ("tot", np.uint8)])
 
     def configure(self):
-        self.file = self.require('file')
+        self.file = self.require("file")
         if isinstance(self.file, str):
             self.file = open(self.file, "rb")
         self._packet_positions = []
@@ -51,7 +51,7 @@ class CLBPump(Pump):
         with ignored(struct.error):
             while True:
                 pointer_position = self.file.tell()
-                length = unpack('<i', self.file.read(4))[0]
+                length = unpack("<i", self.file.read(4))[0]
                 self._packet_positions.append(pointer_position)
                 self.file.seek(length, 1)
         self.file.seek(0, 0)
@@ -71,24 +71,26 @@ class CLBPump(Pump):
 
     def extract_blob(self):
         try:
-            length = unpack('<i', self.file.read(4))[0]
+            length = unpack("<i", self.file.read(4))[0]
         except struct.error:
             raise StopIteration
 
         blob = Blob()
 
-        blob['PacketInfo'] = Table({
-            'data_type': b''.join(unpack('cccc', self.file.read(4))).decode(),
-            'run': unpack('>i', self.file.read(4))[0],
-            'udp_sequence': unpack('>i', self.file.read(4))[0],
-            'timestamp': unpack('>I', self.file.read(4))[0],
-            'ns_ticks': unpack('>I', self.file.read(4))[0],
-            'dom_id': unpack('>i', self.file.read(4))[0],
-            'dom_status': unpack('>I', self.file.read(4))[0]
-        },
-                                   h5loc='/packet_info',
-                                   split_h5=True,
-                                   name="UDP Packet Info")
+        blob["PacketInfo"] = Table(
+            {
+                "data_type": b"".join(unpack("cccc", self.file.read(4))).decode(),
+                "run": unpack(">i", self.file.read(4))[0],
+                "udp_sequence": unpack(">i", self.file.read(4))[0],
+                "timestamp": unpack(">I", self.file.read(4))[0],
+                "ns_ticks": unpack(">I", self.file.read(4))[0],
+                "dom_id": unpack(">i", self.file.read(4))[0],
+                "dom_status": unpack(">I", self.file.read(4))[0],
+            },
+            h5loc="/packet_info",
+            split_h5=True,
+            name="UDP Packet Info",
+        )
 
         remaining_length = length - 7 * 4
         pmt_data = []
@@ -97,7 +99,7 @@ class CLBPump(Pump):
 
         pmt_data = np.fromfile(self.file, dtype=self.pmt_dt, count=count)
 
-        blob['Hits'] = Table(pmt_data, h5loc="/hits", split_h5=True)
+        blob["Hits"] = Table(pmt_data, h5loc="/hits", split_h5=True)
         return blob
 
     def __getitem__(self, index):

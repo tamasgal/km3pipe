@@ -30,6 +30,7 @@ def rtree(rfile):
 
 def main():
     from docopt import docopt
+
     arguments = docopt(__doc__)
 
-    rtree(arguments['FILE'])
+    rtree(arguments["FILE"])

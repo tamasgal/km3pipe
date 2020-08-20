@@ -24,7 +24,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import km3pipe as kp
-import km3pipe.style    # noqa
+import km3pipe.style  # noqa
+
 km3pipe.style.use("km3pipe")
 
 __author__ = "Tamas Gal"
@@ -38,25 +39,26 @@ __status__ = "Development"
 
 def main():
     from docopt import docopt
+
     arguments = docopt(__doc__)
 
     try:
-        event_id = int(arguments['-e'])
+        event_id = int(arguments["-e"])
     except TypeError:
         pass
     else:
-        pump = kp.io.OfflinePump(arguments['FILE'])
+        pump = kp.io.OfflinePump(arguments["FILE"])
         blob = pump[event_id]
-        event_info = blob['EventInfo']
-        hits = blob['Hits']
-        if (arguments['-d']):
-            cal = kp.calib.Calibration(filename=arguments['-d'])
+        event_info = blob["EventInfo"]
+        hits = blob["Hits"]
+        if arguments["-d"]:
+            cal = kp.calib.Calibration(filename=arguments["-d"])
         else:
             cal = kp.calib.Calibration(det_id=event_info.det_id)
         hits = cal.apply(hits)
         # triggered_dus = set(cal.detector.doms[h.dom_id][0] for h in hits)
         det = cal.detector
-        if arguments['-t']:
+        if arguments["-t"]:
             dus = set(det.doms[h.dom_id][0] for h in hits if h.triggered)
         else:
             dus = set(det.doms[h.dom_id][0] for h in hits)
@@ -65,15 +67,11 @@ def main():
         n_cols = int(np.ceil(np.sqrt(n_plots)))
         n_rows = int(n_plots / n_cols) + (n_plots % n_cols > 0)
         fig, axes = plt.subplots(
-            ncols=n_cols,
-            nrows=n_rows,
-            sharex=True,
-            sharey=True,
-            figsize=(16, 16)
+            ncols=n_cols, nrows=n_rows, sharex=True, sharey=True, figsize=(16, 16)
         )
 
         if n_cols == 1 and n_rows == 1:
-            axes = (axes, )
+            axes = (axes,)
         else:
             axes = axes.flatten()
 
@@ -84,16 +82,16 @@ def main():
             ax.scatter(
                 du_hits.time - min(du_hits.time),
                 du_hits.pos_z,
-                c='#09A9DE',
-                label='hit'
+                c="#09A9DE",
+                label="hit",
             )
             ax.scatter(
                 trig_hits.time - min(du_hits.time),
                 trig_hits.pos_z,
-                c='#FF6363',
-                label='triggered hit'
+                c="#FF6363",
+                label="triggered hit",
             )
-            ax.set_title('DU{0}'.format(du), fontsize=8, fontweight='bold')
+            ax.set_title("DU{0}".format(du), fontsize=8, fontweight="bold")
 
         for ax in axes:
             ax.tick_params(labelsize=8)
@@ -103,10 +101,10 @@ def main():
                 label.set_rotation(45)
 
         plt.suptitle(
-            "Filename: {0} - Event #{1}".format(arguments['FILE'], event_id),
-            fontsize=16
+            "Filename: {0} - Event #{1}".format(arguments["FILE"], event_id),
+            fontsize=16,
         )
-        fig.text(0.5, 0.04, 'time [ns]', ha='center')
-        fig.text(0.08, 0.5, 'z [m]', va='center', rotation='vertical')
+        fig.text(0.5, 0.04, "time [ns]", ha="center")
+        fig.text(0.08, 0.5, "z [m]", va="center", rotation="vertical")
         #        plt.tight_layout()
         plt.show()

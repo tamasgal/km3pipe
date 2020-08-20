@@ -12,15 +12,15 @@ from km3modules.common import StatusBar
 import os
 import time
 
-PATH = '/Users/tamasgal/Data/KM3NeT'
-DETX = 'Detector/km3net_jul13_90m_r1494_corrected.detx'
-DATA = 'km3net_jul13_90m_muatm10T23.km3_v5r1.JTE.evt'
+PATH = "/Users/tamasgal/Data/KM3NeT"
+DETX = "Detector/km3net_jul13_90m_r1494_corrected.detx"
+DATA = "km3net_jul13_90m_muatm10T23.km3_v5r1.JTE.evt"
 
 
 class PrintPositions(Module):
     def process(self, blob):
         print("Hit positions:")
-        print(blob['Hits'].pos)
+        print(blob["Hits"].pos)
         time.sleep(0.1)
         return blob
 
@@ -31,8 +31,6 @@ class PrintPositions(Module):
 pipe = Pipeline()
 pipe.attach(EvtPump, filename=os.path.join(PATH, DATA))
 pipe.attach(StatusBar)
-pipe.attach(
-    Calibration, timeit=True, apply=True, filename=os.path.join(PATH, DETX)
-)
+pipe.attach(Calibration, timeit=True, apply=True, filename=os.path.join(PATH, DETX))
 pipe.attach(PrintPositions, timeit=True)
 pipe.drain(3)

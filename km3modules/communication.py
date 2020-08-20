@@ -25,6 +25,7 @@ class ELOGService(kp.Module):
     url: string (optional)
 
     """
+
     def configure(self):
         self.url = self.get("url", default="https://elog.km3net.de/")
         self._password = create_elog_password_hash(self.require("password"))
@@ -32,13 +33,7 @@ class ELOGService(kp.Module):
         self.expose(self.post_elog, "post_elog")
 
     def post_elog(
-        self,
-        logbook,
-        subject,
-        message,
-        author,
-        message_type="Comment",
-        files=None
+        self, logbook, subject, message, author, message_type="Comment", files=None
     ):
         """Post an ELOG entry
 
@@ -54,39 +49,38 @@ class ELOGService(kp.Module):
         files: list of strings (filenames, optional)
         """
         data = {
-            'exp': logbook,
-            'cmd': 'Submit',
-            'Subject': subject,
-            'Author': author,
-            'Type': message_type,
-            'unm': self._username,
-            'upwd': self._password,
-            'When': int(time.time())
+            "exp": logbook,
+            "cmd": "Submit",
+            "Subject": subject,
+            "Author": author,
+            "Type": message_type,
+            "unm": self._username,
+            "upwd": self._password,
+            "When": int(time.time()),
         }
         if files is None:
             files = []
-        files = [(
-            'attfile{}'.format(idx + 1),
-            (os.path.basename(f), builtins.open(f, 'rb'))
-        ) for idx, f in enumerate(files)]
-        files.append(('Text', ('', message)))
+        files = [
+            ("attfile{}".format(idx + 1), (os.path.basename(f), builtins.open(f, "rb")))
+            for idx, f in enumerate(files)
+        ]
+        files.append(("Text", ("", message)))
         try:
             r = requests.post(
-                self.url + '/' + logbook,
+                self.url + "/" + logbook,
                 data=data,
                 files=files,
                 allow_redirects=False,
-                verify=False
+                verify=False,
             )
         except requests.RequestException as e:
-            self.log.error(
-                "Cannot reach the ELOG server!\nError: {}".format(e)
-            )
+            self.log.error("Cannot reach the ELOG server!\nError: {}".format(e))
         else:
             if r.status_code not in [200, 302]:
                 self.log.error(
-                    "Something went wrong...\n\nHere is what we got:\n{}".
-                    format(r.content.decode('utf-8', 'ignore'))
+                    "Something went wrong...\n\nHere is what we got:\n{}".format(
+                        r.content.decode("utf-8", "ignore")
+                    )
                 )
             else:
                 self.cprint("ELOG post created successfully.")
@@ -99,4 +93,5 @@ class ELOGService(kp.Module):
 def create_elog_password_hash(password):
     """Create a SHA256 encrypted password for ELOGs."""
     from passlib.hash import sha256_crypt
-    return sha256_crypt.encrypt(password, salt='', rounds=5000)[4:]
+
+    return sha256_crypt.encrypt(password, salt="", rounds=5000)[4:]

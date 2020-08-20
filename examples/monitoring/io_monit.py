@@ -22,12 +22,12 @@ __email__ = "tgal@km3net.de"
 
 
 def print_monitoring_data(blob):
-    data = io.BytesIO(blob['CHData'])
+    data = io.BytesIO(blob["CHData"])
     print(kp.io.daq.TMCHData(data))
     return blob
 
 
 pipe = kp.Pipeline()
-pipe.attach(kp.io.CHPump, host='localhost', tags='IO_MONIT')
+pipe.attach(kp.io.CHPump, host="localhost", tags="IO_MONIT")
 pipe.attach(print_monitoring_data)
 pipe.drain()

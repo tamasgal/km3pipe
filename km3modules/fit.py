@@ -27,16 +27,16 @@ def fit_delta_ts(data, time_s):
     xs = np.arange(-20, 21)
 
     def gaussian(x, mean, sigma, rate, offset):
-        return rate / np.sqrt(2 * np.pi) /  \
-            sigma * np.exp(-(x - mean)**2 / sigma**2) + offset
+        return (
+            rate / np.sqrt(2 * np.pi) / sigma * np.exp(-((x - mean) ** 2) / sigma ** 2)
+            + offset
+        )
 
     rates = []
     means = []
     for combination in data:
         try:
-            popt, _ = optimize.curve_fit(
-                gaussian, xs, combination, p0=[0, 2, 1000, 20]
-            )
+            popt, _ = optimize.curve_fit(gaussian, xs, combination, p0=[0, 2, 1000, 20])
         except RuntimeError:
             popt = (0, 0, 0, 0)
         rates.append(popt[2])

@@ -47,6 +47,7 @@ __version__ = "1.0"
 
 def main():
     from docopt import docopt
+
     args = docopt(__doc__, version=__version__)
 
     from glob import glob
@@ -64,27 +65,27 @@ def main():
         def tqdm(x):
             return x
 
-    cprint = kp.logger.get_printer('qrunprocessor')
-    log = kp.logger.get_logger('qrunprocessor')
+    cprint = kp.logger.get_printer("qrunprocessor")
+    log = kp.logger.get_logger("qrunprocessor")
 
-    RUN_LIST = os.path.abspath(args['RUN_LIST'])
-    OUTPUT_PATH = os.path.abspath(args['OUTPUT_PATH'])
-    SCRIPT = os.path.abspath(args['SCRIPT'])
-    SUFFIX = args['-s']
-    DET_ID = int(args['DET_ID'])
-    ET_PER_FILE = int(args['-e']) * 60    # [s]
-    FILES_PER_JOB = int(args['-n'])
-    FSIZE = args['-f']
-    VMEM = args['-m']
-    LOG_PATH = os.path.abspath(args['-l'])
-    JOB_NAME = args['-j']
-    DRYRUN = args['-q']
-    PYTHONVENV = os.path.abspath(args['-v'])
-    CLUSTER = args['-c']
+    RUN_LIST = os.path.abspath(args["RUN_LIST"])
+    OUTPUT_PATH = os.path.abspath(args["OUTPUT_PATH"])
+    SCRIPT = os.path.abspath(args["SCRIPT"])
+    SUFFIX = args["-s"]
+    DET_ID = int(args["DET_ID"])
+    ET_PER_FILE = int(args["-e"]) * 60  # [s]
+    FILES_PER_JOB = int(args["-n"])
+    FSIZE = args["-f"]
+    VMEM = args["-m"]
+    LOG_PATH = os.path.abspath(args["-l"])
+    JOB_NAME = args["-j"]
+    DRYRUN = args["-q"]
+    PYTHONVENV = os.path.abspath(args["-v"])
+    CLUSTER = args["-c"]
 
     pathlib.Path(OUTPUT_PATH).mkdir(parents=True, exist_ok=True)
 
-    with open(RUN_LIST, 'r') as fobj:
+    with open(RUN_LIST, "r") as fobj:
         run_numbers = [int(run) for run in fobj.read().split()]
 
     xrootd_files = []
@@ -93,7 +94,7 @@ def main():
         xrootd_files.append(xrootd_path)
 
     processed_files = [
-        basename(f) for f in glob(join(OUTPUT_PATH, '*{}'.format(SUFFIX)))
+        basename(f) for f in glob(join(OUTPUT_PATH, "*{}".format(SUFFIX)))
     ]
 
     rem_files = []
@@ -115,13 +116,13 @@ def main():
         s.add(f"echo Creating run summary for {n_files} files")
         s.add("cd $TMPDIR; mkdir -p $USER; cd $USER")
         if PYTHONVENV is not None:
-            s.add('. {}/bin/activate'.format(PYTHONVENV))
+            s.add(". {}/bin/activate".format(PYTHONVENV))
         s.add("echo")
 
         for xpath in file_chunk:
             fname = basename(xpath)
-            s.separator(' ')
-            s.separator('=')
+            s.separator(" ")
+            s.separator("=")
             s.echo(f"Processing {fname}:")
             s.add("pwd")
             s.add(f"xrdcp {xpath} {fname}")
@@ -130,29 +131,27 @@ def main():
             s.add(f"KPrintTree -f {fname}")
             out_fname = fname + SUFFIX
             out_fpath = join(OUTPUT_PATH, out_fname)
-            tmp_fname = out_fname + '.copying'
+            tmp_fname = out_fname + ".copying"
             tmp_fpath = join(OUTPUT_PATH, tmp_fname)
             s.add(f"{SCRIPT} {fname} -o {out_fname}")
             s.cp(out_fname, tmp_fpath)
             s.add(f"rm {out_fname}")
             s.mv(tmp_fpath, out_fpath)
             s.echo(f"File '{fname}' processed.")
-            s.separator('-')
+            s.separator("-")
 
-        walltime = time.strftime(
-            '%H:%M:%S', time.gmtime(ET_PER_FILE * n_files)
-        )
+        walltime = time.strftime("%H:%M:%S", time.gmtime(ET_PER_FILE * n_files))
 
         kp.shell.qsub(
             s,
-            '{}_{}'.format(JOB_NAME, job_id),
+            "{}_{}".format(JOB_NAME, job_id),
             walltime=walltime,
             fsize=FSIZE,
             vmem=VMEM,
             log_path=LOG_PATH,
             xrootd=True,
             cluster=CLUSTER,
-            dryrun=DRYRUN
+            dryrun=DRYRUN,
         )
 
         if DRYRUN:

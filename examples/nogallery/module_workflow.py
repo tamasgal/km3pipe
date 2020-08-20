@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 
-__author__ = 'tamasgal'
+__author__ = "tamasgal"
 
 import km3pipe as kp
 
 
 class DummyPump(kp.Module):
     """A pump demonstration with a dummy list as data."""
+
     def configure(self):
-        self.data = [{'nr': 1}, {'nr': 2}]
+        self.data = [{"nr": 1}, {"nr": 2}]
         self.blobs = self.blob_generator()
 
     def process(self, blob):
@@ -22,16 +23,17 @@ class DummyPump(kp.Module):
 
 class Foo(kp.Module):
     """A dummy module with optional and required parameters"""
+
     def configure(self):
-        self.foo = self.get('foo', default='default_foo')    # optional
-        self.bar = self.get('bar', default=23)    # optional
-        self.baz = self.require('baz')    # required
+        self.foo = self.get("foo", default="default_foo")  # optional
+        self.bar = self.get("bar", default=23)  # optional
+        self.baz = self.require("baz")  # required
         self.i = 0
 
     def process(self, blob):
         print("This is the current blob: " + str(blob))
         self.i += 1
-        blob['foo_entry'] = self.foo
+        blob["foo_entry"] = self.foo
         return blob
 
     def finish(self):
@@ -40,7 +42,7 @@ class Foo(kp.Module):
 
 def moo(blob):
     """A simple function to attach"""
-    blob['moo_entry'] = 42
+    blob["moo_entry"] = 42
     return blob
 
 
@@ -51,8 +53,8 @@ class PrintBlob(kp.Module):
 
 
 pipe = kp.Pipeline()
-pipe.attach(DummyPump, 'the_pump')
-pipe.attach(Foo, bar='dummybar', baz=69)
+pipe.attach(DummyPump, "the_pump")
+pipe.attach(Foo, bar="dummybar", baz=69)
 pipe.attach(moo)
 pipe.attach(PrintBlob)
 pipe.drain()

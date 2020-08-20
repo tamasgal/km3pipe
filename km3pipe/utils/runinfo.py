@@ -31,21 +31,22 @@ log = kp.logger.get_logger(__name__)
 def runinfo(run_id, det_id, show_trigger=False):
     db = kp.db.DBManager()
     df = db.run_table(det_id)
-    row = df[df['RUN'] == run_id]
+    row = df[df["RUN"] == run_id]
     if len(row) == 0:
         log.error("No database entry for run {0} found.".format(run_id))
         return
-    next_row = df[df['RUN'] == (run_id + 1)]
+    next_row = df[df["RUN"] == (run_id + 1)]
     if len(next_row) != 0:
-        end_time = next_row['DATETIME'].values[0]
+        end_time = next_row["DATETIME"].values[0]
         duration = (
-            next_row['UNIXSTARTTIME'].values[0] -
-            row['UNIXSTARTTIME'].values[0]
-        ) / 1000 / 60
+            (next_row["UNIXSTARTTIME"].values[0] - row["UNIXSTARTTIME"].values[0])
+            / 1000
+            / 60
+        )
     else:
-        end_time = duration = float('NaN')
+        end_time = duration = float("NaN")
     print("Run {0} - detector ID: {1}".format(run_id, det_id))
-    print('-' * 42)
+    print("-" * 42)
     print(
         "  Start time:         {0}\n"
         "  End time:           {1}\n"
@@ -54,20 +55,24 @@ def runinfo(run_id, det_id, show_trigger=False):
         "  Runsetup ID:        {4}\n"
         "  Runsetup name:      {5}\n"
         "  T0 Calibration ID:  {6}\n".format(
-            row['DATETIME'].values[0], end_time, duration,
-            bool(row['STARTTIME_DEFINED'].values[0]),
-            row['RUNSETUPID'].values[0], row['RUNSETUPNAME'].values[0],
-            row['T0_CALIBSETID'].values[0]
+            row["DATETIME"].values[0],
+            end_time,
+            duration,
+            bool(row["STARTTIME_DEFINED"].values[0]),
+            row["RUNSETUPID"].values[0],
+            row["RUNSETUPNAME"].values[0],
+            row["T0_CALIBSETID"].values[0],
         )
     )
     print("iRODS path:  {}".format(kp.tools.irods_path(det_id, run_id)))
     print("xrootd path: {}".format(kp.tools.xrootd_path(det_id, run_id)))
     if show_trigger:
-        print(db.trigger_setup(row['RUNSETUPID'].values[0]))
+        print(db.trigger_setup(row["RUNSETUPID"].values[0]))
 
 
 def main():
     from docopt import docopt
+
     args = docopt(__doc__, version=kp.version)
 
-    runinfo(int(args['RUN']), int(args['DET_ID']), args['-t'])
+    runinfo(int(args["RUN"]), int(args["DET_ID"]), args["-t"])

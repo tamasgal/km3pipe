@@ -10,8 +10,13 @@ import numpy as np
 
 from km3pipe.testing import TestCase, data_path
 from km3pipe.io.daq import (
-    DAQPump, DAQPreamble, DAQHeader, DAQSummaryslice, DMMonitor, TMCHRepump,
-    TimesliceParser
+    DAQPump,
+    DAQPreamble,
+    DAQHeader,
+    DAQSummaryslice,
+    DMMonitor,
+    TMCHRepump,
+    TimesliceParser,
 )
 
 
@@ -34,18 +39,18 @@ class TestDAQPump(TestCase):
     def test_blob_in_io_sum(self):
         p = DAQPump(filename=data_path("daq/IO_SUM.dat"))
         blob = p.next_blob()
-        assert 'DAQSummaryslice' in blob.keys()
-        assert 'DAQPreamble' in blob.keys()
-        assert 'DAQHeader' in blob.keys()
-        assert 16 == blob['DAQSummaryslice'].n_summary_frames
+        assert "DAQSummaryslice" in blob.keys()
+        assert "DAQPreamble" in blob.keys()
+        assert "DAQHeader" in blob.keys()
+        assert 16 == blob["DAQSummaryslice"].n_summary_frames
 
     def test_blob_in_io_evt(self):
         p = DAQPump(filename=data_path("daq/IO_EVT.dat"))
         blob = p.next_blob()
-        assert 'DAQEvent' in blob.keys()
-        assert 'DAQPreamble' in blob.keys()
-        assert 'DAQHeader' in blob.keys()
-        event = blob['DAQEvent']
+        assert "DAQEvent" in blob.keys()
+        assert "DAQPreamble" in blob.keys()
+        assert "DAQHeader" in blob.keys()
+        event = blob["DAQEvent"]
         assert 13 == event.n_triggered_hits
         assert 28 == event.n_snapshot_hits
 
@@ -57,7 +62,7 @@ class TestDAQPump(TestCase):
     def test_get_item(self):
         p = DAQPump(filename=data_path("daq/IO_EVT.dat"))
         blob = p[4]
-        event = blob['DAQEvent']
+        event = blob["DAQEvent"]
         assert 6 == event.n_triggered_hits
         assert 17 == event.n_snapshot_hits
 
@@ -65,7 +70,7 @@ class TestDAQPump(TestCase):
 class TestTMCHRepump(TestCase):
     def test_reading_version_2(self):
         repump = TMCHRepump(filename=data_path("daq/IO_MONIT.dat"))
-        packets = [p['TMCHData'] for p in repump]
+        packets = [p["TMCHData"] for p in repump]
 
         p1 = packets[0]
         p2 = packets[5]
@@ -105,35 +110,32 @@ class TestTMCHRepump(TestCase):
 
 class TestDMMonitor(TestCase):
     def test_init(self):
-        dmm = DMMonitor('a')
-        assert 'http://a:1302/mon/' == dmm._url
+        dmm = DMMonitor("a")
+        assert "http://a:1302/mon/" == dmm._url
 
     def test_available_parameters(self):
-        dmm = DMMonitor('a')
-        dmm._available_parameters = ['b', 'c']
-        self.assertListEqual(['b', 'c'], dmm.available_parameters)
+        dmm = DMMonitor("a")
+        dmm._available_parameters = ["b", "c"]
+        self.assertListEqual(["b", "c"], dmm.available_parameters)
 
 
 class TestTimesliceParser(TestCase):
     def test_l0(self):
-        with open(data_path("daq/IO_TSL0.dat"), 'rb') as fobj:
-            ts_info, ts_frameinfos, ts_hits = TimesliceParser(
-            )._parse_timeslice(fobj)
+        with open(data_path("daq/IO_TSL0.dat"), "rb") as fobj:
+            ts_info, ts_frameinfos, ts_hits = TimesliceParser()._parse_timeslice(fobj)
         assert 200 == len(ts_hits)
         assert 25 == ts_hits[0].tot
         assert 808447031 == ts_hits[23].dom_id
         assert 232 == ts_info[0].frame_index
 
     def test_l1(self):
-        with open(data_path("daq/IO_TSL1.dat"), 'rb') as fobj:
-            ts_info, ts_frameinfos, ts_hits = TimesliceParser(
-            )._parse_timeslice(fobj)
+        with open(data_path("daq/IO_TSL1.dat"), "rb") as fobj:
+            ts_info, ts_frameinfos, ts_hits = TimesliceParser()._parse_timeslice(fobj)
         assert 0 == len(ts_hits)
         assert 4873 == ts_info[0].frame_index
 
     def test_l2(self):
-        with open(data_path("daq/IO_TSL2.dat"), 'rb') as fobj:
-            ts_info, ts_frameinfos, ts_hits = TimesliceParser(
-            )._parse_timeslice(fobj)
+        with open(data_path("daq/IO_TSL2.dat"), "rb") as fobj:
+            ts_info, ts_frameinfos, ts_hits = TimesliceParser()._parse_timeslice(fobj)
         assert 0 == len(ts_hits)
         assert 4872 == ts_info[0].frame_index

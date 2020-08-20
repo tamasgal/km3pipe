@@ -20,7 +20,7 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-loggers = {}    # this holds all the registered loggers
+loggers = {}  # this holds all the registered loggers
 # logging.basicConfig()
 
 DEPRECATION = 45
@@ -45,12 +45,12 @@ def once(self, message, *args, **kws):
     """
     # TODO: after py2 support drop, put this into
     # function signature: identifier=None (between *args and **kws)
-    identifier = kws.pop('identifier', None)
+    identifier = kws.pop("identifier", None)
 
     if identifier is None:
         caller = getframeinfo(stack()[1][0])
         identifier = "%s:%d" % (caller.filename, caller.lineno)
-    if not hasattr(self, 'once_dict'):
+    if not hasattr(self, "once_dict"):
         self.once_dict = {}
     if identifier in self.once_dict:
         return
@@ -63,35 +63,30 @@ logging.Logger.once = once
 
 if supports_color():
     logging.addLevelName(
-        logging.INFO,
-        "\033[1;32m%s\033[1;0m" % logging.getLevelName(logging.INFO)
+        logging.INFO, "\033[1;32m%s\033[1;0m" % logging.getLevelName(logging.INFO)
     )
     logging.addLevelName(
-        logging.DEBUG,
-        "\033[1;34m%s\033[1;0m" % logging.getLevelName(logging.DEBUG)
+        logging.DEBUG, "\033[1;34m%s\033[1;0m" % logging.getLevelName(logging.DEBUG)
     )
     logging.addLevelName(
-        logging.WARNING,
-        "\033[1;33m%s\033[1;0m" % logging.getLevelName(logging.WARNING)
+        logging.WARNING, "\033[1;33m%s\033[1;0m" % logging.getLevelName(logging.WARNING)
     )
     logging.addLevelName(
-        logging.ERROR,
-        "\033[1;31m%s\033[1;0m" % logging.getLevelName(logging.ERROR)
+        logging.ERROR, "\033[1;31m%s\033[1;0m" % logging.getLevelName(logging.ERROR)
     )
     logging.addLevelName(
         logging.CRITICAL,
-        "\033[1;101m%s\033[1;0m" % logging.getLevelName(logging.CRITICAL)
+        "\033[1;101m%s\033[1;0m" % logging.getLevelName(logging.CRITICAL),
     )
-    logging.addLevelName(DEPRECATION, "\033[1;35m%s\033[1;0m" % 'DEPRECATION')
-    logging.addLevelName(ONCE, "\033[1;36m%s\033[1;0m" % 'ONCE')
+    logging.addLevelName(DEPRECATION, "\033[1;35m%s\033[1;0m" % "DEPRECATION")
+    logging.addLevelName(ONCE, "\033[1;36m%s\033[1;0m" % "ONCE")
 
 
 class LogIO(object):
     """Read/write logging information.
     """
-    def __init__(
-        self, node, stream, url='pi2089.physik.uni-erlangen.de', port=28777
-    ):
+
+    def __init__(self, node, stream, url="pi2089.physik.uni-erlangen.de", port=28777):
         self.node = node
         self.stream = stream
         self.url = url
@@ -99,9 +94,10 @@ class LogIO(object):
         self.sock = None
         self.connect()
 
-    def send(self, message, level='info'):
-        message_string = "+log|{0}|{1}|{2}|{3}\r\n" \
-                         .format(self.stream, self.node, level, message)
+    def send(self, message, level="info"):
+        message_string = "+log|{0}|{1}|{2}|{3}\r\n".format(
+            self.stream, self.node, level, message
+        )
         try:
             self.sock.send(message_string)
         except socket.error:
@@ -114,9 +110,7 @@ class LogIO(object):
         self.sock.connect((self.url, self.port))
 
 
-def get_logger(
-    name, filename=None, stream_loglevel="INFO", file_loglevel="DEBUG"
-):
+def get_logger(name, filename=None, stream_loglevel="INFO", file_loglevel="DEBUG"):
     """Helper function to get a logger"""
     if name in loggers:
         return loggers[name]
@@ -125,13 +119,12 @@ def get_logger(
 
     with_color = supports_color()
 
-    pre1, suf1 = hash_coloured_escapes(name) if with_color else ('', '')
-    pre2, suf2 = hash_coloured_escapes(name +
-                                       'salt') if with_color else ('', '')
+    pre1, suf1 = hash_coloured_escapes(name) if with_color else ("", "")
+    pre2, suf2 = hash_coloured_escapes(name + "salt") if with_color else ("", "")
     formatter = logging.Formatter(
-        '%(asctime)s %(levelname)s {}+{}+{} '
-        '%(name)s: %(message)s'.format(pre1, pre2, suf1),
-        datefmt='%Y-%m-%d %H:%M:%S'
+        "%(asctime)s %(levelname)s {}+{}+{} "
+        "%(name)s: %(message)s".format(pre1, pre2, suf1),
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
     if filename is not None:
         ch_file = logging.handlers.RotatingFileHandler(
@@ -168,12 +161,12 @@ def get_printer(name, color=None, ansi_code=None, force_color=False):
     if force_color or supports_color():
         if color is None and ansi_code is None:
             cpre_1, csuf_1 = hash_coloured_escapes(name)
-            cpre_2, csuf_2 = hash_coloured_escapes(name + 'salt')
-            name = cpre_1 + '+' + cpre_2 + '+' + csuf_1 + ' ' + name
+            cpre_2, csuf_2 = hash_coloured_escapes(name + "salt")
+            name = cpre_1 + "+" + cpre_2 + "+" + csuf_1 + " " + name
         else:
             name = colored(name, color=color, ansi_code=ansi_code)
 
-    prefix = name + ': '
+    prefix = name + ": "
 
     def printer(text):
         print(prefix + str(text))
@@ -183,12 +176,12 @@ def get_printer(name, color=None, ansi_code=None, force_color=False):
 
 def hash_coloured(text):
     """Return a ANSI coloured text based on its hash"""
-    ansi_code = int(sha256(text.encode('utf-8')).hexdigest(), 16) % 230
+    ansi_code = int(sha256(text.encode("utf-8")).hexdigest(), 16) % 230
     return colored(text, ansi_code=ansi_code)
 
 
 def hash_coloured_escapes(text):
     """Return the ANSI hash colour prefix and suffix for a given text"""
-    ansi_code = int(sha256(text.encode('utf-8')).hexdigest(), 16) % 230
-    prefix, suffix = colored('SPLIT', ansi_code=ansi_code).split('SPLIT')
+    ansi_code = int(sha256(text.encode("utf-8")).hexdigest(), 16) % 230
+    prefix, suffix = colored("SPLIT", ansi_code=ansi_code).split("SPLIT")
     return prefix, suffix

@@ -46,9 +46,9 @@ ROOT_FILENAME = "KM3NeT_00000014_00004451.root"
 
 import km3pipe as kp
 
-pump = kp.io.jpp.TimeslicePump(filename=ROOT_FILENAME, stream='SN')
+pump = kp.io.jpp.TimeslicePump(filename=ROOT_FILENAME, stream="SN")
 for blob in pump:
-    hits = blob['TSHits']
+    hits = blob["TSHits"]
 
 ####################################################################
 # The timeslice pump is used to convert the timeslice objects in
@@ -57,6 +57,6 @@ for blob in pump:
 #
 # Here is how to access the hits.
 
-pump = kp.io.jpp.TimeslicePump(filename=ROOT_FILENAME, stream='')
+pump = kp.io.jpp.TimeslicePump(filename=ROOT_FILENAME, stream="")
 for blob in pump:
-    hits = blob['TSHits']
+    hits = blob["TSHits"]

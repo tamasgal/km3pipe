@@ -29,14 +29,15 @@ detx = "../data/km3net_jul13_90m_r1494_corrected.detx"
 
 class VertexHitDistanceCalculator(Module):
     """Calculate vertex-hit-distances"""
+
     def configure(self):
         self.distances = []
 
     def process(self, blob):
-        tracks = blob['TrackIns']
+        tracks = blob["TrackIns"]
         muons = tracks[tracks.type == 5]
         muon = Table(muons[np.argmax(muons.energy)])
-        hits = blob['CalibHits']
+        hits = blob["CalibHits"]
         dist = pld3(hits.pos, muon.pos, muon.dir)
         self.distances.append(dist)
         return blob
@@ -44,11 +45,11 @@ class VertexHitDistanceCalculator(Module):
     def finish(self):
         dist_flat = np.concatenate(self.distances)
         plt.hist(dist_flat)
-        plt.savefig('dists.pdf')
+        plt.savefig("dists.pdf")
 
 
 pipe = Pipeline()
-pipe.attach(EvtPump, filename=filename, parsers=['km3'])
+pipe.attach(EvtPump, filename=filename, parsers=["km3"])
 pipe.attach(StatusBar, every=100)
 pipe.attach(Calibration, filename=detx)
 pipe.attach(VertexHitDistanceCalculator)

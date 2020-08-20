@@ -32,36 +32,36 @@ __version__ = "1.0.0"
 
 def handle_input(input):
     """Handle any unhandled input."""
-    if input in UI.keys['escape']:
+    if input in UI.keys["escape"]:
         raise urwid.ExitMainLoop
 
 
 def filter_input(keys, raw):
     """Adds fancy mouse wheel functionality and VI navigation to ListBox"""
     if len(keys) == 1:
-        if keys[0] in UI.keys['up']:
-            keys[0] = 'up'
-        elif keys[0] in UI.keys['down']:
-            keys[0] = 'down'
-        elif len(keys[0]) == 4 and keys[0][0] == 'mouse press':
+        if keys[0] in UI.keys["up"]:
+            keys[0] = "up"
+        elif keys[0] in UI.keys["down"]:
+            keys[0] = "down"
+        elif len(keys[0]) == 4 and keys[0][0] == "mouse press":
             if keys[0][1] == 4:
-                keys[0] = 'up'
+                keys[0] = "up"
             elif keys[0][1] == 5:
-                keys[0] = 'down'
+                keys[0] = "down"
     return keys
 
 
 def get_pump(input_file):
     extension = os.path.splitext(input_file)[1][1:]
-    if extension == 'evt':
+    if extension == "evt":
         pump = EvtPump(filename=input_file, cache_enabled=True)
-    elif extension == 'dat':
+    elif extension == "dat":
         pump = DAQPump(filename=input_file)
-    elif extension == 'dqd':
+    elif extension == "dqd":
         pump = CLBPump(filename=input_file, cache_enabled=True)
-    elif extension == 'root':
+    elif extension == "root":
         pump = AanetPump(filename=input_file)
-    elif extension == 'h5':
+    elif extension == "h5":
         pump = HDF5Pump(filename=input_file)
     else:
         raise SystemExit("No pump found for '{0}' files.".format(extension))
@@ -70,19 +70,17 @@ def get_pump(input_file):
 
 def main():
     from docopt import docopt
+
     arguments = docopt(__doc__, version=__version__)
-    input_file = arguments['FILE']
+    input_file = arguments["FILE"]
     pump = get_pump(input_file)
     main_frame = MainFrame(pump)
-    #main_frame.header.set_text("Inspecting {0}".format(input_file))
+    # main_frame.header.set_text("Inspecting {0}".format(input_file))
     loop = urwid.MainLoop(
-        main_frame,
-        UI.palette,
-        input_filter=filter_input,
-        unhandled_input=handle_input
+        main_frame, UI.palette, input_filter=filter_input, unhandled_input=handle_input
     )
     loop.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

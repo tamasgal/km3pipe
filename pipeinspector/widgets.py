@@ -25,11 +25,11 @@ class BlobBrowser(urwid.Frame):
         self.items = []
         self.cursor_position = 0
 
-        self.header = urwid.AttrMap(urwid.Text('Keys:'), 'head')
+        self.header = urwid.AttrMap(urwid.Text("Keys:"), "head")
 
         self.listbox = urwid.ListBox(urwid.SimpleListWalker(self.items))
         self.frame = urwid.Frame(self.listbox, header=self.header)
-        line_box = urwid.AttrMap(urwid.LineBox(self.frame), 'body')
+        line_box = urwid.AttrMap(urwid.LineBox(self.frame), "body")
         urwid.Frame.__init__(self, line_box)
         self.overlay = None
         self.popup = None
@@ -40,33 +40,31 @@ class BlobBrowser(urwid.Frame):
         for key in sorted(blob.keys()):
             item_widget = ItemWidget(key, blob[key])
             new_items.append(item_widget)
-            urwid.connect_signal(
-                item_widget, 'key_selected', self.key_selected
-            )
+            urwid.connect_signal(item_widget, "key_selected", self.key_selected)
         self.listbox.body.extend(new_items)
         self.listbox.set_focus(self.cursor_position)
 
     def key_selected(self, data):
         def formatter(obj):
-            if hasattr(obj, '__insp__'):
+            if hasattr(obj, "__insp__"):
                 return obj.__insp__()
-            if hasattr(obj, 'size'):
+            if hasattr(obj, "size"):
                 output = ""
                 for obj in data:
                     output += str(obj) + "\n"
                 return output
             return pprint.pformat(obj)
 
-        content = [urwid.Text(line) for line in formatter(data).split('\n')]
+        content = [urwid.Text(line) for line in formatter(data).split("\n")]
         self.popup = urwid.ListBox(content)
         popup_box = urwid.LineBox(self.popup)
         self.overlay = urwid.Overlay(
             popup_box,
             self.body,
-            'center',
-            ('relative', 80),
-            'middle',
-            ('relative', 80),
+            "center",
+            ("relative", 80),
+            "middle",
+            ("relative", 80),
         )
         self.body = self.overlay
 
@@ -74,7 +72,7 @@ class BlobBrowser(urwid.Frame):
         input = urwid.Frame.keypress(self, size, key)
         self.cursor_position = self.listbox.focus_position
         if self.overlay:
-            if input in UI.keys['escape']:
+            if input in UI.keys["escape"]:
                 self.body = self.overlay.bottom_w
                 self.overlay = None
         else:
@@ -82,7 +80,7 @@ class BlobBrowser(urwid.Frame):
 
 
 class ItemWidget(urwid.WidgetWrap):
-    signals = ['key_selected']
+    signals = ["key_selected"]
 
     def __init__(self, key, data):
         self.key = key
@@ -96,13 +94,12 @@ class ItemWidget(urwid.WidgetWrap):
 
         self.item = [
             (
-                'fixed', 35,
-                urwid.Padding(
-                    urwid.AttrWrap(urwid.Text(key), 'body', 'focus'), left=2
-                )
+                "fixed",
+                35,
+                urwid.Padding(urwid.AttrWrap(urwid.Text(key), "body", "focus"), left=2),
             ),
-            urwid.AttrWrap(urwid.Text(type_label), 'body', 'focus'),
-            urwid.AttrWrap(urwid.Text(size_label), 'body', 'focus'),
+            urwid.AttrWrap(urwid.Text(type_label), "body", "focus"),
+            urwid.AttrWrap(urwid.Text(size_label), "body", "focus"),
         ]
         w = urwid.Columns(self.item)
         self.__super.__init__(w)
@@ -111,24 +108,25 @@ class ItemWidget(urwid.WidgetWrap):
         return True
 
     def keypress(self, size, key):
-        if key == 'x':
-            urwid.emit_signal(self, 'key_selected', self.data)
+        if key == "x":
+            urwid.emit_signal(self, "key_selected", self.data)
         return key
 
 
 class BlobWidget(urwid.Pile):
-    signals = ['blob_selected']
+    signals = ["blob_selected"]
 
     def __init__(self):
         self.width = 50
-        self.size = (0, )
+        self.size = (0,)
         self.index = 0
         urwid.Pile.__init__(
-            self, [
-                urwid.Text('', wrap='clip'),
-                urwid.Text('', wrap='clip'),
-                urwid.Text('', wrap='clip')
-            ]
+            self,
+            [
+                urwid.Text("", wrap="clip"),
+                urwid.Text("", wrap="clip"),
+                urwid.Text("", wrap="clip"),
+            ],
         )
 
     def goto_blob(self, position):
@@ -159,7 +157,7 @@ class BlobWidget(urwid.Pile):
         return urwid.Pile.render(self, size, focus)
 
     def _emit_blob_selected(self):
-        urwid.emit_signal(self, 'blob_selected', self.index)
+        urwid.emit_signal(self, "blob_selected", self.index)
 
     def _make_ruler(self, start):
         if start <= 10:
@@ -169,7 +167,7 @@ class BlobWidget(urwid.Pile):
         segment = "|    '    "
         repeat = int(math.ceil(self.width / len(segment)) + 1)
         ruler = segment * repeat
-        slice_start = (start % len(segment))
+        slice_start = start % len(segment)
         slice_end = (start % len(segment)) + self.width
         return ruler[slice_start:slice_end]
 
@@ -181,20 +179,23 @@ class BlobWidget(urwid.Pile):
         lowest_tick = int(math.floor(start / 10) * 10)
         highest_tick = lowest_tick + self.width
         ticks_labels = [
-            '{0:<10}'.format(i) for i in range(lowest_tick, highest_tick, 10)
+            "{0:<10}".format(i) for i in range(lowest_tick, highest_tick, 10)
         ]
-        slice_start = (start % 10)
+        slice_start = start % 10
         slice_end = (start % 10) + self.width
-        ticks = ''.join(ticks_labels)[slice_start:slice_end]
+        ticks = "".join(ticks_labels)[slice_start:slice_end]
         return ticks
 
     def _make_blob_icons(self, start):
-        icon = 'B'
+        icon = "B"
         if start < 10:
-            icons = '.' + icon * (self.width - 1)
+            icons = "." + icon * (self.width - 1)
         else:
             icons = icon * self.width
         if start > 10:
             start = 10
-        return [('blob', icons[:start]), ('blob_selected', icons[start]),
-                ('blob', icons[start + 1:])]
+        return [
+            ("blob", icons[:start]),
+            ("blob_selected", icons[start]),
+            ("blob", icons[start + 1 :]),
+        ]

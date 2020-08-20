@@ -5,13 +5,13 @@ Common unit testing support for km3pipe.
 """
 import sys
 from functools import wraps
-from unittest import TestCase    # noqa
-from mock import MagicMock    # noqa
-from mock import Mock    # noqa
-from mock import patch    # noqa
+from unittest import TestCase  # noqa
+from mock import MagicMock  # noqa
+from mock import Mock  # noqa
+from mock import patch  # noqa
 
-from numpy.testing import assert_allclose    # noqa
-import pytest    # noqa
+from numpy.testing import assert_allclose  # noqa
+import pytest  # noqa
 
 from km3net_testdata import data_path
 

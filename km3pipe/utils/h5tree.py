@@ -36,7 +36,7 @@ def nodeinfo(node, print_titles=False):
     pathname = node._v_pathname
     try:
         n_rows = node.shape[0]
-        n_rows_str = '{}'.format(n_rows)
+        n_rows_str = "{}".format(n_rows)
     except AttributeError:
         n_rows_str = None
     try:
@@ -47,15 +47,15 @@ def nodeinfo(node, print_titles=False):
             title = "'{}'".format(title)
     except AttributeError:
         title = None
-    return ", ".join([
-        node for node in (pathname, title, n_rows_str) if node is not None
-    ])
+    return ", ".join(
+        [node for node in (pathname, title, n_rows_str) if node is not None]
+    )
 
 
 def meta(h5):
     try:
         version = np.string_(h5.root._v_attrs.format_version)
-        print('KM3HDF5 v{}'.format(version.decode('utf-8')))
+        print("KM3HDF5 v{}".format(version.decode("utf-8")))
     except AttributeError:
         pass
     try:
@@ -75,30 +75,31 @@ def h5tree(h5name, print_meta=True, pretty=True, **kwargs):
         for k, group in enumerate(what):
             d = group._v_depth
             if pretty:
-                print('│  ' * (d - 1) + '├── ' * d + group._v_name)
+                print("│  " * (d - 1) + "├── " * d + group._v_name)
             else:
                 print(group._v_pathname)
             for kind in node_kinds:
                 for n, node in enumerate(group._f_list_nodes(kind)):
                     if n == 0:
                         n_siblings = node._v_parent._v_nchildren
-                    filler = '├── '
+                    filler = "├── "
                     if n == n_siblings - 1:
-                        filler = '└── '
+                        filler = "└── "
                     d = node._v_depth
                     if pretty:
-                        print('│  ' * (d - 1) + filler + node._v_name)
+                        print("│  " * (d - 1) + filler + node._v_name)
                     else:
                         print(nodeinfo(node, **kwargs))
 
 
 def main():
     from docopt import docopt
+
     args = docopt(__doc__)
-    fname = args['FILE']
-    do_titles = bool(args['--titles'])
-    do_meta = not bool(args['--no-meta'])
-    do_classic = bool(args['--classic'])
+    fname = args["FILE"]
+    do_titles = bool(args["--titles"])
+    do_meta = not bool(args["--no-meta"])
+    do_classic = bool(args["--classic"])
     h5tree(
         fname,
         print_titles=do_titles,

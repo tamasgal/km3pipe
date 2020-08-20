@@ -5,14 +5,17 @@
 Common Plotting utils.
 """
 try:
-    import _tkinter    # noqa
+    import _tkinter  # noqa
 except ImportError:
     import matplotlib
-    matplotlib.use('agg')
+
+    matplotlib.use("agg")
 import matplotlib.pyplot as plt
 import numpy as np
+
 try:
     import seaborn as sns
+
     HAS_SEABORN = True
 except ImportError:
     HAS_SEABORN = False
@@ -47,15 +50,14 @@ def get_ax(ax=None):
     return ax
 
 
-def diag(ax=None, linecolor='0.0', linestyle='--', **kwargs):
+def diag(ax=None, linecolor="0.0", linestyle="--", **kwargs):
     """Plot the diagonal."""
     ax = get_ax(ax)
     xy_min = np.min((ax.get_xlim(), ax.get_ylim()))
     xy_max = np.max((ax.get_ylim(), ax.get_xlim()))
-    return ax.plot([xy_min, xy_max], [xy_min, xy_max],
-                   ls=linestyle,
-                   c=linecolor,
-                   **kwargs)
+    return ax.plot(
+        [xy_min, xy_max], [xy_min, xy_max], ls=linestyle, c=linecolor, **kwargs
+    )
 
 
 def automeshgrid(
@@ -109,16 +111,17 @@ def prebinned_hist(counts, binlims, ax=None, *args, **kwargs):
 def joint_hex(x, y, **kwargs):
     """Seaborn Joint Hexplot with marginal KDE + hists."""
     return sns.jointplot(
-        x, y, kind='hex', stat_func=None, marginal_kws={'kde': True}, **kwargs
+        x, y, kind="hex", stat_func=None, marginal_kws={"kde": True}, **kwargs
     )
 
 
 def plot_convexhull(xy, ax=None, plot_points=True):
     from scipy.spatial import ConvexHull
+
     ch = ConvexHull(xy)
     ax = get_ax(ax)
     if plot_points:
-        ax.plot(xy[:, 0], xy[:, 1], 'o')
+        ax.plot(xy[:, 0], xy[:, 1], "o")
     for simplex in ch.simplices:
-        ax.plot(xy[simplex, 0], xy[simplex, 1], 'k-')
+        ax.plot(xy[simplex, 0], xy[simplex, 1], "k-")
     return ax

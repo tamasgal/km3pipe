@@ -11,13 +11,13 @@ from .logger import get_logger
 
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2017, Tamas Gal and the KM3NeT collaboration."
-__credits__ = ['Vladimir Kulikovskiy']
+__credits__ = ["Vladimir Kulikovskiy"]
 __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-log = get_logger(__name__)    # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 
 def neutrino_to_source_direction(phi, theta, radian=True):
@@ -167,7 +167,7 @@ def innerprod_1d(v1, v2):
     angle_between_v1_v1 = innerprod_1d(v1, v2)
     ```
     """
-    return np.einsum('ij,ij->i', v1, v1)
+    return np.einsum("ij,ij->i", v1, v1)
 
 
 def unit_vector(vector, **kwargs):
@@ -229,7 +229,7 @@ def circ_permutation(items):
 
 def hsin(theta):
     """haversine"""
-    return (1.0 - np.cos(theta)) / 2.
+    return (1.0 - np.cos(theta)) / 2.0
 
 
 def space_angle(phi1, theta1, phi2, theta2):
@@ -240,13 +240,14 @@ def space_angle(phi1, theta1, phi2, theta2):
     Space angle only makes sense in lon-lat, so convert zenith -> latitude.
     """
     from numpy import pi, sin, cos, arctan2, sqrt, square
+
     lamb1 = pi / 2 - theta1
     lamb2 = pi / 2 - theta2
     lambdelt = lamb2 - lamb1
     under = sin(phi1) * sin(phi2) + cos(phi1) * cos(phi2) * cos(lambdelt)
     over = sqrt(
-        np.square((cos(phi2) * sin(lambdelt))) +
-        square(cos(phi1) * sin(phi2) - sin(phi1) * cos(phi2) * cos(lambdelt))
+        np.square((cos(phi2) * sin(lambdelt)))
+        + square(cos(phi1) * sin(phi2) - sin(phi1) * cos(phi2) * cos(lambdelt))
     )
     angle = arctan2(over, under)
     return angle
@@ -269,17 +270,21 @@ def rotation_matrix(axis, theta):
     b, c, d = -axis * np.sin(theta / 2)
     aa, bb, cc, dd = a * a, b * b, c * c, d * d
     bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
-    return np.array([
-        [aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac)],
-        [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
-        [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc],
-    ])
+    return np.array(
+        [
+            [aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac)],
+            [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
+            [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc],
+        ]
+    )
 
 
 class Polygon(object):
     """A polygon, to implement containment conditions."""
+
     def __init__(self, vertices):
         from matplotlib.path import Path
+
         self.poly = Path(vertices)
 
     def contains(self, points):
@@ -295,6 +300,7 @@ class Polygon(object):
 
 class IrregularPrism(object):
     """Like a cylinder, but the top is an irregular Polygon."""
+
     def __init__(self, xy_vertices, z_min, z_max):
         self.poly = Polygon(xy_vertices)
         self.z_min = z_min
@@ -329,6 +335,7 @@ class SparseCone(object):
         theta, axis to mantle, *not* mantle-mantle. So this is the angle
         to the axis, and mantle-to-mantle (aperture) is 2 theta.
     """
+
     def __init__(self, spike_pos, bottom_center_pos, opening_angle):
         self.spike_pos = np.asarray(spike_pos)
         self.bottom_center_pos = np.asarray(bottom_center_pos)
@@ -356,10 +363,8 @@ class SparseCone(object):
         random_circle_vector = self._random_circle_vector
         # rotate the radius vector around the cone axis
         points_on_circle = [
-            np.dot(
-                rotation_matrix(self.top_bottom_vec, theta),
-                random_circle_vector
-            ) for theta in angles
+            np.dot(rotation_matrix(self.top_bottom_vec, theta), random_circle_vector)
+            for theta in angles
         ]
         return points_on_circle
 
@@ -398,7 +403,7 @@ def inertia(x, y, z, weight=None):
 def g_parameter(time_residual):
     """stolen from thomas"""
     mean = np.mean(time_residual)
-    time_residual_prime = (time_residual - np.ones(time_residual.shape) * mean)
+    time_residual_prime = time_residual - np.ones(time_residual.shape) * mean
     time_residual_prime *= time_residual_prime / (-2 * 1.5 * 1.5)
     time_residual_prime = np.exp(time_residual_prime)
     g = np.sum(time_residual_prime) / len(time_residual)
@@ -407,8 +412,9 @@ def g_parameter(time_residual):
 
 def gold_parameter(time_residual):
     """stolen from thomas"""
-    gold = np.exp(-1 * time_residual * time_residual /
-                  (2 * 1.5 * 1.5)) / len(time_residual)
+    gold = np.exp(-1 * time_residual * time_residual / (2 * 1.5 * 1.5)) / len(
+        time_residual
+    )
     gold = np.sum(gold)
 
 
@@ -462,10 +468,14 @@ def qeuler(yaw, pitch, roll):
     cp = np.cos(pitch * 0.5)
     sp = np.sin(pitch * 0.5)
 
-    q = np.array((
-        cy * cr * cp + sy * sr * sp, cy * sr * cp - sy * cr * sp,
-        cy * cr * sp + sy * sr * cp, sy * cr * cp - cy * sr * sp
-    ))
+    q = np.array(
+        (
+            cy * cr * cp + sy * sr * sp,
+            cy * sr * cp - sy * cr * sp,
+            cy * cr * sp + sy * sr * cp,
+            sy * cr * cp - cy * sr * sp,
+        )
+    )
     return q
 
 
@@ -512,20 +522,14 @@ def intersect_3d(p1, p2):
     nx = normed_v[:, 0]
     ny = normed_v[:, 1]
     nz = normed_v[:, 2]
-    xx = np.sum(nx**2 - 1)
-    yy = np.sum(ny**2 - 1)
-    zz = np.sum(nz**2 - 1)
+    xx = np.sum(nx ** 2 - 1)
+    yy = np.sum(ny ** 2 - 1)
+    zz = np.sum(nz ** 2 - 1)
     xy = np.sum(nx * ny)
     xz = np.sum(nx * nz)
     yz = np.sum(ny * nz)
     M = np.array([(xx, xy, xz), (xy, yy, yz), (xz, yz, zz)])
-    x = np.sum(
-        p1[:, 0] * (nx**2 - 1) + p1[:, 1] * (nx * ny) + p1[:, 2] * (nx * nz)
-    )
-    y = np.sum(
-        p1[:, 0] * (nx * ny) + p1[:, 1] * (ny * ny - 1) + p1[:, 2] * (ny * nz)
-    )
-    z = np.sum(
-        p1[:, 0] * (nx * nz) + p1[:, 1] * (ny * nz) + p1[:, 2] * (nz**2 - 1)
-    )
+    x = np.sum(p1[:, 0] * (nx ** 2 - 1) + p1[:, 1] * (nx * ny) + p1[:, 2] * (nx * nz))
+    y = np.sum(p1[:, 0] * (nx * ny) + p1[:, 1] * (ny * ny - 1) + p1[:, 2] * (ny * nz))
+    z = np.sum(p1[:, 0] * (nx * nz) + p1[:, 1] * (ny * nz) + p1[:, 2] * (nz ** 2 - 1))
     return np.linalg.lstsq(M, np.array((x, y, z)), rcond=None)[0]

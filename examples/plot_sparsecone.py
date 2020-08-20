@@ -10,10 +10,11 @@ Sparse Cone
 
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D    # noqa
+from mpl_toolkits.mplot3d import Axes3D  # noqa
 
 from km3pipe.math import SparseCone
 import km3pipe.style
+
 km3pipe.style.use("moritz")
 
 spike = [0, 0, 1]
@@ -32,6 +33,6 @@ samp = np.array(samp)
 
 plt.clf()
 fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-ax.scatter(samp[:, 0], samp[:, 1], samp[:, 2], 'yo')
+ax = fig.add_subplot(111, projection="3d")
+ax.scatter(samp[:, 0], samp[:, 1], samp[:, 2], "yo")
 plt.show()

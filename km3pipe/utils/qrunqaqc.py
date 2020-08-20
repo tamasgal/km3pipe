@@ -36,13 +36,14 @@ import time
 from tqdm import tqdm
 import km3pipe as kp
 
-kp.logger.get_logger('km3pipe.db').setLevel('CRITICAL')
+kp.logger.get_logger("km3pipe.db").setLevel("CRITICAL")
 
-ESTIMATED_TIME_PER_RUN = 60 * 10    # [s]
+ESTIMATED_TIME_PER_RUN = 60 * 10  # [s]
 
 
 class QAQCAnalyser(object):
     """Determines  run quality parameters and uploads them to the DB"""
+
     def __init__(self, det_id, should_upload_to_db, log_file="qrunqaqc.log"):
         self.det_id = det_id
         self.should_upload_to_db = should_upload_to_db
@@ -61,11 +62,7 @@ class QAQCAnalyser(object):
             self.log.critical("Please load a Jpp environment")
             raise SystemExit()
         else:
-            print(
-                "Run quality determination using Jpp '{}'".format(
-                    self.jpp_version
-                )
-            )
+            print("Run quality determination using Jpp '{}'".format(self.jpp_version))
 
         self.sds = kp.db.StreamDS()
         self.db = kp.db.DBManager()
@@ -82,9 +79,7 @@ class QAQCAnalyser(object):
             if not os.path.exists(path):
                 os.makedirs(path)
 
-        self.blacklist = os.path.join(
-            cwd, "blacklist_{}.txt".format(self.det_id)
-        )
+        self.blacklist = os.path.join(cwd, "blacklist_{}.txt".format(self.det_id))
 
         self.stats = defaultdict(int)
 
@@ -103,17 +98,13 @@ class QAQCAnalyser(object):
         if self._blacklisted_run_ids is None:
             if os.path.exists(self.blacklist):
                 with open(self.blacklist) as fobj:
-                    self._blacklisted_run_ids = set(
-                        int(l) for l in fobj.readlines()
-                    )
+                    self._blacklisted_run_ids = set(int(l) for l in fobj.readlines())
             else:
                 self._blacklisted_run_ids = set()
         return self._blacklisted_run_ids
 
     def retrieve_available_runs(self):
-        files = kp.tools.ifiles(
-            "data/raw/sea/KM3NeT_{:08d}".format(self.det_id)
-        )
+        files = kp.tools.ifiles("data/raw/sea/KM3NeT_{:08d}".format(self.det_id))
         self.available_run_files = {f.path: f.size for f in files}
 
     def run(self, batch_size, max_jobs, dryrun):
@@ -129,7 +120,7 @@ class QAQCAnalyser(object):
                 minrun=min(run_ids),
                 maxrun=max(run_ids),
                 source_name=self.jpp_version,
-                parameter_name="livetime_s"    # to lower the request size
+                parameter_name="livetime_s",  # to lower the request size
             ).RUN.values
         except AttributeError:
             already_processed_runs_ids = set()
@@ -152,9 +143,8 @@ class QAQCAnalyser(object):
         n_jobs = 0
         run_ids_to_process = []
         run_ids_to_check = sorted(
-            set(run_ids) - set(already_processed_runs_ids) -
-            self.blacklisted_run_ids,
-            reverse=True
+            set(run_ids) - set(already_processed_runs_ids) - self.blacklisted_run_ids,
+            reverse=True,
         )
 
         print("Checking runs, retrieving file list from iRODS...")
@@ -165,7 +155,8 @@ class QAQCAnalyser(object):
             if n_jobs >= max_jobs:
                 self.log.warning(
                     "Maximum number of jobs reached (%s), "
-                    "proceeding with batch submission", max_jobs
+                    "proceeding with batch submission",
+                    max_jobs,
                 )
                 break
             self.log.info("Checking run '{}'".format(run_id))
@@ -181,7 +172,7 @@ class QAQCAnalyser(object):
                     "  -> no file found on iRODS or an iRODS error "
                     "occured for run {}".format(run_id)
                 )
-                self.stats['Missing data or iRODS error'] += 1
+                self.stats["Missing data or iRODS error"] += 1
 
         total_runs_to_process = len(run_ids_to_process)
 
@@ -190,21 +181,18 @@ class QAQCAnalyser(object):
         else:
 
             if batch_size is None:
-                batch_size = int(
-                    math.ceil(total_runs_to_process / float(max_jobs))
-                )
+                batch_size = int(math.ceil(total_runs_to_process / float(max_jobs)))
 
             print(
-                "Proceeding with {} runs distributed over {} jobs, {} runs/job"
-                .format(total_runs_to_process, max_jobs, batch_size)
+                "Proceeding with {} runs distributed over {} jobs, {} runs/job".format(
+                    total_runs_to_process, max_jobs, batch_size
+                )
             )
 
             run_id_chunks = kp.tools.chunks(run_ids_to_process, batch_size)
 
             self.pbar_runs = tqdm(
-                total=len(run_ids_to_process),
-                desc="Submitting runs",
-                unit='run'
+                total=len(run_ids_to_process), desc="Submitting runs", unit="run"
             )
 
             for run_ids in tqdm(run_id_chunks, desc="Jobs"):
@@ -233,9 +221,7 @@ class QAQCAnalyser(object):
             self.log.info("adding run %s (det_id %s", run_id, self.det_id)
             xrootd_path = kp.tools.xrootd_path(self.det_id, run_id)
             self.log.info("xrootd path: %s", xrootd_path)
-            size = self.available_run_files[kp.tools.irods_path(
-                self.det_id, run_id
-            )]
+            size = self.available_run_files[kp.tools.irods_path(self.det_id, run_id)]
             self.log.info("filesize: %s (bytes)", size)
             filesizes.append(size)
 
@@ -244,14 +230,13 @@ class QAQCAnalyser(object):
             out_filename = os.path.join(
                 self.outdir, "{}_{}_qparams.csv".format(self.det_id, run_id)
             )
-            t0set = self.runtable[self.runtable.RUN == run_id
-                                  ].T0_CALIBSETID.values[0]
+            t0set = self.runtable[self.runtable.RUN == run_id].T0_CALIBSETID.values[0]
 
             self.log.info("adding run '%s' with t0set '%s'", run_id, t0set)
 
             s.separator()
             s.echo("Processing run {}".format(run_id))
-            s.separator('-')
+            s.separator("-")
             s.add("km3pipe detx {} -t {} -o d.detx".format(self.det_id, t0set))
             s.add("xrdcp {} {}".format(xrootd_path, root_filename))
             s.add("echo '{}'> {}".format(" ".join(self.columns), out_filename))
@@ -267,38 +252,36 @@ class QAQCAnalyser(object):
 
             self.add_to_blacklist(run_id)
             self.pbar_runs.update(1)
-            self.stats['Number of submitted runs'] += 1
+            self.stats["Number of submitted runs"] += 1
 
         walltime = time.strftime(
-            '%H:%M:%S', time.gmtime(ESTIMATED_TIME_PER_RUN * len(run_ids))
+            "%H:%M:%S", time.gmtime(ESTIMATED_TIME_PER_RUN * len(run_ids))
         )
 
         fsize = int(max(filesizes) / 1024 / 1024 * 1.1 + 100)
 
-        identifier = "QAQC_{}_{}-{}".format(
-            self.det_id, run_ids[0], run_ids[-1]
-        )
+        identifier = "QAQC_{}_{}-{}".format(self.det_id, run_ids[0], run_ids[-1])
 
         job_script = kp.shell.qsub(
             s,
             identifier,
-            vmem='4G',
-            fsize='{}M'.format(fsize),
+            vmem="4G",
+            fsize="{}M".format(fsize),
             xrootd=True,
             walltime=walltime,
             silent=True,
-            dryrun=dryrun
+            dryrun=dryrun,
         )
         self.log.info("  => job with %s runs submitted", len(run_ids))
 
         jobfile = os.path.join(self.jobdir, identifier + ".sh")
-        with open(jobfile, 'w') as fobj:
+        with open(jobfile, "w") as fobj:
             fobj.write(job_script)
         self.log.info("     job file have been saved to {}".format(jobfile))
         if dryrun:
-            self.stats['Number of dryrun jobs'] += 1
+            self.stats["Number of dryrun jobs"] += 1
         else:
-            self.stats['Number of submitted jobs'] += 1
+            self.stats["Number of submitted jobs"] += 1
 
     def retrieve_qparams(self):
         """Returns a list of quality parameters determined by JQAQC.sh"""
@@ -306,10 +289,8 @@ class QAQCAnalyser(object):
         try:
             qparams = subprocess.getoutput(command)
         except AttributeError:
-            qparams = subprocess.check_output(
-                command.split(), stderr=subprocess.STDOUT
-            )
-        return qparams.split('\n')[1].split()
+            qparams = subprocess.check_output(command.split(), stderr=subprocess.STDOUT)
+        return qparams.split("\n")[1].split()
 
     @property
     def columns(self):
@@ -318,8 +299,8 @@ class QAQCAnalyser(object):
             qparams = self.retrieve_qparams()
             # Adapting to runsummarynumbers naming convention
             # Warning: for retrieving data, it's called "source_name"
-            qparams[qparams.index('GIT')] = "source"
-            qparams[qparams.index('detector')] = "det_id"
+            qparams[qparams.index("GIT")] = "source"
+            qparams[qparams.index("detector")] = "det_id"
 
             self._columns = qparams
         return self._columns
@@ -327,22 +308,17 @@ class QAQCAnalyser(object):
 
 def main():
     from docopt import docopt
+
     args = docopt(__doc__)
 
     try:
-        batch_size = int(args['-b'])
+        batch_size = int(args["-b"])
     except TypeError:
         batch_size = None
 
-    qaqc = QAQCAnalyser(
-        det_id=int(args['DET_ID']), should_upload_to_db=args['-u']
-    )
-    qaqc.run(
-        batch_size=batch_size,
-        max_jobs=int(args['-j']),
-        dryrun=bool(args['-q'])
-    )
+    qaqc = QAQCAnalyser(det_id=int(args["DET_ID"]), should_upload_to_db=args["-u"])
+    qaqc.run(batch_size=batch_size, max_jobs=int(args["-j"]), dryrun=bool(args["-q"]))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

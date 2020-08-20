@@ -85,7 +85,7 @@ code-style:
     stage: test
     script:
         - *virtualenv_definition
-        - yapf -r -d -e "venv" .
+        - make black
     allow_failure: true
 
 coverage:

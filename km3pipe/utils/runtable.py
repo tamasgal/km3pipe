@@ -34,13 +34,7 @@ log = kp.logger.get_logger(__name__)
 
 
 def runtable(
-    det_id,
-    n=5,
-    run_range=None,
-    target=None,
-    compact=False,
-    sep='\t',
-    regex=None
+    det_id, n=5, run_range=None, target=None, compact=False, sep="\t", regex=None
 ):
     """Print the run table of the last `n` runs for given detector"""
     db = kp.db.DBManager()
@@ -48,7 +42,7 @@ def runtable(
 
     if run_range is not None:
         try:
-            from_run, to_run = [int(r) for r in run_range.split('-')]
+            from_run, to_run = [int(r) for r in run_range.split("-")]
         except ValueError:
             log.critical("Please specify a valid range (e.g. 3100-3200)!")
             raise SystemExit
@@ -62,35 +56,38 @@ def runtable(
             log.error("Invalid regex!")
             return
 
-        df = df[df['RUNSETUPNAME'].str.contains(regex)
-                | df['RUNSETUPID'].str.contains(regex)]
+        df = df[
+            df["RUNSETUPNAME"].str.contains(regex)
+            | df["RUNSETUPID"].str.contains(regex)
+        ]
 
     if target is not None:
-        df = df[df['JOBTARGET'] == target.capitalize()]
+        df = df[df["JOBTARGET"] == target.capitalize()]
 
     if n is not None:
         df = df.tail(n)
 
     if compact:
-        df = df[['RUN', 'DATETIME', 'RUNSETUPNAME']]
+        df = df[["RUN", "DATETIME", "RUNSETUPNAME"]]
 
     df.to_csv(sys.stdout, sep=sep)
 
 
 def main():
     from docopt import docopt
+
     args = docopt(__doc__, version=kp.version)
 
     try:
-        n = int(args['-n'])
+        n = int(args["-n"])
     except TypeError:
         n = None
 
     runtable(
-        args['DET_ID'],
+        args["DET_ID"],
         n=n,
-        run_range=args['-r'],
-        target=args['-t'],
-        regex=args['-s'],
-        compact=args['-c']
+        run_range=args["-r"],
+        target=args["-t"],
+        regex=args["-s"],
+        compact=args["-c"],
     )

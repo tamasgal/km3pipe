@@ -18,11 +18,12 @@ from km3net_testdata import data_path
 
 import km3pipe as kp
 import km3pipe.style
-km3pipe.style.use('km3pipe')
-km3pipe.style.use('talk')
+
+km3pipe.style.use("km3pipe")
+km3pipe.style.use("talk")
 
 detx = data_path(
-    'detx/orca_115strings_av23min20mhorizontal_18OMs_alt9mvertical_v1.detx'
+    "detx/orca_115strings_av23min20mhorizontal_18OMs_alt9mvertical_v1.detx"
 )
 det = kp.hardware.Detector(detx)
 
@@ -44,16 +45,10 @@ pmts = det.pmts[det.pmts.dom_id == dom_id]
 # The `quiver` function can directly plot the PMT data, since those are
 # stored as numpy arrays.
 fig = plt.figure()
-ax = fig.gca(projection='3d')
+ax = fig.gca(projection="3d")
 
 ax.quiver(
-    pmts.pos_x,
-    pmts.pos_y,
-    pmts.pos_z,
-    pmts.dir_x,
-    pmts.dir_y,
-    pmts.dir_z,
-    length=0.1
+    pmts.pos_x, pmts.pos_y, pmts.pos_z, pmts.dir_x, pmts.dir_y, pmts.dir_z, length=0.1
 )
 
 ax.set_xlabel("x [m]")

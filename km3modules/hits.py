@@ -43,8 +43,8 @@ def count_multiplicities(times, tmax=20):
 
     """
     n = times.shape[0]
-    mtp = np.ones(n, dtype=np.int64)    # multiplicities
-    cid = np.zeros(n, dtype=np.int64)    # coincidence id
+    mtp = np.ones(n, dtype=np.int64)  # multiplicities
+    cid = np.zeros(n, dtype=np.int64)  # coincidence id
     idx0 = 0
     _mtp = 1
     _cid = 0

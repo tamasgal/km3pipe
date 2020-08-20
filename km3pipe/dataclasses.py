@@ -20,10 +20,10 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
-__all__ = ('Table', 'is_structured', 'has_structured_dt', 'inflate_dtype')
+__all__ = ("Table", "is_structured", "has_structured_dt", "inflate_dtype")
 
-DEFAULT_H5LOC = '/misc'
-DEFAULT_NAME = 'Generic Table'
+DEFAULT_H5LOC = "/misc"
+DEFAULT_NAME = "Generic Table"
 DEFAULT_SPLIT = False
 DEFAULT_H5SINGLETON = False
 
@@ -38,7 +38,7 @@ def has_structured_dt(arr):
 
 def is_structured(dt):
     """Check if the dtype is structured."""
-    if not hasattr(dt, 'fields'):
+    if not hasattr(dt, "fields"):
         return False
     return dt.fields is not None
 
@@ -110,6 +110,7 @@ class Table(np.recarray):
     from_columns(list_of_columns, **kwargs)
         Instantiate from an array-like with shape (n_columns, n_rows).
     """
+
     def __new__(
         cls,
         data,
@@ -130,7 +131,7 @@ class Table(np.recarray):
                 h5singleton=h5singleton,
                 **kwargs
             )
-        if istype(data, 'DataFrame'):
+        if istype(data, "DataFrame"):
             return cls.from_dataframe(
                 data,
                 h5loc=h5loc,
@@ -176,7 +177,7 @@ class Table(np.recarray):
                 log.once(
                     "dtype mismatch, but matching field names and types. "
                     "Rordering input data...",
-                    identifier=h5loc
+                    identifier=h5loc,
                 )
                 data = Table({f: data[f] for f in dtype_names}, dtype=dtype)
             else:
@@ -200,10 +201,10 @@ class Table(np.recarray):
             # called from explicit contructor
             return obj
         # views or slices
-        self.h5loc = getattr(obj, 'h5loc', DEFAULT_H5LOC)
-        self.split_h5 = getattr(obj, 'split_h5', DEFAULT_SPLIT)
-        self.name = getattr(obj, 'name', DEFAULT_NAME)
-        self.h5singleton = getattr(obj, 'h5singleton', DEFAULT_H5SINGLETON)
+        self.h5loc = getattr(obj, "h5loc", DEFAULT_H5LOC)
+        self.split_h5 = getattr(obj, "split_h5", DEFAULT_SPLIT)
+        self.name = getattr(obj, "name", DEFAULT_NAME)
+        self.h5singleton = getattr(obj, "h5singleton", DEFAULT_H5SINGLETON)
         # attribute access returns void instances on slicing/iteration
         # kudos to
         # https://github.com/numpy/numpy/issues/3581#issuecomment-108957200
@@ -223,7 +224,7 @@ class Table(np.recarray):
     @staticmethod
     def _expand_scalars(arr_dict):
         scalars = []
-        maxlen = 1    # have at least 1-elem arrays
+        maxlen = 1  # have at least 1-elem arrays
         for k, v in arr_dict.items():
             if np.isscalar(v):
                 scalars.append(k)
@@ -233,7 +234,7 @@ class Table(np.recarray):
             #     import pdb; pdb.set_trace()
             #     arr_dict[k] = v[0]
             #     continue
-            if hasattr(v, 'ndim') and v.ndim == 0:    # np.array(1)
+            if hasattr(v, "ndim") and v.ndim == 0:  # np.array(1)
                 arr_dict[k] = v.item()
                 continue
             if len(v) > maxlen:
@@ -260,9 +261,7 @@ class Table(np.recarray):
                     for missing_name in missing_names:
                         arr_dict[missing_name] = np.nan
                 else:
-                    raise KeyError(
-                        'Dictionary keys and dtype fields do not match!'
-                    )
+                    raise KeyError("Dictionary keys and dtype fields do not match!")
             names = list(dtype.names)
 
         arr_dict = cls._expand_scalars(arr_dict)
@@ -281,9 +280,7 @@ class Table(np.recarray):
             dtype = inflate_dtype(column_list, colnames)
             colnames = dtype.names
         if len(column_list) != len(dtype.names):
-            raise ValueError(
-                "Number of columns mismatch between data and dtype!"
-            )
+            raise ValueError("Number of columns mismatch between data and dtype!")
         data = {k: column_list[i] for i, k in enumerate(dtype.names)}
         return cls(data, dtype=dtype, colnames=colnames, **kwargs)
 
@@ -303,7 +300,7 @@ class Table(np.recarray):
         assert is_structured(dtype)
         data = np.asanyarray(row_list).view(dtype)
         # drop useless 2nd dim
-        data = data.reshape((data.shape[0], ))
+        data = data.reshape((data.shape[0],))
         return cls(data, **kwargs)
 
     @property
@@ -331,12 +328,12 @@ class Table(np.recarray):
             table_info = TEMPLATES[name]
         else:
             table_info = template
-        if 'name' in table_info:
-            name = table_info['name']
-        dt = table_info['dtype']
-        loc = table_info['h5loc']
-        split = table_info['split_h5']
-        h5singleton = table_info['h5singleton']
+        if "name" in table_info:
+            name = table_info["name"]
+        dt = table_info["dtype"]
+        loc = table_info["h5loc"]
+        split = table_info["split_h5"]
+        h5singleton = table_info["h5singleton"]
 
         return cls(
             data,
@@ -344,7 +341,7 @@ class Table(np.recarray):
             dtype=dt,
             split_h5=split,
             name=name,
-            h5singleton=h5singleton
+            h5singleton=h5singleton,
         )
 
     @staticmethod
@@ -398,7 +395,7 @@ class Table(np.recarray):
             h5loc=self.h5loc,
             split_h5=self.split_h5,
             name=self.name,
-            h5singleton=self.h5singleton
+            h5singleton=self.h5singleton,
         )
 
     def drop_columns(self, colnames, **kwargs):
@@ -415,7 +412,7 @@ class Table(np.recarray):
             h5loc=self.h5loc,
             split_h5=self.split_h5,
             name=self.name,
-            h5singleton=self.h5singleton
+            h5singleton=self.h5singleton,
         )
 
     def sorted(self, by, **kwargs):
@@ -428,14 +425,12 @@ class Table(np.recarray):
         """
         sort_idc = np.argsort(self[by], **kwargs)
         return self.__class__(
-            self[sort_idc],
-            h5loc=self.h5loc,
-            split_h5=self.split_h5,
-            name=self.name
+            self[sort_idc], h5loc=self.h5loc, split_h5=self.split_h5, name=self.name
         )
 
     def to_dataframe(self):
         from pandas import DataFrame
+
         return DataFrame(self)
 
     @classmethod
@@ -458,7 +453,7 @@ class Table(np.recarray):
                     n_cols = len(missing_cols)
                     col_names = []
                     for col_name, col_dtype in missing_cols:
-                        if 'f' not in col_dtype:
+                        if "f" not in col_dtype:
                             raise ValueError(
                                 "Cannot create NaNs for non-float"
                                 " type column '{}'".format(col_name)
@@ -508,18 +503,18 @@ class Table(np.recarray):
             h5loc=self.h5loc,
             h5singleton=self.h5singleton,
             split_h5=self.split_h5,
-            name=self.name
+            name=self.name,
         )
 
     def __str__(self):
         name = self.name
-        spl = 'split' if self.split_h5 else 'no split'
+        spl = "split" if self.split_h5 else "no split"
         s = "{} {}\n".format(name, type(self))
         s += "HDF5 location: {} ({})\n".format(self.h5loc, spl)
         s += "\n".join(
             map(
                 lambda d: "{2} (dtype: {1}) = {0}".format(self[d[0]], *d),
-                self.dtype.descr
+                self.dtype.descr,
             )
         )
         return s
@@ -560,49 +555,55 @@ class Table(np.recarray):
     @property
     def phi(self):
         from km3pipe.math import phi_separg
+
         return phi_separg(self.dir_x, self.dir_y)
 
     @property
     def theta(self):
         from km3pipe.math import theta_separg
+
         return theta_separg(self.dir_z)
 
     @property
     def zenith(self):
         from km3pipe.math import neutrino_to_source_direction
+
         _, zen = neutrino_to_source_direction(self.phi, self.theta)
         return zen
 
     @property
     def azimuth(self):
         from km3pipe.math import neutrino_to_source_direction
+
         azi, _ = neutrino_to_source_direction(self.phi, self.theta)
         return azi
 
     @property
     def triggered_rows(self):
-        if not hasattr(self, 'triggered'):
+        if not hasattr(self, "triggered"):
             raise KeyError("Table has no 'triggered' column!")
         return self[self.triggered.astype(bool)]
 
 
 class NDArray(np.ndarray):
     """Array with HDF5 metadata."""
+
     def __new__(cls, array, dtype=None, order=None, **kwargs):
         obj = np.asarray(array, dtype=dtype, order=order).view(cls)
-        h5loc = kwargs.get('h5loc', '/misc')
-        title = kwargs.get('title', 'Unnamed NDArray')
-        group_id = kwargs.get('group_id', None)
+        h5loc = kwargs.get("h5loc", "/misc")
+        title = kwargs.get("title", "Unnamed NDArray")
+        group_id = kwargs.get("group_id", None)
         obj.h5loc = h5loc
         obj.title = title
         obj.group_id = group_id
         return obj
 
     def __array_finalize__(self, obj):
-        if obj is None: return
-        self.h5loc = getattr(obj, 'h5loc', None)
-        self.title = getattr(obj, 'title', None)
-        self.group_id = getattr(obj, 'group_id', None)
+        if obj is None:
+            return
+        self.h5loc = getattr(obj, "h5loc", None)
+        self.title = getattr(obj, "title", None)
+        self.group_id = getattr(obj, "group_id", None)
 
 
 class Vec3(object):

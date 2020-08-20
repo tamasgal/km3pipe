@@ -30,11 +30,11 @@ __status__ = "Development"
 
 class Dumper(kp.Module):
     def configure(self):
-        filename = self.require('filename')
-        self._fobj = open(filename, 'bw')
+        filename = self.require("filename")
+        self._fobj = open(filename, "bw")
 
     def process(self, blob):
-        self._fobj.write(blob['CHData'])
+        self._fobj.write(blob["CHData"])
         return blob
 
     def finish(self):
@@ -43,13 +43,14 @@ class Dumper(kp.Module):
 
 def main():
     from docopt import docopt
+
     args = docopt(__doc__, version=kp.version)
 
-    tag = args['TAG']
-    outfile = args['OUTFILE']
-    port = int(args['-p'])
-    ip = args['-i']
-    n = int(args['-n'])
+    tag = args["TAG"]
+    outfile = args["OUTFILE"]
+    port = int(args["-p"])
+    ip = args["-i"]
+    n = int(args["-n"])
 
     pipe = kp.Pipeline()
     pipe.attach(kp.io.ch.CHPump, host=ip, port=port, tags=tag)

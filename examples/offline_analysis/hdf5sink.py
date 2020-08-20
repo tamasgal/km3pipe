@@ -25,24 +25,22 @@ filename = "reco_results.h5"
 
 class DataGenerator(kp.Module):
     def configure(self):
-        self.header = kp.Table({'is_mc': True},
-                               h5singleton=True,
-                               h5loc='/header')
+        self.header = kp.Table({"is_mc": True}, h5singleton=True, h5loc="/header")
 
     def process(self, blob):
 
         n = np.random.randint(2, 20)
-        tab = kp.Table({
-            'lambda': np.random.rand(n),
-            'energy': np.random.rand(n) * 1000
-        },
-                       h5loc='/reco',
-                       name='Quality Parameter')
-        event_info = kp.Table({"run_id": np.random.randint(10000, 20000)},
-                              h5loc='/event_info')
-        blob['Reco'] = tab
-        blob['EventInfo'] = event_info
-        blob['Header'] = self.header
+        tab = kp.Table(
+            {"lambda": np.random.rand(n), "energy": np.random.rand(n) * 1000},
+            h5loc="/reco",
+            name="Quality Parameter",
+        )
+        event_info = kp.Table(
+            {"run_id": np.random.randint(10000, 20000)}, h5loc="/event_info"
+        )
+        blob["Reco"] = tab
+        blob["EventInfo"] = event_info
+        blob["Header"] = self.header
         return blob
 
 
@@ -83,8 +81,8 @@ print(reco.head(3))
 
 
 def inspector(blob):
-    reco = blob['Reco']
-    lambdas = reco['lambda']
+    reco = blob["Reco"]
+    lambdas = reco["lambda"]
     print(lambdas, type(lambdas), lambdas.dtype)
     return blob
 

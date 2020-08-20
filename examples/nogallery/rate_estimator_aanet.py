@@ -25,6 +25,6 @@ class RateEstimator(Module):
 
 
 pipe = Pipeline()
-pipe.attach(AanetPump, filename='KM3NeT_00000007_00001000.root')
+pipe.attach(AanetPump, filename="KM3NeT_00000007_00001000.root")
 pipe.attach(RateEstimator)
 pipe.drain(10)

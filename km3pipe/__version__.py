@@ -13,10 +13,10 @@ from os.path import dirname, realpath, join
 
 from setuptools_scm import get_version
 
-version = 'unknown version'
+version = "unknown version"
 
 try:
-    version = get_version(root='..', relative_to=__file__)
+    version = get_version(root="..", relative_to=__file__)
 except LookupError:
-    with open(join(realpath(dirname(__file__)), "version.txt"), 'r') as fobj:
+    with open(join(realpath(dirname(__file__)), "version.txt"), "r") as fobj:
         version = fobj.read()

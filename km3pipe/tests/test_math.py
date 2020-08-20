@@ -2,14 +2,32 @@
 # pylint: disable=locally-disabled,C0111,R0904,C0103
 
 import numpy as np
-from numpy.testing import (assert_almost_equal, assert_allclose)
+from numpy.testing import assert_almost_equal, assert_allclose
 import pytest
 
 from km3pipe.testing import TestCase
 from km3pipe.math import (
-    angle_between, dist, pld3, com, zenith, azimuth, Polygon, IrregularPrism,
-    rotation_matrix, SparseCone, space_angle, hsin, phi, theta, unit_vector,
-    innerprod_1d, log_b, qeuler, qrot, qrot_yaw, intersect_3d
+    angle_between,
+    dist,
+    pld3,
+    com,
+    zenith,
+    azimuth,
+    Polygon,
+    IrregularPrism,
+    rotation_matrix,
+    SparseCone,
+    space_angle,
+    hsin,
+    phi,
+    theta,
+    unit_vector,
+    innerprod_1d,
+    log_b,
+    qeuler,
+    qrot,
+    qrot_yaw,
+    intersect_3d,
 )
 
 __author__ = ["Tamas Gal", "Moritz Lotze"]
@@ -30,11 +48,15 @@ class TestMath(TestCase):
         #                       [4., 1., 1.]])
         # self.v = (1, 2, 3)
         self.v = np.array([0.26726124, 0.53452248, 0.80178373])
-        self.vecs = np.array([[0., 0.19611614, 0.98058068],
-                              [0.23570226, 0.23570226, 0.94280904],
-                              [0.53452248, 0.26726124, 0.80178373],
-                              [0.80178373, 0.26726124, 0.53452248],
-                              [0.94280904, 0.23570226, 0.23570226]])
+        self.vecs = np.array(
+            [
+                [0.0, 0.19611614, 0.98058068],
+                [0.23570226, 0.23570226, 0.94280904],
+                [0.53452248, 0.26726124, 0.80178373],
+                [0.80178373, 0.26726124, 0.53452248],
+                [0.94280904, 0.23570226, 0.23570226],
+            ]
+        )
 
     def test_phi(self):
         print(phi((1, 0, 0)))
@@ -47,9 +69,7 @@ class TestMath(TestCase):
         assert_almost_equal(phi(self.v), 1.10714872)
         assert_almost_equal(
             phi(self.vecs),
-            np.array([
-                1.57079633, 0.78539816, 0.46364761, 0.32175055, 0.24497866
-            ])
+            np.array([1.57079633, 0.78539816, 0.46364761, 0.32175055, 0.24497866]),
         )
 
     def test_zenith(self):
@@ -62,9 +82,7 @@ class TestMath(TestCase):
         assert_almost_equal(zenith(self.v), 2.5010703409103687)
         assert_allclose(
             zenith(self.vecs),
-            np.array([
-                2.94419709, 2.80175574, 2.50107034, 2.13473897, 1.80873745
-            ])
+            np.array([2.94419709, 2.80175574, 2.50107034, 2.13473897, 1.80873745]),
         )
 
     def test_azimuth(self):
@@ -83,9 +101,7 @@ class TestMath(TestCase):
         self.assertTrue(
             np.allclose(
                 azimuth(self.vecs),
-                np.array([
-                    4.71238898, 3.92699082, 3.60524026, 3.46334321, 3.38657132
-                ])
+                np.array([4.71238898, 3.92699082, 3.60524026, 3.46334321, 3.38657132]),
             )
         )
 
@@ -108,9 +124,7 @@ class TestMath(TestCase):
         self.assertTrue(
             np.allclose(
                 theta(self.vecs),
-                np.array([
-                    0.19739554, 0.33983691, 0.64052231, 1.00685369, 1.3328552
-                ])
+                np.array([0.19739554, 0.33983691, 0.64052231, 1.00685369, 1.3328552]),
             )
         )
 
@@ -140,25 +154,19 @@ class TestMath(TestCase):
         self.assertTrue(
             np.allclose(
                 angle_between(self.vecs, v1),
-                np.array([
-                    1.57079633, 1.3328552, 1.0068537, 0.64052231, 0.33983691
-                ])
+                np.array([1.57079633, 1.3328552, 1.0068537, 0.64052231, 0.33983691]),
             )
         )
         self.assertTrue(
             np.allclose(
                 angle_between(self.vecs, v2),
-                np.array([
-                    1.37340077, 1.3328552, 1.3002466, 1.30024656, 1.3328552
-                ])
+                np.array([1.37340077, 1.3328552, 1.3002466, 1.30024656, 1.3328552]),
             )
         )
         self.assertTrue(
             np.allclose(
                 angle_between(self.vecs, v3),
-                np.array([
-                    1.57079633, 1.80873745, 2.13473897, 2.50107034, 2.80175574
-                ])
+                np.array([1.57079633, 1.80873745, 2.13473897, 2.50107034, 2.80175574]),
             )
         )
 
@@ -205,7 +213,7 @@ class TestMath(TestCase):
         p2 = np.array((-100, 0, -100))
         d2 = np.array((1, 0, 1))
         self.assertAlmostEqual(1.4142136, pld3(p1, p2, d2))
-        p1 = np.array([183., -311., 351.96083871])
+        p1 = np.array([183.0, -311.0, 351.96083871])
         p2 = np.array([40.256, -639.888, 921.93])
         d2 = np.array([0.185998, 0.476123, -0.859483])
         self.assertAlmostEqual(21.25456308, pld3(p1, p2, d2))
@@ -213,8 +221,7 @@ class TestMath(TestCase):
     def test_com(self):
         center_of_mass = com(((1, 2, 3), (4, 5, 6), (7, 8, 9), (10, 11, 12)))
         self.assertEqual((5.5, 6.5, 7.5), tuple(center_of_mass))
-        center_of_mass = com(((1, 2, 3), (4, 5, 6), (7, 8, 9)),
-                             masses=(1, 0, 0))
+        center_of_mass = com(((1, 2, 3), (4, 5, 6), (7, 8, 9)), masses=(1, 0, 0))
         self.assertEqual((1, 2, 3), tuple(center_of_mass))
         center_of_mass = com(((1, 1, 1), (0, 0, 0)))
         self.assertEqual((0.5, 0.5, 0.5), tuple(center_of_mass))
@@ -278,9 +285,7 @@ class TestRotation(TestCase):
         theta = 1.2
         newvec = np.dot(rotation_matrix(axis, theta), v)
         self.assertTrue(
-            np.allclose(
-                newvec, np.array([2.74911638, 4.77180932, 1.91629719])
-            )
+            np.allclose(newvec, np.array([2.74911638, 4.77180932, 1.91629719]))
         )
 
     def test_cone(self):
@@ -327,12 +332,15 @@ class TestQeuler(TestCase):
         assert np.allclose([-0.96592583, -0.25881905, 0, 0], qeuler(0, 0, 390))
 
     def test_mixed_conversion(self):
-        assert np.allclose([0.999471, 0.02601972, 0.01767416, 0.00826538],
-                           qeuler(1, 2, 3))
-        assert np.allclose([0.94371436, 0.26853582, -0.14487813, 0.12767944],
-                           qeuler(10, -20, 30))
-        assert np.allclose([-0.16575384, -0.69624819, 0.05479592, -0.69624819],
-                           qeuler(-999, 999, -999))
+        assert np.allclose(
+            [0.999471, 0.02601972, 0.01767416, 0.00826538], qeuler(1, 2, 3)
+        )
+        assert np.allclose(
+            [0.94371436, 0.26853582, -0.14487813, 0.12767944], qeuler(10, -20, 30)
+        )
+        assert np.allclose(
+            [-0.16575384, -0.69624819, 0.05479592, -0.69624819], qeuler(-999, 999, -999)
+        )
 
 
 class TestQrot(TestCase):
@@ -345,27 +353,26 @@ class TestQrot(TestCase):
     def test_rotation_of_y_vector(self):
         assert np.allclose([-1, 0, 0], qrot([0, 1, 0], qeuler(90, 0, 0)))
         assert np.allclose([0, -1, 0], qrot([0, 1, 0], qeuler(180, 0, 0)))
-        assert np.allclose([0, -0.70710, -0.70710],
-                           qrot([0, 1, 0], qeuler(180, 0, -45)))
-        assert np.allclose([-0.70710, -0.70710, 0],
-                           qrot([0, 1, 0], qeuler(180, 90, 45)))
+        assert np.allclose(
+            [0, -0.70710, -0.70710], qrot([0, 1, 0], qeuler(180, 0, -45))
+        )
+        assert np.allclose(
+            [-0.70710, -0.70710, 0], qrot([0, 1, 0], qeuler(180, 90, 45))
+        )
 
     def test_rotation_of_z_vector(self):
         assert np.allclose([0, 0, 1], qrot([0, 0, 1], qeuler(90, 0, 0)))
         assert np.allclose([0, 0, 1], qrot([0, 0, 1], qeuler(180, 0, 0)))
-        assert np.allclose([0, -0.70710, 0.70710],
-                           qrot([0, 0, 1], qeuler(180, 0, -45)))
-        assert np.allclose([-0.70710, 0.70710, 0],
-                           qrot([0, 0, 1], qeuler(180, 90, 45)))
+        assert np.allclose([0, -0.70710, 0.70710], qrot([0, 0, 1], qeuler(180, 0, -45)))
+        assert np.allclose([-0.70710, 0.70710, 0], qrot([0, 0, 1], qeuler(180, 90, 45)))
 
     def test_mixed_rotation(self):
         assert np.allclose([1, 2, 3], qrot([1, 2, 3], qeuler(0, 0, 0)))
-        assert np.allclose([0, -1.414213, 0],
-                           qrot([0, 1, -1], qeuler(180, 90, 45)))
-        assert np.allclose([-1.41421356, 0, -1],
-                           qrot([1, 1, 1], qeuler(180, 90, 45)))
-        assert np.allclose([-14.1421356, 0, -10],
-                           qrot([10, 10, 10], qeuler(180, 90, 45)))
+        assert np.allclose([0, -1.414213, 0], qrot([0, 1, -1], qeuler(180, 90, 45)))
+        assert np.allclose([-1.41421356, 0, -1], qrot([1, 1, 1], qeuler(180, 90, 45)))
+        assert np.allclose(
+            [-14.1421356, 0, -10], qrot([10, 10, 10], qeuler(180, 90, 45))
+        )
 
 
 class TestQrotYaw(TestCase):
@@ -428,32 +435,25 @@ class TestIntersect3D(TestCase):
 class TestDist(TestCase):
     def test_dist_between_two_2D_points(self):
         self.assertAlmostEqual(1, dist(np.array([0, 0]), np.array([1, 0])))
-        self.assertAlmostEqual(
-            np.sqrt(2), dist(np.array([0, 1]), np.array([1, 0]))
-        )
-        self.assertAlmostEqual(
-            2 * np.sqrt(2), dist(np.array([1, 2]), np.array([3, 4]))
-        )
+        self.assertAlmostEqual(np.sqrt(2), dist(np.array([0, 1]), np.array([1, 0])))
+        self.assertAlmostEqual(2 * np.sqrt(2), dist(np.array([1, 2]), np.array([3, 4])))
 
     def test_dist_between_two_3D_points(self):
-        self.assertAlmostEqual(
-            1, dist(np.array([0, 0, 0]), np.array([1, 0, 0]))
-        )
+        self.assertAlmostEqual(1, dist(np.array([0, 0, 0]), np.array([1, 0, 0])))
         self.assertAlmostEqual(
             np.sqrt(2), dist(np.array([0, 1, 0]), np.array([1, 0, 0]))
         )
-        self.assertAlmostEqual(
-            2, dist(np.array([0, 0, 2]), np.array([0, 0, 0]))
-        )
+        self.assertAlmostEqual(2, dist(np.array([0, 0, 2]), np.array([0, 0, 0])))
         self.assertAlmostEqual(
             5.1961524, dist(np.array([1, 2, 3]), np.array([4, 5, 6]))
         )
 
     def test_dist_to_many_points(self):
-        assert np.allclose([1, 1, 0, 1.73205081],
-                           dist(
-                               np.array([0, 0, 0]),
-                               np.array([[0, 0, 1], [0, 0, 1], [0, 0, 0],
-                                         [1, 1, 1]]),
-                               axis=1
-                           ))
+        assert np.allclose(
+            [1, 1, 0, 1.73205081],
+            dist(
+                np.array([0, 0, 0]),
+                np.array([[0, 0, 1], [0, 0, 1], [0, 0, 0], [1, 1, 1]]),
+                axis=1,
+            ),
+        )

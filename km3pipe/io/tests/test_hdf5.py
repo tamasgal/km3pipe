@@ -10,8 +10,11 @@ import tables as tb
 from km3pipe import Blob, Module, Pipeline, Pump, version
 from km3pipe.dataclasses import Table, NDArray
 from km3pipe.io.hdf5 import (
-    HDF5Pump, HDF5Sink, HDF5Header, convert_header_dict_to_table,
-    FORMAT_VERSION
+    HDF5Pump,
+    HDF5Sink,
+    HDF5Header,
+    convert_header_dict_to_table,
+    FORMAT_VERSION,
 )
 from km3pipe.testing import TestCase, data_path
 
@@ -19,7 +22,7 @@ from km3pipe.testing import TestCase, data_path
 class TestH5Pump(TestCase):
     def setUp(self):
         self.fname = data_path(
-            'hdf5/mcv5.40.mupage_10G.sirene.jterbr00006060.962.root.h5'
+            "hdf5/mcv5.40.mupage_10G.sirene.jterbr00006060.962.root.h5"
         )
 
     def test_init_sets_filename_if_no_keyword_arg_is_passed(self):
@@ -40,7 +43,7 @@ class TestH5Pump(TestCase):
             def process(self, blob):
                 for key, data in blob.items():
                     if key == "Header":
-                        self.dump['headers'].append(data)
+                        self.dump["headers"].append(data)
                     else:
                         self.dump[key].append(len(data))
                 return blob
@@ -51,21 +54,21 @@ class TestH5Pump(TestCase):
         p = Pipeline()
         p.attach(HDF5Pump, filename=self.fname)
         p.attach(Observer)
-        results = p.drain()['Observer']
-        self.assertListEqual([147, 110, 70, 62, 59, 199, 130, 92, 296, 128],
-                             results['Hits'])
-        self.assertListEqual([
-            315, 164, 100, 111, 123, 527, 359, 117, 984, 263
-        ], results['McHits'])
-        self.assertListEqual([1, 1, 1, 1, 1, 3, 2, 1, 2, 1],
-                             results['McTracks'])
+        results = p.drain()["Observer"]
+        self.assertListEqual(
+            [147, 110, 70, 62, 59, 199, 130, 92, 296, 128], results["Hits"]
+        )
+        self.assertListEqual(
+            [315, 164, 100, 111, 123, 527, 359, 117, 984, 263], results["McHits"]
+        )
+        self.assertListEqual([1, 1, 1, 1, 1, 3, 2, 1, 2, 1], results["McTracks"])
 
     def test_event_info_is_not_empty(self):
-        self.fname = data_path('hdf5/test_event_info.h5')
+        self.fname = data_path("hdf5/test_event_info.h5")
 
         class Printer(Module):
             def process(self, blob):
-                assert blob['EventInfo'].size != 0
+                assert blob["EventInfo"].size != 0
                 return blob
 
         p = Pipeline()
@@ -74,14 +77,14 @@ class TestH5Pump(TestCase):
         p.drain()
 
     def test_event_info_has_correct_group_id(self):
-        self.fname = data_path('hdf5/test_event_info.h5')
+        self.fname = data_path("hdf5/test_event_info.h5")
 
         class Printer(Module):
             def configure(self):
                 self.index = 0
 
             def process(self, blob):
-                assert blob['EventInfo'][0].group_id == self.index
+                assert blob["EventInfo"][0].group_id == self.index
                 self.index += 1
                 return blob
 
@@ -91,26 +94,23 @@ class TestH5Pump(TestCase):
         p.drain()
 
     def test_get_blob(self):
-        fname = data_path('hdf5/test_event_info.h5')
+        fname = data_path("hdf5/test_event_info.h5")
         pump = HDF5Pump(filename=fname)
-        assert 44 == len(pump[0]['McTracks'])
-        assert 3 == len(pump[1]['McTracks'])
-        assert 179 == len(pump[2]['McTracks'])
-        assert 55 == len(pump[3]['McTracks'])
+        assert 44 == len(pump[0]["McTracks"])
+        assert 3 == len(pump[1]["McTracks"])
+        assert 179 == len(pump[2]["McTracks"])
+        assert 55 == len(pump[3]["McTracks"])
         pump.finish()
 
 
 class TestH5Sink(TestCase):
     def setUp(self):
         self.fname = data_path(
-            'hdf5/mcv5.40.mupage_10G.sirene.jterbr00006060.962.root.h5'
+            "hdf5/mcv5.40.mupage_10G.sirene.jterbr00006060.962.root.h5"
         )
         self.fobj = tempfile.NamedTemporaryFile(delete=True)
         self.out = tb.open_file(
-            self.fobj.name,
-            "w",
-            driver="H5FD_CORE",
-            driver_core_backing_store=0
+            self.fobj.name, "w", driver="H5FD_CORE", driver_core_backing_store=0
         )
 
     def tearDown(self):
@@ -136,7 +136,7 @@ class TestH5Sink(TestCase):
         pipe.attach(HDF5Sink, filename=fname)
         pipe.drain(5)
 
-        with tb.open_file(fname, 'r') as h5file:
+        with tb.open_file(fname, "r") as h5file:
             assert version == h5file.root._v_attrs.km3pipe.decode()
             assert tb.__version__ == h5file.root._v_attrs.pytables.decode()
             assert FORMAT_VERSION == h5file.root._v_attrs.format_version
@@ -156,9 +156,9 @@ class TestH5Sink(TestCase):
                 self.i = 0
 
             def process(self, blob):
-                blob['A'] = Table({'a': self.i}, name="A", h5loc="tab_a")
-                blob['B'] = Table({'b': self.i}, name="B", h5loc="tab_b")
-                blob['C'] = Table({'c': self.i}, name="C", h5loc="tab_c")
+                blob["A"] = Table({"a": self.i}, name="A", h5loc="tab_a")
+                blob["B"] = Table({"b": self.i}, name="B", h5loc="tab_b")
+                blob["C"] = Table({"c": self.i}, name="C", h5loc="tab_c")
                 self.i += 1
                 return blob
 
@@ -172,13 +172,13 @@ class TestH5Sink(TestCase):
         pipe.drain(5)
 
         for fobj, key in zip(fobjs, keys):
-            with tb.File(fobj.name, 'r') as f:
+            with tb.File(fobj.name, "r") as f:
                 assert "/tab_" + key.lower() in f
                 for _key in set(keys) - set(key):
                     assert "/tab_" + _key.lower() not in f
 
         for key in keys:
-            with tb.File(fobj_all.name, 'r') as f:
+            with tb.File(fobj_all.name, "r") as f:
                 assert "/tab_" + key.lower() in f
 
         for fobj in fobjs:
@@ -193,9 +193,9 @@ class TestH5Sink(TestCase):
                 self.i = 0
 
             def process(self, blob):
-                blob['A'] = Table({'a': self.i}, name="A", h5loc="tab_a")
-                blob['B'] = Table({'b': self.i}, name="B", h5loc="tab_b")
-                blob['C'] = Table({'c': self.i}, name="C", h5loc="tab_c")
+                blob["A"] = Table({"a": self.i}, name="A", h5loc="tab_a")
+                blob["B"] = Table({"b": self.i}, name="B", h5loc="tab_b")
+                blob["C"] = Table({"c": self.i}, name="C", h5loc="tab_c")
                 self.i += 1
                 return blob
 
@@ -206,7 +206,7 @@ class TestH5Sink(TestCase):
         pipe.attach(HDF5Sink, filename=fobj.name, keys=keys)
         pipe.drain(5)
 
-        with tb.File(fobj.name, 'r') as f:
+        with tb.File(fobj.name, "r") as f:
             assert "/tab_a" in f
             assert "/tab_b" in f
             assert "/tab_c" not in f
@@ -218,16 +218,14 @@ class TestH5Sink(TestCase):
 
         class Foo(Module):
             def prepare(self):
-                self.services['write_table'](
-                    Table({'a': 1}, name="A", h5loc="tab_a")
-                )
+                self.services["write_table"](Table({"a": 1}, name="A", h5loc="tab_a"))
 
         pipe = Pipeline()
         pipe.attach(Foo)
         pipe.attach(HDF5Sink, filename=fobj.name)
         pipe.drain(5)
 
-        with tb.File(fobj.name, 'r') as f:
+        with tb.File(fobj.name, "r") as f:
             assert "/tab_a" in f
 
         fobj.close()
@@ -242,7 +240,7 @@ class TestNDArrayHandling(TestCase):
 
         class DummyPump(Pump):
             def process(self, blob):
-                blob['foo'] = NDArray(arr)
+                blob["foo"] = NDArray(arr)
                 return blob
 
         pipe = Pipeline()
@@ -251,11 +249,11 @@ class TestNDArrayHandling(TestCase):
         pipe.drain(3)
 
         with tb.File(fname) as f:
-            foo = f.get_node('/misc')
+            foo = f.get_node("/misc")
             assert 3 == foo[0, 1, 0]
             assert 4 == foo[0, 1, 1]
-            assert 'Unnamed NDArray' == foo.title
-            indices = f.get_node('/misc_indices')
+            assert "Unnamed NDArray" == foo.title
+            indices = f.get_node("/misc_indices")
             self.assertTupleEqual((0, 2, 4), tuple(indices.cols.index[:]))
             self.assertTupleEqual((2, 2, 2), tuple(indices.cols.n_items[:]))
 
@@ -272,9 +270,7 @@ class TestNDArrayHandling(TestCase):
                 self.index = 0
 
             def process(self, blob):
-                blob['foo'] = NDArray(
-                    arr + self.index * 10, h5loc='/foo', title='Yep'
-                )
+                blob["foo"] = NDArray(arr + self.index * 10, h5loc="/foo", title="Yep")
                 self.index += 1
                 return blob
 
@@ -302,9 +298,7 @@ class TestNDArrayHandling(TestCase):
                 self.index = 0
 
             def process(self, blob):
-                blob['foo'] = NDArray(
-                    arr + self.index * 10, h5loc='/foo/bar/baz'
-                )
+                blob["foo"] = NDArray(arr + self.index * 10, h5loc="/foo/bar/baz")
                 self.index += 1
                 return blob
 
@@ -332,9 +326,7 @@ class TestNDArrayHandling(TestCase):
                 self.index = 0
 
             def process(self, blob):
-                blob['foo'] = NDArray(
-                    arr + self.index * 10, h5loc='/foo', title='Yep'
-                )
+                blob["foo"] = NDArray(arr + self.index * 10, h5loc="/foo", title="Yep")
                 self.index += 1
                 return blob
 
@@ -362,9 +354,7 @@ class TestNDArrayHandling(TestCase):
                 self.index = 0
 
             def process(self, blob):
-                blob['Foo'] = NDArray(
-                    arr + self.index * 10, h5loc='/foo', title='Yep'
-                )
+                blob["Foo"] = NDArray(arr + self.index * 10, h5loc="/foo", title="Yep")
                 self.index += 1
                 return blob
 
@@ -378,8 +368,8 @@ class TestNDArrayHandling(TestCase):
                 self.index = 0
 
             def process(self, blob):
-                assert 'Foo' in blob
-                foo = blob['Foo']
+                assert "Foo" in blob
+                foo = blob["Foo"]
                 print(self.index)
                 assert self.index * 10 + 1 == foo[0, 0, 0]
                 assert self.index * 10 + 8 == foo[1, 1, 1]
@@ -407,8 +397,8 @@ class TestH5SinkConsistency(TestCase):
 
             def process(self, blob):
                 self.count += 10
-                tab = Table({'a': self.count, 'b': 1}, h5loc='tab')
-                return Blob({'tab': tab})
+                tab = Table({"a": self.count, "b": 1}, h5loc="tab")
+                return Blob({"tab": tab})
 
         pipe = Pipeline()
         pipe.attach(DummyPump)
@@ -416,17 +406,15 @@ class TestH5SinkConsistency(TestCase):
         pipe.drain(5)
 
         with tb.File(fname) as f:
-            a = f.get_node("/tab")[:]['a']
-            b = f.get_node("/tab")[:]['b']
-            group_id = f.get_node("/tab")[:]['group_id']
+            a = f.get_node("/tab")[:]["a"]
+            b = f.get_node("/tab")[:]["b"]
+            group_id = f.get_node("/tab")[:]["group_id"]
         assert np.allclose([10, 20, 30, 40, 50], a)
         assert np.allclose([1, 1, 1, 1, 1], b)
         assert np.allclose([0, 1, 2, 3, 4], group_id)
         fobj.close()
 
-    def test_h5_consistency_for_tables_without_group_id_and_multiple_keys(
-        self
-    ):
+    def test_h5_consistency_for_tables_without_group_id_and_multiple_keys(self):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = fobj.name
 
@@ -436,9 +424,9 @@ class TestH5SinkConsistency(TestCase):
 
             def process(self, blob):
                 self.count += 10
-                tab1 = Table({'a': self.count, 'b': 1}, h5loc='tab1')
-                tab2 = Table({'c': self.count + 1, 'd': 2}, h5loc='tab2')
-                return Blob({'tab1': tab1, 'tab2': tab2})
+                tab1 = Table({"a": self.count, "b": 1}, h5loc="tab1")
+                tab2 = Table({"c": self.count + 1, "d": 2}, h5loc="tab2")
+                return Blob({"tab1": tab1, "tab2": tab2})
 
         pipe = Pipeline()
         pipe.attach(DummyPump)
@@ -446,12 +434,12 @@ class TestH5SinkConsistency(TestCase):
         pipe.drain(5)
 
         with tb.File(fname) as f:
-            a = f.get_node("/tab1")[:]['a']
-            b = f.get_node("/tab1")[:]['b']
-            c = f.get_node("/tab2")[:]['c']
-            d = f.get_node("/tab2")[:]['d']
-            group_id_1 = f.get_node("/tab1")[:]['group_id']
-            group_id_2 = f.get_node("/tab1")[:]['group_id']
+            a = f.get_node("/tab1")[:]["a"]
+            b = f.get_node("/tab1")[:]["b"]
+            c = f.get_node("/tab2")[:]["c"]
+            d = f.get_node("/tab2")[:]["d"]
+            group_id_1 = f.get_node("/tab1")[:]["group_id"]
+            group_id_2 = f.get_node("/tab1")[:]["group_id"]
         assert np.allclose([10, 20, 30, 40, 50], a)
         assert np.allclose([1, 1, 1, 1, 1], b)
         assert np.allclose([0, 1, 2, 3, 4], group_id_1)
@@ -466,8 +454,8 @@ class TestH5SinkConsistency(TestCase):
 
         class DummyPump(Pump):
             def process(self, blob):
-                tab = Table({'group_id': 2}, h5loc='tab')
-                return Blob({'tab': tab})
+                tab = Table({"group_id": 2}, h5loc="tab")
+                return Blob({"tab": tab})
 
         pipe = Pipeline()
         pipe.attach(DummyPump)
@@ -475,7 +463,7 @@ class TestH5SinkConsistency(TestCase):
         pipe.drain(5)
 
         with tb.File(fname) as f:
-            group_id = f.get_node("/tab")[:]['group_id']
+            group_id = f.get_node("/tab")[:]["group_id"]
 
         assert np.allclose([2, 2, 2, 2, 2], group_id)
 
@@ -487,8 +475,8 @@ class TestH5SinkConsistency(TestCase):
 
         class DummyPump(Pump):
             def process(self, blob):
-                tab = Table({'a': 2}, h5loc='tab', h5singleton=True)
-                return Blob({'tab': tab})
+                tab = Table({"a": 2}, h5loc="tab", h5singleton=True)
+                return Blob({"tab": tab})
 
         pipe = Pipeline()
         pipe.attach(DummyPump)
@@ -496,7 +484,7 @@ class TestH5SinkConsistency(TestCase):
         pipe.drain(5)
 
         with tb.File(fname) as f:
-            a = f.get_node("/tab")[:]['a']
+            a = f.get_node("/tab")[:]["a"]
 
         assert len(a) == 1
 
@@ -508,8 +496,8 @@ class TestH5SinkConsistency(TestCase):
 
         class DummyPump(Pump):
             def process(self, blob):
-                tab = Table({'a': 2}, h5loc='tab', h5singleton=True)
-                return Blob({'Tab': tab})
+                tab = Table({"a": 2}, h5loc="tab", h5singleton=True)
+                return Blob({"Tab": tab})
 
         pipe = Pipeline()
         pipe.attach(DummyPump)
@@ -519,10 +507,10 @@ class TestH5SinkConsistency(TestCase):
         class Observer(Module):
             def process(self, blob):
                 print(blob)
-                assert 'Tab' in blob
-                print(blob['Tab'])
-                assert len(blob['Tab']) == 1
-                assert blob['Tab'].a[0] == 2
+                assert "Tab" in blob
+                print(blob["Tab"])
+                assert len(blob["Tab"]) == 1
+                assert blob["Tab"].a[0] == 2
                 return blob
 
         pipe = Pipeline()
@@ -544,10 +532,10 @@ class TestHDF5PumpConsistency(TestCase):
 
             def process(self, blob):
                 self.count += 1
-                tab = Table({'a': self.count * 10, 'b': 1}, h5loc='tab')
-                tab2 = Table({'a': np.arange(self.count)}, h5loc='tab2')
-                blob['Tab'] = tab
-                blob['Tab2'] = tab2
+                tab = Table({"a": self.count * 10, "b": 1}, h5loc="tab")
+                tab2 = Table({"a": np.arange(self.count)}, h5loc="tab2")
+                blob["Tab"] = tab
+                blob["Tab2"] = tab2
                 return blob
 
         pipe = Pipeline()
@@ -561,15 +549,15 @@ class TestHDF5PumpConsistency(TestCase):
 
             def process(self, blob):
                 self.index += 1
-                assert 'GroupInfo' in blob
-                assert 'Tab' in blob
+                assert "GroupInfo" in blob
+                assert "Tab" in blob
                 print(self.index)
-                print(blob['Tab'])
-                print(blob['Tab']['a'])
-                assert self.index - 1 == blob['GroupInfo'].group_id
-                assert self.index * 10 == blob['Tab']['a']
-                assert 1 == blob['Tab']['b'] == 1
-                assert np.allclose(np.arange(self.index), blob['Tab2']['a'])
+                print(blob["Tab"])
+                print(blob["Tab"]["a"])
+                assert self.index - 1 == blob["GroupInfo"].group_id
+                assert self.index * 10 == blob["Tab"]["a"]
+                assert 1 == blob["Tab"]["b"] == 1
+                assert np.allclose(np.arange(self.index), blob["Tab2"]["a"])
                 return blob
 
         pipe = Pipeline()
@@ -589,13 +577,8 @@ class TestHDF5PumpConsistency(TestCase):
 
             def process(self, blob):
                 self.count += 1
-                tab = Table({
-                    'a': self.count * 10,
-                    'b': 1
-                },
-                            h5loc='/tab',
-                            split_h5=True)
-                blob['Tab'] = tab
+                tab = Table({"a": self.count * 10, "b": 1}, h5loc="/tab", split_h5=True)
+                blob["Tab"] = tab
                 return blob
 
         pipe = Pipeline()
@@ -609,11 +592,11 @@ class TestHDF5PumpConsistency(TestCase):
 
             def process(self, blob):
                 self.index += 1
-                assert 'GroupInfo' in blob
-                assert 'Tab' in blob
-                assert self.index - 1 == blob['GroupInfo'].group_id
-                assert self.index * 10 == blob['Tab']['a']
-                assert 1 == blob['Tab']['b']
+                assert "GroupInfo" in blob
+                assert "Tab" in blob
+                assert self.index - 1 == blob["GroupInfo"].group_id
+                assert self.index * 10 == blob["Tab"]["a"]
+                assert 1 == blob["Tab"]["b"]
                 return blob
 
         pipe = Pipeline()
@@ -633,18 +616,14 @@ class TestHDF5PumpConsistency(TestCase):
 
             def process(self, blob):
                 self.count += 1
-                tab_a = Table({
-                    'a': self.count * 10,
-                },
-                              h5loc='/tabs/tab_a',
-                              split_h5=True)
-                tab_b = Table({
-                    'b': self.count * 100,
-                },
-                              h5loc='/tabs/tab_b',
-                              split_h5=True)
-                blob['TabA'] = tab_a
-                blob['TabB'] = tab_b
+                tab_a = Table(
+                    {"a": self.count * 10,}, h5loc="/tabs/tab_a", split_h5=True
+                )
+                tab_b = Table(
+                    {"b": self.count * 100,}, h5loc="/tabs/tab_b", split_h5=True
+                )
+                blob["TabA"] = tab_a
+                blob["TabB"] = tab_b
                 return blob
 
         pipe = Pipeline()
@@ -658,12 +637,12 @@ class TestHDF5PumpConsistency(TestCase):
 
             def process(self, blob):
                 self.index += 1
-                assert 'GroupInfo' in blob
-                assert 'TabA' in blob
-                assert 'TabB' in blob
-                assert self.index - 1 == blob['GroupInfo'].group_id
-                assert self.index * 10 == blob['TabA']['a']
-                assert self.index * 100 == blob['TabB']['b']
+                assert "GroupInfo" in blob
+                assert "TabA" in blob
+                assert "TabB" in blob
+                assert self.index - 1 == blob["GroupInfo"].group_id
+                assert self.index * 10 == blob["TabA"]["a"]
+                assert self.index * 100 == blob["TabB"]["b"]
                 return blob
 
         pipe = Pipeline()
@@ -685,7 +664,7 @@ class TestHDF5PumpConsistency(TestCase):
                 self.i += 1
 
                 if self.i == 5:
-                    blob['Tab'] = Table({'a': 23}, h5loc='/tab')
+                    blob["Tab"] = Table({"a": 23}, h5loc="/tab")
                 return blob
 
         pipe = Pipeline()
@@ -701,9 +680,9 @@ class TestHDF5PumpConsistency(TestCase):
                 self.i += 1
 
                 if self.i == 5:
-                    assert 23 == blob['Tab'].a[0]
+                    assert 23 == blob["Tab"].a[0]
                 else:
-                    assert 'Tab' not in blob
+                    assert "Tab" not in blob
 
                 return blob
 
@@ -764,11 +743,11 @@ class TestHDF5Shuffle(TestCase):
                 self.i = 0
 
             def process(self, blob):
-                blob['Tab'] = Table({'a': self.i}, h5loc='/tab')
-                blob['SplitTab'] = Table({'b': self.i},
-                                         h5loc='/split_tab',
-                                         split_h5=True)
-                blob['Arr'] = NDArray(np.arange(self.i + 1), h5loc='/arr')
+                blob["Tab"] = Table({"a": self.i}, h5loc="/tab")
+                blob["SplitTab"] = Table(
+                    {"b": self.i}, h5loc="/split_tab", split_h5=True
+                )
+                blob["Arr"] = NDArray(np.arange(self.i + 1), h5loc="/arr")
                 self.i += 1
                 return blob
 
@@ -793,28 +772,28 @@ class TestHDF5Shuffle(TestCase):
                 self.arr_len = []
 
             def process(self, blob):
-                group_id_tab = blob['Tab'].group_id[0]
-                group_id_split_tab = blob['SplitTab'].group_id[0]
-                group_id_arr = blob['Arr'].group_id
-                assert blob['GroupInfo'].group_id[0] == group_id_tab
-                assert blob['GroupInfo'].group_id[0] == group_id_split_tab
-                assert blob['GroupInfo'].group_id[0] == group_id_arr
-                self.group_ids_tab.append(blob['Tab'].group_id[0])
-                self.group_ids_split_tab.append(blob['SplitTab'].group_id[0])
-                self.group_ids_arr.append(blob['Arr'].group_id)
-                self.a.append(blob['Tab'].a[0])
-                self.b.append(blob['SplitTab'].b[0])
-                self.arr_len.append(len(blob['Arr']) - 1)
+                group_id_tab = blob["Tab"].group_id[0]
+                group_id_split_tab = blob["SplitTab"].group_id[0]
+                group_id_arr = blob["Arr"].group_id
+                assert blob["GroupInfo"].group_id[0] == group_id_tab
+                assert blob["GroupInfo"].group_id[0] == group_id_split_tab
+                assert blob["GroupInfo"].group_id[0] == group_id_arr
+                self.group_ids_tab.append(blob["Tab"].group_id[0])
+                self.group_ids_split_tab.append(blob["SplitTab"].group_id[0])
+                self.group_ids_arr.append(blob["Arr"].group_id)
+                self.a.append(blob["Tab"].a[0])
+                self.b.append(blob["SplitTab"].b[0])
+                self.arr_len.append(len(blob["Arr"]) - 1)
                 return blob
 
             def finish(self):
                 return {
-                    'group_ids_tab': self.group_ids_tab,
-                    'group_ids_split_tab': self.group_ids_split_tab,
-                    'group_ids_arr': self.group_ids_arr,
-                    'a': self.a,
-                    'b': self.b,
-                    'arr_len': self.arr_len
+                    "group_ids_tab": self.group_ids_tab,
+                    "group_ids_split_tab": self.group_ids_split_tab,
+                    "group_ids_arr": self.group_ids_arr,
+                    "a": self.a,
+                    "b": self.b,
+                    "arr_len": self.arr_len,
                 }
 
         pipe = Pipeline()
@@ -823,28 +802,22 @@ class TestHDF5Shuffle(TestCase):
             filename=fname,
             shuffle=True,
             shuffle_function=shuffle,
-            reset_index=False
+            reset_index=False,
         )
         pipe.attach(Observer)
         results = pipe.drain()
 
+        self.assertListEqual(results["Observer"]["group_ids_tab"], shuffled_group_ids)
         self.assertListEqual(
-            results['Observer']['group_ids_tab'], shuffled_group_ids
+            results["Observer"]["group_ids_split_tab"], shuffled_group_ids
         )
-        self.assertListEqual(
-            results['Observer']['group_ids_split_tab'], shuffled_group_ids
-        )
-        self.assertListEqual(
-            results['Observer']['group_ids_arr'], shuffled_group_ids
-        )
-        self.assertListEqual(results['Observer']['a'], shuffled_group_ids)
-        self.assertListEqual(results['Observer']['b'], shuffled_group_ids)
+        self.assertListEqual(results["Observer"]["group_ids_arr"], shuffled_group_ids)
+        self.assertListEqual(results["Observer"]["a"], shuffled_group_ids)
+        self.assertListEqual(results["Observer"]["b"], shuffled_group_ids)
         # a small hack: we store the length of the array in 'b', which is
         # then equal to the shuffled group IDs (since those were generated
         # using the group_id
-        self.assertListEqual(
-            results['Observer']['arr_len'], shuffled_group_ids
-        )
+        self.assertListEqual(results["Observer"]["arr_len"], shuffled_group_ids)
 
         fobj.close()
 
@@ -857,11 +830,11 @@ class TestHDF5Shuffle(TestCase):
                 self.i = 0
 
             def process(self, blob):
-                blob['Tab'] = Table({'a': self.i}, h5loc='/tab')
-                blob['SplitTab'] = Table({'b': self.i},
-                                         h5loc='/split_tab',
-                                         split_h5=True)
-                blob['Arr'] = NDArray(np.arange(self.i + 1), h5loc='/arr')
+                blob["Tab"] = Table({"a": self.i}, h5loc="/tab")
+                blob["SplitTab"] = Table(
+                    {"b": self.i}, h5loc="/split_tab", split_h5=True
+                )
+                blob["Arr"] = NDArray(np.arange(self.i + 1), h5loc="/arr")
                 self.i += 1
                 return blob
 
@@ -886,28 +859,28 @@ class TestHDF5Shuffle(TestCase):
                 self.arr_len = []
 
             def process(self, blob):
-                group_id_tab = blob['Tab'].group_id[0]
-                group_id_split_tab = blob['SplitTab'].group_id[0]
-                group_id_arr = blob['Arr'].group_id
-                assert blob['GroupInfo'].group_id[0] == group_id_tab
-                assert blob['GroupInfo'].group_id[0] == group_id_split_tab
-                assert blob['GroupInfo'].group_id[0] == group_id_arr
-                self.group_ids_tab.append(blob['Tab'].group_id[0])
-                self.group_ids_split_tab.append(blob['SplitTab'].group_id[0])
-                self.group_ids_arr.append(blob['Arr'].group_id)
-                self.a.append(blob['Tab'].a[0])
-                self.b.append(blob['SplitTab'].b[0])
-                self.arr_len.append(len(blob['Arr']) - 1)
+                group_id_tab = blob["Tab"].group_id[0]
+                group_id_split_tab = blob["SplitTab"].group_id[0]
+                group_id_arr = blob["Arr"].group_id
+                assert blob["GroupInfo"].group_id[0] == group_id_tab
+                assert blob["GroupInfo"].group_id[0] == group_id_split_tab
+                assert blob["GroupInfo"].group_id[0] == group_id_arr
+                self.group_ids_tab.append(blob["Tab"].group_id[0])
+                self.group_ids_split_tab.append(blob["SplitTab"].group_id[0])
+                self.group_ids_arr.append(blob["Arr"].group_id)
+                self.a.append(blob["Tab"].a[0])
+                self.b.append(blob["SplitTab"].b[0])
+                self.arr_len.append(len(blob["Arr"]) - 1)
                 return blob
 
             def finish(self):
                 return {
-                    'group_ids_tab': self.group_ids_tab,
-                    'group_ids_split_tab': self.group_ids_split_tab,
-                    'group_ids_arr': self.group_ids_arr,
-                    'a': self.a,
-                    'b': self.b,
-                    'arr_len': self.arr_len
+                    "group_ids_tab": self.group_ids_tab,
+                    "group_ids_split_tab": self.group_ids_split_tab,
+                    "group_ids_arr": self.group_ids_arr,
+                    "a": self.a,
+                    "b": self.b,
+                    "arr_len": self.arr_len,
                 }
 
         pipe = Pipeline()
@@ -916,28 +889,22 @@ class TestHDF5Shuffle(TestCase):
             filename=fname,
             shuffle=True,
             shuffle_function=shuffle,
-            reset_index=True
+            reset_index=True,
         )
         pipe.attach(Observer)
         results = pipe.drain()
 
+        self.assertListEqual(results["Observer"]["group_ids_tab"], [0, 1, 2, 3, 4])
         self.assertListEqual(
-            results['Observer']['group_ids_tab'], [0, 1, 2, 3, 4]
+            results["Observer"]["group_ids_split_tab"], [0, 1, 2, 3, 4]
         )
-        self.assertListEqual(
-            results['Observer']['group_ids_split_tab'], [0, 1, 2, 3, 4]
-        )
-        self.assertListEqual(
-            results['Observer']['group_ids_arr'], [0, 1, 2, 3, 4]
-        )
-        self.assertListEqual(results['Observer']['a'], shuffled_group_ids)
-        self.assertListEqual(results['Observer']['b'], shuffled_group_ids)
+        self.assertListEqual(results["Observer"]["group_ids_arr"], [0, 1, 2, 3, 4])
+        self.assertListEqual(results["Observer"]["a"], shuffled_group_ids)
+        self.assertListEqual(results["Observer"]["b"], shuffled_group_ids)
         # a small hack: we store the length of the array in 'b', which is
         # then equal to the shuffled group IDs (since those were generated
         # using the group_id
-        self.assertListEqual(
-            results['Observer']['arr_len'], shuffled_group_ids
-        )
+        self.assertListEqual(results["Observer"]["arr_len"], shuffled_group_ids)
 
         fobj.close()
 
@@ -957,26 +924,11 @@ class TestHDF5Header(TestCase):
         #     )
         # ])
         self.hdict = {
-            "param_a": {
-                "field_a_1": "1",
-                "field_a_2": "2"
-            },
-            "param_b": {
-                "field_b_1": "a"
-            },
-            "param_c": {
-                "field_c_1": 23
-            },
-            "param_d": {
-                "param_d_0": 1,
-                "param_d_1": 2,
-                "param_d_2": 3
-            },
-            "param_e": {
-                "param_e_2": 3,
-                "param_e_0": 1,
-                "param_e_1": 2
-            },
+            "param_a": {"field_a_1": "1", "field_a_2": "2"},
+            "param_b": {"field_b_1": "a"},
+            "param_c": {"field_c_1": 23},
+            "param_d": {"param_d_0": 1, "param_d_1": 2, "param_d_2": 3},
+            "param_e": {"param_e_2": 3, "param_e_0": 1, "param_e_1": 2},
         }
 
     def test_init(self):
@@ -1017,9 +969,9 @@ class TestHDF5Header(TestCase):
         self.assertTupleEqual((1, 2, 3), header.param_d)
 
     def test_header_from_hdf5_file(self):
-        header = HDF5Header.from_hdf5(data_path('hdf5/raw_header.h5'))
-        assert 'MUSIC' == header.propag[0]
-        assert 'seawater' == header.propag[1]
+        header = HDF5Header.from_hdf5(data_path("hdf5/raw_header.h5"))
+        assert "MUSIC" == header.propag[0]
+        assert "seawater" == header.propag[1]
         assert 3450 == header.seabottom[0]
         self.assertAlmostEqual(12.1, header.livetime.numberOfSeconds, places=3)
         self.assertAlmostEqual(0.09, header.livetime.errorOfSeconds, places=3)
@@ -1029,12 +981,14 @@ class TestHDF5Header(TestCase):
         self.assertTupleEqual((0, 0, 0), header.coord_origin)
 
     def test_header_from_table_with_bytes(self):
-        table = Table({
-            "dtype": [b"f4 a2", b"f4"],
-            "field_names": [b"a b", b"c"],
-            "field_values": [b"1.2 ab", b"3.4"],
-            "parameter": [b"foo", b"bar"]
-        })
+        table = Table(
+            {
+                "dtype": [b"f4 a2", b"f4"],
+                "field_names": [b"a b", b"c"],
+                "field_values": [b"1.2 ab", b"3.4"],
+                "parameter": [b"foo", b"bar"],
+            }
+        )
         header = HDF5Header.from_aanet(table)
         self.assertAlmostEqual(1.2, header.foo.a, places=2)
         assert "ab" == header.foo.b
@@ -1044,16 +998,9 @@ class TestHDF5Header(TestCase):
 class TestConvertHeaderDictToTable(TestCase):
     def setUp(self):
         hdict = {
-            "param_a": {
-                "field_a_1": "1",
-                "field_a_2": "2"
-            },
-            "param_b": {
-                "field_b_1": "a"
-            },
-            "param_c": {
-                "field_c_1": 1
-            }
+            "param_a": {"field_a_1": "1", "field_a_2": "2"},
+            "param_b": {"field_b_1": "a"},
+            "param_c": {"field_c_1": 1},
         }
         self.tab = convert_header_dict_to_table(hdict)
 
@@ -1073,12 +1020,12 @@ class TestConvertHeaderDictToTable(TestCase):
             assert "1 2" == tab.field_values[index_a]
         else:
             assert "2 1" == tab.field_values[index_a]
-        assert "f4 f4" == tab['dtype'][index_a]
+        assert "f4 f4" == tab["dtype"][index_a]
 
         assert "param_b" == tab.parameter[index_b]
         assert "field_b_1" == tab.field_names[index_b]
         assert "a" == tab.field_values[index_b]
-        assert "a1" == tab['dtype'][index_b]
+        assert "a1" == tab["dtype"][index_b]
 
     def test_values_are_converted_to_str(self):
         index_c = self.tab.parameter.tolist().index("param_c")

@@ -13,17 +13,18 @@ from km3pipe import Module
 
 class TriggeredDUs(Module):
     """Check for triggered DUs."""
+
     def process(self, blob):
-        triggered_hits = blob['Hits'].triggered_rows.to_dataframe()
+        triggered_hits = blob["Hits"].triggered_rows.to_dataframe()
         self.calibration.apply(triggered_hits)
-        dus = np.unique(triggered_hits['du'])
+        dus = np.unique(triggered_hits["du"])
         n_dus = len(dus)
 
-        blob['TriggeredDUs'] = dus
+        blob["TriggeredDUs"] = dus
 
         if n_dus > 1:
-            blob['multiple_du_event'] = True
+            blob["multiple_du_event"] = True
         else:
-            blob['single_du_event'] = True
+            blob["single_du_event"] = True
 
         return blob

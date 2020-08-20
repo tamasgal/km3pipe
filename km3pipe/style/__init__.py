@@ -16,18 +16,17 @@ __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-STYLE_DIR = join(dirname(dirname(__file__)), 'stylelib')
+STYLE_DIR = join(dirname(dirname(__file__)), "stylelib")
 
 
 def get_style_path(style):
-    return STYLE_DIR + '/' + style + '.mplstyle'
+    return STYLE_DIR + "/" + style + ".mplstyle"
 
 
-def use(style='km3pipe'):
+def use(style="km3pipe"):
     import matplotlib.pyplot as plt
 
-    for s in (get_style_path('km3pipe-' + style), get_style_path(style),
-              style):
+    for s in (get_style_path("km3pipe-" + style), get_style_path(style), style):
         if exists(s):
             plt.style.use(s)
             return
@@ -40,7 +39,8 @@ class ColourCycler(object):
     Instantiate with `cc = ColourCycler()` and use it in plots
     like `plt.plot(xs, ys, c=next(cc))`.
     """
-    def __init__(self, palette='km3pipe'):
+
+    def __init__(self, palette="km3pipe"):
         self.colours = {}
         self.refresh_styles()
         self.choose(palette)
@@ -51,9 +51,7 @@ class ColourCycler(object):
             self._cycler = cycle(self.colours[palette])
         except KeyError:
             raise KeyError(
-                "Chose one of the following colour palettes: {0}".format(
-                    self.available
-                )
+                "Chose one of the following colour palettes: {0}".format(self.available)
             )
 
     def refresh_styles(self):
@@ -63,14 +61,20 @@ class ColourCycler(object):
         self.colours = {}
         for style in plt.style.available:
             try:
-                style_colours = plt.style.library[style]['axes.prop_cycle']
-                self.colours[style] = [c['color'] for c in list(style_colours)]
+                style_colours = plt.style.library[style]["axes.prop_cycle"]
+                self.colours[style] = [c["color"] for c in list(style_colours)]
             except KeyError:
                 continue
 
-        self.colours['km3pipe'] = [
-            "#ff7869", "#4babe1", "#96ad3e", "#e4823d", "#5d72b2", "#e2a3c2",
-            "#fd9844", "#e480e7"
+        self.colours["km3pipe"] = [
+            "#ff7869",
+            "#4babe1",
+            "#96ad3e",
+            "#e4823d",
+            "#5d72b2",
+            "#e2a3c2",
+            "#fd9844",
+            "#e480e7",
         ]
 
     @property

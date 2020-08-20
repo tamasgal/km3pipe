@@ -17,28 +17,28 @@ class MainFrame(urwid.Frame):
     Represents the main GUI
 
     """
+
     def __init__(self, pump):
         self.header = urwid.AttrWrap(
-            urwid.Text("PipeInspector", align='center'), 'header'
+            urwid.Text("PipeInspector", align="center"), "header"
         )
 
         self.blob_browser = BlobBrowser()
 
-        self.info_area = urwid.Text('')
+        self.info_area = urwid.Text("")
         self.blobs = BlobWidget()
         self.footer = urwid.Columns([self.info_area, self.blobs])
 
         self.frame = urwid.AttrWrap(
-            urwid.Frame(
-                self.blob_browser, header=self.header, footer=self.footer
-            ), 'default'
+            urwid.Frame(self.blob_browser, header=self.header, footer=self.footer),
+            "default",
         )
         urwid.Frame.__init__(self, self.frame)
         self.overlay = None
 
         self.pump = pump
 
-        urwid.connect_signal(self.blobs, 'blob_selected', self.blob_selected)
+        urwid.connect_signal(self.blobs, "blob_selected", self.blob_selected)
         self.blobs.goto_blob(0)
 
     def blob_selected(self, index):
@@ -51,15 +51,15 @@ class MainFrame(urwid.Frame):
         input = urwid.Frame.keypress(self, size, key)
         if input is None:
             return
-        if input in UI.keys['left']:
+        if input in UI.keys["left"]:
             self.blobs.previous_blob()
-        elif input in UI.keys['right']:
+        elif input in UI.keys["right"]:
             self.blobs.next_blob()
-        elif input in [key.upper() for key in UI.keys['left']]:
+        elif input in [key.upper() for key in UI.keys["left"]]:
             self.blobs.previous_blob(step=10)
-        elif input in [key.upper() for key in UI.keys['right']]:
+        elif input in [key.upper() for key in UI.keys["right"]]:
             self.blobs.next_blob(step=10)
-        elif input in UI.keys['home']:
+        elif input in UI.keys["home"]:
             self.blobs.goto_blob(0)
         else:
             return self.body.keypress(size, input)

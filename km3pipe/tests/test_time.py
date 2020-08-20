@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from time import sleep
 
 from km3pipe.testing import TestCase, MagicMock
-from km3pipe.time import (Cuckoo, total_seconds, Timer)
+from km3pipe.time import Cuckoo, total_seconds, Timer
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -43,7 +43,7 @@ class TestCuckoo(TestCase):
 
     def test_msg_calls_callback(self):
         callback = MagicMock()
-        message = 'a'
+        message = "a"
         cuckoo = Cuckoo(callback=callback)
         cuckoo.msg(message)
         callback.assert_called_with(message)
@@ -74,14 +74,14 @@ class TestCuckoo(TestCase):
 
     def test_direct_call_calls_callback(self):
         callback = MagicMock()
-        message = 'a'
+        message = "a"
         cuckoo = Cuckoo(callback=callback)
         cuckoo(message)
         callback.assert_called_with(message)
 
     def test_msg_is_not_called_when_interval_not_reached(self):
         callback = MagicMock()
-        message = 'a'
+        message = "a"
         cuckoo = Cuckoo(10, callback)
         cuckoo.reset()
         cuckoo.msg(message)
@@ -89,7 +89,7 @@ class TestCuckoo(TestCase):
 
     def test_msg_is_only_called_when_interval_reached(self):
         callback = MagicMock()
-        message = 'a'
+        message = "a"
         cuckoo = Cuckoo(0.1, callback)
         cuckoo.reset()
         cuckoo.msg(message)
@@ -105,14 +105,14 @@ class TestCuckoo(TestCase):
 
     def test_msg_gets_called_on_the_very_first_time(self):
         callback = MagicMock()
-        message = 'a'
+        message = "a"
         cuckoo = Cuckoo(1, callback)
         cuckoo.msg(message)
         self.assertTrue(callback.called)
 
     def test_msg_resets_timestamp_after_interval_reached(self):
         callback = MagicMock()
-        message = 'a'
+        message = "a"
         cuckoo = Cuckoo(0.1, callback)
         cuckoo.reset()
         timestamp1 = cuckoo.timestamp
@@ -136,12 +136,12 @@ class TestCuckoo(TestCase):
 class TestTimer(TestCase):
     def test_context_manager(self):
         mock = MagicMock()
-        with Timer(callback=mock) as t:    # noqa
+        with Timer(callback=mock) as t:  # noqa
             pass
         mock.assert_called_once()
 
     def test_context_manager_calls_with_standard_text(self):
         mock = MagicMock()
-        with Timer(callback=mock) as t:    # noqa
+        with Timer(callback=mock) as t:  # noqa
             pass
         self.assertTrue(mock.call_args[0][0].startswith("It "))

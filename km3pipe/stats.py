@@ -17,7 +17,7 @@ __maintainer__ = "Moritz Lotze"
 __email__ = "mlotze@km3net.de"
 __status__ = "Development"
 
-log = get_logger(__name__)    # pylint: disable=C0103
+log = get_logger(__name__)  # pylint: disable=C0103
 
 
 def mad(v):

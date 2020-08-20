@@ -24,6 +24,7 @@ BUFFER_SIZE = 1024
 
 class Client(object):
     """The ControlHost client"""
+
     def __init__(self, host, port=5553):
         self.host = host
         self.port = port
@@ -31,8 +32,8 @@ class Client(object):
         self.tags = []
         self.valid_tags = []
 
-    def subscribe(self, tag, mode='wait'):
-        if mode not in ['wait', 'all']:
+    def subscribe(self, tag, mode="wait"):
+        if mode not in ["wait", "all"]:
             raise ValueError("Possible subscription modes are 'wait' or 'all'")
         log.info("Subscribing to {} in mode {}".format(tag, mode))
         full_tag = self._full_tag(tag, mode)
@@ -43,7 +44,7 @@ class Client(object):
                 self.valid_tags.append(t)
         self._update_subscriptions()
 
-    def unsubscribe(self, tag, mode='wait'):
+    def unsubscribe(self, tag, mode="wait"):
         try:
             self.tags.remove(self._full_tag(tag, mode))
             self.valid_tags.remove(tag)
@@ -53,7 +54,7 @@ class Client(object):
             self._update_subscriptions()
 
     def _full_tag(self, tag, mode):
-        mode_flag = ' {} '.format(mode[0])
+        mode_flag = " {} ".format(mode[0])
         full_tag = mode_flag + tag
         return full_tag
 
@@ -61,10 +62,10 @@ class Client(object):
         log.debug("Subscribing to tags: {0}".format(self.tags))
         if not self.socket:
             self._connect()
-        tags = ''.join(self.tags).encode("ascii")
-        message = Message(b'_Subscri', tags)
+        tags = "".join(self.tags).encode("ascii")
+        message = Message(b"_Subscri", tags)
         self.socket.send(message.data)
-        message = Message(b'_Always')
+        message = Message(b"_Always")
         self.socket.send(message.data)
 
     def put_message(self, tag, data):
@@ -81,7 +82,7 @@ class Client(object):
                 data = self.socket.recv(Prefix.SIZE)
                 timestamp = time.time()
                 log.info("    raw prefix data received: '{0}'".format(data))
-                if data == b'':
+                if data == b"":
                     raise EOFError
                 prefix = Prefix(data=data, timestamp=timestamp)
             except (UnicodeDecodeError, OSError, struct.error):
@@ -100,16 +101,14 @@ class Client(object):
                 log.error(
                     "Invalid tag '{0}' received, ignoring the message \n"
                     "and reconnecting.\n"
-                    "  -> valid tags are: {1}".format(
-                        prefix_tag, self.valid_tags
-                    )
+                    "  -> valid tags are: {1}".format(prefix_tag, self.valid_tags)
                 )
                 self._reconnect()
                 continue
             else:
                 break
 
-        message = b''
+        message = b""
         log.info("       got a Prefix with {0} bytes.".format(prefix.length))
         while len(message) < prefix.length:
             log.info("          message length: {0}".format(len(message)))
@@ -120,11 +119,7 @@ class Client(object):
             except OSError:
                 log.error("Failed to construct message.")
                 raise BufferError
-        log.info(
-            "     ------ returning message with {0} bytes".format(
-                len(message)
-            )
-        )
+        log.info("     ------ returning message with {0} bytes".format(len(message)))
         return prefix, message
 
     def _connect(self):
@@ -156,7 +151,8 @@ class Client(object):
 
 class Message(object):
     """The representation of a ControlHost message."""
-    def __init__(self, tag, message=b''):
+
+    def __init__(self, tag, message=b""):
         try:
             message = message.encode()
         except AttributeError:
@@ -175,10 +171,11 @@ class Message(object):
 
 class Tag(object):
     """Represents the tag in a ControlHost Prefix."""
+
     SIZE = 8
 
     def __init__(self, data=None):
-        self._data = b''
+        self._data = b""
         self.data = data
 
     @property
@@ -190,15 +187,15 @@ class Tag(object):
     def data(self, value):
         """Set the byte data and fill up the bytes to fit the size."""
         if not value:
-            value = b''
+            value = b""
         if len(value) > self.SIZE:
             raise ValueError("The maximum tag size is {0}".format(self.SIZE))
         self._data = value
         while len(self._data) < self.SIZE:
-            self._data += b'\x00'
+            self._data += b"\x00"
 
     def __str__(self):
-        return self.data.decode(encoding='UTF-8').strip('\x00')
+        return self.data.decode(encoding="UTF-8").strip("\x00")
 
     def __len__(self):
         return len(self._data)
@@ -206,6 +203,7 @@ class Tag(object):
 
 class Prefix(object):
     """The prefix of a ControlHost message."""
+
     SIZE = 16
 
     def __init__(self, tag=None, length=None, data=None, timestamp=None):
@@ -221,16 +219,14 @@ class Prefix(object):
 
     @property
     def data(self):
-        return self.tag.data + struct.pack('>i', self.length) + b'\x00' * 4
+        return self.tag.data + struct.pack(">i", self.length) + b"\x00" * 4
 
     @data.setter
     def data(self, value):
-        self.tag = Tag(data=value[:Tag.SIZE])
-        self.length = struct.unpack('>i', value[Tag.SIZE:Tag.SIZE + 4])[0]
+        self.tag = Tag(data=value[: Tag.SIZE])
+        self.length = struct.unpack(">i", value[Tag.SIZE : Tag.SIZE + 4])[0]
 
     def __str__(self):
-        return (
-            "ControlHost Prefix with tag '{0}' ({1} bytes of data)".format(
-                self.tag, self.length
-            )
+        return "ControlHost Prefix with tag '{0}' ({1} bytes of data)".format(
+            self.tag, self.length
         )

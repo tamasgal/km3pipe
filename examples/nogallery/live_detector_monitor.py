@@ -13,20 +13,20 @@ from io import StringIO
 class CHPrinter(Module):
     def process(self, blob):
         print("New blob:")
-        print(blob['CHPrefix'])
+        print(blob["CHPrefix"])
         return blob
 
 
 class ROySender(Module):
     def configure(self):
-        self.packet_handler = PacketHandler('131.188.161.241', 9999)
+        self.packet_handler = PacketHandler("131.188.161.241", 9999)
 
     def process(self, blob):
         roy = self.packet_handler
-        data_size = blob['CHPrefix'].length
-        roy.send('evt_size', data_size, 'byte', '')
+        data_size = blob["CHPrefix"].length
+        roy.send("evt_size", data_size, "byte", "")
 
-        data = blob['CHData']
+        data = blob["CHData"]
         data_io = StringIO(data)
 
         preamble = DAQPreamble(file_obj=data_io)
@@ -41,16 +41,16 @@ class ROySender(Module):
             ratio = event.n_triggered_hits / event.n_snapshot_hits * 100
         except ZeroDivisionError:
             ratio = 100 if event.n_triggered_hits > 1 else 0
-        roy.send("hit_ratio", ratio, '%', '')
-        roy.send("trig_hits", event.n_triggered_hits, '#', '')
-        roy.send("hits", event.n_snapshot_hits, '#', '')
-        roy.send("timeslice", event.header.time_slice, '#', '')
-        roy.send("run", event.header.run, '#', '')
+        roy.send("hit_ratio", ratio, "%", "")
+        roy.send("trig_hits", event.n_triggered_hits, "#", "")
+        roy.send("hits", event.n_snapshot_hits, "#", "")
+        roy.send("timeslice", event.header.time_slice, "#", "")
+        roy.send("run", event.header.run, "#", "")
 
         doms = {dom_id for (dom_id, _, _, _) in event.snapshot_hits}
         trig_doms = {dom_id for (dom_id, _, _, _, _) in event.triggered_hits}
-        roy.send("doms", len(doms), '#', '')
-        roy.send("trig_doms", len(trig_doms), '#', '')
+        roy.send("doms", len(doms), "#", "")
+        roy.send("trig_doms", len(trig_doms), "#", "")
 
         hit_times = [time for (_, _, time, _) in event.snapshot_hits]
         try:
@@ -58,7 +58,7 @@ class ROySender(Module):
         except ValueError:
             pass
         else:
-            roy.send("evt_length", length, 'ns', '')
+            roy.send("evt_length", length, "ns", "")
 
         # if event.n_snapshot_hits < 30:
         #    tots = [tot for (_, _, _, tot) in event.snapshot_hits]
@@ -71,11 +71,11 @@ class ROySender(Module):
 pipe = Pipeline()
 pipe.attach(
     CHPump,
-    host='localhost',
+    host="localhost",
     port=5553,
-    tags='IO_EVT',
+    tags="IO_EVT",
     timeout=60 * 60 * 24,
-    max_queue=50
+    max_queue=50,
 )
 pipe.attach(ROySender)
 pipe.attach(CHPrinter)

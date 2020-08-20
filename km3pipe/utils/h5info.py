@@ -31,10 +31,10 @@ def h5info(h5name, raw=False):
             print("HDF5 Meta Data")
             print("--------------")
             print(h5.root._v_attrs.__repr__())
-            if '/header' in h5:
+            if "/header" in h5:
                 print("\nHeader ('/header')")
                 print("----------------")
-                print(h5.get_node('/header')._v_attrs.__repr__())
+                print(h5.get_node("/header")._v_attrs.__repr__())
             return
         if not att_list and not raw:
             print("Sorry, no metadata.")
@@ -44,10 +44,10 @@ def h5info(h5name, raw=False):
         for att in h5.root._v_attrs._f_list():
             ver = h5.root._v_attrs[att]
             print("{}: {}".format(att, ver))
-        if '/header' in h5:
+        if "/header" in h5:
             print("\nHeader (/header)")
             print("----------------")
-            node = h5.get_node('/header')
+            node = h5.get_node("/header")
             for att in node._v_attrs._f_list():
                 ver = node._v_attrs[att]
                 print("{}: {}".format(att, ver))
@@ -55,6 +55,7 @@ def h5info(h5name, raw=False):
 
 def main():
     from docopt import docopt
+
     arguments = docopt(__doc__)
 
-    h5info(arguments['FILE'], arguments['--raw'])
+    h5info(arguments["FILE"], arguments["--raw"])

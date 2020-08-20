@@ -48,26 +48,26 @@ def mkdir(path):
 
 def main():
     from docopt import docopt
+
     args = docopt(__doc__, version=__version__)
 
     CWD = os.getcwd()
-    FITTER = abspath(args['FITTER'])
-    PATH = abspath(args['PATH'])
-    OUTPUT_PATH = join(CWD, args['OUTPUT_PATH'])
-    SUFFIX = args['-x']
-    ET_PER_FILE = int(args['-e']) * 60    # [s]
-    FILES_PER_JOB = int(args['-n'])
-    VMEM = args['-m']
-    LOG_PATH = args['-l']
-    JOB_NAME = args['-j']
-    DRYRUN = args['-q']
+    FITTER = abspath(args["FITTER"])
+    PATH = abspath(args["PATH"])
+    OUTPUT_PATH = join(CWD, args["OUTPUT_PATH"])
+    SUFFIX = args["-x"]
+    ET_PER_FILE = int(args["-e"]) * 60  # [s]
+    FILES_PER_JOB = int(args["-n"])
+    VMEM = args["-m"]
+    LOG_PATH = args["-l"]
+    JOB_NAME = args["-j"]
+    DRYRUN = args["-q"]
 
     mkdir(OUTPUT_PATH)
 
     files = glob(join(PATH, "*.h5"))
     summaries = [
-        basename(f)[:-len(SUFFIX)]
-        for f in glob(join(OUTPUT_PATH, '*' + SUFFIX))
+        basename(f)[: -len(SUFFIX)] for f in glob(join(OUTPUT_PATH, "*" + SUFFIX))
     ]
     rem_files = list(set(basename(f) for f in files) - set(summaries))
 
@@ -93,18 +93,16 @@ def main():
             s.add("echo File '{}' fitted.".format(fname))
             s.add("echo '" + 42 * "=" + "'")
 
-        walltime = time.strftime(
-            '%H:%M:%S', time.gmtime(ET_PER_FILE * n_files)
-        )
+        walltime = time.strftime("%H:%M:%S", time.gmtime(ET_PER_FILE * n_files))
 
         kp.shell.qsub(
             s,
-            '{}_{}'.format(JOB_NAME, job_id),
+            "{}_{}".format(JOB_NAME, job_id),
             walltime=walltime,
             vmem=VMEM,
             log_path=LOG_PATH,
             irods=True,
-            dryrun=DRYRUN
+            dryrun=DRYRUN,
         )
 
         if DRYRUN:

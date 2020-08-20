@@ -24,29 +24,29 @@ class TestTag(TestCase):
         self.assertEqual(Tag.SIZE, len(tag))
 
     def test_tag_has_correct_length(self):
-        for tag_name in (b'foo', b'bar', b'baz', b'1'):
+        for tag_name in (b"foo", b"bar", b"baz", b"1"):
             tag = Tag(tag_name)
             self.assertEqual(Tag.SIZE, len(tag))
 
     def test_tag_with_invalid_length_raises_valueerror(self):
-        self.assertRaises(ValueError, Tag, '123456789')
+        self.assertRaises(ValueError, Tag, "123456789")
 
     def test_tag_has_correct_data(self):
-        tag = Tag(b'foo')
-        self.assertEqual(b'foo\x00\x00\x00\x00\x00', tag.data)
-        tag = Tag('abcdefgh')
-        self.assertEqual('abcdefgh', tag.data)
+        tag = Tag(b"foo")
+        self.assertEqual(b"foo\x00\x00\x00\x00\x00", tag.data)
+        tag = Tag("abcdefgh")
+        self.assertEqual("abcdefgh", tag.data)
 
     def test_tag_has_correct_string_representation(self):
-        tag = Tag(b'foo')
-        self.assertEqual('foo', str(tag))
+        tag = Tag(b"foo")
+        self.assertEqual("foo", str(tag))
 
 
 class TestPrefix(TestCase):
     def test_init(self):
-        Prefix(b'foo', 1)
+        Prefix(b"foo", 1)
 
 
 class TestMessage(TestCase):
     def test_init(self):
-        Message('')
+        Message("")

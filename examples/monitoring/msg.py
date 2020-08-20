@@ -20,12 +20,12 @@ __email__ = "tgal@km3net.de"
 
 
 def print_msg(blob):
-    data = io.BytesIO(blob['CHData'])
+    data = io.BytesIO(blob["CHData"])
     print(data)
     return blob
 
 
 pipe = kp.Pipeline()
-pipe.attach(kp.io.CHPump, host='localhost', tags='MSG')
+pipe.attach(kp.io.CHPump, host="localhost", tags="MSG")
 pipe.attach(print_msg)
 pipe.drain()

@@ -6,14 +6,16 @@ Tests for MC Modules.
 """
 
 import numpy as np
-from numpy.testing import (assert_array_equal, assert_allclose)
+from numpy.testing import assert_array_equal, assert_allclose
 import pytest
 
 from km3pipe import Table, Blob, Pipeline, Module
 from km3pipe.testing import TestCase
 
 from km3modules.mc import (
-    convert_mc_times_to_jte_times, MCTimeCorrector, GlobalRandomState
+    convert_mc_times_to_jte_times,
+    MCTimeCorrector,
+    GlobalRandomState,
 )
 
 __author__ = "Moritz Lotze, Michael Moser"
@@ -26,36 +28,32 @@ __status__ = "Development"
 
 class TestMCConvert(TestCase):
     def setUp(self):
-        self.event_info = Table({
-            'timestamp': 1,
-            'nanoseconds': 700000000,
-            'mc_time': 1.74999978e9,
-        })
+        self.event_info = Table(
+            {"timestamp": 1, "nanoseconds": 700000000, "mc_time": 1.74999978e9,}
+        )
 
-        self.mc_tracks = Table({
-            'time': 1,
-        })
+        self.mc_tracks = Table({"time": 1,})
 
-        self.mc_hits = Table({
-            'time': 30.79,
-        })
+        self.mc_hits = Table({"time": 30.79,})
 
-        self.blob = Blob({
-            'event_info': self.event_info,
-            'mc_hits': self.mc_hits,
-            'mc_tracks': self.mc_tracks,
-        })
+        self.blob = Blob(
+            {
+                "event_info": self.event_info,
+                "mc_hits": self.mc_hits,
+                "mc_tracks": self.mc_tracks,
+            }
+        )
 
     def test_convert_mc_times_to_jte_times(self):
         times_mc_tracks = convert_mc_times_to_jte_times(
             self.mc_tracks.time,
             self.event_info.timestamp * 1e9 + self.event_info.nanoseconds,
-            self.event_info.mc_time
+            self.event_info.mc_time,
         )
         times_mc_hits = convert_mc_times_to_jte_times(
             self.mc_hits.time,
             self.event_info.timestamp * 1e9 + self.event_info.nanoseconds,
-            self.event_info.mc_time
+            self.event_info.mc_time,
         )
 
         assert times_mc_tracks is not None
@@ -66,15 +64,15 @@ class TestMCConvert(TestCase):
 
     def test_process(self):
         corr = MCTimeCorrector(
-            mc_hits_key='mc_hits',
-            mc_tracks_key='mc_tracks',
-            event_info_key='event_info'
+            mc_hits_key="mc_hits",
+            mc_tracks_key="mc_tracks",
+            event_info_key="event_info",
         )
         newblob = corr.process(self.blob)
-        assert newblob['mc_hits'] is not None
-        assert newblob['mc_tracks'] is not None
-        assert np.allclose(newblob['mc_hits'].time, 49999810.79)
-        assert np.allclose(newblob['mc_tracks'].time, 49999781)
+        assert newblob["mc_hits"] is not None
+        assert newblob["mc_tracks"] is not None
+        assert np.allclose(newblob["mc_hits"].time, 49999810.79)
+        assert np.allclose(newblob["mc_tracks"].time, 49999781)
 
 
 class TestGlobalRandomState(TestCase):

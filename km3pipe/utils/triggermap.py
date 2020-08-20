@@ -27,8 +27,9 @@ __status__ = "Development"
 
 from docopt import docopt
 import matplotlib
+
 # Force matplotlib to not use any Xwindows backend.
-matplotlib.use('Agg')    # noqa
+matplotlib.use("Agg")  # noqa
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 import numpy as np
@@ -36,16 +37,18 @@ import numpy as np
 import km3pipe as kp
 from km3modules.common import StatusBar
 import km3pipe.style
-km3pipe.style.use('km3pipe')
+
+km3pipe.style.use("km3pipe")
 
 
 class TriggerMap(kp.Module):
     """Creates a plot to show the number of triggered hits for each DOM."""
+
     def configure(self):
-        self.det = self.require('detector')
-        self.plot_filename = self.require('plot_filename')
-        self.subtitle = self.get('subtitle', default='')
-        self.du = self.get('du')
+        self.det = self.require("detector")
+        self.plot_filename = self.require("plot_filename")
+        self.subtitle = self.get("subtitle", default="")
+        self.du = self.get("du")
         if self.du is not None:
             self.n_dus = 1
             self.n_doms = 18
@@ -55,7 +58,7 @@ class TriggerMap(kp.Module):
         self.hit_counts = []
 
     def process(self, blob):
-        hits = blob['Hits']
+        hits = blob["Hits"]
         hits = hits[hits.triggered.astype(bool)]
         dom_ids = np.unique(hits.dom_id)
         hit_counts = np.zeros(self.n_dus * self.n_doms)
@@ -75,7 +78,7 @@ class TriggerMap(kp.Module):
         self.create_plot()
 
     def create_plot(self):
-        title_du = ' - DU {}'.format(self.du) if self.du else ''
+        title_du = " - DU {}".format(self.du) if self.du else ""
         title = "Trigger Map{}\n{}".format(title_du, self.subtitle)
         fig, ax = plt.subplots(figsize=(16, 8))
         ax.grid(True)
@@ -83,20 +86,21 @@ class TriggerMap(kp.Module):
         hit_mat = np.array([np.array(x) for x in self.hit_counts]).transpose()
         im = ax.matshow(
             hit_mat,
-            interpolation='nearest',
+            interpolation="nearest",
             filternorm=None,
-            cmap='plasma',
-            aspect='auto',
-            origin='lower',
+            cmap="plasma",
+            aspect="auto",
+            origin="lower",
             zorder=3,
-            norm=LogNorm(vmin=1, vmax=np.amax(hit_mat))
+            norm=LogNorm(vmin=1, vmax=np.amax(hit_mat)),
         )
         yticks = np.arange(self.n_doms * self.n_dus)
         ytick_label_templ = "DOM{1:02d}" if self.du else "DU{0:.0f}-DOM{1:02d}"
         ytick_labels = [
             ytick_label_templ.format(
                 np.ceil((y + 1) / self.n_doms), y % (self.n_doms) + 1
-            ) for y in yticks
+            )
+            for y in yticks
         ]
         ax.set_yticks(yticks)
         ax.set_yticklabels(ytick_labels)
@@ -113,22 +117,22 @@ class TriggerMap(kp.Module):
 
 
 def main():
-    args = docopt(__doc__, version='1.0')
-    du = int(args['-u']) if args['-u'] else None
-    det_id = int(args['-d'])
+    args = docopt(__doc__, version="1.0")
+    du = int(args["-u"]) if args["-u"] else None
+    det_id = int(args["-d"])
     det = kp.hardware.Detector(det_id=det_id)
     pipe = kp.Pipeline()
-    pipe.attach(kp.io.aanet.AanetPump, filename=args['FILENAME'])
+    pipe.attach(kp.io.aanet.AanetPump, filename=args["FILENAME"])
     pipe.attach(StatusBar, every=2500)
     pipe.attach(
         TriggerMap,
         detector=det,
         du=du,
-        plot_filename=args['-p'],
-        subtitle=args['FILENAME']
+        plot_filename=args["-p"],
+        subtitle=args["FILENAME"],
     )
     pipe.drain()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
