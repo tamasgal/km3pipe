@@ -31,9 +31,10 @@ class RandomNumberGenerator(kp.Module):
         self.h5loc = self.require("h5loc")
         self.n = self.get("n", default=10)
 
-    def process(self):
+    def process(self, blob):
         table = kp.Table({"x": np.random.randn(self.n)}, h5loc=self.h5loc)
         blob["RandomNumbers"] = table
+        return blob
 
 
 #####################################################
@@ -45,7 +46,7 @@ pipe = kp.Pipeline()
 pipe.attach(km.StatusBar, every=1)
 pipe.attach(km.mc.GlobalRandomState, seed=23)
 pipe.attach(RandomNumberGenerator, h5loc="/rnd", n=5)
-pipe.attach(HDF5Sink, filename="rnd.h5")
+pipe.attach(kp.io.HDF5Sink, filename="rnd.h5")
 pipe.drain(11)
 
 
@@ -56,4 +57,4 @@ pipe.drain(11)
 # ``Provenance``. To access all the provenance information,
 # use the ``as_json()`` method:
 
-kp.Provenance().as_json(indent=2)
+print(kp.Provenance().as_json(indent=2))
