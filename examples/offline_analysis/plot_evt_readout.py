@@ -45,7 +45,7 @@ class VertexHitDistanceCalculator(Module):
     def finish(self):
         dist_flat = np.concatenate(self.distances)
         plt.hist(dist_flat)
-        plt.savefig("dists.pdf")
+        plt.savefig("dists.png")
 
 
 pipe = Pipeline()
