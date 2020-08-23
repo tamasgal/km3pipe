@@ -39,6 +39,8 @@ if not __KM3PIPE_SETUP__:
     from . import time  # noqa
     from . import tools  # noqa
 
+    from thepipe import Provenance  # reexport the provenance handler
+
 __author__ = "Tamas Gal and Moritz Lotze"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
 __credits__ = ["Thomas Heid"]
