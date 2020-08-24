@@ -13,6 +13,7 @@ import warnings
 import numpy as np
 import tables as tb
 import km3io
+from thepipe import Provenance
 
 try:
     from numba import jit
@@ -255,6 +256,7 @@ class HDF5Sink(Module):
                 title="KM3NeT",
                 **self.pytab_file_args
             )
+            Provenance().record_output(self.filename, "HDF5Sink output")
         self.filters = tb.Filters(
             complevel=self.complevel,
             shuffle=True,
@@ -590,6 +592,8 @@ class HDF5Pump(Pump):
         self.index = 0
 
         self.h5file = tb.open_file(self.filename, "r")
+
+        Provenance().record_input(self.filename, "HDF5Pump input")
 
         if not self.skip_version_check:
             check_version(self.h5file)

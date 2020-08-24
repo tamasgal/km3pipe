@@ -3,6 +3,7 @@
 from ..core import Module, Blob
 from ..dataclasses import Table
 from .hdf5 import HDF5Header
+from thepipe import Provenance
 
 import km3io
 import numpy as np
@@ -18,6 +19,8 @@ class OfflinePump(Module):
         self._reader = km3io.OfflineReader(self._filename)
         self.header = self._reader.header
         self.blobs = self._blob_generator()
+
+        Provenance().record_input(self._filename, "OfflinePump input")
 
     def process(self, blob=None):
         return next(self.blobs)
