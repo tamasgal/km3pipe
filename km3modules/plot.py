@@ -249,8 +249,9 @@ def ztplot(
         mltps, m_ids = count_multiplicities(dom_hits.time)
         hits["multiplicity"][hits.dom_id == dom] = mltps
 
-    time_offset = np.min(hits[hits.triggered > 0].time)
-    hits.time -= time_offset
+    if np.any(hits.triggered):
+        time_offset = np.min(hits[hits.triggered > 0].time)
+        hits.time -= time_offset
 
     n_plots = len(dus)
     n_cols = int(np.ceil(np.sqrt(n_plots)))
