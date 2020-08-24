@@ -3,6 +3,7 @@ Unreleased changes
 * ``runtable`` can now filter on job target (e.g. ``-t run``)
 * Switch from yapf to black for code formatting
 * Added access to old slewing calculations
+* Provenance functionality from ``thepipe`` has been integrated
 
 Version 9
 ---------
