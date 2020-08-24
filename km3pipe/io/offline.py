@@ -20,7 +20,7 @@ class OfflinePump(Module):
         self.header = self._reader.header
         self.blobs = self._blob_generator()
 
-        Provenance().record_input(self.filename, "OfflinePump input")
+        Provenance().record_input(self._filename, "OfflinePump input")
 
     def process(self, blob=None):
         return next(self.blobs)
