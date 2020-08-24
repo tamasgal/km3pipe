@@ -1,12 +1,19 @@
 Unreleased changes
 ------------------
+
+Version 9
+---------
+9.0.0-alpha.21 / 2020-08-24
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 * ``runtable`` can now filter on job target (e.g. ``-t run``)
 * Switch from yapf to black for code formatting
 * Added access to old slewing calculations
 * Provenance functionality from ``thepipe`` has been integrated
 
-Version 9
----------
+9.0.0-alpha.20 / 2020-07-23
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* Minor fixes
+
 9.0.0-alpha.19 / 2020-07-15
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 * Clean up deprecated tools and functions, including ``tohdf5``.
