@@ -33,15 +33,22 @@ V_LIGHT_WATER = C_LIGHT / (WATER_INDEX + DN_DL)
 
 def get_cherenkov_photon(calib_hits, track, no_copy=False):
     """Compute parameters of Cherenkov photons emitted from a track and hitting a PMT.
-    event is one track (read with km3io), and calib_hits is the table of calibrated hits
-    of the track
+    event is one track (read with km3io, or a DataFrame), and calib_hits is the table of calibrated hits
+    of the track.
 
     Parameters
     ----------
-    calib_hits : kp Table of a Dataframe
+    calib_hits : kp Table of a DataFrame
         Table of calibrated hits.
-    track : km3io.offline.OfflineBranch
-        One track.
+    track : km3io.offline.OfflineBranch or DataFrame
+        One track with the following parameters:
+            - pos_x.
+            - pos_y.
+            - pos_z.
+            - dir_x.
+            - dir_y.
+            - dir_z.
+            - t.
     no_copy : bool, optional
         provide a copy of calib_hits.
 
