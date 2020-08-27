@@ -6,6 +6,8 @@ Cherenkov photon parameters.
 """
 
 import math
+import numpy as np
+import pandas as pd
 
 from .dataclasses import Table
 from .logger import get_logger
