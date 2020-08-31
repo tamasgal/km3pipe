@@ -11,6 +11,7 @@ import pandas as pd
 
 from .dataclasses import Table
 from .logger import get_logger
+from .constants import SIN_CHERENKOV, TAN_CHERENKOV, V_LIGHT_WATER, C_LIGHT
 
 __author__ = "Zineb ALY"
 __copyright__ = "Copyright 2020, Tamas Gal and the KM3NeT collaboration."
@@ -22,27 +23,22 @@ __status__ = "Development"
 
 log = get_logger(__name__)
 
-# Physics constants
-WATER_INDEX = 1.3499
-DN_DL = 0.0298
-COS_CHERENKOV = 1 / WATER_INDEX
-CHERENKOV_ANGLE_RAD = math.acos(COS_CHERENKOV)
-SIN_CHERENKOV = math.sin(CHERENKOV_ANGLE_RAD)
-TAN_CHERENKOV = math.tan(CHERENKOV_ANGLE_RAD)
-C_LIGHT = 299792458e-9
-V_LIGHT_WATER = C_LIGHT / (WATER_INDEX + DN_DL)
 
-
-def get_cherenkov_photon(calib_hits, track, no_copy=False):
+def get_cherenkov_photon(calib_hits, track):
     """Compute parameters of Cherenkov photons emitted from a track and hitting a PMT.
-    event is one track (read with km3io, or a DataFrame), and calib_hits is the table of calibrated hits
-    of the track.
+    event is one track, and calib_hits is the table of calibrated hits of the track.
 
     Parameters
     ----------
-    calib_hits : kp Table of a DataFrame
-        Table of calibrated hits.
-    track : km3io.offline.OfflineBranch or DataFrame
+    calib_hits : kp Table or a DataFrame or a numpy recarray.
+        Table of calibrated hits with the following parameters:
+            - pos_x.
+            - pos_y.
+            - pos_z.
+            - dir_x.
+            - dir_y.
+            - dir_z.
+    track : km3io.offline.OfflineBranch or a DataFrame or a numpy recarray.
         One track with the following parameters:
             - pos_x.
             - pos_y.
@@ -51,8 +47,6 @@ def get_cherenkov_photon(calib_hits, track, no_copy=False):
             - dir_y.
             - dir_z.
             - t.
-    no_copy : bool, optional
-        provide a copy of calib_hits.
 
     Returns
     -------
@@ -66,7 +60,6 @@ def get_cherenkov_photon(calib_hits, track, no_copy=False):
             - cos_photon_PMT: cos angle of impact of photon with respect to the PMT direction:
             - dir_x_photon, dir_y_photon, dir_z_photon: photon directions.
     """
-
     d = {}
 
     # (vector PMT) - (vector track position)
@@ -81,7 +74,7 @@ def get_cherenkov_photon(calib_hits, track, no_copy=False):
     # d_photon_closest is the closest distance between the PMT and the track
     # (it is perpendicular to the track)
     L = np.sum(np.array([track.dir_x, track.dir_y, track.dir_z]) * V, axis=1)
-    d_2 = np.sum(V * V, axis=1) - np.power(L, 2)  # MUST CHECK IF - OR +
+    d_2 = np.sum(V * V, axis=1) - np.power(L, 2)
 
     d_photon_closest = np.sqrt(d_2)
 
@@ -106,13 +99,19 @@ def get_cherenkov_photon(calib_hits, track, no_copy=False):
     cos_photon_PMT = np.sum(np.array(PMT_dir) * V_photon, axis=1)
 
     # output
-    d["d_photon_closest"] = d_photon_closest
-    d["d_photon"] = d_photon
-    d["d_track"] = d_track
-    d["t_photon"] = t_photon
-    d["cos_photon_PMT"] = cos_photon_PMT
-    d["dir_x_photon"] = V_photon[:, 0]
-    d["dir_y_photon"] = V_photon[:, 1]
-    d["dir_z_photon"] = V_photon[:, 2]
+    out = np.rec.fromarrays(
+        [
+            d_photon_closest,
+            d_photon,
+            d_track,
+            t_photon,
+            cos_photon_PMT,
+            V_photon[:, 0],
+            V_photon[:, 1],
+            V_photon[:, 2],
+        ],
+        names="d_photon_closest, d_photon, d_track, t_photon, cos_photon_PMT, dir_x_photon, dir_y_photon, dir_z_photon",
+        formats="f8, f8, f8, f8, f8, f8, f8, f8",
+    )
 
-    return pd.DataFrame(d)
+    return out
