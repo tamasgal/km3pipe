@@ -72,3 +72,34 @@ class TestGlobalRandomState(TestCase):
         np.random.shuffle(numbers)
         lotto_numbers = sorted(numbers[:6])
         self.assertListEqual([14, 15, 18, 19, 33, 44], lotto_numbers)
+
+
+class TestMCConvert(TestCase):
+    def setUp(self):
+        self.event_info = Table(
+            {"timestamp": 1, "nanoseconds": 700000000, "mc_time": 1.74999978e9,}
+        )
+
+        self.mc_tracks = Table({"time": 1,})
+
+        self.mc_hits = Table({"time": 30.79,})
+
+        self.blob = Blob(
+            {
+                "event_info": self.event_info,
+                "mc_hits": self.mc_hits,
+                "mc_tracks": self.mc_tracks,
+            }
+        )
+
+    def test_process(self):
+        corr = MCTimeCorrector(
+            mc_hits_key="mc_hits",
+            mc_tracks_key="mc_tracks",
+            event_info_key="event_info",
+        )
+        newblob = corr.process(self.blob)
+        assert newblob["mc_hits"] is not None
+        assert newblob["mc_tracks"] is not None
+        assert np.allclose(newblob["mc_hits"].time, 49999810.79)
+        assert np.allclose(newblob["mc_tracks"].time, 49999781)

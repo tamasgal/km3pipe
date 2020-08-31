@@ -1,6 +1,8 @@
 # Filename: test_mc.py
 # pylint: disable=locally-disabled,C0111,R0904,C0103
+import numpy as np
 
+from km3pipe import Table, Blob
 from km3pipe.testing import TestCase
 from km3pipe.mc import geant2pdg, pdg2name, convert_mc_times_to_jte_times
 
