@@ -12,7 +12,7 @@ import pytest
 from km3pipe import Table, Blob, Pipeline, Module
 from km3pipe.testing import TestCase
 
-from km3modules.mc import MCTimeCorrector GlobalRandomState
+from km3modules.mc import MCTimeCorrector, GlobalRandomState
 
 __author__ = "Moritz Lotze, Michael Moser"
 __copyright__ = "Copyright 2018, Tamas Gal and the KM3NeT collaboration."
