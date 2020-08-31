@@ -7,7 +7,7 @@
 import numpy as np
 
 from km3pipe import Module
-from km3pipe.mc import pdg2name
+from km3pipe.mc import pdg2name, convert_mc_times_to_jte_times
 from km3pipe.math import zenith, azimuth
 
 __author__ = "Michael Moser and Tamas Gal and Moritz Lotze"
@@ -79,31 +79,6 @@ class McTruth(Module):
         mc["is_neutrino"] = flavor.apply(self.is_nu)
         blob["McTruth"] = mc
         return blob
-
-
-def convert_mc_times_to_jte_times(times_mc, evt_timestamp_in_ns, evt_mc_time):
-    """
-    Function that converts MC times to JTE times.
-
-    Parameters
-    ----------
-    times_mc : np.ndarray
-        Time array with MC times.
-    evt_timestamp_in_ns : int
-        Total timestamp of the event in nanoseconds.
-    evt_mc_time : int
-        Mc time of the event in nanoseconds.
-
-    Returns
-    -------
-    ndarray
-        Converted time array with JTE times.
-    """
-    # needs to be cast to normal ndarray (not recarray), or else we
-    # would get invalid type promotion
-    times_mc = np.array(times_mc).astype(float)
-    times_jte = times_mc - evt_timestamp_in_ns + evt_mc_time
-    return times_jte
 
 
 class MCTimeCorrector(Module):

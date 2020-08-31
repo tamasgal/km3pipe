@@ -96,3 +96,28 @@ def is_muon(pdg_types):
     import pandas as pd
 
     return pd.Series(pdg_types).apply(_p_eq_mu)
+
+
+def convert_mc_times_to_jte_times(times_mc, evt_timestamp_in_ns, evt_mc_time):
+    """
+    Function that converts MC times to JTE times.
+
+    Parameters
+    ----------
+    times_mc : np.ndarray
+        Time array with MC times.
+    evt_timestamp_in_ns : int
+        Total timestamp of the event in nanoseconds.
+    evt_mc_time : int
+        Mc time of the event in nanoseconds.
+
+    Returns
+    -------
+    ndarray
+        Converted time array with JTE times.
+    """
+    # needs to be cast to normal ndarray (not recarray), or else we
+    # would get invalid type promotion
+    times_mc = np.array(times_mc).astype(float)
+    times_jte = times_mc - evt_timestamp_in_ns + evt_mc_time
+    return times_jte
