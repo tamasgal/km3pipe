@@ -5,25 +5,17 @@
 Functions and modules to work with hits.
 """
 
+from numba import njit
 import numpy as np
 
 import km3pipe as kp
 
 log = kp.logger.get_logger(__name__)
-try:
-    from numba import jit
-except ImportError:
-    log.warning(
-        "This module requires `numba` to be installed, otherwise "
-        "the functions and Modules imported from this module can "
-        "be painfully slow."
-    )
-    jit = lambda f: f
 
 __author__ = "Tamas Gal"
 
 
-@jit
+@njit
 def count_multiplicities(times, tmax=20):
     """Calculate an array of multiplicities and corresponding coincidence IDs
 
