@@ -141,7 +141,13 @@ class Calibration(Module):
 
         """
         if not no_copy:
-            hits = hits.copy()
+            try:
+                hits = hits.copy()
+            except AttributeError:  # probably a km3io object
+                pass
+
+        if istype(hits, "km3io.offline.OfflineBranch"):
+            hits = Table(dict(dom_id=hits.dom_id, channel_id=hits.channel_id, time=hits.t, tot=hits.tot, triggered=hits.trig))
 
         if istype(hits, "DataFrame"):
             # do we ever see McHits here?
