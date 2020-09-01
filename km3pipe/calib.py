@@ -146,7 +146,7 @@ class Calibration(Module):
             except AttributeError:  # probably a km3io object
                 pass
 
-        if istype(hits, "km3io.offline.OfflineBranch"):
+        if istype(hits, "OfflineBranch"):
             hits = Table(
                 dict(
                     dom_id=hits.dom_id,
