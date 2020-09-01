@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* ``kp.calib.Calibration().apply()`` now also takes km3io offline hits
+  from ``km3io.OfflineReader().events[EVENT_ID].hits``
 
 Version 9
 ---------
