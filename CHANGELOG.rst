@@ -2,6 +2,8 @@ Unreleased changes
 ------------------
 * ``kp.calib.Calibration().apply()`` now also takes km3io offline hits
   from ``km3io.OfflineReader().events[EVENT_ID].hits``
+* Fixed a bug where ``kp.Table`` modified scalar entries of the
+  dictionary which was passed to instantiate the table
 
 Version 9
 ---------
