@@ -5,10 +5,13 @@ Cherenkov photon parameters.
 
 """
 
-import math
+import numba
 import numpy as np
 import pandas as pd
 
+from numba import njit
+
+from .core import Module
 from .dataclasses import Table
 from .logger import get_logger
 from .constants import SIN_CHERENKOV, TAN_CHERENKOV, V_LIGHT_WATER, C_LIGHT
@@ -23,10 +26,76 @@ __status__ = "Development"
 
 log = get_logger(__name__)
 
+try:
+    import numba as nb
+except (ImportError, OSError):
+    HAVE_NUMBA = False
+    jit = lambda f: f
+    log.warning("No numba detected, consider `pip install numba` for more speed!")
+else:
+    try:
+        from numba.typed import Dict
+    except ImportError:
+        log.warning("Please update numba (0.43+) to have dictionary support!")
+        HAVE_NUMBA = False
+        jit = lambda f: f
+    else:
+        HAVE_NUMBA = True
+        from numba import jit
 
-def get_cherenkov_photon(calib_hits, track):
+
+class CherekovPhotons(Module):
+    """A Module to access Cherenkov Photons parameters."""
+
+    __name__ = "CherekovPhotons"
+    name = "CherekovPhotons"
+
+    def configure(self):
+        self._should_apply = self.get("apply", default=True)
+
+    def process(self, blob, keys=["CalibHits", "track"], outkey="CherenkovPhotons"):
+        if self._should_apply:
+            blob[outkey] = self.apply(blob[keys[0]], blob[keys[1]])
+        return blob
+
+    def apply(self, calib_hits, track):
+        return get_cherenkov(calib_hits, track)
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return "CherekovPhotons"
+
+
+@njit
+def _get_cherenkov(calib_pos, calib_dir, track_pos, track_dir, track_t):
+    """calculate Cherenkov photons parameters """
+    rows = len(calib_pos)
+    out = np.zeros((rows, 8))
+
+    for i in range(rows):
+        # (vector PMT) - (vector track position)
+        V = calib_pos[i] - track_pos
+        L = np.sum(V * track_pos)
+        out[i][0] = np.sqrt(np.sum(V * V) - L * L)  # d_photon_closest
+        out[i][1] = out[i][0] / SIN_CHERENKOV  # d_photon
+        out[i][2] = L - out[i][0] / TAN_CHERENKOV  # d_track
+        out[i][3] = (
+            track_t + out[i][2] / C_LIGHT + out[i][1] / V_LIGHT_WATER
+        )  # t_photon
+        V_photon = V - (out[i][2] * track_dir)  # photon position
+        norm = np.sqrt(np.sum(V_photon * V_photon))
+        out[i][5:8] = V_photon / norm  # photon direction
+
+        # cos angle of impact of photon with respect to the PMT direction
+        out[i][4] = np.sum(out[i][4:7] * calib_dir[i])
+    return out
+
+
+def get_cherenkov(calib_hits, track):
     """Compute parameters of Cherenkov photons emitted from a track and hitting a PMT.
-    event is one track, and calib_hits is the table of calibrated hits of the track.
+    calib_hits is the table of calibrated hits of the track.
 
     Parameters
     ----------
@@ -38,6 +107,7 @@ def get_cherenkov_photon(calib_hits, track):
             - dir_x.
             - dir_y.
             - dir_z.
+            - time.
     track : km3io.offline.OfflineBranch or a DataFrame or a numpy recarray.
         One track with the following parameters:
             - pos_x.
@@ -60,58 +130,37 @@ def get_cherenkov_photon(calib_hits, track):
             - cos_photon_PMT: cos angle of impact of photon with respect to the PMT direction:
             - dir_x_photon, dir_y_photon, dir_z_photon: photon directions.
     """
-    d = {}
+    if isinstance(calib_hits, dict) or isinstance(
+        calib_hits, pd.DataFrame
+    ):  # or isinstance(calib_hits, np.ndarray) or isinstance(calib_hits, Table) or np.record
+        calib_pos = np.array(
+            [calib_hits["pos_x"], calib_hits["pos_y"], calib_hits["pos_z"]]
+        ).T
+        calib_dir = np.array(
+            [calib_hits["dir_x"], calib_hits["dir_y"], calib_hits["dir_z"]]
+        ).T
 
-    # (vector PMT) - (vector track position)
-    V = np.array(
-        [
-            calib_hits["pos_x"] - track.pos_x,
-            calib_hits["pos_y"] - track.pos_y,
-            calib_hits["pos_z"] - track.pos_z,
+    if isinstance(track, dict) or isinstance(
+        track, (pd.core.series.Series, pd.DataFrame)
+    ):  # or isinstance(track, np.ndarray) or isinstance(track, Table)
+        track_pos = np.array([track["pos_x"], track["pos_y"], track["pos_z"]]).T
+        track_dir = np.array([track["dir_x"], track["dir_y"], track["dir_z"]]).T
+
+    track_t = track["t"]
+
+    out = _get_cherenkov(calib_pos, calib_dir, track_pos, track_dir, track_t)
+
+    return out.view(
+        dtype=[
+            ("d_photon_closest", "<f8"),
+            ("d_photon", "<f8"),
+            ("d_track", "<f8"),
+            ("t_photon", "<f8"),
+            ("cos_photon_PMT", "<f8"),
+            ("dir_x_photon", "<f8"),
+            ("dir_y_photon", "<f8"),
+            ("dir_z_photon", "<f8"),
         ]
-    ).T
-
-    # d_photon_closest is the closest distance between the PMT and the track
-    # (it is perpendicular to the track)
-    L = np.sum(np.array([track.dir_x, track.dir_y, track.dir_z]) * V, axis=1)
-    d_2 = np.sum(V * V, axis=1) - np.power(L, 2)
-
-    d_photon_closest = np.sqrt(d_2)
-
-    # distance traveled by the photon from the track to the PMT
-    d_photon = d_photon_closest / SIN_CHERENKOV
-
-    # distance along the track where the photon was emitted
-    d_track = L - d_photon_closest / TAN_CHERENKOV
-
-    # time of photon travel in [s]
-    t_photon = track.t + d_track / C_LIGHT + d_photon / V_LIGHT_WATER
-
-    # photon vector (unitary), which gives photon direction
-    track_dir = np.array([track.dir_x, track.dir_y, track.dir_z])
-    V_photon = V - (d_track.reshape((-1, 1)) @ track_dir.reshape((1, -1)))
-    V_photon = np.divide(
-        V_photon, np.linalg.norm(V_photon, axis=1).reshape((-1, 1))
-    )  # normalised vector
-
-    # cos angle of impact of photon with respect to the PMT direction
-    PMT_dir = calib_hits[["dir_x", "dir_y", "dir_z"]]
-    cos_photon_PMT = np.sum(np.array(PMT_dir) * V_photon, axis=1)
-
-    # output
-    out = np.rec.fromarrays(
-        [
-            d_photon_closest,
-            d_photon,
-            d_track,
-            t_photon,
-            cos_photon_PMT,
-            V_photon[:, 0],
-            V_photon[:, 1],
-            V_photon[:, 2],
-        ],
-        names="d_photon_closest, d_photon, d_track, t_photon, cos_photon_PMT, dir_x_photon, dir_y_photon, dir_z_photon",
-        formats="f8, f8, f8, f8, f8, f8, f8, f8",
+    ).reshape(
+        len(out),
     )
-
-    return out
