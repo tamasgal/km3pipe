@@ -247,6 +247,7 @@ class Table(np.recarray):
     def from_dict(cls, arr_dict, dtype=None, fillna=False, **kwargs):
         """Generate a table from a dictionary of arrays.
         """
+        arr_dict = arr_dict.copy()
         # i hope order of keys == order or values
         if dtype is None:
             names = sorted(list(arr_dict.keys()))
