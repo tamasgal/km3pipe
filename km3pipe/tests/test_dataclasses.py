@@ -203,6 +203,16 @@ class TestTable(TestCase):
         assert np.isnan(tab.c[0])
         assert np.isnan(tab.c[1])
 
+    def test_from_dict_doesnt_alter_original_dict(self):
+        a = [1, 2]
+        b = [False, True]
+        c = 3
+        data = {"a": a, "b": b, "c": c}
+        tab = Table(data)
+        assert data["a"] is a
+        assert data["b"] is b
+        assert data["c"] is c
+
     def test_fromcolumns(self):
         n = 5
         dlist = [
