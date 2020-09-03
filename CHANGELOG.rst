@@ -1,12 +1,18 @@
 Unreleased changes
 ------------------
-* ``kp.calib.Calibration().apply()`` now also takes km3io offline hits
-  from ``km3io.OfflineReader().events[EVENT_ID].hits``
-* Fixed a bug where ``kp.Table`` modified scalar entries of the
-  dictionary which was passed to instantiate the table
 
 Version 9
 ---------
+9.0.0-alpha.23 / 2020-09-03
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* Fixed a bug where ``kp.Table`` modified scalar entries of the
+  dictionary which was passed to instantiate the table
+
+9.0.0-alpha.22 / 2020-09-02
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* ``kp.calib.Calibration().apply()`` now also takes km3io offline hits
+  from ``km3io.OfflineReader().events[EVENT_ID].hits``
+
 9.0.0-alpha.21 / 2020-08-24
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 * ``runtable`` can now filter on job target (e.g. ``-t run``)
