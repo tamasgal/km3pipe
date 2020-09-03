@@ -25,23 +25,6 @@ class TestGetCherenkovPhotons(TestCase):
         self.expected_t = -1 / (TAN_CHERENKOV * C_LIGHT) + 1 / (
             SIN_CHERENKOV * V_LIGHT_WATER
         )
-        self.track = {
-            "pos_x": 0.0,
-            "pos_y": 0.0,
-            "pos_z": 0.0,
-            "dir_x": 0.0,
-            "dir_y": 1.0,
-            "dir_z": 0.0,
-            "t": 0.0,
-        }
-        self.calib_hits = {
-            "pos_x": [1.0, 1.0],
-            "pos_y": [0.0, 0.0],
-            "pos_z": [0.0, 0.0],
-            "dir_x": [0.0, 0.0],
-            "dir_y": [0.0, 0.0],
-            "dir_z": [0.0, 0.0],
-        }
 
         self.arr_track = np.array(
             [(0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0)],
@@ -69,16 +52,34 @@ class TestGetCherenkovPhotons(TestCase):
         )
 
     def test_with_basic_values(self):
-        trks = [
-            self.track,
-            pd.Series(self.track),
-        ]  # , Table(self.track), self.arr_track]
-        calib_hits = [
-            self.calib_hits,
-            pd.DataFrame(self.calib_hits),
-        ]  # , Table(self.calib_hits), self.arr_calib_hits]
+        track = {
+            "pos_x": 0.0,
+            "pos_y": 0.0,
+            "pos_z": 0.0,
+            "dir_x": 0.0,
+            "dir_y": 1.0,
+            "dir_z": 0.0,
+            "t": 0.0,
+        }
 
-        for trk, hits in zip(trks, calib_hits):
+        calib_hits = {
+            "pos_x": [1.0, 1.0],
+            "pos_y": [0.0, 0.0],
+            "pos_z": [0.0, 0.0],
+            "dir_x": [0.0, 0.0],
+            "dir_y": [0.0, 0.0],
+            "dir_z": [0.0, 0.0],
+        }
+
+        pd_trk = pd.Series(track)
+        pd_hits = pd.DataFrame(calib_hits)
+        # table_trk = Table(track)
+        # table_hits = Table(calib_hits)
+
+        trks = [track, pd_trk, self.arr_track]
+        all_hits = [calib_hits, pd_hits, self.arr_calib_hits]
+
+        for trk, hits in zip(trks, all_hits):
 
             arr = get_cherenkov(hits, trk)
 
@@ -99,3 +100,46 @@ class TestGetCherenkovPhotons(TestCase):
 
             assert arr["dir_z_photon"][0] == 0
             assert arr["dir_z_photon"][1] == 0
+
+    def test_with_basic_values_tables(self):
+        track = {
+            "pos_x": 0.0,
+            "pos_y": 0.0,
+            "pos_z": 0.0,
+            "dir_x": 0.0,
+            "dir_y": 1.0,
+            "dir_z": 0.0,
+            "t": 0.0,
+        }
+
+        calib_hits = {
+            "pos_x": [1.0, 1.0],
+            "pos_y": [0.0, 0.0],
+            "pos_z": [0.0, 0.0],
+            "dir_x": [0.0, 0.0],
+            "dir_y": [0.0, 0.0],
+            "dir_z": [0.0, 0.0],
+        }
+
+        trk = Table(track)
+        hits = Table(calib_hits)
+
+        arr = get_cherenkov(hits, trk)
+
+        assert arr["d_photon_closest"][0] == 1
+        assert arr["d_photon_closest"][1] == 1
+
+        assert arr["d_photon"][0] == 1 / SIN_CHERENKOV
+        assert arr["d_photon"][1] == 1 / SIN_CHERENKOV
+
+        assert arr["d_track"][0] == -1 / TAN_CHERENKOV
+        assert arr["d_track"][1] == -1 / TAN_CHERENKOV
+
+        assert arr["t_photon"][0] == self.expected_t
+        assert arr["t_photon"][1] == self.expected_t
+
+        assert arr["cos_photon_PMT"][0] == 0
+        assert arr["cos_photon_PMT"][1] == 0
+
+        assert arr["dir_z_photon"][0] == 0
+        assert arr["dir_z_photon"][1] == 0

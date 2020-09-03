@@ -8,11 +8,13 @@ Cherenkov photon parameters.
 import numba
 import numpy as np
 import pandas as pd
+import km3pipe as kp
 
 from numba import njit
 
 from .core import Module
 from .dataclasses import Table
+from .tools import istype
 from .logger import get_logger
 from .constants import SIN_CHERENKOV, TAN_CHERENKOV, V_LIGHT_WATER, C_LIGHT
 
@@ -130,9 +132,8 @@ def get_cherenkov(calib_hits, track):
             - cos_photon_PMT: cos angle of impact of photon with respect to the PMT direction:
             - dir_x_photon, dir_y_photon, dir_z_photon: photon directions.
     """
-    if isinstance(calib_hits, dict) or isinstance(
-        calib_hits, pd.DataFrame
-    ):  # or isinstance(calib_hits, np.ndarray) or isinstance(calib_hits, Table) or np.record
+
+    if isinstance(calib_hits, (dict, pd.DataFrame, np.ndarray, kp.Table)):
         calib_pos = np.array(
             [calib_hits["pos_x"], calib_hits["pos_y"], calib_hits["pos_z"]]
         ).T
@@ -140,13 +141,19 @@ def get_cherenkov(calib_hits, track):
             [calib_hits["dir_x"], calib_hits["dir_y"], calib_hits["dir_z"]]
         ).T
 
-    if isinstance(track, dict) or isinstance(
-        track, (pd.core.series.Series, pd.DataFrame)
-    ):  # or isinstance(track, np.ndarray) or isinstance(track, Table)
+    if isinstance(track, (dict, pd.core.series.Series, pd.DataFrame)):
         track_pos = np.array([track["pos_x"], track["pos_y"], track["pos_z"]]).T
         track_dir = np.array([track["dir_x"], track["dir_y"], track["dir_z"]]).T
+        track_t = track["t"]
 
-    track_t = track["t"]
+    if isinstance(track, (kp.Table, np.ndarray)):
+        track_pos = np.array([track["pos_x"], track["pos_y"], track["pos_z"]]).reshape(
+            3,
+        )
+        track_dir = np.array([track["dir_x"], track["dir_y"], track["dir_z"]]).reshape(
+            3,
+        )
+        track_t = track["t"][0]
 
     out = _get_cherenkov(calib_pos, calib_dir, track_pos, track_dir, track_t)
 
