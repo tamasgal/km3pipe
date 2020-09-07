@@ -162,7 +162,7 @@ def _get_closest(track_pos, track_dir, meanDU_pos, meanDU_dir):
     return d_closest, z_closest
 
 
-def get_closest(track, DU):
+def get_closest(track, du_pos):
     """calculate the distance of closest approach (d_closest) and its coordinate along the z axis (z_closest).
     These calculations aLWAYS assume vertical DU.
 
@@ -176,8 +176,8 @@ def get_closest(track, DU):
             - dir_x.
             - dir_y.
             - dir_z.
-    DU : a DataFrame or a numpy recarray or a km3pipe Table or a dict.
-        DU vector with the following information:
+    du_pos : a DataFrame or a numpy recarray or a km3pipe Table or a dict.
+        du_pos vector with the following information:
             - pos_x.
             - pos_y.
             - pos_z.
@@ -188,10 +188,10 @@ def get_closest(track, DU):
         (d_closest, z_closest).
     """
     if isinstance(
-        DU, (dict, pd.core.series.Series, pd.DataFrame, kp.Table, np.ndarray)
+        du_pos, (dict, pd.core.series.Series, pd.DataFrame, kp.Table, np.ndarray)
     ):
         meanDU_pos = np.array(
-            [DU["pos_x"], DU["pos_y"], DU["pos_z"]]
+            [du_pos["pos_x"], du_pos["pos_y"], du_pos["pos_z"]]
         ).reshape(
             3,
         )
