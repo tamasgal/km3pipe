@@ -29,24 +29,6 @@ __status__ = "Development"
 
 log = get_logger(__name__)
 
-try:
-    import numba as nb
-except (ImportError, OSError):
-    HAVE_NUMBA = False
-    jit = lambda f: f
-    log.warning("No numba detected, consider `pip install numba` for more speed!")
-else:
-    try:
-        from numba.typed import Dict
-    except ImportError:
-        log.warning("Please update numba (0.43+) to have dictionary support!")
-        HAVE_NUMBA = False
-        jit = lambda f: f
-    else:
-        HAVE_NUMBA = True
-        from numba import jit
-
-
 def cherenkov(calib_hits, track):
     """Compute parameters of Cherenkov photons emitted from a track and hitting a PMT.
     calib_hits is the table of calibrated hits of the track.
