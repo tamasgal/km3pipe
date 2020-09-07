@@ -176,18 +176,18 @@ class TestGetClosest(TestCase):
 
         self.det = Detector(data_path("detx/detx_v3.detx"))
 
-        self.mean_doms = pd.DataFrame(self.det.dom_table).mean()
+        self.DU = pd.DataFrame(self.det.dom_table).mean()
 
     def test_get_closest(self):
-        mean_doms = pd.DataFrame(self.det.dom_table).mean()
-        d_closest, z_closest = get_closest(self.track, mean_doms)
+        DU = pd.DataFrame(self.det.dom_table).mean()
+        d_closest, z_closest = get_closest(self.track, DU)
 
         self.assertAlmostEqual(d_closest, 9.073491762564467)
         self.assertAlmostEqual(z_closest, 82.24928115091757)
 
     def test_get_closest_from_DataFrame(self):
         d_closest, z_closest = get_closest(
-            pd.Series(self.track), pd.Series(self.mean_doms)
+            pd.Series(self.track), pd.Series(self.DU)
         )
 
         self.assertAlmostEqual(d_closest, 9.073491762564467)
