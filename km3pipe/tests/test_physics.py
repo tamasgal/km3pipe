@@ -112,55 +112,55 @@ class TestGetCherenkov(TestCase):
 
         arr = get_cherenkov(self.calib_hits, self.track)
 
-        assert arr["d_photon_closest"][0] == 24.049593557846112
-        assert arr["d_photon_closest"][1] == 24.085065395206847
+        self.assertAlmostEqual(arr["d_photon_closest"][0], 24.049593557846112)
+        self.assertAlmostEqual(arr["d_photon_closest"][1], 24.085065395206847)
 
-        assert arr["d_photon"][0] == 35.80244420413484
-        assert arr["d_photon"][1] == 35.855250854478896
+        self.assertAlmostEqual(arr["d_photon"][0], 35.80244420413484)
+        self.assertAlmostEqual(arr["d_photon"][1], 35.855250854478896)
 
-        assert arr["d_track"][0] == 45.88106599210481
-        assert arr["d_track"][1] == 45.90850564175342
+        self.assertAlmostEqual(arr["d_track"][0], 45.88106599210481)
+        self.assertAlmostEqual(arr["d_track"][1], 45.90850564175342)
 
-        assert arr["t_photon"][0] == 70311759.26448613
-        assert arr["t_photon"][1] == 70311759.59904088
+        self.assertAlmostEqual(arr["t_photon"][0], 70311759.26448613)
+        self.assertAlmostEqual(arr["t_photon"][1], 70311759.59904088)
 
-        assert arr["cos_photon_PMT"][0] == -0.98123942583677
-        assert arr["cos_photon_PMT"][1] == -0.6166369315726149
+        self.assertAlmostEqual(arr["cos_photon_PMT"][0], -0.98123942583677)
+        self.assertAlmostEqual(arr["cos_photon_PMT"][1], -0.6166369315726149)
 
-        assert arr["dir_x_photon"][0] == 0.45964884122649263
-        assert arr["dir_x_photon"][1] == 0.45652355929477095
+        self.assertAlmostEqual(arr["dir_x_photon"][0], 0.45964884122649263)
+        self.assertAlmostEqual(arr["dir_x_photon"][1], 0.45652355929477095)
 
-        assert arr["dir_y_photon"][0] == -0.8001372907490844
-        assert arr["dir_y_photon"][1] == -0.8025165828910586
+        self.assertAlmostEqual(arr["dir_y_photon"][0], -0.8001372907490844)
+        self.assertAlmostEqual(arr["dir_y_photon"][1], -0.8025165828910586)
 
-        assert arr["dir_z_photon"][0] == -0.3853612055096594
-        assert arr["dir_z_photon"][1] == -0.38412676812960095
+        self.assertAlmostEqual(arr["dir_z_photon"][0], -0.3853612055096594)
+        self.assertAlmostEqual(arr["dir_z_photon"][1], -0.38412676812960095)
 
     def test_get_cherenkov_from_Table(self):
 
         arr = get_cherenkov(Table(self.calib_hits), Table(self.track))
 
-        assert arr["d_photon_closest"][0] == 24.049593557846112
-        assert arr["d_photon"][0] == 35.80244420413484
-        assert arr["d_track"][0] == 45.88106599210481
-        assert arr["t_photon"][0] == 70311759.26448613
-        assert arr["cos_photon_PMT"][0] == -0.98123942583677
-        assert arr["dir_x_photon"][0] == 0.45964884122649263
-        assert arr["dir_y_photon"][0] == -0.8001372907490844
-        assert arr["dir_z_photon"][0] == -0.3853612055096594
+        self.assertAlmostEqual(arr["d_photon_closest"][0], 24.049593557846112)
+        self.assertAlmostEqual(arr["d_photon"][0], 35.80244420413484)
+        self.assertAlmostEqual(arr["d_track"][0], 45.88106599210481)
+        self.assertAlmostEqual(arr["t_photon"][0], 70311759.26448613)
+        self.assertAlmostEqual(arr["cos_photon_PMT"][0], -0.98123942583677)
+        self.assertAlmostEqual(arr["dir_x_photon"][0], 0.45964884122649263)
+        self.assertAlmostEqual(arr["dir_y_photon"][0], -0.8001372907490844)
+        self.assertAlmostEqual(arr["dir_z_photon"][0], -0.3853612055096594)
 
     def test_get_cherenkov_from_DataFrame(self):
 
         arr = get_cherenkov(pd.DataFrame(self.calib_hits), pd.Series(self.track))
 
-        assert arr["d_photon_closest"][0] == 24.049593557846112
-        assert arr["d_photon"][0] == 35.80244420413484
-        assert arr["d_track"][0] == 45.88106599210481
-        assert arr["t_photon"][0] == 70311759.26448613
-        assert arr["cos_photon_PMT"][0] == -0.98123942583677
-        assert arr["dir_x_photon"][0] == 0.45964884122649263
-        assert arr["dir_y_photon"][0] == -0.8001372907490844
-        assert arr["dir_z_photon"][0] == -0.3853612055096594
+        self.assertAlmostEqual(arr["d_photon_closest"][0], 24.049593557846112)
+        self.assertAlmostEqual(arr["d_photon"][0], 35.80244420413484)
+        self.assertAlmostEqual(arr["d_track"][0], 45.88106599210481)
+        self.assertAlmostEqual(arr["t_photon"][0], 70311759.26448613)
+        self.assertAlmostEqual(arr["cos_photon_PMT"][0], -0.98123942583677)
+        self.assertAlmostEqual(arr["dir_x_photon"][0], 0.45964884122649263)
+        self.assertAlmostEqual(arr["dir_y_photon"][0], -0.8001372907490844)
+        self.assertAlmostEqual(arr["dir_z_photon"][0], -0.3853612055096594)
 
 
 class TestGetClosest(TestCase):
@@ -182,16 +182,16 @@ class TestGetClosest(TestCase):
         mean_doms = pd.DataFrame(self.det.dom_table).mean()
         d_closest, z_closest = get_closest(self.track, mean_doms)
 
-        assert d_closest == 9.073491762564467
-        assert z_closest == 82.24928115091757
+        self.assertAlmostEqual(d_closest, 9.073491762564467)
+        self.assertAlmostEqual(z_closest, 82.24928115091757)
 
     def test_get_closest_from_DataFrame(self):
         d_closest, z_closest = get_closest(
             pd.Series(self.track), pd.Series(self.mean_doms)
         )
 
-        assert d_closest == 9.073491762564467
-        assert z_closest == 82.24928115091757
+        self.assertAlmostEqual(d_closest, 9.073491762564467)
+        self.assertAlmostEqual(z_closest, 82.24928115091757)
 
     def test_get_closest_from_Table(self):
         trk = {
@@ -207,5 +207,5 @@ class TestGetClosest(TestCase):
 
         d_closest, z_closest = get_closest(Table(trk), mean)
 
-        assert d_closest == 9.073491762564467
-        assert z_closest == 82.24928115091757
+        self.assertAlmostEqual(d_closest, 9.073491762564467)
+        self.assertAlmostEqual(z_closest, 82.24928115091757)
