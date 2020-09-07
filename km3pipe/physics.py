@@ -154,10 +154,9 @@ def _cherenkov(calib_pos, calib_dir, track_pos, track_dir, track_t):
     return out
 
 
-def _get_closest(track_pos, track_dir, meanDU_pos):
+def _get_closest(track_pos, track_dir, meanDU_pos, meanDU_dir):
     """calculate the distance of closest approach """
     # direction track to the mean DU, assumes vertical DU:
-    meanDU_dir = np.array([0, 0, 1])
     cross = np.cross(track_dir, meanDU_dir)
     dir_to_DU = cross / np.linalg.norm(cross, axis=0)  # normalized vector
 
@@ -181,8 +180,9 @@ def _get_closest(track_pos, track_dir, meanDU_pos):
     return d_closest, z_closest
 
 
-def get_closest(track, mean_doms):
+def get_closest(track, DU):
     """calculate the distance of closest approach (d_closest) and its coordinate along the z axis (z_closest).
+    These calculations aLWAYS assume vertical DU.
 
     Parameters
     ----------
@@ -194,8 +194,8 @@ def get_closest(track, mean_doms):
             - dir_x.
             - dir_y.
             - dir_z.
-    mean_doms : a DataFrame or a numpy recarray or a km3pipe Table or a dict.
-        mean doms table with the following information:
+    DU : a DataFrame or a numpy recarray or a km3pipe Table or a dict.
+        DU vector with the following information:
             - pos_x.
             - pos_y.
             - pos_z.
@@ -206,15 +206,14 @@ def get_closest(track, mean_doms):
         (d_closest, z_closest).
     """
     if isinstance(
-        mean_doms, (dict, pd.core.series.Series, pd.DataFrame, kp.Table, np.ndarray)
+        DU, (dict, pd.core.series.Series, pd.DataFrame, kp.Table, np.ndarray)
     ):
         meanDU_pos = np.array(
-            [mean_doms["pos_x"], mean_doms["pos_y"], mean_doms["pos_z"]]
+            [DU["pos_x"], DU["pos_y"], DU["pos_z"]]
         ).reshape(
             3,
         )
-        # meanDU_dir = np.array(
-        #     [mean_doms["dir_x"], mean_doms["dir_y"], mean_doms["dir_z"]]).reshape(3,)
+        meanDU_dir = np.array([0, 0, 1])  # assumes vertical DU
 
     if isinstance(
         track, (dict, pd.core.series.Series, pd.DataFrame, kp.Table, np.ndarray)
@@ -230,4 +229,4 @@ def get_closest(track, mean_doms):
         track_pos = np.array([track.pos_x, track.pos_y, track.pos_z])
         track_dir = np.array([track.dir_x, track.dir_y, track.dir_z])
 
-    return _get_closest(track_pos, track_dir, meanDU_pos)
+    return _get_closest(track_pos, track_dir, meanDU_pos, meanDU_dir)
