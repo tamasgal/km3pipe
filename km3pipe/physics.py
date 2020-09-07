@@ -47,7 +47,7 @@ else:
         from numba import jit
 
 
-def get_cherenkov(calib_hits, track):
+def cherenkov(calib_hits, track):
     """Compute parameters of Cherenkov photons emitted from a track and hitting a PMT.
     calib_hits is the table of calibrated hits of the track.
 
@@ -111,7 +111,7 @@ def get_cherenkov(calib_hits, track):
         track_dir = np.array([track.dir_x, track.dir_y, track.dir_z]).T
         track_t = track.t
 
-    out = _get_cherenkov(calib_pos, calib_dir, track_pos, track_dir, track_t)
+    out = _cherenkov(calib_pos, calib_dir, track_pos, track_dir, track_t)
 
     return out.view(
         dtype=[
@@ -130,7 +130,7 @@ def get_cherenkov(calib_hits, track):
 
 
 @njit
-def _get_cherenkov(calib_pos, calib_dir, track_pos, track_dir, track_t):
+def _cherenkov(calib_pos, calib_dir, track_pos, track_dir, track_t):
     """calculate Cherenkov photons parameters """
     rows = len(calib_pos)
     out = np.zeros((rows, 8))
