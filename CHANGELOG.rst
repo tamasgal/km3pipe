@@ -1,5 +1,8 @@
 Unreleased changes
 ------------------
+* New ``kp.physics`` module to consolidate physics related
+  functions and ``km.physics`` to gather physics related
+  pipeline modules
 
 Version 9
 ---------
