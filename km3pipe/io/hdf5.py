@@ -255,7 +255,7 @@ class HDF5Sink(Module):
                 self.filename,
                 mode=self.file_mode,
                 title="KM3NeT",
-                **self.pytab_file_args
+                **self.pytab_file_args,
             )
             Provenance().record_output(self.filename, "HDF5Sink output")
         self.filters = tb.Filters(

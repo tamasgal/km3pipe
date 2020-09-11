@@ -618,10 +618,18 @@ class TestHDF5PumpConsistency(TestCase):
             def process(self, blob):
                 self.count += 1
                 tab_a = Table(
-                    {"a": self.count * 10,}, h5loc="/tabs/tab_a", split_h5=True
+                    {
+                        "a": self.count * 10,
+                    },
+                    h5loc="/tabs/tab_a",
+                    split_h5=True,
                 )
                 tab_b = Table(
-                    {"b": self.count * 100,}, h5loc="/tabs/tab_b", split_h5=True
+                    {
+                        "b": self.count * 100,
+                    },
+                    h5loc="/tabs/tab_b",
+                    split_h5=True,
                 )
                 blob["TabA"] = tab_a
                 blob["TabB"] = tab_b
