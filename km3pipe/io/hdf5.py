@@ -890,10 +890,10 @@ def _(header_dict):
                 types.append("a{}".format(len(field_value)))
             except TypeError:  # e.g. values is None
                 types.append("a{}".format(len(str(field_value))))
-        tab_dict["parameter"].append(parameter)
-        tab_dict["field_names"].append(" ".join(fields))
-        tab_dict["field_values"].append(" ".join(values))
-        tab_dict["dtype"].append(" ".join(types))
+        tab_dict["parameter"].append(parameter.encode())
+        tab_dict["field_names"].append(" ".join(fields).encode())
+        tab_dict["field_values"].append(" ".join(values).encode())
+        tab_dict["dtype"].append(" ".join(types).encode())
         log.debug(
             "{}: {} {} {}".format(
                 tab_dict["parameter"][-1],
