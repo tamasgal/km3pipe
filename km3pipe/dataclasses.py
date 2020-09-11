@@ -514,7 +514,7 @@ class Table(np.recarray):
         s += "HDF5 location: {} ({})\n".format(self.h5loc, spl)
         s += "\n".join(
             map(
-                lambda d: "{2} (dtype: {1}) = {0}".format(self[d[0]], *d),
+                lambda d: "{1} (dtype: {2}) = {0}".format(self[d[0]], *d),
                 self.dtype.descr,
             )
         )
