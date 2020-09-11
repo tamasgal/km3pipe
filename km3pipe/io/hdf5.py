@@ -91,13 +91,13 @@ class HDF5Header(object):
     def from_table(cls, table):
         data = OrderedDict()
         for i in range(len(table)):
-            parameter = table["parameter"][i]
-            field_names = table["field_names"][i].split(" ")
-            field_values = table["field_values"][i].split(" ")
+            parameter = table["parameter"][i].decode()
+            field_names = table["field_names"][i].decode().split(" ")
+            field_values = table["field_values"][i].decode().split(" ")
             if field_values == [""]:
                 log.info("No value for parameter '{}'! Skipping...".format(parameter))
                 continue
-            dtypes = table["dtype"][i]
+            dtypes = table["dtype"][i].decode()
             dtyped_values = []
             for dtype, value in zip(dtypes.split(" "), field_values):
                 if dtype.startswith("a"):
@@ -340,7 +340,6 @@ class HDF5Sink(Module):
         if h5loc not in self._tables:
             dtype = arr.dtype
             if any("U" in str(dtype.fields[f][0]) for f in dtype.fields):
-                print(arr)
                 self.log.error(
                     "Cannot write data to '{}'. Unicode strings are not supported!".format(
                         h5loc

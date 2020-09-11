@@ -1019,27 +1019,27 @@ class TestConvertHeaderDictToTable(TestCase):
     def test_values(self):
         tab = self.tab
 
-        index_a = tab.parameter.tolist().index("param_a")
-        index_b = tab.parameter.tolist().index("param_b")
+        index_a = tab.parameter.tolist().index(b"param_a")
+        index_b = tab.parameter.tolist().index(b"param_b")
 
-        assert "param_a" == tab.parameter[index_a]
-        assert "field_a_1" in tab.field_names[index_a]
-        assert "field_a_2" in tab.field_names[index_a]
-        if "field_a_1 field_a_2" == tab.field_names[index_a]:
-            assert "1 2" == tab.field_values[index_a]
+        assert b"param_a" == tab.parameter[index_a]
+        assert b"field_a_1" in tab.field_names[index_a]
+        assert b"field_a_2" in tab.field_names[index_a]
+        if b"field_a_1 field_a_2" == tab.field_names[index_a]:
+            assert b"1 2" == tab.field_values[index_a]
         else:
-            assert "2 1" == tab.field_values[index_a]
-        assert "f4 f4" == tab["dtype"][index_a]
+            assert b"2 1" == tab.field_values[index_a]
+        assert b"f4 f4" == tab["dtype"][index_a]
 
-        assert "param_b" == tab.parameter[index_b]
-        assert "field_b_1" == tab.field_names[index_b]
-        assert "a" == tab.field_values[index_b]
-        assert "a1" == tab["dtype"][index_b]
+        assert b"param_b" == tab.parameter[index_b]
+        assert b"field_b_1" == tab.field_names[index_b]
+        assert b"a" == tab.field_values[index_b]
+        assert b"a1" == tab["dtype"][index_b]
 
     def test_values_are_converted_to_str(self):
-        index_c = self.tab.parameter.tolist().index("param_c")
-        assert "param_c" == self.tab.parameter[index_c]
-        assert "1" == self.tab.field_values[index_c]
+        index_c = self.tab.parameter.tolist().index(b"param_c")
+        assert b"param_c" == self.tab.parameter[index_c]
+        assert b"1" == self.tab.field_values[index_c]
 
     def test_conversion_returns_none_for_empty_dict(self):
         assert None is header2table(None)
@@ -1050,37 +1050,37 @@ class TestConvertHeaderDictToTable(TestCase):
         tab = header2table(header)
         print(tab)
         for p in [
-            "DAQ",
-            "PDF",
-            "can",
-            "can_user",
-            "coord_origin",
-            "cut_in",
-            "cut_nu",
-            "cut_primary",
-            "cut_seamuon",
-            "decay",
-            "detector",
-            "drawing",
-            "genhencut",
-            "genvol",
-            "kcut",
-            "livetime",
-            "model",
-            "ngen",
-            "norma",
-            "nuflux",
-            "physics",
-            "seed",
-            "simul",
-            "sourcemode",
-            "spectrum",
-            "start_run",
-            "target",
-            "usedetfile",
-            "xlat_user",
-            "xparam",
-            "zed_user",
+            b"DAQ",
+            b"PDF",
+            b"can",
+            b"can_user",
+            b"coord_origin",
+            b"cut_in",
+            b"cut_nu",
+            b"cut_primary",
+            b"cut_seamuon",
+            b"decay",
+            b"detector",
+            b"drawing",
+            b"genhencut",
+            b"genvol",
+            b"kcut",
+            b"livetime",
+            b"model",
+            b"ngen",
+            b"norma",
+            b"nuflux",
+            b"physics",
+            b"seed",
+            b"simul",
+            b"sourcemode",
+            b"spectrum",
+            b"start_run",
+            b"target",
+            b"usedetfile",
+            b"xlat_user",
+            b"xparam",
+            b"zed_user",
         ]:
             assert p in tab.parameter
 
@@ -1097,5 +1097,7 @@ class TestConvertHeaderDictToTable(TestCase):
         header = HDF5Header(hdict)
         tab = header2table(header)
 
-        for p in ["param_a", "param_b", "param_c"]:
+        for p in [b"param_a", b"param_b", b"param_c"]:
             assert p in tab.parameter
+
+        hdf5header_from_table = HDF5Header.from_table(tab)
