@@ -7,6 +7,7 @@ Read and write KM3NeT-formatted HDF5 files.
 """
 
 from collections import OrderedDict, defaultdict, namedtuple
+from functools import singledispatch
 import os.path
 import warnings
 
@@ -861,13 +862,19 @@ class HDF5MetaData(Module):
         self.expose(self.data, "HDF5MetaData")
 
 
-def convert_header_dict_to_table(header_dict):
-    """Converts a header dictionary (usually from aanet) to a Table"""
+@singledispatch
+def header2table(data):
+    """Convert a header to an `HDF5Header` compliant `kp.Table`"""
+    print(f"Unsupported header data of type {type(data)}")
+
+
+@header2table.register(dict)
+def _(header_dict):
     if not header_dict:
-        log.warning("Can't convert empty header dict to table, skipping...")
+        print("Empty header dictionary.")
         return
     tab_dict = defaultdict(list)
-    log.debug("Param:   field_names    field_values    dtype")
+
     for parameter, data in header_dict.items():
         fields = []
         values = []
@@ -893,3 +900,17 @@ def convert_header_dict_to_table(header_dict):
             )
         )
     return Table(tab_dict, h5loc="/raw_header", name="RawHeader", h5singleton=True)
+
+
+@header2table.register(km3io.offline.Header)
+def _(header):
+    out = {}
+    for parameter, values in header._data.items():
+        try:
+            values = values._asdict()
+        except AttributeError:
+            # single entry without further parameter name
+            # in specification
+            values = {parameter + "_0": values}
+        out[parameter] = values
+    return header2table(out)

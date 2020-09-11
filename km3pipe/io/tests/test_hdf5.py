@@ -6,6 +6,7 @@ from os.path import join, dirname
 
 import numpy as np
 import tables as tb
+import km3io
 
 from km3pipe import Blob, Module, Pipeline, Pump, version
 from km3pipe.dataclasses import Table, NDArray
@@ -13,7 +14,7 @@ from km3pipe.io.hdf5 import (
     HDF5Pump,
     HDF5Sink,
     HDF5Header,
-    convert_header_dict_to_table,
+    header2table,
     FORMAT_VERSION,
 )
 from km3pipe.testing import TestCase, data_path
@@ -959,7 +960,7 @@ class TestHDF5Header(TestCase):
     #     assert 7e+08 == header.param_g
 
     def test_header_from_table(self):
-        table = convert_header_dict_to_table(self.hdict)
+        table = header2table(self.hdict)
         header = HDF5Header.from_table(table)
         print(header)
         assert 1.0 == header.param_a.field_a_1
@@ -1002,7 +1003,7 @@ class TestConvertHeaderDictToTable(TestCase):
             "param_b": {"field_b_1": "a"},
             "param_c": {"field_c_1": 1},
         }
-        self.tab = convert_header_dict_to_table(hdict)
+        self.tab = header2table(hdict)
 
     def test_length(self):
         assert 3 == len(self.tab)
@@ -1033,5 +1034,47 @@ class TestConvertHeaderDictToTable(TestCase):
         assert "1" == self.tab.field_values[index_c]
 
     def test_conversion_returns_none_for_empty_dict(self):
-        assert None is convert_header_dict_to_table(None)
-        assert None is convert_header_dict_to_table({})
+        assert None is header2table(None)
+        assert None is header2table({})
+
+    def test_conversion_of_km3io_header(self):
+        header = km3io.OfflineReader(data_path("offline/numucc.root")).header
+        tab = header2table(header)
+        print(tab)
+        for p in [
+            "DAQ",
+            "PDF",
+            "can",
+            "can_user",
+            "coord_origin",
+            "cut_in",
+            "cut_nu",
+            "cut_primary",
+            "cut_seamuon",
+            "decay",
+            "detector",
+            "drawing",
+            "genhencut",
+            "genvol",
+            "kcut",
+            "livetime",
+            "model",
+            "ngen",
+            "norma",
+            "nuflux",
+            "physics",
+            "seed",
+            "simul",
+            "sourcemode",
+            "spectrum",
+            "start_run",
+            "target",
+            "usedetfile",
+            "xlat_user",
+            "xparam",
+            "zed_user",
+        ]:
+            assert p in tab.parameter
+
+        h5header = HDF5Header.from_table(tab)
+        assert h5header.can.zmin == header.can.zmin
