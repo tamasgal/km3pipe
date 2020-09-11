@@ -885,8 +885,10 @@ def _(header_dict):
             try:
                 _ = float(field_value)  # noqa
                 types.append("f4")
-            except (TypeError, ValueError):
+            except ValueError:
                 types.append("a{}".format(len(field_value)))
+            except TypeError:  # e.g. values is None
+                types.append("a{}".format(len(str(field_value))))
         tab_dict["parameter"].append(parameter)
         tab_dict["field_names"].append(" ".join(fields))
         tab_dict["field_values"].append(" ".join(values))
