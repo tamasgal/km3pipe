@@ -914,3 +914,8 @@ def _(header):
             values = {parameter + "_0": values}
         out[parameter] = values
     return header2table(out)
+
+
+@header2table.register(HDF5Header)
+def _(header):
+    return header2table(header._data)

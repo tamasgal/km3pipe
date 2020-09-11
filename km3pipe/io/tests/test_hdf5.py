@@ -1086,3 +1086,16 @@ class TestConvertHeaderDictToTable(TestCase):
 
         h5header = HDF5Header.from_table(tab)
         assert h5header.can.zmin == header.can.zmin
+
+    def test_conversion_of_hdf5header(self):
+        hdict = {
+            "param_a": {"field_a_1": "1", "field_a_2": "2"},
+            "param_b": {"field_b_1": "a"},
+            "param_c": {"field_c_1": 1},
+        }
+
+        header = HDF5Header(hdict)
+        tab = header2table(header)
+
+        for p in ["param_a", "param_b", "param_c"]:
+            assert p in tab.parameter
