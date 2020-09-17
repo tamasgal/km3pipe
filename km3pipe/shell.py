@@ -38,6 +38,8 @@ JOB_TEMPLATES = {
         #
         ## Walltime (HH:MM:SS), for different batch systems (IN2P3, ECAP, ...)
         #$ -l ct={walltime}
+        #$ -l h_cpu={cpu}
+        #$ -l s_cpu={cpu}
         ## Memory (Units: G, M, K, B; Min 64M)
         #$ -l vmem={vmem}
         ## Local scratch diskspace (at TMPDIR)
@@ -121,6 +123,7 @@ def gen_job(
     group="km3net",
     platform="cl7",
     walltime="00:10:00",
+    cpu=None,
     cluster="in2p3",
     vmem="8G",
     fsize="8G",
@@ -143,6 +146,8 @@ def gen_job(
         shell = os.environ["SHELL"]
     if email is None:
         email = os.environ["USER"] + "@km3net.de"
+    if cpu is None:
+        cpu = walltime
     if isinstance(script, Script):
         script = str(script)
     log_path = os.path.abspath(log_path)
@@ -164,6 +169,7 @@ def gen_job(
         job_name=job_name,
         group=group,
         walltime=walltime,
+        cpu=cpu,
         vmem=vmem,
         fsize=fsize,
         irods=irods,
