@@ -3,6 +3,10 @@ Unreleased changes
 * New ``kp.physics`` module to consolidate physics related
   functions and ``km.physics`` to gather physics related
   pipeline modules
+* ``kp.db.show_ahrs_calibration`` and ``kp.db.clbupi2ahrsupi``
+  are now deprecated in favour of ``kp.db.show_compass_calibration``
+  and ``kp.db.clbupi2compassupi`` and also support LSM303 in addition
+  to AHRS
 
 Version 9
 ---------
