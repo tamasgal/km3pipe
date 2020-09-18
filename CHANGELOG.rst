@@ -1,5 +1,11 @@
 Unreleased changes
 ------------------
+
+
+Version 9
+---------
+9.0.0-alpha.24 / 2020-09-18
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 * New ``kp.physics`` module to consolidate physics related
   functions and ``km.physics`` to gather physics related
   pipeline modules
@@ -8,8 +14,6 @@ Unreleased changes
   and ``kp.db.clbupi2compassupi`` and also support LSM303 in addition
   to AHRS
 
-Version 9
----------
 9.0.0-alpha.23 / 2020-09-03
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 * Fixed a bug where ``kp.Table`` modified scalar entries of the
