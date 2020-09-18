@@ -806,27 +806,40 @@ class TriggerSetup(object):
 
 
 @functools.lru_cache()
-def clbupi2ahrsupi(clb_upi):
-    """Generate AHRS UPI from CLB UPI."""
+def clbupi2compassupi(clb_upi):
+    """Return Compass UPI from CLB UPI."""
     sds = StreamDS()
     upis = sds.integration(container_upi=clb_upi).CONTENT_UPI.values
-    ahrs_upis = [upi for upi in upis if "AHRS" in upi]
-    if len(ahrs_upis) > 1:
+    compass_upis = [upi for upi in upis if ("AHRS" in upi) or ("LSM303" in upi)]
+    if len(compass_upis) > 1:
         log.warning(
-            "Multiple AHRS UPIs found for CLB UPI {}. "
+            "Multiple compass UPIs found for CLB UPI {}. "
             "Using the first entry.".format(clb_upi)
         )
-    return ahrs_upis[0]
+    return compass_upis[0]
 
 
-def show_ahrs_calibration(clb_upi, version="3"):
-    """Show AHRS calibration data for given `clb_upi`."""
+def clbupi2ahrsupi(clb_upi):
+    """Return UPI from CLB UPI. Wrap clbupi2compassupi for back-compatibility."""
+    log.deprecation("clbupi2ahrsupi is deprecated ! You should use clbupi2compassupi.")
+    upi = clbupi2compassupi(clb_upi)
+    if upi.split("/")[1] != "AHRS":
+        log.warning("clbupi2ahrsupi() is returning a LSM303 UPI : {}".format(upi))
+    return upi
+
+
+def show_compass_calibration(clb_upi, version="3"):
+    """Show compass calibration data for given `clb_upi`."""
     db = DBManager()
-    ahrs_upi = clbupi2ahrsupi(clb_upi)
-    print("AHRS UPI: {}".format(ahrs_upi))
+    compass_upi = clbupi2compassupi(clb_upi)
+    compass_model = compass_upi.split("/")[1]
+    print("Compass UPI: {}".format(compass_upi))
+    print("Compass model: {}".format(compass_model))
     content = db._get_content(
-        "show_product_test.htm?upi={0}&"
-        "testtype=AHRS-CALIBRATION-v{1}&n=1&out=xml".format(ahrs_upi, version)
+        "show_product_test.htm?upi={compass_upi}&"
+        "testtype={model}-CALIBRATION-v{version}&n=1&out=xml".format(
+            compass_upi, compass_model, version
+        )
     ).replace("\n", "")
 
     import xml.etree.ElementTree as ET
@@ -842,6 +855,14 @@ def show_ahrs_calibration(clb_upi, version="3"):
         values = [[i.text for i in c] for c in root.findall(".//Values")]
         for name, value in zip(names, values):
             print("{}: {}".format(name, value))
+
+
+def show_ahrs_calibration(clb_upi, version="3"):
+    """Show AHRS calibration data for given `clb_upi`."""
+    log.deprecation(
+        "show_ahrs_calibration is deprecated ! You should use show_compass_calibration()."
+    )
+    show_compass_calibration(clb_upi, version=version)
 
 
 class CLBMap(object):
