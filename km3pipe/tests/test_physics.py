@@ -186,9 +186,7 @@ class TestGetClosest(TestCase):
         self.assertAlmostEqual(z_closest, 82.24928115091757)
 
     def test_get_closest_from_DataFrame(self):
-        d_closest, z_closest = get_closest(
-            pd.Series(self.track), pd.Series(self.DU)
-        )
+        d_closest, z_closest = get_closest(pd.Series(self.track), pd.Series(self.DU))
 
         self.assertAlmostEqual(d_closest, 9.073491762564467)
         self.assertAlmostEqual(z_closest, 82.24928115091757)

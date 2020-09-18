@@ -26,6 +26,7 @@ import numpy as np
 # Some dummy modules
 # ------------------
 
+
 class RandomNumberGenerator(kp.Module):
     def configure(self):
         self.h5loc = self.require("h5loc")
