@@ -133,7 +133,7 @@ class RecoTracksTabulator(kp.Module):
     ----------
     reco: str
       The reconstruction type to be extracted.
-    split: bool (default: True)
+    split: bool (default: False)
       Defines whether the tracks should be split up into individual arrays
       in a single group (e.g. reco/foo/dom_id, reco/foo/channel_id) or stored
       as a single HDF5Compound array (e.g. reco).
@@ -141,7 +141,7 @@ class RecoTracksTabulator(kp.Module):
 
     def configure(self):
         self.reco = self.require("reco").upper()
-        self.split = self.get("split", default=True)
+        self.split = self.get("split", default=False)
         try:
             rec_stage_begin = km3io.definitions.reconstruction[self.reco + "BEGIN"]
             rec_stage_end = km3io.definitions.reconstruction[self.reco + "END"]
