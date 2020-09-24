@@ -8,22 +8,6 @@ import km3pipe as kp
 import km3modules as km
 
 
-class Observer(kp.Module):
-    def configure(self):
-        self.count = self.require("count")
-        self.required_keys = self.get("required_keys", default=[])
-        self._count = 0
-
-    def process(self, blob):
-        self._count += 1
-        for key in self.required_keys:
-            assert key in blob
-        return blob
-
-    def finish(self):
-        assert self.count == self._count
-
-
 class TestOfflineHeaderTabulator(unittest.TestCase):
     def test_module(self):
         outfile = tempfile.NamedTemporaryFile(delete=True)
@@ -36,7 +20,7 @@ class TestOfflineHeaderTabulator(unittest.TestCase):
 
         pipe = kp.Pipeline()
         pipe.attach(kp.io.HDF5Pump, filename=outfile.name)
-        pipe.attach(Observer, count=10, required_keys=["RawHeader"])
+        pipe.attach(km.common.Observer, count=10, required_keys=["RawHeader"])
         pipe.drain()
 
 
@@ -52,7 +36,7 @@ class TestEventInfoTabulator(unittest.TestCase):
 
         pipe = kp.Pipeline()
         pipe.attach(kp.io.HDF5Pump, filename=outfile.name)
-        pipe.attach(Observer, count=10, required_keys=["EventInfo"])
+        pipe.attach(km.common.Observer, count=10, required_keys=["EventInfo"])
         pipe.drain()
 
 
@@ -68,7 +52,7 @@ class TestHitsTabulator(unittest.TestCase):
 
         pipe = kp.Pipeline()
         pipe.attach(kp.io.HDF5Pump, filename=outfile.name)
-        pipe.attach(Observer, count=10, required_keys=["Hits"])
+        pipe.attach(km.common.Observer, count=10, required_keys=["Hits"])
         pipe.drain()
 
     def test_mc_hits(self):
@@ -82,7 +66,7 @@ class TestHitsTabulator(unittest.TestCase):
 
         pipe = kp.Pipeline()
         pipe.attach(kp.io.HDF5Pump, filename=outfile.name)
-        pipe.attach(Observer, count=10, required_keys=["McHits"])
+        pipe.attach(km.common.Observer, count=10, required_keys=["McHits"])
         pipe.drain()
 
 
@@ -98,5 +82,5 @@ class TestMCTracksTabulator(unittest.TestCase):
 
         pipe = kp.Pipeline()
         pipe.attach(kp.io.HDF5Pump, filename=outfile.name)
-        pipe.attach(Observer, count=10, required_keys=["McTracks"])
+        pipe.attach(km.common.Observer, count=10, required_keys=["McTracks"])
         pipe.drain()
