@@ -129,6 +129,7 @@ class EventInfoTabulator(kp.Module):
     Create `kp.Table` from event information provided by `km3io`.
 
     """
+
     def process(self, blob):
         blob["EventInfo"] = self._parse_eventinfo(blob["event"])
         return blob
@@ -170,5 +171,5 @@ class EventInfoTabulator(kp.Module):
 
 class OfflineHeaderTabulator(kp.Module):
     def process(self, blob):
-        blob['RawHeader'] = kp.io.hdf5.header2table(blob['header'])
+        blob["RawHeader"] = kp.io.hdf5.header2table(blob["header"])
         return blob

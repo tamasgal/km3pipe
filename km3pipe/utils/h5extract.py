@@ -38,13 +38,11 @@ def main():
 
     args = docopt(__doc__, version=kp.version)
 
-    # print(args)
-
     outfile = args["-o"]
     if outfile is None:
         outfile = args["FILENAME"] + ".h5"
 
-    pipe = kp.Pipeline(timeit=args['--timeit'])
+    pipe = kp.Pipeline(timeit=args["--timeit"])
     pipe.attach(kp.io.OfflinePump, filename=args["FILENAME"])
     pipe.attach(km.StatusBar, every=1000)
     if args["--offline-header"]:
