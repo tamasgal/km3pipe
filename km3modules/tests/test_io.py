@@ -84,3 +84,19 @@ class TestMCTracksTabulator(unittest.TestCase):
         pipe.attach(kp.io.HDF5Pump, filename=outfile.name)
         pipe.attach(km.common.Observer, count=10, required_keys=["McTracks"])
         pipe.drain()
+
+
+class TestRecoTracksTabulator(unittest.TestCase):
+    def test_module(self):
+        outfile = tempfile.NamedTemporaryFile(delete=True)
+
+        pipe = kp.Pipeline()
+        pipe.attach(kp.io.OfflinePump, filename=data_path("offline/mcv5.11r2.gsg_muonCChigherE-CC_50-5000GeV.km3_AAv1.jterbr00004695.jchain.aanet.498.root"))
+        pipe.attach(km.io.RecoTracksTabulator, reco="jmuon")
+        pipe.attach(kp.io.HDF5Sink, filename=outfile.name)
+        pipe.drain(5)
+
+        pipe = kp.Pipeline()
+        pipe.attach(kp.io.HDF5Pump, filename=outfile.name)
+        pipe.attach(km.common.Observer, count=5, required_keys=["Jmuon"])
+        pipe.drain()

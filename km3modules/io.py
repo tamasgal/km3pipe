@@ -4,6 +4,7 @@ from collections import defaultdict
 import numpy as np
 
 import km3pipe as kp
+import km3io
 
 USR_MC_TRACKS_KEYS = [b"energy_lost_in_can", b"bx", b"by", b"ichan", b"cc"]
 
@@ -122,6 +123,78 @@ class MCTracksTabulator(kp.Module):
         if self._read_usr_data:
             dct.update(self._parse_usr_to_dct(mc_tracks))
         return kp.Table(dct, name="McTracks", h5loc="/mc_tracks", split_h5=self.split)
+
+
+class RecoTracksTabulator(kp.Module):
+    """
+    Create `kp.Table` from recostruced tracks provided by `km3io`.
+
+    Parameters
+    ----------
+    reco: str
+      The reconstruction type to be extracted.
+    split: bool (default: True)
+      Defines whether the tracks should be split up into individual arrays
+      in a single group (e.g. reco/foo/dom_id, reco/foo/channel_id) or stored
+      as a single HDF5Compound array (e.g. reco).
+    """
+
+    def configure(self):
+        self.reco = self.require("reco").upper()
+        self.split = self.get("split", default=True)
+        try:
+            rec_stage_begin = km3io.definitions.reconstruction[self.reco + "BEGIN"]
+            rec_stage_end = km3io.definitions.reconstruction[self.reco + "END"]
+        except KeyError:
+            self.log.critical(
+                f"Unknown reconstruction type {self.reco}. Try e.g. jmuon."
+            )
+            raise SystemExit()
+        self.rec_stages = {}
+        for rec_stage, idx in km3io.definitions.reconstruction.items():
+            if idx > rec_stage_begin and idx < rec_stage_end:
+                self.rec_stages[rec_stage] = idx
+
+    def process(self, blob):
+        tracks = blob["event"].tracks
+        dct = dict(
+            pos_x=tracks.pos_x,
+            pos_y=tracks.pos_y,
+            pos_z=tracks.pos_z,
+            dir_x=tracks.dir_x,
+            dir_y=tracks.dir_y,
+            dir_z=tracks.dir_z,
+            E=tracks.E,
+            rec_type=tracks.rec_type,
+            t=tracks.t,
+            likelihood=tracks.lik,
+            length=tracks.len,
+            id=tracks.id,
+        )
+
+        n = len(tracks.id)
+        for fitparam in km3io.definitions.fitparameters:
+            dct[fitparam] = np.full(n, np.nan, dtype=np.float32)
+        for rec_stage in self.rec_stages:
+            dct[rec_stage] = np.zeros(n, dtype=np.int8)
+
+        for track_idx, track in enumerate(tracks):
+            fitinf = track.fitinf
+            max_idx = len(fitinf)
+            for fitparam, idx in km3io.definitions.fitparameters.items():
+                if idx >= max_idx:
+                    break
+                dct[fitparam][track_idx] = fitinf[idx]
+            for rec_stage_idx in track.rec_stages:
+                dct[km3io.definitions.reconstruction_idx[rec_stage_idx]] += 1
+
+        blob[self.reco.lower().capitalize()] = kp.Table(
+            dct,
+            h5loc=f"/reco/{self.reco.lower()}",
+            name=self.reco,
+            split_h5=self.split,
+        )
+        return blob
 
 
 class EventInfoTabulator(kp.Module):

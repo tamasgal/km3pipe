@@ -17,6 +17,7 @@ Options:
     --online-hits         Extract snapshot and triggered hits (combined).
     --mc-tracks           Extract MC tracks.
     --mc-tracks-usr-data  Extract usr data from MC tracks (this will be slow).
+    --reco=REC_TYPE       Extract reconstructed tracks for a given type (e.g. jmuon).
     --timeit              Print detailed pipeline performance statistics.
     -h --help             Show this screen.
     --version             Show the version.
@@ -24,13 +25,6 @@ Options:
 """
 import km3pipe as kp
 import km3modules as km
-
-log = kp.logger.get_logger(__name__)
-
-
-def blob_printer(blob):
-    print(blob)
-    return blob
 
 
 def main():
@@ -44,7 +38,7 @@ def main():
 
     pipe = kp.Pipeline(timeit=args["--timeit"])
     pipe.attach(kp.io.OfflinePump, filename=args["FILENAME"])
-    pipe.attach(km.StatusBar, every=1000)
+    pipe.attach(km.StatusBar, every=100)
     if args["--offline-header"]:
         pipe.attach(km.io.OfflineHeaderTabulator)
     if args["--event-info"]:
@@ -57,6 +51,7 @@ def main():
         pipe.attach(km.io.HitsTabulator, kind="mc")
     if args["--mc-tracks"]:
         pipe.attach(km.io.MCTracksTabulator, read_usr_data=args["--mc-tracks-usr-data"])
-    pipe.attach(blob_printer)
+    if args["--reco"] is not None:
+        pipe.attach(km.io.RecoTracksTabulator, reco=args["--reco"])
     pipe.attach(kp.io.HDF5Sink, filename=outfile)
     pipe.drain()
