@@ -25,7 +25,7 @@ import km3pipe as kp
 from km3pipe.core import Pump, Module, Blob
 from km3pipe.dataclasses import Table, NDArray
 from km3pipe.logger import get_logger
-from km3pipe.tools import decamelise, camelise, split, istype, get_jpp_version
+from km3pipe.tools import decamelise, camelise, split, istype
 
 log = get_logger(__name__)  # pylint: disable=C0103
 
@@ -332,6 +332,7 @@ class HDF5Sink(Module):
 
     def write_table(self, table):
         """Write a single table to the HDF5 file, exposed as a service"""
+        self.log.debug("Writing table %s", table.name)
         self._write_table(table.h5loc, table, table.name)
 
     def _write_table(self, h5loc, arr, title):
@@ -475,6 +476,7 @@ class HDF5Sink(Module):
             if self.keys and key not in self.keys:
                 self.log.info("Skipping blob, since it's not in the keys list")
                 continue
+            self.log.debug("Processing %s", key)
             data = self._process_entry(key, entry)
             if data is not None:
                 written_blob[key] = data
@@ -504,7 +506,6 @@ class HDF5Sink(Module):
         self.flush()
         self.h5file.root._v_attrs.km3pipe = np.string_(kp.__version__)
         self.h5file.root._v_attrs.pytables = np.string_(tb.__version__)
-        self.h5file.root._v_attrs.jpp = np.string_(get_jpp_version())
         self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
         self.log.info("Adding index tables.")
         for where, idx_tab in self.indices.items():
