@@ -45,6 +45,7 @@ setup(
             "km3pipe=km3pipe.cmd:main",
             "pipeinspector=pipeinspector.app:main",
             "rtree=km3pipe.utils.rtree:main",
+            "h5extract=km3pipe.utils.h5extract:main",
             "h5info=km3pipe.utils.h5info:main",
             "h5tree=km3pipe.utils.h5tree:main",
             "h5header=km3pipe.utils.h5header:main",
