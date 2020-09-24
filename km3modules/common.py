@@ -338,3 +338,30 @@ class LocalDBService(kp.Module):
     def finish(self):
         if self.connection:
             self.connection.close()
+
+
+class Observer(kp.Module):
+    """A simple helper to observe the blobs in a test pipeline.
+
+    Parameters
+    ----------
+    count: int
+      The exact number of iterations the pipeline has to drain
+    required_keys: list(str)
+      A list of keys which has to be present in a blob in every cycle.
+    """
+    def configure(self):
+        self.count = self.get("count")
+        self.required_keys = self.get("required_keys", default=[])
+        self._count = 0
+
+    def process(self, blob):
+        self._count += 1
+        for key in self.required_keys:
+            assert key in blob
+        return blob
+
+    def finish(self):
+        print(f"Target count={self._count}, actual count={self.count}")
+        if self.count is not None:
+            assert self.count == self._count

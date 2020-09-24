@@ -16,6 +16,7 @@ from km3modules.common import (
     MemoryObserver,
     BlobIndexer,
     LocalDBService,
+    Observer,
 )
 from km3pipe.testing import TestCase, MagicMock
 from km3pipe.tools import istype
@@ -458,3 +459,43 @@ class TestLocalDBService(TestCase):
         assert "42" == data[0][1]
         assert 5 == data[1][0]
         assert "hello" == data[1][1]
+
+
+class TestObserver(TestCase):
+    def test_observer(self):
+        class Dummy(kp.Module):
+            def process(self, blob):
+                blob["a"] = 1
+                return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(Dummy)
+        pipe.attach(Observer, count=5, required_keys="a")
+        pipe.drain(5)
+
+
+
+    def test_observer_raises_when_count_wrong(self):
+        class Dummy(kp.Module):
+            def process(self, blob):
+                return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(Dummy)
+        pipe.attach(Observer, count=5)
+
+        with self.assertRaises(AssertionError):
+            pipe.drain(2)
+
+    def test_observer_raises_when_key_is_missing(self):
+        class Dummy(kp.Module):
+            def process(self, blob):
+                blob["a"] = 1
+                return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(Dummy)
+        pipe.attach(Observer, required_keys=["b"])
+
+        with self.assertRaises(AssertionError):
+            pipe.drain(2)
