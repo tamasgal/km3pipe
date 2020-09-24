@@ -56,7 +56,7 @@ class HitsTabulator(kp.Module):
                     "time": mc_hits.t,
                 },
                 h5loc="/mc_hits",
-                split_h5=self._split_hits,
+                split_h5=self.split,
                 name="McHits",
             )
         return blob
