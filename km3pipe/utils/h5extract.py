@@ -17,7 +17,7 @@ Options:
     --online-hits         Extract snapshot and triggered hits (combined).
     --mc-tracks           Extract MC tracks.
     --mc-tracks-usr-data  Extract usr data from MC tracks (this will be slow).
-    --recos=REC_TYPES     Comma separated list of recos (e.g. jmuon or jmuon,jshower).
+    --recos=REC_TYPES     Comma separated list of recos (e.g. jmuon or jmuon,jshower or all).
     --timeit              Print detailed pipeline performance statistics.
     -h --help             Show this screen.
     --version             Show the version.
@@ -52,7 +52,11 @@ def main():
     if args["--mc-tracks"]:
         pipe.attach(km.io.MCTracksTabulator, read_usr_data=args["--mc-tracks-usr-data"])
     if args["--recos"] is not None:
-        for reco in args["--recos"].split(","):
+        if args["--recos"] == "all":
+            recos = km.io.RecoTracksTabulator.rec_types.keys()
+        else:
+            recos = args["--recos"].split(",")
+        for reco in recos:
             pipe.attach(km.io.RecoTracksTabulator, reco=reco)
     pipe.attach(kp.io.HDF5Sink, filename=outfile)
     pipe.drain()
