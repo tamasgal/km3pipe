@@ -31,7 +31,6 @@ class HitsTabulator(kp.Module):
         self.split = self.get("split", default=True)
 
     def process(self, blob):
-        self.cprint(blob)
         if self.kind == "offline":
             hits = blob["event"].hits
             blob["Hits"] = kp.Table(
