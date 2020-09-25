@@ -32,6 +32,9 @@ class HitsTabulator(kp.Module):
 
     def process(self, blob):
         if self.kind == "offline":
+            n = blob["event"].n_hits
+            if n == 0:
+                return blob
             hits = blob["event"].hits
             blob["Hits"] = kp.Table(
                 {
@@ -47,6 +50,9 @@ class HitsTabulator(kp.Module):
             )
 
         if self.kind == "mc":
+            n = blob["event"].n_mc_hits
+            if n == 0:
+                return blob
             mc_hits = blob["event"].mc_hits
             blob["McHits"] = kp.Table(
                 {
@@ -89,6 +95,10 @@ class MCTracksTabulator(kp.Module):
             )
 
     def process(self, blob):
+        n = blob["event"].n_mc_tracks
+        if n == 0:
+            return blob
+
         mc_tracks = blob["event"].mc_tracks
         blob["McTracks"] = self._parse_mc_tracks(mc_tracks)
         return blob
@@ -155,6 +165,10 @@ class RecoTracksTabulator(kp.Module):
                 self.rec_stages[rec_stage] = idx
 
     def process(self, blob):
+        n = blob["event"].n_tracks
+        if n == 0:
+            return blob
+
         tracks = blob["event"].tracks
         dct = dict(
             pos_x=tracks.pos_x,
@@ -171,7 +185,6 @@ class RecoTracksTabulator(kp.Module):
             id=tracks.id,
         )
 
-        n = len(tracks.id)
         for fitparam in km3io.definitions.fitparameters:
             dct[fitparam] = np.full(n, np.nan, dtype=np.float32)
         for rec_stage in self.rec_stages:
@@ -184,6 +197,7 @@ class RecoTracksTabulator(kp.Module):
                 if idx >= max_idx:
                     break
                 dct[fitparam][track_idx] = fitinf[idx]
+
             for rec_stage_idx in track.rec_stages:
                 dct[km3io.definitions.reconstruction_idx[rec_stage_idx]] += 1
 
