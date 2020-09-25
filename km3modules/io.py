@@ -148,17 +148,32 @@ class RecoTracksTabulator(kp.Module):
       as a single HDF5Compound array (e.g. reco).
     """
 
+    rec_types = dict(
+        JMUON=km3io.definitions.reconstruction["JPP_RECONSTRUCTION_TYPE"],
+        JSHOWER=km3io.definitions.reconstruction["JSHOWERFIT"],
+        DUSJSHOWER=km3io.definitions.reconstruction["DUSJ_RECONSTRUCTION_TYPE"],
+        AASHOWER=km3io.definitions.reconstruction["AANET_RECONSTRUCTION_TYPE"],
+    )
+
     def configure(self):
         self.reco = self.require("reco").upper()
         self.split = self.get("split", default=False)
+
+        if self.reco not in self.rec_types:
+            self.log.critical(
+                f"Unknown reconstruction type: {self.reco}. "
+                f"Available types are: {','.join(self.rec_typs.keys())}"
+            )
+        self.rec_type = self.rec_types[self.reco]
+
         try:
             rec_stage_begin = km3io.definitions.reconstruction[self.reco + "BEGIN"]
             rec_stage_end = km3io.definitions.reconstruction[self.reco + "END"]
         except KeyError:
             self.log.critical(
-                f"Unknown reconstruction type {self.reco}. Try e.g. jmuon."
+                f"Unable to retrieve the reconstruction stages for type: {self.reco}."
             )
-            raise SystemExit()
+            raise
         self.rec_stages = {}
         for rec_stage, idx in km3io.definitions.reconstruction.items():
             if idx > rec_stage_begin and idx < rec_stage_end:
@@ -166,10 +181,17 @@ class RecoTracksTabulator(kp.Module):
 
     def process(self, blob):
         n = blob["event"].n_tracks
+        # we first check if there are any tracks, otherwise the other calls will raise
         if n == 0:
             return blob
 
+        # now check if there are tracks of the requested rec type
         tracks = blob["event"].tracks
+        tracks = tracks[tracks.rec_type == self.rec_type]
+        n = len(tracks)
+        if n == 0:
+            return blob
+
         dct = dict(
             pos_x=tracks.pos_x,
             pos_y=tracks.pos_y,
