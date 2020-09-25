@@ -162,7 +162,7 @@ class RecoTracksTabulator(kp.Module):
         if self.reco not in self.rec_types:
             self.log.critical(
                 f"Unknown reconstruction type: {self.reco}. "
-                f"Available types are: {','.join(self.rec_types.keys())}"
+                f"Available types are: {', '.join(self.rec_types.keys())}"
             )
         self.rec_type = self.rec_types[self.reco]
 
