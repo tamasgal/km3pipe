@@ -98,7 +98,7 @@ class MCTracksTabulator(kp.Module):
         dct = defaultdict(list)
         for k in USR_MC_TRACKS_KEYS:
             dec_key = k.decode("utf_8")
-            for i in range(mc_tracks.usr_names.shape[0]):
+            for i in range(len(mc_tracks.usr_names)):
                 value = np.nan
                 if k in mc_tracks.usr_names[i]:
                     mask = mc_tracks.usr_names[i] == k
