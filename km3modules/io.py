@@ -25,6 +25,7 @@ class HitsTabulator(kp.Module):
       in a single group (e.g. hits/dom_id, hits/channel_id) or stored
       as a single HDF5Compound array (e.g. hits).
     """
+
     def configure(self):
         self.kind = self.require("kind")
         self.split = self.get("split", default=True)
@@ -83,13 +84,15 @@ class MCTracksTabulator(kp.Module):
       be sorted out hopefully soon as it dramatically decreases the processing
       performance and usability.
     """
+
     def configure(self):
         self.split = self.get("split", default=True)
 
         self._read_usr_data = self.get("read_usr_data", default=False)
         if self._read_usr_data:
             self.log.warning(
-                "Reading usr-data will massively decrease the performance.")
+                "Reading usr-data will massively decrease the performance."
+            )
 
     def process(self, blob):
         n = blob["event"].n_mc_tracks
@@ -128,10 +131,7 @@ class MCTracksTabulator(kp.Module):
         }
         if self._read_usr_data:
             dct.update(self._parse_usr_to_dct(mc_tracks))
-        return kp.Table(dct,
-                        name="McTracks",
-                        h5loc="/mc_tracks",
-                        split_h5=self.split)
+        return kp.Table(dct, name="McTracks", h5loc="/mc_tracks", split_h5=self.split)
 
 
 class RecoTracksTabulator(kp.Module):
@@ -151,8 +151,7 @@ class RecoTracksTabulator(kp.Module):
     rec_types = dict(
         JMUON=km3io.definitions.reconstruction["JPP_RECONSTRUCTION_TYPE"],
         JSHOWER=km3io.definitions.reconstruction["JSHOWERFIT"],
-        DUSJSHOWER=km3io.definitions.
-        reconstruction["DUSJ_RECONSTRUCTION_TYPE"],
+        DUSJSHOWER=km3io.definitions.reconstruction["DUSJ_RECONSTRUCTION_TYPE"],
         AASHOWER=km3io.definitions.reconstruction["AANET_RECONSTRUCTION_TYPE"],
     )
 
@@ -164,12 +163,12 @@ class RecoTracksTabulator(kp.Module):
         if self.reco not in self.rec_types:
             self.log.critical(
                 f"Unknown reconstruction type: {self.reco}. "
-                f"Available types are: {', '.join(self.rec_types.keys())}")
+                f"Available types are: {', '.join(self.rec_types.keys())}"
+            )
         self.rec_type = self.rec_types[self.reco]
 
         try:
-            rec_stage_begin = km3io.definitions.reconstruction[self.reco +
-                                                               "BEGIN"]
+            rec_stage_begin = km3io.definitions.reconstruction[self.reco + "BEGIN"]
             rec_stage_end = km3io.definitions.reconstruction[self.reco + "END"]
         except KeyError:
             self.log.critical(
@@ -185,12 +184,14 @@ class RecoTracksTabulator(kp.Module):
         # backward compatibility
         if self.rec_type == self.rec_types["AASHOWER"]:
             # see https://git.km3net.de/common/km3net-dataformat/-/issues/39
-            self.rec_stages.update({
-                1: "AASHOWERFITPREFIT",
-                2: "AASHOWERFITPOSITIONFIT",
-                3: "AASHOWERFITDIRECTIONENERGYFIT",
-                4: "AASHOWERFITDIRECTIONENERGYFIT",
-            })
+            self.rec_stages.update(
+                {
+                    1: "AASHOWERFITPREFIT",
+                    2: "AASHOWERFITPOSITIONFIT",
+                    3: "AASHOWERFITDIRECTIONENERGYFIT",
+                    4: "AASHOWERFITDIRECTIONENERGYFIT",
+                }
+            )
 
     def process(self, blob):
         n = blob["event"].n_tracks
@@ -250,6 +251,7 @@ class EventInfoTabulator(kp.Module):
     Create `kp.Table` from event information provided by `km3io`.
 
     """
+
     def process(self, blob):
         blob["EventInfo"] = self._parse_eventinfo(blob["event"])
         return blob

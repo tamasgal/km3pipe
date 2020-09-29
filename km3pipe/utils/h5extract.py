@@ -50,8 +50,7 @@ def main():
     if args["--mc-hits"]:
         pipe.attach(km.io.HitsTabulator, name="MC", kind="mc")
     if args["--mc-tracks"]:
-        pipe.attach(km.io.MCTracksTabulator,
-                    read_usr_data=args["--mc-tracks-usr-data"])
+        pipe.attach(km.io.MCTracksTabulator, read_usr_data=args["--mc-tracks-usr-data"])
     if args["--recos"] is not None:
         if args["--recos"] == "all":
             recos = km.io.RecoTracksTabulator.rec_types.keys()
