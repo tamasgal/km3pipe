@@ -44,19 +44,20 @@ def main():
     if args["--event-info"]:
         pipe.attach(km.io.EventInfoTabulator)
     if args["--offline-hits"]:
-        pipe.attach(km.io.HitsTabulator, kind="offline")
+        pipe.attach(km.io.HitsTabulator, name="Offline", kind="offline")
     if args["--online-hits"]:
-        pipe.attach(km.io.HitsTabulator, kind="online")
+        pipe.attach(km.io.HitsTabulator, name="Online", kind="online")
     if args["--mc-hits"]:
-        pipe.attach(km.io.HitsTabulator, kind="mc")
+        pipe.attach(km.io.HitsTabulator, name="MC", kind="mc")
     if args["--mc-tracks"]:
-        pipe.attach(km.io.MCTracksTabulator, read_usr_data=args["--mc-tracks-usr-data"])
+        pipe.attach(km.io.MCTracksTabulator,
+                    read_usr_data=args["--mc-tracks-usr-data"])
     if args["--recos"] is not None:
         if args["--recos"] == "all":
             recos = km.io.RecoTracksTabulator.rec_types.keys()
         else:
             recos = args["--recos"].split(",")
         for reco in recos:
-            pipe.attach(km.io.RecoTracksTabulator, reco=reco)
+            pipe.attach(km.io.RecoTracksTabulator, name=reco, reco=reco)
     pipe.attach(kp.io.HDF5Sink, filename=outfile)
     pipe.drain()
