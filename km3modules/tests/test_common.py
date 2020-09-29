@@ -474,7 +474,7 @@ class TestMultiFilePump(TestCase):
 
             def blob_generator(self):
                 for idx in range(self.max_iterations):
-                    yield kp.Blob({'index': self.idx, 'tab': kp.Table({'a': 1})})
+                    yield kp.Blob({"index": self.idx, "tab": kp.Table({"a": 1})})
 
             def finish(self):
                 return self.idx
@@ -499,18 +499,23 @@ class TestMultiFilePump(TestCase):
 
             def process(self, blob):
                 self.count += 1
-                self.filenames.append(blob['filename'])
-                self.group_id.append(blob['tab'].group_id[0])
+                self.filenames.append(blob["filename"])
+                self.group_id.append(blob["tab"].group_id[0])
                 return blob
 
             def finish(self):
                 assert self.count == total_iterations
-                assert ''.join(f*max_iterations for f in filenames) == ''.join(self.filenames)
+                assert "".join(f * max_iterations for f in filenames) == "".join(
+                    self.filenames
+                )
                 super_self.assertListEqual(list(range(total_iterations)), self.group_id)
 
-
         pipe = kp.Pipeline()
-        pipe.attach(MultiFilePump, pump=DummyPump, filenames=filenames, max_iterations=max_iterations)
+        pipe.attach(
+            MultiFilePump,
+            pump=DummyPump,
+            filenames=filenames,
+            max_iterations=max_iterations,
+        )
         pipe.attach(Observer)
         pipe.drain()
-
