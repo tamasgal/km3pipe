@@ -74,10 +74,10 @@ class MCTracksTabulator(kp.Module):
 
     Parameters
     ----------
-    split: bool (default: True)
+    split: bool (default: False)
       Defines whether the tracks should be split up into individual arrays
-      in a single group (e.g. tracks/dom_id, hits/channel_id) or stored
-      as a single HDF5Compound array (e.g. hits).
+      in a single group (e.g. mc_tracks/by, mc_tracks/origin) or stored
+      as a single HDF5Compound array (e.g. mc_tracks).
     read_usr_data: bool (default: False)
       Parses usr-data which is originally meant for user stored values, but
       was abused by generator software to store properties. This issue will
@@ -86,7 +86,7 @@ class MCTracksTabulator(kp.Module):
     """
 
     def configure(self):
-        self.split = self.get("split", default=True)
+        self.split = self.get("split", default=False)
 
         self._read_usr_data = self.get("read_usr_data", default=False)
         if self._read_usr_data:
