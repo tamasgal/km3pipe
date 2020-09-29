@@ -179,6 +179,20 @@ class RecoTracksTabulator(kp.Module):
             if idx > rec_stage_begin and idx < rec_stage_end:
                 self.rec_stages[rec_stage] = idx
 
+        if self.rec_type == "AASHOWER":
+            # backward compatibility
+            # see https://git.km3net.de/common/km3net-dataformat/-/issues/39
+            self.rec_stages.update(
+                {
+                    1: km3io.definitions.reconstruction["AASHOWERFITPREFIT"],
+                    2: km3io.definitions.reconstruction["AASHOWERFITPOSITIONFIT"],
+                    3: km3io.definitions.reconstruction[
+                        "AASHOWERFITDIRECTIONENERGYFIT"
+                    ],
+                    4: km3io.definitions.reconstruction["AASHOWERFITDIRECTIONENERGYFI"],
+                }
+            )
+
     def process(self, blob):
         n = blob["event"].n_tracks
         # we first check if there are any tracks, otherwise the other calls will raise
