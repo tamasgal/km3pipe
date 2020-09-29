@@ -210,7 +210,11 @@ class RecoTracksTabulator(kp.Module):
             return blob
 
         if self.best_track_only:
-            tracks = km3io.tools.best_track(tracks, strategy="default", rec_type=km3io.definitions.reconstruction_idx[self.rec_type])
+            tracks = km3io.tools.best_track(
+                tracks,
+                strategy="default",
+                rec_type=km3io.definitions.reconstruction_idx[self.rec_type],
+            )
 
         dct = dict(
             pos_x=tracks.pos_x,
