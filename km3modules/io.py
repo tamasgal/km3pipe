@@ -177,19 +177,17 @@ class RecoTracksTabulator(kp.Module):
         self.rec_stages = {}
         for rec_stage, idx in km3io.definitions.reconstruction.items():
             if idx > rec_stage_begin and idx < rec_stage_end:
-                self.rec_stages[rec_stage] = idx
+                self.rec_stages[idx] = rec_stage
 
         if self.rec_type == "AASHOWER":
             # backward compatibility
             # see https://git.km3net.de/common/km3net-dataformat/-/issues/39
             self.rec_stages.update(
                 {
-                    1: km3io.definitions.reconstruction["AASHOWERFITPREFIT"],
-                    2: km3io.definitions.reconstruction["AASHOWERFITPOSITIONFIT"],
-                    3: km3io.definitions.reconstruction[
-                        "AASHOWERFITDIRECTIONENERGYFIT"
-                    ],
-                    4: km3io.definitions.reconstruction["AASHOWERFITDIRECTIONENERGYFI"],
+                    1: "AASHOWERFITPREFIT",
+                    2: "AASHOWERFITPOSITIONFIT",
+                    3: "AASHOWERFITDIRECTIONENERGYFIT",
+                    4: "AASHOWERFITDIRECTIONENERGYFI",
                 }
             )
 
@@ -235,7 +233,7 @@ class RecoTracksTabulator(kp.Module):
                 dct[fitparam][track_idx] = fitinf[idx]
 
             for rec_stage_idx in track.rec_stages:
-                dct[km3io.definitions.reconstruction_idx[rec_stage_idx]] += 1
+                dct[rec_stage_idx] += 1
 
         blob[self.reco.lower().capitalize()] = kp.Table(
             dct,
