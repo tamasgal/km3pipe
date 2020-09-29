@@ -221,7 +221,7 @@ class RecoTracksTabulator(kp.Module):
 
         for fitparam in km3io.definitions.fitparameters:
             dct[fitparam] = np.full(n, np.nan, dtype=np.float32)
-        for rec_stage in self.rec_stages:
+        for rec_stage in self.rec_stages.values():
             dct[rec_stage] = np.zeros(n, dtype=np.int8)
 
         for track_idx, track in enumerate(tracks):
@@ -233,7 +233,7 @@ class RecoTracksTabulator(kp.Module):
                 dct[fitparam][track_idx] = fitinf[idx]
 
             for rec_stage_idx in track.rec_stages:
-                dct[rec_stage_idx] += 1
+                dct[self.rec_stages[rec_stage_idx]] += 1
 
         blob[self.reco.lower().capitalize()] = kp.Table(
             dct,
