@@ -142,6 +142,8 @@ class RecoTracksTabulator(kp.Module):
     ----------
     reco: str
       The reconstruction type to be extracted.
+    best_track_only: bool (default: False)
+      Only keep the best track.
     split: bool (default: False)
       Defines whether the tracks should be split up into individual arrays
       in a single group (e.g. reco/foo/dom_id, reco/foo/channel_id) or stored
@@ -159,6 +161,7 @@ class RecoTracksTabulator(kp.Module):
         self.reco = self.require("reco").upper()
         self.cprint(f"Extracting {self.reco} tracks")
         self.split = self.get("split", default=False)
+        self.best_track_only = self.get("best_track_only", default=False)
 
         if self.reco not in self.rec_types:
             self.log.critical(
@@ -205,6 +208,9 @@ class RecoTracksTabulator(kp.Module):
         n = len(tracks)
         if n == 0:
             return blob
+
+        if self.best_track_only:
+            tracks = km3io.tools.best_track(tracks, strategy="default", rec_type=km3io.definitions.reconstruction_idx[self.rec_type])
 
         dct = dict(
             pos_x=tracks.pos_x,

@@ -18,6 +18,7 @@ Options:
     --mc-tracks           Extract MC tracks.
     --mc-tracks-usr-data  Extract usr data from MC tracks (this will be slow).
     --recos=REC_TYPES     Comma separated list of recos (e.g. jmuon or jmuon,jshower or all).
+    --best-track-only     Only keep the best track for each selected reco.
     --timeit              Print detailed pipeline performance statistics.
     -h --help             Show this screen.
     --version             Show the version.
@@ -57,6 +58,6 @@ def main():
         else:
             recos = args["--recos"].split(",")
         for reco in recos:
-            pipe.attach(km.io.RecoTracksTabulator, name=reco, reco=reco)
+            pipe.attach(km.io.RecoTracksTabulator, name=reco, reco=reco, best_track_only=args["--best-track-only"])
     pipe.attach(kp.io.HDF5Sink, filename=outfile)
     pipe.drain()
