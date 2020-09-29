@@ -227,8 +227,6 @@ class RecoTracksTabulator(kp.Module):
             dct[rec_stage] = np.zeros(n, dtype=np.int8)
 
         for track_idx, track in enumerate(tracks):
-            if track.rec_type != self.rec_type:
-                continue
             fitinf = track.fitinf
             max_idx = len(fitinf)
             for fitparam, idx in km3io.definitions.fitparameters.items():
