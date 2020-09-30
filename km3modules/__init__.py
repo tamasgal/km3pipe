@@ -15,6 +15,7 @@ from . import communication
 from . import fit
 from . import hardware
 from . import hits
+from . import io
 from . import k40
 from . import mc
 from . import parser

@@ -1,23 +1,31 @@
 #!/usr/bin/env python3
 # Filename: h5extract.py
 """
-A tool to extract data from ROOT or EVT files to HDF5.
+A tool to extract data from KM3NeT ROOT files to HDF5.
 
 Usage:
-    h5extract filename
+    h5extract [options] FILENAME
     h5extract (-h | --help)
     h5extract --version
 
 Options:
-    -h --help           Show this screen.
-    --version           Show the version.
+    -o OUTFILE            Output file.
+    --offline-header      Extract the offline header.
+    --event-info          Extract event information.
+    --offline-hits        Extract offline hits.
+    --mc-hits             Extract MC hits.
+    --online-hits         Extract snapshot and triggered hits (combined).
+    --mc-tracks           Extract MC tracks.
+    --mc-tracks-usr-data  Extract usr data from MC tracks (this will be slow).
+    --recos=REC_TYPES     Comma separated list of recos (e.g. jmuon or jmuon,jshower or all).
+    --best-track-only     Only keep the best track for each selected reco.
+    --timeit              Print detailed pipeline performance statistics.
+    -h --help             Show this screen.
+    --version             Show the version.
 
 """
 import km3pipe as kp
-
-log = kp.logger.get_logger(__name__)
-
-
+import km3modules as km
 
 
 def main():
@@ -25,4 +33,31 @@ def main():
 
     args = docopt(__doc__, version=kp.version)
 
-    print(args)
+    outfile = args["-o"]
+    if outfile is None:
+        outfile = args["FILENAME"] + ".h5"
+
+    pipe = kp.Pipeline(timeit=args["--timeit"])
+    pipe.attach(kp.io.OfflinePump, filename=args["FILENAME"])
+    pipe.attach(km.StatusBar, every=100)
+    if args["--offline-header"]:
+        pipe.attach(km.io.OfflineHeaderTabulator)
+    if args["--event-info"]:
+        pipe.attach(km.io.EventInfoTabulator)
+    if args["--offline-hits"]:
+        pipe.attach(km.io.HitsTabulator, name="Offline", kind="offline")
+    if args["--online-hits"]:
+        pipe.attach(km.io.HitsTabulator, name="Online", kind="online")
+    if args["--mc-hits"]:
+        pipe.attach(km.io.HitsTabulator, name="MC", kind="mc")
+    if args["--mc-tracks"]:
+        pipe.attach(km.io.MCTracksTabulator, read_usr_data=args["--mc-tracks-usr-data"])
+    if args["--recos"] is not None:
+        if args["--recos"] == "all":
+            recos = km.io.RecoTracksTabulator.rec_types.keys()
+        else:
+            recos = args["--recos"].split(",")
+        for reco in recos:
+            pipe.attach(km.io.RecoTracksTabulator, name=reco, reco=reco, best_track_only=args["--best-track-only"])
+    pipe.attach(kp.io.HDF5Sink, filename=outfile)
+    pipe.drain()
