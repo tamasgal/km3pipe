@@ -5,15 +5,16 @@
 This script creates histogram which shows the trigger contribution for events.
 
 Usage:
-    triggermap [-d DET_ID -p PLOT_FILENAME -u DU] FILENAME
+    triggermap [options] -d DET_ID_OR_DETX FILENAME
     triggermap --version
 
 Option:
-    FILENAME          Name of the input file.
-    -u DU             Only plot for the given DU.
-    -d DET_ID         Detector ID [default: 29].
-    -p PLOT_FILENAME  The filename of the plot [default: trigger_map.png].
-    -h --help         Show this screen.
+    FILENAME           Name of the input file.
+    --offline          Read offline events instead.
+    -u DU              Only plot for the given DU.
+    -d DET_ID_OR_DETX  Detector ID or DETX file.
+    -p PLOT_FILENAME   The filename of the plot [default: trigger_map.png].
+    -h --help          Show this screen.
 
 """
 
@@ -36,6 +37,7 @@ import numpy as np
 
 import km3pipe as kp
 from km3modules.common import StatusBar
+import km3modules as km
 import km3pipe.style
 
 km3pipe.style.use("km3pipe")
@@ -116,12 +118,22 @@ class TriggerMap(kp.Module):
 
 
 def main():
-    args = docopt(__doc__, version="1.0")
+    args = docopt(__doc__, version=kp.version)
     du = int(args["-u"]) if args["-u"] else None
-    det_id = int(args["-d"])
-    det = kp.hardware.Detector(det_id=det_id)
+
+    try:
+        det_id = int(args["-d"])
+        det = kp.hardware.Detector(det_id=det_id)
+    except ValueError:
+        detx = args["-d"]
+        det = kp.hardware.Detector(filename=detx)
+
     pipe = kp.Pipeline()
-    pipe.attach(kp.io.online.EventPump, filename=args["FILENAME"])
+    if args["--offline"]:
+        pipe.attach(kp.io.OfflinePump, filename=args["FILENAME"])
+        pipe.attach(km.io.HitsTabulator, kind="offline")
+    else:
+        pipe.attach(kp.io.online.EventPump, filename=args["FILENAME"])
     pipe.attach(StatusBar, every=2500)
     pipe.attach(
         TriggerMap,
