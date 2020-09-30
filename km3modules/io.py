@@ -215,6 +215,7 @@ class RecoTracksTabulator(kp.Module):
                 strategy="default",
                 rec_type=km3io.definitions.reconstruction_idx[self.rec_type],
             )
+            n = len(tracks)  # this should always be 1, but let's not hardcode it
 
         dct = dict(
             pos_x=tracks.pos_x,
