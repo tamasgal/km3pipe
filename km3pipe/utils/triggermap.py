@@ -52,9 +52,11 @@ class TriggerMap(kp.Module):
         if self.du is not None:
             self.n_dus = 1
             self.n_doms = 18
+            self.dus = [self.du]
         else:
             self.n_dus = self.det.n_dus
             self.n_doms = int(self.det.n_doms / self.n_dus)
+            self.dus = sorted(self.det.dus)
         self.hit_counts = []
 
     def process(self, blob):
@@ -67,9 +69,7 @@ class TriggerMap(kp.Module):
             du, floor, _ = self.det.doms[dom_id]
             if self.du is not None and du != self.du:
                 continue
-            if self.du:
-                du = 1
-            hit_counts[(du - 1) * self.n_doms + floor - 1] += n_hits
+            hit_counts[(self.dus.index(du) - 1) * self.n_doms + floor - 1] += n_hits
         self.hit_counts.append(hit_counts)
 
         return blob
@@ -122,7 +122,7 @@ def main():
     det_id = int(args["-d"])
     det = kp.hardware.Detector(det_id=det_id)
     pipe = kp.Pipeline()
-    pipe.attach(kp.io.aanet.AanetPump, filename=args["FILENAME"])
+    pipe.attach(kp.io.online.EventPump, filename=args["FILENAME"])
     pipe.attach(StatusBar, every=2500)
     pipe.attach(
         TriggerMap,
