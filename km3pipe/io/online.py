@@ -49,9 +49,7 @@ class EventPump(Pump):
             try:
                 yield self.extract_event(i)
             except IndexError:
-                pass
-
-        raise StopIteration
+                return
 
     def __getitem__(self, index):
         if index >= self.n_events:
