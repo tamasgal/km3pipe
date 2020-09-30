@@ -96,8 +96,9 @@ class TriggerMap(kp.Module):
             norm=LogNorm(vmin=1, vmax=np.amax(hit_mat)),
         )
         yticks = np.arange(self.n_rows)
+        floors_to_label = range(self.n_doms) if self.n_dus == 1 else [1, 6, 12]
         ytick_labels = [
-            "DU{}-DOM{}".format(du, floor) if floor in [1, 6, 12] else ""
+            "DU{}-DOM{}".format(du, floor) if floor in floors_to_label else ""
             for (du, floor, _) in self.det.doms.values()
         ]
         ax.set_yticks(yticks)
