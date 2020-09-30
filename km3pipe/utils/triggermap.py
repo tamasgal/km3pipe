@@ -57,6 +57,7 @@ class TriggerMap(kp.Module):
             self.n_dus = self.det.n_dus
             self.n_doms = int(self.det.n_doms / self.n_dus)
             self.dus = sorted(self.det.dus)
+        self.n_rows = self.n_dus * self.n_doms
         self.hit_counts = []
 
     def process(self, blob):
@@ -94,13 +95,10 @@ class TriggerMap(kp.Module):
             zorder=3,
             norm=LogNorm(vmin=1, vmax=np.amax(hit_mat)),
         )
-        yticks = np.arange(self.n_doms * self.n_dus)
-        ytick_label_templ = "DOM{1:02d}" if self.du else "DU{0:.0f}-DOM{1:02d}"
+        yticks = np.arange(self.n_rows)
         ytick_labels = [
-            ytick_label_templ.format(
-                np.ceil((y + 1) / self.n_doms), y % (self.n_doms) + 1
-            )
-            for y in yticks
+            "DU{}-DOM{}".format(du, floor) if floor in [1, 6, 12] else ""
+            for (du, floor, _) in self.det.doms.values()
         ]
         ax.set_yticks(yticks)
         ax.set_yticklabels(ytick_labels)
