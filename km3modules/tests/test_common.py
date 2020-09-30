@@ -17,6 +17,7 @@ from km3modules.common import (
     BlobIndexer,
     LocalDBService,
     Observer,
+    MultiFilePump,
 )
 from km3pipe.testing import TestCase, MagicMock
 from km3pipe.tools import istype
@@ -499,3 +500,63 @@ class TestObserver(TestCase):
 
         with self.assertRaises(AssertionError):
             pipe.drain(2)
+
+
+class TestMultiFilePump(TestCase):
+    def test_iteration(self):
+        class DummyPump(kp.Module):
+            def configure(self):
+                self.idx = 0
+                self.max_iterations = self.get("max_iterations", default=5)
+                self.blobs = self.blob_generator()
+
+            def process(self, blob):
+                return next(self)
+
+            def blob_generator(self):
+                for idx in range(self.max_iterations):
+                    yield kp.Blob({"index": self.idx, "tab": kp.Table({"a": 1})})
+
+            def finish(self):
+                return self.idx
+
+            def __iter__(self):
+                return self
+
+            def __next__(self):
+                return next(self.blobs)
+
+        filenames = ["a", "b", "c"]
+        max_iterations = 5
+        total_iterations = max_iterations * len(filenames)
+
+        super_self = self
+
+        class Observer(kp.Module):
+            def configure(self):
+                self.count = 0
+                self.filenames = []
+                self.group_id = []
+
+            def process(self, blob):
+                self.count += 1
+                self.filenames.append(blob["filename"])
+                self.group_id.append(blob["tab"].group_id[0])
+                return blob
+
+            def finish(self):
+                assert self.count == total_iterations
+                assert "".join(f * max_iterations for f in filenames) == "".join(
+                    self.filenames
+                )
+                super_self.assertListEqual(list(range(total_iterations)), self.group_id)
+
+        pipe = kp.Pipeline()
+        pipe.attach(
+            MultiFilePump,
+            pump=DummyPump,
+            filenames=filenames,
+            max_iterations=max_iterations,
+        )
+        pipe.attach(Observer)
+        pipe.drain()

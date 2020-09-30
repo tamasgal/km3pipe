@@ -1,6 +1,8 @@
 Unreleased changes
 ------------------
 
+* The ``triggermap`` CLI now supports reading offline files using the
+  ``--offline`` parameter and also accepts DETX files via ``-d``
 
 Version 9
 ---------
