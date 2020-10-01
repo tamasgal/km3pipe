@@ -177,6 +177,7 @@ class RecoTracksTabulator(kp.Module):
             likelihood=tracks.lik,
             length=tracks.len,
             id=tracks.id,
+            idx=np.arange(n),
         )
 
         for fitparam in km3io.definitions.fitparameters:
@@ -199,15 +200,14 @@ class RecoTracksTabulator(kp.Module):
 
         _rec_stage = np.array(ak.flatten(tracks.rec_stages)._layout)
         _counts = ak.count(tracks.rec_stages, axis=1)
-        _ids = np.repeat(tracks.id, _counts)
-        _idx = np.arange(len(_ids))
+        _idx = np.repeat(np.arange(n), _counts)
 
         blob["RecStages"] = kp.Table(
-            dict(rec_stage=_rec_stage, id=_ids, idx=_idx),
+            dict(rec_stage=_rec_stage, idx=_idx),
             # Just to save space, we specify smaller dtypes.
             # We assume there will be never more # than 32767
             # reco tracks for a single reconstruction type.
-            dtypes=[("rec_stage", np.int16), ("id", np.int16), ("idx", np.uint16)],
+            dtypes=[("rec_stage", np.int16), ("idx", np.uint16)],
             h5loc=f"/reco/rec_stages",
             name="Reconstruction Stages",
             split_h5=self.split,
