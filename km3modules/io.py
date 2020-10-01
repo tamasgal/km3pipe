@@ -163,7 +163,7 @@ class RecoTracksTabulator(kp.Module):
         # now check if there are tracks of the requested rec type
         tracks = blob["event"].tracks
 
-        dct = dict(
+        reco_tracks = dict(
             pos_x=tracks.pos_x,
             pos_y=tracks.pos_y,
             pos_z=tracks.pos_z,
@@ -181,7 +181,7 @@ class RecoTracksTabulator(kp.Module):
         rec_stages = defaultdict(list)
 
         for fitparam in km3io.definitions.fitparameters:
-            dct[fitparam] = np.full(n, np.nan, dtype=np.float32)
+            reco_tracks[fitparam] = np.full(n, np.nan, dtype=np.float32)
 
         for track_idx, track in enumerate(tracks):
             fitinf = track.fitinf
@@ -189,21 +189,21 @@ class RecoTracksTabulator(kp.Module):
             for fitparam, idx in km3io.definitions.fitparameters.items():
                 if idx >= max_idx:
                     break
-                dct[fitparam][track_idx] = fitinf[idx]
+                reco_tracks[fitparam][track_idx] = fitinf[idx]
 
             for rec_stage_idx in track.rec_stages:
                 rec_stages["id"].append(track.id)
                 rec_stages["rec_stage"].append(rec_stage_idx)
 
         blob["RecoTracks"] = kp.Table(
-            dct,
+            reco_tracks,
             h5loc=f"/reco/tracks",
             name="Reco Tracks",
             split_h5=self.split,
         )
 
         blob["RecStages"] = kp.Table(
-            dct,
+            rec_stages,
             h5loc=f"/reco/rec_stages",
             name="Reconstruction Stages",
             split_h5=self.split,
