@@ -14,6 +14,7 @@ Option:
     -u DU              Only plot for the given DU.
     -d DET_ID_OR_DETX  Detector ID or DETX file.
     -p PLOT_FILENAME   The filename of the plot [default: trigger_map.png].
+    -s SUBTITLE        Optional subtitle for the plot instead of the filename.
     -h --help          Show this screen.
 
 """
@@ -129,6 +130,11 @@ def main():
         detx = args["-d"]
         det = kp.hardware.Detector(filename=detx)
 
+    if args["-s"] is not None:
+        subtitle = args["-s"]
+    else:
+        subtitle = ", ".join(args["FILENAMES"])
+
     pipe = kp.Pipeline()
     if args["--offline"]:
         pipe.attach(km.common.MultiFilePump, pump=kp.io.OfflinePump, filenames=args["FILENAMES"])
@@ -141,7 +147,7 @@ def main():
         detector=det,
         du=du,
         plot_filename=args["-p"],
-        subtitle=", ".join(args["FILENAMES"]),
+        subtitle=subtitle,
     )
     pipe.drain()
 
