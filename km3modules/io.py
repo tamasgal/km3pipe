@@ -2,6 +2,7 @@
 from collections import defaultdict
 
 import numpy as np
+import awkward1 as ak
 
 import km3pipe as kp
 import km3io
@@ -178,8 +179,6 @@ class RecoTracksTabulator(kp.Module):
             id=tracks.id,
         )
 
-        rec_stages = defaultdict(list)
-
         for fitparam in km3io.definitions.fitparameters:
             reco_tracks[fitparam] = np.full(n, np.nan, dtype=np.float32)
 
@@ -191,10 +190,6 @@ class RecoTracksTabulator(kp.Module):
                     break
                 reco_tracks[fitparam][track_idx] = fitinf[idx]
 
-            for rec_stage_idx in track.rec_stages:
-                rec_stages["id"].append(track.id)
-                rec_stages["rec_stage"].append(rec_stage_idx)
-
         blob["RecoTracks"] = kp.Table(
             reco_tracks,
             h5loc=f"/reco/tracks",
@@ -202,8 +197,17 @@ class RecoTracksTabulator(kp.Module):
             split_h5=self.split,
         )
 
+        _rec_stage = np.array(ak.flatten(tracks.rec_stages)._layout)
+        _counts = ak.count(tracks.rec_stages, axis=1)
+        _ids = np.repeat(_ids, _counts)
+        _idx = np.arange(len(ids))
+
         blob["RecStages"] = kp.Table(
-            rec_stages,
+            dict(rec_stage=_rec_stage, id=_ids, idx=_idx),
+            # Just to save space, we specify smaller dtypes.
+            # We assume there will be never more # than 32767
+            # reco tracks for a single reconstruction type.
+            dtypes=[("rec_stage", np.int16), ("id", np.int16), ("idx", np.uint16)],
             h5loc=f"/reco/rec_stages",
             name="Reconstruction Stages",
             split_h5=self.split,
