@@ -199,7 +199,7 @@ class RecoTracksTabulator(kp.Module):
 
         _rec_stage = np.array(ak.flatten(tracks.rec_stages)._layout)
         _counts = ak.count(tracks.rec_stages, axis=1)
-        _ids = np.repeat(track.id, _counts)
+        _ids = np.repeat(tracks.id, _counts)
         _idx = np.arange(len(_ids))
 
         blob["RecStages"] = kp.Table(
