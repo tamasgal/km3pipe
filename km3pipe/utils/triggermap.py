@@ -5,11 +5,11 @@
 This script creates histogram which shows the trigger contribution for events.
 
 Usage:
-    triggermap [options] -d DET_ID_OR_DETX FILENAME
+    triggermap [options] -d DET_ID_OR_DETX FILENAMES...
     triggermap --version
 
 Option:
-    FILENAME           Name of the input file.
+    FILENAMES          Name of the input file(s).
     --offline          Read offline events instead.
     -u DU              Only plot for the given DU.
     -d DET_ID_OR_DETX  Detector ID or DETX file.
@@ -119,6 +119,7 @@ class TriggerMap(kp.Module):
 
 def main():
     args = docopt(__doc__, version=kp.version)
+
     du = int(args["-u"]) if args["-u"] else None
 
     try:
@@ -130,17 +131,17 @@ def main():
 
     pipe = kp.Pipeline()
     if args["--offline"]:
-        pipe.attach(kp.io.OfflinePump, filename=args["FILENAME"])
+        pipe.attach(km.common.MultiFilePump, pump=kp.io.OfflinePump, filenames=args["FILENAMES"])
         pipe.attach(km.io.HitsTabulator, kind="offline")
     else:
-        pipe.attach(kp.io.online.EventPump, filename=args["FILENAME"])
+        pipe.attach(km.common.MultiFilePump, pump=kp.io.online.EventPump, filenames=args["FILENAMES"])
     pipe.attach(StatusBar, every=2500)
     pipe.attach(
         TriggerMap,
         detector=det,
         du=du,
         plot_filename=args["-p"],
-        subtitle=args["FILENAME"],
+        subtitle=", ".join(args["FILENAMES"]),
     )
     pipe.drain()
 
