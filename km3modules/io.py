@@ -68,7 +68,7 @@ class HitsTabulator(kp.Module):
             )
 
         if self.kind == "online":
-            raise NotImplemented("The extraction of online (DAQ) hits is not implemented yet.")
+            raise NotImplementedError("The extraction of online (DAQ) hits is not implemented yet.")
         return blob
 
 
@@ -156,7 +156,7 @@ class RecoTracksTabulator(kp.Module):
         self.split = self.get("split", default=False)
         self.best_track_only = self.get("best_track_only", default=False)
         if self.best_track_only:
-            raise NotImplemented("The best track extraction is WIP.")
+            raise NotImplementedError("The best track extraction is WIP.")
 
     def process(self, blob):
         n = blob["event"].n_tracks
