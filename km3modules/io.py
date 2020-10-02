@@ -66,6 +66,9 @@ class HitsTabulator(kp.Module):
                 split_h5=self.split,
                 name="McHits",
             )
+
+        if self.kind == "online":
+            raise NotImplemented("The extraction of online (DAQ) hits is not implemented yet.")
         return blob
 
 
