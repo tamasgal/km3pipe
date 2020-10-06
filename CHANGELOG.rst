@@ -1,12 +1,15 @@
 Unreleased changes
 ------------------
 
-* The ``triggermap`` CLI now supports reading offline files using the
-  ``--offline`` parameter and also accepts DETX files via ``-d``
-* ``triggermap`` now supports a list of files as input
-
 Version 9
 ---------
+9.0.0-beta.1 / 2020-10-06
+~~~~~~~~~~~~~~~~~~~~~~~~~
+* The ``h5extract`` CLI has been added which replaces the old ``tohdf5``
+  tool and is a modular version of it.
+* The ``triggermap`` CLI now supports reading offline files using the
+  ``--offline`` parameter and also accepts DETX files via ``-d``
+
 9.0.0-alpha.24 / 2020-09-18
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 * New ``kp.physics`` module to consolidate physics related
