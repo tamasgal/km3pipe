@@ -9,20 +9,22 @@ Usage:
     h5extract --version
 
 Options:
-    -o OUTFILE            Output file.
-    --offline-header      The header of an offline file.
-    --event-info          General event information.
-    --offline-hits        Offline hits.
-    --mc-hits             MC hits (use with care!).
-    --online-hits         Snapshot and triggered hits (combined).
-    --mc-tracks           MC tracks..
-    --mc-tracks-usr-data  "usr" data from MC tracks (this will be slow).
-    --reco-tracks         Reconstructed tracks.
-    --timeit              Print detailed pipeline performance statistics.
-    -h --help             Show this screen.
-    --version             Show the version.
+    -o OUTFILE                  Output file.
+    --offline-header            The header of an offline file.
+    --event-info                General event information.
+    --offline-hits              Offline hits.
+    --mc-hits                   MC hits (use with care!).
+    --online-hits               Snapshot and triggered hits (combined).
+    --mc-tracks                 MC tracks..
+    --mc-tracks-usr-data        "usr" data from MC tracks (this will be slow).
+    --reco-tracks               Reconstructed tracks.
+    --provenance-file=FILENAME  The file to store the provenance information.
+    --timeit                    Print detailed pipeline performance statistics.
+    -h --help                   Show this screen.
+    --version                   Show the version.
 
 """
+from thepipe import Provenance
 import km3pipe as kp
 import km3modules as km
 
@@ -35,6 +37,12 @@ def main():
     outfile = args["-o"]
     if outfile is None:
         outfile = args["FILENAME"] + ".h5"
+
+    provfile = args["--provenance-file"]
+    if provfile is None:
+        provfile = outfile + ".prov.json"
+
+    Provenance().outfile = provfile
 
     pipe = kp.Pipeline(timeit=args["--timeit"])
     pipe.attach(kp.io.OfflinePump, filename=args["FILENAME"])
