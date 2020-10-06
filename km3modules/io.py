@@ -208,7 +208,7 @@ class RecoTracksTabulator(kp.Module):
         blob["RecStages"] = kp.Table(
             dict(rec_stage=_rec_stage, idx=_idx),
             # Just to save space, we specify smaller dtypes.
-            # We assume there will be never more # than 32767
+            # We assume there will be never more than 32767
             # reco tracks for a single reconstruction type.
             dtypes=[("rec_stage", np.int16), ("idx", np.uint16)],
             h5loc=f"/reco/rec_stages",
