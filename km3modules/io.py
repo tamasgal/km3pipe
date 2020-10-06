@@ -2,6 +2,7 @@
 from collections import defaultdict
 
 import numpy as np
+import awkward1 as ak
 
 import km3pipe as kp
 import km3io
@@ -65,6 +66,9 @@ class HitsTabulator(kp.Module):
                 split_h5=self.split,
                 name="McHits",
             )
+
+        if self.kind == "online":
+            raise NotImplementedError("The extraction of online (DAQ) hits is not implemented yet.")
         return blob
 
 
@@ -140,61 +144,19 @@ class RecoTracksTabulator(kp.Module):
 
     Parameters
     ----------
-    reco: str
-      The reconstruction type to be extracted.
     best_track_only: bool (default: False)
       Only keep the best track.
     split: bool (default: False)
       Defines whether the tracks should be split up into individual arrays
-      in a single group (e.g. reco/foo/dom_id, reco/foo/channel_id) or stored
-      as a single HDF5Compound array (e.g. reco).
+      in a single group (e.g. reco/tracks/dom_id, reco/tracks/channel_id) or stored
+      as a single HDF5Compound array (e.g. reco/tracks).
     """
 
-    rec_types = dict(
-        JMUON=km3io.definitions.reconstruction["JPP_RECONSTRUCTION_TYPE"],
-        JSHOWER=km3io.definitions.reconstruction["JSHOWERFIT"],
-        DUSJSHOWER=km3io.definitions.reconstruction["DUSJ_RECONSTRUCTION_TYPE"],
-        AASHOWER=km3io.definitions.reconstruction["AANET_RECONSTRUCTION_TYPE"],
-    )
-
     def configure(self):
-        self.reco = self.require("reco").upper()
-        self.cprint(f"Extracting {self.reco} tracks")
         self.split = self.get("split", default=False)
         self.best_track_only = self.get("best_track_only", default=False)
-
-        if self.reco not in self.rec_types:
-            self.log.critical(
-                f"Unknown reconstruction type: {self.reco}. "
-                f"Available types are: {', '.join(self.rec_types.keys())}"
-            )
-        self.rec_type = self.rec_types[self.reco]
-
-        try:
-            rec_stage_begin = km3io.definitions.reconstruction[self.reco + "BEGIN"]
-            rec_stage_end = km3io.definitions.reconstruction[self.reco + "END"]
-        except KeyError:
-            self.log.critical(
-                f"Unable to retrieve the reconstruction stages for type: {self.reco}."
-            )
-            raise
-        self.rec_stages = {}  # rec_stage_idx: REC_STAGE_STRING
-        # store the ones from the standard definitions
-        for rec_stage, idx in km3io.definitions.reconstruction.items():
-            if idx > rec_stage_begin and idx < rec_stage_end:
-                self.rec_stages[idx] = rec_stage
-
-        # backward compatibility
-        if self.rec_type == self.rec_types["AASHOWER"]:
-            # see https://git.km3net.de/common/km3net-dataformat/-/issues/39
-            self.rec_stages.update(
-                {
-                    1: "AASHOWERFITPREFIT",
-                    2: "AASHOWERFITPOSITIONFIT",
-                    3: "AASHOWERFITDIRECTIONENERGYFIT",
-                    4: "AASHOWERFITDIRECTIONENERGYFIT",
-                }
-            )
+        if self.best_track_only:
+            raise NotImplementedError("The best track extraction is WIP.")
 
     def process(self, blob):
         n = blob["event"].n_tracks
@@ -204,20 +166,8 @@ class RecoTracksTabulator(kp.Module):
 
         # now check if there are tracks of the requested rec type
         tracks = blob["event"].tracks
-        tracks = tracks[tracks.rec_type == self.rec_type]
-        n = len(tracks)
-        if n == 0:
-            return blob
 
-        if self.best_track_only:
-            tracks = km3io.tools.best_track(
-                tracks,
-                strategy="default",
-                rec_type=km3io.definitions.reconstruction_idx[self.rec_type],
-            )
-            n = len(tracks)  # this should always be 1, but let's not hardcode it
-
-        dct = dict(
+        reco_tracks = dict(
             pos_x=tracks.pos_x,
             pos_y=tracks.pos_y,
             pos_z=tracks.pos_z,
@@ -230,12 +180,11 @@ class RecoTracksTabulator(kp.Module):
             likelihood=tracks.lik,
             length=tracks.len,
             id=tracks.id,
+            idx=np.arange(n),
         )
 
         for fitparam in km3io.definitions.fitparameters:
-            dct[fitparam] = np.full(n, np.nan, dtype=np.float32)
-        for rec_stage in self.rec_stages.values():
-            dct[rec_stage] = np.zeros(n, dtype=np.int8)
+            reco_tracks[fitparam] = np.full(n, np.nan, dtype=np.float32)
 
         for track_idx, track in enumerate(tracks):
             fitinf = track.fitinf
@@ -243,17 +192,30 @@ class RecoTracksTabulator(kp.Module):
             for fitparam, idx in km3io.definitions.fitparameters.items():
                 if idx >= max_idx:
                     break
-                dct[fitparam][track_idx] = fitinf[idx]
+                reco_tracks[fitparam][track_idx] = fitinf[idx]
 
-            for rec_stage_idx in track.rec_stages:
-                dct[self.rec_stages[rec_stage_idx]][track_idx] += 1
-
-        blob[self.reco.lower().capitalize()] = kp.Table(
-            dct,
-            h5loc=f"/reco/{self.reco.lower()}",
-            name=self.reco,
+        blob["RecoTracks"] = kp.Table(
+            reco_tracks,
+            h5loc=f"/reco/tracks",
+            name="Reco Tracks",
             split_h5=self.split,
         )
+
+        _rec_stage = np.array(ak.flatten(tracks.rec_stages)._layout)
+        _counts = ak.count(tracks.rec_stages, axis=1)
+        _idx = np.repeat(np.arange(n), _counts)
+
+        blob["RecStages"] = kp.Table(
+            dict(rec_stage=_rec_stage, idx=_idx),
+            # Just to save space, we specify smaller dtypes.
+            # We assume there will be never more than 32767
+            # reco tracks for a single reconstruction type.
+            dtypes=[("rec_stage", np.int16), ("idx", np.uint16)],
+            h5loc=f"/reco/rec_stages",
+            name="Reconstruction Stages",
+            split_h5=self.split,
+        )
+
         return blob
 
 
