@@ -69,7 +69,7 @@ black:
 	black setup.py
 
 .PHONY: black-check
-black:
+black-check:
 	black --check km3pipe
 	black --check km3modules
 	black --check examples
