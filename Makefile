@@ -68,4 +68,13 @@ black:
 	black doc/conf.py
 	black setup.py
 
+.PHONY: black-check
+black:
+	black --check km3pipe
+	black --check km3modules
+	black --check examples
+	black --check pipeinspector
+	black --check doc/conf.py
+	black --check setup.py
+
 .PHONY: all clean build install install-dev test test-cov test-loop benchmark test-km3modules flake8 pep8 dependencies docstyle
