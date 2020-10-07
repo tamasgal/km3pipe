@@ -227,7 +227,12 @@ def createconf(overwrite=False, dump=False):
 def main():
     from docopt import docopt
 
-    args = docopt(__doc__, version="KM3Pipe {}".format(version,))
+    args = docopt(
+        __doc__,
+        version="KM3Pipe {}".format(
+            version,
+        ),
+    )
 
     if args["test"]:
         run_tests()

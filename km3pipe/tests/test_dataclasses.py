@@ -85,7 +85,14 @@ class TestDtypes(TestCase):
 class TestTable(TestCase):
     def setUp(self):
         self.dt = np.dtype([("a", int), ("b", float), ("group_id", int)])
-        self.arr = np.array([(0, 1.0, 2), (3, 7.0, 5), (6, 4.0, 8),], dtype=self.dt)
+        self.arr = np.array(
+            [
+                (0, 1.0, 2),
+                (3, 7.0, 5),
+                (6, 4.0, 8),
+            ],
+            dtype=self.dt,
+        )
 
     def test_h5loc(self):
         tab = self.arr.view(Table)
@@ -647,7 +654,14 @@ class TestTable(TestCase):
 
     def test_sort(self):
         dt = np.dtype([("a", int), ("b", float), ("c", int)])
-        arr = np.array([(0, 1.0, 2), (3, 7.0, 5), (6, 4.0, 8),], dtype=dt)
+        arr = np.array(
+            [
+                (0, 1.0, 2),
+                (3, 7.0, 5),
+                (6, 4.0, 8),
+            ],
+            dtype=dt,
+        )
         tab = Table(arr)
         tab_sort = tab.sorted("b")
         assert_array_equal(tab_sort["a"], np.array([0, 6, 3]))
@@ -666,7 +680,14 @@ class TestTable(TestCase):
         import pandas as pd
 
         dt = np.dtype([("a", int), ("b", float), ("c", int)])
-        arr = np.array([(0, 1.0, 2), (3, 7.0, 5), (6, 4.0, 8),], dtype=dt)
+        arr = np.array(
+            [
+                (0, 1.0, 2),
+                (3, 7.0, 5),
+                (6, 4.0, 8),
+            ],
+            dtype=dt,
+        )
         print(dir(Table))
         df = pd.DataFrame(arr)
         tab = Table.from_dataframe(df, h5loc="/bla")
@@ -675,14 +696,28 @@ class TestTable(TestCase):
 
     def test_slicing(self):
         dt = np.dtype([("a", int), ("b", float), ("c", bool)])
-        arr = np.array([(0, 1.0, True), (2, 3.0, False), (4, 5.0, True),], dtype=dt)
+        arr = np.array(
+            [
+                (0, 1.0, True),
+                (2, 3.0, False),
+                (4, 5.0, True),
+            ],
+            dtype=dt,
+        )
         tab = Table(arr)
         assert 2 == len(tab[tab.c])
         assert 1 == len(tab[tab.b > 3.0])
 
     def test_contains(self):
         dt = np.dtype([("a", int), ("b", float), ("c", bool)])
-        arr = np.array([(0, 1.0, True), (2, 3.0, False), (4, 5.0, True),], dtype=dt)
+        arr = np.array(
+            [
+                (0, 1.0, True),
+                (2, 3.0, False),
+                (4, 5.0, True),
+            ],
+            dtype=dt,
+        )
         tab = Table(arr)
         assert "a" in tab
         assert "b" in tab
@@ -974,7 +1009,12 @@ class TestTable(TestCase):
 
 class TestTableFancaAttributes(TestCase):
     def setUp(self):
-        self.arr_bare = Table({"a": [1, 2, 3], "b": [3, 4, 5],})
+        self.arr_bare = Table(
+            {
+                "a": [1, 2, 3],
+                "b": [3, 4, 5],
+            }
+        )
         self.arr_wpos = Table(
             {
                 "a": [1, 2, 3],

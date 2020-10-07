@@ -474,8 +474,6 @@ class TestObserver(TestCase):
         pipe.attach(Observer, count=5, required_keys="a")
         pipe.drain(5)
 
-
-
     def test_observer_raises_when_count_wrong(self):
         class Dummy(kp.Module):
             def process(self, blob):

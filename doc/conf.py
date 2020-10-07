@@ -291,7 +291,9 @@ sphinx_gallery_conf = {
     "default_thumb_file": "_static/default_gallery_thumbnail.png",
     "examples_dirs": ["../examples"],
     "gallery_dirs": ["auto_examples"],
-    "reference_url": {"km3pipe": None,},
+    "reference_url": {
+        "km3pipe": None,
+    },
     "expected_failing_examples": [],
     "abort_on_example_effor": False,
     "show_memory": True,

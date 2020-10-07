@@ -383,18 +383,18 @@ def calibrate_dom(
 ):
     """Calibrate intra DOM PMT time offsets, efficiencies and sigmas
 
-        Parameters
-        ----------
-        dom_id: DOM ID
-        data: dict of coincidences or root or hdf5 file
-        detector: instance of detector class
-        livetime: data-taking duration [s]
-        fixed_ang_dist: fixing angular distribution e.g. for data mc comparison
-        auto_scale: auto scales the fixed angular distribution to the data
+    Parameters
+    ----------
+    dom_id: DOM ID
+    data: dict of coincidences or root or hdf5 file
+    detector: instance of detector class
+    livetime: data-taking duration [s]
+    fixed_ang_dist: fixing angular distribution e.g. for data mc comparison
+    auto_scale: auto scales the fixed angular distribution to the data
 
-        Returns
-        -------
-        return_data: dictionary with fit results
+    Returns
+    -------
+    return_data: dictionary with fit results
     """
 
     if isinstance(data, str):

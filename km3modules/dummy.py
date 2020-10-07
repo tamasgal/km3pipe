@@ -8,9 +8,7 @@ from km3pipe import Module
 
 
 class Dummy(Module):
-    """Dummy base class.
-
-    """
+    """Dummy base class."""
 
     def __init__(self, **kwargs):
         super(Dummy, self).__init__(**kwargs)
@@ -26,9 +24,7 @@ class Dummy(Module):
 
 
 class SubDummy(Dummy):
-    """Primitive Sub-Subclass
-
-    """
+    """Primitive Sub-Subclass"""
 
     def __init__(self, **kwargs):
         super(SubDummy, self).__init__(**kwargs)

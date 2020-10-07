@@ -21,8 +21,7 @@ log = get_logger(__name__)  # pylint: disable=C0103
 
 
 def mad(v):
-    """MAD -- Median absolute deviation. More robust than standard deviation.
-    """
+    """MAD -- Median absolute deviation. More robust than standard deviation."""
     return np.median(np.abs(v - np.median(v)))
 
 

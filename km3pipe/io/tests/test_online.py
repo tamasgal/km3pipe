@@ -326,6 +326,7 @@ class TestSummaryslicePump(TestCase):
         assert sum_slice[dom_ids[0]]["has_udp_trailer"]
         assert not sum_slice[dom_ids[0]]["fifo_status"]
         self.assertAlmostEqual(
-            sum_slice[dom_ids[0]]["rates"][6], 6586.0,
+            sum_slice[dom_ids[0]]["rates"][6],
+            6586.0,
         )
         self.assertAlmostEqual(sum_slice[dom_ids[1]]["rates"][4], 5752.0)

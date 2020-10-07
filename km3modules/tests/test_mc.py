@@ -77,12 +77,24 @@ class TestGlobalRandomState(TestCase):
 class TestMCConvert(TestCase):
     def setUp(self):
         self.event_info = Table(
-            {"timestamp": 1, "nanoseconds": 700000000, "mc_time": 1.74999978e9,}
+            {
+                "timestamp": 1,
+                "nanoseconds": 700000000,
+                "mc_time": 1.74999978e9,
+            }
         )
 
-        self.mc_tracks = Table({"time": 1,})
+        self.mc_tracks = Table(
+            {
+                "time": 1,
+            }
+        )
 
-        self.mc_hits = Table({"time": 30.79,})
+        self.mc_hits = Table(
+            {
+                "time": 30.79,
+            }
+        )
 
         self.blob = Blob(
             {

@@ -49,7 +49,11 @@ def main():
         "POST",
         "/1/messages.json",
         urlencode(
-            {"token": token, "user": user_key, "message": " ".join(args["MESSAGE"]),}
+            {
+                "token": token,
+                "user": user_key,
+                "message": " ".join(args["MESSAGE"]),
+            }
         ),
         {"Content-type": "application/x-www-form-urlencoded"},
     )

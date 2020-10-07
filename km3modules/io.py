@@ -68,7 +68,9 @@ class HitsTabulator(kp.Module):
             )
 
         if self.kind == "online":
-            raise NotImplementedError("The extraction of online (DAQ) hits is not implemented yet.")
+            raise NotImplementedError(
+                "The extraction of online (DAQ) hits is not implemented yet."
+            )
         return blob
 
 

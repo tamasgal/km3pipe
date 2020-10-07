@@ -31,7 +31,15 @@ class TestMAD(TestCase):
 
 class TestPerc(TestCase):
     def test_settings(self):
-        arr = np.array([-2.394, 0.293, 0.371, 0.384, 1.246,])
+        arr = np.array(
+            [
+                -2.394,
+                0.293,
+                0.371,
+                0.384,
+                1.246,
+            ]
+        )
         assert np.allclose(perc(arr), [-2.1253, 1.1598])
         assert np.allclose(perc(arr, interpolation="nearest"), [arr[0], arr[-1]])
 

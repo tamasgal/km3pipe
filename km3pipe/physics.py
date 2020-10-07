@@ -107,7 +107,9 @@ def cherenkov(calib_hits, track):
             ("dir_y_photon", "<f8"),
             ("dir_z_photon", "<f8"),
         ]
-    ).reshape(len(out),)
+    ).reshape(
+        len(out),
+    )
 
 
 @njit
@@ -191,7 +193,9 @@ def get_closest(track, du_pos):
     ):
         meanDU_pos = np.array(
             [du_pos["pos_x"], du_pos["pos_y"], du_pos["pos_z"]]
-        ).reshape(3,)
+        ).reshape(
+            3,
+        )
         meanDU_dir = np.array([0, 0, 1])  # assumes vertical DU
 
     if isinstance(

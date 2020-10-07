@@ -66,7 +66,9 @@ def iexists(irods_path):
     """Returns True of iRODS path exists, otherwise False"""
     try:
         subprocess.check_output(
-            "ils {}".format(irods_path), shell=True, stderr=subprocess.PIPE,
+            "ils {}".format(irods_path),
+            shell=True,
+            stderr=subprocess.PIPE,
         )
         return True
     except subprocess.CalledProcessError:
@@ -282,7 +284,16 @@ HIGHLIGHTS_RE = r"\033\[(?:%s)m" % "|".join(["%d" % v for v in HIGHLIGHTS.values
 COLORS = dict(
     list(
         zip(
-            ["grey", "red", "green", "yellow", "blue", "magenta", "cyan", "white",],
+            [
+                "grey",
+                "red",
+                "green",
+                "yellow",
+                "blue",
+                "magenta",
+                "cyan",
+                "white",
+            ],
             list(range(30, 38)),
         )
     )

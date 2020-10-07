@@ -23,12 +23,12 @@ log = get_logger(__name__)  # pylint: disable=C0103
 
 class I3Pump(kp.Module):
     """
-        Gets information of an ANTARES I3 file and converts it to HDF5.
+    Gets information of an ANTARES I3 file and converts it to HDF5.
 
-        Attributes
-        ----------
-        filename : str
-            Path to the input I3 file.
+    Attributes
+    ----------
+    filename : str
+        Path to the input I3 file.
 
     """
 

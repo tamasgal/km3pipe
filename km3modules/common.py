@@ -346,6 +346,7 @@ class Observer(kp.Module):
     required_keys: list(str)
       A list of keys which has to be present in a blob in every cycle.
     """
+
     def configure(self):
         self.count = self.get("count")
         self.required_keys = self.get("required_keys", default=[])
