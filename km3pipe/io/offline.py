@@ -46,5 +46,3 @@ class OfflinePump(Module):
         for event in self._reader.events:
             blob = Blob({"event": event, "header": self.header})
             yield blob
-
-
