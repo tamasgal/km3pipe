@@ -10,6 +10,7 @@ from collections import OrderedDict, defaultdict, namedtuple
 from functools import singledispatch
 import os.path
 import warnings
+from uuid import uuid4
 
 import numpy as np
 import tables as tb
@@ -245,6 +246,7 @@ class HDF5Sink(Module):
         # might be able to set to `None`, I don't know...
         self.n_rows_expected = self.get("n_rows_expected", default=10000)
         self.index = 0
+        self._uuid = str(uuid4())
 
         self.expose(self.write_table, "write_table")
 
@@ -257,7 +259,7 @@ class HDF5Sink(Module):
                 title="KM3NeT",
                 **self.pytab_file_args,
             )
-            Provenance().record_output(self.filename, "HDF5Sink output")
+            Provenance().record_output(self.filename, uuid=self._uuid, comment="HDF5Sink output")
         self.filters = tb.Filters(
             complevel=self.complevel,
             shuffle=True,
@@ -506,6 +508,7 @@ class HDF5Sink(Module):
         self.flush()
         self.h5file.root._v_attrs.km3pipe = np.string_(kp.__version__)
         self.h5file.root._v_attrs.pytables = np.string_(tb.__version__)
+        self.h5file.root._v_attrs.kid = np.string_(self._uuid)
         self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
         self.log.info("Adding index tables.")
         for where, idx_tab in self.indices.items():
