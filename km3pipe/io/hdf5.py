@@ -598,7 +598,7 @@ class HDF5Pump(Pump):
 
         self.h5file = tb.open_file(self.filename, "r")
 
-        Provenance().record_input(self.filename, "HDF5Pump input")
+        Provenance().record_input(self.filename, comment="HDF5Pump input")
 
         if not self.skip_version_check:
             check_version(self.h5file)
