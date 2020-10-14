@@ -32,7 +32,9 @@ single arrays for easy access.
 The ``tohdf5`` command which was present in KM3Pipe until v8 is now removed
 due to the growing complexity of our ROOT files. To read those files,
 the `km3io <https://km3py.pages.km3net.de/km3io/>`_ package is recommended
-as mentioned above.
+as mentioned above. An alternative to the ``tohdf5`` converter is provided
+by the ``h5extract`` command line utility which has a lot of options to extract
+and combine different branches of the ROOT files to a single HDF5 file.
 
 
 The following sections describe how to read and write HDF5 data with KM3Pipe
