@@ -170,6 +170,14 @@ pointing towards this branch.
 If you are working on your own fork, you can stay on your own ``master`` branch
 and create merge requests from that.
 
+Code Style
+~~~~~~~~~~
+
+Make sure to run ``black`` over the code, which ensures that the code style
+matches the one we love and respect. We have a tool which makes it easy::
+
+    make black
+
 Create a Merge Request (aka Pull Request)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
