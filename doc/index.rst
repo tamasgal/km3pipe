@@ -20,7 +20,7 @@
     examples
     changelog
 
-    Code Coverage <http://km3py.pages.km3net.de/km3pipe/coverage>
+    Code Coverage <https://km3py.pages.km3net.de/km3pipe/coverage>
     Source (Git) <https://git.km3net.de/km3py/km3pipe.git>
 
 * :ref:`genindex`
