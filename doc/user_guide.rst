@@ -1,20 +1,16 @@
 User Guide
 ==========
 
-KM3Pipe has two main workflows: An Event-by-event processing approach, 
-and a 2D-table/array approach. 
+km3pipe is built upon `thepipe <https://github.com/tamasgal/thepipe>`_,
+a Python package which once was the core of
+km3pipe and has been split out as a separate package. It's a generic pipeline framework
+which can be used in all kinds of modular workflow designs.
 
-The event-by-event approach is handled by
-the km3pipe *Pipeline*, where you chain together different modules for 
-processing events (e.g. Hit cleaning, reconstruction), and then pump events --
-also referred to as *blobs* -- down the pipeline.
+The km3pipe package is a collection of functions, classes and modules which are
+more or less specific to KM3NeT. It provides native Python access to all kinds
+of data formats like ROOT, EVT, binary DAQ, network protocols and more.
 
-The table-based approach is using the python libraries ``numpy`` and ``pandas``
-from the SciPy ecosystem, which are fast and easy tools for scientific 
-computation and data analysis, based on a clean tabular data format.
-
-The preferred on-disk file format is :doc:`hdf5`, although km3pipe can read
-all ROOT/Text based km3net file format like Jpp, Aanet, Evt, etc.
+The preferred on-disk output file format is :doc:`hdf5`.
 
 .. toctree:: 
 
