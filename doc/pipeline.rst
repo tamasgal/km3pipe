@@ -3,7 +3,7 @@ Pipeline Workflow
 
 .. contents:: :local:
 
-KM3Pipe is a lightweight framework which tries to give you a lose structure and
+km3pipe is a lightweight framework which tries to give you a lose structure and
 workflow for data analysis. It uses the simple, yet powerful module system
 of the `thepipe <https://github.com/tamasgal/thepipe>`_ Python module,
 which allows you to organise and reuse code.
@@ -22,6 +22,31 @@ from that.
 To setup a workflow, you first create a pipeline, attach the modules to it
 and to fire up the analysis chain, you call ``.drain()`` on your pipeline
 and let the flow go.
+
+Draining Procedure
+------------------
+
+Everything is standing still up until the ``pipe.drain()`` method is called.
+This method can be called without arguments, which will cycle through the iterations
+until the attached pump stops it. One can however also pass a number, which stands
+for the maximum number of iterations, like ``pipe.drain(23)``.
+Another possibility to stop the pipeline before the pump finishes is pressing ``CTRL+C``,
+which will execute the current cycle, gracefully finish up every module and close
+all the file handlers properly.
+
+The stages a pipeline launches when ``pipe.drain()`` is executed are the following:
+
+- Call ``.configure()`` on every attached module one-by-one
+- Call ``.prepare()`` on every attached module one-by-one
+- Start with the actual iteration and call ``.process(blob)`` on the first module
+- Take it's output (a ``Blob()``) and call the next attached module with that Blob instance
+- When the cycle reached the last module, start from the beginning
+- Stop whenever (one of) the pump raises a ``StopIteration``
+- Call ``.finish()`` on every module one-by-one
+
+
+Pipeline Example
+----------------
 
 The following script shows the module system of KM3Pipe. There is a
 ``DummyPump`` which is in this case a dummy data generator. The other Modules
@@ -58,8 +83,10 @@ manipulated and finally returned to allow the handover to the next module
 in the pipeline system.
 
 Instance variables can be initialised within the ``configure()`` method.
-User defined parameters are accessible via the ``get()`` or ``required()``
-method. Both of them return the passed value or ``None`` if not defined.
+User defined parameters are accessible via ``self.get()`` or ``self.required()``
+calls inside the ``configure()`` method.
+Both of them return the passed value or in case of ``self.get()``, the ``default=None``
+value.
 This allows an easy way to define default values as seen in the example below.
 
 .. literalinclude:: ../examples/nogallery/module_workflow.py
@@ -73,6 +100,12 @@ the ``attach()`` method of the pipeline will care about the initialisation::
 
     pipe.attach(Foo, bar='dummybar', baz=69)
 
+Module can optionally implement the following methods::
+
+    configure()
+    prepare()
+    process()
+    finish()
 
 Pumps / Sinks
 -------------
@@ -80,12 +113,15 @@ Pumps / Sinks
 The pump and sink are special kinds of ``Module`` and are usually the
 first and last ones to be attached to a pipeline. They are responsible
 for reading and writing data to/from files, or streams from socket
-connections. Note that you still derive from ``Module``.
+connections in each iteration, continuously.
+Note that they still simply derive from ``Module``.
 
 ``configure()`` method should be used to set up the file or socket
 handler and the ``finish()`` has to close them. The actual data is
 passed via the ``process()`` method. A data chunk is internally called
-``Blob`` and usually represents an event.
+``Blob`` (a fancier ``dict``) and contains whatever the pump extracts
+in each iteration. It can be a single event or the contents of a whole
+file.
 
 To end the data pumping, the pump has to raise a ``StopIteration``
 exception. One elegant way to implement this in Python is using a
@@ -112,7 +148,7 @@ Inside any method of the module, use ``self.log`` to access the logger, which
 comes with the usual functions like ``self.log.debug()``, ``self.log.info()``,
 ``self.log.warning()``, ``self.log.error()`` or ``self.log.critical()``.
 
-The ``self.print`` function can be used to print messages which are colour
+The ``self.cprint`` function can be used to print messages which are colour
 coded with the same colours used for the logger.
 
 
