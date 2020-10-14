@@ -4,146 +4,114 @@ Installation
 
 .. contents:: :local:
 
+Installing km3pipe is as easy as running::
+
+    pip install km3pipe
+
+As of version 9, only Python 3.5+ is supported. version 8 is the last one which
+supports Python 2.7.
+
+To get the latest version from the ``master`` branch, use::
+
+    pip install git+http://git.km3net.de/km3py/km3pipe.git
+
+Once km3pipe is install, you can use the command line utility ``km3pipe`` to
+install or update your copy::
+
+    km3pipe update                  # install the latest master
+    km3pipe update some-git-branch  # install the from "some-git-branch"
+    km3pipe update v9.0.0-beta.2    # install a specific version
+
+Using Virtual Environments
+--------------------------
+
+It is highly recommended to create an isolated Python environment for each of
+your analyses and projects, so that you have full control over the installed
+packages.
+
+To create a virtualenv (Python 3.5+ required) run the command::
+
+    python -m venv venv
+
+which will create one in the ``venv`` folder. To activate it::
+
+    . venv/bin/activate
+
+After that you can ``pip install`` whatever you want.
+
+To leave the environment, activate another one or just type::
+
+    deactivate
+
 
 Important Note for Users of the CC-IN3P3 in Lyon
 ------------------------------------------------
 
-KM3Pipe is preinstalled on the Lyon computing centre. Put this into your
+km3pipe is preinstalled on the Lyon computing centre. Put this into your
 `~/.bashrc` or `~/.zshenv` (or whatever login script you prefer):::
 
-    export KM3NET_THRONG_DIR=/pbs/throng/km3net  # if not already set!
-    export MODULEPATH=$KM3NET_THRONG_DIR/modulefiles
     module load python/3.7.5
 
 Alternatively, if you need the old Python 2 version, you can load it with::
 
     module load python/2.7.17
 
-To test if everything is working, make sure to install all the additional
-requirements with::
-
-    pip install "km3pipe[dev]"
-
-and run the following command::
-
-    km3pipe test
-
-The Python environment also contains the latest versions of all important and
-commonly used scientific packages like scipy, numpy, scikit-learn, pandas etc.
+The Python environments also contain the latest versions of all important and
+commonly used scientific packages like scipy, numpy, scikit-learn, pandas,
+numba, astropy etc.
 
 If you are missing any packages, contact us and we will install them.
-
-Requirements
-------------
-
-To install km3pipe, you need:
-
-- Python >= 3.5
-- HDF5 (the hdf5lib C library, e.g. `apt-get install hdf5` or `yum install hdf5`)
-
-(Recommended) PyEnv or Virtual Environments
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-A very clean and simple way to install any version of Python (we recommend 3.6.1+) is PyEnv (https://github.com/pyenv/pyenv).
-It is easily set up and gives you a fresh installation without messing around with your systems Python environment::
-
-    git clone https://github.com/pyenv/pyenv.git ~/.pyenv
-    echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
-    echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
-    echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.bashrc
-
-After that, log out and in (or close the terminal window and open a new one). To install and activate a Python version::
-
-    pyenv install 3.6.1  # obviously installs Python 3.6.1
-    pyenv global 3.6.1   # sets the global python version to 3.6.1
-
-You can also use virtual environments (https://virtualenvwrapper.readthedocs.io) to isolate your Python projects.
-
-
-Install
--------
-
-To install the latest stable version fromm the PyPI repository:::
-
-    $ pip install km3pipe
-    
-It might be advisable to use:::
-
-    $ easy_install km3pipe
-
-on Windows.
-
-To get the latest version, use:::
-
-    $ pip install git+http://git.km3net.de/km3py/km3pipe.git
 
 
 Install from Source
 -------------------
 
-To install KM3Pipe from source, clone the git repository::
+If you prefer to play around with the source code or contribute to the
+development of km3pipe, you can also install it in an editable mode.
+First, clone the repository with::
 
-    $ git clone http://git.km3net.de/km3py/km3pipe.git
-
-check out your desired branch::
-
-    $ git checkout master  # or any other branch you are interested in
+    git clone http://git.km3net.de/km3py/km3pipe.git
 
 and run::
 
-    $ make install
+    make install-dev
 
-To install it in development-mode, which will just link the folder to your
-Python site-packages, so you will be able to modify KM3Pipe and use it immediately
-without the need to reinstall it::
-
-    $ make install-dev
-
-
-Run the Test Suite
-------------------
-
-To run the unit test suite, you can either run::
-
-    $ km3pipe test
-
-or if you have checked out the sources::
-
-    $ make test
+This will install all the required development packages and create
+a link to your Python site-packages folder, so that you can edit the
+source and try it out immediately without having to reinstall it
+every time.
 
 
-Updating
---------
+Running the test suite
+----------------------
 
-KM3Pipe comes with a command line utility called `km3pipe`, which can
-be used to update KM3Pipe itself::
+To test if everything is working, make sure to install all the additional
+requirements with::
 
-    $ km3pipe update
+    pip install "km3pipe[dev]"
+    pip install "km3pipe[extras]"
 
-Or you can of course use `pip`::
+and run the following command::
 
-    $ pip install --upgrade km3pipe
+    km3pipe test
 
-To get the latest developer version::
-
-    $ km3pipe update master
-
-If you installed KM3Pipe from source via `make install-dev`,
-you simply pull the changes from git and rebuild it::
-
-    $ cd /path/to/km3pipe_repo
-    $ git pull
+If you are a developer, you will like to explore the ``make test``
+and ``make test-loop`` commands after installing km3pipe from source (see above).
 
 
-Configuration
--------------
+Non-Python requirements
+-----------------------
 
-KM3Pipe can read frequently used information (like DB session cookies,
-API tokens, etc.) from a configuration file, which is expected to
-be `~/.km3net`.
+km3pipe uses HDF5 as a primary high-level format.
+On Debian based Linux distributions (Ubuntu, ...), install the HDF5 libraries with::
 
-Here is an example configuration::
+    (sudo) apt-get install hdf5
 
-    [DB]
-    cookie=sid_fooman_123.34.56.78_
+On RedHat-based distributions (CentOS, Scientific Linux, ...)::
+
+    (sudo) yum install hdf5
+
+On ArchLinux, Manjaro and alike::
+
+    (sudo) pacman -S hdf5
 

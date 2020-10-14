@@ -172,10 +172,31 @@ Example::
       -r --raw    Dump raw metadata.
       -h --help   Show this screen.
 
-``h5tree``
-~~~~~~~~~~
+``h5extract``
+~~~~~~~~~~~~~
 
-Print header info (TODO)
+    h5extract -h
+    A tool to extract data from KM3NeT ROOT files to HDF5.
+
+    Usage:
+        h5extract [options] FILENAME
+        h5extract (-h | --help)
+        h5extract --version
+
+    Options:
+        -o OUTFILE                  Output file.
+        --offline-header            The header of an offline file.
+        --event-info                General event information.
+        --offline-hits              Offline hits.
+        --mc-hits                   MC hits (use with care!).
+        --online-hits               Snapshot and triggered hits (combined).
+        --mc-tracks                 MC tracks..
+        --mc-tracks-usr-data        "usr" data from MC tracks (this will be slow).
+        --reco-tracks               Reconstructed tracks.
+        --provenance-file=FILENAME  The file to store the provenance information.
+        --timeit                    Print detailed pipeline performance statistics.
+        -h --help                   Show this screen.
+        --version                   Show the version.
 
 ``h5tree``
 ~~~~~~~~~~
