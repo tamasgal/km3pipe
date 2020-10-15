@@ -22,6 +22,8 @@ class OfflinePump(Module):
             self._filename, uuid=self._reader.uuid, comment="OfflinePump input"
         )
 
+        self.expose(self.header, "offline_header")
+
     def process(self, blob=None):
         return next(self.blobs)
 
