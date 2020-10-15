@@ -31,8 +31,6 @@ samp = np.array(samp)
 ##############################################################################
 # plot the same in 3D because why not?
 
-plt.clf()
 fig = plt.figure()
-ax = fig.add_subplot(111, projection="3d")
+ax = fig.gca(projection="3d")
 ax.scatter(samp[:, 0], samp[:, 1], samp[:, 2], "yo")
-plt.show()
