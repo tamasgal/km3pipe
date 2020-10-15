@@ -22,6 +22,11 @@ filename = "data/atmospheric_muons_sample.h5"
 with tb.File(filename) as f:
     tots = f.get_node("/hits/tot")[:]
 
-plt.hist(tots, bins=max(tots), log=True, edgecolor="none")
-plt.title("ToT distribution")
-plt.xlabel("ToT [ns]")
+
+fig, ax = plt.subplots()
+ax.hist(tots, bins=max(tots), log=True, edgecolor="none")
+ax.set_title("ToT distribution")
+ax.set_xlabel("ToT [ns]")
+
+fig.tight_layout()
+plt.show()

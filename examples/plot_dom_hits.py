@@ -74,6 +74,7 @@ class DOMHits(kp.Module):
         )
         plt.xlabel("Distance between hit and muon track [m]")
         plt.ylabel("Number of hits on DOM")
+        plt.tight_layout()
         plt.show()
 
 
