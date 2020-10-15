@@ -581,7 +581,7 @@ class HDF5Pump(Pump):
 
     Services
     --------
-    singletons(h5loc): h5loc:str -> kp.Table
+    h5singleton(h5loc): h5loc:str -> kp.Table
         Singleton tables for a given HDF5 location.
     """
 
