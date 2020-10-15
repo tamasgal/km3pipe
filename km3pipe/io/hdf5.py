@@ -578,6 +578,11 @@ class HDF5Pump(Pump):
     reset_index: bool, optional [default: True]
         When shuffle is set to true, reset the group ID - start to count
         the group_id by 0.
+
+    Services
+    --------
+    singletons(h5loc): h5loc:str -> kp.Table
+        Singleton tables for a given HDF5 location.
     """
 
     def configure(self):
@@ -607,6 +612,8 @@ class HDF5Pump(Pump):
 
         self._read_group_info()
 
+        self.expose(self.h5singleton, "h5singleton")
+
     def _read_group_info(self):
         h5file = self.h5file
 
@@ -629,6 +636,10 @@ class HDF5Pump(Pump):
         if self.shuffle:
             self.log.info("Shuffling group IDs")
             self.shuffle_function(self.group_ids)
+
+    def h5singleton(self, h5loc):
+        """Returns the singleton table for a given HDF5 location"""
+        return self._singletons[h5loc]
 
     def process(self, blob):
         self.log.info("Reading blob at index %s" % self.index)
