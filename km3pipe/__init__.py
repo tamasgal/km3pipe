@@ -31,6 +31,7 @@ if not __KM3PIPE_SETUP__:
     from . import io  # noqa
     from . import math  # noqa
     from . import mc  # noqa
+    from . import physics
     from . import shell  # noqa
     from . import style  # noqa
     from . import sys  # noqa
