@@ -27,7 +27,7 @@ import km3pipe.style
 
 km3pipe.style.use("km3pipe")
 
-filename = "data/atmospheric_muons_sample.h5"
+filename = data_path("hdf5/atmospheric_muons_sample.h5")
 cal = kp.calib.Calibration(filename=data_path("detx/KM3NeT_-00000001_20171212.detx"))
 
 
