@@ -222,8 +222,8 @@ class HDF5Sink(Module):
 
     Services
     --------
-    write_table: Table
-        The table to write, with "h5loc" set
+    write_table(tab, h5loc=None): tab:Table, h5loc:str
+        The table to write, with ".h5loc" set or to h5loc if specified.
 
     """
 
@@ -334,10 +334,12 @@ class HDF5Sink(Module):
 
         self._ndarrays_cache = defaultdict(list)
 
-    def write_table(self, table):
+    def write_table(self, table, h5loc=None):
         """Write a single table to the HDF5 file, exposed as a service"""
         self.log.debug("Writing table %s", table.name)
-        self._write_table(table.h5loc, table, table.name)
+        if h5loc is None:
+            h5loc = table.h5loc
+        self._write_table(h5loc, table, table.name)
 
     def _write_table(self, h5loc, arr, title):
         level = len(h5loc.split("/"))
