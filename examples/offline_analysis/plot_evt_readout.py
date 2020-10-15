@@ -13,21 +13,16 @@ Monte Carlo productions.
 import matplotlib.pyplot as plt
 import numpy as np
 
-from km3modules.common import StatusBar
-from km3pipe import Module, Pipeline
-from km3pipe.dataclasses import Table
-from km3pipe.calib import Calibration
-from km3pipe.io import EvtPump
-from km3pipe.math import pld3
-import km3pipe.style
+import km3pipe as kp
+import km3modules as km
+from km3net_testdata import data_path
+kp.style.use("km3pipe")
 
-km3pipe.style.use("km3pipe")
-
-filename = "../data/numu_cc.evt"
-detx = "../data/km3net_jul13_90m_r1494_corrected.detx"
+filename = data_path("evt/example_numuCC.evt")
+detx = data_path("detx/km3net_jul13_90m_r1494_corrected.detx")
 
 
-class VertexHitDistanceCalculator(Module):
+class VertexHitDistanceCalculator(kp.Module):
     """Calculate vertex-hit-distances"""
 
     def configure(self):
@@ -36,21 +31,24 @@ class VertexHitDistanceCalculator(Module):
     def process(self, blob):
         tracks = blob["TrackIns"]
         muons = tracks[tracks.type == 5]
-        muon = Table(muons[np.argmax(muons.energy)])
+        muon = kp.Table(muons[np.argmax(muons.energy)])
         hits = blob["CalibHits"]
-        dist = pld3(hits.pos, muon.pos, muon.dir)
+        dist = kp.math.pld3(hits.pos, muon.pos, muon.dir)
         self.distances.append(dist)
         return blob
 
     def finish(self):
         dist_flat = np.concatenate(self.distances)
         plt.hist(dist_flat)
+        plt.xlabel("distance between hits and muon / m")
+        plt.ylabel("count")
+        plt.tight_layout()
         plt.savefig("dists.png")
 
 
-pipe = Pipeline()
-pipe.attach(EvtPump, filename=filename, parsers=["km3"])
-pipe.attach(StatusBar, every=100)
-pipe.attach(Calibration, filename=detx)
+pipe = kp.Pipeline()
+pipe.attach(kp.io.EvtPump, filename=filename, parsers=["km3"])
+pipe.attach(km.StatusBar, every=100)
+pipe.attach(kp.calib.Calibration, filename=detx)
 pipe.attach(VertexHitDistanceCalculator)
 pipe.drain(5)
