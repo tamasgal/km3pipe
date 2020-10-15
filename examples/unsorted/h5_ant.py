@@ -6,9 +6,10 @@ Read Antares HDF5 Files
 Seatray has a builtint HDF5 writer. This is how to read the file.
 """
 
+from km3net_testdata import data_path
 import pandas as pd
 
-store = pd.HDFStore("example.hd5", mode="r")
+store = pd.HDFStore(data_path("seatray/antares.h5"), mode="r")
 
 # Do a selection on the dataframe
 

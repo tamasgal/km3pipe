@@ -23,6 +23,7 @@ import pandas as pd  # the main HDF5 reader
 import numpy as np  # must have
 import km3pipe as kp  # some KM3NeT related helper functions
 import seaborn as sns  # beautiful statistical plots!
+from km3net_testdata import data_path
 
 #####################################################
 # this is just to make our plots a bit "nicer", you can skip it
@@ -76,7 +77,7 @@ km3pipe.style.use("km3pipe")
 # First Look at the Data
 # ----------------------
 
-filepath = "data/basic_analysis_sample.h5"
+filepath = data_path("hdf5/basic_analysis_sample.h5")
 
 #####################################################
 # We can have a quick look at the file with the ``ptdump`` command

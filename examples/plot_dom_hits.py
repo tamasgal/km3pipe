@@ -22,12 +22,13 @@ import km3pipe as kp
 from km3pipe.dataclasses import Table
 from km3pipe.math import pld3
 from km3modules.common import StatusBar
+from km3net_testdata import data_path
 import km3pipe.style
 
 km3pipe.style.use("km3pipe")
 
 filename = "data/atmospheric_muons_sample.h5"
-cal = kp.calib.Calibration(filename="data/KM3NeT_-00000001_20171212.detx")
+cal = kp.calib.Calibration(filename=data_path("detx/KM3NeT_-00000001_20171212.detx"))
 
 
 def filter_muons(blob):
