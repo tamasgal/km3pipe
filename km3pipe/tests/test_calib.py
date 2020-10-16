@@ -56,7 +56,7 @@ class TestCalibration(TestCase):
 
         hits = Table({"pmt_id": [1, 2, 1], "time": [10.1, 11.2, 12.3]})
 
-        chits = calib.apply(hits)
+        chits = calib.apply(hits, correct_slewing=False)
 
         assert len(hits) == len(chits)
 
@@ -79,7 +79,7 @@ class TestCalibration(TestCase):
             {"dom_id": [2, 3, 3], "channel_id": [0, 1, 2], "time": [10.1, 11.2, 12.3]}
         )
 
-        chits = calib.apply(hits)
+        chits = calib.apply(hits, correct_slewing=False)
 
         assert len(hits) == len(chits)
 
@@ -101,7 +101,7 @@ class TestCalibration(TestCase):
         hits = Table({"pmt_id": [999], "time": [10.1]})
 
         with self.assertRaises(KeyError):
-            calib.apply(hits)
+            calib.apply(hits, correct_slewing=False)
 
     def test_apply_to_hits_with_dom_id_and_channel_id_with_wrong_calib_raises(self):
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
@@ -109,7 +109,7 @@ class TestCalibration(TestCase):
         hits = Table({"dom_id": [999], "channel_id": [0], "time": [10.1]})
 
         with self.assertRaises(KeyError):
-            calib.apply(hits)
+            calib.apply(hits, correct_slewing=False)
 
     def test_time_slewing_correction(self):
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
@@ -123,7 +123,7 @@ class TestCalibration(TestCase):
             }
         )
 
-        chits = calib.apply(hits, correct_slewing=True)
+        chits = calib.apply(hits) #  correct_slewing=True is default
 
         assert len(hits) == len(chits)
 
@@ -148,7 +148,7 @@ class TestCalibration(TestCase):
             "TimesliceHits",
         )
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
-        c_tshits = calib.apply(tshits)
+        c_tshits = calib.apply(tshits, correct_slewing=False)
         assert len(c_tshits) == len(tshits)
         assert np.allclose([40, 80, 90], c_tshits.t0)
         # TimesliceHits is using int4 for times, so it's truncated when we pass in float64
@@ -158,7 +158,7 @@ class TestCalibration(TestCase):
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
         hits = Table({"pmt_id": [1, 2, 1], "time": [10.1, 11.2, 12.3]})
         hits_compare = hits.copy()
-        calib.apply(hits)
+        calib.apply(hits, correct_slewing=False)
 
         for t_primary, t_calib in zip(hits_compare, hits):
             self.assertAlmostEqual(t_primary, t_calib)
@@ -168,7 +168,7 @@ class TestCalibrationService(TestCase):
     def test_apply_to_hits_with_dom_id_and_channel_id(self):
 
         hits = Table(
-            {"dom_id": [2, 3, 3], "channel_id": [0, 1, 2], "time": [10.1, 11.2, 12.3]}
+            {"dom_id": [2, 3, 3], "channel_id": [0, 1, 2], "time": [10.1, 11.2, 12.3], "tot": [23, 105, 231]}
         )
 
         tester = self
@@ -176,6 +176,38 @@ class TestCalibrationService(TestCase):
         class HitCalibrator(Module):
             def process(self, blob):
                 chits = self.services["calibrate"](hits)
+
+                assert len(hits) == len(chits)
+
+                a_hit = chits[0]
+                tester.assertAlmostEqual(2.1, a_hit.pos_x)
+                tester.assertAlmostEqual(40, a_hit.t0)
+                t0 = a_hit.t0
+                tester.assertAlmostEqual(10.1 + t0 - slew(a_hit.tot), a_hit.time)
+
+                a_hit = chits[1]
+                tester.assertAlmostEqual(3.4, a_hit.pos_x)
+                tester.assertAlmostEqual(80, a_hit.t0)
+                t0 = a_hit.t0
+                tester.assertAlmostEqual(11.2 + t0 - slew(a_hit.tot), a_hit.time)
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(CalibrationService, filename=data_path("detx/detx_v1.detx"))
+        pipe.attach(HitCalibrator)
+        pipe.drain(1)
+
+    def test_apply_to_hits_with_dom_id_and_channel_id_without_slewing(self):
+
+        hits = Table(
+            {"dom_id": [2, 3, 3], "channel_id": [0, 1, 2], "time": [10.1, 11.2, 12.3], "tot": [23, 105, 231]}
+        )
+
+        tester = self
+
+        class HitCalibrator(Module):
+            def process(self, blob):
+                chits = self.services["calibrate"](hits, correct_slewing=False)
 
                 assert len(hits) == len(chits)
 

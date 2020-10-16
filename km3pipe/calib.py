@@ -402,8 +402,8 @@ class CalibrationService(Module):
             "deprecated. Please use 'get_detector()' instead in future."
         )
 
-    def calibrate(self, hits):
-        return self.calibration.apply(hits)
+    def calibrate(self, hits, correct_slewing=True):
+        return self.calibration.apply(hits, correct_slewing=correct_slewing)
 
     @property
     def detector(self):
