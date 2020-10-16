@@ -136,7 +136,7 @@ class Calibration(Module):
             hits.time += cal
         return hits
 
-    def apply(self, hits, no_copy=False, correct_slewing=False, slewing_variant=3):
+    def apply(self, hits, no_copy=False, correct_slewing=True, slewing_variant=3):
         """Add x, y, z, t0 (and du, floor if DataFrame) columns to the hits."""
         if not no_copy:
             try:
