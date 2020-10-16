@@ -1,6 +1,9 @@
 Unreleased changes
 ------------------
 
+* Time slewing corrections are now automatically applied when
+  using ``kp.calib.Calibration().apply()``
+
 Version 9
 ---------
 9.0.0-beta.2 / 2020-10-07
