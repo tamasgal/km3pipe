@@ -123,7 +123,7 @@ class TestCalibration(TestCase):
             }
         )
 
-        chits = calib.apply(hits) #  correct_slewing=True is default
+        chits = calib.apply(hits)  #  correct_slewing=True is default
 
         assert len(hits) == len(chits)
 
@@ -168,7 +168,12 @@ class TestCalibrationService(TestCase):
     def test_apply_to_hits_with_dom_id_and_channel_id(self):
 
         hits = Table(
-            {"dom_id": [2, 3, 3], "channel_id": [0, 1, 2], "time": [10.1, 11.2, 12.3], "tot": [23, 105, 231]}
+            {
+                "dom_id": [2, 3, 3],
+                "channel_id": [0, 1, 2],
+                "time": [10.1, 11.2, 12.3],
+                "tot": [23, 105, 231],
+            }
         )
 
         tester = self
@@ -200,7 +205,12 @@ class TestCalibrationService(TestCase):
     def test_apply_to_hits_with_dom_id_and_channel_id_without_slewing(self):
 
         hits = Table(
-            {"dom_id": [2, 3, 3], "channel_id": [0, 1, 2], "time": [10.1, 11.2, 12.3], "tot": [23, 105, 231]}
+            {
+                "dom_id": [2, 3, 3],
+                "channel_id": [0, 1, 2],
+                "time": [10.1, 11.2, 12.3],
+                "tot": [23, 105, 231],
+            }
         )
 
         tester = self

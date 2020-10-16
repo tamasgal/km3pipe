@@ -16,6 +16,7 @@ import numpy as np
 import km3pipe as kp
 import km3modules as km
 from km3net_testdata import data_path
+
 kp.style.use("km3pipe")
 
 filename = data_path("evt/example_numuCC.evt")

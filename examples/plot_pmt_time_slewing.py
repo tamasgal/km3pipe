@@ -29,6 +29,7 @@ Variant 3 is currently (as of 2020-10-16) also used in Jpp.
 import km3pipe as kp
 import numpy as np
 import matplotlib.pyplot as plt
+
 kp.style.use()
 
 tots = np.arange(256)
