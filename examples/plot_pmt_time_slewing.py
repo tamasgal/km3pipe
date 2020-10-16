@@ -7,7 +7,14 @@ PMT Time Slewing
 
 Show different variants of PMT time slewing calculations.
 
-Variant 3 is currently (as of 2020-10-16) what's also used in Jpp.
+Time slewing corrects the hit time due to different rise times of the
+PMT signals depending on the number of photo electrons.
+The reference point is at 26.4ns and hits with a different ToT values
+are corrected to refer to comparable arrival times.
+The time slewing is subtracted from the measured hit time, in contrast
+to the time calibration (t0), which is added.
+
+Variant 3 is currently (as of 2020-10-16) also used in Jpp.
 
 """
 
