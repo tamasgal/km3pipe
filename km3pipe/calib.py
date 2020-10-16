@@ -221,7 +221,7 @@ class Calibration(Module):
             "t0": t0,
         }
         hits_data.update(calib)
-        if correct_slewing:
+        if correct_slewing and hasattr(hits, "tot"):  # only correct non-MC hits
             hits_data["time"] -= slew(hits_data["tot"], variant=slewing_variant)
         return Table(
             hits_data, h5loc=hits.h5loc, split_h5=hits.split_h5, name=hits.name
