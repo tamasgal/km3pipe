@@ -64,7 +64,7 @@ print(uncalibrated_times[:n])
 # `km3pipe.Table`, retrieve the positions and directions of the corresponding
 # PMTs, apply the time calibration and also do the PMT time slew correction.
 
-calibrated_hits = calib.apply(f.events[5].hits)
+calibrated_hits = calib.apply(hits)
 
 #######################
 # The calibrated hits are stored in a `kp.Table` which is a thin wrapper
@@ -74,10 +74,13 @@ print(calibrated_hits.dtype)
 
 
 #######################
-# The positions and directions are now showing the correct values:
+# The positions and directions are now showing the correct values and the time
+# is the calibrated one:
 
 for attr in [f"{k}_{q}" for k in ("pos", "dir") for q in "xzy"]:
     print(attr, calibrated_hits[attr][:n])
+
+print(calibrated_hits.time[:n])
 
 #######################
 # The `t0` field holds the time calibration correction which was automatically
@@ -90,7 +93,8 @@ print(calibrated_hits.t0[:n])
 # As mentioned above, the PMT time slewing correction is also applied, which
 # is a tiny correction of the arrival time with respect to the hit's ToT value.
 # We can reveal their values by subtracting the t0 from the calibrated time and
-# compare to the uncalibrated ones:
+# compare to the uncalibrated ones. Notice that hits represented as `kp.Table`
+# in km3pipe use `.time` instead of `.t` for mainly historical reasons:
 
 slews = uncalibrated_times - (calibrated_hits.time - calibrated_hits.t0)
 print(slews[:n])
@@ -101,3 +105,15 @@ print(slews[:n])
 
 slew_diff = slews - kp.calib.slew(hits.tot)
 print(slew_diff[:n])
+
+######################
+# To omit the PMT slew calibration, you can pass the `correct_slewing=False`
+# option the `.apply()`:
+
+calibrated_hits_no_slew_correction = calib.apply(hits, correct_slewing=False)
+
+######################
+# The difference between the calibration with and without slewing is obviously
+# the slewing correction itself:
+
+print((calibrated_hits_no_slew_correction.time - calibrated_hits.time)[:n])
