@@ -67,8 +67,6 @@ setup(
             "nb2sphx=km3pipe.utils.nb2sphx:main",
             "triggersetup=km3pipe.utils.triggersetup:main",
             "ligiermirror=km3pipe.utils.ligiermirror:main",
-            "runtable=km3pipe.utils.runtable:main",
-            "runinfo=km3pipe.utils.runinfo:main",
             "qrunprocessor=km3pipe.utils.qrunprocessor:main",
             "wtd=km3pipe.utils.wtd:main",
             "qrunqaqc=km3pipe.utils.qrunqaqc:main",
