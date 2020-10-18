@@ -7,12 +7,12 @@ Classes representing KM3NeT hardware.
 from collections import OrderedDict, defaultdict
 from io import StringIO
 
+import km3db
 import numpy as np
 
 from .dataclasses import Table
 from .tools import unpack_nfirst, split
 from .math import intersect_3d, qrot_yaw  # , ignored
-from .db import DBManager
 
 from .logger import get_logger, get_printer
 
@@ -82,8 +82,7 @@ class Detector(object):
                 "Retrieving DETX with detector ID {0} "
                 "from the database...".format(det_id)
             )
-            db = DBManager()
-            detx = db.detx(det_id, t0set=t0set, calibration=calibration)
+            detx = km3db.tools.detx(det_id, t0set=t0set, calibration=calibration)
             self._det_file = StringIO(detx)
             self._parse_header()
             self._parse_doms()

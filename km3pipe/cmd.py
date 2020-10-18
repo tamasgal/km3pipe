@@ -6,10 +6,6 @@ Usage:
     km3pipe test
     km3pipe update [GIT_BRANCH]
     km3pipe createconf [--overwrite] [--dump]
-    km3pipe detx DET_ID [-m] [-t T0_SET] [-c CALIBR_ID] [-o OUT]
-    km3pipe detx DET_ID RUN
-    km3pipe detectors [-s REGEX] [--temporary]
-    km3pipe rundetsn [--temporary] RUN DETECTOR
     km3pipe retrieve DET_ID RUN [-i -o OUTFILE]
     km3pipe (-h | --help)
     km3pipe --version
@@ -37,9 +33,10 @@ import os
 from datetime import datetime
 import time
 
+import km3db
+
 from . import version
 from .tools import irods_path, xrootd_path
-from .db import DBManager, we_are_in_lyon
 from .hardware import Detector
 
 from km3pipe.logger import get_logger
@@ -114,7 +111,7 @@ def retrieve(run_id, det_id, use_irods=False, out=None):
 
     cmd += " {0} {1}".format(rpath, outfile)
 
-    if not we_are_in_lyon():
+    if not km3db.core.on_whitelisted_host("lyon"):
         subprocess.call(cmd.split())
         return
 
@@ -158,55 +155,6 @@ def retrieve(run_id, det_id, use_irods=False, out=None):
     subprocess.call(["ln", "-s", cached_filepath, outfile])
 
 
-def detx(det_id, calibration="", t0set="", filename=None):
-    now = datetime.now()
-    if filename is None:
-        filename = "KM3NeT_{0}{1:08d}_{2}{3}{4}.detx".format(
-            "-" if det_id < 0 else "",
-            abs(det_id),
-            now.strftime("%d%m%Y"),
-            "_t0set-%s" % t0set if t0set else "",
-            "_calib-%s" % calibration if calibration else "",
-        )
-    det = Detector(det_id=det_id, t0set=t0set, calibration=calibration)
-    if det.n_doms > 0:
-        det.write(filename)
-
-
-def detx_for_run(det_id, run, temporary=False):
-    """Retrieve the calibrated detx for a given det_id and run"""
-    db = DBManager(temporary=temporary)
-    raw_detx = db.detx_for_run(det_id, run)
-    filename = "KM3NeT_{0:08d}_{1:08d}.detx".format(det_id, run)
-    with open(filename, "w") as fobj:
-        fobj.write(raw_detx)
-    print("File saved as '{}'".format(filename))
-
-
-def detectors(regex=None, sep="\t", temporary=False):
-    """Print the detectors table"""
-    db = DBManager(temporary=temporary)
-    dt = db.detectors
-    if regex is not None:
-        try:
-            re.compile(regex)
-        except re.error:
-            log.error("Invalid regex!")
-            return
-        dt = dt[dt["OID"].str.contains(regex) | dt["CITY"].str.contains(regex)]
-    dt.to_csv(sys.stdout, sep=sep)
-
-
-def rundetsn(run_id, detector="ARCA", temporary=False):
-    """Print the detector serial number for a given run of ARCA/ORCA"""
-    db = DBManager(temporary=temporary)
-    dts = db.detectors
-    for det_id in dts[dts.OID.str.contains(detector)].SERIALNUMBER:
-        if run_id in db.run_table(det_id).RUN.values:
-            print(det_id)
-            return
-
-
 def createconf(overwrite=False, dump=False):
     import os.path
     from os import environ
@@ -245,23 +193,5 @@ def main():
         dump = bool(args["--dump"])
         createconf(overwrite_conf, dump)
 
-    if args["rundetsn"]:
-        rundetsn(int(args["RUN"]), args["DETECTOR"], temporary=args["--temporary"])
-
     if args["retrieve"]:
         retrieve(int(args["RUN"]), args["DET_ID"], use_irods=args["-i"], out=args["-o"])
-
-    if args["detx"]:
-        if args["RUN"] and args["DET_ID"]:
-            det_id = int(args["DET_ID"])
-            run = int(args["RUN"])
-            detx_for_run(det_id, run, temporary=args["--temporary"])
-        else:
-            t0set = args["-t"]
-            calibration = args["-c"]
-            outfile = args["-o"]
-            det_id = int(("-" if args["-m"] else "") + args["DET_ID"])
-            detx(det_id, calibration, t0set, outfile)
-
-    if args["detectors"]:
-        detectors(regex=args["-s"], temporary=args["--temporary"])
