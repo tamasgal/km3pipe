@@ -26,7 +26,6 @@ if not __KM3PIPE_SETUP__:
     from . import config  # noqa
     from . import constants  # noqa
     from . import controlhost  # noqa
-    from . import db  # noqa
     from . import hardware  # noqa
     from . import io  # noqa
     from . import math  # noqa

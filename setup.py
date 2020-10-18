@@ -63,7 +63,6 @@ setup(
             "ztplot=km3pipe.utils.ztplot:main",
             "k40calib=km3pipe.utils.k40calib:main",
             "totmonitor=km3pipe.utils.totmonitor:main",
-            "streamds=km3pipe.utils.streamds:main",
             "triggermap=km3pipe.utils.triggermap:main",
             "nb2sphx=km3pipe.utils.nb2sphx:main",
             "triggersetup=km3pipe.utils.triggersetup:main",
