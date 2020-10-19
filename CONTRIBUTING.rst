@@ -104,7 +104,7 @@ all your commits regularly using::
 Install in Developer Mode
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-KM3Pipe can be installed in `dev-mode`, which means, it links itself to your
+KM3Pipe can be installed in ``dev-mode``, which means, it links itself to your
 site-packages and you can edit the sources and test them without the need
 to reinstall KM3Pipe all the time. Although you will need to restart any
 ``python``, ``ipython`` or ``jupyter``-notebook (only the kernel!) if you
@@ -183,7 +183,7 @@ Create a Merge Request (aka Pull Request)
 
 Go to https://git.km3net.de/km3py/km3pipe/merge_requests/new and select
 your source branch, which contains the changes you want to be included in KM3Pipe
-and select the `develop` branch as target branch.
+and select the ``master`` branch as target branch.
 
 That's it, the merge will be accepted if everything is OK ;)
 
