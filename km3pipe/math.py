@@ -6,6 +6,7 @@
 Maths, Geometry, coordinates.
 """
 import numpy as np
+import vg
 
 from .logger import get_logger
 
@@ -138,8 +139,9 @@ def cartesian(phi, theta, radius=1):
     return np.column_stack((x, y, z))
 
 
-def angle_between(v1, v2):
+def angle_between(v1, v2, axis=0):
     """Returns the angle in radians between vectors 'v1' and 'v2'.
+    If axis=1 it evaluates the angle between arrays of vectors.
 
     >>> angle_between((1, 0, 0), (0, 1, 0))
     1.5707963267948966
@@ -147,13 +149,20 @@ def angle_between(v1, v2):
     0.0
     >>> angle_between((1, 0, 0), (-1, 0, 0))
     3.141592653589793
-
+    >>> angle_between(np.array([(1, 0, 0), (1, 0, 0)]), np.array([(0, 1, 0), (-1, 0, 0)]), axis=1))
+    [1.57079636794896, 3.141592653589793]
     """
-    v1_u = unit_vector(v1)
-    v2_u = unit_vector(v2)
-    # Don't use `np.dot`, does not work with all shapes
-    angle = np.arccos(np.inner(v1_u, v2_u))
-    return angle
+    if axis == 0:
+        v1_u = unit_vector(v1)
+        v2_u = unit_vector(v2)
+        # Don't use `np.dot`, does not work with all shapes
+        angle = np.arccos(np.inner(v1_u, v2_u))
+        return angle
+    elif axis == 1:
+        angle = vg.angle(v1, v2)  # returns angle in deg
+        return np.radians(angle)
+    else:
+        raise ValueError("unsupported axis")
 
 
 def innerprod_1d(v1, v2):
