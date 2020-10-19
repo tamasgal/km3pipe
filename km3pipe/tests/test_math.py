@@ -151,6 +151,10 @@ class TestMath(TestCase):
         self.assertAlmostEqual(angle_between(self.v, v1), 1.3002465638163236)
         self.assertAlmostEqual(angle_between(self.v, v2), 1.0068536854342678)
         self.assertAlmostEqual(angle_between(self.v, v3), 1.8413460897734695)
+
+        assert np.allclose([0., 0., 0.] - angle_between(np.array([v1, v2, v3]), np.array([v1, v2, v3]), axis=1), 0)
+        assert np.allclose([np.pi / 2, np.pi] - angle_between(np.array([v1, v1]), np.array([v2, v3]), axis=1), 0)
+
         self.assertTrue(
             np.allclose(
                 angle_between(self.vecs, v1),
