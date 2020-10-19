@@ -122,18 +122,18 @@ def _cherenkov(calib_pos, calib_dir, track_pos, track_dir, track_t):
         # (vector PMT) - (vector track position)
         V = calib_pos[i] - track_pos
         L = np.sum(V * track_dir)
-        out[i][0] = np.sqrt(np.sum(V * V) - L * L)  # d_photon_closest
-        out[i][1] = out[i][0] / SIN_CHERENKOV  # d_photon
-        out[i][2] = L - out[i][0] / TAN_CHERENKOV  # d_track
-        out[i][3] = (
+        out[i, 0] = np.sqrt(np.sum(V * V) - L * L)  # d_photon_closest
+        out[i, 1] = out[i][0] / SIN_CHERENKOV  # d_photon
+        out[i, 2] = L - out[i][0] / TAN_CHERENKOV  # d_track
+        out[i, 3] = (
             track_t + out[i][2] / C_LIGHT + out[i][1] / V_LIGHT_WATER
         )  # t_photon
         V_photon = V - (out[i][2] * track_dir)  # photon position
         norm = np.sqrt(np.sum(V_photon * V_photon))
-        out[i][5:8] = V_photon / norm  # photon direction
+        out[i, 5:8] = V_photon / norm  # photon direction
 
         # cos angle of impact of photon with respect to the PMT direction
-        out[i][4] = np.sum(out[i][5:8] * calib_dir[i])
+        out[i, 4] = np.sum(out[i][5:8] * calib_dir[i])
     return out
 
 
