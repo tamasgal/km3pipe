@@ -288,6 +288,61 @@ def rotation_matrix(axis, theta):
     )
 
 
+def spherecutmask(center, rmin, rmax, items):
+    """Returns a mask to select items, within a certain radius around a given center.
+
+
+    Parameters
+    -----------
+    center: array of shape(3,)
+        central point of the sphere
+    rmin: float
+        minimum radius of the sphere selection
+    rmax: float
+        maximum radius of the sphere selection
+    items: array of shape (n, 3) or iterable with pos_[xyz]-attributed items
+        the items to cut on 
+
+    Returns
+    --------
+    mask of the array of shape (n, 3) or iterable with pos_[xyz]-attributed items.
+    """
+    items_pos = items
+    
+    if all(hasattr(items, "pos_" + q) for q in "xyz"):
+        items_pos = np.array([items.pos_x, items.pos_y, items.pos_z]).T
+
+    distances = dist(center, items_pos, axis=1)
+    mask = (distances >= rmin) & (distances <= rmax)
+
+    return mask
+
+
+def spherecut(center, rmin, rmax, items):
+    """Select items within a certain radius around a given center.                 
+    This function calls spherecutmask() to create the selection mask and returns the selected items.
+                                              
+    Parameters
+    -----------
+    center: array of shape(3,)
+        central point of the sphere
+    rmin: float
+        minimum radius of the sphere selection
+    rmax: float
+        maximum radius of the sphere selection
+    items: array of shape (n, 3) or iterable with pos_[xyz]-attributed items
+        the items to cut on 
+
+    Returns
+    --------
+    array of shape (k, 3) or iterable with pos_[xyz]-attributed items 
+        items which survived the cut.
+    """
+    selected_items = items[spherecutmask(center, rmin, rmax, items)]
+
+    return selected_items
+
+
 class Polygon(object):
     """A polygon, to implement containment conditions."""
 
