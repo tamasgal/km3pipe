@@ -213,3 +213,48 @@ def get_closest(track, du_pos):
         track_dir = np.array([track.dir_x, track.dir_y, track.dir_z])
 
     return _get_closest(track_pos, track_dir, meanDU_pos, meanDU_dir)
+
+
+
+def cut4d(point4d, tmin, tmax, rmin, rmax, items, c_water=kp.constants.C_WATER):
+    """Select items with a certain time residual and
+    within a certain radius around a given 4D point.  
+                                                                                                                                            
+    Parameters                                                                                                                              
+    -----------                                                                                                                             
+    point4d: array of shape(x, y, z, t)
+        central point of the selection                                                                                                      
+    tmin: float                                                                                                                             
+        minimum tres of the sphere selection                                                                                              
+    tmax: float                                                                                                                             
+        maximum tres of the sphere selection                                                                                              
+    rmin: float                                                                                                                             
+        minimum radius of the sphere selection                                                                                              
+    rmax: float                                                                                                                             
+        maximum radius of the sphere selection                                                                                              
+    items: iterable with pos_[xyz]-attributed items                                                                
+        the items to cut on                                                                                                                 
+                                                                                                                                           
+    Returns                                                                                                                               
+    --------                                                                                                                               
+    iterable with pos_[xyz]-attributed items                                                                     
+        items which survived the cut.                                                                                                    
+    """
+    point_array = point4d
+    
+    if all(hasattr(point4d, "pos_" + q) for q in "xyz"):
+        point_array = np.array([point4d[0].pos_x, point4d[0].pos_y, point4d[0].pos_z, point4d[0].t])
+
+    dt = kp.math.dist(point_array[3], np.array([items.time]).T, axis=1)
+    
+    items_pos = np.array([items.pos_x, items.pos_y, items.pos_z]).T
+
+    distances = kp.math.dist(np.array([point_array[0], point_array[1], point_array[2]]), items_pos, axis=1)
+    
+    tres = kp.math.dist(np.array([distances / kp.constants.C_WATER]).T, dt, axis=1)
+
+    mask = (tres >= tmin) & (tres <= tmax) & (distances >= rmin) & (distances <= rmax)
+    selected_items = items[mask]
+
+    return selected_items
+

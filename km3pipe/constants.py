@@ -17,6 +17,7 @@ __status__ = "Development"
 
 # Physics constants used in physics module
 WATER_INDEX = 1.3499
+INDEX_OF_REFRACTION_WATER = 1.3800851282
 DN_DL = 0.0298
 COS_CHERENKOV = 1 / WATER_INDEX
 CHERENKOV_ANGLE_RAD = math.acos(COS_CHERENKOV)
@@ -24,6 +25,7 @@ SIN_CHERENKOV = math.sin(CHERENKOV_ANGLE_RAD)
 TAN_CHERENKOV = math.tan(CHERENKOV_ANGLE_RAD)
 C_LIGHT = 299792458e-9
 V_LIGHT_WATER = C_LIGHT / (WATER_INDEX + DN_DL)
+C_WATER = C_LIGHT / INDEX_OF_REFRACTION_WATER
 
 # Detector related parameters
 arca_frame_duration = 0.1  # s

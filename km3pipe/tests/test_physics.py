@@ -9,7 +9,7 @@ from km3pipe.dataclasses import Table
 from km3pipe.testing import TestCase, data_path
 from km3pipe.hardware import Detector
 from km3pipe.calib import Calibration
-from km3pipe.physics import cherenkov, get_closest
+from km3pipe.physics import cherenkov, get_closest, cut4d
 
 
 __author__ = "Zineb ALY"
@@ -207,3 +207,42 @@ class TestGetClosest(TestCase):
 
         self.assertAlmostEqual(d_closest, 9.073491762564467)
         self.assertAlmostEqual(z_closest, 82.24928115091757)
+
+
+class TestCut4D(TestCase):
+
+    def test_cut4d(self):
+        point4d = Table(
+            {
+                "pos_x": [0],
+                "pos_y": [3],
+                "pos_z": [0],
+                "t": [20]
+            }   
+        )
+
+        items = Table(
+            {
+                "pos_x": [0, 10, 0, 20, 0],
+                "pos_y": [10, 0, 0, 0, 30],
+                "pos_z": [0, 0, 10, 0, 0],
+                "time" : [10, 15, 10, 20, 25]
+            }
+        )
+
+        tmin = -10.0
+        tmax = 100.0
+        rmin =  10.0
+        rmax =  50.0
+
+        selected_items = cut4d(point4d, tmin, tmax, rmin, rmax, items)
+        assert len(selected_items) == 2
+
+        self.assertListEqual(
+            list(np.array([10, 0, 0, 15])),
+            list(selected_items.T[0]),
+        )
+        self.assertListEqual(
+            list(np.array([0, 0, 10, 10])),
+            list(selected_items.T[1]),
+        )
