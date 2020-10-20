@@ -8,7 +8,7 @@ import numpy as np
 import tables as tb
 import km3io
 
-from km3pipe import Blob, Module, Pipeline, Pump, version
+from km3pipe import Blob, Module, Pipeline, version
 from km3pipe.dataclasses import Table, NDArray
 from km3pipe.io.hdf5 import (
     HDF5Pump,
@@ -128,7 +128,7 @@ class TestH5Sink(TestCase):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = fobj.name
 
-        class DummyPump(Pump):
+        class DummyPump(Module):
             def process(self, blob):
                 return Blob()
 
@@ -152,7 +152,7 @@ class TestH5Sink(TestCase):
 
         fobj_all = tempfile.NamedTemporaryFile(delete=True)
 
-        class DummyPump(Pump):
+        class DummyPump(Module):
             def configure(self):
                 self.i = 0
 
@@ -189,7 +189,7 @@ class TestH5Sink(TestCase):
     def test_filtered_writing_of_multiple_keys(self):
         fobj = tempfile.NamedTemporaryFile(delete=True)
 
-        class DummyPump(Pump):
+        class DummyPump(Module):
             def configure(self):
                 self.i = 0
 
@@ -239,7 +239,7 @@ class TestNDArrayHandling(TestCase):
 
         arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
 
-        class DummyPump(Pump):
+        class DummyPump(Module):
             def process(self, blob):
                 blob["foo"] = NDArray(arr)
                 return blob
@@ -266,7 +266,7 @@ class TestNDArrayHandling(TestCase):
 
         arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
 
-        class DummyPump(Pump):
+        class DummyPump(Module):
             def configure(self):
                 self.index = 0
 
@@ -294,7 +294,7 @@ class TestNDArrayHandling(TestCase):
 
         arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
 
-        class DummyPump(Pump):
+        class DummyPump(Module):
             def configure(self):
                 self.index = 0
 
@@ -322,7 +322,7 @@ class TestNDArrayHandling(TestCase):
 
         arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
 
-        class DummyPump(Pump):
+        class DummyPump(Module):
             def configure(self):
                 self.index = 0
 
@@ -350,7 +350,7 @@ class TestNDArrayHandling(TestCase):
 
         arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
 
-        class DummyPump(Pump):
+        class DummyPump(Module):
             def configure(self):
                 self.index = 0
 
@@ -392,7 +392,7 @@ class TestH5SinkConsistency(TestCase):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = fobj.name
 
-        class DummyPump(Pump):
+        class DummyPump(Module):
             def configure(self):
                 self.count = 0
 
@@ -419,7 +419,7 @@ class TestH5SinkConsistency(TestCase):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = fobj.name
 
-        class DummyPump(Pump):
+        class DummyPump(Module):
             def configure(self):
                 self.count = 0
 
@@ -453,7 +453,7 @@ class TestH5SinkConsistency(TestCase):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = fobj.name
 
-        class DummyPump(Pump):
+        class DummyPump(Module):
             def process(self, blob):
                 tab = Table({"group_id": 2}, h5loc="tab")
                 return Blob({"tab": tab})
@@ -474,7 +474,7 @@ class TestH5SinkConsistency(TestCase):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = fobj.name
 
-        class DummyPump(Pump):
+        class DummyPump(Module):
             def process(self, blob):
                 tab = Table({"a": 2}, h5loc="tab", h5singleton=True)
                 return Blob({"tab": tab})
@@ -495,7 +495,7 @@ class TestH5SinkConsistency(TestCase):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = fobj.name
 
-        class DummyPump(Pump):
+        class DummyPump(Module):
             def process(self, blob):
                 tab = Table({"a": 2}, h5loc="tab", h5singleton=True)
                 return Blob({"Tab": tab})
@@ -527,7 +527,7 @@ class TestHDF5PumpConsistency(TestCase):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = fobj.name
 
-        class DummyPump(Pump):
+        class DummyPump(Module):
             def configure(self):
                 self.count = 0
 
@@ -572,7 +572,7 @@ class TestHDF5PumpConsistency(TestCase):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = fobj.name
 
-        class DummyPump(Pump):
+        class DummyPump(Module):
             def configure(self):
                 self.count = 0
 
@@ -611,7 +611,7 @@ class TestHDF5PumpConsistency(TestCase):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = fobj.name
 
-        class DummyPump(Pump):
+        class DummyPump(Module):
             def configure(self):
                 self.count = 0
 
@@ -747,7 +747,7 @@ class TestHDF5Shuffle(TestCase):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = fobj.name
 
-        class DummyPump(Pump):
+        class DummyPump(Module):
             def configure(self):
                 self.i = 0
 
@@ -834,7 +834,7 @@ class TestHDF5Shuffle(TestCase):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = fobj.name
 
-        class DummyPump(Pump):
+        class DummyPump(Module):
             def configure(self):
                 self.i = 0
 

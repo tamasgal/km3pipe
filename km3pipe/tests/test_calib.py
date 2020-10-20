@@ -7,7 +7,7 @@ import shutil
 import sys
 import tempfile
 
-from km3pipe.core import Module, Pipeline
+from thepipe import Module, Pipeline
 from km3pipe.dataclasses import Table
 from km3pipe.hardware import Detector
 from km3pipe.io.hdf5 import HDF5Sink

@@ -9,8 +9,8 @@ from struct import unpack
 
 import numpy as np
 
+from thepipe import Blob, Module
 from km3pipe.dataclasses import Table
-from km3pipe.core import Blob, Pump
 from km3pipe.sys import ignored
 
 __author__ = "Tamas Gal"
@@ -22,7 +22,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-class CLBPump(Pump):
+class CLBPump(Module):
     """A pump for binary CLB files.
 
     Parameters

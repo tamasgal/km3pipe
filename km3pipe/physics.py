@@ -13,7 +13,7 @@ import km3pipe as kp
 
 from numba import njit
 
-from .core import Module
+from thepipe import Module
 from .hardware import Detector
 from .dataclasses import Table
 from .logger import get_logger

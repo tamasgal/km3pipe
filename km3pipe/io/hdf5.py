@@ -23,7 +23,7 @@ except ImportError:
     jit = lambda f: f
 
 import km3pipe as kp
-from km3pipe.core import Pump, Module, Blob
+from thepipe import Module, Blob
 from km3pipe.dataclasses import Table, NDArray
 from km3pipe.logger import get_logger
 from km3pipe.tools import decamelise, camelise, split, istype
@@ -220,9 +220,9 @@ class HDF5Sink(Module):
     n_rows_expected = int, optional [default: 10000]
     append: bool, optional [default: False]
 
-    Services
-    --------
-    write_table(tab, h5loc=None): tab:Table, h5loc:str
+    Notes
+    -----
+    Provides service write_table(tab, h5loc=None): tab:Table, h5loc:str
         The table to write, with ".h5loc" set or to h5loc if specified.
 
     """
@@ -563,7 +563,7 @@ class HDF5Sink(Module):
         self.cprint("HDF5 file written to: {}".format(self.filename))
 
 
-class HDF5Pump(Pump):
+class HDF5Pump(Module):
     """Read KM3NeT-formatted HDF5 files, event-by-event.
 
     Parameters
@@ -581,9 +581,9 @@ class HDF5Pump(Pump):
         When shuffle is set to true, reset the group ID - start to count
         the group_id by 0.
 
-    Services
-    --------
-    h5singleton(h5loc): h5loc:str -> kp.Table
+    Notes
+    -----
+    Provides service h5singleton(h5loc): h5loc:str -> kp.Table
         Singleton tables for a given HDF5 location.
     """
 

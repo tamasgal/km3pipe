@@ -45,13 +45,10 @@ MC_ANG_DIST = np.array([-0.72337394, 2.59196335, -0.43594182, 1.10514914])
 class K40BackgroundSubtractor(kp.Module):
     """Subtracts random coincidence background from K40 data
 
-    Required Services
-    -----------------
-    'MedianPMTRates()': dict (key=dom_id, value=list of pmt rates)
-
-    Output Keys
-    -----------
-    'K40Counts': dict, Corrected K40 counts
+    Notes
+    -----
+    Requires servce 'MedianPMTRates()'
+    Writes 'K40Counts' into the Blob: dict, Corrected K40 counts
 
     """
 
@@ -119,16 +116,13 @@ class IntraDOMCalibrator(kp.Module):
     mode: str ('offline' | 'online')
       Calibration mode [default: 'online']
 
-    Input Keys
-    ----------
-    'TwofoldCounts': dict (key=dom_id,
-                           value=matrix of k40 counts 465x(dt*2+1))
-    'CorrectedTwofoldCounts': dict (key=dom_id,
-                                    value=matrix of k40 counts 465x(dt*2+1))
-
-    Output Keys
-    -----------
-    'IntraDOMCalibration': dict (key=dom_id, value=calibration)
+    Notes
+    -----
+    Requires 'TwofoldCounts': dict
+        (key=dom_id, value=matrix of k40 counts 465x(dt*2+1))
+    Requires 'CorrectedTwofoldCounts': dict
+        (key=dom_id, value=matrix of k40 counts 465x(dt*2+1))
+    Writes 'IntraDOMCalibration' into the blob: dict (key=dom_id, value=calibration)
 
     """
 
@@ -208,12 +202,10 @@ class TwofoldCounter(kp.Module):
     'dump_filename': str
       name for the dump file
 
-    Input Keys
-    ----------
-    'TSHits': RawHitSeries
-
-    Services
-    --------
+    Notes
+    -----
+    Requires the key 'TSHits': RawHitSeries
+    Provides the following services:
     'TwofoldCounts': dict (key=dom_id, value=matrix (465,(dt*2+1)))
     'ResetTwofoldCounts': reset the TwofoldCounts dict
     'GetLivetime()': dict (key=dom_id, value=float)

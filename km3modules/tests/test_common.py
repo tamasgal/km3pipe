@@ -31,7 +31,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-class InfinitePump(kp.Pump):
+class InfinitePump(kp.Module):
     """A pump which just infinetly spits out indexed blobs"""
 
     def configure(self):
@@ -45,7 +45,7 @@ class InfinitePump(kp.Pump):
 
 class TestKeep(TestCase):
     def test_keep_a_single_key(self):
-        class APump(kp.Pump):
+        class APump(kp.Module):
             def process(self, blob):
                 blob["a"] = "a"
                 blob["b"] = "b"
@@ -68,7 +68,7 @@ class TestKeep(TestCase):
         pipe.drain(5)
 
     def test_keep_multiple_keys(self):
-        class APump(kp.Pump):
+        class APump(kp.Module):
             def process(self, blob):
                 blob["a"] = "a"
                 blob["b"] = "b"
@@ -91,7 +91,7 @@ class TestKeep(TestCase):
         pipe.drain(5)
 
     def test_hdf5_keep_group_wo_subgroup(self):
-        class APump(kp.Pump):
+        class APump(kp.Module):
             def process(self, blob):
                 blob["A"] = kp.Table(
                     {"foo": [1, 2, 3], "bar": [4, 5, 6]}, h5loc="/foobar"
@@ -115,7 +115,7 @@ class TestKeep(TestCase):
         pipe.drain(5)
 
     def test_hdf5_keep_group_w_subgroup(self):
-        class APump(kp.Pump):
+        class APump(kp.Module):
             def process(self, blob):
                 blob["A"] = kp.Table(
                     {"foo": [1, 2, 3], "bar": [4, 5, 6]}, h5loc="/foobar"
@@ -139,7 +139,7 @@ class TestKeep(TestCase):
         pipe.drain(5)
 
     def test_key_hdf5_group_individual(self):
-        class APump(kp.Pump):
+        class APump(kp.Module):
             def process(self, blob):
                 blob["A"] = kp.Table(
                     {"foo": [1, 2, 3], "bar": [4, 5, 6]}, h5loc="/foobar"
@@ -164,7 +164,7 @@ class TestKeep(TestCase):
         pipe.drain(5)
 
     def test_key_hdf5_group_parallel(self):
-        class APump(kp.Pump):
+        class APump(kp.Module):
             def process(self, blob):
                 blob["A"] = kp.Table(
                     {"foo": [1, 2, 3], "bar": [4, 5, 6]}, h5loc="/foobar"
@@ -188,7 +188,7 @@ class TestKeep(TestCase):
         pipe.drain(5)
 
     def test_major_hdf5_group(self):
-        class APump(kp.Pump):
+        class APump(kp.Module):
             def process(self, blob):
                 blob["A"] = kp.Table(
                     {"foo": [1, 2, 3], "bar": [4, 5, 6]}, h5loc="/foobar/a"
@@ -213,7 +213,7 @@ class TestKeep(TestCase):
         pipe.drain(5)
 
     def test_major_hdf5_group_nested(self):
-        class APump(kp.Pump):
+        class APump(kp.Module):
             def process(self, blob):
                 blob["A"] = kp.Table({"a": 0}, h5loc="/foo/bar/a")
                 blob["B"] = kp.Table({"b": 1}, h5loc="/foo/bar/baz/b")
@@ -236,7 +236,7 @@ class TestKeep(TestCase):
 
 class TestDelete(TestCase):
     def test_delete_a_single_key(self):
-        class APump(kp.Pump):
+        class APump(kp.Module):
             def process(self, blob):
                 blob["a"] = "a"
                 blob["b"] = "b"
@@ -257,7 +257,7 @@ class TestDelete(TestCase):
         pipe.drain(5)
 
     def test_delete_multiple_keys(self):
-        class APump(kp.Pump):
+        class APump(kp.Module):
             def process(self, blob):
                 blob["a"] = "a"
                 blob["b"] = "b"

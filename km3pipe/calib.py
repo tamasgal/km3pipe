@@ -8,11 +8,11 @@ import numpy as np
 
 import km3db
 
-from .core import Module
-from .hardware import Detector
-from .dataclasses import Table
-from .tools import istype
-from .logger import get_logger
+from thepipe import Module
+from km3pipe.hardware import Detector
+from km3pipe.dataclasses import Table
+from km3pipe.tools import istype
+from km3pipe.logger import get_logger
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."

@@ -176,6 +176,8 @@ def split(string, callback=None, sep=None):
 def namedtuple_with_defaults(typename, field_names, default_values=[]):
     """Create a namedtuple with default values
 
+    Examples
+    --------
     >>> Node = namedtuple_with_defaults('Node', 'val left right')
     >>> Node()
     Node(val=None, left=None, right=None)
@@ -187,6 +189,7 @@ def namedtuple_with_defaults(typename, field_names, default_values=[]):
     Node(val=None, left=None, right=7)
     >>> Node(4)
     Node(val=4, left=None, right=7)
+
     """
     the_tuple = collections.namedtuple(typename, field_names)
     the_tuple.__new__.__defaults__ = (None,) * len(the_tuple._fields)

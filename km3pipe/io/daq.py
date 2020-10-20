@@ -17,7 +17,7 @@ from urllib.request import urlopen, URLError
 
 import numpy as np
 
-from km3pipe.core import Pump, Module, Blob
+from thepipe import Module, Blob
 from km3pipe.dataclasses import Table
 from km3pipe.sys import ignored
 from km3pipe.logger import get_logger, get_printer
@@ -133,7 +133,7 @@ class TimesliceParser(Module):
         return ts_info, ts_frameinfos, ts_hits
 
 
-class DAQPump(Pump):
+class DAQPump(Module):
     """A pump for binary DAQ files."""
 
     def configure(self):
@@ -374,14 +374,20 @@ RecoShower = namedtuple("RecoShower", "x y z dx dy dz E Q t type status ndf")
 class DAQPreamble(object):
     """Wrapper for the JDAQPreamble binary format.
 
-    Args:
-      file_obj (file): The binary file, where the file pointer is at the
-        beginning of the header.
+    Parameters
+    ----------
+    byte_data : bytes (optional)
+        The binary file, where the file pointer is at the beginning of the header.
+    file_obj : file (optional)
+        The binary file, where the file pointer is at the beginning of the header.
 
-    Attributes:
-      size (int): The size of the original DAQ byte representation.
-      data_type (int): The data type of the following frame. The coding is
-        stored in the ``DATA_TYPES`` dictionary::
+    Attributes
+    ----------
+    size : int
+        The size of the original DAQ byte representation.
+    data_type : int
+        The data type of the following frame. The coding is stored in the
+        ``DATA_TYPES`` dictionary::
 
             101: 'DAQSuperFrame'
             201: 'DAQSummaryFrame'
@@ -422,12 +428,17 @@ class DAQPreamble(object):
 class DAQHeader(object):
     """Wrapper for the JDAQHeader binary format.
 
-    Args:
-      file_obj (file): The binary file, where the file pointer is at the
-        beginning of the header.
+    Parameters
+    ----------
+    byte_data : bytes (optional)
+        The binary file, where the file pointer is at the beginning of the header.
+    file_obj : file (optional)
+        The binary file, where the file pointer is at the beginning of the header.
 
-    Attributes:
-      size (int): The size of the original DAQ byte representation.
+    Attributes
+    ----------
+    size : int
+        The size of the original DAQ byte representation.
 
     """
 
@@ -472,16 +483,20 @@ class DAQHeader(object):
 class DAQSummaryslice(object):
     """Wrapper for the JDAQSummarySlice binary format.
 
-    Args:
-      file_obj (file): The binary file, where the file pointer is at the
-        beginning of the header.
+    Parameters
+    ----------
+    file_obj : file (optional)
+        The binary file, where the file pointer is at the beginning of the header.
 
-    Attributes:
-      n_summary_frames (int): The number of summary frames.
-      summary_frames (dict): The PMT rates for each DOM. The key is the DOM
-        identifier and the corresponding value is a sorted list of PMT rates
-        in [Hz].
-      dom_rates (dict): The overall DOM rate for each DOM.
+    Attributes
+    ----------
+    n_summary_frames : int
+        The number of summary frames.
+    summary_frames : dict
+        The PMT rates for each DOM. The key is the DOM identifier and the
+        corresponding value is a sorted list of PMT rates in [Hz].
+    dom_rates : dict
+        The overall DOM rate for each DOM.
 
     """
 
@@ -522,19 +537,28 @@ class DAQSummaryslice(object):
 class DAQEvent(object):
     """Wrapper for the JDAQEvent binary format.
 
-    Args:
-      file_obj (file): The binary file, where the file pointer is at the
+    Parameters
+    ----------
+    file_obj : file
+        The binary file, where the file pointer is at the beginning of the header.
 
-    Attributes:
-      trigger_counter (int): Incremental identifier of the occurred trigger.
-      trigger_mask (int): The trigger type(s) satisfied.
-      overlays (int): Number of merged events.
-      n_triggered_hits (int): Number of hits satisfying the trigger conditions.
-      n_snapshot_hits (int): Number of snapshot hits.
-      triggered_hits (list): A list of triggered hits
-        (dom_id, pmt_id, tdc_time, tot, (trigger_mask,))
-      snapshot_hits (list): A list of snapshot hits
-        (dom_id, pmt_id, tdc_time, tot)
+
+    Attributes
+    ----------
+    trigger_counter : int
+        Incremental identifier of the occurred trigger.
+    trigger_mask : int
+        The trigger type(s) satisfied.
+    overlays : int
+        Number of merged events.
+    n_triggered_hits : int
+        Number of hits satisfying the trigger conditions.
+    n_snapshot_hits : int
+        Number of snapshot hits.
+    triggered_hits : list
+        A list of triggered hits (dom_id, pmt_id, tdc_time, tot, (trigger_mask,))
+    snapshot_hits : list
+        A list of snapshot hits (dom_id, pmt_id, tdc_time, tot)
 
     """
 
@@ -636,7 +660,7 @@ class TMCHData(object):
         return self.__str__()
 
 
-class TMCHRepump(Pump):
+class TMCHRepump(Module):
     """Takes a IO_MONIT raw dump and replays it."""
 
     def configure(self):
@@ -672,9 +696,8 @@ class TMCHRepump(Pump):
 class DMMonitor(object):
     """A class which provides access to the Detector Manager parameters.
 
-    Example
-    -------
-
+    Examples
+    --------
     >>> import km3pipe as kp
     >>> dmm = kp.io.daq.DMMonitor('192.168.0.120', base='clb/outparams')
     >>> session = dmm.start_session('test', ['wr_mu/1/0','wr_mu/1/1'])

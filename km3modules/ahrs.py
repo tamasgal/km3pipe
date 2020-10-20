@@ -31,17 +31,18 @@ log = kp.logger.get_logger(__name__)  # pylint: disable=C0103
 class AHRSCalibrator(kp.Module):
     """Calculates AHRS yaw, pitch and roll from median A and H of an interval.
 
-    Required Parameters
-    -------------------
-    det_id: int (detector ID, e.g. 29)
+    Parameters
+    ----------
+    det_id: int
+        The detector ID, e.g. 29)
 
-    Optional Parameters
-    -------------------
+    Other Parameters
+    ----------------
     interval: int (accumulation interval in [sec], default: 10s)
 
-    Output Keys
-    -----------
-    'AHRSCalibration':
+    Notes
+    -----
+    Writes 'AHRSCalibration' in the blob with:
         dict: key=dom_id, value=tuple: (timestamp, du, floor, yaw, pitch, roll)
 
     """

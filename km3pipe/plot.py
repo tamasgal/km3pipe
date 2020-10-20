@@ -96,8 +96,8 @@ def meshgrid(x_min, x_max, x_step, y_min=None, y_max=None, y_step=None):
 def prebinned_hist(counts, binlims, ax=None, *args, **kwargs):
     """Plot a histogram with counts, binlims already given.
 
-    Example
-    =======
+    Examples
+    ========
     >>> gaus = np.random.normal(size=100)
     >>> counts, binlims = np.histogram(gaus, bins='auto')
     >>> prebinned_hist(countsl binlims)

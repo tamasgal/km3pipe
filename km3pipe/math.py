@@ -25,10 +25,11 @@ def neutrino_to_source_direction(phi, theta, radian=True):
     """Flip the direction.
 
     Parameters
-    ==========
+    ----------
     phi, theta: neutrino direction
     radian: bool [default=True]
         receive + return angles in radian? (if false, use degree)
+
     """
     phi = np.atleast_1d(phi).copy()
     theta = np.atleast_1d(theta).copy()
@@ -49,10 +50,14 @@ def source_to_neutrino_direction(azimuth, zenith, radian=True):
     """Flip the direction.
 
     Parameters
-    ==========
-    zenith, azimuth: neutrino origin
+    ----------
+    zenith : float
+        neutrino origin
+    azimuth: float
+        neutrino origin
     radian: bool [default=True]
         receive + return angles in radian? (if false, use degree)
+
     """
     azimuth = np.atleast_1d(azimuth).copy()
     zenith = np.atleast_1d(zenith).copy()
@@ -70,11 +75,18 @@ def source_to_neutrino_direction(azimuth, zenith, radian=True):
 def theta(v):
     """Neutrino direction in polar coordinates.
 
+    Parameters
+    ----------
+    v : array (x, y, z)
+
+    Notes
+    -----
     Downgoing event: theta = 180deg
     Horizont: 90deg
     Upgoing: theta = 0
 
     Angles in radians.
+
     """
     v = np.atleast_2d(v)
     dir_z = v[:, 2]
@@ -88,9 +100,17 @@ def theta_separg(dir_z):
 def phi(v):
     """Neutrino direction in polar coordinates.
 
+    Parameters
+    ----------
+    v : array (x, y, z)
+
+
+    Notes
+    -----
     ``phi``, ``theta`` is the opposite of ``zenith``, ``azimuth``.
 
     Angles in radians.
+
     """
     v = np.atleast_2d(v)
     dir_x = v[:, 0]
@@ -107,10 +127,18 @@ def phi_separg(dir_x, dir_y):
 def zenith(v):
     """Return the zenith angle in radians.
 
+    Parameters
+    ----------
+    v : array (x, y, z)
+
+
+    Notes
+    -----
     Defined as 'Angle respective to downgoing'.
     Downgoing event: zenith = 0
     Horizont: 90deg
     Upgoing: zenith = 180deg
+
     """
     return angle_between((0, 0, -1), v)
 
@@ -118,11 +146,19 @@ def zenith(v):
 def azimuth(v):
     """Return the azimuth angle in radians.
 
+    Parameters
+    ----------
+    v : array (x, y, z)
+
+
+    Notes
+    -----
     ``phi``, ``theta`` is the opposite of ``zenith``, ``azimuth``.
 
     This is the 'normal' azimuth definition -- beware of how you
     define your coordinates. KM3NeT defines azimuth
     differently than e.g. SLALIB, astropy, the AAS.org
+
     """
     v = np.atleast_2d(v)
     azi = phi(v) - np.pi
@@ -141,16 +177,22 @@ def cartesian(phi, theta, radius=1):
 
 def angle_between(v1, v2, axis=0):
     """Returns the angle in radians between vectors 'v1' and 'v2'.
+
     If axis=1 it evaluates the angle between arrays of vectors.
 
+    Examples
+    --------
     >>> angle_between((1, 0, 0), (0, 1, 0))
     1.5707963267948966
     >>> angle_between((1, 0, 0), (1, 0, 0))
     0.0
     >>> angle_between((1, 0, 0), (-1, 0, 0))
     3.141592653589793
-    >>> angle_between(np.array([(1, 0, 0), (1, 0, 0)]), np.array([(0, 1, 0), (-1, 0, 0)]), axis=1))
-    [1.57079636794896, 3.141592653589793]
+    >>> v1 = np.array([[1, 0, 0], [1, 0, 0]])
+    >>> v2 = np.array([[0, 1, 0], [-1, 0, 0]])
+    >>> angle_between(v1, v2, axis=1)
+    array([1.57079633, 3.14159265])
+
     """
     if axis == 0:
         v1_u = unit_vector(v1)
@@ -165,27 +207,8 @@ def angle_between(v1, v2, axis=0):
         raise ValueError("unsupported axis")
 
 
-def innerprod_1d(v1, v2):
-    """1d Inner product for vector-of-vectors.
-
-    Example:
-    ========
-    ```
-    v1 = np.array([dir_x, dir_y, dir_z]).T
-    v2 = ... # dito
-    angle_between_v1_v1 = innerprod_1d(v1, v2)
-    ```
-    """
-    return np.einsum("ij,ij->i", v1, v1)
-
-
 def unit_vector(vector, **kwargs):
     """Returns the unit vector of the vector."""
-    # This also works for a dataframe with columns ['x', 'y', 'z']
-    # However, the division operation is picky about the shapes
-    # So, remember input vector shape, cast all up to 2d,
-    # do the (ugly) conversion, then return unit in same shape as input
-    # of course, the numpy-ized version of the input...
     vector = np.array(vector)
     out_shape = vector.shape
     vector = np.atleast_2d(vector)
@@ -243,10 +266,12 @@ def hsin(theta):
 
 def space_angle(phi1, theta1, phi2, theta2):
     """Also called Great-circle-distance --
+
     use long-ass formula from wikipedia (last in section):
     https://en.wikipedia.org/wiki/Great-circle_distance#Computational_formulas
 
     Space angle only makes sense in lon-lat, so convert zenith -> latitude.
+
     """
     from numpy import pi, sin, cos, arctan2, sqrt, square
 
@@ -271,7 +296,8 @@ def rotation_matrix(axis, theta):
     Parameters
     ----------
     axis: vector to rotate around
-    theta: rotation angle, in rad
+    theta: rotation angle [rad]
+
     """
     axis = np.asarray(axis)
     axis = axis / np.linalg.norm(axis)
@@ -337,6 +363,7 @@ def spherecut(center, rmin, rmax, items):
     --------
     array of shape (k, 3) or iterable with pos_[xyz]-attributed items
         items which survived the cut.
+
     """
     selected_items = items[spherecutmask(center, rmin, rmax, items)]
 
@@ -393,9 +420,9 @@ class SparseCone(object):
 
     Parameters
     ----------
-    spike_pos: coordinates of the top
-    bottom_center_pos: center of the bottom circle
-    opening_angle: cone opening angle, in rad
+    spike_pos : coordinates of the top
+    bottom_center_pos : center of the bottom circle
+    opening_angle : cone opening angle, in rad
         theta, axis to mantle, *not* mantle-mantle. So this is the angle
         to the axis, and mantle-to-mantle (aperture) is 2 theta.
     """
@@ -494,8 +521,8 @@ def qrot(vector, quaternion):
 
     Parameters
     ----------
-    vector: np.array
-    quaternion: np.array
+    vector : np.array
+    quaternion : np.array
 
     Returns
     -------
@@ -512,9 +539,9 @@ def qeuler(yaw, pitch, roll):
 
     Parameters
     ----------
-    yaw: number
-    pitch: number
-    roll: number
+    yaw : number
+    pitch : number
+    roll : number
 
     Returns
     -------
@@ -549,8 +576,8 @@ def qrot_yaw(vector, heading):
 
     Parameters
     ----------
-    vector: np.array or list-like (3 elements)
-    heading: the heading to rotate to [deg]
+    vector : np.array or list-like (3 elements)
+    heading : the heading to rotate to [deg]
 
     Returns
     -------

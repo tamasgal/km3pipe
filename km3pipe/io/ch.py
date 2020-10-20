@@ -6,7 +6,7 @@ Pump for the jpp file read through aanet interface.
 
 """
 
-from km3pipe.core import Pump, Blob
+from thepipe import Module, Blob
 from km3pipe.controlhost import Client
 from km3pipe.time import Cuckoo
 from km3pipe.logger import get_logger
@@ -28,7 +28,7 @@ __status__ = "Development"
 log = get_logger(__name__)  # pylint: disable=C0103
 
 
-class CHPump(Pump):
+class CHPump(Module):
     """A pump for ControlHost data."""
 
     def configure(self):

@@ -13,11 +13,11 @@ Provenance
 
 #####################################################
 # Introduction
-# -----------
+# ------------
 # KM3Pipe uses the provenance functionality from ``thepipe``
 # which automatically tracks each activity. This document
 # shows how it works.
-#
+
 import km3pipe as kp
 import km3modules as km
 import numpy as np

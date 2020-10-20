@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from ..core import Module, Blob
+from thepipe import Module, Blob
 from ..dataclasses import Table
 from .hdf5 import HDF5Header
 from thepipe import Provenance

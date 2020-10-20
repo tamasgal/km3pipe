@@ -52,7 +52,6 @@ setup(
         "console_scripts": [
             "km3pipe=km3pipe.cmd:main",
             "pipeinspector=pipeinspector.app:main",
-            "rtree=km3pipe.utils.rtree:main",
             "h5extract=km3pipe.utils.h5extract:main",
             "h5info=km3pipe.utils.h5info:main",
             "h5tree=km3pipe.utils.h5tree:main",
@@ -60,7 +59,6 @@ setup(
             "meantots=km3pipe.utils.meantots:main",
             "ztplot=km3pipe.utils.ztplot:main",
             "k40calib=km3pipe.utils.k40calib:main",
-            "totmonitor=km3pipe.utils.totmonitor:main",
             "triggermap=km3pipe.utils.triggermap:main",
             "nb2sphx=km3pipe.utils.nb2sphx:main",
             "ligiermirror=km3pipe.utils.ligiermirror:main",

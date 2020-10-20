@@ -10,7 +10,7 @@ Pump for the online file format
 import numpy as np
 import km3io
 
-from km3pipe.core import Pump, Blob
+from thepipe import Module, Blob
 from km3pipe.dataclasses import Table
 from km3pipe.logger import get_logger
 
@@ -25,7 +25,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 
-class EventPump(Pump):
+class EventPump(Module):
     """A pump for DAQ (triggered) events in online files.
 
     Parameters
@@ -130,10 +130,10 @@ class EventPump(Pump):
         return self._current_blob
 
 
-class TimeslicePump(Pump):
+class TimeslicePump(Module):
     """A pump to read and extract timeslices. Currently only hits are read.
 
-    Required Parameters
+    Parameters
     -------------------
     filename: str
     stream: str ('L0', 'L1', 'L2', 'SN') default: 'L1'
@@ -248,7 +248,7 @@ class TimeslicePump(Pump):
             yield self.get_blob(i)
 
 
-class SummaryslicePump(Pump):
+class SummaryslicePump(Module):
     """Preliminary Summaryslice reader"""
 
     def configure(self):
