@@ -24,8 +24,6 @@ points = np.random.rand(1000, 3)
 # In this example we create two masks and use them to not only highlight the
 # selected points but also to hide those from the original dataset.
 
-points = np.random.rand(1000, 3)
-
 mask1 = kp.math.spherecutmask([0, 0, 0], 0.8, 1.0, points)
 mask2 = kp.math.spherecutmask([0.8, 0.8, 0.8], 0, 0.2, points)
 
