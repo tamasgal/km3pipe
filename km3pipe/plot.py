@@ -21,6 +21,7 @@ except ImportError:
     HAS_SEABORN = False
 
 from km3pipe.stats import bincenters
+import km3pipe.extras
 
 __author__ = "Moritz Lotze"
 __copyright__ = "Copyright 2018, Tamas Gal and the KM3NeT collaboration."
@@ -116,6 +117,7 @@ def joint_hex(x, y, **kwargs):
 
 
 def plot_convexhull(xy, ax=None, plot_points=True):
+    scipy = km3pipe.extras.scipy()
     from scipy.spatial import ConvexHull
 
     ch = ConvexHull(xy)

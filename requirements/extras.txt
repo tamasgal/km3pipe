@@ -1,0 +1,2 @@
+pandas
+scipy>=1.3.1

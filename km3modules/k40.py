@@ -13,12 +13,12 @@ from functools import partial
 from datetime import datetime
 import io
 
-from scipy import optimize
 import numpy as np
 import h5py
 import pickle
 
 import km3pipe as kp
+import km3pipe.extras
 from km3pipe.io.daq import TMCHData
 
 log = kp.logger.get_logger(__name__)  # pylint: disable=C0103
@@ -575,6 +575,8 @@ def fit_delta_ts(data, livetime, fit_background=True):
     -------
     numpy arrays with rates and means for all PMT combinations
     """
+    scipy = km3pipe.extras.scipy()
+    from scipy import optimize
 
     data = data / livetime
     start = -(data.shape[1] - 1) / 2

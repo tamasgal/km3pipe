@@ -5,8 +5,8 @@
 A collection of fit functions and modules.
 
 """
-from scipy import optimize
 import numpy as np
+import km3pipe.extras
 
 
 def fit_delta_ts(data, time_s):
@@ -21,6 +21,8 @@ def fit_delta_ts(data, time_s):
     -------
     numpy arrays with rates and means for all PMT combinations
     """
+    scipy = km3pipe.extras.scipy()
+    from scipy import optimize
 
     data = data / time_s
 
