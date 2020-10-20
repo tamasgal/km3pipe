@@ -40,11 +40,10 @@ def once(self, message, *args, **kws):
     This will not work in IPython or Jupyter notebooks if no identifier is
     specified, since then the determined position in source contains the
     execution number of the input (cell), which changes every time.
-    Set a unique identifier, otherwise the message will be printed every
+    Set a unique ``identifier=X``, otherwise the message will be printed every
     time.
+
     """
-    # TODO: after py2 support drop, put this into
-    # function signature: identifier=None (between *args and **kws)
     identifier = kws.pop("identifier", None)
 
     if identifier is None:
