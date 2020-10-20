@@ -374,18 +374,6 @@ def is_coherent(seq):
     return np.array_equal(seq, range(seq[0], int(seq[-1] + 1)))
 
 
-class AnyBar:
-    """A lightweight interface to the AnyBar macOS app."""
-
-    def __init__(self, port=1738, address="localhost"):
-        self.port = port
-        self.address = address
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-    def change(self, color):
-        self.sock.sendto(color.encode("utf-8"), (self.address, self.port))
-
-
 def zero_pad(m, n=1):
     """Pad a matrix with zeros, on all sides."""
     return np.pad(m, (n, n), mode="constant", constant_values=[0])

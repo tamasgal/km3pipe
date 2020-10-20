@@ -18,8 +18,6 @@ Options:
     -o OUT              Output folder or filename.
     -t T0_SET           Time calibration ID (eg. A01466431)
     -s REGEX            Regular expression to filter the runsetup name/id.
-    --temporary         Use a temporary session. [default: False]
-    --overwrite         Overwrite existing config [default: False]
     DET_ID              Detector ID (eg. D_ARCA001).
     DETECTOR            Detector (eg. ARCA).
     GIT_BRANCH          Git branch to pull (eg. develop).
@@ -155,23 +153,6 @@ def retrieve(run_id, det_id, use_irods=False, out=None):
     subprocess.call(["ln", "-s", cached_filepath, outfile])
 
 
-def createconf(overwrite=False, dump=False):
-    import os.path
-    from os import environ
-
-    defaultconf = "[General]\ncheck_for_updates=yes"
-    if dump:
-        print("--------------\n" + defaultconf + "\n--------------")
-    fname = environ["HOME"] + "/.km3net"
-    if not overwrite and os.path.exists(fname):
-        log.warn("Config exists, not overwriting")
-        return
-    with open(fname, "w") as f:
-        f.write(defaultconf)
-    print("Wrote default config to ", fname)
-    os.chmod(fname, 0o600)
-
-
 def main():
     from docopt import docopt
 
@@ -187,11 +168,6 @@ def main():
 
     if args["update"]:
         update_km3pipe(args["GIT_BRANCH"])
-
-    if args["createconf"]:
-        overwrite_conf = bool(args["--overwrite"])
-        dump = bool(args["--dump"])
-        createconf(overwrite_conf, dump)
 
     if args["retrieve"]:
         retrieve(int(args["RUN"]), args["DET_ID"], use_irods=args["-i"], out=args["-o"])

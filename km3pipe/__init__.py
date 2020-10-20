@@ -23,7 +23,6 @@ if not __KM3PIPE_SETUP__:
     from . import dataclasses  # noqa
     from . import calib  # noqa
     from . import cmd  # noqa
-    from . import config  # noqa
     from . import constants  # noqa
     from . import controlhost  # noqa
     from . import hardware  # noqa
