@@ -3,6 +3,16 @@ Unreleased changes
 
 Version 9
 ---------
+9.0.0-beta.4 / 2020-10-20
+~~~~~~~~~~~~~~~~~~~~~~~~~
+* ``kp.physics.cut4d`` added which allows the selection of e.g. hits
+  within a given sphere shell while respecting the light propagation
+  limits
+* ``km3pipe.db`` has been removed and all database functionalities
+  replaced by ``km3db``. ``StreamDS``, ``DBManager``, ``CLBMap`` and
+  other helper functions are now inside the ``km3db`` package:
+  More information here: https://git.km3net.de/km3py/km3db
+
 9.0.0-beta.3 / 2020-10-20
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 * Time slewing corrections are now automatically applied when
