@@ -444,17 +444,17 @@ def slew(tot, variant=3):
     Parameters
     ----------
     tot: int or np.array(int)
-      Time over threshold value of a hit
+        Time over threshold value of a hit
     variant: int, optional
-      The variant of the slew calculation.
-      1: The first parametrisation approach
-      2: Jannik's improvement of the parametrisation
-      3: The latest lookup table approach based on lab measurements.
+        The variant of the slew calculation.
+        1: The first parametrisation approach
+        2: Jannik's improvement of the parametrisation
+        3: The latest lookup table approach based on lab measurements.
 
     Returns
     -------
     time: int
-      Time slewing, which has to be subtracted from the original hit time.
+        Time slewing, which has to be subtracted from the original hit time.
     """
 
     if variant < 3:
