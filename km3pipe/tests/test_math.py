@@ -155,8 +155,16 @@ class TestMath(TestCase):
         self.assertAlmostEqual(angle_between(self.v, v2), 1.0068536854342678)
         self.assertAlmostEqual(angle_between(self.v, v3), 1.8413460897734695)
 
-        assert np.allclose([0., 0., 0.] - angle_between(np.array([v1, v2, v3]), np.array([v1, v2, v3]), axis=1), 0)
-        assert np.allclose([np.pi / 2, np.pi] - angle_between(np.array([v1, v1]), np.array([v2, v3]), axis=1), 0)
+        assert np.allclose(
+            [0.0, 0.0, 0.0]
+            - angle_between(np.array([v1, v2, v3]), np.array([v1, v2, v3]), axis=1),
+            0,
+        )
+        assert np.allclose(
+            [np.pi / 2, np.pi]
+            - angle_between(np.array([v1, v1]), np.array([v2, v3]), axis=1),
+            0,
+        )
 
         self.assertTrue(
             np.allclose(
@@ -310,52 +318,77 @@ class TestRotation(TestCase):
 
 
 class TestSphereCut(TestCase):
-
     def test_spherecut_mask(self):
-        center = (0., 0., 0.)
-        items = Table({'pos_x': [0, 10, 0, 20, 0], 'pos_y': [10, 0, 0, 0, 30], 'pos_z': [0, 0, 10, 0, 0]})
-        rmin = 0.
-        rmax = 10.
-        self.assertListEqual(list(spherecutmask(center, rmin, rmax, items)), [True, True, True, False, False])
+        center = (0.0, 0.0, 0.0)
+        items = Table(
+            {
+                "pos_x": [0, 10, 0, 20, 0],
+                "pos_y": [10, 0, 0, 0, 30],
+                "pos_z": [0, 0, 10, 0, 0],
+            }
+        )
+        rmin = 0.0
+        rmax = 10.0
+        self.assertListEqual(
+            list(spherecutmask(center, rmin, rmax, items)),
+            [True, True, True, False, False],
+        )
 
     def test_with_table(self):
-        center = (0., 0., 0.)
-        items = Table({'pos_x': [0, 10, 0, 20, 0], 'pos_y': [10, 0, 0, 0, 30], 'pos_z': [0, 0, 10, 0, 0]})
-        rmin = 0.
-        rmax = 10.
+        center = (0.0, 0.0, 0.0)
+        items = Table(
+            {
+                "pos_x": [0, 10, 0, 20, 0],
+                "pos_y": [10, 0, 0, 0, 30],
+                "pos_z": [0, 0, 10, 0, 0],
+            }
+        )
+        rmin = 0.0
+        rmax = 10.0
         selected_items = spherecut(center, rmin, rmax, items)
         assert len(selected_items) == 3
-        self.assertListEqual(list(items[spherecutmask(center, rmin, rmax, items)]), list(selected_items))
+        self.assertListEqual(
+            list(items[spherecutmask(center, rmin, rmax, items)]), list(selected_items)
+        )
 
     def test_with_array(self):
-        center = (0., 0., 0.)
+        center = (0.0, 0.0, 0.0)
         items = np.array([[0, 10, 0], [10, 0, 0], [0, 0, 10], [20, 0, 0], [0, 30, 0]])
-        rmin = 0.
-        rmax = 10.
+        rmin = 0.0
+        rmax = 10.0
         selected_items = [list(e) for e in spherecut(center, rmin, rmax, items)]
         assert len(selected_items) == 3
         assert [0, 10, 0] in selected_items
         assert [10, 0, 0] in selected_items
         assert [0, 0, 10] in selected_items
-        
+
     def test_center(self):
-        center = (0., 10., 0.)
-        items = Table({'pos_x': [0, 10, 0, 20, 0], 'pos_y': [10, 0, 0, 0, 30], 'pos_z': [0, 0, 10, 0, 0]})
-        rmin = 0.
-        rmax = 15.
+        center = (0.0, 10.0, 0.0)
+        items = Table(
+            {
+                "pos_x": [0, 10, 0, 20, 0],
+                "pos_y": [10, 0, 0, 0, 30],
+                "pos_z": [0, 0, 10, 0, 0],
+            }
+        )
+        rmin = 0.0
+        rmax = 15.0
         selected_items = spherecut(center, rmin, rmax, items)
         assert len(selected_items) == 3
-        self.assertListEqual(list(items[spherecutmask(center, rmin, rmax, items)]), list(selected_items))    
-        
+        self.assertListEqual(
+            list(items[spherecutmask(center, rmin, rmax, items)]), list(selected_items)
+        )
+
     def test_rmin(self):
-        center = (0., 0., 0.)
+        center = (0.0, 0.0, 0.0)
         items = np.array([[0, 10, 0], [10, 0, 0], [0, 0, 10], [20, 0, 0], [0, 30, 0]])
-        rmin = 20.
-        rmax = 40.
+        rmin = 20.0
+        rmax = 40.0
         selected_items = [list(e) for e in spherecut(center, rmin, rmax, items)]
         assert len(selected_items) == 2
         assert [20, 0, 0] in selected_items
         assert [0, 30, 0] in selected_items
+
 
 class TestLog(TestCase):
     def test_val(self):

@@ -301,14 +301,14 @@ def spherecutmask(center, rmin, rmax, items):
     rmax: float
         maximum radius of the sphere selection
     items: array of shape (n, 3) or iterable with pos_[xyz]-attributed items
-        the items to cut on 
+        the items to cut on
 
     Returns
     --------
     mask of the array of shape (n, 3) or iterable with pos_[xyz]-attributed items.
     """
     items_pos = items
-    
+
     if all(hasattr(items, "pos_" + q) for q in "xyz"):
         items_pos = np.array([items.pos_x, items.pos_y, items.pos_z]).T
 
@@ -319,9 +319,9 @@ def spherecutmask(center, rmin, rmax, items):
 
 
 def spherecut(center, rmin, rmax, items):
-    """Select items within a certain radius around a given center.                 
+    """Select items within a certain radius around a given center.
     This function calls spherecutmask() to create the selection mask and returns the selected items.
-                                              
+
     Parameters
     -----------
     center: array of shape(3,)
@@ -331,11 +331,11 @@ def spherecut(center, rmin, rmax, items):
     rmax: float
         maximum radius of the sphere selection
     items: array of shape (n, 3) or iterable with pos_[xyz]-attributed items
-        the items to cut on 
+        the items to cut on
 
     Returns
     --------
-    array of shape (k, 3) or iterable with pos_[xyz]-attributed items 
+    array of shape (k, 3) or iterable with pos_[xyz]-attributed items
         items which survived the cut.
     """
     selected_items = items[spherecutmask(center, rmin, rmax, items)]
