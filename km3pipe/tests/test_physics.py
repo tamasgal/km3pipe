@@ -3,13 +3,13 @@
 
 import km3io as ki
 import numpy as np
-import pandas as pd
 
 from km3pipe.dataclasses import Table
 from km3pipe.testing import TestCase, data_path
 from km3pipe.hardware import Detector
 from km3pipe.calib import Calibration
 from km3pipe.physics import cherenkov, get_closest, cut4d
+import km3pipe.extras
 
 
 __author__ = "Zineb ALY"
@@ -151,6 +151,8 @@ class TestGetCherenkov(TestCase):
 
     def test_cherenkov_from_DataFrame(self):
 
+        pd = km3pipe.extras.pandas()
+
         arr = cherenkov(pd.DataFrame(self.calib_hits), pd.Series(self.track))
 
         self.assertAlmostEqual(arr["d_photon_closest"][0], 24.049593557846112)
@@ -176,9 +178,13 @@ class TestGetClosest(TestCase):
 
         self.det = Detector(data_path("detx/detx_v3.detx"))
 
+        pd = km3pipe.extras.pandas()
+
         self.DU = pd.DataFrame(self.det.dom_table).mean()
 
     def test_get_closest(self):
+        pd = km3pipe.extras.pandas()
+
         DU = pd.DataFrame(self.det.dom_table).mean()
         d_closest, z_closest = get_closest(self.track, DU)
 
@@ -186,6 +192,7 @@ class TestGetClosest(TestCase):
         self.assertAlmostEqual(z_closest, 82.24928115091757)
 
     def test_get_closest_from_DataFrame(self):
+        pd = km3pipe.extras.pandas()
         d_closest, z_closest = get_closest(pd.Series(self.track), pd.Series(self.DU))
 
         self.assertAlmostEqual(d_closest, 9.073491762564467)
@@ -201,6 +208,7 @@ class TestGetClosest(TestCase):
             "dir_z": -0.8714188335794505,
         }
 
+        pd = km3pipe.extras.pandas()
         mean = pd.DataFrame(self.det.dom_table).mean()
 
         d_closest, z_closest = get_closest(Table(trk), mean)

@@ -11,7 +11,6 @@ import os
 import multiprocessing as mp
 import time
 
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt  # noqa
 import matplotlib.ticker as ticker
@@ -197,6 +196,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
 
     def save_hdf5(self, calibration):
         print("Saving calibration information...")
+        pd = kp.extras.pandas()
         store = pd.HDFStore(os.path.join(self.data_path, "k40calib.h5"), mode="a")
         now = int(time.time())
         timestamps = (now,) * 31

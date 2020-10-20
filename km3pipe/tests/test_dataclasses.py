@@ -10,6 +10,7 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_allclose
 import pytest
 
+import km3pipe.extras
 from km3pipe.testing import TestCase, skip  # noqa
 from km3pipe.dataclasses import (
     Table,
@@ -667,7 +668,7 @@ class TestTable(TestCase):
         assert_array_equal(tab_sort["a"], np.array([0, 6, 3]))
 
     def test_init_directly_with_df(self):
-        import pandas as pd
+        pd = km3pipe.extras.pandas()
 
         df = pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
         tab = Table(df, h5loc="/foo")
@@ -676,8 +677,7 @@ class TestTable(TestCase):
         assert tab.h5loc == "/foo"
 
     def test_df(self):
-        from pandas.testing import assert_frame_equal
-        import pandas as pd
+        pd = km3pipe.extras.pandas()
 
         dt = np.dtype([("a", int), ("b", float), ("c", int)])
         arr = np.array(
@@ -692,7 +692,7 @@ class TestTable(TestCase):
         df = pd.DataFrame(arr)
         tab = Table.from_dataframe(df, h5loc="/bla")
         df2 = tab.to_dataframe()
-        assert_frame_equal(df, df2)
+        pd.testing.assert_frame_equal(df, df2)
 
     def test_slicing(self):
         dt = np.dtype([("a", int), ("b", float), ("c", bool)])

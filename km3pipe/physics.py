@@ -8,16 +8,16 @@ Cherenkov photon parameters.
 import km3io
 import numba
 import numpy as np
-import pandas as pd
-import km3pipe as kp
 
 from numba import njit
 
 from thepipe import Module
-from .hardware import Detector
-from .dataclasses import Table
-from .logger import get_logger
-from .constants import SIN_CHERENKOV, TAN_CHERENKOV, V_LIGHT_WATER, C_LIGHT
+from km3pipe.dataclasses import Table
+from km3pipe.hardware import Detector
+from km3pipe.logger import get_logger
+from km3pipe.constants import (C_WATER, SIN_CHERENKOV, TAN_CHERENKOV, V_LIGHT_WATER, C_LIGHT)
+import km3pipe.math
+import km3pipe.extras
 
 __author__ = "Zineb ALY"
 __copyright__ = "Copyright 2020, Tamas Gal and the KM3NeT collaboration."
@@ -67,7 +67,9 @@ def cherenkov(calib_hits, track):
             - dir_x_photon, dir_y_photon, dir_z_photon: photon directions.
     """
 
-    if isinstance(calib_hits, (dict, pd.DataFrame, np.ndarray, kp.Table)):
+    pd = km3pipe.extras.pandas()
+
+    if isinstance(calib_hits, (dict, pd.DataFrame, np.ndarray, Table)):
         calib_pos = np.array(
             [calib_hits["pos_x"], calib_hits["pos_y"], calib_hits["pos_z"]]
         ).T
@@ -80,7 +82,7 @@ def cherenkov(calib_hits, track):
         track_dir = np.array([track["dir_x"], track["dir_y"], track["dir_z"]]).T
         track_t = track["t"]
 
-    if isinstance(track, (kp.Table, np.ndarray)):
+    if isinstance(track, (Table, np.ndarray)):
         track_pos = np.array([track["pos_x"], track["pos_y"], track["pos_z"]]).reshape(
             3,
         )
@@ -188,8 +190,10 @@ def get_closest(track, du_pos):
     tuple
         (d_closest, z_closest).
     """
+    pd = km3pipe.extras.pandas()
+
     if isinstance(
-        du_pos, (dict, pd.core.series.Series, pd.DataFrame, kp.Table, np.ndarray)
+        du_pos, (dict, pd.core.series.Series, pd.DataFrame, Table, np.ndarray)
     ):
         meanDU_pos = np.array(
             [du_pos["pos_x"], du_pos["pos_y"], du_pos["pos_z"]]
@@ -199,7 +203,7 @@ def get_closest(track, du_pos):
         meanDU_dir = np.array([0, 0, 1])  # assumes vertical DU
 
     if isinstance(
-        track, (dict, pd.core.series.Series, pd.DataFrame, kp.Table, np.ndarray)
+        track, (dict, pd.core.series.Series, pd.DataFrame, Table, np.ndarray)
     ):
         track_pos = np.array([track["pos_x"], track["pos_y"], track["pos_z"]]).reshape(
             3,
@@ -216,7 +220,7 @@ def get_closest(track, du_pos):
 
 
 
-def cut4d(point4d, tmin, tmax, rmin, rmax, items, c_water=kp.constants.C_WATER):
+def cut4d(point4d, tmin, tmax, rmin, rmax, items, c_water=C_WATER):
     """Select items with a certain time residual and
     within a certain radius around a given 4D point.  
                                                                                                                                             
@@ -245,13 +249,13 @@ def cut4d(point4d, tmin, tmax, rmin, rmax, items, c_water=kp.constants.C_WATER):
     if all(hasattr(point4d, "pos_" + q) for q in "xyz"):
         point_array = np.array([point4d[0].pos_x, point4d[0].pos_y, point4d[0].pos_z, point4d[0].t])
 
-    dt = kp.math.dist(point_array[3], np.array([items.time]).T, axis=1)
+    dt = km3pipe.math.dist(point_array[3], np.array([items.time]).T, axis=1)
     
     items_pos = np.array([items.pos_x, items.pos_y, items.pos_z]).T
 
-    distances = kp.math.dist(np.array([point_array[0], point_array[1], point_array[2]]), items_pos, axis=1)
+    distances = km3pipe.math.dist(np.array([point_array[0], point_array[1], point_array[2]]), items_pos, axis=1)
     
-    tres = kp.math.dist(np.array([distances / kp.constants.C_WATER]).T, dt, axis=1)
+    tres = km3pipe.math.dist(np.array([distances / C_WATER]).T, dt, axis=1)
 
     mask = (tres >= tmin) & (tres <= tmax) & (distances >= rmin) & (distances <= rmax)
     selected_items = items[mask]
