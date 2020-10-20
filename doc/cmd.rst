@@ -30,23 +30,6 @@ experiments in ``feature/x`` branches. However, we might break it sometimes.
 Have a look at our git repository to see what we're working on if you're
 interested.
 
-``triggersetup``
-~~~~~~~~~~~~~~~~
-Get the trigger setup (description and optical/acoustic DataFilter settings)
-for a given runsetup ID::
-
-    $ triggersetup -h
-    Prints the trigger information of a given run setup.
-
-    Usage:
-	triggersetup RUNSETUP_OID
-	triggersetup (-h | --help)
-	triggersetup --version
-
-    Options:
-	RUNSETUP_OID   The run setup identifier (e.g. A02004580)
-	-h --help      Show this screen.
-
 ``triggermap``
 ~~~~~~~~~~~~~~
 Shows a histogram (similar to the one on the online monitoring pages) of
@@ -70,29 +53,8 @@ the trigger contribution for events::
 DataBase
 --------
 
-``streamds``
-~~~~~~~~~~~~
-The utility ``streamds`` can be used to
-interact with the database directly from the shell::
-
-    $ streamds --help
-    Access the KM3NeT StreamDS DataBase service.
-
-    Usage:
-        streamds
-        streamds list
-        streamds upload [-q] CSV_FILE
-        streamds info STREAM
-        streamds get STREAM [PARAMETERS...]
-        streamds (-h | --help)
-        streamds --version
-
-    Options:
-        STREAM      Name of the stream.
-        CSV_FILE    Tab separated data for the runsummary tables.
-        PARAMETERS  List of parameters separated by space (e.g. detid=29).
-        -q          Dryrun! This will upload the parameters with a TEST_ prefix.
-        -h --help   Show this screen.
+The database command line utilities are provided by ``km3db``. Check
+out the docs at https://km3py.pages.km3net.de/km3db/
 
 PipeInspector
 -------------
