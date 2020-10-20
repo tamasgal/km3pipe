@@ -1,11 +1,17 @@
 Unreleased changes
 ------------------
 
-* Time slewing corrections are now automatically applied when
-  using ``kp.calib.Calibration().apply()``
-
 Version 9
 ---------
+9.0.0-beta.3 / 2020-10-20
+~~~~~~~~~~~~~~~~~~~~~~~~~
+* Time slewing corrections are now automatically applied when
+  using ``kp.calib.Calibration().apply()``
+* New functions added to check if points (e.g. hits) are
+  within a sphere: ``kp.math.spherecut`` and ``kp.math.spherecutmask``
+* ``kp.math.angle_between`` now takes an ``axis=`` parameter to
+  calculate multiple angles in one shot
+
 9.0.0-beta.2 / 2020-10-07
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 * Improved provenance for ROOT files (UUID handling)
