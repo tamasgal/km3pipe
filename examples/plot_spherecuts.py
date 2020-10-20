@@ -33,7 +33,7 @@ ax.scatter(*points[~(mask1 | mask2)].T, label="unselected points")
 ax.scatter(*points[mask1].T, label="mask1")
 ax.scatter(*points[mask2].T, label="mask2")
 
-ax.legend();
+ax.legend()
 
 #######################
 # This will select all points which are inside a sphere with radius 0.5
