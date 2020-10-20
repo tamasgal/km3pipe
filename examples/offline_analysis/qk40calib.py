@@ -33,6 +33,8 @@ import os
 import re
 from glob import glob
 import time
+
+import km3db
 from km3pipe.shell import qsub, Script
 import km3pipe as kp
 from docopt import docopt
@@ -56,8 +58,7 @@ def main():
     if not os.path.exists(CALIB_PATH):
         os.makedirs(CALIB_PATH)
 
-    db = kp.db.DBManager()
-    run_table = db.run_table(det_id=DET_ID)
+    run_table = km3db.StreamDS(container="pd").get("run_table", det_id=DET_ID)
     phys_run_table = run_table[run_table.RUNSETUPNAME.str.contains(RUN_SUBSTR)]
     phys_runs = set(phys_run_table.RUN)
     processed_runs = set(

@@ -33,10 +33,11 @@ import os
 import subprocess
 import time
 
+import km3db
 from tqdm import tqdm
+
 import km3pipe as kp
 
-kp.logger.get_logger("km3pipe.db").setLevel("CRITICAL")
 
 ESTIMATED_TIME_PER_RUN = 60 * 10  # [s]
 
@@ -64,9 +65,8 @@ class QAQCAnalyser(object):
         else:
             print("Run quality determination using Jpp '{}'".format(self.jpp_version))
 
-        self.sds = kp.db.StreamDS()
-        self.db = kp.db.DBManager()
-        self.det_oid = self.db.get_det_oid(det_id)
+        self.sds = km3db.StreamDS(container="pd")
+        self.det_oid = km3db.tools.todetoid(det_id)
 
         self.runtable = self.sds.get("runs", detid=self.det_id)
 

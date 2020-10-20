@@ -9,12 +9,14 @@ AHRS calibration.
 import io
 from collections import defaultdict
 import time
-from km3pipe.tools import timed_cache
 import xml.etree.ElementTree as ET
+
+import km3db
 
 import numpy as np
 from numpy import cos, sin, arctan2
 import km3pipe as kp
+from km3pipe.tools import timed_cache
 from km3pipe.io.daq import TMCHData
 
 __author__ = "Tamas Gal"
@@ -50,7 +52,7 @@ class AHRSCalibrator(kp.Module):
         self.A = defaultdict(list)
         self.H = defaultdict(list)
         self.detector = kp.hardware.Detector(det_id=det_id)
-        self.clbmap = kp.db.CLBMap(det_id)
+        self.clbmap = km3db.CLBMap(det_id)
         self.timestamp = time.time()
 
     def process(self, blob):
@@ -154,14 +156,13 @@ def fit_ahrs(A, H, Aoff, Arot, Hoff, Hrot):
 
 
 @timed_cache(hours=1, maxsize=None, typed=False)
-def get_latest_ahrs_calibration(clb_upi, max_version=3, db=None):
+def get_latest_ahrs_calibration(clb_upi, max_version=3):
     """Retrieve the latest AHRS calibration data for a given CLB
 
     Parameters
     ----------
     clb_upi: str
     max_version: int, maximum version to check, optional
-    db: DBManager(), optional
 
     Returns
     -------
@@ -173,10 +174,9 @@ def get_latest_ahrs_calibration(clb_upi, max_version=3, db=None):
     or None if no calibration found.
 
     """
-    ahrs_upi = kp.db.clbupi2ahrsupi(clb_upi)
+    ahrs_upi = km3db.tools.clbupi2compassupi(clb_upi)
 
-    if db is None:
-        db = kp.db.DBManager()
+    db = km3db.DBManager()
 
     datasets = []
     for version in range(max_version, 0, -1):
@@ -189,7 +189,7 @@ def get_latest_ahrs_calibration(clb_upi, max_version=3, db=None):
                 )
             )
             log.debug("AHRS calib DB URL: {}".format(url))
-            _raw_data = db._get_content(url).replace("\n", "")
+            _raw_data = db.get(url).replace("\n", "")
             log.debug("What I got back as AHRS calib: {}".format(_raw_data))
             if len(_raw_data) == 0:
                 break

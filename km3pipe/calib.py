@@ -6,7 +6,8 @@ Calibration.
 """
 import numpy as np
 
-from .db import DBManager
+import km3db
+
 from .core import Module
 from .hardware import Detector
 from .dataclasses import Table
@@ -83,7 +84,7 @@ class Calibration(Module):
                     self.det_id, self.run
                 )
             )
-            raw_detx = DBManager().detx_for_run(self.det_id, self.run)
+            raw_detx = km3db.tools.detx_for_run(self.det_id, self.run)
             self.detector = Detector(string=raw_detx)
             self._create_dom_channel_lookup()
             self._create_pmt_id_lookup()

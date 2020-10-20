@@ -16,6 +16,7 @@ import numpy as np
 import matplotlib.pyplot as plt  # noqa
 import matplotlib.ticker as ticker
 from matplotlib import pylab  # noqa
+import km3db
 
 import km3pipe as kp  # noqa
 import km3pipe.style  # noqa
@@ -148,7 +149,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
         self.plots_path = self.get("plots_path", default=os.getcwd())
         self.data_path = self.get("data_path", default=os.getcwd())
         self.det_oid = self.require("det_oid")
-        self.clbmap = kp.db.CLBMap(self.det_oid)
+        self.clbmap = km3db.CLBMap(self.det_oid)
 
     def process(self, blob):
         calibration = blob["IntraDOMCalibration"]

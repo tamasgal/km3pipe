@@ -136,11 +136,7 @@ def prettyln(text, fill="-", align="^", prefix="[ ", suffix=" ]", length=69):
 def irods_path(det_id, run_id):
     """Generate the iRODS filepath for given detector (O)ID and run ID"""
     data_path = "/in2p3/km3net/data/raw/sea"
-    from km3pipe.db import DBManager
 
-    if not isinstance(det_id, int):
-        dts = DBManager().detectors
-        det_id = int(dts[dts.OID == det_id].SERIALNUMBER.values[0])
     return data_path + "/KM3NeT_{0:08}/{2}/KM3NeT_{0:08}_{1:08}.root".format(
         det_id, run_id, run_id // 1000
     )
