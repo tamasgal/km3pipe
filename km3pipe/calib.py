@@ -448,8 +448,7 @@ def slew(tot, variant=3):
       The variant of the slew calculation.
       1: The first parametrisation approach
       2: Jannik's improvement of the parametrisation
-      3: The latest lookup table approach based on lab measurements,
-         also used in Jpp (v13).
+      3: The latest lookup table approach based on lab measurements.
 
     Returns
     -------
