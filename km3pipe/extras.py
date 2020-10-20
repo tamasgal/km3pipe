@@ -14,3 +14,18 @@ def pandas():
         )
     else:
         return pandas
+
+
+def scipy():
+    """Imports and returns ``scipy``."""
+    try:
+        import scipy
+    except ImportError:
+        raise ImportError(
+            "install the 'scipy' package with:\n\n"
+            "    pip install scipy\n\n"
+            "or\n\n"
+            "    conda install scipy"
+        )
+    else:
+        return scipy
