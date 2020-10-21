@@ -169,11 +169,14 @@ class HDF5Header(object):
         return cls(data)
 
 
-class HDF5IndexTable(object):
-    def __init__(self, h5loc):
+class HDF5IndexTable:
+    def __init__(self, h5loc, start=0):
         self.h5loc = h5loc
         self._data = defaultdict(list)
         self._index = 0
+        if start > 0:
+            self._data["indices"] = [0] * start
+            self._data["n_items"] = [0] * start
 
     def append(self, n_items):
         self._data["indices"].append(self._index)
@@ -183,6 +186,14 @@ class HDF5IndexTable(object):
     @property
     def data(self):
         return self._data
+
+    def fillup(self, length):
+        missing = length - len(self)
+        self._data["indices"] += [self.data["indices"][-1]] * missing
+        self._data["n_items"] += [0] * missing
+
+    def __len__(self):
+        return len(self.data["indices"])
 
 
 class HDF5Sink(Module):
@@ -322,13 +333,8 @@ class HDF5Sink(Module):
             else:
                 ndarr = self._ndarrays[h5loc]
 
-            idx_table_h5loc = h5loc + "_indices"
-            if idx_table_h5loc not in self.indices:
-                self.indices[idx_table_h5loc] = HDF5IndexTable(idx_table_h5loc)
-            idx_tab = self.indices[idx_table_h5loc]
-
-            for arr_length in (len(a) for a in arrs):
-                idx_tab.append(arr_length)
+            # for arr_length in (len(a) for a in arrs):
+            #     self._record_index(h5loc, arr_length)
 
             ndarr.append(arr)
 
@@ -430,10 +436,10 @@ class HDF5Sink(Module):
             arr.append(data)
 
         # create index table
-        if where not in self.indices:
-            self.indices[where] = HDF5IndexTable(where + "/_indices")
-        idx_tab = self.indices[where]
-        idx_tab.append(len(data))
+        # if where not in self.indices:
+        #     self.indices[where] = HDF5IndexTable(where + "/_indices", start=self.index)
+
+        self._record_index(where, len(data), split=True)
 
     def _process_entry(self, key, entry):
         self.log.debug("Inspecting {}".format(key))
@@ -450,8 +456,10 @@ class HDF5Sink(Module):
         if not hasattr(entry, "h5loc"):
             self.log.debug("Ignoring '%s': no h5loc attribute" % key)
             return
+
         if isinstance(entry, NDArray):
             self._cache_ndarray(entry)
+            self._record_index(entry.h5loc, len(entry))
             return entry
         try:
             title = entry.name
@@ -495,11 +503,41 @@ class HDF5Sink(Module):
             )
             self._process_entry("GroupInfo", gi)
 
+        # fill up NDArray indices with 0 entries if needed
+        if written_blob:
+            ndarray_h5locs = set(self._ndarrays.keys()).union(self._ndarrays_cache.keys())
+            written_h5locs = set(e.h5loc for e in written_blob.values() if isinstance(e, NDArray))
+            missing_h5locs = ndarray_h5locs - written_h5locs
+            for h5loc in missing_h5locs:
+                self.log.info("Filling up %s with 0 length entry", h5loc)
+                self._record_index(h5loc, 0)
+
         if not self.index % self.flush_frequency:
             self.flush()
 
         self.index += 1
         return blob
+
+    def _record_index(self, h5loc, count, split=False):
+        """Add an index entry (optionally create table) for an NDArray h5loc.
+
+        Parameters
+        ----------
+        h5loc : str
+            location in HDF5
+        count : int
+            number of elements (can be 0)
+        split : bool
+            if it's a split table
+
+        """
+        suffix = "/_indices" if split else "_indices"
+        idx_table_h5loc = h5loc + suffix
+        if idx_table_h5loc not in self.indices:
+            self.indices[idx_table_h5loc] = HDF5IndexTable(idx_table_h5loc, start=self.index)
+
+        idx_tab = self.indices[idx_table_h5loc]
+        idx_tab.append(count)
 
     def flush(self):
         """Flush tables and arrays to disk"""
@@ -516,6 +554,9 @@ class HDF5Sink(Module):
         self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
         self.log.info("Adding index tables.")
         for where, idx_tab in self.indices.items():
+            # any skipped NDArrays or split groups will be filled with 0 entries
+            idx_tab.fillup(self.index)
+
             self.log.debug("Creating index table for '%s'" % where)
             h5loc = idx_tab.h5loc
             self.log.info("  -> {0}".format(h5loc))
