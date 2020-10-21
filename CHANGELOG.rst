@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 9
 ---------
+9.0.0-beta.5 / 2020-10-21
+~~~~~~~~~~~~~~~~~~~~~~~~~
+* Minor bugfixes
+
 9.0.0-beta.4 / 2020-10-20
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 * ``kp.physics.cut4d`` added which allows the selection of e.g. hits
