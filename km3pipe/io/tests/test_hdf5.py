@@ -712,7 +712,7 @@ class TestHDF5PumpConsistency(TestCase):
                 self.i += 1
 
                 if self.i == 5:
-                    blob['Arr'] = NDArray([1, 2, 3], h5loc='/arr')
+                    blob["Arr"] = NDArray([1, 2, 3], h5loc="/arr")
                 return blob
 
         pipe = Pipeline()
@@ -729,7 +729,7 @@ class TestHDF5PumpConsistency(TestCase):
 
                 print(blob)
                 if self.i == 5:
-                    assert 6 == np.sum(blob['Arr'])
+                    assert 6 == np.sum(blob["Arr"])
                 # else:
                 #     assert 'Arr' not in blob
 
