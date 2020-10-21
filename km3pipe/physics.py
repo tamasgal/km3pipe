@@ -256,7 +256,7 @@ def cut4d(point4d, tmin, tmax, rmin, rmax, items, c_water=C_WATER):
             [point4d[0].pos_x, point4d[0].pos_y, point4d[0].pos_z, point4d[0].t]
         )
 
-    dt = km3pipe.math.dist(point_array[3], np.array([items.time]).T, axis=1)
+    dt = items.time - point_array[3]
 
     items_pos = np.array([items.pos_x, items.pos_y, items.pos_z]).T
 
@@ -264,7 +264,7 @@ def cut4d(point4d, tmin, tmax, rmin, rmax, items, c_water=C_WATER):
         np.array([point_array[0], point_array[1], point_array[2]]), items_pos, axis=1
     )
 
-    tres = km3pipe.math.dist(np.array([distances / C_WATER]).T, dt, axis=1)
+    tres = dt - (distances / C_WATER)
 
     mask = (tres >= tmin) & (tres <= tmax) & (distances >= rmin) & (distances <= rmax)
     selected_items = items[mask]

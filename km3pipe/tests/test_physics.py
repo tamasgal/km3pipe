@@ -226,23 +226,27 @@ class TestCut4D(TestCase):
                 "pos_x": [0, 10, 0, 20, 0],
                 "pos_y": [10, 0, 0, 0, 30],
                 "pos_z": [0, 0, 10, 0, 0],
-                "time": [10, 15, 10, 20, 25],
+                "time": [60, 15, 40, 20, 100],
             }
         )
 
-        tmin = -10.0
-        tmax = 100.0
-        rmin = 10.0
-        rmax = 50.0
+        tmin = -50.0
+        tmax = 10.0
+        rmin = 3.0
+        rmax = 80.0
 
         selected_items = cut4d(point4d, tmin, tmax, rmin, rmax, items)
-        assert len(selected_items) == 2
+        assert len(selected_items) == 3
 
         self.assertListEqual(
-            list(np.array([10, 0, 0, 15])),
+            list(np.array([0, 10, 0, 60])),
             list(selected_items.T[0]),
         )
         self.assertListEqual(
-            list(np.array([0, 0, 10, 10])),
+            list(np.array([0, 0, 10, 40])),
             list(selected_items.T[1]),
+        )
+        self.assertListEqual(
+            list(np.array([0, 30, 0, 100])),
+            list(selected_items.T[2]),
         )
