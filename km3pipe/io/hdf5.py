@@ -505,8 +505,12 @@ class HDF5Sink(Module):
 
         # fill up NDArray indices with 0 entries if needed
         if written_blob:
-            ndarray_h5locs = set(self._ndarrays.keys()).union(self._ndarrays_cache.keys())
-            written_h5locs = set(e.h5loc for e in written_blob.values() if isinstance(e, NDArray))
+            ndarray_h5locs = set(self._ndarrays.keys()).union(
+                self._ndarrays_cache.keys()
+            )
+            written_h5locs = set(
+                e.h5loc for e in written_blob.values() if isinstance(e, NDArray)
+            )
             missing_h5locs = ndarray_h5locs - written_h5locs
             for h5loc in missing_h5locs:
                 self.log.info("Filling up %s with 0 length entry", h5loc)
@@ -534,7 +538,9 @@ class HDF5Sink(Module):
         suffix = "/_indices" if split else "_indices"
         idx_table_h5loc = h5loc + suffix
         if idx_table_h5loc not in self.indices:
-            self.indices[idx_table_h5loc] = HDF5IndexTable(idx_table_h5loc, start=self.index)
+            self.indices[idx_table_h5loc] = HDF5IndexTable(
+                idx_table_h5loc, start=self.index
+            )
 
         idx_tab = self.indices[idx_table_h5loc]
         idx_tab.append(count)
