@@ -11,6 +11,9 @@ Basic Analysis Example
 # License: BSD-3
 # Date: 2017-10-10
 # Status: Under construction...
+#
+# sphinx_gallery_thumbnail_number = 5
+
 
 #####################################################
 # Preparation
