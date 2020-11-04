@@ -22,7 +22,7 @@ situation.
 Improve KM3Pipe
 ---------------
 
-Check out our KanBan board http://git.km3net.de/km3py/km3pipe/boards,
+Check out our KanBan board https://git.km3net.de/km3py/km3pipe/boards,
 which shows all the open issues in three columns:
 
 - *discussion*: The issues which are yet to be discussed (e.g. not clear how to proceed)
@@ -44,10 +44,10 @@ a merge request, so we can review, discuss and add your contribution.
 Merge requests are automatically tested on our GitLab CI server and you
 don't have to do anything special.
 
-Go to http://git.km3net.de/km3py/km3pipe and click on "Fork".
+Go to https://git.km3net.de/km3py/km3pipe and click on "Fork".
 
 After that, you will have a full copy of KM3Pipe with write access under an URL
-like this: ``http://git.km3net.de/your_git_username/km3pipe``
+like this: ``https://git.km3net.de/your_git_username/km3pipe``
 
 Clone your Fork to your PC
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
