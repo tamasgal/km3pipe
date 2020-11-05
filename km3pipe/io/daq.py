@@ -46,6 +46,9 @@ MAXIMAL_RATE_HZ = 2.0e6
 class TimesliceParser(Module):
     """Preliminary parser for DAQTimeslice"""
 
+    def configure(self):
+        self.legacy = self.get("legacy", default=False)
+
     def _get_raw_data(self, blob):
         if "CHPrefix" in blob:
             if not str(blob["CHPrefix"].tag).startswith("IO_TS"):
@@ -71,12 +74,15 @@ class TimesliceParser(Module):
             return blob
 
     def _parse_timeslice(self, data):
-        tsl_size, datatype, version = unpack("<iih", data.read(10))
-        if version > 1:
-            log.warning(
-                "Unsupported DAQTimeslice version ({}) or legacy DAQ. "
-                "Make sure Jpp v13+ is used.".format(version)
-            )
+        tsl_size, datatype = unpack("<ii", data.read(8))
+        if not self.legacy:
+            version = unpack("<iih", data.read(2))[0]
+            if version != 1:
+                raise NotImplementedError(
+                    "Unsupported DAQTimeslice version ({}) or legacy DAQ. "
+                    "Make sure Jpp v13+ is used or pass 'legacy=True' "
+                    "to {}.".format(version, self.__class__.__name__)
+                )
         det_id, run, sqnr = unpack("<iii", data.read(12))
         timestamp, ns_ticks, n_frames = unpack("<iii", data.read(12))
 
@@ -143,6 +149,7 @@ class DAQPump(Module):
 
     def configure(self):
         self.filename = self.require("filename")
+        self.legacy = self.get("legacy", default=False)
         self.frame_positions = []
         self.index = 0
 
@@ -168,11 +175,11 @@ class DAQPump(Module):
         blob["DAQPreamble"] = preamble
 
         if data_type == "DAQSummaryslice":
-            daq_frame = DAQSummaryslice(blob_file)
+            daq_frame = DAQSummaryslice(blob_file, legacy=self.legacy)
             blob[data_type] = daq_frame
             blob["DAQHeader"] = daq_frame.header
         elif data_type == "DAQEvent":
-            daq_frame = DAQEvent(blob_file)
+            daq_frame = DAQEvent(blob_file, legacy=self.legacy)
             blob[data_type] = daq_frame
             blob["DAQHeader"] = daq_frame.header
         else:
@@ -249,6 +256,7 @@ class DAQPump(Module):
 
 class DAQProcessor(Module):
     def configure(self):
+        self.legacy = self.get("legacy", default=False)
         self.index = 0
         self.event_id = 0
 
@@ -277,7 +285,7 @@ class DAQProcessor(Module):
     def process_event(self, data, blob):
         data_io = BytesIO(data)
         preamble = DAQPreamble(file_obj=data_io)  # noqa
-        event = DAQEvent(file_obj=data_io)
+        event = DAQEvent(file_obj=data_io, legacy=self.legacy)
         header = event.header
 
         hits = event.snapshot_hits
@@ -338,7 +346,7 @@ class DAQProcessor(Module):
     def process_summaryslice(self, data, blob):
         data_io = BytesIO(data)
         preamble = DAQPreamble(file_obj=data_io)  # noqa
-        summaryslice = DAQSummaryslice(file_obj=data_io)
+        summaryslice = DAQSummaryslice(file_obj=data_io, legacy=self.legacy)
         blob["RawSummaryslice"] = summaryslice
 
     def process_online_reco(self, data, blob):
@@ -505,15 +513,16 @@ class DAQSummaryslice(object):
 
     """
 
-    def __init__(self, file_obj):
-        self.version = unpack("<h", file_obj.read(2))[0]
-        if self.version > 6:
-            log.warning(
-                "Unsupported {} version ({}) or legacy DAQ. "
-                "Make sure Jpp v13+ is used.".format(
-                    self.__class__.__name__, self.version
-                )
-            )
+    def __init__(self, file_obj, legacy=False):
+        if not legacy:
+            version = unpack("<h", file_obj.read(2))[0]
+            if version != 6:
+                raise NotImplementedError(
+                    "Unsupported {} version ({}) or legacy DAQ. "
+                    "Make sure Jpp v13+ is used or pass 'legacy=True' "
+                    "to the init.".format(
+                        self.__class__.__name__, version)
+                    )
         self.header = DAQHeader(file_obj=file_obj)
         self.n_summary_frames = unpack("<i", file_obj.read(4))[0]
         self.summary_frames = {}
@@ -575,13 +584,16 @@ class DAQEvent(object):
 
     """
 
-    def __init__(self, file_obj):
-        self.version = unpack("<h", file_obj.read(2))[0]
-        if self.version > 4:
-            log.warning(
-                "Unsupported {} version ({}) or legacy DAQ. "
-                "Update Jpp to v13+.".format(self.__class__.__name__, self.version)
-            )
+    def __init__(self, file_obj, legacy=False):
+        if not legacy:
+            version = unpack("<h", file_obj.read(2))[0]
+            if version != 4:
+                raise NotImplementedError(
+                    "Unsupported {} version ({}) or legacy DAQ. "
+                    "Make sure Jpp v13+ is used or pass 'legacy=True' "
+                    "to the init.".format(
+                        self.__class__.__name__, version)
+                    )
         self.header = DAQHeader(file_obj=file_obj)
         self.trigger_counter = unpack("<Q", file_obj.read(8))[0]
         self.trigger_mask = unpack("<Q", file_obj.read(8))[0]
