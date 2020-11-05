@@ -90,7 +90,6 @@ class TimesliceParser(Module):
             },
             "TimesliceInfo",
         )
-
         ts_frameinfos = {}
 
         _dom_ids = []
