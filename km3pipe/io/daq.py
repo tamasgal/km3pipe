@@ -73,7 +73,7 @@ class TimesliceParser(Module):
     def _parse_timeslice(self, data):
         tsl_size, datatype, version = unpack("<iih", data.read(10))
         if version > 1:
-            log.warn(
+            log.warning(
                 "Unsupported DAQTimeslice version ({}) or legacy DAQ. "
                 "Make sure Jpp v13+ is used.".format(version)
             )
@@ -508,7 +508,7 @@ class DAQSummaryslice(object):
     def __init__(self, file_obj):
         self.version = unpack("<h", file_obj.read(2))[0]
         if self.version > 6:
-            log.warn(
+            log.warning(
                 "Unsupported {} version ({}) or legacy DAQ. "
                 "Make sure Jpp v13+ is used.".format(
                     self.__class__.__name__, self.version
@@ -578,7 +578,7 @@ class DAQEvent(object):
     def __init__(self, file_obj):
         self.version = unpack("<h", file_obj.read(2))[0]
         if self.version > 4:
-            log.warn(
+            log.warning(
                 "Unsupported {} version ({}) or legacy DAQ. "
                 "Update Jpp to v13+.".format(self.__class__.__name__, self.version)
             )
