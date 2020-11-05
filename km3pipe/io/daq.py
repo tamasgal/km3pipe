@@ -520,9 +520,8 @@ class DAQSummaryslice(object):
                 raise NotImplementedError(
                     "Unsupported {} version ({}) or legacy DAQ. "
                     "Make sure Jpp v13+ is used or pass 'legacy=True' "
-                    "to the init.".format(
-                        self.__class__.__name__, version)
-                    )
+                    "to the init.".format(self.__class__.__name__, version)
+                )
         self.header = DAQHeader(file_obj=file_obj)
         self.n_summary_frames = unpack("<i", file_obj.read(4))[0]
         self.summary_frames = {}
@@ -591,9 +590,8 @@ class DAQEvent(object):
                 raise NotImplementedError(
                     "Unsupported {} version ({}) or legacy DAQ. "
                     "Make sure Jpp v13+ is used or pass 'legacy=True' "
-                    "to the init.".format(
-                        self.__class__.__name__, version)
-                    )
+                    "to the init.".format(self.__class__.__name__, version)
+                )
         self.header = DAQHeader(file_obj=file_obj)
         self.trigger_counter = unpack("<Q", file_obj.read(8))[0]
         self.trigger_mask = unpack("<Q", file_obj.read(8))[0]

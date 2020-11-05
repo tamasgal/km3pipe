@@ -89,27 +89,27 @@ class TestDAQPumpWithLegacyFiles(TestCase):
 #         assert "DAQHeader" in blob.keys()
 #         assert 16 == blob["DAQSummaryslice"].n_summary_frames
 
-    # def test_blob_in_io_evt(self):
-    #     p = DAQPump(filename=data_path("daq/IO_EVT.dat"))
-    #     blob = p.next_blob()
-    #     assert "DAQEvent" in blob.keys()
-    #     assert "DAQPreamble" in blob.keys()
-    #     assert "DAQHeader" in blob.keys()
-    #     event = blob["DAQEvent"]
-    #     assert 13 == event.n_triggered_hits
-    #     assert 28 == event.n_snapshot_hits
+# def test_blob_in_io_evt(self):
+#     p = DAQPump(filename=data_path("daq/IO_EVT.dat"))
+#     blob = p.next_blob()
+#     assert "DAQEvent" in blob.keys()
+#     assert "DAQPreamble" in blob.keys()
+#     assert "DAQHeader" in blob.keys()
+#     event = blob["DAQEvent"]
+#     assert 13 == event.n_triggered_hits
+#     assert 28 == event.n_snapshot_hits
 
-    # def test_blob_iteration(self):
-    #     p = DAQPump(filename=data_path("daq/IO_EVT.dat"))
-    #     for blob in p:
-    #         pass
+# def test_blob_iteration(self):
+#     p = DAQPump(filename=data_path("daq/IO_EVT.dat"))
+#     for blob in p:
+#         pass
 
-    # def test_get_item(self):
-    #     p = DAQPump(filename=data_path("daq/IO_EVT.dat"))
-    #     blob = p[4]
-    #     event = blob["DAQEvent"]
-    #     assert 6 == event.n_triggered_hits
-    #     assert 17 == event.n_snapshot_hits
+# def test_get_item(self):
+#     p = DAQPump(filename=data_path("daq/IO_EVT.dat"))
+#     blob = p[4]
+#     event = blob["DAQEvent"]
+#     assert 6 == event.n_triggered_hits
+#     assert 17 == event.n_snapshot_hits
 
 
 class TestTMCHRepump(TestCase):
@@ -167,7 +167,9 @@ class TestDMMonitor(TestCase):
 class TestTimesliceParser(TestCase):
     def test_l0(self):
         with open(data_path("daq/IO_TSL0.dat"), "rb") as fobj:
-            ts_info, ts_frameinfos, ts_hits = TimesliceParser(legacy=True)._parse_timeslice(fobj)
+            ts_info, ts_frameinfos, ts_hits = TimesliceParser(
+                legacy=True
+            )._parse_timeslice(fobj)
         assert 200 == len(ts_hits)
         assert 25 == ts_hits[0].tot
         assert 808447031 == ts_hits[23].dom_id
@@ -175,12 +177,16 @@ class TestTimesliceParser(TestCase):
 
     def test_l1(self):
         with open(data_path("daq/IO_TSL1.dat"), "rb") as fobj:
-            ts_info, ts_frameinfos, ts_hits = TimesliceParser(legacy=True)._parse_timeslice(fobj)
+            ts_info, ts_frameinfos, ts_hits = TimesliceParser(
+                legacy=True
+            )._parse_timeslice(fobj)
         assert 0 == len(ts_hits)
         assert 4873 == ts_info[0].frame_index
 
     def test_l2(self):
         with open(data_path("daq/IO_TSL2.dat"), "rb") as fobj:
-            ts_info, ts_frameinfos, ts_hits = TimesliceParser(legacy=True)._parse_timeslice(fobj)
+            ts_info, ts_frameinfos, ts_hits = TimesliceParser(
+                legacy=True
+            )._parse_timeslice(fobj)
         assert 0 == len(ts_hits)
         assert 4872 == ts_info[0].frame_index
