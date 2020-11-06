@@ -76,7 +76,7 @@ class TimesliceParser(Module):
     def _parse_timeslice(self, data):
         tsl_size, datatype = unpack("<ii", data.read(8))
         if not self.legacy:
-            version = unpack("<iih", data.read(2))[0]
+            version = unpack("<h", data.read(2))[0]
             if version != 1:
                 raise NotImplementedError(
                     "Unsupported DAQTimeslice version ({}) or legacy DAQ. "
