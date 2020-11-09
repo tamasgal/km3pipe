@@ -185,16 +185,14 @@ class RecoTracksTabulator(kp.Module):
             idx=np.arange(n),
         )
 
-        for fitparam in km3io.definitions.fitparameters:
-            reco_tracks[fitparam] = np.full(n, np.nan, dtype=np.float32)
-
-        for track_idx, track in enumerate(tracks):
-            fitinf = track.fitinf
-            max_idx = len(fitinf)
-            for fitparam, idx in km3io.definitions.fitparameters.items():
-                if idx >= max_idx:
-                    break
-                reco_tracks[fitparam][track_idx] = fitinf[idx]
+        n_columns = max(km3io.definitions.fitparameters.values()) + 1
+        fitinf_array = np.ma.filled(
+            ak.to_numpy(ak.pad_none(tracks.fitinf, target=n_columns, axis=-1)),
+            fill_value=np.nan,
+        ).astype("float32")
+        fitinf_split = np.split(fitinf_array, fitinf_array.shape[-1], axis=-1)
+        for fitparam, idx in km3io.definitions.fitparameters.items():
+            reco_tracks[fitparam] = fitinf_split[idx][:, 0]
 
         blob["RecoTracks"] = kp.Table(
             reco_tracks,
