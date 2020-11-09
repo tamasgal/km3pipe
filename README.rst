@@ -65,3 +65,9 @@ Read the docs at https://km3py.pages.km3net.de/km3pipe or
 
 KM3NeT public project homepage http://www.km3net.org
 
+Acknowledgements
+----------------
+
+Thanks especially to the gracious help of all contributors:
+
+Tamas Gal, Moritz Lotze, Johannes Schumann, Piotr Kalaczynski, Jonas Reubelt, Michael Moser, Thomas Heid, Alba Domi, Agustin Sanchez Losa, Zineb Aly, Jordan Seneca, Nicole Geisselbrecht, Javier Barrios, Valentin Pestel, Jannik Hofestaedt, Matthias Bissinger
