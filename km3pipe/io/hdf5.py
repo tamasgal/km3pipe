@@ -230,6 +230,9 @@ class HDF5Sink(Module):
         pass more arguments to the pytables File init
     n_rows_expected = int, optional [default: 10000]
     append: bool, optional [default: False]
+    reset_group_id: bool, optional [default: True]
+        Resets the group_id so that it's continuous in the output file.
+        Use this with care!
 
     Notes
     -----
@@ -249,6 +252,7 @@ class HDF5Sink(Module):
         self.pytab_file_args = self.get("pytab_file_args", default=dict())
         self.file_mode = "a" if self.get("append") else "w"
         self.keep_open = self.get("keep_open")
+        self._reset_group_id = self.get("reset_group_id", default=True)
         self.indices = {}  # to store HDF5IndexTables for each h5loc
         self._singletons_written = {}
         # magic 10000: this is the default of the "expectedrows" arg
@@ -469,6 +473,9 @@ class HDF5Sink(Module):
         if isinstance(entry, Table) and not entry.h5singleton:
             if "group_id" not in entry:
                 entry = entry.append_columns("group_id", self.index)
+            elif self._reset_group_id:
+                # reset group_id to the HDF5Sink's continuous counter
+                entry.group_id = self.index
 
         self.log.debug("h5l: '{}', title '{}'".format(entry.h5loc, title))
 
