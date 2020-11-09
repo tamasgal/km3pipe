@@ -185,15 +185,15 @@ class RecoTracksTabulator(kp.Module):
             idx=np.arange(n),
         )
 
-
         n_columns = max(km3io.definitions.fitparameters.values()) + 1
         fitinf_array = np.ma.filled(
             ak.to_numpy(ak.pad_none(tracks.fitinf, target=n_columns, axis=-1)),
-            fill_value=np.nan).astype("float32")
+            fill_value=np.nan,
+        ).astype("float32")
         fitinf_split = np.split(fitinf_array, fitinf_array.shape[-1], axis=-1)
         for fitparam, idx in km3io.definitions.fitparameters.items():
             reco_tracks[fitparam] = fitinf_split[idx][:, 0]
-        
+
         blob["RecoTracks"] = kp.Table(
             reco_tracks,
             h5loc=f"/reco/tracks",
