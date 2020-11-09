@@ -60,10 +60,12 @@ def run_tests():
 
 
 def update_km3pipe(git_branch=""):
-    print("Running the km3pipe test suite. Make sure you have all the test "
-          "dependencies and extras installed with\n\n"
-          "    pip install \"km3pipe[dev]\"\n"
-          "    pip install \"km3pipe[extras]\"\n")
+    print(
+        "Running the km3pipe test suite. Make sure you have all the test "
+        "dependencies and extras installed with\n\n"
+        '    pip install "km3pipe[dev]"\n'
+        '    pip install "km3pipe[extras]"\n'
+    )
     if git_branch == "" or git_branch is None:
         git_branch = "master"
     os.system(
