@@ -891,8 +891,8 @@ class TestHDF5PumpConsistency(TestCase):
                 print(blob)
                 if self.i == 5:
                     assert 6 == np.sum(blob["Arr"])
-                # else:
-                #     assert 'Arr' not in blob
+                else:
+                    assert len(blob["Arr"]) == 0
 
                 return blob
 
