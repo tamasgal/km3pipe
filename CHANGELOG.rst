@@ -1,6 +1,13 @@
 Unreleased changes
 ------------------
 
+Version 9
+---------
+
+9.0.0-beta.6 / 2020-11-10
+~~~~~~~~~~~~~~~~~~~~~~~~~
+* ``h5extract`` now extracts everything by default, when no other options
+  are passed
 * Fixed a bug in ``HDF5Sink`` when blobs where skipped and ``NDArrays`` written
   The ``group_id`` is now reset automatically and is guaranteed to be continuous.
 * The DAQ structures (``DAQEvent``, ``JDAQSumaryslice`` and ``JDAQTimeslice``)
@@ -9,8 +16,6 @@ Unreleased changes
   see "corrupt data" errors, either downgrade km3pipe to 9.0.0-alpha.13 or
   less, or update Jpp to v13+ (recommended).
 
-Version 9
----------
 9.0.0-beta.5 / 2020-10-21
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 * Minor bugfixes
