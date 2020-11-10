@@ -59,7 +59,7 @@ class TimesliceParser(Module):
         if "FileIO" in blob:
             return blob["FileIO"]
         if "RawBytes" in blob:
-            return BytesIO(blob["Bytes"])
+            return BytesIO(blob["RawBytes"])
 
     def process(self, blob):
         data = self._get_raw_data(blob)
