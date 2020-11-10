@@ -58,6 +58,8 @@ class TimesliceParser(Module):
             return BytesIO(blob["CHData"])
         if "FileIO" in blob:
             return blob["FileIO"]
+        if "RawBytes" in blob:
+            return BytesIO(blob["Bytes"])
 
     def process(self, blob):
         data = self._get_raw_data(blob)
@@ -145,8 +147,29 @@ class TimesliceParser(Module):
         return ts_info, ts_frameinfos, ts_hits
 
 
-class DAQPump(Module):
+class RePump(Module):
     """A pump for binary DAQ files."""
+
+    def configure(self):
+        self.filename = self.require("filename")
+        self.fobj = open(self.filename, "rb")
+
+    def process(self, blob):
+        try:
+            length, data_type = unpack("<ii", self.fobj.read(8))
+            self.fobj.seek(-8, 1)
+        except struct.error:
+            raise StopIteration
+        data = self.fobj.read(length)
+        blob["RawBytes"] = data
+        return blob
+
+    def finish(self):
+        self.fobj.close()
+
+
+class DAQPump(Module):
+    """A pump for binary DAQ files. Deprecated!"""
 
     def configure(self):
         self.filename = self.require("filename")
