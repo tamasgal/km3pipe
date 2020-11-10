@@ -1,6 +1,8 @@
 Unreleased changes
 ------------------
 
+* Fixed a bug in ``HDF5Sink`` when blobs where skipped and ``NDArrays`` written
+  The ``group_id`` is now reset automatically and is guaranteed to be continuous.
 * The DAQ structures (``DAQEvent``, ``JDAQSumaryslice`` and ``JDAQTimeslice``)
   now have a version field in Jpp v13 and were updated in ``kp.io.daq``
   accordingly. There is no backwards compatibility for this change. If you
