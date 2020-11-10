@@ -36,6 +36,7 @@ DATA_TYPES = {
     101: "DAQSuperFrame",
     201: "DAQSummaryFrame",
     1001: "DAQTimeslice",
+    1003: "DAQTimeslice",
     2001: "DAQSummaryslice",
     10001: "DAQEvent",
 }
