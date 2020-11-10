@@ -34,6 +34,19 @@ def main():
 
     args = docopt(__doc__, version=kp.version)
 
+    default_flags = (
+        "--offline-header",
+        "--event-info",
+        "--offline-hits",
+        "--mc-hits",
+        "--mc-tracks",
+        "--mc-tracks-usr-data",
+        "--reco-tracks",
+    )
+    if not any([args[k] for k in default_flags]):
+        for k in default_flags:
+            args[k] = True
+
     outfile = args["-o"]
     if outfile is None:
         outfile = args["FILENAME"] + ".h5"
