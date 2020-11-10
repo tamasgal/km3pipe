@@ -20,6 +20,22 @@ from km3pipe.io.hdf5 import (
 from km3pipe.testing import TestCase, data_path
 
 
+class Skipper(Module):
+    """Skips the iteration with a given index (starting at 0)"""
+
+    def configure(self):
+        self.skip_indices = self.require("indices")
+        self.index = 0
+
+    def process(self, blob):
+        self.index += 1
+        if self.index - 1 in self.skip_indices:
+            print("skipping")
+            return
+        print(blob)
+        return blob
+
+
 class TestH5Pump(TestCase):
     def setUp(self):
         self.fname = data_path(
@@ -387,6 +403,151 @@ class TestNDArrayHandling(TestCase):
         fobj.close()
 
 
+class TestH5SinkSkippedBlobs(TestCase):
+    def test_skipped_blob_with_tables(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Module):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                blob["Tab"] = Table(
+                    {"a": np.arange(self.index + 1), "i": self.index}, h5loc="/tab"
+                )
+                self.index += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(Skipper, indices=[2])
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        with tb.File(fname) as f:
+            a = f.get_node("/tab")[:]["a"]
+            i = f.get_node("/tab")[:]["i"]
+            group_id = f.get_node("/tab")[:]["group_id"]
+        assert np.allclose([0, 1, 1, 3, 3, 3, 3, 4, 4, 4, 4, 4], i)
+        assert np.allclose([0, 0, 1, 0, 1, 2, 3, 0, 1, 2, 3, 4], a)
+        assert np.allclose([0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3], group_id)
+
+        fobj.close()
+
+    def test_skipped_blob_with_ndarray(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Module):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                blob["Arr"] = NDArray(np.arange(self.index + 1), h5loc="/arr")
+                self.index += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(Skipper, indices=[2])
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        with tb.File(fname) as f:
+            a = f.get_node("/arr")[:]
+            index_table = f.get_node("/arr_indices")[:]
+        assert np.allclose([0, 0, 1, 0, 1, 2, 3, 0, 1, 2, 3, 4], a)
+        assert np.allclose([0, 1, 3, 7], index_table["index"])
+        assert np.allclose([1, 2, 4, 5], index_table["n_items"])
+
+        fobj.close()
+
+    def test_skipped_blob_with_tables_and_ndarrays(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Module):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                blob["Arr"] = NDArray(np.arange(self.index + 1), h5loc="/arr")
+                blob["Tab"] = Table(
+                    {"a": np.arange(self.index + 1), "i": self.index}, h5loc="/tab"
+                )
+                self.index += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(Skipper, indices=[2])
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        with tb.File(fname) as f:
+            tab_a = f.get_node("/tab")[:]["a"]
+            tab_i = f.get_node("/tab")[:]["i"]
+            group_id = f.get_node("/tab")[:]["group_id"]
+
+            arr = f.get_node("/arr")[:]
+            index_table = f.get_node("/arr_indices")[:]
+
+            group_info = f.get_node("/group_info")[:]
+
+        assert np.allclose([0, 1, 1, 3, 3, 3, 3, 4, 4, 4, 4, 4], tab_i)
+        assert np.allclose([0, 0, 1, 0, 1, 2, 3, 0, 1, 2, 3, 4], tab_a)
+        assert np.allclose([0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3], group_id)
+
+        assert np.allclose([0, 0, 1, 0, 1, 2, 3, 0, 1, 2, 3, 4], arr)
+        assert np.allclose([0, 1, 3, 7], index_table["index"])
+        assert np.allclose([1, 2, 4, 5], index_table["n_items"])
+
+        fobj.close()
+
+    def test_skipped_blob_with_tables_and_ndarrays_first_and_last(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class DummyPump(Module):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                blob["Arr"] = NDArray(np.arange(self.index + 1), h5loc="/arr")
+                blob["Tab"] = Table(
+                    {"a": np.arange(self.index + 1), "i": self.index}, h5loc="/tab"
+                )
+                self.index += 1
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(Skipper, indices=[0, 4])
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(5)
+
+        with tb.File(fname) as f:
+            tab_a = f.get_node("/tab")[:]["a"]
+            tab_i = f.get_node("/tab")[:]["i"]
+            group_id = f.get_node("/tab")[:]["group_id"]
+
+            arr = f.get_node("/arr")[:]
+            index_table = f.get_node("/arr_indices")[:]
+
+            group_info = f.get_node("/group_info")[:]
+
+        assert np.allclose([1, 1, 2, 2, 2, 3, 3, 3, 3], tab_i)
+        assert np.allclose([0, 1, 0, 1, 2, 0, 1, 2, 3], tab_a)
+        assert np.allclose([0, 0, 1, 1, 1, 2, 2, 2, 2], group_id)
+
+        assert np.allclose([0, 1, 0, 1, 2, 0, 1, 2, 3], arr)
+        assert np.allclose([0, 2, 5], index_table["index"])
+        assert np.allclose([2, 3, 4], index_table["n_items"])
+
+        fobj.close()
+
+
 class TestH5SinkConsistency(TestCase):
     def test_h5_consistency_for_tables_without_group_id(self):
         fobj = tempfile.NamedTemporaryFile(delete=True)
@@ -460,7 +621,7 @@ class TestH5SinkConsistency(TestCase):
 
         pipe = Pipeline()
         pipe.attach(DummyPump)
-        pipe.attach(HDF5Sink, filename=fname)
+        pipe.attach(HDF5Sink, filename=fname, reset_group_id=False)
         pipe.drain(5)
 
         with tb.File(fname) as f:
@@ -700,46 +861,45 @@ class TestHDF5PumpConsistency(TestCase):
         pipe.attach(Observer)
         pipe.drain()
 
-    # TODO: This will fail due to ugly indexing of NDArrays
-    # def test_sparse_ndarray(self):
-    #     fobj = tempfile.NamedTemporaryFile(delete=True)
-    #     fname = fobj.name
-    #
-    #     class Dummy(Module):
-    #         def configure(self):
-    #             self.i = 0
-    #
-    #         def process(self, blob):
-    #             self.i += 1
-    #
-    #             if self.i == 5:
-    #                 blob['Arr'] = NDArray([1, 2, 3], h5loc='/arr')
-    #             return blob
-    #
-    #     pipe = Pipeline()
-    #     pipe.attach(Dummy)
-    #     pipe.attach(HDF5Sink, filename=fname)
-    #     pipe.drain(10)
-    #
-    #     class Observer(Module):
-    #         def configure(self):
-    #             self.i = 0
-    #
-    #         def process(self, blob):
-    #             self.i += 1
-    #
-    #             print(blob)
-    #             if self.i == 5:
-    #                 assert 6 == np.sum(blob['Arr'])
-    #             # else:
-    #             #     assert 'Arr' not in blob
-    #
-    #             return blob
-    #
-    #     pipe = Pipeline()
-    #     pipe.attach(HDF5Pump, filename=fname)
-    #     pipe.attach(Observer)
-    #     pipe.drain()
+    def test_sparse_ndarray(self):
+        fobj = tempfile.NamedTemporaryFile(delete=True)
+        fname = fobj.name
+
+        class Dummy(Module):
+            def configure(self):
+                self.i = 0
+
+            def process(self, blob):
+                self.i += 1
+
+                if self.i == 5:
+                    blob["Arr"] = NDArray([1, 2, 3], h5loc="/arr")
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(Dummy)
+        pipe.attach(HDF5Sink, filename=fname)
+        pipe.drain(10)
+
+        class Observer(Module):
+            def configure(self):
+                self.i = 0
+
+            def process(self, blob):
+                self.i += 1
+
+                print(blob)
+                if self.i == 5:
+                    assert 6 == np.sum(blob["Arr"])
+                else:
+                    assert len(blob["Arr"]) == 0
+
+                return blob
+
+        pipe = Pipeline()
+        pipe.attach(HDF5Pump, filename=fname)
+        pipe.attach(Observer)
+        pipe.drain()
 
 
 class TestHDF5Shuffle(TestCase):
