@@ -126,6 +126,7 @@ class Calibration(Module):
             # do we ever see McHits here?
             hits = Table.from_template(hits, "Hits")
 
+        is_mc = None
         if hasattr(hits, "dom_id") and hasattr(hits, "channel_id"):
             try:
                 (
@@ -138,10 +139,12 @@ class Calibration(Module):
                     pos_y,
                     pos_z,
                     t0,
+                    pmt_id,
                 ) = _get_calibration_for_hits(hits, self._calib_by_dom_and_channel)
             except KeyError as e:
                 self.log.critical("Wrong calibration (DETX) data provided.")
                 raise
+            is_mc = False
         elif hasattr(hits, "pmt_id"):
             try:
                 (
@@ -154,10 +157,13 @@ class Calibration(Module):
                     pos_y,
                     pos_z,
                     t0,
+                    dom_id,
+                    channel_id,
                 ) = _get_calibration_for_mchits(hits, self._calib_by_pmt_id)
             except KeyError as e:
                 self.log.critical("Wrong calibration (DETX) data provided.")
                 raise
+            is_mc = True
         else:
             raise TypeError(
                 "Don't know how to apply calibration to '{0}'. "
@@ -165,7 +171,7 @@ class Calibration(Module):
                 "'pmt_id'.".format(hits.name)
             )
 
-        if hasattr(hits, "time"):
+        if hasattr(hits, "time") and not is_mc:
             if hits.time.dtype != t0.dtype:
                 time = hits.time.astype("f4") + t0.astype("f4")
                 hits = hits.drop_columns(["time"])
@@ -187,18 +193,28 @@ class Calibration(Module):
             "pos_z": pos_z,
             "t0": t0,
         }
+
+        if is_mc:
+            calib["dom_id"] = dom_id.astype(np.int32)
+            calib["channel_id"] = channel_id.astype(np.int32)
+        else:
+            calib["pmt_id"] = pmt_id.astype(np.int32)
+
         hits_data.update(calib)
-        if correct_slewing and hasattr(hits, "tot"):  # only correct non-MC hits
+
+        if correct_slewing and not is_mc:
             hits_data["time"] -= slew(hits_data["tot"], variant=slewing_variant)
         return Table(
             hits_data, h5loc=hits.h5loc, split_h5=hits.split_h5, name=hits.name
         )
 
     def _create_dom_channel_lookup(self):
-        data = nb.typed.Dict.empty(key_type=nb.types.i8, value_type=nb.types.float64[:, :])
+        data = nb.typed.Dict.empty(
+            key_type=nb.types.i8, value_type=nb.types.float64[:, :]
+        )
         for pmt in self.detector.pmts:
             if pmt.dom_id not in data:
-                data[pmt.dom_id] = np.zeros((31, 9))
+                data[pmt.dom_id] = np.zeros((31, 10))
             data[pmt.dom_id][pmt.channel_id] = np.asarray(
                 [
                     pmt.pos_x,
@@ -210,6 +226,7 @@ class Calibration(Module):
                     pmt.t0,
                     pmt.du,
                     pmt.floor,
+                    pmt.pmt_id,
                 ],
                 dtype=np.float64,
             )
@@ -230,6 +247,8 @@ class Calibration(Module):
                     pmt.t0,
                     pmt.du,
                     pmt.floor,
+                    pmt.dom_id,
+                    pmt.channel_id,
                 ],
                 dtype=np.float64,
             )
@@ -262,7 +281,7 @@ def apply_t0_nb(times, dom_ids, channel_ids, lookup_tables):
 def _get_calibration_for_hits(hits, lookup):
     """Append the position, direction and t0 columns and add t0 to time"""
     n = len(hits)
-    cal = np.empty((n, 9))
+    cal = np.empty((n, 10))
     for i in range(n):
         calib = lookup[hits["dom_id"][i]][hits["channel_id"][i]]
         cal[i] = calib
@@ -274,17 +293,18 @@ def _get_calibration_for_hits(hits, lookup):
     pos_x = cal[:, 0]
     pos_y = cal[:, 1]
     pos_z = cal[:, 2]
+    pmt_id = cal[:, 9]
 
     t0 = cal[:, 6]
 
-    return [dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0]
+    return [dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0, pmt_id]
 
 
 @nb.jit
 def _get_calibration_for_mchits(hits, lookup):
     """Append the position, direction and t0 columns and add t0 to time"""
     n_hits = len(hits)
-    cal = np.empty((n_hits, 9))
+    cal = np.empty((n_hits, 11))
     for i in range(n_hits):
         cal[i] = lookup[hits["pmt_id"][i]]
     dir_x = cal[:, 3]
@@ -296,8 +316,10 @@ def _get_calibration_for_mchits(hits, lookup):
     pos_y = cal[:, 1]
     pos_z = cal[:, 2]
     t0 = cal[:, 6]
+    dom_id = cal[:, 9]
+    channel_id = cal[:, 10]
 
-    return [dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0]
+    return [dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0, dom_id, channel_id]
 
 
 class CalibrationService(Module):
