@@ -153,8 +153,14 @@ class TimesliceParser(Module):
 
 
 class RePump(Module):
-    """A pump for binary DAQ files."""
+    """A pump for binary DAQ files.
 
+
+    This pump can be used to replay raw dumps e.g. created with the ``daqsample``
+    tool. It creates the same structures as the ``kp.io.ch.CHPump`` and thus
+    suited to test online processing pipelines with offline files.
+
+    """
     def configure(self):
         self.filename = self.require("filename")
         self.fobj = open(self.filename, "rb")
