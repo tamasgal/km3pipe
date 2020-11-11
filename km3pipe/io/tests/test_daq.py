@@ -15,9 +15,21 @@ from km3pipe.io.daq import (
     DAQHeader,
     DAQSummaryslice,
     DMMonitor,
+    RePump,
     TMCHRepump,
     TimesliceParser,
 )
+
+
+class TestRePump(TestCase):
+    def test_process(self):
+        pump = RePump(filename=data_path("daq/IO_EVT.dat"))
+        blob = pump.process({})
+        assert 5724 == len(blob["RawBytes"])
+        blob = pump.process({})
+        assert 1950 == len(blob["RawBytes"])
+        blob = pump.process({})
+        assert 516 == len(blob["RawBytes"])
 
 
 class TestDAQPumpWithLegacyFiles(TestCase):

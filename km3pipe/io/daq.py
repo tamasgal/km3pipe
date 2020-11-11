@@ -35,7 +35,13 @@ log = get_logger(__name__)  # pylint: disable=C0103
 DATA_TYPES = {
     101: "DAQSuperFrame",
     201: "DAQSummaryFrame",
-    1001: "DAQTimeslice",
+    # Using the same class for all timeslices since they are structurally
+    # identical (until now)
+    1001: "DAQTimeslice",  # Type of erroneous timeslice data
+    1002: "DAQTimeslice",  # L0
+    1003: "DAQTimeslice",  # L1
+    1004: "DAQTimeslice",  # L2
+    1005: "DAQTimeslice",  # SN
     2001: "DAQSummaryslice",
     10001: "DAQEvent",
 }
@@ -57,6 +63,8 @@ class TimesliceParser(Module):
             return BytesIO(blob["CHData"])
         if "FileIO" in blob:
             return blob["FileIO"]
+        if "RawBytes" in blob:
+            return BytesIO(blob["RawBytes"])
 
     def process(self, blob):
         data = self._get_raw_data(blob)
@@ -144,8 +152,35 @@ class TimesliceParser(Module):
         return ts_info, ts_frameinfos, ts_hits
 
 
+class RePump(Module):
+    """A pump for binary DAQ files.
+
+
+    This pump can be used to replay raw dumps e.g. created with the ``daqsample``
+    tool. It creates the same structures as the ``kp.io.ch.CHPump`` and thus
+    suited to test online processing pipelines with offline files.
+
+    """
+    def configure(self):
+        self.filename = self.require("filename")
+        self.fobj = open(self.filename, "rb")
+
+    def process(self, blob):
+        try:
+            length, data_type = unpack("<ii", self.fobj.read(8))
+            self.fobj.seek(-8, 1)
+        except struct.error:
+            raise StopIteration
+        data = self.fobj.read(length)
+        blob["RawBytes"] = data
+        return blob
+
+    def finish(self):
+        self.fobj.close()
+
+
 class DAQPump(Module):
-    """A pump for binary DAQ files."""
+    """A pump for binary DAQ files. Deprecated!"""
 
     def configure(self):
         self.filename = self.require("filename")
@@ -400,13 +435,7 @@ class DAQPreamble(object):
         The size of the original DAQ byte representation.
     data_type : int
         The data type of the following frame. The coding is stored in the
-        ``DATA_TYPES`` dictionary::
-
-            101: 'DAQSuperFrame'
-            201: 'DAQSummaryFrame'
-            1001: 'DAQTimeslice'
-            2001: 'DAQSummaryslice'
-            10001: 'DAQEvent'
+        ``DATA_TYPES``.
 
     """
 
