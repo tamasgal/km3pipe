@@ -4,6 +4,7 @@
 Calibration.
 
 """
+import numba as nb
 import numpy as np
 
 import km3db
@@ -23,23 +24,6 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 log = get_logger(__name__)
-
-try:
-    import numba as nb
-except (ImportError, OSError):
-    HAVE_NUMBA = False
-    jit = lambda f: f
-    log.warning("No numba detected, consider `pip install numba` for more speed!")
-else:
-    try:
-        from numba.typed import Dict
-    except ImportError:
-        log.warning("Please update numba (0.43+) to have dictionary support!")
-        HAVE_NUMBA = False
-        jit = lambda f: f
-    else:
-        HAVE_NUMBA = True
-        from numba import jit
 
 
 class Calibration(Module):
@@ -90,21 +74,12 @@ class Calibration(Module):
             self._create_pmt_id_lookup()
             return
 
-        # TODO: deprecation
-        if self.get("calibration"):
-            self.log.warning(
-                "The parameter 'calibration' has been renamed "
-                "to 'calibset'. The 'calibration' parameter will be removed "
-                "in the next version of KM3Pipe"
-            )
-            self.calibset = self.get("calibration")
-
         if self.filename or self.det_id:
             if self.filename is not None:
                 self.detector = Detector(filename=self.filename)
             if self.det_id:
                 self.detector = Detector(
-                    det_id=self.det_id, t0set=self.t0set, calibration=self.calibset
+                    det_id=self.det_id, t0set=self.t0set, calibset=self.calibset
                 )
 
         if self.detector is not None:
@@ -125,16 +100,7 @@ class Calibration(Module):
 
     def apply_t0(self, hits):
         """Apply only t0s"""
-        if HAVE_NUMBA:
-            apply_t0_nb(hits.time, hits.dom_id, hits.channel_id, self._lookup_tables)
-        else:
-            n = len(hits)
-            cal = np.empty(n)
-            lookup = self._calib_by_dom_and_channel
-            for i in range(n):
-                calib = lookup[hits["dom_id"][i]][hits["channel_id"][i]]
-                cal[i] = calib[6]
-            hits.time += cal
+        apply_t0_nb(hits.time, hits.dom_id, hits.channel_id, self._lookup_tables)
         return hits
 
     def apply(self, hits, no_copy=False, correct_slewing=True, slewing_variant=3):
@@ -229,13 +195,7 @@ class Calibration(Module):
         )
 
     def _create_dom_channel_lookup(self):
-        if HAVE_NUMBA:
-            from numba.typed import Dict
-            from numba import types
-
-            data = Dict.empty(key_type=types.i8, value_type=types.float64[:, :])
-        else:
-            data = {}
+        data = nb.typed.Dict.empty(key_type=nb.types.i8, value_type=nb.types.float64[:, :])
         for pmt in self.detector.pmts:
             if pmt.dom_id not in data:
                 data[pmt.dom_id] = np.zeros((31, 9))
@@ -254,17 +214,10 @@ class Calibration(Module):
                 dtype=np.float64,
             )
         self._calib_by_dom_and_channel = data
-        if HAVE_NUMBA:
-            self._lookup_tables = [(dom, cal) for dom, cal in data.items()]
+        self._lookup_tables = [(dom, cal) for dom, cal in data.items()]
 
     def _create_pmt_id_lookup(self):
-        if HAVE_NUMBA:
-            from numba.typed import Dict
-            from numba import types
-
-            data = Dict.empty(key_type=types.i8, value_type=types.float64[:])
-        else:
-            data = {}
+        data = nb.typed.Dict.empty(key_type=nb.types.i8, value_type=nb.types.float64[:])
         for pmt in self.detector.pmts:
             data[pmt.pmt_id] = np.asarray(
                 [
@@ -289,7 +242,7 @@ class Calibration(Module):
         return "Calibration: det_id({0})".format(self.det_id)
 
 
-@jit
+@nb.njit
 def apply_t0_nb(times, dom_ids, channel_ids, lookup_tables):
     """Apply t0s using a lookup table of tuples (dom_id, calib)"""
     dom_id = 0
@@ -305,7 +258,7 @@ def apply_t0_nb(times, dom_ids, channel_ids, lookup_tables):
         times[i] += t0
 
 
-@jit
+@nb.jit
 def _get_calibration_for_hits(hits, lookup):
     """Append the position, direction and t0 columns and add t0 to time"""
     n = len(hits)
@@ -327,7 +280,7 @@ def _get_calibration_for_hits(hits, lookup):
     return [dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0]
 
 
-@jit
+@nb.jit
 def _get_calibration_for_mchits(hits, lookup):
     """Append the position, direction and t0 columns and add t0 to time"""
     n_hits = len(hits)
@@ -385,8 +338,6 @@ class CalibrationService(Module):
         self.expose(self.load_calibration, "load_calibration")
         self.expose(self.correct_slewing, "correct_slewing")
 
-        self.expose(self.detector_deprecation, "detector")
-
     def load_calibration(self, filename=None, det_id=None, t0set=None, calibset=None):
         """Load another calibration"""
         self.filename = filename
@@ -395,13 +346,6 @@ class CalibrationService(Module):
         self.calibset = calibset
         self._detector = None
         self._calibration = None
-
-    @property
-    def detector_deprecation(self):
-        self.log.deprecation(
-            "The service 'detector' of the CalibrationService has been "
-            "deprecated. Please use 'get_detector()' instead in future."
-        )
 
     def calibrate(self, hits, correct_slewing=True):
         return self.calibration.apply(hits, correct_slewing=correct_slewing)
@@ -436,7 +380,7 @@ class CalibrationService(Module):
         hits.time -= slew(hits.tot)
 
 
-@jit
+@nb.jit
 def slew(tot, variant=3):
     """Calculate the time slewing of a PMT response for a given ToT
 
