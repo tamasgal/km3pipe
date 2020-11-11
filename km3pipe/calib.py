@@ -27,7 +27,12 @@ log = get_logger(__name__)
 
 
 class Calibration(Module):
-    """A very simple, preliminary Module which gives access to the calibration.
+    """A module which applies time, position and rotation corrections to hits.
+
+    This module also calibrates MC hits, but be aware, t0s are not appended to
+    the MC hit times.
+    Additionally, the global PMT ID is added to regular hits as ``pmt_id`` and
+    in case of MC hits, the ``dom_id`` and ``channel_id`` (DAQ) are set.
 
     Parameters
     ----------
