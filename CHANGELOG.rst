@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* ``numba`` is not optional anymore
 
 Version 9
 ---------
