@@ -8,6 +8,10 @@ Installing km3pipe is as easy as running::
 
     pip install km3pipe
 
+To install also all the optional extras (Pandas, SciPy, ...)::
+
+    pip install "km3pipe[extras]"
+
 As of version 9, only Python 3.5+ is supported. version 8 is the last one which
 supports Python 2.7.
 
