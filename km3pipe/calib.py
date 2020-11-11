@@ -41,6 +41,14 @@ class Calibration(Module):
         t0set (when retrieving from database).
     calibset: optional
         calibset (when retrieving from database).
+    key: str, optional [default="Hits"]
+        the blob key of the hits
+    outkey: str, optional [default="CalibHits"]
+        the output blob key of the calibrated hits
+    key_mc: str, optional [default="McHits"]
+        the blob key of the MC hits (if present)
+    outkey_mc: str, optional [default="CalibMcHits"]
+        the output blob key of the calibrated MC hits
     """
 
     __name__ = "Calibration"
@@ -56,6 +64,8 @@ class Calibration(Module):
         self.detector = self.get("detector")
         self.key = self.get("key", default="Hits")
         self.outkey = self.get("outkey", default="CalibHits")
+        self.key_mc = self.get("key_mc", default="McHits")
+        self.outkey_mc = self.get("outkey_mc", default="CalibMcHits")
         self._pos_dom_channel = None
         self._dir_dom_channel = None
         self._t0_dom_channel = None
@@ -94,6 +104,8 @@ class Calibration(Module):
     def process(self, blob):
         if self._should_apply:
             blob[self.outkey] = self.apply(blob[self.key])
+            if self.key_mc in blob:
+                blob[self.outkey_mc] = self.apply(blob[self.key_mc])
         return blob
 
     def get_detector(self):
