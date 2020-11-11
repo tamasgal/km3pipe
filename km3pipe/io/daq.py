@@ -35,8 +35,13 @@ log = get_logger(__name__)  # pylint: disable=C0103
 DATA_TYPES = {
     101: "DAQSuperFrame",
     201: "DAQSummaryFrame",
-    1001: "DAQTimeslice",
-    1003: "DAQTimeslice",
+    # Using the same class for all timeslices since they are structurally
+    # identical (until now)
+    1001: "DAQTimeslice",  # Type of erroneous timeslice data
+    1002: "DAQTimeslice",  # L0
+    1003: "DAQTimeslice",  # L1
+    1004: "DAQTimeslice",  # L2
+    1005: "DAQTimeslice",  # SN
     2001: "DAQSummaryslice",
     10001: "DAQEvent",
 }
@@ -424,13 +429,7 @@ class DAQPreamble(object):
         The size of the original DAQ byte representation.
     data_type : int
         The data type of the following frame. The coding is stored in the
-        ``DATA_TYPES`` dictionary::
-
-            101: 'DAQSuperFrame'
-            201: 'DAQSummaryFrame'
-            1001: 'DAQTimeslice'
-            2001: 'DAQSummaryslice'
-            10001: 'DAQEvent'
+        ``DATA_TYPES``.
 
     """
 
