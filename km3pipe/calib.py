@@ -54,6 +54,8 @@ class Calibration(Module):
         self.t0set = self.get("t0set")
         self.calibset = self.get("calibset")
         self.detector = self.get("detector")
+        self.key = self.get("key", default="Hits")
+        self.outkey = self.get("outkey", default="CalibHits")
         self._pos_dom_channel = None
         self._dir_dom_channel = None
         self._t0_dom_channel = None
@@ -89,9 +91,9 @@ class Calibration(Module):
         else:
             self.log.critical("No detector information loaded.")
 
-    def process(self, blob, key="Hits", outkey="CalibHits"):
+    def process(self, blob):
         if self._should_apply:
-            blob[outkey] = self.apply(blob[key])
+            blob[self.outkey] = self.apply(blob[self.key])
         return blob
 
     def get_detector(self):
