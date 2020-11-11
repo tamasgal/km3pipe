@@ -1,6 +1,10 @@
 Unreleased changes
 ------------------
 * ``numba`` is not optional anymore
+* ``Calibration.apply()`` now adds ``dom_id`` and ``channel_id`` when
+  calibrating MC hits and ``pmt_id`` when calibrating regular hits
+* ``Calibration`` is changed and takes the hits key and out-key in the
+  ``configure`` stage instead of ``process``
 
 Version 9
 ---------

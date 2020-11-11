@@ -8,6 +8,7 @@ import sys
 import tempfile
 
 from thepipe import Module, Pipeline
+import km3pipe as kp
 from km3pipe.dataclasses import Table
 from km3pipe.hardware import Detector
 from km3pipe.io.hdf5 import HDF5Sink
@@ -51,7 +52,7 @@ class TestCalibration(TestCase):
         det = Detector(data_path("detx/detx_v1.detx"))
         Calibration(detector=det)
 
-    def test_apply_to_hits_with_pmt_id(self):
+    def test_apply_to_hits_with_pmt_id_aka_mc_hits(self):
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
 
         hits = Table({"pmt_id": [1, 2, 1], "time": [10.1, 11.2, 12.3]})
@@ -63,14 +64,12 @@ class TestCalibration(TestCase):
         a_hit = chits[0]
         self.assertAlmostEqual(1.1, a_hit.pos_x)
         self.assertAlmostEqual(10, a_hit.t0)
-        t0 = a_hit.t0
-        self.assertAlmostEqual(10.1 + t0, a_hit.time)
+        self.assertAlmostEqual(10.1, a_hit.time)  # t0 should not bei applied
 
         a_hit = chits[1]
         self.assertAlmostEqual(1.4, a_hit.pos_x)
         self.assertAlmostEqual(20, a_hit.t0)
-        t0 = a_hit.t0
-        self.assertAlmostEqual(11.2 + t0, a_hit.time)
+        self.assertAlmostEqual(11.2, a_hit.time)  # t0 should not be applied
 
     def test_apply_to_hits_with_dom_id_and_channel_id(self):
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
@@ -94,6 +93,21 @@ class TestCalibration(TestCase):
         self.assertAlmostEqual(80, a_hit.t0)
         t0 = a_hit.t0
         self.assertAlmostEqual(11.2 + t0, a_hit.time)
+
+    def test_assert_apply_adds_dom_id_and_channel_id_to_mc_hits(self):
+        calib = Calibration(filename=data_path("detx/detx_v1.detx"))
+        hits = Table({"pmt_id": [1, 2, 1], "time": [10.1, 11.2, 12.3]})
+        chits = calib.apply(hits)
+        self.assertListEqual([1, 1, 1], list(chits.dom_id))
+        self.assertListEqual([0, 1, 0], list(chits.channel_id))
+
+    def test_assert_apply_adds_pmt_id_to_hits(self):
+        calib = Calibration(filename=data_path("detx/detx_v1.detx"))
+        hits = Table(
+            {"dom_id": [2, 3, 3], "channel_id": [0, 1, 2], "time": [10.1, 11.2, 12.3]}
+        )
+        chits = calib.apply(hits, correct_slewing=False)
+        self.assertListEqual([4, 8, 9], list(chits.pmt_id))
 
     def test_apply_to_hits_with_pmt_id_with_wrong_calib_raises(self):
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
@@ -162,6 +176,50 @@ class TestCalibration(TestCase):
 
         for t_primary, t_calib in zip(hits_compare, hits):
             self.assertAlmostEqual(t_primary, t_calib)
+
+    def test_calibration_in_pipeline(self):
+        class DummyPump(kp.Module):
+            def configure(self):
+                self.index = 0
+
+            def process(self, blob):
+                self.index += 1
+                mc_hits = Table({"pmt_id": [1, 2, 1], "time": [10.1, 11.2, 12.3]})
+                hits = Table(
+                    {
+                        "dom_id": [2, 3, 3],
+                        "channel_id": [0, 1, 2],
+                        "time": [10.1, 11.2, 12.3],
+                        "tot": [0, 10, 255],
+                    }
+                )
+
+                blob["Hits"] = hits
+                blob["McHits"] = mc_hits
+                return blob
+
+        _self = self
+
+        class Observer(kp.Module):
+            def process(self, blob):
+                assert "Hits" in blob
+                assert "McHits" in blob
+                assert "CalibHits" in blob
+                assert "CalibMcHits" in blob
+                assert not hasattr(blob["Hits"], "pmt_id")
+                assert hasattr(blob["CalibHits"], "pmt_id")
+                assert not hasattr(blob["McHits"], "dom_id")
+                assert hasattr(blob["CalibHits"], "dom_id")
+                assert np.allclose([10.1, 11.2, 12.3], blob["Hits"].time)
+                assert np.allclose([42.09, 87.31, 111.34], blob["CalibHits"].time)
+                assert np.allclose(blob["McHits"].time, blob["CalibMcHits"].time)
+                return blob
+
+        pipe = kp.Pipeline()
+        pipe.attach(DummyPump)
+        pipe.attach(Calibration, filename=data_path("detx/detx_v1.detx"))
+        pipe.attach(Observer)
+        pipe.drain(3)
 
 
 class TestCalibrationService(TestCase):
