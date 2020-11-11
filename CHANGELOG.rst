@@ -1,13 +1,27 @@
 Unreleased changes
 ------------------
-* ``numba`` is not optional anymore
-* ``Calibration.apply()`` now adds ``dom_id`` and ``channel_id`` when
-  calibrating MC hits and ``pmt_id`` when calibrating regular hits
-* ``Calibration`` is changed and takes the hits key and out-key in the
-  ``configure`` stage instead of ``process``
 
 Version 9
 ---------
+
+9.0.0 / 2020-11-11
+~~~~~~~~~~~~~~~~~~
+* The ``h5extract`` tool replaces ``tohdf5``
+* ``km3pipe.db`` has been removed and all database functionalities
+  replaced by ``km3db``. ``StreamDS``, ``DBManager``, ``CLBMap`` and
+  other helper functions are now inside the ``km3db`` package:
+  More information here: https://git.km3net.de/km3py/km3db
+* New ``kp.physics`` module to consolidate physics related
+  functions and ``km.physics`` to gather physics related
+  pipeline modules
+* Provenance tracking! See https://km3py.pages.km3net.de/km3pipe/auto_examples/plot_provenance.html
+* No ROOT or aanet dependency anymore. Every I/O is done by ``km3io`` with
+  native ROOT support written in Python
+* Removed all deprecated functions (no mercy)
+* A lot of clean-up has been done. If you miss anything, create an issue.
+* ``numba`` is not optional anymore
+* ``Calibration.apply()`` now adds ``dom_id`` and ``channel_id`` when
+  calibrating MC hits and ``pmt_id`` when calibrating regular hits
 
 9.0.0-beta.6 / 2020-11-10
 ~~~~~~~~~~~~~~~~~~~~~~~~~
