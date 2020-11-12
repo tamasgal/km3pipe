@@ -60,6 +60,7 @@ def main():
     pipe = kp.Pipeline(timeit=args["--timeit"])
     pipe.attach(kp.io.OfflinePump, filename=args["FILENAME"])
     pipe.attach(km.StatusBar, every=100)
+    pipe.attach(km.common.MemoryObserver, every=500)
     if args["--offline-header"]:
         pipe.attach(km.io.OfflineHeaderTabulator)
     if args["--event-info"]:
