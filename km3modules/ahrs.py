@@ -110,7 +110,7 @@ class AHRSCalibrator(kp.Module):
 def fit_ahrs(A, H, Aoff, Arot, Hoff, Hrot):
     """Calculate yaw, pitch and roll for given A/H and calibration set.
 
-    Author: Vladimir Kulikovsky
+    Author: Vladimir Kulikovskiy
 
     Parameters
     ----------
