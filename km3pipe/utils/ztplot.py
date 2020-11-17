@@ -3,7 +3,7 @@
 Create a zt-Plot.
 
 Usage:
-    ztplot [-d DETX_FILE] [-t] -e EVENT_ID FILE
+    ztplot [-t] -d DETX_FILE -e EVENT_ID FILE
     ztplot [-d DETX_FILE] [-t] -f FRAME -c COUNTER FILE
     ztplot (-h | --help)
     ztplot --version
@@ -47,14 +47,10 @@ def main():
     except TypeError:
         pass
     else:
-        pump = kp.io.OfflinePump(arguments["FILE"])
+        pump = kp.io.OfflinePump(filename=arguments["FILE"])
         blob = pump[event_id]
-        event_info = blob["EventInfo"]
-        hits = blob["Hits"]
-        if arguments["-d"]:
-            cal = kp.calib.Calibration(filename=arguments["-d"])
-        else:
-            cal = kp.calib.Calibration(det_id=event_info.det_id)
+        hits = blob["event"].hits
+        cal = kp.calib.Calibration(filename=arguments["-d"])
         hits = cal.apply(hits)
         # triggered_dus = set(cal.detector.doms[h.dom_id][0] for h in hits)
         det = cal.detector
