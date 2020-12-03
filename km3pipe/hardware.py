@@ -203,6 +203,7 @@ class Detector(object):
                 self.doms[dom_id] = (du, floor, n_pmts)
             if self.version == 4:
                 self.doms[dom_id] = (du, floor, n_pmts, x, y, z, q0, qx, qy, qz, t0)
+                self._dom_positions[dom_id] = np.array([x, y, z])
 
             if self.n_pmts_per_dom is None:
                 self.n_pmts_per_dom = n_pmts
