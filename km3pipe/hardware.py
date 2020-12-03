@@ -42,6 +42,8 @@ class Detector(object):
         calibset (when retrieving from database).
     """
 
+    max_supported_version = 4
+
     def __init__(
         self, filename=None, det_id=None, t0set=None, calibset=None, string=None
     ):
@@ -84,8 +86,7 @@ class Detector(object):
             )
             detx = km3db.tools.detx(det_id, t0set=t0set, calibration=calibset)
             self._det_file = StringIO(detx)
-            self._parse_header()
-            self._parse_doms()
+            self._parse()
             if self.n_doms < 1:
                 log.error("No data found for detector ID %s." % det_id)
 
@@ -93,8 +94,7 @@ class Detector(object):
         # TODO this is ugly, refactor me please
         self._det_file = StringIO(string)
         self._extract_comments()
-        self._parse_header()
-        self._parse_doms()
+        self._parse()
         self._det_file.close()
 
     def _init_from_file(self, filename):
@@ -103,8 +103,7 @@ class Detector(object):
             raise NotImplementedError("Only the detx format is supported.")
         self._open_file(filename)
         self._extract_comments()
-        self._parse_header()
-        self._parse_doms()
+        self._parse()
         self._det_file.close()
 
     def _open_file(self, filename):
@@ -139,13 +138,17 @@ class Detector(object):
         self.cprint("Parsing the DETX header")
         self._det_file.seek(0, 0)
         first_line = self._readline()
-        try:
+        try:  # backward compatibility workaround
             self.det_id, self.n_doms = split(first_line, int)
-            self.version = "v1"
+            self.version = 1
         except ValueError:
             det_id, self.version = first_line.split()
             self.det_id = int(det_id)
-            self.version = self.version.lower()
+            self.version = int(self.version.lower().split("v")[1])
+            if self.version > self.max_supported_version:
+                raise NotImplementedError(
+                    "DETX version {} not supported yet".format(self.version)
+                )
             validity = self._readline().strip()
             self.valid_from, self.valid_until = split(validity, float)
             raw_utm_info = self._readline().strip().split()
@@ -157,24 +160,27 @@ class Detector(object):
             self.n_doms = int(n_doms)
 
     # pylint: disable=C0103
-    def _parse_doms(self):
+    def _parse(self):
         """Extract dom information from detector file"""
+        self._parse_header()
         self.cprint("Reading PMT information...")
-        self._det_file.seek(0, 0)
-        self._readline()
         pmts = defaultdict(list)
         pmt_index = 0
         while True:
             line = self._readline()
 
-            if line == "":
+            if line == "":  # readline semantics, signaling EOF
                 self.cprint("Done.")
                 break
 
-            try:
+            if self.version <= 3:
                 dom_id, du, floor, n_pmts = split(line, int)
-            except ValueError:
-                continue
+            if self.version == 4:
+                dom_id, du, floor, rest = unpack_nfirst(split(line), 3, int)
+                x, y, z, q0, qx, qy, qz, t0, rest = unpack_nfirst(rest, 8, float)
+                n_pmts, rest = unpack_nfirst(rest, 1, int)
+                if rest:
+                    log.warning("Unexpected DOM values: {0}".format(rest))
 
             if du != self._current_du:
                 log.debug("Next DU, resetting floor to 1.")
@@ -193,7 +199,10 @@ class Detector(object):
                 log.debug("Setting floor ID to our own ID")
                 floor = self._current_floor
 
-            self.doms[dom_id] = (du, floor, n_pmts)
+            if self.version <= 3:
+                self.doms[dom_id] = (du, floor, n_pmts)
+            if self.version == 4:
+                self.doms[dom_id] = (du, floor, n_pmts, x, y, z, q0, qx, qy, qz, t0)
 
             if self.n_pmts_per_dom is None:
                 self.n_pmts_per_dom = n_pmts
@@ -224,7 +233,7 @@ class Detector(object):
                 pmts["floor"].append(int(floor))
                 pmts["channel_id"].append(int(i))
                 pmts["dom_id"].append(int(dom_id))
-                if self.version == "v3" and rest:
+                if self.version in (3, 4) and rest:
                     status, rest = unpack_nfirst(rest, 1)
                     pmts["status"].append(int(status))
                 if rest:
@@ -368,16 +377,16 @@ class Detector(object):
     def ascii(self):
         """The ascii representation of the detector"""
         comments = ""
-        if self.version == "v3":
+        if self.version == 3:
             for comment in self.comments:
                 if not comment.startswith(" "):
                     comment = " " + comment
                 comments += "#" + comment + "\n"
 
-        if self.version == "v1":
+        if self.version == 1:
             header = "{det.det_id} {det.n_doms}".format(det=self)
         else:
-            header = "{det.det_id} {det.version}".format(det=self)
+            header = "{det.det_id} v{det.version}".format(det=self)
             header += "\n{0} {1}".format(self.valid_from, self.valid_until)
             header += "\n" + str(self.utm_info) + "\n"
             header += str(self.n_doms)
@@ -398,7 +407,7 @@ class Detector(object):
                     pmt.dir_z,
                     pmt.t0,
                 )
-                if self.version == "v3":
+                if self.version == 3:
                     doms += " {0}".format(pmt.status)
                 doms += "\n"
         return comments + header + "\n" + doms

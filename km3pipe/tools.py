@@ -142,7 +142,7 @@ def irods_path(det_id, run_id):
     )
 
 
-def unpack_nfirst(seq, nfirst):
+def unpack_nfirst(seq, nfirst, callback=None):
     """Unpack the nfrist items from the list and return the rest.
 
     >>> a, b, c, rest = unpack_nfirst((1, 2, 3, 4, 5), 3)
@@ -152,9 +152,11 @@ def unpack_nfirst(seq, nfirst):
     (4, 5)
 
     """
+    if callback is None:
+        callback = lambda x: x
     iterator = iter(seq)
     for _ in range(nfirst):
-        yield next(iterator, None)
+        yield callback(next(iterator, None))
     yield tuple(iterator)
 
 
