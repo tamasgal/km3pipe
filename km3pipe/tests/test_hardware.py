@@ -384,6 +384,33 @@ class TestDetector(TestCase):
 
     def test_detx_v4(self):
         det = Detector(filename=data_path("detx/detx_v4.detx"))
+        assert np.allclose(
+            [119.6, -12.2, 192.77], det.dom_positions[808956908], atol=1e-2
+        )
+        assert np.allclose(
+            [119.6, -12.2, 97.44], det.dom_positions[808981864], atol=1e-2
+        )
+        assert det.n_doms == 90
+        assert det.det_id == 44
+        assert det.n_pmts_per_dom == 31
+        assert det.n_dus == 5
+        assert np.allclose(
+            det.doms[808945480],
+            [
+                1,
+                5,
+                31,
+                86.500,
+                9.100,
+                66.821,
+                1.000000,
+                0.000000,
+                0.000000,
+                0.000000,
+                0.000,
+            ],
+            atol=1e-2,
+        )
 
 
 class TestDetectorTransformations(TestCase):
