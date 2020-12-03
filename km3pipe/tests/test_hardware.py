@@ -109,16 +109,16 @@ class TestDetector(TestCase):
         self.assertEqual(3, self.det.n_doms)
 
     def test_parse_doms_maps_each_dom_correctly(self):
-        self.det._parse_doms()
+        self.det._parse()
         expected = {1: (1, 1, 3), 2: (1, 2, 3), 3: (1, 3, 3)}
         self.assertDictEqual(expected, self.det.doms)
 
     def test_dom_ids(self):
-        self.det._parse_doms()
+        self.det._parse()
         self.assertEqual((1, 2, 3), tuple(self.det.dom_ids))
 
     def test_parse_reset_cache(self):
-        self.det._parse_doms()
+        self.det._parse()
         assert not self.det._dom_positions
         assert not self.det._pmt_angles
         assert not self.det._xy_positions
@@ -135,12 +135,12 @@ class TestDetector(TestCase):
 
     def test_parse_doms_maps_each_dom_correctly_for_mixed_pmt_ids(self):
         self.det._det_file = EXAMPLE_DETX_MIXED_IDS
-        self.det._parse_doms()
+        self.det._parse()
         expected = {8: (1, 1, 3), 7: (1, 2, 3), 6: (1, 3, 3)}
         self.assertDictEqual(expected, self.det.doms)
 
     def test_dom_positions(self):
-        self.det._parse_doms()
+        self.det._parse()
         assert np.allclose(
             [1.49992331, 1.51893187, 1.44185513], self.det.dom_positions[1]
         )
@@ -152,16 +152,16 @@ class TestDetector(TestCase):
         )
 
     def test_xy_positions(self):
-        self.det._parse_doms()
+        self.det._parse()
         assert len(self.det.xy_positions) == 1
         assert np.allclose([1.49992331, 1.51893187], self.det.xy_positions[0])
 
     def test_correct_number_of_pmts(self):
-        self.det._parse_doms()
+        self.det._parse()
         assert 9 == len(self.det.pmts)
 
     def test_pmt_attributes(self):
-        self.det._parse_doms()
+        self.det._parse()
         assert (1, 2, 3, 4, 5, 6, 7, 8, 9) == tuple(self.det.pmts.pmt_id)
         assert np.allclose(
             [1.1, 1.4, 1.7, 2.1, 2.4, 2.7, 3.1, 3.4, 3.7], self.det.pmts.pos_x
@@ -170,18 +170,18 @@ class TestDetector(TestCase):
         assert np.allclose((0.1, 0.2, -1.3), self.det.pmts.dir[8])
 
     def test_pmt_index_by_omkey(self):
-        self.det._parse_doms()
+        self.det._parse()
         assert 5 == self.det._pmt_index_by_omkey[(1, 2, 2)]
         assert 0 == self.det._pmt_index_by_omkey[(1, 1, 0)]
         assert 4 == self.det._pmt_index_by_omkey[(1, 2, 1)]
         assert 1 == self.det._pmt_index_by_omkey[(1, 1, 1)]
 
     def test_pmt_index_by_pmt_id(self):
-        self.det._parse_doms()
+        self.det._parse()
         assert 0 == self.det._pmt_index_by_pmt_id[1]
 
     def test_pmt_with_id_returns_correct_omkeys(self):
-        self.det._parse_doms()
+        self.det._parse()
         pmt = self.det.pmt_with_id(1)
         assert (1, 1, 0) == (pmt.du, pmt.floor, pmt.channel_id)
         pmt = self.det.pmt_with_id(5)
@@ -189,25 +189,25 @@ class TestDetector(TestCase):
 
     def test_pmt_with_id_returns_correct_omkeys_with_mixed_pmt_ids(self):
         self.det._det_file = EXAMPLE_DETX_MIXED_IDS
-        self.det._parse_doms()
+        self.det._parse()
         pmt = self.det.pmt_with_id(73)
         assert (1, 2, 1) == (pmt.du, pmt.floor, pmt.channel_id)
         pmt = self.det.pmt_with_id(81)
         assert (1, 1, 1) == (pmt.du, pmt.floor, pmt.channel_id)
 
     def test_pmt_with_id_raises_exception_for_invalid_id(self):
-        self.det._parse_doms()
+        self.det._parse()
         with self.assertRaises(KeyError):
             self.det.pmt_with_id(100)
 
     def test_get_pmt(self):
         self.det._det_file = EXAMPLE_DETX_MIXED_IDS
-        self.det._parse_doms()
+        self.det._parse()
         pmt = self.det.get_pmt(7, 2)
         assert (1, 2, 2) == (pmt.du, pmt.floor, pmt.channel_id)
 
     def test_xy_pos(self):
-        self.det._parse_doms()
+        self.det._parse()
         xy = self.det.xy_positions
         assert xy is not None
 
@@ -233,8 +233,7 @@ class TestDetector(TestCase):
 
         self.det = Detector()
         self.det._det_file = detx_fob
-        self.det._parse_header()
-        self.det._parse_doms()
+        self.det._parse()
         assert detx_string == self.det.ascii
 
     def test_ascii_with_mixed_dom_ids(self):
@@ -259,8 +258,7 @@ class TestDetector(TestCase):
 
         self.det = Detector()
         self.det._det_file = detx_fobj
-        self.det._parse_header()
-        self.det._parse_doms()
+        self.det._parse()
         assert detx_string == self.det.ascii
 
     def test_init_from_string(self):
@@ -290,7 +288,7 @@ class TestDetector(TestCase):
         assert 2 == det.n_dus
         assert 6 == det.n_doms
         assert 3 == det.n_pmts_per_dom
-        assert "v1" == det.version
+        assert 1 == det.version
         self.assertListEqual([1.1, 1.2, 1.3], list(det.pmts.pos[0]))
         self.assertListEqual([3.4, 3.5, 3.6], list(det.pmts.pos[7]))
         self.assertListEqual([23.4, 23.5, 23.6], list(det.pmts.pos[16]))
@@ -312,7 +310,7 @@ class TestDetector(TestCase):
         assert -2425.0 == det.utm_info.z
         assert 1500000000.1 == det.valid_from
         assert 9999999999.0 == det.valid_until
-        assert "v2" == det.version
+        assert 2 == det.version
         self.assertListEqual([1.1, 1.2, 1.3], list(det.pmts.pos[0]))
         self.assertListEqual([3.4, 3.5, 3.6], list(det.pmts.pos[7]))
         self.assertListEqual([23.4, 23.5, 23.6], list(det.pmts.pos[16]))
@@ -334,7 +332,7 @@ class TestDetector(TestCase):
         assert -2425.0 == det.utm_info.z
         assert 1500000000.1 == det.valid_from
         assert 9999999999.0 == det.valid_until
-        assert "v3" == det.version
+        assert 3 == det.version
         self.assertListEqual([1.1, 1.2, 1.3], list(det.pmts.pos[0]))
         self.assertListEqual([3.4, 3.5, 3.6], list(det.pmts.pos[7]))
         self.assertListEqual([23.4, 23.5, 23.6], list(det.pmts.pos[16]))
@@ -355,7 +353,7 @@ class TestDetector(TestCase):
         assert -2425.0 == det.utm_info.z
         assert 1500000000.1 == det.valid_from
         assert 9999999999.0 == det.valid_until
-        assert "v3" == det.version
+        assert 3 == det.version
         self.assertListEqual([1.1, 1.2, 1.3], list(det.pmts.pos[0]))
         self.assertListEqual([3.4, 3.5, 3.6], list(det.pmts.pos[7]))
         self.assertListEqual([23.4, 23.5, 23.6], list(det.pmts.pos[16]))
@@ -384,22 +382,31 @@ class TestDetector(TestCase):
         with open(data_path("detx/detx_v3.detx"), "r") as fobj:
             assert fobj.read() == det.ascii
 
+    def test_detx_v4(self):
+        det = Detector(filename=data_path("detx/detx_v4.detx"))
+
+
+class TestDetectorTransformations(TestCase):
+    def setUp(self):
+        self.det = Detector()
+        self.det._det_file = EXAMPLE_DETX
+
     def test_translate_detector(self):
-        self.det._parse_doms()
+        self.det._parse()
         t_vec = np.array([1, 2, 3])
         orig_pos = self.det.pmts.pos.copy()
         self.det.translate_detector(t_vec)
         assert np.allclose(orig_pos + t_vec, self.det.pmts.pos)
 
     def test_translate_detector_updates_xy_positions(self):
-        self.det._parse_doms()
+        self.det._parse()
         t_vec = np.array([1, 2, 3])
         orig_xy_pos = self.det.xy_positions.copy()
         self.det.translate_detector(t_vec)
         assert np.allclose(orig_xy_pos + t_vec[:2], self.det.xy_positions)
 
     def test_translate_detector_updates_dom_positions(self):
-        self.det._parse_doms()
+        self.det._parse()
         t_vec = np.array([1, 2, 3])
         orig_dom_pos = deepcopy(self.det.dom_positions)
         self.det.translate_detector(t_vec)
@@ -409,7 +416,7 @@ class TestDetector(TestCase):
     def test_rotate_dom_by_yaw(self):
         det = Detector()
         det._det_file = EXAMPLE_DETX_RADIAL
-        det._parse_doms()
+        det._parse()
         # here, only one PMT is checked
         dom_id = 1
         heading = 23
@@ -428,7 +435,7 @@ class TestDetector(TestCase):
     def test_rotate_dom_set_by_step_by_360_degrees(self):
         det = Detector()
         det._det_file = EXAMPLE_DETX_RADIAL
-        det._parse_doms()
+        det._parse()
         dom_id = 1
         channel_id = 0
         pmt_dir = det.pmts[det.pmts.dom_id == dom_id].dir[channel_id].copy()
@@ -443,7 +450,7 @@ class TestDetector(TestCase):
     def test_rotate_du_by_yaw_step_by_step_360_degrees(self):
         det = Detector()
         det._det_file = EXAMPLE_DETX_RADIAL
-        det._parse_doms()
+        det._parse()
         du = 2
         pmt_dir = det.pmts[det.pmts.du == du].dir.copy()
         pmt_pos = det.pmts[det.pmts.du == du].pos.copy()
@@ -459,7 +466,7 @@ class TestDetector(TestCase):
         assert np.allclose(pmt_pos_other_dus, det.pmts[det.pmts.du != du].pos)
 
     def test_rescale_detector(self):
-        self.det._parse_doms()
+        self.det._parse()
         dom_positions = deepcopy(self.det.dom_positions)
         scale_factor = 2
         self.det.rescale(scale_factor)
@@ -467,7 +474,7 @@ class TestDetector(TestCase):
             assert np.allclose(dom_pos, dom_positions[dom_id] * scale_factor)
 
     def test_dom_table(self):
-        self.det._parse_doms()
+        self.det._parse()
         dt = self.det.dom_table
         assert 3 == len(dt)
         assert np.allclose([1, 2, 3], dt.dom_id)
@@ -480,7 +487,7 @@ class TestDetector(TestCase):
     def test_dom_table_with_another_detx(self):
         det = Detector()
         det._det_file = EXAMPLE_DETX_RADIAL
-        det._parse_doms()
+        det._parse()
 
         dt = det.dom_table
         assert 4 == len(dt)
@@ -494,14 +501,14 @@ class TestDetector(TestCase):
     def test_center_of_mass(self):
         det = Detector()
         det._det_file = EXAMPLE_DETX
-        det._parse_doms()
+        det._parse()
 
         assert np.allclose([2.4, 2.5, 2.6], det.com)
 
     def test_center_of_mass_with_another_detx(self):
         det = Detector()
         det._det_file = EXAMPLE_DETX_RADIAL
-        det._parse_doms()
+        det._parse()
 
         assert np.allclose([-0.2, 0.0, 0.2], det.com)
 
