@@ -161,6 +161,7 @@ class RePump(Module):
     suited to test online processing pipelines with offline files.
 
     """
+
     def configure(self):
         self.filename = self.require("filename")
         self.fobj = open(self.filename, "rb")
