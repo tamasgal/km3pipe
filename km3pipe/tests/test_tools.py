@@ -61,6 +61,14 @@ class TestTools(TestCase):
         self.assertEqual(3, c)
         self.assertTupleEqual((4, 5), rest)
 
+    def test_unpack_nfirst_callback(self):
+        a_string = "12345"
+        a, b, c, rest = unpack_nfirst(a_string, 3, callback=int)
+        self.assertEqual(1, a)
+        self.assertEqual(2, b)
+        self.assertEqual(3, c)
+        self.assertTupleEqual(("4", "5"), rest)
+
     def test_split_splits_strings(self):
         string = "1 2 3 4"
         parts = split(string)
