@@ -4,6 +4,11 @@ Unreleased changes
 Version 9
 ---------
 
+9.1.0 / 2020-12-03
+~~~~~~~~~~~~~~~~~~
+* DETX v4 support added
+* Minor bugfixes in the ``ztplot`` command line tool
+
 9.0.0 / 2020-11-11
 ~~~~~~~~~~~~~~~~~~
 * The ``h5extract`` tool replaces ``tohdf5``
