@@ -2,7 +2,7 @@
 from collections import defaultdict
 
 import numpy as np
-import awkward1 as ak
+import awkward as ak
 
 import km3pipe as kp
 import km3io
