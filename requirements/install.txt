@@ -1,4 +1,4 @@
-awkward
+awkward>=1
 docopt
 h5py
 km3db>=0.4.2
