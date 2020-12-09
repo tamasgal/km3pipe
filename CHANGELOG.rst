@@ -4,6 +4,10 @@ Unreleased changes
 Version 9
 ---------
 
+9.1.1 / 2020-12-09
+~~~~~~~~~~~~~~~~~~
+* Fixed imports for awkward
+
 9.1.0 / 2020-12-03
 ~~~~~~~~~~~~~~~~~~
 * DETX v4 support added
