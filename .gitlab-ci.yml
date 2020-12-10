@@ -35,6 +35,7 @@ stages:
   virtualenv venv
   source venv/bin/activate
   make install-dev
+  pip freeze
 
 .junit_template: &junit_definition
     artifacts:
