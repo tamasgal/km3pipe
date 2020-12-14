@@ -86,7 +86,7 @@ class TimesliceParser(Module):
         if not self.legacy:
             version = unpack("<h", data.read(2))[0]
             if version != 1:
-                raise NotImplementedError(
+                raise ValueError(
                     "Unsupported DAQTimeslice version ({}) or legacy DAQ. "
                     "Make sure Jpp v13+ is used or pass 'legacy=True' "
                     "to {}.".format(version, self.__class__.__name__)
@@ -300,21 +300,27 @@ class DAQProcessor(Module):
         tag = str(blob["CHPrefix"].tag)
         data = blob["CHData"]
 
+        processor = None
+
         if tag == "IO_EVT":
-            try:
-                self.process_event(data, blob)
-            except struct.error:
-                self.log.error("Corrupt event data received. Skipping...")
+            processor = self.process_event
         if tag == "IO_SUM":
-            try:
-                self.process_summaryslice(data, blob)
-            except struct.error:
-                self.log.error("Corrupt summary slice data received. " "Skipping...")
+            processor = self.process_summaryslice
         if tag == "IO_OLINE":
-            try:
-                self.process_online_reco(data, blob)
-            except struct.error:
-                self.log.error("Corrupt online reco data received. Skipping...")
+            processor = self.process_online_reco
+
+        if processor is None:
+            self.log.error("Unsupported tag: %s", tag)
+            return
+
+        try:
+            processor(data, blob)
+        except (struct.error, ValueError) as e:
+            self.log.error(
+                "Corrupt online reco data received. Skipping...\n"
+                "Error: %s", e
+            )
+            return
 
         return blob
 
@@ -547,7 +553,7 @@ class DAQSummaryslice(object):
         if not legacy:
             version = unpack("<h", file_obj.read(2))[0]
             if version != 6:
-                raise NotImplementedError(
+                raise ValueError(
                     "Unsupported {} version ({}) or legacy DAQ. "
                     "Make sure Jpp v13+ is used or pass 'legacy=True' "
                     "to the init.".format(self.__class__.__name__, version)
@@ -617,7 +623,7 @@ class DAQEvent(object):
         if not legacy:
             version = unpack("<h", file_obj.read(2))[0]
             if version != 4:
-                raise NotImplementedError(
+                raise ValueError(
                     "Unsupported {} version ({}) or legacy DAQ. "
                     "Make sure Jpp v13+ is used or pass 'legacy=True' "
                     "to the init.".format(self.__class__.__name__, version)
