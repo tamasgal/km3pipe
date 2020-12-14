@@ -131,7 +131,7 @@ class MCTracksTabulator(kp.Module):
             "pos_z": mc_tracks.pos_z,
             "energy": mc_tracks.E,
             "time": mc_tracks.t,
-            "type": mc_tracks.type,
+            "pdgid": mc_tracks.pdgid,
             "id": mc_tracks.id,
             "length": mc_tracks.len,
         }
@@ -266,5 +266,6 @@ class EventInfoTabulator(kp.Module):
 
 class OfflineHeaderTabulator(kp.Module):
     def process(self, blob):
-        blob["RawHeader"] = kp.io.hdf5.header2table(blob["header"])
+        if blob["header"]:
+            blob["RawHeader"] = kp.io.hdf5.header2table(blob["header"])
         return blob

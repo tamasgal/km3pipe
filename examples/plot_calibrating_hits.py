@@ -47,14 +47,15 @@ calib = kp.calib.Calibration(filename=data_path("detx/km3net_offline.detx"))
 hits = f.events[5].hits
 
 #######################
-# The positions and directions show the default values (0) and are not
-# calibrated. Here are the values of the first few hits:
-n = 7
-for attr in [f"{k}_{q}" for k in ("pos", "dir") for q in "xzy"]:
-    print(attr, hits[attr][:n])
+# The positions (pos_x, pos_y, pos_z) and directions (dir_x, dir_y, dir_z) are
+# not available for uncalibrated hits, in contrast to aanet where each field
+# is present and initialised to some magic value (e.g. 0). km3io hides all
+# those fields and do not occupy additional memory for those.
 
 #######################
 # Here are the uncalibrated times:
+
+n = 7  # just an arbitrary number to limit the output
 uncalibrated_times = hits.t
 print(uncalibrated_times[:n])
 
@@ -78,7 +79,7 @@ print(calibrated_hits.dtype)
 # is the calibrated one:
 
 for attr in [f"{k}_{q}" for k in ("pos", "dir") for q in "xzy"]:
-    print(attr, calibrated_hits[attr][:n])
+    print(attr, getattr(calibrated_hits, attr)[:n])
 
 print(calibrated_hits.time[:n])
 

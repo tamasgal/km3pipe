@@ -9,6 +9,7 @@ import km3io
 import numba
 import numpy as np
 
+import awkward as ak
 from numba import njit
 
 from thepipe import Module
@@ -50,7 +51,7 @@ def cherenkov(calib_hits, track):
             - dir_x.
             - dir_y.
             - dir_z.
-    track : km3io.offline.OfflineBranch or a DataFrame or a numpy recarray or a km3pipe Table or a dict.
+    track : awkward.Array, DataFrame, numpy.recarray, km3pipe.Table or a dict.
         One track with the following parameters:
             - pos_x.
             - pos_y.
@@ -97,7 +98,7 @@ def cherenkov(calib_hits, track):
         )
         track_t = track["t"][0]
 
-    if isinstance(track, km3io.offline.OfflineBranch):
+    if isinstance(track, ak.Array):
         track_pos = np.array([track.pos_x, track.pos_y, track.pos_z]).T
         track_dir = np.array([track.dir_x, track.dir_y, track.dir_z]).T
         track_t = track.t
@@ -177,7 +178,7 @@ def get_closest(track, du_pos):
 
     Parameters
     ----------
-    track : km3io.offline.OfflineBranch or a DataFrame or a numpy recarray or a km3pipe Table or a dict.
+    track : awkward.Array, DataFrame, numpy.recarray, km3pipe.Table or a dict.
         One track with the following parameters:
             - pos_x.
             - pos_y.
@@ -218,7 +219,7 @@ def get_closest(track, du_pos):
             3,
         )
 
-    if isinstance(track, km3io.offline.OfflineBranch):
+    if isinstance(track, ak.Array):
         track_pos = np.array([track.pos_x, track.pos_y, track.pos_z])
         track_dir = np.array([track.dir_x, track.dir_y, track.dir_z])
 

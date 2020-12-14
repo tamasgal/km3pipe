@@ -20,6 +20,7 @@ Options:
     --reco-tracks               Reconstructed tracks.
     --provenance-file=FILENAME  The file to store the provenance information.
     --timeit                    Print detailed pipeline performance statistics.
+    --step-size=N               Number of events to cache or amount of data [default: 2000].
     -h --help                   Show this screen.
     --version                   Show the version.
 
@@ -33,6 +34,7 @@ def main():
     from docopt import docopt
 
     args = docopt(__doc__, version=kp.version)
+    step_size = int(args["--step-size"])
 
     default_flags = (
         "--offline-header",
@@ -58,7 +60,7 @@ def main():
     Provenance().outfile = provfile
 
     pipe = kp.Pipeline(timeit=args["--timeit"])
-    pipe.attach(kp.io.OfflinePump, filename=args["FILENAME"])
+    pipe.attach(kp.io.OfflinePump, filename=args["FILENAME"], step_size=step_size)
     pipe.attach(km.StatusBar, every=100)
     pipe.attach(km.common.MemoryObserver, every=500)
     if args["--offline-header"]:
