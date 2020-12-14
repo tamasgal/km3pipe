@@ -7,6 +7,7 @@ import shutil
 import sys
 import tempfile
 
+import km3io
 from thepipe import Module, Pipeline
 import km3pipe as kp
 from km3pipe.dataclasses import Table
@@ -124,6 +125,18 @@ class TestCalibration(TestCase):
 
         with self.assertRaises(KeyError):
             calib.apply(hits, correct_slewing=False)
+
+    def test_apply_to_hits_from_km3io(self):
+        calib = Calibration(filename=data_path("detx/km3net_offline.detx"))
+        hits = km3io.OfflineReader(data_path("offline/km3net_offline.root"))[0].hits
+
+        chits = calib.apply(hits)
+        assert 176 == len(chits.t0)
+        assert np.allclose([207747.825, 207745.656, 207743.836], chits.t0.tolist()[:3])
+
+        chits = calib.apply(hits[:3])
+        assert 3 == len(chits.t0)
+        assert np.allclose([207747.825, 207745.656, 207743.836], chits.t0.tolist()[:3])
 
     def test_time_slewing_correction(self):
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
