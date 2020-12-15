@@ -4,6 +4,11 @@ Unreleased changes
 Version 9
 ---------
 
+9.1.2 / 2020-12-15
+~~~~~~~~~~~~~~~~~~
+* km3io v0.19 and uproot4 compatibility
+* Small bugfixes
+
 9.1.1 / 2020-12-09
 ~~~~~~~~~~~~~~~~~~
 * Fixed imports for awkward
