@@ -3,6 +3,9 @@ Unreleased changes
 
 Version 9
 ---------
+9.1.3 / 2020-12-16
+~~~~~~~~~~~~~~~~~~
+* Fixed UUID provenance entry for ROOT input files
 
 9.1.2 / 2020-12-15
 ~~~~~~~~~~~~~~~~~~
