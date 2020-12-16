@@ -12,6 +12,7 @@ install:
 install-dev:
 	pip install -e ".[dev]"
 	pip install -e ".[extras]"
+	python -m ipykernel install --user --name="km3pipe-dev"
 
 clean:
 	python setup.py clean --all
