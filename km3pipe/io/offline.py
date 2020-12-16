@@ -20,7 +20,7 @@ class OfflinePump(Module):
         self.blobs = self._blob_generator()
 
         Provenance().record_input(
-            self._filename, uuid=self._reader.uuid, comment="OfflinePump input"
+            self._filename, uuid=str(self._reader.uuid), comment="OfflinePump input"
         )
 
         self.expose(self.header, "offline_header")
