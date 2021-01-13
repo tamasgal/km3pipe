@@ -70,7 +70,7 @@ JOB_TEMPLATES = {
         #PBS -M {email} -m a
         #PBS -o {log_path}/{job_name}{task_name}.out.log
         #PBS -e {log_path}/{job_name}{task_name}.err.log
-        #PBS -l walltime={walltime}
+        #PBS -l nodes={nodes}:ppn={ppn}{node_type} walltime={walltime}
 
         echo "========================================================"
         echo "Job started on" $(date)
@@ -123,6 +123,9 @@ def gen_job(
     group="km3net",
     platform="cl7",
     walltime="00:10:00",
+    nodes=1,
+    ppn=4,
+    node_type=None,
     cpu=None,
     cluster="in2p3",
     vmem="8G",
@@ -161,6 +164,10 @@ def gen_job(
         task_name = "_$TASK_ID"
     else:
         task_name = ""
+    if node_type is not None:
+        node_type = ":" + str(node_type)
+    else:
+        node_type = ""
     job_string = JOB_TEMPLATES[cluster].format(
         script=script,
         email=email,
@@ -182,6 +189,9 @@ def gen_job(
         platform=platform,
         job_array_option=job_array_option,
         task_name=task_name,
+        nodes=nodes,
+        ppn=ppn,
+        node_type=node_type,
     )
     return job_string
 

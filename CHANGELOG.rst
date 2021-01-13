@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* RRZE HPC options for number of nodes, CPUs and node type added to ``km3pipe.shell.qsub`
 
 Version 9
 ---------
