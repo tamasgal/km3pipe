@@ -70,7 +70,8 @@ JOB_TEMPLATES = {
         #PBS -M {email} -m a
         #PBS -o {log_path}/{job_name}{task_name}.out.log
         #PBS -e {log_path}/{job_name}{task_name}.err.log
-        #PBS -l nodes={nodes}:ppn={ppn}{node_type} walltime={walltime}
+        #PBS -l nodes={nodes}:ppn={ppn}{node_type} 
+        #PBS -l walltime={walltime}
 
         echo "========================================================"
         echo "Job started on" $(date)
