@@ -1,6 +1,7 @@
 Unreleased changes
 ------------------
 * RRZE HPC options for number of nodes, CPUs and node type added to ``km3pipe.shell.qsub`
+* ``km.FilePump`` added which is just a simple pump providing filenames
 
 Version 9
 ---------
