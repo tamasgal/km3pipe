@@ -1,10 +1,13 @@
 Unreleased changes
 ------------------
-* RRZE HPC options for number of nodes, CPUs and node type added to ``km3pipe.shell.qsub`
-* ``km.FilePump`` added which is just a simple pump providing filenames
 
 Version 9
 ---------
+9.2.0 / 2021-01-29
+~~~~~~~~~~~~~~~~~~
+* RRZE HPC options for number of nodes, CPUs and node type added to ``km3pipe.shell.qsub`
+* ``km.FilePump`` added which is just a simple pump providing filenames
+
 9.1.3 / 2020-12-16
 ~~~~~~~~~~~~~~~~~~
 * Fixed UUID provenance entry for ROOT input files
