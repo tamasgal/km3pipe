@@ -18,6 +18,7 @@ from km3modules.common import (
     LocalDBService,
     Observer,
     MultiFilePump,
+    FilePump,
 )
 from km3pipe.testing import TestCase, MagicMock
 from km3pipe.tools import istype
@@ -556,5 +557,31 @@ class TestMultiFilePump(TestCase):
             filenames=filenames,
             max_iterations=max_iterations,
         )
+        pipe.attach(Observer)
+        pipe.drain()
+
+
+class TestFilePump(TestCase):
+    def test_iteration(self):
+        filenames = ["a", "b", "c"]
+
+        super_self = self
+
+        class Observer(kp.Module):
+            def configure(self):
+                self.count = 0
+                self.filenames = []
+
+            def process(self, blob):
+                self.count += 1
+                self.filenames.append(blob["filename"])
+                return blob
+
+            def finish(self):
+                assert self.count == len(filenames)
+                super_self.assertListEqual(filenames, self.filenames)
+
+        pipe = kp.Pipeline()
+        pipe.attach(FilePump, filenames=filenames)
         pipe.attach(Observer)
         pipe.drain()
