@@ -373,13 +373,14 @@ class FilePump(kp.Module):
       The filenames to be iterated over which are put into ``blob["filename"]``
 
     """
+
     def configure(self):
         self.filenames = self.require("filenames")
         self.blobs = self.blob_generator()
 
     def blob_generator(self):
         for filename in self.filenames:
-            yield(kp.Blob({"filename": filename}))
+            yield kp.Blob({"filename": filename})
 
     def process(self, blob):
         blob.update(next(self.blobs))
