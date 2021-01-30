@@ -6,7 +6,6 @@ KM3Pipe setup script.
 """
 import os
 from setuptools import setup
-import sys
 
 import builtins
 
@@ -18,12 +17,6 @@ def read_requirements(kind):
     """Return a list of stripped lines from a file"""
     with open(os.path.join("requirements", kind + ".txt")) as fobj:
         requirements = [l.strip() for l in fobj.readlines()]
-    v = sys.version_info
-    if (v.major, v.minor) < (3, 6):
-        try:
-            requirements.pop(requirements.index("black"))
-        except ValueError:
-            pass
     return requirements
 
 
@@ -47,7 +40,7 @@ setup(
     install_requires=read_requirements("install"),
     extras_require={kind: read_requirements(kind) for kind in ["dev", "extras"]},
     use_scm_version=True,
-    python_requires=">=3.5",
+    python_requires=">=3.6",
     entry_points={
         "console_scripts": [
             "km3pipe=km3pipe.cmd:main",
