@@ -39,20 +39,17 @@ km3pipe.style.use("km3pipe")
 # --------------------------
 # In the following, we will work with one random simulation file with
 # reconstruction information from JGandalf which has been converted
-# from ROOT to HDF5 using the ``tohdf5`` command line tool provided by
+# from ROOT to HDF5 using the ``h5extract`` command line tool provided by
 # ``KM3Pipe``.
 #
 # You can find the documentation here:
-# https://km3py.pages.km3net.de/km3pipe/cmd.html#tohdf
+# https://km3py.pages.km3net.de/km3pipe/cmd.html#h5extract
 
 #####################################################
 # Note for Lyon Users
 # ~~~~~~~~~~~~~~~~~~~
-# If you are working on the Lyon cluster, you can activate the latest KM3Pipe
-# with the following command (put it in your ``~/.bashrc`` to load it
-# automatically in each shell session)::
-#
-#     source $KM3NET_THRONG_DIR/src/python/pyenv.sh
+# If you are working on the Lyon cluster, you just need to load the
+# Python module with ``module load python`` and you are all set.
 
 #####################################################
 # Converting from ROOT to HDF5 (if needed)
@@ -61,20 +58,14 @@ km3pipe.style.use("km3pipe")
 # Choose a file (take e.g. one from /in2p3/km3net/mc/...),
 # load the appropriate Jpp/Aanet version and convert it via::
 #
-#     tohdf5 --aa-format=the_file.root --ignore-hits --skip-header
+#     h5extract /path/to/a/reconstructed/file.root
 #
-# Note that you may have to ``--skip-header`` otherwise you might
-# encounter some segfaults. There is currently a big mess of different
-# versions of libraries in several levels of the MC file processings.
+# You can toggle a few options to include or exclude specific information.
+# By default, everything will be extracted but you might want to skip
+# Example the hit information. Have a look at ``h5extract -h``.
 #
-# The ``--ignore-hits`` will skip the hit information, so the converted file
-# is much smaller (normally around 2-3 MBytes). Skip this option if you want
-# to read the hit information too. The file will still be smaller than the
-# ROOT file (about 1/3).
-#
-# Luckily, a handful people are preparing the HDF5 conversion, so in future
-# you can download them directly, without thinking about which Jpp or Aanet
-# version you need to open them.
+# You might also just pick some of the already converted files from
+# HPSS/iRODS!
 
 #####################################################
 # First Look at the Data
