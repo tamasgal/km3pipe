@@ -1098,6 +1098,7 @@ class TestHDF5Header(TestCase):
             "param_c": {"field_c_1": 23},
             "param_d": {"param_d_0": 1, "param_d_1": 2, "param_d_2": 3},
             "param_e": {"param_e_2": 3, "param_e_0": 1, "param_e_1": 2},
+            # "param+invalid.attribute": {"a": 1, "b": 2, "c": 3}
         }
 
     def test_init(self):
@@ -1109,6 +1110,14 @@ class TestHDF5Header(TestCase):
         assert "2" == header.param_a.field_a_2
         assert "a" == header.param_b.field_b_1
         assert 23 == header.param_c.field_c_1
+
+    def test_header_getitem(self):
+        header = HDF5Header(self.hdict)
+        print(header["param_a"])
+        assert "1" == header["param_a"].field_a_1
+        assert "2" == header["param_a"].field_a_2
+        assert "a" == header["param_b"].field_b_1
+        assert 23 == header["param_c"].field_c_1
 
     def test_header_with_vectors(self):
         header = HDF5Header(self.hdict)
@@ -1162,6 +1171,32 @@ class TestHDF5Header(TestCase):
         self.assertAlmostEqual(1.2, header.foo.a, places=2)
         assert "ab" == header.foo.b
         self.assertAlmostEqual(3.4, header.bar.c, places=2)
+
+    def test_header_from_km3io(self):
+        head = {
+            "a": "1 2 3",
+            "b+c": "4 5 6",
+            "c": "foo",
+            "d": "7",
+            "e+f": "bar",
+        }
+
+        header = HDF5Header.from_km3io(km3io.offline.Header(head))
+
+        assert 1 == header["a"][0]
+        assert 2 == header["a"][1]
+        assert 3 == header["a"][2]
+        assert 1 == header.a[0]
+        assert 2 == header.a[1]
+        assert 3 == header.a[2]
+        assert 4 == header["b+c"][0]
+        assert 5 == header["b+c"][1]
+        assert 6 == header["b+c"][2]
+        assert "foo" == header.c
+        assert "foo" == header["c"]
+        assert 7 == header.d
+        assert 7 == header["d"]
+        assert "bar" == header["e+f"]
 
 
 class TestConvertHeaderDictToTable(TestCase):
