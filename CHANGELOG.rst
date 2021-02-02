@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* Added ``-n N_EVENTS`` option to ``h5extract`` to limit the number of events
+  to extract.
 
 Version 9
 ---------

@@ -10,6 +10,7 @@ Usage:
 
 Options:
     -o OUTFILE                  Output file.
+    -n N_EVENTS                 Number of events to extract.
     --offline-header            The header of an offline file.
     --event-info                General event information.
     --offline-hits              Offline hits.
@@ -78,4 +79,7 @@ def main():
     if args["--reco-tracks"]:
         pipe.attach(km.io.RecoTracksTabulator)
     pipe.attach(kp.io.HDF5Sink, filename=outfile)
-    pipe.drain()
+    if args["-n"] is not None:
+        pipe.drain(int(args["-n"]))
+    else:
+        pipe.drain()
