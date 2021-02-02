@@ -1104,6 +1104,12 @@ class TestHDF5Header(TestCase):
     def test_init(self):
         HDF5Header({})
 
+    def test_header_behaves_like_a_dict(self):
+        h = HDF5Header(self.hdict)
+        self.assertListEqual(list(h.keys()), list(self.hdict.keys()))
+        assert 5 == len(h.items())
+        assert 5 == len(h.values())
+
     def test_header(self):
         header = HDF5Header(self.hdict)
         assert "1" == header.param_a.field_a_1
@@ -1158,8 +1164,10 @@ class TestHDF5Header(TestCase):
         assert 0 == header.coord_origin.z
         self.assertTupleEqual((0, 0, 0), header.coord_origin)
 
-    def test_header_from_hdf5_file_2(self):
+    def test_header_from_hdf5_file_with_invalid_identifier_names_in_header(self):
         header = HDF5Header.from_hdf5(data_path("hdf5/geamon.h5"))
+        assert 1.0 == header["drays+z"][0]
+        assert 68.5 == header["drays+z"][1]
 
     def test_header_from_table_with_bytes(self):
         table = Table(

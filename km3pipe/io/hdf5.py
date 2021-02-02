@@ -96,15 +96,24 @@ class HDF5Header(object):
                 # Create a namedtuple for easier access
                 field_names, field_values = zip(*data.items())
                 sorted_indices = np.argsort(field_names)
-                nt = namedtuple(parameter, [field_names[i] for i in sorted_indices])
+                clsname = "HeaderEntry" if not parameter.isidentifier() else parameter
+                nt = namedtuple(clsname, [field_names[i] for i in sorted_indices])
                 data = nt(*[field_values[i] for i in sorted_indices])
             if parameter.isidentifier():
                 setattr(self, parameter, data)
             self._user_friendly_data[parameter] = data
 
-
     def __getitem__(self, key):
         return self._user_friendly_data[key]
+
+    def keys(self):
+        return self._user_friendly_data.keys()
+
+    def values(self):
+        return self._user_friendly_data.values()
+
+    def items(self):
+        return self._user_friendly_data.items()
 
     @classmethod
     def from_table(cls, table):
