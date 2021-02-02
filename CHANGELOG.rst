@@ -1,10 +1,13 @@
 Unreleased changes
 ------------------
-* Fixes issues when reading converted HDF5 files which contain invalid
-  parameter names in the header
 
 Version 9
 ---------
+
+9.3.1 / 2021-02-02
+~~~~~~~~~~~~~~~~~~
+* Fixes issues when reading converted HDF5 files which contain invalid
+  parameter names in the header
 
 9.3.0 / 2021-02-02
 ~~~~~~~~~~~~~~~~~~
