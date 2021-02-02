@@ -1,10 +1,15 @@
 Unreleased changes
 ------------------
-* Added ``-n N_EVENTS`` option to ``h5extract`` to limit the number of events
-  to extract.
 
 Version 9
 ---------
+
+9.3.0 / 2021-02-02
+~~~~~~~~~~~~~~~~~~
+* Added ``-n N_EVENTS`` option to ``h5extract`` to limit the number of events
+  to extract.
+* Python 3.5 support officially removed.
+
 9.2.0 / 2021-01-29
 ~~~~~~~~~~~~~~~~~~
 * RRZE HPC options for number of nodes, CPUs and node type added to ``km3pipe.shell.qsub`
