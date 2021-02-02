@@ -1,5 +1,5 @@
 black==20.8b1
-km3net-testdata>=0.2.20
+km3net-testdata>=0.2.22
 mock
 numpydoc==0.9.2
 pillow

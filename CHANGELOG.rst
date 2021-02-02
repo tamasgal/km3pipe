@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* Fixes issues when reading converted HDF5 files which contain invalid
+  parameter names in the header
 
 Version 9
 ---------

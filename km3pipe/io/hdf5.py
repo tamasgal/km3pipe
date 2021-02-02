@@ -69,24 +69,51 @@ def check_version(h5file):
 
 
 class HDF5Header(object):
-    """Wrapper class for the `/raw_header` table in KM3HDF5"""
+    """Wrapper class for the `/raw_header` table in KM3HDF5
+
+    Parameters
+    ----------
+    data : dict(str, str/tuple/dict/OrderedDict)
+      The actual header data, consisting of a key and an entry.
+      If possible, the key will be set as a property and the the values will
+      be converted to namedtuples (fields sorted by name to ensure consistency
+      when dictionaries are provided).
+
+    """
 
     def __init__(self, data):
         self._data = data
+        self._user_friendly_data = {}  # namedtuples, if possible
         self._set_attributes()
 
     def _set_attributes(self):
         """Traverse the internal dictionary and set the getters"""
-        for parameter, data in self._data.items():
+        for parameter in list(self._data.keys()):
+            data = self._data[parameter]
             if isinstance(data, dict) or isinstance(data, OrderedDict):
+                if not all(f.isidentifier() for f in data.keys()):
+                    break
+                # Create a namedtuple for easier access
                 field_names, field_values = zip(*data.items())
                 sorted_indices = np.argsort(field_names)
-                attr = namedtuple(parameter, [field_names[i] for i in sorted_indices])
-                setattr(
-                    self, parameter, attr(*[field_values[i] for i in sorted_indices])
-                )
-            else:
+                clsname = "HeaderEntry" if not parameter.isidentifier() else parameter
+                nt = namedtuple(clsname, [field_names[i] for i in sorted_indices])
+                data = nt(*[field_values[i] for i in sorted_indices])
+            if parameter.isidentifier():
                 setattr(self, parameter, data)
+            self._user_friendly_data[parameter] = data
+
+    def __getitem__(self, key):
+        return self._user_friendly_data[key]
+
+    def keys(self):
+        return self._user_friendly_data.keys()
+
+    def values(self):
+        return self._user_friendly_data.values()
+
+    def items(self):
+        return self._user_friendly_data.items()
 
     @classmethod
     def from_table(cls, table):
@@ -115,10 +142,7 @@ class HDF5Header(object):
             raise TypeError(
                 "The given header object is not an instance of km3io.offline.Header"
             )
-        h5header = cls({})
-        for attribute, value in header._data.items():
-            setattr(h5header, attribute, value)
-        return h5header
+        return cls(header._data)
 
     @classmethod
     def from_aanet(cls, table):
