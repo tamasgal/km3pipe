@@ -1158,6 +1158,9 @@ class TestHDF5Header(TestCase):
         assert 0 == header.coord_origin.z
         self.assertTupleEqual((0, 0, 0), header.coord_origin)
 
+    def test_header_from_hdf5_file_2(self):
+        header = HDF5Header.from_hdf5(data_path("hdf5/geamon.h5"))
+
     def test_header_from_table_with_bytes(self):
         table = Table(
             {
