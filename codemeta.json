@@ -158,6 +158,12 @@
                 "@type": "Organization",
                 "name": "Friedrich-Alexander-University Erlangen-Nuremberg, Erlangen Centre for Astroparticle Physics"
             }
+        },
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0003-4096-5934",
+            "givenName": "Vladimir",
+            "familyName": "Kulikovskiy"
         }
     ]
 }
