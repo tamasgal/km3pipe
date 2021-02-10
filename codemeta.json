@@ -1,0 +1,163 @@
+{
+    "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+    "@type": "SoftwareSourceCode",
+    "license": "https://spdx.org/licenses/MIT",
+    "codeRepository": "git+https://git.km3net.de/km3py/km3pipe.git",
+    "contIntegration": "https://git.km3net.de/km3py/km3pipe/-/pipelines",
+    "dateCreated": "2014-09-30",
+    "datePublished": "2014-10-08",
+    "dateModified": "2021-02-02",
+    "downloadUrl": "https://git.km3net.de/km3py/km3pipe",
+    "issueTracker": "https://git.km3net.de/km3py/km3pipe/-/issues",
+    "name": "km3pipe",
+    "version": "9.3.1",
+    "description": "Analysis framework for KM3NeT related data, heavily based on NumPy.",
+    "applicationCategory": "Astroparticle physics",
+    "developmentStatus": "active",
+    "referencePublication": "https://doi.org/10.5281/zenodo.808829",
+    "keywords": [
+        "pipeline",
+        "analysis",
+        "astroparticle physics",
+        "km3net"
+    ],
+    "programmingLanguage": [
+        "Python 3"
+    ],
+    "operatingSystem": [
+        "Linux",
+        "macOS",
+        "Windows"
+    ],
+    "relatedLink": [
+        "https://km3py.pages.km3net.de/km3pipe/"
+    ],
+    "author": [
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0001-7821-8673",
+            "givenName": "Tamas",
+            "familyName": "Gal",
+            "email": "tamas.gal@fau.de",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Friedrich-Alexander-University Erlangen-Nuremberg, Erlangen Centre for Astroparticle Physics"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Moritz",
+            "familyName": "Lotze",
+            "email": "mlotze@km3net.de"
+        }
+    ],
+    "contributor": [
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0003-3722-086X",
+            "givenName": "Johannes",
+            "familyName": "Schumann",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Friedrich-Alexander-University Erlangen-Nuremberg, Erlangen Centre for Astroparticle Physics"
+            }
+        },
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0001-9278-5906",
+            "givenName": "Piotr",
+            "familyName": "Kalaczynski"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Jonas",
+            "familyName": "Reubelt",
+            "email": "jreubelt@km3net.de",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Friedrich-Alexander-University Erlangen-Nuremberg, Erlangen Centre for Astroparticle Physics"
+            }
+        },
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0003-3613-488X",
+            "givenName": "Michael",
+            "familyName": "Moser",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Friedrich-Alexander-University Erlangen-Nuremberg, Erlangen Centre for Astroparticle Physics"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Thomas",
+            "familyName": "Heid",
+            "email": "theid@km3net.de",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Friedrich-Alexander-University Erlangen-Nuremberg, Erlangen Centre for Astroparticle Physics"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Alba",
+            "familyName": "Domi",
+            "email": "adomi@km3net.de"
+        },
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0001-9596-7078",
+            "givenName": "Agustin",
+            "familyName": "Sanchez Losa"
+        },
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0002-5593-2580",
+            "givenName": "Zineb",
+            "familyName": "Aly"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Jordan",
+            "familyName": "Seneca"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Nicole",
+            "familyName": "Geisselbrecht",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Friedrich-Alexander-University Erlangen-Nuremberg, Erlangen Centre for Astroparticle Physics"
+            }
+        },
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0001-6721-4300",
+            "givenName": "Javier",
+            "familyName": "Barrios Marti"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Valentin",
+            "familyName": "Pestel"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Jannik ",
+            "familyName": "Hofestaedt",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Friedrich-Alexander-University Erlangen-Nuremberg, Erlangen Centre for Astroparticle Physics"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Matthias",
+            "familyName": "Bissinger",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Friedrich-Alexander-University Erlangen-Nuremberg, Erlangen Centre for Astroparticle Physics"
+            }
+        }
+    ]
+}
