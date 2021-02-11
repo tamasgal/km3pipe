@@ -92,14 +92,24 @@ event_info = pd.read_hdf(filepath, "/event_info")
 print(event_info.head(5))
 
 #####################################################
+# You can easily inspect the columns/fields of a ``Pandas.Dataframe`` with
+# the ``.dtypes`` attribute:
+
+print(event_info.dtypes)
+
+#####################################################
+# And access the data either by the property syntax (if it's a valid Python
+# identifier) or the dictionary syntax, for example to access the neutrino
+# weights:
+
+print(event_info.weight_w2)     # property syntax
+print(event_info["weight_w2"])  # dictionary syntax
+
+
+#####################################################
 # Next, we will read out the MC tracks which are stored under ``/mc_tracks``.
 
 tracks = pd.read_hdf(filepath, "/mc_tracks")
-
-#####################################################
-# also read event info, for things like weights
-
-info = pd.read_hdf(filepath, "/event_info")
 
 #####################################################
 # It has a similar structure, but now you can have multiple rows which belong
@@ -254,7 +264,7 @@ from scipy.stats import cauchy, norm  # noqa
 residuals = gandalfs.zenith - primaries.zenith
 cut = (gandalfs["lambda"] < l) & (np.abs(residuals) < 2 * np.pi)
 residuals = residuals[cut]
-info[cut]
+event_info[cut]
 
 # convert rad -> deg
 residuals = residuals * 180 / np.pi
