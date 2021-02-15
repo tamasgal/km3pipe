@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 9
 ---------
+9.3.3 / 2021-02-15
+~~~~~~~~~~~~~~~~~~
+* Updated containerisation
+
 9.3.2 / 2021-02-15
 ~~~~~~~~~~~~~~~~~~
 * km3db>=0.5.1 is now required which fixes an issue when IPv6 was used,
