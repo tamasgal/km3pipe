@@ -3,6 +3,11 @@ Unreleased changes
 
 Version 9
 ---------
+9.3.4 / 2021-02-15
+~~~~~~~~~~~~~~~~~~
+* ``kp.physics.cherenkov`` now works with ``awkward.Records`` which are e.g.
+  returned from km3io when iterating over events
+
 9.3.3 / 2021-02-15
 ~~~~~~~~~~~~~~~~~~
 * Updated containerisation
