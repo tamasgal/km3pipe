@@ -133,17 +133,8 @@ docker:
     - docker push $CONTAINER_TEST_IMAGE
   tags:
     - docker
-  # only:
-  #   - tags
-
-singularity:
-  image: docker.km3net.de/base/singularity:3.6.2
-  stage: singularity
-  script:
-    - singularity build $SINGULARITY_RELEASE_IMAGE docker://$CONTAINER_TEST_IMAGE
-    - ls -al
-  # only:
-  #   - tags
+  only:
+    - tags
 
 pypi:
     image: docker.km3net.de/base/python:3
@@ -157,7 +148,7 @@ pypi:
     only:
         - tags
 
-release-image:
+release-docker:
   image: docker:stable
   services:
     - docker:dind
@@ -172,3 +163,16 @@ release-image:
     - docker
   only:
     - tags
+
+release-singularity:
+  image: docker.km3net.de/base/singularity:3.6.2
+  stage: release
+  script:
+    - singularity build $SINGULARITY_RELEASE_IMAGE docker://$CONTAINER_TEST_IMAGE
+    - du -sh $SINGULARITY_RELEASE_IMAGE
+    - mkdir -p ~/.ssh && ssh-keyscan -H -t rsa $KM3NET_SFTP_HOST  >> ~/.ssh/known_hosts
+    - apt install -q lftp
+    - lftp -u $KM3NET_SFTP_USER,$KM3NET_SFTP_PASSWORD sftp://$KM3NET_SFTP_HOST -e "set ssl:verify-certificate no; cd singularity/; put $SINGULARITY_RELEASE_IMAGE; bye"
+  only:
+    - tags
+
