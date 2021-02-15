@@ -9,6 +9,7 @@ variables:
   CONTAINER_TEST_IMAGE: docker.km3net.de/test/km3pipe:$CI_COMMIT_REF_SLUG
   CONTAINER_RELEASE_IMAGE: docker.km3net.de/km3pipe:$CI_COMMIT_TAG
   CONTAINER_LATEST_IMAGE: docker.km3net.de/km3pipe:latest
+  SINGULARITY_RELEASE_IMAGE: km3pipe_${CI_COMMIT_TAG}.sif
 
 
 # Pip's cache doesn't store the python packages
@@ -27,6 +28,7 @@ stages:
   - coverage
   - doc
   - docker
+  - singularity
   - release
 
 .virtualenv_template: &virtualenv_definition |
@@ -131,8 +133,17 @@ docker:
     - docker push $CONTAINER_TEST_IMAGE
   tags:
     - docker
-  only:
-    - tags
+  # only:
+  #   - tags
+
+singularity:
+  image: docker.km3net.de/base/singularity:3.6.2
+  stage: singularity
+  script:
+    - singularity build $SINGULARITY_RELEASE_IMAGE docker://$CONTAINER_TEST_IMAGE
+    - ls -al
+  # only:
+  #   - tags
 
 pypi:
     image: docker.km3net.de/base/python:3
