@@ -1,10 +1,12 @@
 Unreleased changes
 ------------------
-* km3db>=0.5.1 is now required which fixes an issue when IPv6 was used,
-  resulting in a >2 minute lag each time the database is accessed
 
 Version 9
 ---------
+9.3.2 / 2021-02-15
+~~~~~~~~~~~~~~~~~~
+* km3db>=0.5.1 is now required which fixes an issue when IPv6 was used,
+  resulting in a >2 minute lag each time the database is accessed
 
 9.3.1 / 2021-02-02
 ~~~~~~~~~~~~~~~~~~
