@@ -37,9 +37,6 @@ def run_pipeline(args):
 
     def single_muon_filter(blob):
         """Only let events pass with exactly one muon"""
-        import pdb
-
-        pdb.set_trace()
         if blob["event"].n_mc_tracks == 1:
             return blob
 
