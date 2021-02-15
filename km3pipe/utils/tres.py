@@ -19,6 +19,7 @@ Options:
 
 """
 
+
 def run_pipeline(args):
     import km3pipe as kp
     import km3modules as km
@@ -36,16 +37,16 @@ def run_pipeline(args):
 
     def single_muon_filter(blob):
         """Only let events pass with exactly one muon"""
-        import pdb; pdb.set_trace()
+        import pdb
+
+        pdb.set_trace()
         if blob["event"].n_mc_tracks == 1:
             return blob
-
 
     def reco_filter(blob):
         """Filter out events without reco tracks"""
         if blob["event"].n_tracks > 0:
             return blob
-
 
     class TimeResidualsCalculator(kp.Module):
         def process(self, blob):
@@ -55,7 +56,11 @@ def run_pipeline(args):
             bt = km3io.tools.best_jmuon(event.tracks)
             cherenkov_params = kp.physics.cherenkov(chits, bt)
 
-            t_res = kp.NDArray(chits.time - cherenkov_params["t_photon"], h5loc="/t_res")
+            t_res = kp.NDArray(
+                chits.time - cherenkov_params["t_photon"],
+                h5loc="/t_res",
+                name="Cherenkov hit time residuals",
+            )
             blob["TRes"] = t_res
 
             return blob
@@ -70,6 +75,7 @@ def run_pipeline(args):
     pipe.attach(km.Keep, keys=["TRes"])
     pipe.attach(kp.io.HDF5Sink, filename=outfile)
     pipe.drain()
+
 
 if __name__ == "__main__":
 
