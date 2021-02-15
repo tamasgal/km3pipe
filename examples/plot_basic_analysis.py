@@ -102,7 +102,7 @@ print(event_info.dtypes)
 # identifier) or the dictionary syntax, for example to access the neutrino
 # weights:
 
-print(event_info.weight_w2)     # property syntax
+print(event_info.weight_w2)  # property syntax
 print(event_info["weight_w2"])  # dictionary syntax
 
 
