@@ -1,3 +1,5 @@
 ipykernel
 pandas
 scipy>=1.3.1
+km3astro
+km3flux
