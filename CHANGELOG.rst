@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 9
 ---------
+9.4.0 / 2021-02-16
+~~~~~~~~~~~~~~~~~~
+* Added the CLI ``tres`` to extract hit time residuals from reconstructed files.
+
 9.3.4 / 2021-02-15
 ~~~~~~~~~~~~~~~~~~
 * ``kp.physics.cherenkov`` now works with ``awkward.Records`` which are e.g.

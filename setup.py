@@ -58,6 +58,7 @@ setup(
             "qrunprocessor=km3pipe.utils.qrunprocessor:main",
             "qrunqaqc=km3pipe.utils.qrunqaqc:main",
             "daqsample=km3pipe.utils.daqsample:main",
+            "tres=km3pipe.utils.tres:main",
         ],
     },
     classifiers=[
