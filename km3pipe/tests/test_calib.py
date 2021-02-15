@@ -138,6 +138,16 @@ class TestCalibration(TestCase):
         assert 3 == len(chits.t0)
         assert np.allclose([207747.825, 207745.656, 207743.836], chits.t0.tolist()[:3])
 
+    def test_apply_to_hits_from_km3io_iterator(self):
+        calib = Calibration(filename=data_path("detx/km3net_offline.detx"))
+        f = km3io.OfflineReader(data_path("offline/km3net_offline.root"))
+
+        for event in f:
+            chits = calib.apply(event.hits)
+            assert 176 == len(chits.t0)
+            assert np.allclose([207747.825, 207745.656, 207743.836], chits.t0.tolist()[:3])
+            break
+
     def test_time_slewing_correction(self):
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
 
