@@ -59,7 +59,7 @@ def run_pipeline(args):
             t_res = kp.NDArray(
                 chits.time - cherenkov_params["t_photon"],
                 h5loc="/t_res",
-                name="Cherenkov hit time residuals",
+                title="Cherenkov hit time residuals",
             )
             blob["TRes"] = t_res
 
@@ -77,8 +77,13 @@ def run_pipeline(args):
     pipe.drain()
 
 
-if __name__ == "__main__":
+def main():
 
     from docopt import docopt
 
     run_pipeline(docopt(__doc__))
+
+
+if __name__ == "__main__":
+
+    main()
