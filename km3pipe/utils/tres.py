@@ -28,10 +28,10 @@ def run_pipeline(args):
     detx = args["DETX"]
     fname = args["FILENAME"]
 
-    if args["-o"] is not None:
-        outfile = args["-o"]
-    else:
+    if args["-o"] is None:
         outfile = fname + ".tres.h5"
+    else:
+        outfile = args["-o"]
 
     calib = kp.calib.Calibration(filename=detx)
 
@@ -71,7 +71,10 @@ def run_pipeline(args):
     pipe.attach(TimeResidualsCalculator)
     pipe.attach(km.Keep, keys=["TRes"])
     pipe.attach(kp.io.HDF5Sink, filename=outfile)
-    pipe.drain()
+    if args["-n"] is not None:
+        pipe.drain(int(args["-n"]))
+    else:
+        pipe.drain()
 
 
 def main():
