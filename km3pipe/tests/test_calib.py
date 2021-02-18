@@ -145,7 +145,9 @@ class TestCalibration(TestCase):
         for event in f:
             chits = calib.apply(event.hits)
             assert 176 == len(chits.t0)
-            assert np.allclose([207747.825, 207745.656, 207743.836], chits.t0.tolist()[:3])
+            assert np.allclose(
+                [207747.825, 207745.656, 207743.836], chits.t0.tolist()[:3]
+            )
             break
 
     def test_time_slewing_correction(self):

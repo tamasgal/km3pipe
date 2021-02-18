@@ -181,6 +181,7 @@ class TestGetCherenkov(TestCase):
         self.assertAlmostEqual(arr["dir_y_photon"][0], -0.8001372907490844)
         self.assertAlmostEqual(arr["dir_z_photon"][0], -0.3853612055096594)
 
+
 class TestGetClosest(TestCase):
     def setUp(self):
         self.track = {
