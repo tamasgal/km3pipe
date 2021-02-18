@@ -5,7 +5,7 @@ A tool to calculate and extract Cherenkov hit time residuals from reconstruced
 events in offline ROOT files (currently only the JMuon chain).
 
 Usage:
-    tres [options] DETX FILENAME
+    tres [options] FILENAME
     tres (-h | --help)
     tres --version
 
@@ -13,6 +13,9 @@ Options:
     -o OUTFILE          Output file.
     --single-muon-only  Filter out single muon events
                         (only possible for RBR atmospheric muons - MUPAGE)
+    -d DETX             Use a detector file to calibrate hits (not needed for
+                        offline files created with km3net-dataformat
+                        version 2+).
     -n N_EVENTS         Number of events to extract.
     -h --help           Show this screen.
     --version           Show the version.
@@ -25,15 +28,12 @@ def run_pipeline(args):
     import km3modules as km
     import km3io
 
-    detx = args["DETX"]
     fname = args["FILENAME"]
 
     if args["-o"] is None:
         outfile = fname + ".tres.h5"
     else:
         outfile = args["-o"]
-
-    calib = kp.calib.Calibration(filename=detx)
 
     def single_muon_filter(blob):
         """Only let events pass with exactly one muon"""
@@ -46,15 +46,25 @@ def run_pipeline(args):
             return blob
 
     class TimeResidualsCalculator(kp.Module):
+        def configure(self):
+            detx = self.get("detx", default=None)
+            self.calib = None
+
+            if detx is not None:
+                self.calib = kp.calib.Calibration(filename=detx)
+
         def process(self, blob):
             event = blob["event"]
+            hits = event.hits
 
-            chits = calib.apply(event.hits)
+            if self.calib is not None:
+                hits = self.calib.apply(hits)
+
             bt = km3io.tools.best_jmuon(event.tracks)
-            cherenkov_params = kp.physics.cherenkov(chits, bt)
+            cherenkov_params = kp.physics.cherenkov(hits, bt)
 
             t_res = kp.NDArray(
-                chits.time - cherenkov_params["t_photon"],
+                hits.t - cherenkov_params["t_photon"],
                 h5loc="/t_res",
                 title="Cherenkov hit time residuals",
             )
