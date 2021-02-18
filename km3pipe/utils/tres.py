@@ -81,7 +81,7 @@ def run_pipeline(args):
     if args["--single-muon-only"]:
         pipe.attach(single_muon_filter)
     pipe.attach(reco_filter)
-    pipe.attach(TimeResidualsCalculator)
+    pipe.attach(TimeResidualsCalculator, detx=args["-d"])
     pipe.attach(km.Keep, keys=["TRes"])
     pipe.attach(kp.io.HDF5Sink, filename=outfile)
     if args["-n"] is not None:
