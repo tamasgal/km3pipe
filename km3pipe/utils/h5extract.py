@@ -14,6 +14,7 @@ Options:
     --offline-header            The header of an offline file.
     --event-info                General event information.
     --offline-hits              Offline hits.
+    --with-calibration          Include calibration information for offline hits.
     --mc-hits                   MC hits (use with care!).
     --online-hits               Snapshot and triggered hits (combined).
     --mc-tracks                 MC tracks..
@@ -69,7 +70,12 @@ def main():
     if args["--event-info"]:
         pipe.attach(km.io.EventInfoTabulator)
     if args["--offline-hits"]:
-        pipe.attach(km.io.HitsTabulator, name="Offline", kind="offline")
+        pipe.attach(
+            km.io.HitsTabulator,
+            name="Offline",
+            kind="offline",
+            with_calibration=args["--with-calibration"],
+        )
     if args["--online-hits"]:
         pipe.attach(km.io.HitsTabulator, name="Online", kind="online")
     if args["--mc-hits"]:
