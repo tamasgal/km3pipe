@@ -29,6 +29,7 @@ class HitsTabulator(kp.Module):
 
     def configure(self):
         self.kind = self.require("kind")
+        self.with_calibration = self.get("with_calibration", default=False)
         self.split = self.get("split", default=True)
 
     def process(self, blob):
@@ -37,14 +38,26 @@ class HitsTabulator(kp.Module):
             if n == 0:
                 return blob
             hits = blob["event"].hits
+
+            hits_data = {
+                "channel_id": hits.channel_id,
+                "dom_id": hits.dom_id,
+                "time": hits.t,
+                "tot": hits.tot,
+                "triggered": hits.trig,
+            }
+
+            if self.with_calibration:
+                hits_data["pos_x"] = hits.pos_x
+                hits_data["pos_y"] = hits.pos_y
+                hits_data["pos_z"] = hits.pos_z
+                hits_data["dir_x"] = hits.dir_x
+                hits_data["dir_y"] = hits.dir_y
+                hits_data["dir_z"] = hits.dir_z
+                hits_data["tdc"] = hits.tdc
+
             blob["Hits"] = kp.Table(
-                {
-                    "channel_id": hits.channel_id,
-                    "dom_id": hits.dom_id,
-                    "time": hits.t,
-                    "tot": hits.tot,
-                    "triggered": hits.trig,
-                },
+                hits_data,
                 h5loc="/hits",
                 split_h5=self.split,
                 name="Hits",
