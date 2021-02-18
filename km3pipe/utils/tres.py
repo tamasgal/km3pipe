@@ -59,12 +59,15 @@ def run_pipeline(args):
 
             if self.calib is not None:
                 hits = self.calib.apply(hits)
+                times = hits.time  # TODO: harmonise names
+            else:
+                times = hits.t  # TODO: harmonise names
 
             bt = km3io.tools.best_jmuon(event.tracks)
             cherenkov_params = kp.physics.cherenkov(hits, bt)
 
             t_res = kp.NDArray(
-                hits.t - cherenkov_params["t_photon"],
+                times - cherenkov_params["t_photon"],
                 h5loc="/t_res",
                 title="Cherenkov hit time residuals",
             )
