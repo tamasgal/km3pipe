@@ -1,5 +1,7 @@
 Unreleased changes
 ------------------
+* Fixed parsing of DETX v4 in ``kp.hardware.Detector.get_pmt()`` and
+  ``kp.hardware.Detetor.xy_positions``
 
 Version 9
 ---------
