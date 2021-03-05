@@ -411,6 +411,30 @@ class TestDetector(TestCase):
             ],
             atol=1e-2,
         )
+        assert np.allclose(
+            np.array(
+                [[86.5, 9.1], [86.6, 6.6], [109.6, 5.9], [97.8, -9.6], [119.6, -12.2]]
+            ),
+            det.xy_positions,
+        )
+        assert np.allclose(
+            [
+                3,
+                0.844,
+                0.449,
+                0.295,
+                808981864,
+                5,
+                8,
+                13367,
+                119.768,
+                -12.11,
+                97.5,
+                0,
+                207863.242,
+            ],
+            list(det.get_pmt(808981864, 3)),
+        )
 
 
 class TestDetectorTransformations(TestCase):

@@ -428,7 +428,9 @@ class Detector(object):
 
     def get_pmt(self, dom_id, channel_id):
         """Return PMT with DOM ID and DAQ channel ID"""
-        du, floor, _ = self.doms[dom_id]
+        dom = self.doms[dom_id]
+        du = dom[0]
+        floor = dom[1]
         pmt = self.pmts[self._pmt_index_by_omkey[(du, floor, channel_id)]]
         return pmt
 
@@ -436,8 +438,7 @@ class Detector(object):
         return self._pmts_by_id[int(pmt_id)].omkey
 
     def domid2floor(self, dom_id):
-        _, floor, _ = self.doms[dom_id]
-        return floor
+        return self.doms[dom_id][1]
 
     @property
     def n_dus(self):
