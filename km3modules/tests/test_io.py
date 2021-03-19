@@ -6,6 +6,9 @@ from km3net_testdata import data_path
 
 import km3pipe as kp
 import km3modules as km
+import numpy as np
+import km3io
+import awkward as ak
 
 
 class TestOfflineHeaderTabulator(unittest.TestCase):
@@ -97,7 +100,7 @@ class TestRecoTracksTabulator(unittest.TestCase):
                 "offline/mcv5.11r2.gsg_muonCChigherE-CC_50-5000GeV.km3_AAv1.jterbr00004695.jchain.aanet.498.root"
             ),
         )
-        pipe.attach(km.io.RecoTracksTabulator)
+        pipe.attach(km.io.RecoTracksTabulator, best_tracks=True)
         pipe.attach(kp.io.HDF5Sink, filename=outfile.name)
         pipe.drain(5)
 
@@ -105,4 +108,78 @@ class TestRecoTracksTabulator(unittest.TestCase):
         pipe.attach(kp.io.HDF5Pump, filename=outfile.name)
         pipe.attach(km.common.Observer, count=5, required_keys=["Tracks"])
         pipe.attach(km.common.Observer, count=5, required_keys=["RecStages"])
+        pipe.attach(km.common.Observer, count=5, required_keys=["BestJmuon"])
+        pipe.attach(CheckRecoContents)
         pipe.drain()
+
+
+class CheckRecoContents(kp.Module):
+    def configure(self):
+
+        # use this to count through the single events
+        self.event_idx = 0
+
+        # get the original file to compare to
+        filename = data_path(
+            "offline/mcv5.11r2.gsg_muonCChigherE-CC_50-5000GeV.km3_AAv1.jterbr00004695.jchain.aanet.498.root"
+        )
+        self.f = km3io.OfflineReader(filename)
+
+    def process(self, blob):
+
+        # first, get some extracted values form the h5 file
+
+        # best track
+        jmuon_dir_z = blob["BestJmuon"].dir_z  # a reco parameter
+        jmuon_jgandalf_chi2 = blob["BestJmuon"].JGANDALF_CHI2  # a fitinf parameter
+
+        # all tracks
+        tracks_dir_z = blob["Tracks"].dir_z
+        tracks_jgandalf_chi2 = blob["Tracks"].JGANDALF_CHI2
+
+        # then, get the values from the original file
+
+        # all tracks
+        all_tracks_raw = self.f.events[self.event_idx].tracks
+        all_tracks_raw_dir_z = all_tracks_raw.dir_z
+        all_tracks_raw_fitinf = self._preprocess_fitinf(all_tracks_raw.fitinf)
+        all_tracks_raw_jgandalf_chi2 = all_tracks_raw_fitinf[
+            :, km3io.definitions.fitparameters.JGANDALF_CHI2
+        ]
+
+        # best tracks
+        best_tracks_raw = km3io.tools.best_jmuon(all_tracks_raw)
+        best_tracks_raw_dir_z = best_tracks_raw.dir_z
+        best_tracks_raw_jgandalf_chi2 = best_tracks_raw.fitinf[
+            km3io.definitions.fitparameters.JGANDALF_CHI2
+        ]
+
+        # and finally compare
+        assert np.allclose(best_tracks_raw_dir_z, jmuon_dir_z)
+        assert np.allclose(best_tracks_raw_jgandalf_chi2, jmuon_jgandalf_chi2)
+
+        # since an ak array wise assertion is not possible, do this element wise
+        for i in range(len(all_tracks_raw_dir_z)):
+
+            assert np.allclose(all_tracks_raw_dir_z[i], tracks_dir_z[i])
+
+            # exclude nans from the assertion as they are not detected as equal
+            if not np.isnan(all_tracks_raw_jgandalf_chi2[i]) and not np.isnan(
+                tracks_jgandalf_chi2[i]
+            ):
+                assert np.allclose(
+                    all_tracks_raw_jgandalf_chi2[i], tracks_jgandalf_chi2[i]
+                )
+
+        self.event_idx += 1
+
+        return blob
+
+    def _preprocess_fitinf(self, fitinf):
+        # preprocess the fitinf a bit - yay!
+        n_columns = max(km3io.definitions.fitparameters.values()) + 1
+        fitinf_array = np.ma.filled(
+            ak.to_numpy(ak.pad_none(fitinf, target=n_columns, axis=-1)),
+            fill_value=np.nan,
+        ).astype("float32")
+        return fitinf_array
