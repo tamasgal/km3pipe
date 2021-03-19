@@ -159,8 +159,8 @@ class RecoTracksTabulator(kp.Module):
 
     Parameters
     ----------
-    best_track_only: bool (default: False)
-      Only keep the best track.
+    best_tracks: bool (default: False)
+      Additionally determine best track.
     split: bool (default: False)
       Defines whether the tracks should be split up into individual arrays
       in a single group (e.g. reco/tracks/dom_id, reco/tracks/channel_id) or stored
@@ -169,18 +169,63 @@ class RecoTracksTabulator(kp.Module):
 
     def configure(self):
         self.split = self.get("split", default=False)
-        self.best_track_only = self.get("best_track_only", default=False)
-        if self.best_track_only:
-            raise NotImplementedError("The best track extraction is WIP.")
+        self.best_tracks = self.get("best_tracks", default=False)
+        self._best_track_fmap = {
+            km3io.definitions.reconstruction.JMUONPREFIT: (
+                km3io.tools.best_jmuon,
+                "best_jmuon",
+            ),
+            km3io.definitions.reconstruction.JSHOWERPREFIT: (
+                km3io.tools.best_jshower,
+                "best_jshower",
+            ),
+            km3io.definitions.reconstruction.DUSJSHOWERPREFIT: (
+                km3io.tools.best_dusjshower,
+                "best_dusjshower",
+            ),
+            km3io.definitions.reconstruction.AASHOWERFITPREFIT: (
+                km3io.tools.best_aashower,
+                "best_aashower",
+            ),
+        }
 
     def process(self, blob):
-        n = blob["event"].n_tracks
+        n_tracks = blob["event"].n_tracks
         # we first check if there are any tracks, otherwise the other calls will raise
-        if n == 0:
+        if n_tracks == 0:
             return blob
 
-        # now check if there are tracks of the requested rec type
-        tracks = blob["event"].tracks
+        all_tracks = blob["event"].tracks
+
+        # put all tracks into the blob
+        self._put_tracks_into_blob(blob, all_tracks, "tracks", n_tracks)
+
+        # select the best track using the km3io tools
+        if self.best_tracks:
+
+            # check if it contains any of the specific reco types (can be several)
+            for stage, (best_track, reco_name) in self._best_track_fmap.items():
+                if stage in all_tracks.rec_stages:
+                    tracks = best_track(all_tracks)
+                    self._put_tracks_into_blob(blob, tracks, reco_name, 1)
+
+        return blob
+
+    def _put_tracks_into_blob(self, blob, tracks, reco_identifier, n_tracks):
+
+        """
+        Put a certain type of "tracks" in the blob and give specific name.
+
+        Parameters
+        ----------
+        tracks : awkward array
+            The tracks object to be put in the blob eventually. Can be only best tracks.
+        identifier : string
+            A string to name the kp table.
+        n_tracks : int
+            The number of tracks from before. Use to distinguish between best and all tracks.
+
+        """
 
         reco_tracks = dict(
             pos_x=tracks.pos_x,
@@ -193,10 +238,14 @@ class RecoTracksTabulator(kp.Module):
             rec_type=tracks.rec_type,
             t=tracks.t,
             likelihood=tracks.lik,
-            length=tracks.len,
-            id=tracks.id,
-            idx=np.arange(n),
+            length=tracks.len,  # do all recos have this?
         )
+
+        if n_tracks != 1:
+            reco_tracks.update(
+                id=tracks.id,
+                idx=np.arange(n_tracks),
+            )
 
         n_columns = max(km3io.definitions.fitparameters.values()) + 1
         fitinf_array = np.ma.filled(
@@ -204,32 +253,38 @@ class RecoTracksTabulator(kp.Module):
             fill_value=np.nan,
         ).astype("float32")
         fitinf_split = np.split(fitinf_array, fitinf_array.shape[-1], axis=-1)
-        for fitparam, idx in km3io.definitions.fitparameters.items():
-            reco_tracks[fitparam] = fitinf_split[idx][:, 0]
 
-        blob["RecoTracks"] = kp.Table(
+        if n_tracks == 1:
+            for fitparam, idx in km3io.definitions.fitparameters.items():
+                reco_tracks[fitparam] = fitinf_split[idx][0]
+
+        else:
+            for fitparam, idx in km3io.definitions.fitparameters.items():
+                reco_tracks[fitparam] = fitinf_split[idx][:, 0]
+
+        blob["Reco_" + reco_identifier] = kp.Table(
             reco_tracks,
-            h5loc=f"/reco/tracks",
-            name="Reco Tracks",
+            h5loc=f"/reco/" + reco_identifier,
+            name="Reco " + reco_identifier,
             split_h5=self.split,
         )
 
-        _rec_stage = np.array(ak.flatten(tracks.rec_stages)._layout)
-        _counts = ak.count(tracks.rec_stages, axis=1)
-        _idx = np.repeat(np.arange(n), _counts)
+        # write out the rec stages only once with all tracks
+        if n_tracks != 1:
+            _rec_stage = np.array(ak.flatten(tracks.rec_stages)._layout)
+            _counts = ak.count(tracks.rec_stages, axis=1)
+            _idx = np.repeat(np.arange(n_tracks), _counts)
 
-        blob["RecStages"] = kp.Table(
-            dict(rec_stage=_rec_stage, idx=_idx),
-            # Just to save space, we specify smaller dtypes.
-            # We assume there will be never more than 32767
-            # reco tracks for a single reconstruction type.
-            dtypes=[("rec_stage", np.int16), ("idx", np.uint16)],
-            h5loc=f"/reco/rec_stages",
-            name="Reconstruction Stages",
-            split_h5=self.split,
-        )
-
-        return blob
+            blob["RecStages"] = kp.Table(
+                dict(rec_stage=_rec_stage, idx=_idx),
+                # Just to save space, we specify smaller dtypes.
+                # We assume there will be never more than 32767
+                # reco tracks for a single reconstruction type.
+                dtypes=[("rec_stage", np.int16), ("idx", np.uint16)],
+                h5loc=f"/reco/rec_stages",
+                name="Reconstruction Stages",
+                split_h5=self.split,
+            )
 
 
 class EventInfoTabulator(kp.Module):

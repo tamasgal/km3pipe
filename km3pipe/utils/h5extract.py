@@ -20,6 +20,7 @@ Options:
     --mc-tracks                 MC tracks..
     --mc-tracks-usr-data        "usr" data from MC tracks (this will be slow).
     --reco-tracks               Reconstructed tracks.
+    --best-tracks               Write a separate best track dataset for each known reco.
     --provenance-file=FILENAME  The file to store the provenance information.
     --timeit                    Print detailed pipeline performance statistics.
     --step-size=N               Number of events to cache or amount of data [default: 2000].
@@ -46,6 +47,7 @@ def main():
         "--mc-tracks",
         "--mc-tracks-usr-data",
         "--reco-tracks",
+        "--best-tracks",
     )
     if not any([args[k] for k in default_flags]):
         for k in default_flags:
@@ -60,10 +62,9 @@ def main():
         provfile = outfile + ".prov.json"
 
     Provenance().outfile = provfile
-
     pipe = kp.Pipeline(timeit=args["--timeit"])
     pipe.attach(kp.io.OfflinePump, filename=args["FILENAME"], step_size=step_size)
-    pipe.attach(km.StatusBar, every=100)
+    pipe.attach(km.StatusBar, every=1000)
     pipe.attach(km.common.MemoryObserver, every=500)
     if args["--offline-header"]:
         pipe.attach(km.io.OfflineHeaderTabulator)
@@ -83,7 +84,7 @@ def main():
     if args["--mc-tracks"]:
         pipe.attach(km.io.MCTracksTabulator, read_usr_data=args["--mc-tracks-usr-data"])
     if args["--reco-tracks"]:
-        pipe.attach(km.io.RecoTracksTabulator)
+        pipe.attach(km.io.RecoTracksTabulator, best_tracks=args["--best-tracks"])
     pipe.attach(kp.io.HDF5Sink, filename=outfile)
     if args["-n"] is not None:
         pipe.drain(int(args["-n"]))
