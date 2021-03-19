@@ -6,11 +6,11 @@
     "contIntegration": "https://git.km3net.de/km3py/km3pipe/-/pipelines",
     "dateCreated": "2014-09-30",
     "datePublished": "2014-10-08",
-    "dateModified": "2021-02-02",
+    "dateModified": "2021-05-19",
     "downloadUrl": "https://git.km3net.de/km3py/km3pipe",
     "issueTracker": "https://git.km3net.de/km3py/km3pipe/-/issues",
     "name": "km3pipe",
-    "version": "9.3.1",
+    "version": "9.5.0",
     "description": "Analysis framework for KM3NeT related data, heavily based on NumPy.",
     "applicationCategory": "Astroparticle physics",
     "developmentStatus": "active",
@@ -140,6 +140,11 @@
             "@type": "Person",
             "givenName": "Valentin",
             "familyName": "Pestel"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Daniel",
+            "familyName": "Guderian"
         },
         {
             "@type": "Person",
