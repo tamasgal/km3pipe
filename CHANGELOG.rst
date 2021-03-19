@@ -1,12 +1,15 @@
 Unreleased changes
 ------------------
+Version 9
+---------
+
+9.5.0 / 2021-05-19
+~~~~~~~~~~~~~~~~~~
 * Fixed parsing of DETX v4 in ``kp.hardware.Detector.get_pmt()`` and
   ``kp.hardware.Detetor.xy_positions``
 * ``h5extract`` now has the option ``--best-tracks`` which will create
   separate datasets of best tracks for each known reconstruction
 
-Version 9
----------
 9.4.0 / 2021-02-16
 ~~~~~~~~~~~~~~~~~~
 * Added the CLI ``tres`` to extract hit time residuals from reconstructed files.
