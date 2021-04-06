@@ -422,6 +422,7 @@ class CalibrationService(Module):
         """Apply time slewing correction to the hit times"""
         hits.time -= slew(hits.tot)
 
+
 def slew(tot, variant=3):
     """Calculate the time slewing of a PMT response for a given ToT
 
@@ -444,7 +445,9 @@ def slew(tot, variant=3):
     if variant == 1:
         return _slew_parametrised(7.70824, 0.00879447, -0.0621101, -1.90226, tot)
     if variant == 2:
-        return _slew_parametrised(13.6488662517, -0.128744123166, -0.0174837749244,-4.47119633965, tot)
+        return _slew_parametrised(
+            13.6488662517, -0.128744123166, -0.0174837749244, -4.47119633965, tot
+        )
     if variant == 3:
         if isinstance(tot, (int, np.int8, np.int16, np.int32, np.int64)):
             return _SLEWS[tot]
@@ -455,7 +458,8 @@ def slew(tot, variant=3):
 
 @nb.jit
 def _slew_parametrised(p0, p1, p2, p3, tot):
-        return p0 * np.exp(p1 * np.sqrt(tot) + p2 * tot) + p3
+    return p0 * np.exp(p1 * np.sqrt(tot) + p2 * tot) + p3
+
 
 @nb.jit
 def _slew_tabulated(tab, tots):
@@ -464,6 +468,7 @@ def _slew_tabulated(tab, tots):
     for i in range(n):
         out[i] = tab[tots[i]]
     return out
+
 
 _SLEWS = np.array(
     [
