@@ -3,7 +3,7 @@ Unreleased changes
 Version 9
 ---------
 
-9.5.0 / 2021-05-19
+9.5.0 / 2021-03-19
 ~~~~~~~~~~~~~~~~~~
 * Fixed parsing of DETX v4 in ``kp.hardware.Detector.get_pmt()`` and
   ``kp.hardware.Detetor.xy_positions``
