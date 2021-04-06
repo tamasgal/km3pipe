@@ -24,6 +24,7 @@ Options:
     --provenance-file=FILENAME  The file to store the provenance information.
     --timeit                    Print detailed pipeline performance statistics.
     --step-size=N               Number of events to cache or amount of data [default: 2000].
+    --aashower-legacy           Use only with old MC files where aashower rec_stage=100 (now it is 300)
     -h --help                   Show this screen.
     --version                   Show the version.
 
@@ -84,7 +85,11 @@ def main():
     if args["--mc-tracks"]:
         pipe.attach(km.io.MCTracksTabulator, read_usr_data=args["--mc-tracks-usr-data"])
     if args["--reco-tracks"]:
-        pipe.attach(km.io.RecoTracksTabulator, best_tracks=args["--best-tracks"])
+        pipe.attach(
+            km.io.RecoTracksTabulator,
+            best_tracks=args["--best-tracks"],
+            aashower_legacy=args["--aashower-legacy"],
+        )
     pipe.attach(kp.io.HDF5Sink, filename=outfile)
     if args["-n"] is not None:
         pipe.drain(int(args["-n"]))

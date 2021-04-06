@@ -168,8 +168,11 @@ class RecoTracksTabulator(kp.Module):
     """
 
     def configure(self):
+
         self.split = self.get("split", default=False)
         self.best_tracks = self.get("best_tracks", default=False)
+        self.aashower_legacy = self.get("aashower_legacy", default=False)
+
         self._best_track_fmap = {
             km3io.definitions.reconstruction.JMUONPREFIT: (
                 km3io.tools.best_jmuon,
@@ -196,6 +199,15 @@ class RecoTracksTabulator(kp.Module):
             return blob
 
         all_tracks = blob["event"].tracks
+
+        if self.aashower_legacy == True:
+
+            all_tracks.rec_stages = np.where(
+                all_tracks.rec_type
+                == km3io.definitions.reconstruction.AANET_RECONSTRUCTION_TYPE,
+                all_tracks.rec_stages + 300,
+                all_tracks.rec_stages,
+            )
 
         # put all tracks into the blob
         self._put_tracks_into_blob(blob, all_tracks, "tracks", n_tracks)
@@ -271,6 +283,7 @@ class RecoTracksTabulator(kp.Module):
 
         # write out the rec stages only once with all tracks
         if n_tracks != 1:
+
             _rec_stage = np.array(ak.flatten(tracks.rec_stages)._layout)
             _counts = ak.count(tracks.rec_stages, axis=1)
             _idx = np.repeat(np.arange(n_tracks), _counts)
