@@ -31,8 +31,10 @@ class LigierSender(kp.Module):
     def configure(self):
         target_ip = self.get("target_ip", default="127.0.0.1")
         port = self.get("port", default=5553)
-        self.socket = socket.socket()
-        self.client = self.socket.connect((target_ip, port))
+        s = socket.socket()
+        s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        self.client = s.connect((target_ip, port))
+        self.socket = s
 
     def process(self, blob):
         self.socket.send(blob["CHPrefix"].data + blob["CHData"])
