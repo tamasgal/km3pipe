@@ -98,11 +98,8 @@ class CHPump(Module):
         log.debug("Entering the main loop.")
         while True:
             current_qsize = self.queue.qsize()
-            log.info("----- New loop cycle #%s", self.loop_cycle)
-            log.info("Current queue size: %s", current_qsize)
             self.loop_cycle += 1
             self._set_idle_timer()
-            log.debug("Waiting for data from network...")
             try:
                 prefix, data = self.client.get_message()
             except EOFError:
@@ -116,7 +113,7 @@ class CHPump(Module):
                 self._add_idle_dt()
                 self.message_count += 1
                 self.performance_warn()
-                log.debug("%d bytes received from network.", len(data))
+                # log.debug("%d bytes received from network.", len(data))
             if not data:
                 log.critical(
                     "No data received, connection died.\n"
@@ -135,7 +132,6 @@ class CHPump(Module):
                     "dropping data.".format(self.max_queue)
                 )
             else:
-                log.debug("Filling data into queue.")
                 self.queue.put((prefix, data))
         log.debug("Quitting the main loop.")
 
