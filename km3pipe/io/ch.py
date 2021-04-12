@@ -89,7 +89,7 @@ class CHPump(Module):
         log.debug("Connecting to JLigier")
         self.client = Client(self.host, self.port)
         self.client._connect()
-        log.debug("Subscribing to tags: {0}".format(self.tags))
+        log.debug("Subscribing to tags: %s", self.tags)
         for tag in self.tags.split(","):
             self.client.subscribe(tag.strip(), mode=self.subscription_mode)
         log.debug("Controlhost initialisation done.")
@@ -98,8 +98,8 @@ class CHPump(Module):
         log.debug("Entering the main loop.")
         while True:
             current_qsize = self.queue.qsize()
-            log.info("----- New loop cycle #{0}".format(self.loop_cycle))
-            log.info("Current queue size: {0}".format(current_qsize))
+            log.info("----- New loop cycle #%s", self.loop_cycle)
+            log.info("Current queue size: %s", current_qsize)
             self.loop_cycle += 1
             try:
                 log.debug("Waiting for data from network...")
@@ -108,7 +108,7 @@ class CHPump(Module):
                 self._add_idle_dt()
                 self._set_idle_timer()
                 self.performance_warn()
-                log.debug("{0} bytes received from network.".format(len(data)))
+                log.debug("%d bytes received from network.", len(data))
             except EOFError:
                 log.warning("EOF from Ligier, trying again in 30 seconds...")
                 time.sleep(30)
@@ -144,9 +144,9 @@ class CHPump(Module):
         try:
             log.debug("Waiting for queue items.")
             prefix, data = self.queue.get(timeout=self.timeout)
-            log.debug("Got {0} bytes from queue.".format(len(data)))
+            log.debug("Got %d bytes from queue.", len(data))
         except Empty:
-            log.warning("ControlHost timeout ({0}s) reached".format(self.timeout))
+            log.warning("ControlHost timeout (%d s) reached", self.timeout)
             raise StopIteration("ControlHost timeout reached.")
         blob[self.key_for_prefix] = prefix
         blob[self.key_for_data] = data
