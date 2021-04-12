@@ -101,14 +101,10 @@ class CHPump(Module):
             log.info("----- New loop cycle #%s", self.loop_cycle)
             log.info("Current queue size: %s", current_qsize)
             self.loop_cycle += 1
+            self._set_idle_timer()
+            log.debug("Waiting for data from network...")
             try:
-                log.debug("Waiting for data from network...")
                 prefix, data = self.client.get_message()
-                self.message_count += 1
-                self._add_idle_dt()
-                self._set_idle_timer()
-                self.performance_warn()
-                log.debug("%d bytes received from network.", len(data))
             except EOFError:
                 log.warning("EOF from Ligier, trying again in 30 seconds...")
                 time.sleep(30)
@@ -116,6 +112,11 @@ class CHPump(Module):
             except BufferError:
                 log.error("Buffer error in Ligier stream, aborting...")
                 break
+            else:
+                self._add_idle_dt()
+                self.message_count += 1
+                self.performance_warn()
+                log.debug("%d bytes received from network.", len(data))
             if not data:
                 log.critical(
                     "No data received, connection died.\n"
@@ -136,7 +137,6 @@ class CHPump(Module):
             else:
                 log.debug("Filling data into queue.")
                 self.queue.put((prefix, data))
-            self._set_idle_timer()
         log.debug("Quitting the main loop.")
 
     def process(self, blob):
