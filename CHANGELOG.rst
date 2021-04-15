@@ -1,11 +1,14 @@
 Unreleased changes
 ------------------
 
+Version 9
+---------
+
+9.6.0 / 2021-04-15
+~~~~~~~~~~~~~~~~~~
 * ``h5extract`` now has the option ``--aashower-legacy`` which is needed
   to account for the old number of aashower reco_stages which has now changed.
 
-Version 9
----------
 
 9.5.0 / 2021-03-19
 ~~~~~~~~~~~~~~~~~~
