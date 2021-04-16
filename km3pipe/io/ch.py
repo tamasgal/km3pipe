@@ -39,7 +39,7 @@ class CHPump(Module):
         self.max_queue = self.get("max_queue") or 50
         self.key_for_data = self.get("key_for_data") or "CHData"
         self.key_for_prefix = self.get("key_for_prefix") or "CHPrefix"
-        self.subscription_mode = self.get("subscription_mode", default="wait")
+        self.subscription_mode = self.get("subscription_mode", default="any")
         self.show_statistics = self.get("show_statistics", default=False)
         self.statistics_interval = self.get("statistics_interval", default=30)
         self.cuckoo_warn = Cuckoo(60 * 5, log.warning)
