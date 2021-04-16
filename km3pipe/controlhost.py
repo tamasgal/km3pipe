@@ -36,7 +36,11 @@ class Client(object):
 
     def subscribe(self, tag, mode="any"):
         if mode not in self._valid_modes:
-            raise ValueError("Possible subscription modes are: {}".format(", ".join(self._valid_modes)))
+            raise ValueError(
+                "Possible subscription modes are: {}".format(
+                    ", ".join(self._valid_modes)
+                )
+            )
         log.info("Subscribing to %s in mode %s", tag, mode)
         full_tag = self._full_tag(tag, mode)
         if full_tag not in self.tags:
