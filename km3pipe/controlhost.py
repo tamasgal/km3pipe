@@ -25,6 +25,8 @@ BUFFER_SIZE = 1024
 class Client(object):
     """The ControlHost client"""
 
+    _valid_modes = ["any", "all"]
+
     def __init__(self, host, port=5553):
         self.host = host
         self.port = port
@@ -32,9 +34,9 @@ class Client(object):
         self.tags = []
         self.valid_tags = []
 
-    def subscribe(self, tag, mode="wait"):
-        if mode not in ["wait", "all"]:
-            raise ValueError("Possible subscription modes are 'wait' or 'all'")
+    def subscribe(self, tag, mode="any"):
+        if mode not in self._valid_modes:
+            raise ValueError("Possible subscription modes are: {}".format(", ".join(self._valid_modes)))
         log.info("Subscribing to %s in mode %s", tag, mode)
         full_tag = self._full_tag(tag, mode)
         if full_tag not in self.tags:
@@ -44,7 +46,7 @@ class Client(object):
                 self.valid_tags.append(t)
         self._update_subscriptions()
 
-    def unsubscribe(self, tag, mode="wait"):
+    def unsubscribe(self, tag, mode="any"):
         try:
             self.tags.remove(self._full_tag(tag, mode))
             self.valid_tags.remove(tag)
@@ -54,7 +56,7 @@ class Client(object):
             self._update_subscriptions()
 
     def _full_tag(self, tag, mode):
-        mode_flag = " {} ".format(mode[0])
+        mode_flag = " {} ".format("w" if mode == "any" else "a")
         full_tag = mode_flag + tag
         return full_tag
 
