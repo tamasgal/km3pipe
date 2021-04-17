@@ -451,7 +451,7 @@ def slew(tot, variant=3):
     if variant == 3:
         if isinstance(tot, (int, np.int8, np.int16, np.int32, np.int64)):
             return _SLEWS[tot]
-        return _slew_tabulated(_SLEWS, tot)
+        return _slew_tabulated(np.array(_SLEWS), tot)
 
     raise ValueError("Unknown slew calculation variant '{}'".format(variant))
 
