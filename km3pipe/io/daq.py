@@ -316,9 +316,7 @@ class DAQProcessor(Module):
         try:
             processor(data, blob)
         except (struct.error, ValueError) as e:
-            self.log.error(
-                "Corrupt online reco data received. Skipping...\n" "Error: %s", e
-            )
+            self.log.error("Corrupt data received. Skipping...\n" "Error: %s", e)
             return
 
         return blob

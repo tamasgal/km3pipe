@@ -39,7 +39,7 @@ class CHPump(Module):
         self.max_queue = self.get("max_queue") or 50
         self.key_for_data = self.get("key_for_data") or "CHData"
         self.key_for_prefix = self.get("key_for_prefix") or "CHPrefix"
-        self.subscription_mode = self.get("subscription_mode", default="wait")
+        self.subscription_mode = self.get("subscription_mode", default="any")
         self.show_statistics = self.get("show_statistics", default=False)
         self.statistics_interval = self.get("statistics_interval", default=30)
         self.cuckoo_warn = Cuckoo(60 * 5, log.warning)
@@ -89,7 +89,7 @@ class CHPump(Module):
         log.debug("Connecting to JLigier")
         self.client = Client(self.host, self.port)
         self.client._connect()
-        log.debug("Subscribing to tags: {0}".format(self.tags))
+        log.debug("Subscribing to tags: %s", self.tags)
         for tag in self.tags.split(","):
             self.client.subscribe(tag.strip(), mode=self.subscription_mode)
         log.debug("Controlhost initialisation done.")
@@ -98,17 +98,10 @@ class CHPump(Module):
         log.debug("Entering the main loop.")
         while True:
             current_qsize = self.queue.qsize()
-            log.info("----- New loop cycle #{0}".format(self.loop_cycle))
-            log.info("Current queue size: {0}".format(current_qsize))
             self.loop_cycle += 1
+            self._set_idle_timer()
             try:
-                log.debug("Waiting for data from network...")
                 prefix, data = self.client.get_message()
-                self.message_count += 1
-                self._add_idle_dt()
-                self._set_idle_timer()
-                self.performance_warn()
-                log.debug("{0} bytes received from network.".format(len(data)))
             except EOFError:
                 log.warning("EOF from Ligier, trying again in 30 seconds...")
                 time.sleep(30)
@@ -116,6 +109,11 @@ class CHPump(Module):
             except BufferError:
                 log.error("Buffer error in Ligier stream, aborting...")
                 break
+            else:
+                self._add_idle_dt()
+                self.message_count += 1
+                self.performance_warn()
+                # log.debug("%d bytes received from network.", len(data))
             if not data:
                 log.critical(
                     "No data received, connection died.\n"
@@ -134,9 +132,7 @@ class CHPump(Module):
                     "dropping data.".format(self.max_queue)
                 )
             else:
-                log.debug("Filling data into queue.")
                 self.queue.put((prefix, data))
-            self._set_idle_timer()
         log.debug("Quitting the main loop.")
 
     def process(self, blob):
@@ -144,9 +140,9 @@ class CHPump(Module):
         try:
             log.debug("Waiting for queue items.")
             prefix, data = self.queue.get(timeout=self.timeout)
-            log.debug("Got {0} bytes from queue.".format(len(data)))
+            log.debug("Got %d bytes from queue.", len(data))
         except Empty:
-            log.warning("ControlHost timeout ({0}s) reached".format(self.timeout))
+            log.warning("ControlHost timeout (%d s) reached", self.timeout)
             raise StopIteration("ControlHost timeout reached.")
         blob[self.key_for_prefix] = prefix
         blob[self.key_for_data] = data

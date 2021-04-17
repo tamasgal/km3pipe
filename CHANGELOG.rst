@@ -1,6 +1,8 @@
 Unreleased changes
 ------------------
 
+* DAQ io is refined and is now a bit faster
+
 Version 9
 ---------
 

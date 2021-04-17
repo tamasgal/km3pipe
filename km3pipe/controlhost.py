@@ -25,6 +25,8 @@ BUFFER_SIZE = 1024
 class Client(object):
     """The ControlHost client"""
 
+    _valid_modes = ["any", "all"]
+
     def __init__(self, host, port=5553):
         self.host = host
         self.port = port
@@ -32,10 +34,14 @@ class Client(object):
         self.tags = []
         self.valid_tags = []
 
-    def subscribe(self, tag, mode="wait"):
-        if mode not in ["wait", "all"]:
-            raise ValueError("Possible subscription modes are 'wait' or 'all'")
-        log.info("Subscribing to {} in mode {}".format(tag, mode))
+    def subscribe(self, tag, mode="any"):
+        if mode not in self._valid_modes:
+            raise ValueError(
+                "Possible subscription modes are: {}".format(
+                    ", ".join(self._valid_modes)
+                )
+            )
+        log.info("Subscribing to %s in mode %s", tag, mode)
         full_tag = self._full_tag(tag, mode)
         if full_tag not in self.tags:
             self.tags.append(full_tag)
@@ -44,7 +50,7 @@ class Client(object):
                 self.valid_tags.append(t)
         self._update_subscriptions()
 
-    def unsubscribe(self, tag, mode="wait"):
+    def unsubscribe(self, tag, mode="any"):
         try:
             self.tags.remove(self._full_tag(tag, mode))
             self.valid_tags.remove(tag)
@@ -54,12 +60,12 @@ class Client(object):
             self._update_subscriptions()
 
     def _full_tag(self, tag, mode):
-        mode_flag = " {} ".format(mode[0])
+        mode_flag = " {} ".format("w" if mode == "any" else "a")
         full_tag = mode_flag + tag
         return full_tag
 
     def _update_subscriptions(self):
-        log.debug("Subscribing to tags: {0}".format(self.tags))
+        log.debug("Subscribing to tags: %s", self.tags)
         if not self.socket:
             self._connect()
         tags = "".join(self.tags).encode("ascii")
@@ -81,7 +87,7 @@ class Client(object):
             try:
                 data = self.socket.recv(Prefix.SIZE)
                 timestamp = time.time()
-                log.info("    raw prefix data received: '{0}'".format(data))
+                log.info("    raw prefix data received: '%s'", data)
                 if data == b"":
                     raise EOFError
                 prefix = Prefix(data=data, timestamp=timestamp)
@@ -99,9 +105,11 @@ class Client(object):
 
             if prefix_tag not in self.valid_tags:
                 log.error(
-                    "Invalid tag '{0}' received, ignoring the message \n"
+                    "Invalid tag '%s' received, ignoring the message \n"
                     "and reconnecting.\n"
-                    "  -> valid tags are: {1}".format(prefix_tag, self.valid_tags)
+                    "  -> valid tags are: %s",
+                    prefix_tag,
+                    self.valid_tags,
                 )
                 self._reconnect()
                 continue
@@ -109,9 +117,9 @@ class Client(object):
                 break
 
         message = b""
-        log.info("       got a Prefix with {0} bytes.".format(prefix.length))
+        log.info("       got a Prefix with %d bytes.", prefix.length)
         while len(message) < prefix.length:
-            log.info("          message length: {0}".format(len(message)))
+            log.info("          message length: %d", len(message))
             log.info("            (getting next part)")
             buffer_size = min((BUFFER_SIZE, (prefix.length - len(message))))
             try:
@@ -119,14 +127,17 @@ class Client(object):
             except OSError:
                 log.error("Failed to construct message.")
                 raise BufferError
-        log.info("     ------ returning message with {0} bytes".format(len(message)))
+        log.info("     ------ returning message with %d bytes", len(message))
         return prefix, message
 
     def _connect(self):
         """Connect to JLigier"""
         log.debug("Connecting to JLigier")
-        self.socket = socket.socket()
-        self.socket.connect((self.host, self.port))
+
+        s = socket.socket()
+        s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        s.connect((self.host, self.port))
+        self.socket = s
 
     def _disconnect(self):
         """Close the socket"""
@@ -189,7 +200,7 @@ class Tag(object):
         if not value:
             value = b""
         if len(value) > self.SIZE:
-            raise ValueError("The maximum tag size is {0}".format(self.SIZE))
+            raise ValueError("The maximum tag size is {}".format(self.SIZE))
         self._data = value
         while len(self._data) < self.SIZE:
             self._data += b"\x00"
