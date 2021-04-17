@@ -38,6 +38,9 @@ stages:
   source venv/bin/activate
   make install-dev
   pip freeze
+  ls -al venv/
+  ls -al venv/lib
+  du -sh venv/lib/*
 
 .junit_template: &junit_definition
     artifacts:
