@@ -2,6 +2,8 @@ Unreleased changes
 ------------------
 
 * DAQ io is refined and is now a bit faster
+* Add support for Numpy compatible arrays (e.g. ``awkward.Arrays``)
+  in ``kp.calib.slew``
 
 Version 9
 ---------
