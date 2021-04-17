@@ -13,13 +13,6 @@ except ImportError:
 import matplotlib.pyplot as plt
 import numpy as np
 
-try:
-    import seaborn as sns
-
-    HAS_SEABORN = True
-except ImportError:
-    HAS_SEABORN = False
-
 from km3pipe.stats import bincenters
 import km3pipe.extras
 
@@ -30,18 +23,6 @@ __license__ = "BSD-3"
 __maintainer__ = "Moritz Lotze"
 __email__ = "mlotze@km3net.de"
 __status__ = "Development"
-
-
-def hexbin(x, y, color="purple", **kwargs):
-    """Seaborn-compatible hexbin plot.
-
-    See also: http://seaborn.pydata.org/tutorial/axis_grids.html#mapping-custom-functions-onto-the-grid
-    """
-    if HAS_SEABORN:
-        cmap = sns.light_palette(color, as_cmap=True)
-    else:
-        cmap = "Purples"
-    plt.hexbin(x, y, cmap=cmap, **kwargs)
 
 
 def get_ax(ax=None):
@@ -107,13 +88,6 @@ def prebinned_hist(counts, binlims, ax=None, *args, **kwargs):
     x = bincenters(binlims)
     weights = counts
     return ax.hist(x, bins=binlims, weights=weights, *args, **kwargs)
-
-
-def joint_hex(x, y, **kwargs):
-    """Seaborn Joint Hexplot with marginal KDE + hists."""
-    return sns.jointplot(
-        x, y, kind="hex", stat_func=None, marginal_kws={"kde": True}, **kwargs
-    )
 
 
 def plot_convexhull(xy, ax=None, plot_points=True):
