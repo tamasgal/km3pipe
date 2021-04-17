@@ -1,18 +1,19 @@
 Unreleased changes
 ------------------
 
+Version 9
+---------
+
+9.6.1 / 2021-04-17
+~~~~~~~~~~~~~~~~~~
 * DAQ io is refined and is now a bit faster
 * Add support for Numpy compatible arrays (e.g. ``awkward.Arrays``)
   in ``kp.calib.slew``
-
-Version 9
----------
 
 9.6.0 / 2021-04-15
 ~~~~~~~~~~~~~~~~~~
 * ``h5extract`` now has the option ``--aashower-legacy`` which is needed
   to account for the old number of aashower reco_stages which has now changed.
-
 
 9.5.0 / 2021-03-19
 ~~~~~~~~~~~~~~~~~~
