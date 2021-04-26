@@ -327,33 +327,6 @@ class DAQProcessor(Module):
         event = DAQEvent(file_obj=data_io, legacy=self.legacy)
         header = event.header
 
-        hits = event.snapshot_hits
-        n_hits = event.n_snapshot_hits
-        if n_hits == 0:
-            return
-        dom_ids, channel_ids, times, tots = zip(*hits)
-        triggereds = np.zeros(n_hits)
-        triggered_map = {}
-        for triggered_hit in event.triggered_hits:
-            dom_id, pmt_id, time, tot, _ = triggered_hit
-            triggered_map[(dom_id, pmt_id, time, tot)] = True
-        for idx, hit in enumerate(hits):
-            triggereds[idx] = hit in triggered_map
-
-        hit_series = Table.from_template(
-            {
-                "channel_id": channel_ids,
-                "dom_id": dom_ids,
-                "time": times,
-                "tot": tots,
-                "triggered": triggereds,
-                "group_id": self.event_id,
-            },
-            "Hits",
-        )
-
-        blob["Hits"] = hit_series
-
         event_info = Table.from_template(
             {
                 "det_id": header.det_id,
@@ -381,6 +354,35 @@ class DAQProcessor(Module):
 
         self.event_id += 1
         self.index += 1
+
+        hits = event.snapshot_hits
+        n_hits = event.n_snapshot_hits
+        if n_hits == 0:
+            self.log.warning("No hits found in event.")
+            return
+
+        dom_ids, channel_ids, times, tots = zip(*hits)
+        triggereds = np.zeros(n_hits)
+        triggered_map = {}
+        for triggered_hit in event.triggered_hits:
+            dom_id, pmt_id, time, tot, _ = triggered_hit
+            triggered_map[(dom_id, pmt_id, time, tot)] = True
+        for idx, hit in enumerate(hits):
+            triggereds[idx] = hit in triggered_map
+
+        hit_series = Table.from_template(
+            {
+                "channel_id": channel_ids,
+                "dom_id": dom_ids,
+                "time": times,
+                "tot": tots,
+                "triggered": triggereds,
+                "group_id": self.event_id,
+            },
+            "Hits",
+        )
+
+        blob["Hits"] = hit_series
 
     def process_summaryslice(self, data, blob):
         data_io = BytesIO(data)
