@@ -295,7 +295,7 @@ sphinx_gallery_conf = {
         "km3pipe": None,
     },
     "expected_failing_examples": [],
-    "abort_on_example_effor": False,
+    "abort_on_example_error": False,
     "show_memory": True,
 }
 
