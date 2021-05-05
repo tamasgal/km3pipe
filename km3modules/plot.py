@@ -31,7 +31,7 @@ def plot_dom_parameters(
     title,
     vmin=0.0,
     vmax=10.0,
-    cmap="RdYlGn_r",
+    cmap="cividis",
     under="deepskyblue",
     over="deeppink",
     underfactor=1.0,
