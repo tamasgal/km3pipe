@@ -32,14 +32,20 @@ class TestEventInfoTabulator(unittest.TestCase):
         outfile = tempfile.NamedTemporaryFile(delete=True)
 
         pipe = kp.Pipeline()
-        pipe.attach(kp.io.OfflinePump, filename=data_path("offline/numucc.root"))
+        pipe.attach(
+            kp.io.OfflinePump,
+            filename=data_path(
+                "offline/mcv6.0.gsg_muon_highE-CC_50-500GeV.km3sim.jterbr00008357.jorcarec.aanet.905.root"
+            ),
+        )
         pipe.attach(km.io.EventInfoTabulator)
         pipe.attach(kp.io.HDF5Sink, filename=outfile.name)
-        pipe.drain()
+        pipe.drain(10)
 
         pipe = kp.Pipeline()
         pipe.attach(kp.io.HDF5Pump, filename=outfile.name)
         pipe.attach(km.common.Observer, count=10, required_keys=["EventInfo"])
+        pipe.attach(CheckW2listContents)
         pipe.drain()
 
 
@@ -97,7 +103,7 @@ class TestRecoTracksTabulator(unittest.TestCase):
         pipe.attach(
             kp.io.OfflinePump,
             filename=data_path(
-                "offline/mcv5.11r2.gsg_muonCChigherE-CC_50-5000GeV.km3_AAv1.jterbr00004695.jchain.aanet.498.root"
+                "offline/mcv6.0.gsg_muon_highE-CC_50-500GeV.km3sim.jterbr00008357.jorcarec.aanet.905.root"
             ),
         )
         pipe.attach(km.io.RecoTracksTabulator, best_tracks=True)
@@ -121,7 +127,7 @@ class CheckRecoContents(kp.Module):
 
         # get the original file to compare to
         filename = data_path(
-            "offline/mcv5.11r2.gsg_muonCChigherE-CC_50-5000GeV.km3_AAv1.jterbr00004695.jchain.aanet.498.root"
+            "offline/mcv6.0.gsg_muon_highE-CC_50-500GeV.km3sim.jterbr00008357.jorcarec.aanet.905.root"
         )
         self.f = km3io.OfflineReader(filename)
 
@@ -183,3 +189,38 @@ class CheckRecoContents(kp.Module):
             fill_value=np.nan,
         ).astype("float32")
         return fitinf_array
+
+
+class CheckW2listContents(kp.Module):
+    def configure(self):
+
+        # use this to count through the single events
+        self.event_idx = 0
+
+        # get the original file to compare to
+        filename = data_path(
+            "offline/mcv6.0.gsg_muon_highE-CC_50-500GeV.km3sim.jterbr00008357.jorcarec.aanet.905.root"
+        )
+        self.f = km3io.OfflineReader(filename)
+
+    def process(self, blob):
+
+        # extracted values
+        by = blob["EventInfo"].W2LIST_GSEAGEN_BY[0]
+        cc = blob["EventInfo"].W2LIST_GSEAGEN_CC[0]
+
+        # original values
+        original_by = self.f.events[self.event_idx].w2list[
+            km3io.definitions.w2list_gseagen["W2LIST_GSEAGEN_BY"]
+        ]
+        original_cc = self.f.events[self.event_idx].w2list[
+            km3io.definitions.w2list_gseagen["W2LIST_GSEAGEN_CC"]
+        ]
+
+        # and compare
+        assert by == original_by
+        assert cc == original_cc
+
+        self.event_idx += 1
+
+        return blob

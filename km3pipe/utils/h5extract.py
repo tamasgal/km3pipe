@@ -46,7 +46,7 @@ def main():
         "--offline-hits",
         "--mc-hits",
         "--mc-tracks",
-        "--mc-tracks-usr-data",
+        "--with-calibration",
         "--reco-tracks",
         "--best-tracks",
     )
