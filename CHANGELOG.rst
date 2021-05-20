@@ -3,6 +3,10 @@ Unreleased changes
 
 Version 9
 ---------
+9.6.2 / 2021-05-20
+~~~~~~~~~~~~~~~~~~
+* Fixed a bug which prevented to retrieve a detector from the database via
+  ``kp.hardware.Detector(det_id)``
 
 9.6.1 / 2021-04-17
 ~~~~~~~~~~~~~~~~~~
