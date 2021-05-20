@@ -1,6 +1,9 @@
 Unreleased changes
 ------------------
 
+* ``km.common.MultiFilePump`` now takes a dictionary via the ``kwargs`` parameter
+  which is then passed as keyword arguments to the pump
+
 Version 9
 ---------
 9.6.2 / 2021-05-20
