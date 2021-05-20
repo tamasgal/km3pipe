@@ -38,14 +38,12 @@ class Detector(object):
         .detx ID of detector (when retrieving from database).
     t0set: optional
         t0set (when retrieving from database).
-    calibset: optional
-        calibset (when retrieving from database).
     """
 
     max_supported_version = 4
 
     def __init__(
-        self, filename=None, det_id=None, t0set=None, calibset=None, string=None
+        self, filename=None, det_id=None, t0set=0, string=None
     ):
         self._det_file = None
         self.det_id = None
@@ -84,7 +82,7 @@ class Detector(object):
                 "Retrieving DETX with detector ID {0} "
                 "from the database...".format(det_id)
             )
-            detx = km3db.tools.detx(det_id, t0set=t0set, calibration=calibset)
+            detx = km3db.tools.detx(det_id, tcal=t0set)
             self._det_file = StringIO(detx)
             self._parse()
             if self.n_doms < 1:
