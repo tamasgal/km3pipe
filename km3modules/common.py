@@ -224,12 +224,15 @@ class MultiFilePump(kp.Module):
       The pump to be used to generate the blobs.
     filenames: iterable(str)
       List of filenames.
+    kwargs: dict(str -> any) optional
+      Keyword arguments to be passed to the pump.
 
     """
 
     def configure(self):
         self.pump = self.require("pump")
         self.filenames = self.require("filenames")
+        self.kwargs = self.get("kwargs", default={})
         self.blobs = self.blob_generator()
         self.cprint("Iterating through {} files.".format(len(self.filenames)))
         self.n_processed = 0
@@ -238,7 +241,7 @@ class MultiFilePump(kp.Module):
     def blob_generator(self):
         for filename in self.filenames:
             self.cprint("Current file: {}".format(filename))
-            pump = self.pump(filename=filename)
+            pump = self.pump(filename=filename, **self.kwargs)
             for blob in pump:
                 self._set_group_id(blob)
                 blob["filename"] = filename
