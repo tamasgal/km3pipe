@@ -508,6 +508,8 @@ class TestMultiFilePump(TestCase):
                 self.idx = 0
                 self.max_iterations = self.get("max_iterations", default=5)
                 self.blobs = self.blob_generator()
+                assert 23 == self.get("foo")
+                assert "narf" == self.get("bar")
 
             def process(self, blob):
                 return next(self)
@@ -556,6 +558,7 @@ class TestMultiFilePump(TestCase):
             pump=DummyPump,
             filenames=filenames,
             max_iterations=max_iterations,
+            kwargs={"foo": 23, "bar": "narf"}
         )
         pipe.attach(Observer)
         pipe.drain()
