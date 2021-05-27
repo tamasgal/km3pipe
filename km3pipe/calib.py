@@ -208,7 +208,7 @@ class Calibration(Module):
             "dir_y": dir_y,
             "dir_z": dir_z,
             "du": du.astype(np.uint8),
-            "floor": du.astype(np.uint8),
+            "floor": floor.astype(np.uint8),
             "pos_x": pos_x,
             "pos_y": pos_y,
             "pos_z": pos_z,
