@@ -1,11 +1,15 @@
 Unreleased changes
 ------------------
 
-* ``km.common.MultiFilePump`` now takes a dictionary via the ``kwargs`` parameter
-  which is then passed as keyword arguments to the pump
-
 Version 9
 ---------
+
+9.7.0 / 2021-05-28
+~~~~~~~~~~~~~~~~~~
+* ``km.common.MultiFilePump`` now takes a dictionary via the ``kwargs`` parameter
+  which is then passed as keyword arguments to the pump
+* Fixed a bug which assigned the wrong floor when the calibration was applied
+
 9.6.2 / 2021-05-20
 ~~~~~~~~~~~~~~~~~~
 * Fixed a bug which prevented to retrieve a detector from the database via
