@@ -1,4 +1,4 @@
-black==20.8b1
+black==21.6b0
 km3net-testdata>=0.2.25
 mock
 numpydoc==0.9.2
