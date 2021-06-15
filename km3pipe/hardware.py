@@ -42,9 +42,7 @@ class Detector(object):
 
     max_supported_version = 4
 
-    def __init__(
-        self, filename=None, det_id=None, t0set=0, string=None
-    ):
+    def __init__(self, filename=None, det_id=None, t0set=0, string=None):
         self._det_file = None
         self.det_id = None
         self.n_doms = None

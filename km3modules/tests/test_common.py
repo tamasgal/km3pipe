@@ -558,7 +558,7 @@ class TestMultiFilePump(TestCase):
             pump=DummyPump,
             filenames=filenames,
             max_iterations=max_iterations,
-            kwargs={"foo": 23, "bar": "narf"}
+            kwargs={"foo": 23, "bar": "narf"},
         )
         pipe.attach(Observer)
         pipe.drain()

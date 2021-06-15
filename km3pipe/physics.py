@@ -123,7 +123,7 @@ def cherenkov(calib_hits, track):
 
 @njit
 def _cherenkov(calib_pos, calib_dir, track_pos, track_dir, track_t):
-    """calculate Cherenkov photons parameters """
+    """calculate Cherenkov photons parameters"""
     rows = len(calib_pos)
     out = np.zeros((rows, 8))
 
@@ -147,7 +147,7 @@ def _cherenkov(calib_pos, calib_dir, track_pos, track_dir, track_t):
 
 
 def _get_closest(track_pos, track_dir, meanDU_pos, meanDU_dir):
-    """calculate the distance of closest approach """
+    """calculate the distance of closest approach"""
     # direction track to the mean DU, assumes vertical DU:
     cross = np.cross(track_dir, meanDU_dir)
     dir_to_DU = cross / np.linalg.norm(cross, axis=0)  # normalized vector
