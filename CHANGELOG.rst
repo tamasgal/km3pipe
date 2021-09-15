@@ -1,9 +1,12 @@
 Unreleased changes
 ------------------
-* new tool ``h5extractf``, which is similar to h5extract but faster
-
 Version 9
 ---------
+
+9.8.0 / 2021-09-15
+~~~~~~~~~~~~~~~~~~
+* New command line tool ``h5extractf``, which is similar to ``h5extract`` but
+  much faster. It has limited options but does the conversion in one go.
 
 9.7.0 / 2021-05-28
 ~~~~~~~~~~~~~~~~~~
