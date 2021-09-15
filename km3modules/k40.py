@@ -14,7 +14,6 @@ from datetime import datetime
 import io
 
 import numpy as np
-import h5py
 import pickle
 
 import km3pipe as kp
@@ -500,6 +499,7 @@ def load_k40_coincidences_from_hdf5(filename, dom_id):
     livetime: duration of data-taking
     """
 
+    import h5py
     with h5py.File(filename, "r") as h5f:
         data = h5f["/k40counts/{0}".format(dom_id)]
         livetime = data.attrs["livetime"]
