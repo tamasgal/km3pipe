@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* new tool ``h5extractf``, which is similar to h5extract but faster
 
 Version 9
 ---------
