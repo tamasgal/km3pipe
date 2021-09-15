@@ -1,5 +1,6 @@
-awkward>=1
+awkward>=1.4
 docopt
+h5py
 km3db>=0.6.0
 km3io>=0.20.0
 matplotlib>=3.0.0

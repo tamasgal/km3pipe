@@ -500,6 +500,7 @@ def load_k40_coincidences_from_hdf5(filename, dom_id):
     """
 
     import h5py
+
     with h5py.File(filename, "r") as h5f:
         data = h5f["/k40counts/{0}".format(dom_id)]
         livetime = data.attrs["livetime"]
