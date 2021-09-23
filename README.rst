@@ -11,7 +11,7 @@ KM3Pipe
    :alt: Codacy Badge
    :target: https://app.codacy.com/app/tamasgal/km3pipe?utm_source=github.com&utm_medium=referral&utm_content=tamasgal/km3pipe&utm_campaign=Badge_Grade_Settings
 
-.. image:: https://examples.pages.km3net.de/km3badges/docs-latest-brightgreen.svg
+.. image:: https://git.km3net.de/examples/km3badges/-/raw/master/docs-latest-brightgreen.svg
     :target: https://km3py.pages.km3net.de/km3pipe
 
 .. image:: https://zenodo.org/badge/24634697.svg
