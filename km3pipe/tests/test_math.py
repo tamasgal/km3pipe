@@ -8,7 +8,9 @@ import pytest
 from km3pipe.testing import TestCase
 from km3pipe import Table
 from km3pipe.math import (
+    angle,
     angle_between,
+    magnitude,
     dist,
     pld3,
     com,
@@ -137,6 +139,31 @@ class TestMath(TestCase):
         assert np.allclose(v1, unit_vector(v1))
         assert np.allclose(np.array(v2) / np.sqrt(2), unit_vector(v2))
         assert np.allclose(np.array(v3) / np.sqrt(5), unit_vector(v3))
+
+    def test_magnitude(self):
+        assert 1 == magnitude(np.array([1, 0, 0]))
+        assert 2 == magnitude(np.array([0, 2, 0]))
+        assert 3 == magnitude(np.array([0, 0, 3]))
+        assert np.allclose(
+            [3.74165739, 8.77496439, 13.92838828],
+            magnitude(np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])),
+        )
+
+    def test_angle(self):
+        v1 = np.array([1, 0, 0])
+        v2 = np.array([0, 1, 0])
+        v3 = np.array([-1, 0, 0])
+        self.assertAlmostEqual(0, angle(v1, v1))
+        self.assertAlmostEqual(np.pi / 2, angle(v1, v2))
+        self.assertAlmostEqual(np.pi, angle(v1, v3))
+        self.assertAlmostEqual(angle(self.v, v1), 1.3002465638163236)
+        self.assertAlmostEqual(angle(self.v, v2), 1.0068536854342678)
+        self.assertAlmostEqual(angle(self.v, v3), 1.8413460897734695)
+
+        assert np.allclose(
+            [1.300246563816323, 1.0068536854342678, 1.8413460897734695],
+            angle(np.array([self.v, self.v, self.v]), np.array([v1, v2, v3])),
+        )
 
     def test_angle_between(self):
         v1 = (1, 0, 0)
