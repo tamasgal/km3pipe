@@ -3,6 +3,10 @@ Unreleased changes
 Version 9
 ---------
 
+9.8.1 - 2021-09-26
+~~~~~~~~~~~~~~~~~~
+* Minor refactoring of dependencies
+
 9.8.0 / 2021-09-15
 ~~~~~~~~~~~~~~~~~~
 * New command line tool ``h5extractf``, which is similar to ``h5extract`` but
