@@ -50,7 +50,6 @@ setup(
             "h5info=km3pipe.utils.h5info:main",
             "h5tree=km3pipe.utils.h5tree:main",
             "h5header=km3pipe.utils.h5header:main",
-            "meantots=km3pipe.utils.meantots:main",
             "ztplot=km3pipe.utils.ztplot:main",
             "k40calib=km3pipe.utils.k40calib:main",
             "triggermap=km3pipe.utils.triggermap:main",
