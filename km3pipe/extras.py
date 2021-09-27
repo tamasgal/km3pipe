@@ -29,3 +29,18 @@ def scipy():
         )
     else:
         return scipy
+
+
+def pypandoc():
+    """Imports and returns ``pypandoc``."""
+    try:
+        import pypandoc
+    except ImportError:
+        raise ImportError(
+            "install the 'pypandoc' package with:\n\n"
+            "    pip install pypandoc\n\n"
+            "or\n\n"
+            "    conda install pypandoc"
+        )
+    else:
+        return pypandoc

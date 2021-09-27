@@ -9,7 +9,7 @@ Usage:
 """
 
 import json
-import pypandoc as pdoc
+import km3pipe.extras
 
 from km3pipe import version
 
@@ -20,6 +20,8 @@ def convert_ipynb_to_gallery(file_name):
     https://gist.github.com/wuhuikai/4a7ceb8bc52454e17a4eb8327d538d85
 
     """
+    pdoc = km3pipe.extras.pypandoc()
+
     python_file = ""
 
     nb_dict = json.load(open(file_name))
