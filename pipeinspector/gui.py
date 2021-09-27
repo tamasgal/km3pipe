@@ -44,7 +44,7 @@ class MainFrame(urwid.Frame):
     def blob_selected(self, index):
         self.info_area.set_text("Blob: {0}".format(index))
 
-        blob = self.pump.get_blob(index)
+        blob = self.pump[index]
         self.blob_browser.load(blob)
 
     def keypress(self, size, key):

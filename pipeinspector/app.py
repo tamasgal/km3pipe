@@ -18,7 +18,7 @@ import urwid
 
 from pipeinspector.gui import MainFrame
 from pipeinspector.settings import UI
-from km3pipe.io import EvtPump, AanetPump, CLBPump, HDF5Pump
+from km3pipe.io import OfflinePump, HDF5Pump, EvtPump, CLBPump
 from km3pipe.io.daq import DAQPump
 
 __author__ = "Tamas Gal"
@@ -61,7 +61,7 @@ def get_pump(input_file):
     elif extension == "dqd":
         pump = CLBPump(filename=input_file, cache_enabled=True)
     elif extension == "root":
-        pump = AanetPump(filename=input_file)
+        pump = OfflinePump(filename=input_file)
     elif extension == "h5":
         pump = HDF5Pump(filename=input_file)
     else:
