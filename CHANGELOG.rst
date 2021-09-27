@@ -3,6 +3,10 @@ Unreleased changes
 Version 9
 ---------
 
+9.9.1 - 2021-09-28
+~~~~~~~~~~~~~~~~~~
+* Minor cosmetics and bug fixes
+
 9.9.0 - 2021-09-27
 ~~~~~~~~~~~~~~~~~~
 * ``h5extract`` got two new options: ``--without-calibration`` to skip
