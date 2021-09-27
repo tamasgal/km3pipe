@@ -1,12 +1,14 @@
 Unreleased changes
 ------------------
+Version 9
+---------
+
+9.9.0 - 2021-09-27
+~~~~~~~~~~~~~~~~~~
 * ``h5extract`` got two new options: ``--without-calibration`` to skip
   hit-calibration information and ``--without-full-reco`` to skip writing
   the complete reconstruction information (best tracks are written by
   default)
-
-Version 9
----------
 
 9.8.1 - 2021-09-26
 ~~~~~~~~~~~~~~~~~~
