@@ -1,5 +1,10 @@
 Unreleased changes
 ------------------
+* ``h5extract`` got two new options: ``--without-calibration`` to skip
+  hit-calibration information and ``--without-full-reco`` to skip writing
+  the complete reconstruction information (best tracks are written by
+  default)
+
 Version 9
 ---------
 

@@ -8,6 +8,8 @@ Usage:
 
 Options:
     -o OUTFILE                  Output file.
+    --without-full-reco         Don't include all reco tracks, only the best.
+    --without-calibration       Don't include calibration information for offline hits.
     -h --help                   Show this screen.
 
 """
@@ -21,7 +23,21 @@ import km3pipe as kp
 FORMAT_VERSION = np.string_("5.1")
 
 
-def h5extractf(root_file, outfile=None):
+def h5extractf(
+    root_file, outfile=None, without_full_reco=False, without_calibration=False
+):
+    if without_calibration:
+        calibration_fields = []
+    else:
+        calibration_fields = [
+            "pos_x",
+            "pos_y",
+            "pos_z",
+            "dir_x",
+            "dir_y",
+            "dir_z",
+            "tdc",
+        ]
     fields = {
         "event_info": [
             ("id", "event_id"),  # id gets renamed to event_id
@@ -49,13 +65,7 @@ def h5extractf(root_file, outfile=None):
             ("t", "time"),
             "tot",
             ("trig", "triggered"),
-            "pos_x",
-            "pos_y",
-            "pos_z",
-            "dir_x",
-            "dir_y",
-            "dir_z",
-            "tdc",
+            *calibration_fields,
         ],
         "mc_hits": [
             "a",
@@ -117,16 +127,20 @@ def h5extractf(root_file, outfile=None):
 
             print("Processing tracks")
             reco = f.create_group("reco")
-            for branch_data in _yield_tracks(r.tracks, fields["tracks"]):
+            for branch_data in _yield_tracks(
+                r.tracks, fields["tracks"], without_full_reco=without_full_reco
+            ):
                 _to_hdf(reco, *branch_data)
 
             for field_name in ("hits", "mc_hits", "mc_tracks"):
                 if r[field_name] is None:
                     continue
                 print("Processing", field_name)
-                _to_hdf(
-                    f, field_name, _branch_to_numpy(r[field_name], fields[field_name])
-                )
+                np_branch = _branch_to_numpy(r[field_name], fields[field_name])
+                if np_branch[1].sum() == 0:
+                    # empty branch, e.g. mc_hits for data files
+                    continue
+                _to_hdf(f, field_name, np_branch)
         f.attrs.create("format_version", FORMAT_VERSION)
         f.attrs.create("km3pipe", kp.__version__)
         f.attrs.create("origin", root_file)
@@ -208,7 +222,7 @@ def _ak_to_numpy(ak_array, fields):
     return {fields[i]: filled[:, i] for i in range(len(fields))}, n_items
 
 
-def _yield_tracks(tracks, fields):
+def _yield_tracks(tracks, fields, without_full_reco=False):
     """
     Yield info from the tracks branch.
 
@@ -218,6 +232,8 @@ def _yield_tracks(tracks, fields):
         The tracks branch.
     fields : list
         The fields to read for each track.
+    without_full_reco : bool
+        Don't include all reco tracks, only the best.
 
     Yields
     ------
@@ -228,7 +244,6 @@ def _yield_tracks(tracks, fields):
 
     """
     track_fmap = {
-        "tracks": (None, None),
         "best_jmuon": (
             km3io.definitions.reconstruction.JMUONPREFIT,
             km3io.tools.best_jmuon,
@@ -246,6 +261,9 @@ def _yield_tracks(tracks, fields):
             km3io.tools.best_aashower,
         ),
     }
+    if not without_full_reco:
+        track_fmap["tracks"] = (None, None)
+
     n_columns = max(km3io.definitions.fitparameters.values()) + 1
 
     for name, (stage, func) in track_fmap.items():
@@ -310,7 +328,12 @@ def main():
     from docopt import docopt
 
     args = docopt(__doc__, version=kp.version)
-    h5extractf(args["FILENAME"], args["-o"])
+    h5extractf(
+        args["FILENAME"],
+        args["-o"],
+        without_full_reco=args["--without-full-reco"],
+        without_calibration=args["--without-calibration"],
+    )
 
 
 if __name__ == "__main__":
