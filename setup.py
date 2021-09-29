@@ -36,7 +36,7 @@ setup(
     packages=["km3pipe", "km3pipe.io", "km3pipe.utils", "km3modules", "pipeinspector"],
     include_package_data=True,
     platforms="any",
-    setup_requires=["numpy>=1.12", "setuptools_scm"],
+    setup_requires=["setuptools_scm"],
     install_requires=read_requirements("install"),
     extras_require={kind: read_requirements(kind) for kind in ["dev", "extras"]},
     use_scm_version=True,
