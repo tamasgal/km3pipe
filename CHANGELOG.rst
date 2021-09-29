@@ -3,6 +3,10 @@ Unreleased changes
 Version 9
 ---------
 
+9.9.2 - 2021-09-29
+~~~~~~~~~~~~~~~~~~
+* Removed ``numpy`` from build stage
+
 9.9.1 - 2021-09-28
 ~~~~~~~~~~~~~~~~~~
 * Minor cosmetics and bug fixes
