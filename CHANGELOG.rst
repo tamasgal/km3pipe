@@ -3,6 +3,11 @@ Unreleased changes
 Version 9
 ---------
 
+9.9.3 - 2021-09-30
+~~~~~~~~~~~~~~~~~~
+* Improved logging behaviour when setting a level using
+  ``kp.logger.set_level()``
+
 9.9.2 - 2021-09-29
 ~~~~~~~~~~~~~~~~~~
 * Removed ``numpy`` from build stage
