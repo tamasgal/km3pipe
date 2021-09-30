@@ -148,9 +148,15 @@ def available_loggers():
     return list(logging.Logger.manager.loggerDict.keys())
 
 
-def set_level(name, level):
-    """Set the log level for given logger"""
-    get_logger(name).setLevel(level)
+def set_level(log_or_name, level):
+    """Set the log level for given logger and all handlers"""
+    if isinstance(log_or_name, str):
+        log = get_logger(log_or_name)
+    else:
+        log = log_or_name
+    log.setLevel(level)
+    for handler in log.handlers:
+        handler.setLevel(level)
 
 
 def get_printer(name, color=None, ansi_code=None, force_color=False):
