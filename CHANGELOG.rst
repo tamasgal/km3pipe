@@ -3,6 +3,11 @@ Unreleased changes
 Version 9
 ---------
 
+9.9.4 - 2021-10-01
+~~~~~~~~~~~~~~~~~~
+* ``uriwd`` is now an optional dependency and needs to be installed
+  separately for ``pipeinspector``
+
 9.9.3 - 2021-09-30
 ~~~~~~~~~~~~~~~~~~
 * Improved logging behaviour when setting a level using
