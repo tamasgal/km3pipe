@@ -15,4 +15,3 @@ tables>=3.4.2
 thepipe>=1.3.5
 toml
 tqdm
-urwid

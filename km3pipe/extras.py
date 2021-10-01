@@ -44,3 +44,18 @@ def pypandoc():
         )
     else:
         return pypandoc
+
+
+def urwid():
+    """Imports and returns ``urwid``."""
+    try:
+        import urwid
+    except ImportError:
+        raise ImportError(
+            "install the 'urwid' package with:\n\n"
+            "    pip install urwid\n\n"
+            "or\n\n"
+            "    conda install urwid"
+        )
+    else:
+        return urwid

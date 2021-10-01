@@ -14,10 +14,8 @@ Options:
 
 import os
 
-import urwid
-
-from pipeinspector.gui import MainFrame
 from pipeinspector.settings import UI
+import km3pipe.extras
 from km3pipe.io import OfflinePump, HDF5Pump, EvtPump, CLBPump
 from km3pipe.io.daq import DAQPump
 
@@ -73,10 +71,17 @@ def main():
     from docopt import docopt
 
     arguments = docopt(__doc__, version=__version__)
+
+    urwid = km3pipe.extras.urwid()
+
     input_file = arguments["FILE"]
     pump = get_pump(input_file)
+
+    from pipeinspector.gui import MainFrame
+
     main_frame = MainFrame(pump)
     # main_frame.header.set_text("Inspecting {0}".format(input_file))
+
     loop = urwid.MainLoop(
         main_frame, UI.palette, input_filter=filter_input, unhandled_input=handle_input
     )
