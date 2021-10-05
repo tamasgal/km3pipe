@@ -26,7 +26,7 @@ import km3pipe as kp
 FORMAT_VERSION = np.string_("5.1")
 
 
-def h5extractf(root_file, outfile, without_full_reco=False, without_calibration=False):
+def h5extractf(root_file, outfile=None, without_full_reco=False, without_calibration=False):
     if without_calibration:
         calibration_fields = []
     else:
@@ -102,6 +102,9 @@ def h5extractf(root_file, outfile, without_full_reco=False, without_calibration=
             "id",
         ],
     }
+
+    if outfile is None:
+        outfile = root_file + ".h5"
 
     start_time = time.time()
     with h5py.File(outfile, "w") as f:
