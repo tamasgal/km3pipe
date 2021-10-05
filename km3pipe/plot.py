@@ -13,7 +13,6 @@ except ImportError:
 import matplotlib.pyplot as plt
 import numpy as np
 
-from km3pipe.stats import bincenters
 import km3pipe.extras
 
 __author__ = "Moritz Lotze"
@@ -73,6 +72,12 @@ def meshgrid(x_min, x_max, x_step, y_min=None, y_max=None, y_step=None):
         np.arange(x_min, x_max, x_step), np.arange(y_min, y_max, y_step)
     )
     return xx, yy
+
+
+def bincenters(bins):
+    """Bincenters, assuming they are all equally spaced."""
+    bins = np.atleast_1d(bins)
+    return 0.5 * (bins[1:] + bins[:-1])
 
 
 def prebinned_hist(counts, binlims, ax=None, *args, **kwargs):
