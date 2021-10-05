@@ -8,24 +8,25 @@ Usage:
 
 Options:
     -o OUTFILE                  Output file.
+    --provenance-file=FILENAME  The file to store the provenance information.
     --without-full-reco         Don't include all reco tracks, only the best.
     --without-calibration       Don't include calibration information for offline hits.
     -h --help                   Show this screen.
 
 """
 import time
+from uuid import uuid4
 import numpy as np
 import h5py
 import awkward as ak
+from thepipe import Provenance
 import km3io
 import km3pipe as kp
 
 FORMAT_VERSION = np.string_("5.1")
 
 
-def h5extractf(
-    root_file, outfile=None, without_full_reco=False, without_calibration=False
-):
+def h5extractf(root_file, outfile, without_full_reco=False, without_calibration=False):
     if without_calibration:
         calibration_fields = []
     else:
@@ -102,11 +103,17 @@ def h5extractf(
         ],
     }
 
-    if outfile is None:
-        outfile = root_file + ".h5"
     start_time = time.time()
     with h5py.File(outfile, "w") as f:
+
+        _uuid = str(uuid4())
+        Provenance().record_output(outfile, uuid=_uuid, comment="Converted HDF5 file")
+
         with km3io.OfflineReader(root_file) as r:
+            Provenance().record_input(
+                root_file, uuid=str(r.uuid), comment="Input ROOT file"
+            )
+
             if r.header is not None:
                 print("Processing header")
                 f.create_dataset(
@@ -144,6 +151,7 @@ def h5extractf(
         f.attrs.create("format_version", FORMAT_VERSION)
         f.attrs.create("km3pipe", kp.__version__)
         f.attrs.create("origin", root_file)
+        f.attrs.create("kid", _uuid)
     print("Completed in {:.1f} s".format(time.time() - start_time))
 
 
@@ -328,9 +336,20 @@ def main():
     from docopt import docopt
 
     args = docopt(__doc__, version=kp.version)
+
+    outfile = args["-o"]
+    if outfile is None:
+        outfile = args["FILENAME"] + ".h5"
+
+    provfile = args["--provenance-file"]
+    if provfile is None:
+        provfile = outfile + ".prov.json"
+
+    Provenance().outfile = provfile
+
     h5extractf(
         args["FILENAME"],
-        args["-o"],
+        outfile,
         without_full_reco=args["--without-full-reco"],
         without_calibration=args["--without-calibration"],
     )
