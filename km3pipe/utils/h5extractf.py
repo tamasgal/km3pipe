@@ -26,7 +26,9 @@ import km3pipe as kp
 FORMAT_VERSION = np.string_("5.1")
 
 
-def h5extractf(root_file, outfile=None, without_full_reco=False, without_calibration=False):
+def h5extractf(
+    root_file, outfile=None, without_full_reco=False, without_calibration=False
+):
     if without_calibration:
         calibration_fields = []
     else:
