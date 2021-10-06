@@ -1,5 +1,8 @@
 Unreleased changes
 ------------------
+* ``kp.stats`` removed as it is not used
+
+
 Version 9
 ---------
 
