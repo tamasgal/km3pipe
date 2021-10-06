@@ -823,15 +823,3 @@ class DMMonitor(object):
                     "Retry in %d seconds..." % (e, interval)
                 )
             time.sleep(interval)
-
-
-def is_3dshower(trigger_mask):
-    return bool(trigger_mask & 2)
-
-
-def is_mxshower(trigger_mask):
-    return bool(trigger_mask & 4)
-
-
-def is_3dmuon(trigger_mask):
-    return bool(trigger_mask & 16)
