@@ -1,7 +1,7 @@
 Unreleased changes
 ------------------
 * ``kp.stats`` removed as it is not used
-
+* added ``memory`` option to ``kp.shell.qsub()``
 
 Version 9
 ---------

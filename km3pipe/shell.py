@@ -42,6 +42,7 @@ JOB_TEMPLATES = {
         #$ -l s_cpu={cpu}
         ## Memory (Units: G, M, K, B; Min 64M)
         #$ -l vmem={vmem}
+        #$ -l s_rss={memory}
         ## Local scratch diskspace (at TMPDIR)
         #$ -l fsize={fsize}
         #
@@ -129,6 +130,7 @@ def gen_job(
     node_type=None,
     cpu=None,
     cluster="in2p3",
+    memory="8G",
     vmem="8G",
     fsize="8G",
     shell=None,
@@ -178,6 +180,7 @@ def gen_job(
         group=group,
         walltime=walltime,
         cpu=cpu,
+        memory=memory,
         vmem=vmem,
         fsize=fsize,
         irods=irods,
