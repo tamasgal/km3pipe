@@ -1,13 +1,16 @@
 Unreleased changes
 ------------------
+
+Version 9
+---------
+
+9.10.0 - 2021-10-06
+~~~~~~~~~~~~~~~~~~~
 * ``kp.stats`` removed as it is not used
 * added ``memory`` option to ``kp.shell.qsub()``
 * ``kp.io.daq.is_3dmuon``, ``kp.io.daq.is_3dshower`` and
   ``kp.io.daq.is_mxshower`` have been removed in favour of
   ``km3io.tools.is_3dmuon`` etc.
-
-Version 9
----------
 
 9.9.4 - 2021-10-01
 ~~~~~~~~~~~~~~~~~~
