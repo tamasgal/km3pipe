@@ -263,7 +263,7 @@ class DOMActivityPlotter(Module):
     def create_plot(self):
         x, y, _ = zip(*detector.doms.values())
         fig, ax = plt.subplots(figsize=(10, 6))
-        cmap = plt.get_cmap('RdYlGn_r')
+        cmap = plt.get_cmap('RdYlGn_r').copy()
         cmap.set_over('deeppink', 1.0)
         cmap.set_under('deepskyblue', 1.0)
 
