@@ -1,6 +1,9 @@
 Unreleased changes
 ------------------
 
+* ``Calibration.dus(hits)`` added, which returns the DUs for each hit
+* Performance improvements in ``DAQEvent`` parsing
+
 Version 9
 ---------
 

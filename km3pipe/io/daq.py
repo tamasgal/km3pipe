@@ -361,22 +361,22 @@ class DAQProcessor(Module):
             self.log.warning("No hits found in event.")
             return
 
-        dom_ids, channel_ids, times, tots = zip(*hits)
+        # This might not be needed
         triggereds = np.zeros(n_hits)
         triggered_map = {}
-        for triggered_hit in event.triggered_hits:
-            dom_id, pmt_id, time, tot, _ = triggered_hit
-            triggered_map[(dom_id, pmt_id, time, tot)] = True
+        for thit in event.triggered_hits:
+            # TODO: switch to thit.trigger_mask instead of True!
+            triggered_map[(thit.dom_id, channel_id, thit.time, thit.tot)] = True
         for idx, hit in enumerate(hits):
             triggereds[idx] = hit in triggered_map
 
         hit_series = Table.from_template(
             {
-                "channel_id": channel_ids,
-                "dom_id": dom_ids,
-                "time": times,
-                "tot": tots,
-                "triggered": triggereds,
+                "channel_id": hits.channel_id,
+                "dom_id": hits.dom_id,
+                "time": hits.time,
+                "tot": hits.tot,
+                "triggered": triggereds,  # TODO: switch to trigger_mask!
                 "group_id": self.event_id,
             },
             "Hits",
@@ -611,12 +611,30 @@ class DAQEvent(object):
         Number of hits satisfying the trigger conditions.
     n_snapshot_hits : int
         Number of snapshot hits.
-    triggered_hits : list
-        A list of triggered hits (dom_id, pmt_id, tdc_time, tot, (trigger_mask,))
-    snapshot_hits : list
-        A list of snapshot hits (dom_id, pmt_id, tdc_time, tot)
+    triggered_hits : np.recarray
+        Array of triggered hits (fields: dom_id, pmt_id, tdc_time, tot, trigger_mask)
+    snapshot_hits : np.recarray
+        A list of snapshot hits (fields: dom_id, pmt_id, tdc_time, tot)
 
     """
+
+    triggered_hits_dt = np.dtype(
+        [
+            ("dom_id", "<i"),
+            ("channel_id", "b"),
+            ("time", ">I"),
+            ("tot", "b"),
+            ("trigger_mask", "<Q"),
+        ]
+    )
+    snapshot_hits_dt = np.dtype(
+        [
+            ("dom_id", "<i"),
+            ("channel_id", "b"),
+            ("time", ">I"),
+            ("tot", "b"),
+        ]
+    )
 
     def __init__(self, file_obj, legacy=False):
         if not legacy:
@@ -633,29 +651,22 @@ class DAQEvent(object):
         self.overlays = unpack("<i", file_obj.read(4))[0]
 
         self.n_triggered_hits = unpack("<i", file_obj.read(4))[0]
-        self.triggered_hits = []
-        self._parse_triggered_hits(file_obj)
+        self.triggered_hits = self._parse_triggered_hits(file_obj)
 
         self.n_snapshot_hits = unpack("<i", file_obj.read(4))[0]
-        self.snapshot_hits = []
-        self._parse_snapshot_hits(file_obj)
+        self.snapshot_hits = self._parse_snapshot_hits(file_obj)
 
     def _parse_triggered_hits(self, file_obj):
         """Parse and store triggered hits."""
-        for _ in range(self.n_triggered_hits):
-            dom_id, pmt_id = unpack("<ib", file_obj.read(5))
-            tdc_time = unpack(">I", file_obj.read(4))[0]
-            tot = unpack("<b", file_obj.read(1))[0]
-            trigger_mask = unpack("<Q", file_obj.read(8))
-            self.triggered_hits.append((dom_id, pmt_id, tdc_time, tot, trigger_mask))
+        raw_data = file_obj.read(
+            self.triggered_hits_dt.itemsize * self.n_triggered_hits
+        )
+        return np.frombuffer(raw_data, self.triggered_hits_dt).view(np.recarray)
 
     def _parse_snapshot_hits(self, file_obj):
         """Parse and store snapshot hits."""
-        for _ in range(self.n_snapshot_hits):
-            dom_id, pmt_id = unpack("<ib", file_obj.read(5))
-            tdc_time = unpack(">I", file_obj.read(4))[0]
-            tot = unpack("<b", file_obj.read(1))[0]
-            self.snapshot_hits.append((dom_id, pmt_id, tdc_time, tot))
+        raw_data = file_obj.read(self.snapshot_hits_dt.itemsize * self.n_snapshot_hits)
+        return np.frombuffer(raw_data, self.snapshot_hits_dt).view(np.recarray)
 
     def __repr__(self):
         string = "\n".join(

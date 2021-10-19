@@ -122,6 +122,26 @@ class TestDAQPump(TestCase):
         event = blob["DAQEvent"]
         assert 182 == event.n_triggered_hits
         assert 239 == event.n_snapshot_hits
+        assert np.allclose(
+            [806451572, 806455814, 806455814, 806483369, 806483369],
+            event.triggered_hits.dom_id[:5],
+        )
+        assert np.allclose([23, 14, 24, 6, 11], event.triggered_hits.channel_id[:5])
+        assert np.allclose(
+            [40380598, 40380623, 40380551, 40380835, 40380920],
+            event.triggered_hits.time[:5],
+        )
+        assert np.allclose([4, 4, 4, 4, 22], event.triggered_hits.trigger_mask[:5])
+
+        assert np.allclose(
+            [806451572, 806455814, 806455814, 806483369, 806483369],
+            event.triggered_hits.dom_id[:5],
+        )
+        assert np.allclose([23, 17, 14, 24, 6], event.snapshot_hits.channel_id[:5])
+        assert np.allclose(
+            [40380598, 40380623, 40380551, 40380835, 40380920],
+            event.triggered_hits.time[:5],
+        )
 
 
 class TestTMCHRepump(TestCase):
