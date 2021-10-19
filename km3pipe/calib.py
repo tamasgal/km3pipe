@@ -119,6 +119,10 @@ class Calibration(Module):
         """Return the detector"""
         return self.detector
 
+    def dus(self, hits):
+        """Return the DUs for given hits"""
+        return _dus(hits, len(hits), self._calib_by_dom_and_channel)
+
     def apply_t0(self, hits):
         """Apply only t0s"""
         apply_t0_nb(hits.time, hits.dom_id, hits.channel_id, self._lookup_tables)
@@ -341,6 +345,14 @@ def _get_calibration_for_mchits(hits, lookup):
     channel_id = cal[:, 10]
 
     return [dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0, dom_id, channel_id]
+
+
+@nb.njit
+def _dus(hits, n, lookup):
+    dus = np.empty(n, dtype=np.uint8)
+    for i in range(n):
+        dus[i] = lookup[hits["dom_id"][i]][0][7]  # looking only at channel ID 0
+    return dus
 
 
 class CalibrationService(Module):
