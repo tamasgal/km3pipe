@@ -7,15 +7,15 @@ default: build
 all: install
 
 install:
-	pip install .
+	python3 -m pip install .
 
 install-dev:
-	pip install -e ".[dev]"
-	pip install -e ".[extras]"
-	python -m ipykernel install --user --name="km3pipe-dev"
+	python3 -m pip install -e ".[dev]"
+	python3 -m pip install -e ".[extras]"
+	python3 -m ipykernel install --user --name="km3pipe-dev"
 
 clean:
-	python setup.py clean --all
+	python3 setup.py clean --all
 
 test: 
 	py.test --junitxml=./reports/junit.xml -o junit_suite_name=$(PKGNAME) $(ALLNAMES)
