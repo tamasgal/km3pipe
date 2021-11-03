@@ -124,6 +124,11 @@ class Calibration(Module):
         dom_ids = hits["dom_id"]
         return _dus(dom_ids, len(dom_ids), self._calib_by_dom_and_channel)
 
+    def floors(self, hits):
+        """Return the floors for given hits"""
+        dom_ids = hits["dom_id"]
+        return _floors(dom_ids, len(dom_ids), self._calib_by_dom_and_channel)
+
     def apply_t0(self, hits):
         """Apply only t0s"""
         apply_t0_nb(hits.time, hits.dom_id, hits.channel_id, self._lookup_tables)
@@ -352,7 +357,17 @@ def _get_calibration_for_mchits(hits, lookup):
 def _dus(dom_ids, n, lookup):
     dus = np.empty(n, dtype=np.uint8)
     for i in range(n):
+        # DU is at index 7
         dus[i] = lookup[dom_ids[i]][0][7]  # looking only at channel ID 0
+    return dus
+
+
+@nb.njit
+def _floors(dom_ids, n, lookup):
+    dus = np.empty(n, dtype=np.uint8)
+    for i in range(n):
+        # floor is at index 8
+        dus[i] = lookup[dom_ids[i]][0][8]  # looking only at channel ID 0
     return dus
 
 

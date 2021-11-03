@@ -82,6 +82,16 @@ class TestCalibration(TestCase):
         dus = calib.dus(hits)
         assert np.allclose([1, 2, 1], dus)
 
+    def test_floors(self):
+        calib = Calibration(filename=data_path("detx/detx_v1.detx"))
+
+        hits = Table(
+            {"dom_id": [2, 6, 3], "channel_id": [0, 1, 2], "time": [10.1, 11.2, 12.3]}
+        )
+
+        floors = calib.floors(hits)
+        assert np.allclose([2, 3, 3], floors)
+
     def test_apply_to_hits_with_dom_id_and_channel_id(self):
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
 
