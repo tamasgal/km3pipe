@@ -49,7 +49,7 @@ class Detector(object):
         self.dus = []
         self.n_pmts_per_dom = None
         self.doms = OrderedDict()
-        self.pmts = []
+        self.pmts = None  # a Table
         self.version = None
         self.valid_from = None
         self.valid_until = None
