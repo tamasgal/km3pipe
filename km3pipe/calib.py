@@ -121,7 +121,8 @@ class Calibration(Module):
 
     def dus(self, hits):
         """Return the DUs for given hits"""
-        return _dus(hits, len(hits), self._calib_by_dom_and_channel)
+        dom_ids = hits["dom_id"]
+        return _dus(dom_ids, len(dom_ids), self._calib_by_dom_and_channel)
 
     def apply_t0(self, hits):
         """Apply only t0s"""
@@ -348,10 +349,10 @@ def _get_calibration_for_mchits(hits, lookup):
 
 
 @nb.njit
-def _dus(hits, n, lookup):
+def _dus(dom_ids, n, lookup):
     dus = np.empty(n, dtype=np.uint8)
     for i in range(n):
-        dus[i] = lookup[hits["dom_id"][i]][0][7]  # looking only at channel ID 0
+        dus[i] = lookup[dom_ids[i]][0][7]  # looking only at channel ID 0
     return dus
 
 
