@@ -1,12 +1,14 @@
 Unreleased changes
 ------------------
 
+Version 9
+---------
+
+9.11.0 - 2021-11-04
+~~~~~~~~~~~~~~~~~~~
 * ``Calibration.dus(hits)`` added, which returns the DU for each hit
 * ``Calibration.floors(hits)`` added, which returns the floor for each hit
 * Performance improvements in ``DAQEvent`` parsing
-
-Version 9
----------
 
 9.10.0 - 2021-10-06
 ~~~~~~~~~~~~~~~~~~~
