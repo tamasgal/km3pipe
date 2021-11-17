@@ -4,6 +4,10 @@ Unreleased changes
 Version 9
 ---------
 
+9.11.1 - 2021-11-17
+~~~~~~~~~~~~~~~~~~~
+* Forces the usage of HTTPS connections to ELOG and when updating
+
 9.11.0 - 2021-11-04
 ~~~~~~~~~~~~~~~~~~~
 * ``Calibration.dus(hits)`` added, which returns the DU for each hit
