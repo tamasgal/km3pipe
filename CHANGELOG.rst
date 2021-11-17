@@ -4,6 +4,10 @@ Unreleased changes
 Version 9
 ---------
 
+9.11.2 - 2021-11-17
+~~~~~~~~~~~~~~~~~~~
+* Minor fixes in CI
+
 9.11.1 - 2021-11-17
 ~~~~~~~~~~~~~~~~~~~
 * Forces the usage of HTTPS connections to ELOG and when updating
