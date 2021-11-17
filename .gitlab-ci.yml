@@ -108,7 +108,7 @@ coverage:
             - reports/coverage
 
 docs:
-    image: docker.km3net.de/base/python:3.6
+    image: docker.km3net.de/base/python:3.9
     stage: doc
     script:
         - *virtualenv_definition
@@ -116,7 +116,7 @@ docs:
     cache: {}
 
 pages:
-    image: docker.km3net.de/base/python:3.6
+    image: docker.km3net.de/base/python:3.9
     stage: doc
     script:
         - *virtualenv_definition
