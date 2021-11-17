@@ -2,7 +2,7 @@
 # pylint: disable=C0111,E1003,R0904,C0103,R0201,C0102
 
 from km3pipe.testing import TestCase, patch
-from km3pipe.cmd import update_km3pipe
+from km3pipe.cmd import update_km3pipe, KM3PIPE_GIT
 
 __author__ = "Tamas Gal"
 __copyright__ = "Copyright 2016, Tamas Gal and the KM3NeT collaboration."
@@ -11,8 +11,6 @@ __license__ = "MIT"
 __maintainer__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
-
-KM3PIPE_GIT = "http://git.km3net.de/km3py/km3pipe.git"
 
 
 class TestUpdateKm3pipe(TestCase):

@@ -50,6 +50,7 @@ __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
 SPS_CACHE = "/sps/km3net/repo/data/cache"
+KM3PIPE_GIT = "https://git.km3net.de/km3py/km3pipe.git"
 
 
 def run_tests():
@@ -69,11 +70,7 @@ def run_tests():
 def update_km3pipe(git_branch=""):
     if git_branch == "" or git_branch is None:
         git_branch = "master"
-    os.system(
-        "pip install -U git+https://git.km3net.de/km3py/km3pipe.git@{0}".format(
-            git_branch
-        )
-    )
+    os.system(f"pip install -U git+{KM3PIPE_GIT}@{git_branch}")
 
 
 def retrieve(run_id, det_id, use_irods=False, out=None):
