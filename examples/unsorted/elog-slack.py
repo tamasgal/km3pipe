@@ -15,7 +15,7 @@ from pyslack import SlackClient  # pip install pyslack-real
 wm = pyinotify.WatchManager()
 mask = pyinotify.IN_CLOSE_WRITE
 
-URL = "http://elog.km3net.de"
+URL = "https://elog.km3net.de"
 # LOGBOOK_PATH = '/home/elog/elog'
 LOGBOOK_PATH = "/usr/local/elog/logbooks"
 BOTNAME = "ELOG"

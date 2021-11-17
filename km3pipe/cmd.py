@@ -53,6 +53,13 @@ SPS_CACHE = "/sps/km3net/repo/data/cache"
 
 
 def run_tests():
+    print(
+        "Running the km3pipe test suite. Make sure you have all the test "
+        "dependencies and extras installed with\n\n"
+        '    pip install "km3pipe[dev]"\n'
+        '    pip install "km3pipe[extras]"\n'
+    )
+
     import pytest
     import km3pipe
 
@@ -60,16 +67,10 @@ def run_tests():
 
 
 def update_km3pipe(git_branch=""):
-    print(
-        "Running the km3pipe test suite. Make sure you have all the test "
-        "dependencies and extras installed with\n\n"
-        '    pip install "km3pipe[dev]"\n'
-        '    pip install "km3pipe[extras]"\n'
-    )
     if git_branch == "" or git_branch is None:
         git_branch = "master"
     os.system(
-        "pip install -U git+http://git.km3net.de/km3py/km3pipe.git@{0}".format(
+        "pip install -U git+https://git.km3net.de/km3py/km3pipe.git@{0}".format(
             git_branch
         )
     )

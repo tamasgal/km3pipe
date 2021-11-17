@@ -28,7 +28,7 @@ except UnicodeDecodeError:
 
 setup(
     name="km3pipe",
-    url="http://git.km3net.de/km3py/km3pipe",
+    url="https://git.km3net.de/km3py/km3pipe",
     description="An analysis framework for KM3NeT",
     long_description=long_description,
     author="Tamas Gal and Moritz Lotze",
