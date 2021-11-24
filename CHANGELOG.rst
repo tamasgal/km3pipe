@@ -3,11 +3,13 @@ Unreleased changes
 
 Version 9
 ---------
+9.11.4 - 2021-11-24
+~~~~~~~~~~~~~~~~~~~
+* Hotfix for parsing triggered hits in online streams
 
 9.11.3 - 2021-11-24
 ~~~~~~~~~~~~~~~~~~~
-* Fixed typo in ``io.daq`` which messed up the triggere hits parsing
-  in online streams
+* Fixed typo in ``io.daq``
 
 9.11.2 - 2021-11-17
 ~~~~~~~~~~~~~~~~~~~
