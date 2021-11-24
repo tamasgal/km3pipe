@@ -368,7 +368,7 @@ class DAQProcessor(Module):
             # TODO: switch to thit.trigger_mask instead of True!
             triggered_map[(thit.dom_id, thit.channel_id, thit.time, thit.tot)] = True
         for idx, hit in enumerate(hits):
-            triggereds[idx] = hit in triggered_map
+            triggereds[idx] = tuple(hit) in triggered_map
 
         hit_series = Table.from_template(
             {
@@ -621,18 +621,18 @@ class DAQEvent(object):
     triggered_hits_dt = np.dtype(
         [
             ("dom_id", "<i"),
-            ("channel_id", "b"),
+            ("channel_id", np.uint8),
             ("time", ">I"),
-            ("tot", "b"),
+            ("tot", np.uint8),
             ("trigger_mask", "<Q"),
         ]
     )
     snapshot_hits_dt = np.dtype(
         [
             ("dom_id", "<i"),
-            ("channel_id", "b"),
+            ("channel_id", np.uint8),
             ("time", ">I"),
-            ("tot", "b"),
+            ("tot", np.uint8),
         ]
     )
 

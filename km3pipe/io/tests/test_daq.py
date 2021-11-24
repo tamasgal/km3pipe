@@ -4,7 +4,9 @@
 Tests for KM3NeT binary formats readout.
 
 """
+import io
 from os.path import dirname, join
+import struct
 
 import numpy as np
 
@@ -14,6 +16,7 @@ from km3pipe.io.daq import (
     DAQPreamble,
     DAQHeader,
     DAQSummaryslice,
+    DAQProcessor,
     DMMonitor,
     RePump,
     TMCHRepump,
@@ -142,6 +145,44 @@ class TestDAQPump(TestCase):
             [40380598, 40380623, 40380551, 40380835, 40380920],
             event.triggered_hits.time[:5],
         )
+
+
+class TestDAQProcessor(TestCase):
+    def test_events(self):
+        dp = DAQProcessor()
+
+        filename = data_path("daq/IO_EVT.dat")
+        with open(filename, "rb") as fobj:
+            data = fobj.read()
+            blob = {}
+            blob["CHData"] = data
+            blob["CHPrefix"] = lambda x: x  # quick and dirty thing to attach fields to
+            blob["CHPrefix"].tag = "IO_EVT"
+
+            blob = dp(blob)
+
+            assert "Hits" in blob
+            hits = blob["Hits"]
+            assert 182 == sum(hits.triggered)
+            assert 239 == len(hits)
+
+    def test_events_legacy(self):
+        dp = DAQProcessor(legacy=True)
+
+        filename = data_path("daq/IO_EVT_legacy.dat")
+        with open(filename, "rb") as fobj:
+            data = fobj.read()
+            blob = {}
+            blob["CHData"] = data
+            blob["CHPrefix"] = lambda x: x  # quick and dirty thing to attach fields to
+            blob["CHPrefix"].tag = "IO_EVT"
+
+            blob = dp(blob)
+
+            assert "Hits" in blob
+            hits = blob["Hits"]
+            assert 13 == sum(hits.triggered)
+            assert 28 == len(hits)
 
 
 class TestTMCHRepump(TestCase):
