@@ -366,7 +366,7 @@ class DAQProcessor(Module):
         triggered_map = {}
         for thit in event.triggered_hits:
             # TODO: switch to thit.trigger_mask instead of True!
-            triggered_map[(thit.dom_id, channel_id, thit.time, thit.tot)] = True
+            triggered_map[(thit.dom_id, thit.channel_id, thit.time, thit.tot)] = True
         for idx, hit in enumerate(hits):
             triggereds[idx] = hit in triggered_map
 
