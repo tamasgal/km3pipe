@@ -253,7 +253,7 @@ def angle_between(v1, v2, axis=0):
         v1_u = unit_vector(v1)
         v2_u = unit_vector(v2)
         # Don't use `np.dot`, does not work with all shapes
-        return np.arccos(np.inner(v1_u, v2_u))
+        return np.arccos(np.clip(np.inner(v1_u, v2_u), -1, 1))
     elif axis == 1:
         return angle(v1, v2)  # returns angle in deg
     else:
