@@ -274,7 +274,6 @@ class HDF5Sink(Module):
         self.chunksize = self.get("chunksize")
         self.flush_frequency = self.get("flush_frequency", default=500)
         self.pytab_file_args = self.get("pytab_file_args", default=dict())
-        self.file_mode = "a" if self.get("append") else "w"
         self.keep_open = self.get("keep_open")
         self._reset_group_id = self.get("reset_group_id", default=True)
         self.indices = {}  # to store HDF5IndexTables for each h5loc
@@ -294,7 +293,7 @@ class HDF5Sink(Module):
         else:
             self.h5file = tb.open_file(
                 self.filename,
-                mode=self.file_mode,
+                mode="w",
                 title="KM3NeT",
                 **self.pytab_file_args,
             )

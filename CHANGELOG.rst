@@ -1,6 +1,8 @@
 Unreleased changes
 ------------------
 
+* Removed ``file_mode="append"`` from ``HDF5Sink``
+
 Version 9
 ---------
 9.11.4 - 2021-11-24
