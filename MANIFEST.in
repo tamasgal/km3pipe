@@ -1,12 +1,21 @@
-include README.rst
-include LICENSE
-include requirements*.txt
+graft src/km3pipe
+graft src/km3modules
+graft src/pipeinspector
 
-recursive-include doc *
-recursive-include km3pipe/tests *.py
-recursive-include km3pipe/io/tests *.py
-recursive-include km3pipe/style *.py
+global-exclude .env*
+global-exclude .git*
+global-exclude .pytest_cache
+global-exclude .DS_Store
+global-exclude .ipynb_checkpoints
+global-exclude *.py[co]
+global-exclude __pycache__
 
-recursive-exclude doc *.pyc
-recursive-exclude doc *.pyo
-prune doc/_build
+include README.rst CHANGELOG.rst LICENSE CONTRIBUTING.rst pyproject.toml setup.py setup.cfg codemeta.json
+
+include src/km3pipe/version.py
+
+prune docs
+prune notebooks
+prune tests
+
+exclude .coveragerc
