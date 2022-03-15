@@ -49,7 +49,7 @@ autosummary_generate = True
 
 # Document Python Code
 autoapi_type = "python"
-autoapi_dirs = ["../km3pipe", "../km3modules"]
+autoapi_dirs = ["../src/km3pipe", "../src/km3modules"]
 autoapi_options = [
     "members",
     "undoc-members",

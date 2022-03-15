@@ -3,7 +3,7 @@
 from km3pipe.testing import TestCase, patch, skip, data_path
 import sys
 import numpy as np
-from km3pipe.io.online import EventPump, TimeslicePump, SummaryslicePump
+from km3pipe.io.online import EventPump, TimeslicePump
 from km3pipe.io.hdf5 import HDF5Pump
 from os.path import join, dirname, abspath
 
@@ -296,37 +296,3 @@ class TestTimeslicePump(TestCase):
         self.assertListEqual(
             dom_id, np.unique(l1hits.dom_id, return_counts=True)[1].tolist()
         )
-
-
-class TestSummaryslicePump(TestCase):
-    def setUp(self):
-        self.pump = SummaryslicePump(filename=ONLINE_TEST_FILE)
-
-    def test_summaryslice_info(self):
-        sum_slice_info = self.pump[0]["SummarysliceInfo"]
-        assert sum_slice_info.frame_index == 183
-        assert sum_slice_info.timestamp == 1575979218
-        assert sum_slice_info.nanoseconds == 300000000 / 16
-        assert sum_slice_info.n_frames == 2
-
-    def test_summaryslice_field_len(self):
-        sum_slice = self.pump[0]["Summaryslice"]
-        dom_ids = [808447180, 808488895]
-        self.assertListEqual(dom_ids, list(sum_slice.keys()))
-        for i in range(2):
-            assert len(sum_slice[dom_ids[i]]["rates"]) == 31
-            assert len(sum_slice[dom_ids[i]]["fifos"]) == 31
-            assert len(sum_slice[dom_ids[i]]["hrvs"]) == 31
-
-    def test_summaryslice_ctnt(self):
-        sum_slice = self.pump[0]["Summaryslice"]
-        dom_ids = [808447180, 808488895]
-        assert sum_slice[dom_ids[0]]["max_sequence_number"] == 26
-        assert sum_slice[dom_ids[0]]["n_udp_packets"] == 27
-        assert sum_slice[dom_ids[0]]["has_udp_trailer"]
-        assert not sum_slice[dom_ids[0]]["fifo_status"]
-        self.assertAlmostEqual(
-            sum_slice[dom_ids[0]]["rates"][6],
-            6586.0,
-        )
-        self.assertAlmostEqual(sum_slice[dom_ids[1]]["rates"][4], 5752.0)

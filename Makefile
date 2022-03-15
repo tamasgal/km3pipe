@@ -1,6 +1,4 @@
 PKGNAME=km3pipe
-ALLNAMES = $(PKGNAME)
-ALLNAMES += km3modules 
 
 default: build
 
@@ -18,33 +16,33 @@ clean:
 	python3 setup.py clean --all
 
 test: 
-	py.test --junitxml=./reports/junit.xml -o junit_suite_name=$(PKGNAME) $(ALLNAMES)
+	py.test --junitxml=./reports/junit.xml -o junit_suite_name=$(PKGNAME) src/
 
 benchmark:
 	scripts/run_tests.py benchmarks
 
 test-cov:
-	py.test --cov ./ --cov-report term-missing --cov-report xml:reports/coverage.xml --cov-report html:reports/coverage $(ALLNAMES)
+	py.test --cov src/ --cov-report term-missing --cov-report xml:reports/coverage.xml --cov-report html:reports/coverage src/
 
 test-loop: 
-	py.test $(ALLNAMES)
-	ptw --ext=.py,.pyx --ignore=doc $(ALLNAMES)
+	py.test src/
+	ptw --ext=.py,.pyx --ignore=doc src/
 
 .PHONY: black
 black:
-	black km3pipe
-	black km3modules
+	black  --exclude 'version.py' src/km3pipe
+	black src/km3modules
 	black examples
-	black pipeinspector
+	black src/pipeinspector
 	black doc/conf.py
 	black setup.py
 
 .PHONY: black-check
 black-check:
-	black --check km3pipe
-	black --check km3modules
+	black --check  --exclude 'version.py' src/km3pipe
+	black --check src/km3modules
 	black --check examples
-	black --check pipeinspector
+	black --check src/pipeinspector
 	black --check doc/conf.py
 	black --check setup.py
 

@@ -3,23 +3,13 @@ source = km3pipe
 
 [report]
 include =
-    km3pipe/*
-    km3modules/*
+    src/km3pipe/*
+    src/km3modules/*
 omit =
-    */tests/*
-    */*/tests/*
-    km3pipe/utils/*
-    km3pipe/__version__.py
-    km3pipe/io/i3.py
-    km3modules/ahrs.py
-    km3modules/dummy.py
-    km3modules/fit.py
-    km3modules/hardware.py
-    km3modules/k40.py
-    km3modules/mc.py
-    km3modules/parser.py
-    km3modules/plot.py
-    km3modules/topology.py
+    src/km3pipe/utils/*
+    src/km3pipe/__version__.py
+    src/km3pipe/io/i3.py
+    src/km3modules/dummy.py
 exclude_lines =
     pragma: no cover
     raise AssertionError
