@@ -1,11 +1,14 @@
 Unreleased changes
 ------------------
 
-* DETX V5 support added
-* Removed ``file_mode="append"`` from ``HDF5Sink``
 
 Version 9
 ---------
+9.12.0 - 2022-03-23
+~~~~~~~~~~~~~~~~~~~
+* DETX V5 support added
+* Removed ``file_mode="append"`` from ``HDF5Sink``
+
 9.11.4 - 2021-11-24
 ~~~~~~~~~~~~~~~~~~~
 * Hotfix for parsing triggered hits in online streams
