@@ -40,7 +40,7 @@ class Detector(object):
         t0set (when retrieving from database).
     """
 
-    max_supported_version = 4
+    max_supported_version = 5
 
     def __init__(self, filename=None, det_id=None, t0set=0, string=None):
         self._det_file = None
@@ -177,6 +177,12 @@ class Detector(object):
                 n_pmts, rest = unpack_nfirst(rest, 1, int)
                 if rest:
                     log.warning("Unexpected DOM values: {0}".format(rest))
+            if self.version == 5:
+                dom_id, du, floor, rest = unpack_nfirst(split(line), 3, int)
+                x, y, z, q0, qx, qy, qz, t0, rest = unpack_nfirst(rest, 8, float)
+                component_status, n_pmts, rest = unpack_nfirst(rest, 2, int)
+                if rest:
+                    log.warning("Unexpected DOM values: {0}".format(rest))
 
             if du != self._current_du:
                 log.debug("Next DU, resetting floor to 1.")
@@ -199,6 +205,22 @@ class Detector(object):
                 self.doms[dom_id] = (du, floor, n_pmts)
             if self.version == 4:
                 self.doms[dom_id] = (du, floor, n_pmts, x, y, z, q0, qx, qy, qz, t0)
+                self._dom_positions[dom_id] = np.array([x, y, z])
+            if self.version == 5:
+                self.doms[dom_id] = (
+                    du,
+                    floor,
+                    n_pmts,
+                    x,
+                    y,
+                    z,
+                    q0,
+                    qx,
+                    qy,
+                    qz,
+                    component_status,
+                    t0,
+                )
                 self._dom_positions[dom_id] = np.array([x, y, z])
 
             if self.n_pmts_per_dom is None:
@@ -230,7 +252,7 @@ class Detector(object):
                 pmts["floor"].append(int(floor))
                 pmts["channel_id"].append(int(i))
                 pmts["dom_id"].append(int(dom_id))
-                if self.version in (3, 4) and rest:
+                if self.version in (3, 4, 5) and rest:
                     status, rest = unpack_nfirst(rest, 1)
                     pmts["status"].append(int(status))
                 if rest:

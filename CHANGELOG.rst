@@ -1,6 +1,7 @@
 Unreleased changes
 ------------------
 
+* DETX V5 support added
 * Removed ``file_mode="append"`` from ``HDF5Sink``
 
 Version 9

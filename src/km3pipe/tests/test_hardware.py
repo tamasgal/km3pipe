@@ -436,6 +436,68 @@ class TestDetector(TestCase):
             list(det.get_pmt(808981864, 3)),
         )
 
+    def test_detx_v5(self):
+        det = Detector(filename=data_path("detx/detx_v5.detx"))
+        assert np.allclose(
+            [464.4, 564.7, 190.583], det.dom_positions[808956908], atol=1e-2
+        )
+        assert np.allclose(
+            [464.4, 564.7, 95.389], det.dom_positions[808981864], atol=1e-2
+        )
+        assert det.n_doms == 114
+        assert det.det_id == 49
+        assert det.n_pmts_per_dom == 31
+        assert det.n_dus == 6
+        assert np.allclose(
+            det.doms[808981864],
+            [
+                1.0000000e01,
+                8.0000000e00,
+                3.1000000e01,
+                4.6440000e02,
+                5.6470000e02,
+                9.5389000e01,
+                9.9995400e-01,
+                -7.8470000e-03,
+                3.9110000e-03,
+                4.0080000e-03,
+                0.0000000e00,
+                3.7861343e04,
+            ],
+            atol=1e-2,
+        )
+        assert np.allclose(
+            np.array(
+                [
+                    [484.6, 564.65],
+                    [464.4, 564.7],
+                    [442.5, 567.45],
+                    [474.15, 583.45],
+                    [454.2, 583.0],
+                    [431.1, 583.5],
+                ]
+            ),
+            det.xy_positions,
+        )
+        assert np.allclose(
+            [
+                3,
+                0.73205,
+                0.614161,
+                0.29479,
+                808981864,
+                10,
+                8,
+                13367,
+                464.546,
+                564.823,
+                95.448,
+                0,
+                207862.961,
+            ],
+            list(det.get_pmt(808981864, 3)),
+        )
+
 
 class TestDetectorTransformations(TestCase):
     def setUp(self):
