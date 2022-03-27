@@ -4,6 +4,10 @@ Unreleased changes
 
 Version 9
 ---------
+9.12.1 - 2022-03-27
+~~~~~~~~~~~~~~~~~~~
+* Fixes version discovery in deployment
+
 9.12.0 - 2022-03-23
 ~~~~~~~~~~~~~~~~~~~
 * DETX V5 support added
