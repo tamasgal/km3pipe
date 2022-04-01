@@ -105,6 +105,11 @@ class CHPump(Module):
             except EOFError:
                 log.warning("EOF from Ligier, trying again in 30 seconds...")
                 time.sleep(30)
+                try:
+                    log.debug("Reinitialising new CH connection.")
+                    self._init_controlhost()
+                except socket.error:
+                    log.error("Failed to connect to host.")
                 continue
             except BufferError:
                 log.error("Buffer error in Ligier stream, aborting...")
