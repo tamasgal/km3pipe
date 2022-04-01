@@ -4,6 +4,11 @@ Unreleased changes
 
 Version 9
 ---------
+9.12.2 - 2022-04-01
+~~~~~~~~~~~~~~~~~~~
+* Hotfix for the incident where ligier sends EOF. Now the Controlhost
+  client resets the connection
+
 9.12.1 - 2022-03-27
 ~~~~~~~~~~~~~~~~~~~
 * Fixes version discovery in deployment
