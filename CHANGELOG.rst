@@ -1,11 +1,15 @@
 Unreleased changes
 ------------------
 
-* Fixed the calibration of MC hits when using ``kp.calib.Calibration().apply()``
-  on ``km3io`` MC hits.
 
 Version 9
 ---------
+
+9.12.3 - 2022-04-25
+~~~~~~~~~~~~~~~~~~~
+* Fixed the calibration of MC hits when using ``kp.calib.Calibration().apply()``
+  on ``km3io`` MC hits.
+
 9.12.2 - 2022-04-01
 ~~~~~~~~~~~~~~~~~~~
 * Hotfix for the incident where ligier sends EOF. Now the Controlhost
