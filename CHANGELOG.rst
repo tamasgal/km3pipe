@@ -1,6 +1,8 @@
 Unreleased changes
 ------------------
 
+* Fixed the calibration of MC hits when using ``kp.calib.Calibration().apply()``
+  on ``km3io`` MC hits.
 
 Version 9
 ---------
