@@ -98,7 +98,7 @@ def cherenkov(calib_hits, track):
         )
         track_t = track["t"][0]
 
-    if isinstance(track, (ak.Array, ak.Record)):
+    if isinstance(track, (ak.Array, ak.Record, km3io.rootio.Branch)):
         track_pos = np.array([track.pos_x, track.pos_y, track.pos_z]).T
         track_dir = np.array([track.dir_x, track.dir_y, track.dir_z]).T
         track_t = track.t
