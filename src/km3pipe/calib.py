@@ -143,15 +143,28 @@ class Calibration(Module):
                 pass
 
         if isinstance(hits, (ak.Array, ak.Record, km3io.rootio.Branch)):
-            hits = Table(
-                dict(
-                    dom_id=hits.dom_id,
-                    channel_id=hits.channel_id,
-                    time=hits.t,
-                    tot=hits.tot,
-                    triggered=hits.trig,
+            if hasattr(hits, "dom_id"):
+                hits = Table(
+                    dict(
+                        dom_id=hits.dom_id,
+                        channel_id=hits.channel_id,
+                        time=hits.t,
+                        tot=hits.tot,
+                        triggered=hits.trig,
+                    )
                 )
-            )
+            else:  # mc_hits in km3io
+                hits = Table(
+                    dict(
+                        pmt_id=hits.pmt_id,
+                        time=hits.t,
+                        a=hits.a,
+                        # TODO: Not all MC files have these two fields
+                        # pure_a=hits.pure_a,
+                        # pure_t=hits.pure_t,
+                        origin=hits.origin,
+                    )
+                )
 
         if istype(hits, "DataFrame"):
             # do we ever see McHits here?

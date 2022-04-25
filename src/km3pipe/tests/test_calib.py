@@ -72,6 +72,49 @@ class TestCalibration(TestCase):
         self.assertAlmostEqual(20, a_hit.t0)
         self.assertAlmostEqual(11.2, a_hit.time)  # t0 should not be applied
 
+    def test_apply_to_hits_with_pmt_id_aka_mc_hits_from_km3io(self):
+        calib = Calibration(filename=data_path("detx/KM3NeT_-00000001_20171212.detx"))
+        f = km3io.OfflineReader(
+            data_path(
+                "offline/mcv6.gsg_nue-CCHEDIS_1e4-1e6GeV.sirene.jte.jchain.aanet.1.root"
+            )
+        )
+
+        for event in f:
+            chits = calib.apply(event.mc_hits)
+            assert 840 == len(chits.t0)
+            assert np.allclose([3, 26, 24, 4, 23, 25], chits.channel_id[:6])
+            assert np.allclose([3401, 3401, 3406, 3411, 5501, 5501], chits.dom_id[:6])
+            assert np.allclose([1, 1, 6, 11, 1, 1], chits.floor[:6])
+            assert np.allclose([34, 34, 34, 34, 55, 55], chits.du[:6])
+            assert np.allclose(
+                [
+                    1679.18706571,
+                    1827.14262054,
+                    1926.71722628,
+                    2433.83097585,
+                    1408.35942832,
+                    1296.51397496,
+                ],
+                chits.time[:6],
+            )
+            assert np.allclose(
+                [2.034, 1.847, 1.938, 2.082, -54.96, -55.034], chits.pos_x[:6]
+            )
+            assert np.allclose(
+                [-233.415, -233.303, -233.355, -233.333, -341.346, -341.303],
+                chits.pos_y[:6],
+            )
+            assert np.allclose(
+                [65.059, 64.83, 244.83, 425.111, 64.941, 64.83], chits.pos_z[:6]
+            )
+            assert np.allclose([4, 4, 4, 26, 4, 4], f.mc_hits.origin[0][:6].tolist())
+            assert np.allclose(
+                [36835, 36881, 37187, 37457, 60311, 60315],
+                f.mc_hits.pmt_id[0][:6].tolist(),
+            )
+            break
+
     def test_dus(self):
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
 
