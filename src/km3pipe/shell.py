@@ -27,8 +27,8 @@ BATCH_TYPE = {"in2p3": "slurm", "woody": "torque"}
 SUBMIT_CMD = {"slurm": "squeue", "torque": "qsub"}
 
 JOB_TEMPLATES = {
-    "in2p3":
-    lstrip("""
+    "in2p3": lstrip(
+        """
         #SBATCH --partition=htc
         #SBATCH --job-name={job_name}
         #SBATCH --mail-user= {email}
@@ -54,9 +54,10 @@ JOB_TEMPLATES = {
         echo "========================================================"
         echo "JAWOLLJA! Job exited on" $(date)
         echo "========================================================"
-        """),
-    "woody":
-    lstrip("""
+        """
+    ),
+    "woody": lstrip(
+        """
         #PBS -N {job_name}
         #PBS -M {email} -m a
         #PBS -o {log_path}/{job_name}{task_name}.out.log
@@ -73,7 +74,8 @@ JOB_TEMPLATES = {
         echo "========================================================"
         echo "JAWOLLJA! Job exited on" $(date)
         echo "========================================================"
-        """),
+        """
+    ),
 }
 
 
@@ -83,9 +85,11 @@ def qsub(script, job_name, dryrun=False, silent=False, *args, **kwargs):
 
     Returns the job script as string.
     """
-    warn('qsub is deprecated and will be removed in the next major version!',
-         DeprecationWarning,
-         stacklevel=2)
+    warn(
+        "qsub is deprecated and will be removed in the next major version!",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     submit(script, job_name, dryrun=dryrun, silent=silent, *arg, **kwargs)
 
 
@@ -102,21 +106,24 @@ def submit(script, job_name, dryrun=False, silent=False, *args, **kwargs):
     job_string = gen_job(script=script, job_name=job_name, *args, **kwargs)
     env = os.environ.copy()
     if dryrun:
-        print("This is a dry run! Here is the generated job file, which will "
-              "not be submitted:")
+        print(
+            "This is a dry run! Here is the generated job file, which will "
+            "not be submitted:"
+        )
         print(job_string)
     else:
         if not silent:
-            print(
-                "Calling {} with the generated job script.".format(submit_cmd))
+            print("Calling {} with the generated job script.".format(submit_cmd))
             out_pipe = subprocess.PIPE
         else:
             out_pipe = DEVNULL
-        p = subprocess.Popen("{} -V".format(submit_cmd),
-                             stdin=subprocess.PIPE,
-                             env=env,
-                             shell=True,
-                             stdout=out_pipe)
+        p = subprocess.Popen(
+            "{} -V".format(submit_cmd),
+            stdin=subprocess.PIPE,
+            env=env,
+            shell=True,
+            stdout=out_pipe,
+        )
         p.communicate(input=bytes(job_string.encode("ascii")))
 
     return job_string
@@ -138,8 +145,11 @@ def _gen_job_slurm(**kwargs):
         resources.append("oracle")
     resources = ",".join(resources)
 
-    email = os.environ["USER"] + "@km3net.de" if kwargs[
-        "email"] is None else kwargs["email"]
+    email = (
+        os.environ["USER"] + "@km3net.de"
+        if kwargs["email"] is None
+        else kwargs["email"]
+    )
     del kwargs["kwargs"]
 
     log_path = os.path.abspath(kwargs["log_path"])
@@ -147,19 +157,22 @@ def _gen_job_slurm(**kwargs):
 
     if job_array_stop is not None:
         job_array_option = "#SBATCH --array {}-{}:{}".format(
-            kwargs["job_array_start"], kwargs["job_array_stop"],
-            kwargs["job_array_step"])
+            kwargs["job_array_start"],
+            kwargs["job_array_stop"],
+            kwargs["job_array_step"],
+        )
     else:
         job_array_option = "#"
 
-    extra_options = '\n'.join([job_array_option])
+    extra_options = "\n".join([job_array_option])
 
     job_string = JOB_TEMPLATES[kwargs["cluster"]].format(
         resources=resources,
         email=email,
         extra_options=extra_options,
         log_path=log_path,
-        **kwargs)
+        **kwargs
+    )
 
     return job_string
 
@@ -169,24 +182,32 @@ def _gen_job_torque(**kwargs):
     shell = os.environ["SHELL"] if kwargs["shell"] is None else kwargs["shell"]
     del kwargs["shell"]
 
-    email = os.environ["USER"] + "@km3net.de" if kwargs[
-        "email"] is None else kwargs["email"]
+    email = (
+        os.environ["USER"] + "@km3net.de"
+        if kwargs["email"] is None
+        else kwargs["email"]
+    )
     del kwargs["kwargs"]
 
     cpu = kwargs["walltime"] if kwargs["walltime"] is None else kwargs["cpu"]
     del kwargs["walltime"]
 
-    script = str(kwargs["script"]) if isinstance(kwargs["script"],
-                                                 Script) else kwargs["script"]
+    script = (
+        str(kwargs["script"])
+        if isinstance(kwargs["script"], Script)
+        else kwargs["script"]
+    )
     del kwargs["script"]
 
     log_path = os.path.abspath(kwargs["log_path"])
     del kwargs["log_path"]
 
     if job_array_stop is not None:
-        job_array_option = "#$ -t {}-{}:{}".format(kwargs["job_array_start"],
-                                                   kwargs["job_array_stop"],
-                                                   kwargs["job_array_step"])
+        job_array_option = "#$ -t {}-{}:{}".format(
+            kwargs["job_array_start"],
+            kwargs["job_array_stop"],
+            kwargs["job_array_step"],
+        )
     else:
         job_array_option = "#"
 
@@ -208,7 +229,8 @@ def _gen_job_torque(**kwargs):
         job_array_option=job_array_option,
         task_name=task_name,
         node_type=node_type,
-        **kwargs)
+        **kwargs
+    )
     return job_string
 
 
@@ -254,8 +276,10 @@ def get_jpp_env(jpp_dir):
         v[0]: "".join(v[1:])
         for v in [
             l.split("=")
-            for l in os.popen("source {0}/setenv.sh {0} && env".format(
-                jpp_dir)).read().split("\n") if "=" in l
+            for l in os.popen("source {0}/setenv.sh {0} && env".format(jpp_dir))
+            .read()
+            .split("\n")
+            if "=" in l
         ]
     }
     return env
