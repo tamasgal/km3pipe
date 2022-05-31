@@ -49,9 +49,6 @@ help:
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
 	@echo "  view       to open HTML output in browser"
 
-doc-dependencies:
-	pip install -Ur ../requirements.txt
-
 clean:
 	rm -rf $(BUILDDIR)/*
 	rm -rf auto_examples/
