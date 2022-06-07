@@ -1209,6 +1209,10 @@ class TestHDF5Header(TestCase):
         assert 7 == header["d"]
         assert "bar" == header["e+f"]
 
+    def test_header_fails_when_no_info_in_file(self):
+        with self.assertRaises(tb.NoSuchNodeError):
+            HDF5Header.from_hdf5(data_path("hdf5/basic_analysis_sample.h5"))
+
 
 class TestConvertHeaderDictToTable(TestCase):
     def setUp(self):

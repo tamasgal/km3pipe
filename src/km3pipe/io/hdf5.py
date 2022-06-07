@@ -168,7 +168,11 @@ class HDF5Header(object):
     @classmethod
     def from_hdf5(cls, filename):
         with tb.open_file(filename, "r") as f:
-            table = f.get_node("/raw_header")
+            try:
+                table = f.get_node("/raw_header")
+            except tb.NoSuchNodeError:
+                msg = f"No header information found in '{filename}'"
+                raise
             return cls.from_pytable(table)
 
     @classmethod
