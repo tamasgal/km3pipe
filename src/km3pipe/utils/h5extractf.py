@@ -129,6 +129,9 @@ def h5extractf(
             np_event_info = _branch_to_numpy(r, fields["event_info"])
             np_weights = _ak_to_numpy(r.w, fields["event_info_weights"])
             np_event_info[0].update(np_weights[0])
+            np_w2 = _parse_w2list(r)
+            if np_w2 is not None:
+                np_event_info[0].update(np_w2[0])
             _to_hdf(f, "event_info", np_event_info)
 
             # TODO remove group_info once km3pipe does not require it anymore
@@ -158,6 +161,16 @@ def h5extractf(
         f.attrs.create("origin", root_file)
         f.attrs.create("kid", _uuid)
     print("Completed in {:.1f} s".format(time.time() - start_time))
+
+
+def _parse_w2list(f):
+    try:
+        w2list_idx = km3io.tools.get_w2list_idx(f)
+    except AttributeError:
+        return None
+    if w2list_idx is None:
+        return None
+    return _ak_to_numpy(f.w2list, list(w2list_idx.values()))
 
 
 def _branch_to_numpy(branch, fields):
