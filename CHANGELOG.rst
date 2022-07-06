@@ -5,6 +5,11 @@ Unreleased changes
 Version 9
 ---------
 
+9.13.0 - 2022-07-06
+~~~~~~~~~~~~~~~~~~~
+* The ``h5extractf`` command line tool was updated to extract additional
+  information from the ROOT files.
+
 9.12.3 - 2022-04-25
 ~~~~~~~~~~~~~~~~~~~
 * Fixed the calibration of MC hits when using ``kp.calib.Calibration().apply()``
