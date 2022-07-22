@@ -76,6 +76,14 @@ test-py3.9:
         - make test
     <<: *junit_definition
 
+test-py3.10:
+    image: docker.km3net.de/base/python:3.10
+    stage: test
+    script:
+        - *virtualenv_definition
+        - make test
+    <<: *junit_definition
+
 benchmarks:
     image: docker.km3net.de/base/python:3.9
     stage: test
