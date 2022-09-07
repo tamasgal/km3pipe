@@ -177,7 +177,7 @@ try:
 except:
     print("No seaborn found, skipping example.")
 else:
-    g = sns.jointplot("pos_x", "pos_y", data=primaries, kind="hex")
+    g = sns.jointplot(x="pos_x", y="pos_y", data=primaries, kind="hex")
     g.set_axis_labels("x [m]", "y[m]")
     plt.subplots_adjust(right=0.90)  # make room for the colorbar
     plt.title("2D Plane")
