@@ -552,14 +552,14 @@ def load_k40_coincidences_from_rootfile(filename, dom_id):
 
 def gaussian(x, mean, sigma, rate, offset):
     return (
-        rate / np.sqrt(2 * np.pi) / sigma * np.exp(-0.5 * (x - mean) ** 2 / sigma ** 2)
+        rate / np.sqrt(2 * np.pi) / sigma * np.exp(-0.5 * (x - mean) ** 2 / sigma**2)
         + offset
     )
 
 
 def gaussian_wo_offset(x, mean, sigma, rate):
     return (
-        rate / np.sqrt(2 * np.pi) / sigma * np.exp(-0.5 * (x - mean) ** 2 / sigma ** 2)
+        rate / np.sqrt(2 * np.pi) / sigma * np.exp(-0.5 * (x - mean) ** 2 / sigma**2)
     )
 
 

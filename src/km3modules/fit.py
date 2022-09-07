@@ -30,7 +30,7 @@ def fit_delta_ts(data, time_s):
 
     def gaussian(x, mean, sigma, rate, offset):
         return (
-            rate / np.sqrt(2 * np.pi) / sigma * np.exp(-((x - mean) ** 2) / sigma ** 2)
+            rate / np.sqrt(2 * np.pi) / sigma * np.exp(-((x - mean) ** 2) / sigma**2)
             + offset
         )
 

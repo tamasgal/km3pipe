@@ -162,7 +162,7 @@ def _get_closest(track_pos, track_dir, meanDU_pos, meanDU_dir):
     V_norm = np.linalg.norm(V, axis=0)
 
     # 2) distance from the track origin to point of closest approach along the track
-    d = np.sqrt(V_norm ** 2 - d_closest ** 2)
+    d = np.sqrt(V_norm**2 - d_closest**2)
     # norm of the track direction along (x,y)
     xy_norm = np.linalg.norm(track_dir[0:2], axis=0)
 
