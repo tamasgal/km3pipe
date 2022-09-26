@@ -45,7 +45,7 @@ pmts = det.pmts[det.pmts.dom_id == dom_id]
 # The `quiver` function can directly plot the PMT data, since those are
 # stored as numpy arrays.
 fig = plt.figure()
-ax = fig.gca(projection="3d")
+ax = plt.axes(projection="3d")
 
 ax.quiver(
     pmts.pos_x, pmts.pos_y, pmts.pos_z, pmts.dir_x, pmts.dir_y, pmts.dir_z, length=0.1

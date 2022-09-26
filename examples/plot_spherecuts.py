@@ -28,7 +28,7 @@ mask1 = kp.math.spherecutmask([0, 0, 0], 0.8, 1.0, points)
 mask2 = kp.math.spherecutmask([0.8, 0.8, 0.8], 0, 0.2, points)
 
 fig = plt.figure()
-ax = fig.gca(projection="3d")
+ax = plt.axes(projection="3d")
 ax.scatter(*points[~(mask1 | mask2)].T, label="unselected points")
 ax.scatter(*points[mask1].T, label="mask1")
 ax.scatter(*points[mask2].T, label="mask2")
@@ -42,7 +42,7 @@ ax.legend()
 selected_points = kp.math.spherecut([0.5, 0.5, 0.5], 0.0, 0.5, points)
 
 fig = plt.figure()
-ax = fig.gca(projection="3d")
+ax = plt.axes(projection="3d")
 
 ax.scatter(*selected_points.T)
 

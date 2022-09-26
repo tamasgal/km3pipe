@@ -32,5 +32,5 @@ samp = np.array(samp)
 # plot the same in 3D because why not?
 
 fig = plt.figure()
-ax = fig.gca(projection="3d")
+ax = plt.axes(projection="3d")
 ax.scatter(samp[:, 0], samp[:, 1], samp[:, 2], "yo")
