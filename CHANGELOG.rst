@@ -5,6 +5,10 @@ Unreleased changes
 Version 9
 ---------
 
+9.13.1 - 2022-11-02
+~~~~~~~~~~~~~~~~~~~
+* Updated dependencies (km3io)
+
 9.13.0 - 2022-07-06
 ~~~~~~~~~~~~~~~~~~~
 * The ``h5extractf`` command line tool was updated to extract additional
