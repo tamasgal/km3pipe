@@ -5,6 +5,10 @@ Unreleased changes
 Version 9
 ---------
 
+9.13.2 - 2022-11-02
+~~~~~~~~~~~~~~~~~~~
+* Better error reporting in ``h5extractf``
+
 9.13.1 - 2022-11-02
 ~~~~~~~~~~~~~~~~~~~
 * Updated dependencies (km3io)

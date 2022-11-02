@@ -241,7 +241,9 @@ def _ak_to_numpy(ak_array, fields):
         n_items = ak.num(ak_array).to_numpy()
         ak_array = ak.flatten(ak_array)
     else:
-        raise ValueError("Can not process array")
+        raise ValueError("Cannot process array")
+    if len(ak_array) == 0:
+        raise ValueError("Empty array")
 
     filled = np.ma.filled(
         ak.pad_none(ak_array, target=len(fields), axis=-1).to_numpy(),
@@ -304,9 +306,12 @@ def _yield_tracks(tracks, fields, without_full_reco=False):
 
             try:
                 np_fitinf = _ak_to_numpy(sel_tracks.fitinf, range(n_columns))
-            except ValueError:
-                log.critical("Cannot convert fitinf: probably unsupported KM3NeT dataformat version")
-                exit(1)
+            except ValueError as e:
+                log.warning(
+                    "Cannot convert fitinf (%s): probably unsupported KM3NeT dataformat version or empty branch. Skipping..."
+                    % e
+                )
+                continue
             for fitparam, idx in km3io.definitions.fitparameters.items():
                 np_branch[0][fitparam] = np_fitinf[0][idx].astype("float32")
 

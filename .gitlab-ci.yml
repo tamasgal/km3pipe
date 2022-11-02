@@ -192,3 +192,14 @@ release-singularity:
   only:
     - tags
 
+cc-lyon:
+    image: docker.km3net.de/base/ci-helper:1
+    stage: release
+    script:
+        - mkdir -p /root/.ssh && chmod 700 /root/.ssh
+        - ssh-keyscan -H $IN2P3_HOST > ~/.ssh/known_hosts
+        - chmod 600 /root/.ssh/known_hosts
+        - sshpass -p $IN2P3_PASSWORD ssh -v $IN2P3_USERNAME@$IN2P3_HOST 'export KM3NET_THRONG_DIR=/pbs/throng/km3net; export MODULEPATH=/pbs/throng/km3net/modulefiles; . /usr/share/Modules/init/bash; module load km3net_env; module load python/3.7.5; pip install git+https://git.km3net.de/km3py/km3pipe.git'
+    only:
+        - tags
+    allow_failure: true
