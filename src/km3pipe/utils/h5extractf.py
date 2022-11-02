@@ -25,6 +25,8 @@ import km3pipe as kp
 
 FORMAT_VERSION = np.string_("5.1")
 
+log = kp.logger.get_logger("h5extractf")
+
 
 def h5extractf(
     root_file, outfile=None, without_full_reco=False, without_calibration=False
@@ -300,7 +302,11 @@ def _yield_tracks(tracks, fields, without_full_reco=False):
                 sel_tracks = func(tracks)
             np_branch = _branch_to_numpy(sel_tracks, fields)
 
-            np_fitinf = _ak_to_numpy(sel_tracks.fitinf, range(n_columns))
+            try:
+                np_fitinf = _ak_to_numpy(sel_tracks.fitinf, range(n_columns))
+            except ValueError:
+                log.critical("Cannot convert fitinf: probably unsupported KM3NeT dataformat version")
+                exit(1)
             for fitparam, idx in km3io.definitions.fitparameters.items():
                 np_branch[0][fitparam] = np_fitinf[0][idx].astype("float32")
 
