@@ -181,8 +181,9 @@
         },
         {
             "@type": "Person",
+            "@id": "https://orcid.org/0000-0002-2816-2242",
             "givenName": "Lukas",
-            "familyName": "Henning",
+            "familyName": "Hennig",
             "affiliation": {
                 "@type": "Organization",
                 "name": "Friedrich-Alexander-University Erlangen-Nuremberg, Erlangen Centre for Astroparticle Physics"
