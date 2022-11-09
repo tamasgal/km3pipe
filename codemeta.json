@@ -178,6 +178,15 @@
                 "@type": "Organization",
                 "name": "Friedrich-Alexander-University Erlangen-Nuremberg, Erlangen Centre for Astroparticle Physics"
             }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Lukas",
+            "familyName": "Henning",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Friedrich-Alexander-University Erlangen-Nuremberg, Erlangen Centre for Astroparticle Physics"
+            }
         }
     ]
 }
