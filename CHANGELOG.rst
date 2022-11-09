@@ -4,6 +4,10 @@ Unreleased changes
 
 Version 9
 ---------
+9.13.3 - 2022-11-09
+~~~~~~~~~~~~~~~~~~~
+* Fixed a crash in ``h5extractf`` which happens when the input ROOT file
+  has no events
 
 9.13.2 - 2022-11-02
 ~~~~~~~~~~~~~~~~~~~
