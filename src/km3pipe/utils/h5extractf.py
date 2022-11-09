@@ -243,7 +243,9 @@ def _ak_to_numpy(ak_array, fields):
     else:
         raise ValueError("Cannot process array")
     if len(ak_array) == 0:
-        raise ValueError("Empty array")
+        return {
+            fields[i]: ak_array.to_numpy().reshape((0,)) for i in range(len(fields))
+        }, n_items
 
     filled = np.ma.filled(
         ak.pad_none(ak_array, target=len(fields), axis=-1).to_numpy(),
@@ -273,6 +275,12 @@ def _yield_tracks(tracks, fields, without_full_reco=False):
         Numpy-fied awkward array. See output of _branch_to_numpy.
 
     """
+
+    nmbr_events = len(tracks)
+    if nmbr_events == 0:
+        log.warn("No events found")
+        return
+
     track_fmap = {
         "best_jmuon": (
             km3io.definitions.reconstruction.JMUONPREFIT,
