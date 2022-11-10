@@ -69,4 +69,4 @@ Acknowledgements
 
 Thanks especially to the gracious help of all contributors:
 
-Tamas Gal, Moritz Lotze, Johannes Schumann, Piotr Kalaczynski, Jonas Reubelt, Michael Moser, Thomas Heid, Alba Domi, Agustin Sanchez Losa, Zineb Aly, Jordan Seneca, Nicole Geisselbrecht, Javier Barrios, Valentin Pestel, Jannik Hofestaedt, Matthias Bissinger, Vladimir Kulikovskiy, Lukas Henning
+Tamas Gal, Moritz Lotze, Johannes Schumann, Piotr Kalaczynski, Jonas Reubelt, Michael Moser, Thomas Heid, Alba Domi, Agustin Sanchez Losa, Zineb Aly, Jordan Seneca, Nicole Geisselbrecht, Javier Barrios, Valentin Pestel, Jannik Hofestaedt, Matthias Bissinger, Vladimir Kulikovskiy, Lukas Hennig
