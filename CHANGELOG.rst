@@ -4,6 +4,17 @@ Unreleased changes
 
 Version 9
 ---------
+9.13.5 - 2022-11-20
+~~~~~~~~~~~~~~~~~~~
+* Fixed a bug when a hit recarray from DAQ is directly passed to the
+  calibration and crashes Numba because it's cannot work with big
+  endian types (fields). This caused crashes in the ``triggered_hits``
+  script of the ``km3mon`` monitoring system
+
+9.13.4 - 2022-11-14
+~~~~~~~~~~~~~~~~~~~
+* Cosmetics and typos
+
 9.13.3 - 2022-11-09
 ~~~~~~~~~~~~~~~~~~~
 * Fixed a crash in ``h5extractf`` which happens when the input ROOT file

@@ -490,7 +490,7 @@ def slew(tot, variant=3):
             13.6488662517, -0.128744123166, -0.0174837749244, -4.47119633965, tot
         )
     if variant == 3:
-        if isinstance(tot, (int, np.int8, np.int16, np.int32, np.int64)):
+        if isinstance(tot, (int, np.integer)):
             return _SLEWS[tot]
         return _slew_tabulated(np.array(_SLEWS), tot)
 

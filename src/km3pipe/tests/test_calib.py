@@ -11,6 +11,7 @@ import km3io
 from thepipe import Module, Pipeline
 import km3pipe as kp
 from km3pipe.dataclasses import Table
+from km3pipe.io.daq import DAQEvent
 from km3pipe.hardware import Detector
 from km3pipe.io.hdf5 import HDF5Sink
 from km3pipe.testing import TestCase, MagicMock, patch, skip, skipif, data_path
@@ -212,6 +213,32 @@ class TestCalibration(TestCase):
                 [207747.825, 207745.656, 207743.836], chits.t0.tolist()[:3]
             )
             break
+
+    def test_daq_triggered_hits(self):
+        calib = Calibration(filename=data_path("detx/detx_v1.detx"))
+
+        dt = DAQEvent.triggered_hits_dt_final
+
+        raw_hits = np.array(
+            [(2, 0, 10, 0, 100), (3, 1, 11, 10, 200), (3, 2, 12, 255, 300)],
+            dtype=dt,
+        )
+        print(raw_hits.dtype)
+
+        hits = Table(raw_hits)
+
+        chits = calib.apply(hits)  #  correct_slewing=True is default
+
+        assert len(hits) == len(chits)
+
+        a_hit = chits[0]
+        self.assertAlmostEqual(10 + a_hit.t0 - slew(a_hit.tot), a_hit.time, places=5)
+
+        a_hit = chits[1]
+        self.assertAlmostEqual(11 + a_hit.t0 - slew(a_hit.tot), a_hit.time, places=5)
+
+        a_hit = chits[2]
+        self.assertAlmostEqual(12 + a_hit.t0 - slew(a_hit.tot), a_hit.time, places=5)
 
     def test_time_slewing_correction(self):
         calib = Calibration(filename=data_path("detx/detx_v1.detx"))
