@@ -627,11 +627,30 @@ class DAQEvent(object):
             ("trigger_mask", "<Q"),
         ]
     )
+    # Numba chokes on big endian and the time is big, so we need to reinterpret
+    triggered_hits_dt_final = np.dtype(
+        [
+            ("dom_id", "<i"),
+            ("channel_id", np.uint8),
+            ("time", "<I"),
+            ("tot", np.uint8),
+            ("trigger_mask", "<Q"),
+        ]
+    )
     snapshot_hits_dt = np.dtype(
         [
             ("dom_id", "<i"),
             ("channel_id", np.uint8),
             ("time", ">I"),
+            ("tot", np.uint8),
+        ]
+    )
+    # Numba chokes on big endian and the time is big, so we need to reinterpret
+    snapshot_hits_dt_final = np.dtype(
+        [
+            ("dom_id", "<i"),
+            ("channel_id", np.uint8),
+            ("time", "<I"),
             ("tot", np.uint8),
         ]
     )
@@ -661,12 +680,14 @@ class DAQEvent(object):
         raw_data = file_obj.read(
             self.triggered_hits_dt.itemsize * self.n_triggered_hits
         )
-        return np.frombuffer(raw_data, self.triggered_hits_dt).view(np.recarray)
+        arr = np.frombuffer(raw_data, self.triggered_hits_dt).view(np.recarray)
+        return arr.astype(self.triggered_hits_dt_final)
 
     def _parse_snapshot_hits(self, file_obj):
         """Parse and store snapshot hits."""
         raw_data = file_obj.read(self.snapshot_hits_dt.itemsize * self.n_snapshot_hits)
-        return np.frombuffer(raw_data, self.snapshot_hits_dt).view(np.recarray)
+        arr = np.frombuffer(raw_data, self.snapshot_hits_dt).view(np.recarray)
+        return arr.astype(self.snapshot_hits_dt_final)
 
     def __repr__(self):
         string = "\n".join(
