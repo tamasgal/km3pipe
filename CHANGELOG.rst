@@ -4,6 +4,11 @@ Unreleased changes
 
 Version 9
 ---------
+9.13.6 - 2022-11-24
+~~~~~~~~~~~~~~~~~~~
+* Controlhost client now reconnects automatically if socket connection
+  is lost
+
 9.13.5 - 2022-11-20
 ~~~~~~~~~~~~~~~~~~~
 * Fixed a bug when a hit recarray from DAQ is directly passed to the
