@@ -84,6 +84,10 @@ class Client(object):
     def get_message(self):
         while True:
             log.info("     Waiting for control host Prefix")
+            if self.socket is None:
+                log.error("Lost socket connection, reconnecting...")
+                self._reconnect()
+                continue
             try:
                 data = self.socket.recv(Prefix.SIZE)
                 timestamp = time.time()
