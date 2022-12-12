@@ -4,6 +4,12 @@ Unreleased changes
 
 Version 9
 ---------
+9.13.7 - 2022-12-09
+~~~~~~~~~~~~~~~~~~~
+* Improves buffer handling of controlhost streams. This fixes a very
+  rare bug where the prefix (4 bytes) is not fully retreived, in which
+  case the connection was reset.
+
 9.13.6 - 2022-11-24
 ~~~~~~~~~~~~~~~~~~~
 * Controlhost client now reconnects automatically if socket connection
