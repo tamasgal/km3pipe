@@ -89,7 +89,7 @@ class Client(object):
                 self._reconnect()
                 continue
             try:
-                data = self.socket.recv(Prefix.SIZE)
+                data = self._recv(Prefix.SIZE)
                 timestamp = time.time()
                 log.info("    raw prefix data received: '%s'", data)
                 if data == b"":
@@ -120,17 +120,8 @@ class Client(object):
             else:
                 break
 
-        message = b""
         log.info("       got a Prefix with %d bytes.", prefix.length)
-        while len(message) < prefix.length:
-            log.info("          message length: %d", len(message))
-            log.info("            (getting next part)")
-            buffer_size = min((BUFFER_SIZE, (prefix.length - len(message))))
-            try:
-                message += self.socket.recv(buffer_size)
-            except OSError:
-                log.error("Failed to construct message.")
-                raise BufferError
+        message = self._recv(prefix.length)
         log.info("     ------ returning message with %d bytes", len(message))
         return prefix, message
 
@@ -155,6 +146,23 @@ class Client(object):
         self._disconnect()
         self._connect()
         self._update_subscriptions()
+
+    def _recv(self, size):
+        """Receive the exact amount of bytes from the socket.
+
+        This is needed since socket.recv(size) may return less than
+        size, according to the specification: 'size' is the maximum
+        number of bytes returned.
+        """
+        message = b""
+        while len(message) < size:
+            buffer_size = min((BUFFER_SIZE, (size - len(message))))
+            try:
+                message += self.socket.recv(buffer_size)
+            except OSError as e:
+                log.error("Failed to receive controlhost message: %s", e)
+                raise BufferError
+        return message
 
     def __enter__(self):
         self._connect()
