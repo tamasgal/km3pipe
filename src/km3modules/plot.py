@@ -7,6 +7,7 @@ A collection of plotting functions and modules.
 """
 from collections import Counter
 from datetime import datetime
+import gc
 import os
 import multiprocessing as mp
 import time
@@ -123,6 +124,7 @@ def plot_dom_parameters(
 
     plt.savefig(filename, dpi=120, bbox_inches="tight")
     plt.close("all")
+    gc.collect()
 
 
 def make_dom_map(pmt_directions, values, nside=512, d=0.2, smoothing=0.1):
@@ -193,6 +195,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
             bbox_inches="tight",
         )
         plt.close("all")
+        gc.collect()
 
     def save_hdf5(self, calibration):
         print("Saving calibration information...")
@@ -336,6 +339,7 @@ def ztplot(
     if filename is not None:
         plt.savefig(filename, dpi=120, bbox_inches="tight")
 
+    gc.collect()
     return fig
 
 
