@@ -54,8 +54,6 @@ xtick.labelsize: 10
 ytick.labelsize: 10
 
 font.size:14.0
-font.family: sans-serif
-font.sans-serif: Helvetica Neue, Helvetica, Liberation Sans, Bitstream Vera Sans, sans-serif
 
 savefig.edgecolor: ffffff
 savefig.facecolor: ffffff
