@@ -4,6 +4,11 @@ Unreleased changes
 
 Version 9
 ---------
+9.13.8 - 2022-12-15
+~~~~~~~~~~~~~~~~~~~
+* Removed font-family setting in default style to suppress tons of warnings
+  on some systems where fonts are not (properyl) installed
+
 9.13.7 - 2022-12-09
 ~~~~~~~~~~~~~~~~~~~
 * Improves buffer handling of controlhost streams. This fixes a very
