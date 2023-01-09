@@ -4,6 +4,11 @@ Unreleased changes
 
 Version 9
 ---------
+9.13.9 - 2023-01-09
+~~~~~~~~~~~~~~~~~~~
+* Fixes an issue in the parsing of the timestamp of the DAQHeader
+  which is caused by the CLB (bit flipping?)
+
 9.13.8 - 2022-12-15
 ~~~~~~~~~~~~~~~~~~~
 * Removed font-family setting in default style to suppress tons of warnings

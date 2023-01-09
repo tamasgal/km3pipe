@@ -508,7 +508,8 @@ class DAQHeader(object):
         self.det_id = det_id
         self.run = run
         self.time_slice = time_slice
-        self.time_stamp = time_stamp
+        # Masking the first bit due to bit flipping issue in CLB (?)
+        self.time_stamp = time_stamp & 0x7FFFFFFF
         self.ticks = ticks
 
     def _parse_file(self, file_obj):
