@@ -496,6 +496,7 @@ class DAQHeader(object):
         self.run = None
         self.time_slice = None
         self.time_stamp = None
+        self.wr_status = None
         if byte_data:
             self._parse_byte_data(byte_data)
         if file_obj:
@@ -508,7 +509,9 @@ class DAQHeader(object):
         self.det_id = det_id
         self.run = run
         self.time_slice = time_slice
-        # Masking the first bit due to bit flipping issue in CLB (?)
+        # most significant bit is the WR status
+        self.wr_status = time_stamp & 0x80000000
+        # masking the most significant bit, which is the WR status
         self.time_stamp = time_stamp & 0x7FFFFFFF
         self.ticks = ticks
 
