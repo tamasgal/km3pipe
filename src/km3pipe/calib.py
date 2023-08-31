@@ -321,7 +321,7 @@ def apply_t0_nb(times, dom_ids, channel_ids, lookup_tables):
         times[i] += t0
 
 
-@nb.jit
+@nb.jit(nopython=True)
 def _get_calibration_for_hits(hits, lookup):
     """Append the position, direction and t0 columns and add t0 to time"""
     n = len(hits)
@@ -344,7 +344,7 @@ def _get_calibration_for_hits(hits, lookup):
     return [dir_x, dir_y, dir_z, du, floor, pos_x, pos_y, pos_z, t0, pmt_id]
 
 
-@nb.jit
+@nb.jit(nopython=True)
 def _get_calibration_for_mchits(hits, lookup):
     """Append the position, direction and t0 columns and add t0 to time"""
     n_hits = len(hits)
@@ -497,12 +497,12 @@ def slew(tot, variant=3):
     raise ValueError("Unknown slew calculation variant '{}'".format(variant))
 
 
-@nb.jit
+@nb.jit(nopython=True)
 def _slew_parametrised(p0, p1, p2, p3, tot):
     return p0 * np.exp(p1 * np.sqrt(tot) + p2 * tot) + p3
 
 
-@nb.jit
+@nb.jit(nopython=True)
 def _slew_tabulated(tab, tots):
     n = len(tots)
     out = np.empty(n)
