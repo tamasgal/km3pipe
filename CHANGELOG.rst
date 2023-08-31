@@ -4,6 +4,10 @@ Unreleased changes
 
 Version 9
 ---------
+9.13.10 - 2023-08-31
+˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜
+* Fixes numba warning
+
 9.13.9 - 2023-01-09
 ~~~~~~~~~~~~~~~~~~~
 * Fixes an issue in the parsing of the timestamp of the DAQHeader
