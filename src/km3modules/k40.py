@@ -872,13 +872,13 @@ def calculate_rms_rates(rates, fitted_rates, corrected_rates):
     return rms_rates, rms_corrected_rates
 
 
-@jit
+@jit(nopython=True)
 def get_comb_index(i, j):
     """Return the index of PMT pair combinations"""
     return i * 30 - i * (i + 1) // 2 + j - 1
 
 
-@jit
+@jit(nopython=True)
 def add_to_twofold_matrix(times, tdcs, mat, tmax=10):
     """Add counts to twofold coincidences for a given `tmax`.
 

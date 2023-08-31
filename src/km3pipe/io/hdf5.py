@@ -921,7 +921,7 @@ class HDF5Pump(Module):
         self._close_h5file()
 
 
-@jit
+@jit(nopython=True)
 def create_index_tuple(group_ids):
     """An helper function to create index tuples for fast lookup in HDF5Pump"""
     max_group_id = np.max(group_ids)
