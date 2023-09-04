@@ -4,6 +4,10 @@ Unreleased changes
 
 Version 9
 ---------
+9.13.11 - 2023-09-04
+˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜
+* Minor fix of CI/publishing
+
 9.13.10 - 2023-08-31
 ˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜
 * Fixes numba warning
