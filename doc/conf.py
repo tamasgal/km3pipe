@@ -16,7 +16,6 @@ import sys
 import os
 from datetime import date
 import sphinx_rtd_theme
-from pkg_resources import get_distribution
 
 # -- Project information -----------------------------------------------------
 
@@ -77,7 +76,13 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-version = get_distribution("km3pipe").version
+try:
+    from importlib.metadata import version as get_version
+    version = get_version("km3pipe")
+except ImportError:
+    from pkg_resources import get_distribution
+    version = get_distribution("km3pipe").version
+
 short_version = ".".join(version.split(".")[:2])
 project = "KM3Pipe {}".format(short_version)
 

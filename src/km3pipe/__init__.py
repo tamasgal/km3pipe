@@ -3,17 +3,19 @@
 The extemporary KM3NeT analysis framework.
 
 """
-from pkg_resources import get_distribution, DistributionNotFound
-
 try:
+    from importlib.metadata import version as get_version
+    version = get_version(__name__)
+except ImportError:
+    from pkg_resources import get_distribution
     version = get_distribution(__name__).version
-except DistributionNotFound:
-    version = "unknown version"
+
 
 try:
     __KM3PIPE_SETUP__
 except NameError:
     __KM3PIPE_SETUP__ = False
+
 
 if not __KM3PIPE_SETUP__:
     from . import logger  # noqa
