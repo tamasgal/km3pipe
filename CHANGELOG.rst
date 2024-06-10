@@ -4,6 +4,10 @@ Unreleased changes
 
 Version 9
 ---------
+9.13.12 - 2024-06-10
+˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜
+* Fixes a freeze at the process end which rarely happens in Slurm jobs
+
 9.13.11 - 2023-09-04
 ˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜
 * Minor fix of CI/publishing
