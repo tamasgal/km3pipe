@@ -20,6 +20,7 @@ except NameError:
 
 
 if not __KM3PIPE_SETUP__:
+    import thepipe  # to avoid a freeze at process exist, see https://git.km3net.de/km3py/km3pipe/-/issues/293
     from . import logger  # noqa
     from .dataclasses import Table, NDArray  # noqa
     from . import dataclasses  # noqa
