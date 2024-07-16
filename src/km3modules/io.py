@@ -19,7 +19,6 @@ class HitsTabulator(kp.Module):
     kind: str
       The kind of hits to tabulate:
         "offline": the hits in an offline file
-        "online": snapshot and triggered hits (will be combined)
         "mc": MC hits
     split: bool (default: True)
       Defines whether the hits should be split up into individual arrays
@@ -80,10 +79,6 @@ class HitsTabulator(kp.Module):
                 name="McHits",
             )
 
-        if self.kind == "online":
-            raise NotImplementedError(
-                "The extraction of online (DAQ) hits is not implemented yet."
-            )
         return blob
 
 
