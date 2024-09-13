@@ -23,7 +23,7 @@ from thepipe import Provenance
 import km3io
 import km3pipe as kp
 
-FORMAT_VERSION = np.string_("5.1")
+FORMAT_VERSION = np.bytes_("5.1")
 
 log = kp.logger.get_logger("h5extractf")
 

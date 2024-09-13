@@ -38,8 +38,8 @@ __maintainer__ = "Tamas Gal and Moritz Lotze"
 __email__ = "tgal@km3net.de"
 __status__ = "Development"
 
-FORMAT_VERSION = np.string_("5.1")
-MINIMUM_FORMAT_VERSION = np.string_("4.1")
+FORMAT_VERSION = np.bytes_("5.1")
+MINIMUM_FORMAT_VERSION = np.bytes_("4.1")
 
 
 class H5VersionError(Exception):
@@ -48,15 +48,15 @@ class H5VersionError(Exception):
 
 def check_version(h5file):
     try:
-        version = np.string_(h5file.root._v_attrs.format_version)
+        version = np.bytes_(h5file.root._v_attrs.format_version)
     except AttributeError:
         log.error(
             "Could not determine HDF5 format version: '%s'."
             "You may encounter unexpected errors! Good luck..." % h5file.filename
         )
         return
-    if split(version, int, np.string_(".")) < split(
-        MINIMUM_FORMAT_VERSION, int, np.string_(".")
+    if split(version, int, np.bytes_(".")) < split(
+        MINIMUM_FORMAT_VERSION, int, np.bytes_(".")
     ):
         raise H5VersionError(
             "HDF5 format version {0} or newer required!\n"
@@ -588,10 +588,10 @@ class HDF5Sink(Module):
 
     def finish(self):
         self.flush()
-        self.h5file.root._v_attrs.km3pipe = np.string_(kp.__version__)
-        self.h5file.root._v_attrs.pytables = np.string_(tb.__version__)
-        self.h5file.root._v_attrs.kid = np.string_(self._uuid)
-        self.h5file.root._v_attrs.format_version = np.string_(FORMAT_VERSION)
+        self.h5file.root._v_attrs.km3pipe = np.bytes_(kp.__version__)
+        self.h5file.root._v_attrs.pytables = np.bytes_(tb.__version__)
+        self.h5file.root._v_attrs.kid = np.bytes_(self._uuid)
+        self.h5file.root._v_attrs.format_version = np.bytes_(FORMAT_VERSION)
         self.log.info("Adding index tables.")
         for where, idx_tab in self.indices.items():
             # any skipped NDArrays or split groups will be filled with 0 entries
