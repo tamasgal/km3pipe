@@ -32,7 +32,7 @@ stages:
 
 .virtualenv_template: &virtualenv_definition |
   python -V
-  pip install -U pip setuptools wheel virtualenv setuptools_scm
+  pip install -U pip setuptools wheel virtualenv setuptools_scm packaging>=22.0
   virtualenv venv
   source venv/bin/activate
   make install-dev
