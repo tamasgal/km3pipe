@@ -217,7 +217,7 @@ class RecoTracksTabulator(kp.Module):
 
             # check if it contains any of the specific reco types (can be several)
             for stage, (best_track, reco_name) in self._best_track_fmap.items():
-                if stage in all_tracks.rec_stages:
+                if ak.any(stage == all_tracks.rec_stages):
                     tracks = best_track(all_tracks)
                     self._put_tracks_into_blob(blob, tracks, reco_name, 1)
 
@@ -284,7 +284,7 @@ class RecoTracksTabulator(kp.Module):
         # write out the rec stages only once with all tracks
         if n_tracks != 1:
 
-            _rec_stage = np.array(ak.flatten(tracks.rec_stages)._layout)
+            _rec_stage = np.array(ak.highlevel.Array(ak.flatten(tracks.rec_stages)._layout))
             _counts = ak.count(tracks.rec_stages, axis=1)
             _idx = np.repeat(np.arange(n_tracks), _counts)
 
