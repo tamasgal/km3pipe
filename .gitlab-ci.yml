@@ -32,7 +32,7 @@ stages:
 
 .virtualenv_template: &virtualenv_definition |
   python -V
-  pip install -U pip setuptools wheel virtualenv setuptools_scm
+  pip install -U pip setuptools wheel virtualenv setuptools_scm packaging>=22.0
   virtualenv venv
   source venv/bin/activate
   make install-dev
@@ -43,39 +43,6 @@ stages:
       reports:
         junit: "reports/junit*.xml"
 
-
-test-py3.6:
-    image: docker.km3net.de/base/python:3.6
-    stage: test
-    script:
-        - *virtualenv_definition
-        - make test
-    <<: *junit_definition
-
-test-py3.7:
-    image: docker.km3net.de/base/python:3.7
-    stage: test
-    script:
-        - *virtualenv_definition
-        - make test
-    <<: *junit_definition
-
-test-py3.8:
-    image: docker.km3net.de/base/python:3.8
-    stage: test
-    script:
-        - *virtualenv_definition
-        - make test
-    <<: *junit_definition
-
-test-py3.9:
-    image: docker.km3net.de/base/python:3.9
-    stage: test
-    script:
-        - *virtualenv_definition
-        - make test
-    <<: *junit_definition
-
 test-py3.10:
     image: docker.km3net.de/base/python:3.10
     stage: test
@@ -84,8 +51,24 @@ test-py3.10:
         - make test
     <<: *junit_definition
 
+test-py3.11:
+    image: docker.km3net.de/base/python:3.11
+    stage: test
+    script:
+        - *virtualenv_definition
+        - make test
+    <<: *junit_definition
+
+test-py3.12:
+    image: git.km3net.de:4567/common/dockerfiles/base/python:3.12
+    stage: test
+    script:
+        - *virtualenv_definition
+        - make test
+    <<: *junit_definition
+
 benchmarks:
-    image: docker.km3net.de/base/python:3.9
+    image: git.km3net.de:4567/common/dockerfiles/base/python:3.12
     stage: test
     script:
         - *virtualenv_definition
@@ -94,7 +77,7 @@ benchmarks:
     allow_failure: true
 
 code-style:
-    image: docker.km3net.de/base/python:3.9
+    image: git.km3net.de:4567/common/dockerfiles/base/python:3.12
     stage: test
     script:
         - *virtualenv_definition
@@ -102,7 +85,7 @@ code-style:
     allow_failure: true
 
 coverage:
-    image: docker.km3net.de/base/python:3.9
+    image: git.km3net.de:4567/common/dockerfiles/base/python:3.12
     stage: coverage
     script:
         - *virtualenv_definition
@@ -116,7 +99,7 @@ coverage:
             - reports/coverage
 
 docs:
-    image: docker.km3net.de/base/python:3.9
+    image: git.km3net.de:4567/common/dockerfiles/base/python:3.12
     stage: doc
     script:
         - *virtualenv_definition
@@ -124,7 +107,7 @@ docs:
     cache: {}
 
 pages:
-    image: docker.km3net.de/base/python:3.9
+    image: git.km3net.de:4567/common/dockerfiles/base/python:3.12
     stage: doc
     script:
         - *virtualenv_definition
@@ -153,7 +136,7 @@ docker:
     - tags
 
 pypi:
-    image: docker.km3net.de/base/python:3.9
+    image: git.km3net.de:4567/common/dockerfiles/base/python:3.12
     stage: release
     cache: {}
     script:
