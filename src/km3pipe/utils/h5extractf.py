@@ -14,6 +14,7 @@ Options:
     -h --help                   Show this screen.
 
 """
+
 import time
 from uuid import uuid4
 import numpy as np
@@ -23,7 +24,7 @@ from thepipe import Provenance
 import km3io
 import km3pipe as kp
 
-FORMAT_VERSION = np.string_("5.1")
+FORMAT_VERSION = np.bytes_("5.1")
 
 log = kp.logger.get_logger("h5extractf")
 
@@ -305,7 +306,7 @@ def _yield_tracks(tracks, fields, without_full_reco=False):
     n_columns = max(km3io.definitions.fitparameters.values()) + 1
 
     for name, (stage, func) in track_fmap.items():
-        if stage is None or stage in tracks.rec_stages:
+        if (stage is None) or (ak.any(stage == tracks.rec_stages)):
             if func is None:
                 sel_tracks = tracks
             else:

@@ -54,7 +54,7 @@ def nodeinfo(node, print_titles=False):
 
 def meta(h5):
     try:
-        version = np.string_(h5.root._v_attrs.format_version)
+        version = np.bytes_(h5.root._v_attrs.format_version)
         print("KM3HDF5 v{}".format(version.decode("utf-8")))
     except AttributeError:
         pass
