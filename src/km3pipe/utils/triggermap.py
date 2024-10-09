@@ -136,17 +136,10 @@ def main():
         subtitle = ", ".join(args["FILENAMES"])
 
     pipe = kp.Pipeline()
-    if args["--offline"]:
-        pipe.attach(
-            km.common.MultiFilePump, pump=kp.io.OfflinePump, filenames=args["FILENAMES"]
-        )
-        pipe.attach(km.io.HitsTabulator, kind="offline")
-    else:
-        pipe.attach(
-            km.common.MultiFilePump,
-            pump=kp.io.online.EventPump,
-            filenames=args["FILENAMES"],
-        )
+    pipe.attach(
+        km.common.MultiFilePump, pump=kp.io.OfflinePump, filenames=args["FILENAMES"]
+    )
+    pipe.attach(km.io.HitsTabulator, kind="offline")
     pipe.attach(StatusBar, every=2500)
     pipe.attach(
         TriggerMap,

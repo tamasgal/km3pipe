@@ -126,7 +126,6 @@ Example::
         --event-info                General event information.
         --offline-hits              Offline hits.
         --mc-hits                   MC hits (use with care!).
-        --online-hits               Snapshot and triggered hits (combined).
         --mc-tracks                 MC tracks..
         --mc-tracks-usr-data        "usr" data from MC tracks (this will be slow).
         --reco-tracks               Reconstructed tracks.

@@ -16,7 +16,6 @@ Options:
     --offline-hits              Offline hits.
     --with-calibration          Include calibration information for offline hits.
     --mc-hits                   MC hits (use with care!).
-    --online-hits               Snapshot and triggered hits (combined).
     --mc-tracks                 MC tracks..
     --mc-tracks-usr-data        "usr" data from MC tracks (this will be slow).
     --reco-tracks               Reconstructed tracks.
@@ -78,8 +77,6 @@ def main():
             kind="offline",
             with_calibration=args["--with-calibration"],
         )
-    if args["--online-hits"]:
-        pipe.attach(km.io.HitsTabulator, name="Online", kind="online")
     if args["--mc-hits"]:
         pipe.attach(km.io.HitsTabulator, name="MC", kind="mc")
     if args["--mc-tracks"]:
