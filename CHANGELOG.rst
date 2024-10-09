@@ -1,9 +1,19 @@
 Unreleased changes
 ------------------
 
+Version 10
+----------
+
+10.0.0 - 2024-10-09
+˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜
+* Removed support for the online ROOT format since it's not supported anymore
+  in km3io due to the lack of maintainers (it relied on uproot3 which is
+  deprecated)
+* Python 3.10+ is now required
 
 Version 9
 ---------
+
 9.13.12 - 2024-06-10
 ˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜
 * Fixes a freeze at the process end which rarely happens in Slurm jobs
