@@ -4,6 +4,11 @@ Unreleased changes
 Version 10
 ----------
 
+10.0.1 - 2024-10-18
+˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜
+* Fixes a 100% CPU issue when Ligier is disconnected in the middle of receiving
+  a message
+
 10.0.0 - 2024-10-09
 ˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜
 * Removed support for the online ROOT format since it's not supported anymore
