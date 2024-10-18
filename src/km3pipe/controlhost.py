@@ -158,7 +158,16 @@ class Client(object):
         while len(message) < size:
             buffer_size = min((BUFFER_SIZE, (size - len(message))))
             try:
-                message += self.socket.recv(buffer_size)
+                if recv := self.socket.recv(buffer_size):
+                    message += recv
+                else:
+                    log.error(
+                        "Client has disconnected. "
+                        + "Trying to reconnect in 30 seconds."
+                    )
+                    time.sleep(30)
+                    self._reconnect()
+                    message = b""
             except OSError as e:
                 log.error("Failed to receive controlhost message: %s", e)
                 raise BufferError
