@@ -1,5 +1,6 @@
 Unreleased changes
 ------------------
+* removed warnings when modules have different numbers of PMTs
 
 Version 10
 ----------
