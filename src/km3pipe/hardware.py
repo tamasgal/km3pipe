@@ -226,13 +226,6 @@ class Detector(object):
             if self.n_pmts_per_dom is None:
                 self.n_pmts_per_dom = n_pmts
 
-            if self.n_pmts_per_dom != n_pmts:
-                log.warning(
-                    "DOMs with different number of PMTs are "
-                    "detected, this can cause some unexpected "
-                    "behaviour."
-                )
-
             for i in range(n_pmts):
                 raw_pmt_info = self._readline()
                 pmt_info = raw_pmt_info.split()
