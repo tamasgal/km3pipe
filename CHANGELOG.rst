@@ -1,9 +1,12 @@
 Unreleased changes
 ------------------
-* removed warnings when modules have different numbers of PMTs
 
 Version 10
 ----------
+
+10.0.2 - 2025-01-21
+˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜
+* removed warnings when modules have different numbers of PMTs
 
 10.0.1 - 2024-10-18
 ˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜
