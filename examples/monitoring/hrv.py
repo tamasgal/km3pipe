@@ -119,7 +119,7 @@ class PMTRates(kp.Module):
         if dom_id not in self.detector.doms:
             return blob
 
-        du, floor, _ = self.detector.doms[dom_id]
+        du, floor, *_ = self.detector.doms[dom_id]
 
         if du != self.du:
             return blob

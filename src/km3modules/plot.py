@@ -54,7 +54,7 @@ def plot_dom_parameters(
     hide_limits: do not show under/overflows in the plot
 
     """
-    x, y, _ = zip(*detector.doms.values())
+    x, y, *_ = zip(*detector.doms.values())
     fig, ax = plt.subplots(figsize=(10, 6))
     cmap = plt.get_cmap(cmap).copy()
     cmap.set_over(over, 1.0)

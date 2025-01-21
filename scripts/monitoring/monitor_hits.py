@@ -56,12 +56,12 @@ class DOMHits(Module):
         with lock:
             hits = np.zeros(N_DOMS * N_DUS)
             for dom_id, _, _, _ in event.snapshot_hits:
-                du, floor, _ = detector.doms[dom_id]
+                du, floor, *_ = detector.doms[dom_id]
                 hits[(du - 1) * N_DOMS + floor - 1] += 1
             self.hits.append(hits)
             triggered_hits = np.zeros(N_DOMS * N_DUS)
             for dom_id, _, _, _, _ in event.triggered_hits:
-                du, floor, _ = detector.doms[dom_id]
+                du, floor, *_ = detector.doms[dom_id]
                 triggered_hits[(du - 1) * N_DOMS + floor - 1] += 1
             self.triggered_hits.append(triggered_hits)
 

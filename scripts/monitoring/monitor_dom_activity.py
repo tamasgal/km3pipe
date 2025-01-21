@@ -40,7 +40,7 @@ class DOMActivityPlotter(kp.Module):
         timestamp = summaryslice.header.time_stamp
 
         for dom_id, _ in summaryslice.summary_frames.items():
-            du, dom, _ = detector.doms[dom_id]
+            du, dom, *_ = detector.doms[dom_id]
             self.last_activity[(du, dom)] = timestamp
 
         self.cuckoo.msg()

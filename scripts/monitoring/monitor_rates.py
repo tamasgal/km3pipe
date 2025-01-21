@@ -35,7 +35,7 @@ class MonitorRates(kp.Module):
         preamble = kp.io.daq.DAQPreamble(file_obj=data_io)    # noqa
         summaryslice = kp.io.daq.DAQSummaryslice(file_obj=data_io)
         for dom_id, rates in summaryslice.summary_frames.iteritems():
-            du, dom, _ = detector.doms[dom_id]
+            du, dom, *_ = detector.doms[dom_id]
             self.rates[(du, dom)] = np.sum(rates) / 1000
 
         self.cuckoo.msg()

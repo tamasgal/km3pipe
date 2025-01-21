@@ -60,7 +60,7 @@ class AHRSCalibrator(kp.Module):
         tmch_data = TMCHData(io.BytesIO(blob["CHData"]))
         dom_id = tmch_data.dom_id
         try:
-            du, floor, _ = self.detector.doms[dom_id]
+            du, floor, *_ = self.detector.doms[dom_id]
         except KeyError:  # base CLB
             return blob
 
@@ -96,7 +96,7 @@ class AHRSCalibrator(kp.Module):
             if ahrs_calib is None:
                 log.warning("AHRS calibration missing for '{}'".format(dom_id))
                 continue
-            du, floor, _ = self.detector.doms[dom_id]
+            du, floor, *_ = self.detector.doms[dom_id]
             A = np.median(self.A[dom_id], axis=0)
             H = np.median(self.H[dom_id], axis=0)
 

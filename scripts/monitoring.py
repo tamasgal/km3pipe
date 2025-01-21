@@ -58,12 +58,12 @@ class DOMHits(Module):
         with lock:
             hits = np.zeros(N_DOMS * N_DUS)
             for dom_id, _, _, _ in event.snapshot_hits:
-                du, floor, _ = detector.doms[dom_id]
+                du, floor, *_ = detector.doms[dom_id]
                 hits[(du - 1) * N_DOMS + floor - 1] += 1
             self.hits.append(hits)
             triggered_hits = np.zeros(N_DOMS * N_DUS)
             for dom_id, _, _, _, _ in event.triggered_hits:
-                du, floor, _ = detector.doms[dom_id]
+                du, floor, *_ = detector.doms[dom_id]
                 triggered_hits[(du - 1) * N_DOMS + floor - 1] += 1
             self.triggered_hits.append(triggered_hits)
 
@@ -249,7 +249,7 @@ class DOMActivityPlotter(Module):
         timestamp = summaryslice.header.time_stamp
         with lock:
             for dom_id, rates in summaryslice.summary_frames.iteritems():
-                du, dom, _ = detector.doms[dom_id]
+                du, dom, *_ = detector.doms[dom_id]
                 self.rates[(du, dom)].append((timestamp, sum(rates)))
 
         return blob
@@ -261,7 +261,7 @@ class DOMActivityPlotter(Module):
             time.sleep(5)
 
     def create_plot(self):
-        x, y, _ = zip(*detector.doms.values())
+        x, y, *_ = zip(*detector.doms.values())
         fig, ax = plt.subplots(figsize=(10, 6))
         cmap = plt.get_cmap('RdYlGn_r').copy()
         cmap.set_over('deeppink', 1.0)
