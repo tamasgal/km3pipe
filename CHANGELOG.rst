@@ -3,6 +3,9 @@ Unreleased changes
 
 Version 10
 ----------
+10.0.3 - 2025-01-21
+˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜
+* Fixed parameter pattern matching from detector DOMs
 
 10.0.2 - 2025-01-21
 ˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜
