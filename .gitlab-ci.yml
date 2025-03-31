@@ -116,7 +116,7 @@ docs:
     script:
         - *virtualenv_definition
         - cd doc && make clean && make html
-    cache: {}
+    cache: []
 
 pages:
     image: git.km3net.de:4567/common/dockerfiles/base/python:3.12
@@ -129,7 +129,7 @@ pages:
     artifacts:
         paths:
             - public
-    cache: {}
+    cache: []
     only:
         - tags
         - master
@@ -150,7 +150,7 @@ docker:
 pypi:
     image: git.km3net.de:4567/common/dockerfiles/base/python:3.12
     stage: release
-    cache: {}
+    cache: []
     script:
         - pip install -U twine wheel setuptools_scm
         - python setup.py sdist
