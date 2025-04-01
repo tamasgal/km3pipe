@@ -3,6 +3,7 @@ image: docker.km3net.de/base/python:3
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
 variables:
+  GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/$CI_PROJECT_PATH
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   DOCKER_HOST: tcp://docker:2375
   DOCKER_DRIVER: overlay2
