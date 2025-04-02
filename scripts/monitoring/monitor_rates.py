@@ -10,9 +10,9 @@ import km3pipe as kp
 from km3modules.plot import plot_dom_parameters
 import km3pipe.style
 
-km3pipe.style.use('km3pipe')
+km3pipe.style.use("km3pipe")
 
-PLOTS_PATH = 'www/plots'
+PLOTS_PATH = "www/plots"
 cal = kp.calib.Calibration(det_id=14)
 detector = cal.detector
 
@@ -30,9 +30,9 @@ class MonitorRates(kp.Module):
         if self.index % 30:
             return blob
 
-        data = blob['CHData']
+        data = blob["CHData"]
         data_io = BytesIO(data)
-        preamble = kp.io.daq.DAQPreamble(file_obj=data_io)    # noqa
+        preamble = kp.io.daq.DAQPreamble(file_obj=data_io)  # noqa
         summaryslice = kp.io.daq.DAQSummaryslice(file_obj=data_io)
         for dom_id, rates in summaryslice.summary_frames.iteritems():
             du, dom, *_ = detector.doms[dom_id]
@@ -45,19 +45,19 @@ class MonitorRates(kp.Module):
     def create_plot(self):
         print(self.__class__.__name__ + ": updating plot.")
 
-        filename = os.path.join(PLOTS_PATH, 'dom_rates.png')
+        filename = os.path.join(PLOTS_PATH, "dom_rates.png")
         plot_dom_parameters(
             self.rates,
             detector,
             filename,
-            'rate [kHz]',
+            "rate [kHz]",
             "DOM Rates",
             vmin=190,
             vmax=230,
-            cmap='coolwarm',
-            missing='black',
-            under='darkorchid',
-            over='deeppink'
+            cmap="coolwarm",
+            missing="black",
+            under="darkorchid",
+            over="deeppink",
         )
         print("done")
 
@@ -65,11 +65,11 @@ class MonitorRates(kp.Module):
 pipe = kp.Pipeline()
 pipe.attach(
     kp.io.ch.CHPump,
-    host='127.0.0.1',
+    host="127.0.0.1",
     port=5553,
-    tags='IO_SUM',
+    tags="IO_SUM",
     timeout=60 * 60 * 24 * 7,
-    max_queue=2000
+    max_queue=2000,
 )
 pipe.attach(kp.io.daq.DAQProcessor)
 pipe.attach(MonitorRates)
