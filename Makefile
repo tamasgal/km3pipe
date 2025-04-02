@@ -10,7 +10,7 @@ install:
 install-dev:
 	python3 -m pip install -e ".[dev]"
 	python3 -m pip install -e ".[extras]"
-	python3 -m ipykernel install --user --name="km3pipe-dev"
+	python3 -m ipykernel install --user --name="$(PKGNAME)"
 
 clean:
 	python3 setup.py clean --all
