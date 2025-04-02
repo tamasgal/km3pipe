@@ -42,7 +42,7 @@ and properly closed::
     EventFile io / wall time = 1.72786 / 20.5438 (8.41063 % spent on io.)
 
 
-Time / Memory / CPU Usage 
+Time / Memory / CPU Usage
 --------------------------
 
 Pass the `Pipeline(timeit=True)` argument to show detailed time and CPU
@@ -88,4 +88,3 @@ The `Table` class has the attribute `h5loc` which can also be set upon initialis
 It is the target location in an HDF5 file if a `km3pipe.io.hdf5.HDF5Sink` is attached
 to the pipeline.
 Use this datastructure if you want to dump out your data into an HDF5 file.
-

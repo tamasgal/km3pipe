@@ -6,4 +6,3 @@ for file in $(python -m km3net_testdata offline)/*.root; do
     h5extractf $file
     echo done
 done
-

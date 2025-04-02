@@ -15,7 +15,7 @@ install-dev:
 clean:
 	python3 setup.py clean --all
 
-test: 
+test:
 	py.test --junitxml=./reports/junit.xml -o junit_suite_name=$(PKGNAME) src/
 
 benchmark:
@@ -24,7 +24,7 @@ benchmark:
 test-cov:
 	py.test --cov src/ --cov-report term-missing --cov-report xml:reports/coverage.xml --cov-report html:reports/coverage src/
 
-test-loop: 
+test-loop:
 	py.test src/
 	ptw --ext=.py,.pyx --ignore=doc src/
 

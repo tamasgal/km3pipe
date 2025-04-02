@@ -416,7 +416,7 @@ Version 9
 9.0.0-alpha.3 / 2019-12-13
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 * ``km3pipe retrieve DET_ID RUN`` will now use a local cache in Lyon and
-  create symbolic links to save space. 
+  create symbolic links to save space.
 
 
 Version 8
@@ -465,7 +465,7 @@ Version 8
 8.26.3 / 2019-12-13
 ~~~~~~~~~~~~~~~~~~~
 * ``km3pipe retrieve DET_ID RUN`` will now use a local cache in Lyon and
-  create symbolic links to save space. 
+  create symbolic links to save space.
 
 8.26.0 / 2019-12-04
 ~~~~~~~~~~~~~~~~~~~
@@ -669,7 +669,7 @@ Version 8
 
 8.14.2 / 2019-05-09
 ~~~~~~~~~~~~~~~~~~~
-* Improved error handling in streamds runsummary upload 
+* Improved error handling in streamds runsummary upload
 
 8.14.1 / 2019-05-09
 ~~~~~~~~~~~~~~~~~~~
@@ -704,7 +704,7 @@ Version 8
 * Adds a workaround for converting aanet ROOT files when the dtype dict is
   mixed up
 * ``[self.]log.once`` can now be used to print a log message exactly once!
-* Fixes a problem where hit times could be overwritten by applying the 
+* Fixes a problem where hit times could be overwritten by applying the
   calibration more than once.
 
 8.11.0 / 2019-02-26
@@ -924,7 +924,7 @@ Version 8
 ~~~~~~~~~~~~~~~~~~
 
 * Completely rewrote Aanet file readout -- supporting latest jpp/aanet only,
-  and using enumerated types to label ``fitinf`` vectors / ``rec_type`` 
+  and using enumerated types to label ``fitinf`` vectors / ``rec_type``
   reconstruction types
 * Added `triggered_hits = hits.triggered_rows` syntactical sugar
 * Fixed datatype bug when applying t0 calibration to timeslice hits
@@ -1016,7 +1016,7 @@ Version 7
 * ``triggersetup`` command line utility added, which allows easy access to
   the trigger setup of a given run setup
 * ``k40calib`` now accepts ``-s`` to select a ``JDAQTimeslice`` stream.
-  an empty string will use the original stream and 'L1', 'L2' and 'SN' will 
+  an empty string will use the original stream and 'L1', 'L2' and 'SN' will
   select the new streams introduced in Jpp v9
 * ``kp.tools.AnyBar`` added to control the AnyBar macOS app, including a
   pipeline integration: ``kp.Pipeline(anybar=True)``
@@ -1033,7 +1033,7 @@ Version 7
 * ``km3pipe.plot``: Common plotting helpers
 * A handful utility functions for ``km3pipe.shell.Script``, like ``cp``,
   ``iget``...
-* ``kp.tools.bincenters`` now lives in ``kp.plot``. 
+* ``kp.tools.bincenters`` now lives in ``kp.plot``.
 * ``kp.db.DBManager.trigger_setup`` can now retrieve trigger setups for a given
   OID
 * Add ``n_digits`` option in ``kp.io.evt.EvtPump`` for file number index
@@ -1070,7 +1070,7 @@ Version 7
   if you ``importe km3pipe as kp``.
   This change was needed to be able to import __km3pipe__ in Julia.
 * ``kp.io.hdf5.HDF5Pump`` now accepts the path of a boolean cut mask,
-  e.g. ``cut_mask='/pid/survives_precut'``. If the bool mask is false, the 
+  e.g. ``cut_mask='/pid/survives_precut'``. If the bool mask is false, the
   event is skipped.
 
 7.13.2 / 2017-12-11
@@ -1103,14 +1103,14 @@ Version 7
 
 7.12.1 / 2017-11-28
 ~~~~~~~~~~~~~~~~~~~
-* ``kp.math``: ``zenith, azimuth, phi, theta`` now follow the correct 
+* ``kp.math``: ``zenith, azimuth, phi, theta`` now follow the correct
   km3net definitions (finally)
 * JFit pump now follows multipump paradigm
 * improved logging in IO
 
 7.12.0 / 2017-11-24
 ~~~~~~~~~~~~~~~~~~~
-* Added preliminary ``kp.io.jpp.FitPump``, which reads ``JFit`` objects. 
+* Added preliminary ``kp.io.jpp.FitPump``, which reads ``JFit`` objects.
   However, it does not yet read the ``fitinf`` vector, yet.
 * ``Calibration`` moved to ``kp.calib``, since core.pyx was Cython and numba
   does not like cython files.
@@ -1132,7 +1132,7 @@ Version 7
 * New ``k40calib`` command line tool to calibrate DOMs using the K40
   method
 * ``TimeslicePump`` and ``SummaryslicePump`` now add meta information about
-  the slices to the blob: ``blob['TimesliceInfo']`` and 
+  the slices to the blob: ``blob['TimesliceInfo']`` and
   ``blob['SummarysliceInfo']``
 * ``SummaryslicePump`` now reads out FIFO status and HRV for each PMT
 * ``kp.shell.qsub()`` can be used to submit jobs to SGE clusters

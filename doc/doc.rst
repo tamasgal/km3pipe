@@ -2,7 +2,7 @@ How to Write Documentation
 --------------------------
 
 Build docs locally::
-  
+
   cd km3pipe/doc
   make html
 
@@ -24,4 +24,3 @@ or simply (checks the whole project)::
 
 How to Add Examples to the Gallery
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-

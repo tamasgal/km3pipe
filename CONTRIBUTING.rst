@@ -15,7 +15,7 @@ https://git.km3net.de/km3py/km3pipe/issues
 
 You can browse all the issues here: https://git.km3net.de/km3py/km3pipe/issues
 
-Please follow the instructions in the templates to provide all the 
+Please follow the instructions in the templates to provide all the
 necessary information which will help other people to understand the
 situation.
 
@@ -153,7 +153,7 @@ This should give you a green bar, with an output like this::
 Run the tests every time you make changes to see if you broke anything! It usually
 takes just a few seconds and ensures that you don't break existing code. It's
 also an easy way to spot syntax errors ;)
-    
+
 You can also start a script which will watch for file changes and retrigger
 a test suite run every time for you. It's a nice practice to have a terminal
 open running this script to check your test results continuously::

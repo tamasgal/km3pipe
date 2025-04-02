@@ -22,4 +22,3 @@ for file in $(python -m km3net_testdata offline)/*.root; do
 
     echo done
 done
-

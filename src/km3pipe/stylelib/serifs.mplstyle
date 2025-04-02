@@ -21,4 +21,3 @@ savefig.format: svg
 savefig.transparent: false
 
 svg.fonttype: none
-

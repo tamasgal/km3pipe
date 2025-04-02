@@ -29,8 +29,8 @@ be read by any other package since it uses only native HDF5 data structures
 Hits and McHits
 ---------------
 
-If you want to analyse the hits or create your own reconstruction, 
-the ``Hits`` and ``McHits`` datatypes are the most important ones. 
+If you want to analyse the hits or create your own reconstruction,
+the ``Hits`` and ``McHits`` datatypes are the most important ones.
 
 The ``Hits`` come with ``dom_id``, ``channel_id``, ``tot``, ``time``
 and ``triggered`` and the ``McHits`` have ``a``, ``origin``, ``time`` and
@@ -79,8 +79,8 @@ Calibrating Hits and McHits
 ---------------------------
 
 Both ``Hits`` and ``McHits`` have corresponding
-``CalibHits`` and ``CalibMcHits``. Those classes have additional attributes 
-to access the position, direction and calibrated hit times. 
+``CalibHits`` and ``CalibMcHits``. Those classes have additional attributes
+to access the position, direction and calibrated hit times.
 They also provide access to the DU and floor which the hit was registered.
 
 In order to obtain the position, direction, the t0 correction and DU/floor, you
@@ -106,7 +106,7 @@ Another, even easier way is to calibrate your file beforehand, using the
 
     calibrate DETXFILE HDF5FILE
 
-If you read in the file with the ``km3pipe.io.hdf5.HDF5Pump``, it will 
+If you read in the file with the ``km3pipe.io.hdf5.HDF5Pump``, it will
 automatically recognise the calibration and use the correct classes.
 
 Sorting of Hits
@@ -138,7 +138,7 @@ Here is an example showing how to sort a dummy hit series with 3 hits::
     tot (dtype: |u1) = [22 23 24]
     triggered (dtype: |u1) = [0 1 1]
     group_id (dtype: <u4) = [23 23 23]
-    
+
     In [3]: hits.sorted('time')
     Out[3]:
     Hits <class 'km3pipe.dataclasses.Table'>

@@ -11,9 +11,9 @@ from km3modules.plot import plot_dom_parameters
 from km3modules.fit import fit_delta_ts
 import km3pipe.style
 
-km3pipe.style.use('km3pipe')
+km3pipe.style.use("km3pipe")
 
-PLOTS_PATH = 'www/plots'
+PLOTS_PATH = "www/plots"
 cal = kp.calib.Calibration(det_id=14)
 detector = cal.detector
 
@@ -25,9 +25,11 @@ def mongincidence(times, tdcs, tmax=20, offset=0):
     for t_idx, t in enumerate(times):
         cur_t = t
         diff = cur_t - las_t
-        if offset < diff <= offset + tmax \
-                and t_idx > 0 \
-                and tdcs[t_idx - 1] != tdcs[t_idx]:
+        if (
+            offset < diff <= offset + tmax
+            and t_idx > 0
+            and tdcs[t_idx - 1] != tdcs[t_idx]
+        ):
             coincidences.append(((tdcs[t_idx - 1], tdcs[t_idx]), diff))
         las_t = cur_t
     return coincidences
@@ -48,7 +50,7 @@ class MonitorK40(kp.Module):
 
         self.n_slices += 1
 
-        for dom_id, hits in blob['TimesliceFrames'].iteritems():
+        for dom_id, hits in blob["TimesliceFrames"].iteritems():
             du, dom, _ = detector.doms[dom_id]
             omkey = (du, dom)
             if omkey not in self.rates:
@@ -82,19 +84,19 @@ class MonitorK40(kp.Module):
         self.rates = {}
         self.n_slices = 0
 
-        filename = os.path.join(PLOTS_PATH, 'k40.png')
+        filename = os.path.join(PLOTS_PATH, "k40.png")
         plot_dom_parameters(
             data,
             detector,
             filename,
-            'rate [Hz]',
+            "rate [Hz]",
             "K40 rate",
             vmin=600,
             vmax=1200,
-            cmap='coolwarm',
-            missing='black',
-            under='darkorchid',
-            over='deeppink'
+            cmap="coolwarm",
+            missing="black",
+            under="darkorchid",
+            over="deeppink",
         )
         print("done")
 
@@ -102,11 +104,11 @@ class MonitorK40(kp.Module):
 pipe = kp.Pipeline()
 pipe.attach(
     kp.io.ch.CHPump,
-    host='127.0.0.1',
+    host="127.0.0.1",
     port=5553,
-    tags='IO_TSL',
+    tags="IO_TSL",
     timeout=60 * 60 * 24 * 7,
-    max_queue=2000
+    max_queue=2000,
 )
 pipe.attach(kp.io.daq.TimesliceParser)
 pipe.attach(MonitorK40)

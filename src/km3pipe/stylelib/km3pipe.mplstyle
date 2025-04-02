@@ -23,8 +23,8 @@ axes.grid: true
 axes.edgecolor: .7
 axes.linewidth: 1
 axes.titlesize: 14
-axes.titlepad: 23 
-axes.labelpad: 18 
+axes.titlepad: 23
+axes.labelpad: 18
 
 patch.edgecolor: ffffff
 # patch.facecolor: 4C72B0

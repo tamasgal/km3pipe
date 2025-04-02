@@ -54,8 +54,8 @@ classes and then do some basic high level data analysis using the ``Pandas``
 Data Hierarchy
 ~~~~~~~~~~~~~~
 
-HDF5 has an internal structure line a Unix file system: There are groups 
-("folders") containing tables ("files") which hold the data. Every 
+HDF5 has an internal structure line a Unix file system: There are groups
+("folders") containing tables ("files") which hold the data. Every
 table/group is identified by a "filepath". This is the output of
 ``ptdump`` for a file which contains MUPAGE simulation data for the ORCA
 detector and was converted with the now deprecated ``tohdf5`` command::
@@ -89,7 +89,7 @@ stored this way to get the maximum performance when doing event-by-event
 analysis. The ``_indices`` array holds the index information, which you
 need to split up the huge 1D arrays into the corresponding events.
 
-A typical km3net h5 file looks like this: The reconstruction tables, for 
+A typical km3net h5 file looks like this: The reconstruction tables, for
 example, have columns called "energy" or "zenith", and each row of the table
 corresponds to a single event::
 
@@ -110,7 +110,7 @@ corresponds to a single event::
 (Experts) Data Substructure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Since HDF5 is a general-purpose table based format, there are some minor 
+Since HDF5 is a general-purpose table based format, there are some minor
 tweaks done by km3pipe to emulate an event-by-event based workflow:
 
 For example, the event ``Hit`` storage: each hit in the whole file (!) is split up
@@ -118,9 +118,9 @@ into its "components" ``time``, ``tot`` etc. and stored under the ``/hits``
 group. In order to get the hits for the event #23, you first have to read
 in the ``/hits/_indices`` table (keep that in memory if you want to look at
 multiple events, it's 1-2 MB or so!) and look at its entry at index 23.
-You will see two numbers, the first is the index of the first hit (let's call 
+You will see two numbers, the first is the index of the first hit (let's call
 it ``idx``) and the second is the number of hits (``n_items``).
-Now you can read ``/hit/time[idx:idx+n_items]``, ``/hit/time[idx:idx+n_item``, 
+Now you can read ``/hit/time[idx:idx+n_items]``, ``/hit/time[idx:idx+n_item``,
 etc. Of course KM3Pipe provides the ``km3pipe.io.hdf5.HDF5Pump(filename=...)``
 instance which does this for you::
 

@@ -194,7 +194,7 @@ Example output::
 ``pttree`` (from PyTables)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Show the memory consumption of a HDF5 file. As you can see below, the 
+Show the memory consumption of a HDF5 file. As you can see below, the
 overwhelming majority of space is used by the hits, as expected.
 
 Example output::

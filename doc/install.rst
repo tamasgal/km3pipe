@@ -118,4 +118,3 @@ On RedHat-based distributions (CentOS, Scientific Linux, ...)::
 On ArchLinux, Manjaro and alike::
 
     (sudo) pacman -S hdf5
-

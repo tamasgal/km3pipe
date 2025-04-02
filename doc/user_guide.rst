@@ -12,7 +12,7 @@ of data formats like ROOT, EVT, binary DAQ, network protocols and more.
 
 The preferred on-disk output file format is :doc:`hdf5`.
 
-.. toctree:: 
+.. toctree::
 
     pipeline
     datastructures
