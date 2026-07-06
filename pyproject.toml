@@ -78,7 +78,6 @@ extras = [
     "pydocstyle",
     "pytest",
     "pytest-cov",
-    "pytest-flake8",
     "pylint",
     "pytest-watch",
     "sphinx-gallery",
