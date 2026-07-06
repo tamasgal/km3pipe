@@ -1,20 +1,20 @@
-FROM python:3.12.7-bookworm
+FROM python:3.13-bookworm
 LABEL maintainer="Tamas Gal <tgal@km3net.de>"
 
- ENV INSTALL_DIR /km3pipe
+ENV INSTALL_DIR=/km3pipe
 
- RUN apt-get update
- RUN apt-get install -y -qq git gnupg1 make wget llvm
- RUN python3 -m pip install --upgrade pip setuptools wheel
+RUN apt-get update
+RUN apt-get install -y -qq git gnupg1 make wget llvm
+RUN python3 -m pip install --upgrade pip setuptools wheel
 
- ADD . $INSTALL_DIR
- RUN cd $INSTALL_DIR && \
-     python3 -m pip install numpy && \
-     python3 -m pip install . ".[dev]" ".[extras]"
+COPY . $INSTALL_DIR
+RUN cd $INSTALL_DIR && \
+    python3 -m pip install numpy && \
+    python3 -m pip install ".[all]"
 
- # Clean up
- RUN cd / && rm -rf $INSTALL_DIR
- RUN apt-get -y clean && apt-get autoclean && rm -rf /var/cache
+# Clean up
+RUN cd / && rm -rf $INSTALL_DIR
+RUN apt-get -y clean && apt-get autoclean && rm -rf /var/cache
 
  # 1337
  RUN echo '[ ! -z "$TERM" -a -r /etc/motd ] && cat /etc/motd' \

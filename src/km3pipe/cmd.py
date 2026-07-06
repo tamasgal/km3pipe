@@ -57,8 +57,7 @@ def run_tests():
     print(
         "Running the km3pipe test suite. Make sure you have all the test "
         "dependencies and extras installed with\n\n"
-        '    pip install "km3pipe[dev]"\n'
-        '    pip install "km3pipe[extras]"\n'
+        '    pip install "km3pipe[all]"\n'
     )
 
     import pytest

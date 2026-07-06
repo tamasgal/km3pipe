@@ -51,44 +51,41 @@ readme = {file = "README.rst", content-type = "text/x-rst"}
 dynamic = ["version"]
 
 [project.optional-dependencies]
-all = [
-    "ipykernel",
-    "pandas",
-    "pypandoc",
-    "scipy>=1.3.1",
-    "seaborn",
-    "km3astro",
-    "km3flux",
-    "urwid"
-]
 extras = [
     "ipykernel",
+    "km3astro",
+    "km3flux",
     "pandas",
     "pypandoc",
     "scipy>=1.3.1",
     "seaborn",
-    "km3astro",
-    "km3flux",
-    "urwid",
-    "black==22.10.0",
+    "urwid"
+]
+dev = [
+    "black==26.5.1",
+    "build",
     "km3net-testdata>=0.4.0",
     "mock",
-    "numpydoc",
     "pillow",
     "pydocstyle",
+    "pylint",
     "pytest",
     "pytest-cov",
-    "pylint",
     "pytest-watch",
+    "twine"
+]
+doc = [
+    "memory_profiler",
+    "numpydoc",
+    "sphinx>=7",
+    "sphinx-autoapi",
     "sphinx-gallery",
     "sphinx-rtd-theme>=0.3",
-    "sphinx>=5.2.1",
-    "sphinxcontrib-napoleon>=0.6.1",
     "sphinxcontrib-programoutput>=0.11",
-    "sphinxcontrib-websupport>=1.0.1",
-    "sphinx-autoapi",
-    "twine",
-    "wheel"
+    "sphinxcontrib-websupport>=1.0.1"
+]
+all = [
+    "km3pipe[extras,dev,doc]"
 ]
 
 [project.scripts]
