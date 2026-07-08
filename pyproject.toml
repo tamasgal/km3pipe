@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=64", "setuptools-scm>=8"]
+requires = ["setuptools>=77", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -36,7 +36,6 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
@@ -49,6 +48,8 @@ classifiers = [
 ]
 description = "An analysis framework for KM3NeT"
 readme = {file = "README.rst", content-type = "text/x-rst"}
+license = "MIT"
+license-files = ["LICENSE"]
 dynamic = ["version"]
 
 [project.optional-dependencies]
