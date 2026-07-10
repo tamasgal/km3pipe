@@ -115,4 +115,33 @@ Issues = "https://git.km3net.de/km3py/km3pipe/-/issues"
 Changelog = "https://km3py.pages.km3net.de/km3pipe/changelog.html"
 
 [tool.setuptools_scm]
-write_to = "src/km3pipe/version.py"
+version_file = "src/km3pipe/version.py"
+write_to_source = true
+
+[tool.black]
+target-version = ["py311", "py312", "py313", "py314"]
+extend-exclude = "src/km3pipe/version.py"
+
+[tool.pytest.ini_options]
+testpaths = ["src"]
+junit_suite_name = "km3pipe"
+
+[tool.coverage.run]
+source = ["src/km3pipe", "src/km3modules"]
+omit = [
+    "src/km3pipe/utils/*",
+    "src/km3pipe/version.py",
+    "src/km3pipe/io/i3.py",
+    "src/km3modules/dummy.py",
+    "*/tests/*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "if self.debug:"
+]

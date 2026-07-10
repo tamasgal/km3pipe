@@ -10,7 +10,7 @@ global-exclude .ipynb_checkpoints
 global-exclude *.py[co]
 global-exclude __pycache__
 
-include README.rst CHANGELOG.rst LICENSE CONTRIBUTING.rst pyproject.toml setup.py setup.cfg codemeta.json
+include README.rst CHANGELOG.rst LICENSE CONTRIBUTING.rst pyproject.toml codemeta.json
 
 include src/km3pipe/version.py
 
@@ -18,4 +18,3 @@ prune docs
 prune notebooks
 prune tests
 
-exclude .coveragerc
