@@ -138,7 +138,7 @@ def h5extractf(
             _to_hdf(f, "event_info", np_event_info)
 
             # TODO remove group_info once km3pipe does not require it anymore
-            group_info = np.core.records.fromarrays(
+            group_info = np.rec.fromarrays(
                 [np.arange(len(np_event_info[1]))], names=["group_id"]
             )
             f.create_dataset("group_info", data=group_info)
@@ -358,14 +358,12 @@ def _to_hdf(f, name, np_branch, with_group_id=True):
         data["group_id"] = np.repeat(np.arange(len(n_items)), n_items)
     else:
         index = np.concatenate([[0], np.cumsum(n_items)[:-1]])
-        indices = np.core.records.fromarrays(
-            [index, n_items], names=["index", "n_items"]
-        )
+        indices = np.rec.fromarrays([index, n_items], names=["index", "n_items"])
         f.create_dataset(name + "_indices", data=indices, **hdf_settings)
 
     f.create_dataset(
         name,
-        data=np.core.records.fromarrays(list(data.values()), names=list(data.keys())),
+        data=np.rec.fromarrays(list(data.values()), names=list(data.keys())),
         **hdf_settings,
     )
 
