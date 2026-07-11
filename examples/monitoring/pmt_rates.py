@@ -12,7 +12,7 @@ The following script calculates the mean PMT rates and updates the plot.
 
 # Author: Tamas Gal <tgal@km3net.de>
 # License: MIT
-from datetime import datetime
+from datetime import datetime, timezone
 import io
 from collections import defaultdict
 import threading
@@ -93,7 +93,7 @@ class PMTRates(kp.Module):
         interval = self.interval
 
         def xlabel_func(timestamp):
-            return datetime.utcfromtimestamp(timestamp).strftime("%H:%M")
+            return datetime.fromtimestamp(timestamp, timezone.utc).strftime("%H:%M")
 
         m = self.rates_matrix
         m[m > 15000] = 15000
@@ -102,7 +102,7 @@ class PMTRates(kp.Module):
         ax.imshow(m, origin="lower")
         ax.set_title(
             "Mean PMT Rates for DU{} (colours from 5kHz to 15kHz)\n{}".format(
-                self.du, datetime.utcnow()
+                self.du, datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
             )
         )
         ax.set_xlabel("UTC time [{}s/px]".format(interval))

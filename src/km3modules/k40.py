@@ -10,7 +10,7 @@ import os
 from itertools import combinations
 from collections import defaultdict
 from functools import partial
-from datetime import datetime
+from datetime import datetime, timezone
 import io
 
 import numpy as np
@@ -218,7 +218,7 @@ class TwofoldCounter(kp.Module):
 
         self.counts = None
         self.n_timeslices = None
-        self.start_time = datetime.utcnow()
+        self.start_time = datetime.now(timezone.utc)
         self.reset()
 
         self.expose(self.counts, "TwofoldCounts")
@@ -558,9 +558,7 @@ def gaussian(x, mean, sigma, rate, offset):
 
 
 def gaussian_wo_offset(x, mean, sigma, rate):
-    return (
-        rate / np.sqrt(2 * np.pi) / sigma * np.exp(-0.5 * (x - mean) ** 2 / sigma**2)
-    )
+    return rate / np.sqrt(2 * np.pi) / sigma * np.exp(-0.5 * (x - mean) ** 2 / sigma**2)
 
 
 def fit_delta_ts(data, livetime, fit_background=True):
