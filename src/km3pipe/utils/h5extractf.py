@@ -279,7 +279,7 @@ def _yield_tracks(tracks, fields, without_full_reco=False):
 
     nmbr_events = len(tracks)
     if nmbr_events == 0:
-        log.warn("No events found")
+        log.warning("No events found")
         return
 
     track_fmap = {
