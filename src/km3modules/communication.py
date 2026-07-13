@@ -85,7 +85,7 @@ class ELOGService(kp.Module):
             else:
                 self.cprint("ELOG post created successfully.")
 
-        for (_, (_, fobj)) in files:
+        for _, (_, fobj) in files:
             if fobj and hasattr(fobj, "close"):
                 fobj.close()
 
@@ -94,4 +94,4 @@ def create_elog_password_hash(password):
     """Create a SHA256 encrypted password for ELOGs."""
     from passlib.hash import sha256_crypt
 
-    return sha256_crypt.encrypt(password, salt="", rounds=5000)[4:]
+    return sha256_crypt.using(salt="", rounds=5000).hash(password)[4:]

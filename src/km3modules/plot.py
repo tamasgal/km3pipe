@@ -57,9 +57,7 @@ def plot_dom_parameters(
     """
     x, y, *_ = zip(*detector.doms.values())
     fig, ax = plt.subplots(figsize=(10, 6))
-    cmap = plt.get_cmap(cmap).copy()
-    cmap.set_over(over, 1.0)
-    cmap.set_under(under, 1.0)
+    cmap = plt.get_cmap(cmap).with_extremes(over=over, under=under)
 
     m_size = 100
     scatter_args = {
