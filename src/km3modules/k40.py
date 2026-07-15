@@ -574,7 +574,7 @@ def fit_delta_ts(data, livetime, fit_background=True):
     -------
     numpy arrays with rates and means for all PMT combinations
     """
-    scipy = km3pipe.extras.scipy()
+    km3pipe.extras.scipy()
     from scipy import optimize
 
     data = data / livetime
@@ -673,6 +673,9 @@ def fit_angular_distribution(angles, rates, rate_errors, shape="pexp"):
     fitted_rates: numpy array of fitted rates (fit_function(angles, popt...))
 
     """
+    km3pipe.extras.scipy()
+    from scipy import optimize
+
     if shape == "exp":
         fit_function = exponential
         # p0 = [-0.91871169,  2.72224241, -1.19065965,  1.48054122]
@@ -700,6 +703,8 @@ def minimize_t0s(means, weights, combs):
     opt_t0s: optimal t0 values for all PMTs
 
     """
+    km3pipe.extras.scipy()
+    from scipy import optimize
 
     def make_quality_function(means, weights, combs):
         def quality_function(t0s):
@@ -732,6 +737,8 @@ def minimize_sigmas(sigmas, weights, combs):
     opt_sigmas: optimal sigma values for all PMTs
 
     """
+    km3pipe.extras.scipy()
+    from scipy import optimize
 
     def make_quality_function(sigmas, weights, combs):
         def quality_function(s):
@@ -766,6 +773,8 @@ def minimize_qes(fitted_rates, rates, weights, combs):
     opt_qes: optimal qe values for all PMTs
 
     """
+    km3pipe.extras.scipy()
+    from scipy import optimize
 
     def make_quality_function(fitted_rates, rates, weights, combs):
         def quality_function(qes):
