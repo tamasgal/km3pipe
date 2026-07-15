@@ -4,6 +4,7 @@
 Calibration.
 
 """
+
 import awkward as ak
 import numba as nb
 import numpy as np
@@ -79,7 +80,6 @@ class Calibration(Module):
         self._pos_pmt_id = None
         self._dir_pmt_id = None
         self._t0_pmt_id = None
-        self._lookup_tables = None  # for Numba
 
         if self.det_id and self.run:
             self.cprint(
@@ -131,7 +131,9 @@ class Calibration(Module):
 
     def apply_t0(self, hits):
         """Apply only t0s"""
-        apply_t0_nb(hits.time, hits.dom_id, hits.channel_id, self._lookup_tables)
+        apply_t0_nb(
+            hits.time, hits.dom_id, hits.channel_id, self._calib_by_dom_and_channel
+        )
         return hits
 
     def apply(self, hits, no_copy=False, correct_slewing=True, slewing_variant=3):
@@ -275,7 +277,6 @@ class Calibration(Module):
                 dtype=np.float64,
             )
         self._calib_by_dom_and_channel = data
-        self._lookup_tables = [(dom, cal) for dom, cal in data.items()]
 
     def _create_pmt_id_lookup(self):
         data = nb.typed.Dict.empty(key_type=nb.types.i8, value_type=nb.types.float64[:])
@@ -306,19 +307,10 @@ class Calibration(Module):
 
 
 @nb.njit
-def apply_t0_nb(times, dom_ids, channel_ids, lookup_tables):
-    """Apply t0s using a lookup table of tuples (dom_id, calib)"""
-    dom_id = 0
-    lookup = np.empty((31, 9))
+def apply_t0_nb(times, dom_ids, channel_ids, lookup):
+    """Apply t0s using the calibration lookup, keyed by DOM ID and channel ID"""
     for i in range(len(times)):
-        cur_dom_id = dom_ids[i]
-        if cur_dom_id != dom_id:
-            dom_id = cur_dom_id
-            for (d, m) in lookup_tables:
-                if d == dom_id:
-                    np.copyto(lookup, m)
-        t0 = lookup[channel_ids[i]][6]
-        times[i] += t0
+        times[i] += lookup[dom_ids[i]][channel_ids[i]][6]
 
 
 @nb.jit(nopython=True)
