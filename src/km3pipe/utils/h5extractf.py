@@ -11,7 +11,7 @@ Options:
     --provenance-file=FILENAME  The file to store the provenance information.
     --without-full-reco         Don't include all reco tracks, only the best.
     --without-calibration       Don't include calibration information for offline hits.
-    -h --help                   Show this screen.
+    -h, --help                  Show this screen.
 
 """
 

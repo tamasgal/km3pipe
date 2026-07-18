@@ -24,9 +24,10 @@ Options:
     -j MAX_JOBS    Maximum number of jobs to submit [default: 100].
     -u             Upload summary data to the database automatically.
     -q             Dryrun, don't submit the jobs.
-    -h --help      Show this screen.
+    -h, --help     Show this screen.
 
 """
+
 from collections import defaultdict
 import math
 import os
@@ -37,7 +38,6 @@ import km3db
 from tqdm import tqdm
 
 import km3pipe as kp
-
 
 ESTIMATED_TIME_PER_RUN = 60 * 10  # [s]
 

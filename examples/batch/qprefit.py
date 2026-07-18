@@ -24,7 +24,7 @@ Options:
     -j JOBNAME   The name of the submitted jobs [default: royprefit].
     -l LOG_PATH  Path of the job log files [default: qlogs].
     -q           Dryrun: don't submit jobs, just print the first job script.
-    -h --help    Show this screen.
+    -h, --help   Show this screen.
 
 """
 

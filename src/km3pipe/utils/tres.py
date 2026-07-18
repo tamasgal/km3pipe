@@ -17,7 +17,7 @@ Options:
                         offline files created with km3net-dataformat
                         version 2+).
     -n N_EVENTS         Number of events to extract.
-    -h --help           Show this screen.
+    -h, --help          Show this screen.
     --version           Show the version.
 
 """

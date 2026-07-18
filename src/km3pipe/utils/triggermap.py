@@ -15,7 +15,7 @@ Option:
     -d DET_ID_OR_DETX  Detector ID or DETX file.
     -p PLOT_FILENAME   The filename of the plot [default: trigger_map.png].
     -s SUBTITLE        Optional subtitle for the plot instead of the filename.
-    -h --help          Show this screen.
+    -h, --help         Show this screen.
 
 """
 

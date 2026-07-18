@@ -13,7 +13,7 @@ Usage:
 
 Options:
     FILE        Input file.
-    -h --help   Show this screen.
+    -h, --help  Show this screen.
     --no-meta   Don't print meta data at top
     --titles    Print leaf titles.
     --classic   Print like ptdump.

@@ -11,13 +11,15 @@ Usage:
     km3pipe --version
 
 Options:
-    -h --help           Show this screen.
+    -h, --help          Show this screen.
     -m                  Get the MC detector file (flips the sign of DET_ID).
     -c CALIBR_ID        Geometrical calibration ID (eg. A01466417)
     -i                  Use iRODS instead of xrootd to retrieve files.
     -o OUT              Output folder or filename.
     -t T0_SET           Time calibration ID (eg. A01466431)
     -s REGEX            Regular expression to filter the runsetup name/id.
+
+Arguments:
     DET_ID              Detector ID (eg. D_ARCA001).
     DETECTOR            Detector (eg. ARCA).
     GIT_BRANCH          Git branch to pull (eg. develop).

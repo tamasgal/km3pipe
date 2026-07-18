@@ -8,7 +8,7 @@ Usage:
     pipeinspector --version
 
 Options:
-    -h --help       Show this screen.
+    -h, --help      Show this screen.
 
 """
 

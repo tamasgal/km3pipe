@@ -14,9 +14,10 @@ Options:
     -i LIGIER_IP    IP of the Ligier [default: 127.0.0.1].
     -p LIGIER_PORT  Port of the Ligier [default: 5553].
     -n SAMPLES      Number of samples [default: 1].
-    -h --help       Show this screen.
+    -h, --help      Show this screen.
 
 """
+
 import km3pipe as kp
 
 __author__ = "Tamas Gal"

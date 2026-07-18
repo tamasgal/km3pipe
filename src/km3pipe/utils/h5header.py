@@ -10,7 +10,7 @@ Usage:
 Options:
     FILE        Input file.
     -r --raw    Dump raw metadata.
-    -h --help   Show this screen.
+    -h, --help  Show this screen.
 
 """
 

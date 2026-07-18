@@ -15,7 +15,7 @@ Options:
     -e EVENT_ID   Event ID.
     -f FRAME      Frame index.
     -t            Triggered DUs only.
-    -h --help     Show this screen.
+    -h, --help    Show this screen.
 
 """
 

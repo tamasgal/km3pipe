@@ -47,7 +47,7 @@ the trigger contribution for events::
 	-u DU             Only plot for the given DU.
 	-d DET_ID         Detector ID [default: 29].
 	-p PLOT_FILENAME  The filename of the plot [default: trigger_map.png].
-	-h --help         Show this screen.
+	-h, --help        Show this screen.
 
 
 DataBase
@@ -107,10 +107,12 @@ Example::
     Options:
       FILE        Input file.
       -r --raw    Dump raw metadata.
-      -h --help   Show this screen.
+      -h, --help  Show this screen.
 
 ``h5extract``
 ~~~~~~~~~~~~~
+
+::
 
     h5extract -h
     A tool to extract data from KM3NeT ROOT files to HDF5.
@@ -131,7 +133,7 @@ Example::
         --reco-tracks               Reconstructed tracks.
         --provenance-file=FILENAME  The file to store the provenance information.
         --timeit                    Print detailed pipeline performance statistics.
-        -h --help                   Show this screen.
+        -h, --help                  Show this screen.
         --version                   Show the version.
 
 ``h5tree``
