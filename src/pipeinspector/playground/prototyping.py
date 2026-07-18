@@ -55,14 +55,14 @@ class ItemWidget(urwid.WidgetWrap):
                 "fixed",
                 15,
                 urwid.Padding(
-                    urwid.AttrWrap(urwid.Text("item %s" % str(id)), "body", "focus"),
+                    urwid.AttrMap(urwid.Text("item %s" % str(id)), "body", "focus"),
                     left=2,
                 ),
             ),
-            urwid.AttrWrap(urwid.Text("%s" % description), "body", "focus"),
+            urwid.AttrMap(urwid.Text("%s" % description), "body", "focus"),
         ]
         w = urwid.Columns(self.item)
-        self.__super.__init__(w)
+        super().__init__(w)
 
     def selectable(self):
         return True
@@ -75,10 +75,10 @@ class BlobSelector(urwid.WidgetWrap):
     def __init__(self, description):
         self.content = description
         self.item = [
-            urwid.AttrWrap(urwid.Text("%s" % description), "blob", "focus"),
+            urwid.AttrMap(urwid.Text("%s" % description), "blob", "focus"),
         ]
         w = urwid.Columns(self.item)
-        self.__super.__init__(w)
+        super().__init__(w)
 
     def selectable(self):
         return True
@@ -115,8 +115,8 @@ def next_blob():
     pass
 
 
-header = urwid.AttrWrap(urwid.Text("The header!", align="center"), "header")
-footer = urwid.AttrWrap(urwid.Text("The footer"), "footer")
+header = urwid.AttrMap(urwid.Text("The header!", align="center"), "header")
+footer = urwid.AttrMap(urwid.Text("The footer"), "footer")
 
 items = []
 for i in range(100):
@@ -125,13 +125,13 @@ for i in range(100):
 browser_header = urwid.AttrMap(urwid.Text("selected:"), "head")
 browser_listbox = urwid.ListBox(urwid.SimpleListWalker(items))
 browser_view = urwid.Frame(
-    urwid.AttrWrap(browser_listbox, "body"), header=browser_header
+    urwid.AttrMap(browser_listbox, "body"), header=browser_header
 )
 
 blobs = BlobWidget()
 footer = urwid.Columns([urwid.Text("Info\nSecond kube"), blobs])
 
-main_frame = urwid.AttrWrap(urwid.Frame(browser_view, focus_part="body"), "default")
+main_frame = urwid.AttrMap(urwid.Frame(browser_view, focus_part="body"), "default")
 main_frame.set_header(header)
 main_frame.set_footer(footer)
 

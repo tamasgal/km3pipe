@@ -96,13 +96,13 @@ class ItemWidget(urwid.WidgetWrap):
             (
                 "fixed",
                 35,
-                urwid.Padding(urwid.AttrWrap(urwid.Text(key), "body", "focus"), left=2),
+                urwid.Padding(urwid.AttrMap(urwid.Text(key), "body", "focus"), left=2),
             ),
-            urwid.AttrWrap(urwid.Text(type_label), "body", "focus"),
-            urwid.AttrWrap(urwid.Text(size_label), "body", "focus"),
+            urwid.AttrMap(urwid.Text(type_label), "body", "focus"),
+            urwid.AttrMap(urwid.Text(size_label), "body", "focus"),
         ]
         w = urwid.Columns(self.item)
-        self.__super.__init__(w)
+        super().__init__(w)
 
     def selectable(self):
         return True
