@@ -56,6 +56,8 @@ def h5info(h5name, raw=False):
 def main():
     from docopt import docopt
 
-    arguments = docopt(__doc__)
+    from km3pipe import version
+
+    arguments = docopt(__doc__, version=version)
 
     h5info(arguments["FILE"], arguments["--raw"])

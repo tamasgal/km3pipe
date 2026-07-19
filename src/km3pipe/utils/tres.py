@@ -94,7 +94,9 @@ def main():
 
     from docopt import docopt
 
-    run_pipeline(docopt(__doc__))
+    from km3pipe import version
+
+    run_pipeline(docopt(__doc__, version=version))
 
 
 if __name__ == "__main__":
