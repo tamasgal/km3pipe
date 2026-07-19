@@ -32,6 +32,17 @@ __email__ = "mlotze@km3net.de"
 __status__ = "Development"
 
 
+def nodetitle(node):
+    """Return the quoted title of a node, or None if it has none."""
+    try:
+        title = str(node.title)
+    except AttributeError:
+        return None
+    if not title or title.isspace():
+        return None
+    return "'{}'".format(title)
+
+
 def nodeinfo(node, print_titles=False):
     pathname = node._v_pathname
     try:
@@ -39,14 +50,7 @@ def nodeinfo(node, print_titles=False):
         n_rows_str = "{}".format(n_rows)
     except AttributeError:
         n_rows_str = None
-    try:
-        title = str(node.title)
-        if not print_titles or not title or title.isspace():
-            title = None
-        else:
-            title = "'{}'".format(title)
-    except AttributeError:
-        title = None
+    title = nodetitle(node) if print_titles else None
     return ", ".join(
         [node for node in (pathname, title, n_rows_str) if node is not None]
     )
@@ -66,7 +70,7 @@ def meta(h5):
         pass
 
 
-def h5tree(h5name, print_meta=True, pretty=True, **kwargs):
+def h5tree(h5name, print_meta=True, pretty=True, print_titles=False):
     with tables.open_file(h5name) as h5:
         if print_meta:
             meta(h5)
@@ -87,15 +91,19 @@ def h5tree(h5name, print_meta=True, pretty=True, **kwargs):
                         filler = "└── "
                     d = node._v_depth
                     if pretty:
-                        print("│  " * (d - 1) + filler + node._v_name)
+                        line = "│  " * (d - 1) + filler + node._v_name
+                        title = nodetitle(node) if print_titles else None
+                        print(line if title is None else line + " " + title)
                     else:
-                        print(nodeinfo(node, **kwargs))
+                        print(nodeinfo(node, print_titles=print_titles))
 
 
 def main():
     from docopt import docopt
 
-    args = docopt(__doc__)
+    from km3pipe import version
+
+    args = docopt(__doc__, version=version)
     fname = args["FILE"]
     do_titles = bool(args["--titles"])
     do_meta = not bool(args["--no-meta"])
@@ -104,5 +112,5 @@ def main():
         fname,
         print_titles=do_titles,
         print_meta=do_meta,
-        print_pretty=not (do_classic),
+        pretty=not do_classic,
     )
