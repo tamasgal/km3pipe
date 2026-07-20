@@ -73,7 +73,7 @@ class TriggerMap(kp.Module):
             du, floor, _ = self.det.doms[dom_id]
             if self.du is not None and du != self.du:
                 continue
-            hit_counts[(self.dus.index(du) - 1) * self.n_doms + floor - 1] += n_hits
+            hit_counts[self.dus.index(du) * self.n_doms + floor - 1] += n_hits
         self.hit_counts.append(hit_counts)
 
         return blob
@@ -99,10 +99,12 @@ class TriggerMap(kp.Module):
             norm=LogNorm(vmin=1, vmax=np.amax(hit_mat)),
         )
         yticks = np.arange(self.n_rows)
-        floors_to_label = range(self.n_doms) if self.n_dus == 1 else [1, 6, 12]
+        floors = range(1, self.n_doms + 1)
+        floors_to_label = floors if self.n_dus == 1 else [1, 6, 12]
         ytick_labels = [
             "DU{}-DOM{}".format(du, floor) if floor in floors_to_label else ""
-            for (du, floor, _) in self.det.doms.values()
+            for du in self.dus
+            for floor in floors
         ]
         ax.set_yticks(yticks)
         ax.set_yticklabels(ytick_labels)
