@@ -37,9 +37,10 @@ to find files which have already been converted to avoid multiple conversions.
         -v PYTHONVENV  Path to the Python virtual env.
         -c CLUSTER     Cluster to run on (in2p3, woody, ...) [default: in2p3].
         -q             Dryrun: don't submit jobs, just print the job script.
-        -h --help      Show this screen.
+        -h, --help     Show this screen.
 
 """
+
 __author__ = "Tamas Gal"
 __email__ = "tgal@km3net.de"
 __version__ = "1.0"
@@ -80,7 +81,7 @@ def main():
     LOG_PATH = os.path.abspath(args["-l"])
     JOB_NAME = args["-j"]
     DRYRUN = args["-q"]
-    PYTHONVENV = os.path.abspath(args["-v"])
+    PYTHONVENV = os.path.abspath(args["-v"]) if args["-v"] else None
     CLUSTER = args["-c"]
 
     pathlib.Path(OUTPUT_PATH).mkdir(parents=True, exist_ok=True)
