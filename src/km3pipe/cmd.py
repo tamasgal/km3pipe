@@ -74,9 +74,28 @@ def update_km3pipe(git_branch=""):
     os.system(f"pip install -U git+{KM3PIPE_GIT}@{git_branch}")
 
 
+def on_lyon():
+    """Check if we are running on a machine of the CC-IN2P3 in Lyon.
+
+    This used to live in km3db as ``on_whitelisted_host("lyon")``, which was
+    removed in km3db 0.9.
+    """
+    try:
+        return socket.gethostbyname(socket.gethostname()).startswith("134.158.")
+    except OSError:
+        return False
+
+
 def retrieve(run_id, det_id, use_irods=False, out=None):
     """Retrieve run from iRODS for a given detector (O)ID"""
-    det_id = int(det_id)
+    try:
+        det_id = int(det_id)
+    except ValueError:  # a detector OID like D_ARCA001, needs a DB connection
+        resolved = km3db.tools.todetid(det_id)
+        if resolved is None:
+            print("Could not resolve the detector OID '{}'.".format(det_id))
+            return
+        det_id = resolved
 
     if use_irods:
         rpath = irods_path(det_id, run_id)
@@ -100,7 +119,7 @@ def retrieve(run_id, det_id, use_irods=False, out=None):
 
     cmd += " {0} {1}".format(rpath, outfile)
 
-    if not km3db.core.on_whitelisted_host("lyon"):
+    if not on_lyon():
         subprocess.call(cmd.split())
         return
 
