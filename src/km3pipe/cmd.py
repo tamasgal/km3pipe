@@ -5,7 +5,6 @@ KM3Pipe command line utility.
 Usage:
     km3pipe test
     km3pipe update [GIT_BRANCH]
-    km3pipe createconf [--overwrite] [--dump]
     km3pipe retrieve DET_ID RUN [-i -o OUTFILE]
     km3pipe (-h | --help)
     km3pipe --version
@@ -26,7 +25,9 @@ Arguments:
     RUN                 Run number.
 
 """
+
 import re
+import socket
 import sys
 import subprocess
 import os
