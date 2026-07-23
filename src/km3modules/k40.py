@@ -274,58 +274,6 @@ class TwofoldCounter(kp.Module):
         )
 
 
-class HRVFIFOTimesliceFilter(kp.Module):
-    """Creat a frame index lookup table which holds DOM IDs of frames with
-    at least one PMT in HRV."""
-
-    def configure(self):
-        filename = self.require("filename")
-        filter_hrv = self.get("filter_hrv", default=False)
-        self.expose(self.get_skipped_frames, "GetSkippedFrames")
-        self.skipped_frames = defaultdict(list)
-        p = kp.io.jpp.SummaryslicePump(filename=filename)
-        for b in p:
-            sum_info = b["SummarysliceInfo"]
-            frame_index = sum_info.frame_index
-            summaryslice = b["Summaryslice"]
-            for dom_id, sf in summaryslice.items():
-                if not sf["fifo_status"] or (filter_hrv and any(sf["hrvs"])):
-                    self.skipped_frames[frame_index].append(dom_id)
-
-    def get_skipped_frames(self):
-        return self.skipped_frames
-
-
-class SummaryMedianPMTRateService(kp.Module):
-    def configure(self):
-        self.expose(self.get_median_rates, "GetMedianPMTRates")
-        self.filename = self.require("filename")
-
-    def get_median_rates(self):
-        rates = defaultdict(list)
-
-        if "GetSkippedFrames" in self.services:
-            skipped_frames = self.services["GetSkippedFrames"]()
-        else:
-            skipped_frames = None
-
-        p = kp.io.jpp.SummaryslicePump(filename=self.filename)
-        for b in p:
-            sum_info = b["SummarysliceInfo"]
-            frame_index = sum_info.frame_index
-            summary = b["Summaryslice"]
-            for dom_id in summary.keys():
-                if skipped_frames is not None and dom_id in skipped_frames[frame_index]:
-                    continue
-                rates[dom_id].append(summary[dom_id]["rates"])
-
-        median_rates = {}
-        for dom_id in rates.keys():
-            median_rates[dom_id] = np.median(rates[dom_id], axis=0)
-
-        return median_rates
-
-
 class MedianPMTRatesService(kp.Module):
     def configure(self):
         self.rates = defaultdict(lambda: defaultdict(list))

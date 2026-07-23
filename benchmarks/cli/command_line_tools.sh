@@ -8,7 +8,6 @@ h5info --help
 h5tree --help
 h5header --help
 ztplot --help
-k40calib --help
 triggermap --help
 nb2sphx --help
 ligiermirror --help
