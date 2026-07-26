@@ -345,14 +345,20 @@ class TestKM3Sim(TestCase):
 
     def test_hits(self):
         pump = EvtPump(filename=self.fname, parsers=["km3sim"])
-        blob = pump[0]
+        try:
+            blob = pump[0]
+        finally:
+            pump.finish()
         hits = blob["KM3SimHits"]
         assert 4 == len(hits)
         assert 195749 == hits[0].pmt_id
 
     def test_neutrino(self):
         pump = EvtPump(filename=self.fname, parsers=["gseagen", "km3sim"])
-        blob = pump[0]
+        try:
+            blob = pump[0]
+        finally:
+            pump.finish()
         EVT_PARSERS["gseagen"](blob)
         neutrino = blob["Neutrinos"][0]
         self.assertAlmostEqual(0.10066, neutrino.energy)
