@@ -50,7 +50,7 @@ class MonitorK40(kp.Module):
 
         self.n_slices += 1
 
-        for dom_id, hits in blob["TimesliceFrames"].iteritems():
+        for dom_id, hits in blob["TimesliceFrames"].items():
             du, dom, _ = detector.doms[dom_id]
             omkey = (du, dom)
             if omkey not in self.rates:
@@ -74,7 +74,7 @@ class MonitorK40(kp.Module):
         print(self.__class__.__name__ + ": updating plot.")
 
         data = {}
-        for omkey, m in self.rates.iteritems():
+        for omkey, m in self.rates.items():
             print("Fitting {0}".format(omkey))
             time = self.n_slices / 10
             rates, means = fit_delta_ts(m, time)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim: ts=4 sw=4 et
 
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 from queue import Queue, Empty
 import shutil
@@ -45,7 +45,7 @@ class ZTPlot(Module):
         if "Hits" not in blob:
             return blob
 
-        hits = blob["Hits"].serialise(to="pandas")
+        hits = blob["Hits"].to_dataframe()
         cal.apply(hits)
         e_info = blob["EventInfo"]
 
@@ -100,7 +100,9 @@ class ZTPlot(Module):
             "FrameIndex {0}, TriggerCounter {1}\n{2} UTC".format(
                 e_info.frame_index,
                 e_info.trigger_counter,
-                datetime.utcfromtimestamp(e_info.utc_seconds),
+                datetime.fromtimestamp(e_info.utc_seconds, timezone.utc).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                ),
             ),
             fontsize=16,
         )
