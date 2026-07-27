@@ -228,10 +228,10 @@ class TestIstype(TestCase):
 
 
 class TestJppRevision(TestCase):
-    @patch("subprocess.check_output")
-    def test_version(self, co_mock):
-        co_mock.return_value = b"version:    8519\nname space: KM3NET\n"
+    @patch("subprocess.getoutput")
+    def test_version(self, go_mock):
+        go_mock.return_value = "version:    8519\nname space: KM3NET\n"
         assert "8519" == get_jpp_version()
 
-    def test_version(self):
+    def test_version_is_none_for_missing_command(self):
         assert get_jpp_version(via_command="a_non_existing_command") is None

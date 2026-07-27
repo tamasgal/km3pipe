@@ -1061,7 +1061,7 @@ class TestTableFancaAttributes(TestCase):
         p = tab.phi
         assert p is not None
 
-    def test_phi(self):
+    def test_theta(self):
         tab = Table({"dir_x": [1, 0, 0], "dir_y": [0, 1, 0], "dir_z": [0, 0, 1]})
         p = tab.theta
         assert p is not None

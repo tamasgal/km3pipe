@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Tests for HDF5 stuff"""
+
 from collections import OrderedDict, defaultdict
 import tempfile
 from os.path import join, dirname
@@ -276,7 +277,7 @@ class TestNDArrayHandling(TestCase):
 
         fobj.close()
 
-    def test_writing_of_n_dim_arrays(self):
+    def test_writing_of_n_dim_arrays_with_indices(self):
         fobj = tempfile.NamedTemporaryFile(delete=True)
         fname = fobj.name
 
