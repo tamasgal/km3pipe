@@ -51,14 +51,12 @@ To leave the environment, activate another one or just type::
 Important Note for Users of the CC-IN3P3 in Lyon
 ------------------------------------------------
 
-km3pipe is preinstalled on the Lyon computing centre. Put this into your
-`~/.bashrc` or `~/.zshenv` (or whatever login script you prefer):::
+km3pipe is preinstalled on the Lyon computing centre. Run ``module avail python``
+to see which interpreters are provided, pick one which is at least Python 3.11
+and put this into your `~/.bashrc` or `~/.zshenv` (or whatever login script you
+prefer):::
 
-    module load python/3.7.5
-
-Alternatively, if you need the old Python 2 version, you can load it with::
-
-    module load python/2.7.17
+    module load python/X.Y.Z
 
 The Python environments also contain the latest versions of all important and
 commonly used scientific packages like scipy, numpy, scikit-learn, pandas,
@@ -92,8 +90,7 @@ Running the test suite
 To test if everything is working, make sure to install all the additional
 requirements with::
 
-    pip install "km3pipe[dev]"
-    pip install "km3pipe[extras]"
+    pip install "km3pipe[all]"
 
 and run the following command::
 
