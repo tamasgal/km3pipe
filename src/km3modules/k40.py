@@ -121,6 +121,7 @@ class IntraDOMCalibrator(kp.Module):
         (key=dom_id, value=matrix of k40 counts 465x(dt*2+1))
     Requires 'CorrectedTwofoldCounts': dict
         (key=dom_id, value=matrix of k40 counts 465x(dt*2+1))
+
     Writes 'IntraDOMCalibration' into the blob: dict (key=dom_id, value=calibration)
 
     """

@@ -5,6 +5,7 @@
 """
 Maths, Geometry, coordinates.
 """
+
 import numpy as np
 
 from .logger import get_logger
@@ -372,7 +373,7 @@ def spherecutmask(center, rmin, rmax, items):
 
 
     Parameters
-    -----------
+    ----------
     center: array of shape(3,)
         central point of the sphere
     rmin: float
@@ -383,7 +384,7 @@ def spherecutmask(center, rmin, rmax, items):
         the items to cut on
 
     Returns
-    --------
+    -------
     mask of the array of shape (n, 3) or iterable with pos_[xyz]-attributed items.
     """
     items_pos = items
@@ -402,7 +403,7 @@ def spherecut(center, rmin, rmax, items):
     This function calls spherecutmask() to create the selection mask and returns the selected items.
 
     Parameters
-    -----------
+    ----------
     center: array of shape(3,)
         central point of the sphere
     rmin: float
@@ -413,7 +414,7 @@ def spherecut(center, rmin, rmax, items):
         the items to cut on
 
     Returns
-    --------
+    -------
     array of shape (k, 3) or iterable with pos_[xyz]-attributed items
         items which survived the cut.
 
