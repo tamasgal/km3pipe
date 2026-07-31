@@ -25,8 +25,14 @@ reports
 # Sphinx documentation
 doc/_build/
 doc/auto_examples/
+doc/autoapi/
 doc/modules/
 doc/api
+doc/sg_execution_times.rst
+
+# artefacts of the examples which sphinx-gallery executes
+examples/*.h5
+examples/**/*.png
 
 # jupyter files
 .ipynb_checkpoints/
