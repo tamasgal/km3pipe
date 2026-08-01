@@ -3,6 +3,7 @@
 Common unit testing support for km3pipe.
 
 """
+
 import sys
 from functools import wraps
 from unittest import TestCase  # noqa

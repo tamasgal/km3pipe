@@ -4,6 +4,7 @@
 """
 Dataclasses for internal use. Heavily based on Numpy arrays.
 """
+
 import itertools
 
 import numpy as np
@@ -119,7 +120,7 @@ class Table(np.recarray):
         split_h5=DEFAULT_SPLIT,
         name=DEFAULT_NAME,
         h5singleton=DEFAULT_H5SINGLETON,
-        **kwargs
+        **kwargs,
     ):
         if isinstance(data, dict):
             return cls.from_dict(
@@ -129,7 +130,7 @@ class Table(np.recarray):
                 split_h5=split_h5,
                 name=name,
                 h5singleton=h5singleton,
-                **kwargs
+                **kwargs,
             )
         if istype(data, "DataFrame"):
             return cls.from_dataframe(
@@ -139,7 +140,7 @@ class Table(np.recarray):
                 split_h5=split_h5,
                 name=name,
                 h5singleton=h5singleton,
-                **kwargs
+                **kwargs,
             )
         if isinstance(data, (list, tuple)):
             raise ValueError(

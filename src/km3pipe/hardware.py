@@ -4,6 +4,7 @@
 Classes representing KM3NeT hardware.
 
 """
+
 from collections import OrderedDict, defaultdict
 from io import StringIO
 

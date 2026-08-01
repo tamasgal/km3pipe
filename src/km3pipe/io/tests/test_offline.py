@@ -5,7 +5,6 @@ import km3pipe as kp
 from km3pipe.testing import TestCase, data_path
 from km3pipe.io.offline import OfflinePump
 
-
 # class TestEventPump(TestCase):
 #     def setUp(self):
 #         self.pump = EventPump(

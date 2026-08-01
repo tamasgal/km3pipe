@@ -219,7 +219,6 @@ class RecoTracksTabulator(kp.Module):
         return blob
 
     def _put_tracks_into_blob(self, blob, tracks, reco_identifier, n_tracks):
-
         """
         Put a certain type of "tracks" in the blob and give specific name.
 

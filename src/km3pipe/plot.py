@@ -4,6 +4,7 @@
 """
 Common Plotting utils.
 """
+
 try:
     import _tkinter  # noqa
 except ImportError:

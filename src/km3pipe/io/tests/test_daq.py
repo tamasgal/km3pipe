@@ -4,6 +4,7 @@
 Tests for KM3NeT binary formats readout.
 
 """
+
 import io
 from os.path import dirname, join
 import struct

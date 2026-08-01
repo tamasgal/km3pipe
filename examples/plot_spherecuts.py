@@ -10,10 +10,10 @@ This example shows some spher(ical) cuts on a set of points in 3D
 using ``kp.math.spherecut`` and ``kp.math.spherecutmask``.
 
 """
+
 import km3pipe as kp
 import matplotlib.pyplot as plt
 import numpy as np
-
 
 #######################
 # Generating a few points randomly distributed in a cube

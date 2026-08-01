@@ -4,6 +4,7 @@
 The logging facility.
 
 """
+
 from hashlib import sha256
 from inspect import getframeinfo, stack
 import socket
