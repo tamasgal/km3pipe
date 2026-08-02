@@ -1,24 +1,31 @@
 {
-    "description": "<p>KM3Pipe - pipeline framework for KM3NeT.</p>",
-    "license": "MIT",
-    "title": "tamasgal/km3pipe: KM3Pipe 6.8.0",
+    "title": "km3pipe: An analysis framework for KM3NeT",
+    "description": "<p>km3pipe is an analysis framework for the KM3NeT neutrino telescopes. It provides a pipeline of pumps, modules and sinks to process data, native Python access to the KM3NeT file formats, network protocols and databases, and a set of command line tools built on top of it.</p>",
     "upload_type": "software",
-    "publication_date": "2017-06-14",
+    "license": "MIT",
+    "access_right": "open",
     "creators": [
         {
-            "affiliation": "Erlangen Centre for Astroparticle Physics (ECAP)",
-            "name": "Tamas Gal"
+            "name": "Tamas Gal",
+            "orcid": "0000-0001-7821-8673",
+            "affiliation": "Erlangen Centre for Astroparticle Physics (ECAP)"
         },
         {
-            "affiliation": "Instituto de Física Corpuscular (IFIC)",
-            "name": "Moritz Lotze"
+            "name": "Moritz Lotze",
+            "affiliation": "Instituto de Física Corpuscular (IFIC)"
         }
     ],
-    "access_right": "open",
+    "keywords": [
+        "pipeline",
+        "analysis",
+        "astroparticle physics",
+        "neutrino telescope",
+        "km3net"
+    ],
     "related_identifiers": [
         {
             "scheme": "url",
-            "identifier": "https://github.com/tamasgal/km3pipe/tree/v6.8.0",
+            "identifier": "https://git.km3net.de/km3py/km3pipe",
             "relation": "isSupplementTo"
         },
         {
