@@ -1,5 +1,10 @@
 Unreleased changes
 ------------------
+
+Version 11
+----------
+11.0.0 - 2026-08-03
+~~~~~~~~~~~~~~~~~~~
 * Python 3.11+ is now required, Python 3.13 and 3.14 are supported
 * Requires thepipe 1.3.9+, which no longer imports the removed ``pkg_resources``
 * Fixed ``Calibration.apply_t0()``, which raised a numba ``TypingError`` on
@@ -50,9 +55,7 @@ Unreleased changes
   and ``pyslack`` packages
 * Removed the ``km3pipe createconf`` usage line, the config subsystem it refers
   to was removed a while ago
-* Refreshed ``.zenodo.json`` and ``codemeta.json``, both of which still described
-  releases from 2017 and 2021
-* The documentation builds without warnings again
+* Refreshed ``.zenodo.json`` and ``codemeta.json``
 
 Version 10
 ----------
