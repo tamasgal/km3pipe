@@ -16,6 +16,7 @@ The preferred on-disk output file format is :doc:`hdf5`.
 
     pipeline
     datastructures
+    table
     features
     hdf5
     cmd

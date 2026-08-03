@@ -4,9 +4,11 @@
 Monte Carlo related things.
 
 """
+
 import particle
 import numpy as np
 
+from . import extras
 from .logger import get_logger
 
 __author__ = "Tamas Gal and Moritz Lotze"
@@ -24,7 +26,7 @@ def geant2pdg(geant_code):
     """Convert GEANT particle ID to PDG"""
     try:
         return particle.Geant3ID(geant_code).to_pdgid()
-    except KeyError:
+    except (KeyError, particle.exceptions.MatchingIDNotFound):
         return 0
 
 
@@ -32,7 +34,7 @@ def pdg2name(pdg_id):
     """Convert PDG ID to human readable names"""
     try:
         return particle.Particle.from_pdgid(pdg_id).name
-    except particle.particle.particle.InvalidParticle:
+    except particle.InvalidParticle:
         log.debug("No particle with PDG ID %d found!" % pdg_id)
         return "N/A"
 
@@ -71,7 +73,7 @@ def leading_particle(df):
 
 def get_flavor(pdg_types):
     """Build a 'flavor' from the 'type' column."""
-    pd = km3pipe.extras.pandas()
+    pd = extras.pandas()
 
     return pd.Series(pdg_types).apply(pdg2name)
 
@@ -86,14 +88,14 @@ def _p_eq_mu(pdg_type):
 
 def is_neutrino(pdg_types):
     """flavor string -> is_neutrino"""
-    pd = km3pipe.extras.pandas()
+    pd = extras.pandas()
 
     return pd.Series(pdg_types).apply(_p_eq_nu)
 
 
 def is_muon(pdg_types):
     """flavor string -> is_neutrino"""
-    pd = km3pipe.extras.pandas()
+    pd = extras.pandas()
 
     return pd.Series(pdg_types).apply(_p_eq_mu)
 

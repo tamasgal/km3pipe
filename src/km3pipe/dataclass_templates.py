@@ -4,6 +4,7 @@
 """
 Dataclasses for internal use. Heavily based on Numpy arrays.
 """
+
 import numpy as np
 
 __author__ = "Tamas Gal and Moritz Lotze"

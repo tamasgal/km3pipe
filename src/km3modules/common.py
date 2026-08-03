@@ -117,7 +117,7 @@ class HitCalibrator(Module):
 
     def process(self, blob):
         if self.input_key not in blob:
-            self.log.warn("No hits found in key '{}'.".format(self.input_key))
+            self.log.warning("No hits found in key '{}'.".format(self.input_key))
             return blob
         hits = blob[self.input_key]
         chits = self.calibration.apply(hits)
@@ -289,7 +289,7 @@ class LocalDBService(kp.Module):
             self.connection = sqlite3.connect(
                 self.filename, check_same_thread=self.thread_safety
             )
-            self.cprint(sqlite3.version)
+            self.cprint(sqlite3.sqlite_version)
         except sqlite3.Error as exception:
             self.log.error(exception)
 

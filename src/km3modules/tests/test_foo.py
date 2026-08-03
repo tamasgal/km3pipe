@@ -1,7 +1,7 @@
 # Filename: test_foo.py
 # pylint: disable=C0111,E1003,R0904,C0103,R0201,C0102
-"""Make a dummy test so jenkins won't cry ):
-"""
+"""Make a dummy test so jenkins won't cry ):"""
+
 from km3pipe.testing import TestCase
 
 __author__ = "Moritz Lotze"

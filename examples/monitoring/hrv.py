@@ -11,7 +11,7 @@ The following script checks the high-rate-veto for each PMT.
 
 # Author: Tamas Gal <tgal@km3net.de>
 # License: MIT
-from datetime import datetime
+from datetime import datetime, timezone
 import io
 from collections import defaultdict
 import threading
@@ -93,12 +93,16 @@ class PMTRates(kp.Module):
         interval = self.interval
 
         def xlabel_func(timestamp):
-            return datetime.utcfromtimestamp(timestamp).strftime("%H:%M")
+            return datetime.fromtimestamp(timestamp, timezone.utc).strftime("%H:%M")
 
         m = self.hrv_matrix
         fig, ax = plt.subplots(figsize=(10, 6))
         ax.imshow(m, origin="lower")
-        ax.set_title("HRV Ratios for DU-{}\n{}".format(self.du, datetime.utcnow()))
+        ax.set_title(
+            "HRV Ratios for DU-{}\n{}".format(
+                self.du, datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+            )
+        )
         ax.set_xlabel("UTC time [{}s/px]".format(interval))
         plt.yticks(
             [i * 31 for i in range(18)], ["Floor {}".format(f) for f in range(1, 19)]

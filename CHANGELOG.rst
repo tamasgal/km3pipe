@@ -1,23 +1,76 @@
 Unreleased changes
 ------------------
+* Python 3.11+ is now required, Python 3.13 and 3.14 are supported
+* Requires thepipe 1.3.9+, which no longer imports the removed ``pkg_resources``
+* Fixed ``Calibration.apply_t0()``, which raised a numba ``TypingError`` on
+  every call since ``np.copyto`` cannot be compiled in nopython mode
+* Fixed the K40 intra-DOM calibration chain (``calibrate_dom()``,
+  ``IntraDOMCalibrator``, ``K40BackgroundSubtractor``), which raised
+  ``NameError: optimize`` because scipy was only imported inside ``fit_delta_ts``
+* Fixed ``km3pipe.shell``: ``qsub()`` raised ``NameError`` and returned nothing,
+  ``gen_job()`` raised ``TypeError``, and both job-script generators referenced
+  parameters that no longer exist. ``qrunprocessor`` and ``qrunqaqc`` work again
+* Fixed ``km3pipe.mc.get_flavor()``, ``is_neutrino()`` and ``is_muon()``, which
+  raised ``NameError`` because ``km3pipe.extras`` was never imported
+* Fixed ``km3modules.parser.CHParser``, which wrapped binary ControlHost
+  payloads in ``StringIO``
+* Fixed ``pipeinspector``, which crashed on start with urwid 4 (removed
+  ``__super`` idiom) and raised ``NameError`` instead of exiting on escape
+* Fixed ``LocalDBService``, which used the removed ``sqlite3.version``
+* Fixed ``geant2pdg()``, which no longer swallowed the ``MatchingIDNotFound``
+  raised by recent versions of ``particle``
+* Fixed ``km3pipe retrieve``, which called the removed
+  ``km3db.core.on_whitelisted_host``, and taught it to accept detector OIDs
+* Fixed ``--version`` in ``h5info``, ``h5header``, ``h5tree``, ``tres`` and
+  ``ztplot``, and ``--classic``/``--titles`` in ``h5tree``
+* Fixed ``triggermap -u DU``, which crashed while labelling the y axis, and the
+  off-by-one that rotated the DU blocks in the map
+* Fixed ``qrunprocessor``, which crashed when ``-v`` was omitted
+* Three tests were shadowed by same-named definitions and never ran; one of
+  them was failing
+* Replaced the deprecated ``datetime.utcnow()``, ``datetime.utcfromtimestamp()``,
+  ``np.core.records``, ``logging.Logger.warn()``, ``Colormap.set_over/set_under``
+  and ``passlib``'s ``encrypt()`` calls
+* Dropped the ``pytest-flake8`` test dependency, it is unmaintained and breaks
+  pytest 8+ at collection time
+* Switched from ``docopt`` to its maintained fork ``docopt-ng``, the original
+  has been unmaintained since 2014 and raises SyntaxWarnings on Python 3.12+
+* Reworked the extras: ``dev`` (test and release tooling), ``doc`` (Sphinx stack)
+  and ``extras`` (optional runtime packages), with ``all`` pulling in everything
+* Implemented ``ztplot -f FRAME -c COUNTER``, which was documented but silently
+  did nothing
+* Removed the ``k40calib`` command line tool, the ``HRVFIFOTimesliceFilter`` and
+  ``SummaryMedianPMTRateService`` modules and the ``qk40calib`` and
+  ``k40summary`` examples, they all needed the online ROOT reader which km3io no
+  longer provides
+* The ``trigger_map`` and ``trigger_contribution`` examples now read offline
+  files via ``OfflinePump`` and ``HitsTabulator`` instead of the removed
+  ``km3pipe.io.jpp``
+* Removed the ``elog-slack`` example, it depends on the abandoned ``pyinotify``
+  and ``pyslack`` packages
+* Removed the ``km3pipe createconf`` usage line, the config subsystem it refers
+  to was removed a while ago
+* Refreshed ``.zenodo.json`` and ``codemeta.json``, both of which still described
+  releases from 2017 and 2021
+* The documentation builds without warnings again
 
 Version 10
 ----------
 10.0.3 - 2025-01-21
-˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜
+~~~~~~~~~~~~~~~~~~~
 * Fixed parameter pattern matching from detector DOMs
 
 10.0.2 - 2025-01-21
-˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜
+~~~~~~~~~~~~~~~~~~~
 * removed warnings when modules have different numbers of PMTs
 
 10.0.1 - 2024-10-18
-˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜
+~~~~~~~~~~~~~~~~~~~
 * Fixes a 100% CPU issue when Ligier is disconnected in the middle of receiving
   a message
 
 10.0.0 - 2024-10-09
-˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜
+~~~~~~~~~~~~~~~~~~~
 * Removed support for the online ROOT format since it's not supported anymore
   in km3io due to the lack of maintainers (it relied on uproot3 which is
   deprecated)
@@ -27,15 +80,15 @@ Version 9
 ---------
 
 9.13.12 - 2024-06-10
-˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜
+~~~~~~~~~~~~~~~~~~~~
 * Fixes a freeze at the process end which rarely happens in Slurm jobs
 
 9.13.11 - 2023-09-04
-˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜
+~~~~~~~~~~~~~~~~~~~~
 * Minor fix of CI/publishing
 
 9.13.10 - 2023-08-31
-˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜˜
+~~~~~~~~~~~~~~~~~~~~
 * Fixes numba warning
 
 9.13.9 - 2023-01-09
@@ -231,7 +284,7 @@ Version 9
 
 9.2.0 / 2021-01-29
 ~~~~~~~~~~~~~~~~~~
-* RRZE HPC options for number of nodes, CPUs and node type added to ``km3pipe.shell.qsub`
+* RRZE HPC options for number of nodes, CPUs and node type added to ``km3pipe.shell.qsub``
 * ``km.FilePump`` added which is just a simple pump providing filenames
 
 9.1.3 / 2020-12-16

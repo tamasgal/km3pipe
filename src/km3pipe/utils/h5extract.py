@@ -24,10 +24,11 @@ Options:
     --timeit                    Print detailed pipeline performance statistics.
     --step-size=N               Number of events to cache or amount of data [default: 2000].
     --aashower-legacy           Use only with old MC files where aashower rec_stage=100 (now it is 300)
-    -h --help                   Show this screen.
+    -h, --help                  Show this screen.
     --version                   Show the version.
 
 """
+
 from thepipe import Provenance
 import km3pipe as kp
 import km3modules as km

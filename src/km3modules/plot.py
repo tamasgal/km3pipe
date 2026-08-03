@@ -5,8 +5,9 @@
 A collection of plotting functions and modules.
 
 """
+
 from collections import Counter
-from datetime import datetime
+from datetime import datetime, timezone
 import gc
 import os
 import multiprocessing as mp
@@ -56,9 +57,7 @@ def plot_dom_parameters(
     """
     x, y, *_ = zip(*detector.doms.values())
     fig, ax = plt.subplots(figsize=(10, 6))
-    cmap = plt.get_cmap(cmap).copy()
-    cmap.set_over(over, 1.0)
-    cmap.set_under(under, 1.0)
+    cmap = plt.get_cmap(cmap).with_extremes(over=over, under=under)
 
     m_size = 100
     scatter_args = {
@@ -79,7 +78,7 @@ def plot_dom_parameters(
         c=zs[in_range_idx],
         cmap=cmap,
         s=m_size,
-        **scatter_args
+        **scatter_args,
     )
     if not hide_limits:
         under_idx = zs < vmin
@@ -89,7 +88,7 @@ def plot_dom_parameters(
             c=under,
             label="< {0}".format(vmin),
             s=m_size * underfactor,
-            **scatter_args
+            **scatter_args,
         )
         over_idx = zs > vmax
         ax.scatter(
@@ -98,13 +97,15 @@ def plot_dom_parameters(
             c=over,
             label="> {0}".format(vmax),
             s=m_size * overfactor,
-            **scatter_args
+            **scatter_args,
         )
 
     cb = plt.colorbar(sc)
     cb.set_label(label)
 
-    ax.set_title("{0}\n{1} UTC".format(title, datetime.utcnow().strftime("%c")))
+    ax.set_title(
+        "{0}\n{1} UTC".format(title, datetime.now(timezone.utc).strftime("%c"))
+    )
     ax.set_xlabel("DU")
     ax.set_ylabel("DOM")
     ax.set_ylim(-2)
@@ -176,7 +177,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
             floor = self.clbmap.dom_ids[dom_id].floor
             ax.set_title("{0} - {1}".format("DU{}-DOM{}".format(du, floor), dom_id))
             ax.set_ylim((-10, 10))
-        plt.suptitle("{0} UTC".format(datetime.utcnow().strftime("%c")))
+        plt.suptitle("{0} UTC".format(datetime.now(timezone.utc).strftime("%c")))
         plt.savefig(os.path.join(self.plots_path, "intradom.png"), bbox_inches="tight")
         plt.close("all")
 
@@ -189,7 +190,7 @@ class IntraDOMCalibrationPlotter(kp.Module):
             floor = self.clbmap.dom_ids[dom_id].floor
             ax.set_title("{0} - {1}".format("DU{}-DOM{}".format(du, floor), dom_id))
             ax.set_ylim((0, 10))
-        plt.suptitle("{0} UTC".format(datetime.utcnow().strftime("%c")))
+        plt.suptitle("{0} UTC".format(datetime.now(timezone.utc).strftime("%c")))
         plt.savefig(
             os.path.join(self.plots_path, "angular_k40rate_distribution.png"),
             bbox_inches="tight",

@@ -18,7 +18,7 @@ This script creates a histogram to show the trigger contribution for events.
         FILENAME          Name of the input file.
         -d DU             Only plot for the given DU.
         -p PLOT_FILENAME  The filename of the plot [default: trigger_map.png].
-        -h --help         Show this screen.
+        -h, --help        Show this screen.
 
 """
 
@@ -32,6 +32,7 @@ from matplotlib.colors import LogNorm
 import numpy as np
 
 import km3pipe as kp
+import km3modules as km
 import km3pipe.style
 
 
@@ -116,7 +117,8 @@ if __name__ == "__main__":
     du = int(args["-d"]) if args["-d"] else None
     det = kp.hardware.Detector(det_id=29)
     pipe = kp.Pipeline()
-    pipe.attach(kp.io.jpp.EventPump, filename=args["FILENAME"])
+    pipe.attach(kp.io.OfflinePump, filename=args["FILENAME"])
+    pipe.attach(km.io.HitsTabulator, kind="offline")
     pipe.attach(
         TriggerMap,
         detector=det,

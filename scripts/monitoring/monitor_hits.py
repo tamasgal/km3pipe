@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # vim: ts=4 sw=4 et
 
-from datetime import datetime
+from datetime import datetime, timezone
 from collections import deque
 import os
-from io import StringIO
+from io import BytesIO
 import shutil
 import time
 import threading
@@ -51,7 +51,7 @@ class DOMHits(Module):
             return blob
 
         data = blob["CHData"]
-        data_io = StringIO(data)
+        data_io = BytesIO(data)
         preamble = DAQPreamble(file_obj=data_io)  # noqa
         event = DAQEvent(file_obj=data_io)
         with lock:
@@ -109,7 +109,7 @@ class DOMHits(Module):
         ax.set_xlabel("event (latest on the right)")
         ax.set_title(
             "{0} - via the last {1} Events\n{2} UTC".format(
-                title, self.max_events, datetime.utcnow().strftime("%c")
+                title, self.max_events, datetime.now(timezone.utc).strftime("%c")
             )
         )
         cb = fig.colorbar(im, pad=0.05)

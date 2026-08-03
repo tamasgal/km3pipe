@@ -20,6 +20,8 @@ import km3pipe.style
 
 km3pipe.style.use("km3pipe")
 
+DET_OID = "D_ARCA001"  # adapt to the detector you are monitoring
+
 pipe = kp.Pipeline(timeit=True)
 pipe.attach(
     kp.io.ch.CHPump,
@@ -38,6 +40,6 @@ pipe.attach(k40.TwofoldCounter, tmax=10)
 pipe.attach(Siphon, volume=10 * 10 * 1, flush=True)
 pipe.attach(k40.K40BackgroundSubtractor)
 pipe.attach(k40.IntraDOMCalibrator, ctmin=0.0)
-pipe.attach(IntraDOMCalibrationPlotter)
+pipe.attach(IntraDOMCalibrationPlotter, det_oid=DET_OID)
 pipe.attach(k40.ResetTwofoldCounts)
 pipe.drain()

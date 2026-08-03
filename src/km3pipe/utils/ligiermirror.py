@@ -17,9 +17,10 @@ Options:
     -s QUEUE        Maximum queue size for messages [default: 20000].
     -x TIMEOUT      Connection timeout in seconds [default: 604800].
     -d DEBUG_LEVEL  Debug level (DEBUG, INFO, WARNING, ...) [default: WARNING].
-    -h --help       Show this screen.
+    -h, --help      Show this screen.
 
 """
+
 import socket
 
 import km3pipe as kp

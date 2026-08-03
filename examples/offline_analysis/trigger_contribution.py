@@ -16,6 +16,7 @@ from collections import defaultdict
 import sys
 import numpy as np
 import km3pipe as kp
+import km3modules as km
 from km3modules.common import StatusBar
 
 if len(sys.argv) == 2:
@@ -87,7 +88,8 @@ def omkey(dom_id):
 
 
 pipe = kp.Pipeline()
-pipe.attach(kp.io.jpp.EventPump, filename=filename)
+pipe.attach(kp.io.OfflinePump, filename=filename)
+pipe.attach(km.io.HitsTabulator, kind="offline")
 pipe.attach(StatusBar, every=5000)
 pipe.attach(TriggerContributionCalculator, dus=[2])
 pipe.drain()

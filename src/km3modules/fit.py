@@ -5,6 +5,7 @@
 A collection of fit functions and modules.
 
 """
+
 import numpy as np
 import km3pipe.extras
 

@@ -6,7 +6,7 @@ __author__ = "Tamas Gal"
 from datetime import datetime
 from collections import deque, defaultdict
 from functools import partial
-from io import StringIO
+from io import BytesIO
 import os
 import shutil
 import time
@@ -52,7 +52,7 @@ class DOMHits(Module):
             return blob
 
         data = blob["CHData"]
-        data_io = StringIO(data)
+        data_io = BytesIO(data)
         preamble = DAQPreamble(file_obj=data_io)  # noqa
         event = DAQEvent(file_obj=data_io)
         with lock:
@@ -154,7 +154,7 @@ class TriggerRate(Module):
             return blob
 
         data = blob["CHData"]
-        data_io = StringIO(data)
+        data_io = BytesIO(data)
         preamble = DAQPreamble(file_obj=data_io)  # noqa
         event = DAQEvent(file_obj=data_io)
         timestamp = event.header.time_stamp
@@ -235,12 +235,12 @@ class DOMActivityPlotter(Module):
             return blob
 
         data = blob["CHData"]
-        data_io = StringIO(data)
+        data_io = BytesIO(data)
         preamble = DAQPreamble(file_obj=data_io)  # noqa
         summaryslice = DAQSummaryslice(file_obj=data_io)
         timestamp = summaryslice.header.time_stamp
         with lock:
-            for dom_id, rates in summaryslice.summary_frames.iteritems():
+            for dom_id, rates in summaryslice.summary_frames.items():
                 du, dom, *_ = detector.doms[dom_id]
                 self.rates[(du, dom)].append((timestamp, sum(rates)))
 

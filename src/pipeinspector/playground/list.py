@@ -11,14 +11,14 @@ class ItemWidget(urwid.WidgetWrap):
                 "fixed",
                 15,
                 urwid.Padding(
-                    urwid.AttrWrap(urwid.Text("item %s" % str(id)), "body", "focus"),
+                    urwid.AttrMap(urwid.Text("item %s" % str(id)), "body", "focus"),
                     left=2,
                 ),
             ),
-            urwid.AttrWrap(urwid.Text("%s" % description), "body", "focus"),
+            urwid.AttrMap(urwid.Text("%s" % description), "body", "focus"),
         ]
         w = urwid.Columns(self.item)
-        self.__super.__init__(w)
+        super().__init__(w)
 
     def selectable(self):
         return True
@@ -45,10 +45,10 @@ def main():
         if input in ("q", "Q"):
             raise urwid.ExitMainLoop()
 
-        if input is "enter":
+        if input == "enter":
             focus = listbox.get_focus()[0].content
             view.set_header(
-                urwid.AttrWrap(urwid.Text("selected: %s" % str(focus)), "head")
+                urwid.AttrMap(urwid.Text("selected: %s" % str(focus)), "head")
             )
 
     items = []
@@ -57,7 +57,7 @@ def main():
 
     header = urwid.AttrMap(urwid.Text("selected:"), "head")
     listbox = urwid.ListBox(urwid.SimpleListWalker(items))
-    view = urwid.Frame(urwid.AttrWrap(listbox, "body"), header=header)
+    view = urwid.Frame(urwid.AttrMap(listbox, "body"), header=header)
     loop = urwid.MainLoop(view, palette, unhandled_input=keystroke)
     loop.run()
 

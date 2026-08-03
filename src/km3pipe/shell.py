@@ -4,6 +4,7 @@
 Some shell helpers
 
 """
+
 import os
 import subprocess
 from warnings import warn
@@ -27,8 +28,7 @@ BATCH_TYPE = {"in2p3": "slurm", "woody": "torque"}
 SUBMIT_CMD = {"slurm": "squeue", "torque": "qsub"}
 
 JOB_TEMPLATES = {
-    "in2p3": lstrip(
-        """
+    "in2p3": lstrip("""
         #SBATCH --partition=htc
         #SBATCH --job-name={job_name}
         #SBATCH --mail-user= {email}
@@ -54,10 +54,8 @@ JOB_TEMPLATES = {
         echo "========================================================"
         echo "JAWOLLJA! Job exited on" $(date)
         echo "========================================================"
-        """
-    ),
-    "woody": lstrip(
-        """
+        """),
+    "woody": lstrip("""
         #PBS -N {job_name}
         #PBS -M {email} -m a
         #PBS -o {log_path}/{job_name}{task_name}.out.log
@@ -74,8 +72,7 @@ JOB_TEMPLATES = {
         echo "========================================================"
         echo "JAWOLLJA! Job exited on" $(date)
         echo "========================================================"
-        """
-    ),
+        """),
 }
 
 
@@ -90,7 +87,7 @@ def qsub(script, job_name, dryrun=False, silent=False, *args, **kwargs):
         DeprecationWarning,
         stacklevel=2,
     )
-    submit(script, job_name, dryrun=dryrun, silent=silent, *arg, **kwargs)
+    return submit(script, job_name, *args, dryrun=dryrun, silent=silent, **kwargs)
 
 
 def submit(script, job_name, dryrun=False, silent=False, *args, **kwargs):
@@ -99,11 +96,11 @@ def submit(script, job_name, dryrun=False, silent=False, *args, **kwargs):
 
     Returns the job script as string.
     """
-    submit_cmd = SUBMIT_CMD[BATCH_TYPE[kwargs["cluster"]]]
+    submit_cmd = SUBMIT_CMD[BATCH_TYPE[kwargs.get("cluster", "in2p3")]]
 
     if not silent:
         print("Preparing job script...")
-    job_string = gen_job(script=script, job_name=job_name, *args, **kwargs)
+    job_string = gen_job(script, job_name, *args, **kwargs)
     env = os.environ.copy()
     if dryrun:
         print(
@@ -129,33 +126,19 @@ def submit(script, job_name, dryrun=False, silent=False, *args, **kwargs):
     return job_string
 
 
+def _default_email():
+    return os.environ["USER"] + "@km3net.de"
+
+
 def _gen_job_slurm(**kwargs):
-    resources = []
-    if kwargs["sps"]:
-        resources.append("sps")
-    if kwargs["irods"]:
-        resources.append("irods")
-    if kwargs["hpss"]:
-        resources.append("hpss")
-    if kwargs["xrootd"]:
-        resources.append("xrootd")
-    if kwargs["dcache"]:
-        resources.append("dcache")
-    if kwargs["oracle"]:
-        resources.append("oracle")
-    resources = ",".join(resources)
-
-    email = (
-        os.environ["USER"] + "@km3net.de"
-        if kwargs["email"] is None
-        else kwargs["email"]
+    """Generate a SLURM job script."""
+    resources = ",".join(
+        name
+        for name in ("sps", "irods", "hpss", "xrootd", "dcache", "oracle")
+        if kwargs[name]
     )
-    del kwargs["kwargs"]
 
-    log_path = os.path.abspath(kwargs["log_path"])
-    del kwargs["log_path"]
-
-    if job_array_stop is not None:
+    if kwargs["job_array_stop"] is not None:
         job_array_option = "#SBATCH --array {}-{}:{}".format(
             kwargs["job_array_start"],
             kwargs["job_array_stop"],
@@ -164,74 +147,36 @@ def _gen_job_slurm(**kwargs):
     else:
         job_array_option = "#"
 
-    extra_options = "\n".join([job_array_option])
-
-    job_string = JOB_TEMPLATES[kwargs["cluster"]].format(
+    return JOB_TEMPLATES[kwargs["cluster"]].format(
+        job_name=kwargs["job_name"],
+        script=str(kwargs["script"]),
+        group=kwargs["group"],
+        walltime=kwargs["walltime"],
+        memory=kwargs["memory"],
+        send_mail=kwargs["send_mail"],
+        email=kwargs["email"] or _default_email(),
+        log_path=os.path.abspath(kwargs["log_path"]),
+        task_name="_$SLURM_ARRAY_TASK_ID" if kwargs["split_array_logs"] else "",
         resources=resources,
-        email=email,
-        extra_options=extra_options,
-        log_path=log_path,
-        **kwargs
+        extra_options=job_array_option,
     )
-
-    return job_string
 
 
 def _gen_job_torque(**kwargs):
-    """Generate a job script."""
-    shell = os.environ["SHELL"] if kwargs["shell"] is None else kwargs["shell"]
-    del kwargs["shell"]
+    """Generate a TORQUE job script."""
+    node_type = "" if kwargs["node_type"] is None else ":" + str(kwargs["node_type"])
 
-    email = (
-        os.environ["USER"] + "@km3net.de"
-        if kwargs["email"] is None
-        else kwargs["email"]
-    )
-    del kwargs["kwargs"]
-
-    cpu = kwargs["walltime"] if kwargs["walltime"] is None else kwargs["cpu"]
-    del kwargs["walltime"]
-
-    script = (
-        str(kwargs["script"])
-        if isinstance(kwargs["script"], Script)
-        else kwargs["script"]
-    )
-    del kwargs["script"]
-
-    log_path = os.path.abspath(kwargs["log_path"])
-    del kwargs["log_path"]
-
-    if job_array_stop is not None:
-        job_array_option = "#$ -t {}-{}:{}".format(
-            kwargs["job_array_start"],
-            kwargs["job_array_stop"],
-            kwargs["job_array_step"],
-        )
-    else:
-        job_array_option = "#"
-
-    if kwargs["split_array_logs"]:
-        task_name = "_$TASK_ID"
-    else:
-        task_name = ""
-
-    if kwargs["node_type"] is not None:
-        node_type = ":" + str(kwargs["node_type"])
-    else:
-        node_type = ""
-    del kwargs["node_type"]
-
-    job_string = JOB_TEMPLATES[kwargs["cluster"]].format(
-        email=email,
-        log_path=log_path,
-        cpu=cpu,
-        job_array_option=job_array_option,
-        task_name=task_name,
+    return JOB_TEMPLATES[kwargs["cluster"]].format(
+        job_name=kwargs["job_name"],
+        script=str(kwargs["script"]),
+        nodes=kwargs["nodes"],
+        ppn=kwargs["ppn"],
         node_type=node_type,
-        **kwargs
+        walltime=kwargs["walltime"],
+        email=kwargs["email"] or _default_email(),
+        log_path=os.path.abspath(kwargs["log_path"]),
+        task_name="_$TASK_ID" if kwargs["split_array_logs"] else "",
     )
-    return job_string
 
 
 def gen_job(
@@ -258,7 +203,7 @@ def gen_job(
     oracle=False,
     split_array_logs=False,
 ):
-    kwargs = locals().items()
+    kwargs = dict(locals())
     if BATCH_TYPE[cluster] == "slurm":
         return _gen_job_slurm(**kwargs)
     elif BATCH_TYPE[cluster] == "torque":

@@ -4,6 +4,7 @@
 Some unsorted, frequently used logic.
 
 """
+
 try:
     import resource  # linux/macos
 except ImportError:

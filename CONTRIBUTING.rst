@@ -128,24 +128,23 @@ correctly::
 This should give you a green bar, with an output like this::
 
     $ make test
-    py.test --junitxml=./reports/junit.xml km3pipe
+    python3 -m pytest --junitxml=./reports/junit.xml src/
     ================================== test session starts ===================================
-    platform darwin -- Python 3.6.4, pytest-3.5.1, py-1.5.3, pluggy-0.6.0
-    rootdir: ~/Dev/km3pipe, inifile: pytest.ini
-    plugins: pylint-0.9.0, flake8-1.0.1, cov-2.5.1
-    collected 309 items
+    platform darwin -- Python 3.13.1, pytest-8.3.4, pluggy-1.5.0
+    rootdir: ~/Dev/km3pipe, configfile: pyproject.toml
+    plugins: cov-6.0.0
+    collected 494 items
 
-    km3pipe/io/tests/test_aanet.py ....                         [  1%]
-    km3pipe/io/tests/test_ch.py .                               [  1%]
-    km3pipe/io/tests/test_clb.py ........                       [  4%]
-    km3pipe/io/tests/test_daq.py ........                       [  6%]
+    src/km3modules/tests/test_common.py ....                    [  1%]
+    src/km3pipe/io/tests/test_ch.py .                           [  1%]
+    src/km3pipe/io/tests/test_clb.py ........                   [  4%]
+    src/km3pipe/io/tests/test_daq.py ........                   [  6%]
     ...
     ...
     ...
-    km3pipe/tests/test_style.py ........................        [ 87%]
-    km3pipe/tests/test_testing.py ..                            [ 88%]
-    km3pipe/tests/test_time.py ..................               [ 93%]
-    km3pipe/tests/test_tools.py ...................             [100%]
+    src/km3pipe/tests/test_style.py ........................    [ 87%]
+    src/km3pipe/tests/test_time.py ..................           [ 93%]
+    src/km3pipe/tests/test_tools.py ...................         [100%]
 
     ----- generated xml file: ~/Dev/km3pipe/reports/junit.xml ------
     =================== 467 passed in 6.21 seconds ===================

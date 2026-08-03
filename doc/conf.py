@@ -15,7 +15,6 @@
 import sys
 import os
 from datetime import date
-import sphinx_rtd_theme
 
 # -- Project information -----------------------------------------------------
 
@@ -52,7 +51,7 @@ autoapi_dirs = ["../src/km3pipe", "../src/km3modules"]
 autoapi_options = [
     "members",
     "undoc-members",
-    "show-module-summary"
+    "show-module-summary",
     # , 'private-members', 'special-members'
 ]
 autoapi_ignore = [
@@ -61,6 +60,7 @@ autoapi_ignore = [
     "*/doc/conf.py",
     "*/pydataskel*",
     "*/style/*",
+    "*/km3pipe/version.py",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -76,14 +76,9 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-try:
-    from importlib.metadata import version as get_version
+from importlib.metadata import version as get_version
 
-    version = get_version("km3pipe")
-except ImportError:
-    from pkg_resources import get_distribution
-
-    version = get_distribution("km3pipe").version
+version = get_version("km3pipe")
 
 short_version = ".".join(version.split(".")[:2])
 project = "KM3Pipe {}".format(short_version)
@@ -131,7 +126,6 @@ pygments_style = "sphinx"
 # -- Options for HTML output ----------------------------------------------
 
 html_theme = "sphinx_rtd_theme"
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # html_theme_options = {}
 
 # The name for this set of Sphinx documents.  If None, it defaults to

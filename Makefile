@@ -1,4 +1,5 @@
 PKGNAME=km3pipe
+BLACK_TARGETS=src/km3pipe src/km3modules src/pipeinspector examples doc/conf.py
 
 default: build
 
@@ -8,42 +9,36 @@ install:
 	python3 -m pip install .
 
 install-dev:
-	python3 -m pip install -e ".[dev]"
-	python3 -m pip install -e ".[extras]"
+	python3 -m pip install -e ".[all]"
 	python3 -m ipykernel install --user --name="$(PKGNAME)"
 
+build:
+	python3 -m build
+
 clean:
-	python3 setup.py clean --all
+	rm -rf build dist src/km3pipe.egg-info reports/junit.xml reports/coverage reports/coverage.xml
+	find src -name '__pycache__' -type d -exec rm -rf {} +
 
 test:
-	py.test --junitxml=./reports/junit.xml -o junit_suite_name=$(PKGNAME) src/
+	python3 -m pytest --junitxml=./reports/junit.xml src/
 
 benchmark:
 	scripts/run_tests.py benchmarks
 
 test-cov:
-	py.test --cov src/ --cov-report term-missing --cov-report xml:reports/coverage.xml --cov-report html:reports/coverage src/
+	python3 -m pytest --cov src/ --cov-report term-missing --cov-report xml:reports/coverage.xml --cov-report html:reports/coverage src/
 
 test-loop:
-	py.test src/
+	python3 -m pytest src/
 	ptw --ext=.py,.pyx --ignore=doc src/
 
-.PHONY: black
+doc:
+	$(MAKE) -C doc clean html
+
 black:
-	black  --exclude 'version.py' src/km3pipe
-	black src/km3modules
-	black examples
-	black src/pipeinspector
-	black doc/conf.py
-	black setup.py
+	black --exclude 'version.py' $(BLACK_TARGETS)
 
-.PHONY: black-check
 black-check:
-	black --check  --exclude 'version.py' src/km3pipe
-	black --check src/km3modules
-	black --check examples
-	black --check src/pipeinspector
-	black --check doc/conf.py
-	black --check setup.py
+	black --check --exclude 'version.py' $(BLACK_TARGETS)
 
-.PHONY: all black black-check clean install install-dev test test-cov test-loop benchmark
+.PHONY: all black black-check build clean doc install install-dev test test-cov test-loop benchmark

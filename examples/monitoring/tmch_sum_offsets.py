@@ -20,7 +20,7 @@ in a CSV file.
     Options:
         DOM_ID           The DOM ID.
         -n N_TIMESLICES  The number of timeslices to investigate [default: 50].
-        -h --help        Show this screen.
+        -h, --help       Show this screen.
 
 """
 

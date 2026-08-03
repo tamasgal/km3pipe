@@ -84,7 +84,10 @@ class TestJsireneH5File(TestCase):
 
     def test_h5_file_can_be_opened_with_hdf5pump_and_keys_are_correct(self):
         pump = kp.io.HDF5Pump(filename=self.h5file.name)
-        blob = pump[1]
+        try:
+            blob = pump[1]
+        finally:
+            pump.finish()
         target = {
             "BestJmuon",
             "EventInfo",

@@ -17,7 +17,7 @@ Options:
                         offline files created with km3net-dataformat
                         version 2+).
     -n N_EVENTS         Number of events to extract.
-    -h --help           Show this screen.
+    -h, --help          Show this screen.
     --version           Show the version.
 
 """
@@ -94,7 +94,9 @@ def main():
 
     from docopt import docopt
 
-    run_pipeline(docopt(__doc__))
+    from km3pipe import version
+
+    run_pipeline(docopt(__doc__, version=version))
 
 
 if __name__ == "__main__":

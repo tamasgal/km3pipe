@@ -289,13 +289,13 @@ plt.plot(
 plt.plot(
     x,
     norm(g_mu_bad, g_sigma_bad).pdf(x),
-    label="Unrestricted Gauss: $\sigma =$ {:.3f}".format(g_sigma_bad),
+    label=r"Unrestricted Gauss: $\sigma =$ {:.3f}".format(g_sigma_bad),
     linewidth=2,
 )
 plt.plot(
     x,
     norm(g_mu, g_sigma).pdf(x),
-    label="+- 10 deg Gauss: $\sigma =$ {:.3f}".format(g_sigma),
+    label=r"+- 10 deg Gauss: $\sigma =$ {:.3f}".format(g_sigma),
     linewidth=2,
 )
 plt.xlim(-pi / 4, pi / 4)

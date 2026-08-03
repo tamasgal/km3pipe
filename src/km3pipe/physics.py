@@ -66,7 +66,7 @@ def cherenkov(calib_hits, track):
     ndarray
         a structured array of the physics parameters of Cherenkov photons:
             - d_photon_closest: the closest distance between the PMT and the track
-            (it is perpendicular to the track).
+              (it is perpendicular to the track).
             - d_photon: distance traveled by the photon from the track to the PMT.
             - d_track: distance along the track where the photon was emitted.
             - t_photon: time of photon travel in [s].
@@ -231,7 +231,7 @@ def cut4d(point4d, tmin, tmax, rmin, rmax, items, c_water=C_WATER):
     within a certain radius around a given 4D point.
 
     Parameters
-    -----------
+    ----------
     point4d: array of shape(x, y, z, t)
         central point of the selection
     tmin: float
@@ -246,7 +246,7 @@ def cut4d(point4d, tmin, tmax, rmin, rmax, items, c_water=C_WATER):
         the items to cut on
 
     Returns
-    --------
+    -------
     iterable with pos_[xyz]-attributed items
         items which survived the cut.
     """

@@ -8,7 +8,7 @@ Usage:
     pipeinspector --version
 
 Options:
-    -h --help       Show this screen.
+    -h, --help      Show this screen.
 
 """
 
@@ -31,6 +31,8 @@ __version__ = "1.0.0"
 
 def handle_input(input):
     """Handle any unhandled input."""
+    import urwid
+
     if input in UI.keys["escape"]:
         raise urwid.ExitMainLoop
 

@@ -19,7 +19,7 @@ class MainFrame(urwid.Frame):
     """
 
     def __init__(self, pump):
-        self.header = urwid.AttrWrap(
+        self.header = urwid.AttrMap(
             urwid.Text("PipeInspector", align="center"), "header"
         )
 
@@ -29,7 +29,7 @@ class MainFrame(urwid.Frame):
         self.blobs = BlobWidget()
         self.footer = urwid.Columns([self.info_area, self.blobs])
 
-        self.frame = urwid.AttrWrap(
+        self.frame = urwid.AttrMap(
             urwid.Frame(self.blob_browser, header=self.header, footer=self.footer),
             "default",
         )

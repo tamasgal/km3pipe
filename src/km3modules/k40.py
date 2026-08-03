@@ -10,7 +10,7 @@ import os
 from itertools import combinations
 from collections import defaultdict
 from functools import partial
-from datetime import datetime
+from datetime import datetime, timezone
 import io
 
 import numpy as np
@@ -121,6 +121,7 @@ class IntraDOMCalibrator(kp.Module):
         (key=dom_id, value=matrix of k40 counts 465x(dt*2+1))
     Requires 'CorrectedTwofoldCounts': dict
         (key=dom_id, value=matrix of k40 counts 465x(dt*2+1))
+
     Writes 'IntraDOMCalibration' into the blob: dict (key=dom_id, value=calibration)
 
     """
@@ -218,7 +219,7 @@ class TwofoldCounter(kp.Module):
 
         self.counts = None
         self.n_timeslices = None
-        self.start_time = datetime.utcnow()
+        self.start_time = datetime.now(timezone.utc)
         self.reset()
 
         self.expose(self.counts, "TwofoldCounts")
@@ -272,58 +273,6 @@ class TwofoldCounter(kp.Module):
             {"data": self.counts, "livetime": self.get_livetime()},
             open(self.dump_filename, "wb"),
         )
-
-
-class HRVFIFOTimesliceFilter(kp.Module):
-    """Creat a frame index lookup table which holds DOM IDs of frames with
-    at least one PMT in HRV."""
-
-    def configure(self):
-        filename = self.require("filename")
-        filter_hrv = self.get("filter_hrv", default=False)
-        self.expose(self.get_skipped_frames, "GetSkippedFrames")
-        self.skipped_frames = defaultdict(list)
-        p = kp.io.jpp.SummaryslicePump(filename=filename)
-        for b in p:
-            sum_info = b["SummarysliceInfo"]
-            frame_index = sum_info.frame_index
-            summaryslice = b["Summaryslice"]
-            for dom_id, sf in summaryslice.items():
-                if not sf["fifo_status"] or (filter_hrv and any(sf["hrvs"])):
-                    self.skipped_frames[frame_index].append(dom_id)
-
-    def get_skipped_frames(self):
-        return self.skipped_frames
-
-
-class SummaryMedianPMTRateService(kp.Module):
-    def configure(self):
-        self.expose(self.get_median_rates, "GetMedianPMTRates")
-        self.filename = self.require("filename")
-
-    def get_median_rates(self):
-        rates = defaultdict(list)
-
-        if "GetSkippedFrames" in self.services:
-            skipped_frames = self.services["GetSkippedFrames"]()
-        else:
-            skipped_frames = None
-
-        p = kp.io.jpp.SummaryslicePump(filename=self.filename)
-        for b in p:
-            sum_info = b["SummarysliceInfo"]
-            frame_index = sum_info.frame_index
-            summary = b["Summaryslice"]
-            for dom_id in summary.keys():
-                if skipped_frames is not None and dom_id in skipped_frames[frame_index]:
-                    continue
-                rates[dom_id].append(summary[dom_id]["rates"])
-
-        median_rates = {}
-        for dom_id in rates.keys():
-            median_rates[dom_id] = np.median(rates[dom_id], axis=0)
-
-        return median_rates
 
 
 class MedianPMTRatesService(kp.Module):
@@ -558,9 +507,7 @@ def gaussian(x, mean, sigma, rate, offset):
 
 
 def gaussian_wo_offset(x, mean, sigma, rate):
-    return (
-        rate / np.sqrt(2 * np.pi) / sigma * np.exp(-0.5 * (x - mean) ** 2 / sigma**2)
-    )
+    return rate / np.sqrt(2 * np.pi) / sigma * np.exp(-0.5 * (x - mean) ** 2 / sigma**2)
 
 
 def fit_delta_ts(data, livetime, fit_background=True):
@@ -576,7 +523,7 @@ def fit_delta_ts(data, livetime, fit_background=True):
     -------
     numpy arrays with rates and means for all PMT combinations
     """
-    scipy = km3pipe.extras.scipy()
+    km3pipe.extras.scipy()
     from scipy import optimize
 
     data = data / livetime
@@ -675,6 +622,9 @@ def fit_angular_distribution(angles, rates, rate_errors, shape="pexp"):
     fitted_rates: numpy array of fitted rates (fit_function(angles, popt...))
 
     """
+    km3pipe.extras.scipy()
+    from scipy import optimize
+
     if shape == "exp":
         fit_function = exponential
         # p0 = [-0.91871169,  2.72224241, -1.19065965,  1.48054122]
@@ -702,6 +652,8 @@ def minimize_t0s(means, weights, combs):
     opt_t0s: optimal t0 values for all PMTs
 
     """
+    km3pipe.extras.scipy()
+    from scipy import optimize
 
     def make_quality_function(means, weights, combs):
         def quality_function(t0s):
@@ -734,6 +686,8 @@ def minimize_sigmas(sigmas, weights, combs):
     opt_sigmas: optimal sigma values for all PMTs
 
     """
+    km3pipe.extras.scipy()
+    from scipy import optimize
 
     def make_quality_function(sigmas, weights, combs):
         def quality_function(s):
@@ -768,6 +722,8 @@ def minimize_qes(fitted_rates, rates, weights, combs):
     opt_qes: optimal qe values for all PMTs
 
     """
+    km3pipe.extras.scipy()
+    from scipy import optimize
 
     def make_quality_function(fitted_rates, rates, weights, combs):
         def quality_function(qes):

@@ -4,7 +4,8 @@
 Manipulating time and so...
 
 """
-from datetime import datetime
+
+from datetime import datetime, timezone
 import numpy as np
 import time
 from timeit import default_timer as timer
@@ -95,7 +96,7 @@ class Cuckoo(object):
 def tai_timestamp():
     """Return current TAI timestamp."""
     timestamp = time.time()
-    date = datetime.utcfromtimestamp(timestamp)
+    date = datetime.fromtimestamp(timestamp, timezone.utc)
     if date.year < 1972:
         return timestamp
     offset = 10 + timestamp
@@ -139,4 +140,6 @@ def np_to_datetime(intime):
     """Convert numpy/pandas datetime64 to list[datetime]."""
     nptime = np.atleast_1d(intime)
     np_corr = (nptime - np.datetime64("1970-01-01T00:00:00")) / np.timedelta64(1, "s")
-    return [datetime.utcfromtimestamp(t) for t in np_corr]
+    return [
+        datetime.fromtimestamp(t, timezone.utc).replace(tzinfo=None) for t in np_corr
+    ]

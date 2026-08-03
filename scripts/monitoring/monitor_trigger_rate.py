@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # vim: ts=4 sw=4 et
 
-from datetime import datetime
+from datetime import datetime, timezone
 from collections import deque
 import sys
-from io import StringIO
+from io import BytesIO
 import os
 import shutil
 import time
@@ -19,7 +19,6 @@ import matplotlib.dates as md
 import pandas as pd
 
 from km3pipe import Pipeline, Module
-from km3pipe.config import Config
 from km3pipe.io import CHPump
 from km3pipe.io.daq import DAQPreamble, DAQEvent
 from km3pipe.logger import get_logger
@@ -34,17 +33,13 @@ xfmt = md.DateFormatter("%Y-%m-%d %H:%M")
 lock = threading.Lock()
 
 
-def trigger_rate_sampling_period():
-    try:
-        return int(Config().get("Monitoring", "trigger_rate_sampling_period"))
-    except (TypeError, ValueError):
-        return 180
+DEFAULT_SAMPLING_PERIOD = 180  # [s], override with the 'interval' parameter
 
 
 class TriggerRate(Module):
     def configure(self):
         self.run = True
-        self.interval = self.get("interval") or trigger_rate_sampling_period()
+        self.interval = self.get("interval") or DEFAULT_SAMPLING_PERIOD
         self.event_times = deque(maxlen=4000)  # max events per interval
         # minutes to monitor
         self.trigger_rates = deque(maxlen=60 * 24 // (self.interval // 60))
@@ -70,7 +65,7 @@ class TriggerRate(Module):
         sys.stdout.flush()
 
         data = blob["CHData"]
-        data_io = StringIO(data)
+        data_io = BytesIO(data)
         preamble = DAQPreamble(file_obj=data_io)  # noqa
         event = DAQEvent(file_obj=data_io)
         timestamp = event.header.time_stamp
@@ -81,7 +76,6 @@ class TriggerRate(Module):
 
     def plot(self):
         while self.run:
-            self.interval = trigger_rate_sampling_period()
             time.sleep(self.interval)
             with lock:
                 self.create_plot()
@@ -89,7 +83,7 @@ class TriggerRate(Module):
     def create_plot(self):
         print("\n" + self.__class__.__name__ + ": updating plot.")
         timestamp = time.time()
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         interval = self.interval
         n_events = sum(t > timestamp - interval for t in self.event_times)
         rate = n_events / interval
@@ -110,7 +104,7 @@ class TriggerRate(Module):
         data.plot("dates", "rates", grid=True, ax=ax, legend=False, style=".")
         ax.set_title(
             "Trigger Rate - via Event Times\n{0} UTC".format(
-                datetime.utcnow().strftime("%c")
+                datetime.now(timezone.utc).strftime("%c")
             )
         )
         ax.set_xlabel("time")

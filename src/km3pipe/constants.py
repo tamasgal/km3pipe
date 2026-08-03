@@ -5,6 +5,7 @@
 The constants used in KM3Pipe.
 
 """
+
 import math
 
 __author__ = "Tamas Gal"

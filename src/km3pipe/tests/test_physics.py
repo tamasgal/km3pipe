@@ -12,7 +12,6 @@ from km3pipe.calib import Calibration
 from km3pipe.physics import cherenkov, get_closest, cut4d
 import km3pipe.extras
 
-
 __author__ = "Zineb ALY"
 __copyright__ = "Copyright 2017, Tamas Gal and the KM3NeT collaboration."
 __credits__ = []

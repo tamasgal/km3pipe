@@ -52,8 +52,10 @@ help:
 clean:
 	rm -rf $(BUILDDIR)/*
 	rm -rf auto_examples/
+	rm -rf autoapi/
 	rm -rf modules/generated/*
 	rm -rf api/*
+	rm -f sg_execution_times.rst
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html

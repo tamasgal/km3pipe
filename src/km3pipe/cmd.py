@@ -5,26 +5,29 @@ KM3Pipe command line utility.
 Usage:
     km3pipe test
     km3pipe update [GIT_BRANCH]
-    km3pipe createconf [--overwrite] [--dump]
     km3pipe retrieve DET_ID RUN [-i -o OUTFILE]
     km3pipe (-h | --help)
     km3pipe --version
 
 Options:
-    -h --help           Show this screen.
+    -h, --help          Show this screen.
     -m                  Get the MC detector file (flips the sign of DET_ID).
     -c CALIBR_ID        Geometrical calibration ID (eg. A01466417)
     -i                  Use iRODS instead of xrootd to retrieve files.
     -o OUT              Output folder or filename.
     -t T0_SET           Time calibration ID (eg. A01466431)
     -s REGEX            Regular expression to filter the runsetup name/id.
+
+Arguments:
     DET_ID              Detector ID (eg. D_ARCA001).
     DETECTOR            Detector (eg. ARCA).
     GIT_BRANCH          Git branch to pull (eg. develop).
     RUN                 Run number.
 
 """
+
 import re
+import socket
 import sys
 import subprocess
 import os
@@ -57,8 +60,7 @@ def run_tests():
     print(
         "Running the km3pipe test suite. Make sure you have all the test "
         "dependencies and extras installed with\n\n"
-        '    pip install "km3pipe[dev]"\n'
-        '    pip install "km3pipe[extras]"\n'
+        '    pip install "km3pipe[all]"\n'
     )
 
     import pytest
@@ -73,9 +75,28 @@ def update_km3pipe(git_branch=""):
     os.system(f"pip install -U git+{KM3PIPE_GIT}@{git_branch}")
 
 
+def on_lyon():
+    """Check if we are running on a machine of the CC-IN2P3 in Lyon.
+
+    This used to live in km3db as ``on_whitelisted_host("lyon")``, which was
+    removed in km3db 0.9.
+    """
+    try:
+        return socket.gethostbyname(socket.gethostname()).startswith("134.158.")
+    except OSError:
+        return False
+
+
 def retrieve(run_id, det_id, use_irods=False, out=None):
     """Retrieve run from iRODS for a given detector (O)ID"""
-    det_id = int(det_id)
+    try:
+        det_id = int(det_id)
+    except ValueError:  # a detector OID like D_ARCA001, needs a DB connection
+        resolved = km3db.tools.todetid(det_id)
+        if resolved is None:
+            print("Could not resolve the detector OID '{}'.".format(det_id))
+            return
+        det_id = resolved
 
     if use_irods:
         rpath = irods_path(det_id, run_id)
@@ -99,7 +120,7 @@ def retrieve(run_id, det_id, use_irods=False, out=None):
 
     cmd += " {0} {1}".format(rpath, outfile)
 
-    if not km3db.core.on_whitelisted_host("lyon"):
+    if not on_lyon():
         subprocess.call(cmd.split())
         return
 

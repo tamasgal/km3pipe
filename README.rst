@@ -48,7 +48,7 @@ To start off, run::
 If you have Docker (https://www.docker.com) installed, you can start using
 KM3Pipe immediately by typing::
 
-    docker run -it docker.km3net.de/km3pipe
+    docker run -it git.km3net.de:4567/km3py/km3pipe
 
 Feel free to get in touch if you’re looking for a small, versatile framework
 which provides a quite straightforward module system to make code exchange
